@@ -1,0 +1,519 @@
+<meta name="viewport" content="width=device-width" />
+<!DOCTYPE html>
+
+
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Stackr</title>
+        <link rel="stylesheet" href="/style.css?128" type='text/css'>
+
+    </head>
+    <body>
+
+<!--<div id="container">-->
+
+<header>
+<h1 class="front"><?php $settings = $GLOBALS['settings']; echo $settings['settings']['stack']['short_name']; ?></h1>
+<?php global $web_prefix; $web_prefix = $settings['settings']['stack']['web_prefix']; ?>
+
+<?php $mail_postfix = $settings['settings']['stack']['mail_postfix']; ?>
+
+        <div><?php echo $settings['settings']['thing']['is']; ?></div>
+
+
+
+<br>
+<br>
+
+</header>
+
+
+<main class="grid">
+
+
+
+
+<?php
+
+$GLOBALS['thingy'] = $thing_report;
+
+function displayThingreport($channel, $value) {
+    global $web_prefix;
+    $uuid = $GLOBALS['thingy']['thing']->uuid;
+
+
+    echo $channel;
+	echo "<br>";
+
+    switch ($channel) {
+
+        case 'thing':
+
+            if (isset($value)) {
+                echo '"' . quoted_printable_decode("") . '"';
+            } else {
+                echo 'Task not found.';
+            }
+            break;
+        case 'png':
+            $base64= base64_encode($value); ?>
+
+            <br><img src="data:image/png;base64,<?php echo $base64; ?>" alt="" />
+
+            <?php
+            break;
+        case 'email':
+            if (is_array($value)) {
+                echo quoted_printable_decode($value['message']);
+            } else {
+                echo quoted_printable_decode($value);
+            }
+            echo "<br>";
+            break;
+
+        case 'pdf':
+            echo "PDF data available.<br>";
+            $filename =  $GLOBALS['thingy']['filename'] . ".pdf";
+            //$uuid = $GLOBALS['thingy']['thing']->uuid;
+            $link = $web_prefix . "thing/" . $uuid . "/".$filename; 
+            echo "<a href = '" . $link . "'>" . $link . "</a>";
+            echo "<br>";
+            break;
+
+        case 'txt':
+            if (is_string($value) ) {
+            echo "TXT data available.<br>";
+
+
+            $filename =  $GLOBALS['thingy']['filename'] . ".txt";
+            $link = $web_prefix . "thing/" . $uuid . "/".$filename; 
+            echo "<a href = '" . $link . "'>" . $link . "</a>";
+
+
+            echo "<br>";
+
+//            echo $GLOBALS['thingy']['filename'] . ".txt";
+            }
+            break;
+
+        case 'web':
+            if (is_string($value) ) {
+                echo quoted_printable_decode($value);
+
+//                echo "Web content available";
+
+
+            }
+            break;
+
+        case 'choices':
+            if (isset($value['button']) ) {
+                echo quoted_printable_decode($value['button']);
+            }
+            break;
+
+        default:
+            if (is_array($value) ) {
+                echo "Array found";
+            }
+
+            if (is_string($value) ) {
+                echo $value;
+            }
+        }
+        return;
+    }
+?>
+
+
+
+<article>
+
+<?php
+
+if (isset($thing_report['requested_channel'])) {
+if (!isset($thing_report['thing'])) {
+    $GLOBALS['uuid'] = false;
+} else {
+    $GLOBALS['uuid'] = $thing_report['thing']->uuid;
+}
+
+//echo $GLOBALS['uuid'];
+}
+
+if (!isset($thing_report['requested_channel'])) {
+    $requested_channel = "web";
+} else {
+    $requested_channel = $thing_report['requested_channel'];
+}
+
+$whitelistArray = array("agent","email", "sms","slack","facebook","web","message","thing","log");
+        if (in_array(strtolower($requested_channel), $whitelistArray))
+        {
+            //Do nothing, check passed
+        }
+        else
+        {
+            $requested_channel = "web";
+        }
+
+
+//echo strtoupper($requested_channel) . "<br>";
+// h2
+
+?>
+
+
+<div class = "media">
+<!--<div class = "asset">
+</div>-->
+<div class = "content">
+
+<?php
+
+//var_dump($requested_channel);
+
+switch ($requested_channel) {
+    case "thing":
+    case "agent":
+
+        $head = '<table class="blob">
+                        <tr class="blob">
+                        <td class="blob">
+                        <div class="blob">';
+
+        $foot = "
+                        </div>
+                        </td>
+                        </tr>
+                        </tbody>
+                        </table>";
+
+
+        foreach ( $thing_report as $channel=>$value) {
+    
+            switch ($channel) {
+                case "etime":
+                case "choices":
+                case "requested_channel":
+                    // Don't display above listed blobs
+                    continue;
+                default:
+           
+                    echo quoted_printable_decode($head);
+
+                    if ($channel == 'thing') {
+                        displayThingreport('message', '"' . $thing_report['request'] . '"');
+                    } else {
+                        displayThingreport($channel, $value);
+                    }
+
+                    echo "<br>";
+
+                    echo quoted_printable_decode($foot);
+            }
+
+        }
+        break;
+
+    case "log":
+        echo '<center><table>
+            <tr>
+            <td class="blob">';
+
+        echo quoted_printable_decode($thing_report['log']);
+
+        echo "<br>
+            </td>
+            </tr>
+            </table></center>";
+        break;
+
+    case "web":
+        if (isset($thing_report['web'])) {
+            echo '<div id="imagecentered">';
+
+            echo $thing_report['web'];
+            echo "</div>";
+            break;
+        }
+        // Otherwise drop through to sms
+
+    case "email":
+        
+        if (isset($thing_report['email']) and (is_string($thing_report['email']))) {
+            echo quoted_printable_decode($thing_report['email']);
+
+            break;
+        }
+
+    case "message":
+        if (isset($thing_report['message'])) {
+            //$button_align = "left";
+            //$bubble = '<div class="triangle-border">' . $thing_report['sms'] . '</div>';
+            echo quoted_printable_decode($thing_report['message']);
+            break;
+        }
+
+
+    case "sms":
+        if (isset($thing_report['sms'])) {
+            $button_align = "left";
+//https://stackoverflow.com/questions/1960461/convert-plain-text-urls-into-html-hyperlinks-in-php
+$string = $thing_report['sms'];
+$url = '~(?:(https?)://([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![\.,:])~i'; 
+//$string = preg_replace($url, '<a href="$0" target="_blank" title="$0">$0</a>', $string);
+$string = preg_replace($url, '<a href="$0" title="$0">$0</a>', $string);
+
+
+//echo $string;
+
+            $bubble = '<div class="triangle-border">' . $thing_report['sms'] . '</div>';
+            $bubble = '<div class="triangle-border">' . $string . '</div>';
+
+            echo quoted_printable_decode($bubble);
+            break;
+        }
+        // Drop through to default
+    default:
+
+        // exit(); // Enable this to just return Stackr graphic
+
+        // Otherwise check for a sms message and display.
+
+        if (isset($thing_report['sms'] ) ) {
+            $button_align = "left";
+            $bubble = '<div class="triangle-border">' . $thing_report['sms'] . '</div>';
+            echo quoted_printable_decode($bubble);
+
+        } else {
+            // This end point is reached is there is no web or sms information on the Thing.
+            // and
+            // when the Thing has been forgotten.
+            $button_align = "left";
+            $bubble = '<div class="triangle-border">' ."THING | That Thing seems to be forgotten. Or never was. Or no agent responded." . '</div>';
+            echo quoted_printable_decode($bubble);
+        }
+}
+
+
+$buttons="on";
+
+if  ($buttons == "on") {
+
+    //echo "<br>";
+    // Set the default button here... display if false or not set.
+    $default_button = "meep";
+    $content =  '<table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+
+        <tr class="buttonset">
+        <td>
+
+        <table class="buttonset">
+        <tr>
+        <td class="button">
+
+        <a class = "button" style="text-decoration: none; color: white;" href="<?php echo $web_prefix; ?>privacy"> Privacy </a>
+        </td>
+        </tr>
+        </table>
+
+        </td>
+        </tr>
+
+
+        </tbody>
+        </table>';
+/*
+        $head= '
+        <table class="makeweb">
+        <tr>
+        <td class="makeweb">
+        <div class="makeweb">';
+
+        $foot = "
+        </div>
+        </td>
+        </tr>
+        </tbody>
+        </table>";
+*/
+
+        $head= '<div class="buttonset">';
+        $foot = '</div>';
+
+//if (!isset($GLOBAL['thingy']['thing'])) {
+//    $uuid = false;
+//    $forget_button ="";
+
+//} else {
+$forget_button = "";
+
+if (isset($GLOBALS['thingy']['thing']->uuid)) {
+
+ $uuid = $GLOBALS['thingy']['thing']->uuid;
+
+        $word = "Forget";
+        $url_link = $web_prefix . "thing/".$uuid ."/forget";
+        $forget_button = '<span class="button">
+            <a style="text-decoration: none; color: white;" href="'.
+                $url_link . '"> '.  ''. $word . ''.' </a></span>
+            ';
+}
+
+
+        $word = "Privacy";
+        $url_link = $web_prefix . "privacy";
+        $privacy_button = '<span class="button">
+            <a style="text-decoration: none; color: white;" href="'.
+                $url_link . '"> '.  ''. $word . ''.' </a></span>
+            ';
+
+
+    $content =  '<table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+
+        <tr class="buttonset">
+        <td>
+
+        <table class="buttonset">
+        <tr>
+        <td>
+' . $forget_button . ' ' .$privacy_button . '
+
+        </td>
+        </tr>
+        </table>
+
+        </td>
+        </tr>
+
+
+        </tbody>
+        </table>';
+
+
+
+    if (isset($thing_report['choices'] ) ) {
+
+        if ($thing_report["choices"]["button"] != null) {
+            $content = $thing_report["choices"]["button"];
+//var_dump($content);
+        }
+
+    }
+
+    if (!isset($button_align)) {$button_align = "center";}
+//$button_align = "center";
+    if ($button_align != "left") {
+//        echo '<div id="buttons">';
+//        echo '<div id="inner">';
+        echo quoted_printable_decode($head);
+        echo quoted_printable_decode($content);
+        echo quoted_printable_decode($foot);
+  //      echo '</div>';
+//        echo '</div>';
+    } else {
+        echo quoted_printable_decode($head);
+        echo quoted_printable_decode($content);
+        echo quoted_printable_decode($foot);
+    }
+
+}
+
+?>
+
+
+</div>
+</div>
+</article>
+
+
+
+</div></div>
+
+</main>
+<footer>
+
+<?php
+if (isset($state)) : ?>
+
+<table class="blob">
+<tr class="blob">
+<td class="blob">
+
+<?php echo "usermanager: " . quoted_printable_decode($state['thing']); ?><br>
+<?php echo "stack: " . quoted_printable_decode($state['stack']); ?><br>
+
+</td>
+</tr>
+
+</table>
+
+<?php endif; ?>
+
+
+
+			
+<div>
+<center>
+
+<img src="<?php $web_prefix = "http://$_SERVER[HTTP_HOST]/"; echo $web_prefix; ?>pixel_sml.png">
+</center>
+</div>
+
+<?php
+    // calculated using thing_report elapsed_time since gearman call
+    echo $settings['settings']['stack']['hashmessage'];
+    // Show the elapsed time
+    if (isset($thing_report['etime'])) :
+    echo " ";
+    echo quoted_printable_decode($thing_report['etime']) . 'ms';
+?>
+<br>
+
+    <?php endif; ?>
+
+
+
+<?php
+
+
+
+// Confirm if there is a validated identit behind the agent request
+if (isset($thing_report['thing']->nom_from)) {
+    $nom_from = $thing_report['thing']->nom_from;
+} else {
+    $nom_from = null;
+}
+
+switch ($nom_from) {
+    case null:
+    case "null" . $mail_postfix:
+        echo "no identity available";
+        break;
+    case "web":
+        echo "no identity provided";
+        break;
+    default:
+        echo "identity provided";
+}
+
+
+
+?>
+<br>
+
+        <a href="<?php echo  $web_prefix ?>"><?php echo  $web_prefix ?></a>
+
+
+</footer>
+
+
+
+<!--</div>-->
+</body>
+</html>
+
