@@ -1,0 +1,7 @@
+I am calling this a communications operating system.  I will try and release classes once they are somewhat ready.  But I'll start with the core class of Thing.
+
+In this framework, UUID (v4) identifiers are served on request and linked to Things.
+
+This first upload is of thing.php.
+
+nrwtaylor 16 July 2017
