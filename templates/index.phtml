@@ -1,0 +1,181 @@
+<?php namespace Nrwtaylor\StackAgentThing; ?>
+<?php $settings = $GLOBALS['settings'];?>
+<?php //$thing= new Thing(null);?>
+
+<meta name="viewport" content="width=device-width" />
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title><?php echo $settings['settings']['stack']['short_name']; ?></title>
+        <link rel="stylesheet" href="/style.css?70" type='text/css'>
+    </head>
+    <body>
+
+
+<header>
+
+<h1 class="front"><?php echo $settings['settings']['stack']['short_name']; ?></h1>
+
+        <div><?php echo $settings['settings']['thing']['is']; ?></div>
+
+
+        <?php if (isset($messages)) : ?>
+            <h2></h2>
+        <?php else: ?>
+
+        <?php endif; ?>
+
+
+
+        <?php if (isset($name)) : ?>
+        <h2><?= htmlspecialchars($name); ?>!</h2>  
+       <!--     <h2>Hello.</h2> -->
+
+        <?php else: ?>
+
+</header>
+<main class="grid">
+<article>
+<br>
+<br>
+
+        <?php endif; ?>
+
+<?php
+//            $messages[0] = "Down for maintenance.";
+
+            $messages[0] = "Text START to " .  $settings['settings']['stack']['location'] . " SMS Portal <br>at ".$settings['settings']['stack']['sms_address']." operated by " . $settings['settings']['stack']['entity_name'].".";
+            $messages[1] = "Use " . $settings['settings']['stack']['short_name'] . " by email.  Request access to " . $settings['settings']['stack']['email']. ".";
+
+//            $messages[2] = "Hello.";
+
+            $message = $messages[rand(0,count($messages) - 1)];
+
+            $bubble = '<div class="triangle-border">' .$message . '</div>';
+            echo quoted_printable_decode($bubble);
+?>
+
+
+
+
+<?php
+        // Display default button here
+
+        $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+
+        $word = "Privacy";
+        $url_link = $actual_link . "/privacy";
+
+        $privacy_button = '<span class="button">
+            <a style="text-decoration: none; color: white;" href="'.
+                $url_link . '"> '.  ''. $word . ''.' </a></span>
+            ';
+        //$privacy_button = '<a href = "' . $url_link . '">'. $word.'</a>' ;
+
+            $privacy_button = '<td style="background-color: #0066dd; font-family: "Helvetica Neue",Arial,sans-serif;
+            font-size: 14px; 
+            line-height: 18px; padding-left: 7px; padding-right: 7px;
+            padding-top: 4px;
+            padding-bottom: 4px; 
+            margin-left: 18px;
+            margin-right: 18px;
+            font-weight: bold;
+            box-shadow: 0px 0px 2px 0 rgb(0.18, 0.18, 0.18);
+            border-radius: 0px; 
+            background: #719e40;">
+
+            <a style="text-decoration: none; color: white;" href="' . $url_link . '"> '. $word . '  </a>
+            </td>';
+
+
+
+
+
+
+$forget_button = "";
+
+    $html_button_set = 
+
+'<table border="0" width="100%" cellpadding="0" cellspacing="0">
+    <tbody>
+        <tr>
+            <td colspan="3" valign="top" width="15" height="10">
+            </td>
+        </tr>
+        <tr style="line-height: 0">
+            <td>
+                <table style="border-spacing: 14px 0px">
+                    <tr>
+                        ' . $privacy_button . '
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3" valign="top" width="15" height="10">
+            </td>
+        </tr>
+    </tbody>
+</table>';
+
+        echo quoted_printable_decode($html_button_set);
+
+
+?>
+</div>
+</article>
+<div>
+
+A limited-AI message processor.
+
+
+<footer>
+
+
+<br>
+<br>
+Unsubscribe: <a href="mailto:unsubscribe<?php echo  $settings['settings']['stack']['mail_postfix'] ?>">unsubscribe<?php  echo $settings['settings']['stack']['mail_postfix'] ?></a>
+<br>
+Text STOP
+<br>
+<br>
+Hosted in <?php echo $settings['settings']['stack']['server_location'] ?>
+<br>
+<?php echo $settings['settings']['stack']['mail_regulatory'] ?>
+<br>
+<br>
+<div>
+<center>
+<img src="<?php $this->web_prefix = "http://$_SERVER[HTTP_HOST]/"; echo $this->web_prefix; ?>pixel_sml.png">
+</center>
+</div>
+
+
+
+<?php
+    echo $settings['settings']['stack']['hashmessage']; 
+    // Show the elapsed time
+    if (isset($thing_report['start_time'])) {
+        echo " ";
+        $run_time = microtime(true) - $thing_report['start_time'];
+
+        //microtime(true) returns time in seconds accurate to milliseconds
+
+        $t = round($run_time * 1000000);
+
+        if ($t > 999) {
+            echo number_format(round($t/1000)). "ms";
+        } else {
+            echo number_format($t). "µs";
+        }
+    } 
+    
+?>
+
+
+</footer>
+</main>
+    </body>
+</html>
