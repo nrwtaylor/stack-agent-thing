@@ -30,8 +30,9 @@ class Makelog
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
-
         $this->email = $thing->container['stack']['entity_name'];
+
+
 
 
 
@@ -64,25 +65,27 @@ class Makelog
 
         $this->getRuntimes();
 
-        $t = null;
+        $t = "\nSelf-reported Agent runtimes\n";
         foreach(array_reverse($this->agent_run_for) as $key=>$agent_run_for) {
-            $t .= $agent_run_for['agent_name'] . " " . $agent_run_for['run_for'] . "ms\n";
+            $t .= $agent_run_for['agent_name'] . " " . number_format($agent_run_for['run_for']) . "ms\n";
         }
 
         $file .= $t. "\n";
 
-        $t = null;
-        foreach($this->agent_sequence as $key=>$array) {
+        $t = "\nSelf-reported Agent chain-of-custody\n";
+        foreach(($this->agent_sequence) as $key=>$array) {
             $t .= $array["agent_name"];
             if ($array["run_for"] != "X") {
-                $t .= " " . $array["run_for"] . " ";
+                $t .= " (" . number_format($array["run_for"]) . "ms)";
+                $t .= " | ";
+            }  else {
+                $t .= " > ";
             }
-            $t .= ">";
         }
         $t .= "\n";
 
         $file .= $t. "\n";
-
+        $file .= "\nSelf-report\n";
         $file .= $text;
         $file .= $footer;
 

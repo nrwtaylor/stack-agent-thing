@@ -22,6 +22,12 @@ class Makephp
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $stack_state = $thing->container['stack']['state'];    
+
+        if ($stack_state == "prod") {
+            $class_name = strtolower($class_name); // only in production
+        }
+
         $file = @file_get_contents(__DIR__ . '/../agents/'. $class_name . '.php');
 
         if($file=== FALSE) { // handle error here... }
