@@ -12,6 +12,8 @@ class Quota {
         $this->agent_input = $agent_input;
 
 		$this->thing = $thing;
+        $this->start_time = $this->thing->elapsed_runtime();
+
 		$this->agent_name = 'quota';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 
@@ -47,7 +49,7 @@ class Quota {
 
 		$this->node_list = array("quota"=>array("opt-in"));
 
-        $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.</pre>', "INFORMATION");
+        $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
 
         //foreach ($quotas_list as $key=>$value) {
             // Pattern $this->{"default_" . $variable_name};
@@ -58,7 +60,6 @@ class Quota {
 
 
         // Check whether quota should be reset
-
         $this->get();
 
         // Check whether quota should be reset
@@ -77,7 +78,7 @@ class Quota {
 
 		$this->thing->flagGreen();
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
+        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
@@ -89,13 +90,9 @@ class Quota {
 
     function set()
     {
-//echo "set";
-
-//var_dump($this->counter);
         $this->variables->setVariable("counter", $this->counter);
         $this->variables->setVariable("reset_at", $this->reset_at);
         $this->variables->setVariable("refreshed_at", $this->current_time);
-
 
         return;
     }
@@ -106,24 +103,17 @@ class Quota {
         $this->counter = $this->variables->getVariable("counter");
         $this->reset_at = $this->variables->getVariable("reset_at");
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
-//echo "get";
-//var_dump($this->counter);
 
         if ($this->counter == null) {$this->counter = 1;}
         if ($this->reset_at == null) {$this->reset_at = $this->current_time;}
 
-        //$this->counter_daily = $this->counter; // Factor out.
-//        $this->counter_daily += 1;
-
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".", "DEBUG");
-
 
         return;
     }
 
     function setFlag($colour = null)
     {
-
         if ($colour == null) {
             $colour = "red";
         }
@@ -158,7 +148,6 @@ class Quota {
                 $sms .= "Text QUOTA RESET";
                 break;
 
-
             case true:
             default:
         }
@@ -173,60 +162,33 @@ class Quota {
 
         switch ($this->counter) {
             case 1:
-
-                $subject = "Start Stackr?";
-
-                $message = "So an action you took (or someone else took) opted you into 
-                    Stackr.
-                    <br>
-                    There is always that little element of uncertainity.  So we clearly think
-                    this is a good thing and are excited to start
-                    making associations from your emails that (which?) we know will be
-                    helpful or useful to you.
-                    <br>
-                    So thanks for that and be sure to keep an eye on your stack balance. Which
-                    will be maintained at least until you opt-out.  
-                    <br>
-                    Keep on stacking.
-
-                    ";
-                break;
+                // drop through
             case 2:
-                $subject = "Opt-in request accepted";
-
-                $message = "Thank you for your opt-in request.  'optin' has 
-                    added ".$this->from." to the accepted list of Stackr emails.
-                    You can now use Stackr.  Keep on stacking.\n\n";
-
-                break;
-
+                // drop through
             case null;
-
+                // drop through
             default:
-                $message = "START | Acknowledged. " . $this->web_prefix . "privacy";
-
+                $message = "QUOTA | Acknowledged. " . $this->web_prefix . "privacy";
         }
 
             $this->message = $message;
             $this->thing_report['email'] = $message;
-
     }
 
 
     public function makeChoices()
     {
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-        $choices = $this->thing->choice->makeLinks('start');
-        // $choices = false;
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "quota");
+        $choices = $this->thing->choice->makeLinks('quota');
         $this->thing_report['choices'] = $choices;
         return;
     }
 
 
 
-	public function respond() {
-
+	public function respond()
+    {
 		// Thing actions
 
 		// New user is triggered when there is no nom_from in the db.
@@ -234,13 +196,9 @@ class Quota {
 		// which explains what stackr is and asks either
 		// for a reply to the email, or to send an email to opt-in@<email postfix>.
 
-
 		$this->thing->flagGreen();
 
 		// Get the current user-state.
-
-
-
         $this->makeSMS();
         $this->makeEmail();
         $this->makeChoices();
@@ -258,10 +216,8 @@ class Quota {
 		return;
 	}
 
-
-
-	public function readSubject() {
-
+	public function readSubject()
+    {
         // Process as User>Agent or as Thing>Agent?
         if ($this->agent_input == null) {
             $piece = strtolower($this->from . " " . $this->subject);
@@ -275,6 +231,7 @@ class Quota {
                // Match phrase within phrase
                 $this->quotaReset();
                 break;
+
             case (strpos(strtolower($piece),"use") !== false):
                // Match phrase within phrase
                 $this->quotaUse();

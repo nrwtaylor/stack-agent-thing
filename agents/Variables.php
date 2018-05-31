@@ -3,15 +3,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-
-class Variables {
-
+class Variables
+{
     // So Variables manages a set of variables.
     // Providing basic mathematical and text variable
     // operations.
 
-    
-    //   variables <variable set name> <identity> ie
+    // variables <variable set name> <identity> ie
     // a tally of 5 for mordok for variables@<mail_postfix>
 
     // Without an agent instruction, tally
@@ -23,7 +21,6 @@ class Variables {
     {
         // Setup Thing
         $this->thing = $thing;
-
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->uuid = $thing->uuid;
@@ -52,10 +49,6 @@ class Variables {
         // Setup reporting
         $this->thing_report['thing'] = $this->thing->thing;
 
-
-        // For testing
-        // $agent_command = $this->agent . " " . $this->name . " " . $this->identity;
-
         if ($agent_command == null) {
             $this->thing->log( $this->agent_prefix . 'did not find an agent command. No action taken.', "WARNING" );
         }
@@ -65,14 +58,6 @@ class Variables {
         $this->agent_command = $agent_command;
 
         $this->nom_input = $agent_command . " " . $this->from . " " . $this->subject;
-//var_dump($agent_command);
-//        if ($this->agent_command == null) {
-//            $this->nom_input = $this->from . " " . $this->subject;
-//        } else {
-//            $this->nom_input = $this->agent_command;
-//        }
-//var_dump($this->nom_input);
-//echo "<br>";
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
@@ -81,7 +66,7 @@ class Variables {
 
 		$this->node_list = array("start");
 
-		$this->thing->log( $this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  '.', 'INFORMATION' );
+		$this->thing->log( $this->agent_prefix . 'running on Thing ' .  $this->thing->nuuid .  '.', 'INFORMATION' );
 
         $this->readInstruction();
 
@@ -102,16 +87,11 @@ class Variables {
         $time_string = $this->thing->json->time();
         $this->setVariable("refreshed_at", $time_string);
 
-//        $this->end_time = microtime(true);
-//        $this->actual_run_time = $this->end_time - $this->start_time;
-//        $milliseconds = round($this->actual_run_time * 1000);
-
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', 'OPTIMIZE' );
 
         $this->thing_report['log'] = $this->thing->log;
 		return;
 	}
-
 
     function setVariables()
     {
@@ -131,11 +111,9 @@ class Variables {
             }
 
         }
-//exit();
-
     }
 
-    function getAgent() 
+    function getAgent()
     {
         return;
     }
@@ -146,20 +124,7 @@ class Variables {
             $variable_set_name= $this->variable_set_name;
         }
 
-     $this->thing->log( $this->agent_prefix . ' got variable "' .  $variable_set_name . '".', 'INFORMATION' );
-
-
-        //$this->thing->log( $this->agent_prefix . 'ran getVariables().' );
-
-
-//        $this->variables_agent = $agent;
-
-        // So this returns the last 3 tally Things.
-        // which should be enough.  One should be enough.
-        // But this just provides some resiliency.
-
-//        $this->thing->log( $this->agent_prefix . 'requested the variables.' );
-
+        $this->thing->log( $this->agent_prefix . 'got variable "' .  $variable_set_name . '".', 'INFORMATION' );
 
         // We will probably want a getThings at some point.
 
@@ -172,7 +137,7 @@ class Variables {
 
         // When we have that list of Things, we check it for the tally we are looking for.
         // Review using $this->limit as search length limiter.  Might even just
-        // limit search to N microseconds of search. 
+        // limit search to N microseconds of search.
 
         $match_count =0;
         if ( $things == false  ) {
@@ -215,13 +180,9 @@ class Variables {
 
     function resetVariable() 
     {
-       
         $this->setVariable("variable", 1);
-
         return;
     }
-
-
 
 	function startVariables() 
     {
@@ -252,13 +213,11 @@ class Variables {
         $thing = new Thing(null);
         $this->setVariable("next_uuid", $thing->uuid);
 
-
 		return;
 	}
 
-    function addVariable($variable = null, $amount) 
+    function addVariable($variable = null, $amount)
     {
-
         $this->{$variable . "_overflow_flag"} = false;
 
         if ($variable == null) {$variable = 'variable';}
@@ -288,12 +247,13 @@ class Variables {
 
         // Store counts
         $this->setVariable($variable, $this->variables_thing->$variable);
-//        $this->variables_thing->flagGreen();
+        // $this->variables_thing->flagGreen();
 
         return $this->{$variable . "_overflow_flag"};
     }
-
-    function oldgetVariableset() {
+/*
+    function oldgetVariableset()
+    {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
 
@@ -318,15 +278,14 @@ class Variables {
         return false;
 
     }
+*/
 
-
-    function getVariableset() {
+    function getVariableset()
+    {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
 
         $variables = $this->variables_thing->account['stack']->json->array_data;
-//var_dump($variables);
-//exit();
         if (isset($variables[$this->variable_set_name])) {
             $this->context = "train";
             $t = $variables[$this->variable_set_name];
@@ -344,13 +303,11 @@ class Variables {
             return null;
         }
 
-
         return false;
-
     }
 
-
-    function echoVariableset() {
+    function echoVariableset()
+    {
         // Urgh :/
 
         echo "<br>Screened on: " . $this->variable_set_name . "<br>";
@@ -363,14 +320,11 @@ class Variables {
             echo "<br>";
         }
         echo "<br>";
-
-
-
     }
 
 
-    function getVariable($variable = null) {
-
+    function getVariable($variable = null)
+    {
         // Pulls variable from the database
         // and sets variables thing on the current record.
         // so shouldn't need to adjust the $this-> set
@@ -397,7 +351,7 @@ class Variables {
         return $this->variables_thing->$variable;
     }
 
-    function setVariable($variable = null, $value) 
+    function setVariable($variable = null, $value)
     {
 
         // Take a variable in the variables_thing and save
@@ -408,12 +362,9 @@ class Variables {
 
         if ($variable == null) {$variable = 'variable';}
 
-
         // Review why it would be unsset at this point.
         if (!isset($this->variables_thing)) {
-//            $this->thing->log($this->agent_prefix . "found variables_thing unsset.  Creating variable set.");
             $this->startVariables();
-
         }
 
         $this->variables_thing->$variable = $value;
@@ -422,28 +373,13 @@ class Variables {
         $this->variables_thing->json->setField("variables");
         $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
 
-
         // And save variable_set onto local Thing.
         $this->thing->db->setFrom($this->identity);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
 
-        //$this->thing->log( 'Agent "Variables" ' . $this->variable_set_name . "_" . $variable . " = " . $value . ".");
-
-        // Brute-ish.
-        //$this->setVariableset();
-
-        // Remember don't use $this->thing or $this-> to
-        // save the local variables.
-        // Everything should standalone in $this->variables_thing
-
-//        $this->variables_thing->flagGreen();
-
         return $this->variables_thing->$variable;
     }
-
-
-
 
     function incrementVariable($variable = null)
     {
@@ -451,9 +387,8 @@ class Variables {
         return;
 	}
 
-
-	public function Respond() {
-
+	public function Respond()
+    {
 		// Develop the various messages for each channel.
 
 		// Thing actions
@@ -461,11 +396,9 @@ class Variables {
 		// can be left alone until called on next.
 		$this->thing->flagGreen(); 
 
-
-  //      $this->thing->log( $this->agent_prefix . ' ' .$this->variables_thing->variable . '.' );
+        // $this->thing->log( $this->agent_prefix . ' ' .$this->variables_thing->variable . '.' );
 
 		$this->sms_message = "VARIABLES SET IS ";
-
         $this->sms_message .= strtoupper($this->name);
 
         if ($this->verbosity >= 2) {
@@ -476,7 +409,6 @@ class Variables {
         $this->sms_message .= " | ";
 
         foreach ($this->agent_variables as $key=>$variable_name) {
-
             if (isset($variable_name)) {
                 $this->sms_message .= " " . strtolower($variable_name) . " ";
                 if (isset($this->variables_thing->$variable_name)) {
@@ -516,13 +448,11 @@ class Variables {
 	}
 
 
-    public function defaultCommand() 
+    public function defaultCommand()
     {
         $this->thing->log( $this->agent_prefix  . 'default command set.' , "DEBUG" );
 
-
         $this->agent = "variables";
-//        $this->limit = 5;
         $this->variable_set_name = "identity";
 
         $this->name = "identity";
@@ -531,7 +461,7 @@ class Variables {
     }
 
 
-    public function readInstruction() 
+    public function readInstruction()
     {
         if($this->agent_command == null) {
             $this->defaultCommand();
@@ -552,14 +482,11 @@ class Variables {
             $this->index = $pieces[4];
         }
 
-        //$this->thing->log( $this->agent_prefix .  'read the instruction and got ' . $this->agent . ' '  . $this->name . ' ' . $this->identity . "." );
-
         return;
-
     }
 
-
-    public function extractNumber($input) {
+    public function extractNumber($input)
+    {
         $matches = 0;
         $pieces = explode(" ", strtolower($input));
 
@@ -577,11 +504,9 @@ class Variables {
         return true;
     }
 
-    public function isVariable($input) 
+    public function isVariable($input)
     {
-//        $matches = 0;
         $pieces = explode(" ", strtolower($input));
-//var_dump($this->agent_variables);
         foreach ($pieces as $key=>$piece) {
             foreach ($this->agent_variables as $variable_name) {
                 if ($piece == $variable_name) {
@@ -596,24 +521,9 @@ class Variables {
     {
         $matches = 0;
         $pieces = explode(" ", strtolower($input));
-//var_dump($this->agent_variables);
         foreach ($pieces as $key=>$piece) {
-//echo $piece;
-
-            //echo "<br>";
-            //echo "piece " . $piece . "<br>";
-            //echo "in_array";var_dump (in_array($piece, $this->agent_variables));
-            //echo "<br>";
-            //echo "array_key_exists";var_dump (array_key_exists($piece, $this->agent_variables));
-            //echo "<br>";
-            //echo "isVariable";var_dump ($this->isVariable($piece));
-            //echo "<br>";
-
 
             if ($this->isVariable($piece) == false) {
-            //if (in_array($piece, $this->agent_variables)) {
-            //if (array_key_exists($piece, $this->agent_variables)) {
-//echo $piece;
                 $variable = $piece;
                 $matches += 1;
             }
@@ -625,7 +535,7 @@ class Variables {
         }
     }
 
-	public function readText() 
+	public function readText()
     {
         //$this->thing->log( $this->agent_prefix . 'started reading the received text.' );
         $this->num_hits = 0;
@@ -645,15 +555,11 @@ class Variables {
         //$this->input = $input;
 
         $haystack = strtolower($this->nom_input);
-
         $pieces = explode(" ", strtolower($this->nom_input));
 
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-
-            //exit();
-
             if ($this->nom_input == $this->agent) {
                 //$this->readVariables();
                 return;
@@ -796,25 +702,12 @@ echo "</pre>";
         return;
 	}
 
-    public function newVariable($name = null, $value = null) {
+    public function newVariable($name = null, $value = null)
+    {
         if ($this->isVariable($name) == true) {
            $this->agent_variables[] = $name;
         }
         $this->setVariable($name, $value);
- 
-//        $this->agent_variables[] = $name;
-//var_dump($variable);
-//var_dump($value);
-//exit();
-
     }
-
-//    public function readInput() {
-//        $this->readInstruction();
-//        $this->readText();
-//        return;
-//    }
-
-
 }
 ?>
