@@ -13,13 +13,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-//require_once '/var/www/html/stackr.ca/agents/uuid.php';
-
-
 class Identity {
 
 	function __construct(Thing $thing, $agent_input = null) {
@@ -53,20 +46,11 @@ $this->thing_report['thing'] = $this->thing->thing;
 
 
 
-$this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
+        $this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
 		$this->node_list = array("identity"=>
 						array("who am i"));
 
 		$this->aliases = array("learning"=>array("good job"));
-
-//		echo '<pre> Agent "Receipt" constructed a Thing ';echo $this->uuid;echo'</pre>';
-//		echo '<pre> Agent "Receipt" received this Thing "';echo $this->subject;echo'"</pre>';
-
-		//echo "construct email responser";
-
-		// If readSubject is true then it has been responded to.
-		// Forget thing.
-
 
 		$this->readSubject();
 
@@ -75,23 +59,28 @@ $this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H
         }
 
 
-$this->thing->log('Agent "Identity" found ' . $this->uuid);
+        $this->thing->log('Agent "Identity" found ' . $this->uuid);
 
-
-$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
-//echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
+        //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
 
 	}
 
-    function extractUuids($input)
+    function extractUuids($input = null)
     {
+        if ($input == null) {
+            $input = $this->subject;
+        }
+
         if (!isset($this->uuids)) {
             $this->uuids = array();
         }
         
         $agent = new Uuid($this->thing, "uuid");
-        $this->uuids = $agent->uuids;
-
+        if (isset($agent->uuids)) {
+            $this->uuids = $agent->uuids;
+        } else {
+            $this->uuids = null;
+        }
         //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 
         //preg_match_all($pattern, $input, $m);

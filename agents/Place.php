@@ -259,8 +259,11 @@ function isCode() {
 
     if ( ($findagent_thing->thing_report['things'] == true)) {}
 
+
     if ((count($findagent_thing->thing_report['things']) == 0) or 
-        ($findagent_thing->thing_report['things'] == 0)) {
+        ($findagent_thing->thing_report['things'] == 0) or 
+        ($findagent_thing->thing_report['things'] == true) 
+        ) {
         // No places found
     } else {
         foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object) {

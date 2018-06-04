@@ -18,14 +18,10 @@ class Nuuid {
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-//      This is how old roll.php is.
-//		$thingy = $thing->thing;
 		$this->thing = $thing;
-
-         $this->thing_report  = array("thing"=>$this->thing->thing);
+        $this->thing_report['thing']  = $thing;
 
         $this->start_time = $this->thing->elapsed_runtime(); 
-
 
         $command_line = null;
 
@@ -42,6 +38,7 @@ class Nuuid {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
 		$this->haystack = $thing->uuid . 
 		$thing->to . 
@@ -319,7 +316,7 @@ class Nuuid {
 //$number = ($this->result[0]);
 //var_dump($number);
 //exit();
-$font = $GLOBALS['stack'] . 'resources/roll/KeepCalm-Medium.ttf';
+$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 $text = $this->thing->nuuid;
 // Add some shadow to the text
 //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);

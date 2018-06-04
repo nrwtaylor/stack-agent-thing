@@ -169,9 +169,6 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 
 	function defaultButtons() {
 
-//$html_links = $this->thing->choice->makeLinks();
-
-
 		if (rand(0,5) <= 3) {
 			$this->thing->choice->Create('link', $this->node_list, 'start a');
 		} else {

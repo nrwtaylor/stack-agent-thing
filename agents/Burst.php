@@ -14,7 +14,9 @@ class Burst
 
     function __construct(Thing $thing, $agent_input = null) {
 
-        $this->start_time = microtime(true);
+        // $this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime();
+
         $this->agent_instruction = $agent_input;
 
 
@@ -663,4 +665,3 @@ class Burst
 }
 
 ?>
-
