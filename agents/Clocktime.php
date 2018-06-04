@@ -19,8 +19,6 @@ class Clocktime
 
         //if ($agent_input == null) {$agent_input = "";}
 
-        //$agent_input = "test";
-
         $this->agent_input = $agent_input;
 
         $this->thing = $thing;
@@ -31,7 +29,6 @@ class Clocktime
         $this->agent_prefix = 'Agent "Clocktime" ';
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
-
 
         // I'm not sure quite what the node_list means yet
         // in the context of headcodes.
@@ -69,7 +66,6 @@ class Clocktime
 
         //$this->subject = "Let's meet at 10:00";
 
-
         // Read the subject to determine intent.
 		$this->readSubject();
 
@@ -77,23 +73,18 @@ class Clocktime
         // I think properly capitalized.
         //$this->set();
         if ($this->agent_input == null) {
+
 		    $this->Respond();
         }
 
-//exit();
         $this->set();
-
-
 
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
 
         $this->thing_report['log'] = $this->thing->log;
 
-
-
 		return;
-
-		}
+    }
 
     function makeClocktime($input = null)
     {
@@ -119,15 +110,13 @@ class Clocktime
         //if ($input == null) {$this->clocktime = $train_time;}
 
         return $this->clocktime;
-
-
     }
 
 
     function test()
     {
         $test_corpus = file_get_contents("/var/www/html/stackr.ca/resources/clocktime/test.txt");
-$test_corpus = explode("\n", $test_corpus);
+        $test_corpus = explode("\n", $test_corpus);
 //var_dump($test_corpus);
 //exit();
         $this->response = "";
@@ -136,41 +125,22 @@ $test_corpus = explode("\n", $test_corpus);
             if ($line == "-") {break;}
             $this->extractClocktime($line);
 
-//            $this->response .= 
             $line."<br>".
             "hour " . $this->hour . " minute " . $this->minute . "<br>".
             "<br>";
-
         }
-        
-
     }
-
 
     function set()
     {
-//$this->head_code = "0Z15";
+        //$this->head_code = "0Z15";
         //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
-
-
 
         $this->clocktime->setVariable("refreshed_at", $this->current_time);
         $this->clocktime->setVariable("hour", $this->hour);
         $this->clocktime->setVariable("minute", $this->minute);
 
-//        $this->flag->setVariable("state", $this->state);
-
         $this->thing->log( $this->agent_prefix .' saved '  . $this->hour . " " . $this->minute . ".", "DEBUG" );
-
-
-
-  //      $this->thing->json->writeVariable( array("run_at", "day"), $this->day );
-  //      $this->thing->json->writeVariable( array("run_at", "hour"), $this->hour );
-  //      $this->thing->json->writeVariable( array("run_at", "minute"), $this->minute );
-  //      $this->thing->json->writeVariable( array("run_at", "refreshed_at"), $this->current_time );
-
-
-
 
         return;
     }
@@ -339,10 +309,10 @@ $test_corpus = explode("\n", $test_corpus);
 
         $this->makeSMS();
 
+//echo "foo";
 
-
-			$this->thing_report['email'] = $this->sms_message;
-			$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+	    $this->thing_report['email'] = $this->sms_message;
+		$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
 
 
@@ -411,8 +381,21 @@ $test_corpus = explode("\n", $test_corpus);
 
         if (($this->minute == "X") and ($this->hour == "X")) {
             $this->get();
-            return;
+/*
+            if ($this->agent_input == null) {
+                if( $this->hour == false) {
+                    // Get the current time
+                    $this->makeClocktime();
+//var_dump($this->clocktime);
+//var_dump($this->hour);
+                }
+            }
+*/
+
         }
+
+//        echo "meep";
+//        $this->makeClocktime();
 
         return "Message not understood";
         return false;

@@ -242,7 +242,6 @@ and the user UX/UI
                         $thing_report = $train_thing->thing_report;
                         return $thing_report;
                 }
-
                 if (strpos($this->agent_input, 'snowflake') !== false) {
 
                 $this->thing->log( '<pre> Agent created a Snowflake agent</pre>' );
@@ -286,8 +285,8 @@ and the user UX/UI
                 $this->thing->log( 'Agent "Agent" has heard this three times.' );
             }
 
-                        $thing_report = $beetlejuice_thing->thing_report;
-                        //return $thing_report;
+            $thing_report = $beetlejuice_thing->thing_report;
+            //return $thing_report;
          }
 
 
@@ -312,11 +311,24 @@ and the user UX/UI
             $burst_age = strtotime($this->current_time) - strtotime($burst->burst_time);
             if ($burst_age < 0) {$burst_age = 0;}
 
-            if ( ($bursts >= 1) and
-                ($burstiness < 750) and
-                ($similarities >= 8) and
-                ($similarness < 100) and
-                ($burst_age < 900) ) {
+
+            $channel_burst_limit = 1;
+            $channel_burstiness_limit = 750;
+            $channel_similarities_limit = 8;
+            $channel_similarness_limit = 100;
+            $channel_burst_age_limit = 900;
+
+//            if ( ($bursts >= 1) and
+//               ($burstiness < 750) and
+//                ($similarities >= 8) and
+//                ($similarness < 100) and
+//                ($burst_age < 900) ) {
+            if ( ($bursts >= $channel_burst_limit) and
+                ($burstiness < $channel_burstiness_limit) and
+                ($similarities >= $channel_similarities_limit) and
+                ($similarness < $channel_similarness_limit) and
+                ($burst_age < $channel_burst_age_limit) ) {
+
                 // Don't respond
                 $this->thing->log( 'Agent "Agent" heard similarities, similarness, with bursts and burstiness.', "WARNING" );
 
@@ -362,10 +374,8 @@ and the user UX/UI
         $emoji_thing = new Emoji($this->thing, "emoji");
         $thing_report = $emoji_thing->thing_report;
 
-
         if (isset($emoji_thing->emojis)) {
             // Emoji found.
-//                $input = $emoji_thing->thing->keyword . $input;
             $input = $emoji_thing->translated_input;
         }
 
@@ -447,37 +457,20 @@ and the user UX/UI
 		// See if there is an agent with the first workd
 		$arr = explode(' ',trim($input));
 
-
 		$agents = array();
-//echo $this->agent_input;
-//exit();
-//        $agents[] = $this->agent_input;
 
-//var_dump($arr);
+        $bigrams = $this->getNgrams($input, $n = 2);
+        $trigrams = $this->getNgrams($input, $n = 3);
 
-//var_dump($input);
-//exit();
+        $arr = array_merge($arr, $bigrams);
+        $arr = array_merge($arr, $trigrams);
 
-$bigrams = $this->getNgrams($input, $n = 2);
-$trigrams = $this->getNgrams($input, $n = 3);
-
-$arr = array_merge($arr, $bigrams);
-$arr = array_merge($arr, $trigrams);
-
-// Added this March 6, 2018.  Testing.
-if ($this->agent_input == null) {
-        $arr[] = $this->to;
-
-} else {
-    //    $arr[] = explode(' ' ,$this->agent_input);
-    //$arr[] = $this->agent_input;
-    //    $arr = array_merge($arr, explode(' ' , $this->agent_input));
-        $arr = explode(' ' ,$this->agent_input);
-
-}
-
-//        $arr[] = $this->agent_input;
-//        $arr[] = $this->to;
+        // Added this March 6, 2018.  Testing.
+        if ($this->agent_input == null) {
+            $arr[] = $this->to;
+        } else {
+            $arr = explode(' ' ,$this->agent_input);
+        }
 
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
 		//set_error_handler("warning_handler", E_WARNING);
@@ -508,23 +501,14 @@ if ($this->agent_input == null) {
 		//set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
 		restore_error_handler();
 
-//$agents = array_reverse($agents);
-//$agent = new Ping($this->thing);
-//var_dump($agents);
-//echo $agent->thing_report['sms'];
-//exit();
-
-
 		foreach ($agents as $agent_class_name) {
-//echo $agent_class_name . "<br>";
-//exit();
-//$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
+
+            //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
 			// Allow for doing something smarter here with 
 			// word position and Bayes.  Agent scoring
 			// But for now call the first agent found and
             // see where that consistency takes this.
-//$agent = new Ping($this->thing);
-//exit();
+
             // Ignore Things for now 19 May 2018 NRWTaylor
             if ($agent_class_name == "Thing") {
                 continue;
@@ -535,10 +519,7 @@ if ($this->agent_input == null) {
 // devstack This needs to be refactored out.
 // devstack How do I link to the packagist name programatically.
 
-// working ping
-//$agent_class_name = "Ping";
-$agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
-
+                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
                 //echo $agent_class_name."<br>";
                 $this->thing->log( $this->agent_prefix .'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
@@ -552,7 +533,7 @@ $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
                 //echo "Error meep<br>";      
-          $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
+                  $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
 
     			$message = $ex->getMessage();
 	    		//$code = $ex->getCode();
@@ -560,7 +541,7 @@ $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 			    $line = $ex->getLine();
 
     			$input = $message . '  ' . $file . ' line:' . $line;
-//echo $input;
+
                 // This is an error in the Place, so Bork and move onto the next context.
         		$bork_agent = new Bork($this->thing, $input);
 	    		continue;
@@ -568,7 +549,7 @@ $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 			}
 			return $thing_report;
 		}
-exit();
+//exit();
         $this->thing->log( $this->agent_prefix .'did not find an Ngram agent to run.', "INFORMATION" );
 
 

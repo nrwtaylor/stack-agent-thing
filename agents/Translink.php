@@ -138,7 +138,7 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
 
 
-			$ch = curl_init();
+			$ch = \curl_init();
 			curl_setopt($ch, CURLOPT_URL, $file);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			$xmldata = curl_exec($ch);

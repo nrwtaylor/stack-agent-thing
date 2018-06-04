@@ -909,12 +909,15 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
     if ( E_RECOVERABLE_ERROR===$errno ) {
         //ob_clean();
         //echo "BORK | Bounty ";
-        ob_clean();
+        //ob_clean();
+        if (ob_get_contents()) ob_clean();
         echo "BORK | 3797e2c1-6585-4ae8-a256-b3e5466c980f ";
         //echo "'caught' fatal error E_RECOVERABLE_ERROR\n";
         return true;
     } elseif ( E_ERROR===$errno ) {
-        ob_clean();
+        if (ob_get_contents()) ob_clean();
+
+        //ob_clean();
         echo "BORK | e5ffb5de-a502-466e-8ecc-f0ec9f861e0d";
         //echo "'caught' fatal E_ERROR | BOUNTY\n";
         $actual_link = "meep";
@@ -925,7 +928,9 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 
         return true;
     }
-    ob_clean();
+    if (ob_get_contents()) ob_clean();
+
+    //ob_clean();
     echo "BORK | 00539cf2-0f56-495a-87df-64746cebfd41";
     echo "'dropped' catchable fatal error\n";
     return false;

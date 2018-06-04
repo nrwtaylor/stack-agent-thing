@@ -5,37 +5,27 @@ use QR_Code\QR_Code;
 
 //QR_Code::png('Hello World');
 
-//echo '<pre> Agent "Receipt" started running on Thing ';echo date("Y-m-d H:i:s");echo'</pre>';
-
-// Call regularly from cron 
-// On call determine best thing to be addressed.
-
-// Start by picking a random thing and seeing what needs to be done.
-
+// Recognizes and handles UUIDS.  Does not generate.  That is a Thing function.
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Uuid {
+class Uuid
+{
 
-	function __construct(Thing $thing, $agent_input = null) {
+	function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->thing_report['thing'] = $thing;
 
+        if ($agent_input == null) {$agent_input = '';}
+        $this->agent_input = $agent_input;
+        $this->agent_name = "uuid";
+        // Given a "thing".  Instantiate a class to identify and create the
+        // most appropriate agent to respond to it.
+        $this->thing = $thing;
 
-//QRcode::png('PHP QR Code :)');
-//echo "meep";
-//exit(); 
-
-
-
-		if ($agent_input == null) {$agent_input = '';}
-		$this->agent_input = $agent_input;
-
-			// Given a "thing".  Instantiate a class to identify and create the
-			// most appropriate agent to respond to it.
-			$this->thing = $thing;
-
-        $this->thing_report['thing'] = $this->thing->thing;
+        //$this->thing_report['thing'] = $this->thing->thing;
 
 		// Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -46,7 +36,6 @@ class Uuid {
 		$this->stack_state = $thing->container['stack']['state'];
 		$this->short_name = $thing->container['stack']['short_name'];
 
-
 		// Create some short-cuts.
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -54,24 +43,13 @@ class Uuid {
         $this->subject = $thing->subject;
 
 		//$this->sqlresponse = null;
-            $this->created_at =  strtotime($thing->thing->created_at);
+        $this->created_at =  strtotime($thing->thing->created_at);
 
-
-
-$this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
+        $this->thing->log('Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '');
 		$this->node_list = array("uuid"=>
 						array("uuid","snowflake"));
 
 		$this->aliases = array("learning"=>array("good job"));
-
-//		echo '<pre> Agent "Receipt" constructed a Thing ';echo $this->uuid;echo'</pre>';
-//		echo '<pre> Agent "Receipt" received this Thing "';echo $this->subject;echo'"</pre>';
-
-		//echo "construct email responser";
-
-		// If readSubject is true then it has been responded to.
-		// Forget thing.
-
 
 		$this->readSubject();
 
@@ -81,12 +59,10 @@ $this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H
 
         $this->makePNG();
 
+        $this->thing->log('Agent "Uuid" found ' . $this->uuid);
 
-$this->thing->log('Agent "Uuid" found ' . $this->uuid);
-
-
-//$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
-//echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
+        //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
+        //echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
 
 	}
 
@@ -117,12 +93,13 @@ $this->thing->log('Agent "Uuid" found ' . $this->uuid);
         $this->thing->choice->Create($this->agent_name, $this->node_list, "uuid");
         $choices = $this->thing->choice->makeLinks('uuid');
 
+        $alt_text = "a QR code with a uuid";
+
         $web = '<a href="' . $link . '">';
-//$web_prefix = "http://localhost:8080/";
+        //$web_prefix = "http://localhost:8080/";
         $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/uuid.png" jpg" 
                 width="100" height="100" 
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/uuid.txt">';
-
 
         $web .= "</a>";
         $web .= "<br>";
@@ -135,9 +112,7 @@ $this->thing->log('Agent "Uuid" found ' . $this->uuid);
 
         $web.= "created at " . strtoupper(date('Y M d D H:m',$this->created_at)). "<br>";
 
-
         $web .= "<br>";
-
 
         $this->thing_report['web'] = $web;
     }
@@ -168,30 +143,27 @@ $this->thing->log('Agent "Uuid" found ' . $this->uuid);
 
         $this->makeSMS();
 
-        $this->thing_report['email'] = array('to'=>$from,
-					'from'=>'uuid',
-					'subject'=>$subject,
-					'message'=>$message,
-					'choices'=>$choices);
+//        $this->thing_report['email'] = array('to'=>$from,
+//					'from'=>'uuid',
+//					'subject'=>$subject,
+//					'message'=>$message,
+//					'choices'=>$choices);
+
+        $this->thing_report['email'] = $this->thing_report['sms'];
 
 		$this->makePNG();
 
         $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		$this->thing_report['thing'] = $this->thing->thing;
+		//$this->thing_report['thing'] = $this->thing->thing;
 
         $this->makeWeb();
 
 		return;
 	}
-
-
-
-
-
 
 	public function readSubject() {
 
@@ -252,31 +224,16 @@ $this->thing->log('Agent "Uuid" found ' . $this->uuid);
 
 
 
-        public function makePNG() {
-// Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
+    public function makePNG()
+    {
+        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
 
-//I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
-//No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-//So beware of your included files!
-//Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-//Hope it save someone's time.
+        $codeText = $this->web_prefix . "thing/".$this->uuid;
 
-//http://php.net/manual/en/function.imagepng.php
+//		ob_clean();
+        if (ob_get_contents()) ob_clean();
 
-//header('Content-Type: text/html');
-//echo "Hello World";
-//exit();
-
-//header('Content-Type: image/png');
-//QRcode::png('PHP QR Code :)');
-//exit();
-
-                // here DB request or some processing
-                $codeText = "thing:".$this->uuid;
-
-		ob_clean();
-
-                ob_start();
+        ob_start();
 
 
 
@@ -311,9 +268,6 @@ $this->thing_report['png'] = $image;
 
                 return $this->thing_report['png'];
                 }
-
-
-
 
 }
 

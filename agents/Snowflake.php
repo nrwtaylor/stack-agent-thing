@@ -11,12 +11,13 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Snowflake {
+class Snowflake
+{
 
 	public $var = 'hello';
 
-
-    function __construct(Thing $thing, $agent_input = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
 
         $this->agent_input = $agent_input;
 
@@ -24,14 +25,12 @@ class Snowflake {
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-//      This is how old roll.php is.
-//		$thingy = $thing->thing;
 		$this->thing = $thing;
 
-         $this->thing_report  = array("thing"=>$this->thing->thing);
+        $this->thing_report  = array("thing"=>$this->thing->thing);
 
         $this->start_time = $this->thing->elapsed_runtime(); 
-
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
 
@@ -52,7 +51,6 @@ class Snowflake {
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
         $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
 
-
         $this->current_time = $this->thing->json->time();
 
         // Get some stuff from the stack which will be helpful.
@@ -72,72 +70,32 @@ class Snowflake {
             $this->thing->json->writeVariable( array("snowflake", "refreshed_at"), $time_string );
         }
 
+        $split_time = $this->thing->elapsed_runtime();
 
-        //$this->getSnowflake();
+        $agent = new Retention($this->thing, "retention");
+        $this->retain_to = $agent->retain_to;
 
-$split_time = $this->thing->elapsed_runtime();
+        $agent = new Persistence($this->thing, "persistence");
+        $this->time_remaining = $agent->time_remaining;
+        $this->persist_to = $agent->persist_to;
 
-
-$agent = new Retention($this->thing, "retention");
-
-$this->retain_to = $agent->retain_to;
-
-$agent = new Persistence($this->thing, "persistence");
-
-//echo $agent->time_remaining . "<br>";
-//echo $agent->persist_to . "<br>";
-//$this->time_remaining = $this->thing->human_time($agent->time_remaining);
-
-$this->time_remaining = $agent->time_remaining;
-
-$this->persist_to = $agent->persist_to;
-
-//echo $this->persist_to;
-//echo $this->time_remaining;
-//exit();
-//exit();
-
-//echo $agent->persist_to;
-//exit();
-
-
-$this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this->thing->elapsed_runtime() - $split_time) .  'ms.', "OPTIMIZE" );
-
-
-//echo $text;
-//exit();
-
+        $this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this->thing->elapsed_runtime() - $split_time) .  'ms.', "OPTIMIZE" );
 
         $this->readSubject();
 
-
         $this->init();
-
-
         $this->initSnowflake();
-
 
         $this->thing->log( $this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
-//        }
-
-      //  $this->readSubject();
         $this->setSnowflake();
-
 
         if ($this->agent_input == null) {$this->setSignals();}
 
         $this->thing->log( $this->agent_prefix .'completed setSignals. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
-//        $this->setSnowflake();
-
         $this->thing->log( $this->agent_prefix .'completed setSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-
 
         $this->thing_report['log'] = $this->thing->log;
 
@@ -152,19 +110,14 @@ $this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this-
     function getNuuid()
     {
         $agent = new Nuuid($this->thing, "nuuid");
-
         $this->nuuid_png = $agent->PNG_embed;
-
     }
 
     function getUuid()
     {
         $agent = new Uuid($this->thing, "uuid");
-
         $this->uuid_png = $agent->PNG_embed;
-
     }
-
 
     function timestampSnowflake($t = null) {
         $s = $this->thing->thing->created_at;
@@ -181,56 +134,37 @@ $this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this-
 
     function init()
     {
-
         if (!isset($this->max)) {$this->max = 12;}
         if (!isset($this->size)) {$this->size = 3.7;}
         if (!isset($this->lattice_size)) {$this->lattice_size = 15;}
 
+        $this->initLattice($this->max);
+        $this->initSegment();
 
-
-            $this->initLattice($this->max);
-            $this->initSegment();
-
-            $this->setProbability();
-            $this->setRules();
+        $this->setProbability();
+        $this->setRules();
     }
 
-	private function setSignals() {
-
+	private function setSignals()
+    {
 		$this->thing->flagGreen();
 
-		// This should be the code to handle non-matching responses.
-
 		$to = $this->thing->from;
-
-		//echo "to:". $to;
-
 		$from = "snowflake";
-
-// This choice element is super slow.  It 
-// is the difference between 6s and 351ms.
-// Hard to justify a button question in response to a die roll.
 
         $this->makePNG();
 
-     //   $this->makePDF();
-
-//        $this->thing->json->setField("variables");
-//          $this->thing->json->writeVariable( array("snowflake", "decimal"), $this->decimal_snowflake );
-
         $this->thing->log( $this->agent_prefix .'completed makePNG. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
         $this->makeSMS();
+
         $this->makeMessage();
-        $this->makeTXT();
+        //$this->makeTXT();
         $this->thing->log( $this->agent_prefix .'completed makeTXT. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
         $this->makeChoices();
         $this->thing->log( $this->agent_prefix .'completed makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
-        $this->makeWeb();
         $this->thing->log( $this->agent_prefix .'completed makeWeb. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
 
@@ -239,14 +173,14 @@ $this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this-
 
         $this->thing->log( $this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
+        $this->makeWeb();
+        $this->makeTXT();
         $this->makePDF();
-
         $this->thing->log( $this->agent_prefix .'completed message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+
+
 		return $this->thing_report;
 
 
@@ -321,10 +255,7 @@ $this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this-
         $this->decimal_snowflake = $this->thing->json->readVariable( array("snowflake", "decimal") );
 
         if ($this->decimal_snowflake == false) {
-//echo "meep";
-//exit();
             $this->thing->log($this->agent_prefix . ' did not find a decimal snowflake.', "INFORMATION") ;
-
             // No snowflake saved.  Return.
             return true;
         }
@@ -363,62 +294,47 @@ $this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this-
             $this->lattice[$q][$r][$s] = $value;
             $this->snowflake_points[] = $this->binary_snowflake[$index];
             $index += 1;
-if ($index >= strlen($this->binary_snowflake)) {break;}
+            if ($index >= strlen($this->binary_snowflake)) {break;}
 
         }
-
-
-
-
-
     }
-    
-    function decimalUuid() 
+
+    function decimalUuid()
     {
 
         $hex = str_replace("-", "", $this->uuid);
 
-    $dec = 0;
-    $len = strlen($hex);
-    for ($i = 1; $i <= $len; $i++) {
-        $dec = bcadd($dec, bcmul(strval(hexdec($hex[$i - 1])), bcpow('16', strval($len - $i))));
-    }
+        $dec = 0;
+        $len = strlen($hex);
+        for ($i = 1; $i <= $len; $i++) {
+            $dec = bcadd($dec, bcmul(strval(hexdec($hex[$i - 1])), bcpow('16', strval($len - $i))));
+        }
 
         $this->decimal_snowflake = $dec;
 
-      //  $this->thing->log($this->agent_prefix . ' loaded decimal snowflake ' . $this->decimal_snowflake . '.', "INFORMATION") ;
         return;
     }
 
-    function binaryUuid() 
+    function binaryUuid()
     {
 
         $hex = str_replace("-", "", $this->uuid);
 
-    $bin = 0;
-    $len = strlen($hex);
-    for ($i = 1; $i <= $len; $i++) {
-        $dec = bcadd($dec, bcmul(strval(hex2bin($hex[$i - 1])), bcpow('16', strval($len - $i))));
-    }
-
-//exit();
+        $bin = 0;
+        $len = strlen($hex);
+        for ($i = 1; $i <= $len; $i++) {
+            $dec = bcadd($dec, bcmul(strval(hex2bin($hex[$i - 1])), bcpow('16', strval($len - $i))));
+        }
 
         $this->thing->log($this->agent_prefix . ' loaded decimal snowflake ' . $this->decimal_snowflake . '.', "INFORMATION") ;
         return;
     }
 
-
-
-    function makeWeb() {
+    function makeWeb()
+    {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
-
         $this->node_list = array("web"=>array("snowflake","uuid snowflake"));
-        // Make buttons
-        //$this->thing->choice->Create($this->agent_name, $this->node_list, "web");
-        //$choices = $this->thing->choice->makeLinks('web');
-
-
 
         $web = '<a href="' . $link . '">';
         $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
@@ -430,16 +346,8 @@ if ($index >= strlen($this->binary_snowflake)) {break;}
 
 
         $web .= "<br><br>";
-        //$web .= $head;
-
-        //$web .= $this->choices['button'];
-        //$web .= $foot;
-
         $this->thing_report['web'] = $web;
-
     }
-
-
 
     function makeTXT()
     {
@@ -502,12 +410,6 @@ if ($index >= strlen($this->binary_snowflake)) {break;}
 
     }
 
-
-
-
-
-
-
     public function makePNG()
     {
 
@@ -531,12 +433,9 @@ if ($index >= strlen($this->binary_snowflake)) {break;}
 
 
 
-//$number = ($this->result[0]);
-//var_dump($number);
-//exit();
-
 // devstack add path
-$font = '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
+//$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
+$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 $text = "test";
 // Add some shadow to the text
 //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -563,7 +462,11 @@ $pad = 0;
         // Save the image
         //header('Content-Type: image/png');
         //imagepng($im);
-        ob_clean();
+        //xob_clean();
+
+// https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
+if (ob_get_contents()) ob_clean();
+
         ob_start();
         imagepng($this->image);
         $imagedata = ob_get_contents();
@@ -1132,12 +1035,15 @@ $angle = 0;
 
     public function makePDF()
     {
+
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
-        $pdf->setSourceFile('/var/www/stackr.test/resources/snowflake/bubble.pdf');
+        $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
+        $pdf->SetFont('Helvetica','',10);
 
         $tplidx1 = $pdf->importPage(1, '/MediaBox');  
+
         $pdf->addPage();  
         $pdf->useTemplate($tplidx1,0,0,215);  
 
@@ -1146,6 +1052,12 @@ $angle = 0;
 
         $pdf->Image($this->PNG_embed,5,5,20,20,'PNG');
 
+        // $pdf->SetTextColor(0,0,0);
+        // $pdf->SetXY(50, 50);
+        // $t = $this->thing_report['sms'];
+        // $pdf->Write(0, $t);
+
+        // Page 2
         $tplidx2 = $pdf->importPage(2);
 
         $pdf->addPage();
@@ -1161,8 +1073,15 @@ $angle = 0;
 
         $pdf->SetTextColor(0,0,0);
 
+//        $pdf->SetXY(15, 10);
+//        $t = $this->web_prefix . "thing/".$this->uuid;
+//        $t = $this->uuid;
+
+        $pdf->SetTextColor(0,0,0);
         $pdf->SetXY(15, 10);
-        $t = $this->web_prefix . "thing/".$this->uuid;
+        $t = $this->thing_report['sms'];
+
+
         $pdf->Write(0, $t);
 
         $pdf->SetXY(15, 15);
@@ -1172,7 +1091,6 @@ $angle = 0;
         $text = "Pre-printed text and graphics (c) 2018 Stackr Interactive Ltd";
         $pdf->SetXY(15, 20);
         $pdf->Write(0, $text);
-
         ob_start();
         $image = $pdf->Output('', 'I');
         $image = ob_get_contents();

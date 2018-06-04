@@ -42,6 +42,7 @@ class Roll {
 
         $this->node_list = array("roll"=>array("roll", "roll d20"));
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
 		$this->haystack = $thing->uuid . 
 				$thing->to . 
@@ -377,7 +378,8 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
             }
 
-            $font = $GLOBALS['stack'] . 'vendor/nrwtaylor/stack-agent-thing/resources/roll/KeepCalm-Medium.ttf';
+            //$font = $GLOBALS['stack'] . 'vendor/nrwtaylor/stack-agent-thing/resources/roll/KeepCalm-Medium.ttf';
+            $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
             $text = $number;
 

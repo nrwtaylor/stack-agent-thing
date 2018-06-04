@@ -194,8 +194,8 @@ class Choice {
 		return true;
 	}
 
-	function load($variable = null) {
-
+	function load($variable = null)
+    {
 		// Provides a general load function for the variables field only.
 		// Allows a null setting which loads the name given to this choice.
 
@@ -216,8 +216,8 @@ class Choice {
 		return $this->current_node;
 	}
 
-	function save($value, $variable = null) {
-
+	function save($value, $variable = null)
+    {
 		// Similarly.  Save function to save as \uuid\<$variable>\<$value>
 
 		if ($variable == null) {$variable = $this->name;}
@@ -388,10 +388,9 @@ class Choice {
 
 
 
-	function makeLinks($state = null) {
-
-//echo "makeLinks";
-//$this->ref_time = microtime(true);
+	function makeLinks($state = null)
+    {
+        $this->split_time = microtime(true);
 
 		if ($state == null) {
 			$state = $this->loadDecision();

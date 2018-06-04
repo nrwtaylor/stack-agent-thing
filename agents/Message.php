@@ -10,6 +10,8 @@ class Message {
 
 	function __construct(Thing $thing, $agent_input = null) {
 
+        //$this->start_time = $thing->elapsed_runtime();
+
         $this->thing = $thing;
 
         // Set this but overwrite it later if agent_input received
@@ -562,4 +564,3 @@ $this->tallyMessage();
 
 
 ?>
-

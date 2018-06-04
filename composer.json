@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "description": "Stack Agent Thing framework",
     "require": {
-        "nrwtaylor/stack-agent-thing": "@dev"
+        "nrwtaylor/stack-agent-thing": "@dev",
+        "symfony/console": "^4.1"
     },
     "require-dev": {
     },

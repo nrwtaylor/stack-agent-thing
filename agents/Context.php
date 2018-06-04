@@ -374,17 +374,23 @@ $shift_state = "off";
     function extractContext()
     {
 //        set_error_handler(array($this, '\Nrwtaylor\StackAgentThing\warning_handler'), E_WARNING);
-        set_error_handler('\Nrwtaylor\StackAgentThing\warning_handler', E_WARNING);
+//        set_error_handler('\Nrwtaylor\StackAgentThing\warning_handler', E_WARNING);
+        set_error_handler(array($this, 'warning_handler'), E_WARNING);
 
 //        set_error_handler("warning_handler", E_WARNING);
 
         foreach ($this->contexts as $context=>$context_id) {
+
+
             $agent_class_name = ucfirst($context);
+                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+
 
             try {
                 //include_once __DIR__ ."/". $agent_class_name . '.php';
                 //$agent = new $agent_class_name($this->thing, $context);
-                $agent = new $agent_class_name($this->thing, "extract");
+                //$agent = new $agent_class_name($this->thing, "extract");
+                $agent = new $agent_namespace_name($this->thing, "extract");
 
                 if (isset($agent->{$context_id})) {
 

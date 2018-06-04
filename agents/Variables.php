@@ -156,7 +156,6 @@ class Variables
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
-                //echo "<br>" . $this->variables_thing->uuid . "<br>";  
 
                 if($this->getVariableSet() == false) {
 
