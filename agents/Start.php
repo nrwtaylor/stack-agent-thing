@@ -11,6 +11,9 @@ class Start {
 
 	function __construct(Thing $thing) {
 
+        // $timestamp =  new Timestamp($thing, "timestamp");
+
+
 		$this->thing = $thing;
 		$this->agent_name = 'start';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
@@ -44,10 +47,19 @@ class Start {
 
         $this->verbosity = 1;
 
+        $this->thing->log( $this->agent_prefix .'get().', "OPTIMIZE" );
+
+
         $this->get();
+
+        $this->thing->log( $this->agent_prefix .'readSubject().', "OPTIMIZE" );
+
 		$this->readSubject();
 
         $this->set();
+
+        $this->thing->log( $this->agent_prefix .'respond().', "OPTIMIZE" );
+
  		$this->respond();
 
 		$this->thing->flagGreen();
@@ -158,7 +170,11 @@ class Start {
     public function makeChoices()
     {
         // Make buttons
+        $this->thing->log( $this->agent_prefix .'Create(...).', "OPTIMIZE" );
+
         $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+        $this->thing->log( $this->agent_prefix .'makeLinks(...).', "OPTIMIZE" );
+
         $choices = $this->thing->choice->makeLinks('start');
         // $choices = false;
         $this->thing_report['choices'] = $choices;
@@ -180,10 +196,15 @@ class Start {
 
 		// Get the current user-state.
 
-
+        $this->thing->log( $this->agent_prefix .'makeSMS().', "OPTIMIZE" );
 
         $this->makeSMS();
+
+        $this->thing->log( $this->agent_prefix .'makeEmail().', "OPTIMIZE" );
+
         $this->makeEmail();
+
+        $this->thing->log( $this->agent_prefix .'makeChoices().', "OPTIMIZE" );
         $this->makeChoices();
 
         $this->thing_report['message'] = $this->sms_message;
@@ -191,6 +212,7 @@ class Start {
         $this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
+        $this->thing->log( $this->agent_prefix .'call Message.', "OPTIMIZE" );
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -203,44 +225,23 @@ class Start {
 
 
 
-	public function readSubject() {
+	public function readSubject()
+    {
         $this->start();
-//		$this->thing->choice->Choose("new user");
-		return;		
-
-	}
-
-
-	function start() {
-
-        // Call the Usermanager agent and update the state
-        $agent = new Usermanager($this->thing, "usermanager start");
-        $this->thing->log( $this->agent_prefix .'called the Usermanager to update user state to start.' );
-
-
 		return;
 	}
 
 
+	function start()
+    {
+        // Call the Usermanager agent and update the state
+        $agent = new Usermanager($this->thing, "usermanager start");
+        $this->thing->log( $this->agent_prefix .'called the Usermanager and said "usermanager start".' );
+        $timestamp =  new Timestamp($this->thing, "timestamp");
 
-
-
-
-
-
-
-
-
-
+		return;
+	}
 
 }
-
-
-
-
-
-
-
-
 
 ?>

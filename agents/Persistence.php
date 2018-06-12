@@ -38,7 +38,7 @@ class Persistence
 
 
         if ( ($this->remember_status == true) ) {
-            $this->thing->log( '<pre> Agent "Retention" found a record flagged for Remember </pre>' );
+            $this->thing->log( '<pre> Agent "Persistence" found a record flagged for Remember </pre>' );
             //$this->setRemember();
         } else {
             $this->created_at =  strtotime($thing->thing->created_at);
@@ -76,7 +76,7 @@ class Persistence
 
     }
 
-		$this->thing->log('<pre> Agent "Retention" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
+		$this->thing->log('<pre> Agent "Persistence" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
 		$this->node_list = array("start"=>
 						array("useful","useful?"));
 

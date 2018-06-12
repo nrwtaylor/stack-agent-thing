@@ -59,94 +59,22 @@ class Tick
 
         $this->readSubject();
 
-//        $quota = new Quota($this->thing, 'quota reset');
+                $arr = json_encode(array("to"=>"test", "from"=>"latency", "subject"=>"s/ latency"));
+
+                $client= new GearmanClient();
+                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doHighBackground("call_agent", $arr);
+
+                $arr = json_encode(array("to"=>"test", "from"=>"damage", "subject"=>"s/ damage"));
+
+                $client= new GearmanClient();
+                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doHighBackground("call_agent", $arr);
 
 
-
-/*
-        $this->thing->log($this->agent_prefix . "called Damage.");
-
-        $damage_thing = new Damage($this->thing, '1000');
-
-        $this->things_destroyed = $damage_thing->things_destroyed;
-        $this->value_destroyed = $damage_thing->value_destroyed;
-*/
-        $this->thing->log($this->agent_prefix . "called Tallycounter.");
-        $t = new Thing(null);
-
-        $t->Create(null,"tallycounter", 's/ tallycounter message');
-        $tallycounter_thing = new Tallycounter($t, 'tallycounter message tally " . $this->mail_postfix);
-/*
-        $to = "tallycounter";
-        $from = null;
-        $subject = "s/ tallycounter message";
-
-            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>$subject));
-
-            $client= new GearmanClient();
-            $client->addServer();
-            //$client->doNormal("call_agent", $arr);
-            $client->doLowBackground("call_agent", $arr);
-*/
-
-        $to = "latency";
-        $from = null;
-        $subject = "s/ latency gearman";
-
-            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>$subject));
-
-            $client= new GearmanClient();
-            $client->addServer();
-            //$client->doNormal("call_agent", $arr);
-            $client->doLowBackground("call_agent", $arr);
-
-
-/*
-        $this->thing->log($this->agent_prefix . "called Latency.");
-        $t = new Thing(null);
-        $t->Create(null,"latency", 's/ latency');
-        $latency_agent = new Latency($t, 'latency');
-*/
-        $to = "stack";
-        $from = null;
-        $subject = "s/ stack count";
-
-            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>$subject));
-
-//            $client= new GearmanClient();
-//            $client->addServer();
-//            //$client->doNormal("call_agent", $arr);
-//            $client->doLowBackground("call_agent", $arr);
-
-
-        $to = "damage";
-        $from = null;
-        $subject = "s/ damage";
-
-            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>$subject));
-
-//            $client= new GearmanClient();
-//            $client->addServer();
-//            //$client->doNormal("call_agent", $arr);
-//            $client->doLowBackground("call_agent", $arr);
-
-
-
-
-//            $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
-
-//            $client= new GearmanClient();
-//            $client->addServer();
-            //$client->doNormal("call_agent", $arr);
-//            $client->doHighBackground("call_agent", $arr);
-
-
-//echo "<br>";
-//echo $latency_agent->queue_time . "<br>";
-//echo $latency_agent->run_time . "<br>";
-//exit();
-
-a:
+//        $latency_agent = new Latency($this->thing,"latency");
 
         //$this->doTick();
 

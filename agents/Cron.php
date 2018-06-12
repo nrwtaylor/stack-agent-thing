@@ -24,7 +24,8 @@ ini_set("allow_url_fopen", 1);
         $cron = new Cron($thing);
 
 
-class Cron {
+class Cron
+{
     function __construct(Thing $thing, $agent_input = null)
     {
 
@@ -38,13 +39,25 @@ class Cron {
 		$this->thing->flagGreen(); // Just make sure
 
         //$arr = json_encode(array("to"=>$from, "from"=>$stack_agent, "subject"=>$subject));
-        $arr = json_encode(array("uuid"=>$this->thing->uuid));
+        //$arr = json_encode(array("uuid"=>$this->thing->uuid));
+        //$arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
 
+//        $arr = json_encode(array("to"=>null, "from"=>"tick", "subject"=>"s/ tick"));
+
+    //            $client= new GearmanClient();
+  //              $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+//                $client->doHighBackground("call_agent", $arr);
+
+
+        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
+
+/*
         $client= new \GearmanClient();
         $client->addServer();
         //$client->doNormal("call_agent", $arr);
         $client->doLowBackground("call_agent", $arr);
-
+*/
         //exit();
 
         $this->thing_report['sms'] = "CRON | Tick";

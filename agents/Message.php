@@ -10,6 +10,8 @@ class Message {
 
 	function __construct(Thing $thing, $agent_input = null) {
 
+        // $timestamp =  new Timestamp($thing, "timestamp");
+
         //$this->start_time = $thing->elapsed_runtime();
 
         $this->thing = $thing;
@@ -88,6 +90,9 @@ class Message {
 //$this->thing_report['email'] = "meep";
 //exit();
 //        $this->thing_report['email'] = "message test";
+
+        $timestamp =  new Timestamp($thing, "timestamp");
+
 
 		return;
 
@@ -554,13 +559,5 @@ $this->tallyMessage();
 
 
 }
-
-
-
-
-
-
-
-
 
 ?>

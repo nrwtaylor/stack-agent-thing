@@ -634,4 +634,3 @@ if ($this->state == 'red') {
 }
 
 ?>
-

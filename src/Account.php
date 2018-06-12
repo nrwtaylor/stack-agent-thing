@@ -13,7 +13,7 @@ class Account {
 
         $settings = require $GLOBALS['stack_path'] . "private/settings.php";
 
-		$this->db = new Database($uuid, 'null' . $settings['settings']['stack']['mail_postfix'] );
+		//$this->db = new Database($uuid, 'null' . $settings['settings']['stack']['mail_postfix'] );
 
 		$this->uuid = $uuid;
 

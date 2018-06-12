@@ -1,14 +1,15 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-//ini_set('display_startup_errors', 1);
-//ini_set('display_errors', 1);
-//error_reporting(-1);
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
 
 class Usermanager
 {
 	function __construct(Thing $thing, $agent_input = null)
     {
+
 		$this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
         $this->thing_report['thing'] = $this->thing->thing;
@@ -67,17 +68,18 @@ class Usermanager
         if ($this->agent_input == null) {
 		    $this->setSignals(); /// Don't send any messages
         }
-
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
 
+
+
 		return;
 	}
 
-    function readInstruction() {
-
+    function readInstruction()
+    {
         $this->thing->log( $this->agent_prefix .'read instruction "' . $this->agent_input.'".', "INFORMATION" );
 
 
@@ -101,6 +103,8 @@ class Usermanager
         }
 
         if ($this->agent_input == "usermanager start") {
+            $this->thing->log( $this->agent_prefix .' set internal state to START.', "INFORMATION" );
+
             $this->previous_state = $this->state;
             $this->state = "start";
         }
@@ -398,6 +402,9 @@ class Usermanager
         $this->thing->log( $this->agent_prefix .' chose START.', "INFORMATION" );
 
         $this->thing->choice->Choose("start");
+
+        $this->thing->log( $this->agent_prefix .' choice call completed.', "INFORMATION" );
+
         $this->previous_state = $this->state;
         $this->state = "start";
 

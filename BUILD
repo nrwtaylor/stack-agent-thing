@@ -44,6 +44,10 @@ sudo apt install php7.1-bcmath
 sudo apt-get install php-bcmath
 restart.
 
+and curl
+sudo apt-get install php-curl
+sudo service apache2 restart
+
 8. Set-up cron
 
 * * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/agents/Cron.php >/dev/null 2>&1
@@ -89,6 +93,10 @@ sudo apt-get install gearman-job-server
 sudo pecl install gearman
 sudo nano /etc/php5/conf.d/gearman.ini [and then write extension=gearman.so as content of the file, save it and close it]
 sudo service apache2 restart
+
+-
+
+sudo apt install gearman-tools
 
 -
 
@@ -215,6 +223,7 @@ autorestart=true
 numprocs=3
 process_name=gearman-worker-%(process_num)s
 
+sudo supervisorctl reload
 ---
 
 Change php/ini
@@ -293,3 +302,58 @@ Test this bit
 /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 
 Once ticking, you'll see a cron tick every 60s in the database.
+
+Install MYSQL
+
+Problem #1
+Increase Max connections
+https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-foo/
+
+
+Posted on June 13, 2017 by peter
+MySQL max_connections limited to 214 on Ubuntu Foo
+
+After moving a server to a new machine with Ubuntu 16.10 I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
+
+postfix/cleanup[30475]: warning: connect to mysql server 127.0.0.1: Too many connections
+
+Oops, did I forgot to up max_connections during the migration:
+
+# grep max_connections /etc/mysql/mysql.conf.d/mysqld.cnf
+max_connections = 8000
+
+Nope, I didn’t. Did we all of a sudden have a surge in clients accessing the database. Let me check and ask MySQL, and the process list looked fine. But something was off. So let’s check the value in the SQL server itself:
+
+mysql> show variables like 'max_connections';
++-----------------+-------+
+| Variable_name | Value |
++-----------------+-------+
+| max_connections | 214 |
++-----------------+-------+
+1 row in set (0.01 sec)
+
+Wait, what?! A look into the error log gave the same result:
+
+# grep max_connections /var/log/mysql/error.log
+2017-06-14T01:23:29.804684Z 0 [Warning] Changed limits: max_connections: 214 (requested 8000)
+
+Something is off here and ye olde oracle Google has quite some hits on that topic. And the problem lies with the maximum allowed number of open files. You can’t have more connections, than open files. Makes sense. Some people suggest to solve it using /etc/security/limits.conf to fix it. Which is not so simple on Ubuntu anymore, because you have to first enable pam_limits.so. And even then it doesn’t work, because since Ubuntu is using systemd (15.04 if I am not mistaken) this configuration is only valid for user sessions and not services/demons.
+
+So let’s solve it using systemd’s settings to allow for more connections/open files. First you have to copy the configuration file, so that you can make the changes we need:
+
+cp /lib/systemd/system/mysql.service /etc/systemd/system/
+
+Append the following lines to the new file using vi (or whatever editor you want to use):
+
+vi /etc/systemd/system/mysql.service
+
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+
+Reload systemd:
+
+systemctl daemon-reload
+
+After restarting MySQL it was finally obeying the setting:
+
+mysql> show variables like 'max_connections';

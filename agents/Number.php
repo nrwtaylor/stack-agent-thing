@@ -23,8 +23,9 @@ class Number {
         $this->thing_report['thing'] = $this->thing->thing;
 
 		// Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $GLOBALS['web_prefix'];
-;
+        //$this->web_prefix = $GLOBALS['web_prefix'];
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+
 
 		$this->stack_state = $thing->container['stack']['state'];
 		$this->short_name = $thing->container['stack']['short_name'];
@@ -62,39 +63,29 @@ $this->test_count = null;
         // $this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
 	}
 
-    function extractNumbers($input)
+    function extractNumbers($input = null)
     {
-//https://www.regular-expressions.info/floatingpoint.html
-// Life goals regex that does this
+        if ($input == null) {
+            $input = $this->subject;
+        }
+        // https://www.regular-expressions.info/floatingpoint.html
+        // Life goals regex that does this
 
         if (!isset($this->numbers)) {
             $this->numbers = array();
         }
 
-        //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
+        $pieces = explode(" ",$input);
+        $this->numbers = [];
+        foreach ($pieces as $key=>$piece) {
 
-        //preg_match_all($pattern, $input, $m);
+            if (is_numeric($piece)) {
+                $this->numbers[] = $piece;
+                continue;
+            }
 
-        //$arr = $m[0];
-        //array_pop($arr);
-//        $this->numbers = $arr;
-
-//$pattern = "|[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?|";
-
-//    preg_match_all($pattern, $input, $matches);
-//    $this->numbers = $matches[0];
-//echo "meep";
-$pieces = explode(" ",$input);
-$this->numbers = [];
-foreach ($pieces as $key=>$piece) {
-
-    if (is_numeric($piece)) {
-        $this->numbers[] = $piece;
-        continue;
-    }
-
-    // Treat () as accounting format number
-    // Rare to see this in use.
+            // Treat () as accounting format number
+            // Rare to see this in use.
 /*
     if (is_numeric(substr($piece,0,-1))) {
             $this->numbers[] = substr($piece,0,-1);
@@ -108,46 +99,31 @@ foreach ($pieces as $key=>$piece) {
 */
 
 
-    if (is_numeric(substr($piece,1,-1))) {
-        if ((substr($piece,0,1) == "(") and (substr($piece,-1,1) == ")")) {
-            $this->numbers[] = -1 * substr($piece,1,-1);
-            continue;
+            if (is_numeric(substr($piece,1,-1))) {
+                if ((substr($piece,0,1) == "(") and (substr($piece,-1,1) == ")")) {
+                    $this->numbers[] = -1 * substr($piece,1,-1);
+                    continue;
+                }
+
+                $this->numbers[] = substr($piece,1,-1);
+                continue;
+            }
+
+            if (is_numeric(str_replace(",", "", $piece))) {
+                $this->numbers[] = str_replace(",","",$piece);
+                continue;
+            }
+
+            // preg_match_all('!\d+!', $piece, $matches);
+            preg_match_all('/([\d]+)/',  $piece, $matches);
+
+            foreach ($matches[0] as $key=>$match){
+                $this->numbers[] = $match;
+            }
+
         }
 
-        $this->numbers[] = substr($piece,1,-1);
-        continue;
-    }
-
-    if (is_numeric(str_replace(",", "", $piece))) {
-        $this->numbers[] = str_replace(",","",$piece);
-        continue;
-    }
-
-//    $chars = str_split($piece);
-//    foreach($chars as $key=>$char) {
-
-//        echo $char." ";
-
-//    }
-
-//preg_match_all('!\d+!', $piece, $matches);
-preg_match_all('/([\d]+)/',  $piece, $matches);
-//var_dump($matches);
-    foreach ($matches[0] as $key=>$match){
-        $this->numbers[] = $match;
-    }
-
-}
-//var_dump($this->subject);
-//var_dump($this->numbers);
-//exit();
-
-
-
-
-
-    return $this->numbers;
-
+        return $this->numbers;
     }
 
 

@@ -231,11 +231,4 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 }
 
 
-
-
-
-
-
-
-
 ?>

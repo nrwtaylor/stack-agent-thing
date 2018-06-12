@@ -270,6 +270,4 @@ return $this->word_context;
 }
 }
 
-
-
 ?>
