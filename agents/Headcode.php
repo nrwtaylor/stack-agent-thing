@@ -82,14 +82,15 @@ class Headcode
 //                                'negative_time'=>'yes'),
 
                 //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
-                //$this->negative_time = $this->thing->container['api']['headcode']['negative_time'];
+        $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
 
         // But for now use this below.
 
         // You will probably see these a lot.
         // Unless you learn headcodes after typing SYNTAX.
-
-        $this->default_head_code = "0Z10";
+        if (!isset($this->default_head_code)) {
+            $this->default_head_code = "0Z99";
+        }
         //$this->head_code = "0Z" . str_pad($this->index + 11,2, '0', STR_PAD_LEFT);
 
         $this->default_alias = "Thing";
@@ -606,12 +607,21 @@ class Headcode
             $txt .= " " . str_pad(strtoupper($variable['head_code']), 4, "X", STR_PAD_LEFT);
             //$txt .= " " . str_pad($train['alias'], 10, " " , STR_PAD_RIGHT);
 
-            $txt .= " " . str_pad($variable['run_at'], 8, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($variable['available'], 6, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($variable['quantity'], 9, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($variable['consist'], 6, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($variable['route'], 6, " ", STR_PAD_LEFT);
-
+            if (isset($variable['run_at'])) {
+                $txt .= " " . str_pad($variable['run_at'], 8, " ", STR_PAD_LEFT);
+            }
+            if (isset($variable['available'])) {
+                $txt .= " " . str_pad($variable['available'], 6, " ", STR_PAD_LEFT);
+            }
+            if (isset($variable['quantity'])) {
+                $txt .= " " . str_pad($variable['quantity'], 9, " ", STR_PAD_LEFT);
+            }
+            if (isset($variable['consist'])) {
+                $txt .= " " . str_pad($variable['consist'], 6, " ", STR_PAD_LEFT);
+            }
+            if (isset($variable['route'])) {
+                $txt .= " " . str_pad($variable['route'], 6, " ", STR_PAD_LEFT);
+            }
             $txt .= "\n";
 
         }

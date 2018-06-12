@@ -19,6 +19,13 @@ class Database
 	function __construct($uuid, $nom_from)
     {
         $start_time = microtime(true);
+        $this->start_time = $start_time;
+        $this->split_time = $start_time;
+        $this->operations_time = 0;
+        $this->operations = 0;
+        $this->log = array();
+        //echo $this->get_calling_function() . "<br>";
+
 		// Database controls access by $uuid.
 
 		// Should know $nom_from of requester.
@@ -40,6 +47,7 @@ class Database
 		if (($nom_from == null) and ($uuid == null)) {throw new Exception('No 
 			$nom_from and $uuid provided to Class Db.');}
 
+
 		if ($nom_from == null) {throw new Exception('No $nom_from provided to
 			Class Db.');}
 		if ($uuid == null) {throw new Exception('No $uuid provided to
@@ -53,10 +61,10 @@ class Database
 
         $settings = require $GLOBALS['stack_path'] . "private/settings.php";
 
-        $this->web_prefix = $settings['settings']['stack']['web_prefix']; 
+        $this->web_prefix = $settings['settings']['stack']['web_prefix'];
+        $this->state = $settings['settings']['stack']['state'];
 
         $this->container = new \Slim\Container($settings);
-
 
 		// create app instance
 		$app = new \Slim\App($this->container);
@@ -85,9 +93,21 @@ $c['errorHandler'] = function ($c) {
 			return $db;
 			};
 
+        $this->get_calling_function();
+        //        $this->caller = $r;
+        // $t[count($t)-2];
+
+        $this->test( "<b>".$this->get_calling_function()."</b>" );
+
+        // NRW Taylor 12 June 2018
+        // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
+
 		$this->char_max = $c['stack']['char_max'];
 
 		$this->uuid = $uuid;
+
+
+        $this->test("Database set-up ");
 
 		// Which means at this point, we have a UUID
 		// whether or not the record exists is another question.
@@ -97,11 +117,78 @@ $c['errorHandler'] = function ($c) {
 
 		// So just return the contents of thing.  false if it doesn't exist.
 
-		return $this->Get();
+        $this->split_time = microtime(true);
+
+        $r = "";
+
+		return $r;
 	}
 
-	function priorGet($created_at = null) {
+    function __destruct()
+    {
+        // Log database transactions in test
+        $this->test("Database destruct ");
+    }
 
+    function test($comment = null, $instruction=null)
+    {
+
+        if ($this->state != "test") {return;}
+
+        if (($comment ==null) and ($instruction == null)) {
+            $comment ="";
+        }
+
+        // echo in test
+        // devstack save to variable
+        echo "<pre>";
+        echo substr($this->uuid,0,4) . "-" . $this->caller . " ";
+        echo str_pad(number_format((microtime(true) - $this->start_time)*1000) ."ms", 0, " ",STR_PAD_RIGHT);
+
+        echo "[" . number_format($this->operations_time * 1e3) . "ms]";
+        echo " ". $comment. " ";
+        echo "split time " . number_format( (microtime(true) - $this->split_time)*1000)."ms " ;
+        echo "operations " . $this->operations . " ";
+        echo "<br>";
+
+        foreach ($this->log as $key=>$value) {
+            echo str_pad("",4, " ") .   $value . "<br>";
+        }
+        $this->log = array();
+        echo "</pre>";
+    }
+
+    function get_calling_function()
+    {
+        // see stackoverflow.com/questions/190421
+        $caller = debug_backtrace();
+
+        // echo "function ". debug_backtrace()[1]['function'];
+
+        $caller = $caller[2];
+        $r = $caller['function'] . '()';
+
+        if (isset($caller['class'])) {
+            $r .= ' called by ';
+            // $r .= $caller['class'];
+            $t = explode("\\",$caller['class']);
+            $r .= "" . $t[count($t) -1];
+        }
+
+        $this->caller = $t[count($t)-1];
+
+        $r .= "\\";
+        $r .=  debug_backtrace()[1]['function'];
+
+        if (isset($caller['object'])) {
+            //$r .= ' (' . get_class($caller['object']) . ')';
+        }
+        return $r;
+    }
+
+
+	function priorGet($created_at = null)
+    {
 		// Given a $uuid.  Find the previous record the $from user
 		// created.
 
@@ -128,14 +215,12 @@ $c['errorHandler'] = function ($c) {
 				"' ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
 
 		} else {
-//				$query_string = "SELECT * FROM stack where nom_from = 'bob@example.com' and created_at < '2017-04-24 13:16:27' order by created_at DESC LIMIT 3;"
 			$query_string = "SELECT * FROM stack where nom_from = '" . $this->from . "' and created_at < '" . $created_at . "' order by created_at DESC LIMIT 3";
 		};
 
 	    $sth = $this->container->db->prepare($query_string);
 	    $sth->execute();
 		$thing = $sth->fetchObject();
-
 
 		$thingreport = array('thing' => $thing, 'info' => 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' . $this->web_prefix . 'api/thing/<32 characters>.','help' => 'Check your junk/spam folder.');
 
@@ -146,6 +231,10 @@ $c['errorHandler'] = function ($c) {
 
 	function writeField($field_text, $string_text) 
     {
+        $this->split_time = microtime(true);
+        $this->log = array($field_text, $string_text);
+        //$this->test( $this->get_calling_function() );
+
         // sqlinjection commentary
         // user provided string_text
         // stack provided field_text
@@ -158,7 +247,7 @@ $c['errorHandler'] = function ($c) {
             $sth->bindParam(":uuid", $this->uuid);
 		    $sth->bindParam(":string_text", $string_text);
 
-            // This is not allowed in the code.
+            // This is not allowed by PHP.
             // Noting that field_text is generated by an Agent.  Not channel input.
             //$sth->bindParam(":field_text", $field_text);
 
@@ -175,7 +264,10 @@ $c['errorHandler'] = function ($c) {
             //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
         }
+        $this->operations_time += (microtime(true) - $this->split_time);
+        $this->operations += 1;
 
+        $this->test("writeField");
 
 		return;
 	}
@@ -213,6 +305,9 @@ $c['errorHandler'] = function ($c) {
 	function Create($subject, $to)
     {
 		// Create a new record in the db for the Thing.
+        $this->split_time = microtime(true);
+
+        //$this->test("Create");
 
 	    $query = $this->container->db->prepare("INSERT INTO stack
 			(uuid,task,nom_from,nom_to)
@@ -254,6 +349,8 @@ $c['errorHandler'] = function ($c) {
 		}
 
 		$thingreport = array('thing' => $thing, 'info' => 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' . $this->web_prefix . 'api/thing/<32 characters>.','help' => 'Check your junk/spam folder.');
+
+        $this->test();
 
         return $thingreport;
     }
@@ -343,8 +440,8 @@ $c['errorHandler'] = function ($c) {
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
-        //die();
         }
+
 
         return $thingreport;
 	}
@@ -651,7 +748,6 @@ $c['errorHandler'] = function ($c) {
 
         $query = "SELECT * FROM stack WHERE nom_from='". $this->from . $sub_query . " ORDER BY RAND()"; // LIMIT 3";
 
-
 		$sth = $this->container->db->prepare($query);
 		$sth->bindParam("nom_from", $this->from);
 		$sth->execute();
@@ -660,10 +756,8 @@ $c['errorHandler'] = function ($c) {
 
 		$thingreport = array('things' => $things, 'info' => 'So here are the uuids of all records matching your request.  That\'s what you wanted.','help' => 'It is up to you what you do with these.');
 
-
-
 		return $thingreport;
-		}
+    }
 
 
 /*
@@ -745,8 +839,6 @@ $c['errorHandler'] = function ($c) {
 		return $thingreport;
 	}
 
-
-
 	public static function getNew()
     {
 		$query = "SELECT * FROM stack WHERE variables is NULL";
@@ -760,8 +852,8 @@ $c['errorHandler'] = function ($c) {
 		return $thingreport;
     }
 
-	function connections() {
-
+	function connections()
+    {
 		// NOT TESTED
 
 		$query = "SHOW STATUS WHERE `variable_name` = 'Threads_connected'";
@@ -778,7 +870,6 @@ $c['errorHandler'] = function ($c) {
 
 		return $thingreport;
 	}
-
 
 	function random($nom_from = null)
     {
@@ -833,7 +924,6 @@ $c['errorHandler'] = function ($c) {
 		return $thingreport;
 	}
 
-
 	function randomN($nom_from, $n=3) 
     {
         // Pick N of identity's things.
@@ -846,7 +936,6 @@ $c['errorHandler'] = function ($c) {
 
 		return $thingreport;
     }
-
 
     // code review
 	function reminder($nom_from, $task_exclusions = null, $nom_to_exclusions = null)

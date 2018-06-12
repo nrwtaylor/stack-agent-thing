@@ -566,4 +566,3 @@ if (count($list) == 1) { $this->minutes = $list[0];}
 }
 
 ?>
-

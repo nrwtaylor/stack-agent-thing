@@ -289,17 +289,6 @@ $this->thing_report['png'] = $image;
                 return $this->thing_report['png'];
                 }
 
-
-
-
 }
-
-
-
-
-
-
-
-
 
 ?>

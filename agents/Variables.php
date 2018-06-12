@@ -32,9 +32,11 @@ class Variables
 
         // Setup Agent
         $this->agent = strtolower(get_class());
-        $this->agent_name = $this->agent;
-        //$this->agent_name = "test_name";
-        $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
+//$agent = explode($this->agent,"\");
+//var_dump($agent);
+//exit();
+        $this->agent_name = "variables";
+        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         $this->agent_variables = array('variable', 'name', 'alpha', 'beta'); //Default variable set.
         $this->agent_variables = array();
         $this->max_variable_sets = 5;
@@ -104,12 +106,11 @@ class Variables
 //            $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
 //            $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
 
-
+            // Intentionally write to the variable thing.  And the current thing.
             if (isset($variable_name)) {
                 $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
                 $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
             }
-
         }
     }
 

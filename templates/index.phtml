@@ -147,9 +147,11 @@ Hosted in <?php echo $settings['settings']['stack']['server_location'] ?>
 <br>
 <br>
 <div>
-<center>
-<img src="<?php $this->web_prefix = "http://$_SERVER[HTTP_HOST]/"; echo $this->web_prefix; ?>pixel_sml.png">
-</center>
+<?php $web_prefix = $settings['settings']['stack']['web_prefix']; ?>
+<img src="<?php echo $web_prefix; ?>pixel_sml.png">
+
+<?php /*<img src="<?php $this->web_prefix = "http://$_SERVER[HTTP_HOST]/"; echo $web_prefix; ?>pixel_sml.png"> */ ?>
+
 </div>
 
 

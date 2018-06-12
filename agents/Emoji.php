@@ -461,6 +461,9 @@ if (isset($text[$word])) $arr[] = $match;
 
 
 }
+if ($arr == null) {
+$this->emojis = null;
+} else {
             //$array = $this->matches[0];
             $k = array_rand($arr);
             $v = $arr[$k];
@@ -470,7 +473,7 @@ if (isset($text[$word])) $arr[] = $match;
 //            $this->emojis = implode("", $this->extractEmoji($this->emoji_from_words));
 
             $this->emojis = $this->extractEmoji(implode(" ", $arr));
-
+}
 
 //echo $this->emoji_from_words;
 

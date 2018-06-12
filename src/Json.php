@@ -31,31 +31,76 @@ class Json {
 
         $this->char_max = $this->container['stack']['char_max'];
 
+        $this->write_on_destruct = false;
 		// Consider factor this out.  Json should not need to call 
 		// Database functions.  Database should do the reading and writing 
 		// to the database.  Guess Json needs to be able to trigger
 		// a database write though.  
 
 		// This will be creating multiple (unnecessay?) db calls.
+        // But needed otherwise readField on null line 422
 		$this->db = new Database($uuid, 'refactorout' . $this->mail_postfix);
 
 		$this->array_data = array();
 		$this->json_data = '{}';
 
 		$this->field = null;
-
+//        $this->write_field_list = array();
+        $this->thing_array= array();
 		// Temporary hack.
 		$this->uuid = $uuid;
 
 		return;
 	}
 
+    function __destruct() {
+return;
+echo "<pre>";
+
+//echo $this->field;
+//echo $this->json_data;
+
+//var_dump($this->thing_array);
+//exit();
+
+        foreach($this->thing_array as $field=>$json_data) {
+            echo $field;
+            echo $json_data;
+            $this->db->writeField($field, $json_data);
+
+        }
+//exit();
+        //if (strtolower($this->field) == 'variables') {
+
+        //$this->db->writeField($this->field, $this->json_data);
+        //}
+
+echo "</pre>";
+    }
 
 	function time($time = null)
     {
 		if ( $time == null ) {$time = time();}
-		return $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
+        $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
+
+        return $this->time;
+		//return $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
 	}
+
+    function microtime($time = null)
+    {
+        if ( $time == null ) {$time = time();}
+        //$this->time = gmdate("Y-m-d\TH:i:s.u\Z", $time);
+
+
+        list($usec, $sec) = explode(' ', microtime());
+        //print date('Y-m-d H:i:s', $sec) . $usec;
+
+        $this->microtime = date('Y-m-d H:i:s', $sec) . " " .$usec;
+
+        return $this->microtime;
+    }
+
 
    	function isUsed()
     {
@@ -74,29 +119,30 @@ class Json {
 
 	function setField($field)
     {
+        //$this->write();
+
 		$this->field = $field;
 		$this->read();
 
 		return;
     }
 
-	function setArray(Array $array_data) 
+    function setArray(Array $array_data)
     {
-		$this->array_data = $array_data;
-		$this->arraytoJson();
-		$this->write();
-		
-		return;
-	}
+        $this->array_data = $array_data;
+        $this->arraytoJson();
+        $this->write();
+        return;
+    }
 
-	function setJson($json_data) {
+    function setJson($json_data)
+    {
+        $this->json_data = $json_data;
+        $this->jsontoArray();
+        $this->write();
 
-		$this->json_data = $json_data;
-		$this->jsontoArray();
-		$this->write();
-		
-		return;
-		}
+        return;
+    }
 
 //	function streamOn() {
 //		$this->field_type = "stream";
@@ -110,27 +156,17 @@ class Json {
 //		return;
 //		}
 
-   	function jsontoArray() {
-//		echo "JSON TO ARRAY";
-//	echo '<pre> json.php readVaribale() jsontoArray(): '; print_r($this->array_data); echo '</pre>';
+   	function jsontoArray()
+    {
 		$this->array_data = json_decode($this->json_data, true);
-
-		// Do I have to do something silly here to strip out the [0] indexes?
-//		if ($this->array_data !=null){
-//			$this->strip0($this->array_data);
-//		}
-
-		return;
-		}
-
-
-
+        return;
+    }
 
    	function arraytoJson()
     {
 		$this->json_data = json_encode($this->array_data, JSON_PRESERVE_ZERO_FRACTION);
-
-	return;
+        $this->thing_array[$this->field] = $this->json_data;
+        return;
 	}
 
 	function idStream()
@@ -174,14 +210,10 @@ class Json {
 		unset($this->array_data[$stream_id][$pos]);
 
 		$this->array_data = array_map('array_values', $this->array_data);
-
-		$this->setArray($this->array_data);		
-		
+		$this->setArray($this->array_data);
 
 		return;
-
-
-		}
+    }
 
 	function fallingWater($value) {
 		// Drop N items off end of queue until less than max_chars.
@@ -236,7 +268,8 @@ class Json {
 		}
 
 		$this->arraytoJson();
-		$this->write();
+//		$this->write();
+        $this->write();
 
 		return;
 		}
@@ -275,35 +308,20 @@ class Json {
             $value = false;
         }
 
-
-
-
-
-
-		// Yikes - pretty hacky...
 		return $value;
 		}
 
 
 
-   	function writeVariable(Array $var_path, $value) {
-//$this->ref_time = microtime(true);
+    function writeVariable(Array $var_path, $value)
+    {
+        $this->setValueFromPath($this->array_data, $var_path, $value);
+        $this->arraytoJson();
+        $this->write();
+//        $this->write();
 
-//		print_r($this->array_data);echo "<br>";
-//		print_r($var_path);echo "<br>";
-
-		$this->setValueFromPath($this->array_data, $var_path, $value);
-
-		$this->arraytoJson();
-		$this->write();
-
-//echo number_format(microtime(true) - $this->ref_time) . "ms"; echo "<br>";
-
-
-		return;
-
-
-		}
+        return;
+    }
 
 
 
@@ -344,11 +362,8 @@ class Json {
 		    $dest = &$dest[$key];
 		}
 
-//echo $value;
 		$dest[$finalKey] = $value;
-
 		return;
-
 	}
 
 	private function recursive_array_search($target_path, $haystack, $var_path = array()) {
@@ -408,33 +423,36 @@ class Json {
 
 
 
-	function write() {
+	function write() 
+    {
 		// Now write to defined column.
-
 		//print_r($this->json_data);echo "<br>";
 		//print_r($this->field);echo "<br>";
 
+        if ($this->field == null) {return;}
+        if (strlen($this->json_data) > $this->char_max) {
+            //echo $this->json_data;
+            echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.";
+            //throw new Exception('Insufficient space in DB record.');
+            return false;
+        } else {
 
+            //$this->thing_array[$this->field] = $this->json_data;
+            if ($this->write_on_destruct) {
+                //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
+                //$this->write_field_list[] = $this->field;
+            } else {
+                
+                $this->db->writeField($this->field, $this->json_data);
+            }
+            return true;
+        }
+        return;
+    }
 
-			if (strlen($this->json_data) > $this->char_max) {
-//echo $this->json_data;
-echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.";
-//throw new Exception('Insufficient space in DB record.');
-				return false;
-			} else {
+    function read()
+    {
 
-
-
-				$this->db->writeField($this->field, $this->json_data);
-
-				return true;
-			}
-		return;
-		}
-
-	function read() {
-
-//$this->ref_time = microtime(true);
 			$this->json_data = $this->db->readField($this->field);
 
 

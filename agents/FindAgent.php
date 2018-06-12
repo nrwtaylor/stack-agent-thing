@@ -301,3 +301,5 @@ $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report
 
 
 }
+
+?>

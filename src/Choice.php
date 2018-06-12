@@ -67,9 +67,9 @@ class Choice {
 
 	}
 
-	function Create($choice_name = null , $node_list = null, $current_node = null) {
-
-//$this->ref_time = microtime(true);
+	function Create($choice_name = null , $node_list = null, $current_node = null)
+    {
+        $this->split_time = microtime(true);
 
 		// So we want to enable the creation of a default state on a choice
 		// call.  Leaving Things null means leaving their intent unclear.
@@ -134,17 +134,11 @@ class Choice {
 			$this->current_node = $current_node;
 		}
 
-
-
-//echo number_format(microtime(true) - $this->ref_time) . "ms"; echo "<br>";
-
-
 		$this->saveStateMap($this->node_list);
-//echo number_format(microtime(true) - $this->ref_time) . "ms"; echo "<br>";
 
 		$this->save($this->current_node, $this->name);
+//        echo "Choice->Create." . number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 
-//echo number_format(microtime(true) - $this->ref_time) . "ms"; echo "<br>";
 
 		// format:
 		// {"<34 chars>":{"choices":["Red Team", "Blue Team"], "decision":null}
@@ -182,14 +176,16 @@ class Choice {
 		return $this->node_list;
 	}
 
-	function saveStateMap($state_map = null) {
+	function saveStateMap($state_map = null)
+    {
+        // Settings communicates throught the settings json 
+        // what settings the Thing can be set to.
 
 		if ($state_map == null) {$state_map = $this->node_list;}
 
  		$this->json->setField("settings");
        	$this->json->writeVariable(array("choice", $this->name), array($state_map));
 	    $this->node_list = $state_map;
-
 
 		return true;
 	}
@@ -218,12 +214,15 @@ class Choice {
 
 	function save($value, $variable = null)
     {
+        // Save is a generic function to save a particular value to a variable
+
 		// Similarly.  Save function to save as \uuid\<$variable>\<$value>
 
 		if ($variable == null) {$variable = $this->name;}
 
 		$this->json->setField("variables");
 		$this->json->writeVariable(array($this->uuid,$variable), $value);
+
 
 		return;
 	}
@@ -293,17 +292,15 @@ class Choice {
 
 
 		$choice_thing = new Thing(null); // This times at 2ms.
-
-//$this->ref_time = microtime(true);
-
-
+        // And at 3, 3, 3, 5 ms on 7 June 2018
 
         // This takes 6s.
         // As of 27 Feb 2018 - 2,942ms 1169ms, 1134ms
-		$choice_thing->Create(null, "ant", 's/ is ' . $choice . ' button');
-        //
-//echo $choice_thing->uuid . " " .number_format(round( (microtime(true) - $this->ref_time)*1000 )) . "ms"; echo "<br>";
+        $this->split_time = microtime(true);
 
+		$choice_thing->Create(null, "ant", 's/ is ' . $choice . ' button');
+        // Timing at 199, 173, 368, 201ms
+        //echo number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 
 
 		$choice_thing->choice->Create($this->name, $this->node_list, $choice);
@@ -314,7 +311,6 @@ class Choice {
 
 		$choice_thing->choice->saveStateMap($this->node_list);
 
-//echo number_format(round( (microtime(true) - $this->ref_time)*1000 )) . "ms"; echo "<br>";
 
 
 		$choice_thing->choice->save($choice,'choice_list');
@@ -329,15 +325,18 @@ class Choice {
 	}
 
 	function makeChoices() {
-//$this->ref_time = microtime(true);
+        //$this->split_time = microtime(true);
+
 		$choice_uuid_array = array();
 		$choices = $this->getChoices($this->current_node);
+
+
 
 		if ($choices == null) {return false;}
 
 		foreach ($choices as $choice) {
+
 			$uuid = $this->makeChoice($choice);
-//echo number_format(microtime(true) - $this->ref_time) . "ms"; echo "<br>";
 
 
 			if (strtolower($choice) == 'forget') {
@@ -346,8 +345,6 @@ class Choice {
 
 			$choice_uuid_array[] = array("uuid"=>$uuid, "choice"=>$choice);	
 		}
-
-
 		return $choice_uuid_array;
 	}
 
@@ -390,6 +387,7 @@ class Choice {
 
 	function makeLinks($state = null)
     {
+        //$start_time = microtime(true);
         $this->split_time = microtime(true);
 
 		if ($state == null) {
@@ -400,15 +398,8 @@ class Choice {
 
 		$this->load($this->name);
 
-//echo number_format((round(microtime(true) - $this->ref_time)*1000)) . "ms"; echo "<br>";
-
-
-
 		// Not sure why I am saving the decision here
 		$this->save($state, $this->name);
-
-//echo number_format((round(microtime(true) - $this->ref_time)*1000)) . "ms"; echo "<br>";
-//echo "load statemap<br>";
 
 		$words = null;
 		$urls = null;
@@ -418,25 +409,19 @@ class Choice {
 
 		$node_list = $this->loadStateMap();
 
-//	echo '<pre> choice.php $this->name: '; print_r($this->name); echo '</pre>';
-//	echo '<pre> choice.php $node_list: '; print_r($node_list); echo '</pre>';
-//	echo '<pre> choice.php $state: '; print_r($state); echo '</pre>';
-//echo number_format((round(microtime(true) - $this->ref_time)*1000)) . "ms"; echo "<br>";
-
 		// It is a valid state, so write the state to the variables.
 		$this->Create($this->name, $node_list,$state);
 
-//$this->ref_time = microtime(true);
 
+        $this->split_time = microtime(true);
 
 		$choice_list = $this->makeChoices(); //25-26s // As of 27 Feb - 3,857 ms
+        // As of 7 June 2018 897ms to 1,116ms on stackr.test
 
-//echo number_format(round( (microtime(true) - $this->ref_time)*1000 )) . "ms"; echo "<br>";
-
-
+//echo number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 
 		if ($choice_list != false) {
-					
+
 			foreach ($choice_list as $item) {
 				//$url = "http://project-stack.dev:8080/public/thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
 				$word = $item['choice'];

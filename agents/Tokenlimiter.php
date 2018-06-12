@@ -438,4 +438,3 @@ $this->thing_report = array('thing' => $this->thing->thing, 'choices' => $choice
 }
 
 ?>
-

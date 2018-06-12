@@ -77,15 +77,7 @@ class Thing {
 		$this->associate_prior = $this->container['stack']['associate_prior'];
 		$this->associate_posterior = $this->container['stack']['associate_posterior'];
 
-
-
-//        if (!isset($_SERVER['HTTP_HOST'])) {
-            $this->web_prefix = $this->container['stack']['web_prefix'];
-        
-//        } else {
-//            $this->web_prefix = "http://$_SERVER[HTTP_HOST]/";
-//        }
-
+        $this->web_prefix = $this->container['stack']['web_prefix'];
 
 		$this->log = "";
 
@@ -158,12 +150,12 @@ class Thing {
 
 			// Provide handler to support state maps and navigation.
 			// And state persistence through de-instantiation/instantiation.
-			$this->choice = new Choice($this->uuid);
+            $this->choice = new Choice($this->uuid);
 
 			// Cost of connecting to a Thing is 100 <units>.
 			// That is set by the stack variable.  No need to do anything here
 			// except load the Things internal balances.
-			$this->loadAccounts();
+            $this->loadAccounts();
 
 			// Examples:
 
@@ -197,6 +189,10 @@ class Thing {
 
 		return $this->thing;
 
+    }
+
+    function __destruct()
+    {
     }
 
 
@@ -277,7 +273,10 @@ class Thing {
 
         // This seems to create the db entry.
         //Commented out 27 Feb 2018.  And it stopped creating mysql records.
-		$query = $this->db->Create($subject, $to); // 3s
+		//$query = $this->db->Create($subject, $to); // 3s
+
+        $query = $this->db->Create($subject, $to); // 3s
+
 $query = true;
 //echo number_format(microtime(true)-$ref_time) . "s";
 
@@ -413,7 +412,7 @@ $query = true;
 
 
 	// For debugging
-		$thingreport = $this->db->Get();
+	//	$thingreport = $this->db->Get();
 	//echo '<pre> thingreport[ thing ]: '; print_r($thingreport['thing']); echo '</pre>';
 		
 
@@ -452,7 +451,7 @@ $query = true;
 
 		echo "WORK ON STACK BALANCE";
 
-		$thingreport = $this->db->UUids(); // Designed to accept null as $this->uuid.
+		$thingreport = $this->db-->UUids(); // Designed to accept null as $this->uuid.
 
 		$things = $thingreport['things'];
 
@@ -603,33 +602,30 @@ $query = true;
 
 		}
 
-        public function flagAmber() {
+    public function flagAmber()
+    {
 
                 $this->json->setField("variables");
                 $this->json->writeVariable(array("thing","status"), "amber");
                 $this->Get();
 
-                }
+    }
 
+	public function flagGreen()
+    {
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","status"), "green");
+        $this->Get();
+    }
 
-	public function flagGreen() {
-
-		$this->json->setField("variables");
-		$this->json->writeVariable(array("thing","status"), "green");
-		$this->Get();
-
-		}
-
-
-	public function isRed() {
-
-		$var_path = array("thing", "status");
-		if ($this->json->readVariable($var_path) == "red") {
-			return true;
-			}
-		
-		return false;
-		}
+	public function isRed()
+    {
+        $var_path = array("thing", "status");
+        if ($this->json->readVariable($var_path) == "red") {
+            return true;
+        }
+        return false;
+    }
 
 
 	public function isGreen() {
@@ -667,35 +663,29 @@ $query = true;
 
 
 
-	public function flagGet() {
+	public function flagGet()
+    {
+        $var_path = array("thing", "status");
+        return $this->json->readVariable($var_path);
+    }
 
-                $var_path = array("thing", "status");
-                return $this->json->readVariable($var_path);
-
-                }
-
-        public function flagSet($color = null) {
-
+    public function flagSet($color = null)
+    {
 		if ($color == null) {$color = 'red';}
 
-                $this->json->setField("variables");
-                $this->json->writeVariable(array("thing","status"), $color);
-                $this->Get();
-
-                }
-
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","status"), $color);
+        $this->Get();
+    }
 
 
-
-	public function Get() {
-
+	public function Get()
+    {
 		// Bootstrapping db access.
 		// A Thing can call an UUID so called up
 		// the requested UUID.  Using the null account.
 		$thingreport = $this->db->Get($this->uuid);
 		$thing = $thingreport['thing'];
-
-
 
 		if ($thing == false) {
 			//$this->uuid = $this->thing->uuid;
@@ -797,9 +787,6 @@ $query = true;
 
 			$thing = new Thing($uuid);
 			// append to states
-
-//			$thing->json->setField('variables');
-//			$t = $thing->json->readVariable(array($uuid, 'decision'));
 
 			$t = $thing->choice->load($agent);
 
@@ -906,8 +893,10 @@ $query = true;
 
         if ($logging_level == null) {$logging_level = "WARNING";}
 
-        $t = strip_tags($text);
+        //$t = strip_tags($text);
+        $runtime = number_format($this->elapsed_runtime()) . "ms";
 
+        $t = str_pad($runtime,10," ",STR_PAD_LEFT) . " " . strip_tags($text);
 
         //if (strtoupper($logging_level) == "INFORMATION") {
 

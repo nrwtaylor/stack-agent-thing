@@ -1,17 +1,15 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-class Tallygraph{
-
-
+class Tallygraph
+{
     // So Tally graph show a graph of all the messages sent
 
-	function __construct(Thing $thing, $agent_command = null) {
-
-        $this->start_time = microtime(true);
+	function __construct(Thing $thing, $agent_command = null)
+    {
+        $this->start_time = $thing->elapsed_runtime();
 
         // Setup Thing
         $this->thing = $thing;
@@ -73,7 +71,8 @@ class Tallygraph{
         $this->actual_run_time = $this->end_time - $this->start_time;
         $milliseconds = round($this->actual_run_time * 1000);
 
-        $this->thing->log( 'Agent "Tallycounter" ran for ' . $milliseconds . 'ms.', 'OPTIMIZE' );
+        //$this->thing->log( 'Agent "Tallycounter" ran for ' . $milliseconds . 'ms.', 'OPTIMIZE' );
+        $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
         $this->thing_report['log'] = $this->thing->log;
 		return;
