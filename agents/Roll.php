@@ -600,8 +600,8 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 				} else {
 
                     // Roll a d6 if unclear
-                    //$N_rolls = 1;
-                    //$die_N = 6;
+                    $N_rolls = 1;
+                    $die_N = 6;
                     //return;
 
 //					return "Invalid input";	
@@ -611,14 +611,11 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
 				for ($i = 1; $i <= $N_rolls; $i++) {
 					$d = rand(1, $die_N);
-					 $result[] = array('d'.$die_N=>$d);
+					$result[] = array('d'.$die_N=>$d);
 
 					$roll = $roll + $d;
-
 				}
-
 			}
-
 		}
 
 		$result[] = array('roll'=>$roll);

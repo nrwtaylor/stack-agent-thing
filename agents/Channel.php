@@ -1,26 +1,14 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-//echo '<pre> Agent "Receipt" started running on Thing ';echo date("Y-m-d H:i:s");echo'</pre>';
-
-// Call regularly from cron 
-// On call determine best thing to be addressed.
-
-// Start by picking a random thing and seeing what needs to be done.
-
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-
-
-class Channel {
-
-	function __construct(Thing $thing, $agent_input = null) {
+class Channel
+{
+	function __construct(Thing $thing, $agent_input = null)
+    {
 
         $this->start_time = microtime(true);
 
@@ -31,7 +19,7 @@ class Channel {
 			// most appropriate agent to respond to it.
 
         $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
 
 		// Get some stuff from the stack which will be helpful.
 		$this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -95,7 +83,7 @@ class Channel {
 		// figure out how set do aliases fluidly "good job"="learning".
 		// For now.
 
-		
+/*		
 		foreach ($this->aliases as $alias) {
 
 			// Find out if the array test is in the aliase "database"?  But
@@ -105,7 +93,7 @@ class Channel {
 			// world consequences.
 
 		}
-
+*/
 		$this->thing->choice->Create('channel', $this->node_list, "start");
 
 		$choices = $this->thing->choice->makeLinks('start');
@@ -181,11 +169,14 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+    //    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		$this->thing_report['thing'] = $this->thing->thing;
+	//	$this->thing_report['thing'] = $this->thing->thing;
 
-		return;
+        $thing_report['info'] = $message_thing->thing_report['info'] ;
+
+        return $this->thing_report;
+
 	}
 
     function getMessenger() 
@@ -394,13 +385,45 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
 
     function getSMS() {
 
-        $this->channel_name .= "SMS";
-        $this->plain_text_statement .= "Public plain text";
+        $this->channel_name = "SMS";
+        $this->plain_text_statement = "Public plain text";
         $this->retention_policy = "private indefinite";
 
         $this->reach = "1-1";
         $this->fields = 2;
         $this->eyes =  "X";
+
+        $this->latency = "seconds";
+        $this->characters = "alphanumeric";
+        $this->threading = "no";
+
+        $this->association = "no";
+        $this->cueing = "no";
+
+        $this->emoji = "yes";
+        $this->images = "PNG";
+        $this->buttons = "no";
+
+        $this->carousel = "no";
+
+        $this->attachments = "MMS";
+        $this->voice = "no";
+        $this->video = "no";
+
+        $this->presence = "none";
+        $this->ux_ui = "client based";
+    }
+
+
+    function getConsole() {
+
+        $this->channel_name = "console";
+        $this->plain_text_statement = "Public plain text";
+        $this->retention_policy = "private indefinite";
+
+        $this->reach = "1-1";
+        $this->fields = 2;
+        $this->eyes =  "1";
 
         $this->latency = "seconds";
         $this->characters = "alphanumeric";
@@ -452,8 +475,6 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
     function readFrom()
     {
 
-
-
         if (strlen($this->from) == 16 and (is_numeric($this->from))) { 
             $this->channel = "messenger";
             $this->getMessenger();
@@ -473,6 +494,13 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
             $this->getSMS();
             return; 
        }
+
+        if ($this->from == "console") { 
+            $this->channel = "console";
+            $this->getConsole();
+            return;
+        }
+
 
         $this->channel = "unknown";
         return;
@@ -498,7 +526,9 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
         // here DB request or some processing
         $codeText = "thing:".$this->uuid;
 
-		ob_clean();
+//      ob_clean();
+        if (ob_get_contents()) ob_clean();
+
         ob_start();
 
         QRcode::png($codeText,false,QR_ECLEVEL_Q,4);

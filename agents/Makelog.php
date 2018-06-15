@@ -32,10 +32,6 @@ class Makelog
         $this->email = $thing->container['stack']['email'];
         $this->email = $thing->container['stack']['entity_name'];
 
-
-
-
-
         $header = "THING AGENT LOG";
         $header .= "\n";
 
@@ -60,7 +56,6 @@ class Makelog
 
         $text = str_replace("<br>", "\n", ($this->agent_thing->thing->log));
         $text = str_replace("\n ", "\n", $text);
-
         $this->text = $text;
 
         $this->getRuntimes();
@@ -111,7 +106,7 @@ class Makelog
             preg_match_all('/[0-9,]+/',$line,$matches);
             $numbers = $matches[0];
 
-            $agent_name = $words[1];
+            $agent_name = $words[2];
 
             if (strpos($line, 'ran for') !== false) {
                 $c += 1;

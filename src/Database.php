@@ -410,19 +410,22 @@ $c['errorHandler'] = function ($c) {
         $user_search = $this->from;
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-        //$value = "%$value%"; // Value to search for in Variables
-        $value = "*$value*"; // Value to search for in Variables
+        $value = "%$value%"; // Value to search for in Variables
+  //      $value = "*$value*"; // Value to search for in Variables
 
 //        $max = (int) $max;
 
         $thingreport['things'] = array();
 
         try{
+            $value = "%$value%"; // Value to search for in Variables
+            $query = "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
+            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
+            // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
 
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
-            $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
+            // $value = "*$value*"; // Value to search for in Variables
+            // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
 
             $sth = $this->container->db->prepare($query);
 

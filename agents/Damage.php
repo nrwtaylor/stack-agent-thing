@@ -313,9 +313,10 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             $thing = $this->getThing();
             $destroyed = $this->doHit($thing);
 
+$balance = $thing->account['stack']->balance['amount']);
 
 //echo $thing->thing->created_at;
-            $this->things[] = array("nuuid"=>$thing->nuuid,"balance"=> $thing->account['stack']->balance['amount'],
+            $this->things[] = array("nuuid"=>$thing->nuuid,"balance"=> $balance,
                  "destroyed"=>$destroyed,
                  "created_at"=>$thing->thing->created_at);
 
@@ -360,6 +361,4 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
 }
 
-
-
-return;
+?>

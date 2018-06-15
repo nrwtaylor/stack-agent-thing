@@ -88,7 +88,7 @@ $this->token_request = $this->agent_input;
                         	$this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
 
                                 //callAgent($this->thing->uuid, $token);
-                            $c = new CallAgent($this->thing);
+                            $c = new Callagent($this->thing);
                             $c->callAgent($this->thing->uuid, $token);
 
 $message = 'Agent "Token Limiter" issued a ' . ucfirst($token) . " Token to Thing " . $this->thing->nuuid . ".";

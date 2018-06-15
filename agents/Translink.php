@@ -62,12 +62,12 @@ class Translink {
 		$this->thing->log('Agent "Translink" received this Thing "' . $this->subject .  '".');
 
 //		$this->readSubject(); // No need to read subject 'translink' is pretty clear.
-        $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+        //$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
         $this->readSubject();
-$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+//$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
   		$this->thing_report = $this->respond();
-$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+//$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 		$this->thing->log('Agent "Translink" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
 		return;
@@ -126,8 +126,8 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 
 
 	public function stopTranslink($stop) {
-
-        $this->thing->log('Agent "Translink". Start Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+        $split_time = $this->thing->elapsed_runtime();
+        //$this->thing->log('Agent "Translink". Start Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
 
 		$this->stop = $stop;
@@ -152,7 +152,7 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 			echo 'Caught exception: ',  $e->getMessage(), "\n";
 			$this->error = $e;
 			$web_input = false;
-$this->sms_message = "Request not understood: " . $this->error;
+            $this->sms_message = "Request not understood: " . $this->error;
 
 			return "Request not understood";
 		}
@@ -218,7 +218,7 @@ $response ="";
 
 			$this->sms_message .= "TEXT ?";
 
-        $this->thing->log('Agent "Translink". End Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+        $this->thing->log('Agent "Translink". Translink API call took ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.');
 
 
 		return $message;
@@ -269,7 +269,7 @@ $response ="";
 
 	private function respond()
     {
-        $this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+        //$this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
 		// Thing actions
 		$this->thing->flagGreen();
@@ -321,20 +321,17 @@ $response ="";
 //            $thing = new Transit($this->thing, "transit " . $this->stop);
 //        }
 
-//exit();
-
 //	$this->thing_report['info'] = 'This is the translink agent responding to a request.';
 	    $this->thing_report['help'] = 'Connector to Translink API.';
 
-        $this->thing->log('Agent "Translink". End Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+        //$this->thing->log('Agent "Translink". End Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
 
 		return $this->thing_report;
-
-
 	}
 
-	private function nextWord($phrase) {
+	private function nextWord($phrase)
+    {
 
 
 	}

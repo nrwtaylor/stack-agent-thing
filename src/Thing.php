@@ -10,11 +10,14 @@ ini_set("allow_url_fopen", 1);
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 
-class Thing {
-
+class Thing
+{
 	public $var = 'hello';
 
-	function __construct($uuid, $test_message = null) {
+	function __construct($uuid, $test_message = null)
+    {
+        // Start the clock
+        $this->elapsed_runtime();
 
 		// At this point, we are presented a UUID.
 		// Whether or not the record exists is another question.
@@ -79,8 +82,6 @@ class Thing {
 
         $this->web_prefix = $this->container['stack']['web_prefix'];
 
-		$this->log = "";
-
 		if (null === $uuid) {
 
 			// ONLY PLACE IN STACK WHERE UUIDs ARE ASSIGNED
@@ -113,6 +114,11 @@ class Thing {
 			// $this->db = new Database($this->uuid, $this->from);
 
 			$this->json = new Json($this->uuid);
+
+            // Testing this as of 15 June 2018.  Not used by framework yet.
+            $this->variables = new Json($this->uuid);
+            $this->variables->setField("variables");
+
 			$this->choice = new Choice($this->uuid);
 
 
@@ -503,7 +509,30 @@ $query = true;
 //                }
 
 
+    function time($time = null)
+    {
+        if ( $time == null ) {$time = time();}
+        $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
 
+        return $this->time;
+        //return $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
+    }
+
+    function microtime($time = null)
+    {
+        if ( $time == null ) {$time = time();}
+        //$this->time = gmdate("Y-m-d\TH:i:s.u\Z", $time);
+
+
+        list($usec, $sec) = explode(' ', microtime());
+        //print date('Y-m-d H:i:s', $sec) . $usec;
+
+        $this->microtime = date('Y-m-d H:i:s', $sec) . " " .$usec;
+
+        return $this->microtime;
+    }
+
+/*
         public function PDF($pdf_name = null) {
 		return;
                 $param = $_GET['id'];
@@ -518,7 +547,7 @@ $query = true;
 
                 return;
                 }
-
+*/
 
 
 	public function test($variable = null, $agent= null, $action = null) {
@@ -527,8 +556,7 @@ $query = true;
 		// Keep it simple for now.
 
 		echo '<pre> Agent "'.$agent.'" ' . $action . ' this Thing at ';print_r($variable);echo'</pre>';
-	}		
-		
+    }
 
     public function getVariable($variable_set, $variable) {
 
@@ -551,16 +579,13 @@ $query = true;
 //            }
 //        }
 
-        
         return false;
-        
-
-
 
     }
 
 
-	public function Forget() {
+	public function Forget()
+    {
 		// Call to account destruction.  Both for DB and stack account, 
 		// and the Thing.
 
@@ -580,35 +605,29 @@ $query = true;
 
 		$thingreport = $this->db->Forget($this->uuid);
 
-
 		// To be developed.  PHP object destruction.
+    }
 
-		}
+	public function Ignore()
+    {
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","status"), "green");
+        $this->Get();
+    }
 
-	public function Ignore() {
-
-		$this->json->setField("variables");
-		$this->json->writeVariable(array("thing","status"), "green");
-		$this->Get();
-
-		}
-
-
-	public function flagRed() {
-
-		$this->json->setField("variables");
-		$this->json->writeVariable(array("thing","status"), "red");
-		$this->Get();
+    public function flagRed()
+    {
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","status"), "red");
+        $this->Get();
 
 		}
 
     public function flagAmber()
     {
-
-                $this->json->setField("variables");
-                $this->json->writeVariable(array("thing","status"), "amber");
-                $this->Get();
-
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","status"), "amber");
+        $this->Get();
     }
 
 	public function flagGreen()
@@ -628,15 +647,14 @@ $query = true;
     }
 
 
-	public function isGreen() {
-
-		$var_path = array("thing", "status");
-		if ($this->json->readVariable($var_path) == "green") {
-			return true;
-			}
-		
-		return false;
-		}
+	public function isGreen()
+    {
+        $var_path = array("thing", "status");
+        if ($this->json->readVariable($var_path) == "green") {
+            return true;
+        }
+        return false;
+    }
 
 	// Yeah - it's amber.  Cycles red > red + amber > green > amber > red
 	public function isAmber() {
@@ -746,7 +764,7 @@ $query = true;
 		return false;
 		}
 
-
+/*
 	function currentState() {
 
 		throw new Exception('devstack deprecate');
@@ -759,7 +777,7 @@ $query = true;
 		return $this->current_state;
 
 		}
-
+*/
 	function getState($agent = null) {
 
 // This can probably be deprecated after updating usermanager
@@ -818,17 +836,16 @@ $query = true;
 	}
 
 
-
+/*
 	function setState() {
 		throw new Exception('devstack deprecate');
 		$this->test("Not implemented");
 		return;
 
 	}
-
-	function associatePosterior ($nom_from, $nom_to) {
-
-
+*/
+    function associatePosterior ($nom_from, $nom_to)
+    {
 		// Get the UUID of the last entry in the db with
 		// the same planned $to email address.
 
@@ -841,10 +858,7 @@ $query = true;
 		// to the database.  26 Apr.  Got to be worth something.
 		// Apparently enough to get rid of Too many connections in test_account.php
 		// Passing test_redpanda.php 26 Apr.
-//$ref_time = microtime(true);
 		$thingreport = $this->db->priorGet(); // 3s
-
-//echo number_format(microtime(true)-$ref_time) . "s";
 
 		$posterior_thing = $thingreport['thing'];
 
@@ -887,7 +901,9 @@ $query = true;
 		return true;
 	}
 
-	function log($text = "|", $logging_level = null) {//echo $notusd;
+	function log($text = "|", $logging_level = null)
+    {
+        if (!isset($this->log)) {$this->log = "\n";}
         // DEBUG, INFORMATION, WARNING, ERROR, FATAL
         // Plus OPTIMIZE
 

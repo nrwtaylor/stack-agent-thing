@@ -1,109 +1,78 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-
-class Latency {
-
+class Latency
+{
 	public $var = 'hello';
 
+    function __construct(Thing $thing)
+    {
+        $this->thing = $thing;
+        $this->agent_name = 'latency';
 
-    function __construct(Thing $thing) {
+        // Queue time is the time in the queue
+        // Here it is the time from the point the Thing
+        // is deserialized by the gearman worker.
+        // Or the time from which the web-end point created the thing
+        // to being processed by this agent (Latency).
+        $this->queue_time = $this->thing->elapsed_runtime();
+        $this->start_time = $this->queue_time;
 
-                $this->thing = $thing;
-                $this->agent_name = 'latency';
+        $this->thing_report  = array("thing"=>$this->thing->thing);
 
-                $this->queue_time = $this->thing->elapsed_runtime();
-
-                $this->start_time = $this->queue_time;
-
- 		$this->thing_report  = array("thing"=>$this->thing->thing);
-
-                // So I could call
-                $this->test = false;
-                if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-                // I think.
-                // Instead.
+        // So I could call
+        $this->test = false;
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+        // I think.
+        // Instead.
 
  		$this->uuid = $thing->uuid;
-        	$this->to = $thing->to;
-        	$this->from = $thing->from;
-        	$this->subject = $thing->subject;
-                //$this->sqlresponse = null;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
+        //$this->sqlresponse = null;
 
-            $this->created_at = $thing->thing->created_at;
+        $this->created_at = $thing->thing->created_at;
+        $this->current_time = $this->thing->time();
 
-        $this->current_time = $this->thing->json->time();
+        $this->node_list = array("ping"=>array("pong"));
 
+        $this->thing->log('<pre> Agent "Latency" running on Thing ' . $this->thing->nuuid . '.</pre>',"INFORMATION");
 
-                $this->node_list = array("ping"=>array("pong"));
-
-                $this->thing->log('<pre> Agent "Latency" running on Thing ' . $this->thing->nuuid . '.</pre>',"INFORMATION");
-
-
-
-                // Probably an unnecessary call, but it updates $this->thing.
-                // And we need the previous usermanager state.
-
-                $this->thing->Get();
-
-                $this->current_state = $this->thing->getState('usermanager');
-
-
-
-
-
-		// create container and configure
-		$this->api_key = $this->thing->container['api']['watson'];
-
+        // Probably an unnecessary call, but it updates $this->thing.
+        // And we need the previous usermanager state.
+        //$this->thing->Get();
+        //$this->current_state = $this->thing->getState('usermanager');
 
 		$this->readSubject();
-		
 		$this->thing_report = $this->respond();
 
 		$this->thing->log('Agent "Latency" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
 
         $this->thing_report['log'] = $this->thing->log;
 
-
 		return;
-
-		}
-
-
-
-
+    }
 
 // -----------------------
 
-	private function respond() {
+	private function respond()
+    {
+        $this->thing->flagGreen();
 
+        // This should be the code to handle non-matching responses.
+        $to = $this->thing->from;
+        $from = "latency";
 
-		$this->thing->flagGreen();
-
-		// This should be the code to handle non-matching responses.
-
-		$to = $this->thing->from;
-
-		//echo "to:". $to;
-
-		$from = "latency";
-		
-		$subject = 's/pingback '. $this->current_state;	
+		$subject = 's/pingback ';
 
 		$message = 'Latency checker.';
 
-		//$email->sendGeneric($to,$from,$this->subject, $message);
-		//$thing->thing->email->sendGeneric($to,$from,$this->subject, $message);
-
 		$received_at = strtotime($this->thing->thing->created_at);
-
-		//$ago = Thing::human_time ( time() - $received_at );
 
         $ago = $this->thing->human_time ( time() - $received_at );
 
-
 		$this->sms_message = "LATENCY";
-
 
         $this->sms_message .= " | qtime " . number_format($this->queue_time) . "ms";
 
@@ -120,47 +89,20 @@ class Latency {
 
 		//$this->thing_report['choices'] = false; 
 
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-                $message_thing = new Message($this->thing, $this->thing_report);
-                //$thing_report['info'] = 'SMS sent';
-
-
-                $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-		
-
-//		$this->thing->email->sendGeneric($to,"ping",$subject,$message);
-
-
-
-		//$this->thing->log( '<pre> Agent "Latency" sent a message to ' . $this->thing->from . '</pre>');
-
-	
-	//	$this->thing_report = array('thing'=>$this->thing, 'keyword'=>'pingback', 'info'=>'Ping agent pinged back', 'help'=>'Useful for checking the stack.');
-
-//                $this->thing_report['thing'] = $this->thing; 
-$this->thing_report['keyword'] = 'pingback';
-//$this->thing_report['info'] = 'Ping agent pinged back';
-$this->thing_report['help'] = 'Useful for checking the stack.';
-
-
+        $this->thing_report['keyword'] = 'pingback';
+        $this->thing_report['help'] = 'Useful for checking the stack.';
 
 		return $this->thing_report;
-
-
 	}
 
-
-
-	public function readSubject() {
-
+	public function readSubject()
+    {
 		return;
-
 	}
 
 }
 
-
-
-
-return;
+?>
