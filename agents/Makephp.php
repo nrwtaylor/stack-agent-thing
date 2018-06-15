@@ -10,8 +10,8 @@ class Makephp
 {
     public $var = 'hello';
 
-    function __construct(Thing $thing, $input = null) {
-
+    function __construct(Thing $thing, $input = null)
+    {
 	    $this->input = $input;
 
         $class_name = ucwords($input);
@@ -22,7 +22,7 @@ class Makephp
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        $stack_state = $thing->container['stack']['state'];    
+        $stack_state = $thing->container['stack']['state'];
 
         if ($stack_state == "prod") {
             $class_name = strtolower($class_name); // only in production
@@ -36,25 +36,20 @@ class Makephp
 
         echo "\n";
 
+	    if ($input == null) {
+		    echo "Agent 'make php' says 'Nothing received'";//
+	    } else {
+		    echo "Agent 'make php' says '" . $input . "' received.";
+	    }
 
-	if ($input == null) {
-		echo "Agent 'make php' says 'Nothing received'";//
-	} else {
-		echo "Agent 'make php' says '" . $input . "' received.";
-	}
+        echo "\n";
+        echo "\n";
+        echo $this->web_prefix;
 
-    echo "\n";
-    echo "\n";
-    echo $this->web_prefix;
-
-    $this->thing_report = array('thing' => $thing, 
+        $this->thing_report = array('thing' => $thing, 
             'php' => $file);
 
-
 	}
-
-
 }
-
 
 ?>

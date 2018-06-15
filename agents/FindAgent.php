@@ -5,19 +5,15 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
 ini_set("allow_url_fopen", 1);
 
-class FindAgent {
-
+class FindAgent
+{
 	public $var = 'hello';
 
  	function __construct(Thing $thing, $agent_input = null)
     {
-
-        //$this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime();
 
 
         if ($agent_input == null) {$agent_input = null;}
@@ -26,13 +22,13 @@ class FindAgent {
         $this->agent_name = 'findagent';
         $this->agent_prefix = 'Agent "Findagent" ';
         $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
+        //$this->start_time = $this->thing->elapsed_runtime();
         $this->thing_report['thing'] = $this->thing->thing;
 
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		$this->api_key = $this->thing->container['api']['translink'];
+		//$this->api_key = $this->thing->container['api']['translink'];
         // Just some examples of pulling in settings from settings.php
 
 		$this->retain_for = 4; // Retain target 4 hours.
@@ -73,43 +69,27 @@ class FindAgent {
 
         $this->choices = false;
 
-//        $run_time = microtime(true) - $ref_time;
-//        $milliseconds = round($run_time * 1000);
-//        $this->thing->log( $this->agent_prefix .'choice init ran for ' . $milliseconds . 'ms.' );
-
-
-
-
-//		$this->thing->log( '<pre> Agent "Find Agent" running on Thing ' . $this->thing->nuuid . '.</pre>' );
-//		$this->thing->log( '<pre> Agent "Find Agent" received this Thing "' . $this->subject . '".</pre>');
-
-        $ref_time = microtime(true);
+        //$ref_time = microtime(true);
 
         $this->findAgent($this->requested_agent_name);
 
-//        $run_time = microtime(true) - $ref_time;
-//        $milliseconds = round($run_time * 1000);
-//        $this->thing->log( $this->agent_prefix .'findAgent call ran for ' . $milliseconds . 'ms.' );
-
-
 		$this->readSubject();
 
-		if ($this->response == true) {
+        if ($this->response == true) {
 
-                $this->thing_report['info'] = 'No matching agent found.';
-                $this->thing_report['help'] = 'This is the "Find Group".';
-                $this->thing_report['num_hits'] = $this->num_hits;
+            $this->thing_report['info'] = 'No matching agent found.';
+            $this->thing_report['help'] = 'This is the "Find Group".';
+            $this->thing_report['num_hits'] = $this->num_hits;
 
-                if ($this->verbosity >= 2) {
-                    $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
-                }
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
-
-
- $this->thing_report['log'] = $this->thing->log;
+            if ($this->verbosity >= 2) {
+                $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
+            }
+            $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
 
 
-                return;
+            $this->thing_report['log'] = $this->thing->log;
+
+            return;
 		}
 
 
@@ -120,49 +100,32 @@ class FindAgent {
         $this->thing_report['num_hits'] = $this->num_hits;
 
 
-if ($this->verbosity >= 2) {
-$this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
-}
+        if ($this->verbosity >= 2) {
+            $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
+        }
 
-
-//        $this->thing->log( $this->agent_prefix .'ran for ' . $this->thing->elapsed_runtime() . 'ms.' );
-//        $this->thing->log( $this->agent_prefix .'. ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
-
 
         $this->thing_report['log'] = $this->thing->log;
 
-
 		return;
-
-		}
-
-
+    }
 
 	function findAgent($name = null, $id = null)
     {
-
-        $ref_time = microtime(true);
+        $ref_time = $this->thing->elapsed_runtime();
 
 		$thingreport = $this->thing->db->setUser($this->from);
 		$thingreport = $this->thing->db->variableSearch(null, $name, $this->horizon);
 
-        $run_time = microtime(true) - $ref_time;
-        $milliseconds = round($run_time * 1000);
-        $this->thing->log( $this->agent_prefix .'db call ran for ' . $milliseconds . 'ms.', "OPTIMIZE" );
+        $run_time = $this->thing->elapsed_runtime() - $ref_time;
+        $this->thing->log( $this->agent_prefix .'db call ran for ' . $run_time . 'ms.', "OPTIMIZE" );
 
 
 		$groups = array();
         $agent_things = array();
 
 		foreach ($thingreport['things'] as $thing_obj) {
-
-
-
-			//$agent_thing = new Thing( $thing_obj['uuid'] );
-
-         	//$agent_thing->json->setField("variables");
-           	//$agent_thing_id = $agent_thing->json->readVariable( array($name, $name."_id") );
 
             if ($id == null) {
                 // No id matching, just grab thing
@@ -175,36 +138,29 @@ $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report
                 //$agent_thing->json->setField("variables");
                 //$agent_thing_id = $agent_thing->json->readVariable( array($name, $name."_id") );
 
+                $uuid = $thing_object['uuid'];
 
+                if ($thing_object['nom_to'] != "usermanager") {
+                    $match += 1;
 
-            $uuid = $thing_object['uuid'];
+                    $thing= new Thing($uuid);
+                    $variables = $thing->account['stack']->json->array_data;
 
-            if ($thing_object['nom_to'] != "usermanager") {
-                $match += 1;
+                    if (isset($variables[$name])) {
+                        $agent_thing_id = $variables[$name][$name."_id"];
 
-                $thing= new Thing($uuid);
-                $variables = $thing->account['stack']->json->array_data;
-
-                if (isset($variables[$name])) {
-                    $agent_thing_id = $variables[$name][$name."_id"];
-
-                } else {
-                    // No alias variable set
-                    // Try the next one.
-                    $agent_thing_id = null;
-                    //break;
+                    } else {
+                        // No alias variable set
+                        // Try the next one.
+                        $agent_thing_id = null;
+                        //break;
+                    }
                 }
-            }
-
-
-
 
                 if (!($agent_thing_id == false) or ($agent_thing_id == null)) {
                     $agent_things[] = $thing_obj;
                 }
             }
-
-
 		}
 
 

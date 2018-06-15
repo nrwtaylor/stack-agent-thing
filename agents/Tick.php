@@ -61,17 +61,17 @@ class Tick
 
                 $arr = json_encode(array("to"=>"test", "from"=>"latency", "subject"=>"s/ latency"));
 
-                $client= new GearmanClient();
+                $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
-                $client->doHighBackground("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
 
                 $arr = json_encode(array("to"=>"test", "from"=>"damage", "subject"=>"s/ damage"));
 
-                $client= new GearmanClient();
+                $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
-                $client->doHighBackground("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
 
 
 //        $latency_agent = new Latency($this->thing,"latency");

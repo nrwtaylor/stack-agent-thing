@@ -44,6 +44,26 @@ $app->group('/api', function () use ($app) {
         });
 
         // Operational end-point for NEXMO
+        $app->get('/gearman', function ($request, $response, $args)  {
+
+            $body = $request->getParsedBody();
+
+            //echo "meep";
+                $arr = json_encode(array("to"=>"hey", "from"=>"test", "subject"=>"ping"));
+
+                $client= new \GearmanClient();
+                $client->addServer();
+                $client->doNormal("call_agent", $arr);
+                //$client->doHighBackground("call_agent", $arr);
+echo "Gearman worker called";
+
+            return;
+// $response->withHeader('HTTP/1.0 200 OK')
+//                ->withStatus(200);
+        });
+
+
+        // Operational end-point for NEXMO
         $app->post('/nexmo', function ($request, $response, $args)  {
 
             $body = $request->getParsedBody();

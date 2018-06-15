@@ -80,16 +80,10 @@ class Message {
             "outcome"),  $this->thing_report['info']
             );
 
-
-//        $this->current_time = $this->thing->json->time();
-
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
-//$this->thing_report['email'] = "meep";
-//exit();
-//        $this->thing_report['email'] = "message test";
 
         $timestamp =  new Timestamp($thing, "timestamp");
 

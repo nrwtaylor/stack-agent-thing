@@ -11,8 +11,9 @@ class Agent {
 
 	function __construct(Thing $thing, $input = null)
     {
-
-        $this->start_time = microtime(true);
+        // Start the timer
+        $this->start_time = $thing->elapsed_runtime();
+        //microtime(true);
 
 		$this->agent_input = strtolower($input);
         $this->agent_name = "Agent";
@@ -48,7 +49,8 @@ class Agent {
         $this->agents_path = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents/';
 
 
-        $this->current_time = $this->thing->json->time();
+//        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->verbosity = 9;
 
@@ -312,6 +314,7 @@ and the user UX/UI
             $burst_age = strtotime($this->current_time) - strtotime($burst->burst_time);
             if ($burst_age < 0) {$burst_age = 0;}
 
+            //$channel_agent = new Channel($this->thing);
 
             $channel_burst_limit = 1;
             $channel_burstiness_limit = 750;
