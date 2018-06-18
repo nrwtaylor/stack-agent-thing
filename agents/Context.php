@@ -237,12 +237,15 @@ class Context
             if ($thing_object['nom_to'] != "usermanager") {
                 $match += 1;
 
-                $thing= new Thing($uuid);
+               //x $thing= new Thing($uuid);
+
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
 
 //                $this->variables_agent = new Variables($thing, "variables context " . $this->from);
 //                $this->variables_agent->getVariables();
 
-                $variables = $thing->account['stack']->json->array_data;
+               //x $variables = $thing->account['stack']->json->array_data;
 
                 if (isset($variables['train'])) {
                     $this->context = "train";
@@ -281,6 +284,8 @@ class Context
                 }
             }
         }
+
+                $thing= new Thing($uuid);
 
                 $this->variables_agent = new Variables($thing, "variables context " . $this->from);
                 $this->variables_agent->getVariables();

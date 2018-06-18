@@ -453,8 +453,6 @@ and the user UX/UI
         }
 
 
-
-
         $this->thing->log( $this->agent_prefix .'now looking at Words (and Places and Characters).  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
 		// See if there is an agent with the first workd
@@ -550,11 +548,12 @@ exit();
 
 				//$agent = new $agent_class_name($this->thing);
                 $agent = new $agent_namespace_name($this->thing);
+
 				$thing_report = $agent->thing_report;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
                 //echo "Error meep<br>";      
-                  $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
+                  $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".' , "WARNING" );
 
     			$message = $ex->getMessage();
 	    		//$code = $ex->getCode();
@@ -573,10 +572,10 @@ exit();
 
         $this->thing->log( $this->agent_prefix .'did not find an Ngram agent to run.', "INFORMATION" );
 
-        $run_time = microtime(true) - $this->start_time;
-        $milliseconds = round($run_time * 1000);
+        //$run_time = microtime(true) - $this->start_time;
+        //$milliseconds = round($run_time * 1000);
 
-        $this->thing->log( $this->agent_prefix .'now looking at Group Context.  Timestamp ' . $milliseconds . 'ms.' );
+        $this->thing->log( $this->agent_prefix .'now looking at Group Context.' );
 
         // So no agent ran.
 
@@ -617,7 +616,7 @@ var_dump($place_thing->place_name);
         }
 */
 
-        $this->thing->log( $this->agent_prefix .'now looking at Transit Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
+        $this->thing->log( $this->agent_prefix .'now looking at Transit Context.' );
 
         $transit_thing = new Transit($this->thing, "extract");
         $thing_report = $transit_thing->thing_report;
@@ -631,7 +630,7 @@ var_dump($place_thing->place_name);
         }
 
 
-        $this->thing->log( $this->agent_prefix .'now looking at Place Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
+        $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
 
         $place_thing = new Place($this->thing, "extract");
         $thing_report = $place_thing->thing_report;
@@ -860,7 +859,7 @@ var_dump($place_thing->place_name);
 
 
 
-        $this->thing->log( $this->agent_prefix .'now looking at Identity Context.  Timestamp ' . $milliseconds . 'ms.', "OPTIMIZE" );
+        $this->thing->log( $this->agent_prefix .'now looking at Identity Context.', "OPTIMIZE" );
 
 
         // Is this a request for a specific named agent?

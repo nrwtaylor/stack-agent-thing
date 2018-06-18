@@ -21,6 +21,7 @@ class Variables
     {
         // Setup Thing
         $this->thing = $thing;
+
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->uuid = $thing->uuid;
@@ -32,9 +33,7 @@ class Variables
 
         // Setup Agent
         $this->agent = strtolower(get_class());
-//$agent = explode($this->agent,"\");
-//var_dump($agent);
-//exit();
+
         $this->agent_name = "variables";
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         $this->agent_variables = array('variable', 'name', 'alpha', 'beta'); //Default variable set.
@@ -86,7 +85,7 @@ class Variables
         }
 
         // Toss in a refreshed.
-        $time_string = $this->thing->json->time();
+        $time_string = $this->thing->time();
         $this->setVariable("refreshed_at", $time_string);
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', 'OPTIMIZE' );
@@ -119,7 +118,9 @@ class Variables
         return;
     }
 
-    function getVariables($variable_set_name = null) {
+    function getVariables($variable_set_name = null)
+    {
+        $split_time = $this->thing->elapsed_runtime();
 
         if ($variable_set_name == null) {
             $variable_set_name= $this->variable_set_name;
@@ -160,7 +161,7 @@ class Variables
 
                 if($this->getVariableSet() == false) {
 
-                $this->thing->log( $this->agent_prefix . 'got ' . $this->variables_thing->nuuid, "DEBUG" );
+                    $this->thing->log( $this->agent_prefix . 'got ' . $this->variables_thing->nuuid, "DEBUG" );
 
               //if($this->getVariableSet() != false) {
 

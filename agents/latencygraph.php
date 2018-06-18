@@ -1,11 +1,33 @@
 <?php
-namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-class Stackgraph {
+require_once('/var/www/html/stackr.ca/lib/fpdf.php');
+require_once('/var/www/html/stackr.ca/lib/fpdi.php');
 
-    // Stackgraph shows how much is on the stack.
+require_once '/var/www/html/stackr.ca/agents/message.php';
+require_once '/var/www/html/stackr.ca/agents/tally.php';
+
+require_once '/var/www/html/stackr.ca/agents/variables.php';
+
+//include_once('/var/www/html/stackr.ca/src/pdf.php'); 
+
+class Latencygraph{
+
+    // So Tallycounter tallies up.  It follows
+    // the uuid chain and calculates the count.
+
+    // If an Agent gives it a command, it will set up the 
+    // parameters of the Tally, which by default are:
+    //   tallycounter / mordok  /  tally@stackr.ca
+    
+    //   tallycounter  <agent> <identity> ie
+    // a tallycounter for mordok for tally@stackr.ca
+
+    // Without an agent instruction, tallycounter
+    // return the calling identities self-count.
+
+    //   tallycounter / thing  /   $this->from
 
 	function __construct(Thing $thing, $agent_command = null) {
 
@@ -25,14 +47,18 @@ class Stackgraph {
         // Setup logging
         $this->thing_report['thing'] = $this->thing->thing;
 
+//Testing
+//$agent_command = "tallycounter binary tally@stackr.ca";
 
         if ($agent_command == null) {
-            $this->thing->log( 'Agent "Stackgraph" did not find an agent command.' );
+            $this->thing->log( 'Agent "Latencygraph" did not find an agent command.' );
         }
 
         $this->agent_command = $agent_command;
 
         $this->nom_input = $agent_command . " " . $this->from . " " . $this->subject;
+//        $this->nom_input = "tally message" . " " . "tally@stackr.ca";
+//      $this->nom_input = "tally message tally@stackr.ca";
 
         $this->ignore_empty = true;
 
@@ -47,31 +73,42 @@ class Stackgraph {
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
 		// I think.
 		// Instead.
 
 
         $this->current_time = $this->thing->json->time();
 
-		$this->node_list = array("stackgraph");
+		$this->node_list = array("latencygraph");
 
 		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>','INFORMATION' );
 
-        $this->getData();
+        // Not sure this is limiting.
+//tally 10000 message tally@stackr.ca
+  
+     //  $this->variables = new Variables($this->thing, "tallycounter_" . $this->name . "_" . $this->identity);
+
+//$this->get();
+//var_dump($this->variable);
+//var_dump($this->name);
+//var_dump($this->next_uuid);
+
+//exit();
+
+
+//        $this->getAgent();
+
+$this->getData();
 
 		$this->Respond();
+
+//        $this->set();
 
         $this->end_time = microtime(true);
         $this->actual_run_time = $this->end_time - $this->start_time;
         $milliseconds = round($this->actual_run_time * 1000);
 
-        $this->thing->log( 'Agent "Stackgraph" ran for ' . $milliseconds . 'ms.', 'OPTIMIZE' );
+        $this->thing->log( 'Agent "Latencygraph" ran for ' . $milliseconds . 'ms.', 'OPTIMIZE' );
 
         $this->thing_report['log'] = $this->thing->log;
 		return;
@@ -118,49 +155,70 @@ class Stackgraph {
 
     function getData() {
 
-        $this->identity = "null" . $this->mail_postfix;
+//        $this->identity = "tally@stackr.ca";
+        $this->identity = "null@stackr.ca";
 
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
-        $thing_report = $this->thing->db->agentSearch("stack", 99);
+        $thing_report = $this->thing->db->agentSearch("latency", 99);
         $things = $thing_report['things'];
-
+//echo "<pre>";
+//var_dump($things);
+//echo "</pre>";
+//exit();
         if ( $things == false  ) {return;}
 
         $this->points = array();
         foreach ($things as $thing) {
             // Check each of the three Things.
-/*
             $this->variables_thing = new Thing($thing['uuid']);
 
             $thing = new Thing($thing['uuid']);
             $thing->json->setField("variables");
 
-            $count = $thing->getVariable("stack", "count");
-            $refreshed_at = strtotime($thing->getVariable("stack", "refreshed_at"));
-*/
+            $run_time = $thing->getVariable("latency", "run_time");
+            $queue_time = $thing->getVariable("latency", "queue_time");
+            $refreshed_at = strtotime($thing->getVariable("latency", "refreshed_at"));
 
-            $variables_json= $thing['variables'];
+            $elapsed_time = $run_time + $queue_time;
+//echo $run_time;
+//exit();
 
-            $variables = $this->thing->json->jsontoArray($variables_json);
+//var_dump($this->variables_thing->variables);
 
-            if (!isset($variables['stack'])) {continue;}
+  //          $created_at = strtotime($thing['created_at']);
 
-            $stack = $variables['stack'];
-            $count = $stack['count'];
-            $refreshed_at = strtotime($stack['refreshed_at']);
+    //        $run_time = $this->variables_thing->run_time;
+//echo $run_time;
 
-            if ((($count == null) or ($count == 0)) and ($this->ignore_empty)) {
+//exit();
+
+            //$variable = $this->getVariable('count');
+            //$name = $this->getVariable('name');
+            //$next_uuid = $this->getVariable('next_uuid');
+
+            if ((($queue_time == null) or ($queue_time == 0)) and ($this->ignore_empty)) {
                 continue;
             }
-
+            if ((($run_time == null) or ($run_time == 0)) and ($this->ignore_empty)) {
+                continue;
+            }
             if ((($refreshed_at == null) or ($refreshed_at == 0)) and ($this->ignore_empty)) {
                 continue;
             }
 
 
-            $this->points[] = array("refreshed_at"=>$refreshed_at, "series_0"=>$count, "series_1"=>null);
+
+
+
+            $this->points[] = array("refreshed_at"=>$refreshed_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
         }
+
+//echo "<pre>";
+//var_dump($this->points);
+//echo "</pre>";
+//exit();
+
 
     }
 
@@ -192,7 +250,7 @@ return;
         // which should be enough.  One should be enough.
         // But this just provides some resiliency.
 
-        $this->thing->log( 'Agent "Stackgraph" requested the variables.' ,'DEBUG');
+        $this->thing->log( 'Agent "Tallycounter" requested the variables.' ,'DEBUG');
 
 
         // We will probably want a getThings at some point.
@@ -208,7 +266,7 @@ return;
 
             
 
-        $this->thing->log( 'Agent "Stackgraph" got ' . count($things) . ' recent Tally Things.', 'INFORMATION' );
+        $this->thing->log( 'Agent "Tallycounter" got ' . count($things) . ' recent Tally Things.', 'INFORMATION' );
 
         $this->counter_uuids = array();
 
@@ -254,6 +312,7 @@ return;
                 //$name = $this->getVariable('name');
                 $next_uuid = $this->getVariable('next_uuid');
 
+
                 if ($name == $match_uuid)  {
 
                     $this->counter_uuids[] = $uuid;
@@ -279,7 +338,7 @@ return;
 
 	function startVariables() 
     {
-        $this->thing->log( 'Agent "Stackgraph" started a count.' );
+        $this->thing->log( 'Agent "Tallycounter" started a count.' );
 
         if (!isset($this->variables_thing)) { $this->variables_thing = $this->thing;}
 
@@ -374,7 +433,7 @@ $this->variables_agent = "tallycounter";
 
 //        $this->thing->log( 'Agent "Tallycounter" variable is ' . $this->variables_thing->variable . '.' );
 
-		$this->sms_message = "STACK GRAPH  | " . $this->web_prefix . "stackgraph/" . $this->uuid;
+		$this->sms_message = "LATENCY GRAPH  | https://stackr.ca/latencygraph/" . $this->uuid;
 
   //      $this->sms_message .= " | " . $this->display;
   //      $this->sms_message .= " | " . $this->name;
@@ -409,14 +468,14 @@ $this->variables_agent = "tallycounter";
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
 
-        $series_0 = $this->points[0]['series_0'];
-        $series_1 = $this->points[0]['series_1'];
+        $run_time = $this->points[0]['run_time'];
+        $queue_time = $this->points[0]['queue_time'];
 
         $refreshed_at = $this->points[0]['refreshed_at'];
 
         // Get min and max
-        if (!isset($y_min)) { $y_min = $series_0 + $series_1; }
-        if (!isset($y_max)) {$y_max = $series_0 + $series_1;}
+        if (!isset($y_min)) { $y_min = $run_time + $queue_time; }
+        if (!isset($y_max)) {$y_max = $run_time + $queue_time;}
 
         if (!isset($x_min)) { $x_min = $refreshed_at; }
         if (!isset($x_max)) { $x_max = $refreshed_at; }
@@ -424,18 +483,17 @@ $this->variables_agent = "tallycounter";
         $i = 0;
         foreach ($this->points as $point) {
 
-            $series_0 = $point['series_0'];
-            $series_1 = $point['series_1'];
+            $run_time = $point['run_time'];
+            $queue_time = $point['queue_time'];
+            $elapsed_time = $run_time + $queue_time;
+                    $refreshed_at = $point['refreshed_at'];
 
-            $combined_series = $series_0 + $series_1;
-            $refreshed_at = $point['refreshed_at'];
-
-            if (($combined_series == null) or ($combined_series == 0 )) {
+            if (($elapsed_time == null) or ($elapsed_time == 0 )) {
                 continue;
             }
 
-            if ($combined_series < $y_min) {$y_min = $combined_series;}
-            if ($combined_series > $y_max) {$y_max = $combined_series;}
+            if ($elapsed_time < $y_min) {$y_min = $elapsed_time;}
+            if ($elapsed_time > $y_max) {$y_max = $elapsed_time;}
 
             if ($refreshed_at < $x_min) {$x_min = $refreshed_at;}
             if ($refreshed_at > $x_max) {$x_max = $refreshed_at;}
@@ -444,6 +502,8 @@ $this->variables_agent = "tallycounter";
         }
 
       $x_max = strtotime($this->current_time);
+//var_dump($x_max);
+//exit();
       $i = 0;
 
         foreach ($this->points as $point) {
@@ -452,16 +512,22 @@ $this->variables_agent = "tallycounter";
      //           continue;
      //       }
 
-            $series_0 = $point['series_0'];
-            $series_1 = $point['series_1'];
-            $combined_series = $series_0 + $series_1;
+            $run_time = $point['run_time'];
+            $queue_time = $point['queue_time'];
+            $elapsed_time = $run_time + $queue_time;
             $refreshed_at = $point['refreshed_at'];
 
+//echo $refreshed_at;
+//echo "<br>";
+
+//var_dump($this->chart_height);
+//var_dump($y_max);
+//var_dump($y_min);
 
 $y_spread = $y_max - $y_min;
 if ($y_spread == 0) {$y_spread = 100;}
-
-            $y = 10 + $this->chart_height - ($combined_series - $y_min) / ($y_spread) * $this->chart_height;
+        //    var_dump($point);
+            $y = 10 + $this->chart_height - ($elapsed_time - $y_min) / ($y_spread) * $this->chart_height;
             $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
 
 if (!isset($x_old)) {$x_old = $x;}
@@ -522,7 +588,7 @@ if (!isset($y_old)) {$y_old = $y;}
             $i += 1;
 //if ($i = 10) {break;}
         }
-$allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500);
+$allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
 $inc = ($y_max - $y_min)/ 5;
 //echo "inc" . $inc . "\n";
 $closest_distance = $y_max;
@@ -569,10 +635,8 @@ if ($y_spread == 0) {$y_spread = 100;}
                     $this->black);
 
 
-$font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
-
-
-$text = number_format( $y);
+$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
+$text = $y;
 // Add some shadow to the text
 //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
@@ -634,9 +698,7 @@ function roundUpToAny($n,$x=5) {
         $radius = 1.165 * (125 - 2 * $border) / 3;
 
 
-//$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
-$font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
-
+$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
 $text = "test";
 // Add some shadow to the text
 //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -666,7 +728,7 @@ $pad = 0;
         $this->thing_report['png'] = $imagedata;
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="stackgraph"/>';
+        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="latencygraph"/>';
         $this->image_embedded = $response;
 
         imagedestroy($this->image);
@@ -685,7 +747,7 @@ $pad = 0;
     function makeWeb()
     {
 
-        $link = $this->web_prefix . 'stackgraph/' . $this->uuid . '/agent';
+        $link = 'https://stackr.ca/latencygraph/' . $this->uuid . '/agent';
 
 $head= '
 <td>
@@ -700,12 +762,23 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
         $web = '<a href="' . $link . '">';
         $web .= $this->image_embedded;
+        //$web .= '<img src= "https://stackr.ca/thing/' . $this->uuid . '/latencygraph.png">';
         $web .= "</a>";
         $web .= "<br>";
 
-        $web .= "stack graph";
+//        $web .= $this->sms_message;
+//        $web .= "<br>";
+
+//var_dump($this->points[0]);
+    //$arr = $this->points;
+//        $tally =  $this->points[0]['variable'];
+        $web .= "latency graph";
 
         $web .= "<br><br>";
+        //$web .= $head;
+
+        //$web .= $this->choices['button'];
+        //$web .= $foot;
 
         $this->thing_report['web'] = $web;
 

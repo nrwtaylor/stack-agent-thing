@@ -161,7 +161,6 @@ class Uuid
 		//$this->thing_report['thing'] = $this->thing->thing;
 
         $this->makeWeb();
-
 		return;
 	}
 
@@ -226,7 +225,9 @@ class Uuid
 
     public function makePNG()
     {
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
+        if (isset($this->PNG)) {return;}
+        //if (headers_sent()) {return;}  
+      // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
 
         $codeText = $this->web_prefix . "thing/".$this->uuid;
 
@@ -234,20 +235,30 @@ class Uuid
         if (ob_get_contents()) ob_clean();
 
         ob_start();
+        QR_Code::png($codeText,false,QR_ECLEVEL_Q,4); 
 
+        $image = ob_get_contents();
 
+        ob_clean();
+        ob_end_clean();
 
-                QR_Code::png($codeText,false,QR_ECLEVEL_Q,4); 
+//header_remove();
 
-                $image = ob_get_contents();
+/*
+echo "meep";
+header_remove();
+        if (ob_get_contents()) ob_clean();
 
+        ob_start();
+QR_Code::png('Hello World');
 
-
+//        imagepng($image);
+        $image = ob_get_contents();
+        ob_clean();
+*/
 //header('Content-Type: image/png');
 //echo $image;
 //exit();
-
-		ob_clean();
 
 
 
@@ -268,15 +279,5 @@ $this->thing_report['png'] = $image;
 
                 return $this->thing_report['png'];
                 }
-
 }
-
-
-
-
-
-
-
-
-
 ?>

@@ -7,16 +7,14 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Flag 
+class Flag
 {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
-
-        $this->start_time = microtime(true);
-
-
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->start_time = $thing->elapsed_runtime();
 
         //if ($agent_input == null) {$agent_input = "";}
 
@@ -28,8 +26,7 @@ class Flag
         $this->thing_report['thing'] = $this->thing->thing;
         $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . ".", "INFORMATION");
 
-
-        $this->start_time = $this->thing->elapsed_runtime();
+        // $this->start_time = $this->thing->elapsed_runtime();
 
         $this->test= "Development code"; // Always
 
@@ -53,7 +50,7 @@ class Flag
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get the current Identities flag
         $this->flag = new Variables($this->thing, "variables flag " . $this->from);

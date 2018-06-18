@@ -286,15 +286,18 @@ class Headcode
 
             $uuid = $thing_object['uuid'];
 
-            $thing= new Thing($uuid);
-            $variables = $thing->account['stack']->json->array_data;
+//            $thing= new Thing($uuid);
+//            $variables = $thing->account['stack']->json->array_data;
 
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['headcode'])) {
                 $head_code = $variables['headcode']['head_code'];
                 $variables['headcode'][] = $thing_object['task'];
                 $this->headcode_list[] = $variables['headcode'];
             }
+
         }
 
         return $this->headcode_list;

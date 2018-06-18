@@ -16,7 +16,9 @@ $worker->addServer();
 $uuid = null;
 $worker->addFunction("call_agent", "Nrwtaylor\StackAgentThing\call_agent_function", $uuid);
 
-while ($worker->work());
+while ($worker->work()){
+    echo "\nWaiting for a job\n";
+}
 
 function call_agent_function($job)
 {
@@ -35,9 +37,13 @@ function call_agent_function($job)
     }
 
     echo "worker timestamp " . $thing->microtime(). "\n";
+    echo "job timestamp " . $thing->thing->created_at. "\n";
+
     //$thing = new Thing($uuid);
     echo "worker call agent\n";
     $t = new Agent($thing);
+
+    echo $t->thing_report['sms'] . "\n";
 
     echo "worker ran for " . number_format($thing->elapsed_runtime() - $start_time) . "ms\n\n";
 

@@ -53,9 +53,14 @@ class Json {
 		return;
 	}
 
+    function __call($method, $args) {
+        return "meep";
+        //return $this->array_data;
+    } 
+
     function __destruct() {
-return;
-echo "<pre>";
+        return;
+        echo "<pre>";
 
 //echo $this->field;
 //echo $this->json_data;
@@ -130,6 +135,10 @@ echo "</pre>";
     function setArray(Array $array_data)
     {
         $this->array_data = $array_data;
+
+        foreach($array_data as $key=>$value) {
+            $this->{$key} = $value;
+        }
         $this->arraytoJson();
         $this->write();
         return;
@@ -156,10 +165,20 @@ echo "</pre>";
 //		return;
 //		}
 
-   	function jsontoArray()
+   	function jsontoArray($json_data = null)
     {
-		$this->array_data = json_decode($this->json_data, true);
-        return;
+        if ($json_data == null) {$json_data = $this->json_data;}
+
+		$array_data = json_decode($json_data, true);
+
+        if ($array_data == false) {return;}
+        foreach($array_data as $key=>$value) {
+            $this->{$key} = $value;
+        }
+
+        $this->array_data = $array_data;
+
+        return $array_data;
     }
 
    	function arraytoJson()
@@ -215,7 +234,8 @@ echo "</pre>";
 		return;
     }
 
-	function fallingWater($value) {
+	function fallingWater($value)
+    {
 		// Drop N items off end of queue until less than max_chars.
 
 		// First push onto the left.
@@ -227,9 +247,8 @@ echo "</pre>";
 			//echo strlen($this->json_data);
 			$this->popStream();
 		}
-
 		return;
-		}
+	}
 
 
    	function pushStream($value, $pos = -1) {

@@ -1,23 +1,10 @@
 <?php
-namespace Nrwtaylor\Stackr;
+namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-
-
-//require_once('/var/www/html/stackr.ca/lib/fpdf.php');
-//require_once('/var/www/html/stackr.ca/lib/fpdi.php');
-
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-//require_once '/var/www/html/stackr.ca/agents/tally.php';
-
-//require_once '/var/www/html/stackr.ca/agents/variables.php';
-
-//include_once('/var/www/html/stackr.ca/src/pdf.php'); 
-
-
-class Tallycounter{
-
+class Tallycounter
+{
     // So Tallycounter tallies up.  It follows
     // the uuid chain and calculates the count.
 
@@ -33,8 +20,8 @@ class Tallycounter{
 
     //   tallycounter / thing  /   $this->from
 
-	function __construct(Thing $thing, $agent_command = null) {
-
+	function __construct(Thing $thing, $agent_command = null)
+    {
         $this->start_time = microtime(true);
 
         // Setup Thing
@@ -141,11 +128,9 @@ class Tallycounter{
             "display"),  $this->display
             );
 
-
         $this->thing->json->writeVariable(array("tallycounter",
             "refreshed_at"),  $this->thing->json->time()
             );
-
 
   //      $this->variables->setVariable("count", $this->count);
 

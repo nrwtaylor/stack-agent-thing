@@ -449,15 +449,17 @@ $c['errorHandler'] = function ($c) {
         return $thingreport;
 	}
 
-	function agentSearch($agent, $max = null){
+    function agentSearch($agent, $max = null)
+    {
 
         if ($max == null) {$max = 3;}
         $max = (int) $max;
 
 		$user_search = $this->from;
-        $user_search= "%$user_search%"; // Value to search for in Variables
+        //$user_search= "%$user_search%"; // Value to search for in Variables
 
-        $query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+        //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+        $query = "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
 		$sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -469,7 +471,7 @@ $c['errorHandler'] = function ($c) {
 
 		$thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.','help' => 'It is up to you what you do with these.', 'whatisthis' => 'A list of Things which match at the provided phrase.');
 		return $thingreport;
-		}
+	}
 
 /*
     // add bindparam
@@ -1011,6 +1013,11 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 
         //ob_clean();
         echo "BORK | e5ffb5de-a502-466e-8ecc-f0ec9f861e0d";
+        //echo $errno . "\n";
+        //echo $errstr . "\n";
+        //echo $errfile . "\n";
+        //echo $errline . "\n";
+
         //echo "'caught' fatal E_ERROR | BOUNTY\n";
         $actual_link = "meep";
         // For debugging.
@@ -1031,7 +1038,7 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 function fatalErrorShutdownHandler()
 {
     // This displays on each uuid end-point
-   // echo "#test test test global notification";
+    // echo "#test test test global notification";
     //exit(); // will not stop display of full Stackr response
 
     $last_error = error_get_last();

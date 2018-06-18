@@ -11,7 +11,6 @@ class Tick
 {
     function __construct(Thing $thing, $agent_input = null)
     {
-
         //echo "Not ticking";
         //exit();
 
@@ -50,8 +49,7 @@ class Tick
         $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
         $this->value_destroyed = 0;
-        $this->things_destroyed =0;
-
+        $this->things_destroyed = 0;
 
         $this->stack_idle_mode = 'use'; // Prevents stack generated execution when idle.
         $this->cron_period = $this->thing->container['stack']['cron_period'];
@@ -59,14 +57,40 @@ class Tick
 
         $this->readSubject();
 
-                $arr = json_encode(array("to"=>"test", "from"=>"latency", "subject"=>"s/ latency"));
+/*
+        if (rand(1,20) == 1) {
+
+        $this->thing->log($this->agent_prefix . "called Tallycounter.");
+
+        $t = new Thing(null);
+        $t->Create(null,"tallycounter", 's/ tallycounter message');
+        //require_once '/var/www/html/stackr.ca/agents/tallycounter.php';
+        $tallycounter_thing = new Tallycounter($t, 'tallycounter message tally@stackr.ca');
+        }
+*/
+/*
+        $to = "tallycounter";
+        $from = null;
+        $subject = "s/ tallycounter message";
+
+            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>$subject));
+
+            $client= new GearmanClient();
+            $client->addServer();
+            //$client->doNormal("call_agent", $arr);
+            $client->doLowBackground("call_agent", $arr);
+*/
+
+
+                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"latency", "subject"=>"s/ latency"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
 
-                $arr = json_encode(array("to"=>"test", "from"=>"damage", "subject"=>"s/ damage"));
+
+                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
@@ -74,7 +98,39 @@ class Tick
                 $client->doLowBackground("call_agent", $arr);
 
 
-//        $latency_agent = new Latency($this->thing,"latency");
+                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"stack", "subject"=>"s/ stack"));
+
+                $client= new \GearmanClient();
+                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
+
+/*
+                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"uuid", "subject"=>"s/ uuid"));
+
+                $client= new \GearmanClient();
+                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
+*/
+/*
+                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"snow", "subject"=>"s/ snow"));
+
+                $client= new \GearmanClient();
+                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
+*/
+
+/*
+                //        $tallycounter_thing = new Tallycounter($t, 'tallycounter message tally@stackr.ca');
+                $arr = json_encode(array("to"=>"tally@stackr.ca", "from"=>"tallycounter", "subject"=>"s/ tallycounter message"));
+
+                $client= new \GearmanClient();
+                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
+*/
 
         //$this->doTick();
 

@@ -3,13 +3,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-class Latencygraph{
-
+class Latencygraph
+{
     // Latencygraph shows the stack latency history.
 
-	function __construct(Thing $thing, $agent_command = null) {
-
-        $this->start_time = microtime(true);
+	function __construct(Thing $thing, $agent_command = null)
+    {
+        $this->start_time = $thing->elapsed_runtime();
 
         // Setup Thing
         $this->thing = $thing;
@@ -63,15 +63,15 @@ class Latencygraph{
 
 		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>','INFORMATION' );
 
+        //$split_time = $this->thing->elapsed_runtime();
         $this->getData();
+        //$this->thing->log('Agent "Latencygraph" getData ran for ' . number_format($this->thing->elapsed_runtime()- $split_time)."ms.", "OPTIMIZE");
 
-		$this->Respond();
+        if ($agent_command == null) {
+		    $this->Respond();
+        }
 
-        $this->end_time = microtime(true);
-        $this->actual_run_time = $this->end_time - $this->start_time;
-        $milliseconds = round($this->actual_run_time * 1000);
-
-        $this->thing->log( 'Agent "Latencygraph" ran for ' . $milliseconds . 'ms.', 'OPTIMIZE' );
+        $this->thing->log('Agent "Latencygraph" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
 
         $this->thing_report['log'] = $this->thing->log;
 		return;
@@ -86,64 +86,56 @@ class Latencygraph{
 
         $this->thing->json->setField("variables");
 
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "count"),  $this->count
-//            );
-
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "display"),  $this->display
-//            );
-
-
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "refreshed_at"),  $this->thing->json->time()
-//            );
-
-
-  //      $this->variables->setVariable("count", $this->count);
-
-    //    $this->variables->setVariable("display", $this->display);
-
-      //  $this->variables->setVariable("refreshed_at", $this->current_time);
-
 
         return;
     }
 
-
+/*
     function get()
     {
         return;
     }
-
-    function getData() {
+*/
+    function getData()
+    {
+        $split_time = $this->thing->elapsed_runtime();
 
         $this->identity = "null" . $this->mail_postfix;
-
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
         $thing_report = $this->thing->db->agentSearch("latency", 99);
+
         $things = $thing_report['things'];
 
         if ( $things == false  ) {return;}
 
         $this->points = array();
         foreach ($things as $thing) {
+
+            $variables_json= $thing['variables'];
+
+            $variables = $this->thing->json->jsontoArray($variables_json);
+
+            if (!isset($variables['latency'])) {continue;}
+
+            $latency = $variables['latency'];
+
             // Check each of the three Things.
-            $this->variables_thing = new Thing($thing['uuid']);
+            //$this->variables_thing = new Thing($thing['uuid']);
 
-            $thing = new Thing($thing['uuid']);
-            $thing->json->setField("variables");
+            //$thing = new Thing($thing['uuid']);
+            //$thing->json->setField("variables");
 
-            $run_time = $thing->getVariable("latency", "run_time");
-            $queue_time = $thing->getVariable("latency", "queue_time");
-            $refreshed_at = strtotime($thing->getVariable("latency", "refreshed_at"));
+            //$run_time = $thing->getVariable("latency", "run_time");
+            //$queue_time = $thing->getVariable("latency", "queue_time");
+            //$refreshed_at = strtotime($thing->getVariable("latency", "refreshed_at"));
+
+
+            $run_time = $latency['run_time'];
+            $queue_time = $latency['queue_time'];
+            $refreshed_at = strtotime($latency['refreshed_at']);
 
             $elapsed_time = $run_time + $queue_time;
-
-            //$variable = $this->getVariable('count');
-            //$name = $this->getVariable('name');
-            //$next_uuid = $this->getVariable('next_uuid');
 
             if ((($queue_time == null) or ($queue_time == 0)) and ($this->ignore_empty)) {
                 continue;
@@ -155,28 +147,21 @@ class Latencygraph{
                 continue;
             }
 
-
-
-
-
             $this->points[] = array("refreshed_at"=>$refreshed_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
         }
 
+        $this->thing->log('Agent "Latencygraph" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
 
     }
-
-
-
-    function getAgent() 
+/*
+    function getAgent()
     {
-        // Tallycounter
-//        $this->getTallycounter();
-
         return;
     }
-
+*/
+/*
 	function getVariables($agent = null) {
-return;
+        return;
         if ($agent == null) {
             $agent = $this->agent;
         }
@@ -276,9 +261,9 @@ return;
         return;
 	}
 
+*/
 
-
-
+/*
 	function startVariables() 
     {
         $this->thing->log( 'Agent "Tallycounter" started a count.' );
@@ -287,16 +272,11 @@ return;
 
         $this->setVariable("variable", 0);
         $this->setVariable("name", $this->name);
-//exit();
-
-//        $thing = new Thing(null);
-//        $this->setVariable("next_uuid", $thing->uuid);
-
 
 		return;
 	}
-
-
+*/
+/*
     function getVariable($variable = null) {
 
         // Pulls variable from the database
@@ -331,7 +311,8 @@ $this->variables_agent = "tallycounter";
 
         return $this->variables_thing->$variable;
     }
-
+*/
+/*
     function setVariable($variable = null, $value) 
     {
 
@@ -360,7 +341,7 @@ $this->variables_agent = "tallycounter";
         return $this->variables_thing->$variable;
     }
 
-
+*/
 
 
 
@@ -372,22 +353,17 @@ $this->variables_agent = "tallycounter";
 		// Because we are making a decision and moving on.  This Thing
 		// can be left alone until called on next.
 		$this->thing->flagGreen(); 
-
-
-//        $this->thing->log( 'Agent "Tallycounter" variable is ' . $this->variables_thing->variable . '.' );
-
+/*
 		$this->sms_message = "LATENCY GRAPH  | " . $this->web_prefix . "latencygraph/" . $this->uuid;
-
-  //      $this->sms_message .= " | " . $this->display;
-  //      $this->sms_message .= " | " . $this->name;
 
         if (isset($this->function_message)) {
             $this->sms_message .= " | " . $this->function_message;
         }
 		$this->sms_message .= ' | TEXT ?';
-
+*/
+        $this->makeSMS();
 		$this->thing_report['thing'] = $this->thing->thing;
-		$this->thing_report['sms'] = $this->sms_message;
+//		$this->thing_report['sms'] = $this->sms_message;
 
         $this->makePNG();
 
@@ -402,11 +378,23 @@ $this->variables_agent = "tallycounter";
 		return $this->thing_report;
 	}
 
+    function makeSMS()
+    {
+        $this->sms_message = "LATENCY GRAPH  | " . $this->web_prefix . "latencygraph/" . $this->uuid;
+
+        if (isset($this->function_message)) {
+            $this->sms_message .= " | " . $this->function_message;
+        }
+        $this->sms_message .= ' | TEXT ?';
+
+        $this->thing_report['sms'] = $this->sms_message;
+    }
+
+
     function drawGraph() {
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
-
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -444,57 +432,28 @@ $this->variables_agent = "tallycounter";
             $i += 1;
         }
 
-      $x_max = strtotime($this->current_time);
+        $x_max = strtotime($this->current_time);
 
-      $i = 0;
+        $i = 0;
 
         foreach ($this->points as $point) {
-
-     //       if (($point['variable'] == null) or ($point['variable'] == 0)) {
-     //           continue;
-     //       }
 
             $run_time = $point['run_time'];
             $queue_time = $point['queue_time'];
             $elapsed_time = $run_time + $queue_time;
             $refreshed_at = $point['refreshed_at'];
 
-$y_spread = $y_max - $y_min;
-if ($y_spread == 0) {$y_spread = 100;}
+            $y_spread = $y_max - $y_min;
+            if ($y_spread == 0) {$y_spread = 100;}
 
             $y = 10 + $this->chart_height - ($elapsed_time - $y_min) / ($y_spread) * $this->chart_height;
             $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
 
-if (!isset($x_old)) {$x_old = $x;}
-if (!isset($y_old)) {$y_old = $y;}
+            if (!isset($x_old)) {$x_old = $x;}
+            if (!isset($y_old)) {$y_old = $y;}
 
-
-//echo $x . " " . $y; 
-//echo "<br>";
-
-//            imagefilledrectangle($this->image,
-//                    $i * $column_width, $this->height,
-//                    $i * $column_width + $column_width, $p,
-//                    $this->black);
-/*
-            imagefilledrectangle($this->image,
-                    $i * $column_width, 200,
-                    $i * $column_width + $column_width, $y,
-                    $this->black);
-
-            imagerectangle($this->image,
-                    $i * $column_width, 200,
-                    $i * $column_width + $column_width, $y,
-                    $this->white);
-*/
-
-        //foreach(range(-1,1,1) as $key=>$offset) {
+            // +1 to overlap bars
             $width = $x - $x_old;
-
-//            imageline($this->image,
-//                    $x_old + $offset , $y_old + $offset,
-//                    $x, $y,
-//                    $this->green);
 
             $offset = 1.5;
 
@@ -514,32 +473,25 @@ if (!isset($y_old)) {$y_old = $y;}
                     $this->red);
 
 
-
-        //}
-
             $y_old = $y;
             $x_old = $x;
 
             $i += 1;
-//if ($i = 10) {break;}
         }
-$allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
-$inc = ($y_max - $y_min)/ 5;
-//echo "inc" . $inc . "\n";
-$closest_distance = $y_max;
-foreach ($allowed_steps as $key=>$step) {
 
-    $distance = abs($inc - $step);
-//echo $distance . "\n";
-    if ($distance < $closest_distance) {
-         $closest_distance = $distance;
-         $preferred_step = $step;
-    }
-}
-//echo $closest_distance;
-//echo "<br>";
-//$inc = $closest_distance;
+        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
+        $inc = ($y_max - $y_min)/ 5;
 
+        $closest_distance = $y_max;
+
+        foreach ($allowed_steps as $key=>$step) {
+
+            $distance = abs($inc - $step);
+            if ($distance < $closest_distance) {
+                $closest_distance = $distance;
+                $preferred_step = $step;
+            }
+        }
 
         $this->drawGrid($y_min, $y_max, $preferred_step);
     }
@@ -552,66 +504,45 @@ foreach ($allowed_steps as $key=>$step) {
         //echo $y . " ". $y_max;
         //exit();
         while ($y <= $y_max) {
-            //    echo $i++;  /* the printed value would be
-            //                   $i before the increment
-            //                   (post-increment) */
-
-//echo $y;
-//exit();
-$y_spread = $y_max - $y_min;
-if ($y_spread == 0) {$y_spread = 100;}
+            $y_spread = $y_max - $y_min;
+            if ($y_spread == 0) {$y_spread = 100;}
 
             $plot_y = 10 + $this->chart_height - ($y - $y_min) / $y_spread * $this->chart_height;
 
 
-                imageline($this->image,
-                    10 , $plot_y,
-                    300-10, $plot_y,
-                    $this->black);
+            imageline($this->image,
+                10 , $plot_y,
+                300-10, $plot_y,
+                $this->black);
 
+            $font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
 
-$font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+            $text = $y;
 
-$text = $y;
-// Add some shadow to the text
-//imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+            $size = 6;
+            $angle = 0;
+            $pad = 0;
 
-$size = 6;
-$angle = 0;
-//$bbox = imagettfbbox ($size, $angle, $font, $text); 
-//$bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-//$bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-//$bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-//$bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-//extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-//check width of the image 
-//$width = imagesx($this->image); 
-//$height = imagesy($this->image);
-$pad = 0;
+            imagettftext($this->image, $size, $angle, 10, $plot_y-1, $this->grey, $font, $text);
 
-imagettftext($this->image, $size, $angle, 10, $plot_y-1, $this->grey, $font, $text);
-
-
-
-    $y = $y + $inc;
-}
-
-
+            $y = $y + $inc;
+        }
     }
 
-function roundUpToAny($n,$x=5) {
-    return round(($n+$x/2)/$x)*$x;
-}
+    function roundUpToAny($n,$x=5)
+    {
+        return round(($n+$x/2)/$x)*$x;
+    }
 
-    private function drawBar() {
-
+    private function drawBar()
+    {
 
     }
 
     public function makePNG()
     {
-    //    $this->height = 200;
-    //    $this->width = 300;
+        //    $this->height = 200;
+        //    $this->width = 300;
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
@@ -625,36 +556,31 @@ function roundUpToAny($n,$x=5) {
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
-
-
         $this->drawGraph();
 
         // Write the string at the top left
         $border = 30;
         $radius = 1.165 * (125 - 2 * $border) / 3;
 
+        $font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
 
-$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
-$text = "test";
-// Add some shadow to the text
-//imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+        $text = "test";
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
-$size = 72;
-$angle = 0;
-$bbox = imagettfbbox ($size, $angle, $font, $text); 
-$bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-$bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-//check width of the image 
-$width = imagesx($this->image); 
-$height = imagesy($this->image);
-$pad = 0;
-//imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
+        $size = 72;
+        $angle = 0;
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+            extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
 
-
-//     imagestring($this->image, 2, 100, 0, $this->thing->nuuid, $textcolor);
+        //check width of the image 
+        $width = imagesx($this->image); 
+        $height = imagesy($this->image);
+        $pad = 0;
 
         ob_start();
         imagepng($this->image);
@@ -671,30 +597,26 @@ $pad = 0;
 
         return $response;
 
+//        $this->PNG = $image;
+//        $this->thing_report['png'] = $image;
 
-
-        $this->PNG = $image;    
-        $this->thing_report['png'] = $image;
- 
-       return;
+//       return;
     }
-
 
     function makeWeb()
     {
 
         $link = $this->web_prefix . 'latencygraph/' . $this->uuid . '/agent';
 
-$head= '
-<td>
-<table border="0" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-bottom:0; border-radius:10px">
-<tr>
-<td align="center" valign="top">
-<div padding: 5px; text-align: center">';
+        $head= '
+            <td>
+            <table border="0" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-bottom:0; border-radius:10px">
+            <tr>
+            <td align="center" valign="top">
+            <div padding: 5px; text-align: center">';
 
 
-$foot = "</td></div></td></tr></tbody></table></td></tr>";
-
+        $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
         $web = '<a href="' . $link . '">';
         $web .= $this->image_embedded;
@@ -704,28 +626,19 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $web .= "latency graph";
 
         $web .= "<br><br>";
-        //$web .= $head;
-
-        //$web .= $this->choices['button'];
-        //$web .= $foot;
 
         $this->thing_report['web'] = $web;
-
     }
 
-
-
-    public function defaultCommand() 
+    public function defaultCommand()
     {
-        $this->agent = "tallycounter";
-        //$this->limit = 5;
+        $this->agent = "latencygraph";
         $this->name = "thing";
         $this->identity = $this->from;
         return;
     }
 
-
-    public function readInstruction() 
+    public function readInstruction()
     {
         if($this->agent_command == null) {
             $this->defaultCommand();
@@ -738,9 +651,6 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $this->name = $pieces[1];
         $this->identity = $pieces[2];
 
-
-//        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agent . ' ' . $this->limit . ' ' . $this->name . ' ' . $this->identity . "." );
-
         return;
 
     }
@@ -749,7 +659,6 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
     {
         // No need to read text.  Any identity input to Tally
         // increments the tally.
-     
         return;
 	}
 
@@ -759,8 +668,6 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $this->readText();
         return;
     }
-
-
 }
 
 ?>

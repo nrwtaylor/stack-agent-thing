@@ -47,6 +47,9 @@ class Bork {
 		$this->thing->log( 'Agent "Bork" running on Thing ' . $this->thing->nuuid . '' );
 		$this->thing->log( 'Agent "Bork" received this Thing "' . $this->subject . '"');
 
+        $this->thing->log( 'Agent "Bork" received this Agent Input "' . $agent_input . '"');
+
+
         $this->startBork();
 
 
