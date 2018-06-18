@@ -264,6 +264,10 @@ class Train
 
             $thing = new Thing($train_thing['uuid']);
 
+            $variables_json= $train_thing['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
+
+
             $thing->json->setField("variables");
 
             $thing->index = $thing->getVariable("train", "index");

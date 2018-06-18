@@ -295,10 +295,15 @@ class Message {
 			);
 
 
-
+//        $a = explode("\", $this->previous_agent);
+//var_dump($a);
+//exit();
         $this->thing->json->writeVariable(array("message",
             "agent"), $this->previous_agent
             );
+        //$this->thing->json->writeVariable(array("message",
+        //    "agent"), $a[-1]
+        //    );
 
 
 

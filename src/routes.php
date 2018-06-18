@@ -6,6 +6,8 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+
+
 // API group
 $app->group('/api', function () use ($app) {
     // This is the red panda API.  Accessible at api/redpanda/
@@ -355,8 +357,12 @@ echo "Gearman worker called";
                 $t->variables = $thing->json->array_data;
 
                 // Just display the thing.
+
+$web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/";
+//$web_prefix = "";
+
 			    $thingreport = array('thing' => $t, 
-					'info' => 'Turns out Stackr has an imperfect and forgetful memory - ' . $app->web_prefix . 'privacy.',
+					'info' => 'Turns out Stackr has an imperfect and forgetful memory - ' . $web_prefix . 'privacy.',
 					'help' => 'Check your junk/spam folder.',
 					'devstack' => 'Expect false when no record.',
 					'whatisthis'=>'This is the redpanda API thing JSON end-point.');
@@ -401,7 +407,7 @@ echo "Gearman worker called";
                 $thingreport = array('thing' => $thing->thing,
                     'info' => 'This is a GET connector to message Agent.  It does not extract any 
                     other information from the datagram.  And only uses the text in the URI provided.',
-                    'help' => $app->web_prefix . 'api/redpanda/<998 characters>',
+                    'help' => 'api/redpanda/<998 characters>',
                     'whatisthis' => 'This is the API endpoint for submitting a message to Agent.');
 
                 return $this->response->withJson($thingreport);

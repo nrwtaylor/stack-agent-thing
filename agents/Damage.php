@@ -1,16 +1,15 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-//echo "Watson says hi<br>";
 
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-
-class Damage {
-
+class Damage
+{
 	public $var = 'hello';
 
-
-    function __construct(Thing $thing, $text = null) {
-
+    function __construct(Thing $thing, $text = null)
+    {
+        $this->start_time = $thing->elapsed_runtime();
+//echo "meep";
+//exit();
 
 		$this->agent_name = 'damage';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
@@ -21,9 +20,7 @@ class Damage {
 //      This is how old roll.php is.
 //		$thingy = $thing->thing;
 		$this->thing = $thing;
-
-        $this->thing_report  = array("thing"=>$this->thing->thing);
-        $this->start_time = $this->thing->elapsed_runtime();
+        $this->thing_report['thing']  = $thing;
 
 
 
@@ -201,7 +198,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     {
         if ($thing == null) {$thing = $this->getThing();}
 
-        $this->thing->log($this->agent_prefix . "randombly selected a " . $thing->to . " Thing ".  $thing->subject . '".');
+        $this->thing->log($this->agent_prefix . "randomly selected a " . ucwords($thing->to) . ' Thing "'.  $thing->subject . '".');
         $this->thing->log("DEVLOG " . $this->agent_prefix . "associated with ID " . $thing->from .  '".');
 
         if ( $thing->isRed() ) {
@@ -313,8 +310,11 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             $thing = $this->getThing();
             $destroyed = $this->doHit($thing);
 
-$balance = $thing->account['stack']->balance['amount']);
+if (!isset($thing->account['stack']->balance['amount'])) {$balance = null;} else {
 
+
+$balance = $thing->account['stack']->balance['amount'];
+}
 //echo $thing->thing->created_at;
             $this->things[] = array("nuuid"=>$thing->nuuid,"balance"=> $balance,
                  "destroyed"=>$destroyed,

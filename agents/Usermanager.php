@@ -12,7 +12,7 @@ class Usermanager
 
 		$this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
 
 		$this->agent_name = 'usermanager';
         $this->agent_prefix = 'Agent "Usermanager"';
@@ -46,18 +46,21 @@ class Usermanager
         $this->subject = $thing->subject;
 		//$this->sqlresponse = null;
 
-        $this->thing_report['thing'] = $this->thing->thing;
-
 		$this->node_list = array("start"=>array("new user"=>array("opt-in"=>
 			array("opt-out"=>array("opt-in","delete")))));
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
 		$this->thing->log( 'Agent "Usermanager" running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
 
+        // 279ms 303ms 306ms
+        $split_time = $this->thing->elapsed_runtime();
         $this->variables_agent = new Variables($this->thing, "variables usermanager " . $this->from);
+        $this->thing->log( $this->agent_prefix .' created variables agent in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.', "OPTIMIZE" );
 
+        //4ms 4ms 3ms
         $this->get();
+
         if ($this->agent_input != null) {
             $this->readInstruction();
 	    } else {
@@ -73,15 +76,12 @@ class Usermanager
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
 
-
-
 		return;
 	}
 
     function readInstruction()
     {
-        $this->thing->log( $this->agent_prefix .'read instruction "' . $this->agent_input.'".', "INFORMATION" );
-
+        $this->thing->log( $this->agent_prefix .' read instruction "' . $this->agent_input.'".', "INFORMATION" );
 
         if ($this->agent_input == "usermanager optin") {
             $this->previous_state = $this->state;
@@ -119,10 +119,8 @@ class Usermanager
             $this->state = "stop";
         }
 
-
         if ($this->agent_input == "usermanager") {
             $this->previous_state = $this->state;
-            //$this->state = "delete";
         }
     }
 
@@ -193,20 +191,15 @@ class Usermanager
                 break;
         }
 
-        
         $sms .= " counter " .$this->counter;
-
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
         return;
-
-
     }
 
 	public function setSignals()
     {
-
 		// Develop the various messages for each channel.
 
 		$this->thing->flagGreen(); 
@@ -227,8 +220,6 @@ class Usermanager
 
 		return $this->thing_report;
 	}
-
-
 
 	public function getSubject()
     {
@@ -253,9 +244,7 @@ class Usermanager
             $input = strtolower($this->agent_input);
 
         } else {
-
             $input = strtolower($this->to . " " . $this->subject);
-
         }
 
         $keywords = array('usermanager','optin','opt-in','optout','opt-out','start','delete','new');

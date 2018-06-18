@@ -9,8 +9,9 @@ class Stack
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
-
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->start_time = $thing->elapsed_runtime();
         $this->agent_input = $agent_input;
 
         $this->thing = $thing;
@@ -18,16 +19,13 @@ class Stack
 
         $this->agent_prefix = 'Agent "'. ucwords($this->agent_name) . '" ';
 
-        //$this->queue_time = $this->thing->elapsed_runtime();
-        $this->start_time = $this->thing->elapsed_runtime();
+ 		$this->thing_report['thing']  = $thing;
 
-        // $this->start_time = $this->queue_time;
- 		$this->thing_report  = array("thing"=>$this->thing->thing);
-                // So I could call
-                $this->test = false;
-                if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-                // I think.
-                // Instead.
+        // So I could call
+        $this->test = false;
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+        // I think.
+        // Instead.
 
  		$this->uuid = $thing->uuid;
      	$this->to = $thing->to;
@@ -43,28 +41,26 @@ class Stack
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-
         $this->current_time = $this->thing->json->time();
 
         $this->default_state = "off";
-    
+
         $this->countStack();
 
         $this->node_list = array("stack"=>array("agent","thing"), "null"=>array("stack"));
 
-                $this->thing->log('<pre> Agent "Stack" running on Thing ' . $this->thing->nuuid . '.</pre>',"INFORMATION");
+        $this->thing->log('<pre> Agent "Stack" running on Thing ' . $this->thing->nuuid . '.</pre>',"INFORMATION");
 
-                // Probably an unnecessary call, but it updates $this->thing.
-                // And we need the previous usermanager state.
-//var_dump($this->from);
+        // Probably an unnecessary call, but it updates $this->thing.
+        // And we need the previous usermanager state.
         $this->stack = new Variables($this->thing, "variables stack " . $this->from);
 
         $this->get();
 
-        $this->current_state = $this->thing->getState('usermanager');
+//        $this->current_state = $this->thing->getState('usermanager');
 
 		// create container and configure
-		$this->api_key = $this->thing->container['api']['watson'];
+//		$this->api_key = $this->thing->container['api']['watson'];
 
 //        $this->get();
 
@@ -74,23 +70,17 @@ class Stack
 
 		$this->readSubject();
 
-
-
         $this->set();
-        if ($this->agent_input == null) {		
+        if ($this->agent_input == null) {
 		    $this->thing_report = $this->respond();
         }
-
 
   //      $this->set();
 		$this->thing->log('Agent "Stack" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
 
         $this->thing_report['log'] = $this->thing->log;
-
-
 		return;
-
-		}
+    }
 
     function resetStack()
     {
@@ -98,9 +88,9 @@ class Stack
 
     }
 
-   function set($requested_state = null)
+    function set($requested_state = null)
     {
- 
+
         if ($requested_state == null) {
             if (!isset($this->requested_state)) {
                 // Set default behaviour.
@@ -130,10 +120,8 @@ class Stack
 
         $this->thing->log($this->agent_prefix . 'set Stack to ' . $this->state, "INFORMATION");
 
-
         return;
     }
-
 
     function get()
     {
@@ -187,8 +175,6 @@ class Stack
 
 
         return;
-
-
     }
 
     function isStack($state = null)
@@ -210,79 +196,47 @@ class Stack
     function getStart()
     {
 
+        // This returns an uuid
+
         $thing_json = file_get_contents($this->web_prefix . "api/redpanda/start");
         $thing_array = json_decode($thing_json, true);
 
-if ($thing_array == null) {
-    //echo "Thing not found.";
-    return true;
-    // No thing found
-}
-
-//var_dump( $thing_array );
-$this->identity = $thing_array["thing"]["uuid"];
-
-        return;
-
-
-        $start = @file_get_contents($this->web_prefix . "privacy");
-
-        if ($start == false) {
-            $this->state = "red";
-            $this->identity = null;
-            return;
+        if ($thing_array == null) {
+            return true;
+            // No thing found
         }
 
-        $this->state = "green";
-        $a = new Uuid($this->thing, $start);
-
-        $a->extractUuids($start); // Need to improve Uuid agent_input handling
-
-        $this->identity = $a->uuids[1];
-
+        $this->identity = $thing_array["thing"]["uuid"];
+        return;
     }
 
     function getThing()
     {
-
         $this->thing->log("Loading " . $this->identity . " from " . str_replace("@","",$this->mail_postfix) . ".");
+        $url = $this->web_prefix . "api/redpanda/thing/" . $this->identity;
 
-        $thing_json = file_get_contents($this->web_prefix . "api/redpanda/thing/" . $this->identity);
-        $thing_array = json_decode($thing_json, true);
-
-if ($thing_array == null) {
-    echo "Thing not found.";
-    return true;
-    // No thing found
-}
-
-//var_dump( $thing_array );
-$variables_json = $thing_array["thing"]["variables"];
-//$this->variables = json_decode($variables_json,true);
-$this->variables = $variables_json;
-
-$settings_json = $thing_array["thing"]["settings"];
-//var_dump($settings_json);
-//$this->settings = json_decode($variables_json,true);
-$this->settings = $settings_json;
+        $thing_json = file_get_contents($url);
+        $thing_report = $this->thing->json->jsontoArray($thing_json);
 
 
-//var_dump($thing_array["thing"]["variables"]);
-//var_dump($this->variables);
-//echo "meep";
+        if ($thing_report['thing'] == null) {
+            echo "Thing not found.";
+            return true;
+            // No thing found
+        }
+
+        $thing = $thing_report['thing'];
+
+        $this->variables = $thing["variables"];
+        $this->settings = $thing['settings'];
+
         return;
-
+/*
         $this->stack = $thing_array;
 
-        $variables_json = $thing_array['thing']['variables'];
-
-        $this->variables = json_decode($variables_json,true);
-
-//var_dump($this->variables);
-$this->agent = $this->variables['agent'];
-$this->account = $this->variables['account'];
-
-
+        $this->agent = $this->variables['agent'];
+        $this->account = $this->variables['account'];
+*/
 
     }
 
@@ -292,55 +246,35 @@ $this->account = $this->variables['account'];
         $this->agent = $this->variables['agent'];
         $this->account = $this->variables['account'];
 
-
-
     }
-/*
-function printArrayList($array)
-{
-    echo "<ul>";
 
-    foreach($array as $k => $v) {
-        if (is_array($v)) {
-            echo "<li>" . $k . "</li>";
-            $this->printArrayList($v);
-            continue;
+    function printArrayList($array, $h = null, $depth = 0)
+    {
+        if ($array == false) {$h = "No data found."; return $h;}
+
+        $depth = $depth + 1;
+        if ($h = null) {$h = "Start";}
+        $h .= "<ul>";
+        //echo "<ul>";
+
+        foreach($array as $k => $v) {
+            if (is_array($v)) {
+                $h .= "<li>" . $k . "</li>";
+                //echo "<li>" . $k . "</li>";
+                //$depth = $depth + 1;
+                $h .= $this->printArrayList($v, $h, $depth);
+                //$depth = $depth - 1;
+                continue;
+            }
+            if (($v == null) or ($v == false)) {$v= "X";}
+            $h .= "<li>" . $k . " is " .  $v . "</li>";
+            //echo "<li>" . $v . "</li>";
         }
-
-        echo "<li>" . $v . "</li>";
+        $h .= "</ul>";
+        $depth = $depth - 1;
+        return $h;
+        //echo "</ul>";
     }
-
-    echo "</ul>";
-}
-*/
-function printArrayList($array, $h = null, $depth = 0)
-{
-    if ($array == false) {$h = "No data found."; return $h;}
-
-    $depth = $depth + 1;
-    if ($h = null) {$h = "Start";}
-    $h .= "<ul>";
-    //echo "<ul>";
-
-    foreach($array as $k => $v) {
-        if (is_array($v)) {
-            $h .= "<li>" . $k . "</li>";
-            //echo "<li>" . $k . "</li>";
-            //$depth = $depth + 1;
-            $h .= $this->printArrayList($v, $h, $depth);
-            //$depth = $depth - 1;
-            continue;
-        }
-        if (($v == null) or ($v == false)) {$v= "X";}
-        $h .= "<li>" . $k . " is " .  $v . "</li>";
-        //echo "<li>" . $v . "</li>";
-    }
-    $h .= "</ul>";
-    $depth = $depth - 1;
-    return $h;
-    //echo "</ul>";
-}
-
 
     public function makeWeb()
     {
@@ -393,48 +327,7 @@ function printArrayList($array, $h = null, $depth = 0)
             $this->count = $this->countSack();
         }
     }
-/*
-    private function set()
-    {
 
-        $this->current_time = $this->thing->json->time();
-
-        // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("stack", "refreshed_at") );
-
-        if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("stack", "refreshed_at"), $time_string );
-        }
-
-        $this->refreshed_at = strtotime($time_string);
-
-        $this->thing->json->setField("variables");
-        $count = $this->thing->json->readVariable( array("stack", "count") );
-
-        if ($count == false) {
-            $this->getCount();
-
-//            $this->readSubject();
-
-            $this->thing->json->writeVariable( array("stack", "count"), $this->count );
-
-        }
-
-        $this->thing->json->writeVariable( array("stack", "uuid"), $this->stack_uuid );
-
-    }
-*/
-    function getLatency() 
-    {
-//        $this->getQueuetime();
-//        $this->getRuntime();
-//        $this->elapsed_time = $this->queue_time + $this->run_time;
-
-
-    }
 
     function countStack() 
     {
@@ -462,7 +355,7 @@ function printArrayList($array, $h = null, $depth = 0)
 
 		$from = "stack";
 		
-		$subject = 's/pingback '. $this->current_state;	
+		$subject = 's/pingback ';	
 
 		$message = 'Stack checker.';
 
@@ -476,21 +369,16 @@ function printArrayList($array, $h = null, $depth = 0)
         $ago = $this->thing->human_time ( time() - $received_at );
 
         $this->makeChoices();
-
         $this->makeSMS();
 
 		$this->thing_report['email'] = $this->sms_message;
 		$this->thing_report['message'] = $this->sms_message;
 
-		//$this->thing_report['choices'] = false; 
 
+        $message_thing = new Message($this->thing, $this->thing_report);
 
-                $message_thing = new Message($this->thing, $this->thing_report);
-                //$thing_report['info'] = 'SMS sent';
-
-                $this->messageStack($this->response);
-
-                $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        $this->messageStack($this->response);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 		
 
@@ -510,32 +398,28 @@ $this->thing_report['help'] = 'Useful for checking the stack.';
 
     function messageStack($text = null)
     {
-        file_get_contents($this->web_prefix . "api/redpanda/meep");
+        //file_get_contents($this->web_prefix . "api/redpanda/" . $text);
+        file_get_contents($this->web_prefix . "api/redpanda/" . "stack");
+
     }
 
     function makeSMS()
     {
         $this->sms_message = "STACK";
-
         $this->sms_message .= " | count " . number_format($this->count) . " Things";
-        $this->sms_message .= " | identity " . $this->identity;
-
+        if (!isset($this->identity)) {$identity = "X";} else {$identity = $this->identity;}
+        $this->sms_message .= " | identity " . $identity;
         $this->sms_message .= " | TEXT LATENCY";
 
         $this->thing_report['sms'] = $this->sms_message;
-
-
     }
 
-	public function readSubject() {
-
+	public function readSubject()
+    {
 		return;
 
 	}
 
 }
 
-
-
-
-return;
+?>

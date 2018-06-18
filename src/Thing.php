@@ -18,7 +18,7 @@ class Thing
     {
         // Start the clock
         $this->elapsed_runtime();
-
+        $this->log("Thing deserialization started.");
 		// At this point, we are presented a UUID.
 		// Whether or not the record exists is another question.
 
@@ -154,6 +154,10 @@ class Thing
 			// Provide handler for Json translation from/to MySQL.
 			$this->json = new Json($this->uuid);
 
+            $this->variables = new Json($this->uuid);
+            $this->variables->setField("variables");
+
+
 			// Provide handler to support state maps and navigation.
 			// And state persistence through de-instantiation/instantiation.
             $this->choice = new Choice($this->uuid);
@@ -192,6 +196,7 @@ class Thing
 
 //		echo "Stack Balance<br>";
 //		$this->stackBalance($this->uuid);
+        $this->log("Thing instantiation completed.");
 
 		return $this->thing;
 
@@ -199,6 +204,7 @@ class Thing
 
     function __destruct()
     {
+        $this->log("Thing de-instantiated.");
     }
 
 
@@ -562,7 +568,7 @@ $query = true;
 
 //                $thing= new Thing($uuid);
         $variables = $this->account['stack']->json->array_data;
-
+//var_dump($variables);
 
         if (isset($variables[$variable_set])) {
 
