@@ -50,28 +50,9 @@ class Nuuid {
         $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
 
 
-        $this->current_time = $this->thing->json->time();
-
-
-      //  $this->max = 12;
-      //  $this->size = 3.7;
-      //  $this->lattice_size = 15;
-
-      //  $this->init();
+        $this->current_time = $this->thing->time();
 
         $this->thing->log( $this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
-//        $this->flag = new Variables($this->thing, "variables roll " . $this->from);
-
-
-		//echo "construct email responser";
-
-		// If readSubject is true then it has been responded to.
-		// Forget thing.
-
-        // Borrow this from iching
-
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("nuuid", "refreshed_at") );
@@ -82,42 +63,13 @@ class Nuuid {
             $this->thing->json->writeVariable( array("nuuid", "refreshed_at"), $time_string );
         }
 
-
-        //$this->getSnowflake();
-
         $this->readSubject();
 
-//        $this->max = 12;
-//        $this->size = 3.7;
-//        $this->lattice_size = 15;
-
         $this->init();
-
-//        if ((!isset($this->decimal_snowflake)) or 
-//            ($this->decimal_snowflake == null)) {$this->getSnowflake();}
-
-        //$this->initSnowflake();
-//        $this->drawSnowflake(0,0,0,$this->max);
-
-
-        //$this->thing->log( $this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
-//        if ($this->decimal_snowflake == false) {
-//            $this->updateSnowflake();        
-//            $this->thing->log( $this->agent_prefix .'completed updateSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-//        }
-
-      //  $this->readSubject();
-        //$this->setSnowflake();
-
 
         if ($this->agent_input == null) {$this->setSignals();}
 
         $this->thing->log( $this->agent_prefix .'completed setSignals. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
-//        $this->setSnowflake();
 
         $this->makePNG();
 

@@ -95,9 +95,11 @@ class Snow
 
     public function getSnowflake()
     {
+//echo "make a thing":
         $thing = new Thing(null);
-
+//echo "turn it into a snowflake";
         $this->snowflake = new Snowflake($this->thing);
+//echo "count";
         $this->countSnow();
     }
 
@@ -182,7 +184,7 @@ class Snow
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        //$this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);

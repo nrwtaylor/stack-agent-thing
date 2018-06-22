@@ -426,8 +426,6 @@ $this->display = $display;
 		$this->thing_report['email'] = $this->sms_message;
         $message_thing = new Message($this->thing, $this->thing_report);
 
-
-
 		return $this->thing_report;
 	}
 
@@ -442,7 +440,7 @@ $this->display = $display;
     }
 
 
-    public function readInstruction() 
+    public function readInstruction()
     {
         if($this->agent_command == null) {
             $this->defaultCommand();
@@ -455,28 +453,22 @@ $this->display = $display;
         $this->name = $pieces[1];
         $this->identity = $pieces[2];
 
-
-//        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agent . ' ' . $this->limit . ' ' . $this->name . ' ' . $this->identity . "." );
-
         return;
-
     }
 
-	public function readText() {
-
+	public function readText()
+    {
         // No need to read text.  Any identity input to Tally
         // increments the tally.
-     
         return;
 	}
 
-    public function readInput() {
+    public function readInput()
+    {
         $this->readInstruction();
         $this->readText();
         return;
     }
-
-
 }
 
 ?>

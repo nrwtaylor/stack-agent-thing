@@ -85,7 +85,9 @@ class Web {
         //$web_thing->Create($this->from, 'ant' , 's/ web view ' . $web_thing->uuid);
         $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
 
-		$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
+		//$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
+        $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
+
 		$this->sms_message .= " | TEXT WHATIS";
 		$this->thing_report['sms'] = $this->sms_message;
 
@@ -128,7 +130,7 @@ class Web {
 
 		return $this->thing_report;
 	}
-
+/*
     function getLink() {
 
         $block_things = array();
@@ -160,6 +162,58 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
         return $this->link_uuid;
     
     }
+*/
+    function getLink() {
+
+        $block_things = array();
+        // See if a block record exists.
+        //require_once '/var/www/html/stackr.ca/agents/findagent.php';
+        $findagent_thing = new Findagent($this->thing, 'thing');
+
+        // This pulls up a list of other Block Things.
+        // We need the newest block as that is most likely to be relevant to
+        // what we are doing.
+
+//$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
+
+        $this->max_index =0;
+
+        $match = 0;
+
+        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+
+            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
+
+
+
+            if ($block_thing['nom_to'] != "usermanager") {
+                $match += 1;
+                $this->link_uuid = $block_thing['uuid'];
+                if ($match == 2) {break;}
+            }
+        }
+
+            $variables_json= $block_thing['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
+
+
+        //require_once '/var/www/html/stackr.ca/agents/variables.php';
+
+        //$previous_thing = new Thing($block_thing['uuid']);
+
+        //$this->agent = new Variables($message_thing, "variables message " . $this->from);
+
+
+        if (!isset($variables['message']['agent'])) {
+            $this->prior_agent = "web";
+        } else {
+            $this->prior_agent = $variables['message']['agent'];
+        }
+
+        return $this->link_uuid;
+    
+    }
+
 
 
 

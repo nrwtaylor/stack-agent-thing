@@ -238,6 +238,15 @@ and the user UX/UI
                         return $thing_report;
                 }
 
+                if (strpos($this->agent_input, 'whatis') !== false) {
+
+                $this->thing->log( '<pre> Agent created a Whatis agent</pre>' );
+                        $whatis_thing = new Whatis($this->thing);
+                        $thing_report = $whatis_thing->thing_report;
+                        return $thing_report;
+                }
+
+
                 if (strpos($this->agent_input, 'train') !== false) {
 
                 $this->thing->log( '<pre> Agent created a Train agent</pre>' );
@@ -277,6 +286,23 @@ and the user UX/UI
             return $thing_report;
         }
 
+        // Third.  Forget.
+        if (strpos($input, 'forget') !== false) {
+        //if (strtolower($input) == 'forget') {
+
+            if (strpos($input, 'all') !== false) {
+                // pass through
+            } else {
+                $this->thing->log( 'Agent "Agent" did not ignore a forget".' );
+                //$this->thing->flagGreen();
+                $this->thing->Forget();
+                $thing_report = false;
+                $thing_report['info'] = 'Agent did not ignore a "forget" request.';
+                $thing_report['sms'] = "FORGET | That Thing has been forgotten.";
+                return $thing_report;
+            }
+        }
+
 
        //if (strpos($input, 'flag') !== false) {
         $check_beetlejuice = false;
@@ -292,15 +318,21 @@ and the user UX/UI
             //return $thing_report;
          }
 
-
-
         $burst_check = true; // Runs in about 3s.  So need something much faster.
         $burst_limit = 8;
+
+        $burst_age_limit = 900; //s
+        $similarness_limit = 100;
+        $similiarities_limit = 500; //
+        $burstiness_limit = 750;
+        $bursts_limit = 1;
+
         if ($burst_check) {
             $this->thing->log( 'Agent "Agent" created a Burst agent looking for burstiness.', "DEBUG" );
             $burst = new Burst($this->thing, 'read');
 
             $this->thing->log( 'Agent "Agent" created a Similar agent looking for incoming message repeats.',"DEBUG" );
+
             $similar = new Similar($this->thing, 'read');
 
             $similarness = $similar->similarness;
@@ -311,39 +343,38 @@ and the user UX/UI
 
             $elapsed = $this->thing->elapsed_runtime();
 
+            $burst_age_limit = 900; //s
+            $similiarness_limit = 90;
+
             $burst_age = strtotime($this->current_time) - strtotime($burst->burst_time);
             if ($burst_age < 0) {$burst_age = 0;}
 
-            //$channel_agent = new Channel($this->thing);
 
-            $channel_burst_limit = 1;
-            $channel_burstiness_limit = 750;
-            $channel_similarities_limit = 8;
-            $channel_similarness_limit = 100;
-            $channel_burst_age_limit = 900;
-
-//            if ( ($bursts >= 1) and
-//               ($burstiness < 750) and
-//                ($similarities >= 8) and
-//                ($similarness < 100) and
-//                ($burst_age < 900) ) {
-            if ( ($bursts >= $channel_burst_limit) and
-                ($burstiness < $channel_burstiness_limit) and
-                ($similarities >= $channel_similarities_limit) and
-                ($similarness < $channel_similarness_limit) and
-                ($burst_age < $channel_burst_age_limit) ) {
-
+            if ( ($bursts >= $bursts_limit) and
+                ($burstiness < $burstiness_limit) and
+                ($similarities >= $similiarities_limit) and
+              ($similarness < $similarness_limit) and
+                ($burst_age < $burst_age_limit) ) {
                 // Don't respond
                 $this->thing->log( 'Agent "Agent" heard similarities, similarness, with bursts and burstiness.', "WARNING" );
 
-
                 if ($this->verbosity >= 9) {
-                    $t = new Hashmessage($this->thing, "#channelbursts ". $bursts . " #channelburstiness ". $burstiness ." ".
-                                                    "#channelsimilarities ". $similarities . " #channelsimilarness ". $similarness . 
-                                                    " #thingelapsedruntime ". $elapsed . 
+                    $t = new Hashmessage($this->thing, "#channelbursts ". $bursts . "/" .$bursts_limit .
+                                                     " #channelburstiness ". $burstiness ."/".$burstiness_limit .
+                                                     " #channelsimilarities ". $similarities ."/".$similiarities_limit .
+                                                     " #channelsimilarness ". $similarness ."/".$similiarness_limit . 
+                                                     " #thingelapsedruntime ". $elapsed . 
                                                     " #burstage ". $burst_age
                                                     );
-                } else {
+            } elseif ($this->verbosity >=8) {
+                                    $t = new Hashmessage($this->thing, "MESSAGE | #stackoverage | wait " 
+. number_Format(($burst_age_limit - $burst_age)/ 60) ." minutes");
+
+                 } elseif ($this->verbosity >=7) {
+                                    $t = new Hashmessage($this->thing, "MESSAGE | The stack is handling a burst of similar requests. | Wait " 
+. number_Format(($burst_age_limit - $burst_age)/ 60) ." minutes and then retry.");
+
+           } else {
                     $t = new Hashmessage($this->thing, "#testtesttest 15m timeout"
                                                     );
                 }
@@ -357,6 +388,12 @@ and the user UX/UI
         $this->thing->log( 'Agent "Agent" noted burstiness ' . $burstiness . ' and similarness ' . $similarness . '.' );
 
         }
+
+
+
+
+
+
         // Based on burstiness and similiary decide if this message is okay.
       //  if ($burstiness
 
@@ -446,7 +483,7 @@ and the user UX/UI
 
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
-        $this->thing->log( '<pre> Agent created a Usermanager agent</pre>', "INFORMATION" );
+        $this->thing->log( '<pre> Agent created a Robot agent</pre>', "INFORMATION" );
             $robot_thing = new Robot($this->thing);
             $thing_report = $robot_thing->thing_report;
             return $thing_report;
@@ -486,6 +523,8 @@ and the user UX/UI
 
         	$agent_class_name = ucfirst($keyword);
 
+            // Can probably do this quickly by loading path list into a variable
+            // and looping, or a direct namespance check.
             $filename = $this->agents_path .  $agent_class_name . ".php";
             if (file_exists($filename)) {
                 $agents[] = $agent_class_name;  
@@ -524,6 +563,10 @@ exit();
 		//set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
 		restore_error_handler();
 
+        // What effect would this have?
+        //$agents = array_reverse($agents);
+
+
 		foreach ($agents as $agent_class_name) {
 
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
@@ -553,7 +596,7 @@ exit();
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
                 //echo "Error meep<br>";      
-                  $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".' , "WARNING" );
+                  $this->thing->log( $this->agent_prefix .'could not load "' . $agent_class_name . '".' , "WARNING" );
 
     			$message = $ex->getMessage();
 	    		//$code = $ex->getCode();
@@ -561,9 +604,10 @@ exit();
 			    $line = $ex->getLine();
 
     			$input = $message . '  ' . $file . ' line:' . $line;
+                $this->thing->log( $this->agent_prefix .$input , "WARNING" );
 
                 // This is an error in the Place, so Bork and move onto the next context.
-        		$bork_agent = new Bork($this->thing, $input);
+        		// $bork_agent = new Bork($this->thing, $input);
 	    		continue;
 
 			}
@@ -808,7 +852,7 @@ var_dump($place_thing->place_name);
 
                 // Character recognition should be replaceable by alias
                 // by refactoring character to use the aliasing engine.
-                $place_thing = new Place($this->thing,'character');
+                $place_thing = new Place($this->thing,'place');
                 $this->place_code = $place_thing->place_code;
 
                 if ($this->place_code != null) {
@@ -821,7 +865,7 @@ var_dump($place_thing->place_name);
                     return $thing_report;
                 }
 
-                $thing_report = $this->timeout(45000, "No matching characters found. ");
+                $thing_report = $this->timeout(45000, "No matching places found. ");
                 if ($thing_report != false) {return $thing_report;}
 
 

@@ -18,8 +18,7 @@ class Duplicable
 
     function __construct(Thing $thing, $agent_input = null)
     {
-//echo "meep";
-//exit();
+
         $this->agent_input = $agent_input;
 
 		$this->agent_name = "duplicable";
@@ -51,7 +50,7 @@ class Duplicable
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
         $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -117,20 +116,6 @@ class Duplicable
         $this->uuid_png = $agent->PNG_embed;
     }
 
-/*
-    function timestampSnowflake($t = null) {
-        $s = $this->thing->thing->created_at;
-
-        if (!isset($this->retain_to)) {
-            $text = "X";
-        } else {
-            $t  = $this->retain_to;
-            $text = "GOOD UNTIL " .  strtoupper(date('Y M d D H:i',$t));
-        }
-        $this->timestamp = $text;
-        return $this->timestamp;
-    }
-*/
     function init()
     {
         if (!isset($this->min)) {$this->min = 1;}
@@ -204,8 +189,6 @@ class Duplicable
 
     function makeSMS()
     {
-//        $cell = $this->lattice[0][0][0];
-        //$sms = "SNOWFLAKE | cell (0,0,0) state ". strtoupper($cell['state']);
         $sms = "DUPLICABLE | ";
         $sms .= $this->web_prefix . "thing/".$this->uuid."/duplicable.pdf";
         $this->sms_message = $sms;
@@ -220,11 +203,8 @@ class Duplicable
         $uuid = $this->uuid;
 
         $message .= "Keep on stacking.\n\n<p>" . $this->web_prefix . "thing/$uuid/duplicable\n \n\n<br> ";
-        //$message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/snowflake.png" alt="snowflake" height="92" width="92">';
-
 
         $this->thing_report['message'] = $message;
-
 
         return;
 
@@ -232,13 +212,8 @@ class Duplicable
 
     function setDuplicable()
     {
-//        $this->thing->json->setField("message7");
-//        $this->thing->json->writeVariable( array("snowflake", "lattice"), $this->lattice );
-//echo "setSnowflake";
-//var_dump($this->decimal_snowflake);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array("duplicable", "index"), $this->index );
-
         $this->thing->log($this->agent_prefix . ' saved duplicable index ' . $this->index . '.', "INFORMATION") ;
     }
 
@@ -250,15 +225,9 @@ class Duplicable
 
         if ($this->index == false) {
             $this->thing->log($this->agent_prefix . ' did not find a duplicable index.', "INFORMATION") ;
-            // No snowflake saved.  Return.
+            // Return.
             return true;
         }
-
-//        $this->max = 12;
-//        $this->size = 3.7;
-//        $this->lattice_size = 15;
-
-//        $this->binarySnowflake($this->decimal_snowflake);
 
         $this->thing->log($this->agent_prefix . ' loaded duplicable index ' . $this->index . '.', "INFORMATION") ;
         return;
@@ -274,10 +243,6 @@ class Duplicable
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
         $web .= "</a>";
         $web .= "<br>";
-
-        //$this->timestampSnowflake($this->retain_to);
-        //$web .= ucwords($this->timestamp). "<br>";
-
 
         $web .= "<br><br>";
         $this->thing_report['web'] = $web;

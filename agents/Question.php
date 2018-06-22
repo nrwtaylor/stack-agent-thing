@@ -188,7 +188,6 @@ class Question {
             $input = $this->subject;
             //echo str_word_count($this->subject);
 
-
             if (is_string($this->subject) and strlen($input) == 1 ) {
             	// Test for single ? mark and call question()
 			    $this->message = "Single question mark received";

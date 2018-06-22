@@ -63,6 +63,9 @@ class Email {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
+
         // Sent uo agent.
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -181,10 +184,10 @@ $this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 
     {
         // Check address against the beta list
 
-        $file = '/var/www/stackr.test/resources/limitedbeta/limitedbeta.txt';
-        $contents = file_get_contents($file);
+        //$file = '/var/www/stackr.test/resources/limitedbeta/limitedbeta.txt';
+        $file = $this->resource_path . 'limitedbeta/limitedbeta.txt'; // prod
 
-//var_dump($contents);
+        $contents = file_get_contents($file);
         $pattern = "|\b($searchfor)\b|";
 
         // search, and store all matching occurences in $matches

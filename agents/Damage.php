@@ -206,8 +206,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             return;
         } // Don't remove a Thing that is working.
 
-//echo $thing->from;
-
         // Get the stack balance.
 
         if ( isset($thing->account['stack']) ) {
@@ -222,13 +220,10 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             // Flip a coin
             $d2 = rand(1,2);
             if($d2 == 2) {
-//var_dump($thing);
                 $thing->Forget();
-//exit();
                 $this->things_destroyed += 1;
                 $this->thing->log($this->agent_prefix . " Forgot Thing.");
 
-                //echo "Forgot Thing";
                 return;
             } // Critical success
             return;
@@ -343,21 +338,6 @@ $balance = $thing->account['stack']->balance['amount'];
 
 
     }
-
-//    $value_destroyed = $damage_budget - $remaining_budget;
-//    echo "<pre>";
-//    echo "damagehandler destroyed " . $value_destroyed . " units of value";
-//    return $value_destroyed;
-
-//}
-
-//}
-
-
-//return;
-
-
-  //  }
 
 }
 
