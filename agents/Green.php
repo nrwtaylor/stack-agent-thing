@@ -5,17 +5,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-//require_once '/var/www/html/stackr.ca/agents/headcode.php';
-//require_once '/var/www/html/stackr.ca/agents/flag.php';
-//require_once '/var/www/html/stackr.ca/agents/consist.php';
-//require_once '/var/www/html/stackr.ca/agents/variables.php';
-//require_once '/var/www/html/stackr.ca/agents/alias.php';
-
-
-//require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
 								// factored to
 								// call agent 'Agent'
 
@@ -93,7 +82,6 @@ $this->agent_prefix = 'Agent "Green" ';
         $this->thing->log( $this->agent_prefix .'. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
 
-        require_once '/var/www/html/stackr.ca/agents/flag.php';
         $this->flag_thing = new Flag($this->thing); // Pass without agent instruction to generate message.
 
 
@@ -207,7 +195,7 @@ $this->agent_prefix = 'Agent "Green" ';
 
         $train_things = array();
         // See if a block record exists.
-        require_once '/var/www/html/stackr.ca/agents/findagent.php';
+
         $findagent_thing = new FindAgent($this->thing, 'train');
 
         // This pulls up a list of other Block Things.
@@ -466,7 +454,6 @@ $match = true;
         $this->aliases = array("Logan's run", "Kessler Run", "Orient Express", "Pineapple Express",
             "Dahjeeling Express", "Flying Scotsman", "Crazy Train" );
 
-        require_once '/var/www/html/stackr.ca/agents/alias.php';
         $this->alias_thing = new Alias($this->train_thing, 'alias');
 
         $this->alias = $this->alias_thing->alias;
@@ -530,17 +517,15 @@ $match = true;
 
 
         $this->thing->log('Agent "Train" will make a Train with ' . $this->trainTime($run_at) . " " . $quantity . " " . $available . ".");
-//exit();
         // $quantity, $run_at, $available set to preferred values.
 
 
         // Check that the shift is okay for making blocks.
 
-//        require_once '/var/www/html/stackr.ca/agents/shift.php';
 //        $shift_thing = new Shift($this->thing);
 //        $shift_state = strtolower($this->thing->log($shift_thing->thing_report['keyword']));
 
-$shift_override == true;
+        $shift_override == true;
 
         if ( ($shift_state == "off") or
                 ($shift_state == "null") or

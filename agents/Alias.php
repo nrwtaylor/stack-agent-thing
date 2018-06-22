@@ -215,8 +215,12 @@ class Alias
 
             if ($thing_object['nom_to'] != "usermanager") {
 
-                $thing= new Thing($uuid);
-                $variables = $thing->account['stack']->json->array_data;
+                //$thing= new Thing($uuid);
+                //$variables = $thing->account['stack']->json->array_data;
+
+                $variables_json= $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
 
                 if ( (isset($variables['alias'])) and (isset($variables['alias']['alias'])) ) {
                     // prod

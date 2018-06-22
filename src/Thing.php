@@ -94,6 +94,9 @@ class Thing
 			$this->nuuid = substr($this->uuid, 0, 4);
 			//$this->uuid = (string) Uuid::uuid4();
 
+            $this->log("Thing made a UUID.");
+
+
 			// And then we pull out some Thing related variables and settings.
 
 			$this->container['thing'] = function ($c) {
@@ -134,6 +137,7 @@ class Thing
 			// returns false, and with a Thing instantiated.  For tasking.
 
 		} else {
+            $this->log("Thing was given a UUID.");
 
 			// Reinstate existing Thing from Stack
 
@@ -150,22 +154,26 @@ class Thing
 			// Is link to the ->db broken when the Thing is deinstantiated.
 			// Assume yes.
 			$this->db = new Database($this->uuid, 'null' . $this->mail_postfix);
+            $this->log("Thing made a db connector.");
 
 			// Provide handler for Json translation from/to MySQL.
 			$this->json = new Json($this->uuid);
 
+            // This is a placeholder for refactoring the Thing variables
             $this->variables = new Json($this->uuid);
             $this->variables->setField("variables");
-
+            $this->log("Thing made a json connector.");
 
 			// Provide handler to support state maps and navigation.
 			// And state persistence through de-instantiation/instantiation.
             $this->choice = new Choice($this->uuid);
+            $this->log("Thing made a choice connector.");
 
 			// Cost of connecting to a Thing is 100 <units>.
 			// That is set by the stack variable.  No need to do anything here
 			// except load the Things internal balances.
             $this->loadAccounts();
+            $this->log("Thing loaded accounts.");
 
 			// Examples:
 
@@ -592,6 +600,8 @@ $query = true;
 
 	public function Forget()
     {
+        $this->log("Thing Forget started.");
+
 		// Call to account destruction.  Both for DB and stack account, 
 		// and the Thing.
 
@@ -604,11 +614,12 @@ $query = true;
 
 		// Planned behaviour:
 		// Stack account value is distributed within defined groups.
-		$thingreport = $this->db->Uuids();
+		// $thingreport = $this->db->Uuids();
 
+        // For now don't do this.  Just forget the record as quickly as possibly.
+        // Stack Engine No.1 7ms 10ms 8ms
 
 		// Call Db and forget the record.
-
 		$thingreport = $this->db->Forget($this->uuid);
 
 		// To be developed.  PHP object destruction.
@@ -705,11 +716,16 @@ $query = true;
 
 	public function Get()
     {
+        $this->log("Thing Get started.");
+
 		// Bootstrapping db access.
 		// A Thing can call an UUID so called up
 		// the requested UUID.  Using the null account.
+
 		$thingreport = $this->db->Get($this->uuid);
 		$thing = $thingreport['thing'];
+
+        $this->log("Thing loaded thing from db.");
 
 		if ($thing == false) {
 			//$this->uuid = $this->thing->uuid;

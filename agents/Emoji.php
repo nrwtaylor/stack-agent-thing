@@ -29,7 +29,9 @@ class Emoji
 
 //        $test = "6     U+1F604     😄   grinning face with smiling eyes     eye | face | grinning face with smiling eyes | mouth | open | smile";
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
+//var_dump($this->resource_path);
         $string =  $this->subject;
 
         $emojis =$this->extractEmoji($string);
@@ -39,28 +41,35 @@ class Emoji
 
 
         $searchfor = $this->convert_emoji($this->emoji);
-
         $arr = explode(" ",$searchfor);
         $this->words = array();
+        $this->word = null;
 
         foreach ($arr as $key=>$value) {
             if ($value == "U+FE0F") {continue;}
             // Return dictionary entry.
             $text = $this->findEmoji('list', $value);
             //echo $value . " " .$text . "<br>";
-            $this->words = array_merge($this->getWords($text));
-            $this->word = $this->words[0];
+            $words = $this->getWords($text);
+            if ($words != false) {
+                $this->words = array_merge($this->getWords($text));
+               $this->word = $this->words[0];
+            }
         }
 
         $this->keywords = array();
+        $this->keyword = null;
 
         foreach ($arr as $key=>$value) {
             $text = $this->findEmoji('mordok', $value); 
 
             if ($value == "U+FE0F") {continue;}
 
-            $this->keywords = array_merge($this->getWords($text));
-            $this->keyword = $this->keywords[0];
+            $words = $this->getWords($text);
+            if ($words != false) {
+                $this->keywords = array_merge($this->getWords($text));
+                $this->keyword = $this->keywords[0];
+            }
         }
 
 
@@ -113,6 +122,8 @@ class Emoji
 
     function getWords($test)
     {
+//var_dump($test);
+//echo "getWords " . $test . "<br>";
         if ($test == false) {
             return false;
         }
@@ -198,13 +209,47 @@ $translation = preg_replace($patterns, $replacements, $string);
         $myHexString = str_replace('\\u', '', $myInput);
         $myBinString = hex2bin($myHexString);
 
-        print iconv("UTF-16BE", "UTF-8", $myBinString);
+        return  iconv("UTF-16BE", "UTF-8", $myBinString);
     }
 
+function utf8($num)
+{
+    if($num<=0x7F)       return chr($num);
+    if($num<=0x7FF)      return chr(($num>>6)+192).chr(($num&63)+128);
+    if($num<=0xFFFF)     return chr(($num>>12)+224).chr((($num>>6)&63)+128).chr(($num&63)+128);
+    if($num<=0x1FFFFF)   return chr(($num>>18)+240).chr((($num>>12)&63)+128).chr((($num>>6)&63)+128).chr(($num&63)+128);
+    return '';
+}
+
+function uniord($c)
+{
+    $ord0 = ord($c{0}); if ($ord0>=0   && $ord0<=127) return $ord0;
+    $ord1 = ord($c{1}); if ($ord0>=192 && $ord0<=223) return ($ord0-192)*64 + ($ord1-128);
+    $ord2 = ord($c{2}); if ($ord0>=224 && $ord0<=239) return ($ord0-224)*4096 + ($ord1-128)*64 + ($ord2-128);
+    $ord3 = ord($c{3}); if ($ord0>=240 && $ord0<=247) return ($ord0-240)*262144 + ($ord1-128)*4096 + ($ord2-128)*64 + ($ord3-128);
+    return false;
+}
+
 function convert_emoji($emoji) {
+$u =  $this->uniord($emoji);
+return strtoupper("U+".dechex($u));
+//exit();
+//echo "received". $emoji . "<br>";
+//echo "encoding" . mb_check_encoding($emoji, 'UTF-8'). "<br>";
     // ✊🏾 --> 0000270a0001f3fe
-    $emoji = mb_convert_encoding($emoji, 'UTF-32', 'UTF-8');
-    $hex = bin2hex($emoji);
+    //$emoji = mb_convert_encoding($emoji, 'UTF-32');
+    $utf32_emoji = mb_convert_encoding($emoji, 'UTF-32', 'UTF-8');
+
+//$emoji = iconv("UTF-8", "UTF-32", $emoji);
+
+    $hex = bin2hex($utf32_emoji);
+    
+//echo "<br>";
+//echo "mb_convert ". $utf32_emoji;
+//echo "<br>";
+//echo "hex ".$hex;
+//echo "<br>";
+
 
     // Split the UTF-32 hex representation into chunks
     $hex_len = strlen($hex) / 8;
@@ -212,9 +257,17 @@ function convert_emoji($emoji) {
 
     for ($i = 0; $i < $hex_len; ++$i) {
         $tmp = substr($hex, $i * 8, 8);
+//var_dump($tmp);
         // Format each chunk
         $chunks[$i] = $this->format($tmp);
     }
+//echo "<br>";
+//echo "imploded chunks " . implode($chunks, ' ');
+
+
+
+
+//var_dump($chunks);
     // Convert chunks array back to a string
     return implode($chunks, ' ');
 }
@@ -249,6 +302,7 @@ function convert_emoji($emoji) {
 
     function findEmoji($librex, $searchfor)
     {
+
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
 
         $path = $GLOBALS['stack_path'];
@@ -257,24 +311,24 @@ function convert_emoji($emoji) {
             case null:
                 // Drop through
             case 'keywords':
-                $file = $path .'resources/emoji/emoji-keywords.txt';
+                $file = $this->resource_path .'emoji/emoji-keywords.txt';
                 $contents = file_get_contents($file);
                 break;
             case 'data':
-                $file = $path . 'resources/emoji/emoji-data.txt';
+                $file = $this->resource_path .  'emoji/emoji-data.txt';
                 $contents = file_get_contents($file);
                 break;
             case 'mordok':
-                $file = $path . 'resources/emoji/emoji-mordok.txt';
+                $file = $this->resource_path . 'emoji/emoji-mordok.txt';
                 $contents = file_get_contents($file);
 
                 break;
             case 'list':
-                $file = $path . 'resources/emoji/emoji-list.txt';
+                $file = $this->resource_path . 'emoji/emoji-list.txt';
                 $contents = file_get_contents($file);
                 break;
             case 'unicode':
-                $file = $path . 'resources/emoji/unicode.txt';
+                $file = $this->resource_path . 'emoji/unicode.txt';
                 $contents = file_get_contents($file);
                 break;
             case 'context':
@@ -285,7 +339,7 @@ function convert_emoji($emoji) {
             case 'emotion':
                 break;
             default:
-                $file = $GLOBALS['stack_path'] . '/resources/emoji-keywords.txt';
+                $file = $this->resource_path . 'emoji/emoji-keywords.txt';
 
         }
 //        header('Content-Type: text/plain');
@@ -425,6 +479,7 @@ function convert_emoji($emoji) {
 
         $this->translated_input = $this->wordsEmoji($this->subject);
 
+//echo $this->translated_input;
         if (count($this->emojis) > 0) {
             return;
         }

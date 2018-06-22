@@ -223,10 +223,9 @@ function isCode() {
     function getPlace($selector = null)
     {
         foreach ($this->places as $place) {
-            // so this is where it doesn't do anything useful.
-            // need to get places returning known relevant places
+            // Match the first matching place
 
-            if (($place['code'] == $selector) or ($place['name'] == $selector)) {
+            if (($place['code'] == $selector) or ($place['name'] == $selector) or ($selector == null)) {
 
                 $this->place_name = $place['name'];
                 $this->place_code = $place['code'];
@@ -272,8 +271,12 @@ function isCode() {
             $uuid = $thing_object['uuid'];
 
             // refactor to avoid unnecessary Thing
-            $thing= new Thing($uuid);
-            $variables = $thing->account['stack']->json->array_data;
+            //$thing= new Thing($uuid);
+            //$variables = $thing->account['stack']->json->array_data;
+
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
+
 
             if (isset($variables['place'])) {
 
@@ -545,17 +548,19 @@ $this->place_names = array_unique($this->place_names);
 //var_dump($place_names);
         return array($this->place_code, $this->place_name);
     }
-    function assertPlace($input) {
 
+    function assertPlace($input)
+    {
 
-if (($pos = strpos(strtolower($input), "place is")) !== FALSE) { 
-    $whatIWant = substr(strtolower($input), $pos+strlen("place is")); 
-} elseif (($pos = strpos(strtolower($input), "place")) !== FALSE) { 
-    $whatIWant = substr(strtolower($input), $pos+strlen("place")); 
-}
+        if (($pos = strpos(strtolower($input), "place is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("place is")); 
+        } elseif (($pos = strpos(strtolower($input), "place")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("place")); 
+        }
 
-$filtered_input = ltrim(strtolower($whatIWant), " ");
+        $filtered_input = ltrim(strtolower($whatIWant), " ");
 
+var_dump($filtered_input);
         if ($this->getPlace($filtered_input)) {
          //true so make a place
             $this->makePlace(null, $filtered_input);
@@ -848,7 +853,6 @@ switch (true) {
    case 'add':
 //exit();
 
-    
       //$this->nextCode();
         $this->assertPlace(strtolower($input));
 //        if ($this->place_name == null) {$this->place_name = "Foo" . rand(0,1000000) . "Bar";}

@@ -92,18 +92,26 @@ class Tick
 
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage"));
 
-                $client= new \GearmanClient();
-                $client->addServer();
+//                $client= new \GearmanClient();
+//                $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
 
 
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"stack", "subject"=>"s/ stack"));
 
-                $client= new \GearmanClient();
-                $client->addServer();
+//                $client= new \GearmanClient();
+//                $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
+
+                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"dummyload", "subject"=>"s/ dummyload"));
+
+//                $client= new \GearmanClient();
+//                $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+                $client->doLowBackground("call_agent", $arr);
+
 
 /*
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"uuid", "subject"=>"s/ uuid"));

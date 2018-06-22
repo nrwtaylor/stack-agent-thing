@@ -54,6 +54,7 @@ return [
 		    'sms_address' => '<not set>',
 		    'retain_for' => array('amount'=> 8, 'attribute'=>'time', 'unit'=>'hours'),
             'persist_for' => array('amount'=> 2, 'attribute'=>'time', 'unit'=>'days'),
+            'path' => "/var/www/stackr.test/";
         ],
 
 	    'api' => [

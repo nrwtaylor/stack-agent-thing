@@ -36,6 +36,7 @@ function call_agent_function($job)
         $thing->Create($arr['to'], $arr['from'], $arr['subject'] );
     }
 
+    echo "worker nuuid " . $thing->nuuid."\n";
     echo "worker timestamp " . $thing->microtime(). "\n";
     echo "job timestamp " . $thing->thing->created_at. "\n";
 

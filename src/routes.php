@@ -6,6 +6,8 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+// start the clock
+$app->thing_report['start_time'] = microtime(true);
 
 
 // API group
@@ -51,13 +53,14 @@ $app->group('/api', function () use ($app) {
             $body = $request->getParsedBody();
 
             //echo "meep";
-                $arr = json_encode(array("to"=>"hey", "from"=>"test", "subject"=>"ping"));
+                $arr = json_encode(array("to"=>"snow", "from"=>"snow", "subject"=>"snow"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
 echo "Gearman worker called";
+var_dump($client);
 
             return;
 // $response->withHeader('HTTP/1.0 200 OK')
@@ -429,6 +432,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
     //  $params = $args['params'];
 
     $thing_report['start_time'] = microtime(true);
+    //$thing_report['start_time'] = $app->thing_report['start_time'];
 
     // Add any post ? mark text to the command
     $input_array = $request->getParams();

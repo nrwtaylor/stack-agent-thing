@@ -294,18 +294,13 @@ class Message {
 			"received_at"),  $this->thing->json->time()
 			);
 
+        // Process namespace to return agent name
+        $previous_agent_path = explode("\\",$this->previous_agent);
+        $previous_agent = $previous_agent_path[count($previous_agent_path)-1];
 
-//        $a = explode("\", $this->previous_agent);
-//var_dump($a);
-//exit();
         $this->thing->json->writeVariable(array("message",
-            "agent"), $this->previous_agent
+            "agent"), $previous_agent
             );
-        //$this->thing->json->writeVariable(array("message",
-        //    "agent"), $a[-1]
-        //    );
-
-
 
 		$this->thing->flagGreen();
 
@@ -322,7 +317,6 @@ class Message {
         } else {
 
         }
-
 
         $from = $this->from;
         $to = $this->to;
@@ -489,7 +483,9 @@ $this->tallyMessage();
 
 
             $this->thing->log( 'Agent "Message" received a ' . $token_thing->thing_report['token'] . " Token.", "INFORMATION");
-                $makeemail_agent = new makeEmail($this->thing, $this->thing_report);
+                // $makeemail_agent = new makeEmail($this->thing, $this->thing_report);
+                $makeemail_agent = new Makeemail($this->thing, $this->thing_report); // prod fix
+
                 $this->thing_report['email'] = $makeemail_agent->email_message;
 
             switch (true) {

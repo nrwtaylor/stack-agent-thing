@@ -193,17 +193,23 @@ $choices = false;
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
         $choices = $this->thing->choice->makeLinks('web');
-
+/*
         if (isset($this->result[1]['roll'])) {
             $alt_text = "Rolled " . $this->roll . " and got " . $this->result[1]['roll'] . ".";
         } else {
             $alt_text = "Roll result not available";
         }
-
+*/
         $web = '<a href="' . $link . '">';
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
-                width="100" height="100" 
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
+//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
+//                width="100" height="100" 
+//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
+
+        //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
+
+if (!isset($this->html_image)) {$this->makePNG();}
+
+        $web .= $this->html_image;
 
 
 
@@ -416,8 +422,26 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
         $this->thing_report['png'] = $imagedata;
 
+        if (isset($this->result[1]['roll'])) {
+            $alt_text = "Rolled " . $this->roll . " and got " . $this->result[1]['roll'] . ".";
+        } else {
+            $alt_text = "Roll result not available";
+        }
+
+
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
+//        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
+        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata). '"
+                width="100" height="100" 
+                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
+
+
+        $this->html_image = $response;
+
+//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
+//                width="100" height="100" 
+//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
+
 
 //        $this->thing_report['png'] = $image;
 

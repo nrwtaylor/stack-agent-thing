@@ -224,6 +224,11 @@ numprocs=3
 process_name=gearman-worker-%(process_num)s
 
 sudo supervisorctl reload
+
+-
+Helpful
+http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.html
+
 ---
 
 Change php/ini
@@ -357,3 +362,27 @@ systemctl daemon-reload
 After restarting MySQL it was finally obeying the setting:
 
 mysql> show variables like 'max_connections';
+
+-
+my.cnf - change this to avoid long queries every so often
+
+#
+# * Query Cache Configuration
+#
+query_cache_limit   = 1M
+# 19 June 2018 query_cache_size        = 16M
+query_cache_size        = 0
+# added this
+query_cache_type = 0
+
+
+---
+
+INSTALL POSTFIX
+
+master.cf
+
+mytransportname   unix  -       n       n       -       -       pipe
+  flags=FR user=<username> argv=<path>/src/emailhandler.php
+  ${nexthop} ${user}
+

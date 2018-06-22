@@ -84,6 +84,12 @@ class Snowflake
         $this->init();
         $this->initSnowflake();
 
+        //$this->updateSnowflake();
+
+        $this->draw_center = false;
+        $this->draw_outline = false; //Draw hexagon line
+
+
         $this->thing->log($this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
         $this->setSnowflake();
@@ -322,11 +328,12 @@ class Snowflake
 
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.pdf';
         $this->node_list = array("web"=>array("snowflake","uuid snowflake"));
 
         $web = '<a href="' . $link . '">';
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
+        //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
+        $web .= $this->html_image;
         $web .= "</a>";
         $web .= "<br>";
 
@@ -396,9 +403,16 @@ class Snowflake
         $this->txt = $txt;
     }
 
+    function rgbcolor($r, $g, $b) {
+
+        $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
+
+    }
+
     public function makePNG()
     {
-        $this->image = imagecreatetruecolor(164, 164);
+$canvas_size = 164;
+        $this->image = imagecreatetruecolor($canvas_size, $canvas_size);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -406,14 +420,17 @@ class Snowflake
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->white);
+
+        imagefilledrectangle($this->image, 0, 0, $canvas_size, $canvas_size, $this->white);
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        $this->drawSnowflake(164/2, 164/2);
+        $this->drawSnowflake($canvas_size/2, $canvas_size/2);
 
         // Write the string at the top left
         $border = 30;
-        $radius = 1.165 * (164 - 2 * $border) / 3;
+        $r = 1.165;
+
+        $radius = $r * ($canvas_size - 2 * $border) / 3;
 
 
 
@@ -424,8 +441,10 @@ class Snowflake
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
-        $size = 72;
+        $size = $canvas_size - 90;
         $angle = 0;
+
+
         $bbox = imagettfbbox($size, $angle, $font, $text);
         $bbox["left"] = 0- min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
         $bbox["top"] = 0- min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
@@ -464,6 +483,8 @@ class Snowflake
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="snowflake"/>';
+
+        $this->html_image = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="snowflake"/>';
 
         $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
@@ -535,13 +556,11 @@ class Snowflake
 
     public function drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color = null)
     {
-        $this->draw_center = false;
         if ($color == null) {
             $color = $this->white;
         }
 
         list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
-
 
         if ($this->draw_center == true) {
             // Draw centre points of hexagons
@@ -562,12 +581,26 @@ class Snowflake
             $y_old = $y;
         }
 
-        $this->draw_outline = false;
         if ($this->draw_outline == true) {
             imagepolygon($this->image, $point_array, count($point_array)/2, $this->black);
         }
         if ($color != $this->white) {
-            imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
+
+//        $cell = $this->lattice[$q][$r][$s];
+        //$value = $cell['value'];
+            $r = 155;
+            $g = 183;
+            $b = 217;
+            $this->rgbcolor(rand($r-20,$r+10),rand($g-10,$g+10),rand($b-40, $b+20));
+            // Need consistency from image to image
+            $this->rgbcolor(155,183,217);
+
+
+            //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
+            imagefilledpolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
+
+            $this->rgbcolor(100,100,217);
+            imagepolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
         }
     }
 
@@ -1058,8 +1091,8 @@ class Snowflake
 
             $pdf->SetFont('Helvetica', '', 10);
             $this->txt = "".$this->uuid.""; // Pure uuid.
-            $this->getUuid();
-            $pdf->Image($this->uuid_png, 175, 5, 30, 30, 'PNG');
+//            $this->getUuid();
+//            $pdf->Image($this->uuid_png, 175, 5, 30, 30, 'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
 //        $pdf->SetXY(15, 10);
@@ -1121,7 +1154,6 @@ class Snowflake
                 $this->max = 13;
                 $this->size = 4;
                 $this->lattice_size = 40;
-
                 return;
             }
         }
@@ -1173,7 +1205,6 @@ class Snowflake
         $this->max = 13;
         $this->size = 4;
         $this->lattice_size = 40;
-
         return;
 
         if (strpos($input, 'uuid') !== false) {
