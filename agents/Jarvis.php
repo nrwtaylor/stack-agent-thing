@@ -66,7 +66,7 @@ $this->num_hits = 0;
 			$this->thing_report = $this->respond();
 		}
 
-		$this->PNG();
+		//$this->PNG();
 
 	        $this->thing_report['info'] = 'Hey';
         	$this->thing_report['help'] = 'HEY';
@@ -172,58 +172,8 @@ $value = $litany[$key];
 
 		return;
 	}
-        public function PNG() {
-// Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-//I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and tes$
-//No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-//So beware of your included files!
-//Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-//Hope it save someone's time.
-
-//http://php.net/manual/en/function.imagepng.php
-
-//header('Content-Type: text/html');
-//echo "Hello World";
-//exit();
-
-//header('Content-Type: image/png');
-//QRcode::png('PHP QR Code :)');
-//exit();
-                // here DB request or some processing
-
-		if ($this->requested_agent == null) {
-			$this->startBork();
-		}
-
-                $codeText = "bork:".$this->requested_agent;
-
-                ob_clean();
-                ob_start();
-
-                QRcode::png($codeText,false,QR_ECLEVEL_Q,4); 
-                $image = ob_get_contents();
-
-                ob_clean();
-// Can't get this text editor working yet 10 June 2017
-
-//$textcolor = imagecolorallocate($image, 0, 0, 255);
-// Write the string at the top left
-//imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
-
-$this->thing_report['png'] = $image;
-//echo $this->thing_report['png']; // for testing.  Want function to be silent.
-
-                return $this->thing_report['png'];
-                }
 
 
 }
 
-
-
-
 ?>
-
-
-

@@ -1,14 +1,13 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Headcode 
+class Headcode
 {
 
     // This is a headcode.  You will probably want to read up about
@@ -39,49 +38,23 @@ class Headcode
 
     function __construct(Thing $thing, $agent_input = null) 
     {
-        $this->start_time = microtime(true);
-
+//        $this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime();
         //if ($agent_input == null) {$agent_input = "";}
 
         $this->agent_input = $agent_input;
 
         $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
+        //$this->start_time = $this->thing->elapsed_runtime();
+        $this->thing_report['thing'] = $thing;
 
         $this->agent_prefix = 'Agent "Headcode" ';
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
 
-
-        // I'm not sure quite what the node_list means yet
-        // in the context of headcodes.
-        // At the moment it seems to be the headcode routing.
-        // Which is leading to me to question whether "is"
-        // or "Place" is the next Agent to code up.  I think
-        // it will be "Is" because you have to define what 
-        // a "Place [is]".
- //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
- //       $this->thing->choice->load('headcode');
-
+        // Keywords which are accepted/expected to be headcode related.
         $this->keywords = array('next', 'accept', 'clear', 'drop','add','new');
 
-//        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
-
-
-        // So around this point I'd be expecting to define the variables.
-        // But I can do that in each agent.  Though there will be some
-        // common variables?
-
-        // So here is building block of putting a headcode in each Thing.
-        // And a little bit of work on a common variable framework. 
-
-        // Factor in the following code.
-
-//                'headcode' => array('default run_time'=>'105',
-//                                'negative_time'=>'yes'),
-
-                //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
         $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
 
         // But for now use this below.
@@ -125,16 +98,6 @@ class Headcode
         // Agent variables
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
 
-//        $this->thing->log('<pre> Agent "Headcode" running on Thing '. $this->thing->nuuid . '.</pre>');
-//        $this->thing->log('<pre> Agent "Headcode" received this Thing "'.  $this->subject . '".</pre>');
-
-//$split_time = $this->thing->elapsed_runtime();
-//        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
-//        $this->head_code = $this->headcode->getVariable('head_code', null);
-
-//$this->get();
-
-//$this->thing->log( $this->agent_prefix .' set up variables in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.' );
 
         $this->state = null; // to avoid error messages
 
@@ -150,18 +113,12 @@ class Headcode
         }
         $this->set();
 
-//		$this->thing->log('<pre> Agent "Headcode" completed</pre>');
-
 
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-
         $this->thing_report['log'] = $this->thing->log;
 
-
-
-		return;
-
-		}
+        return;
+    }
 
 
     function set()
@@ -186,13 +143,11 @@ class Headcode
         $this->headcode->setVariable("quantity", $this->quantity);
         $this->headcode->setVariable("available", $this->available);
 
-
-
         return;
     }
 
-    function nextHeadcode() {
-
+    function nextHeadcode()
+    {
         $this->thing->log("next headcode");
         // Pull up the current headcode
         $this->get();
@@ -212,7 +167,6 @@ class Headcode
 
 
         return $this->available;
-
 
     }
 
@@ -272,9 +226,8 @@ class Headcode
 
     }
 
-
-    function getHeadcodes() {
-
+    function getHeadcodes()
+    {
         $this->headcode_list = array();
         // See if a headcode record exists.
         $findagent_thing = new FindAgent($this->thing, 'headcode');
@@ -353,16 +306,13 @@ class Headcode
         }
 
         $this->get();
- 
     }
 
-
-    function makeHeadcode($head_code = null) {
-
+    function makeHeadcode($head_code = null)
+    {
         $head_code = $this->getVariable('head_code', $head_code);
 
         $this->thing->log('Agent "Headcode" will make a headcode for ' . $head_code . ".");
-
 
         $ad_hoc = true;
 
@@ -435,13 +385,10 @@ class Headcode
         if ($input == null) {$this->headcode_time = $headcode_time;}
 
         return $headcode_time;
-
-
-
     }
 
-    function getEndat() {
-
+    function getEndat()
+    {
         if (($this->run_at != "x") and ($this->quantity != "x")) {
             $this->end_at = $this->thing->json->time(strtotime($this->run_at . " " . $this->quantity . " minutes"));
         } else {
@@ -451,8 +398,8 @@ class Headcode
         return $this->end_at;
     }
 
-    function getAvailable() {
-
+    function getAvailable()
+    {
         // This proto-typical headcode manages (available) time.
         // From start_at and current_time we can calculate elapsed_time.
 
@@ -526,10 +473,12 @@ class Headcode
             $this->head_codes = array();
         }
 
-        $pattern = "|\d[A-Za-z]{1}\d{2}|";
+        //$pattern = "|\d[A-Za-z]{1}\d{2}|";
+        $pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
 
         preg_match_all($pattern, $input, $m);
         $this->head_codes = $m[0];
+
 
         return $this->head_codes;
     }
@@ -768,6 +717,8 @@ if (!isset($this->index)) {
         // Is there a headcode in the provided datagram
         $this->extractHeadcode($input);
 //var_dump($this->head_code);
+        // Bail at this point if only a headcode check is needed.
+        if ($this->agent_input == "extract") {return;}
 
         $this->headcode_id = new Variables($this->thing, "variables headcode " . $this->from);
 
@@ -840,7 +791,6 @@ if (!isset($this->index)) {
 
 
     default:
-
                                         }
 
                                 }
@@ -854,7 +804,6 @@ if (!isset($this->index)) {
 // might have extracted information in these variables.
 
 // $uuids, $head_codes, $this->run_at, $this->run_time
-
 
 
     if ($this->isData($this->head_code)) {

@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-use QR_Code\QR_Code;
+//use QR_Code\QR_Code;
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -115,6 +115,13 @@ class Duplicable
         $agent = new Uuid($this->thing, "uuid");
         $this->uuid_png = $agent->PNG_embed;
     }
+
+    function getQuickresponse()
+    {
+        $agent = new Qr($this->thing, "qr");
+        $this->quick_response_png = $agent->PNG_embed;
+    }
+
 
     function init()
     {
@@ -834,8 +841,12 @@ while ($i<=$max_i) {
 
         $this->txt = "".$this->uuid.""; // Pure uuid.  
 
-        $this->getUuid();
-        $pdf->Image($this->uuid_png,175,5,30,30,'PNG');
+        //$this->getUuid();
+        //$pdf->Image($this->uuid_png,175,5,30,30,'PNG');
+
+        $this->getQuickresponse();
+        $pdf->Image($this->quick_response_png,175,5,30,30,'PNG');
+
 
         $pdf->SetTextColor(0,0,0);
 
@@ -858,11 +869,14 @@ while ($i<=$max_i) {
         $pdf->SetXY(15, 20);
         $pdf->Write(0, $text);
 
-
+/*
         ob_start();
         $image = $pdf->Output('', 'I');
         $image = ob_get_contents();
         ob_clean();
+*/
+          $image = $pdf->Output('', 'S');
+
 
         $this->thing_report['pdf'] = $image;
 

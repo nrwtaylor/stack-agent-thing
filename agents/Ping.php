@@ -11,7 +11,6 @@ class Ping {
 
 
     function __construct(Thing $thing) {
-
                 $this->thing = $thing;
                 $this->agent_name = 'ping';
 
@@ -136,7 +135,6 @@ class Ping {
 $this->thing_report['keyword'] = 'pingback';
 //$this->thing_report['info'] = 'Ping agent pinged back';
 $this->thing_report['help'] = 'Useful for checking the stack.';
-
 
 
 		return $this->thing_report;

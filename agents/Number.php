@@ -126,6 +126,17 @@ $this->test_count = null;
         return $this->numbers;
     }
 
+    function extractNumber()
+    {
+        $this->number = false; // No numbers.
+        if (!isset($this->numbers)) {$this->extractNumbers();}
+
+        if (isset($this->numbers[0])) {
+            $this->number = $this->numbers[0];
+        }
+
+    }
+
 
 	public function respond()
     {
@@ -192,7 +203,7 @@ $this->test_count = null;
         //}
 
             $this->extractNumbers($input);
-
+        $this->extractNumber();
 
 //var_dump($input);
         // Then look for messages sent to UUIDS

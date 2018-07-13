@@ -176,6 +176,8 @@ class Similar
 
         $this->matches = array();
 
+        if ($findagent_thing->thing_report['things'] != true) {
+
         foreach ($findagent_thing->thing_report['things'] as $thing) {
         foreach ($findagent_thing->thing_report['things'] as $thing2) {
 
@@ -199,7 +201,7 @@ class Similar
             }
         }
         }
-
+        }
 
         if ($this->similarity >= 2) {
             $this->flag = "red";

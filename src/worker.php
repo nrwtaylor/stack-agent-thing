@@ -14,10 +14,38 @@ echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 $worker->addServer();
 $uuid = null;
+$name = "call_agent";
+$task = "Nrwtaylor\StackAgentThing\call_agent_function";
 $worker->addFunction("call_agent", "Nrwtaylor\StackAgentThing\call_agent_function", $uuid);
+
+/*
+$worker->addFunction($name, function() use($task) {
+     try {
+         $result = call_user_func_array($task, func_get_args());
+     } catch(\Exception $e) {
+         $result = GEARMAN_WORK_EXCEPTION;
+         echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+         // Send exception to Exceptional so it can be logged with details
+         Exceptional::handle_exception($e, FALSE);
+     }
+
+     return $result;
+});
+*/
+
+// This would limit the length of any one worker.
+// This is handled by supervisor
+//$worker->setTimeout(1000);
 
 while ($worker->work()){
     echo "\nWaiting for a job\n";
+
+//  if ($worker->returnCode() != GEARMAN_SUCCESS)
+//  {
+//    echo "return_code: " . $worker->returnCode() . "\n";
+//  }
+//    echo "\nGearman return code " . $worker->returnCode() . "\n";
+
 }
 
 function call_agent_function($job)
@@ -37,6 +65,7 @@ function call_agent_function($job)
     }
 
     echo "worker nuuid " . $thing->nuuid."\n";
+    echo "worker uuid " . $thing->uuid."\n";
     echo "worker timestamp " . $thing->microtime(). "\n";
     echo "job timestamp " . $thing->thing->created_at. "\n";
 
@@ -44,29 +73,21 @@ function call_agent_function($job)
     echo "worker call agent\n";
     $t = new Agent($thing);
 
-    echo $t->thing_report['sms'] . "\n";
+    if (!isset($t->thing_report['sms'])) {
+        echo "WORKER | No SMS message found.". "\n";
+    } else {
+        echo $t->thing_report['sms'] . "\n";
+    }
+
+    // Gearman can't pass a raw image variable
+    // Needs to be base64 encoded first
+    // Devstask PNG (to convert $image to PNG)
+    if (isset($t->thing_report['png'])) {
+        $t->thing_report['png'] = base64_encode($t->thing_report['png']);
+    }
 
     echo "worker ran for " . number_format($thing->elapsed_runtime() - $start_time) . "ms\n\n";
 
     return json_encode($t->thing_report);
 }
-/*
-function call_agent_function_old($job)
-{
-
-var_dump($job->workload());
-
-    $uuid = $job->workload();
-
-    //$thing = (object) json_decode($thing);//
-    $thing = new Thing($uuid);
-    $thing->flagRed();
-    //$t->Create("from","to","gearman test");
-
-    $t = new Agent($thing);
-
-//    $t->thing_report;
-  return json_encode($t->thing_report);
-}
-*/
 ?>

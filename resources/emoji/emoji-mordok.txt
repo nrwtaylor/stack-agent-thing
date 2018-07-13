@@ -2087,7 +2087,7 @@ sky & weather
 1920 	U+2614 	☔ 	umbrella with rain drops 	clothing | drop | rain | umbrella | umbrella with rain drops
 1921 	U+26F1 	⛱ 	umbrella on ground 	rain | sun | umbrella | umbrella on ground
 1922 	U+26A1 	⚡ 	high voltage 	danger | electric | electricity | high voltage | lightning | voltage | zap
-1923 	U+2744 	❄ 	snowflake 	cold | snow | snowflake
+1923 	U+2744 	❄ 	snowflake 	snowflake | cold | snow | snowflake
 1924 	U+2603 	☃ 	snowman 	cold | snow | snowman
 № 	Code 	Sample 	CLDR Short Name 	Other Keywords
 1925 	U+26C4 	⛄ 	snowman without snow 	cold | snow | snowman | snowman without snow
@@ -2132,7 +2132,7 @@ sport
 1959 	U+1F3C8 	🏈 	american football 	american | american football | ball | football
 1960 	U+1F3C9 	🏉 	rugby football 	ball | football | rugby | rugby football
 1961 	U+1F3BE 	🎾 	tennis 	ball | racquet | tennis
-1962 	U+1F3B1 	🎱 	pool 8 ball 	eightball | 8 | 8 ball | ball | billiard | eight | game | pool 8 ball
+1962 	U+1F3B1 	🎱 	pool 8 ball 	snowflake | eightball | 8 | 8 ball | ball | billiard | eight | game | pool 8 ball
 1963 	U+1F3B3 	🎳 	bowling 	ball | bowling | game
 1964 	U+1F3CF 	🏏 	cricket game 	ball | bat | cricket game | game
 1965 	U+1F3D1 	🏑 	field hockey 	ball | field | field hockey | game | hockey | stick

@@ -6,9 +6,9 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-// start the clock
-$app->thing_report['start_time'] = microtime(true);
-
+//ini_set("max_execution_time",1 ); //s
+//ini_set("max_input_time", 2); //s
+//set_time_limit(2);
 
 // API group
 $app->group('/api', function () use ($app) {
@@ -50,17 +50,22 @@ $app->group('/api', function () use ($app) {
         // Operational end-point for NEXMO
         $app->get('/gearman', function ($request, $response, $args)  {
 
+
             $body = $request->getParsedBody();
 
             //echo "meep";
-                $arr = json_encode(array("to"=>"snow", "from"=>"snow", "subject"=>"snow"));
+//                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
+                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"snowflake", "subject"=>"snowflake"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
-                $client->doNormal("call_agent", $arr);
-                //$client->doHighBackground("call_agent", $arr);
-echo "Gearman worker called";
-var_dump($client);
+//$client->addServers("10.0.0.24,10.0.0.25");
+
+//$client->addServer("10.0.0.24");
+//$client->addServer('10.0.0.25');
+                //$client->doNormal("call_agent", $arr);
+                $client->doHighBackground("call_agent", $arr);
+                //echo "Gearman worker called";
 
             return;
 // $response->withHeader('HTTP/1.0 200 OK')
@@ -106,10 +111,12 @@ var_dump($client);
 
                 $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
 
-                $client= new GearmanClient();
+                $client= new \GearmanClient();
                 $client->addServer();
-                //$client->doNormal("call_agent", $arr);
-                $client->doHighBackground("call_agent", $arr);
+//$client->addServer("10.0.0.24");
+//$client->addServer("10.0.0.25");
+                $client->doNormal("call_agent", $arr);
+                //$client->doHighBackground("call_agent", $arr);
 
             } else {
                 $agent = new Agent($new_thing);
@@ -283,8 +290,10 @@ var_dump($client);
                 if ($queue) {
 
                     $arr = json_encode(array("to"=>$sender_id, "from"=>$page_id, "subject"=>$text));
-                    $client= new GearmanClient();
+                    $client= new \GearmanClient();
                     $client->addServer();
+//$client->addServer("10.0.0.24");
+//$client->addServer("10.0.0.25");
                     //$client->doNormal("call_agent", $arr);
                     $client->doHighBackground("call_agent", $arr);
 
@@ -421,7 +430,10 @@ $web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_
 
 // Route handler for everything after the /
 $app->get('[/{params:.*}]', function ($request, $response, $args)  {
+//    ini_set("max_input_time", 2); //s
+//set_time_limit(2);
 
+    //ini_set("max_execution_time",1 ); //s
     //$actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     $actual_link = $_SERVER['REQUEST_URI'];
 
@@ -432,7 +444,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
     //  $params = $args['params'];
 
     $thing_report['start_time'] = microtime(true);
-    //$thing_report['start_time'] = $app->thing_report['start_time'];
 
     // Add any post ? mark text to the command
     $input_array = $request->getParams();
@@ -559,6 +570,19 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
             $content = $agent->thing_report[strtolower($ext_name)];
 
+    if (preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $content)) {
+    //   //return TRUE;
+    //} else {
+        $content = base64_decode($content);
+    }
+       //return FALSE;
+    //}
+
+
+            // Assume that image is base64 encoded.
+            // Non base64 encoding doesn't pass through Gearman
+            //$content = base64_decode($content);
+
             if (($content === FALSE) or ($content == null)) {
                 $response->write(false);
                 return $response->withHeader('Content-Type', $content_types[$ext_name]);
@@ -568,7 +592,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             return $response->withHeader('Content-Type', $content_types[$ext_name]);
 
         case true:
-
             // Everything else
 
             $thing = new Thing($uuid);
@@ -590,8 +613,10 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             if ($uuid == null) {
                 $thing->Create("web@stackr.ca", "agent", $command);
             }
-
             $agent = new Agent($thing, $command);
+
+
+            //$agent = new Agent($thing);
             $thing_report = $agent->thing_report;
 
             $thing_report['filename'] = $last;
@@ -611,15 +636,16 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             }
 
             if ($channel == "email") {
-                if (!isset($thing_report['message'])) {
-                    if (!isset($thing_report['sms'])) {
-                        $thing_report['message'] = null;
-                    } else {
-                        $thing_report['message'] = $thing_report['sms'];
-                    }
-                }
+                //if (!isset($thing_report['message'])) {
+                //    if (!isset($thing_report['sms'])) {
+                //        $thing_report['message'] = null;
+                //    } else {
+                //        $thing_report['message'] = $thing_report['sms'];
+                //    }
+                //}
+                $makeemail_agent = new Makeemail($thing, $thing_report);
 
-                $makeemail_agent = new Makeemail($thing, $thing_report['message']);
+//                $makeemail_agent = new Makeemail($thing, $thing_report['message']);
                 $this->email_message = $makeemail_agent->email_message;
                 $thing_report['email'] = $makeemail_agent->email_message;
             }

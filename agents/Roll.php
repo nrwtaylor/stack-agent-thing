@@ -9,8 +9,9 @@ class Roll {
 
 	public $var = 'hello';
 
-
-    function __construct(Thing $thing, $agent_input = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->start_time = $thing->elapsed_runtime(); 
 
         $this->agent_input = $agent_input;
 
@@ -18,11 +19,9 @@ class Roll {
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-//      This is how old roll.php is.
-//		$thingy = $thing->thing;
 		$this->thing = $thing;
 
-         $this->thing_report  = array("thing"=>$this->thing->thing);
+        $this->thing_report['thing']  = $thing;
 
         $this->start_time = $this->thing->elapsed_runtime();
 
@@ -81,18 +80,12 @@ class Roll {
             $this->thing->json->writeVariable( array("roll", "roll"), $this->roll );
             $this->thing->json->writeVariable( array("roll", "result"), $this->result );
 
-
-//        $this->readSubject();
-        
-
-        $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
         }
-        //$this->set();
-        //]
 
-        if ($this->agent_input == null) {$this->Respond();}
+        $this->respond();
 
-        $this->thing->log($this->agent_prefix . ' set response. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+        $this->thing->log($this->agent_prefix . ' set response.', "OPTIMIZE") ;
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
@@ -121,7 +114,7 @@ class Roll {
 		$roll = -1;
 
 
-        $this->sms_message = "ROLL | ";
+//        $this->sms_message = "ROLL | ";
 
 
 // This choice element is super slow.  It 
@@ -151,6 +144,8 @@ $choices = false;
         $this->makeChoices();
         $this->makeWeb();
 
+        $this->makeEmail();
+
  		$this->thing_report["info"] = "This rolls a dice.  See 
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
         if (!isset($this->thing_report['help'])) {
@@ -158,12 +153,13 @@ $choices = false;
         }
 
 		//$this->thing_report['sms'] = $this->sms_message;
-//		$this->thing_report['message'] = $this->sms_message;
+		$this->thing_report['message'] = $this->sms_message;
 
 
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
-
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
 
 		return $this->thing_report;
 
@@ -182,36 +178,25 @@ $choices = false;
 
     }
 
-//function makeWeb() {
-//}
+    function makeEmail() {
 
-    function makeWeb() {
-
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/roll';
 
         $this->node_list = array("roll"=>array("roll d20", "roll"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
-        $choices = $this->thing->choice->makeLinks('web');
-/*
-        if (isset($this->result[1]['roll'])) {
-            $alt_text = "Rolled " . $this->roll . " and got " . $this->result[1]['roll'] . ".";
-        } else {
-            $alt_text = "Roll result not available";
-        }
-*/
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "roll");
+        $choices = $this->thing->choice->makeLinks('roll');
+
         $web = '<a href="' . $link . '">';
 //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
 //                width="100" height="100" 
-//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
+//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.tx$
 
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
 
-if (!isset($this->html_image)) {$this->makePNG();}
+        if (!isset($this->html_image)) {$this->makePNG();}
 
         $web .= $this->html_image;
-
-
 
         $web .= "</a>";
         $web .= "<br>";
@@ -223,11 +208,33 @@ if (!isset($this->html_image)) {$this->makePNG();}
         $web .= "<br>";
 
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report['email'] = $web;
     }
 
 
 
+    function makeWeb() {
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+
+        $this->node_list = array("roll"=>array("roll d20", "roll"));
+        // Make buttons
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
+        $choices = $this->thing->choice->makeLinks('web');
+
+        if (!isset($this->html_image)) {$this->makePNG();}
+
+        $web = '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web .= "<br>";
+
+        //$received_at = strtotime($this->thing->thing->created_at);
+        $ago = $this->thing->human_time ( time() - $this->refreshed_at );
+        $web .= "Rolled about ". $ago . " ago.";
+
+        $web .= "<br>";
+
+        $this->thing_report['web'] = $web;
+    }
 
     function makeSMS()
     {
@@ -263,7 +270,7 @@ if (!isset($this->html_image)) {$this->makePNG();}
         }
 
 
-
+        $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
 
     }
@@ -286,9 +293,7 @@ if (!isset($this->html_image)) {$this->makePNG();}
 
         $this->thing_report['message'] = $message;
 
-
         return;
-
     }
 
 
@@ -315,12 +320,11 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 */
 
 
-    public function makePNG()
+    public function makeImage()
     {
-
+        //if (isset($this->image)) {return;}
         // here DB request or some processing
 
-        if (count($this->result) != 2) {return;}
 
         $number = $this->result[1]['roll'];
 
@@ -333,8 +337,10 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         $grey = imagecolorallocate($image, 128, 128, 128);
 
         imagefilledrectangle($image, 0, 0, 125, 125, $white);
+
         $textcolor = imagecolorallocate($image, 0, 0, 0);
 
+        if (count($this->result) != 2) {$this->image = $image;return;}
 
 
         if ($this->roll == "d6") {
@@ -368,7 +374,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
         } else {
 
-            if ($number>99) {return;}
+            if ($number>99) {$this->image = $image;return;}
 
             if (false) {
 
@@ -411,14 +417,42 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             imagestring($image, 2, 100, 0, $this->roll, $textcolor);
         }
 
-        // Save the image
-        //header('Content-Type: image/png');
-        //imagepng($im);
+        $this->image = $image;
+    }
+
+    public function makePNG()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+
+        $agent = new Png($this->thing, "png");
+        $this->makeImage();
+
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+
+        //$this->thing_report['png'] = $agent->PNG;
+        $this->thing_report['png'] = $agent->image_string;
+
+    }
+
+/*
+    public function makePNG()
+    {
+        if (!isset($this->image)) {$this->makeImage();}
 
         ob_start();
-        imagepng($image);
+        imagepng($this->image);
         $imagedata = ob_get_contents();
+        ob_clean();
         ob_end_clean();
+
+//var_dump($imagedata);
+//$imagedata = null;
+        $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
+        $this->PNG = $imagedata;
 
         $this->thing_report['png'] = $imagedata;
 
@@ -431,10 +465,11 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
 //        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
+
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata). '"
                 width="100" height="100" 
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
-
+        //$response = null;
 
         $this->html_image = $response;
 
@@ -443,9 +478,11 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 //                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
 
 
-//        $this->thing_report['png'] = $image;
+        //$this->thing_report['png'] = null;
+//        imagedestroy($image);
 
-        imagedestroy($image);
+
+        return $this->thing_report['png'];
 
         return $response;
 
@@ -454,7 +491,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
 //       return;
     }
-
+*/
 
     function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
@@ -648,6 +685,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         $this->sum = $result;
 
 		return $result;
-        }
-
     }
+
+}

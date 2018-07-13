@@ -23,7 +23,7 @@ class Agent {
 		// and create the most appropriate agent to respond to it.
 
 		$this->thing = $thing;
-        $this->thing->elapsed_runtime();
+//        $this->thing->elapsed_runtime();
 		$this->agent_name = 'agent';
 
 		// So I could call
@@ -73,12 +73,16 @@ and the user UX/UI
 }
 */
 
-        $thing_report = $this->readSubject();
+        //$this->thing_report = 
+        $this->readSubject();
         if ($this->agent_input == null) {
             $this->respond();
         }
 
-		$this->thing_report = $thing_report;
+        // Following line stops Gearman error, but turns off images obvs Jul 11, 2018 
+        //$this->thing_report['png'] = null;
+
+		//$this->thing_report = $thing_report;
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
@@ -134,7 +138,6 @@ and the user UX/UI
                 $ngrams[] = $ngram;
             }
         }
-
         return $ngrams;
     }
 
@@ -180,9 +183,9 @@ and the user UX/UI
             $this->thing->log( 'Agent "Agent" timeout triggered. Timestamp ' . number_format($this->thing->elapsed_runtime()) );
 
             $timeout_thing = new Timeout($this->thing, $response);
-            $thing_report = $timeout_thing->thing_report;
+            $this->thing_report = $timeout_thing->thing_report;
 
-            return $thing_report;
+            return $this->thing_report;
         }
 
         return false;
@@ -207,43 +210,43 @@ and the user UX/UI
         if (strpos($this->agent_input, 'receipt') !== false) {
             $this->thing->log( 'Agent created a Receipt agent' );
             $receipt_thing = new Receipt($this->thing);
-            $thing_report = $receipt_thing->thing_report;
+            $this->thing_report = $receipt_thing->thing_report;
 
-            return $thing_report;
+            return $this->thing_report;
         }
 
         if (strpos($this->agent_input, 'flag') !== false) {
             $this->thing->log( '<pre> Agent created a Flag agent</pre>' );
             $flag_thing = new Flag($this->thing);
-            $thing_report = $flag_thing->thing_report;
+            $this->thing_report = $flag_thing->thing_report;
 
-            return $thing_report;
+            return $this->thing_report;
         }
 
         if (strpos($this->agent_input, 'satoshi') !== false) {
 
             $this->thing->log( '<pre> Agent created a Satoshi agent</pre>' );
-                        $satoshi_thing = new Satoshi($this->thing);
-                        $thing_report = $satoshi_thing->thing_report;
+            $satoshi_thing = new Satoshi($this->thing);
+            $this->thing_report = $satoshi_thing->thing_report;
 
-                        return $thing_report;
+            return $this->thing_report;
 
-                }
+         }
 
-                if (strpos($this->agent_input, 'iching') !== false) {
+         if (strpos($this->agent_input, 'iching') !== false) {
 
                 $this->thing->log( '<pre> Agent created a iChing agent</pre>' );
                         $iching_thing = new Iching($this->thing);
-                        $thing_report = $iching_thing->thing_report;
-                        return $thing_report;
+                        $this->thing_report = $iching_thing->thing_report;
+                        return $this->thing_report;
                 }
 
                 if (strpos($this->agent_input, 'whatis') !== false) {
 
                 $this->thing->log( '<pre> Agent created a Whatis agent</pre>' );
                         $whatis_thing = new Whatis($this->thing);
-                        $thing_report = $whatis_thing->thing_report;
-                        return $thing_report;
+                        $this->thing_report = $whatis_thing->thing_report;
+                        return $this->thing_report;
                 }
 
 
@@ -251,17 +254,16 @@ and the user UX/UI
 
                 $this->thing->log( '<pre> Agent created a Train agent</pre>' );
                         $train_thing = new Train($this->thing);
-                        $thing_report = $train_thing->thing_report;
-                        return $thing_report;
+                        $this->thing_report = $train_thing->thing_report;
+                        return $this->thing_report;
                 }
                 if (strpos($this->agent_input, 'snowflake') !== false) {
 
                 $this->thing->log( '<pre> Agent created a Snowflake agent</pre>' );
                         $snowflake_thing = new Snowflake($this->thing);
-                        $thing_report = $snowflake_thing->thing_report;
-                        return $thing_report;
+                        $this->thing_report = $snowflake_thing->thing_report;
+                        return $this->thing_report;
                 }
-
 
 
 
@@ -270,20 +272,20 @@ and the user UX/UI
         $this->thing->log( 'Agent "Agent" ignored "cronhandler run".' );
             $this->thing->flagGreen();
             //$thing_report['thing'] = $this->thing;
-            $thing_report['thing'] = $this->thing->thing;
-            $thing_report['info'] = 'Mordok ignored a "cronhandler run" request.';
+            $this->thing_report['thing'] = $this->thing->thing;
+            $this->thing_report['info'] = 'Mordok ignored a "cronhandler run" request.';
             //$usermanager_thing = new Optout($this->thing);
             //$thing_report = $usermanager_thing->thing_report;
-            return $thing_report;
+            return $this->thing_report;
         }
 
         // Second.  Ignore web view flags for now.
         if (strpos($input, 'web view') !== false) {
         $this->thing->log( 'Agent "Agent" ignored "web view".' );
             $this->thing->flagGreen();
-            $thing_report['thing'] = $this->thing->thing;
-            $thing_report['info'] = 'Mordok ignored a "web view" request.';
-            return $thing_report;
+            $this->thing_report['thing'] = $this->thing->thing;
+            $this->thing_report['info'] = 'Mordok ignored a "web view" request.';
+            return $this->thing_report;
         }
 
         // Third.  Forget.
@@ -296,10 +298,10 @@ and the user UX/UI
                 $this->thing->log( 'Agent "Agent" did not ignore a forget".' );
                 //$this->thing->flagGreen();
                 $this->thing->Forget();
-                $thing_report = false;
-                $thing_report['info'] = 'Agent did not ignore a "forget" request.';
-                $thing_report['sms'] = "FORGET | That Thing has been forgotten.";
-                return $thing_report;
+                $this->thing_report = false;
+                $this->thing_report['info'] = 'Agent did not ignore a "forget" request.';
+                $this->thing_report['sms'] = "FORGET | That Thing has been forgotten.";
+                return $this->thing_report;
             }
         }
 
@@ -314,7 +316,7 @@ and the user UX/UI
                 $this->thing->log( 'Agent "Agent" has heard this three times.' );
             }
 
-            $thing_report = $beetlejuice_thing->thing_report;
+            $this->thing_report = $beetlejuice_thing->thing_report;
             //return $thing_report;
          }
 
@@ -380,8 +382,8 @@ and the user UX/UI
                 }
 
 
-                $thing_report = $t->thing_report;
-                return $thing_report;
+                $this->thing_report = $t->thing_report;
+                return $this->thing_report;
 
             }
 
@@ -412,12 +414,14 @@ and the user UX/UI
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
         $emoji_thing = new Emoji($this->thing, "emoji");
-        $thing_report = $emoji_thing->thing_report;
+        $this->thing_report = $emoji_thing->thing_report;
+
 
         if (isset($emoji_thing->emojis)) {
             // Emoji found.
             $input = $emoji_thing->translated_input;
         }
+
 
 		$this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>', "DEBUG");
 
@@ -430,29 +434,29 @@ and the user UX/UI
 		if (strpos($input, 'optin') !== false) {
 		$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
 			$usermanager_thing = new Usermanager($this->thing);
-			$thing_report = $usermanager_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $usermanager_thing->thing_report;
+			return $this->thing_report;
 		}
 
 		if (strpos($input, 'optout') !== false) {
 		$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
 			$usermanager_thing = new Optout($this->thing);
-			$thing_report = $usermanager_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $usermanager_thing->thing_report;
+			return $this->thing_report;
 		}
 
 		if (strpos($input, 'opt-in') !== false) {
 			$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
 			$usermanager_thing = new Optin($this->thing);
-			$thing_report = $usermanager_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $usermanager_thing->thing_report;
+			return $this->thing_report;
 		}
 
 		if (strpos($input, 'opt-out') !== false) {
 		$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
 			$usermanager_thing = new Optout($this->thing);
-			$thing_report = $usermanager_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $usermanager_thing->thing_report;
+			return $this->thing_report;
 		}
 
 
@@ -465,17 +469,18 @@ and the user UX/UI
             $this->thing->log('Agent "Agent" found a  UUID in address.', "INFORMATION");
 
             $uuid_thing = new Uuid($this->thing);
-            $thing_report = $uuid_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $uuid_thing->thing_report;
+            return $this->thing_report;
         }
 
         // Is it sent to a headcode?
-        $pattern = "|[0-9]{1}[A-Za-z]{1}[0-9]{2}|";
+        // Refactor to check this pattern with Headcode
+        $pattern = "|\b[0-9]{1}[A-Za-z]{1}[0-9]{2}\b|";
         if (preg_match($pattern, $this->to)) {
             $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
             $headcode_thing = new Headcode($this->thing);
-            $thing_report = $headcode_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $headcode_thing->thing_report;
+            return $this->thing_report;
         }
 
 
@@ -485,8 +490,8 @@ and the user UX/UI
         if (strpos($input, 'robots') !== false) {
         $this->thing->log( '<pre> Agent created a Robot agent</pre>', "INFORMATION" );
             $robot_thing = new Robot($this->thing);
-            $thing_report = $robot_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $robot_thing->thing_report;
+            return $this->thing_report;
         }
 
 
@@ -510,7 +515,6 @@ and the user UX/UI
             $arr = explode(' ' ,$this->agent_input);
         }
 
-
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
 		//set_error_handler("warning_handler", E_WARNING);
 
@@ -521,10 +525,10 @@ and the user UX/UI
             // Don't allow agent to be recognized
             if (strtolower($keyword) == 'agent') {continue;}
 
-        	$agent_class_name = ucfirst($keyword);
+        	$agent_class_name = ucfirst(strtolower($keyword));
 
             // Can probably do this quickly by loading path list into a variable
-            // and looping, or a direct namespance check.
+            // and looping, or a direct namespace check.
             $filename = $this->agents_path .  $agent_class_name . ".php";
             if (file_exists($filename)) {
                 $agents[] = $agent_class_name;  
@@ -560,6 +564,7 @@ var_dump($filename);
 exit();
 */
 		}
+
 		//set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
 		restore_error_handler();
 
@@ -579,6 +584,13 @@ exit();
             if ($agent_class_name == "Thing") {
                 continue;
             }
+
+            // And Email ... because email\uuid\roll otherwise goes to email
+            if ((count($agents) > 1) and ($agent_class_name == "Email")) {
+                continue;
+            }
+
+
 			try {
 
 // devstack This needs to be refactored out.
@@ -592,7 +604,7 @@ exit();
 				//$agent = new $agent_class_name($this->thing);
                 $agent = new $agent_namespace_name($this->thing);
 
-				$thing_report = $agent->thing_report;
+				$this->thing_report = $agent->thing_report;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
                 //echo "Error meep<br>";      
@@ -611,7 +623,7 @@ exit();
 	    		continue;
 
 			}
-			return $thing_report;
+			return $this->thing_report;
 		}
 
         $this->thing->log( $this->agent_prefix .'did not find an Ngram agent to run.', "INFORMATION" );
@@ -635,9 +647,9 @@ exit();
 
         if ( (isset($emoji_thing->emojis)) and (count($emoji_thing->emojis)>0) ) {
             $emoji_thing = new Emoji($this->thing);
-            $thing_report = $emoji_thing->thing_report;
+            $this->thing_report = $emoji_thing->thing_report;
 
-            return $thing_report;
+            return $this->thing_report;
         }
 
 /*
@@ -663,13 +675,13 @@ var_dump($place_thing->place_name);
         $this->thing->log( $this->agent_prefix .'now looking at Transit Context.' );
 
         $transit_thing = new Transit($this->thing, "extract");
-        $thing_report = $transit_thing->thing_report;
+        $this->thing_report = $transit_thing->thing_report;
 
         if ((isset($transit_thing->stop)) and ($transit_thing->stop != false) ) {
 
             $translink_thing = new Translink($this->thing);
-            $thing_report = $translink_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $translink_thing->thing_report;
+            return $this->thing_report;
 
         }
 
@@ -677,14 +689,14 @@ var_dump($place_thing->place_name);
         $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
 
         $place_thing = new Place($this->thing, "extract");
-        $thing_report = $place_thing->thing_report;
+        $this->thing_report = $place_thing->thing_report;
 
         if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
 
         } else {
             $place_thing = new Place($this->thing);
-            $thing_report = $place_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $place_thing->thing_report;
+            return $this->thing_report;
         }
 
 
@@ -696,35 +708,34 @@ var_dump($place_thing->place_name);
 		if (strpos($input, 'nest maintenance') !== false) {
 
 			$ant_thing = new Ant($this->thing);
-			$thing_report = $ant_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $ant_thing->thing_report;
+			return $this->thing_report;
 		}
 
 		if (strpos($input, 'patrolling') !== false) {
 			$ant_thing = new Ant($this->thing);
-			$thing_report = $ant_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $ant_thing->thing_report;
+			return $this->thing_report;
 		}
 
 		if (strpos($input, 'foraging') !== false) {
 			$ant_thing = new Ant($this->thing);
-			$thing_report = $ant_thing->thing_report;
-			return $thing_report;
+			$this->thing_report = $ant_thing->thing_report;
+			return $this->thing_report;
 		}
 
+        $pattern = '/\?/';
 
-        if ( preg_match('/\?/',$this->subject,$matches) ) { // returns true with ? mark
+        if (preg_match($pattern, $input)) { // returns true with ? mark
             $this->thing->log( '<pre> Agent found a question mark and created a Question agent</pre>', "INFORMATION" );
-
             $question_thing = new Question($this->thing);
-            $thing_report = $question_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $question_thing->thing_report;
+            return $this->thing_report;
 
         }
-
         // Timecheck
-        $thing_report = $this->timeout(15000);
-        if ($thing_report != false) {return $thing_report;}
+        $this->thing_report = $this->timeout(15000);
+        if ($this->thing_report != false) {return $this->thing_report;}
 
 
         // Now pull in the context
@@ -751,8 +762,8 @@ var_dump($place_thing->place_name);
         }
 
 
-        $thing_report = $this->timeout(15000, $r);
-        if ($thing_report != false) {return $thing_report;}
+        $this->thing_report = $this->timeout(15000, $r);
+        if ($this->thing_report != false) {return $this->thing_report;}
 
         switch (strtolower($this->context)) {
             case 'group':
@@ -769,14 +780,14 @@ var_dump($place_thing->place_name);
                     // words ie ivor dave help
 
                     $group_thing = new Group($this->thing);
-                    $thing_report = $group_thing->thing_report;
+                    $this->thing_report = $group_thing->thing_report;
 
-                    return $thing_report;
+                    return $this->thing_report;
                 }
 
                 //Timecheck
-                $thing_report = $this->timeout(45000, "No matching groups found. ");
-                if ($thing_report != false) {return $thing_report;}
+                $this->thing_report = $this->timeout(45000, "No matching groups found. ");
+                if ($this->thing_report != false) {return $this->thing_report;}
 
                 break;
 
@@ -792,14 +803,14 @@ var_dump($place_thing->place_name);
                     // Assign to Train manager.
 
                     $headcode_thing = new Headcode($this->thing);
-                    $thing_report = $headcode_thing->thing_report;
+                    $this->thing_report = $headcode_thing->thing_report;
 
-                    return $thing_report;
+                    return $this->thing_report;
                 }
 
                 //Timecheck
-                $thing_report = $this->timeout(45000, "No matching headcodes found. ");
-                if ($thing_report != false) {return $thing_report;}
+                $this->thing_report = $this->timeout(45000, "No matching headcodes found. ");
+                if ($this->thing_report != false) {return $this->thing_report;}
 
                 break;
             case 'train':
@@ -813,14 +824,14 @@ var_dump($place_thing->place_name);
                     // Assign to Train manager.
 
                     $train_thing = new Train($this->thing);
-                    $thing_report = $train_thing->thing_report;
+                    $this->thing_report = $train_thing->thing_report;
 
-                    return $thing_report;
+                    return $this->thing_report;
                 }
 
                 //Timecheck
-                $thing_report = $this->timeout(45000, "No matching train headcodes found. ");
-                if ($thing_report != false) {return $thing_report;}
+                $this->thing_report = $this->timeout(45000, "No matching train headcodes found. ");
+                if ($this->thing_report != false) {return $this->thing_report;}
 
                 break;
 
@@ -836,13 +847,13 @@ var_dump($place_thing->place_name);
                     // Assign to Train manager.
 
                     $character_thing = new Character($this->thing);
-                    $thing_report = $character_thing->thing_report;
+                    $this->thing_report = $character_thing->thing_report;
 
-                    return $thing_report;
+                    return $this->thing_report;
                 }
 
-                $thing_report = $this->timeout(45000, "No matching characters found. ");
-                if ($thing_report != false) {return $thing_report;}
+                $this->thing_report = $this->timeout(45000, "No matching characters found. ");
+                if ($this->thing_report != false) {return $this->thing_report;}
 
 
                 break;
@@ -860,21 +871,21 @@ var_dump($place_thing->place_name);
                     // Assign to Train manager.
 
                     $place_thing = new Place($this->thing);
-                    $thing_report = $place_thing->thing_report;
+                    $this->thing_report = $place_thing->thing_report;
 
-                    return $thing_report;
+                    return $this->thing_report;
                 }
 
-                $thing_report = $this->timeout(45000, "No matching places found. ");
-                if ($thing_report != false) {return $thing_report;}
+                $this->thing_report = $this->timeout(45000, "No matching places found. ");
+                if ($this->thing_report != false) {return $this->thing_report;}
 
 
                 break;
 
 
             default:
-                $thing_report = $this->timeout(45000, "No matching context found. ");
-                if ($thing_report != false) {return $thing_report;}
+                $this->thing_report = $this->timeout(45000, "No matching context found. ");
+                if ($this->thing_report != false) {return $this->thing_report;}
 
         }
 
@@ -892,14 +903,14 @@ var_dump($place_thing->place_name);
        if ($this->alias != null) {
             // Alias was recognized.
            $alias_thing = new Alias($this->thing);
-           $thing_report = $alias_thing->thing_report;
+           $this->thing_report = $alias_thing->thing_report;
 
-           return $thing_report;
+           return $this->thing_report;
        }
 
         //Timecheck
-        $thing_report = $this->timeout(45000, "No matching aliases found. ");
-        if ($thing_report != false) {return $thing_report;}
+        $this->thing_report = $this->timeout(45000, "No matching aliases found. ");
+        if ($this->thing_report != false) {return $this->thing_report;}
 
 
 
@@ -911,14 +922,14 @@ var_dump($place_thing->place_name);
 
         if (strpos($input, 'mordok') !== false) {
             $mordok_thing = new Mordok($this->thing);
-            $thing_report = $mordok_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $mordok_thing->thing_report;
+            return $this->thing_report;
         }
 
         if ($this->from == "1327328917385978") { // Facebook Messenger Mordok
             $mordok_thing = new Mordok($this->thing);
-            $thing_report = $mordok_thing->thing_report;
-            return $thing_report;
+            $this->thing_report = $mordok_thing->thing_report;
+            return $this->thing_report;
         }
 
 
@@ -926,11 +937,11 @@ var_dump($place_thing->place_name);
 		$this->thing->log( '<pre> Agent "Agent" created a Redpanda agent.</pre>', "WARNING" );
 		$redpanda_thing = new Redpanda($this->thing);
 
-		$thing_report = $redpanda_thing->thing_report;
+		$this->thing_report = $redpanda_thing->thing_report;
 
 
 
-	return $thing_report;		
+	return $this->thing_report;		
 	}
 
 

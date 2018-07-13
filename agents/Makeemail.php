@@ -15,66 +15,88 @@ error_reporting(E_ALL);ini_set('display_errors', 1);
 // Allowing these core channel processing functions to be handled
 // in Composer packages
 
-class Makeemail {
+class makeEmail
+{
+    public $var = 'hello';
 
-        public $var = 'hello';
+    function __construct(Thing $thing, $input = null)
+    {
 
-    	function __construct(Thing $thing, $input = null) {
-//echo "meep";
-//exit();
+        $this->input = null;
+        $this->choices = false;
 
-	$this->input = $input;
+        switch (true) {
+            case (isset($input['message'])):
+                $this->input = $input['message'];
+                break;
+            case (isset($input['email'])):
+                $this->input = $input['email'];
+                break;
+            case (isset($input['sms'])):
+                $this->input = $input['sms'];
+                break;
+            case (!is_array($input)):
+                $this->input = $input;
+                break;
+            default:
+                $this->input = "No message provided.";
+        }
 
+/*        if (isset($input['message'])) {
+	        $this->input = $input['message'];
+        }
 
-                // Given a "thing".  Instantiate a class to identify and create the
-                // most appropriate agent to respond to it.
-                $this->thing = $thing;
-                $this->agent_name = 'makeemail';
+        } elseif (isset($input['sms'])) {
+            $this->input = $input['sms'];
 
-                // Get some stuff from the stack which will be helpful.
-                $this->web_prefix = $thing->container['stack']['web_prefix'];
-                $this->stack_state = $thing->container['stack']['state'];
-                $this->short_name = $thing->container['stack']['short_name'];
-                $this->word = $thing->container['stack']['word'];
+        } else {
+            if (!is_array($input)) {
+                $this->input = $input;
+            }
+        }
+*/
+        if (isset($input['choices'])) {
+            $this->choices = $input['choices'];
+        }
+        // Given a "thing".  Instantiate a class to identify and create the
+        // most appropriate agent to respond to it.
+        $this->thing = $thing;
+        $this->thing_report['thing'] = $thing;
 
+        $this->agent_name = 'makeemail';
 
-                // Create some short-cuts.
-                $this->uuid = $thing->uuid;
-                $this->to = $thing->to;
-                $this->from = $thing->from;
-                $this->subject = $thing->subject;
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->stack_state = $thing->container['stack']['state'];
+        $this->short_name = $thing->container['stack']['short_name'];
 
-                //$this->web_prefix = $this->thing->container['stack']['web_prefix'];
-                $this->mail_prefix = $this->thing->container['stack']['mail_prefix'];
-                $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
-                $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
+        // Create some short-cuts.
+        $this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
 
-                $this->unsubscribe = "unsub";
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
-//echo "meep";
+        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
+        $this->mail_prefix = $this->thing->container['stack']['mail_prefix'];
+        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+        $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
 
-	// routes passes image_name to make png as $input
-	$image_name = $input;
+        $this->unsubscribe = "unsub";
 
-	$this->thing_report = array('thing' => $thing);
-	//$this->thing_report['email'] = $this->agent_thing->thing_report['email'];
-	$from =false;
-$raw_message = false;
-$choices = false;
+        $from =false;
 
+        if (is_array($this->input)) {var_dump($this->input); exit();}
 
-	$email = $this->generateMultipart($from, $raw_message, $choices);
-        $this->email_message = $email;
+	    $email = $this->generateMultipart($from, $this->input, $this->choices);
 
-        $this->thing_report['email'] = $email['message'];
-
-
-
+        $this->thing_report['email'] = $this->email_message;
 
 	}
 
-	public function generateHTML($raw_message, $choices = null) {
-
+	public function generateHTML($raw_message, $choices = null)
+    {
 		$html_button_set = $choices['button'];
 		if ($choices == null) {$html_button_set = "";}
 
@@ -110,7 +132,7 @@ width="480" style="background-color:#ffffff">
             <tr>
                 <td class="headerContent" width="15" style="padding:0;text-align:right;vertical-align:bottom;"></td>
                 <td class="headerContent logo" width="126" height="28" style="padding:0;text-align:left;vertical-align:bottom;">
-                    <a href="' . $this->web_prefix . '"><img style="border:none;" src="' . $this->web_prefix . '' . $this->word . '.png" width="79" height="28"/></a>
+                    <a href="' . $this->web_prefix . '"><img style="border:none;" src="https://stackr.ca/stackr.png" width="79" height="28"/></a>
                 </td>
                 <td class="headerContent Thing" width="324" align="right" style="padding:0;text-align:right;vertical-align:bottom;">
                     <a href="' . $this->web_prefix . 'thing/' . $this->uuid . '/'. $this->to .'" style="color:#719e40;font-family:\'Helvetica Neue\', Arial, sans-serif;font-weight:normal;text-decoration:none; font-size: 12px; line-height:15px;">View this Thing in your browser</a>
@@ -191,7 +213,7 @@ Hi,
                 </td>
                 <td width="280">
                     <div style="line-height: 17px; padding: 12px 0 20px 0; text-align: right">
-                        <a href="' . $this->web_prefix . '"><img width="92" height="30" src="' . $this->web_prefix .'graphics/Apple_store.png"/></a> <a href="' . $this->web_prefix . '"><img width="92" height="30" src="' . $this->web_prefix . '/graphics/Google_store.png"/></a>
+                        <a href="https://stackr.ca/"><img width="92" height="30" src="https://stackr.ca/Apple_store.png"/></a> <a href="https://stackr.ca"><img width="92" height="30" src="https://stackr.ca/Google_store.png"/></a>
                     </div>
                 </td>
             </tr>
@@ -212,7 +234,7 @@ Hi,
 <td valign="top" style="padding:18px 18px 18px 18px; font-family:\'Helvetica Neue\', Arial, sans-serif; text-align: left;color:#6f6f6f;font-size:10px; line-height:16px; text-decoration:none; background-color:#efefef">
 
 You received this e-mail because of your participation in
-Stackr. In order not to receive anymore notifications from Stackr use the following <a href="' . $this->web_prefix . 'thing/' . $this->uuid . '/unsubscribe">link</a>.
+Stackr. In order not to receive anymore notifications from ' . $this->short_name . ' use the following <a href="' . $this->web_prefix . 'thing/' . $this->uuid . '/unsubscribe">link</a>.
 </td>
 </tr>
 </table>
@@ -243,23 +265,23 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 </body>
 </html>';
 
-
+$this->email_message = $message;
 	return $message;
 	}
 
 
 
-	function generateText($raw_message) {
+	function generateText($raw_message)
+    {
+        $message = strip_tags($raw_message);
+        $message .= strip_tags($this->mail_regulatory);
+        $message .= strip_tags($this->unsubscribe);
 
-		$message = strip_tags($raw_message);
-		$message .= strip_tags($this->mail_regulatory);
-		$message .= strip_tags($this->unsubscribe);
+        return $message;
+    }
 
-		return $message;
-		}
-
-	function generateMultipart($from, $raw_message, $choices = null) {
-
+	function generateMultipart($from, $raw_message, $choices = null)
+    {
         // useful in dev - to create the same message received by email.
         $this->generateHTML($raw_message, $choices);
 
@@ -268,28 +290,25 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 
 		//headers - specify your from email address and name here
 		//and specify the boundary for the email
-		$headers = "MIME-Version: 1.0\r\n";
-		$headers .= "From: ".$from . "\r\n";
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "From: ".$from . "\r\n";
 //		$headers .=	"Reply-To: ".$from . "\r\n";
-	    	$headers .= "X-Sender: stackr < admin" . $this->mail_postfix . " >\n";
-		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
+        $headers .= "X-Sender: stackr < admin@stackr.ca >\n";
+        $headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
 //		$headers .= "To: ".$this->from."\r\n";
-		$headers .= "Content-Type: multipart/mixed;boundary=\"PHP-mixed-" . $boundary . "\"" ."\r\n";
+        $headers .= "Content-Type: multipart/mixed;boundary=\"PHP-mixed-" . $boundary . "\"" ."\r\n";
 
-
-
-
-		$message = "--PHP-mixed-" . $boundary . "\r\n";
-		$message .= "Content-Type: multipart/alternative;boundary=\"PHP-alt-" . $boundary . "\"" . "\r\n\r\n";
+        $message = "--PHP-mixed-" . $boundary . "\r\n";
+        $message .= "Content-Type: multipart/alternative;boundary=\"PHP-alt-" . $boundary . "\"" . "\r\n\r\n";
 
 		//here is the content body
 		//$message .= "This is a MIME encoded message.";
-		$message .= "--PHP-alt-" . $boundary . "\r\n";
-		$message .= "Content-type: text/plain;charset=utf-8\r\n";
-		$message .= "Content-Transfer-Encoding: quoted-printable\r\n";
+        $message .= "--PHP-alt-" . $boundary . "\r\n";
+        $message .= "Content-type: text/plain;charset=utf-8\r\n";
+        $message .= "Content-Transfer-Encoding: quoted-printable\r\n";
 
 		//Plain text body
-		$message .= $this->generateText($raw_message) . "\r\n";
+        $message .= $this->generateText($raw_message) . "\r\n";
 
 		$message .= "--PHP-alt-" . $boundary . "\r\n";
 		$message .= "Content-type: text/html;charset=utf-8\r\n";
@@ -297,8 +316,6 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 
 		//Html body
 		$message .= quoted_printable_encode($this->generateHTML($raw_message, $choices)) . "\r\n";
-
-
 
 //		echo $choices['email_html'];
 
@@ -311,21 +328,16 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 		//$message .= 'Content-Disposition: attachment ';
 		//$message .= $attachment;
 
+        $message .= "--PHP-mixed-" .$boundary . "--";
 
-		$message .= "--PHP-mixed-" .$boundary . "--";
+        $m = array("message"=>$message,"headers"=>$headers);
+        $this->multipart = $m;
+        return $m;
+    }
 
-
-		$m = array("message"=>$message,"headers"=>$headers);
-
-		return $m;
-		}
-
-
-	public function sendGeneric($to,$from,$subject,$raw_message, $choices = null) {
-
+	public function sendGeneric($to,$from,$subject,$raw_message, $choices = null)
+    {
 		$from = $from .$this->mail_postfix;
-
-
 
 //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
 
@@ -363,11 +375,6 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 		return false;
 	}
 
-
-
-
 }
-
-
 
 ?>

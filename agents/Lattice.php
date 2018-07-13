@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-//use QR_Code\QR_Code;
+use QR_Code\QR_Code;
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -11,7 +11,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Snowflake
+class Lattice
 {
     public $var = 'hello';
 
@@ -19,7 +19,7 @@ class Snowflake
     {
         $this->agent_input = $agent_input;
 
-        $this->agent_name = "snowflake";
+        $this->agent_name = "lattice";
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
         $this->test= "Development code";
 
@@ -56,8 +56,6 @@ class Snowflake
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
-        $this->entity_name = $thing->container['stack']['entity_name'];
-
 
         $this->thing->log($this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
@@ -82,21 +80,23 @@ class Snowflake
         $this->thing->log($this->agent_prefix .'got retention. ' . number_format($this->thing->elapsed_runtime() - $split_time) .  'ms.', "OPTIMIZE");
 
         $this->readSubject();
+
         $this->init();
-        $this->initSnowflake();
+        //$this->initSnowflake();
+        $this->initLattice();
+
         //$this->updateSnowflake();
+
+        $this->canvas_size_x = 1640;
+        $this->canvas_size_y = 1640;
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
 
 
-        $this->thing->log($this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
+        $this->thing->log($this->agent_prefix .'completed getLattice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
-
-
-        $this->setSnowflake();
-
-
+        $this->setLattice();
         if ($this->agent_input == null) {
             $this->setSignals();
         }
@@ -115,25 +115,20 @@ class Snowflake
 
     // -----------------------
 
-    function getQuickresponse()
-    {
-        $agent = new Qr($this->thing, "qr");
-        $this->quick_response_png = $agent->PNG_embed;
-    }
 
     public function getNuuid()
     {
         $agent = new Nuuid($this->thing, "nuuid");
         $this->nuuid_png = $agent->PNG_embed;
     }
-/*
+
     public function getUuid()
     {
         $agent = new Uuid($this->thing, "uuid");
         $this->uuid_png = $agent->PNG_embed;
     }
-*/
-    public function timestampSnowflake($t = null)
+
+    public function timestampLattice($t = null)
     {
         $s = $this->thing->thing->created_at;
 
@@ -171,7 +166,7 @@ class Snowflake
         $this->thing->flagGreen();
 
         $to = $this->thing->from;
-        $from = "snowflake";
+        $from = "lattice";
         $this->makePNG();
 
         $this->thing->log($this->agent_prefix .'completed makePNG. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
@@ -187,7 +182,7 @@ class Snowflake
 
         $this->thing->log($this->agent_prefix .'completed makeWeb. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
-        $this->thing_report["info"] = "This creates a snowflake.";
+        $this->thing_report["info"] = "This creates a Lattice.";
         $this->thing_report["help"] = 'Try "UUID SNOWFLAKE"';
 
         $this->thing->log($this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
@@ -207,10 +202,10 @@ class Snowflake
     {
         $this->thing->log($this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "snowflake");
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "lattice");
         $this->thing->log($this->agent_prefix .'completed create choice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
-        $this->choices = $this->thing->choice->makeLinks('snowflake');
+        $this->choices = $this->thing->choice->makeLinks('lattice');
         $this->thing->log($this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
 
@@ -219,53 +214,49 @@ class Snowflake
         //  $this->thing_report['choices'] = false;
     }
 
-
-
     public function makeSMS()
     {
         $cell = $this->lattice[0][0][0];
         //$sms = "SNOWFLAKE | cell (0,0,0) state ". strtoupper($cell['state']);
-        $sms = "SNOWFLAKE | ";
-        $sms .= $this->web_prefix . "thing/".$this->uuid."/snowflake";
+        $sms = "LATTICE | ";
+        $sms .= $this->web_prefix . "thing/".$this->uuid."/lattice";
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
     public function makeMessage()
     {
-        $message = "Stackr made a snowflake for you.<br>";
+        $message = "Stackr made a lattice for you.<br>";
 
         $uuid = $this->uuid;
 
         $message .= "Keep on stacking.\n\n<p>" . $this->web_prefix . "thing/$uuid/snowflake.png\n \n\n<br> ";
-        $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/snowflake.png" alt="snowflake" height="92" width="92">';
-
+        $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/lattice.png" alt="lattice" height="92" width="92">';
 
         $this->thing_report['message'] = $message;
-
 
         return;
     }
 
-    public function setSnowflake()
+    public function setLattice()
     {
 //        $this->thing->json->setField("message7");
 //        $this->thing->json->writeVariable( array("snowflake", "lattice"), $this->lattice );
         //echo "setSnowflake";
         //var_dump($this->decimal_snowflake);
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("snowflake", "decimal"), $this->decimal_snowflake);
+        $this->thing->json->writeVariable(array("lattice", "decimal"), $this->decimal_lattice);
 
-        $this->thing->log($this->agent_prefix . ' saved decimal snowflake ' . $this->decimal_snowflake . '.', "INFORMATION") ;
+        $this->thing->log($this->agent_prefix . ' saved decimal lattice ' . $this->decimal_lattice . '.', "INFORMATION") ;
     }
 
-    public function getSnowflake()
+    public function getLattice()
     {
         $this->thing->json->setField("variables");
-        $this->decimal_snowflake = $this->thing->json->readVariable(array("snowflake", "decimal"));
+        $this->decimal_lattice = $this->thing->json->readVariable(array("lattice", "decimal"));
 
-        if ($this->decimal_snowflake == false) {
-            $this->thing->log($this->agent_prefix . ' did not find a decimal snowflake.', "INFORMATION") ;
+        if ($this->decimal_lattice == false) {
+            $this->thing->log($this->agent_prefix . ' did not find a decimal lattice.', "INFORMATION") ;
             // No snowflake saved.  Return.
             return true;
         }
@@ -276,34 +267,8 @@ class Snowflake
 
 //        $this->binarySnowflake($this->decimal_snowflake);
 
-        $this->thing->log($this->agent_prefix . ' loaded decimal snowflake ' . $this->decimal_snowflake . '.', "INFORMATION") ;
+        $this->thing->log($this->agent_prefix . ' loaded decimal lattice ' . $this->decimal_lattice . '.', "INFORMATION") ;
         return;
-    }
-
-    public function initSnowflake()
-    {
-        $this->binarySnowflake($this->decimal_snowflake);
-
-        $this->snowflake_points = array();
-        $index =0;
-
-        foreach ($this->point_list as $point) {
-            list($q, $r, $s) = $point;
-            $value = rand(0, 1);
-
-            if ($this->binary_snowflake[$index] == 1) {
-                $value= array("name"=>null, "state"=>'on', "value"=>1);
-            } else {
-                $value= array("name"=>null, "state"=>'off', "value"=>0);
-            }
-
-            $this->lattice[$q][$r][$s] = $value;
-            $this->snowflake_points[] = $this->binary_snowflake[$index];
-            $index += 1;
-            if ($index >= strlen($this->binary_snowflake)) {
-                break;
-            }
-        }
     }
 
     public function decimalUuid()
@@ -316,7 +281,7 @@ class Snowflake
             $dec = bcadd($dec, bcmul(strval(hexdec($hex[$i - 1])), bcpow('16', strval($len - $i))));
         }
 
-        $this->decimal_snowflake = $dec;
+        $this->decimal_lattice = $dec;
 
         return;
     }
@@ -331,13 +296,13 @@ class Snowflake
             $dec = bcadd($dec, bcmul(strval(hex2bin($hex[$i - 1])), bcpow('16', strval($len - $i))));
         }
 
-        $this->thing->log($this->agent_prefix . ' loaded decimal snowflake ' . $this->decimal_snowflake . '.', "INFORMATION") ;
+        $this->thing->log($this->agent_prefix . ' loaded decimal lattice ' . $this->decimal_lattice . '.', "INFORMATION") ;
         return;
     }
 
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.pdf';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/lattice.pdf';
         $this->node_list = array("web"=>array("snowflake","uuid snowflake"));
 
         $web = '<a href="' . $link . '">';
@@ -346,8 +311,11 @@ class Snowflake
         $web .= "</a>";
         $web .= "<br>";
 
-        $this->timestampSnowflake($this->retain_to);
+        $this->timestampLattice($this->retain_to);
         $web .= ucwords($this->timestamp). "<br>";
+
+        $web .= "<br>";
+        $web .= $this->decimal_lattice. "<br>";
 
         $web .= "<br><br>";
         $this->thing_report['web'] = $web;
@@ -355,7 +323,7 @@ class Snowflake
 
     public function makeTXT()
     {
-        $txt = 'This is a SNOWFLAKE';
+        $txt = 'This is a LATTICE';
         $txt .= "\n";
         $txt .= count($this->lattice). ' cells retrieved.';
 
@@ -420,8 +388,9 @@ class Snowflake
 
     public function makePNG()
     {
-$canvas_size = 164;
-        $this->image = imagecreatetruecolor($canvas_size, $canvas_size);
+//$canvas_size = 164;
+//$this->canvas_size =164;
+        $this->image = imagecreatetruecolor($this->canvas_size_x, $this->canvas_size_y);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -430,19 +399,19 @@ $canvas_size = 164;
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
 
-        imagefilledrectangle($this->image, 0, 0, $canvas_size, $canvas_size, $this->white);
+        imagefilledrectangle($this->image, 0, 0, $this->canvas_size_x, $this->canvas_size_y, $this->white);
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        $this->drawSnowflake($canvas_size/2, $canvas_size/2);
+        $this->drawLattice($this->canvas_size_x/2, $this->canvas_size_y/2);
 
         // Write the string at the top left
         $border = 30;
         $r = 1.165;
 
-        $radius = $r * ($canvas_size - 2 * $border) / 3;
+        $radius = $r * ($this->canvas_size_x - 2 * $border) / 3;
 
 
-
+        
         // devstack add path
         //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
@@ -450,7 +419,7 @@ $canvas_size = 164;
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
-        $size = $canvas_size - 90;
+        $size = $this->canvas_size_x - 90;
         $angle = 0;
 
 
@@ -464,9 +433,12 @@ $canvas_size = 164;
         $width = imagesx($this->image);
         $height = imagesy($this->image);
         $pad = 0;
-        //imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
 
-        imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
+$size = 10;
+
+        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2,$this->grey, $font, $text);
+
+        imagestring($this->image, 2, 140, 0, $text, $textcolor);
 
 
 
@@ -521,7 +493,47 @@ $canvas_size = 164;
 
 
 
+    public function drawWord($q,$r,$s, $center_x, $center_y,$text, $angle = null, $size = null, $color =null)
+    {
 
+        if ($size == null) {$size = 10;}
+
+        list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
+
+        // devstack add path
+        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+//        $text = "test";
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+
+        $size = $this->canvas_size_x - 90;
+        $angle = 0;
+$font_size = 6;
+
+        $bbox = imagettfbbox($font_size, $angle, $font, $text);
+        $bbox["left"] = 0- min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+        $bbox["top"] = 0- min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+        $bbox["width"] = max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+        $bbox["height"] = max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        //check width of the image
+        $width = imagesx($this->image);
+        $height = imagesy($this->image);
+        $pad = 0;
+
+        //$size = 10;
+
+//$font_size = 10;
+//var_dump($bbox["height"]);
+//exit();
+        imagettftext($this->image, $font_size, $angle, $x_pt + $center_x - $bbox["width"] / 2, $y_pt + $center_y+$bbox["height"]/2, $color, $font, $text);
+
+//$font_size = 2;
+//        imagestring($this->image, $font_size, $x_pt+$center_x, $y_pt+$center_y, $text, $this->grey);
+
+
+    }
 
     public function drawTriangle()
     {
@@ -563,10 +575,11 @@ $canvas_size = 164;
         return  array($x,$y);
     }
 
-    public function drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color = null)
+    public function drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color = null, $label = null)
     {
         if ($color == null) {
             $color = $this->white;
+            $color = $this->red; // override colo
         }
 
         list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
@@ -575,6 +588,7 @@ $canvas_size = 164;
             // Draw centre points of hexagons
             imageline($this->image, $center_x+$x_pt, $center_y+$y_pt, $center_x+$x_pt, $center_y+$y_pt, $this->black);
         }
+
 
         $arr = array(0, 1, 2, 3, 4, 5);
         list($x_old, $y_old) = $this->hex_corner($x_pt, $y_pt, $size, 0, count($arr)-1);
@@ -597,20 +611,31 @@ $canvas_size = 164;
 
 //        $cell = $this->lattice[$q][$r][$s];
         //$value = $cell['value'];
-            $r = 155;
-            $g = 183;
-            $b = 217;
-            $this->rgbcolor(rand($r-20,$r+10),rand($g-10,$g+10),rand($b-40, $b+20));
+            $red = 155;
+            $green = 183;
+            $blue = 217;
+            $this->rgbcolor(rand($red-20,$red+10),rand($green-10,$green+10),rand($blue-40, $blue-+20));
             // Need consistency from image to image
             $this->rgbcolor(155,183,217);
 
+            $this->rgbcolor(255,255,255);
 
             //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
             imagefilledpolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
 
-            $this->rgbcolor(100,100,217);
+            $this->rgbcolor(20,20,20);
             imagepolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
         }
+/*
+        $label = "(" . $q . ", " . $r . ", " . $s . ")";;
+        if ($label != null) {
+
+            imagestring($this->image, 2, $x_pt+$center_x, $y_pt+$center_y, $label, $textcolor);
+            $this->drawWord($label, $x_pt+ $center_x, $y_pt + $center_y);
+
+        }
+*/
+
     }
 
     public function setProbability()
@@ -838,17 +863,34 @@ $canvas_size = 164;
         $this->lattice[$q][$r][$s] = $cell;
     }
 
-
-    public function decimalSnowflake()
+    public function wordLattice()
     {
+        $this->decimal_lattice = null;
+/*
         $s ="";
-        foreach ($this->snowflake_points as $point) {
+
+        foreach ($this->lattice_points as $point) {
             $s .= $point;
         }
-        $this->decimal_snowflake= bindec($s);
-        return $this->decimal_snowflake;
+*/
+//        $this->word_lattice= bindec($s);
+        return $this->decimal_lattice;
     }
 
+
+
+    public function decimalLattice()
+    {
+        $s ="";
+        foreach ($this->lattice_points as $point) {
+            $s .= $point;
+        }
+        $this->decimal_lattice= bindec($s);
+        return $this->decimal_lattice;
+
+    }
+
+/*
     public function binarySnowflake($dec)
     {
         if ($dec == null) {
@@ -871,6 +913,7 @@ $canvas_size = 164;
         //      $this->binary_snowflake= decbin($dec);
         return $this->binary_snowflake;
     }
+*/
 
     public function initSegment()
     {
@@ -879,16 +922,20 @@ $canvas_size = 164;
         $this->point_list = array();
 
         foreach (range(0, $this->max) as $a) {
-            foreach (range(0, $a-3) as $b) {
+            foreach (range(0, $this->max) as $b) {
+
+//            foreach (range(0, $a-3) as $b) {
                 if (!(($a-$b) > $a)) {
                     //echo $a-$b . " " .-$a . " " .$b . "---" . ( ($a-$b) > $a) . "<br>";
+//                    $this->point_list[] = array($a-$b, -$a, $b);
                     $this->point_list[] = array($a-$b, -$a, $b);
+
                 }
             }
         }
     }
 
-    public function updateSnowflake()
+    public function updateLattice()
     {
         $this->thing->log($this->agent_prefix . 'updated the snowflake.', "INFORMATION");
 
@@ -899,8 +946,11 @@ $canvas_size = 164;
         }
     }
 
-    public function drawSnowflake($q = null, $r = null, $s = null, $size = null, $index = 0)
+    public function drawLattice($q = null, $r = null, $s = null, $size = null, $index = 0)
     {
+
+        if (!isset($this->lattice)) {$this->getLattice();}
+
         $this->split_time = $this->thing->elapsed_runtime();
 
         $index += 1; // Track for recursion
@@ -922,8 +972,7 @@ $canvas_size = 164;
             $size=$this->size;
         }
 
-
-        $this->snowflake_points = array();
+        $this->lattice_points = array();
         foreach ($this->point_list as $point) {
             list($q, $r, $s) = $point;
 
@@ -935,9 +984,10 @@ $canvas_size = 164;
             $color = $this->black;
             if ($cell['state'] == 'on') {
                 $color = $this->grey;
-                $this->snowflake_points[] = 1;
+                $this->lattice_points[] = 1;
             } else {
-                $this->snowflake_points[] = 0;
+                $color = $this->green;
+                $this->lattice_points[] = 0;
             }
 
             //if ($cell['name'] == 'boundary') {$color = $this->black;}
@@ -961,22 +1011,32 @@ $canvas_size = 164;
             // Draw an individual hexagon (q,r,s) centred at at an angle and distance from (x,y)
 
             $this->drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-1*$r, -1*$s, -1*$q, $center_x, $center_y, $angle, $size, $color);
 
-            $this->drawHexagon($r, $q, $s, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-1*$s, -1*$r, -1*$q, $center_x, $center_y, $angle, $size, $color);
+        $label = "(" . $q . ", " . $r . ", " . $s . ")";;
+        //if ($label != null) {
 
-            $this->drawHexagon($q, $s, $r, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-$q, -$r, -$s, $center_x, $center_y, $angle, $size, $color);
+            //imagestring($this->image, 2, $x_pt+$center_x, $y_pt+$center_y, $label, $textcolor);
+            $this->drawWord($q, $r, $s, $center_x, $center_y, $label, $angle, $size, $this->grey);
 
-            $this->drawHexagon(-1*$s, -1*$q, -1*$r, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-1*$q, -1*$s, -1*$r, $center_x, $center_y, $angle, $size, $color);
+        //}
 
-            $this->drawHexagon($s, $r, $q, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon($r, $s, $q, $center_x, $center_y, $angle, $size, $color);
 
-            $this->drawHexagon(-$r, -$q, -$s, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon($s, $q, $r, $center_x, $center_y, $angle, $size, $color);
+            //$this->drawHexagon(-1*$r, -1*$s, -1*$q, $center_x, $center_y, $angle, $size, $color);
+
+            //$this->drawHexagon($r, $q, $s, $center_x, $center_y, $angle, $size, $color);
+            //$this->drawHexagon(-1*$s, -1*$r, -1*$q, $center_x, $center_y, $angle, $size, $color);
+
+            //$this->drawHexagon($q, $s, $r, $center_x, $center_y, $angle, $size, $color);
+            //$this->drawHexagon(-$q, -$r, -$s, $center_x, $center_y, $angle, $size, $color);
+
+            //$this->drawHexagon(-1*$s, -1*$q, -1*$r, $center_x, $center_y, $angle, $size, $color);
+            //$this->drawHexagon(-1*$q, -1*$s, -1*$r, $center_x, $center_y, $angle, $size, $color);
+
+            //$this->drawHexagon($s, $r, $q, $center_x, $center_y, $angle, $size, $color);
+            //$this->drawHexagon($r, $s, $q, $center_x, $center_y, $angle, $size, $color);
+
+            //$this->drawHexagon(-$r, -$q, -$s, $center_x, $center_y, $angle, $size, $color);
+            //$this->drawHexagon($s, $q, $r, $center_x, $center_y, $angle, $size, $color);
 
 
 
@@ -984,11 +1044,13 @@ $canvas_size = 164;
 //                    // Which eventually becomes recursively $this->drawSnowflake(...)
         }
 
+//var_dump($this->decimal_lattice);
+//echo "drawLattice";
+//exit();
+        $this->wordLattice();
 
-        $this->decimalSnowflake();
-
-        $this->thing->log($this->agent_prefix .'drew a snowflake in ' . number_format($this->thing->elapsed_runtime() - $this->split_time) . 'ms.', "OPTIMIZE");
-        $this->thing->log($this->agent_prefix . 'drew an snowflake.', "INFORMATION");
+        $this->thing->log($this->agent_prefix .'drew a lattice in ' . number_format($this->thing->elapsed_runtime() - $this->split_time) . 'ms.', "OPTIMIZE");
+        $this->thing->log($this->agent_prefix . 'drew an lattice.', "INFORMATION");
 
 
         return;
@@ -1069,7 +1131,6 @@ $canvas_size = 164;
 
     public function makePDF()
     {
-
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
@@ -1077,19 +1138,16 @@ $canvas_size = 164;
             $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
             $pdf->SetFont('Helvetica', '', 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');  
-            $s = $pdf->getTemplatesize($tplidx1);
-
-            $pdf->addPage($s['orientation'], $s);  
-//        $pdf->useTemplate($tplidx1,0,0,215);  
-            $pdf->useTemplate($tplidx1);  
-
-            //$tplidx1 = $pdf->importPage(1, '/MediaBox');
-            //$pdf->addPage();
-            //$pdf->useTemplate($tplidx1, 0, 0, 215);
+            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $pdf->addPage();
+            $pdf->useTemplate($tplidx1, 0, 0, 215);
             $this->getNuuid();
             $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
-            $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
+
+            $pdf->Image($this->PNG_embed, 5, 5, 400, 400, 'PNG');
+            //$pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
+
+            //$pdf->Image($this->PNG_embed, 5, 5, 5+$this->canvas_size_x, 5 + $this->canvas_size_y, 'PNG');
 
             // $pdf->SetTextColor(0,0,0);
             // $pdf->SetXY(50, 50);
@@ -1099,10 +1157,7 @@ $canvas_size = 164;
             // Page 2
             $tplidx2 = $pdf->importPage(2);
 
-    //        $pdf->addPage();
-
-            $pdf->addPage($s['orientation'], $s);  
-
+            $pdf->addPage();
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
@@ -1110,9 +1165,6 @@ $canvas_size = 164;
             $this->txt = "".$this->uuid.""; // Pure uuid.
 //            $this->getUuid();
 //            $pdf->Image($this->uuid_png, 175, 5, 30, 30, 'PNG');
-
-        $this->getQuickresponse();
-        $pdf->Image($this->quick_response_png,175,5,30,30,'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
 //        $pdf->SetXY(15, 10);
@@ -1127,13 +1179,13 @@ $canvas_size = 164;
             $pdf->Write(0, $t);
 
             $pdf->SetXY(15, 15);
-            $text = $this->timestampSnowflake();
+            $text = $this->timestampLattice();
             $pdf->Write(0, $text);
 
-            $text = "Pre-printed text and graphics (c) 2018 " . $this->entity_name;
+            $text = "Pre-printed text and graphics (c) 2018 Stackr Interactive Ltd";
             $pdf->SetXY(15, 20);
             $pdf->Write(0, $text);
-/*
+
             if (ob_get_contents()) {
                 ob_clean();
             }
@@ -1142,8 +1194,6 @@ $canvas_size = 164;
             $image = $pdf->Output('', 'I');
             $image = ob_get_contents();
             ob_clean();
-*/
-          $image = $pdf->Output('', 'S');
 
             $this->thing_report['pdf'] = $image;
 
@@ -1162,16 +1212,16 @@ $canvas_size = 164;
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'snowflake') {
-                $this->getSnowflake();
+            if ($input == 'lattice') {
+                $this->getLattice();
 
-                if ((!isset($this->decimal_snowflake)) or
-                    ($this->decimal_snowflake == null)) {
-                    $this->decimal_snowflake = rand(1, rand(1, 10)*1e11);
+                if ((!isset($this->decimal_lattice)) or
+                    ($this->decimal_lattice == null)) {
+                    $this->decimal_lattice = rand(1, rand(1, 10)*1e11);
                 }
 
-                $this->binarySnowflake($this->decimal_snowflake);
-                $p = strlen($this->binary_snowflake);
+                $this->wordLattice();
+                $p = strlen($this->decimal_lattice);
 
                 $this->max = 13;
                 $this->size = 4;
@@ -1186,19 +1236,30 @@ $canvas_size = 164;
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
 
+                        case 'word':
+                              $this->max = sqrt(128) + 6;
+                              //$this->max = 24;
+
+                              $this->size = 2.5;
+                              $this->lattice_size = 40;
+                            $this->wordLattice();
+
+                            return;
+
+
                         case 'uuid':
                               $this->max = sqrt(128) + 6;
                               //$this->max = 24;
 
                               $this->size = 2.5;
                               $this->lattice_size = 40;
-                            $this->decimalUuid();
+                            $this->uuidLattice();
 
                             return;
 
                         case 'iterate':
                             $this->thing->log($this->agent_prefix . 'received a command to update the snowflake.', "INFORMATION");
-                            $this->updateSnowflake();
+                            $this->updateLattice();
                             return;
 
                         case 'on':
@@ -1214,18 +1275,18 @@ $canvas_size = 164;
 
 
 
-        $this->getSnowflake();
+        $this->getLattice();
 
-        if ((!isset($this->decimal_snowflake)) or
-            ($this->decimal_snowflake == null)) {
-            $this->decimal_snowflake = rand(1, rand(1, 10)*1e11);
+        if ((!isset($this->decimal_lattice)) or
+            ($this->decimal_lattice == null)) {
+            $this->decimal_lattice = rand(1, rand(1, 10)*1e11);
         }
 
-        $this->binarySnowflake($this->decimal_snowflake);
-        $p = strlen($this->binary_snowflake);
+        $this->wordLattice();
+//        $p = strlen($this->binary_snowflake);
 
         $this->max = 13;
-        $this->size = 4;
+        $this->size = 30;
         $this->lattice_size = 40;
         return;
 
@@ -1233,9 +1294,9 @@ $canvas_size = 164;
             //    $this->uuidSnowflake();
         }
 
-        if ($this->agent_input == "snowflake iterate") {
+        if ($this->agent_input == "lattice iterate") {
             $this->thing->log($this->agent_prefix . 'received a command to update the snowflake.', "INFORMATION");
-            $this->updateSnowflake();
+            $this->updateLattice();
             return;
         }
 

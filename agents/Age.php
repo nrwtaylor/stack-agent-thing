@@ -54,6 +54,21 @@ class Age {
 
 			foreach ($things as $thing) {
 
+                $uuid = $thing['uuid'];
+
+                $variables_json= $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                if(isset($variables['age']['mean'])) {$this->age = $variables['age']['mean'];}
+                if(isset($variables['age']['count'])) {$this->count = $variables['age']['count'];}
+                if(isset($variables['age']['sum'])) {$this->sum = floatval($variables['age']['sum']);}
+                if(isset($variables['age']['sum_squared'])) {$this->sum_squared = floatval($variables['age']['sum_squared']);}
+                if(isset($variables['age']['sum_squared_difference'])) {$this->sum_squared_difference = floatval($variables['age']['sum_squared_difference']);}
+
+                if(isset($variables['age']['earliest'])) {$this->earliest_known = strtotime($variables['age']['earliest']);}
+
+
+/*
 
 				$thing = new Thing($thing['uuid']);
 		//		var_dump($thing);
@@ -66,7 +81,7 @@ class Age {
                 		$this->sum_squared_difference = floatval( $thing->json->readVariable( array("age", "sum_squared_difference") )  );
 
                                 $this->earliest_known = strtotime ( $thing->json->readVariable( array("age", "earliest") )  );
-
+*/
 
 //var_dump ($this->age == false);
 //var_dump ($this->count == false);
@@ -85,7 +100,9 @@ class Age {
 
 					// Successfully loaded an age Thing
 
-					$this->age_thing = $thing;
+                    $this->age_thing = new Thing($uuid);
+
+					//$this->age_thing = $thing;
 					break;
 
                 		}
@@ -305,16 +322,16 @@ shuffle($things);
 //		$this->PNG();
 //		$this->PDF();
 
-		$this->sms_message = "AGE = " . Thing::human_time ($this->mean) . " to " . 
-			Thing::human_time ( $this->age_oldest ) .  " | " . $this->sms_message;
+		$this->sms_message = "AGE = " . $this->thing->human_time ($this->mean) . " to " . 
+			$this->thing->human_time ( $this->age_oldest ) .  " | " . $this->sms_message;
 
                 $this->sms_message .= "This is the Mean to Oldest age of the Things you have deposited. | ";
 
 
                 if (false) {
 //                        $this->sms_message .= "OLDEST " . number_format( time() - $this->earliest ) . " | ";
-                        $this->sms_message .= "OLDEST " . Thing::human_time( $this->age_oldest )
-				. " to " . Thing::human_time ( time() - $this->earliest_seen_population )  . " | ";
+                        $this->sms_message .= "OLDEST " . $this->thing->human_time( $this->age_oldest )
+				. " to " . $this->thing->human_time ( time() - $this->earliest_seen_population )  . " | ";
                 }
 
                 //$this->sms_message .= "SD " . number_format ($this->standard_deviation) . " | ";
