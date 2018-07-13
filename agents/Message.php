@@ -6,9 +6,11 @@ ini_set('display_errors', 1);
 error_reporting(-1);
 
 
-class Message {
+class Message
+{
 
-	function __construct(Thing $thing, $agent_input = null) {
+	function __construct(Thing $thing, $agent_input = null)
+    {
 
         // $timestamp =  new Timestamp($thing, "timestamp");
 
@@ -55,6 +57,7 @@ class Message {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
 		// Create some short-cuts.
 		$this->uuid = $thing->uuid;
@@ -121,16 +124,14 @@ class Message {
 
     }
 
-    function tallyMessage() {
-
+    function tallyMessage()
+    {
         $command = "tally 10000 message tally" . $this->mail_postfix;
         $tally_thing = new Tally($this->thing, $command);
 
         // Tally message counts up successfully sent messages.
         // So this is a good place to check if the same message has been
         // sent 3 times.
-
-
     }
 
 
@@ -166,9 +167,7 @@ class Message {
 
         }
 
-
 		// As must 'thing'
-
         foreach ($this->thing_report as $key=>$value) {
 			switch ($key) {
                 case 'keyword':
@@ -190,7 +189,7 @@ class Message {
 					        $this->message = $this->thing_report['message'];
 					}
 */
-    				case 'email':
+                case 'email':
 //					if (isset($this->thing_report['email']) ) {
 //						$this->message = $this->thing_report['message'];
 						$this->email = $this->thing_report['email'];
@@ -217,7 +216,6 @@ class Message {
     {
         // See if the channel is open.
         $u = new Usermanager($this->thing, "usermanager");
-
         if (($u->state == "opt-in") or ($u->state == "start") or ($u->state == "new user")) {
 
             $this->messaging = "on";
@@ -231,8 +229,7 @@ class Message {
     function checkFacebook($searchfor)
     {
         // Check address against the beta list
-
-        $file = '/var/www/stackr.test/resources/facebook/fbid.txt';
+        $file = $this->resource_path . 'facebook/fbid.txt';
         $contents = file_get_contents($file);
 
         $pattern = "|\b($searchfor)\b|";
@@ -254,7 +251,7 @@ class Message {
     {
         // Check address against the beta list
 
-        $file = '/var/www/stackr.test/resources/slack/id.txt';
+        $file = $this->resource_path . 'slack/id.txt';
         $contents = file_get_contents($file);
 
         $pattern = "|\b($searchfor)\b|";
@@ -275,7 +272,6 @@ class Message {
 
 	public function respond()
     {
-
         if ($this->isOpen() == "off") {
             $this->thing->log( $this->agent_prefix . ' messaging is off.' , "WARNING");
             $this->thing_report['info'] = 'Agent "Message" says user messaging is OFF.';
@@ -284,9 +280,7 @@ class Message {
             return;
         }
 
-
 		$this->thing_report['info'] = 'Agent "Message" processing response';
-
 		// Thing actions
 
 		$this->thing->json->setField("variables");
@@ -477,11 +471,7 @@ $this->tallyMessage();
             // it's capacity to token limit outgoing email
 
             $token_thing = new Tokenlimiter($this->thing, 'email');
-
             $quota = new Quota($this->thing, 'quota');
-
-
-
             $this->thing->log( 'Agent "Message" received a ' . $token_thing->thing_report['token'] . " Token.", "INFORMATION");
                 // $makeemail_agent = new makeEmail($this->thing, $this->thing_report);
                 $makeemail_agent = new Makeemail($this->thing, $this->thing_report); // prod fix
@@ -493,16 +483,12 @@ $this->tallyMessage();
                     $this->thing_report['info'] = 'Agent "Message" did not send an Email to an internal address.';
                     break;
 
-
                 case ($token_thing->thing_report['token'] != 'email' ):
-
                     $this->thing_report['info'] = 'Agent "Message" did not get Email token.';
-
                     break;
 
                 case ($quota->flag == 'red'):
                     $this->thing_report['info'] = 'Agent "Message" has exceeded the daily message quota.';
-
                     break;
 //            case (isset($dev_overide)):
                 case (true):
@@ -542,11 +528,10 @@ $this->tallyMessage();
 
 
 
-	public function readSubject() {
-
-
+	public function readSubject()
+    {
 		$status = true;
-	return $status;		
+	    return $status;
 	}
 
 

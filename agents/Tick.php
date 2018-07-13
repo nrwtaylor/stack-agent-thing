@@ -121,14 +121,14 @@ class Tick
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
 */
-/*
+
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"snow", "subject"=>"s/ snow"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-*/
+
 
 /*
                 //        $tallycounter_thing = new Tallycounter($t, 'tallycounter message tally@stackr.ca');

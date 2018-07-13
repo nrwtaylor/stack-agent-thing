@@ -54,7 +54,7 @@ class Latency
 
 		$this->readSubject();
 
-        if ($this->agent_input == null) {		
+        if ($this->agent_input == null) {
 		    $this->thing_report = $this->respond();
         }
 
@@ -186,7 +186,6 @@ class Latency
 		//$this->thing_report['sms'] = $this->sms_message;
 		$this->thing_report['email'] = $this->sms_message;
 		$this->thing_report['message'] = $this->sms_message;
-
 
         $message_thing = new Message($this->thing, $this->thing_report);
 

@@ -2,7 +2,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
-//use Endroid\QrCode\QrCode;
+use Endroid\QrCode\QrCode;
 
 //QR_Code::png('Hello World');
 
@@ -12,7 +12,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Uuid
+class Qr
 {
 
 	function __construct(Thing $thing, $agent_input = null)
@@ -21,7 +21,7 @@ class Uuid
 
         if ($agent_input == null) {$agent_input = '';}
         $this->agent_input = $agent_input;
-        $this->agent_name = "uuid";
+        $this->agent_name = "qr";
         // Given a "thing".  Instantiate a class to identify and create the
         // most appropriate agent to respond to it.
         $this->thing = $thing;
@@ -46,68 +46,73 @@ class Uuid
 		//$this->sqlresponse = null;
         $this->created_at =  strtotime($thing->thing->created_at);
 
-        $this->thing->log('Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '');
-		$this->node_list = array("uuid"=>
-						array("uuid","snowflake"));
+        $this->thing->log('Agent "QR" started running on Thing ' . date("Y-m-d H:i:s") . '');
+		$this->node_list = array("qr"=>
+						array("qr","uuid","snowflake"));
 
 		$this->aliases = array("learning"=>array("good job"));
 
+        if ($this->agent_input == null) {
+            $this->quick_response = $this->web_prefix . "" . $this->uuid . "";
+        } else {
+            $this->quick_response = $this->agent_input;
+        }
+
+
 		$this->readSubject();
+
 
         if ($this->agent_input == null) {
 		    $this->respond();
         }
 
+
         $this->makePNG();
 
-        $this->thing->log('Agent "Uuid" found ' . $this->uuid);
+
+        $this->thing->log('Agent "QR" found ' . $this->quick_response);
 
         //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
         //echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
 
+        //echo $agent_input;
+
 	}
 
-    function getQuickresponse()
+    function extractQuickresponse($input)
     {
-        $agent = new Qr($this->thing, "qr");
-        $this->quick_response_png = $agent->PNG_embed;
-    }
-
-
-    function extractUuids($input)
-    {
-        if (!isset($this->uuids)) {
-            $this->uuids = array();
+        if (!isset($this->quick_responses)) {
+            $this->quick_responses = array();
         }
 
-        $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
+        //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 
-        preg_match_all($pattern, $input, $m);
+        //preg_match_all($pattern, $input, $m);
 
-        $arr = $m[0];
+        //$arr = $m[0];
         //array_pop($arr);
-        $this->uuids = $arr;
-        return $arr;
+        $this->quick_responses[] = $input;
+        return $this->quick_responses;
 
 
     }
 
     function makeWeb() {
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/qr';
 
-        $this->node_list = array("uuid"=>array("uuid", "snowflake"));
+        $this->node_list = array("qr"=>array("qr", "uuid"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "uuid");
-        $choices = $this->thing->choice->makeLinks('uuid');
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "qr");
+        $choices = $this->thing->choice->makeLinks('qr');
 
         $alt_text = "a QR code with a uuid";
 
         $web = '<a href="' . $link . '">';
         //$web_prefix = "http://localhost:8080/";
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/uuid.png" jpg" 
+        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/qr.png" jpg" 
                 width="100" height="100" 
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/uuid.txt">';
+                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/qr.txt">';
 
         $web .= "</a>";
         $web .= "<br>";
@@ -115,8 +120,8 @@ class Uuid
         //$received_at = strtotime($this->thing->thing->created_at);
         //$ago = $this->thing->human_time ( $this->created_at );
         //$web .= "Created about ". $ago . " ago.";
-        $web.= "<b>UUID Agent</b><br>";
-        $web.= "uuid is " . $this->uuid. "<br>";
+        $web.= "<b>QR (Quick Response) Agent</b><br>";
+        $web.= "qr is " . $this->quick_response. "<br>";
 
         $web.= "created at " . strtoupper(date('Y M d D H:m',$this->created_at)). "<br>";
 
@@ -131,7 +136,7 @@ class Uuid
 		// Thing actions
 
 		$this->thing->json->setField("settings");
-		$this->thing->json->writeVariable(array("uuid",
+		$this->thing->json->writeVariable(array("qr",
 			"received_at"),  $this->thing->json->time()
 			);
 
@@ -143,11 +148,11 @@ class Uuid
 		$subject = $this->subject;
 
 		// Now passed by Thing object
-		$uuid = $this->uuid;
+		$quick_response = $this->quick_response;
 		$sqlresponse = "yes";
 
-        $message = "Thank you $from here is a UUID.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
-        $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
+        $message = "Thank you $from here is a QR (Quick Response).<p>" . $this->web_prefix . "thing/$quick_response\n$sqlresponse \n\n<br> ";
+        $message .= '<img src="' . $this->web_prefix . 'thing/'. $quick_response.'/receipt.png" alt="thing:'.$quick_response.'" height="92" width="92">';
 
         $this->makeSMS();
 
@@ -181,40 +186,23 @@ class Uuid
         //        $thing_report['info'] = $message_thing->thing_report['info'] ;
 
         // Then look for messages sent to UUIDS
-        $this->thing->log('Agent "UUID" looking for UUID in address.');
+        $this->thing->log('Agent "QR" looking for QR in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
 
-
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-//echo $this->to;
-//        preg_match_all($pattern, $this->to, $m);
+
         if (preg_match($pattern, $this->to)) {
-        $this->thing->log('Agent "UUID" found a  UUID in address.');
+        $this->thing->log('Agent "QR" found a QR in address.');
+
+        return;
 
 
-//        $arr = $m[0];
-//        $this->uuids = $arr;
-//var_dump($arr);
+    }
 
-            //$uuid_thing = new Receipt($this->thing);
-            //$this->thing_report['info'] = $receipt_thing->thing_report['info'];
-
-            return;
-
-
-        }
-
-
-
-
-		$status = true;
-	return $status;		
-	}
-
-    function makeSMS() 
+    function makeSMS()
     {
-        $this->sms_message = "UUID | ";
-        $this->sms_message .= $this->uuid;
+        $this->sms_message = "QR | ";
+        $this->sms_message .= $this->quick_response;
         $this->sms_message .= ' | TEXT ?';
 
         $this->thing_report['sms'] = $this->sms_message;
@@ -222,40 +210,44 @@ class Uuid
 
     function makeChoices ()
     {
-        $this->thing->choice->Create("uuid", $this->node_list, "uuid");
+        $this->thing->choice->Create("uuid", $this->node_list, "qr");
 
-        $choices = $this->thing->choice->makeLinks("uuid");
+        $choices = $this->thing->choice->makeLinks("qr");
         $this->thing_report['choices'] = $choices;
         $this->choices = $choices;
     }
-
-
 
     public function makePNG()
     {
         if (isset($this->PNG)) {return;}
 
-
-
-        //if (headers_sent()) {return;}  
-      // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
         $codeText = $this->web_prefix . "thing/".$this->uuid;
 
-        $agent = new Qr($this->thing, $codeText);
-      //  $this->thing_report['png'] = $agent->PNG;
+        if (ob_get_contents()) ob_clean();
 
-     //   return $this->thing_report['png'];
+        $qrCode = new QrCode($codeText);
 
-        $image = $agent->PNG;
+        ob_start();
+        echo $qrCode->writeString();
+        $image = ob_get_contents();
+
+        ob_clean();
+        ob_end_clean();
 
         $this->PNG_embed = "data:image/png;base64,".base64_encode($image);
         $this->PNG = $image;
 
+        // Can't get this text editor working yet 10 June 2017
+
+        //$textcolor = imagecolorallocate($image, 0, 0, 255);
+        // Write the string at the top left
+        //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
+
         $this->thing_report['png'] = $image;
 
-        return $this->thing_report['png'];
+        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
+        return $this->thing_report['png'];
     }
 }
 ?>

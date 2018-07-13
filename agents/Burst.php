@@ -197,6 +197,7 @@ class Burst
 //exit();
 //        foreach ($findagent_thing->thing_report['things'] as $thing) {
 
+        if ($t['things'] != true) {
         foreach ($t['things'] as $thing) {
 
             $previous_created_at = $created_at;
@@ -219,7 +220,7 @@ class Burst
                 $this->thing->log($this->agent_prefix . ' td ' . $inter_arrival_time . '.');
             }
         }
-
+        }
 
         if ($this->burst >= 1) {
             $this->flag = "red";

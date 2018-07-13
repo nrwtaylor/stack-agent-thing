@@ -8,17 +8,21 @@ class Email {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $input = null) {
+    function __construct(Thing $thing, $input = null)
+    {
+        //$this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime();
 
-        $this->start_time = microtime(true);
-
+/*
 
         if ($input == null) {
             $this->message = "No message provided";
         } else {
             $this->message = $input;
         }
+*/
 
+$this->makeMessage($input);
 //        $this->input = $input;
         $this->cost = 50;
 
@@ -44,12 +48,13 @@ class Email {
         $this->thing = $thing;
 
 
-        $this->start_time = microtime(true);
+        //$this->start_time = microtime(true);
 
         $this->agent_name = 'email';
         $this->agent_prefix = 'Agent "Email"';
 
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
         if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
@@ -76,7 +81,33 @@ class Email {
     
         // This probably isn't needed.
         // But keep it here for if we want to add override type choices.
-        $this->node_list = array("email send"=>array("email send"));
+        $this->node_list = array("email"=>array("email"));
+
+
+        // Borrow this from iching
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable( array("email", "refreshed_at") );
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("email", "refreshed_at"), $time_string );
+        }
+
+        $this->thing->json->setField("variables");
+        $this->email_count = $this->thing->json->readVariable( array("email", "count") );
+
+        if ($this->email_count == false) {$this->email_count = 0;}
+
+
+
+        $this->email_per_message_responses = 1;
+        $this->email_horizon = 2 *60; //s
+/*
+*/
+
+
+
 
         $this->thing->log( 'Agent "Email" running on Thing ' .  $this->thing->nuuid . '.',"INFORMATION" );
         $this->thing->log( 'Agent "Email" received this Thing "' .  $this->subject . '".' ,"INFORMATION");
@@ -128,6 +159,27 @@ class Email {
             $test_message = $this->subject;
         }
 
+/////
+
+        if ($this->message == false) {
+            $this->thing_report['choices']= false;
+            $this->thing_report['info'] = 'No message to send.';
+            $this->thing_report['help'] = 'False message.';
+
+            // No message to send
+            return;
+        }
+
+//        $this->email_message = false;
+        $this->makeEmail();
+
+        $received_at = strtotime($this->thing->thing->created_at);
+        $time_ago = time() - $received_at;
+
+/////
+
+
+
         if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
             //$this->sendSms($to, $test_message);
 
@@ -158,7 +210,10 @@ class Email {
         }
 
 
-$this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 'info' => 'This is a sms sender.','help' => 'Ants.  Lots of ants.');
+//$this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 'info' => 'This is a sms sender.','help' => 'Ants.  Lots of ants.');
+
+//$this->thing_report['choices'] = false;
+$this->thing_report['help'] = "This agent is responsible for sending emails.";
 
 
         //echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
@@ -167,6 +222,69 @@ $this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 
         return;
 
 
+    }
+
+    function makeEmail() {
+        if (!isset($this->message)) {
+            $this->makeMessage();
+        }
+
+        if (!isset($this->choices)) {
+            $this->makeChoices();
+        }
+
+//new
+//        require_once '/var/www/html/stackr.ca/agents/makeemail.php';
+        $this->thing_report['choices'] = $this->choices;
+        $makeemail_agent = new Makeemail($this->thing, $this->thing_report);
+
+        $this->email_message = $makeemail_agent->email_message;
+
+//old
+//        $from = $this->from .$this->mail_postfix;
+//        $this->email_message = $this->generateMultipart($this->from, $this->message, $this->choice$
+
+
+
+        $this->thing_report['email'] = $this->email_message;
+    }
+
+    function makeChoices()
+    {
+        if (!isset($this->choices)) {$this->choices = false;}
+        $this->thing_report['choices'] = $this->choices;
+    }
+
+
+    function makeMessage($input = null)
+    {
+        if ($input == null) {
+            $this->message = false;
+                    }
+
+        if (!isset($input['message'])) {
+            if (!is_array($input)) {
+                $this->message = $input;
+            } else {
+                $this->message = "No message provided to email agent.";
+            }
+        } else {
+            $this->message = $input['message'];
+        }
+
+        if (!isset($input['choices'])) {
+            if (!is_array($input)) {
+                $this->choices = false; //"foo";
+            } else {
+                $this->choices = false; //"No choices provided to email agent.";
+            }
+        } else {
+            $this->choices = $input['choices'];
+        }
+
+
+//var_dump($this->message);
+//exit();
     }
 
 
@@ -185,9 +303,13 @@ $this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 
         // Check address against the beta list
 
         //$file = '/var/www/stackr.test/resources/limitedbeta/limitedbeta.txt';
-        $file = $this->resource_path . 'limitedbeta/limitedbeta.txt'; // prod
+        //$file = '/var/www/html/stackr.ca/resources/limitedbeta/limitedbeta.txt';
+        $file = $this->resource_path . 'limitedbeta/limitedbeta.txt';
+
 
         $contents = file_get_contents($file);
+
+//var_dump($contents);
         $pattern = "|\b($searchfor)\b|";
 
         // search, and store all matching occurences in $matches
@@ -397,7 +519,7 @@ Hi,
                 </td>
                 <td width="280">
                     <div style="line-height: 17px; padding: 12px 0 20px 0; text-align: right">
-                        <a href="' . $this->web_prefix . '"><img width="92" height="30" src="' . $this->web_prefix . ' Apple_store.png"/></a> <a href="' . $this->web_prefix . '"><img width="92" height="30" src="' . $this->web_prefix . 'Google_store.png"/></a>
+                        <a href="' . $this->web_prefix . '"><img width="92" height="30" src="' . $this->web_prefix . 'Apple_store.png"/></a> <a href="' . $this->web_prefix . '"><img width="92" height="30" src="' . $this->web_prefix . 'Google_store.png"/></a>
                     </div>
                 </td>
             </tr>

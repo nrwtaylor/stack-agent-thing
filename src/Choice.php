@@ -48,11 +48,13 @@ class Choice {
             $this->web_prefix = "http://$_SERVER[HTTP_HOST]/";
         }
 
-$prod = false;
+$prod = true;
 if ($prod == true) {
-    $this->web_prefix = $this->container['stack']['web_prefix']; 
+    $this->web_prefix = $this->container['stack']['web_prefix'];
 }
 
+
+//var_dump($this->web_prefix);
 
 //            $this->web_prefix = $this->container['stack']['web_prefix'];
 

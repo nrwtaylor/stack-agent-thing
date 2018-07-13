@@ -131,8 +131,16 @@ class Damage
             $web_message .= " " . str_pad($t['destroyed'], 10, " ");
             $web_message .= " " . str_pad($t['created_at'], 10, " ");
 
+            if ($t['balance'] <= 0) {$web_message .= " CRITICAL HIT";}
+
             $web_message .= "<br>";
         }
+
+        $web_message .=  "<br>";
+        $web_message .= "Damage budget was " . $this->damage_budget . ".<br>";
+        $web_message .= $this->value_destroyed . " of value destroyed.<br>";
+        $web_message .= $this->things_destroyed . " Things destroyed.<br>";
+
 
         $this->web_message = $web_message;
         $this->thing_report['web'] = $this->web_message;
@@ -181,14 +189,38 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 		return false;
     }
 
+    function getThings($n = 1)
+    {
+        // Get a list of Things  in one go.  Saves time for database calls.
+        $this->thing->log($this->agent_prefix . "start getThings.");
+
+        // meep tries the second way of creating random row
+        $thingreport = $this->thing->db->random(null,50); // Leaving this blank selects any record for deletion.
+        $this->uuids = array();
+        foreach($thingreport['things'] as $thing) {
+
+
+            $this->uuids[] = $thing['uuid'];
+        }
+        $this->thing->log($this->agent_prefix . "completed getThings " . count($this->uuids) . ".");
+
+    }
 
     function getThing()
     {
+        if (!isset($this->uuids)) {$this->getThings();}
+        $this->thing->log($this->agent_prefix . "start getThing.");
 
-        // meep tries the second way of creating random row
-        $thingreport = $this->thing->db->random("meep");
-        $uuid = $thingreport['things']->uuid; // Quest that random only returns one thing and this is misnamed
+        $uuid = array_pop($this->uuids);
+
+//        $uuid = $thingreport['things']->uuid; // Quest that random only returns one thing and this is misnamed
+
+        $this->thing->log($this->agent_prefix . "got a random UUID ". $uuid .".");
+
         $thing = new Thing($uuid);
+
+        $this->thing->log($this->agent_prefix . "instantiated Thing.");
+
 
         return $thing;
 
@@ -198,7 +230,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     {
         if ($thing == null) {$thing = $this->getThing();}
 
-        $this->thing->log($this->agent_prefix . "randomly selected a " . ucwords($thing->to) . ' Thing "'.  $thing->subject . '".');
+        $this->thing->log($this->agent_prefix . 'randomly selected a "' . ucwords($thing->to) . ' Thing "'.  $thing->subject . '".');
         $this->thing->log("DEVLOG " . $this->agent_prefix . "associated with ID " . $thing->from .  '".');
 
         if ( $thing->isRed() ) {

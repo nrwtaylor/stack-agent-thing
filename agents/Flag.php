@@ -366,7 +366,7 @@ if ($this->state == "inside nest") {
 
     }
 
-    public function makePNG()
+    public function makeImage()
     {
 
         // here DB request or some processing
@@ -400,11 +400,36 @@ if ($this->state == 'red') {
 
         imagestring($image, 2, 150, 100, $this->flag->nuuid, $textcolor);
 
+        $this->image = $image;
+    }
 
+    public function new_makePNG()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+//$split_time = $this->thing->elapsed_runtime();
+        $agent = new Png($this->thing, "png"); // long run
+//echo $this->thing->elapsed_runtime() - $split_time; 
+
+        $this->makeImage();
+
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+        $this->PNG_embed = $agent->PNG_embed;
+    }
+
+
+    public function makePNG()
+    {
         // Save the image
         //header('Content-Type: image/png');
         //imagepng($im);
 
+        $this->makeImage();
+
+        $image = $this->image;
         ob_start();
         imagepng($image);
         $imagedata = ob_get_contents();
@@ -414,8 +439,6 @@ if ($this->state == 'red') {
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
-
-
 
 //        $this->thing_report['png'] = $image;
 

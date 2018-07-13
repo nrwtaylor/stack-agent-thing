@@ -19,6 +19,8 @@ class Variables
 
 	function __construct(Thing $thing, $agent_command = null)
     {
+
+//if ($agent_command == "variables place console") {exit();}
         // Setup Thing
         $this->thing = $thing;
 
@@ -39,6 +41,8 @@ class Variables
         $this->agent_variables = array('variable', 'name', 'alpha', 'beta'); //Default variable set.
         $this->agent_variables = array();
         $this->max_variable_sets = 5;
+
+        $this->agent_command = $agent_command;
 
         $this->verbosity = 1;
         $this->log_verbosity = 1;
@@ -73,20 +77,21 @@ class Variables
 
         // Not sure this is limiting.
         $this->getVariables();
+//if ($agent_command == "variables place console") {exit();}
 
         $this->nuuid = substr($this->variables_thing->uuid,0,4);
 
 		$this->readText();
 
         $this->setVariables();
-
         if ($this->agent_command == null) {
     		$this->Respond();
         }
 
+        // Commented out 4 Jul 2018
         // Toss in a refreshed.
-        $time_string = $this->thing->time();
-        $this->setVariable("refreshed_at", $time_string);
+        //$time_string = $this->thing->time();
+        //$this->setVariable("refreshed_at", $time_string);
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', 'OPTIMIZE' );
 
@@ -96,8 +101,12 @@ class Variables
 
     function setVariables()
     {
+        //echo "variables.php Variable set name " . ($this->variable_set_name) . "\n";
+
 
         $this->thing->db->setFrom($this->identity);
+
+        $refreshed_at = false;
 
         foreach ($this->agent_variables as $key=>$variable_name) {
 
@@ -105,12 +114,34 @@ class Variables
 //            $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
 //            $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
 
+
+
+//if ($this->agent_command == "variables place console") {exit();}
+
+
             // Intentionally write to the variable thing.  And the current thing.
             if (isset($variable_name)) {
                 $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
                 $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
+
+    //echo  "variables.php variable name  ".$variable_name . "\n";
+    //echo  "variables.php variable value ".$this->variables_thing->$variable_name . "\n";
             }
+
+            if ($variable_name == "refreshed_at") {$refreshed_at = true;}
+
         }
+
+//if ($this->agent_command == "variables place console") {exit();}
+
+    //echo "variables.pgp setVariable complete\n";
+
+        if ($refreshed_at == false) {
+        // Toss in a refreshed.
+            $time_string = $this->thing->time();
+            $this->setVariable("refreshed_at", $time_string);
+        }
+
     }
 
     function getAgent()
@@ -134,7 +165,9 @@ class Variables
 
         // Returns variable sets managed by Variables.
         // Creates just one record per variable set.
-        $thing_report = $this->thing->db->agentSearch("variables", $this->max_variable_sets);
+        $thing_report = $this->thing->db->agentSearch("variables", $this->max_variable_sets); 
+//if ($this->agent_command == "variables place console") {exit();}
+
         $things = $thing_report['things'];
 
         // When we have that list of Things, we check it for the tally we are looking for.
@@ -158,6 +191,7 @@ class Variables
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
+//if ($this->agent_command == "variables place console") {exit();}
 
                 if($this->getVariableSet() == false) {
 
@@ -167,8 +201,12 @@ class Variables
 
                     // Should echo the matching variable sets
                     $match_count += 1;
-                    $this->setVariables(); // Make sure thing and stack match.
+//if ($this->agent_command == "variables place console") {exit();}
+ 
+                   $this->setVariables(); // Make sure thing and stack match.
                                             // Consider seeing if this is really needed.
+//if ($this->agent_command == "variables place console") {exit();}
+
 //                    $this->echoVariableSet();
                     return;
                 }
@@ -378,6 +416,8 @@ class Variables
         $this->thing->db->setFrom($this->identity);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
+
+        // bughunt 23 June 2018 if ($value == "usermanager") {exit();}
 
         return $this->variables_thing->$variable;
     }

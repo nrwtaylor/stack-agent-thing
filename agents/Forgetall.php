@@ -30,7 +30,7 @@ class Forgetall {
 
 		$this->node_list = array("start");
 
-		echo '<pre> Agent "Forget All" running on Thing ';echo $this->uuid;echo'</pre>';
+		$this->thing->log('Agent "Forget All" running on Thing ' .  $this->uuid . '.');
 
 		// Kind of pointless because we are going to forget it.  But leave in for now.
 
@@ -94,12 +94,12 @@ $count = 0;
 
 $start_time = time();
 
-echo count ($this->total_things);
+//echo count ($this->total_things);
 
                 while (count($things) > 1) {
 
-			echo "<br>";
-			echo count($things);
+			//echo "<br>";
+			//echo count($things);
                         $thing = array_pop($things);
 
 //			if ( time() - $start_time > 2 ) {
@@ -111,9 +111,9 @@ echo count ($this->total_things);
 
 //			}
 
-			echo $thing['uuid'];echo "<br>";
-			echo $this->uuid;
-			echo "<br>";
+			//echo $thing['uuid'];echo "<br>";
+			//echo $this->uuid;
+			//echo "<br>";
 //exit();
 			if ($thing['uuid'] != $this->uuid) {
 
@@ -123,11 +123,11 @@ echo count ($this->total_things);
 				$temp_thing->Forget();
 $count += 1;
 			} else {
-				echo "match";
+				//echo "match";
 //exit();
 			}
 		}
-echo "<br>" . "complete" . $count;
+//echo "<br>" . "complete" . $count;
 //exit();
 
 		$this->sms_message .= "Completed request for this Identity. Forgot ". $count . " Things.";

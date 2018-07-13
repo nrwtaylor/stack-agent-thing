@@ -68,6 +68,7 @@ class Usermanager
         }
 
         $this->set();
+
         if ($this->agent_input == null) {
 		    $this->setSignals(); /// Don't send any messages
         }
@@ -135,7 +136,6 @@ class Usermanager
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 
         $this->thing->choice->save('usermanager', $this->state);
-
         return;
     }
 
@@ -156,7 +156,7 @@ class Usermanager
         $this->counter = $this->variables_agent->getVariable("counter");
 
         if ($this->verbosity_log >= 8) {
-            $this->thing->log( 'Agent "Uaermanager" loaded ' . $this->counter . ".", "DEBUG");
+            $this->thing->log( 'Agent "Usermanager" loaded ' . $this->counter . ".", "DEBUG");
         }
 
         $this->counter = $this->counter + 1;

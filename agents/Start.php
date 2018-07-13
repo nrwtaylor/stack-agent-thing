@@ -123,8 +123,8 @@ class Start {
     }
 
 
-    private function makeEmail() {
-
+    private function makeEmail()
+    {
         switch ($this->counter) {
             case 1:
 

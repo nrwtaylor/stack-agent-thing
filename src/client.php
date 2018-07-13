@@ -3,7 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 // Create our client object
 $client = new \GearmanClient();
 
-$arr = json_encode(array("to"=>"test", "from"=>"client", "subject"=>"latency"));
+$arr = json_encode(array("to"=>"U6NQ4A34N", "from"=>"A6N36NMMJ", "subject"=>"latency"));
 
 // Add a server
 //$client->addServer(); // by default host/port will be "localhost" & 4730

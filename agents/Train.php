@@ -5,18 +5,9 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-
-// Specific declaration of reliant agents
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-//require_once '/var/www/html/stackr.ca/agents/headcode.php';
-//require_once '/var/www/html/stackr.ca/agents/flag.php';
-//require_once '/var/www/html/stackr.ca/agents/consist.php';
-//require_once '/var/www/html/stackr.ca/agents/variables.php';
-
 ini_set("allow_url_fopen", 1);
 
-class Train 
+class Train
 {
 
     // This is a resource block.  It is a train which be run by the block scheduler.

@@ -32,6 +32,8 @@ class Makelog
         $this->email = $thing->container['stack']['email'];
         $this->email = $thing->container['stack']['entity_name'];
 
+        $this->subject = $thing->subject;
+
         $header = "THING AGENT LOG";
         $header .= "\n";
 
@@ -82,6 +84,18 @@ class Makelog
         $file .= $t. "\n";
         $file .= "\nSelf-report\n";
         $file .= $text;
+
+        $file .= "\nMessage received\n";
+        $file .= $this->subject;
+
+
+        $file .= "\n";
+
+        $file .= "\nAgent SMS response\n";
+        $file .= $this->agent_thing->thing_report['sms'];
+
+        $file .= "\n";
+
         $file .= $footer;
 
         $this->thing_report = array('thing' => $thing, 
@@ -105,6 +119,8 @@ class Makelog
 
             preg_match_all('/[0-9,]+/',$line,$matches);
             $numbers = $matches[0];
+
+            if (strtolower($words[1]) == "thing") {continue;}
 
             $agent_name = $words[2];
 

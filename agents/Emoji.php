@@ -31,7 +31,6 @@ class Emoji
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-//var_dump($this->resource_path);
         $string =  $this->subject;
 
         $emojis =$this->extractEmoji($string);
@@ -62,10 +61,10 @@ class Emoji
 
         foreach ($arr as $key=>$value) {
             $text = $this->findEmoji('mordok', $value); 
-
             if ($value == "U+FE0F") {continue;}
 
             $words = $this->getWords($text);
+
             if ($words != false) {
                 $this->keywords = array_merge($this->getWords($text));
                 $this->keyword = $this->keywords[0];
@@ -85,7 +84,6 @@ class Emoji
         // If it has already been processed ...
         //$this->thing->json->setField("variables");
         $this->reading = $this->thing->json->readVariable( array("emoji", "reading") );
-
             $this->readSubject();
 //        if ( ($this->reading == false) ) {
 //            $this->thing->log( $this->agent_prefix . 'no prior reading found.' );
@@ -117,13 +115,10 @@ class Emoji
 
         $this->thing_report['log'] = $this->thing->log;
 
-
 	}
 
     function getWords($test)
     {
-//var_dump($test);
-//echo "getWords " . $test . "<br>";
         if ($test == false) {
             return false;
         }
@@ -157,34 +152,29 @@ class Emoji
 
     function wordsEmoji($string)
     {
-
         if (!isset($this->emojis)) {
             $this->emojis = $this->getEmoji();
         }
-
 //        $string = 'The quick brown fox jumps over the lazy dog.';
-
         $patterns = array();
 //$patterns[0] = '/quick/';
 //$patterns[1] = '/brown/';
 //$patterns[2] = '/fox/';
         $replacements = array();
 
-foreach($this->emojis as $emoji) {
-    $patterns[] = '/' . $emoji . '/';
+        foreach($this->emojis as $emoji) {
+            $patterns[] = '/' . $emoji . '/';
+            $text = $this->findEmoji('mordok', $emoji);
+            $words = $this->getWords($text);
 
-$text = $this->findEmoji('mordok', $emoji);
-
-$words = $this->getWords($text);
-
-if ($words == false) {
-    $word = "?";
-} else {
-    $word = $words[0];
-}
-    $replacements[] = " ". $word . " ";
-}
-$translation = preg_replace($patterns, $replacements, $string);
+            if ($words == false) {
+                $word = "?";
+            } else {
+                $word = $words[0];
+            }
+            $replacements[] = " ". $word . " ";
+        }
+        $translation = preg_replace($patterns, $replacements, $string);
 
     
 //exit();
@@ -195,6 +185,7 @@ $translation = preg_replace($patterns, $replacements, $string);
         if (!isset($this->emojis)) {
             $this->extractEmoji($this->subject);
         }
+
         if (count($this->emojis) == 0) {$this->emoji = false;return false;}
         $this->emoji = $this->emojis[0];
         return $this->emoji;
@@ -257,17 +248,13 @@ return strtoupper("U+".dechex($u));
 
     for ($i = 0; $i < $hex_len; ++$i) {
         $tmp = substr($hex, $i * 8, 8);
-//var_dump($tmp);
         // Format each chunk
         $chunks[$i] = $this->format($tmp);
     }
-//echo "<br>";
-//echo "imploded chunks " . implode($chunks, ' ');
 
 
 
 
-//var_dump($chunks);
     // Convert chunks array back to a string
     return implode($chunks, ' ');
 }
@@ -302,11 +289,9 @@ return strtoupper("U+".dechex($u));
 
     function findEmoji($librex, $searchfor)
     {
-
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
 
-        $path = $GLOBALS['stack_path'];
-
+//        $path = $GLOBALS['stack_path'];
         switch ($librex) {
             case null:
                 // Drop through
@@ -321,7 +306,6 @@ return strtoupper("U+".dechex($u));
             case 'mordok':
                 $file = $this->resource_path . 'emoji/emoji-mordok.txt';
                 $contents = file_get_contents($file);
-
                 break;
             case 'list':
                 $file = $this->resource_path . 'emoji/emoji-list.txt';
@@ -342,23 +326,24 @@ return strtoupper("U+".dechex($u));
                 $file = $this->resource_path . 'emoji/emoji-keywords.txt';
 
         }
+
+//echo "search for ". $searchfor;
 //        header('Content-Type: text/plain');
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
-        $pattern = "/^.*$pattern.*\$/m";
+        $pattern = "/^.*". $pattern. ".*\$/m";
+
+
         // search, and store all matching occurences in $matches
+        $m = false;
         if(preg_match_all($pattern, $contents, $matches)){
+//echo "\n";
+//var_dump($matches);
             //echo "Found matches:\n";
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
-            return $m;
-        } else {
-            //echo "no found";            
-            return false;
-            //echo "No matches found";
         }
-
-        return;
+        return $m;
     }
 
 
@@ -388,8 +373,6 @@ return strtoupper("U+".dechex($u));
 
 //		$this->thing->log( "this reading:" . $this->reading );
 
-//echo "meep";
-//exit();
 
 
 
@@ -467,20 +450,22 @@ return strtoupper("U+".dechex($u));
     }
 
 
-    function makeEmail() {
-
+    function makeEmail()
+    {
         $this->email_message = "EMOJI | ";
-
     }
 
 
 
-	public function readSubject() {
-
+	public function readSubject()
+    {
         $this->translated_input = $this->wordsEmoji($this->subject);
 
-//echo $this->translated_input;
         if (count($this->emojis) > 0) {
+
+// This line catches snowflakes as a temp solution
+// They are not recognized.  devstack
+if (($this->translated_input == " ? ") and ($this->keyword = "snowflake")) {$this->translated_input = "snowflake";}
             return;
         }
         $input = strtolower($this->subject);
@@ -530,9 +515,6 @@ $this->emojis = null;
             $this->emojis = $this->extractEmoji(implode(" ", $arr));
 }
 
-//echo $this->emoji_from_words;
-
-//exit();
                             return;
 
 
@@ -555,7 +537,6 @@ $this->emojis = null;
 
 //        }
 
-//echo $this->translated_input;
 //exit();
 	return $status;		
 	}

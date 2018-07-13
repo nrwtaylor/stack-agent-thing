@@ -247,25 +247,25 @@ class Context
 
                //x $variables = $thing->account['stack']->json->array_data;
 
-                if (isset($variables['train'])) {
+                if (isset($variables['train']['head_code'])) {
                     $this->context = "train";
                     $this->context_id = $variables['train']['head_code'];
                     break;
                 }
 
-                if (isset($variables['headcode'])) {
+                if (isset($variables['headcode']['head_code'])) {
                     $this->context = "headcode";
                     $this->context_id = $variables['headcode']['head_code'];
                     break;
                 }
 
-                if (isset($variables['group'])) {
+                if (isset($variables['group']['group_id'])) {
                     $this->context = "group";
                     $this->context_id = $variables['group']['group_id'];
                     break;
                 }
 
-                if (isset($variables['transit'])) {
+                if (isset($variables['transit']['transit_id'])) {
                     $this->context = "transit";
                     $this->context_id = $variables['group']['transit_id'];
                     break;

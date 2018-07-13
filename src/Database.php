@@ -473,34 +473,36 @@ $c['errorHandler'] = function ($c) {
 		return $thingreport;
 	}
 
-/*
+
     // add bindparam
-	function userSearch($keyword) {
-
+	function userSearch($keyword)
+    {
 		$user_search = $this->from;
+        $keyword = "%$keyword%"; // Value to search for in Variables
 
-		$query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' AND task LIKE '%$keyword%' ORDER BY created_at DESC";
+//		$query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' AND task LIKE '%$keyword%' ORDER BY created_at DESC";
+//      $query = "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE '%$keyword%' ORDER BY created_at DESC";
+        $query = "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE :keyword ORDER BY created_at DESC";
 
         try {
+    		$sth = $this->container->db->prepare($query);
 
+            $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":keyword", $keyword);
 
-		$sth = $this->container->db->prepare($query);
-
-		$sth->execute();
-		$things = $sth->fetchAll();
+		    $sth->execute();
+		    $things = $sth->fetchAll();
 
         } catch (\Exception $e) {
             echo 'Caught error: ',  $e->getMessage(), "\n";
             $things = false;
         }
 
-		$thingreport = array('thing' => $things, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.','help' => 'It is up to you what you do with these.');
-
-
+		$thingreport = array('thing' => $things, 'info' => 'Searches by nom_from and task.','help' => 'Keyword subject line search.');
 
 		return $thingreport;
 	}
-*/
+
 /*
     // add bindparam
     function userThings() {
@@ -876,12 +878,12 @@ $c['errorHandler'] = function ($c) {
 		return $thingreport;
 	}
 
-	function random($nom_from = null)
+	function random($nom_from = null, $n = 1)
     {
-
         if ($nom_from == null) {
             // https://explainextended.com/2009/03/01/selecting-random-rows/
-
+            // https://stackoverflow.com/questions/1244555/how-can-i-optimize-mysqls-order-by-rand-function
+/*
             $q = "SELECT  *
                 FROM    (
                     SELECT  @cnt := COUNT(*) + 1,
@@ -896,18 +898,29 @@ $c['errorHandler'] = function ($c) {
                     WHERE   (@cnt := @cnt - 1)
                     AND RAND(20090301) < @lim / @cnt
                 ) i";
+*/
+//            $q = "SELECT * FROM stack WHERE RAND()<=0.0006 limit 1";
+//            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
+//            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
+//            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
+
+            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((" . $n . "/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT " . $n;
+
+//            $q = "SELECT * FROM stack ORDER BY RAND() LIMIT " . $n;
+//            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((20/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 20";
 
             $sth = $this->container->db->prepare($q);
 
     		$sth->execute();
-	    	$thing = $sth->fetchObject();
+//	    	$thing = $sth->fetchObject();
+        $things = $sth->fetchAll();
 
 
-    		$this->to = $thing->nom_to;
-	    	$this->from = $thing->nom_from;
-		    $this->subject = $thing->task;
+  //  		$this->to = $thing->nom_to;
+//	    	$this->from = $thing->nom_from;
+//		    $this->subject = $thing->task;
 
-		    $thingreport = array('things' => $thing, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.','help' => 'It is up to you what you do with these.');
+		    $thingreport = array('things' => $things, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.','help' => 'It is up to you what you do with these.');
 
         } else {
 

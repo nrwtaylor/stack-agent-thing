@@ -11,8 +11,8 @@ class EightBall {
 
 
     function __construct(Thing $thing, $text = null) {
-
-        $this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime(); 
+        //$this->start_time = microtime(true);
 
 		$this->agent_name = "eightball";
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
@@ -22,7 +22,8 @@ class EightBall {
 //		$thingy = $thing->thing;
 		$this->thing = $thing;
 
-         $this->thing_report  = array("thing"=>$this->thing->thing);
+         //$this->thing_report  = array("thing"=>$this->thing->thing);
+         $this->thing_report['thing']  = $thing;
 
 
         $this->uuid = $thing->uuid;
@@ -37,13 +38,17 @@ class EightBall {
 
 		$this->readSubject();
 
-		$this->thing_report = $this->respond();
+        $this->respond();
 
-        $this->end_time = microtime(true);
-        $this->actual_run_time = $this->end_time - $this->start_time;
-        $milliseconds = round($this->actual_run_time * 1000);
+		//$this->thing_report = $this->respond();
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($milliseconds) . 'ms.' );
+ //       $this->end_time = microtime(true);
+ //       $this->actual_run_time = $this->end_time - $this->start_time;
+ //       $milliseconds = round($this->actual_run_time * 1000);
+
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($milliseconds) . 'ms.' );
+        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
+
         $this->thing_report['log'] = $this->thing->log;
 
 		return;
@@ -175,7 +180,7 @@ class EightBall {
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 
 		return $this->thing_report;

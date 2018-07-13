@@ -19,7 +19,7 @@ class Hey {
     function __construct(Thing $thing, $input = null) {
 
 		if ($input == null) {
-			$this->requested_agent = "Bork.";
+			$this->requested_agent = "Hey";
 		} else {
 			$this->requested_agent = $input;
 

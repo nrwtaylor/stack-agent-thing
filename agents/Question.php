@@ -7,14 +7,13 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Question {
-
-
+class Question
+{
 	public $var = 'hello';
 
-
-    function __construct(Thing $thing) {
-
+    function __construct(Thing $thing)
+    {
+        $this->start_time = $thing->elapsed_runtime();
         $this->agent_prefix = 'Agent "Question" ';
 
         $this->thing = $thing;
@@ -26,11 +25,12 @@ class Question {
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+
         $this->email = $this->thing->container['stack']['email'];
 
         $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . '.');
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
         $this->verbosity = 9;
 
         $this->uuid = $thing->uuid;
@@ -46,6 +46,7 @@ class Question {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
         $this->nominal = $thing->container['stack']['nominal'];
+        $this->mail_regulatory = $thing->container['stack']['mail_regulatory'];
 
 
         $this->entity_name = $thing->container['stack']['entity_name'];
@@ -59,7 +60,7 @@ class Question {
 
         $this->respond();
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
+        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
 
         $this->thing_report['log'] = $this->thing->log;
@@ -98,7 +99,7 @@ class Question {
     {
 
         $mail_regulatory = str_replace("\r", "", $this->mail_regulatory);
-        $mail_regulatory = str_replace("\n", "", $mail_regulatory);
+        $mail_regulatory = str_replace("\n", " ", $mail_regulatory);
 
         $this->sms_message = 'QUESTION MARK | ' . ucwords($this->nominal) . ' | ' . $this->email . ' | ' . $mail_regulatory . ' | TEXT <question>' ;
  
@@ -137,8 +138,6 @@ class Question {
         $this->makeSMS();
         $this->makeChoice();
 
-        //		$this->thing->email->sendGeneric($to,$from,$this->subject, $message, $choices);
-        //		echo '<pre> Agent "Question" email sent to '; echo $to; echo ' </pre>';
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
@@ -186,7 +185,6 @@ class Question {
         if (count($pieces) == 1) {
 
             $input = $this->subject;
-            //echo str_word_count($this->subject);
 
             if (is_string($this->subject) and strlen($input) == 1 ) {
             	// Test for single ? mark and call question()
@@ -241,18 +239,11 @@ class Question {
         if ( $endsWith ) {
             $this->question();
             return;
-        
-    }
+        }
 		// Message not understood
         return;
 	}
 
 }
 
-
-
-
 ?>
-
-
-

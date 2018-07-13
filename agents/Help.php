@@ -53,6 +53,7 @@ class Help {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->namespace = "\\Nrwtaylor\\StackAgentThing\\";
 
 		$this->thing->log ( '<pre> Agent "Help" running on Thing ' .  $this->uuid . '</pre>' );
 		$this->thing->log ( '<pre> Agent "Help" received this Thing "' .  $this->subject .  '"</pre>' );
@@ -88,26 +89,27 @@ class Help {
             return;
         }
 
-            try {
-                $this->thing->log( $this->agent_prefix .'trying Agent "' . $this->prior_agent . '".', "INFORMATION" );
-                $agent_class_name = ucwords($this->prior_agent);
-                $agent = new $agent_class_name($this->prior_thing);
+        try {
+            $this->thing->log( $this->agent_prefix .'trying Agent "' . $this->prior_agent . '".', "INFORMATION" );
+            $agent_class_name = $this->namespace . ucwords(strtolower($this->prior_agent));
+            $agent = new $agent_class_name($this->prior_thing);
 
-                $thing_report = $agent->thing_report;
+            $thing_report = $agent->thing_report;
 
-            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-                $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
-                $message = $ex->getMessage();
-                //$code = $ex->getCode();
-                $file = $ex->getFile();
-                $line = $ex->getLine();
+        } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+            $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
+            $message = $ex->getMessage();
+            //$code = $ex->getCode();
+            $file = $ex->getFile();
+            $line = $ex->getLine();
 
-                $input = $message . '  ' . $file . ' line:' . $line;
+            $input = $message . '  ' . $file . ' line:' . $line;
 
-                // This is an error in the Place, so Bork and move onto the next context.
-                $bork_agent = new Bork($this->thing, $input);
-                //continue;
-            }
+            // This is an error in the Place, so Bork and move onto the next context.
+            $bork_agent = new Bork($this->thing, $input);
+            $thing_report['help'] = $bork_agent->thing_report['help'] . " " . $input;
+            //continue;
+        }
 
         $this->help = $thing_report['help'];
 

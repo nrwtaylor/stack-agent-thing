@@ -17,7 +17,8 @@ class Receipt {
 		// Given a "thing".  Instantiate a class to identify and create the
 		// most appropriate agent to respond to it.
 		$this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
 
         $this->start_time = $this->thing->elapsed_runtime();
 
@@ -58,14 +59,8 @@ class Receipt {
 
 		$this->aliases = array("learning"=>array("good job"));
 
-$this->thing->log('Agent "Receipt" constructed a Thing '. $this->uuid . '', "INFORMATION");
-$this->thing->log( 'Agent "Receipt" received this Thing "' . $this->uuid . '"', "INFORMATION");
-
-		//echo "construct email responser";
-
-		// If readSubject is true then it has been responded to.
-		// Forget thing.
-
+        $this->thing->log('Agent "Receipt" constructed a Thing '. $this->uuid . '', "INFORMATION");
+        $this->thing->log( 'Agent "Receipt" received this Thing "' . $this->uuid . '"', "INFORMATION");
 
 		$this->readSubject();
 
@@ -83,8 +78,15 @@ $this->thing->log( 'Agent "Receipt" received this Thing "' . $this->uuid . '"', 
 
 	}
 
-    function setReceipt() {
+    function getQuickresponse()
+    {
+        $agent = new Qr($this->thing, "qr");
+        $this->quick_response_png = $agent->PNG_embed;
+    }
 
+
+    function setReceipt()
+    {
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("receipt",
             "refreshed_at"),  $this->thing->json->time()
@@ -131,44 +133,38 @@ $this->makeSMS();
 	}
 
 
-    function makeSMS() {
+    function makeSMS()
+    {
+        $this->verbosity = 1;
 
-$this->verbosity = 1;
+        $this->sms_message = "RECEIPT";
 
-$this->sms_message = "RECEIPT";
+        if ($this->verbosity > 5) {
+            //$this->sms_message = "RECEIPT";
+            $this->sms_message .= " | thing " . $this->uuid ."";
+            $this->sms_message .= " created " . $this->thing->thing->created_at;
+            $this->sms_message .= " by " . strtoupper($this->from);
+        }
 
-if ($this->verbosity > 5) {
+        if ($this->verbosity >=1) {
+            $this->sms_message .= " | datagram " . $this->uuid . " received " . $this->thing->thing->created_at. ".";
+        }
 
-//$this->sms_message = "RECEIPT";
-$this->sms_message .= " | thing " . $this->uuid ."";
-$this->sms_message .= " created " . $this->thing->thing->created_at;
-$this->sms_message .= " by " . strtoupper($this->from);
-}
+        //$this->sms_message .= ' | TEXT ?';
 
-if ($this->verbosity >=1) {
-
-$this->sms_message .= " | datagram " . $this->uuid . " received " . $this->thing->thing->created_at. ".";
-
-
-}
-
-//$this->sms_message .= ' | TEXT ?';
-
-
-$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['sms'] = $this->sms_message;
 
         return $this->sms_message;
-
     }
 
-	public function readSubject() {
+	public function readSubject()
+    {
+        $status = true;
+        return $status;
+    }
 
-
-		$status = true;
-	return $status;		
-	}
-
-        public function PNG() {
+    public function PNG()
+    {
 // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
 
 //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
@@ -189,28 +185,8 @@ $this->thing_report['sms'] = $this->sms_message;
                 // here DB request or some processing
                 $codeText = "thing:".$this->uuid;
 
-		ob_clean();
-                ob_start();
-                //QR_Code::png($codeText); 
-QR_Code::png($codeText,false,QR_ECLEVEL_Q,4); 
-
-//                QR_Code::png($codeText,false,QR_ECLEVEL_Q,4); 
-                $image = ob_get_contents();
-
-		ob_clean();
-// Can't get this text editor working yet 10 June 2017
-
-//$textcolor = imagecolorallocate($image, 0, 0, 255);
-// Write the string at the top left
-//imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
-
-$this->thing_report['png'] = $image;
-
-        // passing echo '<img src="data:image/png;base64,'.base64_encode($image).'"/>';
-        // passing echo '<img src="data:image/png;base64,'.base64_encode($this->thing_report['png']).'"/>';
-
-
-//echo $this->thing_report['png']; // for testing.  Want function to be silent.
+$agent = new Qr($this->thing, $codeText);
+$this->thing_report['png'] = $agent->PNG;
 
                 return $this->thing_report['png'];
                 }
