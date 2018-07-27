@@ -19,11 +19,11 @@ class Coordinate
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) 
+    function __construct(Thing $thing, $agent_input = null)
     {
-
-
-        $this->start_time = microtime(true);
+//echo "meep";
+//exit();
+//        $this->start_time = microtime(true);
 
         //if ($agent_input == null) {$agent_input = "";}
         $this->agent_input = $agent_input;
@@ -81,44 +81,33 @@ class Coordinate
 
         // Generate a response based on that intent.
         // I think properly capitalized.
-        //$this->set();
-//echo "coordinate " . $this->stringCoordinate($this->coordinate). "";
 
-        if ($this->agent_input == null) {
-		    $this->Respond();
-        }
-//echo "post-respond coordinate " . $this->stringCoordinate($this->coordinate). "";
+        $this->Respond();
+
         if ($this->agent_input != "extract") {
             $this->set();
         }
 
         $this->thing->log( $this->agent_prefix .' loaded coordinate ' . $this->stringCoordinate($this->coordinate) . "." );
 
-//		$this->thing->log('<pre> Agent "Headcode" completed</pre>');
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['log'] = $this->thing->log;
 
-        //echo $this->response;
-        //echo str_replace('<br>', "\n", $this->thing_report['log']);
+        $this->thing_report['response'] = $this->response;
 
 		return;
     }
 
-
     function set()
     {
-//echo "\n";
-//echo "set\n";
 
         if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
         $string_coordinate = $this->stringCoordinate($this->coordinate);
-//var_dump($this->coordinate);
-if (($this->coordinate == true) and (!is_array($this->coordinate))) {return;}
+        if (($this->coordinate == true) and (!is_array($this->coordinate))) {return;}
 
         //$this->refreshed_at = $this->current_time;
         $coordinate_variable = new Variables($this->thing, "variables coordinate " . $this->from);
 
-//echo "xxx" . $string_coordinate . "xxx";
         $coordinate_variable->setVariable("coordinate", $string_coordinate);
         $coordinate_variable->setVariable("refreshed_at", $this->refreshed_at);
 
@@ -135,12 +124,10 @@ if (($this->coordinate == true) and (!is_array($this->coordinate))) {return;}
         $place_zone = "05";
         //$place_code = $place_zone  . str_pad(rand(0,999) + 1,6,  '0', STR_PAD_LEFT);
 
-
         foreach (range(1,9999) as $n) {
             foreach($this->coordinates as $coordinate) {
 
                 $place_code = $place_zone . str_pad($n, 4, "0", STR_PAD_LEFT);
-
                 if ($this->getCoordinate($coordinate)) {
                     // Code doesn't exist
                     break;
@@ -151,11 +138,10 @@ if (($this->coordinate == true) and (!is_array($this->coordinate))) {return;}
                 return;
             }
         }
-}
+    }
 
-    function nextCode() {
-
-
+    function nextCode()
+    {
         $place_code_candidate = null;
 
         foreach ($this->coordinates as $place) {
@@ -167,10 +153,7 @@ if (($this->coordinate == true) and (!is_array($this->coordinate))) {return;}
 
 //        $place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
         return $place_code;
-
     }
-
-
 
     function nextCoordinate() {
 
@@ -276,7 +259,7 @@ if (is_array($this->last_coordinate)) {echo "lastcoord"; exit();}
         // See if a headcode record exists.
         $findagent_thing = new Findagent($this->thing, 'coordinate');
         $count = count($findagent_thing->thing_report['things']);
-        $this->thing->log('Agent "Coordinate" found ' . count($findagent_thing->thing_report['things']) ." place Things." );
+        $this->thing->log('Agent "Coordinate" found ' . count($findagent_thing->thing_report['things']) ." coordinate Things." );
 
 //        if ($findagent_thing->thing_reports['things'] == false) {
 //                $place_code = $this->default_place_code;
@@ -666,58 +649,43 @@ if (is_array($input)) {$this->coordinate = true; return;}
         return;
     }
 
+    public function makeWeb()
+    {
+        $test_message = "<b>COORDINATE " . $this->stringCoordinate($this->coordinate) . "</b>" . '<br>';
+
+        $refreshed_at = $this->refreshed_at;
+
+        $test_message .= "<p>";
+        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
+        $test_message .= "<br>Thing happened about ". $ago . " ago.";
+
+        //$test_message .= '<br>' .$this->whatisthis[$this->state] . '<br>';
+
+        //$this->thing_report['sms'] = $this->message['sms'];
+        $this->thing_report['web'] = $test_message;
+
+
+    }
+
+
     function makeTXT()
     {
         if (!isset($this->coordinates)) {$this->getCoordinates();}
 
-        //$this->getCoordinates();
-
         if (!isset($this->coordinate)) {$txt = "Not here";} else {
 
-        $txt = 'These are COORDINATES. ';
+            $txt = 'These are COORDINATEs for RAILWAY ' . $this->last_coordinate_variable->nuuid . '. ';
         }
         $txt .= "\n";
-//        $txt .= count($this->placecode_list). ' Place codes and names retrieved.';
-
         $txt .= "\n";
 
 
-        //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
-        $txt .= " " . str_pad("COORDINATE", 40, " ", STR_PAD_RIGHT);
-        $txt .= " " . str_pad("REFRESHED AT", 8, " ", STR_PAD_LEFT);
-
+        $txt .= " " . str_pad("COORDINATE", 19, " ", STR_PAD_RIGHT);
+        $txt .= " " . str_pad("REFRESHED AT", 25, " ", STR_PAD_RIGHT);
 
         $txt .= "\n";
         $txt .= "\n";
 
-
-/*
-
-        //$txt = "Test \n";
-        foreach ($this->placecode_list as $place_code) {
-    
-            $txt .= " " . str_pad(" ", 40, " ", STR_PAD_RIGHT);
-
-            $txt .= " " . "  " . str_pad(strtoupper($place_code), 5, "X", STR_PAD_LEFT);
-            //$txt .= " " . str_pad($train['alias'], 10, " " , STR_PAD_RIGHT);
-
-            $txt .= "\n";
-
-
-
-        }
-
-
-        foreach ($this->placename_list as $place_name) {
-
-            $txt .= " " . str_pad(strtoupper($place_name), 40, " ", STR_PAD_RIGHT);
-
-            $txt .= "\n";
-
-
-
-        }
-*/
         // Places must have both a name and a code.  Otherwise it's not a place.
         foreach ($this->coordinates as $key=>$coordinate) {
 
@@ -726,7 +694,7 @@ if (is_array($input)) {$this->coordinate = true; return;}
                 $t = $this->stringCoordinate($coordinate['coordinate']);
                 $txt .= " " . "  " .str_pad($t, 15, " ", STR_PAD_LEFT);
 
-                $txt .= " " . "  " .str_pad(strtoupper($coordinate['refreshed_at']), 15, "X", STR_PAD_LEFT);
+                $txt .= " " . "  " .str_pad(strtoupper($coordinate['refreshed_at']), 25, " ", STR_PAD_RIGHT);
             }
             $txt .= "\n";
 
@@ -802,8 +770,6 @@ $string_coordinate = $this->stringCoordinate($this->coordinate);
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
-//echo $sms;
-//exit();
 
     }
 
@@ -823,7 +789,6 @@ $string_coordinate = $this->stringCoordinate($this->coordinate);
         $choices = false;
 		$this->thing_report['choices'] = $choices;
 
-        //$this->makeTXT();
 
 
 // Get available for place.  This would be an available agent.
@@ -837,7 +802,7 @@ $string_coordinate = $this->stringCoordinate($this->coordinate);
         }
 
         $this->makeSMS();
-
+        $this->makeWeb();
 
 		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
 		$test_message .= '<br>headcode state: ' . $this->state . '<br>';
@@ -873,28 +838,21 @@ $string_coordinate = $this->stringCoordinate($this->coordinate);
         }
     }
 
-    function lastCoordinate() {
-
-//$this->getCoordinate();
-//return;
-
-       // var_dump($this->coordinates[0]);
-
-//exit();
-
+    function lastCoordinate()
+    {
         $this->last_coordinate_variable = new Variables($this->thing, "variables coordinate " . $this->from);
        // $this->last_coordinate = $this->last_coordinate_variable->getVariable('coordinate');
 
-
+        // Get a textual representation of a coordinate
         $coordinate = $this->last_coordinate_variable->getVariable("coordinate");
 
+        // Turn the text into an array
         $this->last_coordinate = $this->arrayCoordinate($coordinate);
     
-
         // This doesn't work
         $this->last_refreshed_at = $this->last_coordinate_variable->getVariable('refreshed_at');
 
-return;
+        return;
 
         // So do it the hard way
 
@@ -920,10 +878,6 @@ var_dump($last_coordinate['coordinate']);
 
     public function readSubject() 
     {
-
-//echo $this->stringCoordinate($this->coordinate);
-
-
         $this->response = null;
         $this->num_hits = 0;
 
@@ -958,8 +912,7 @@ var_dump($last_coordinate['coordinate']);
         $this->extractCoordinate($input);
 
 
-        if ($this->agent_input == "extract") {return;}
-//$input = "coordinate";
+        if ($this->agent_input == "extract") {$this->response = "Extracted coordinate(s).";return;}
         $pieces = explode(" ", strtolower($input));
 
 		// So this is really the 'sms' section
@@ -968,79 +921,64 @@ var_dump($last_coordinate['coordinate']);
             if ($input == 'coordinate') {
                 $this->lastCoordinate();
 
-            $this->coordinate = $this->last_coordinate;
-            $this->refreshed_at = $this->last_refreshed_at;
+                $this->coordinate = $this->last_coordinate;
+                $this->refreshed_at = $this->last_refreshed_at;
 
-
-                //$this->place_code = $this->last_place_code;
-                //$this->place_name = $this->last_place_name;
-                //$this->refreshed_at = $this->last_refreshed_at;
                 $this->response = "Last coordinate retrieved.";
-                //$this->read();
                 return;
             }
         }
 
-    foreach ($pieces as $key=>$piece) {
-        foreach ($this->keywords as $command) {
-            if (strpos(strtolower($piece),$command) !== false) {
+        foreach ($pieces as $key=>$piece) {
+            foreach ($this->keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
 
-                switch($piece) {
+                    switch($piece) {
 
-    case 'next':
-        $this->thing->log("read subject nextheadcode");
-        $this->nextCoordinate();
-        break;
+                        case 'next':
+                            $this->thing->log("read subject next coordinate");
+                            $this->nextCoordinate();
+                            break;
 
-   case 'drop':
-   //     //$this->thing->log("read subject nextheadcode");
-        $this->dropCoordinate();
-        break;
+                        case 'drop':
+                            //$this->thing->log("read subject nextheadcode");
+                            $this->dropCoordinate();
+                            break;
+                        case 'make':
+                        case 'new':
+                        case 'coordinate':
+                        case 'create':
+                        case 'add':
 
-   case 'make':
-   case 'new':
-   case 'coordinate':
-   case 'create':
-   case 'add':
+                            if (is_array($this->coordinate)) {
+                                $this->response = 'Asserted coordinate and found ' . $this->stringCoordinate($this->coordinate) .".";
+                                return;
+                            }
 
-        if (is_array($this->coordinate)) {
-//echo "reads" . $this->stringCoordinate($this->coordinate) . "\n";
-//echo "--";
+                            if ($this->coordinate) { // Coordinate not provided in string
+                                $this->lastCoordinate();
+                                $this->coordinate = $this->last_coordinate;
+                                $this->refreshed_at = $this->last_refreshed_at;
+                                $this->response = 'Asserted coordinate and found last ' . $this->stringCoordinate($this->coordinate) .".";
+                                return;
+                            }
 
-            $this->response = 'Asserted coordinate and found ' . $this->stringCoordinate($this->coordinate) .".";
-            return;
-        }
+                            $this->assertCoordinate(strtolower($input));
 
-        if ($this->coordinate) { // Coordinate not provided in string
-            $this->lastCoordinate();
-            $this->coordinate = $this->last_coordinate;
-            $this->refreshed_at = $this->last_refreshed_at;
-            $this->response = 'Asserted coordinate and found last ' . $this->stringCoordinate($this->coordinate) .".";
+                            if (empty($this->coordinate)) {$this->coordinate = "X";}
 
-            return;
-        }
+                            $this->response = 'Asserted Coordinate and found ' . $this->stringCoordinate($this->coordinate) .".";
 
-        $this->assertCoordinate(strtolower($input));
+                            return;
+                            break;
 
-        //$this->assertCoordinate($this->coordinate);
+                        default:
 
-        //$this->refreshed_at = $this->thing->time();
-
-        if (empty($this->coordinate)) {$this->coordinate = "X";}
-
-        $this->response = 'Asserted Coordinate and found ' . $this->stringCoordinate($this->coordinate) .".";
-
-        return;
-        break;
-
-    default:
-
-                                        }
-
-                                }
-                        }
-
+                    }
                 }
+            }
+
+        }
 
 
         // If at this point we get false/false, then the default Place has not been created.
@@ -1048,73 +986,60 @@ var_dump($last_coordinate['coordinate']);
 //            $this->makePlace($this->default_place_code, $this->default_place_name);
 //        }
 
-//var_dump($this->last_place_code);
-//var_dump($this->last_place_name);
-//echo "<bR>";
-//var_dump($this->place_code);
-//var_dump($this->place_name);
 
-    if ($this->coordinate != null) {
-        $this->getCoordinate($this->coordinate);
-        $this->thing->log($this->agent_prefix . 'using extracted coordinate ' . $this->stringCoordinate() . ".","INFORMATION");
-        $this->response = $this->stringCoordinate() . " used to retrieve a Coordinate.";
+        if ($this->coordinate != null) {
+            $this->getCoordinate($this->coordinate);
+            $this->thing->log($this->agent_prefix . 'using extracted coordinate ' . $this->stringCoordinate() . ".","INFORMATION");
+            $this->response = $this->stringCoordinate() . " used to retrieve a Coordinate.";
 
-        return;
-    }
+            return;
+        }
 
-    if ($this->last_coordinate != null) {
-        $this->getCoordinate($this->last_coordinate);
-        $this->thing->log($this->agent_prefix . 'using extracted last_coordinate ' . $this->last_coordinate . ".","INFORMATION");
-        $this->response = "Last coordinate " . $this->last_coordinate . " used to retrieve a Coordinate.";
+        if ($this->last_coordinate != null) {
+            $this->getCoordinate($this->last_coordinate);
+            $this->thing->log($this->agent_prefix . 'using extracted last_coordinate ' . $this->last_coordinate . ".","INFORMATION");
+            $this->response = "Last coordinate " . $this->last_coordinate . " used to retrieve a Coordinate.";
 
-        return;
-    }
+            return;
+        }
 
         // so we get here and this is null placename, null place_id.
         // so perhaps try just loading the place by name
-//var_dump($this->subject);
-//echo $this->subject;
-//$place = "dogpark";
 
-$coordinate = strtolower($this->subject);
+        $coordinate = strtolower($this->subject);
 
-if ( !$this->getCoordinate(strtolower($coordinate)) ){
-    // Place was found
-    // And loaded
-    $this->response = $coordinate . " used to retrieve a Coordinate.";
-
-    return;
-}
-
-
-//    function makePlace($place_code = null, $place_name = null) {
-$this->makeCoordinate($coordinate);
-//$this->set();
-
-$this->thing->log($this->agent_prefix . 'using default_coordinate ' . implode(" ",$this->default_coordinate) . ".","INFORMATION");
-
-//$this->getPlace($this->default_place_code);
-//$this->getPlace($place);
-
-        $this->response = "Made a Coordinate called " . $coordinate . ".";
-
+        if ( !$this->getCoordinate(strtolower($coordinate)) ){
+            // Place was found
+            // And loaded
+            $this->response = $coordinate . " used to retrieve a Coordinate.";
 
             return;
+        }
 
+        //    function makePlace($place_code = null, $place_name = null) {
+        $this->makeCoordinate($coordinate);
 
-    if (($this->isData($this->coordinate)) or ($this->isData($this->coordinate)) ) {
-        $this->set();
+        $this->thing->log($this->agent_prefix . 'using default_coordinate ' . implode(" ",$this->default_coordinate) . ".","INFORMATION");
+
+        $this->response = "Made a Coordinate called " . $coordinate . ".";
         return;
-    }
+
+
+        if (($this->isData($this->coordinate)) or ($this->isData($this->coordinate)) ) {
+            $this->set();
+            return;
+        }
 
 		return false;
 
 	}
-
-	function kill() {
+/*
+	function kill()
+    {
 		// No messing about.
 		return $this->thing->Forget();
 	}
+*/
 }
 
 /* More on places
