@@ -18,7 +18,6 @@ class Tick
 		//echo '<pre> cronhandler started running ';echo date("Y-m-d H:i:s");echo'</pre>';
 		//echo '<pre> cronhandler version v1/api 1 5 June 2017';echo'</pre>';
 
-
         $this->agent_name = 'tick';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
         $this->test= "Development code";
@@ -30,13 +29,10 @@ class Tick
         $this->thing_report  = array("thing"=>$this->thing->thing);
         $this->start_time = $this->thing->elapsed_runtime();
 
-
-
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
-
 
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -55,10 +51,20 @@ class Tick
         $this->cron_period = $this->thing->container['stack']['cron_period'];
         $this->start_time = $this->thing->elapsed_runtime();
 
+
+        $this->variables = new Variables($this->thing, "variables tick " . $this->from);
+        $this->current_time = $this->thing->json->time();
+
+
+        $this->get();
         $this->readSubject();
 
 /*
         if (rand(1,20) == 1) {
+        // devstack refactor this to use gearman
+        // will need tallycounter to recognize the named tally provided.
+
+        // Call this on a random beat
 
         $this->thing->log($this->agent_prefix . "called Tallycounter.");
 
@@ -68,12 +74,15 @@ class Tick
         $tallycounter_thing = new Tallycounter($t, 'tallycounter message tally@stackr.ca');
         }
 */
+//        $bar = new Bar($this->thing, "bar");
+
+
 /*
         $to = "tallycounter";
         $from = null;
         $subject = "s/ tallycounter message";
 
-            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>$subject));
+            $arr = json_encode(array("to"=>$from, "from"=>$to, "subject"=>"s/ tallycounter message"));
 
             $client= new GearmanClient();
             $client->addServer();
@@ -97,14 +106,10 @@ class Tick
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
 
-
+/*
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"stack", "subject"=>"s/ stack"));
-
-//                $client= new \GearmanClient();
-//                $client->addServer();
-                //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-
+*/
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"dummyload", "subject"=>"s/ dummyload"));
 
 //                $client= new \GearmanClient();
@@ -142,6 +147,22 @@ class Tick
 
         //$this->doTick();
 
+        if ($this->tick_count > 8) {
+            $this->tick_count = 0; 
+            //$bar = new Bar($this->thing, "bar");
+            //$bar = new Bar($this->thing, "bar");
+
+            $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ bar"));
+
+            //$client= new \GearmanClient();
+            //$client->addServer();
+            $client->doLowBackground("call_agent", $arr);
+
+        }
+
+
+        $this->set();
+
         //$this->thing_report = $this->respond();
         if ($this->agent_input == null) {
             $this->respond();
@@ -160,21 +181,52 @@ class Tick
 
         }
 
+
+    function set()
+    {
+        $this->variables->setVariable("ticks", $this->tick_count);
+        $this->variables->setVariable("refreshed_at", $this->current_time);
+
+//        $this->thing->choice->save('usermanager', $this->state);
+
+        return;
+    }
+
+
+    function get()
+    {
+        $this->tick_count = $this->variables->getVariable("ticks");
+        $this->refreshed_at = $this->variables->getVariable("refreshed_at");
+
+        $this->thing->log( $this->agent_prefix .  'loaded ' . $this->tick_count . ".", "DEBUG");
+
+        $this->tick_count = $this->tick_count + 1;
+
+        return;
+    }
+
+
     function respond() {
 
         $this->makeSMS();
+        $this->makeMessage();
 
     }
 
-    function makeSMS() {
+    public function makeMessage() 
+    {
+        $message = "On this tick, " . number_format($this->value_destroyed) . " units of value, and " . $this->things_destroyed . " Things were destroyed. ";
+        $message .= "Counted " . $this->tick_count . " ticks.";
 
-        //$this->things_destroyed = $damage_thing->things_destroyed;
-        //$this->value_destroyed = $damage_thing->value_destroyed;
+        $this->message = $message;
+        $this->thing_report['message'] = $message;
+    }
 
-
+    function makeSMS()
+    {
         $this->sms_message = "TICK | value destroyed " . number_format($this->value_destroyed) . " things destroyed " . $this->things_destroyed . ".";
+        $this->sms_message .= " | " . $this->tick_count;
         $this->thing_report['sms'] = $this->sms_message;
-
     }
 
     function readSubject() {}

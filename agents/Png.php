@@ -289,9 +289,17 @@ $text = $this->text;
                 width="' . $this->width .'" height="' . $this->height . '" 
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/png.txt">';
 */
+/*
         $html = '<img src="data:image/png;base64,'. $this->image_string . '"
                 width="' . $this->width .'" height="' . $this->height . '" 
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/png.txt">';
+*/
+        // Removing height fixes problem with image squashing on mobile devices
+        // Prodstack css
+        $html = '<img src="data:image/png;base64,'. $this->image_string . '"
+                width="' . $this->width .'"  
+                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/png.txt">';
+
 
         $this->html_image = $html;
 

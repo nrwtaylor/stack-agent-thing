@@ -212,7 +212,8 @@ class Thing
 //		$this->stackBalance($this->uuid);
         $this->log("Thing instantiation completed.");
 
-		return $this->thing;
+		return;
+//        return $this->thing;
 
     }
 

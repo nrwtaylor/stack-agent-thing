@@ -153,7 +153,7 @@ $choices = false;
         }
 
 		//$this->thing_report['sms'] = $this->sms_message;
-		$this->thing_report['message'] = $this->sms_message;
+		//$this->thing_report['message'] = $this->sms_message;
 
 
         if ($this->agent_input == null) {
@@ -277,7 +277,6 @@ $choices = false;
 
     function makeMessage()
     {
-
         $message = "Stackr rolled the following for you.<br>";
 
         foreach($this->result as $k=>$v) {
@@ -324,9 +323,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     {
         //if (isset($this->image)) {return;}
         // here DB request or some processing
-
-
-        $number = $this->result[1]['roll'];
+        $number = $this->result[count($this->result) - 1]['roll'];
 
         $image = imagecreatetruecolor(125, 125);
 
@@ -418,6 +415,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         }
 
         $this->image = $image;
+
     }
 
     public function makePNG()

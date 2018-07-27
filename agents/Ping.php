@@ -4,17 +4,16 @@ namespace Nrwtaylor\StackAgentThing;
 //require_once '/var/www/html/stackr.ca/agents/message.php';
 //echo "Watson says hi<br>";
 
-class Ping {
-	
-
+class Ping
+{
 	public $var = 'hello';
 
+    function __construct(Thing $thing)
+    {
+        $this->thing = $thing;
+        $this->agent_name = 'ping';
 
-    function __construct(Thing $thing) {
-                $this->thing = $thing;
-                $this->agent_name = 'ping';
-
- 		$this->thing_report  = array("thing"=>$this->thing->thing);
+ 		$this->thing_report['thing']  = $thing;
 
                 // So I could call
                 $this->test = false;
@@ -44,19 +43,15 @@ class Ping {
 
 
 
-
 		// create container and configure
 		$this->api_key = $this->thing->container['api']['watson'];
 
 
 		$this->readSubject();
-		
 		$this->thing_report = $this->respond();
-
 		$this->thing->log('Agent "Ping" completed.', "INFORMATION");
 
         $this->thing_report['log'] = $this->thing->log;
-
 
 		return;
 
@@ -113,10 +108,8 @@ class Ping {
 
 		//$this->thing_report['choices'] = false; 
 
-
                 $message_thing = new Message($this->thing, $this->thing_report);
                 //$thing_report['info'] = 'SMS sent';
-
 
                 $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 

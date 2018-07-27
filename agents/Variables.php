@@ -77,6 +77,7 @@ class Variables
 
         // Not sure this is limiting.
         $this->getVariables();
+
 //if ($agent_command == "variables place console") {exit();}
 
         $this->nuuid = substr($this->variables_thing->uuid,0,4);
@@ -323,6 +324,7 @@ class Variables
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
+
 
         $variables = $this->variables_thing->account['stack']->json->array_data;
         if (isset($variables[$this->variable_set_name])) {

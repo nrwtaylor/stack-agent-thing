@@ -599,7 +599,9 @@ if (is_array($input)) {$this->coordinate = true; return;}
 
         $coordinates = $this->extractCoordinates($input);
 
-        if ( ( count($coordinates) ) == 1) {
+
+        if ( (is_array($coordinates)) and (count($coordinates) == 1)) {
+        //if ( ( count($coordinates) ) == 1) {
             if (isset($coordinates[0])) {$this->coordinate = $coordinates[0];}
 
             $this->thing->log( $this->agent_prefix  . 'found a coordinate ' . $this->stringCoordinate() . ' in the text.');
@@ -614,8 +616,10 @@ if (is_array($input)) {$this->coordinate = true; return;}
         // Take out word 'place' at the start.
 //        $filtered_input = ltrim(strtolower($input), "place");
 
-
-        if (count($coordinates) == 1) {$this->coordinate = $this->coordinates[0];}
+        if ( (is_array($coordinates)) and (count($coordinates) == 1)) {
+        //if (count($coordinates) == 1) {
+            $this->coordinate = $this->coordinates[0];
+        }
         return $this->coordinate;
     }
 
@@ -746,7 +750,16 @@ if (is_array($input)) {$this->coordinate = true; return;}
 
         $coordinate_array = true;
 
-        if (count($coordinates) == 1) {$coordinate_array = $coordinates[0];}
+//prod
+//var_dump($coordinates);
+//        if (is_array($coordinates)) {
+
+//        if (count($coordinates) == 1) {$coordinate_array = $coordinates[0];}
+//        }
+
+        if ( (is_array($coordinates)) and (count($coordinates) == 1)) {
+            $coordinate_array = $coordinates[0];
+        }
 
 
 //exit();

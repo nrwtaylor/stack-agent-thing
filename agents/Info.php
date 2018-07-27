@@ -7,14 +7,16 @@ error_reporting(-1);
 
 class Info {
 
-	function __construct(Thing $thing)
+	function __construct(Thing $thing, $agent_input = null)
     {
+        $this->start_time = $thing->elapsed_runtime(); 
 
+        $this->agent_input = $agent_input;
 		$this->thing_report['thing'] = false;
 
 		if ($thing->thing != true) {
 
-            $this->thing->log ( '<pre> Agent "Info" ran on a null Thing ' .  $thing->uuid .  '</pre>');
+            $this->thing->log ( 'Agent "Info" ran on a null Thing ' .  $thing->uuid .  '');
   	        $this->thing_report['info'] = 'Tried to run Info on a null Thing.';
 			$this->thing_report['help'] = "That isn't going to work";
 
@@ -51,8 +53,8 @@ class Info {
 
 		$this->sqlresponse = null;
 
-		$this->thing->log ( '<pre> Agent "Info" running on Thing ' .  $this->uuid . '</pre>' );
-		$this->thing->log ( '<pre> Agent "Info" received this Thing "' .  $this->subject .  '"</pre>' );
+		$this->thing->log ( 'Agent "Info" running on Thing ' .  $this->uuid . '' );
+		$this->thing->log ( 'Agent "Info" received this Thing "' .  $this->subject .  '"' );
 
 //$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
 
@@ -88,10 +90,12 @@ class Info {
 
         try {
            $this->thing->log( $this->agent_prefix .'trying Agent "' . $this->prior_agent . '".', "INFORMATION" );
-           $agent_class_name = ucwords($this->prior_agent);
-           $agent = new $agent_class_name($this->prior_thing);
+           $agent_class_name = ucwords(strtolower($this->prior_agent));
+           $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-           $thing_report = $agent->thing_report;
+           $agent = new $agent_namespace_name($this->prior_thing);
+            $this->info = $agent->thing_report['info'];
+           //$thing_report = $agent->thing_report;
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
            $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
@@ -103,11 +107,12 @@ class Info {
            $input = $message . '  ' . $file . ' line:' . $line;
 
            // This is an error in the Place, so Bork and move onto the next context.
-           $bork_agent = new Bork($this->thing, $input);
+           $agent = new Bork($this->thing, $input);
            //continue;
+            $this->info = $input;
         }
 
-        $this->info = $thing_report['info'];
+        $this->thing_report['info'] = $this->info;
     }
 
     public function makeSMS()
@@ -118,25 +123,18 @@ class Info {
         $this->sms_message .= " | TEXT WHATIS";
         $this->thing_report['sms'] = $this->sms_message;
 
-
-
     }
 
 	public function respond()
     {
 		// Thing actions
 
-//        $web_thing = new Thing(null);
-//        $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
         $this->makeSMS();
 
 		$this->thing->json->setField("variables");
 		$this->thing->json->writeVariable(array("info",
 			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
 			);
-
-
-//        $this->makeWeb();
 
         $this->makeChoices();
 
@@ -145,30 +143,22 @@ class Info {
 		$this->thing_report['info'] = 'This is the info agent.';
 		$this->thing_report['help'] = 'This agent takes a Thing and runs the Info agent on it.';
 
-        $this->thing->log ( '<pre> Agent "Info" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
-
-		$message_thing = new Message($this->thing, $this->thing_report);
-
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
+        if ($this->agent_input == null) {
+		    $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
 
         $this->makeWeb();
-//        $this->thing_report['etime'] = "meep";
 
 		return $this->thing_report;
 	}
 
-    function getLink() {
+    function getLink()
+    {
 
         $block_things = array();
         // See if a block record exists.
         $findagent_thing = new FindAgent($this->thing, 'thing');
-
-        // This pulls up a list of other Block Things.
-        // We need the newest block as that is most likely to be relevant to
-        // what we are doing.
-
-//$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
 
         $this->max_index =0;
 

@@ -19,7 +19,7 @@ class Qr
     {
         $this->thing_report['thing'] = $thing;
 
-        if ($agent_input == null) {$agent_input = '';}
+//        if ($agent_input == null) {$agent_input = '';}
         $this->agent_input = $agent_input;
         $this->agent_name = "qr";
         // Given a "thing".  Instantiate a class to identify and create the
@@ -53,7 +53,7 @@ class Qr
 		$this->aliases = array("learning"=>array("good job"));
 
         if ($this->agent_input == null) {
-            $this->quick_response = $this->web_prefix . "" . $this->uuid . "";
+            $this->quick_response = $this->web_prefix . "" . $this->uuid . "" . "/qr";
         } else {
             $this->quick_response = $this->agent_input;
         }
@@ -110,11 +110,15 @@ class Qr
 
         $web = '<a href="' . $link . '">';
         //$web_prefix = "http://localhost:8080/";
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/qr.png" jpg" 
-                width="100" height="100" 
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/qr.txt">';
+//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/qr.png" jpg" 
+//                width="100" height="100" 
+//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/qr.txt">';
+
+        $web .= $this->html_image;
 
         $web .= "</a>";
+
+
         $web .= "<br>";
 
         //$received_at = strtotime($this->thing->thing->created_at);
@@ -177,11 +181,11 @@ class Qr
 		return;
 	}
 
-	public function readSubject() {
-
+	public function readSubject()
+    {
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
-        
+
         //        $message_thing = new Message($this->thing, $this->thing_report);
         //        $thing_report['info'] = $message_thing->thing_report['info'] ;
 
@@ -192,8 +196,8 @@ class Qr
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 
         if (preg_match($pattern, $this->to)) {
-        $this->thing->log('Agent "QR" found a QR in address.');
-
+            $this->thing->log('Agent "QR" found a QR in address.');
+        }
         return;
 
 
@@ -221,8 +225,12 @@ class Qr
     {
         if (isset($this->PNG)) {return;}
 
-        $codeText = $this->web_prefix . "thing/".$this->uuid;
-
+        if ($this->agent_input == null) {
+            $codeText = $this->quick_response;
+            //$codeText = $this->web_prefix . "thing/".$this->uuid . "/qr";
+        } else {
+            $codeText = $this->agent_input;
+        }
         if (ob_get_contents()) ob_clean();
 
         $qrCode = new QrCode($codeText);
@@ -237,6 +245,17 @@ class Qr
         $this->PNG_embed = "data:image/png;base64,".base64_encode($image);
         $this->PNG = $image;
 
+        $this->width = 100;
+        $alt_text = $this->uuid;
+
+        $html = '<img src="data:image/png;base64,'. base64_encode($image) . '"
+                width="' . $this->width .'"  
+                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/qr.txt">';
+
+
+        $this->html_image = $html;
+
+
         // Can't get this text editor working yet 10 June 2017
 
         //$textcolor = imagecolorallocate($image, 0, 0, 255);
@@ -249,5 +268,27 @@ class Qr
 
         return $this->thing_report['png'];
     }
+/*
+    public function makePNG()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+
+        $agent = new Png($this->thing, "png");
+        $this->makeImage();
+
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+
+        //$this->thing_report['png'] = $agent->PNG;
+        $this->thing_report['png'] = $agent->image_string;
+
+    }
+*/
+
 }
+
+
 ?>

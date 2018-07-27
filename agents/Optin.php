@@ -104,16 +104,16 @@ class Optin {
 
         switch ($this->counter) {
             case 1:
-                $sms = "OPT-IN | Thank you for opting into Stackr.  " . $this->web_prefix .".";
+                $sms = "OPT-IN | Thank you for opting into Stackr.  " . $this->web_prefix ." | Opted-in.";
                 break;
             case 2:
-                $sms = "OPT-IN | Read our Privacy Policy at " . $this->web_prefix . "privacy";
+                $sms = "OPT-IN | Read our Privacy Policy at " . $this->web_prefix . "privacy | Opted-in.";
                 break;
 
             case null;
 
             default:
-                $sms = "OPT-IN | Acknowledged.  " . $this->web_prefix . "privacy";
+                $sms = "OPT-IN | " . $this->web_prefix . "privacy | Acknowledged.";
 
         }
 

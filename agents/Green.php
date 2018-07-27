@@ -5,31 +5,24 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-								// factored to
-								// call agent 'Agent'
-
 ini_set("allow_url_fopen", 1);
 
-class Green 
+class Green
 {
 
-    // This is a resource block.  It is a train which be run by the block scheduler.
-    // It will respond to trains with a signal.
+    // This is a color.
+
     // Red - Not available
     // Green - Slot allocated
     // Yellow - Next signal Red.
     // Double Yellow - Next signal Yellow
 
-    // The block keeps track of the uuids of associated resources.
-    // And checks to see what the block signal should be.  And pass and collect tokens.
-
-    // This is the block manager.  They are an ex-British Rail signalperson.
-
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
 
-        $this->start_time = microtime(true);
+//        $this->start_time = microtime(true);
 
         if ($agent_input == null) {$agent_input = "";}
 
@@ -54,25 +47,15 @@ class Green
 
         $this->num_hits =0;
 
-$this->agent_prefix = 'Agent "Green" ';
+        $this->agent_prefix = 'Agent "Green" ';
 
 
-
-//$this->node_list = array("red"=>array("green"=>array("red")));
-//$this->thing->choice->load('train');
-//exit();
-
-       $this->keywords = array('green');
-
-
-//                'block' => array('default run_time'=>'105',
-//                                'negative_time'=>'yes'),
+        $this->keywords = array('green');
 
         $this->current_time = $this->thing->json->time();
 
-        $this->thing->log('<pre> Agent "Green" running on Thing '. $this->thing->nuuid . '.</pre>');
-        $this->thing->log('<pre> Agent "Green" received this Thing "'.  $this->subject . '".</pre>');
-
+        $this->thing->log('Agent "Green" running on Thing '. $this->thing->nuuid . '.');
+        $this->thing->log('Agent "Green" received this Thing "'.  $this->subject . '".');
 
 //                $this->default_run_time = $this->current_time;
 //                $this->negative_time = true;
@@ -81,15 +64,12 @@ $this->agent_prefix = 'Agent "Green" ';
 
         $this->thing->log( $this->agent_prefix .'. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
-
         $this->flag_thing = new Flag($this->thing); // Pass without agent instruction to generate message.
-
-
 
 		//$this->readSubject();
         $this->thing->log( $this->agent_prefix .'. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
-		//$this->respond();
+//		$this->respond();
         //$this->thing->log( $this->agent_prefix .'. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
 
@@ -103,11 +83,7 @@ $this->agent_prefix = 'Agent "Green" ';
 
 		return;
 
-		}
-
-
-
-
+    }
 
     function set()
     {
@@ -924,6 +900,7 @@ $match = true;
 
     function setFlag($colour) 
     {
+
         $this->flag_thing = new Flag($this->variables_agent->thing, 'flag '.$colour);
         $this->flag = $this->flag_thing->state; 
 

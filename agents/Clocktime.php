@@ -40,7 +40,7 @@ class Clocktime
  //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
  //       $this->thing->choice->load('headcode');
 
-        $this->keywords = array('next', 'accept', 'clear', 'drop','add','new');
+        $this->keywords = array('now','next', 'accept', 'clear', 'drop','add','new');
 
         // You will probably see these a lot.
         // Unless you learn headcodes after typing SYNTAX.
@@ -72,8 +72,8 @@ class Clocktime
         // Generate a response based on that intent.
         // I think properly capitalized.
         //$this->set();
-        if ($this->agent_input == null) {
 
+        if ($this->agent_input == null) {
 		    $this->Respond();
         }
 
@@ -88,15 +88,17 @@ class Clocktime
 
     function makeClocktime($input = null)
     {
+
         if ($input == null) {
             $input_time = $this->current_time;
         } else {
             $input_time = $input;
         }
 
+
         if (strtoupper($input) == "X") {
-            $this->clocktime  = "X";
-            return $this->clocktime;
+            $this->clock_time  = "X";
+            return $this->clock_time;
         }
 
         $t = strtotime($input_time);
@@ -105,11 +107,10 @@ class Clocktime
         $this->hour = date("H",$t);
         $this->minute =  date("i",$t);
 
-        $this->clocktime = $this->hour . $this->minute;
+        $this->clock_time = $this->hour . $this->minute;
 
         //if ($input == null) {$this->clocktime = $train_time;}
-
-        return $this->clocktime;
+        return $this->clock_time;
     }
 
 
@@ -217,7 +218,7 @@ class Clocktime
 
             // Test for non-recognized edge case
             if (preg_match("(o'clock|oclock)", $input) === 1) {
-                require_once '/var/www/html/stackr.ca/agents/number.php';
+//                require_once '/var/www/html/stackr.ca/agents/number.php';
                 $number_agent = new Number($this->thing, "number " . $input);
                 if (count($number_agent->numbers) == 1) {
                     $this->hour = $number_agent->numbers[0];
@@ -267,30 +268,26 @@ class Clocktime
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $m .= $this->response;
 
-
         $this->web_message = $m;
         $this->thing_report['web'] = $m;
-
-
     }
 
 
 
-    private function makeSMS() {
-
+    private function makeSMS()
+    {
         $sms_message = "CLOCKTIME";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | hour " . $this->hour . " minute " . $this->minute;
 
+        if (isset($this->response)) {$sms_message .= " | " . $this->response;}
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
-
-
     }
 
-	private function Respond() {
-
+	private function Respond()
+    {
 		// Thing actions
 
 		$this->thing->flagGreen();
@@ -309,13 +306,8 @@ class Clocktime
 
         $this->makeSMS();
 
-//echo "foo";
-
 	    $this->thing_report['email'] = $this->sms_message;
 		$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
-
-
-
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -329,32 +321,26 @@ class Clocktime
 
         $this->thing_report['help'] = 'This is a clocktime.  Extracting clock times from strings.';
 
-
-
 		return;
-
 
 	}
 
-    function isData($variable) {
-        if ( 
+    function isData($variable)
+    {
+        if (
             ($variable !== false) and
             ($variable !== true) and
             ($variable != null) ) {
- 
             return true;
-
         } else {
             return false;
         }
     }
 
-    public function readSubject() 
+    public function readSubject()
     {
-
         if ($this->agent_input == "test") {$this->test(); return;}
 
-        //$this->response = null;
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
@@ -368,50 +354,57 @@ class Clocktime
             $input = strtolower($this->subject);
         }
 
-		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-
         $prior_uuid = null;
 
-        // Is there a headcode in the provided datagram
+        // Is there a clocktime in the provided datagram
         $this->extractClocktime($input);
-
-        if ($this->agent_input == "extract") {return;}
+        if ($this->agent_input == "extract") {$this->response = "Extracted a clocktime.";return;}
 
         $pieces = explode(" ", strtolower($input));
 
-        if (($this->minute == "X") and ($this->hour == "X")) {
-            $this->get();
-/*
-            if ($this->agent_input == null) {
-                if( $this->hour == false) {
-                    // Get the current time
-                    $this->makeClocktime();
-//var_dump($this->clocktime);
-//var_dump($this->hour);
-                }
+
+     if (count($pieces) == 1) {
+            if ($input == 'clocktime') {
+                $this->get();
+                $this->response = "Last 'clocktime' retrieved.";
+                return;
             }
-*/
 
         }
 
-//        echo "meep";
-//        $this->makeClocktime();
+        foreach ($pieces as $key=>$piece) {
+            foreach ($this->keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) {
+                        case 'now':
+                            $this->thing->log("read subject nextheadcode");
+                            $t = $this->thing->time();
+                            $this->extractClocktime($t);
+                            $this->response = "Got server time.";
 
+                            return;
+
+                    }
+                }
+            }
+        }
+
+        if (($this->minute == "X") and ($this->hour == "X")) {
+            $this->get();
+            $this->response = "Last clocktime retrieved.";
+        }
+/*
+        // Added in test 2018 Jul 26
+        if (($this->minute == false) and ($this->hour == false)) {
+
+            $t = $this->thing->time();
+            $this->extractClocktime($t);
+            $this->response = "Got server time.";
+        }
+*/
         return "Message not understood";
-        return false;
 
 	}
-
-
-
-
-
-
-	function kill() {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-
 }
 
 ?>

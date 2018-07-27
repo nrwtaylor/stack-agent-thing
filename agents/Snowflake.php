@@ -39,12 +39,13 @@ class Snowflake
 
         $this->node_list = array("snowflake"=>array("snowflake", "uuid"));
 
-
         $this->haystack = $thing->uuid .
                 $thing->to .
                 $thing->subject .
                 $command_line .
                         $this->agent_input;
+
+
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
         $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
@@ -58,6 +59,9 @@ class Snowflake
         $this->email = $thing->container['stack']['email'];
         $this->entity_name = $thing->container['stack']['entity_name'];
 
+
+        $this->default_canvas_size_x = 164;
+        $this->default_canvas_size_y = 164;
 
         $this->thing->log($this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
@@ -96,17 +100,15 @@ class Snowflake
 
         $this->setSnowflake();
 
-
         if ($this->agent_input == null) {
             $this->setSignals();
         }
 
         $this->thing->log($this->agent_prefix .'completed setSignals.', "OPTIMIZE");
-
         $this->thing->log($this->agent_prefix .'completed setSnowflake.', "OPTIMIZE");
         $this->thing->log($this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE");
-
         $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report['response'] = $this->response;
 
         return;
     }
@@ -115,9 +117,10 @@ class Snowflake
 
     // -----------------------
 
-    function getQuickresponse()
+    function getQuickresponse($text = null)
     {
-        $agent = new Qr($this->thing, "qr");
+        if ($text == null) {$text = $this->web_prefix;}
+        $agent = new Qr($this->thing, $text);
         $this->quick_response_png = $agent->PNG_embed;
     }
 
@@ -126,6 +129,7 @@ class Snowflake
         $agent = new Nuuid($this->thing, "nuuid");
         $this->nuuid_png = $agent->PNG_embed;
     }
+
 /*
     public function getUuid()
     {
@@ -196,6 +200,7 @@ class Snowflake
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
         $this->makeWeb();
+        //$this->makeChoices();
         $this->makeTXT();
         $this->makePDF();
 
@@ -227,6 +232,7 @@ class Snowflake
         //$sms = "SNOWFLAKE | cell (0,0,0) state ". strtoupper($cell['state']);
         $sms = "SNOWFLAKE | ";
         $sms .= $this->web_prefix . "thing/".$this->uuid."/snowflake";
+        $sms .= " | " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -340,6 +346,7 @@ class Snowflake
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.pdf';
         $this->node_list = array("web"=>array("snowflake","uuid snowflake"));
 
+
         $web = '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
         $web .= $this->html_image;
@@ -420,8 +427,29 @@ class Snowflake
 
     public function makePNG()
     {
-$canvas_size = 164;
-        $this->image = imagecreatetruecolor($canvas_size, $canvas_size);
+//$canvas_size = 164;
+//$this->canvas_size_x = 164;
+//$this->canvas_size_y = $this->canvas_size_x;
+//if ((isset($this->canvas_size_x)) and (!isset($this->canvas_size_y))) {
+
+if (isset($this->canvas_size_x)) {
+    $canvas_size_x = $this->canvas_size_x;
+    $canvas_size_y = $this->canvas_size_x;
+} else {
+    $canvas_size_x = 164;
+    $canvas_size_y = 164;
+}
+//}
+
+//$canvas_size_y = $this->canvas_size_y;
+//if ($this->event->event_name == "pride") {
+   // $canvas_size_x = 2 * $canvas_size_x;
+   // $canvas_size_y = 2 * $canvas_size_y;
+
+//}
+
+        $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+        //$this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -429,17 +457,60 @@ $canvas_size = 164;
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
+        // For Vancouver Pride 2018
 
-        imagefilledrectangle($this->image, 0, 0, $canvas_size, $canvas_size, $this->white);
+        // https://en.wikipedia.org/wiki/Rainbow_flag
+        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
+        // https://www.schemecolor.com/lgbt-flag-colors.php
+
+        $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
+        $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
+        $this->canary_yellow = imagecolorallocate($this->image, 255, 239, 0);
+        $this->la_salle_green = imagecolorallocate($this->image, 0, 129, 31);
+        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
+        $this->patriarch = imagecolorallocate($this->image, 118, 0, 137);
+
+        $this->flag_red = imagecolorallocate($this->image, 231, 0, 0);
+        $this->flag_orange = imagecolorallocate($this->image, 255, 140, 0);
+        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
+        $this->flag_green = imagecolorallocate($this->image, 0, 129, 31);
+        $this->flag_blue = imagecolorallocate($this->image, 0, 68, 255);
+        // Indigo https://www.rapidtables.com/web/color/purple-color.html
+        $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
+        $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
+
+        $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
+
+        // Patriarch as a color name.
+        // https://www.schemecolor.com/lgbt-flag-colors.php
+        $this->color_palette = array($this->electric_red,
+                                    $this->dark_orange,
+                                    $this->canary_yellow,
+                                    $this->la_salle_green,
+                                    $this->blue,
+                                    $this->patriarch);
+
+        $this->flag_color_palette = array($this->flag_red,
+                                    $this->flag_orange,
+                                    $this->flag_yellow,
+                                    $this->flag_green,
+                                    $this->flag_blue,
+                                    $this->flag_indigo,
+                                    $this->flag_violet);
+
+        imagefilledrectangle($this->image, 0, 0, $canvas_size_x, $canvas_size_y, $this->white);
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        $this->drawSnowflake($canvas_size/2, $canvas_size/2);
+
+//        $this->drawSnowflake($canvas_size_x/2, $canvas_size_y/2);
+        $this->drawSnowflake();
+
 
         // Write the string at the top left
         $border = 30;
         $r = 1.165;
 
-        $radius = $r * ($canvas_size - 2 * $border) / 3;
+        $radius = $r * ($canvas_size_x - 2 * $border) / 3;
 
 
 
@@ -450,7 +521,7 @@ $canvas_size = 164;
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
-        $size = $canvas_size - 90;
+        $size = $canvas_size_x - 90;
         $angle = 0;
 
 
@@ -567,6 +638,10 @@ $canvas_size = 164;
     {
         if ($color == null) {
             $color = $this->white;
+            $color_outline = $this->grey;
+            
+//            $key = abs($q);
+//            $color = $this->color_palette[$key];
         }
 
         list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
@@ -593,23 +668,73 @@ $canvas_size = 164;
         if ($this->draw_outline == true) {
             imagepolygon($this->image, $point_array, count($point_array)/2, $this->black);
         }
+
         if ($color != $this->white) {
 
-//        $cell = $this->lattice[$q][$r][$s];
+        //$cell = $this->lattice[$q][$r][$s];
         //$value = $cell['value'];
+
             $r = 155;
             $g = 183;
             $b = 217;
             $this->rgbcolor(rand($r-20,$r+10),rand($g-10,$g+10),rand($b-40, $b+20));
             // Need consistency from image to image
             $this->rgbcolor(155,183,217);
+$color = $this->rgb;            
+            // $color = $this->rgb;
 
 
-            //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
-            imagefilledpolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
+        
+            if ((isset($this->event)) and ($this->event->event_name == "vancouver pride 2018")) {
+                $color_index = ($q+6) *0.3;
+                $color = $this->green;
+                if (isset($this->color_palette[$color_index])) {
+                    $color = $this->color_palette[$color_index];
+                    $color_outline = $this->rgb;
+                }
+if (($color_index < 0) or ($color_index >= 6)) {
+    //$distance = 1/4*sqrt(pow($q,2) + pow($r,2) + pow($s, 2) );
+//echo distance;
+    //            $key = $distance % 5;
+    //            $color = $this->color_palette[$key];
+    $color = $this->rgb;
+    //$color_outline = $color;
+        $color_outline = $this->white;
+//$color = $this->black;
 
-            $this->rgbcolor(100,100,217);
-            imagepolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
+}
+
+            }
+  //          $r = 155;
+  //          $g = 183;
+  //          $b = 217;
+  //          $this->rgbcolor(rand($r-20,$r+10),rand($g-10,$g+10),rand($b-40, $b+20));
+            // Need consistency from image to image
+  //          $this->rgbcolor(155,183,217);
+//$color = $this->rgb;            
+            // $color = $this->rgb;
+
+            imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
+
+        //if ($this->event->event_name == "pride") {
+            //$key = array_rand($this->color_palette);
+
+
+
+
+
+        //}
+
+
+            //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
+
+            if ((isset($this->event)) and ($this->event->event_name == "vancouver pride 2018")) {
+                imagepolygon($this->image, $point_array, count($point_array)/2, $color_outline);
+
+            } else {
+                $this->rgbcolor(100,100,217);
+                imagepolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
+            }
         }
     }
 
@@ -922,6 +1047,14 @@ $canvas_size = 164;
             $size=$this->size;
         }
 
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
 
         $this->snowflake_points = array();
         foreach ($this->point_list as $point) {
@@ -934,7 +1067,28 @@ $canvas_size = 164;
 
             $color = $this->black;
             if ($cell['state'] == 'on') {
+
+
                 $color = $this->grey;
+
+            //$r = 155;
+            //$g = 183;
+            //$b = 217;
+            //$color = $this->rgbcolor(rand($r-20,$r+10),rand($g-10,$g+10),rand($b-40, $b+20));
+            //$color = imagecolorallocate($this->image, $r, $g, $b);
+
+            // Need consistency from image to image
+            //$this->rgbcolor(155,183,217);
+
+
+                if ((isset($this->event)) and ($this->event->event_name == "vancouver pride 2018")) {
+                    $distance = 1/4*sqrt(pow($q,2) + pow($r,2) + pow($s, 2) );
+                    //$distance = abs($s);
+                    $key = $distance % 5;
+                    $color = $this->color_palette[$key];
+                }
+
+
                 $this->snowflake_points[] = 1;
             } else {
                 $this->snowflake_points[] = 0;
@@ -943,14 +1097,26 @@ $canvas_size = 164;
             //if ($cell['name'] == 'boundary') {$color = $this->black;}
 
             if ($index == 2) {
-                $color=$this->green;
+                $color=$this->white;
             }
             // Draw out the state
-
-            $center_x = 164/2;
-            $center_y = 164/2;
+//var_dump($this->canvas_size_x);
+//exit();
+            $center_x = $canvas_size_x/2;
+            $center_y = $canvas_size_y/2;
             $angle = 0;
-
+//if ($this->event->event_name == "pride") {
+//echo "meep";
+//exit();
+//echo $this->event->event_name;
+//exit();
+  //          if ((isset($this->event)) and ($this->event->event_name == "pride")) {
+//$distance = 1/4*sqrt(pow($q,2) + pow($r,2) + pow($s, 2) );
+//echo distance;
+//                $key = $distance % 5;
+//                $color = $this->color_palette[$key];
+ //           }
+//}
 //                    foreach(range(0,5) as $i) {
 //                        $x = $size * 6;
 //                        $y = 0;
@@ -959,7 +1125,6 @@ $canvas_size = 164;
 //                    $angle = $i/5 * 3.14159;
 
             // Draw an individual hexagon (q,r,s) centred at at an angle and distance from (x,y)
-
             $this->drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color);
             $this->drawHexagon(-1*$r, -1*$s, -1*$q, $center_x, $center_y, $angle, $size, $color);
 
@@ -1111,7 +1276,7 @@ $canvas_size = 164;
 //            $this->getUuid();
 //            $pdf->Image($this->uuid_png, 175, 5, 30, 30, 'PNG');
 
-        $this->getQuickresponse();
+        $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\snowflake');
         $pdf->Image($this->quick_response_png,175,5,30,30,'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
@@ -1122,7 +1287,6 @@ $canvas_size = 164;
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(15, 10);
             $t = $this->thing_report['sms'];
-
 
             $pdf->Write(0, $t);
 
@@ -1176,15 +1340,36 @@ $canvas_size = 164;
                 $this->max = 13;
                 $this->size = 4;
                 $this->lattice_size = 40;
+                $this->response = "Made a snowflake. Which will melt.";
                 return;
             }
         }
 
-        $keywords = array("uuid","iterate");
+        $keywords = array("uuid","iterate","pride");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
+
+                        case 'pride':
+
+                            $this->node_list = array("snowflake"=>array("pride", "snowflake", "uuid"));
+
+                              $this->max = sqrt(128) + 6;
+                              //$this->max = 24;
+
+                              $this->size = 4;
+                              $this->canvas_size_x = 164*1.5;
+                                $this->canvas_size_y = 164*1.5;
+                              $this->lattice_size = 40;
+                            $this->event = new Event($this->thing,"vancouver pride 2018");
+//echo ($this->event->event_name);
+//exit();
+                            $this->decimalUuid();
+                            $this->response = "Made a vancouver pride 2018 snowflake.  It is going to melt.";
+
+                            return;
+
 
                         case 'uuid':
                               $this->max = sqrt(128) + 6;
@@ -1193,18 +1378,19 @@ $canvas_size = 164;
                               $this->size = 2.5;
                               $this->lattice_size = 40;
                             $this->decimalUuid();
-
+                            $this->response = "I created a UUID snowflake.";
                             return;
 
                         case 'iterate':
                             $this->thing->log($this->agent_prefix . 'received a command to update the snowflake.', "INFORMATION");
                             $this->updateSnowflake();
+                           $this->response = "This snowflake ticked 1 interval.";
                             return;
 
                         case 'on':
                             //$this->setFlag('green');
                             //break;
-
+                            $this->response = "Heard on.";
 
                         default:
                      }
@@ -1227,6 +1413,8 @@ $canvas_size = 164;
         $this->max = 13;
         $this->size = 4;
         $this->lattice_size = 40;
+
+        $this->response = "Made a binary snowflake.";
         return;
 
         if (strpos($input, 'uuid') !== false) {

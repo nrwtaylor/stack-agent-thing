@@ -7,8 +7,8 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Agent {
-
+class Agent
+{
 	function __construct(Thing $thing, $input = null)
     {
         // Start the timer
@@ -90,8 +90,6 @@ and the user UX/UI
         $this->thing_report['log'] = $this->thing->log;
 
 //        $this->thing->container->db->commit();
-
-
 		return;
 	}
 
@@ -231,17 +229,17 @@ and the user UX/UI
 
             return $this->thing_report;
 
-         }
+        }
 
-         if (strpos($this->agent_input, 'iching') !== false) {
+        if (strpos($this->agent_input, 'iching') !== false) {
 
-                $this->thing->log( '<pre> Agent created a iChing agent</pre>' );
-                        $iching_thing = new Iching($this->thing);
-                        $this->thing_report = $iching_thing->thing_report;
-                        return $this->thing_report;
-                }
+            $this->thing->log( '<pre> Agent created a iChing agent</pre>' );
+            $iching_thing = new Iching($this->thing);
+            $this->thing_report = $iching_thing->thing_report;
+            return $this->thing_report;
+        }
 
-                if (strpos($this->agent_input, 'whatis') !== false) {
+        if (strpos($this->agent_input, 'whatis') !== false) {
 
                 $this->thing->log( '<pre> Agent created a Whatis agent</pre>' );
                         $whatis_thing = new Whatis($this->thing);
@@ -292,19 +290,18 @@ and the user UX/UI
         if (strpos($input, 'forget') !== false) {
         //if (strtolower($input) == 'forget') {
 
-            if (strpos($input, 'all') !== false) {
-                // pass through
-            } else {
-                $this->thing->log( 'Agent "Agent" did not ignore a forget".' );
-                //$this->thing->flagGreen();
-                $this->thing->Forget();
-                $this->thing_report = false;
-                $this->thing_report['info'] = 'Agent did not ignore a "forget" request.';
-                $this->thing_report['sms'] = "FORGET | That Thing has been forgotten.";
-                return $this->thing_report;
-            }
+        if (strpos($input, 'all') !== false) {
+            // pass through
+        } else {
+            $this->thing->log( 'Agent "Agent" did not ignore a forget".' );
+            //$this->thing->flagGreen();
+            $this->thing->Forget();
+            $this->thing_report = false;
+            $this->thing_report['info'] = 'Agent did not ignore a "forget" request.';
+            $this->thing_report['sms'] = "FORGET | That Thing has been forgotten.";
+            return $this->thing_report;
         }
-
+    }
 
        //if (strpos($input, 'flag') !== false) {
         $check_beetlejuice = false;
@@ -422,7 +419,6 @@ and the user UX/UI
             $input = $emoji_thing->translated_input;
         }
 
-
 		$this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>', "DEBUG");
 
 		// Now pick up obvious cases where the keywords are embedded
@@ -459,7 +455,6 @@ and the user UX/UI
 			return $this->thing_report;
 		}
 
-
         // Then look for messages sent to UUIDS
         $this->thing->log('Agent "Agent" looking for UUID in address.');
 
@@ -472,20 +467,39 @@ and the user UX/UI
             $this->thing_report = $uuid_thing->thing_report;
             return $this->thing_report;
         }
+//echo 'input is "' . $input . "'";
+
+        $headcode = new Headcode($this->thing, "extract");
+        $headcode->extractHeadcodes($input);
 
         // Is it sent to a headcode?
         // Refactor to check this pattern with Headcode
-        $pattern = "|\b[0-9]{1}[A-Za-z]{1}[0-9]{2}\b|";
-        if (preg_match($pattern, $this->to)) {
+
+        //$pattern = "|\b[0-9]{1}[A-Za-z]{1}[0-9]{2}\b|";
+        //if (preg_match($pattern, $this->to)) {
+        if (count($headcode->head_codes) > 0) { 
             $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
             $headcode_thing = new Headcode($this->thing);
             $this->thing_report = $headcode_thing->thing_report;
             return $this->thing_report;
         }
 
+/*
+
+        $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
+        $headcode = new Headcode($this->thing, "headcode");
+        $headcode->extractHeadcodes();
+var_dump($headcode->head_codes);
+        if(isset($this->headcode)) {echo "Burp";}
+//var_dump($headcode);
+//exit();
+        $this->thing_report = $headcode->thing_report;
+//        $this->thing_report = $headcode_thing->thing_report;
+//        return $this->thing_report;
+//    }
 
 
-
+*/
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
         $this->thing->log( '<pre> Agent created a Robot agent</pre>', "INFORMATION" );
@@ -507,6 +521,7 @@ and the user UX/UI
 
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
+//var_dump($arr);
 
         // Added this March 6, 2018.  Testing.
         if ($this->agent_input == null) {
@@ -519,7 +534,8 @@ and the user UX/UI
 		//set_error_handler("warning_handler", E_WARNING);
 
 		$this->thing->log('Agent "Agent" looking for keyword matches with available agents.', "INFORMATION");
-
+//var_dump($arr);
+//exit();
 		foreach ($arr as $keyword) {
             
             // Don't allow agent to be recognized
@@ -572,6 +588,11 @@ exit();
         //$agents = array_reverse($agents);
 
 
+// Prefer longer agent names
+usort($agents, function($a, $b) {
+    return strlen($b) <=> strlen($a);
+});
+
 		foreach ($agents as $agent_class_name) {
 
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
@@ -596,14 +617,13 @@ exit();
 // devstack This needs to be refactored out.
 // devstack How do I link to the packagist name programatically.
 
+
                 $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
                 //echo $agent_class_name."<br>";
                 $this->thing->log( $this->agent_prefix .'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
-
 				//$agent = new $agent_class_name($this->thing);
                 $agent = new $agent_namespace_name($this->thing);
-
 				$this->thing_report = $agent->thing_report;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
@@ -657,17 +677,18 @@ exit();
 
 
 
-        $place_thing = new Place($this->thing, "extract");
+        $place_thing = new Place($this->thing, $this->agent_input);
         $thing_report = $place_thing->thing_report;
 
+var_dump($this->subject);
 var_dump($place_thing->place_code);
 var_dump($place_thing->place_name);
 
         if ((isset($place_thing->place_code)) and ($place_thing->place_code != false) ) {
 
-            $place_thing = new Place($this->thing);
-            $thing_report = $place_thing->thing_report;
-            return $thing_report;
+            $place_thing = new Place($this->thing, $this->place_thing->place_code);
+            $this->thing_report = $place_thing->thing_report;
+            return $this->thing_report;
 
         }
 */
@@ -687,19 +708,35 @@ var_dump($place_thing->place_name);
 
 
         $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
-
         $place_thing = new Place($this->thing, "extract");
         $this->thing_report = $place_thing->thing_report;
 
         if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
-
+            //echo "place not found";
         } else {
+            //echo "place found";
             $place_thing = new Place($this->thing);
             $this->thing_report = $place_thing->thing_report;
             return $this->thing_report;
         }
 
+/*
+        // This would allow web based agent to update state
+        // devstack think 
+        // Now check for any place agent input
+        $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
+        $place_thing = new Place($this->thing, $this->agent_input);
+        $this->thing_report = $place_thing->thing_report;
 
+        if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
+echo "place not found";
+        } else {
+echo "place found";
+            $place_thing = new Place($this->thing, $this->agent_input);
+            $this->thing_report = $place_thing->thing_report;
+            return $this->thing_report;
+        }
+*/
 
 
         $this->thing->log( $this->agent_prefix .'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );

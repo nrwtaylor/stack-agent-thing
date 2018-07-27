@@ -160,58 +160,44 @@ class Tallycounter
         //    $this->variables_thing->next_uuid = null;
         //}
         $next_uuid = $this->variables_thing->next_uuid;
-//var_dump($next_uuid);
-//exit();
-        // Now there is a 
 
-$index = 0;
-$count = 0;
-$display = "";
+        // Now there is a
 
+        $index = 0;
+        $count = 0;
+        $display = "";
 
-$split_time = $this->thing->elapsed_runtime();
-foreach ($this->counter_uuids as $uuid) {
+        $split_time = $this->thing->elapsed_runtime();
 
-        //$uuid = $next_uuid;
-        $thing = new Thing($uuid);
+        foreach ($this->counter_uuids as $uuid) {
+            //$uuid = $next_uuid;
+            $thing = new Thing($uuid);
 
-        //echo "<br>meep<br>"; 
-        $thing->db->setFrom($this->identity);
-        $thing->json->setField("variables");
+            $thing->db->setFrom($this->identity);
+            $thing->json->setField("variables");
 
+            $variable = $thing->json->readVariable( array("tally", "variable") );
+            $limit = $thing->json->readVariable( array("tally", "limit") );
+            $name = $thing->json->readVariable( array("tally", "name") );
+            $next_uuid = $thing->json->readVariable( array("tally", "next_uuid") );
 
-        $variable = $thing->json->readVariable( array("tally", "variable") );
-        $limit = $thing->json->readVariable( array("tally", "limit") );
-        $name = $thing->json->readVariable( array("tally", "name") );
-        $next_uuid = $thing->json->readVariable( array("tally", "next_uuid") );
+            $count = $count  + pow($limit,$index) * ($variable);
+            $display = $variable . "/" .$display;
+            $index += 1;
+        }
 
-//echo $uuid . " " . $variable . " " . $index . " " .$limit;
-
-        $count = $count  + pow($limit,$index) * ($variable);
-        $display = $variable . "/" .$display;
-        $index += 1;
-}
-
-//echo $count;
-//echo "<br>";
-//echo $display;
-
-$this->count = $count;
-$this->display = $display;
-
-//exit();
+        $this->count = $count;
+        $this->display = $display;
     }
 
-    function getAgent() 
+    function getAgent()
     {
         // Tallycounter
         $this->getTallycounter();
-
-        return;
     }
 
-	function getVariables($agent = null) {
-
+	function getVariables($agent = null)
+    {
         if ($agent == null) {
             $agent = $this->agent;
         }
@@ -252,13 +238,31 @@ $this->display = $display;
 
 
             foreach ($things as $thing) {
-                // Check each of the three Things.
+//echo "meep";
+           // Check each of the three Things.
+/*
                 $this->variables_thing = new Thing($thing['uuid']);
 
                 $uuid = $thing['uuid'];
                 $variable = $this->getVariable('variable');
                 $name = $this->getVariable('name');
                 $next_uuid = $this->getVariable('next_uuid');
+*/
+
+                $uuid = $thing['uuid'];
+                $variables_json= $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                if (isset($variables['tally'])) {
+                    if(isset($variables['tally']['variable'])) {$variable = $variables['tally']['variable'];}
+                    if(isset($variables['tally']['name'])) {$name = $variables['tally']['name'];}
+                    if(isset($variables['tally']['next_uuid'])) {$next_uuid = $variables['tally']['next_uuid'];}
+
+                }
+
+
+
+
 
                 if (($this->name == $name))  {
 
@@ -280,8 +284,8 @@ $this->display = $display;
         $index = 0 ;
 
         while (true) {
-
             foreach ($things as $thing) {
+
                 // Check each of the three Things.
                 $this->variables_thing = new Thing($thing['uuid']);
 
@@ -289,6 +293,17 @@ $this->display = $display;
                 $variable = $this->getVariable('variable');
                 $name = $this->getVariable('name');
                 $next_uuid = $this->getVariable('next_uuid');
+/*
+                $uuid = $thing['uuid'];
+                $variables_json= $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+                if (isset($variables['tally'])) {
+                    if(isset($variables['tally']['variable'])) {$variable = $variables['tally']['variable'];}
+                    if(isset($variables['tally']['name'])) {$name = $variables['tally']['name'];}
+                    if(isset($variables['tally']['next_uuid'])) {$next_uuid = $variables['tally']['next_uuid'];}
+
+                }
+*/
 
 
                 if ($name == $match_uuid)  {
@@ -297,16 +312,17 @@ $this->display = $display;
                     break;
                 }
             }
-
-                $match_uuid = $next_uuid;
+/*
+            $this->variables_thing = new Thing($thing['uuid']);
+*/
+            $match_uuid = $next_uuid;
 
             $index += 1;
 
-            $max_time = 1000 * 10; //ms
+            $max_time = 1000 * 0.05; //ms
             if ($this->thing->elapsed_runtime() - $split_time > $max_time) {break;}
 
         }
-
 
         return;
 	}

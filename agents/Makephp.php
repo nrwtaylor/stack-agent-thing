@@ -12,6 +12,8 @@ class Makephp
 
     function __construct(Thing $thing, $input = null)
     {
+echo "meep";
+
 	    $this->input = $input;
 
         $class_name = ucwords($input);
@@ -24,9 +26,9 @@ class Makephp
 
         $stack_state = $thing->container['stack']['state'];
 
-        if ($stack_state == "prod") {
-            $class_name = strtolower($class_name); // only in production
-        }
+//        if ($stack_state == "prod") {
+//            $class_name = strtolower($class_name); // only in production
+//        }
 
         $file = @file_get_contents(__DIR__ . '/../agents/'. $class_name . '.php');
 

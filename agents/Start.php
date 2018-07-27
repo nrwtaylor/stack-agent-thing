@@ -101,16 +101,16 @@ class Start {
 
         switch ($this->counter) {
             case 1:
-                $sms = "START | Thank you for starting to use Stackr.  Read our Privacy Policy " . $this->web_prefix . "policy";
+                $sms = "START | Thank you for starting to use Stackr.  Read our Privacy Policy " . $this->web_prefix . "privacy | Started.";
                 break;
             case 2:
-                $sms = "START | Stackr started. Read our Privacy Policy at " . $this->web_prefix . "privacy";
+                $sms = "START | Read our Privacy Policy at " . $this->web_prefix . "privacy | Started. Again.";
                 break;
 
             case null;
 
             default:
-                $sms = "START | Started. " . $this->web_prefix ."";
+                $sms = "START | " . $this->web_prefix ."privacy | Started.";
 
         }
 
