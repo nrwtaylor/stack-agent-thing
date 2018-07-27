@@ -7,6 +7,8 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// Capitalization?
+
 class FindAgent
 {
 	public $var = 'hello';
@@ -14,7 +16,6 @@ class FindAgent
  	function __construct(Thing $thing, $agent_input = null)
     {
         $this->start_time = $thing->elapsed_runtime();
-
 
         if ($agent_input == null) {$agent_input = null;}
         $this->agent_input = strtolower($agent_input);
@@ -24,7 +25,6 @@ class FindAgent
         $this->thing = $thing;
         //$this->start_time = $this->thing->elapsed_runtime();
         $this->thing_report['thing'] = $this->thing->thing;
-
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
