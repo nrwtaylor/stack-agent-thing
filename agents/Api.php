@@ -5,11 +5,10 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Web {
+class Api {
 
 	function __construct(Thing $thing)
     {
-
 		$this->thing_report['thing'] = false;
 
 		if ($thing->thing != true) {
@@ -22,8 +21,8 @@ class Web {
 		}
 
 		$this->thing = $thing;
-		$this->agent_name = 'web';
-        $this->agent_prefix = 'Agent "Web" ';
+		$this->agent_name = 'api';
+        $this->agent_prefix = 'Agent "api" ';
 		$this->agent_version = 'redpanda';
 
 		$this->thing_report = array('thing' => $this->thing->thing);
@@ -52,8 +51,8 @@ class Web {
 
 		$this->sqlresponse = null;
 
-		$this->thing->log ( '<pre> Agent "Web" running on Thing ' .  $this->uuid . '</pre>' );
-		$this->thing->log ( '<pre> Agent "Web" received this Thing "' .  $this->subject .  '"</pre>' );
+		$this->thing->log ( '<pre> Agent "Api" running on Thing ' .  $this->uuid . '</pre>' );
+		$this->thing->log ( '<pre> Agent "Api" received this Thing "' .  $this->subject .  '"</pre>' );
 
 //$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
 
@@ -66,13 +65,12 @@ class Web {
 		$this->respond(); // Return $this->thing_report;
 
 
-		$this->thing->log( '<pre> Agent "Web" completed</pre>' );
+		$this->thing->log( '<pre> Agent "Api" completed</pre>' );
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
 
 
 		return;
@@ -87,27 +85,36 @@ class Web {
         $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
 
 		//$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
-        $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
+        $this->sms_message = "API | " . $this->web_prefix . "api/redpanda/thing/" . $this->link_uuid;
 
 		$this->sms_message .= " | TEXT WHATIS";
 		$this->thing_report['sms'] = $this->sms_message;
 
 
 		$this->thing->json->setField("variables");
-		$this->thing->json->writeVariable(array("web",
+		$this->thing->json->writeVariable(array("api",
 			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
 			);
 
 
+//        $this->makeWeb();
+
 		$this->thing->flagGreen();
+
+		//$choices = $this->thing->choice->makeLinks('start a');
+        // Account for web views.
+        // A Credit to Things account
+        // And a debit from the Stack account.  Withdrawal.
+        //$this->thing->account['thing']->Credit(25);
+		//$this->thing->account['stack']->Debit(25);
+
+//        $choices = $this->thing->choice->makeLinks('start a');
 
         $choices = false;
 
-        $this->thing_report['message'] = $this->response;
-
 		$this->thing_report['choices'] = $choices;
-		$this->thing_report['info'] = 'This is the web agent.';
-		$this->thing_report['help'] = 'This agent takes an UUID and runs the Web agent on it.';
+		$this->thing_report['info'] = 'This is the api agent.';
+		$this->thing_report['help'] = 'This agent creates a web link to the API.';
 
         $this->thing->log ( '<pre> Agent "Web" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
 
@@ -197,40 +204,37 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 
 
         if (!isset($variables['message']['agent'])) {
-            $this->prior_agent = "web";
+            $this->prior_agent = "api";
         } else {
             $this->prior_agent = $variables['message']['agent'];
         }
 
         return $this->link_uuid;
-    
     }
 
-
-
-
-
-	public function readSubject() {
+	public function readSubject()
+    {
 
 		$this->defaultButtons();
+
 		$status = true;
-        $this->response = "Made a web link.";
 		return $status;		
 	}
 
     function makeWeb() {
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . 'api/redpanda/thing/' . $this->link_uuid;
 
-      $this->node_list = array("web"=>array("iching", "roll"));
+      $this->node_list = array("api"=>array("iching", "roll"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
-        $choices = $this->thing->choice->makeLinks('web');
-
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "api");
+        $choices = $this->thing->choice->makeLinks('api');
+        $web = "";
+/*
         $web = '<a href="' . $link . '">';
         $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
         $web .= "</a>";
-
+*/
         $web .= "<br>";
 
         $web .= $this->subject;

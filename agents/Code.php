@@ -8,7 +8,7 @@ error_reporting(-1);
 
 //require '/var/www/html/stackr.ca/vendor/autoload.php';
 
-class Pdf
+class Code
 {
 	function __construct(Thing $thing, $agent_input = null)
     {
@@ -19,16 +19,16 @@ class Pdf
 
 		if ($thing->thing != true) {
 
-            $this->thing->log ( 'Agent "Pdf" ran on a null Thing ' .  $thing->uuid .  '.');
-  	        $this->thing_report['info'] = 'Tried to run Pdf on a null Thing.';
+            $this->thing->log ( 'Agent "Code" ran on a null Thing ' .  $thing->uuid .  '.');
+  	        $this->thing_report['info'] = 'Tried to run Code on a null Thing.';
 			$this->thing_report['help'] = "That isn't going to work";
 
             return $this->thing_report;
 		}
 
 		$this->thing = $thing;
-		$this->agent_name = 'pdf';
-        $this->agent_prefix = 'Agent "Pdf" ';
+		$this->agent_name = 'code';
+        $this->agent_prefix = 'Agent "Code" ';
 		$this->agent_version = 'redpanda';
 
 		$this->thing_report['thing'] = $thing;
@@ -37,7 +37,6 @@ class Pdf
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 		// I think.
 		// Instead.
-
        // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
@@ -46,7 +45,7 @@ class Pdf
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-		$this->node_list = array('pdf'=>array('privacy'),'start a'=>
+		$this->node_list = array('code'=>array('privacy'),'start a'=>
 					array('useful', 'useful?'),
 				'start b'=>array('helpful','helpful?')
 					);
@@ -58,8 +57,8 @@ class Pdf
 
 		$this->sqlresponse = null;
 
-		$this->thing->log ( 'Agent "Pdf" running on Thing ' .  $this->uuid . '.' );
-		$this->thing->log ( 'Agent "Pdf" received this Thing "' .  $this->subject .  '".' );
+		$this->thing->log ( 'Agent "Code" running on Thing ' .  $this->uuid . '.' );
+		$this->thing->log ( 'Agent "Code" received this Thing "' .  $this->subject .  '".' );
 
 //$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
 
@@ -68,11 +67,13 @@ class Pdf
         $this->getLink();
 
 		$this->readSubject();
-        if ($this->agent_input == null) {
-		    $this->respond(); // Return $this->thing_report;
-        }
 
-		$this->thing->log( 'Agent "Pdf" completed' );
+//        if ($this->agent_input == null) {
+		    $this->respond(); // Return $this->thing_report;
+//        }
+
+
+		$this->thing->log( 'Agent "Code" completed' );
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
@@ -102,22 +103,22 @@ class Pdf
 		$this->thing_report['sms'] = $this->sms_message;
 */
 		$this->thing->json->setField("variables");
-		$this->thing->json->writeVariable(array("pdf",
+		$this->thing->json->writeVariable(array("code",
 			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
 			);
-
         $this->makeChoices();
 
 		$this->thing->flagGreen();
 
-		$this->thing_report['info'] = 'This is the pdf agent.';
-		$this->thing_report['help'] = 'This agent takes an UUID and runs the pdf agent on it.';
+		$this->thing_report['info'] = 'This is the code agent.';
+		$this->thing_report['help'] = 'This agent takes an UUID and shows the code of the agent run on it.';
 
-        $this->thing->log ( '<pre> Agent "Pdf" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
+        $this->thing->log ( '<pre> Agent "Code" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
 
-		$message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-
+        if ($this->agent_input == null) {
+		    $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
+        }
         $this->makeWeb();
         $this->makePDF();
 
@@ -126,18 +127,18 @@ class Pdf
 
     function makeSMS()
     {
-        $this->sms_message = "PDF | No pdf found";
-        if (strtolower($this->prior_agent) == "pdf") {
-            $this->sms_message = "PDF | No pdf available.";
+        $this->sms_message = "CODE | No php found.";
+        if (strtolower($this->prior_agent) == "php") {
+            $this->sms_message = "CODE | No php available.";
         } else {
+      //  $agent_class_name = ucwords($this->prior_agent);
+      //  $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+//echo $agent_class_name; 
+  //     $agent = new $agent_namespace_name($this->thing);
 
-        $agent_class_name = ucwords($this->prior_agent);
-        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
-        $agent = new $agent_namespace_name($this->thing);
-
-            if (isset($agent->thing_report['pdf'])) {
-                $this->sms_message = "PDF | " . $this->web_prefix . "" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".pdf";
-            }
+    //        if (isset($agent->thing_report['php'])) {
+                $this->sms_message = "CODE | " . $this->web_prefix . "" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".php";
+      //      }
         }
 
 
@@ -172,7 +173,7 @@ class Pdf
         $previous_thing = new Thing($block_thing['uuid']);
 
         if (!isset($previous_thing->json->array_data['message']['agent'])) {
-            $this->prior_agent = "pdf";
+            $this->prior_agent = "php";
         } else {
             $this->prior_agent = $previous_thing->json->array_data['message']['agent'];
         }
@@ -192,8 +193,8 @@ class Pdf
     {
         //$this->node_list = array("web"=>array("iching", "roll"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "pdf");
-        $choices = $this->thing->choice->makeLinks('pdf');
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "php");
+        $choices = $this->thing->choice->makeLinks('php');
 
         $this->thing_report['choices'] = $choices;
     }
@@ -236,9 +237,9 @@ class Pdf
 	function defaultButtons()
     {
 		if (rand(1,6) <= 3) {
-			$this->thing->choice->Create('pdf', $this->node_list, 'start a');
+			$this->thing->choice->Create('php', $this->node_list, 'start a');
 		} else {
-			$this->thing->choice->Create('pdf', $this->node_list, 'start b');
+			$this->thing->choice->Create('php', $this->node_list, 'start b');
 		}
 
 		//$this->thing->choice->Choose("inside nest");

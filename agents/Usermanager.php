@@ -55,9 +55,10 @@ class Usermanager
 
         // 279ms 303ms 306ms
         $split_time = $this->thing->elapsed_runtime();
-        $this->variables_agent = new Variables($this->thing, "variables usermanager " . $this->from);
-        $this->thing->log( $this->agent_prefix .' created variables agent in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.', "OPTIMIZE" );
 
+        $this->variables_agent = new Variables($this->thing, "variables usermanager " . $this->from);
+
+        $this->thing->log( $this->agent_prefix .' created variables agent in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.', "OPTIMIZE" );
         //4ms 4ms 3ms
         $this->get();
 

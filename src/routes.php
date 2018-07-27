@@ -132,12 +132,50 @@ $app->group('/api', function () use ($app) {
         });
 
         $app->post('/webhook_slack_86qn6p11', function ($request, $response, $args)  {
-
+/*
 	        // Create an empty Thing
 		    $slack_thing = new Thing(null);
 
+            //$channel = new Channel($slack_thing, "slack");
 		    // Retrieve the body of the request
             $body = $request->getParsedBody();
+*/
+//var_dump($body);
+
+            ob_start();
+
+            $prod = true;
+            if ($prod == true) {
+                $serverProtocol = filter_input(INPUT_SERVER, 'SERVER_PROTOCOL', FILTER_SANITIZE_STRING);
+                header($serverProtocol . ' 200 OK');
+                // Disable compression (in case content length is compressed).
+                header('Content-Encoding: none');
+                header('Content-Length: ' . ob_get_length());
+
+                // Close the connection.
+                header('Connection: close');
+
+            } else {
+                header('HTTP/1.0 200 OK');
+                header("Content-Type: application/json");
+                header('Content-Length: '.ob_get_length());
+            }
+
+            ob_end_flush();
+            ob_flush();
+            flush();
+
+            // Create an empty Thing
+            $slack_thing = new Thing(null);
+            //$channel = new Channel($slack_thing,"slack");
+
+            //$channel = new Channel($slack_thing, "slack");
+            // Retrieve the body of the request
+            $body = $request->getParsedBody();
+
+
+//                $channel = new Channel($slack_thing,"slack");
+
 
 		    // Check if this is a webhook verification
 			//https://api.slack.com/events/url_verification
@@ -153,7 +191,6 @@ $app->group('/api', function () use ($app) {
                     ->withStatus(200);
 			}
 
-
     		$verify_token = 'hellomordok';
 
 			// https://gist.github.com/stefanzweifel/04be27486517cd7d3422
@@ -162,7 +199,7 @@ $app->group('/api', function () use ($app) {
 
       		$input = json_decode(file_get_contents("php://input"), true);
 
-			echo "Slack says it's good to remind you that the button is doing something.";
+			echo "Slack says it's good to remind you that the button is doing something. ";
 
 			if (isset( $body['event'] )) {
 				echo "An event was received";
@@ -174,12 +211,18 @@ $app->group('/api', function () use ($app) {
 					$test_text = $body['event']['text'];
 
 					$test_text = ltrim( str_replace("<@U6N5VCYDT>","",$test_text) );
-
+//$nom_to = "mordok";
 					$slack_thing->Create($sender_id, $nom_to, $test_text );
 
+                $channel = new Channel($slack_thing,"slack");
+
 					$slack_agent = new Slack($slack_thing, $body);
+
+                $slack_agent = new Agent($slack_thing);
+
+
 					$slack_thing->flagRed();
-					$response_text = "";
+					$response_text = "foo";
 					return $this->response->write($response_text)
                 				->withStatus(200);
 				}
@@ -188,15 +231,32 @@ $app->group('/api', function () use ($app) {
 			// So it is not a message event?
 			// Perhaps it is a command.
 			if ( isset( $body['command'] ) ) {
-				echo "Command accepted.";
+				echo "Command accepted. ";
 				//$sender_id = $body['user_id'] . "-" . $body['channel_id'];
 				$sender_id = $body['user_id'];
 
 				$page_id = "mordok";
 				$text = $body['text'];
-                		$slack_thing->Create($sender_id, $page_id, $text );
+
+          		$slack_thing->Create($sender_id, $page_id, $text );
 
                 $slack_agent = new Slack($slack_thing, $body);
+                $channel = new Channel($slack_thing,"slack");
+                //$slack_agent = new Agent($slack_thing, $body);
+
+                //$slack_agent = new Slack($slack_thing);
+                $slack_agent = new Agent($slack_thing);
+
+/*
+                    $arr = json_encode(array("to"=>$sender_id, "from"=>$page_id, "subject"=>$text));
+                    $client= new \GearmanClient();
+                    $client->addServer();
+//$client->addServer("10.0.0.24");
+//$client->addServer("10.0.0.25");
+                    //$client->doNormal("call_agent", $arr);
+                    $client->doHighBackground("call_agent", $arr);
+*/
+
 				$slack_thing->flagRed();
 				$response_text ="";
 
@@ -482,6 +542,8 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
     switch (true) {
         case ($command == null):
+        case ($command == "stackr.ca"): //prod
+
         case ($command == "/"):
             $thing_report['choices'] = array("Privacy", "Thing"); 
 

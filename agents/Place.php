@@ -95,6 +95,7 @@ class Place
         // Generate a response based on that intent.
         // I think properly capitalized.
         //$this->set();
+
         if ($this->agent_input == null) {
 		    $this->Respond();
         }
@@ -109,7 +110,6 @@ class Place
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['log'] = $this->thing->log;
 
-        //echo $this->response;
 
 		return;
     }
@@ -236,24 +236,19 @@ class Place
     {
         foreach ($this->places as $place) {
             // Match the first matching place
-
             if (($selector == null) or ($selector == "")) {
-
                 $this->refreshed_at = $this->last_refreshed_at; // This is resetting the count.
                 $this->place_name = $this->last_place_name;
                 $this->place_code = $this->last_place_code;
-
                 $this->place = new Variables($this->thing, "variables " . $this->place_code . " " . $this->from);
                 return array($this->place_code, $this->place_name);
             }
 
             if (($place['code'] == $selector) or ($place['name'] == $selector)) {
-//var_dump($place);
                 $this->refreshed_at = $place['refreshed_at'];
                 $this->place_name = $place['name'];
                 $this->place_code = $place['code'];
                 $this->place = new Variables($this->thing, "variables " . $this->place_code . " " . $this->from);
-
                 return array($this->place_code, $this->place_name);
             }
        }
@@ -286,12 +281,9 @@ class Place
 
         if (!$this->is_positive_integer($count))
         {
-//echo $count;
-//echo "meep";
             // No places found
         } else {
 
-//echo "else";
 
 
 
@@ -311,6 +303,7 @@ class Place
                     if(isset($variables['place']['place_code'])) {$place_code = $variables['place']['place_code'];}
                     if(isset($variables['place']['place_name'])) {$place_name = $variables['place']['place_name'];}
                     if(isset($variables['place']['refreshed_at'])) {$refreshed_at = $variables['place']['refreshed_at'];}
+
 /*
                     // Check if the place is already in the the list (this->places)
                     $found = false;
@@ -476,7 +469,6 @@ foreach ($this->old_places as $key =>$row)
             if (($place_code == $place['code']) or ($place_name == $place['name'])) {
                 $this->place_name = $place['name'];
                 $place_code =$place['code'];
-//var_dump($place_code);
                 $this->last_refreshed_at = $place['refreshed_at'];
             }
         }
@@ -624,7 +616,6 @@ foreach ($this->old_places as $key =>$row)
 //        $filtered_input = ltrim(strtolower($input), "place");
 
 
-//echo $filtered_input;
 //exit();
 
 
@@ -667,6 +658,13 @@ foreach ($this->old_places as $key =>$row)
         return;
     }
 
+    public function makeMessage()
+    {
+        $message = "Place is ". ucwords($this->place_name) . ".";
+        $this->message = $message;
+        $this->thing_report['message'] = $message;
+    }
+
     function makeTXT()
     {
         if (!isset($this->placecode_list)) {$this->getPlaces();}
@@ -691,9 +689,7 @@ foreach ($this->old_places as $key =>$row)
         $txt .= "\n";
         $txt .= "\n";
 
-
 /*
-
         //$txt = "Test \n";
         foreach ($this->placecode_list as $place_code) {
     
@@ -756,7 +752,7 @@ foreach ($this->old_places as $key =>$row)
         } 
 
         if ((!empty($this->place_code))) {
-        $sms .= " | " . strtoupper($this->place_code);
+        $sms .= " | " . trim(strtoupper($this->place_code));
         }
 /*
 
@@ -867,13 +863,6 @@ $web .= $this->sms_message;
 $image_height = 125;
 $image_width = 125*4;
 
-
-        // here DB request or some processing
-//        $this->result = 1;
-//        if (count($this->result) != 2) {return;}
-
-//        $number = $this->result[1]['roll'];
-
         $image = imagecreatetruecolor($image_width, $image_height);
 
         $white = imagecolorallocate($image, 255, 255, 255);
@@ -884,7 +873,6 @@ $image_width = 125*4;
 
         imagefilledrectangle($image, 0, 0, $image_width, $image_height, $white);
         $textcolor = imagecolorallocate($image, 0, 0, 0);
-
 
         $this->ImageRectangleWithRoundedCorners($image, 0,0, $image_width, $image_height, 12, $black);
         $this->ImageRectangleWithRoundedCorners($image, 6,6, $image_width-6, $image_height-6, 12-6, $white);
@@ -921,10 +909,7 @@ $image_width = 125*4;
 
     public function makePNG()
     {
-        //if (!isset($this->image)) {$this->makeImage();}
-//$split_time = $this->thing->elapsed_runtime();
         $agent = new Png($this->thing, "png"); // long run
-//echo $this->thing->elapsed_runtime() - $split_time; 
 
         $this->makeImage();
 
@@ -935,10 +920,9 @@ $image_width = 125*4;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
         $this->thing_report['png'] = $agent->image_string;
-
     }
 
-
+/*
     public function old_makePNG()
     {
 $split_time = $this->thing->elapsed_runtime();
@@ -956,8 +940,6 @@ $split_time = $this->thing->elapsed_runtime();
         $alt_text = "Place is " . $this->place_name;
 
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
-//        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata). '"
                 width="100" height="100" 
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
@@ -987,7 +969,7 @@ echo $this->thing->elapsed_runtime() - $split_time;
 
 //       return;
     }
-
+*/
     function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
         // draw rectangle without corners
@@ -1002,14 +984,13 @@ echo $this->thing->elapsed_runtime() - $split_time;
     }
 
 
-	private function Respond() {
-
+	private function Respond()
+    {
 		// Thing actions
 
 		$this->thing->flagGreen();
 
 		// Generate email response.
-
 		$to = $this->thing->from;
 		$from = "place";
 
@@ -1033,15 +1014,16 @@ echo $this->thing->elapsed_runtime() - $split_time;
 
         $this->makeSMS();
 
-
+/*
 		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
 		$test_message .= '<br>headcode state: ' . $this->state . '<br>';
 
 		$test_message .= '<br>' . $this->sms_message;
-
+*/
     	$this->thing_report['email'] = $this->sms_message;
-		$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+		//$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
+        $this->makeMessage();
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -1049,6 +1031,7 @@ echo $this->thing->elapsed_runtime() - $split_time;
         } else {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
+
         $this->makeWeb();
         $this->makeTXT();
 
@@ -1057,7 +1040,8 @@ echo $this->thing->elapsed_runtime() - $split_time;
 		return;
 	}
 
-    function isData($variable) {
+    function isData($variable)
+    {
         if (
             ($variable !== false) and
             ($variable !== true) and
@@ -1098,7 +1082,7 @@ return;
 
     }
 
-    public function readSubject() 
+    public function readSubject()
     {
 
         $this->response = null;
@@ -1131,51 +1115,25 @@ return;
         $this->extractPlace($input);
         if ($this->agent_input == "extract") {return;}
 
-        // Could happen?
-        //        if (($this->place_name == null) or ($this->place_code == null)) {
-        //        }
-
-        // Return the current place
-
-//        $this->lastPlace();
-/*
-        $this->last_place = new Variables($this->thing, "variables place " . $this->from);
-        $this->last_place_code = $this->last_place->getVariable('place_code');
-        $this->last_place_name = $this->last_place->getVariable('place_name');
-        $this->last_refreshed_at = $this->last_place->getVariable('refreshed_at');
-
-echo "last place refreshed at " .$this->last_refreshed_at;
-echo "<br>";
-*/
-        // If at this point we get false/false, then the default Place has not been created.
-
         $pieces = explode(" ", strtolower($input));
-
-
-		// So this is really the 'sms' section
-		// Keyword
 
         if (count($pieces) == 1) {
             if ($input == 'place') {
-                $this->lastPlace();
-                //$this->place_code = $this->last_place_code;
-                //$this->place_name = $this->last_place_name;
-                //$this->refreshed_at = $this->last_refreshed_at;
-                $this->response = "Last place retrieved.";
-                //$this->read();
+                $this->getPlace();
+                $this->response = "Last 'place' retrieved.";
                 return;
             }
 
         }
 
-    foreach ($pieces as $key=>$piece) {
-        foreach ($this->keywords as $command) {
-            if (strpos(strtolower($piece),$command) !== false) {
+        foreach ($pieces as $key=>$piece) {
+            foreach ($this->keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
 
-                switch($piece) {
+                    switch($piece) {
 
-    case 'next':
-        $this->thing->log("read subject nextheadcode");
+                        case 'next':
+                            $this->thing->log("read subject nextheadcode");
         $this->nextPlace();
         break;
 
@@ -1214,12 +1172,6 @@ echo "<br>";
 //            $this->makePlace($this->default_place_code, $this->default_place_name);
 //        }
 
-//var_dump($this->last_place_code);
-//var_dump($this->last_place_name);
-//echo "<bR>";
-//var_dump($this->place_code);
-//var_dump($this->place_name);
-
     if ($this->place_code != null) {
         $this->getPlace($this->place_code);
         $this->thing->log($this->agent_prefix . 'using extracted place_code ' . $this->place_code . ".","INFORMATION");
@@ -1229,9 +1181,8 @@ echo "<br>";
     }
 
     if ($this->place_name != null) {
-//echo $this->place_code ." " .$this->place_name . "<br>";
+
         $this->getPlace($this->place_name);
-//echo $this->place_code ." " .$this->place_name. "<br>";
 
         $this->thing->log($this->agent_prefix . 'using extracted place_name ' . $this->place_name . ".","INFORMATION");
         $this->response = strtoupper($this->place_name) . " retrieved.";
@@ -1249,9 +1200,6 @@ $this->assertPlace($this->place_name);
 
         // so we get here and this is null placename, null place_id.
         // so perhaps try just loading the place by name
-//var_dump($this->subject);
-//echo $this->subject;
-//$place = "dogpark";
 
 $place = strtolower($this->subject);
 
@@ -1264,37 +1212,23 @@ if ( !$this->getPlace(strtolower($place)) ){
 }
 
 
-//    function makePlace($place_code = null, $place_name = null) {
-$this->makePlace(null, $place);
-//$this->set();
-
-$this->thing->log($this->agent_prefix . 'using default_place_code ' . $this->default_place_code . ".","INFORMATION");
-
-//$this->getPlace($this->default_place_code);
-//$this->getPlace($place);
+        $this->makePlace(null, $place);
+        $this->thing->log($this->agent_prefix . 'using default_place_code ' . $this->default_place_code . ".","INFORMATION");
 
         $this->response = "Made a Place called " . $place . ".";
-
-
-            return;
-
-
-    if (($this->isData($this->place_name)) or ($this->isData($this->place_code)) ) {
-        $this->set();
         return;
-    }
+
+        if (($this->isData($this->place_name)) or ($this->isData($this->place_code)) ) {
+            $this->set();
+            return;
+        }
 
 		return false;
 
-	
 	}
 
-
-
-
-
-
-	function kill() {
+	function kill()
+    {
 		// No messing about.
 		return $this->thing->Forget();
 	}
@@ -1304,8 +1238,6 @@ $this->thing->log($this->agent_prefix . 'using default_place_code ' . $this->def
 /* More on places
 
 Lots of different ways to number places.
-
-
 
 */
 ?>

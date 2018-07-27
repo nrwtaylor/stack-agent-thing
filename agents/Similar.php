@@ -113,6 +113,7 @@ class Similar
             $requested_flag = $this->requested_flag;
         }
 
+
         $this->flag = $requested_flag;
         $this->refreshed_at = $this->current_time;
 
@@ -266,7 +267,14 @@ class Similar
             $choice = $this->flag;
         }
 
-        $this->previous_flag = $this->flag;
+        if (!isset($this->flag)) {
+            $this->previous_flag = false;
+        } else {
+            $this->previous_flag = $this->flag;
+        }
+
+
+//        $this->previous_flag = $this->flag;
         $this->flag = $choice;
 
         //$this->thing->choice->Choose($this->state);

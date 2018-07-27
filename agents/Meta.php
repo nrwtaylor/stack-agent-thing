@@ -100,7 +100,13 @@ class Meta
             if($this->agent_input == null) {$input = $this->agent_input;} else {$input = $this->subject;}
         }
 
-        if ($input == "") {echo "Blank provided\n";return;}
+        if ($input == "") {        $data_gram = array("from"=>null,
+                                "to"=>null,
+                                "message"=>null);
+
+        $this->meta = $data_gram;
+//echo "Blank provided\n";
+return;}
 
 
         if (!isset($this->words)) {
@@ -189,7 +195,7 @@ class Meta
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->thing->json->writeVariable(array($this->agent_name, "meta"), $this->meta);
+        if (isset($this->meta)) {$this->thing->json->writeVariable(array($this->agent_name, "meta"), $this->meta);}
 
         return $this->thing_report;
 	}

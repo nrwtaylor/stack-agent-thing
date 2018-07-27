@@ -100,8 +100,8 @@ class Tally{
         return;
     }
 
-function setVariables() {
-
+    function setVariables()
+    {
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
         $this->variables_thing->json->writeVariable( array("tally", "variable"), $this->variables_thing->variable );
@@ -120,7 +120,6 @@ function setVariables() {
         $this->thing->json->writeVariable( array("tally", "limit"), $this->variables_thing->limit );
 
         $this->thing->json->writeVariable( array("tally", "next_uuid"), $this->variables_thing->next_uuid );
-
     }
 
     function getFlag() 
@@ -355,13 +354,11 @@ function setVariables() {
         if ($this->variable_overflow_flag) {
             $this->function_message = "CLICK";
 
-          
-
             // There are two ways to call the next wheel.
             $tally_thing = new Thing($this->variables_thing->next_uuid);
 
-//var_dump($tally_thing->thing);
-//exit();
+//var_dump($tally_thing->uuid);
+//var_dump($this->variables_thing->next_uuid);
 
             // Create the wheel on the fly if it hasn't yet been created..
             if ($tally_thing->thing == false) {

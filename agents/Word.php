@@ -136,28 +136,27 @@ class Word {
 
         $this->words = array();
 
-//var_dump($w);
-
         foreach ($w as $key=>$value) {
 
             // Return dictionary entry.
             $value = $this->stripPunctuation($value);
 
             $text = $this->findWord('list', $value);
-//echo $text;
-            //echo $value . " " .$text . "<br>";
-//            $this->words = array_merge($this->getWords($text));
+
             if ($text != false) {
-             //   echo "word is " . $text . "\n";
-            $this->words[] = $text;
+                 //   echo "word is " . $text . "\n";
+                $this->words[] = $text;
             } else {
-             //   echo "word is not " . $value . "\n";
+                 //   echo "word is not " . $value . "\n";
             }
         }
 
         if (count($this->words) != 0) {
             $this->word = $this->words[0];
         } else {
+//            $text = $this->nearestWord($value);
+//echo $text;
+//exit();
             $this->word = null;
         }
 
@@ -199,6 +198,7 @@ class Word {
                 $contents = $this->word_context;
                 $file = null;
                 break;
+
             case 'emotion':
                 break;
             default:
@@ -220,6 +220,55 @@ class Word {
         return;
     }
 
+    function nearestWord($input)
+    {
+//var_dump($input);
+                $file = $this->resource_path . 'words.txt';
+                $contents = file_get_contents($file);
+
+        $words = explode("\n", $contents);
+
+        $nearness_min = 1e6;
+        $word = false;
+
+        foreach ($words as $key=>$word) {
+            $nearness = levenshtein($input, $word);
+            //$nearness = similar_text($word, $input);
+
+            if ($nearness < $nearness_min) {
+                $word_list = array();
+                $nearness_min = $nearness;
+            }
+            if ($nearness_min == $nearness) {
+                $word_list[] = $word;
+
+            }
+
+        }
+
+        $nearness_max = 0;
+        $word = false;
+
+        foreach ($word_list as $key=>$word) {
+            //$nearness = levenshtein($input, $word);
+            $nearness = similar_text($word, $input);
+
+            if ($nearness > $nearness_max) {
+                $new_word_list = array();
+                $nearness_min = $nearness;
+            }
+            if ($nearness_min == $nearness) {
+                $new_word_list[] = $word;
+
+            }
+
+        }
+
+        $nearest_word = implode(" " ,$new_word_list);
+
+
+        return $nearest_word;
+    }
 
 
 
@@ -284,13 +333,23 @@ class Word {
     if (isset($this->words)) {
 
         if (count($this->words) == 0) {
-            $this->sms_message = "WORD | no words found";
+            if (isset($this->nearest_word)) {
+                $this->sms_message = "WORD | closest match " . $this->nearest_word;
+            } else {
+                $this->sms_message = "WORD | no words found";
+            }
+
+//            $this->sms_message = "WORD | no words found";
             return;
         }
 
 
         if ($this->words[0] == false) {
-            $this->sms_message = "WORD | no words found";
+            if (isset($this->nearest_word)) {
+                $this->sms_message = "WORD | closest match " . $this->nearest_word;
+            } else {
+                $this->sms_message = "WORD | no words found";
+            }
             return;
         }
 
@@ -339,6 +398,7 @@ class Word {
                 if (strpos(strtolower($piece),$command) !== false) {
 
                     switch($piece) {
+
                         case 'word':   
 
                             $prefix = 'word';
@@ -348,14 +408,8 @@ class Word {
 
                             $this->extractWords($words);
 
-                            //$t = $this->findWord('list', $words);
-//echo "test";
-//var_dump($this->words);
-//exit();
-            //$this->words = implode(" ", $t);
-
-                            return;
-
+                            if ($this->word != null) {return;}
+                            //return;
 
                         default:
 
@@ -368,16 +422,12 @@ class Word {
 
         }
 
-        $this->extractWords($input);
+        $this->nearest_word = $this->nearestWord($this->search_words);
+//var_dump($this->word);
+        //$this->extractWords($input);
 
 		$status = true;
 
-//        if (count($this->emojis) == 0) {
-
-//            $text = $this->findEmoji('list', $searchfor);
-
-
-//        }
 
 	return $status;		
 	}

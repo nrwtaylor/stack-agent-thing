@@ -284,7 +284,12 @@ class Burst
             $choice = $this->flag;
         }
 
-        $this->previous_flag = $this->flag;
+        if (!isset($this->flag)) {
+            $this->previous_flag = false;
+        } else {
+            $this->previous_flag = $this->flag;
+        }
+
         $this->flag = $choice;
 
         //$this->thing->choice->Choose($this->state);

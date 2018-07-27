@@ -57,6 +57,10 @@ class Lattice
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->canvas_size_x = 1640;
+        $this->canvas_size_y = 1640;
+
+
         $this->thing->log($this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
         $this->thing->json->setField("variables");
@@ -87,8 +91,8 @@ class Lattice
 
         //$this->updateSnowflake();
 
-        $this->canvas_size_x = 1640;
-        $this->canvas_size_y = 1640;
+//        $this->canvas_size_x = 1640;
+//        $this->canvas_size_y = 1640;
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
@@ -753,7 +757,7 @@ $font_size = 6;
 
 //        $this->lattice_size = $n;
         $n = $this->lattice_size;
-        ;
+        
         //$this->lattice_size = $n;
 
         $this->lattice = array();
@@ -997,8 +1001,8 @@ $font_size = 6;
             }
             // Draw out the state
 
-            $center_x = 164/2;
-            $center_y = 164/2;
+            $center_x = 0;//$this->canvas_size_x/2;
+            $center_y = 0;//$this->canvas_size_y/2;
             $angle = 0;
 
 //                    foreach(range(0,5) as $i) {
@@ -1224,7 +1228,7 @@ $font_size = 6;
                 $p = strlen($this->decimal_lattice);
 
                 $this->max = 13;
-                $this->size = 4;
+                $this->size = 50;
                 $this->lattice_size = 40;
                 return;
             }

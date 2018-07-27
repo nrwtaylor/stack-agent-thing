@@ -10,6 +10,8 @@ class Channel
 	function __construct(Thing $thing, $agent_input = null)
     {
 
+        //echo "agent_input is " . $agent_input;
+
         $this->start_time = microtime(true);
 
 		if ($agent_input == null) {$agent_input = '';}
@@ -36,18 +38,28 @@ class Channel
 
 
 
-        $this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
-		$this->node_list = array("start"=>array("cue primary channel"));
+        $this->thing->log('<pre> Agent "Channel" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
+		$this->node_list = array("channel"=>array("cue primary channel"));
 
 		//$this->aliases = array("learning"=>array("good job"));
 
 //		echo '<pre> Agent "Receipt" constructed a Thing ';echo $this->uuid;echo'</pre>';
 //		echo '<pre> Agent "Receipt" received this Thing "';echo $this->subject;echo'"</pre>';
 
+        if ($agent_input == "channel") {
+            $this->thing->json->setField("variables");
+            //$this->roll = strtolower($this->thing->json->readVariable( array("roll", "roll") ));
+            $this->channel_name = $this->thing->json->readVariable( array("channel", "name") );
+        } elseif ($agent_input != null) {
+            $this->channel_name = $agent_input;
+        }
+
+        
 
         $this->readFrom();
 		$this->readSubject();
 
+        $this->set();
 		$this->respond();
 
         $this->end_time = microtime(true);
@@ -61,17 +73,47 @@ class Channel
 
 	}
 
+    public function set()
+    {
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(array("channel",
+            "refreshed_at"),  $this->thing->json->time()
+            );
+        $this->thing->json->writeVariable(array("channel",
+            "name"),  $this->channel_name
+            );
+
+    }
+
+    public function get()
+    {
+        $this->thing->json->setField("variables");
+        //$this->refreshed_at = strtolower($this->thing->json->readVariable( array("roll", "roll") ));
+        $this->channel_name = $this->thing->json->readVariable( array("channel", "name") );
+    }
+
 	public function respond() {
 
 
         $this->blankX();
 
 		// Thing actions
+/*
+		$this->thing->json->setField("variables");
 
-		$this->thing->json->setField("settings");
-		$this->thing->json->writeVariable(array("uuid",
+		$this->thing->json->writeVariable(array("channel",
 			"received_at"),  $this->thing->json->time()
 			);
+
+        $this->thing->json->writeVariable(array("channel",
+            "refreshed_at"),  $this->thing->json->time()
+            );
+
+
+        $this->thing->json->writeVariable(array("channel",
+            "channel"),  $this->agent_input
+            );
+*/
 
 
 		$this->thing->flagGreen();
@@ -118,7 +160,7 @@ $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" al
 
 
     // Allow for channel specific injections.
-    switch($this->channel) {
+    switch($this->channel_name) {
         case null:
             break;
         case 'email':
@@ -167,14 +209,14 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
  //       $this->thing_report['email'] = $email_agent->thing_report['email'];
 
 
-
-        $message_thing = new Message($this->thing, $this->thing_report);
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
     //    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 	//	$this->thing_report['thing'] = $this->thing->thing;
 
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
-
+            $thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
         return $this->thing_report;
 
 	}
@@ -475,14 +517,16 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
     function readFrom()
     {
 
+        if (isset($this->channel_name)) {return;}
+
         if (strlen($this->from) == 16 and (is_numeric($this->from))) { 
-            $this->channel = "messenger";
+            //$this->channel = "messenger";
             $this->getMessenger();
             return;
         }
 
         if ( filter_var($this->from, FILTER_VALIDATE_EMAIL) ) {
-            $this->channel = "email";
+            //$this->channel = "email";
             $this->getEmail();
             return;
         }
@@ -490,13 +534,13 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
 
         if (strlen($this->from) == 11 and (is_numeric($this->from))) { 
             // Comes in as 11.  Perhaps has a blank space.
-            $this->channel = "SMS";
+            //$this->channel = "SMS";
             $this->getSMS();
             return; 
        }
 
         if ($this->from == "console") { 
-            $this->channel = "console";
+            //$this->channel = "console";
             $this->getConsole();
             return;
         }
@@ -513,37 +557,9 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
 	    return $status;
 	}
 
-    public function PNG() {
-
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
-
-        // here DB request or some processing
-        $codeText = "thing:".$this->uuid;
-
-//      ob_clean();
-        if (ob_get_contents()) ob_clean();
-
-        ob_start();
-
-        QRcode::png($codeText,false,QR_ECLEVEL_Q,4);
-        $image = ob_get_contents();
-
-		ob_clean();
-
-        // Can't get this text editor working yet 10 June 2017
-
-        //$textcolor = imagecolorallocate($image, 0, 0, 255);
-        // Write the string at the top left
-        //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
-
-        $this->thing_report['png'] = $image;
-
+    public function PNG()
+    {
+        $this->thing_report['png'] = null;
         return $this->thing_report['png'];
     }
 
@@ -613,9 +629,10 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
 
     function makeEmail()
     {
-        $this->email_message = "Thank you $from here is a UUID.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
-        $this->email_message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
-        $this->email_message .= $this->sms_message;
+        if (!isset($this->sms_message)) {$this->makeSMS();}
+        $this->email_message = $this->sms_message;
+        $this->thing_report['email'] = $this->sms_message;
+
     }
 
 }

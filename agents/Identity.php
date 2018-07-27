@@ -1,293 +1,405 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-//echo '<pre> Agent "Receipt" started running on Thing ';echo date("Y-m-d H:i:s");echo'</pre>';
-
-// Call regularly from cron 
-// On call determine best thing to be addressed.
-
-// Start by picking a random thing and seeing what needs to be done.
-
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Identity {
+ini_set("allow_url_fopen", 1);
 
-	function __construct(Thing $thing, $agent_input = null) {
-//QRcode::png('PHP QR Code :)');
-//echo "meep";
-//exit(); 
+class Identity
+{
 
+    public $var = 'hello';
 
+    function __construct(Thing $thing, $agent_input = null) {
 
-		if ($agent_input == null) {$agent_input = '';}
-		$this->agent_input = $agent_input;
+        $this->start_time = microtime(true);
 
-			// Given a "thing".  Instantiate a class to identify and create the
-			// most appropriate agent to respond to it.
-			$this->thing = $thing;
+        if ($agent_input == null) {$agent_input = "";}
 
-$this->thing_report['thing'] = $this->thing->thing;
+        $this->agent_input = $agent_input;
 
-		// Get some stuff from the stack which will be helpful.
-		$this->web_prefix = $thing->container['stack']['web_prefix'];
-		$this->stack_state = $thing->container['stack']['state'];
-		$this->short_name = $thing->container['stack']['short_name'];
+        $this->keyword = "identity";
 
+        $this->agent_prefix = 'Agent "Identity" ';
 
-		// Create some short-cuts.
+        $this->thing = $thing;
+        $this->thing_report['thing'] = $thing;
+
+        $this->test= "Development code"; // Always
+
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
-		//$this->sqlresponse = null;
+        $this->sqlresponse = null;
 
 
+        $this->node_list = array("identity"=>array("on"=>array("off")));
 
-        $this->thing->log('<pre> Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
-		$this->node_list = array("identity"=>
-						array("who am i"));
+// This isn't going to help because we don't know if this
+// is the base.
+//        $this->state = "off";
+//        $this->thing->choice->load($this->keyword);
 
-		$this->aliases = array("learning"=>array("good job"));
+        $this->current_time = $this->thing->json->time();
+
+        $this->variables_thing = new Variables($this->thing, "variables identity " . $this->from);
+
+        $this->get(); // Updates $this->elapsed_time;
+
+		$this->thing->log('Agent "Identity" running on Thing ' . $this->thing->nuuid . ".");
+		$this->thing->log('Agent "Identity" received this Thing, "' . $this->subject .  '".') ;
 
 		$this->readSubject();
+		$this->respond();
 
-        if ($this->agent_input == null) {
-		    $this->respond();
-        }
-
-
-        $this->thing->log('Agent "Identity" found ' . $this->uuid);
-
-        //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
-
-	}
-
-    function extractUuids($input = null)
-    {
-        if ($input == null) {
-            $input = $this->subject;
-        }
-
-        if (!isset($this->uuids)) {
-            $this->uuids = array();
-        }
-        
-        $agent = new Uuid($this->thing, "uuid");
-        if (isset($agent->uuids)) {
-            $this->uuids = $agent->uuids;
-        } else {
-            $this->uuids = null;
-        }
-        //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-
-        //preg_match_all($pattern, $input, $m);
-
-        //$arr = $m[0];
-        //array_pop($arr);
-        //$this->uuids = $arr;
-        return $this->uuids;
+		//$this->thing->log( '<pre> Agent "Mordok" completed and is showing a ' . $this->state . ' flag.</pre>');
 
 
-    }
+        $this->end_time = microtime(true);
+        $this->actual_run_time = $this->end_time - $this->start_time;
+        $milliseconds = round($this->actual_run_time * 1000);
+
+        $this->thing->log( $this->agent_prefix .'ran for ' . $milliseconds . 'ms.' );
 
 
-	public function respond() {
+        $this->thing_report['log'] = $this->thing->log;
+//        echo $this->thing_report['log'];
 
 
-
-		// Thing actions
-
-		$this->thing->json->setField("settings");
-		$this->thing->json->writeVariable(array("uuid",
-			"received_at"),  $this->thing->json->time()
-			);
-
-
-		$this->thing->flagGreen();
-
-
-		// What receipts states are there.
-		// "Hi.  I'm receipt management.  How can I help you."
-
-		// figure out how set do aliases fluidly "good job"="learning".
-		// For now.
-
-		
-		foreach ($this->aliases as $alias) {
-
-			// Find out if the array test is in the aliase "database"?  But
-			// want to avoid database calls.  They clearly have a real world
-			// cost.  We are setting the paramenters for what 100 <unit> costs.
-			// Because triggering the db connections issue has to have real 
-			// world consequences.
+		return;
 
 		}
 
 
+    function set($requested_state = null)
+    {
+ 
+        if ($requested_state == null) {
+            $requested_state = $this->requested_state;
+        }
 
-		$this->thing->choice->Create('uuid', $this->node_list, "identity");
+//        $this->thing->json->setField("variables");
+//        $this->thing->json->writeVariable( array($this->keyword, "state"), $requested_state );
+//        $this->thing->json->writeVariable( array($this->keyword, "refreshed_at"), $this->current_time );
 
-		$choices = $this->thing->choice->makeLinks('identity');
-//		$html_button_set = $links['button'];
+        $this->variables_thing->setVariable("state", $requested_state);
+        $this->variables_thing->setVariable("refreshed_at", $this->current_time);
 
+      
 
-
-		$from = $this->from;
-		$to = $this->to;
-
-		//echo "from",$from,"to",$to;
-
-		$subject = $this->subject;
-
-		// Now passed by Thing object
-		$uuid = $this->uuid;
-		$sqlresponse = "yes";
-
-$message = "Thank you $from here is a UUID.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
-$message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
+        $this->thing->choice->Choose($requested_state);
 
 
+        $this->thing->choice->save($this->keyword, $requested_state);
 
-$this->sms_message = "IDENTITY | uuid ";
-$this->sms_message .= $this->uuid;
-$this->sms_message .= ' | TEXT ?';
-
-/*
-                if ( is_numeric($this->from) ) {
-                        require_once '/var/www/html/stackr.ca/agents/sms.php';
-
-                        $this->readSubject();
-
-                        $sms_thing = new Sms($this->thing, $this->sms_message);
-                        $thing_report['info'] = 'SMS sent';
-
-                //return $thing_report;
-                }
+        $this->state = $requested_state;
+        $this->refreshed_at = $this->current_time;
 
 
+//$this->thing->log("Result of choice->load() ". $this->thing->choice->load($this->keyword));
 
 
-if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
-	// Sufficiient balance to send an email
-	$this->thing->email->sendGeneric($from, "uuid", $subject, $message, $choices);
-	$this->thing->account['thing']->Credit(100);
+        return;
+    }
+
+
+    function get()
+    {
+        //$this->variables_thing->getVariables();
+        if (!isset($this->requested_state)) {$this->requested_state = "X";}
+
+        $this->previous_state = $this->variables_thing->getVariable("state")  ;
+        $this->refreshed_at = $this->variables_thing->getVariables("refreshed_at");
+
+        //var_dump($this->variables_thing);
+        //exit();
+        //$this->previous_state = $this->variables_thing->choice->load($this->keyword);
+        //exit();
+        //$this->previous_state = $this->thing->choice->current_node;
+
+        $this->thing->choice->Create($this->keyword, $this->node_list, $this->previous_state);
+        $this->thing->choice->Choose($this->requested_state);
+
+        $this->state = $this->thing->choice->current_node;
+
+        $this->state = $this->previous_state;
+
+        return;
+    }
+
+    function read()
+    {
+        return $this->state;
+    }
+
+    function selectChoice($choice = null)
+    {
+
+        if ($choice == null) {
+            return $this->state;
+
+    //        $choice = 'off'; // Fail off.
+        }
+
+
+        $this->thing->log('Agent "' . ucwords($this->keyword) . '" chose "' . $choice . '".');
+
+        $this->set($choice);
+
+
+        //$this->thing->log('Agent "' . ucwords($this->keyword) . '" choice selected was "' . $choice . '".');
+
+        return $this->state;
+    }
+
+
+	private function respond()
+    {
+
+		// Thing actions
+
+		$this->thing->flagGreen();
+
+		// Generate email response.
+
+		$to = $this->thing->from;
+		$from = $this->keyword;
+
+		$choices = $this->variables_thing->thing->choice->makeLinks($this->state);
+		$this->thing_report['choices'] = $choices;
+
+if ($this->state == false) {
+    $t = "X";
+} else {
+       $t = $this->state;
 }
+		$sms_message = "IDENTITY IS " . strtoupper($t);
 
-*/
+        if ($this->state == "on") {
+            $sms_message .= " | identity " . strtoupper($this->from);
+        }
+//        $sms_message .= " | Previous " . strtoupper($this->previous_state);
+//        $sms_message .= " | Now " . strtoupper($this->state);
+//        $sms_message .= " | Requested " . strtoupper($this->requested_state);
+//        $sms_message .= " | Current " . strtoupper($this->base_thing->choice->current_node);
+//        $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
+//        $sms_message .= " | base nuuid " . strtoupper($this->variables_thing->thing->nuuid);
 
-$this->thing_report['sms'] = $this->sms_message;
+//        $sms_message .= " | another nuuid " . substr($this->variables_thing->uuid,0,4); 
+        $sms_message .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
 
-$this->thing_report['email'] = array('to'=>$from,
-					'from'=>'uuid',
-					'subject'=>$subject,
-					'message'=>$message,
-					'choices'=>$choices);
 
-		$this->PNG();
+        if ($this->state == "off") {
+            $sms_message .= " | TEXT IDENTITY ON";
+        } else {
+            $sms_message .= " | TEXT ?"; 
+        }
 
-                $message_thing = new Message($this->thing, $this->thing_report);
-                $thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		$this->thing_report['thing'] = $this->thing->thing;
+		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
+		$test_message .= '<br>Shift state: ' . $this->state . '<br>';
+
+		$test_message .= '<br>' . $sms_message;
+
+		$test_message .= '<br>Current node: ' . $this->thing->choice->current_node;
+
+		$test_message .= '<br>Requested state: ' . $this->requested_state;
+
+	    $this->thing_report['sms'] = $sms_message;
+		$this->thing_report['email'] = $sms_message;
+		$this->thing_report['message'] = $test_message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
+
+
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+
+        $this->thing_report['help'] = 'This is your Identity.  You can turn your Identity ON and OFF.';
 
 		return;
+
+
 	}
 
 
+    public function readSubject() 
+    {
+        $this->response = null;
 
-	public function readSubject() {
+        $keywords = array('off', 'on');
 
-        // If the to line is a UUID, then it needs
-        // to be sent a receipt.
-        
-        //        $message_thing = new Message($this->thing, $this->thing_report);
-        //        $thing_report['info'] = $message_thing->thing_report['info'] ;
+        $input = strtolower($this->subject);
 
-        // Then look for messages sent to UUIDS
-        $this->thing->log('Agent "UUID" looking for UUID in address.');
-        //    $uuid_thing = new Uuid($this->thing, 'uuid');
+        // Because the identity is likely to be in the from address
+		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
+//		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
-//        $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-//        if (preg_match($pattern, $this->to)) {
-        $this->extractUuids();
+        $prior_uuid = null;
 
-        $this->thing->log('Agent "UUID" found a  UUID in address.');
+        $pieces = explode(" ", strtolower($input));
 
 
-//        $arr = $m[0];
-//        $this->uuids = $arr;
-//var_dump($arr);
-//            $uuid_thing = new Receipt($this->thing);
-//            $this->thing_report['info'] = $receipt_thing->thing_report['info'];
-            return;
+		// So this is really the 'sms' section
+		// Keyword
+        if (count($pieces) == 1) {
 
+            if ($input == $this->keyword) {
+                $this->read();
+                return;
+            }
+            //return "Request not understood";
+            // Drop through to piece scanner
+        }
+
+
+        foreach ($pieces as $key=>$piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) 
+                    {
+                        case 'off':
+                            $this->thing->log('switch off');
+                            $this->selectChoice('off');
+                            return;
+                        case 'on':
+                            $this->selectChoice('on');
+                            return;
+                        case 'next':
+                        default:
+                    }
+
+                }
+            }
 
         }
 
 
+        // If all else fails try the discriminator.
+
+        $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+        switch($this->requested_state)
+        {
+            case 'on':
+                $this->selectChoice('on');
+                return;
+            case 'off':
+                $this->selectChoice('off');
+                return;
+        }
+
+        $this->read();
+
+        return "Message not understood";
+
+	}
+
+    function discriminateInput($input, $discriminators = null)
+    {
 
 
-//		$status = true;
-//	return $status;		
-//	}
+                //$input = "optout opt-out opt-out";
 
-        public function PNG() {
-// Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-//I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
-//No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-//So beware of your included files!
-//Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-//Hope it save someone's time.
-
-//http://php.net/manual/en/function.imagepng.php
-
-//header('Content-Type: text/html');
-//echo "Hello World";
-//exit();
-
-//header('Content-Type: image/png');
-//QRcode::png('PHP QR Code :)');
-//exit();
-
-                // here DB request or some processing
-                $codeText = "thing:".$this->uuid;
-
-		ob_clean();
-
-                ob_start();
+                if ($discriminators == null) {
+                        $discriminators = array('on', 'off');
+                }       
 
 
 
-                QRcode::png($codeText,false,QR_ECLEVEL_Q,4); 
+                $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
 
-                $image = ob_get_contents();
-
-//header('Content-Type: image/png');
-//echo $image;
-//exit();
-
-		ob_clean();
-
-
-
-
-// Can't get this text editor working yet 10 June 2017
-
-//$textcolor = imagecolorallocate($image, 0, 0, 255);
-// Write the string at the top left
-//imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
-
-$this->thing_report['png'] = $image;
-
-//echo $this->thing_report['png']; // for testing.  Want function to be silent.
-
-                return $this->thing_report['png'];
+                if (count($discriminators) > 4) {
+                        $minimum_discrimination = $default_discriminator_thresholds[4];
+                } else {
+                        $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
                 }
+
+
+
+                $aliases = array();
+
+                $aliases['on'] = array('red','on');
+                $aliases['off'] = array('green', 'off');
+                //$aliases['reset'] = array('rst','reset','rest');
+                //$aliases['lap'] = array('lap','laps','lp');
+
+
+
+                $words = explode(" ", $input);
+
+                $count = array();
+
+                $total_count = 0;
+                // Set counts to 1.  Bayes thing...     
+                foreach ($discriminators as $discriminator) {
+                        $count[$discriminator] = 1;
+
+                       $total_count = $total_count + 1;
+                }
+                // ...and the total count.
+
+
+
+                foreach ($words as $word) {
+
+                        foreach ($discriminators as $discriminator) {
+
+                                if ($word == $discriminator) {
+                                        $count[$discriminator] = $count[$discriminator] + 1;
+                                        $total_count = $total_count + 1;
+                                                //echo "sum";
+                                }
+
+                                foreach ($aliases[$discriminator] as $alias) {
+
+                                        if ($word == $alias) {
+                                                $count[$discriminator] = $count[$discriminator] + 1;
+                                                $total_count = $total_count + 1;
+                                                //echo "sum";
+                                        }
+                                }
+                        }
+
+                }
+
+                $this->thing->log('Agent "Flag" has a total count of ' . $total_count . '.');
+                // Set total sum of all values to 1.
+
+                $normalized = array();
+                foreach ($discriminators as $discriminator) {
+                        $normalized[$discriminator] = $count[$discriminator] / $total_count;            
+                }
+
+
+                // Is there good discrimination
+                arsort($normalized);
+
+
+                // Now see what the delta is between position 0 and 1
+
+                foreach ($normalized as $key=>$value) {
+                        //echo $key, $value;
+
+          if ( isset($max) ) {$delta = $max-$value; break;}
+                        if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
+                }
+
+
+//                        echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
+
+
+                if ($delta >= $minimum_discrimination) {
+                        //echo "discriminator" . $discriminator;
+                        return $selected_discriminator;
+                } else {
+                        return false; // No discriminator found.
+                } 
+
+                return true;
+        }
 
 }
 

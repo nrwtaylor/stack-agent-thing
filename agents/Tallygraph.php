@@ -120,12 +120,14 @@ class Tallygraph
     function getData() {
 
         $this->identity = "null" . $this->mail_postfix;
-
+echo $this->identity;
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
         $thing_report = $this->thing->db->agentSearch("tallycounter", 99);
+
+
         $things = $thing_report['things'];
-//var_dump(count($things));
+
 //echo "<pre>";
 //var_dump($things);
 //echo "</pre>";
@@ -134,20 +136,41 @@ class Tallygraph
 
         $this->points = array();
         foreach ($things as $thing) {
-
+/*
             // Check each of the three Things.
             $this->variables_thing = new Thing($thing['uuid']);
 
             $created_at = strtotime($thing['created_at']);
-
+echo $created_at;
             $variable = $this->getVariable('count');
             //$name = $this->getVariable('name');
             //$next_uuid = $this->getVariable('next_uuid');
+*/
+
+                $uuid = $thing['uuid'];
+
+                $variables_json= $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                if (isset($variables['tallycounter'])) {
+
+//                    if(isset($variables['tallycounter']['created_at'])) {$created_at = strtotime($variables['tallycounter']['created_at']);}
+                    if(isset($variables['tallycounter']['count'])) {$variable = $variables['tallycounter']['count'];}
+                    if(isset($variables['tallycounter']['refreshed_at'])) {$refreshed_at = strtotime($variables['tallycounter']['refreshed_at']);}
+                }
+
+//echo $created_at;
+//echo $refreshed_at;
+//if (!isset($created_at)) {$created_at = $refreshed_at;}
+
+echo $variable . " " . $refreshed_at . "<br>";
 
             if ((($variable == null) or ($variable == 0)) and ($this->ignore_empty)) {
                 continue;
             }
-            $this->points[] = array("created_at"=>$created_at, "variable"=>$variable);
+//            $this->points[] = array("created_at"=>$created_at, "variable"=>$variable);
+            $this->points[] = array("created_at"=>$refreshed_at, "variable"=>$variable);
+
         }
 
 //echo "<pre>";

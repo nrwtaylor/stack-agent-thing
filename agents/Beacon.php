@@ -1,12 +1,13 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Mordok 
+class Beacon
 {
 
     public $var = 'hello';
@@ -15,18 +16,16 @@ class Mordok
 
         $this->start_time = microtime(true);
 
-
-
         if ($agent_input == null) {$agent_input = "";}
 
         $this->agent_input = $agent_input;
+        $this->agent_name = "beacon";
+        $this->keyword = "beacon";
 
-        $this->keyword = "mordok";
-
-        $this->agent_prefix = 'Agent "Mordok" ';
+        $this->agent_prefix = 'Agent "Beacon" ';
 
         $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
 
         $this->test= "Development code"; // Always
 
@@ -37,7 +36,14 @@ class Mordok
         $this->sqlresponse = null;
 
 
-        $this->node_list = array("off"=>array("on"=>array("off")));
+        $this->node_list = array("beacon"=>array("on"=>array("off")));
+
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+        $this->word = $thing->container['stack']['word'];
+        $this->email = $thing->container['stack']['email'];
+
 
 // This isn't going to help because we don't know if this
 // is the base.
@@ -46,23 +52,12 @@ class Mordok
 
         $this->current_time = $this->thing->json->time();
 
-$this->variables_thing = new Variables($this->thing, "variables mordok " . $this->from);
-
+        $this->variables_thing = new Variables($this->thing, "variables beacon " . $this->from);
 
         $this->get(); // Updates $this->elapsed_time;
 
-        // And so at this point we have a timer model.
-
-		// So created a token_generated_time field.
-        //        $this->thing->json->setField("variables");
-        //        $this->thing->json->writeVariable( array("stopwatch", "request_at"), $this->thing->json->time() );
-
-//$this->thing->json->time()
-
-
-
-		$this->thing->log('Agent "Mordok" running on Thing ' . $this->thing->nuuid . ".");
-		$this->thing->log('Agent "Mordok" received this Thing, "' . $this->subject .  '".') ;
+		$this->thing->log('Agent "Beacon" running on Thing ' . $this->thing->nuuid . ".");
+		$this->thing->log('Agent "Beacon" received this Thing, "' . $this->subject .  '".') ;
 
 		$this->readSubject();
 		$this->respond();
@@ -120,58 +115,40 @@ $this->variables_thing = new Variables($this->thing, "variables mordok " . $this
 
     function get()
     {
-
         //$this->variables_thing->getVariables();
 
+        if (!isset($this->requested_state)) {
+            if (!isset($this->state)) {
+                $this->requested_state = "X";
+            } else {
+                $this->requested_state = $this->state;
+            }
+        }
 
 
         $this->previous_state = $this->variables_thing->getVariable("state")  ;
         $this->refreshed_at = $this->variables_thing->getVariables("refreshed_at");
 
-//var_dump($this->variables_thing);
-
-//exit();
-
-
+        //var_dump($this->variables_thing);
+        //exit();
         //$this->previous_state = $this->variables_thing->choice->load($this->keyword);
-//exit();
-//            $this->previous_state = $this->thing->choice->current_node;
-
-        if (!isset($this->requested_state)) {
-            if (isset($this->state)) {
-                $this->requested_state = $this->state;
-            } else {
-                $this->requested_state = false;
-//                $this->requested_state = "off";
-
-            }
-        }
-
+        //exit();
+        //$this->previous_state = $this->thing->choice->current_node;
 
         $this->thing->choice->Create($this->keyword, $this->node_list, $this->previous_state);
         $this->thing->choice->Choose($this->requested_state);
 
         $this->state = $this->thing->choice->current_node;
 
-
         $this->state = $this->previous_state;
-//echo $this->state;
-//exit();
 
         return;
-
     }
-
 
     function read()
     {
-        //$this->thing->log("read");
-
-//        $this->get();
         return $this->state;
     }
-
-
 
     function selectChoice($choice = null)
     {
@@ -194,8 +171,9 @@ $this->variables_thing = new Variables($this->thing, "variables mordok " . $this
     }
 
 
-	private function respond() {
-
+	private function respond()
+    {
+        $this->makeBeacon();
 		// Thing actions
 
 		$this->thing->flagGreen();
@@ -208,63 +186,198 @@ $this->variables_thing = new Variables($this->thing, "variables mordok " . $this
 		$choices = $this->variables_thing->thing->choice->makeLinks($this->state);
 		$this->thing_report['choices'] = $choices;
 
-        if (($this->state == "inside nest") or ($this->state == false)) {
-            $t = "NOT SET";
-        } else {
-            $t = $this->state;
+        $this->makeSMS();
+
+		$this->thing_report['email'] = $this->sms_message;
+
+        $this->makeMessage();
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
+        $this->makeWeb();
 
-		$sms_message = "MORDOK IS " . strtoupper($t);
-//        $sms_message .= " | Previous " . strtoupper($this->previous_state);
-//        $sms_message .= " | Now " . strtoupper($this->state);
-//        $sms_message .= " | Requested " . strtoupper($this->requested_state);
-//        $sms_message .= " | Current " . strtoupper($this->base_thing->choice->current_node);
-//        $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
-//        $sms_message .= " | base nuuid " . strtoupper($this->variables_thing->thing->nuuid);
-
-//        $sms_message .= " | another nuuid " . substr($this->variables_thing->uuid,0,4); 
-        $sms_message .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
-
-
-        if ($this->state == "off") {
-            $sms_message .= " | TEXT MORDOK ON";
-        } else {
-            $sms_message .= " | TEXT ?"; 
-        }
-
-
-		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
-		$test_message .= '<br>Shift state: ' . $this->state . '<br>';
-
-		$test_message .= '<br>' . $sms_message;
-
-		$test_message .= '<br>Current node: ' . $this->thing->choice->current_node;
-
-		$test_message .= '<br>Requested state: ' . $this->requested_state;
-
-	    $this->thing_report['sms'] = $sms_message;
-		$this->thing_report['email'] = $sms_message;
-		$this->thing_report['message'] = $test_message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
-
-
-                        $message_thing = new Message($this->thing, $this->thing_report);
-
-                        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
-
-		//$this->thing->email->sendGeneric($to,$from,$this->subject, $test_message, $choices);
-
-$this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and OFF.';
-
-
-		//echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
-//echo $message;
+        $this->thing_report['help'] = 'This is your Beacon.  You can turn your Beacon ON and OFF.';
 
 		return;
 
 
 	}
+
+    function makeMessage()
+    {
+
+        switch($this->state) 
+        {
+            case 'off':
+                $m = "The beacon is off.";
+                break;
+            case 'on':
+                if (!isset($this->place->place_name)) {$place = "NOT SET";} else {$place =  strtoupper($this->place->place_name);}
+
+                $m = "The beacon is at " . strtoupper($this->place->place_name);
+                $m .= " with a " . strtoupper($this->flag->state) . " flag.";
+                $m .= " Train " . strtoupper($this->headcode->head_code) . " is running.";
+                break;
+            default:
+                $m = "The beacon is not on.";
+        }
+
+        $this->message = $m;
+        $this->thing_report['message'] = $m;
+    }
+
+    function makeSMS()
+    {
+
+        if ($this->state == false) {
+            $t = "X";
+        } else {
+            $t = $this->state;
+        }
+        $sms_message = "BEACON IS " . strtoupper($t);
+
+        if ($this->state == "on") {
+            $sms_message .= " | identity " . strtoupper($this->identity->from);
+            $sms_message .= " | flag " . strtoupper($this->flag->state);
+            $sms_message .= " | headcode " . strtoupper($this->headcode->head_code);
+            $sms_message .= " | place " . strtoupper($this->place->place_name);
+
+        }
+
+        $sms_message .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
+
+
+        if ($this->state == "off") {
+            $sms_message .= " | TEXT BEACON ON";
+        } else {
+            $sms_message .= " | TEXT ?"; 
+        }
+
+
+        $this->sms_message = $sms_message;
+        $this->thing_report['sms'] = $sms_message;
+
+
+    }
+
+    function makeWeb()
+    {
+
+        if ($this->state == "on") {
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+
+        $link_txt = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
+
+        $this->node_list = array("beacon"=>array("beacon", "job"));
+
+        // Make buttons
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "beacon");
+        $choices = $this->thing->choice->makeLinks('beacon');
+
+
+        $web = '<a href="' . $link . '">';
+        $web .= $this->place->html_image;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= "<br>";
+
+        $web .= '<a href="' . $link . '">';
+        $web .= $this->flag->html_image;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= "<br>";
+
+        $web .= '<a href="' . $link . '">';
+        $web .= $this->headcode->html_image;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
+// Headcode updates all the time...
+//$refreshed_at = max($this->headcode->refreshed_at,$this->flag->refreshed_at, $this->place->refreshed_at); 
+$refreshed_at = max($this->flag->refreshed_at, $this->place->refreshed_at); 
+
+        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
+        $web .= "Last asserted about ". $ago . " ago.";
+
+        $web .= "<br>";
+
+
+        }
+
+        if ($this->state != "on") {
+            $web = '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
+            //if (($this->state == null) or ($this->state == false)) {$t = "NOT SET";} else {$t = strtoupper($this->state);}
+
+            //$web .= "Beacon is " .  $t;
+            //$web .= "<br>";
+
+            $web .= $this->message;
+            $web .= "<br>";
+        }
+
+$this->thing_report['web'] = $web;
+return;
+
+
+$web .= $this->sms_message;
+        $web .= "<br>";
+
+
+/*        
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
+        $web .= '<a href="' . $link . '">place.txt</a>';
+        $web .= " | ";
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.log';
+        $web .= '<a href="' . $link . '">place.log</a>';
+        $web .= " | ";
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. $this->place_name;
+        $web .= '<a href="' . $link . '">'. $this->place_name. '</a>';
+*/
+
+
+        $web .= "<br>";
+
+
+
+        $web .= "<br>";
+
+
+
+        //$received_at = strtotime($this->thing->thing->created_at);
+        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($this->refreshed_at) );
+        $web .= "Last asserted about ". $ago . " ago.";
+
+        $web .= "<br>";
+
+        $this->thing_report['web'] = $web;
+    }
+
+
+    function makeBeacon()
+    {
+
+        $this->identity = new Identity($this->thing, "identity");
+
+        $this->flag = new Flag($this->thing, "flag");
+        $this->flag->makePNG();
+
+        $this->headcode = new Headcode($this->thing, "headcode");
+        $this->headcode->makePNG();
+
+        $this->place = new Place($this->thing, "place");
+        $this->place->makePNG();
+//var_dump($this->place->response);
+//var_dump($this->place->place_name);
+
+    }
 
 
     public function readSubject() 
@@ -275,7 +388,8 @@ $this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and O
 
         $input = strtolower($this->subject);
 
-		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        // Because the identity is likely to be in the from address
+		$haystack = $this->agent_input . " " . $this->subject;
 
 //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
@@ -292,8 +406,8 @@ $this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and O
                 $this->read();
                 return;
             }
-                        //return "Request not understood";
-                        // Drop through to piece scanner
+            //return "Request not understood";
+            // Drop through to piece scanner
         }
 
 
@@ -302,7 +416,6 @@ $this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and O
                 if (strpos(strtolower($piece),$command) !== false) {
                     switch($piece) 
                     {
-
                         case 'off':
                             $this->thing->log('switch off');
                             $this->selectChoice('off');
@@ -311,10 +424,7 @@ $this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and O
                             $this->selectChoice('on');
                             return;
                         case 'next':
-
-
                         default:
-
                     }
 
                 }
@@ -338,25 +448,8 @@ $this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and O
 
         $this->read();
 
-
-
-
         return "Message not understood";
 
-		return false;
-
-	
-	}
-
-
-
-
-
-
-	function kill()
-    {
-		// No messing about.
-		return $this->thing->Forget();
 	}
 
     function discriminateInput($input, $discriminators = null)
@@ -466,4 +559,3 @@ $this->thing_report['help'] = 'This is a Mordok.  You can turn a Mordok ON and O
 }
 
 ?>
-

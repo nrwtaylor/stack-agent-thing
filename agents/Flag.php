@@ -117,10 +117,20 @@ class Flag
         // Nothing else is allowed.
 
         if ($flag == null) {
+            if (!isset($this->state)) {$this->state = "red";}
+
             $flag = $this->state;
         }
 
-        if (($flag == "red") or ($flag == "green")) {return false;}
+        if (($flag == "red") or 
+                ($flag == "green") or 
+                ($flag == "rainbow") or
+                ($flag == "yellow") or 
+                 ($flag == "blue") or 
+                ($flag == "indigo") or 
+                ($flag == "violet") or 
+                ($flag == "orange")
+            ) {return false;}
 
         return true;
     }
@@ -148,9 +158,7 @@ class Flag
 
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
-
         return;
-
 
     }
 
@@ -222,7 +230,9 @@ $head= '
 $foot = "</td></div></td></tr></tbody></table></td></tr>";
 */
         $web = '<a href="' . $link . '">';
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
+//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
+        $web .= $this->html_image;
+
         $web .= "</a>";
         $web .= "<br>";
         $web .= $this->sms_message;
@@ -348,7 +358,7 @@ if ($this->state == "inside nest") {
     function makeMessage()
     {
 
-        $message = 'This is a FLAG POLE.  The flag is a  ' . strtoupper($this->state) . " FLAG. ";
+        $message = 'This is a FLAG POLE.  The flag is a ' . trim(strtoupper($this->state)) . " FLAG. ";
 
         if ($this->state == 'red') {
             $message .= 'It is a BAD time at the moment. ';
@@ -374,14 +384,87 @@ if ($this->state == "inside nest") {
 
 
 // Create a 55x30 image
-$image = imagecreatetruecolor(200, 125);
-$red = imagecolorallocate($image, 255, 0, 0);
-$green = imagecolorallocate($image, 0, 255, 0);
+$this->image = imagecreatetruecolor(200, 125);
+//$red = imagecolorallocate($this->image, 255, 0, 0);
+//$green = imagecolorallocate($this->image, 0, 255, 0);
+//$grey = imagecolorallocate($this->image, 100, 100, 100);
+
+
+        //$this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+        //$this->image = imagecreatetruecolor(164, 164);
+
+        $this->white = imagecolorallocate($this->image, 255, 255, 255);
+        $this->black = imagecolorallocate($this->image, 0, 0, 0);
+        $this->red = imagecolorallocate($this->image, 255, 0, 0);
+        $this->green = imagecolorallocate($this->image, 0, 255, 0);
+        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+        // For Vancouver Pride 2018
+
+        // https://en.wikipedia.org/wiki/Rainbow_flag
+        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
+        // https://www.schemecolor.com/lgbt-flag-colors.php
+
+        // https://www.bustle.com/p/9-pride-flags-whose-symbolism-everyone-should-know-9276529
+
+        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
+
+        $this->pride_red = imagecolorallocate($this->image, 231, 0, 0);
+        $this->pride_orange = imagecolorallocate($this->image, 255, 140, 0);
+        $this->pride_yellow = imagecolorallocate($this->image, 255, 239, 0);
+        $this->pride_green = imagecolorallocate($this->image, 0, 129, 31);
+        $this->pride_blue = imagecolorallocate($this->image, 0, 68, 255);
+        $this->pride_violet = imagecolorallocate($this->image, 118, 0, 137);
+
+        $this->flag_red = imagecolorallocate($this->image, 231, 0, 0);
+        $this->flag_orange = imagecolorallocate($this->image, 255, 140, 0);
+        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
+        $this->flag_green = imagecolorallocate($this->image, 0, 129, 31);
+        $this->flag_blue = imagecolorallocate($this->image, 0, 68, 255);
+        // Indigo https://www.rapidtables.com/web/color/purple-color.html
+        $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
+        $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
+
+        $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
+
+
+        $this->color_palette = array($this->pride_red,
+                                    $this->pride_orange,
+                                    $this->pride_yellow,
+                                    $this->pride_green,
+                                    $this->pride_blue,
+                                    $this->pride_violet);
+
+
+
 
 // Draw a white rectangle
+if ((!isset($this->state)) or ($this->state == false)) {
+    $color = $this->grey;
+} else { 
+    if (isset($this->{$this->state})) {
+        $color = $this->{$this->state};
+    } elseif (isset($this->{'flag_' . $this->state})) {
+        $color = $this->{'flag_' . $this->state};
+    }
 
+}
+//imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
+if ($this->state == "rainbow") {
+//    $color = $this->grey;
+    foreach(range(0,5) as $n) {
+        $a = $n * (200/6);
+        $b = $n *(200/6) + (200/6);
+$color = $this->color_palette[$n];
 
-imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
+imagefilledrectangle($this->image, $a, 0, $b, 125, $color);
+//}
+    }
+} else {
+
+//} else [
+imagefilledrectangle($this->image, 0, 0, 200, 125, $color);
+}
 
 // Save the image
 //imagepng($image, './imagefilledrectangle.png');
@@ -391,19 +474,19 @@ imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
 
 // Can't get this text editor working yet 10 June 2017
 if ($this->state == 'red') {
-    $textcolor = imagecolorallocate($image, 255, 255, 255);
+    $textcolor = imagecolorallocate($this->image, 255, 255, 255);
 } else {
-    $textcolor = imagecolorallocate($image, 0, 0, 0);
+    $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 }
 // Write the string at the top left
 
 
-        imagestring($image, 2, 150, 100, $this->flag->nuuid, $textcolor);
+        imagestring($this->image, 2, 150, 100, $this->flag->nuuid, $textcolor);
 
-        $this->image = $image;
+        //$this->image = $image;
     }
 
-    public function new_makePNG()
+    public function makePNG()
     {
         //if (!isset($this->image)) {$this->makeImage();}
 //$split_time = $this->thing->elapsed_runtime();
@@ -421,7 +504,7 @@ if ($this->state == 'red') {
     }
 
 
-    public function makePNG()
+    public function old_makePNG()
     {
         // Save the image
         //header('Content-Type: image/png');
@@ -459,7 +542,7 @@ if ($this->state == 'red') {
     {
         $this->response = null;
 
-        $keywords = array('flag', 'red', 'green');
+        $keywords = array('flag', 'red', 'green', 'rainbow','blue','indigo', 'orange', 'yellow', 'violet');
 
         $input = strtolower($this->subject);
 
@@ -498,6 +581,17 @@ if ($this->state == 'red') {
                         case 'green':
                             $this->selectChoice('green');
                             return;
+                        case 'rainbow':
+                        case 'blue':
+                        case 'indigo':
+                        case 'orange':
+                        case 'yellow':
+                        case 'violet':
+
+                            $this->selectChoice($piece);
+                            return;
+
+
                         case 'next':
 
 

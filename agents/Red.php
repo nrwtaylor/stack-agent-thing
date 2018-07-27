@@ -857,8 +857,6 @@ $match = true;
 
         // First see if the planned consist appears in the headcode
         // consist.
-
-
         $train_places = explode(">", $this->route);
         $head_code_places = explode(">", $route);
         $valid = true;
@@ -929,8 +927,6 @@ $match = true;
         //array_pop($arr);
 
         return $arr;
-
-
     }
 
     function trains() {
@@ -1355,8 +1351,6 @@ $this->thing->log($this->agent_prefix . " counted " . count($uuids) . " uuids.")
                 if (!isset($this->train_thing->alias)) {
                     $this->train_thing->alias = $this->getAlias();
                 }
-
-
 
                 return;
             }

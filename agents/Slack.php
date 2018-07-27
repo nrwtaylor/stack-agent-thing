@@ -26,7 +26,8 @@ class Slack
 
     function __construct(Thing $thing, $input = null)
     {
-
+//echo "slack.php meep";
+//exit();
 		$this->cost = 50;
 
 		$this->test= "Development code";
@@ -76,6 +77,8 @@ $input =
 */
 //echo "foobar";
 //echo $input;
+
+$this->set();
 
     	$this->eventGet();
 
@@ -190,6 +193,19 @@ exit();
 
     }
 
+    public function set()
+    {
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(array("slack",
+            "refreshed_at"),  $this->thing->json->time()
+            );
+//        $this->thing->json->writeVariable(array("slack",
+//            "name"),  $this->channel_name
+//            );
+
+    }
+
+
     function eventSet()
     {
 
@@ -224,7 +240,7 @@ exit();
 		$this->channel_id = $this->getChannel();
 		$this->user = $this->getUser();
 		$this->text = $this->getText();
-
+//var_dump($this->body);
 		$this->response_url = $this->body['response_url'];
 
 		return;
@@ -253,7 +269,7 @@ exit();
         $this->thing->json->setField("message0");
         $this->response_url = $this->thing->json->readVariable( array("slack", "response_url") );
 
-		echo $this->response_url;
+		//echo $this->response_url;
 
 		if ($this->response_url != false) {
 			$this->chat_webhookResponse(null,$test_message);
@@ -515,7 +531,7 @@ $arr = array(
 */
 
 //$arr = $message;
-
+//var_dump($message);
 
         $data = http_build_query($message);
 
@@ -937,12 +953,12 @@ $array =
                 "username" => "Mordok",
 				"attachments" => $json_attachments
             );
-
+/*
             echo "<pre>";
             //echo "data buttons";
             print_r(json_encode($data));
             echo "</pre>";
-
+*/
             // $data_string = json_encode($data);
 			$data_string = $data;
 

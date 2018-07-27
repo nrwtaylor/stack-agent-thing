@@ -74,6 +74,14 @@ class Message
 
 		$this->aliases = array("message"=>array("communicate"));
 
+        // Find out what channel this is
+//echo "meep";
+
+$channel = new Channel($this->thing, "channel");
+$this->channel_name = $channel->channel_name;
+
+//echo "channel name is " .$this->channel_name;
+
 //		$this->readSubject();
 		$this->respond();
 
@@ -249,6 +257,14 @@ class Message
 
     function checkSlack($searchfor)
     {
+//return false;
+        // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
+        // Don't make assumptions about characters in slack id.
+//$channel = new Channel($this->thing, "channel");
+//var_dump($channel);
+        if ($this->channel_name == "slack") {return true;}
+      return false; // in dev
+//exit();
         // Check address against the beta list
 
         $file = $this->resource_path . 'slack/id.txt';
@@ -324,7 +340,7 @@ class Message
         // Recognize and then handle Facebook messenger chat.
         if ( $this->checkFacebook($to)  ) { // The FB number of Mordok the Magnificent
 
-            $this->channel = 'facebook';
+            $this->channel_name = 'facebook';
 
             // See what sorry state Mordok is in.
             //$mordok_thing = new Mordok($this->thing);
@@ -362,9 +378,9 @@ class Message
             return $this->thing_report;
         }
 
-
+//echo "message";
         if ( $this->checkSlack($to) ) { // The Slack app of Mordok the Magnificent
-
+//echo "slack";
             $this->thing->log('<pre> Agent "Message" responding via Slack.</pre>');
 
 

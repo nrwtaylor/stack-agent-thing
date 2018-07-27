@@ -1,12 +1,14 @@
 <?php
-namespace Nrwtaylor\Stackr;
+namespace Nrwtaylor\StackAgentThing;
 
-class Agents {
-
+class Agents
+{
 	public $var = 'hello';
 
-
-    function __construct(Thing $thing, $text = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->start_time = $thing->elapsed_runtime();
+        $this->agent_input = $agent_input;
 
         $this->start_time = microtime(true);
 
@@ -14,18 +16,13 @@ class Agents {
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-//      This is how old roll.php is.
-//		$thingy = $thing->thing;
 		$this->thing = $thing;
-
-         $this->thing_report  = array("thing"=>$this->thing->thing);
-
+        $this->thing_report['thing']  = $thing;
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
-
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
         $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
@@ -34,14 +31,11 @@ class Agents {
 
 		$this->readSubject();
 
-		$this->thing_report = $this->respond();
+		$this->respond();
 
-        $this->end_time = microtime(true);
-        $this->actual_run_time = $this->end_time - $this->start_time;
-        $milliseconds = round($this->actual_run_time * 1000);
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($milliseconds) . 'ms.' );
+        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['log'] = $this->thing->log;
+
 
 		return;
 
@@ -51,57 +45,43 @@ class Agents {
     {
 
         $this->agencies = array();
+
         // Only use Stackr agents for now
-        $dir    = $GLOBALS['stack'] . 'vendor/nrwtaylor/stackr/agents'; 
-// /var/www/stackr.test/vendor/nrwtaylor/stackr/agent 
-//' ';
-//echo $dir;
+        $dir    = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents'; 
         $files = scandir($dir);
 
         foreach ($files as $key=>$file) {
             if ($file[0] == "_") {continue;}
-
             if ( strtolower(substr($file, 0, 3)) == "dev") {continue;}
-
             if ( strtolower(substr($file, -4)) != ".php") {continue;}
-
             if (!ctype_upper($file[0])) {continue;}
 
             $agent_name = substr($file, 0, -4);
-
             $this->agencies[] =  ucwords($agent_name);
         }
 
-        //var_dump($files);
         $this->agent_names = $this->agencies;
 
     }
 
 // -----------------------
 
-	private function respond() {
-
+	private function respond()
+    {
 
 		$this->thing->flagGreen();
 
-		// This should be the code to handle non-matching responses.
 
 		$to = $this->thing->from;
-
-		//echo "to:". $to;
-
 		$from = "agents";
 
-$s = "AGENTS | ";
-$rand_keys = array_rand($this->agencies, 3);
-$s .= $this->agencies[$rand_keys[0]] . " ";
-$s .= $this->agencies[$rand_keys[1]] . " ";
-$s .= $this->agencies[$rand_keys[2]];
-
-
+        $s = "AGENTS | ";
+        $rand_keys = array_rand($this->agencies, 3);
+        $s .= $this->agencies[$rand_keys[0]] . " ";
+        $s .= $this->agencies[$rand_keys[1]] . " ";
+        $s .= $this->agencies[$rand_keys[2]];
 
         $this->sms_message = $s;
-
 
         $choices = false;
 
@@ -116,15 +96,14 @@ $s .= $this->agencies[$rand_keys[2]];
 		$this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
 
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
 
         $this->makeWeb();
 
 		return $this->thing_report;
-
-
 	}
 
     function makeWeb()
@@ -136,38 +115,9 @@ $s .= $this->agencies[$rand_keys[2]];
         $this->thing_report['web'] = $w;
     }
 
-/*
-    function extractRoll($input) {
-
-//echo $input;
-//exit();
-
-preg_match('/^(\\d)?d(\\d)(\\+\\d)?$/',$input,$matches);
-
-print_r($matches);
-
-$t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
-                '$a="$1"? : 1;for(; $i++<$a; $s+=rand(1,$2) );echo$s$3;',
-                $input)?:'echo"Invalid input";';
-
-
-    }
-*/
-
-
-
 	public function readSubject()
     {
-
-
-        //$input = strtolower($this->subject);
-
-
 		return false;
     }
 
 }
-
-
-
-return;

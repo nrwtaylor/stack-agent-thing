@@ -1,13 +1,14 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Headcode
+class Headcode 
 {
 
     // This is a headcode.  You will probably want to read up about
@@ -38,23 +39,60 @@ class Headcode
 
     function __construct(Thing $thing, $agent_input = null) 
     {
-//        $this->start_time = microtime(true);
-        $this->start_time = $thing->elapsed_runtime();
-        //if ($agent_input == null) {$agent_input = "";}
 
+//        var_dump($agent_input);
+
+        $this->start_time = microtime(true);
+
+        //if ($agent_input == null) {$agent_input = "";}
+        $this->agent_name = "headcode";
         $this->agent_input = $agent_input;
 
         $this->thing = $thing;
-        //$this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $thing;
+        $this->start_time = $this->thing->elapsed_runtime();
+        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->agent_prefix = 'Agent "Headcode" ';
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
 
-        // Keywords which are accepted/expected to be headcode related.
+
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+        $this->word = $thing->container['stack']['word'];
+        $this->email = $thing->container['stack']['email'];
+
+        // I'm not sure quite what the node_list means yet
+        // in the context of headcodes.
+        // At the moment it seems to be the headcode routing.
+        // Which is leading to me to question whether "is"
+        // or "Place" is the next Agent to code up.  I think
+        // it will be "Is" because you have to define what 
+        // a "Place [is]".
+ //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
+ //       $this->thing->choice->load('headcode');
+
         $this->keywords = array('next', 'accept', 'clear', 'drop','add','new');
 
+//        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
+
+
+        // So around this point I'd be expecting to define the variables.
+        // But I can do that in each agent.  Though there will be some
+        // common variables?
+
+        // So here is building block of putting a headcode in each Thing.
+        // And a little bit of work on a common variable framework. 
+
+        // Factor in the following code.
+
+//                'headcode' => array('default run_time'=>'105',
+//                                'negative_time'=>'yes'),
+
+                //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
         $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
 
         // But for now use this below.
@@ -95,9 +133,21 @@ class Headcode
         // Treat as nominal
         $this->from = $thing->from;
 
+//var_dump($this->subject);
+
         // Agent variables
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
 
+//        $this->thing->log('<pre> Agent "Headcode" running on Thing '. $this->thing->nuuid . '.</pre>');
+//        $this->thing->log('<pre> Agent "Headcode" received this Thing "'.  $this->subject . '".</pre>');
+
+//$split_time = $this->thing->elapsed_runtime();
+//        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
+//        $this->head_code = $this->headcode->getVariable('head_code', null);
+
+//$this->get();
+
+//$this->thing->log( $this->agent_prefix .' set up variables in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.' );
 
         $this->state = null; // to avoid error messages
 
@@ -113,18 +163,27 @@ class Headcode
         }
         $this->set();
 
+//		$this->thing->log('<pre> Agent "Headcode" completed</pre>');
+
 
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
+
         $this->thing_report['log'] = $this->thing->log;
 
-        return;
-    }
+
+
+		return;
+
+		}
 
 
     function set()
     {
 //$this->head_code = "0Z15";
         //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
+
+        // Added test 26 July 2018
+        $this->refreshed_at = $this->current_time;
 
         $this->headcode_id->setVariable("head_code", $this->head_code);
      //   $this->headcode->setVariable("index", $this->index);
@@ -143,11 +202,13 @@ class Headcode
         $this->headcode->setVariable("quantity", $this->quantity);
         $this->headcode->setVariable("available", $this->available);
 
+
+
         return;
     }
 
-    function nextHeadcode()
-    {
+    function nextHeadcode() {
+
         $this->thing->log("next headcode");
         // Pull up the current headcode
         $this->get();
@@ -167,6 +228,7 @@ class Headcode
 
 
         return $this->available;
+
 
     }
 
@@ -226,8 +288,9 @@ class Headcode
 
     }
 
-    function getHeadcodes()
-    {
+
+    function getHeadcodes() {
+
         $this->headcode_list = array();
         // See if a headcode record exists.
         $findagent_thing = new FindAgent($this->thing, 'headcode');
@@ -306,13 +369,75 @@ class Headcode
         }
 
         $this->get();
+ 
     }
 
-    function makeHeadcode($head_code = null)
+    function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
+        // draw rectangle without corners
+        imagefilledrectangle($im, $x1+$radius, $y1, $x2-$radius, $y2, $color);
+        imagefilledrectangle($im, $x1, $y1+$radius, $x2, $y2-$radius, $color);
+
+        // draw circled corners
+        imagefilledellipse($im, $x1+$radius, $y1+$radius, $radius*2, $radius*2, $color);
+        imagefilledellipse($im, $x2-$radius, $y1+$radius, $radius*2, $radius*2, $color);
+        imagefilledellipse($im, $x1+$radius, $y2-$radius, $radius*2, $radius*2, $color);
+        imagefilledellipse($im, $x2-$radius, $y2-$radius, $radius*2, $radius*2, $color);
+    }
+
+
+    function makeWeb()
+    {
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+
+        $this->node_list = array("headcode"=>array("headcode", "headcode 0Z99"));
+        // Make buttons
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
+        $choices = $this->thing->choice->makeLinks('web');
+
+        if (!isset($this->html_image)) {$this->makePNG();}
+
+        $web = '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web .= "<br>";
+
+        //$received_at = strtotime($this->thing->thing->created_at);
+        //$ago = $this->thing->human_time ( time() - $this->refreshed_at );
+        //$web .= "Rolled about ". $ago . " ago.";
+
+        $web .= "<br>";
+
+        $web .= $this->makeSMS();
+
+        $this->thing_report['web'] = $web;
+    }
+
+
+    public function makePNG()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+        //$split_time = $this->thing->elapsed_runtime();
+        $agent = new Png($this->thing, "png"); // long run
+
+        $this->makeImage();
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+        $this->PNG_embed = $agent->PNG_embed;
+
+        $this->thing_report['png'] = $agent->image_string;
+
+    }
+
+
+
+    function makeHeadcode($head_code = null) {
+
         $head_code = $this->getVariable('head_code', $head_code);
 
         $this->thing->log('Agent "Headcode" will make a headcode for ' . $head_code . ".");
+
 
         $ad_hoc = true;
 
@@ -385,10 +510,13 @@ class Headcode
         if ($input == null) {$this->headcode_time = $headcode_time;}
 
         return $headcode_time;
+
+
+
     }
 
-    function getEndat()
-    {
+    function getEndat() {
+
         if (($this->run_at != "x") and ($this->quantity != "x")) {
             $this->end_at = $this->thing->json->time(strtotime($this->run_at . " " . $this->quantity . " minutes"));
         } else {
@@ -398,8 +526,8 @@ class Headcode
         return $this->end_at;
     }
 
-    function getAvailable()
-    {
+    function getAvailable() {
+
         // This proto-typical headcode manages (available) time.
         // From start_at and current_time we can calculate elapsed_time.
 
@@ -449,8 +577,9 @@ class Headcode
 
         $consists = $this->extractConsists($input);
 
+        if ((is_array($consists)) and (count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
 
-        if ((count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
+//        if ((count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
             $this->consist = $consists[0];
             $this->thing->log('Agent "Headcode" found a consist (' . $this->consist . ') in the text.');
             return $this->consist;
@@ -458,8 +587,11 @@ class Headcode
 
         $this->consist = "X";
 
-        if (count($consists == 0)) {return false;}
-        if (count($consists > 1)) {return true;}
+        if  ((is_array($consists)) and (count($consists) == 0)){return false;}
+        if  ((is_array($consists)) and (count($consists) > 1)){return false;}
+
+        //if (count($consists == 0)) {return false;}
+        //if (count($consists > 1)) {return true;}
 
         return true;
 
@@ -467,18 +599,19 @@ class Headcode
 
 
 
-    function extractHeadcodes($input = null) {
+    function extractHeadcodes($input = null)
+    {
 
         if (!isset($this->head_codes)) {
             $this->head_codes = array();
         }
 
-        //$pattern = "|\d[A-Za-z]{1}\d{2}|";
-        $pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
+        //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
+        //$pattern = "|[A-Za-z]{4}|"; echo $input; exit();
 
+        $pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
         preg_match_all($pattern, $input, $m);
         $this->head_codes = $m[0];
-
 
         return $this->head_codes;
     }
@@ -486,17 +619,25 @@ class Headcode
     function extractHeadcode($input)
     {
         $head_codes = $this->extractHeadcodes($input);
+//var_dump($head_codes);
+        if (!(is_array($head_codes))) {return true;}
 
-        if (count($head_codes) == 1) {
+        if ((is_array($head_codes)) and (count($head_codes) == 1)) {
             $this->head_code = $head_codes[0];
             $this->thing->log('Agent "Headcode" found a headcode (' . $this->head_code . ') in the text.');
             return $this->head_code;
         }
 
-        if (count($head_codes == 0)) {return false;}
-        if (count($head_codes > 1)) {return true;}
+        //if (count($head_codes == 0)) {return false;}
+        //if (count($head_codes > 1)) {return true;}
+
+        if  ((is_array($head_codes)) and (count($head_codes) == 0)){return false;}
+        if  ((is_array($head_codes)) and (count($head_codes) > 1)) {return true;}
+
+
 
         return true;
+
     }
 
 
@@ -515,6 +656,65 @@ class Headcode
         $this->get();
         return;
     }
+
+    public function makeImage()
+    {
+        $text = strtoupper($this->head_code);
+
+$image_height = 125;
+$image_width = 125;
+
+        // here DB request or some processing
+//        $this->result = 1;
+//        if (count($this->result) != 2) {return;}
+
+//        $number = $this->result[1]['roll'];
+
+        $image = imagecreatetruecolor($image_width, $image_height);
+
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 0, 0, 0);
+        $red = imagecolorallocate($image, 255, 0, 0);
+        $green = imagecolorallocate($image, 0, 255, 0);
+        $grey = imagecolorallocate($image, 128, 128, 128);
+
+        imagefilledrectangle($image, 0, 0, $image_width, $image_height, $white);
+        $textcolor = imagecolorallocate($image, 0, 0, 0);
+
+
+        $this->ImageRectangleWithRoundedCorners($image, 0,0, $image_width, $image_height, 12, $black);
+        $this->ImageRectangleWithRoundedCorners($image, 6,6, $image_width-6, $image_height-6, 12-6, $white);
+
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+        $sizes_allowed = array(72,36,24,18,12,6);
+
+        foreach($sizes_allowed as $size) {
+            $angle = 0;
+            $bbox = imagettfbbox ($size, $angle, $font, $text); 
+            $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+            $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+            $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+            $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+            extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+
+         //check width of the image 
+            $width = imagesx($image); 
+            $height = imagesy($image);
+            if ($bbox['width'] < $image_width - 30) {break;}
+
+        }
+
+        $pad = 0;
+        imagettftext($image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $text);
+        //imagestring($image, 2, $image_width-75, 10, $text, $textcolor);
+        imagestring($image, 2, $image_width-45, 10, $this->headcode->nuuid, $textcolor);
+
+        $this->image = $image;
+    }
+
 
     function makeTXT() {
         if (!isset($this->headcode_list)) {$this->getHeadcodes();}
@@ -583,10 +783,19 @@ class Headcode
 
     }
 
+    private function getFlag()
+    {
+        $this->flag = new Flag($this->thing, $this->head_code);
+    }
 
     private function makeSMS() {
 
         $s = "GREEN";
+        if (!isset($this->flag)) {$this->getFlag();}
+        $s = strtoupper($this->flag->state);
+        
+
+
         $sms_message = "HEADCODE " . strtoupper($this->head_code) ." | " . $s;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
@@ -604,7 +813,7 @@ class Headcode
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
 
-
+        return $sms_message;
     }
 
 	private function Respond() {
@@ -657,8 +866,8 @@ if (!isset($this->index)) {
 			$this->thing_report['email'] = $this->sms_message;
 			$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
-
-
+        $this->makePNG();
+        $this->makeWeb();
 
         if (!$this->thing->isData($this->agent_input)) {
                         $message_thing = new Message($this->thing, $this->thing_report);
@@ -716,9 +925,6 @@ if (!isset($this->index)) {
 
         // Is there a headcode in the provided datagram
         $this->extractHeadcode($input);
-//var_dump($this->head_code);
-        // Bail at this point if only a headcode check is needed.
-        if ($this->agent_input == "extract") {return;}
 
         $this->headcode_id = new Variables($this->thing, "variables headcode " . $this->from);
 
@@ -745,7 +951,7 @@ if (!isset($this->index)) {
         //$this->get();
         $this->get();
         // Bail at this point if only a headcode check is needed.
-        if ($this->agent_input == "extract") {return;}
+        if ($this->agent_input == "extract") {$this->response = "Extract";return;}
 
         //$this->get();
         
@@ -760,6 +966,7 @@ if (!isset($this->index)) {
             if ($input == 'headcode') {
 
                 $this->read();
+                $this->response = "Read headcode";
                 return;
             }
 
@@ -775,11 +982,13 @@ if (!isset($this->index)) {
     case 'next':
         $this->thing->log("read subject nextheadcode");
         $this->nextheadcode();
+        $this->response = "Got next headcode";
         break;
 
    case 'drop':
    //     //$this->thing->log("read subject nextheadcode");
         $this->dropheadcode();
+        $this->response = "Dropped headcode";
         break;
 
 
@@ -787,10 +996,12 @@ if (!isset($this->index)) {
    //     //$this->thing->log("read subject nextheadcode");
         //$this->makeheadcode();
         $this->get();
+        $this->response = "Added headcode";
         break;
 
 
     default:
+
                                         }
 
                                 }
@@ -805,14 +1016,14 @@ if (!isset($this->index)) {
 
 // $uuids, $head_codes, $this->run_at, $this->run_time
 
-
     if ($this->isData($this->head_code)) {
         $this->set();
+        $this->response = "Set headcode " . $this->head_code;
         return;
     }
 
     $this->read();
-
+    $this->response = "Read";
 
 
 

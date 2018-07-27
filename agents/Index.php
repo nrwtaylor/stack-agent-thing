@@ -11,9 +11,9 @@ class Index
 {
     public function __construct(Thing $thing, $agent_input = null)
     {
-        if ($agent_input == null) {
-            $this->agent_input = $agent_input;
-        }
+//        if ($agent_input == null) {
+         $this->agent_input = $agent_input;
+//        }
 
         $this->thing = $thing;
         $this->agent_name = 'index';
@@ -33,6 +33,9 @@ class Index
         $this->from = $thing->from;
         $this->subject = $thing->subject;
         //$this->sqlresponse = null;
+
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
 
         $this->pad_length = 4;
 
@@ -55,9 +58,9 @@ class Index
         $this->padIndex();
 
         $this->set();
-        if ($this->agent_input == null) {
+//        if ($this->agent_input == null) {
             $this->respond();
-        }
+//        }
 
         $this->thing->flagGreen();
 
@@ -170,10 +173,83 @@ class Index
         $this->thing_report['choices'] = $choices;
     }
 
+    public function makePNG()
+    {
+        $agent = new Png($this->thing, "png"); // long run
+
+        $this->makeImage();
+
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+        $this->PNG_embed = $agent->PNG_embed;
+        $this->thing_report['png'] = $agent->image_string;
+    }
+
+
+
+   public function makeImage()
+    {
+        $text = strtoupper($this->index);
+        $text = $this->index;
+$image_height = 125;
+$image_width = 125;
+
+        $image = imagecreatetruecolor($image_width, $image_height);
+
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 0, 0, 0);
+        $red = imagecolorallocate($image, 255, 0, 0);
+        $green = imagecolorallocate($image, 0, 255, 0);
+        $grey = imagecolorallocate($image, 128, 128, 128);
+
+        imagefilledrectangle($image, 0, 0, $image_width, $image_height, $white);
+        $textcolor = imagecolorallocate($image, 0, 0, 0);
+
+//        $this->ImageRectangleWithRoundedCorners($image, 0,0, $image_width, $image_height, 12, $black);
+//        $this->ImageRectangleWithRoundedCorners($image, 6,6, $image_width-6, $image_height-6, 12-6, $white);
+
+
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+
+
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+        $sizes_allowed = array(72,36,24,18,12,6);
+
+        foreach($sizes_allowed as $size) {
+
+            $angle = 0;
+            $bbox = imagettfbbox ($size, $angle, $font, $text); 
+            $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+            $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+            $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]);
+            $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]);
+            extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+
+            //check width of the image 
+            $width = imagesx($image); 
+            $height = imagesy($image);
+            if ($bbox['width'] < $image_width - 10) {break;}
+
+        }
+
+        $pad = 0;
+        imagettftext($image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $text);
+        imagestring($image, 2, $image_width-35, 10, $this->thing->nuuid, $textcolor);
+
+        $this->image = $image;
+    }
+
+
     public function respond()
     {
         // Thing actions
         $this->thing->flagGreen();
+
+        $this->makePNG();
 
         // Get the current user-state.
         $this->makeSMS();
@@ -185,9 +261,10 @@ class Index
         //$this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
+        }
         $this->thing_report['help'] = $this->agent_prefix . 'providing the current index.';
         return $this->thing_report;
     }
