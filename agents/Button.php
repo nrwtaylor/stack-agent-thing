@@ -238,6 +238,8 @@ class Button
     {
         $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
+        $this->buttons[] = "flag green";
+
         $this->node_list = array("button"=>$this->buttons);
         $this->thing->choice->Create($this->agent_name, $this->node_list, "button");
 
@@ -335,4 +337,3 @@ class Button
 }
 
 ?>
-

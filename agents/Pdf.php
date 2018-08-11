@@ -68,9 +68,9 @@ class Pdf
         $this->getLink();
 
 		$this->readSubject();
-        if ($this->agent_input == null) {
+//        if ($this->agent_input == null) {
 		    $this->respond(); // Return $this->thing_report;
-        }
+//        }
 
 		$this->thing->log( 'Agent "Pdf" completed' );
 
@@ -115,8 +115,10 @@ class Pdf
 
         $this->thing->log ( '<pre> Agent "Pdf" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
 
-		$message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        if ($this->agent_input == null) {
+		    $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
+        }
 
         $this->makeWeb();
         $this->makePDF();
@@ -131,13 +133,16 @@ class Pdf
             $this->sms_message = "PDF | No pdf available.";
         } else {
 
-        $agent_class_name = ucwords($this->prior_agent);
-        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
-        $agent = new $agent_namespace_name($this->thing);
+        // prod 27 July 2018
+        //$agent_class_name = ucwords($this->prior_agent);
+        //$agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+        //$agent = new {$agent_namespace_name}($this->thing);
 
-            if (isset($agent->thing_report['pdf'])) {
+//var_dump($agent->thing_report['pdf']);
+
+//            if (isset($agent->thing_report['pdf'])) {
                 $this->sms_message = "PDF | " . $this->web_prefix . "" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".pdf";
-            }
+//            }
         }
 
 

@@ -41,6 +41,7 @@ class Privacy {
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
+        $this->mail_regulatory = $thing->container['stack']['mail_regulatory'];
 
 
 		// Allow for a new state tree to be introduced here.
@@ -76,7 +77,10 @@ class Privacy {
 
 	public function makeSMS()
     {
-       	$this->sms_message = "PRIVACY | Records of the subject/chat, originating address and destination agent are retained until they are forgotten.  Records may be forgotten at anytime either by the system or by the Identity. Forgetall will forget all of an Identity's Things. Things may contain nominal key accesible information. | " . $this->web_prefix ."privacy" ;
+       	$this->sms_message = "PRIVACY | Records of the subject/chat, originating address and destination agent are retained until they are forgotten.  Records may be forgotten at anytime either by the system or by the Identity. Forgetall will forget all of an Identity's Things. Things may contain nominal key accesible information.";
+        $this->sms_message .= " | " . $this->web_prefix ."privacy" ;
+        $this->sms_message .= " | " . "TEXT ?" ;
+
         $this->thing_report['sms'] = $this->sms_message;
         $this->message = $this->sms_message;
 		return $this->message;
@@ -88,7 +92,13 @@ class Privacy {
         $message .= "The address fields (to:, cc:, and bcc:) are stripped of non-Stackr emails, and the subject line is processed by " . ucwords($this->word) . ".\r\n";
         $message .= "An instruction to Stackr to remove all message records associated with this email address can be sent to forgetall" . $this->mail_postfix . ".\r\n";
 
+        $message .= "<br><br>";
+
+        $message .= 'If you need to discuss our privacy policy please contact ' . $this->email . ".\r\n";
+        $message .= 'Our mailing address is ' . trim($this->mail_regulatory) . ".\r\n";
+
         $message .= 'For a full statement of our privacy policy, please goto to <a href="' . $this->web_prefix . ' privacy">' . $this->web_prefix . 'privacy</a>';
+
 
         $this->thing_report['email'] = $message;
 
@@ -128,7 +138,9 @@ class Privacy {
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		$this->thing_report['help'] = 'This is the Privacy manager. Email privacy' . $this->mail_postfix .'.';
+		//$this->thing_report['help'] = 'This is the Privacy manager. Email privacy' . $this->mail_postfix .'.';
+        $this->thing_report['help'] = 'This is the Privacy manager. Email ' . $this->email .'.';
+
 
 		return $this->thing_report;
 	}
@@ -146,8 +158,5 @@ class Privacy {
 
 
 }
-
-
-
 
 ?>

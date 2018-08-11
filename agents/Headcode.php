@@ -1,6 +1,9 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+// devstack need to think around designing for a maximum 4000 charactor json thing 
+// constraints are good.  Remember arduinos.  So perhaps all agents don't get saved.
+// Only the necessary ones.
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -17,23 +20,30 @@ class Headcode
     // A headcode takes the form (or did in the 1960s),
     // of NANN.  Where N is a digit from 0-9, and A is an uppercase character from A-Z.
 
-    // This implementation is recognizes lowercase and uppercase characters as the same.
+    // This implementation recognizes lowercase and uppercase characters as the same.
+    // 0t80. OT80. HEADODE 0t90.
 
     // The headcode is used by the Train agent to create the proto-train.
+    // A Train must have a Headcode to run.  Rule #1.
+    // RUN TRAIN.
 
     // A headcode must have a route. Route is a text string.  Examples of route are:
     //  Gilmore > Hastings > Place
     //  >> Gilmore >>
     //  > Hastings
+    // ADD PLACE. ROUTE IS Gilmore> Hastings > Place.
 
-    // A headcode may have a consist. (Z - indicates train may fill consist. 
+    // A headcode may have a consist. (Z - indicates train may fill consist.
     // X - indicates train should specify the consist. (devstack: "Input" agent)
-    // NnXZ is therefore a valid consist. As is "X" or "Z".  
+    // NnXZ is therefore a valid consist. As is "X" or "Z".
     // A consist must always resolve to a locomotive.  Specified as uppercase letter.
-    // The locomotive closest to the first character is the engine.  And gives 
+    // The locomotive closest to the first character is the engine.  And gives
     // commands to following locomotives to follow.
+    // #devstack
+    // The ordered-ness of Consist will come from building out of the orderness of Route.
 
     // This is the headcode manager.  This person is pretty special.
+    // HEADCODE.
 
     public $var = 'hello';
 
@@ -56,7 +66,6 @@ class Headcode
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
 
-
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         // Get some stuff from the stack which will be helpful.
@@ -65,6 +74,7 @@ class Headcode
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+
         // I'm not sure quite what the node_list means yet
         // in the context of headcodes.
         // At the moment it seems to be the headcode routing.
@@ -72,6 +82,7 @@ class Headcode
         // or "Place" is the next Agent to code up.  I think
         // it will be "Is" because you have to define what 
         // a "Place [is]".
+
  //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
  //       $this->thing->choice->load('headcode');
 
@@ -79,20 +90,21 @@ class Headcode
 
 //        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
 
-
         // So around this point I'd be expecting to define the variables.
         // But I can do that in each agent.  Though there will be some
         // common variables?
 
+        // And Headcode is a context.
+
         // So here is building block of putting a headcode in each Thing.
-        // And a little bit of work on a common variable framework. 
+        // And a little bit of work on a common variable framework.
 
         // Factor in the following code.
 
-//                'headcode' => array('default run_time'=>'105',
-//                                'negative_time'=>'yes'),
+        // 'headcode' => array('default run_time'=>'105',
+        //                        'negative_time'=>'yes'),
 
-                //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
+        //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
         $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
 
         // But for now use this below.
@@ -102,10 +114,11 @@ class Headcode
         if (!isset($this->default_head_code)) {
             $this->default_head_code = "0Z99";
         }
+        // devstack
         //$this->head_code = "0Z" . str_pad($this->index + 11,2, '0', STR_PAD_LEFT);
 
         $this->default_alias = "Thing";
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Loads in headcode variables.
         // This will attempt to find the latest head_code
@@ -120,9 +133,6 @@ class Headcode
         //        $this->thing->json->setField("variables");
         //        $this->thing->json->writeVariable( array("stopwatch", "request_at"), $this->thing->json->time() );
 
-        //$this->thing->json->time()
-
-
 		$this->test= "Development code"; // Always iterative.
 
         // Non-nominal
@@ -133,10 +143,12 @@ class Headcode
         // Treat as nominal
         $this->from = $thing->from;
 
-//var_dump($this->subject);
-
         // Agent variables
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
+
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/headcode';
+
+
 
 //        $this->thing->log('<pre> Agent "Headcode" running on Thing '. $this->thing->nuuid . '.</pre>');
 //        $this->thing->log('<pre> Agent "Headcode" received this Thing "'.  $this->subject . '".</pre>');
@@ -163,14 +175,12 @@ class Headcode
         }
         $this->set();
 
-//		$this->thing->log('<pre> Agent "Headcode" completed</pre>');
-
-
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
 
         $this->thing_report['log'] = $this->thing->log;
 
-
+        if (!isset($this->response)) {$this->response = "No response found.";}
+        $this->thing_report['response'] = $this->response;
 
 		return;
 
@@ -179,35 +189,46 @@ class Headcode
 
     function set()
     {
-//$this->head_code = "0Z15";
-        //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
+        // Apparently not needful of a variable.
+        // It is a context. The managing Agents define it.
+        // $this->head_code = "0Z15";
+        // $headcode = new Variables($this->thing, "variables headcode " . $this->from);
 
         // Added test 26 July 2018
         $this->refreshed_at = $this->current_time;
 
+        // Write the headcode with the Variables agent.
+        // No time needed(?).  Variables handles that.
+        // headcode_id suggests that this is the identifier of the Headcode.
+        // To distinguish from headcode.   
         $this->headcode_id->setVariable("head_code", $this->head_code);
-     //   $this->headcode->setVariable("index", $this->index);
-        $this->headcode_id->setVariable("refreshed_at", $this->current_time);
 
+        // Don't use an index with headcodes.
+        // But allow Headcode to access the current index. 
+        // But won't need this line.  Keep it to just head_code.
+        // No Name either.  Trains have names.
+        //   $this->headcode->setVariable("index", $this->index);
+
+        $this->headcode_id->setVariable("refreshed_at", $this->current_time);
 
         $this->thing->json->writeVariable( array("headcode", "head_code"), $this->head_code );
         $this->thing->json->writeVariable( array("headcode", "refreshed_at"), $this->current_time );
 
-
         //$headcode = new Variables($this->thing, "variables " . $this->head_code . " " . $this->from);
 
         //$this->head_code = $this->headcode->getVariable("head_code");
+        // devstack this is code for devstack agents refactor out
         $this->headcode->setVariable("consist", $this->consist);
         $this->headcode->setVariable("run_at", $this->run_at);
         $this->headcode->setVariable("quantity", $this->quantity);
         $this->headcode->setVariable("available", $this->available);
 
-
-
         return;
     }
 
-    function nextHeadcode() {
+    function nextHeadcode()
+    {
+        // #devstack
 
         $this->thing->log("next headcode");
         // Pull up the current headcode
@@ -224,15 +245,14 @@ class Headcode
 
         // So this should create a headcode in the next quantity unit.
 
-
-
-
         return $this->available;
 
 
     }
 
-    function getVariable($variable_name = null, $variable = null) {
+    function getVariable($variable_name = null, $variable = null)
+    {
+        // devstack remove?
 
         // This function does a minor kind of magic
         // to resolve between $variable, $this->variable,
@@ -264,33 +284,34 @@ class Headcode
         return false;
     }
 
-    function getRoute() {
+    function getRoute()
+    {
             //$this->route = $this->thing->json->readVariable( array("headcode", "route") );
 //            $this->route = "na";
-      
+
         //$route_agent = new Route($this->thing, $this->head_code);
         //$this->route = $route_agent->route;
         $this->route = "Place";
     }
 
-    function getRunat() {
-
-            if (isset($run_at)) {
-               $this->run_at = $run_at;
-            } else {
-                $this->run_at = "X";
-            }
-
+    function getRunat()
+    {
+        if (isset($run_at)) {
+            $this->run_at = $run_at;
+        } else {
+            $this->run_at = "X";
+        }
     }
-    function getQuantity () {
+
+    function getQuantity ()
+    {
         // $this->quantity = $this->thing->json->readVariable( array("headcode", "quantity"))  ;
         $this->quantity = "X";
-
     }
 
 
-    function getHeadcodes() {
-
+    function getHeadcodes()
+    {
         $this->headcode_list = array();
         // See if a headcode record exists.
         $findagent_thing = new FindAgent($this->thing, 'headcode');
@@ -306,18 +327,50 @@ class Headcode
 //            $variables = $thing->account['stack']->json->array_data;
 
             $variables_json= $thing_object['variables'];
+//var_dump($variables_json);
+//exit();
             $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['headcode'])) {
                 $head_code = $variables['headcode']['head_code'];
+                $refreshed_at = $variables['headcode']['refreshed_at'];
+
                 $variables['headcode'][] = $thing_object['task'];
                 $this->headcode_list[] = $variables['headcode'];
+
+
+                // https://gist.github.com/JeffreyWay/3194444
+                // $name = $name ?: 'joe';
+                
+if(!isset($variables['consist'])) {$variables['consist'] = "X";}
+if(!isset($variables['route'])) {$variables['route'] = "X";}
+if(!isset($variables['runtime'])) {$variables['runtime'] = "X";}
+if(!isset($variables['quantity'])) {$variables['quantity'] = "X";}
+if(!isset($variables['flag'])) {$variables['flag'] = "X";}
+if(!isset($variables['route'])) {$variables['route'] = "X";}
+
+                //$route = $route ?: $variables['route'];
+                //$runtime = $runtime ?: $variables['runtime'];
+                //$quantity = $quantity ?: $variables['quantity'];
+
+
+                $headcode = array("head_code"=>$head_code,
+                                    "refreshed_at"=>$refreshed_at,
+                                    "flag" =>$variables['flag'],
+                                    "consist" =>$variables['consist'],
+                                    "route" =>$variables['route'],
+                                    "runtime" =>$variables['runtime'],
+                                    "quantity" =>$variables['quantity'],
+                                    "route" =>$variables['route']
+                                    );
+
+                $this->headcodes[] = $headcode;
+
             }
 
         }
 
         return $this->headcode_list;
-
     }
 
     function get($head_code = null)
@@ -330,22 +383,16 @@ class Headcode
         // 10. Because starting at the beginning is probably a mistake. 
         // if you need 0Z00 ... you really need it.
 
-//        if (!isset($this->head_code)) {
-//            $this->head_code = $this->headcode->getVariable('head_code', $head_code);
-//        }
-
-
-//        $headcode = new Variables($this->thing, "variables " . $this->head_code . " " . $this->from);
-
         $this->headcode = new Variables($this->thing, "variables " . $this->head_code . " " . $this->from);
+        $this->last_refreshed_at = $this->headcode->getVariable("refreshed_at");
 
-
+        // Don't need this as can access headcode variables at $this->headcode
         //$this->head_code = $this->headcode->getVariable("head_code");
+
         $this->consist = $this->headcode->getVariable("consist");
         $this->run_at = $this->headcode->getVariable("run_at");
         $this->quantity = $this->headcode->getVariable("quantity");
         $this->available = $this->headcode->getVariable("available");
-
 
         $this->getRoute();
         $this->getConsist();
@@ -353,13 +400,13 @@ class Headcode
         $this->getQuantity();
         $this->getAvailable();
 
-
         return;
     }
 
-    function dropHeadcode() {
+    function dropHeadcode()
+    {
+        // devstack
         $this->thing->log($this->agent_prefix . "was asked to drop a headcode.");
-
 
         // If it comes back false we will pick that up with an unset headcode thing.
 
@@ -369,11 +416,12 @@ class Headcode
         }
 
         $this->get();
- 
     }
 
     function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
+        // devstack move to Image agent.
+
         // draw rectangle without corners
         imagefilledrectangle($im, $x1+$radius, $y1, $x2-$radius, $y2, $color);
         imagefilledrectangle($im, $x1, $y1+$radius, $x2, $y2-$radius, $color);
@@ -390,19 +438,22 @@ class Headcode
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
-        $this->node_list = array("headcode"=>array("headcode", "headcode 0Z99"));
+        $this->node_list = array("headcode web"=>array("headcode", "headcode 0Z99"));
+
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
-        $choices = $this->thing->choice->makeLinks('web');
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "headcode web");
+        $choices = $this->thing->choice->makeLinks('headcode web');
 
         if (!isset($this->html_image)) {$this->makePNG();}
 
         $web = '<a href="' . $link . '">'. $this->html_image . "</a>";
         $web .= "<br>";
 
-        //$received_at = strtotime($this->thing->thing->created_at);
-        //$ago = $this->thing->human_time ( time() - $this->refreshed_at );
-        //$web .= "Rolled about ". $ago . " ago.";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
+
+        $ago = $this->thing->human_time ( time() - strtotime($this->last_refreshed_at) );
+        $web .= "Asserted about ". $ago . " ago.";
 
         $web .= "<br>";
 
@@ -411,14 +462,19 @@ class Headcode
         $this->thing_report['web'] = $web;
     }
 
+    public function makeMessage()
+    {
+        $message = "Headcode is " . strtoupper($this->head_code) . ".";
+        $this->message = $message;
+        $this->thing_report['message'] = $message;
+    }
+
 
     public function makePNG()
     {
-        //if (!isset($this->image)) {$this->makeImage();}
-        //$split_time = $this->thing->elapsed_runtime();
-        $agent = new Png($this->thing, "png"); // long run
+        if (!isset($this->image)) {$this->makeImage();}
 
-        $this->makeImage();
+        $agent = new Png($this->thing, "png"); // long run
         $agent->makePNG($this->image);
 
         $this->html_image = $agent->html_image;
@@ -427,20 +483,15 @@ class Headcode
         $this->PNG_embed = $agent->PNG_embed;
 
         $this->thing_report['png'] = $agent->image_string;
-
     }
 
-
-
-    function makeHeadcode($head_code = null) {
-
+    function makeHeadcode($head_code = null)
+    {
         $head_code = $this->getVariable('head_code', $head_code);
 
         $this->thing->log('Agent "Headcode" will make a headcode for ' . $head_code . ".");
 
-
         $ad_hoc = true;
-
         if ( ($ad_hoc != false) ) {
 
             // Ad-hoc headcodes allows creation of headcodes on the fly.
@@ -468,9 +519,11 @@ class Headcode
             } else {
                 $this->run_at = "X";
             }
+
             $this->getEndat();
             $this->getAvailable();
 
+            // devstack?
             $this->headcode_thing = $this->thing;
 
         }
@@ -607,7 +660,7 @@ class Headcode
         }
 
         //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
-        //$pattern = "|[A-Za-z]{4}|"; echo $input; exit();
+        //$pattern = "|[A-Za-z]{4}|"; echo $input;
 
         $pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
         preg_match_all($pattern, $input, $m);
@@ -716,29 +769,40 @@ $image_width = 125;
     }
 
 
-    function makeTXT() {
+    function makeTXT()
+    {
         if (!isset($this->headcode_list)) {$this->getHeadcodes();}
-        $this->getHeadcodes();
+        //$this->getHeadcodes();
 
         $txt = 'These are HEADCODES for RAILWAY ' . $this->headcode->nuuid . '. ';
         $txt .= "\n";
-        $txt .= count($this->headcode_list). ' Headcodes retrieved.';
+
+        $count = "X";
+        if (is_array($this->headcodes)) {
+            $count = count($this->headcodes);
+        }
+
+        $txt .= "Last " . $count. ' Headcodes retrieved.';
 
         $txt .= "\n";
-
+        $txt .= "\n";
 
         //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
+        $txt .= " " . str_pad("RUN AT", 20, " ", STR_PAD_RIGHT);
+
         $txt .= " " . str_pad("HEAD", 4, " ", STR_PAD_LEFT);
+        $txt.= " " . str_pad("FLAG", 8, " ", STR_PAD_LEFT);
+
 //        $txt .= " " . str_pad("ALIAS", 10, " " , STR_PAD_RIGHT);
         //$txt .= " " . str_pad("DAY", 4, " ", STR_PAD_LEFT);
 
         //$txt .= " " . str_pad("RUNAT", 6, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("RUNTIME", 8, " ", STR_PAD_LEFT);
 
-        $txt .= " " . str_pad("AVAILABLE", 6, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("AVAILABLE", 9, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("QUANTITY", 9, " ", STR_PAD_LEFT);
-        $txt .= " " . str_pad("CONSIST", 6, " ", STR_PAD_LEFT);
-        $txt .= " " . str_pad("ROUTE", 6, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("CONSIST",9, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("ROUTE", 9, " ", STR_PAD_LEFT);
 
         $txt .= "\n";
         $txt .= "\n";
@@ -746,33 +810,53 @@ $image_width = 125;
 
 
         //$txt = "Test \n";
-        foreach ($this->headcode_list as $variable) {
-            //$txt .= $variable['head_code'] . " | " . $variable['index'] . " | " . $variable['route'];
-            //$txt .= $variable['consist'] . " | " .$variable['quantity'] . " | " . $variable['available'];
-            //$txt .= " | " . $variable['run_at'];
-            //$txt .= " | " . $variable['refreshed_at'];
+        foreach (array_reverse($this->headcodes) as $headcode) {
 
-        //    $txt .= "\n";
-
-
-            //$txt .= str_pad($train['index'], 7, '0', STR_PAD_LEFT);
-            $txt .= " " . str_pad(strtoupper($variable['head_code']), 4, "X", STR_PAD_LEFT);
+//            $txt .= " " . str_pad(strtoupper($headcode['head_code']), 4, "X", STR_PAD_LEFT);
             //$txt .= " " . str_pad($train['alias'], 10, " " , STR_PAD_RIGHT);
 
-            if (isset($variable['run_at'])) {
-                $txt .= " " . str_pad($variable['run_at'], 8, " ", STR_PAD_LEFT);
+            $refreshed_at = "X";
+            if (isset($headcode['refreshed_at'])) {
+                // devstack
+                // $agent = new Timestamp($this->thing, $headcode['refreshed_at']);  
+                $refreshed_at = strtoupper(date('Y M d D H:i', strtotime($headcode['refreshed_at'])));
             }
-            if (isset($variable['available'])) {
-                $txt .= " " . str_pad($variable['available'], 6, " ", STR_PAD_LEFT);
+            $txt .= " " . str_pad($refreshed_at, 20, " ", STR_PAD_LEFT);
+
+
+            $txt .= " " . str_pad(strtoupper($headcode['head_code']), 4, "X", STR_PAD_LEFT);
+
+            $flag_state = "X";
+            if (isset($headcode['flag']['state'])) {
+                $flag_state = $headcode['flag']['state'];
+
+                //$txt .= " " . str_pad($headcode['flag']['state'], 8, " ", STR_PAD_LEFT);
             }
-            if (isset($variable['quantity'])) {
-                $txt .= " " . str_pad($variable['quantity'], 9, " ", STR_PAD_LEFT);
+            $txt .= " " . str_pad($flag_state, 8, " ", STR_PAD_LEFT);
+
+//            if (isset($headcode['refreshed_at'])) {
+//                $txt .= " " . str_pad($headcode['refreshed_at'], 12, " ", STR_PAD_LEFT);
+//            }
+
+           $runtime_minutes = "X";
+           if (isset($headcode['runtime']['minutes'])) {$runtime_minutes = $headcode['runtime']['minutes'];}
+           $txt .= " " . str_pad($runtime_minutes, 8, " ", STR_PAD_LEFT);
+
+
+            if (isset($headcode['run_at'])) {
+                $txt .= " " . str_pad($headcode['run_at'], 8, " ", STR_PAD_LEFT);
             }
-            if (isset($variable['consist'])) {
-                $txt .= " " . str_pad($variable['consist'], 6, " ", STR_PAD_LEFT);
+            if (isset($headcode['available'])) {
+                $txt .= " " . str_pad($headcode['available'], 9, " ", STR_PAD_LEFT);
             }
-            if (isset($variable['route'])) {
-                $txt .= " " . str_pad($variable['route'], 6, " ", STR_PAD_LEFT);
+            if (isset($headcode['quantity'])) {
+                $txt .= " " . str_pad($headcode['quantity'], 9, " ", STR_PAD_LEFT);
+            }
+            if (isset($headcode['consist'])) {
+                $txt .= " " . str_pad($headcode['consist'], 9, " ", STR_PAD_LEFT);
+            }
+            if (isset($headcode['route'])) {
+                $txt .= " " . str_pad($headcode['route'], 9, " ", STR_PAD_LEFT);
             }
             $txt .= "\n";
 
@@ -785,18 +869,20 @@ $image_width = 125;
 
     private function getFlag()
     {
-        $this->flag = new Flag($this->thing, $this->head_code);
+//        $this->flag = new Flag($this->thing, "flag " .$this->head_code);
+        $this->flag = new Flag($this->thing, "flag");
+
+        if (!isset($this->flag->state)) { $this->flag->state = "X";}
     }
 
     private function makeSMS() {
 
-        $s = "GREEN";
-        if (!isset($this->flag)) {$this->getFlag();}
-        $s = strtoupper($this->flag->state);
+        //$s = "GREEN";
+        if (!isset($this->flag->state)) {$this->getFlag();}
+        //$s = strtoupper($this->flag->state);
         
 
-
-        $sms_message = "HEADCODE " . strtoupper($this->head_code) ." | " . $s;
+        $sms_message = "HEADCODE " . strtoupper($this->head_code) ." | " . $this->flag->state;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
 
@@ -864,7 +950,9 @@ if (!isset($this->index)) {
 
 			//$this->thing_report['sms'] = $sms_message;
 			$this->thing_report['email'] = $this->sms_message;
-			$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+
+        $this->makeMessage();
+	    //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $this->makePNG();
         $this->makeWeb();
@@ -943,19 +1031,11 @@ if (!isset($this->index)) {
         }
 
 
-        //var_dump($this->head_code);
-
-
-
-//        $this->headcode = new Variables($this->thing, "variables " . $this->head_code . " " . $this->from);
-        //$this->get();
         $this->get();
+
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {$this->response = "Extract";return;}
 
-        //$this->get();
-        
-//exit();
         $pieces = explode(" ", strtolower($input));
 
 
@@ -1018,7 +1098,7 @@ if (!isset($this->index)) {
 
     if ($this->isData($this->head_code)) {
         $this->set();
-        $this->response = "Set headcode " . $this->head_code;
+        $this->response = "Set headcode to " . strtoupper($this->head_code);
         return;
     }
 
@@ -1072,4 +1152,3 @@ V         "     "     "         Western Region
 
 */
 ?>
-

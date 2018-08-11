@@ -9,13 +9,25 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Translink
+class Station
 {
 
 	public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
     {
+
+        $this->channel = new Channel($thing, "channel");
+        $this->channel_name = $this->channel->channel_name;
+
+        // Handle stations specifically.
+        // And if the context is Transit handle Translink Stops.
+        $this->context = new Context($thing, "context");
+        // 1 word messages don't action.
+
+        $this->transit = new Transit($thing,"translink");
+
+
         // Some notes
         // agency.txt - agency_id, agency_name - descriptions of the three agencies
         // feed_info.txt - description of the feed publisher
@@ -34,7 +46,6 @@ class Translink
         // From stop_times translate stop_id to trip_id (after found line)
         //   this gives a list of all the stops after the stop on routes served
         //   from the stop
-
 
         $this->agent_input = $agent_input;
 
@@ -62,37 +73,145 @@ class Translink
 
 		$this->sqlresponse = null;
 
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+        $this->word = $thing->container['stack']['word'];
+        $this->email = $thing->container['stack']['email'];
+
+
 		// Allow for a new state tree to be introduced here.
 		$this->node_list = array("start"=>array("useful", "useful?"));
 
 		$this->thing->log('Agent "Translink" running on Thing ' . $this->thing->nuuid . '.');
 		$this->thing->log('Agent "Translink" received this Thing "' . $this->subject .  '".');
 
-//		$this->readSubject(); // No need to read subject 'translink' is pretty clear.
-        //$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
-
-// Use this to create routes from a given stop
-// devstack NRWTaylor 28 July 2018
-        //$this->getEvents();
+$this->max_hops = 2;
 
         $this->getNetworktime();
-//echo $this->network_time_string;
-//exit();
+        //$this->getStations(); // Get the stops served directly by this stop.
+        $this->getDestinations(); // Get the stops available from this stop.  Availability includes runat.
         $this->readSubject();
   		$this->respond();
+		$this->thing->log('Agent "Station" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
-		$this->thing->log('Agent "Translink" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+
 		return;
 
+    }
+/*
+    function depr_getTrains()
+    {
+        if (!isset($this->routes)) {$this->getRoutes();}
+        foreach($this->routes as $route_id=>$route) {
+            // All the trains passing through this station
+            $train = $this->get("trips", array("route_id"=>$route_id));
+            $trains[$route_id] = $train;
+        }
+        $this->trains = $trains;
+
+    }
+*/
+
+    function getRailway()
+    {
+        // Running in 15s.  4 Aug 2018.
+        $split_time = $this->thing->elapsed_runtime();
+        $this->thing->log ( "Making railway - transit context");
+        //echo $this->thing->log();
+//exit();
+        // stop_times is a large file
+        // this looks through and identifies all the blocks.
+        // From one stop to the next.
+
+        for ($channels = $this->nextGtfs("stop_times"); $channels->valid(); $channels->next()) {
+
+            $channel = $channels->current();
+
+            $station_id = $channel['stop_id'];
+            $train_id = $channel['trip_id'];
+
+            $stop_sequence = $channel['stop_sequence'];
+            if ($stop_sequence == 1) {unset($last_station);}
+
+            if (isset($last_station)) {
+                $this->blocks[$last_station][$station_id] = $channel;
+            }
+            $last_station = $station_id;
+        }
+        $this->railway = $this->blocks;
+        $this->thing->log('Made a railway in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.');
+
+    }
+
+    function getStations($text = null)
+    {
+        // This needs to get a list of all the stations connected to this station (stop) by a train (trip)
+
+
+        // Get the stations are connected (backwards and forwards) a stop
+
+        // For transit context speak that looks like seeing which stops are
+        // on all the routes which pass through this stop.
+
+        // And this should do that.  Let's check.
+        //$stop_code = $this->idStation($text);
+        $stop_code = 51380;
+        $stop_id = $this->idStation($text);
+
+        // Make the networks
+        $this->getRailway();
+        $station_id = $stop_id; // Work in train context
+
+        $visible_stations[$station_id] = array("visited"=>false,"station_id"=>$station_id);
+
+        $completed = false;
+        $hops = 0;
+
+        $this->thing->log("Looking for visible stations.");
+
+        while($completed == false) {
+            $completed = true;
+            foreach ($visible_stations as $visible_station_id=>$visible_station) {
+                if ($visible_station['visited'] == false) {
+                    $station_id_pointer = $visible_station_id;
+                    $completed = false;
+                    break;
+                }
+            }
+
+            if ($completed == true) {echo "meep";exit();}
+            //echo "\n";
+
+            // Now visiting stations up from $station_id
+            $stations =  $this->railway[$station_id_pointer];
+
+            foreach ($stations as $station_id=>$station) {
+                $visible_stations[$station_id] = array("visited"=>false,"station_id"=>$station_id,"station"=>$station);
+                echo $station_id . " ";
+                $completed = false;
+            }
+
+            $visible_stations[$station_id_pointer]['visited'] = true;
+            $hops += 1;
+            if ($hops > $this->max_hops) {break;}
+        }
+
+        echo "\n";
+
+        $this->stations = $visible_stations;
+        return $this->stations;
+    }
+
+    public function getDestinations()
+    {
+        $this->destinations = array(); // Fair enough.
     }
 
     public function nullAction()
     {
 
         $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable( array("character", "action"), 'null' );
-
 
         $this->message = "TRANSIT | Request not understood. | TEXT SYNTAX";
         $this->sms_message = "TRANSIT | Request not understood. | TEXT SYNTAX";
@@ -100,15 +219,27 @@ class Translink
         return $this->message;
     }
 
-    function getStopid()
+    function idStation($text = null)
     {
+        // Curiously one of the harder things to do.
+        // dev create a CSV file when recognize version number has changed.
 
+        // Transit context
+        // Take text and recognize the id.
+        $stop_code = 51380;
 
+        $stops = $this->get("stops", array("stop_code"=>$stop_code));
+
+        if (isset($stops[0])) {$stop_id = $stops[0]["stop_id"];}
+        $this->thing->log("Matched stop_code " . $stop_code . " to stop_id " .$stop_id . ".");
+
+        $this->station_id = $stop_id;
+        return $this->station_id;
     }
 
     function get($file_name, $selector_array = null)
     {
-        echo "Getting " . $file_name . "\n";
+        $this->thing->log("Getting " . $file_name . ".txt.");
 
         $matches = array();
         $iterator = $this->nextGtfs($file_name, $selector_array);
@@ -116,40 +247,6 @@ class Translink
         foreach ($iterator as $iteration) {
             $matches[] = $iteration;
         }
-
-/*
-        foreach ($iterator as $iteration) {
-            //echo $iteration;
-
-            //var_dump($iteration);
-
-
-            foreach ($iteration as $field_name=>$field_value) {
-
-                if ($selector_array == null) {$matches[] = $iteration; continue;}
-
-                foreach ($selector_array as $selector_name=>$selector_value) {
-                    //echo $selector_name ." " . $selector_value . "\n";
-                    //echo $field_name ." " . $field_value . "\n";
-  
-                    if (($selector_name == $field_name) and ($selector_value == $field_value)) {
-                        $matches[] = $iteration;
-                    }
-              }
-
-            $matches[] = $iteration;
-//                    echo $field_name ." " . $field_value . "\n";
-
-            }
-//            $arr = explode(",",$iteration);
-//            foreach ($arr as $key=>$value) {
-//                echo $key ." ".$value . "\n";
-//            }
-            
-        }
-*/
-//        var_dump($matches);
-//exit();
 
         return $matches;
     }
@@ -171,6 +268,7 @@ class Translink
         return $stop;
 
     }
+
 // To handle >24 hours.  Urgh:/
 // https://stackoverflow.com/questions/12708419/strtotime-function-for-hours-more-than-24
 function getTimeFromString($time){
@@ -178,234 +276,6 @@ function getTimeFromString($time){
     return mktime($time[0], $time[1], $time[2]);
 }
 
-    function getEvents()
-    {
-        // For testing
-        // So this is too slow to present the full tuple map
-        $stop_code =51380;
-        $this->network_time = $this->network_time_string;
-        //"15:43:33";
-
-        $stops = $this->get("stops", array("stop_code"=>$stop_code));
-
-        if (isset($stops[0])) {$stop_id = $stops[0]["stop_id"];}
-        echo "Matched stop_code " . $stop_code . " to stop_id " .$stop_id . ".\n";
-        $this->stop_id = $stop_id;
-        // Information for this stop.  Generator/yield magic.
-        $events = $this->nextGtfs("stop_times", array("stop_id"=>$stop_id));
-
-
-        $stop_events = array();
-
-        $trip_ids = array();
-        // Information for this stop.
-
-
-        // Generate the next event
-        $visible = "off";
-        for ($events = $this->nextGtfs("stop_times",array("stop_id"=>$stop_id)); $events->valid(); $events->next()) {
-
-            $event = $events->current();
-
-            $event_time_delta = $this->getTimeFromString($event['arrival_time']) - $this->getTimeFromString($this->network_time);
-            $event['event_time_delta'] = $event_time_delta;
-
-//            if ($event_time_delta < -30) {continue;}
-
-            // And really only looking 2 hours into the future (transit pass validity)
-//            $seconds_limit = 2 * 60 * 60;
-//            if ($event_time_delta > $seconds_limit) {continue;}
-
-
-            $event_stop_id = $event['stop_id'];
-            $event_trip_id = $event['trip_id'];
-
- //           $event['event_time_delta'] = $event_time_delta;
-
-
-//var_dump($event);
-//exit();
-            $stop_events[$event_stop_id][$event_trip_id] = $event;
-//echo "[".$event_stop_id."]" . "[" . $event_trip_id ."]" . " --- ".implode(" " , $event) . "\n";
-//var_dump($stop_events);
-//exit();
-
-/*
-            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
-            $trip_event = $trip_events->current();
-
-
-            $trip_event_stop_id = $trip_event['stop_id'];
-
-            if ($trip_event_stop_id == $stop_id) {$visible = "on";}
-//echo "foo";
-//exit();
-
-            if ($visible = "off") {continue;}
-echo "foo";
-exit();
-                $arrival_time = $trip_event['arrival_time']; // Limit of one event per second, per trip, per stop.  Make more stops.
-
-                // Calculate event variables
-                if (!isset($shape_dist_traveled)) {$shape_dist_traveled = 0;}
-                $shape_dist_traveled += floatval( $trip_event['shape_dist_traveled'] );
-
-                if ((!isset($last_departure_time)) 
-                    or ($last_departure_time == null)
-                    or ($last_event_trip_id != $event_trip_id)) {
-                    $trip_time_elapsed = 0;
-                } else {
-                    $trip_time_elapsed += strtotime($event['departure_time']) - strtotime($last_departure_time);
-                }
-
-                $trip_event['trip_time_elapsed'] = $trip_time_elapsed;
-                $trip_event['shape_dist_traveled'] = $shape_dist_traveled;
-
-                $last_event_trip_id = $event_trip_id;
-                $last_departure_time = $trip_event['departure_time'];
-                // Discrete
-                $this->stops[strval($trip_event_stop_id)][strval($event_trip_id)][strval($arrival_time)] = $trip_event;
-echo $event_stop_id . " " . $event_trip_id ." " . $arrival_time ." --- ".implode(" " , $trip_event) . "\n";
-               // Now get the stops with can be reached from this stop.
-                // Stops on trips which are after now.
-
-
-
-
-echo "foo";
-exit();
-
-/*
-            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
-
-            $visible = "off";
-            for ($trip_events = $this->nextGtfs("stop_times",array("trip_id"=>$event_trip_id)); $trip_events->valid(); $trip_events->next()) {
-
-
-
-
-                $trip_event = $trip_events->current();
-//                $trip_event_stop_id = $trip_event['stop_id'];
-                $trip_event_stop_id = $trip_event['stop_id'];
-
-                if ($trip_event_stop_id == $stop_id) {$visible = "on";}
-                if ($visible = "off") {continue;}
-
-                $arrival_time = $trip_event['arrival_time']; // Limit of one event per second, per trip, per stop.  Make more stops.
-
-                // Calculate event variables
-                if (!isset($shape_dist_traveled)) {$shape_dist_traveled = 0;}
-                $shape_dist_traveled += floatval( $trip_event['shape_dist_traveled'] );
-
-                if ((!isset($last_departure_time)) 
-                    or ($last_departure_time == null)
-                    or ($last_event_trip_id != $event_trip_id)) {
-                    $trip_time_elapsed = 0;
-                } else {
-                    $trip_time_elapsed += strtotime($event['departure_time']) - strtotime($last_departure_time);
-                }
-
-                $trip_event['trip_time_elapsed'] = $trip_time_elapsed;
-                $trip_event['shape_dist_traveled'] = $shape_dist_traveled;
-
-                $last_event_trip_id = $event_trip_id;
-                $last_departure_time = $trip_event['departure_time'];
-                // Discrete
-                $this->stops[strval($trip_event_stop_id)][strval($event_trip_id)][strval($arrival_time)] = $trip_event;
-echo $event_stop_id . " " . $event_trip_id ." " . $arrival_time ." --- ".implode(" " , $trip_event) . "\n";
-               // Now get the stops with can be reached from this stop.
-                // Stops on trips which are after now.
-
-            }
-*/
-        }
-//var_dump($stop_events);
-//exit();
-        // Now determine which stops are visible.
-        // Based on network time and whether the trip has passed the stop.
-        echo "Determining tripe events for first trip on the list :/" . "\n";
-        //$this->network_time = "15:43:33";
-
-  //      foreach ($this->stops as $stop) {
-//            foreach ($stop as $trips) {
-  //              foreach ($trips as $event) {
-                    // Get all the trip events
-
-
-
-
-
-
-                    $event_stop_id = $event['stop_id'];
-                    $event_trip_id = $event['trip_id'];
-
-
-
-                    // Can't go back to previous events / stops.
-
-//                    $trip_events = $this->stops[$event_stop_id][$event_trip_id];
-
-
-            // Generator to get the stops on the next trip
-            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
-            $visible = "off"; // No events visible.
-            foreach ($trip_events as $event) {
-
-                $event_stop_id = $event['stop_id'];
-                $event_trip_id = $event['trip_id'];
-
-                $event['event_time_delta'] = (strtotime($event['arrival_time']) - strtotime($this->network_time));
-
-
-                $stop_events[$event_stop_id][$event_trip_id] = $event;
-
-
-            }
-
-$this->events = $stop_events;
-    return;
-var_dump($stop_events);
-exit();
-//            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
-
-
-                    $visible = "off"; // No events visible.
-                    foreach ($trip_events as $trip_event) {
-
-                        if ($trip_event['stop_id'] == $stop_id) {$visible = "on";} // Until the event has happened.
-/*
-                        $event_time_delta = $this->getTimeFromString($event['arrival_time']) - $this->getTimeFromString($this->network_time);
-                        // Because this doesn't work with > 24:
-                        //$event_time_delta = (strtotime($event['arrival_time']) - strtotime($this->network_time));
-                        //echo $event_time_delta;
-
-                        switch (true) {
-                            case ($event_time_delta < -60):
-                                $tense = "past";
-                                $visible = "off";
-                                break;
-                            case ($event_time_delta > +60):
-                                $tense = "future";
-                                break;
-                            default:
-                                $tense =  "now";
-                       }
-*/
-                       if ($visible == "on") {
-                           //echo $trip_event['arrival_time'] . $event_time_delta . " " . $tense .  "\n";
-                           $this->visible_events[$trip_event['stop_id']][$trip_event['trip_id']] = $event;
-
-                       }
-                    }
-      //          }
-    //        }
-    //    }
-
-        $this->stop_events = $stop_events;
-//var_dump($this->stop_events);
-//exit();
-        return;
-    }
 
     function echoTuple()
     {
@@ -420,244 +290,249 @@ exit();
         echo $txt;
     }
 
-    function getTrips($stop_id = null)
+    function getStation($station_id = null)
     {
-        $trips = array();
-        $trip_ids = array();
+        if (isset($this->routes[$station_id])) {return $this->routes[$station_id];}
+        if ($station_id == null) {$station_id = $this->station_id;}
 
-        //$trips = $this->nextGtfs("trips");
-        // Information for this stop.
-        // Generate the next event
-        for ($trips = $this->nextGtfs("stop_times", array("stop_id"=>$stop_id)); $trips->valid(); $trips->next()) {
+        // This is tricky, because there is no existing file that maps
+        // station_id to route.
 
-            $trip = $trips->current();
-            //$route_id = $trip['route_id'];
-            $trip_id = $trip['trip_id'];
-            $stop_id = $trip['stop_id'];
+        // Question is can it be done quick enough not
+        // to worry about building another table.
 
-            //$trip_headsign = $trip['trip_headsign'];
+        // Currently taking 15s.  4 August 2018.
 
-            $trip_ids[] = $trip_id;
 
-            $trips[$trip_id][] = $stop_id;
-        }
-        $this->trip_stops = $trips;
+//        $selector_array = array("stop_id"=>$station_id); // Because this is a Station
+
+        if (!isset($this->stations_db)) {$this->stations_db = $this->get("stops");}
+        $station_count = $this->searchForsId($station_id, $this->stations_db);
+        $station = $this->stations_db[$station_count];
+
+        // stop_times.txt maps stop_id <> trip_id
+
+
+        if(!isset($this->routes[$station_id])) {$this->getRoutes($station_id);}
+
+        // trip_times.txt maps trip_id <> route_id
+        // routes gets route info
+
+        $station['routes'] = $this->routes[$station_id];
+
+        return $station;
 
     }
 
-    function getRoutes()
+    function tripRoute($station_id)
     {
-// I think this is where this forks to station 3 August 2018    
+        if (isset($this->trip_routes[$station_id])) {return $this->trip_routes;}
 
-        $this->routes = array();
-        $routes = $this->nextGtfs("routes");
-        //$stop_events = array();
-        $trip_ids = array();
-        // Information for this stop.
-        // Generate the next event
-        $visible = "off";
-        for ($routes = $this->nextGtfs("routes"); $routes->valid(); $routes->next()) {
-
+        for ($routes = $this->nextGtfs("trips", array("stop_id"=>$station_id)); $routes->valid(); $routes->next()) {
             $route = $routes->current();
-            $route_id = $route['route_id'];
-            $this->routes[$route_id] = array("route_short_name"=>$route['route_short_name'],
-                                    "route_long_name"=>$route['route_long_name']);
+            $this->trip_routes[$route['trip_id']] = $route['route_id'];
         }
 
+        return $this->trip_routes;
+    }
 
+// This is ugly.
+
+function searchForId($id, $array) {
+   foreach ($array as $key => $val) {
+       if ($val['trip_id'] === $id) {
+           return $key;
+       }
+   }
+   return null;
+}
+
+function searchForsId($id, $array) {
+   foreach ($array as $key => $val) {
+       if ($val['stop_id'] === $id) {
+           return $key;
+       }
+   }
+   return null;
+}
+
+function searchForrId($id, $array) {
+   foreach ($array as $key => $val) {
+       if ($val['route_id'] === $id) {
+           return $key;
+       }
+   }
+   return null;
+}
+
+
+    function getRoutes($station_id)
+    {
+
+        $this->tripRoute($station_id); // trip_routes (quick trip to route conversion)
+
+        $this->split_time = $this->thing->elapsed_runtime();
+
+        $this->thing->log('Agent "Station" is gettings routes for ' . $station_id .'.');
+
+        // This is slow
+        if (!isset($this->trips[$station_id])) {$this->getTrips($station_id);}
+        if (!isset($this->routes[$station_id])) {$this->routes[$station_id] = array();}
+
+        if (!isset($this->trips_db)) {$this->trips_db = $this->get("trips");}
+
+
+        // For each trip_id get the route
+        foreach($this->trips[$station_id] as $trip_id) {
+
+            // Translate trip_id to route_id
+            $route_id =  $this->trip_routes[$trip_id];
+
+            // Have we processed it?
+            if (isset($this->routes[$station_id][$route_id])) {continue;}
+
+
+            $index = $this->searchForrId($route_id, $this->trips_db);
+            $route = $this->trips_db[$index];
+
+            $route_id = $route['route_id'];
+
+            $this->routes[$station_id][$route_id] = $route;
+
+//            echo ".";
+            $this->thing->log('Got station ' . $station_id . ' and route ' . $route_id . ".");
+
+        }
+
+        echo "\n";
+        $this->thing->log('Got stations.');
+
+        return $this->routes[$station_id];
+
+    }
+
+    function getTrips($station_ids)
+    {
+        //echo "\n";
+        $this->thing->log("Getting trips passing through " . $station_ids . ".");
+        //if (isset($this->trips[$station_ids])) {return $this->trips[$station_ids];}
+
+
+
+        // stop times is 80Mb
+        $selector_array = array("stop_id"=>$station_ids);
+
+        //foreach($this->stations as $station_id=>$station) {
+        //    if (!isset($this->trips[$station_id])) {$this->trips[$station_id] = array();}
+        //    $selector_array[] = array("stop_id"=>$station_id);
+        //}
+
+        for ($stops = $this->nextGtfs("stop_times", $selector_array); $stops->valid(); $stops->next()) {
+
+            $stop = $stops->current();
+//var_dump($stop);
+            $trip_id = $stop['trip_id'];
+
+            $this->trips[$station_ids][] = $stop['trip_id'];
+
+        }
+//echo "meep";
+//exit();
+        return $this->trips[$station_ids];
+    }
+
+    function makeSms()
+    {
+        //if ((isset($this->stations)) and (is_array($this->stations))) {$count = count($this->stations);} 
+        $sms = "STATION | " . "A work in progress. Text TXT.";
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
 
     }
 
     function makeTxt()
     {
-        if (!isset($this->events)) {$this->getEvents();}
+        if (!isset($this->stations)) {$this->getStations();}
 
-$this->routes = array();
-        $routes = $this->nextGtfs("routes");
-        $stop_events = array();
-        $trip_ids = array();
-        // Information for this stop.
-        // Generate the next event
-        $visible = "off";
-        for ($routes = $this->nextGtfs("routes"); $routes->valid(); $routes->next()) {
-
-            $route = $routes->current();
-            $route_id = $route['route_id'];
-            $this->routes[$route_id] = array("route_short_name"=>$route['route_short_name'],
-                                    "route_long_name"=>$route['route_long_name']);
-        }
-
-/* Get trips which pass through this stop.
-        $this->getTrips($this->stop_id);
-var_dump($this->trip_stops);
-exit();
-*/
-
-// this is like runs
-$this->trips = array();
-$this->trip_ids = array();
-
-        //$trips = $this->nextGtfs("trips");
-        // Information for this stop.
-        // Generate the next event
-        for ($trips = $this->nextGtfs("trips"); $trips->valid(); $trips->next()) {
-
-            $trip = $trips->current();
-            $route_id = $trip['route_id'];
-            $trip_id = $trip['trip_id'];
-            $trip_headsign = $trip['trip_headsign'];
-
-            $this->trip_ids[] = $trip_id;
-
-            $this->trips[$trip_id] = array("route_id"=>$route_id,
-                                    "trip_headsign"=>$trip_headsign);
-        }
-/*
-var_dump($this->trip_ids);
-exit();
-*/
-/*
-        for ($events = $this->nextGtfs("stop_times"); $events->valid(); $events->next()) {
-
-            $event = $events->current();
-
-            $event_trip_id = $event['trip_id'];
-        }
-*/
-
-//var_dump($this->routes);
-//exit();
-/*
-function cmp($a, $b)
-{
-    return strcmp($a["event_time_delta"], $b["event_time_delta"]);
-}
-usort($this->events, "cmp");
-*/
-
-
-        $txt = "FUTURE EVENTS VISIBLE FROM THIS STOP " . $this->stop;
+        $txt = "FUTURE STOPS VISIBLE FROM THIS STATION " . $this->station_id;
         $txt .= "\n";
-        $txt .= $this->network_time;
+        //$txt .= $this->network_time;
 
         $txt .= "\n";
 
+//        if (!isset($this->routes)) {$this->getRoutes(array("stop_id"=>$this->station_id));}
 
+        foreach($this->stations as $station_id=>$station) {
+            if ($station['visited']) {
 
-        //foreach($this->stops as $visible_stop) {
-            //foreach($this->events as $event) {
-                    //$txt .= $event['stop_code'] ;
+            $txt .= "[".$station_id ."] ";
+            } else {
+                $txt .= $station_id ." ";
+
+            }
+        }
 $j = 0;
-        foreach($this->events as $trips) {
-            foreach ($trips as $event) {
-                    $line = "";
-//                    $event = $this->events[51380][9130758];
 
-                    if ($event['event_time_delta'] < 0) {continue;}
-                    if ($event['event_time_delta'] > 60 * 60 * 2) {continue;}
+        foreach($this->stations as $station_id=>$station) {
 
-$trip_id = $event['trip_id'];
-                    $line .= str_pad($trip_id, 10, " ", STR_PAD_LEFT) ;
+  //          $this->getRoutes(array("stop_id"=>$station_id));
 
-$route_id = $this->trips[$event['trip_id']]['route_id'];
-$trip_headsign = $this->trips[$event['trip_id']]['trip_headsign'];
-
-                    $line .= str_pad($route_id, 12, " ", STR_PAD_LEFT) ;
-                    $line .= str_pad($trip_headsign, 20, " ", STR_PAD_LEFT) ;
-
-
-$route_array = $this->routes[$route_id];
-
-            $route_short_name = $this->routes[$route_id]["route_short_name"];
-            $route_long_name = $this->routes[$route_id]["route_long_name"];
-
-
-//var_dump($route_id);
-//var_dump($route_short_name);
-//var_dump($route_long_name);
-
-
-//exit();
-
-
-                    $line .= str_pad($event['stop_id'], 7, " ", STR_PAD_LEFT) ;
-
-                    $line .= str_pad("*".$route_short_name."*", 10, " ", STR_PAD_LEFT) ;
-                    $line .= " ";
-                    $line .= str_pad($route_long_name, 34, " ", STR_PAD_RIGHT) ;
-
-
-                    $line .= str_pad($event['arrival_time'], 12, " ", STR_PAD_LEFT) ;
-                    $line .= str_pad($event['departure_time'], 10, " ", STR_PAD_LEFT) ;
-
-$event_time_delta = $event['event_time_delta'];
-
-                    $line .= str_pad($this->thing->human_time($event['event_time_delta']), 15, " ", STR_PAD_LEFT) ;
-
-                    //$txt .= str_pad($event['trip_time_elapsed'], 15, " ", STR_PAD_LEFT) ;
-                    //$txt .= str_pad($event['shape_dist_traveled'], 15, " ", STR_PAD_LEFT) ; 
-                    $line .= "\n";
-
-                    if (!isset($lines[$event_time_delta])) {$lines[$event_time_delta] = array();}
-
-                    $lines[$event_time_delta][] = $line;
-//still devstack here
-
-                    $trip_ids[] = $trip_id;
-
-$find_stops = false;
-if ($find_stops) {
-$i = 0;
-$j+=1;
-       //$trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$trip_id));
-       for ($trip_events = $this->nextGtfs("stop_times",array("trip_id"=>$trip_id)); $trip_events->valid(); $trip_events->next()) {
-if ($j>2) {break;}
-            $trip_event = $trip_events->current();
-$i+=1;
-if ($j>=1) {break;}
-
-if ($i>=1) {break;}
-
-            $trip_event_time_delta = $this->getTimeFromString($trip_event['arrival_time']) - $this->getTimeFromString($this->network_time);
-            $trip_event['event_time_delta'] = $trip_event_time_delta + $event_time_delta;
-
-if ($trip_event['event_time_delta'] > 60 *5) {continue;}
-            $stop_id = $trip_event['stop_id'];
-
-            $lines[$trip_event_time_delta][] = "    " . $stop_id . " " . $trip_event['event_time_delta'] ."\n";
-
- echo "\n".$stop_id . " " . $trip_event['event_time_delta']. "\n";
-
-       }
-}
-                }
-//exit();
-            }
-ksort($lines);
-//var_dump($lines);
-//exit();
-
-            foreach ($lines as $line_set) {
-                foreach ($line_set as $line) {
-                    $txt .= $line;
+            $this->split_time = $this->thing->elapsed_runtime();
 
 
 
+            $stop_id =  ($station['station']['stop_id']);
 
-                }
-            }
+            $next_stop_distance = $station['station']['shape_dist_traveled'];
 
-                    $txt .= "\n";
+            //if ($this->thing->elapsed_runtime() > (20000)) {
+            //    break;
             //}
-//        }
+
+            $next_station = $this->getStation($stop_id);
+            //$this->stations[$stop_id]; // functionally equivalent
 
 
-//        $txt .= "Test";
+            // Create text block for routes served at a specific stop
+            $r = "";
+            foreach ($next_station['routes'] as $route) {
+                $r .= $route['trip_headsign'] ." ";
+            }
+            $r = "\n";
 
+            // Create text block for static information about stop
+            $next_station_id = $next_station['stop_id'];
+            $next_station_code = $next_station['stop_code'];
+            $next_station_desc = $next_station['stop_desc'];
+            $next_station_lat = $next_station['stop_lat'];
+            $next_station_long = $next_station['stop_lon'];
+
+            //$next_trip_id = $next_station['trip_id'];
+
+            //$this->getRoutes($station_id);
+            //$this->trains
+            //$this->trips
+
+//            $station = $this->getStation($station_id);
+
+            $line = $station_id . "  ".$next_stop_distance . " " . $next_station_id ." ". $next_station_desc . " " . $next_station_lat . " " . $next_station_long ."\n";
+
+         $txt .= $line;
+         $txt .= $r . "\n";
+        $this->thing->log ($line);
+        $this->thing->log ($r);
+
+            // Get a least one station
+            if ($this->thing->elapsed_runtime() > (20000)) {
+                break;
+            }
+
+
+            //$last_station_id = $next_station_id;
+
+        }
         $this->thing_report['txt'] = $txt;
-        $this->txt = $txt;
-
-
     }
 
     function makeWeb()
@@ -668,6 +543,7 @@ ksort($lines);
     }
 /*
         $txt = "";
+echo "meep";
         foreach ($this->stop_tuples as $stop_tuple) {
             $txt .= $stop_tuple['trip_time_elapsed']. " " . $stop_tuple['shape_dist_traveled']. " " . $stop_tuple['departure_time'];
             $txt .= "\n"; 
@@ -699,10 +575,7 @@ ksort($lines);
         $file = $GLOBALS['stack_path'] . 'resources/translink/' . $file_name . '.txt';
 
         $handle = fopen($file, "r");
-
         $line_number = 0;
-
-
 
         while(!feof($handle)) {
             $line = trim(fgets($handle));
@@ -763,6 +636,7 @@ ksort($lines);
                 if ($selector_array == null) {continue;}
 
                 foreach ($selector_array as $selector_name=>$selector_value) {
+
                     if ($selector_name != $field_name) {continue;}
 
 //                    echo $selector_name ." " . $selector_value . "\n";
@@ -770,13 +644,15 @@ ksort($lines);
 //                    echo "\n";
 
                     if ($selector_value == $field_value) {
-                        $match_count += 1;
+
+                      $match_count += 1;
                     } else {
                         $match = false; 
                         break;
                     }
 
                 }
+
             }
 
             if ($match == false) {continue;}
@@ -798,8 +674,6 @@ ksort($lines);
  //       $searchfor = strtoupper($this->search_words);
         //$searchfor = "MAIN HASTINGS";
         $file = $GLOBALS['stack_path'] . 'resources/translink/' . $file_name . '.txt';
-//var_dump($file);
-//exit();
 
 /*
         $contents = file_get_contents($file);
@@ -1064,64 +938,43 @@ $response ="";
 	private function respond()
     {
         //$this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
 		// Thing actions
 		$this->thing->flagGreen();
 
+
         $this->thing_report['sms'] = $this->sms_message;
+
+        $this->makeSms();
+
         $this->thing_report['choices'] = false;
         $this->thing_report['info'] = 'SMS sent';
-
-
-
-
-  //              $this->thing_report['email'] = array('to'=>$this->from,
-  //                              'from'=>'transit',
-  //                              'subject' => $this->subject,
-  //                              'message' => $message, 
-  //                              'choices' => false);
-
-
-
 
 		// Generate email response.
 
 		$to = $this->thing->from;
-		$from = "transit";
+		$from = "station";
 
-		//$message = $this->readSubject();
+        $this->thing_report['info'] = 'This is the Station Agent responding to a request.';
 
-		//$message = "Thank you for your request.<p><ul>" . ucwords(strtolower($response)) . '</ul>' . $this->error . " <br>";
-
-// This is running at 20s...
-//		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-//		$choices = $this->thing->choice->makeLinks('start');
-//		$this->thing_report['choices'] = $choices;
-
-
-		// Need to refactor email to create a preview of the sent email in the $thing_report['email']
-		// For now this attempts to send both an email and text.
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
-// And then at this point if Mordok is on?
-// Run an hour train.
-//$thing = new Mordok($this->thing);
-//If Mordok is on.  Then allow starting of a train automatically.
 //        if (strtolower($thing->state) == "on") {
-
 //            $thing = new Transit($this->thing, "transit " . $this->stop);
 //        }
 
-//	$this->thing_report['info'] = 'This is the translink agent responding to a request.';
-	    $this->thing_report['help'] = 'Connector to Translink API.';
+	    $this->thing_report['help'] = 'This agent is developmental (and slow ~160,000ms).  See what you think.  Let me know at ' . $this->email . ".";
 
-        //$this->thing->log('Agent "Translink". End Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-        $this->makeTxt();
-        $this->makeweb();
+        $this->makeWeb();
+
+//var_dump($this->channel->channel_name);
+//exit();
+//        if ($this->channel->channel_name == "web") {return;}
+
+        $this->makeTxt(); // Do last because this needs some processing.
 
 		return $this->thing_report;
 	}
@@ -1278,4 +1131,3 @@ $response ="";
 */
 
 ?>
-

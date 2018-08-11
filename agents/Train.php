@@ -157,7 +157,7 @@ class Train
 
         $this->variables_agent->setVariable ( "route" , $this->route) ;
         $this->variables_agent->setVariable ( "consist" , $this->consist) ;
-        $this->variables_agent->setVariable ( "runtime", $this->runtime) ;
+        $this->variables_agent->setVariable ( "runtime", $this->runtime->minutes) ;
 
         $this->thing->choice->save('train', $this->state);
 
@@ -396,7 +396,7 @@ $train = null;
                 $this->end_at = $this->getEndat();
 
 //                $this->train_thing = $thing;
-                $this->thing->log( 'Agent "Train" got last train ' . $this->trainTime($train_time) . ' in existing train #' . $this->index .  ' (' . $this->trainTime($this->run_at) . " " . $this->runtime . ').');
+                $this->thing->log( 'got last train ' . $this->trainTime($train_time) . ' in existing train #' . $this->index .  ' (' . $this->trainTime($this->run_at) . " " . $this->runtime->minutes . ').');
 
                 break;
             case (false) :
@@ -937,28 +937,32 @@ $train_day = $this->day;
             $this->getHeadcode();
         }
 
-        $runtime = $this->headcode_thing->runtime; //which is runtime
+        $this->runtime = new Runtime($this->thing,"runtime " . $this->head_code);
+
+        //$runtime = $this->headcode_thing->runtime; //which is runtime
+
+        $runtime = $this->runtime->minutes;
 
         // Which can be <number>, "X" or "Z".
 
         if (strtoupper($runtime) == "X") {
             // Train must specifiy runtime.
             if (!isset($this->runtime)) {
-                $this->runtime = "X";
+                $this->runtime->minutes = "X";
             }
         }
 
         if (strtoupper($runtime) == "Z") {
             // Train must specifiy runtime.
-            $this->runtime = "Z";
+            $this->runtime->minutes = "Z";
         }
 
         if (is_numeric($runtime)) {
             // Train must specifiy runtime.
-            $this->runtime = $runtime;
+            $this->runtime->minutes = $runtime;
         }
 
-        return $this->runtime;
+        return $this->runtime->minutes;
     }
 
 
@@ -1038,8 +1042,8 @@ $train_day = $this->day;
         return true; // Consist is not compatable with headcode.
     }
 
-    function getRoute() {
-
+    function getRoute()
+    {
         $this->route = "X";
         return $this->route;
 
@@ -1435,7 +1439,7 @@ $this->getConsist();
         $test_message .= "<b>Schedule</b>";
         $test_message .= '<br>run_at ' . $this->trainTime($this->run_at);
         $test_message .= '<br>end_at ' . $this->trainTime($this->end_at);
-        $test_message .= '<br>runtime ' . $this->runtime;
+        $test_message .= '<br>runtime ' . $this->runtime->minutes;
 
 
         if (!isset($this->sms_message)) {$this->makeSMS;}
@@ -1496,7 +1500,7 @@ $this->getConsist();
         $test_message .= "Schedule";
         $test_message .= '<br>run_at ' . $this->run_at;
         $test_message .= '<br>end_at ' . $this->end_at;
-        $test_message .= '<br>runtime ' . $this->runtime;
+        $test_message .= '<br>runtime ' . $this->runtime->minutes;
 
 
         if (!isset($this->sms_message)) {$this->makeSMS;}
@@ -1556,7 +1560,7 @@ $this->getConsist();
                     $run_at = $this->trainTime($this->run_at);
                     //if (!$this->thing->isData($run_at)) {$run_at = "X";}
                     $sms_message .= "" ."run at " . $this->trainTime($this->run_at);
-                    $sms_message .= " " ."runtime " . $this->runtime;
+                    $sms_message .= " " ."runtime " . $this->runtime->minutes;
 
                 }
 
@@ -1607,7 +1611,7 @@ $this->getConsist();
             }
 
 
-            $route_description = $route . " [" . $this->consist . "] " . $this->runtime;
+            $route_description = $route . " [" . $this->consist . "] " . $this->runtime->minutes;
             $sms_message .= " | " . $route_description;
             $sms_message .= " | nuuid " . substr($this->variables_agent->variables_thing->uuid,0,4); 
         }
@@ -1707,7 +1711,7 @@ $this->getConsist();
         foreach ($pieces as $key=>$piece) {
 
             if (($piece == 'x') or ($piece == 'z')) {
-                $this->runtime = $piece;
+                $this->runtime->minutes = $piece;
                 $matches += 1;
                 continue;
             }
@@ -1725,25 +1729,25 @@ $this->getConsist();
 
             ) {
 
-            $this->runtime = $piece;
+            $this->runtime->minutes = $piece;
             $matches += 1;
             continue;
         }
 
         if ((strlen($piece) == 3) and (is_numeric($piece))) {
-            $this->runtime = $piece; //3 digits is a good indicator of a runtime in minutes
+            $this->runtime->minutes = $piece; //3 digits is a good indicator of a runtime in minutes
             $matches += 1;
             continue;
         }
 
         if ((strlen($piece) == 2) and (is_numeric($piece))) {
-            $this->runtime = $piece;
+            $this->runtime->minutes = $piece;
             $matches += 1;
             continue;
         }
 
         if ((strlen($piece) == 1) and (is_numeric($piece))) {
-            $this->runtime = $piece;
+            $this->runtime->minutes = $piece;
             $matches += 1;
             continue;
         }
@@ -1751,8 +1755,8 @@ $this->getConsist();
     }
 
     if ($matches == 1) {
-        return $this->runtime;
-        $this->runtime = $piece;
+        return $this->runtime->minutes;
+        $this->runtime->minutes = $piece;
         $this->num_hits += 1;
         //$this->thing->log('Agent "Block" found a "run time" of ' . $this->quantity .'.');
     }
@@ -1941,18 +1945,18 @@ $this->getConsist();
 
 // $uuids, $head_codes, $this->run_at, $this->run_time
 
-if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->run_at)) and (isset($this->runtime)) ) {
+if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->run_at)) and (isset($this->runtime->minutes)) ) {
 
     // Likely matching a head_code to a uuid.
 
 }
 
 
-if ( (isset($this->run_at)) and (isset($this->runtime)) ) {
+if ( (isset($this->run_at)) and (isset($this->runtime->minutes)) ) {
     $this->r_type = "instruction";
 //$this->thing->log('Agent "Block" found a run_at and a run_time and made a Block.');
     // Likely matching a head_code to a uuid.
-    $this->makeTrain($this->head_code,$this->run_at,$this->runtime);
+    $this->makeTrain($this->head_code,$this->run_at,$this->runtime->minutes);
     return;
 }
 

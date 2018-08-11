@@ -37,6 +37,7 @@ return [
             'server_location' => '<NOT SET>',
             'hashmessage' => '#devstack',
 		    'state' => 'test',
+            'engine_state' => 'dev',
 		    'uuid' => '<private>',
 		    'email' => '<not set>',
             'nominal' => '<not set>',

@@ -10,72 +10,100 @@ class EightBall {
 	public $var = 'hello';
 
 
-    function __construct(Thing $thing, $text = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->agent_input = $agent_input;
         $this->start_time = $thing->elapsed_runtime(); 
-        //$this->start_time = microtime(true);
 
 		$this->agent_name = "eightball";
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-//      This is how old roll.php is.
-//		$thingy = $thing->thing;
 		$this->thing = $thing;
-
-         //$this->thing_report  = array("thing"=>$this->thing->thing);
-         $this->thing_report['thing']  = $thing;
-
+        $this->thing_report['thing']  = $thing;
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
 
-
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
         $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
-
+        $this->get();
 		$this->readSubject();
 
         $this->respond();
+        $this->set();
 
-		//$this->thing_report = $this->respond();
-
- //       $this->end_time = microtime(true);
- //       $this->actual_run_time = $this->end_time - $this->start_time;
- //       $milliseconds = round($this->actual_run_time * 1000);
-
-//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($milliseconds) . 'ms.' );
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['log'] = $this->thing->log;
-
+        $this->thing_report['response'] = $this->response;
 		return;
-
 	}
+
+    function set()
+    {
+            $this->thing->json->writeVariable( array("eightball", "face"), $this->face );
+    }
+
+    function get()
+    {
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable( array("eightball", "refreshed_at") );
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("eightball", "refreshed_at"), $time_string );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
+        $this->thing->json->setField("variables");
+        $this->face = strtolower($this->thing->json->readVariable( array("eightball", "face") ));
+    }
 
 
 // -----------------------
 
-	private function respond() {
-
-
+	private function respond()
+    {
 		$this->thing->flagGreen();
 
 		// This should be the code to handle non-matching responses.
 
 		$to = $this->thing->from;
-
-		//echo "to:". $to;
-
 		$from = "eightball";
 
+        $this->makeMessage();
 
+        $this->sms_message = "8 BALL";
 
-        $i = rand(1,20);
+        $this->sms_message .= " | " . $this->message;
+        $this->sms_message .= ' | TEXT ROLL d20';
 
-        switch ($i) {
+        $choices = false;
+
+		$this->thing_report[ "choices" ] = $choices;
+ 		$this->thing_report["info"] = "This makes a prognistication.";
+ 		$this->thing_report["help"] = "Try EIGHTBALL.";
+
+		$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
+
+		return $this->thing_report;
+	}
+
+    function makeMessage()
+    {
+        switch ($this->face) {
             case 1:
                 $answer = "It is certain";
                 break;
@@ -91,136 +119,74 @@ class EightBall {
             case 5:
                 $answer = "You may rely on it";
                 break;
-
             case 6:
                 $answer = "As I see it, yes";
                 break;
-
             case 7:
                 $answer = "Most likely";
                 break;
-
             case 8:
                 $answer = "Outlook good";
-                break;
-
             case 9:
                 $answer = "Yes";
                 break;
-
             case 10:
                 $answer = "Signs point to yes";
                 break;
-
             case 11:
                 $answer = "Reply hazy try again";
                 break;
-
             case 12:
                 $answer = "Ask again later";
                 break;
-
             case 13:
                 $answer = "Better not tell you now";
                 break;
-
             case 14:
                 $answer = "Cannot predict now";
                 break;
-
             case 15:
                 $answer = "Concentrate and ask again";
                 break;
-
             case 16:
                 $answer = "Don't count on it";
                 break;
-
             case 17:
                 $answer = "My reply is no";
                 break;
-
             case 18:
                 $answer = "My sources say no";
-                break;
-
             case 19:
                 $answer = "Outlook not so good";
                 break;
-
             case 20:
                 $answer = "Very doubtful";
                 break;
-
             default:
                 $answer = "Broken";
                 break;
-            }
+        }
 
 
+        $m = $answer;
 
-
-
-        $this->sms_message = "8 BALL";
-
-        $this->sms_message .= " | " . $answer;
-        $this->sms_message .= ' | TEXT ?';
-
-			
-
-        $choices = false;
-
-		$this->thing_report[ "choices" ] = $choices;
- 		$this->thing_report["info"] = "This makes a prognistication."; 
- 		$this->thing_report["help"] = "This is about stochastics.";
-
-		$this->thing_report['sms'] = $this->sms_message;
-		$this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
-
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
-		return $this->thing_report;
-
-
-	}
-/*
-    function extractRoll($input) {
-
-//echo $input;
-//exit();
-
-preg_match('/^(\\d)?d(\\d)(\\+\\d)?$/',$input,$matches);
-
-print_r($matches);
-
-$t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
-                '$a="$1"? : 1;for(; $i++<$a; $s+=rand(1,$2) );echo$s$3;',
-                $input)?:'echo"Invalid input";';
-
-
+        $this->message = $m;
+        $this->thing_report['message'] = $m;
     }
-*/
 
 
 
 	public function readSubject()
     {
 
+        if ((!isset($this->face)) or ($this->face == "")) {$this->face = rand(1,20);}
+        $this->response = "Received an answer to the question.";
 
         //$input = strtolower($this->subject);
-
 
 		return false;
     }
 
 }
-
-
-
-return;
 
 ?>

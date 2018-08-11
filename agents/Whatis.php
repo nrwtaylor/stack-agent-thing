@@ -101,7 +101,7 @@ class Whatis {
 
 	public function makeSMS()
     {
-       	$this->sms_message = "WHATIS | This is (778) 401-2132, the BC SMS portal to Stackr. | " . $this->web_prefix . "" ;
+       	$this->sms_message = "WHATIS | This is (778) 401-2132, the BC SMS portal to Stackr. | " . $this->web_prefix . "" . " | TEXT HELP" ;
         $this->thing_report['sms'] = $this->sms_message;
         $this->message = $this->sms_message;
 		return $this->message;
@@ -110,7 +110,7 @@ class Whatis {
     public function makeEmail()
     {
         // devstack review Thing link in email for limitedbeta
-        $message = "This is " . str_replace("@","", $this->mail_post_fix) . ", the limited beta service portal to " . ucwords($this->word) . ".\r\n";
+        $message = "This is " . str_replace("@","", $this->mail_postfix) . ", the limited beta service portal to " . ucwords($this->word) . ".\r\n";
         $message .= "Only the subject line, any " . $this->mail_postfix . " email addresses in the address and the return email address is processed by " . ucwords($this->word) . ".\r\n";
 
         $message .= 'For a full statement of our privacy policy, please goto to <a href="' . $this->web_prefix . 'privacy">' . $this->web_prefix . 'privacy</a>';
@@ -185,7 +185,7 @@ class Whatis {
         $this->makePDF();
 
         // Offer help
-		$this->thing_report['help'] = 'This is the Whatis responder. It has a go at figuring out what a Thing is. Email whatis' . $this->mail_post_fix . '.';
+		$this->thing_report['help'] = 'This is the Whatis responder. It has a go at figuring out what a Thing is. Email whatis' . $this->mail_postfix . '.';
 
 		return $this->thing_report;
 	}

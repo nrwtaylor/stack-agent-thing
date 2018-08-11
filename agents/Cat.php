@@ -34,7 +34,7 @@ class Cat {
 
 		$this->readSubject();
 
-        $this->getNegativetime();
+        //$this->getNegativetime();
 
 		$this->thing_report = $this->respond();
 
@@ -97,9 +97,9 @@ class Cat {
     {
         $this->node_list = array("cat"=>array("cat","dog"));
         $this->sms_message = "" . $this->cat_message;
-        if ($this->negative_time < 0) {
-            $this->sms_message .= " " .$this->thing->human_time($this->negative_time/-1) . ".";
-        }
+        //if ($this->negative_time < 0) {
+        //    $this->sms_message .= " " .$this->thing->human_time($this->negative_time/-1) . ".";
+        //}
         $this->thing_report['sms'] = $this->sms_message;
 
     }

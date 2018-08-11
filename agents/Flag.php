@@ -19,6 +19,7 @@ class Flag
         //if ($agent_input == null) {$agent_input = "";}
 
         $this->agent_input = $agent_input;
+        $this->agent_name = "flag";
         $this->keyword = "flag";
         $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
 
@@ -50,6 +51,11 @@ class Flag
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/flag';
+
+
+        $this->refreshed_at = null;
+
         $this->current_time = $this->thing->time();
 
         // Get the current Identities flag
@@ -72,7 +78,7 @@ class Flag
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['log'] = $this->thing->log;
-
+        if(isset($this->response)) {$this->thing_report['response'] = $this->response;}
 
 		return;
 
@@ -126,10 +132,12 @@ class Flag
                 ($flag == "green") or 
                 ($flag == "rainbow") or
                 ($flag == "yellow") or 
-                 ($flag == "blue") or 
+                ($flag == "blue") or 
                 ($flag == "indigo") or 
                 ($flag == "violet") or 
-                ($flag == "orange")
+                ($flag == "orange") or
+                ($flag == "grey")
+
             ) {return false;}
 
         return true;
@@ -235,6 +243,7 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
         $web .= "</a>";
         $web .= "<br>";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         $web .= $this->sms_message;
 
 //        $web .= "<br><br>";
@@ -378,17 +387,17 @@ if ($this->state == "inside nest") {
 
     public function makeImage()
     {
-
+//var_dump ($this->state);
+//exit();
         // here DB request or some processing
 //        $codeText = "thing:".$this->state;
 
-
 // Create a 55x30 image
-$this->image = imagecreatetruecolor(200, 125);
-//$red = imagecolorallocate($this->image, 255, 0, 0);
-//$green = imagecolorallocate($this->image, 0, 255, 0);
-//$grey = imagecolorallocate($this->image, 100, 100, 100);
 
+        $this->image = imagecreatetruecolor(200, 125);
+        //$red = imagecolorallocate($this->image, 255, 0, 0);
+        //$green = imagecolorallocate($this->image, 0, 255, 0);
+        //$grey = imagecolorallocate($this->image, 100, 100, 100);
 
         //$this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
         //$this->image = imagecreatetruecolor(164, 164);
@@ -425,6 +434,8 @@ $this->image = imagecreatetruecolor(200, 125);
         $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
         $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
 
+
+
         $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
 
 
@@ -435,65 +446,54 @@ $this->image = imagecreatetruecolor(200, 125);
                                     $this->pride_blue,
                                     $this->pride_violet);
 
+        // Draw a white rectangle
+        if ((!isset($this->state)) or ($this->state == false)) {
+            $color = $this->grey;
+        } else {
+            if (isset($this->{$this->state})) {
+                $color = $this->{$this->state};
+            } elseif (isset($this->{'flag_' . $this->state})) {
+                $color = $this->{'flag_' . $this->state};
+            }
+        }
 
-
-
-// Draw a white rectangle
-if ((!isset($this->state)) or ($this->state == false)) {
-    $color = $this->grey;
-} else { 
-    if (isset($this->{$this->state})) {
-        $color = $this->{$this->state};
-    } elseif (isset($this->{'flag_' . $this->state})) {
-        $color = $this->{'flag_' . $this->state};
-    }
-
-}
 //imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
-if ($this->state == "rainbow") {
+        if ($this->state == "rainbow") {
 //    $color = $this->grey;
-    foreach(range(0,5) as $n) {
-        $a = $n * (200/6);
-        $b = $n *(200/6) + (200/6);
-$color = $this->color_palette[$n];
+            foreach(range(0,5) as $n) {
+                $a = $n * (200/6);
+                $b = $n *(200/6) + (200/6);
+                $color = $this->color_palette[$n];
 
-imagefilledrectangle($this->image, $a, 0, $b, 125, $color);
-//}
-    }
-} else {
+//                imagefilledrectangle($this->image, $a, 0, $b, 125, $color);
+                $a = $n * (125/6);
+                $b = $n *(125/6) + (200/6);
 
-//} else [
-imagefilledrectangle($this->image, 0, 0, 200, 125, $color);
-}
+                imagefilledrectangle($this->image, 0, $a, 200, $b, $color);
 
-// Save the image
-//imagepng($image, './imagefilledrectangle.png');
-//imagedestroy($im);
+            }
+        } else {
+            if (!isset($color)) {$color = $this->grey;}
+            imagefilledrectangle($this->image, 0, 0, 200, 125, $color);
+        }
 
+        $light_text_list = array("red","rainbow","indigo","violet", "blue");
+        if (in_array($this->state, $light_text_list)) {
+            $textcolor = imagecolorallocate($this->image, 255, 255, 255);
+        } else {
+            $textcolor = imagecolorallocate($this->image, 0, 0, 0);
+        }
 
-
-// Can't get this text editor working yet 10 June 2017
-if ($this->state == 'red') {
-    $textcolor = imagecolorallocate($this->image, 255, 255, 255);
-} else {
-    $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-}
-// Write the string at the top left
-
-
+        // Write the string at the top left
         imagestring($this->image, 2, 150, 100, $this->flag->nuuid, $textcolor);
-
-        //$this->image = $image;
     }
 
     public function makePNG()
     {
-        //if (!isset($this->image)) {$this->makeImage();}
-//$split_time = $this->thing->elapsed_runtime();
-        $agent = new Png($this->thing, "png"); // long run
-//echo $this->thing->elapsed_runtime() - $split_time; 
+        if (!isset($this->image)) {$this->makeImage();}
+        $agent = new Png($this->thing, "png");
 
-        $this->makeImage();
+        //$this->makeImage();
 
         $agent->makePNG($this->image);
 
@@ -503,50 +503,25 @@ if ($this->state == 'red') {
         $this->PNG_embed = $agent->PNG_embed;
     }
 
-
-    public function old_makePNG()
-    {
-        // Save the image
-        //header('Content-Type: image/png');
-        //imagepng($im);
-
-        $this->makeImage();
-
-        $image = $this->image;
-        ob_start();
-        imagepng($image);
-        $imagedata = ob_get_contents();
-        ob_end_clean();
-
-        $this->thing_report['png'] = $imagedata;
-
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
-
-//        $this->thing_report['png'] = $image;
-
-        imagedestroy($image);
-
-        return $response;
-
-
-
-        $this->PNG = $image;    
-        $this->thing_report['png'] = $image;
- 
-       return;
-    }
-
-
     public function readSubject() 
     {
         $this->response = null;
 
-        $keywords = array('flag', 'red', 'green', 'rainbow','blue','indigo', 'orange', 'yellow', 'violet');
+        $keywords = array('flag', 'red', 'green', 'rainbow','blue','indigo', 'orange', 'yellow', 'violet',
+                        'gray',
+                        'grey',
+                        'gris',
+                        'cinzento');
 
-        $input = strtolower($this->subject);
-
-		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        if (isset($this->agent_input)) {
+            $input = $this->agent_input;
+        } else {
+            $input = strtolower($this->subject);
+        }
+		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        //$haystack = $this->agent_input . " " . $this->from;
+        //$haystack = $input . " " . $this->from;
+        $haystack = "";
 
 //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
@@ -554,17 +529,15 @@ if ($this->state == 'red') {
 
         $pieces = explode(" ", strtolower($input));
 
-
 		// So this is really the 'sms' section
 		// Keyword
         if (count($pieces) == 1) {
 
             if ($input == $this->keyword) {
                 $this->get();
+                $this->response = "Got the flag.";
                 return;
             }
-                        //return "Request not understood";
-                        // Drop through to piece scanner
         }
 
 
@@ -577,9 +550,11 @@ if ($this->state == 'red') {
                         case 'red':
                             $this->thing->log($this->agent_prefix . 'received request for RED FLAG.', "INFORMATION");
                             $this->selectChoice('red');
+                            $this->response = "Selected a red flag.";
                             return;
                         case 'green':
                             $this->selectChoice('green');
+                            $this->response = "Selected a green flag.";
                             return;
                         case 'rainbow':
                         case 'blue':
@@ -589,162 +564,145 @@ if ($this->state == 'red') {
                         case 'violet':
 
                             $this->selectChoice($piece);
+                            $this->response = "Selected a Flag.";
+                            return;
+
+                        case 'gray':
+                        case 'grey':
+                        case 'gris':
+                        case 'cinzento':
+
+                            $this->selectChoice('grey');
+                            $this->response = "Selected a grey flag.";
                             return;
 
 
                         case 'next':
 
-
                         default:
 
                     }
-
                 }
             }
-
         }
 
-
         // If all else fails try the discriminator.
-
+//        if (!isset($haystack)) {$this->response = "Did nothing."; return;} 
         $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
         switch($this->requested_state)
         {
             case 'green':
                 $this->selectChoice('green');
+                $this->response = "Asserted a Green Flag.";
                 return;
             case 'red':
                 $this->selectChoice('red');
+                $this->response = "Asserted a Red Flag.";
                 return;
         }
 
         $this->read();
+        $this->response = "Looked at the Flag.";
 
-
-
-
+        // devstack
         return "Message not understood";
-
 		return false;
-
-	
 	}
 
-
-
-
-
-
+/*
 	function kill()
     {
 		// No messing about.
 		return $this->thing->Forget();
 	}
-
+*/
     function discriminateInput($input, $discriminators = null)
     {
+        //$input = "optout opt-out opt-out";
 
-
-                //$input = "optout opt-out opt-out";
-
-                if ($discriminators == null) {
-                        $discriminators = array('red', 'green');
-                }       
-
-
-
-                $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
-
-                if (count($discriminators) > 4) {
-                        $minimum_discrimination = $default_discriminator_thresholds[4];
-                } else {
-                        $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
-                }
-
-
-
-                $aliases = array();
-
-                $aliases['red'] = array('r', 'red','on');
-                $aliases['green'] = array('g','grn','gren','green', 'gem', 'off');
-                //$aliases['reset'] = array('rst','reset','rest');
-                //$aliases['lap'] = array('lap','laps','lp');
-
-
-
-                $words = explode(" ", $input);
-
-                $count = array();
-
-                $total_count = 0;
-                // Set counts to 1.  Bayes thing...     
-                foreach ($discriminators as $discriminator) {
-                        $count[$discriminator] = 1;
-
-                       $total_count = $total_count + 1;
-                }
-                // ...and the total count.
-
-
-
-                foreach ($words as $word) {
-
-                        foreach ($discriminators as $discriminator) {
-
-                                if ($word == $discriminator) {
-                                        $count[$discriminator] = $count[$discriminator] + 1;
-                                        $total_count = $total_count + 1;
-                                                //echo "sum";
-                                }
-
-                                foreach ($aliases[$discriminator] as $alias) {
-
-                                        if ($word == $alias) {
-                                                $count[$discriminator] = $count[$discriminator] + 1;
-                                                $total_count = $total_count + 1;
-                                                //echo "sum";
-                                        }
-                                }
-                        }
-
-                }
-
-                $this->thing->log('Agent "Flag" matched ' . $total_count . ' discriminators.',"DEBUG");
-                // Set total sum of all values to 1.
-
-                $normalized = array();
-                foreach ($discriminators as $discriminator) {
-                        $normalized[$discriminator] = $count[$discriminator] / $total_count;            
-                }
-
-
-                // Is there good discrimination
-                arsort($normalized);
-
-
-                // Now see what the delta is between position 0 and 1
-
-                foreach ($normalized as $key=>$value) {
-                        //echo $key, $value;
-
-          if ( isset($max) ) {$delta = $max-$value; break;}
-                        if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
-                }
-
-
-                        //echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-
-                if ($delta >= $minimum_discrimination) {
-                        //echo "discriminator" . $discriminator;
-                        return $selected_discriminator;
-                } else {
-                        return false; // No discriminator found.
-                } 
-
-                return true;
+        if ($discriminators == null) {
+            $discriminators = array('red', 'green');
         }
 
+
+
+        $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
+
+        if (count($discriminators) > 4) {
+            $minimum_discrimination = $default_discriminator_thresholds[4];
+        } else {
+            $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
+        }
+
+        $aliases = array();
+
+        $aliases['red'] = array('r', 'red','on');
+        $aliases['green'] = array('g','grn','gren','green', 'gem', 'off');
+        //$aliases['reset'] = array('rst','reset','rest');
+        //$aliases['lap'] = array('lap','laps','lp');
+
+        $words = explode(" ", $input);
+
+        $count = array();
+
+        $total_count = 0;
+        // Set counts to 1.  Bayes thing...
+        foreach ($discriminators as $discriminator) {
+            $count[$discriminator] = 1;
+            $total_count = $total_count + 1;
+        }
+        // ...and the total count.
+
+        foreach ($words as $word) {
+            foreach ($discriminators as $discriminator) {
+                if ($word == $discriminator) {
+                    $count[$discriminator] = $count[$discriminator] + 1;
+                    $total_count = $total_count + 1;
+                    //echo "sum";
+                }
+                foreach ($aliases[$discriminator] as $alias) {
+                    if ($word == $alias) {
+                        $count[$discriminator] = $count[$discriminator] + 1;
+                        $total_count = $total_count + 1;
+                        //echo "sum";
+                    }
+                }
+            }
+        }
+
+        $this->thing->log('Agent "Flag" matched ' . $total_count . ' discriminators.',"DEBUG");
+        // Set total sum of all values to 1.
+
+        $normalized = array();
+        foreach ($discriminators as $discriminator) {
+            $normalized[$discriminator] = $count[$discriminator] / $total_count;            
+        }
+
+        // Is there good discrimination
+        arsort($normalized);
+
+        // Now see what the delta is between position 0 and 1
+
+        foreach ($normalized as $key=>$value) {
+            //echo $key, $value;
+
+            if ( isset($max) ) {$delta = $max-$value; break;}
+            if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
+        }
+
+
+        //echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
+
+
+        if ($delta >= $minimum_discrimination) {
+            //echo "discriminator" . $discriminator;
+            return $selected_discriminator;
+        } else {
+            return false; // No discriminator found.
+        }
+
+    return true;
+    }
 }
 
 ?>

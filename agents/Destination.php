@@ -57,6 +57,13 @@ class Destination {
         $this->subject = $thing->subject;
 
 
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+        $this->word = $thing->container['stack']['word'];
+        $this->email = $thing->container['stack']['email'];
+
+
 
 		$this->sqlresponse = null;
 
@@ -92,30 +99,45 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
         }
 
 
-    function getStop()
+    function getDestinations()
     {
 
         $searchfor = strtoupper($this->search_words);
-        $searchfor = "MAIN HASTINGS";
+        //$searchfor = "MAIN HASTINGS";
         $file = $GLOBALS['stack_path'] . 'resources/translink/stops.txt';
         $contents = file_get_contents($file);
 
         $lines = explode("\n", $contents); // this is your array of words $line 
 
+        $this->matched_lines = array();
         foreach ($lines as $line) {
             // if(preg_match('(MAIN|HASTINGS)', $line) === 1) { // echo $line; // 
             //$matches[] = $line; // $count += 1; // }
 
-            $needles = array('VINE','4');
+            //$needles = array('MAIN','HASTINGS');
+            $needles = explode(" ",$searchfor);
 
             $regex='/(?=.*?'.implode(')(?=.*?', $needles).')/s';
             if (preg_match($regex,$line)===1) {
                 //  echo 'true';
-                echo $line;
-                echo "<br>";
+                $this->matched_lines[] = $line;
+                //echo $line;
+                //echo "<br>";
             }
         }
 
+        $this->destination_list = array();
+        $this->destination_count = 0;
+        foreach ($this->matched_lines as $line) {
+            $arr = $this->makeDestination($line);
+            $this->destination_list[]  = $arr;
+            $this->destination_count += 1;
+        }
+
+
+        //var_dump($this->destination_list);
+
+        return;
 exit();
 
 $searchfor = "MAIN";
@@ -326,6 +348,33 @@ $response ="";
         }
 
 
+    public function makeDestination($text)
+    {
+        $columns = explode(",",$text);
+
+        $arr = array("a"=>$columns[0],
+                        "stop_number"=>$columns[1],
+                        "stop_name"=>$columns[2],
+                        "stop_description"=>$columns[3],
+                        "stop_latitude"=>$columns[4],
+                        "stop_longitude"=>$columns[5],
+                        "stop_zone"=>$columns[6] );
+
+
+        return $arr;
+
+    }
+
+    public function getDestination() {
+
+        if (!isset($this->destination_list)) {$this->getDestinations();}
+//var_dump($this->destination_list);
+//exit();
+        $this->destination = false;
+        if ((is_array($this->destination_list)) and count($this->destination_list) == 1) {$this->destination = $this->destination_list[0];}
+
+    }
+
 
 
 
@@ -338,7 +387,7 @@ $response ="";
 		// Thing actions
 		$this->thing->flagGreen();
 
-        $this->thing_report['sms'] = $this->sms_message;
+  //      $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['choices'] = false;
         $this->thing_report['info'] = 'SMS sent';
 
@@ -372,9 +421,15 @@ $response ="";
 		// Need to refactor email to create a preview of the sent email in the $thing_report['email']
 		// For now this attempts to send both an email and text.
 
+        $this->makeSMS();
+
+//$this->sms_message = "hello";
+//$this->thing_report['sms'] = "heelo";
+
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
+        $this->makeWeb();
 
 // And then at this point if Mordok is on?
 // Run an hour train.
@@ -398,10 +453,76 @@ $response ="";
 
 	}
 
+    public function makeSMS()
+    {
+        if (!isset($this->destination)) {$this->getDestination();}
+
+        if ($this->destination == false) {
+            $message = "DESTINATION | " . $this->destination_count . " matches | " . $this->web_prefix . "thing/" . $this->uuid . "/destination";
+        } else {
+
+//var_dump($this->destination["stop_name"]);
+            $stop_name = $this->destination["stop_name"];
+            $stop_number = $this->destination["stop_number"];
+
+            $message = "DESTINATION";
+            $message .= " | " . $stop_number;
+            $message .= " | " . $stop_name;
+        }
+
+        $this->sms_message = $message;
+        $this->thing_report['sms'] = $message;
+
+    }
+
+    public function makeWeb()
+    {
+        if (!isset($this->destination_list)) {$this->getDestinations();}
+
+//var_dump($this->destination["stop_name"]);
+//$stop_name = $this->destination["stop_name"];
+//$stop_number = $this->destination["stop_number"];
+
+        $message = "DESTINATION<br>";
+
+        foreach($this->destination_list as $key=> $destination) {
+            $stop_name = $destination["stop_name"];
+            $stop_number = $destination["stop_number"];
+
+
+            $message .= $stop_number . " | " . $stop_name . "<br>";
+        }
+        $this->web_message = $message;
+        $this->thing_report['web'] = $message;
+
+    }
+
+
+
 	private function nextWord($phrase) {
 
 
 	}
+
+    function assertDestination($input)
+    {
+        $whatIWant = $input;
+        if (($pos = strpos(strtolower($input), "destination is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("destination is")); 
+        } elseif (($pos = strpos(strtolower($input), "destination")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("destination")); 
+        }
+
+        //$filtered_input = ltrim(strtolower($whatIWant), " ");
+        //$destination = $this->getDestination($filtered_input);
+        //if ($place) {
+        //    //true so make a place
+        //    $this->makeDestination(null, $filtered_input);
+        //}
+
+        $this->destination_input = $whatIWant;
+    }
+
 
 	public function readSubject()
     {
@@ -472,7 +593,7 @@ $response ="";
                             $words = ltrim($words);
                             $this->search_words = $words;
 
-                            $this->getStop();
+                            $this->getDestinations();
 
                             //$this->extractWords($words);
 //var_dump($words);

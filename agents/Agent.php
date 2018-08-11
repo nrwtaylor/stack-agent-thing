@@ -48,8 +48,6 @@ class Agent
         $this->agents_path = $GLOBALS['stack_path'] . 'agents/';
         $this->agents_path = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents/';
 
-
-//        $this->current_time = $this->thing->json->time();
         $this->current_time = $this->thing->time();
 
         $this->verbosity = 9;
@@ -72,9 +70,11 @@ and the user UX/UI
 
 }
 */
-
         //$this->thing_report = 
-        $this->readSubject();
+
+            $this->readSubject();
+
+
         if ($this->agent_input == null) {
             $this->respond();
         }

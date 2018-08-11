@@ -44,6 +44,9 @@ class Beacon
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/beacon';
+
+
 
 // This isn't going to help because we don't know if this
 // is the base.
@@ -73,8 +76,7 @@ class Beacon
 
 
         $this->thing_report['log'] = $this->thing->log;
-//        echo $this->thing_report['log'];
-
+        $this->thing_report['response'] = $this->response;
 
 		return;
 
@@ -142,6 +144,13 @@ class Beacon
 
         $this->state = $this->previous_state;
 
+        // Bring in stuff
+        $this->getPlace();
+        $this->getFlag();
+        $this->getHeadcode();
+
+
+
         return;
     }
 
@@ -183,8 +192,10 @@ class Beacon
 		$to = $this->thing->from;
 		$from = $this->keyword;
 
-		$choices = $this->variables_thing->thing->choice->makeLinks($this->state);
-		$this->thing_report['choices'] = $choices;
+		//$choices = $this->variables_thing->thing->choice->makeLinks($this->state);
+		//$this->thing_report['choices'] = $choices;
+
+        $this->makeChoices();
 
         $this->makeSMS();
 
@@ -198,12 +209,27 @@ class Beacon
         }
         $this->makeWeb();
 
-        $this->thing_report['help'] = 'This is your Beacon.  You can turn your Beacon ON and OFF.';
+        $this->thing_report['help'] = 'This is your Beacon. Try BEACON ON. BEACON OFF. PLACE IS PRIDE. FLAG IS RAINBOW.';
 
 		return;
 
 
 	}
+
+    function makeChoices ()
+    {
+        $this->node_list = array("beacon"=>null);
+
+
+       $this->thing->choice->Create($this->agent_name, $this->node_list, "beacon");
+
+       $this->choices = $this->thing->choice->makeLinks('beacon');
+
+        $this->thing_report['choices'] = $this->choices;
+
+
+    }
+
 
     function makeMessage()
     {
@@ -228,32 +254,106 @@ class Beacon
         $this->thing_report['message'] = $m;
     }
 
+    function getPlace()
+    {
+        $this->place = new Place($this->thing, "place");
+
+        if ((!isset($this->place->place_name)) or ($this->place->place_name == false)) {$this->place->place_name = "X";}
+
+//        echo $this->place->place_name ."\n";
+
+    }
+
+    function getHeadcode()
+    {
+        $this->headcode = new Headcode($this->thing, "headcode");
+        if (!isset($this->headcode->head_code)) {$this->headcode->head_code = "X";}
+
+ //       echo $this->headcode->head_code ."\n";
+
+
+//var_dump($this->flag->state);
+//var_dump($this->flag->refreshed_at);
+
+    }
+
+
+    function getFlag()
+    {
+        $this->flag = new Flag($this->thing, "flag");
+
+        if ((!isset($this->flag->state)) or ($this->flag->state == false)) {$this->flag->state = "X";}
+
+        $this->thing->log( $this->agent_prefix .' got a flag ' . $this->flag->state .  '.' );
+
+ //       echo $this->flag->state ."\n";
+
+
+//var_dump($this->flag->state);
+//var_dump($this->flag->refreshed_at);
+
+    }
+
+
     function makeSMS()
     {
 
+
         if ($this->state == false) {
-            $t = "X";
+            $text = "X";
         } else {
-            $t = $this->state;
+            $text = $this->state;
         }
-        $sms_message = "BEACON IS " . strtoupper($t);
+        $sms_message = "BEACON IS " . strtoupper($text);
 
+        switch($this->state) 
+        {
+            case 'off':
+                $sms_message .= " | The beacon is off.";
+                break;
+            case 'on':
+
+                if ($this->flag->state == false) {$flag_state = "X";} else {$flag_state = $this->flag->state;}
+                $sms_message .= " | flag " . strtoupper($flag_state);
+                $sms_message .= " | headcode " . strtoupper($this->headcode->head_code);
+
+                if ($this->place->place_name == false) {$place_name = "X";} else {$place_name = $this->place->place_name;}
+                $sms_message .= " | place " . strtoupper($place_name);
+
+                $sms_message .= " | link " . $this->link;
+
+
+                break;
+            default:
+                $sms_message .= " | The beacon is not on.";
+        }
+
+/*
         if ($this->state == "on") {
-            $sms_message .= " | identity " . strtoupper($this->identity->from);
-            $sms_message .= " | flag " . strtoupper($this->flag->state);
+
+            if ($this->flag->state == false) {$flag_state = "X";} else {$flag_state = $this->flag->state;}
+            $sms_message .= " | flag " . strtoupper($flag_state);
             $sms_message .= " | headcode " . strtoupper($this->headcode->head_code);
-            $sms_message .= " | place " . strtoupper($this->place->place_name);
+
+            if ($this->place->place_name == false) {$place_name = "X";} else {$place_name = $this->place->place_name;}
+            $sms_message .= " | place " . strtoupper($place_name);
 
         }
+*/
 
         $sms_message .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
 
-
-        if ($this->state == "off") {
-            $sms_message .= " | TEXT BEACON ON";
+//var_dump($this->state);
+/*
+        if (($text == "off") or ($text =="X")) {
+            $sms_message .= " | TEXT HELP";
         } else {
-            $sms_message .= " | TEXT ?"; 
+            $sms_message .= $this->link . " | TEXT HELP"; 
         }
+*/
+            $sms_message .= " | TEXT HELP"; 
+
+
 
 
         $this->sms_message = $sms_message;
@@ -269,42 +369,61 @@ class Beacon
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
+
         $link_txt = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
 
         $this->node_list = array("beacon"=>array("beacon", "job"));
 
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "beacon");
-        $choices = $this->thing->choice->makeLinks('beacon');
+        //$this->thing->choice->Create($this->agent_name, $this->node_list, "beacon");
+        //$choices = $this->thing->choice->makeLinks('beacon');
 
+       
 
-        $web = '<a href="' . $link . '">';
-        $web .= $this->place->html_image;
-        $web .= "</a>";
+        //$web = '<a href="' . $this->place->link . '">';
+        //$web .= $this->place->html_image;
+        //$web .= "</a>";
+        //$web .= "<br>";
+
+        //$web = '<a href="' . $this->place->link . '">';
+        $web = $this->place->html_image;
+        //$web .= "</a>";
         $web .= "<br>";
 
         $web .= "<br>";
 
-        $web .= '<a href="' . $link . '">';
+        $web .= '<a href="' . $this->flag->link . '">';
         $web .= $this->flag->html_image;
         $web .= "</a>";
         $web .= "<br>";
 
         $web .= "<br>";
-
-        $web .= '<a href="' . $link . '">';
+/*
+        //$web .= '<a href="' . $this->headcode->link . '">';
         $web .= $this->headcode->html_image;
-        $web .= "</a>";
+        //$web .= "</a>";
         $web .= "<br>";
-
+*/
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
 
 // Headcode updates all the time...
 //$refreshed_at = max($this->headcode->refreshed_at,$this->flag->refreshed_at, $this->place->refreshed_at); 
-$refreshed_at = max($this->flag->refreshed_at, $this->place->refreshed_at); 
 
-        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
-        $web .= "Last asserted about ". $ago . " ago.";
+//var_dump($this->flag->refreshed_at);
+//var_dump($this->place->refreshed_at);
+
+
+//if (is_string($this->flag->refreshed_at)) {$this->flag->refreshed_at = null;}
+//if (is_string($this->place->refreshed_at)) {$this->place->refreshed_at = null;}
+
+$refreshed_at = max(strtotime($this->flag->refreshed_at), strtotime($this->place->refreshed_at)); 
+//var_dump($refreshed_at);
+        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - $refreshed_at );
+  //      if ($refreshed_at == null) {
+  //          $web .= "Place and/or Flag have not yet been asserted.";
+  //      } else {
+            $web .= "Last asserted about ". $ago . " ago.";
+  //      }
 
         $web .= "<br>";
 
@@ -364,15 +483,15 @@ $web .= $this->sms_message;
     function makeBeacon()
     {
 
-        $this->identity = new Identity($this->thing, "identity");
+        //$this->identity = new Identity($this->thing, "identity");
 
-        $this->flag = new Flag($this->thing, "flag");
+        //$this->flag = new Flag($this->thing, "flag");
         $this->flag->makePNG();
 
-        $this->headcode = new Headcode($this->thing, "headcode");
+        //$this->headcode = new Headcode($this->thing, "headcode");
         $this->headcode->makePNG();
 
-        $this->place = new Place($this->thing, "place");
+        //$this->place = new Place($this->thing, "place");
         $this->place->makePNG();
 //var_dump($this->place->response);
 //var_dump($this->place->place_name);

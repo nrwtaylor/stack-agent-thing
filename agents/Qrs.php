@@ -195,6 +195,7 @@ class Qrs
     {
         $sms = "QRS | ";
         $sms .= $this->web_prefix . "thing/".$this->uuid."/qrs.pdf";
+        $sms .= " | TEXT QR";
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -242,6 +243,8 @@ class Qrs
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
         $this->node_list = array("web"=>array("nuuids","nuuid"));
+
+        $web = "";
 
         //$web = '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
