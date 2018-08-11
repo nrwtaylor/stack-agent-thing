@@ -57,7 +57,7 @@ $this->test_count = null;
 		    $this->respond();
         }
 
-        $this->thing->log('Agent "Number" found ' . $this->uuid);
+        $this->thing->log('Agent "Number" found ' . implode(" ",$this->numbers) .".");
 
         // Way to output test information to web page as a thing call
         // $this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');

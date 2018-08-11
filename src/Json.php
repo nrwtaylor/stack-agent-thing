@@ -28,6 +28,8 @@ class Json {
             return $db;
             };
 
+        $this->size_overflow = false;
+        $this->write_fail_count = 0;
 
         $this->char_max = $this->container['stack']['char_max'];
 
@@ -124,8 +126,6 @@ echo "</pre>";
 
 	function setField($field)
     {
-        //$this->write();
-
 		$this->field = $field;
 		$this->read();
 
@@ -141,7 +141,7 @@ echo "</pre>";
         }
         $this->arraytoJson();
         $this->write();
-        return;
+        return ;
     }
 
     function setJson($json_data)
@@ -336,8 +336,18 @@ echo "</pre>";
     {
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
-        $this->write();
-//        $this->write();
+        $t = $this->write();
+
+        // Failing to write a variable isn't a problem.
+        // The agents will do what they can.
+
+//        if ($t === false) {throw new \Exception("Thing state not saved.");}
+        $this->size_overflow = false;
+        if ($t === false) {
+            $this->size_overflow = strlen($this->json_data) - $this->char_max;
+            $this->write_fail_count += 1;
+        }
+        
 
         return;
     }
@@ -449,10 +459,27 @@ echo "</pre>";
 		//print_r($this->field);echo "<br>";
 
         if ($this->field == null) {return;}
+//$this->char_max = 30;
         if (strlen($this->json_data) > $this->char_max) {
+            // devstack what do you do here?
+            // This is the place where Json borks when asked to save too much.
+
+            // Clearly expected behaviour and the agents should be aware.
+            // Rather not raise an exception for something so routine.
+
+            // Rely on agents to check if it's necessary to flag an exception.
+
+            // Nah. Do the hard work through exceptions.
+
             //echo $this->json_data;
-            echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.";
-            //throw new Exception('Insufficient space in DB record.');
+            //echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.";
+            //$thing = new Thing(null);
+            //$thing->Create("","","");
+//echo "meep";
+            //throw new \Exception('Insufficient space in DB record.');
+
+//            $this->overload_length = strlen($this->json_data) - $this->char_max;
+
             return false;
         } else {
 
@@ -485,10 +512,6 @@ echo "</pre>";
 	
 
 }
-
-
-
-
 
 
 ?>

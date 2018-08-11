@@ -118,8 +118,7 @@ class Clocktime
     {
         $test_corpus = file_get_contents("/var/www/html/stackr.ca/resources/clocktime/test.txt");
         $test_corpus = explode("\n", $test_corpus);
-//var_dump($test_corpus);
-//exit();
+
         $this->response = "";
         foreach ($test_corpus as $key=>$line) {
 
@@ -205,6 +204,12 @@ class Clocktime
 
     function extractClocktime($input = null) 
     {
+
+        if (is_numeric($input)) {
+            // See if we received a unix timestamp number
+            $input = date('Y-m-d H:i:s', $input);
+        }
+
         $this->parsed_date = date_parse($input);
 
         $this->minute = $this->parsed_date['minute']; 
@@ -349,6 +354,12 @@ class Clocktime
             // If agent input has been provided then
             // ignore the subject.
             // Might need to review this.
+
+//$assume_time = date('Y-m-d H:i:s', $this->agent_input);
+//$assume_string = date('Y-m-d H:i:s', str_to_time($this->agent_input));
+
+//echo $this->agent_input ." > " . $assume_time . " " . $assume_string . "\n";
+
             $input = strtolower($this->agent_input);
         } else {
             $input = strtolower($this->subject);

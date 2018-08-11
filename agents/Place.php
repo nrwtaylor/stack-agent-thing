@@ -55,6 +55,8 @@ class Place
 
 
 
+
+
         $this->keywords = array('place','next', 'accept', 'clear', 'drop','add','new','here','there');
 
         $this->default_place_name = $this->thing->container['api']['place']['default_place_name'];
@@ -83,6 +85,9 @@ class Place
 
         $this->state = null; // to avoid error messages
 
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/place';
+
+
         $this->lastPlace();
 
         // Read the subject to determine intent.
@@ -109,7 +114,7 @@ class Place
 //		$this->thing->log('<pre> Agent "Headcode" completed</pre>');
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['log'] = $this->thing->log;
-
+        $this->thing_report['response'] = $this->response;
 
 		return;
     }
@@ -832,8 +837,10 @@ $web .= $this->sms_message;
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.log';
         $web .= '<a href="' . $link . '">place.log</a>';
         $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. $this->place_name;
-        $web .= '<a href="' . $link . '">'. $this->place_name. '</a>';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. "place";
+        $web .= $this->place_name. '';
+        $web .= " | ";
+        $web .= '<a href="' . $link . '">'. "place" . '</a>';
 
 
 
@@ -1092,9 +1099,13 @@ return;
             case ($this->agent_input == "extract"):
                 $input = strtolower($this->from . " " . $this->subject);
                 break;
-            case ($this->agent_input != null):
+            case (isset($this->agent_input)):
                 $input = strtolower($this->agent_input);
                 break;
+            case ($this->agent_input == null):
+                $input = strtolower($this->from . " " . $this->subject);
+                break;
+/*
             case (true):
                 // What is going to be found in from?
                 // Allows place name extraction from email address.
@@ -1102,7 +1113,20 @@ return;
                 // Internet of Things.  Sometimes all you have is the Thing's address.
                 // And that's a Place.
                 $input = strtolower($this->from . " " . $this->subject);
+ */
+       }
+
+//var_dump($input);
+/*
+        if (isset($this->agent_input)) {
+            $input = $this->agent_input;
+        } else {
+            $input = strtolower($this->subject);
         }
+        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        //$haystack = $this->agent_input . " " . $this->from;
+        $haystack = $input . " " . $this->from;
+*/
 
         // Would normally just use a haystack.
         // Haystack doesn't work well here because we want to run the extraction on the cleanest signal.

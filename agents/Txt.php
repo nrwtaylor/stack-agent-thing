@@ -71,7 +71,7 @@ class Txt {
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
-
+        $this->thing_report['response'] = $this->response;
 
 		return;
 	}
@@ -85,9 +85,9 @@ class Txt {
         $web_thing->Create($this->from, $this->agent_name, 's/ record txt view');
 
 		//$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
-        $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".txt";
+        $this->sms_message = "TXT | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".txt";
 
-		$this->sms_message .= " | TEXT WHATIS";
+		$this->sms_message .= " | TEXT API";
 		$this->thing_report['sms'] = $this->sms_message;
 
 
@@ -220,6 +220,8 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 	public function readSubject() {
 
 		$this->defaultButtons();
+
+        $this->response = 'Made a ".txt" file.';
 
 		$status = true;
 		return $status;		

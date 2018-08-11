@@ -68,6 +68,20 @@ class Latency
 
     }
 
+    function makeMessage()
+    {
+
+        $m = "Time queued was " . number_format($this->queue_time) . "ms. ";
+        $rtime = $this->thing->elapsed_runtime() - $this->start_time;
+        $m .= "Job ran for " . number_format($rtime). "ms. "; 
+        $m .= "Total elapsed time is " . number_format($this->thing->elapsed_runtime()). "ms."; 
+
+
+        $this->message = $m;
+        $this->thing_report['message'] = $m;
+    }
+
+
     function makeSMS()
     {
         $this->getQueuetime();
@@ -182,10 +196,10 @@ class Latency
 
         $this->makeChoices();
         $this->makeSMS();
-
+        $this->makeMessage();
 		//$this->thing_report['sms'] = $this->sms_message;
 		$this->thing_report['email'] = $this->sms_message;
-		$this->thing_report['message'] = $this->sms_message;
+		//$this->thing_report['message'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 

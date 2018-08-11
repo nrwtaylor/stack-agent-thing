@@ -36,6 +36,8 @@ class Thing
         if (!isset($GLOBALS['stack_path'])) {
             // Try this, otherwise fail.
             $GLOBALS['stack_path'] = "/var/www/stackr.test/";
+            //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+
         }
 
         $url = $GLOBALS['stack_path'] . 'private/settings.php';
@@ -81,6 +83,8 @@ class Thing
 		$this->associate_posterior = $this->container['stack']['associate_posterior'];
 
         $this->web_prefix = $this->container['stack']['web_prefix'];
+
+        $this->engine_state = $this->container['stack']['engine_state'];
 
         try {
             $this->getThing($uuid);
@@ -219,7 +223,9 @@ class Thing
 
     function __destruct()
     {
-        $this->log("Thing de-instantiated.");
+        $t = "";
+        if (isset($this->nuuid)) {$t = $this->nuuid;}
+        $this->log("Thing " . $t. " de-instantiated.");
     }
 
     function getThing($uuid = null)
@@ -1052,18 +1058,39 @@ $query = true;
 		return true;
 	}
 
-	function log($text = "|", $logging_level = null)
+
+//	function log($text = "|", $logging_level = null)
+//    {
+    function log($text = null, $logging_level = null)
     {
+
+        if ($text == null) {return $this->log_last;}
+
         if (!isset($this->log)) {$this->log = "\n";}
         // DEBUG, INFORMATION, WARNING, ERROR, FATAL
         // Plus OPTIMIZE
 
         if ($logging_level == null) {$logging_level = "WARNING";}
 
+    //get the calling class
+    $trace = debug_backtrace();
+    // Get the class that is asking for who awoke it
+    $class_namespace = $trace[1]['class'];
+    $class_name_array = explode("\\", $class_namespace);
+    $class_name = end($class_name_array);
+
+
         //$t = strip_tags($text);
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
-        $t = str_pad($runtime,10," ",STR_PAD_LEFT) . " " . strip_tags($text);
+        $text = strip_tags($text);
+        $agent_prefix = 'Agent "'. ucwords($class_name) .'"' ;
+
+        $text = str_replace($agent_prefix, "", $text);
+
+        $text = lcfirst($text);
+        $text = trim($text);
+        $t = str_pad($runtime,10," ",STR_PAD_LEFT) . " " . $agent_prefix . ' ' . strip_tags($text);
 
         //if (strtoupper($logging_level) == "INFORMATION") {
 
@@ -1086,7 +1113,8 @@ $query = true;
             default:
                 //echo "i is not equal to 0, 1 or 2";
         }
-
+if ((isset($this->engine_state)) and ($this->engine_state =="test")) {echo $t ."\n";}
+        $this->log_last = $t;
 
 	}
 

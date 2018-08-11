@@ -59,6 +59,10 @@ class Tick
         $this->get();
         $this->readSubject();
 
+            $client= new GearmanClient();
+            $client->addServer();
+
+
 /*
         if (rand(1,20) == 1) {
         // devstack refactor this to use gearman
@@ -90,33 +94,26 @@ class Tick
             $client->doLowBackground("call_agent", $arr);
 */
 
-
+/* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"latency", "subject"=>"s/ latency"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-
-
+*/
+/* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage"));
-
-//                $client= new \GearmanClient();
-//                $client->addServer();
-                //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-
+*/
 /*
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"stack", "subject"=>"s/ stack"));
                 $client->doLowBackground("call_agent", $arr);
 */
+/* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"dummyload", "subject"=>"s/ dummyload"));
-
-//                $client= new \GearmanClient();
-//                $client->addServer();
-                //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-
+*/
 
 /*
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"uuid", "subject"=>"s/ uuid"));
@@ -127,13 +124,14 @@ class Tick
                 $client->doLowBackground("call_agent", $arr);
 */
 
+
+/* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"snow", "subject"=>"s/ snow"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
-                //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-
+*/
 
 /*
                 //        $tallycounter_thing = new Tallycounter($t, 'tallycounter message tally@stackr.ca');
@@ -153,11 +151,7 @@ class Tick
             //$bar = new Bar($this->thing, "bar");
 
             $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ bar"));
-
-            //$client= new \GearmanClient();
-            //$client->addServer();
             $client->doLowBackground("call_agent", $arr);
-
         }
 
 

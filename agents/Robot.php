@@ -114,6 +114,8 @@ class Robot {
 
         }
 
+            $sms .= " | TEXT PRIVACY";
+
             //$sms .= " | counter " . $this->counter;
 
             $this->sms_message = $sms;

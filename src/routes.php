@@ -401,12 +401,11 @@ $app->group('/api', function () use ($app) {
 		$app->group('/thing/{uuid}', function () use ($app)  {
 
 			$app->get('', function ($request, $response, $args)  {
-
 				$uuid = $args['uuid'];
 				$thing = new Thing($uuid);
-
                 //$j = json_decode ($thing->thing);
                 $t = $thing->thing;
+
 
                 // NOMINAL INFORMATION RELEASE
                 // Remove nom_from
@@ -661,6 +660,8 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
+
+
             if ( $thing->thing == false ) {
 
                 $datagram = [];
@@ -677,8 +678,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             }
             $agent = new Agent($thing, $command);
 
-
-            //$agent = new Agent($thing);
             $thing_report = $agent->thing_report;
 
             $thing_report['filename'] = $last;
@@ -721,10 +720,17 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
                 $thing_report['requested_channel'] = "thing";
             }
 
+
             // Flag the Thing Green.
             // Stackr can't accept Red flagged Things from the Internet.
             // Unless ID validated.
             $thing->flagGreen();
+
+            // Report overflow
+            if ($thing->json->size_overflow > 0) {
+                $thing_report['response'] = "Thing overflow: ". $thing->json->size_overflow . " characters not saved.";
+            }
+            //if ($thing->json->size_overflow != false) {echo "Stack write failed.";}
 
             // We have to give a response.  Bleep.
             // So give the full thing report.

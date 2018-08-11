@@ -213,10 +213,10 @@ if ($this->state == false) {
 		$this->thing_report['message'] = $test_message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
 
 
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
         $this->thing_report['help'] = 'This is your Identity.  You can turn your Identity ON and OFF.';
 
 		return;

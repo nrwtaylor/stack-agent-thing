@@ -36,7 +36,9 @@ class Dog {
 
 		$this->readSubject();
 
-        $this->getNegativetime();
+//        $this->getNegativetime();
+        $this->negative_time = null;
+
         $this->getFlag();
 
 		$this->thing_report = $this->respond();

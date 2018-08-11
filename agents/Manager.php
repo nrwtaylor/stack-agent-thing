@@ -94,7 +94,7 @@ $this->queued_jobs = $s['operations']['call_agent']['total'];
 $this->workers_running = $s['operations']['call_agent']['running'];
 $this->workers_connected = $s['operations']['call_agent']['connectedWorkers'];
 
-
+/*
 // Fire off a test message via Gearman
         $arr = json_encode(array("to"=>"console", "from"=>"manager", "subject"=>"ping"));
         $client= new \GearmanClient();
@@ -103,7 +103,7 @@ $this->workers_connected = $s['operations']['call_agent']['connectedWorkers'];
         $client->doHighBackground("call_agent", $arr);
 //        var_dump($client);
 $this->response = "Gearman snowflake worker started.";
-
+*/
 
 
 //echo $this->queued_jobs ." " . $this->workers_running . " of " . $this->workers_connected . " workers (" . $this->queue_engine_version . ")";

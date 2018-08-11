@@ -196,6 +196,8 @@ class Nuuids
     {
         $sms = "NUUIDS | ";
         $sms .= $this->web_prefix . "thing/".$this->uuid."/nuuids.pdf";
+        $sms .= " | TEXT NUUID";
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }

@@ -653,12 +653,15 @@ if (is_array($input)) {$this->coordinate = true; return;}
     {
         $test_message = "<b>COORDINATE " . $this->stringCoordinate($this->coordinate) . "</b>" . '<br>';
 
-        $refreshed_at = $this->refreshed_at;
+        if (!isset($this->refreshed_at)) {
+            $test_message .= "<br>Thing just happened.";
+        } else {
+            $refreshed_at = $this->refreshed_at;
 
-        $test_message .= "<p>";
-        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
-        $test_message .= "<br>Thing happened about ". $ago . " ago.";
-
+            $test_message .= "<p>";
+            $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
+            $test_message .= "<br>Thing happened about ". $ago . " ago.";
+        }
         //$test_message .= '<br>' .$this->whatisthis[$this->state] . '<br>';
 
         //$this->thing_report['sms'] = $this->message['sms'];

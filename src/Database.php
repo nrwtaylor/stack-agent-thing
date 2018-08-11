@@ -880,6 +880,7 @@ $c['errorHandler'] = function ($c) {
 
 	function random($nom_from = null, $n = 1)
     {
+
         if ($nom_from == null) {
             // https://explainextended.com/2009/03/01/selecting-random-rows/
             // https://stackoverflow.com/questions/1244555/how-can-i-optimize-mysqls-order-by-rand-function
@@ -913,8 +914,7 @@ $c['errorHandler'] = function ($c) {
 
     		$sth->execute();
 //	    	$thing = $sth->fetchObject();
-        $things = $sth->fetchAll();
-
+            $things = $sth->fetchAll();
 
   //  		$this->to = $thing->nom_to;
 //	    	$this->from = $thing->nom_from;
@@ -925,7 +925,6 @@ $c['errorHandler'] = function ($c) {
         } else {
 
             $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
-
             $sth = $this->container->db->prepare($q);
 
             $sth->execute();
@@ -944,6 +943,7 @@ $c['errorHandler'] = function ($c) {
 
 	function randomN($nom_from, $n=3) 
     {
+
         // Pick N of identity's things.
 		$sth = $this->container->db->prepare("SELECT * FROM stack WHERE nom_from=:nom_from ORDER BY RAND() LIMIT 3");
 		$sth->bindParam("nom_from", $nom_from);
@@ -990,7 +990,6 @@ $c['errorHandler'] = function ($c) {
 			$nom_to_sql .= ")";
 		}
 
-
         $query = "SELECT * FROM stack WHERE nom_from='". $nom_from . "' and (" . $task_sql . " and " . $nom_to_sql . ") ORDER BY RAND() LIMIT 3";
 
 		$sth = $this->container->db->prepare($query);
@@ -1022,21 +1021,26 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         //echo "'caught' fatal error E_RECOVERABLE_ERROR\n";
         return true;
     } elseif ( E_ERROR===$errno ) {
-        if (ob_get_contents()) ob_clean();
+        // If there is stuff in the screen buffer clear it.
 
+        if (ob_get_contents()) ob_clean();
         //ob_clean();
         echo "BORK | e5ffb5de-a502-466e-8ecc-f0ec9f861e0d";
-        //echo $errno . "\n";
-        //echo $errstr . "\n";
-        //echo $errfile . "\n";
-        //echo $errline . "\n";
+        if(preg_match('(Maximum|execution|time|exceeded)', $errstr) === 1) {
+            echo " | We only a limited amount of steam on this server.";
+        }
 
-        //echo "'caught' fatal E_ERROR | BOUNTY\n";
-        $actual_link = "meep";
+        // echo $errno . "\n";
+        // echo $errstr . "\n";
+        // echo $errfile . "\n";
+        // echo $errline . "\n";
+
+//        echo "'caught' fatal E_ERROR | BOUNTY\n";
+//        $actual_link = "meep";
         // For debugging.
         // https://stackoverflow.com/questions/6768793/get-the-full-url-in-php
-        // $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        // echo $actual_link;
+//        $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+//        echo $actual_link;
 
         return true;
     }
@@ -1050,23 +1054,41 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 
 function fatalErrorShutdownHandler()
 {
+    // Options
+
     // This displays on each uuid end-point
     // echo "#test test test global notification";
-    //exit(); // will not stop display of full Stackr response
+    // exit(); // will not stop display of full Stackr response
+
+    // Present blank screen
+    // ob_clean();
+    // Add text.
+    //echo "BORK | Bounty ";
+
+    // This is the end-point to the full Stackr response.
+    // exit(); // has no effect/affect
+    // Present blank screen
+    // ob_clean();
+
+    //Add text.
+    //echo "BORK | Bounty ";
+    //exit();
 
     $last_error = error_get_last();
     if ($last_error['type'] === E_ERROR) {
         // fatal error
         myErrorHandler(E_ERROR, $last_error['message'], $last_error['file'], $last_error['line']);
     }
-
-    // Present blank screen
-    // ob_clean();
-    // Add text.
-    // echo "BORK | Bounty ";
+        
 
     // This is the end-point to the full Stackr response.
-    // exit(); // has no effect/affect
+    // 
+    //ob_clean(); // Stops buttons and footer.
+    //Add text.
+    //echo "BORK | No response."; // Will appear in the web page
+    // An exit here will cut off the footer display.
+    //exit();
+
 
 }
 

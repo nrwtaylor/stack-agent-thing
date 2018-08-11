@@ -1,7 +1,10 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 require '/var/www/stackr.test/vendor/autoload.php';
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
+
 $GLOBALS['stack'] = '/var/www/stackr.test/';
+//$GLOBALS['stack'] = '/var/www/html/stackr.ca/';
 
 //use GearmanClient;
 //https://stackoverflow.com/questions/36787079/php-class-not-found-when-using-namespace
