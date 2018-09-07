@@ -37,9 +37,9 @@ class Runtime
 
     function __construct(Thing $thing, $agent_input = null) 
     {
-        $this->start_time = microtime(true);
 
-        //if ($agent_input == null) {$agent_input = "";}
+
+        $this->start_time = microtime(true);
 
         $this->agent_input = $agent_input;
 
@@ -107,8 +107,9 @@ class Runtime
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
 
         $this->state = null; // to avoid error messages
+        $this->runtime = false;
 
-        $this->runtime = new Variables($this->thing, "variables runtime " . $this->from);
+        //$this->runtime = new Variables($this->thing, "variables runtime " . $this->from);
 
 
         // Read the subject to determine intent.
@@ -117,6 +118,7 @@ class Runtime
         // Generate a response based on that intent.
         // I think properly capitalized.
         //$this->set();
+
         if ($this->agent_input == null) {
 		    $this->Respond();
         }
@@ -139,19 +141,13 @@ class Runtime
 
     function set()
     {
-//$this->head_code = "0Z15";
-        //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
 
-
+        if ($this->runtime == false) {return;}
 
         $this->runtime->setVariable("refreshed_at", $this->current_time);
         $this->runtime->setVariable("minutes", $this->minutes);
 
-//        $this->flag->setVariable("state", $this->state);
-
         $this->thing->log( $this->agent_prefix .' saved ' . $this->minutes . ".", "DEBUG" );
-
-
 
   //      $this->thing->json->writeVariable( array("run_at", "day"), $this->day );
   //      $this->thing->json->writeVariable( array("run_at", "hour"), $this->hour );
@@ -165,43 +161,8 @@ class Runtime
         return;
     }
 
-/*
-    function getVariable($variable_name = null, $variable = null) {
-
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
-
     function getRuntime()
     {
-
         if (!isset($this->run_time)) {
             if (isset($run_time)) {
                $this->run_time = $run_time;
@@ -209,12 +170,12 @@ class Runtime
                 $this->run_at = "Meep";
             }
         }
-    return $this->run_time;
-
+        return $this->run_time;
     }
 
 
-    function getHeadcodes() {
+    function getHeadcodes()
+    {
 
         $this->headcode_list = array();
         // See if a headcode record exists.
@@ -245,6 +206,7 @@ class Runtime
 
     function get($run_at = null)
     {
+        if ($this->runtime == false) {return;}
 
         $this->minutes = $this->runtime->getVariable("minutes");
 
@@ -252,35 +214,7 @@ class Runtime
         return;
     }
 
-/*
-    function headcodeTime($input = null) {
-
-        if ($input == null) {
-            $input_time = $this->current_time;
-        } else {
-            $input_time = $input;
-        }
-
-        if ($input == "x") {
-            $headcode_time = "x";
-            return $headcode_time;
-        }
-
-
-        $t = strtotime($input_time);
-
-        $this->hour = date("H",$t);
-        $this->minute =  date("i",$t);
-
-        $headcode_time = $this->hour . $this->minute;
-
-        if ($input == null) {$this->headcode_time = $headcode_time;}
-
-        return $headcode_time;
-
-    }
-*/
-    function extractRuntime($input = null) 
+    function extractRuntime($input = null)
     {
 
         $this->minutes = "X";
@@ -341,7 +275,7 @@ class Runtime
 //var_dump($input);
 //var_dump($list);
 
-if (count($list) == 1) { $this->minutes = $list[0];} 
+        if (count($list) == 1) { $this->minutes = $list[0];}
 
 //exit();
 
@@ -405,8 +339,8 @@ if (count($list) == 1) { $this->minutes = $list[0];}
     }
 
 
-    private function makeSMS() {
-
+    private function makeSMS()
+    {
         $sms_message = "RUNTIME";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | minutes " . $this->minutes;
@@ -416,12 +350,10 @@ if (count($list) == 1) { $this->minutes = $list[0];}
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
-
-
     }
 
-	private function Respond() {
-
+	private function Respond()
+    {
 		// Thing actions
 
 		$this->thing->flagGreen();
@@ -465,9 +397,8 @@ if (count($list) == 1) { $this->minutes = $list[0];}
 
 
         if (!$this->thing->isData($this->agent_input)) {
-                        $message_thing = new Message($this->thing, $this->thing_report);
-
-                        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         } else {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
@@ -476,11 +407,7 @@ if (count($list) == 1) { $this->minutes = $list[0];}
 
         $this->thing_report['help'] = 'This is the runtime manager.';
 
-
-
 		return;
-
-
 	}
 
     function isData($variable) {
@@ -498,7 +425,6 @@ if (count($list) == 1) { $this->minutes = $list[0];}
 
     public function readSubject() 
     {
-
         $this->response = null;
         $this->num_hits = 0;
 
@@ -512,8 +438,6 @@ if (count($list) == 1) { $this->minutes = $list[0];}
         } else {
             $input = strtolower($this->subject);
         }
-
-
 		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
@@ -530,6 +454,13 @@ if (count($list) == 1) { $this->minutes = $list[0];}
 
 
         if ($this->agent_input == "extract") {return;}
+
+
+        if (explode(" " , strtolower($this->agent_input))[0] == "extract") {return;}
+
+
+        $this->runtime = new Variables($this->thing, "variables runtime " . $this->from);
+
 
         $pieces = explode(" ", strtolower($input));
 

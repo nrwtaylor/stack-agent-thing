@@ -575,16 +575,12 @@ $route_id = $this->trip_routes[$trip_id];
         } else {
                 $selector_array = array(array("stop_id"=>$station_id_input));
         }
-//var_dump($selector_array);
-//exit();
         for ($stops = $this->nextGtfs("stop_times", $selector_array); $stops->valid(); $stops->next()) {
 
             $stop = $stops->current();
             $trip_id = $stop['trip_id'];
             $stop_id = $stop['stop_id'];
 
-//  var_dump($stop);
-//exit();
           if (!isset($this->trips[$stop_id])) {$this->trips[$stop_id] = array();}
             $this->trips[$stop_id][$trip_id] = $stop;
 
@@ -1045,7 +1041,8 @@ $route_id = $this->trip_routes[$trip_id];
         } else {
             $input = strtolower($this->agent_input);
         }
-
+//var_dump($input);
+//exit();
 
         $input = str_replace("gtfs " , "", $input);
         $arr =  $this->findStop($input);
@@ -1056,13 +1053,21 @@ $route_id = $this->trip_routes[$trip_id];
             $m = "";
             $temp_array = array();
             foreach ($arr as $stop) {
+
+                $station_id = $stop['stop_id'];
+                $this->stations[$station_id] = array("visited"=>false,"station_id"=>$station_id);
+                //var_dump($stop);
+                $this->places[$stop['stop_desc']][$stop['stop_id']] = $stop;
+
                 $temp_array[$stop['stop_desc']][] = $stop['stop_code'];
             }
 
             foreach($temp_array as $stop_desc=>$stops) {
                 $m .= trim(implode(" " ,$stops)) . " " .$stop_desc . " / " ;
-
             }
+
+            //$this->places = $temp_array;
+
 /*
             foreach ($arr as $stop) {
                 $m .= $stop['stop_code'] . " " . $stop['stop_desc'] . " /  ";
@@ -1080,29 +1085,25 @@ $route_id = $this->trip_routes[$trip_id];
         }
 
 
-
         $number = new Number($this->thing, $input);
 
         if(isset($number->numbers[0])) {
+
             $transit_id = $number->numbers[0];
-
-
-//        $number = new Number($this->thing, $input);
-//$transit_id = $number->numbers[0];
-
             $station_id =  $this->idStation($transit_id);
 
-if ($station_id == null) {
-    $this->message = "No match found.";
-    $this->response = "No match found.";
-    return;
-}
+            if ($station_id == null) {
+                $this->message = "No match found.";
+                $this->response = "No match found.";
+                return;
+            }
+
             $this->getStation($station_id);
             $this->station_id = $station_id;
 
-    $this->response = "Collected stop information within 10 hops of this stop.";
-        return;
-}
+            $this->response = "Collected stop information within 10 hops of this stop.";
+            return;
+        }
 
 
         $m = "No matching stops found.";

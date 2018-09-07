@@ -721,16 +721,14 @@ class Snowflake
 
 //var_dump($this->flag->state);
 //exit();
+if (!isset($this->events[0])) {$this->event = false;} else {
 $this->event = $this->events[0];
+}
+
             // Vancouver Pride 2018 
-            if ((isset($this->event)) and
+            if ((isset($this->event)) and ($this->event != false) and
                 ($this->event->event_name == "vancouver pride 2018") or 
                 ((isset($this->flag->state)) and ($this->flag->state == "rainbow"))) {
-
-//            if ((isset($this->event)) and
-//                ($this->event->event_name == "vancouver pride 2018") or 
-//                (($this->flag->state == "rainbow"))) {
-
 
                 $this->selector_hex = substr($this->uuid, 0, 1); // A random number from 0 to 9.
                 $this->selector_dec = $this->hextodec($this->selector_hex);
@@ -1101,7 +1099,7 @@ $this->event = $this->events[0];
 //            $this->angle = ($this->selector_dec % 6) * 30;
 
                 switch (true) {
-                    case ((isset($this->event)) and ($this->event->event_name == "vancouver pride 2018")) :
+                    case ((isset($this->event)) and ($this->event != false) and ($this->event->event_name == "vancouver pride 2018")) :
                         $this->angle = ($this->selector_dec % 6) * 60;
                         $distance = 1/4*sqrt(pow($q,2) + pow($r,2) + pow($s, 2) );
                         $key = $distance % 5;

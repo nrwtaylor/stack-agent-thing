@@ -148,8 +148,6 @@ class Headcode
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/headcode';
 
-
-
 //        $this->thing->log('<pre> Agent "Headcode" running on Thing '. $this->thing->nuuid . '.</pre>');
 //        $this->thing->log('<pre> Agent "Headcode" received this Thing "'.  $this->subject . '".</pre>');
 
@@ -163,7 +161,6 @@ class Headcode
 
         $this->state = null; // to avoid error messages
 
-
         // Read the subject to determine intent.
 		$this->readSubject();
 
@@ -176,16 +173,15 @@ class Headcode
         $this->set();
 
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-
         $this->thing_report['log'] = $this->thing->log;
 
         if (!isset($this->response)) {$this->response = "No response found.";}
+
+        //var_dump($this->response);
         $this->thing_report['response'] = $this->response;
 
 		return;
-
-		}
-
+    }
 
     function set()
     {
@@ -672,7 +668,6 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
     function extractHeadcode($input)
     {
         $head_codes = $this->extractHeadcodes($input);
-//var_dump($head_codes);
         if (!(is_array($head_codes))) {return true;}
 
         if ((is_array($head_codes)) and (count($head_codes) == 1)) {
@@ -1001,7 +996,11 @@ if (!isset($this->index)) {
             // If agent input has been provided then
             // ignore the subject.
             // Might need to review this.
-            $input = strtolower($this->agent_input);
+            if ($this->agent_input == "extract") {
+                $input = strtolower($this->subject);
+            } else {
+                $input = strtolower($this->agent_input);
+            }
         } else {
             $input = strtolower($this->from . " " . $this->subject);
         }
@@ -1012,7 +1011,7 @@ if (!isset($this->index)) {
         $prior_uuid = null;
 
         // Is there a headcode in the provided datagram
-        $this->extractHeadcode($input);
+        $x = $this->extractHeadcode($input);
 
         $this->headcode_id = new Variables($this->thing, "variables headcode " . $this->from);
 
@@ -1022,22 +1021,32 @@ if (!isset($this->index)) {
             if (!isset($this->head_code) or ($this->head_code == false)) {
                 $this->head_code = $this->getVariable('head_code', null);
                 //var_dump($this->head_code);
-            if (!isset($this->head_code) or ($this->head_code == false)) {
-                $this->head_code = "0Z10";
-                //var_dump($this->head_code);
-            }
 
+                if (!isset($this->head_code) or ($this->head_code == false)) {
+                    $this->head_code = "0Z10";
+                    //var_dump($this->head_code);
+                }
             }
         }
 
 
         $this->get();
 
+        if ( ($this->agent_input == "extract") and (strpos(strtolower($this->subject),'roll') !== false )   ) {
+
+//            echo "headcode found was " . $this->head_code ."\n";
+
+            if (strtolower($this->head_code[1]) == "d") {
+                $this->response = true; // Which flags not to use response.  
+                //$this->response = "Not a headcode."; 
+                return;
+            }
+        }
+
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {$this->response = "Extract";return;}
 
         $pieces = explode(" ", strtolower($input));
-
 
 		// So this is really the 'sms' section
 		// Keyword

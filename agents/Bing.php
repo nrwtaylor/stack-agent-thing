@@ -7,12 +7,11 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-// devstack
 
-class Google
+class Bing
 {
 
-    // This does Google Search via Google's API.
+    // This gets Forex from an API.
 
     public $var = 'hello';
 
@@ -20,14 +19,12 @@ class Google
     {
         $this->start_time = $thing->elapsed_runtime();
 
-//        $this->start_time = microtime(true);
-
         $this->agent_input = $agent_input;
 
-        $this->keyword = "mordok";
+        $this->keyword = "bing";
 
         $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
 
         $this->test= "Development code"; // Always
 
@@ -37,23 +34,18 @@ class Google
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
+        $this->agent_prefix = 'Agent "Bing" ';
 
-        $this->agent_prefix = 'Agent "Google" ';
-
-        //$this->node_list = array("off"=>array("on"=>array("off")));
-
-        $this->keywords = array('google','search','web');
+        $this->keywords = array('bing','search','web');
 
         $this->current_time = $this->thing->json->time();
 
+        $this->api_key = $this->thing->container['api']['microsoft']['bing']['key1'];
 
-        $this->global_engine_id = $this->thing->container['api']['google']['custom_search']['global_engine_id'];
-        $this->ca_engine_id = $this->thing->container['api']['google']['custom_search']['ca_engine_id'];
-        $this->api_key = $this->thing->container['api']['google']['custom_search']['api_key'];
+        $this->variables_agent = new Variables($this->thing, "variables " . "bing" . " " . $this->from);
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "google" . " " . $this->from);
-
-        $this->get(); 
+        // Loads in variables.
+        $this->get();
 
 		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
 		$this->thing->log('received this Thing "'.  $this->subject . '".');
@@ -69,6 +61,7 @@ class Google
         $this->thing_report['log'] = $this->thing->log;
 
 		return;
+
 	}
 
 
@@ -109,29 +102,49 @@ class Google
         $keywords = "";
         if (isset($this->search_words)) {$keywords = $this->search_words;}
 
+//        $keywords = str_replace(" ", "%20%", $keywords);
         $keywords = urlencode($keywords);
 
-        if (!isset($this->search_words)) {
-            $keywords = "google";
-        } else {
-            $keywords = urlencode($this->search_words);
-        }
+/*
+$options = array(
+  'http'=>array(
+    'method'=>"GET",
+    'header'=>"Accept-language: application/json\r\n" .
+              "Ocp-Apim-Subscription-Key: " . $this->api_key . "\r\n" .  // check function.stream-context-create on php.net
+              "" // i.e. An iPad 
+  )
+);
+*/
 
-        $data_source = "https://www.googleapis.com/customsearch/v1?key=" . $this->api_key . "&cx=" . $this->ca_engine_id . "&q=" . $keywords;
+$options = array(
+  'http'=>array(
+    'method'=>"GET",
+    'header'=>"Ocp-Apim-Subscription-Key: " . $this->api_key . "\r\n" // check function.stream-context-create on php.net
+  )
+);
 
-        $data = @file_get_contents($data_source);
+        $context = stream_context_create($options);
+
+        $keywords = urlencode($this->search_words);
+
+        $data_source = "https://api.cognitive.microsoft.com/bing/v7.0/search?q=" . $keywords;
+
+        $data = @file_get_contents($data_source, false, $context);
 
         if ($data == false) {
-            $this->response = "Could not ask Google.";
+
+            $this->response = "Could not ask Bing.";
             $this->definitions_count = 0;
+            //$this->events_count = 0;
             return true;
             // Invalid query of some sort.
         }
         $json_data = json_decode($data, TRUE);
 
-        $link = $json_data['items'][0]['link'];
+        $definition = $json_data['webPages']['value'][0]['snippet'];
 
-        $definition = $json_data['items'][0]['snippet'];
+//var_dump($definitions);
+//exit();
 /*
 $count = 0;
 foreach ($definitions as $id=>$definition) {
@@ -141,8 +154,8 @@ foreach ($definitions as $id=>$definition) {
     $count += 1;
 }
 */
+//exit();
 
-        $this->links[0] = $link;
         $this->definitions[0] = $definition;
         $this->definitions_count = 1;
 
@@ -150,23 +163,23 @@ foreach ($definitions as $id=>$definition) {
 
     }
 
+
     function getLink($ref)
     {
         // Give it the message returned from the API service
 
-        $this->link = "https://www.google.com/search?q=" . $ref; 
+        $this->link = "https://www.bing.com/?q=" . $ref; 
         return $this->link;
     }
 
 	private function respond()
     {
 		// Thing actions
-
 		$this->thing->flagGreen();
-		// Generate email response.
 
+		// Generate email response.
 		$to = $this->thing->from;
-		$from = "google";
+		$from = "bing";
 
         $choices = false;
 		$this->thing_report['choices'] = $choices;
@@ -181,30 +194,32 @@ foreach ($definitions as $id=>$definition) {
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
+        $this->thingreportEventful();
+
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
-        $this->thing_report['help'] = 'This provides web search via the Google API.';
+        $this->thing_report['help'] = 'This triggers provides currency prices using the 1forge API.';
 
-        $this->thingreportGoogle();
+//        $this->thingreportBing();
 
 		return;
 	}
 
     public function makeWeb()
     {
-        $html = "<b>GOOGLE</b>";
-        $html .= "<p><b>Google Defintitions</b>";
+        $html = "<b>BING</b>";
+        $html .= "<p><b>Bing Defintitions</b>";
 
-        if (!isset($this->events)) {
-            $html .= "<br>No definitions found on Google.";
-        } else {
+        if (!isset($this->events)) {$html .= "<br>No definitions found on Bing.";} else {
 
             foreach ($this->events as $id=>$event) {
+
                 $event_html = $this->eventString($event);
 
+                //        $link = $this->web_prefix . 'thing/' . $this->uuid . '/splosh';
                 $link = $event['link'];
                 $html_link = '<a href="' . $link . '">';
                 //        $web .= $this->html_image;
@@ -212,27 +227,31 @@ foreach ($definitions as $id=>$definition) {
                 $html_link .= "</a>";
 
                 $html .= "<br>" . $event_html . " " . $html_link;
+                //exit();
             }
         }
-
         $this->html_message = $html;
     }
 
     public function makeSms()
     {
-        $sms = "GOOGLE";
-
+        //$sms = "BING";
+        $sms = strtoupper($this->search_words);
         switch ($this->definitions_count) {
             case 0:
                 $sms .= " | No definitions found.";
                 break;
             case 1:
-                $sms .= " | " .$this->definitions[0] . " " . $this->links[0];
+                $sms .= " | " .$this->definitions[0];
+
+
+
+
                 break;
             default:
                 foreach($this->definitions as $definition) {
                     $sms .= " / " . $definition;
-            }
+                }
         }
 
         $sms .= " | " . $this->response;
@@ -244,7 +263,7 @@ foreach ($definitions as $id=>$definition) {
 
     public function makeMessage()
     {
-        $message = "Google";
+        $message = "Bing";
 
         switch ($this->definitions_count) {
             case 0:
@@ -252,6 +271,7 @@ foreach ($definitions as $id=>$definition) {
                 break;
             case 1:
                 $message .= ' found, "' .$this->definitions[0] . '"';
+
                 break;
             default:
                 foreach($this->definitions as $definition) {
@@ -260,24 +280,52 @@ foreach ($definitions as $id=>$definition) {
 
         }
 
-       // $message .= " | " . $this->response;
+        // Really need to refactor this double :/
 
         $this->message = $message;
 
     }
 
 
-    private function thingreportGoogle()
+    private function thingreportEventful()
     {
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
         $this->thing_report['message'] = $this->message;
     }
 
+    public function extractNumber($input = null)
+    {
+        if ($input == null) {$input = $this->subject;}
+
+        $pieces = explode(" ", strtolower($input));
+
+        // Extract number
+        $matches = 0;
+        foreach ($pieces as $key=>$piece) {
+
+            if (is_numeric($piece)) {
+                $number = $piece;
+                $matches += 1;
+            }
+        }
+
+        if ($matches == 1) {
+            if (is_integer($number)) {
+                $this->number = intval($number);
+            } else {
+                $this->number = floatval($number);
+            }
+        } else {
+            $this->number = true;
+        }
+
+        return $this->number;
+    }
+
     public function readSubject()
     {
         $this->response = null;
-
 
         $this->num_hits = 0;
 
@@ -296,15 +344,19 @@ foreach ($definitions as $id=>$definition) {
 
         $this->input = $input;
 
+		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+
+        //$prior_uuid = null;
+
         $pieces = explode(" ", strtolower($input));
 
 		// So this is really the 'sms' section
 		// Keyword
         if (count($pieces) == 1) {
 
-            if ($input == 'google') {
+            if ($input == 'bing') {
                 //$this->search_words = null;
-                $this->response = "Asked Google about nothing.";
+                $this->response = "Asked Bing about nothing.";
                 return;
             }
 
@@ -314,27 +366,29 @@ foreach ($definitions as $id=>$definition) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
                     switch($piece) {
-
-                    default:
-                    }
-                }
+                        default:
+                     }
+                 }
             }
         }
 
+
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "google is")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("google is"));
-        } elseif (($pos = strpos(strtolower($input), "google")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("google"));
+        if (($pos = strpos(strtolower($input), "bing is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("bing is")); 
+        } elseif (($pos = strpos(strtolower($input), "bing")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("bing")); 
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            $this->response = 'Asked Google about "' . $this->search_words . '".';
+            $this->response = "Asked Bing about the word " . $this->search_words . ".";
             return false;
         }
+
+
 
         $this->response = "Message not understood";
 		return true;

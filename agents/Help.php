@@ -119,7 +119,7 @@ class Help {
     {
 
         $this->sms_message = "HELP | " . ucwords($this->prior_agent) . " | " . $this->help;
-        $this->sms_message .= " | TEXT INFO";
+        //$this->sms_message .= " | TEXT INFO";
         $this->thing_report['sms'] = $this->sms_message;
 
 

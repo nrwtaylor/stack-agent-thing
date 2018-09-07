@@ -5,8 +5,8 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Roll {
-
+class Roll
+{
 	public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
@@ -74,7 +74,6 @@ class Roll {
 
         if ( ($this->roll == false) or ($this->result == false) ) {
 
-
             $this->readSubject();
 
             $this->thing->json->writeVariable( array("roll", "roll"), $this->roll );
@@ -99,9 +98,8 @@ class Roll {
 
 // -----------------------
 
-	private function respond() {
-
-
+	private function respond()
+    {
 		$this->thing->flagGreen();
 
 		// This should be the code to handle non-matching responses.
@@ -127,8 +125,6 @@ class Roll {
 
 $choices = false;
 
-
-
 		// When making an email.
 		// The Thing will have the to address (aka nom_from in db).
 		// The originating agent will have to be passed in this call.
@@ -149,7 +145,7 @@ $choices = false;
  		$this->thing_report["info"] = "This rolls a dice.  See 
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
         if (!isset($this->thing_report['help'])) {
- 		    $this->thing_report["help"] = 'This is about dice with more than 6 sides.  Try "ROLL d20"';
+ 		    $this->thing_report["help"] = 'This is about dice with more than 6 sides.  Try "Roll d20". Or "Roll 3d20+17.';
         }
 
 		//$this->thing_report['sms'] = $this->sms_message;
@@ -166,11 +162,8 @@ $choices = false;
 
 	}
 
-    function makeChoices () {
-
-//        $this->thing->choice->Choose($this->state);
-//        $this->thing->choice->save($this->keyword, $this->state);
-
+    function makeChoices ()
+    {
         $this->thing->choice->Create($this->agent_name, $this->node_list, "roll");
 
         $choices = $this->thing->choice->makeLinks('roll');
@@ -178,8 +171,8 @@ $choices = false;
 
     }
 
-    function makeEmail() {
-
+    function makeEmail()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/roll';
 
         $this->node_list = array("roll"=>array("roll d20", "roll"));
@@ -294,11 +287,6 @@ $choices = false;
 
         return;
     }
-
-
-
-
-
 
 /*
     function extractRoll($input) {
@@ -436,61 +424,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
     }
 
-/*
-    public function makePNG()
-    {
-        if (!isset($this->image)) {$this->makeImage();}
-
-        ob_start();
-        imagepng($this->image);
-        $imagedata = ob_get_contents();
-        ob_clean();
-        ob_end_clean();
-
-//var_dump($imagedata);
-//$imagedata = null;
-        $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
-        $this->PNG = $imagedata;
-
-        $this->thing_report['png'] = $imagedata;
-
-        if (isset($this->result[1]['roll'])) {
-            $alt_text = "Rolled " . $this->roll . " and got " . $this->result[1]['roll'] . ".";
-        } else {
-            $alt_text = "Roll result not available";
-        }
-
-
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
-//        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
-
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata). '"
-                width="100" height="100" 
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
-        //$response = null;
-
-        $this->html_image = $response;
-
-//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
-//                width="100" height="100" 
-//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
-
-
-        //$this->thing_report['png'] = null;
-//        imagedestroy($image);
-
-
-        return $this->thing_report['png'];
-
-        return $response;
-
-//        $this->PNG = $image;    
-//        $this->thing_report['png'] = $image;
-
-//       return;
-    }
-*/
-
     function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
         // draw rectangle without corners
@@ -575,24 +508,22 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     {
 
         //        $input = '2d20+5+d100';
-//        if ($this->agent_input != null) {
-//            $input = strtolower($this->agent_input);
-//        } else {
+        if ($this->agent_input != null) {
+            $input = strtolower($this->agent_input);
+        } else {
             $input = strtolower($this->subject);
-//        }
 
-        // Translate from emoji
-        $temp_thing = new Emoji($this->thing, "emoji");
-        $input = $temp_thing->translated_input; 
+            $temp_thing = new Emoji($this->thing, "emoji");
+            $input = $temp_thing->translated_input; 
+        }
+
 
         $n = substr_count($input, "roll");
 
         //$input=preg_replace('/\b(\S+)(?:\s+\1\b)+/i', '$1', $input);
         $input=preg_replace('/\b(\S+)(?:\s+\1\b)+/i', "roll " . $n ."d6" , $input);
 
-
         $this->getRoll($input);
-
 
 //        $words = explode(" ", $input);
 

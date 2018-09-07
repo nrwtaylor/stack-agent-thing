@@ -16,9 +16,10 @@ class Hey {
 	public $var = 'hello';
 
 
-    function __construct(Thing $thing, $input = null) {
-
-		if ($input == null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->agent_input = $agent_input;
+		if ($agent_input == null) {
 			$this->requested_agent = "Hey";
 		} else {
 			$this->requested_agent = $input;
@@ -31,7 +32,11 @@ class Hey {
 		}
 
 
+
 		$this->thing = $thing;
+
+        $this->current_time = $this->thing->time();
+
 		$this->agent_name = 'hey';
 //	        $thing_report['thing'] = $this->thing->thing;
 
@@ -60,11 +65,13 @@ class Hey {
 		$this->thing->log( '<pre> Agent "Hey" received this Thing "' . $this->subject . '".</pre>');
 
 
+        $this->readSubject();
+
 		$this->thing->log( '<pre> Agent "Hey" startHey() </pre>' );
                 $this->startHey();
 
 
-		$this->readSubject();
+//		$this->readSubject();
 
 		//if ($input != 'screen') {
     	$this->thing->log( '<pre> Agent "Hey" respond() </pre>' );
@@ -72,7 +79,7 @@ class Hey {
 		$this->respond();
 
         $this->thing_report['info'] = 'Hey';
-        $this->thing_report['help'] = 'HEY';
+        $this->thing_report['help'] = "An agent which says, 'Hey'. Type 'Web' on the next line.";
         $this->thing_report['num_hits'] = $this->num_hits;
 
 
@@ -93,6 +100,12 @@ class Hey {
 
 		$this->message = $value;
 		$this->sms_message = $value;
+        $this->max_nod_time = 30;
+
+        //var_dump($this->nod->time_travelled);
+        if ($this->nod->time_travelled > $this->max_nod_time) {
+            $this->sms_message = "Last nod was over " . $this->thing->human_time($this->max_nod_time) . " ago.";
+        }
 
 	    $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable( array("hey", "requested_agent"), $this->requested_agent );
@@ -125,21 +138,64 @@ class Hey {
 	        $this->thing_report['choices'] = $choices;
 
 
-		$this->sms_message = "HEY | " . $this->sms_message . " | REPLY HELP";
+		$this->sms_message = "HEY | " . $this->sms_message . "";
 		$this->thing_report['sms'] = $this->sms_message;
 
 		$this->thing_report['email'] = $this->message;
         $this->thing_report['message'] = $this->message;
 
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
+        $this->makeWeb();
 
 		return $this->thing_report;
 	}
 
+    public function makeWeb()
+    {
+        $html = "<b>HEY</b>";
+
+        $html .= "<br>Last nod html " . $this->nod->last_timestamp;
+
+        $html .= "<br>Last nod sms " . $this->nod->last_created_at;
+
+
+        $timestamp = $this->nod->last_timestamp;
+        $t = explode(" ",$timestamp);
+        $timestamp = $t[0] ." " .$t[1];
+
+        $t1 = strtotime($timestamp);
+        $t2 = strtotime($this->nod->last_created_at);
+
+        $html_time =  (strtotime($this->current_time) - $t1);
+        $sms_time = (strtotime($this->current_time) - $t2);
+
+
+        $nearest_time = min($html_time, $sms_time);
+
+
+        $html .= "<br>Last nod was " . $this->thing->human_time($nearest_time) . " ago.";
+
+      
+        $warranty = new Warranty($this->thing, "warranty");
+
+        $html .= "<p><br>" . "This is a developmental tool. Sometimes it might not work. If you have resources, we hope you can make it more reliable.";
+
+        $html .= "<p><br>" . $warranty->message;
+
+        $this->thing_report['web'] = $html;
+
+
+    }
+
 	public function readSubject()
     {
+        $this->nod = new Nod($this->thing, "nod");
+
+      //var_dump($nod->sms_message);
+//echo ($nod->last_timestamp);
 		$this->response = null;
 		return;
 	}

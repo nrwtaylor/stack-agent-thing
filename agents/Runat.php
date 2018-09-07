@@ -50,6 +50,7 @@ class Runat
 
     function __construct(Thing $thing, $agent_input = null) 
     {
+
         $this->start_time = microtime(true);
 
         //if ($agent_input == null) {$agent_input = "";}
@@ -121,8 +122,8 @@ class Runat
 
         $this->state = null; // to avoid error messages
 
-        $this->runat = new Variables($this->thing, "variables runat " . $this->from);
-
+        //$this->runat = new Variables($this->thing, "variables runat " . $this->from);
+        $this->runat = false;
 
         // Read the subject to determine intent.
 		$this->readSubject();
@@ -134,7 +135,6 @@ class Runat
 		    $this->Respond();
         }
 
-//exit();
         $this->set();
 
 
@@ -152,10 +152,10 @@ class Runat
 
     function set()
     {
-//$this->head_code = "0Z15";
+        //$this->head_code = "0Z15";
         //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
 
-
+        if ($this->runat == false) {return;}
 
         $this->runat->setVariable("refreshed_at", $this->current_time);
         $this->runat->setVariable("day", $this->day);
@@ -259,6 +259,8 @@ class Runat
     function get($run_at = null)
     {
 
+        if ($this->runat == false) {return;}
+
         $this->day = $this->runat->getVariable("day");
         $this->hour = $this->runat->getVariable("hour");
         $this->minute = $this->runat->getVariable("minute");
@@ -267,6 +269,20 @@ class Runat
         return;
     }
 
+    function isToday($text = null)
+    {
+
+        $unixTimestamp = strtotime($this->current_time);
+        $day = date("D", $unixTimestamp);
+
+        if (strtoupper($this->day) == strtoupper($day)) {
+            return true;
+        } else {
+            return false;
+        }
+
+        // true = yes, false = no
+    }
 
     function headcodeTime($input = null) {
 
@@ -325,8 +341,17 @@ class Runat
     {
         $this->parsed_date = date_parse($input);
 
+        //$this->day = $this->parsed_date['year'] ."/".$this->parsed_date['month']. "/" . $this->parsed_date['day'];
+
         $this->minute = $this->parsed_date['minute']; 
         $this->hour = $this->parsed_date['hour']; 
+
+        $this->extractDay($input);
+
+        if ($this->day == false) {
+            $this->day = "X";
+        }
+
 
         if (($this->minute == false) and ($this->hour == false)) {
             $this->minute = "X";
@@ -337,7 +362,7 @@ class Runat
             return null;
         }
 
-        return array($this->hour, $this->minute);
+        return array($this->day,$this->hour, $this->minute);
     }
 
     function extractMeridian($input = null)
@@ -405,6 +430,13 @@ class Runat
     function extractDay($input = null) 
     {
         $this->day = "X";
+
+
+//$unixTimestamp = strtotime($input);
+//$this->day = date("l", $unixTimestamp);
+ 
+
+
         $days = array("MON"=>array("mon","monday","M"),
                       "TUE"=>array("tue","tuesday","Tu"),
                       "WED"=>array("wed","wednesday","W"),
@@ -430,6 +462,19 @@ class Runat
             }
         }
 
+        $this->parsed_date = date_parse($input);
+
+        if (($this->parsed_date['year'] != false) and ($this->parsed_date['month'] != false) and ($this->parsed_date['day'] != false)) {
+
+            $date_string = $this->parsed_date['year'] ."/".$this->parsed_date['month']. "/" . $this->parsed_date['day'];
+
+            $unixTimestamp = strtotime($date_string);
+            $day = date("D", $unixTimestamp);
+
+            if ($this->day == "X") {$this->day = $day;}
+        }
+
+        $this->thing->log("found day " . $this->day . ".");
 
         return $this->day;
     }
@@ -576,10 +621,14 @@ class Runat
 
         //$this->runat = new Variables($this->thing, "variables runat " . $this->from);
 
-
         if ($this->agent_input == "extract") {return;}
 
         $pieces = explode(" ", strtolower($input));
+        if (explode(" " , strtolower($this->agent_input))[0] == "extract") {return;}
+
+
+        $this->runat = new Variables($this->thing, "variables runat " . $this->from);
+
 
     if (($this->day == "X") and ($this->minute == "X") and ($this->hour == "X")) {
 

@@ -26,8 +26,6 @@ class Slack
 
     function __construct(Thing $thing, $input = null)
     {
-//echo "slack.php meep";
-//exit();
 		$this->cost = 50;
 
 		$this->test= "Development code";
@@ -47,6 +45,8 @@ class Slack
        	$this->from = $thing->from;
        	$this->subject = $thing->subject;
 		$this->sqlresponse = null;
+
+        if($this->from == "null@stackr.ca") {return;}
 
 		$this->node_list = array("sms send"=>array("sms send"));
 
@@ -75,8 +75,6 @@ $input =
         "event_time": 1234567890
 }';
 */
-//echo "foobar";
-//echo $input;
 
 $this->set();
 
@@ -128,11 +126,11 @@ $this->set();
                 if (isset ($input['sms'])) {
                     $this->message = $input['sms'];
                 }
-
+/*
         		if (isset ($input['message'])) {
 		            $this->message = $input['message'];
                 }
-
+*/
 	            if (!isset($this->message)) {
     		        $this->message = "Message not set";
 		        }
@@ -240,7 +238,7 @@ exit();
 		$this->channel_id = $this->getChannel();
 		$this->user = $this->getUser();
 		$this->text = $this->getText();
-//var_dump($this->body);
+
 		$this->response_url = $this->body['response_url'];
 
 		return;

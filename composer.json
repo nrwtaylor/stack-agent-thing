@@ -1,6 +1,6 @@
 {
     "name": "nrwtaylor/stack-agent-thing",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Stack Agent Thing framework",
     "require": {
         "nrwtaylor/stack-agent-thing": "@dev",
