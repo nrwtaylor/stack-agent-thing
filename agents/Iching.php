@@ -5,6 +5,9 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+use setasign\Fpdi;
+
+
 class IChing {
 
 	function __construct(Thing $thing)
@@ -13,6 +16,7 @@ class IChing {
         // Generate an iching reading.
 
 		$this->thing = $thing;
+        $this->agent_name = "Iching";
         $this->agent_prefix = 'Agent "Iching"';
 
         $this->thing_report['thing'] = $this->thing->thing;
@@ -28,11 +32,15 @@ class IChing {
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
+        $this->entity_name = $thing->container['stack']['entity_name'];
 
 
-		$this->thing->log($this->agent_prefix . ' running on Thing ' . $this->thing->nuuid .'.');
+        $this->start_time = $this->thing->elapsed_runtime();
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-		$this->thing->log($this->agent_prefix . ' received this Thing "' . $this->subject .  '".');
+		$this->thing->log('running on Thing ' . $this->thing->nuuid .'.');
+
+		$this->thing->log('received this Thing "' . $this->subject .  '".');
 
         $this->node_list = array("iching"=>array("iching","snowflake"));
 
@@ -67,18 +75,14 @@ class IChing {
 
         $this->response();
 
-        //$this->response();
-
-
 		$this->response_format = "text no images";
 
         $this->drawHexagram();
 
-        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
+        $this->thing->log(' ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
 //		$this->thing->log($this->agent_prefix . ' completed with a reading of ' . $this->reading . '.');
         $this->thing_report['log'] = $this->thing->log;
-//exit();
 
 	}
 
@@ -100,32 +104,23 @@ class IChing {
             }
 
 
-        if ($number == 8) {
-                                $line[0] = 'yang';
-                                $line[2] = '';
-                        }
+            if ($number == 8) {
+                $line[0] = 'yang';
+                $line[2] = '';
+            }
 
-                        if ($number == 8) {
-                                $line[0] = 'yang';
-                                $line[2] = 'changing';
-                        }
+            if ($number == 8) {
+               $line[0] = 'yang';
+               $line[2] = 'changing';
+            }
 
-		$lines[] = $line;
+    		$lines[] = $line;
 
-
-//		echo "<br>";
-//		echo $number;
 		}
-
-
-
-
-
-
 	}
 
-	function setReading() {
-
+	function setReading()
+    {
 		// Not used
 
 		$r = "";
@@ -140,33 +135,25 @@ class IChing {
 				}
 			}
 
-                        if ($line[0] == 'yang') {
-                                if ($line[2] == 'changing') { 
-                                        $r .= "6";
-                                } else {
-                                	$r .= "8";
-				}
-                        }
-
-
-
-//			echo "<br>";
+            if ($line[0] == 'yang') {
+                if ($line[2] == 'changing') { 
+                  $r .= "6";
+                } else {
+                    $r .= "8";
+                }
+            }
 		}
 
-//		echo "r" . $r;
 		$this->reading = $r;
 		return $this->reading;
-
 	}
 
-
-	public function response() {
+	public function response()
+    {
 
 		$this->cost = 100;
 
 		// Thing stuff
-
-
 		$this->thing->flagGreen();
 
 		// Compose email
@@ -177,7 +164,6 @@ class IChing {
 
 		$iching_query = $this->subject;
 
-
 		$this->thing->log( 'Agent "Iching" divined a reading of ' . $this->reading. "." );
 
 		$this->lower = $this->trigramLookup( substr($this->reading, 0,3));
@@ -186,16 +172,10 @@ class IChing {
 		$this->hexagram_number = $this->readingtoHexagram();
 		$this->hexagram_text = $this->interpretHexagram($this->hexagram_number);
 
-
-//$this->response = $response;
         $this->makeMessage();
         $this->makeSMS();
 
-
         $response = $this->message;
-
-//			}
-
 
      //   $this->response = $response;
 
@@ -249,6 +229,7 @@ class IChing {
         }
 
 
+        $this->makePdf();
 
 // Prepare PNG
 
@@ -270,14 +251,29 @@ class IChing {
         $response .= "Hexagram ". $this->hexagram_number . ' ' .$this->hexagram_text[0] . ' ' . $this->hexagram_text[1]
             . ' ' . $this->hexagram_text[2] . '<br>';
 
-        if ($this->changinglines() == null) {
+/*
+        if (mb_strlen($this->changinglines()) == 0) {
             $response .= "Unchanging";
         } else {
-            $response .= "Changing lines:";
+            $response .= "Changing lines are";
             $response .= $this->changinglines();
         }
         $response .= '<br><br>';
+*/
 
+        if (mb_strlen($this->changinglines()) == 0) {
+                $response .= " Unchanging.";
+        } else {
+            // Hexagram 小畜 9 xiǎo chù Small Accumulating with changing line 5
+            if (mb_strlen($this->changinglines()) == 2) {
+            $response .= "With changing line";
+            } else {
+                $response .= "With changing lines";
+            }
+            $response .= $this->changinglines();
+        }
+  //      $this->thing_report['sms'] = $this->sms_message;
+        $response .= "<p><br>";
 
         //$response .= '</div';
 
@@ -289,8 +285,8 @@ class IChing {
 
         $response .= "<br>";
 
-        $response .= "upper trigram: ".$this->upper[2] . ' / ' .$this->upper[3] . '<br>';
-        $response .= "lower trigram: ".$this->lower[2] . ' / ' .$this->lower[3] . '<br><br>';
+        $response .= "upper trigram is ".$this->upper[2] . ' / ' .$this->upper[3] . '<br>';
+        $response .= "lower trigram is ".$this->lower[2] . ' / ' .$this->lower[3] . '<br><br>';
 
         // Embed image
         $response .= $this->drawHexagram();
@@ -321,33 +317,131 @@ class IChing {
 
     }
 
+  public function makePDF()
 
-    function makeSMS()
+
     {
+        try {
 
-        $this->sms_message = 'ICHING | ';
-        $this->sms_message .= "Hexagram ". $this->hexagram_number . ' ' . $this->hexagram_text[1]  . ' ' . $this->hexagram_text[2];
+            // I guess Fpdi/Fpdi will be abstracted as Pdf.
+            // But leave that exercise for later.  This is serviceable.
 
-        if ($this->changinglines() == null ) {
-                $this->sms_message .= " unchanging ";
-        } else {
-            if (count($this->changinglines() == 1)) {
-            $this->sms_message .= " with changing line ";
-            } else {
-                $this->sms_message .= " with changing lines ";
-            }
-            $this->sms_message .= $this->changinglines();
-            
+            // initiate FPDI
+            $pdf = new Fpdi\Fpdi();
+
+            $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
+            $pdf->SetFont('Helvetica', '', 10);
+
+            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $s = $pdf->getTemplatesize($tplidx1);
+
+            $pdf->addPage($s['orientation'], $s);
+            $pdf->useTemplate($tplidx1);
+
+            //$this->getNuuid();
+            //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+            //$pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
+
+            //$this->getNuuid();
+            //$pdf->Image($this->png, 5, 18, 20, 20, 'PNG');
+            $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
+
+
+            // Page 2
+            $tplidx2 = $pdf->importPage(2);
+
+            $pdf->addPage($s['orientation'], $s);
+
+
+            $pdf->useTemplate($tplidx2, 0, 0);
+            // Generate some content for page 2
+
+            $pdf->SetFont('Helvetica', '', 10);
+            $this->txt = "".$this->uuid.""; // Pure uuid.
+
+//            $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\iching');
+//            $pdf->Image($this->quick_response_png,175,5,30,30,'PNG');
+
+            $pdf->SetTextColor(0, 0, 0);
+
+            $pdf->SetXY(15, 7);
+
+            $line_height = 4;
+
+            $t = $this->thing_report['sms'];
+
+            $t = utf8_decode($t);
+//setlocale(LC_CTYPE, 'en_US');
+
+//$t = iconv('UTF-8', 'ASCII//TRANSLIT', $t);
+//$pdf->Cell(140, 6, $t, 1);
+
+
+            $pdf->MultiCell( 150, $line_height, $t, 0);
+
+
+            $y = $pdf->GetY() + 0.9;
+            $pdf->SetXY(15, $y);
+            $text = "v0.0.1";
+            $pdf->MultiCell( 150, $line_height, $this->agent_name . " " . $text, 0);
+
+
+
+
+            //$text = $this->timestampSnowflake();
+            //$y = $pdf->GetY() + 0.9;
+            //$pdf->SetXY(15, $y);
+            //$pdf->MultiCell( 150, $line_height, $text, 0);
+
+
+
+
+            $y = $pdf->GetY() + 0.9;
+            $pdf->SetXY(15, $y);
+            $text = "";
+            $pdf->MultiCell( 150, $line_height, $text, 0);
+
+
+            $y = $pdf->GetY() + 0.9;
+            $pdf->SetXY(15, $y);
+            $text = "Pre-printed text and graphics (c) 2018 " . $this->entity_name;
+            $pdf->MultiCell( 150, $line_height, $text, 0);
+
+            $image = $pdf->Output('', 'S');
+            $this->thing_report['pdf'] = $image;
+
+        } catch (Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
-        $this->sms_message .= " | TEXT ICHING <question>";
 
-        $this->thing_report['sms'] = $this->sms_message;
 
+        return $this->thing_report['pdf'];
     }
 
 
-    function makeWeb() {
+    function makeSMS()
+    {
+        $this->sms_message = 'ICHING | ';
+        $this->sms_message .= "Hexagram ". $this->hexagram_text[0] ." ". $this->hexagram_number . ' ' . $this->hexagram_text[1]  . ' ' . $this->hexagram_text[2];
 
+
+        if (mb_strlen($this->changinglines()) == 0) {
+                $this->sms_message .= " unchanging ";
+        } else {
+            // Hexagram 小畜 9 xiǎo chù Small Accumulating with changing line 5
+            if (mb_strlen($this->changinglines()) == 2) {
+
+            $this->sms_message .= " with changing line";
+            } else {
+                $this->sms_message .= " with changing lines";
+            }
+            $this->sms_message .= $this->changinglines();
+        }
+        $this->thing_report['sms'] = $this->sms_message;
+    }
+
+    function makeWeb()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $web = "<center>";
@@ -356,7 +450,6 @@ class IChing {
         $web .= "hexagram</center>";
 
         $this->thing_report['web'] = $web;
-
     }
 
 
@@ -369,14 +462,10 @@ class IChing {
         $this->choices = $choices;
     }
 
-
-
-
-	public function readSubject() {
-
-		$status = true;
-
-	return $status;		
+	public function readSubject()
+    {
+        $status = true;
+        return $status;
 	}
 
 
@@ -496,10 +585,17 @@ class IChing {
 		$imagedata = ob_get_contents();
 		ob_end_clean();
 
+        
+
 		$this->thing_report['png'] = $imagedata;
 
 		//echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
 		$response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram" class="embed"/>';
+
+        $this->html_image = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="snowflake"/>';
+        $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
+        $this->PNG = $imagedata;
+
 
 
 		imagedestroy($im);

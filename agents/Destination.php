@@ -16,7 +16,9 @@ class Destination {
     // Find the trips servicng it.
 
 
-    function __construct(Thing $thing) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
+        $this->agent_input = $agent_input;
 	//function __construct($arguments) {
 
 		//echo $arguments;
@@ -99,80 +101,6 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
         }
 
 
-    function getDestinations()
-    {
-
-        $searchfor = strtoupper($this->search_words);
-        //$searchfor = "MAIN HASTINGS";
-        $file = $GLOBALS['stack_path'] . 'resources/translink/stops.txt';
-        $contents = file_get_contents($file);
-
-        $lines = explode("\n", $contents); // this is your array of words $line 
-
-        $this->matched_lines = array();
-        foreach ($lines as $line) {
-            // if(preg_match('(MAIN|HASTINGS)', $line) === 1) { // echo $line; // 
-            //$matches[] = $line; // $count += 1; // }
-
-            //$needles = array('MAIN','HASTINGS');
-            $needles = explode(" ",$searchfor);
-
-            $regex='/(?=.*?'.implode(')(?=.*?', $needles).')/s';
-            if (preg_match($regex,$line)===1) {
-                //  echo 'true';
-                $this->matched_lines[] = $line;
-                //echo $line;
-                //echo "<br>";
-            }
-        }
-
-        $this->destination_list = array();
-        $this->destination_count = 0;
-        foreach ($this->matched_lines as $line) {
-            $arr = $this->makeDestination($line);
-            $this->destination_list[]  = $arr;
-            $this->destination_count += 1;
-        }
-
-
-        //var_dump($this->destination_list);
-
-        return;
-exit();
-
-$searchfor = "MAIN";
-//        header('Content-Type: text/plain');
-        $pattern = preg_quote($searchfor, '/');
-        // finalise the regular expression, matching the whole line
-        $pattern = "/^.*$pattern.*\$/m";
-
-//$pattern = "^(?=.*?(MAIN))(?=.*?(HASTINGS)).*$^";
-//$pattern = "/^(?=.*?\MAIN\b)(?=.*?\bHASTINGS\b)(?=.*?\bHASTINGS\b).*$/";
-//$pattern = '~\b(HASTINGS|MAIN)\b~i';
-
-//$pattern = '/(?=.*MAIN)/';
-
-//$pattern = '~(?=.*\bMAIN)(?=.*\bHASTING)~i';
-
-        // search, and store all matching occurences in $matches
-        if(preg_match_all($pattern, $contents, $matches)){
-            //echo "Found matches:\n";
-            $m = implode("\n", $matches[0]);
-            var_dump($m);
-exit();
-            $this->matches = $matches;
-            return $m;
-        } else {
-            //echo "no found";            
-            return false;
-            //echo "No matches found";
-        }
-
-
-
-    }
-
-
         function translinkInfo() {
 
 
@@ -187,164 +115,15 @@ exit();
 
         }
 
-        function translinkHelp() {
+        function destinationHelp() {
 
-                        $this->sms_message = "TRANSIT";
+                        $this->sms_message = "DESTINATION";
 //                      if (count($t) > 1) {$this->sms_message .= "ES";}
                         $this->sms_message .= " | ";
-                        $this->sms_message .= 'Text the five-digit stop number for live Translink stop inforation. | For example, "51380". | ';
-                        $this->sms_message .= "TEXT <5-digit stop number>";
+                        $this->sms_message .= 'Text a desired transit place.  | For example "Metrotown". Or "Commercial-Broadway".';
                 return;
 
 
-        }
-
-    function translinkSyntax() {
-
-        $this->sms_message = "TRANSIT";
-//                      if (count($t) > 1) {$this->sms_message .= "ES";}
-        $this->sms_message .= " | ";
-        $this->sms_message .= 'Syntax: "51380". | ';
-        $this->sms_message .= "TEXT HELP";
-
-        return;
-    }
-
-
-	public function stopTranslink($stop) {
-
-        $this->thing->log('Agent "Translink". Start Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
-
-		$this->stop = $stop;
-		try {
-
-			$file = 'http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
-
-			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
-
-
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $file);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$xmldata = curl_exec($ch);
-			curl_close($ch);
-
-			$web_input = $xmldata;
-
-			$this->error = "";
-
-		} catch (Exception $e) {
-			echo 'Caught exception: ',  $e->getMessage(), "\n";
-			$this->error = $e;
-			$web_input = false;
-            $this->sms_message = "Request not understood: " . $this->error;
-
-			return "Request not understood";
-		}
-
-		//echo $web_input;
-
-
-                $xml = simplexml_load_string($web_input);  
-                $t = $xml->NextBus;
-
-                //var_dump($xml);
-                $json_data = json_encode($t,true);
-                //echo $json_data;
-
-                $response = null;
-
-                foreach($t as $item) {
-  $response .= '<li>' . $item->Schedules->Schedule->ExpectedLeaveTime . ' ' . $item->RouteNo . ' ' . $item->RouteName . ' ' . '> ' . $item->Schedules->Schedule->Destination . '</li>';
-                }
-
-                $message = "Thank you for your request for stop " . $stop .".  The next buses are: <p><ul>" . ucwords(strtolower($response)) . '</ul>';
-		$message .= "";
-		$message .= "Source: Translink real-time data feed.";
-
-
-// Hacky here to be refactored.
-// Generate a special short SMS message
-
-$this->sms_message = "";
-$response ="";
-
-                foreach($t as $item) {
- // $response .=  $item->Schedules->Schedule->ExpectedLeaveTime . ' ' . $item->RouteNo . '> ' . $item->Schedules->Schedule->Destination . ' | ';
-
-  $response .=  $item->RouteNo . ' ' . $item->Schedules->Schedule->ExpectedLeaveTime . ' > ' . $item->Schedules->Schedule->Destination . ' | ';
-
-                }
-
-
-
-                	$this->sms_message = "NEXT BUS";
-			if (count($t) > 1) {$this->sms_message .= "ES";}
-
-			$this->sms_message .= " | ";
-
-
-			// Sometimes Translink return 
-			// a date in the time string.  Remove it.
-
-			$input = $response;
-			//$input = "Current from 2014-10-10 to 2015/05/23 and 2001.02.10";
-			$output = preg_replace('/(\d{4}[\.\/\-][01]\d[\.\/\-][0-3]\d)/', '', $input);
-
-			//echo $output;
-
-			if (count($t) == 0) {
-				$this->sms_message .= "No information returned for stop " . $this->stop . ' | ';
-			} else {
-				$this->sms_message .= ucwords(strtolower($output))  ;
-			}
-
-            $this->sms_message .= "Source: Translink | ";
-
-			$this->sms_message .= "TEXT ?";
-
-        $this->thing->log('Agent "Translink". End Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
-
-		return $message;
-	}
-
-
-
-        public function busTranslink($bus_id) {
-
-                try {
-
-                        $file = 'http://api.translink.ca/rttiapi/v1/buses/' . $bus_id . '?apikey=' . $this->api_key;
-
-//http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
-
-                        $web_input = file_get_contents($file);
-
-
-                        $ch = curl_init();
-                        curl_setopt($ch, CURLOPT_URL, $file);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $xmldata = curl_exec($ch);
-                        curl_close($ch);
-
-                        $web_input = $xmldata;
-
-                        $this->error = "";
-
-                } catch (Exception $e) {
-                        echo 'Caught exception: ',  $e->getMessage(), "\n";
-                        $this->error = $e;
-                        $web_input = false;
-			return "Bus information not yet supported";
-                }
-
-		$message = "Here is some xml information" . $web_input;
-		$this->sms_message = "TRANSIT | Bus number service not implemented.";
-		$this->message = "A bus number was provided, but the agent cannot yet respond to this.";
-                //echo $web_input;
-                return $message;
         }
 
 
@@ -365,11 +144,37 @@ $response ="";
 
     }
 
+    public function getDestinations()
+    {
+//            $stop_name = $destination["stop_name"];
+//            $stop_number = $destination["stop_number"];
+
+
+        $this->destination_list = array();
+        $places = $this->gtfs->places;
+//var_dump($places);
+//exit();
+
+        foreach ($places as $stop_desc=>$stops) {
+            foreach($stops as $stop) {
+            //$station_id = $this->gtfs->idStation($stop_code);
+            //$stop = $this->gtfs->getStop($station_id);
+
+            $this->destination_list[] = array("stop_desc"=>$stop['stop_desc'],
+                                                "stop_code"=>$stop['stop_code']);
+
+            }
+
+        }
+
+       // var_dump($this->destination_list);
+//exit();
+    }
+
     public function getDestination() {
 
         if (!isset($this->destination_list)) {$this->getDestinations();}
-//var_dump($this->destination_list);
-//exit();
+
         $this->destination = false;
         if ((is_array($this->destination_list)) and count($this->destination_list) == 1) {$this->destination = $this->destination_list[0];}
 
@@ -382,25 +187,12 @@ $response ="";
 
 	private function respond()
     {
-        $this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
 		// Thing actions
 		$this->thing->flagGreen();
 
-  //      $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['choices'] = false;
         $this->thing_report['info'] = 'SMS sent';
-
-
-
-
-  //              $this->thing_report['email'] = array('to'=>$this->from,
-  //                              'from'=>'transit',
-  //                              'subject' => $this->subject,
-  //                              'message' => $message, 
-  //                              'choices' => false);
-
-
 
 
 		// Generate email response.
@@ -426,23 +218,13 @@ $response ="";
 //$this->sms_message = "hello";
 //$this->thing_report['sms'] = "heelo";
 
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
 
         $this->makeWeb();
 
-// And then at this point if Mordok is on?
-// Run an hour train.
-//$thing = new Mordok($this->thing);
-//If Mordok is on.  Then allow starting of a train automatically.
-//        if (strtolower($thing->state) == "on") {
-
-//            $thing = new Transit($this->thing, "transit " . $this->stop);
-//        }
-
-//exit();
-
-//	$this->thing_report['info'] = 'This is the translink agent responding to a request.';
 	    $this->thing_report['help'] = 'Connector to Translink API.';
 
         $this->thing->log('Agent "Translink". End Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
@@ -455,20 +237,22 @@ $response ="";
 
     public function makeSMS()
     {
-        if (!isset($this->destination)) {$this->getDestination();}
 
-        if ($this->destination == false) {
-            $message = "DESTINATION | " . $this->destination_count . " matches | " . $this->web_prefix . "thing/" . $this->uuid . "/destination";
-        } else {
+       if (!isset($this->destination_list)) {$this->getDestinations();}
+
+ //       if ($this->destination == false) {
+ //           $message = "DESTINATION | " . $this->destination_count . " matches | " . $this->web_prefix . "thing/" . $this->uuid . "/destination";
+ //       } else {
 
 //var_dump($this->destination["stop_name"]);
-            $stop_name = $this->destination["stop_name"];
-            $stop_number = $this->destination["stop_number"];
+ //           $stop_name = $this->destination["stop_name"];
+ //           $stop_number = $this->destination["stop_number"];
 
             $message = "DESTINATION";
-            $message .= " | " . $stop_number;
-            $message .= " | " . $stop_name;
-        }
+ //           $message .= " | " . $stop_number;
+ //           $message .= " | " . $stop_name;
+            $message .= " > " . $this->route_list_text;
+//        }
 
         $this->sms_message = $message;
         $this->thing_report['sms'] = $message;
@@ -486,8 +270,8 @@ $response ="";
         $message = "DESTINATION<br>";
 
         foreach($this->destination_list as $key=> $destination) {
-            $stop_name = $destination["stop_name"];
-            $stop_number = $destination["stop_number"];
+            $stop_name = $destination["stop_desc"];
+            $stop_number = $destination["stop_code"];
 
 
             $message .= $stop_number . " | " . $stop_name . "<br>";
@@ -499,9 +283,8 @@ $response ="";
 
 
 
-	private function nextWord($phrase) {
-
-
+	private function nextWord($phrase)
+    {
 	}
 
     function assertDestination($input)
@@ -523,7 +306,6 @@ $response ="";
         $this->destination_input = $whatIWant;
     }
 
-
 	public function readSubject()
     {
 
@@ -532,6 +314,38 @@ $response ="";
 		$keywords = array('destination');
 
 		$input = strtolower($this->subject);
+
+        $input = str_replace("destination " , "", $input);
+
+        $this->gtfs = new Gtfs($this->thing, $input);
+
+//var_dump($this->gtfs->response);
+var_dump($this->gtfs->thing_report['sms']);
+
+
+foreach ($this->gtfs->stations as $station) {
+
+    $station_id =  $station['station_id'];
+    $this->gtfs->getRoutes($station_id);
+
+    //$route_text = "";
+    foreach ($this->gtfs->routes[$station_id] as $route_id=>$route) {
+        $route_list[$route['route_short_name']] = true;
+        //$route_text .= $route['route_short_name'] . " ";
+    }
+    //echo $route_text;
+}
+
+$route_text = "";
+foreach($route_list as $route_number=>$value) {
+    $route_text .= $route_number . " ";
+}
+
+$this->route_list_text = $route_text;
+$this->response = "Got routes serving " . $input;
+return;
+
+
 
 		$prior_uuid = null;
 
@@ -671,6 +485,3 @@ $response ="";
 
 
 ?>
-
-
-

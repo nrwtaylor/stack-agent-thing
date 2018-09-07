@@ -222,21 +222,6 @@ class Flag
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
-      //$this->node_list = array("flag"=>array("flag"));
-        // Make buttons
-      //  $this->thing->choice->Create($this->agent_name, $this->node_list, "flag");
-      //  $choices = $this->thing->choice->makeLinks('flag');
-/*
-$head= '
-<td>
-<table border="0" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-bottom:0; border-radius:10px">
-<tr>
-<td align="center" valign="top">
-<div padding: 5px; text-align: center">';
-
-
-$foot = "</td></div></td></tr></tbody></table></td></tr>";
-*/
         $web = '<a href="' . $link . '">';
 //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
         $web .= $this->html_image;
@@ -246,16 +231,11 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         $web .= $this->sms_message;
 
-//        $web .= "<br><br>";
-//        $web .= $head;
-//        $web .= $this->choices['button'];
-//        $web .= $foot;
-
         $this->thing_report['web'] = $web;
-
     }
 
-	private function Respond() {
+	private function Respond()
+    {
 
         // At this point state is set
         $this->set($this->state);
@@ -269,18 +249,14 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 		$to = $this->thing->from;
 		$from = $this->keyword;
 
-
-
-
-if ($this->state == "inside nest") {
-    $t = "NOT SET";
-} else {
-       $t = $this->state;
-}
+        if ($this->state == "inside nest") {
+            $t = "NOT SET";
+        } else {
+            $t = $this->state;
+        }
 
         $this->makeSMS();
         $this->makeMessage();
-
 
 		$this->thing_report['email'] = $this->message;
 
@@ -358,8 +334,6 @@ if ($this->state == "inside nest") {
         }
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
-
-
 
     }
 

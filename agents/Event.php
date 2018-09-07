@@ -256,6 +256,7 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->event_code . ' and ' . 
             //true so make a place
             $this->makeEvent(null, $filtered_input);
         }
+
     }
 
     function nextEvent() {
@@ -1310,7 +1311,6 @@ $this->getRuntime();
    case 'create':
    case 'add':
    case 'event':
-
         $this->assertEvent(strtolower($input));
 
         //$this->refvar_dump($this->minute);

@@ -7,8 +7,8 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Number {
-
+class Number
+{
 	function __construct(Thing $thing, $agent_input = null)
     {
 		if ($agent_input == null) {$agent_input = '';}
@@ -25,7 +25,6 @@ class Number {
 		// Get some stuff from the stack which will be helpful.
         //$this->web_prefix = $GLOBALS['web_prefix'];
         $this->web_prefix = $thing->container['stack']['web_prefix'];
-
 
 		$this->stack_state = $thing->container['stack']['state'];
 		$this->short_name = $thing->container['stack']['short_name'];

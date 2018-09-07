@@ -161,11 +161,17 @@ class Sms
 
     function sendSMS($to, $text)
     {
+$type = "text";
+if (strlen($text) != strlen(utf8_decode($text)))
+{
+    $type = "unicode";
+}
 
         $url = 'https://rest.nexmo.com/sms/json?' . http_build_query(
             [
                 'api_key' =>  $this->api_key,
                 'api_secret' => $this->api_secret,
+'type'=>$type,
                 'to' => $to,
                 'from' => $this->to,
                 'text' => $text

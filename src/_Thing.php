@@ -91,12 +91,133 @@ class Thing
         } catch (\Exception $e) {
            echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
+/*
+		if (null === $uuid) {
+
+			// ONLY PLACE IN STACK WHERE UUIDs ARE ASSIGNED
+			//
+			// ---
+			// THIS IS CORE TECHNOLOGY.  THE SELECTION OF THE UUID GENERATOR IS
+			// CRITICAL.  INTENTIONALLY LEFT OPEN AS CHAR(34) DB FIELD.
+
+			$this->uuid = $this->getUUid();
+			$this->nuuid = substr($this->uuid, 0, 4);
+			//$this->uuid = (string) Uuid::uuid4();
+
+            $this->log("Thing made a UUID.");
+
+
+			// And then we pull out some Thing related variables and settings.
+
+			$this->container['thing'] = function ($c) {
+				$db = $c['settings']['thing'];
+				return $db;
+				};
+
+			$this->stack_account = $this->container['thing']['stack_account'];
+			// The settings file can make Thing set up a specific Thing account.
+			$this->thing_account = $this->container['thing']['thing_account'];
+
+			// I'm still working on what the difference between the two really
+			// is.  Settings determine the functioning of the Thing.
+			// Variables are stuff that can be lost when the Thing
+			// deinstantiates.
+
+			// Can't call db here, can only call it when $from is known.
+			// $this->db = new Database($this->uuid, $this->from);
+
+			$this->json = new Json($this->uuid);
+
+            // Testing this as of 15 June 2018.  Not used by framework yet.
+            $this->variables = new Json($this->uuid);
+            $this->variables->setField("variables");
+
+			$this->choice = new Choice($this->uuid);
+
+
+			// Sigh.  Hold this Thing to account.  Unless it is a forager.
+			$this->state = 'foraging'; // Add code link later.
+
+			// Don't create accounts here because that is done on ->Create()
+			// The instatiation function needs to return a minimum clean false
+			// Thing.
+			$this->thing = false;
+
+			// Calling constructor with a uuid that doesn't exist,
+			// returns false, and with a Thing instantiated.  For tasking.
+
+		} else {
+            $this->log("Thing was given a UUID.");
+
+			// Reinstate existing Thing from Stack
+
+			// EXISTING THING IS CONNECTED TO THE STACK.
+
+			// A specific-Uuid has been called by Uuid reference.
+			// This section re-creates a Thing and sets scalar either to 0,
+			// or to Stack value.
+
+			$this->uuid = $uuid;
+			$this->nuuid = substr($this->uuid, 0, 4);
+
+
+			// Is link to the ->db broken when the Thing is deinstantiated.
+			// Assume yes.
+			$this->db = new Database($this->uuid, 'null' . $this->mail_postfix);
+            $this->log("Thing made a db connector.");
+
+			// Provide handler for Json translation from/to MySQL.
+			$this->json = new Json($this->uuid);
+
+            // This is a placeholder for refactoring the Thing variables
+            $this->variables = new Json($this->uuid);
+            $this->variables->setField("variables");
+            $this->log("Thing made a json connector.");
+
+			// Provide handler to support state maps and navigation.
+			// And state persistence through de-instantiation/instantiation.
+            $this->choice = new Choice($this->uuid);
+            $this->log("Thing made a choice connector.");
+
+			// Cost of connecting to a Thing is 100 <units>.
+			// That is set by the stack variable.  No need to do anything here
+			// except load the Things internal balances.
+            $this->loadAccounts();
+            $this->log("Thing loaded accounts.");
+
+			// Examples:
+
+			//$this->account[$account_name] = new Account($this->uuid, $account_name);
+			//$this->account[$account_name]->getBalance(); // Yup.  That easy.
+
+			//$this->account['cost']->getBalance(); // Yup.  That easy.
+
+			//$this->account['run_time'] = new Account($this->uuid, $account_name);
+			//$this->account['run_time']->Create(0, 'time', 'seconds');
+			//$this->account['run_time']->getBalance(); // Yup.  That easy.
+
+			// Pull the Thing's record from the stack.  Providing
+			// $to(stack), $from, $task, $message0-7, ,$variables, $settings
+			// $message0-7 not implemented except for development testing.
+
+			$this->Get();
+
+			// And fire up the stack balance calculation to make 
+			// sure stack balance snapshot is latest.
+			//$this->stackBalance();
+		}
+*/
+
+
+
+//	echo '<pre> thing.php $this->thing: '; print_r($this->thing); echo '</pre>';
 
 //		echo "Stack Balance<br>";
 //		$this->stackBalance($this->uuid);
         $this->log("Thing instantiation completed.");
 
 		return;
+//        return $this->thing;
 
     }
 
@@ -590,14 +711,11 @@ $query = true;
 
 //                $thing= new Thing($uuid);
         $variables = $this->account['stack']->json->array_data;
+//var_dump($variables);
 
         if (isset($variables[$variable_set])) {
 
             $this->$variable_set = (object) array($variables[$variable_set])[0];
-
-            if (!isset($this->$variable_set->$variable)) {
-                $this->$variable_set->$variable = false; //Not found
-            }
 
             return $this->$variable_set->$variable;
         }
@@ -954,12 +1072,13 @@ $query = true;
 
         if ($logging_level == null) {$logging_level = "WARNING";}
 
-        //get the calling class
-        $trace = debug_backtrace();
-        // Get the class that is asking for who awoke it
-        $class_namespace = $trace[1]['class'];
-        $class_name_array = explode("\\", $class_namespace);
-        $class_name = end($class_name_array);
+    //get the calling class
+    $trace = debug_backtrace();
+    // Get the class that is asking for who awoke it
+    $class_namespace = $trace[1]['class'];
+    $class_name_array = explode("\\", $class_namespace);
+    $class_name = end($class_name_array);
+
 
         //$t = strip_tags($text);
         $runtime = number_format($this->elapsed_runtime()) . "ms";
@@ -994,7 +1113,7 @@ $query = true;
             default:
                 //echo "i is not equal to 0, 1 or 2";
         }
-        if ((isset($this->engine_state)) and ($this->engine_state =="test")) {echo $t ."\n";}
+if ((isset($this->engine_state)) and ($this->engine_state =="test")) {echo $t ."\n";}
         $this->log_last = $t;
 
 	}

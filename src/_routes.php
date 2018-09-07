@@ -50,23 +50,28 @@ $app->group('/api', function () use ($app) {
         // Operational end-point for NEXMO
         $app->get('/gearman', function ($request, $response, $args)  {
 
+
             $body = $request->getParsedBody();
 
+            //echo "meep";
 //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
-            $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"snowflake", "subject"=>"snowflake"));
+                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"snowflake", "subject"=>"snowflake"));
 
-            $client= new \GearmanClient();
-            $client->addServer();
+                $client= new \GearmanClient();
+                $client->addServer();
 //$client->addServers("10.0.0.24,10.0.0.25");
 
 //$client->addServer("10.0.0.24");
 //$client->addServer('10.0.0.25');
-            //$client->doNormal("call_agent", $arr);
-            $client->doHighBackground("call_agent", $arr);
-            //echo "Gearman worker called";
+                //$client->doNormal("call_agent", $arr);
+                $client->doHighBackground("call_agent", $arr);
+                //echo "Gearman worker called";
 
             return;
+// $response->withHeader('HTTP/1.0 200 OK')
+//                ->withStatus(200);
         });
+
 
         // Operational end-point for NEXMO
         $app->post('/nexmo', function ($request, $response, $args)  {
@@ -530,8 +535,10 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
     } else {
         $uuid = null;
     }
+
     // Last item is going to be the command
     $last = $params_array[count($params_array)-1];
+
     switch (true) {
         case ($command == null):
         case ($command == "stackr.ca"): //prod
@@ -649,13 +656,13 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             // Everything else
 
             $thing = new Thing($uuid);
+
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
 
 
             if ( $thing->thing == false ) {
-                // Could not find Uuid on current stack
 
                 $datagram = [];
                 $datagram['thing'] = false;

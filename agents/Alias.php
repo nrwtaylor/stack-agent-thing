@@ -26,9 +26,10 @@ class Alias
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
 
-        if ($agent_input == null) {$agent_input = "";}
+//        if ($agent_input == null) {$agent_input = "";}
         $this->agent_input = $agent_input;
         $this->keyword = "alias";
 
@@ -100,6 +101,7 @@ class Alias
 		$this->readSubject();
 
         $this->set();
+
         if ($this->agent_input == null) {
          
 		    $this->respond();

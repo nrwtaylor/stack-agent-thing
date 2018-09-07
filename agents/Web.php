@@ -89,7 +89,7 @@ class Web {
 		//$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
         $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
 
-		$this->sms_message .= " | TEXT WHATIS";
+		$this->sms_message .= " | " . $this->response;
 		$this->thing_report['sms'] = $this->sms_message;
 
 

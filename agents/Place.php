@@ -759,6 +759,12 @@ foreach ($this->old_places as $key =>$row)
         if ((!empty($this->place_code))) {
         $sms .= " | " . trim(strtoupper($this->place_code));
         }
+
+        if ((!empty($this->place_code))) {
+            $sms .= " | " . $this->web_prefix . 'thing/' . $this->uuid . '/place';
+        }
+
+
 /*
 
 //        if (!isset($this->last_refreshed_at) {$this->lastPlace();}

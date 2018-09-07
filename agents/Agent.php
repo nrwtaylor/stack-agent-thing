@@ -70,8 +70,6 @@ and the user UX/UI
 
 }
 */
-        //$this->thing_report = 
-
             $this->readSubject();
 
 
@@ -89,7 +87,6 @@ and the user UX/UI
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
 
-//        $this->thing->container->db->commit();
 		return;
 	}
 
@@ -198,7 +195,6 @@ and the user UX/UI
         // to specific Identities.
 
 		$input = strtolower($this->agent_input . " " . $this->to . " " .$this->subject);
-
         if ($this->agent_input == null) {
             $input = strtolower($this->to . " " . $this->subject);
         } else {
@@ -477,13 +473,26 @@ and the user UX/UI
 
         //$pattern = "|\b[0-9]{1}[A-Za-z]{1}[0-9]{2}\b|";
         //if (preg_match($pattern, $this->to)) {
-        if (count($headcode->head_codes) > 0) { 
+//echo "headcode responded " . $headcode->response."\n";
+//var_dump(!$headcode->response);
+//var_dump($headcode->head_codes);
+//var_dump($headcode->response);
+
+if ($headcode->response === true) {
+// pass echo "not a headcode...";
+} else {
+        //if ( is_string($headcode->head_code)) { 
+
+        if ( (is_array($headcode->head_codes) and (count($headcode->head_codes) > 0))) { 
             $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
             $headcode_thing = new Headcode($this->thing);
             $this->thing_report = $headcode_thing->thing_report;
             return $this->thing_report;
         }
 
+}
+
+//}
 /*
 
         $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
@@ -549,36 +558,7 @@ var_dump($headcode->head_codes);
             if (file_exists($filename)) {
                 $agents[] = $agent_class_name;  
             }
-/*
-        	try {
-                // See if the agent file exists
 
-// Testing this
-            $filename = $this->agents_path .  $agent_class_name . ".php";
-
-            echo file_exists($filename) . " " . $filename;
-//            if (file_exists($filename)) { $agents[] = $agent_class_name; $success = true;}
-
-                include_once __DIR__ . '/' . ucwords($agent_class_name) . '.php';
-                $this->thing->log($this->agent_prefix . 'added ' . $agent_class_name . ' to Agent options.', "INFORMATION");
-				$success = true;
-			} catch (Exception $e) {
-                $success = false;
-			}
-
-			if ($success == true) {
-				$agents[] = $agent_class_name;
-			}
-*/
-/*
-echo "meep";
-            $filename = $GLOBALS['stack_path'] . 'agents\' . $agent_class_name;
-var_dump($filename);
-            if (file_exists($filename)) {
-                $agents[] = $agent_class_name;
-            }
-exit();
-*/
 		}
 
 		//set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
@@ -588,10 +568,10 @@ exit();
         //$agents = array_reverse($agents);
 
 
-// Prefer longer agent names
-usort($agents, function($a, $b) {
-    return strlen($b) <=> strlen($a);
-});
+        // Prefer longer agent names
+        usort($agents, function($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
 
 		foreach ($agents as $agent_class_name) {
 
