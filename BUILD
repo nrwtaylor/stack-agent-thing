@@ -40,8 +40,9 @@ php -S localhost:8080 -t public public/index.php
 6. Verify Roll PNG
 
 7. Install PHP extensions
-sudo apt install php7.1-bcmath
-sudo apt-get install php-bcmath
+sudo apt install php7.2-bcmath
+#sudo apt-get install php-bcmath
+sudo apt-get install php7.2-gd
 restart.
 
 and curl

@@ -50,23 +50,116 @@ $app->group('/api', function () use ($app) {
         // Operational end-point for NEXMO
         $app->get('/gearman', function ($request, $response, $args)  {
 
+
             $body = $request->getParsedBody();
 
+            //echo "meep";
 //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
-            $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"snowflake", "subject"=>"snowflake"));
+                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"snowflake", "subject"=>"snowflake"));
 
-            $client= new \GearmanClient();
-            $client->addServer();
+                $client= new \GearmanClient();
+                $client->addServer();
 //$client->addServers("10.0.0.24,10.0.0.25");
 
 //$client->addServer("10.0.0.24");
 //$client->addServer('10.0.0.25');
-            //$client->doNormal("call_agent", $arr);
-            $client->doHighBackground("call_agent", $arr);
-            //echo "Gearman worker called";
+                //$client->doNormal("call_agent", $arr);
+                $client->doHighBackground("call_agent", $arr);
+                //echo "Gearman worker called";
 
             return;
+// $response->withHeader('HTTP/1.0 200 OK')
+//                ->withStatus(200);
         });
+
+        // Operational end-point for NEXMO
+        $app->post('/webhook_microsoft_qvhs6s4y', function ($request, $response, $args)  {
+//        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
+            $body = $request->getParsedBody();
+
+            //$body = $response->getBody();
+
+
+            ignore_user_abort(true);
+            set_time_limit(0);
+
+            ob_start();
+
+            $prod = true;
+            if ($prod == true) {
+                $serverProtocol = filter_input(INPUT_SERVER, 'SERVER_PROTOCOL', FILTER_SANITIZE_STRING);
+                header($serverProtocol . ' 200 OK');
+                // Disable compression (in case content length is compressed).
+                header('Content-Encoding: none');
+                header('Content-Length: ' . ob_get_length());
+
+                // Close the connection.
+                header('Connection: close');
+
+            } else {
+                header('HTTP/1.0 200 OK');
+                header("Content-Type: application/json");
+                header('Content-Length: '.ob_get_length());
+            }
+
+            ob_end_flush();
+            ob_flush();
+            flush();
+
+//            $microsoft_thing = new Thing(null);
+//            $microsoft_thing->Create( $body['conversation']['id'], $body['from']['id'], $body['text'] );
+
+//        $microsoft_thing->db->setFrom($microsoft_thing->from);
+
+//        $microsoft_thing->json->setField("message0");
+//        $microsoft_thing->json->writeVariable( array("edna") , $body  );
+
+
+
+//            return $response->withHeader('HTTP/1.0 200 OK')
+//                ->withStatus(200);
+
+
+
+            $queue = false;
+            // Flag Red so that the agent handler picks it up.
+            if ($queue) {
+                $to = $body['conversation']['id'];
+
+                $arr = json_encode(array("to"=>$to, "from"=>$body['from']['id'], "subject"=>$body['text']));
+
+                $client= new \GearmanClient();
+                $client->addServer();
+//$client->addServer("10.0.0.24");
+//$client->addServer("10.0.0.25");
+                $client->doNormal("call_agent", $arr);
+                //$client->doHighBackground("call_agent", $arr);
+
+            } else {
+
+                $microsoft_thing = new Thing(null);
+                $microsoft_thing->Create( $body['conversation']['id'], $body['from']['id'], $body['text'] );
+
+                $m = new Microsoft($microsoft_thing, $body);
+
+//        $microsoft_thing->json->setField("message0");
+//        $microsoft_thing->json->writeVariable( array("edna") , $body  );
+
+
+                $agent = new Agent($microsoft_thing);
+            }
+
+            $message = "Stackr received a message from ";
+            $message .= $body['msisdn'] . " to " . $body['to'];
+            $message .= " which said " . $body['text'] . ".";
+
+
+            return $response->withHeader('HTTP/1.0 200 OK')
+                ->withStatus(200);
+
+
+        });
+
 
         // Operational end-point for NEXMO
         $app->post('/nexmo', function ($request, $response, $args)  {
@@ -530,8 +623,10 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
     } else {
         $uuid = null;
     }
+
     // Last item is going to be the command
     $last = $params_array[count($params_array)-1];
+
     switch (true) {
         case ($command == null):
         case ($command == "stackr.ca"): //prod
@@ -649,13 +744,13 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
             // Everything else
 
             $thing = new Thing($uuid);
+
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
 
 
             if ( $thing->thing == false ) {
-                // Could not find Uuid on current stack
 
                 $datagram = [];
                 $datagram['thing'] = false;

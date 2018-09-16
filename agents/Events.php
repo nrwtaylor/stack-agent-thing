@@ -55,10 +55,6 @@ class Events
 
 		$this->readSubject();
 
-        //$this->doCriticalhit();
-//        $this->criticalhitDo();
-
-
 		$this->respond();
 
         $this->set();
@@ -74,13 +70,9 @@ class Events
     {
         // UK Commonwealth spelling
         $this->thing->json->setField("variables");
-        //$names = $this->thing->json->writeVariable( array("critical_hit", "roll"), $this->roll );
 
         $time_string = $this->thing->time();
         $this->thing->json->writeVariable( array("events", "refreshed_at"), $time_string );
-
-//        $splosh_timestamp = $this->thing->microtime();
-//        $this->thing->json->writeVariable( array("splosh", "timestamp"), $splosh_timestamp );
 
     }
 
@@ -131,6 +123,33 @@ class Events
 		return $this->thing_report;
 	}
 
+    public function eventString($event) 
+    {
+        $event_date = date_parse($event['runat']);
+        $month_number = $event_date['month'];
+        $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
+
+        $simple_date_text = $month_name . " " . $event_date['day'];
+        $event_string = ""  . $simple_date_text;
+        $event_string .= " "  . $event['event'];
+
+        $runat = new Runat($this->thing, "extract " . $event['runat']);
+
+        $event_string .= " "  . $runat->day;
+        $event_string .= " "  . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
+        $event_string .= ":"  . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
+
+        $run_time = new Runtime($this->thing, "extract " .$event['runtime']);
+
+        if ($event['runtime'] != "X") {
+            $event_string .= " " . $this->thing->human_time($run_time->minutes);
+        }
+
+        $event_string .= " "  . $event['place'];
+        return $event_string;
+    }
+
+
     function thingreportEvents()
     {
         $this->thing_report['message'] = $this->message;
@@ -158,12 +177,21 @@ class Events
         $this->events = array_merge($this->events, $this->eventful->events);
 
         $this->meetup = new Meetup($this->thing, "meetup ". $keywords);
+
+
         $this->events = array_merge($this->events, $this->meetup->events);
 
         $this->brownpapertickets = new Brownpapertickets($this->thing, "brownpapertickets ". $keywords);
         $this->events = array_merge($this->events, $this->brownpapertickets->events);
 
-
+$this->thing->log("start sort");
+$runat = array();
+foreach ($this->events as $key => $row)
+{
+    $runat[$key] = $row['runat'];
+}
+array_multisort($runat, SORT_ASC, $this->events);
+$this->thing->log("end sort");
 
         //$this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
 
@@ -290,14 +318,22 @@ class Events
 
         $html .= "<p>";
         foreach($this->events as $id=>$event) {
-            // devstack Need to move the event string code to Event.php
-//var_dump($event);
-//exit();
-            $e = $event['event'];
-            $runat = $event['runat'];
-            $p = $event['place'];
-            //$e = $this->eventful->eventString($event);
-            $html .= "<br>" . ($e). " " . $runat . " " . $p;
+
+                $event_html = $this->eventString($event);
+
+                $link = $event['link'];
+
+// https://stackoverflow.com/questions/8591623/checking-if-a-url-has-http-at-the-beginning-inserting-if-not
+$parsed = parse_url($link);
+if (empty($parsed['scheme'])) {
+    $link = 'http://' . ltrim($link, '/');
+}
+
+                $html_link = '<a href="' . $link . '">';
+                $html_link .= "link";
+                $html_link .= "</a>";
+
+                $html .= "<p>" . $event_html . " " . $html_link;
         }
 
         $this->web_message = $html;

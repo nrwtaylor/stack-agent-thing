@@ -242,6 +242,9 @@ echo $this->response;
 
         }
 
+//var_dump($this->train_thing);
+//exit();
+
                 $this->train_thing->index = $this->train_thing->getVariable("train", "index");
                 if ($this->train_thing->index > $this->max_index) {$this->max_index = $this->train_thing->index;}
 
@@ -294,7 +297,6 @@ echo $this->response;
             $variables_json= $train_thing['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
 
-
             $thing->json->setField("variables");
 
             $thing->index = $thing->getVariable("train", "index");
@@ -320,7 +322,6 @@ echo $this->response;
             } else {
                 $thing->end_at = null;
             }
-
 
             $this->previous_trains[] = array("index"=>$thing->index, "head_code"=>$thing->head_code, 
                 "run_at"=>$thing->run_at,"end_at"=>$thing->end_at,"runtime"=>$thing->runtime, "alias"=>$thing->alias,
@@ -374,7 +375,7 @@ $train = null;
 
                 $this->thing->log($this->agent_prefix . "found a valid train.");
                 $this->info = "current train retrieved";
-
+                $this->response = "Retrieved the current train.";
                 // Load the Train into this Thing.
                 //$this->train_thing = $trea;
 
@@ -393,8 +394,8 @@ $train = null;
                 $this->available = $this->getAvailable();
                 $this->end_at = $this->getEndat();
 
-                //$this->train_thing = $this->thing;
-                $this->train_thing = true;
+                $this->train_thing = $this->thing;
+                //$this->train_thing = true;
                 break;
 
             case ($match == false):
@@ -402,7 +403,7 @@ $train = null;
                 // Recent train.  Perhaps running late?
                 $train_thing = $findagent_thing->thing_report['things'][0];
                 $this->info = "last train retrieved";
-
+                $this->response = "Retrieved the last train.";
                 // No valid train found, so make a block record in current Thing
                 // and set flag to Green ie accepting trains.
                 $this->thing->log('Agent "Train" did not find a valid train at traintime ' . $this->trainTime($train_time) . "." );
@@ -437,6 +438,7 @@ $train = null;
                 break;
             case (false) :
                 $this->info = "special created";
+                $this->response = "Created a special train.";
                 $this->train_thing = $this->thing;
                 $this->train_thing->index = $this->max_index + 1;
                 $this->head_code = "2Z" . rand(20,29);
@@ -482,8 +484,9 @@ $train = null;
 
     }
 
-    function dropTrain() {
-        $this->thing->log($this->agent_prefix . "was asked to drop a train.");
+    function dropTrain()
+    {
+        $this->thing->log("was asked to drop a train.");
 
         //$this->get(); No need as it ran on start up.
 
@@ -602,7 +605,6 @@ $train = null;
     function makeTrain($head_code, $alias = null, $run_at = null, $runtime = null)
     {
 
-
 //        if ($alias == null) {$alias = "X";}
 
         // See if the code or name already exists
@@ -635,6 +637,7 @@ $train = null;
             $run_at = $this->run_at;
         }
 
+        $runtime_minutes = "X";
         if ($runtime == null) {
             $this->getRuntime(); // which is runtime
             if ( (!isset($this->runtime->minutes)) 
@@ -655,8 +658,8 @@ $train = null;
 
         $this->state = "stopped";
 
-        if ($runtime == "X") {
-            $runtime = 45;
+        if ($runtime_minutes == "X") {
+            $runtime_minutes = 45;
         }
 
         if ($run_at == "X") {
@@ -665,7 +668,7 @@ $train = null;
 
         $this->getAvailable();
 
-        $this->thing->log('Agent "Train" will make a Train with ' . $this->trainTime($run_at) . " " . $runtime_minutes . " " . $this->runtime->minutes . ".");
+        $this->thing->log('will make a Train with ' . $this->trainTime($run_at) . " " . $runtime_minutes . " " . $this->runtime->minutes . ".");
 
         $shift_override = true;
         $shift_state = "off";
@@ -717,7 +720,7 @@ $train = null;
 
         $this->set();
 
-        $this->thing->log('Agent "Train" found a run_at and a runtime and made a Train.');
+        $this->thing->log('found a run_at and a runtime and made a Train.');
 
     }
 
@@ -952,7 +955,7 @@ $train_day = $this->day;
 
         switch (true) {
             case ( (strtoupper($this->end_at) != "X") and (strtoupper($this->end_at) != "Z")) :
-                $this->run_at = strtotime( $this->end_at . "-" . $this->runtime. "minutes");
+                $this->run_at = strtotime( $this->end_at . "-" . $this->runtime->minutes. "minutes");
                 break;
             default:
                 $this->run_at = $this->trainTime();
@@ -1703,8 +1706,8 @@ $this->getConsist();
         }
 
         if ($this->verbosity >= 1) {
-            if (isset($this->info)) {
-                $sms_message .= " | info " . $this->info;
+            if (isset($this->response)) {
+                $sms_message .= " | " . $this->response;
             }
         }
         

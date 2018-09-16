@@ -55,6 +55,8 @@ class Button
 		$this->thing->log('Agent "Button" running on Thing ' . $this->thing->nuuid . ".");
 		$this->thing->log('Agent "Button" received this Thing, "' . $this->subject .  '".') ;
 
+$this->getBody();
+
 		$this->readSubject();
         if ($this->agent_input == null) {
 		    $this->respond();
@@ -67,6 +69,28 @@ class Button
 
     }
 
+
+    function getBody()
+    {
+ $t = '{"agent":[],"slack":{"type":"interactive_message","actions":[{"name":"Roll","type":"button","value":"Roll"}],"callback_id":"slack_button_9f4c1b29-5081-4911-bf08-e06f79f8bad2","team":{"id":"T6M85G0RE",
+"domain":"mordok"},"channel":{"id":"C6NQ4A3KQ","name":"general"},"user":{"id":"U6NQ4A34N","name":"nrwtaylor"},
+"action_ts":"1536625769.232832","message_ts":"1536625765.000100","attachment_id":"1","token":"gJQZR2QFAQYNVMTlvbUbgqeC",
+"is_app_unfurl":false,"original_message":{"text":"ROLL | 6","username":"Mordok","icons":{"emoji":":alien:",
+"image_64":"https:\/\/a.slack-edge.com\/37d58\/img\/emoji_2017_12_06\/apple\/1f47d.png"},
+"bot_id":"B6N5VCYCV","attachments":[{"callback_id":"slack_button_9f4c1b29-5081-4911-bf08-e06f79f8bad2",
+"fallback":"TEXT [ Forget | Roll | Roll d20 ]","id":1,"color":"719e40","actions":[{"id":"1","name":"Roll",
+"text":"Roll","type":"button","value":"Roll","style":""}]}],"type":"message","subtype":"bot_message",
+"ts":"1536625765.000100"},"response_url":"https:\/\/hooks.slack.com\/actions\/T6M85G0RE\/433921910887\/V07CYVQFXUPxX5HnWJQ3EzaB","trigger_id":"432877505426.225277544864.bd6f0e4cf3baef4748f832ec8340dd4a"}}';
+
+
+
+        $bodies = json_decode($this->thing->thing->message0, true);
+        $this->body = $bodies['slack'];
+
+$this->body = json_decode($t);
+//var_dump($this->body);
+
+    }
 
     function set($requested_state = null)
     {
@@ -310,6 +334,7 @@ class Button
     {
 
         if ($this->agent_input != null) {
+            $this->response = "Saw an agent instruction and didn't read further.";
             return;
         }
 

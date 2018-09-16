@@ -20,8 +20,6 @@ class Google
     {
         $this->start_time = $thing->elapsed_runtime();
 
-//        $this->start_time = microtime(true);
-
         $this->agent_input = $agent_input;
 
         $this->keyword = "mordok";
@@ -132,6 +130,7 @@ class Google
         $link = $json_data['items'][0]['link'];
 
         $definition = $json_data['items'][0]['snippet'];
+
 /*
 $count = 0;
 foreach ($definitions as $id=>$definition) {

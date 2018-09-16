@@ -26,7 +26,6 @@ class Robot {
         $user_agent = $this->thing->container['api']['robot']['user_agent'];
         ini_set('user_agent', $user_agent);
 
-
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
@@ -68,10 +67,6 @@ class Robot {
     {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-//        $this->thing->choice->save('usermanager', $this->state);
-
-        return;
     }
 
 
@@ -83,14 +78,19 @@ class Robot {
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".");
 
         $this->counter = $this->counter + 1;
-
-        return;
     }
 
 
     function makeTXT()
     {
-        $txt = 'User-agent: *';
+        // https://developers.google.com/search/reference/robots_txt
+
+        $txt = "# welcome robot\n";
+
+        $jarvis = new Jarvis($this->thing,"jarvis");
+        $txt .= "# " . $jarvis->sms_message . "\n";
+
+        $txt .= 'User-agent: *';
         $txt .= "\n";
 
         $txt .= 'Disallow:';
@@ -123,8 +123,8 @@ class Robot {
 
     }
 
-    private function makeEmail() {
-
+    private function makeEmail()
+    {
         switch ($this->counter) {
             case 1:
                 $subject = "Hello Robot";
@@ -159,8 +159,8 @@ class Robot {
 
 
 
-	public function respond() {
-
+	public function respond()
+    {
 		// Thing actions
 		$this->thing->flagGreen();
 
@@ -189,13 +189,11 @@ class Robot {
 		return;
 	}
 
-
-	function start() {
-
+	function start()
+    {
         // Call the Usermanager agent and update the state
         $agent = new Usermanager($this->thing, "robot start");
         $this->thing->log( $this->agent_prefix .'called the Usermanager to update user state to start.' );
-
 
 		return;
 	}
@@ -240,9 +238,8 @@ class Robot {
         }
 
         // page is not disallowed
-        return true;    
+        return true;
     }
-
 
     function getRobots($url)
     {

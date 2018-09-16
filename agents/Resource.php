@@ -10,9 +10,13 @@ ini_set("allow_url_fopen", 1);
 class Resource
 {
 
-    // This is a place.
+    // This is a resource.
 
-    //
+    // A resource for this machine is piles and streams of text.
+
+    // And recognizing which pieces of text are valuable.
+    // Responds (devstack) to "resource is".
+    // And (devstack) nextResource.
 
     // This is an agent of a place.  They can probaby do a lot for somebody.
     // With the right questions.
@@ -74,6 +78,8 @@ class Resource
 
         $this->state = null; // to avoid error messages
 
+//        $this->findResource("Geographical Name","New Westminster");
+
 
         // Read the subject to determine intent.
 
@@ -98,6 +104,101 @@ class Resource
         $this->thing_report['log'] = $this->thing->log;
 
 		return;
+    }
+
+
+
+    function nextResource($file_name, $selector_array = null)
+    {
+        //if ($file_name == null) {
+            $resource_name = "resources/places_canada/cgn_bc_csv_eng.csv";
+        //}
+
+
+        //$this->thing->log("nextGtfs " . $file_name . " ");
+        $split_time = $this->thing->elapsed_runtime();
+
+//        $file = $GLOBALS['stack_path'] . 'resources/translink/' . $file_name . '.txt';
+        $file = $GLOBALS['stack_path'] . $resource_name;
+
+
+        $handle = fopen($file, "r");
+        $line_number = 0;
+       while(!feof($handle)) {
+            $line = trim(fgets($handle));
+            $line_number += 1;
+            //echo ".";
+            // Get headers
+            if ($line_number == 1) {
+                $i = 0;
+                $field_names = explode(",",$line);
+
+                foreach ($field_names as $field){ 
+                    $field_names[$i] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
+                    $i += 1;
+                }
+                continue;
+            }
+
+
+            //$line = trim(fgets($handle));
+            $arr = array();
+            $field_values = explode(",",$line);
+            $i = 0;
+            foreach($field_names as $field_name) {
+                if (!isset($field_values[$i])) {$field_values[$i] = null;}
+                $arr[$field_name] = $field_values[$i];
+                $i += 1;
+            }
+
+            // If there is no selector array, just return it.
+            if ($selector_array == null) {yield $arr;continue;}
+
+            if (array_key_exists(0,$selector_array)) {
+            } else {
+                 $selector_array = array($selector_array);
+            }
+
+            // Otherwise see if it matches the selector array.
+            $match_count = 0;
+            $match = true;
+            foreach ($arr as $field_name=>$field_value) {
+
+                //if ($selector_array == null) {$matches[] = $iteration; continue;}
+
+                // Look for all items in the selector_array matching
+                if ($selector_array == null) {continue;}
+
+                foreach ($selector_array as $selector) {
+                    //var_dump($selector_array);
+
+                    foreach ($selector as $selector_name=>$selector_value) {
+
+                        if ($selector_name != $field_name) {continue;}
+
+                        if ($selector_value == $field_value) {
+
+                            $match_count += 1;
+                        } else {
+                            $match = false; 
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if ($match == false) {continue;}
+
+            yield $arr;
+
+        }
+
+        fclose($handle);
+
+        $this->thing->log('nextGtfs took ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.');
+
+
+
     }
 
 
@@ -199,6 +300,56 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
         return false;
     }
 
+    function findResource($category = null, $value = null)
+    {
+
+
+        if ($value == null) {
+            $value = "Vancouver"; // Largest population center ... see what resources there are
+        }
+
+        if ($category == null) {
+            $category = "Geographical Name";
+        }
+//var_dump($category);
+//var_dump($value);
+        // Is this find?
+
+        //$selector_array = array(array("stop_id"=>$station_id_input));
+        $selector_array = array($category=>$value);
+
+        $this->resources = array();
+        for ($resources = $this->nextResource("meep", $selector_array); $resources->valid(); $resources->next()) {
+
+            $resource = $resources->current();
+            $id = $resource['CGNDB ID'];
+
+
+            $code = $resource['Concise Code'];
+            $description = $resource['Generic Term'];
+
+            $latitude = $resource['Latitude'];
+            $longitude = $resource['Longitude'];
+            $name = $resource['Geographical Name'];
+
+            $resource = array("name"=>$name,
+                                "code"=>$code,
+                                "latitude"=>$latitude,
+                                "longitude"=>$longitude,
+                                "description"=>$description,
+                                "quantity"=>1,
+                                "id"=>$id);
+
+            // Not sure about using BC place code to identify resource
+            // Decided id is better
+            $this->resources[$name][$id] = $resource;
+
+        }
+
+
+
+    }
+
     function getResource($selector = null)
     {
         foreach ($this->resources as $resource) {
@@ -206,7 +357,7 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
             // need to get places returning known relevant places
 
             if (($resource['name'] == $selector)) {
-
+//var_dump($resource);
                 $this->resource_name = $resource['name'];
                 $this->resource_quantity = $resource['quantity'];
                 $this->place = new Variables($this->thing, "variables " . $this->resource_name . " " . $this->from);
@@ -260,7 +411,7 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
                 if(isset($variables['resource']['resource_quantity'])) {$resource_quantity = $variables['resource']['resource_quantity'];}
                 if(isset($variables['resource']['resource_name'])) {$resource_name = $variables['resource']['resource_name'];}
 
-                $this->resources[] = array("quantity"=>$resource_quantity, "name"=>$resource_name);
+                $this->resources[$resource_name] = array("quantity"=>$resource_quantity, "name"=>$resource_name);
                 //$variables['place'][] = $thing_object['task'];
           //      $this->placecode_list[] = $place_code;
                 $this->resourcename_list[] = $resource_name;
@@ -452,6 +603,7 @@ var_dump($this->resource_name);
             if (!isset($this->resources)) {$this->getResources();}
 
             foreach ($this->resources as $resource) {
+
                 $resource_name = strtolower($resource['name']);
                 $resource_quantity = strtolower($resource['quantity']);
 

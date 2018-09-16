@@ -468,15 +468,7 @@ and the user UX/UI
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
 
-        // Is it sent to a headcode?
-        // Refactor to check this pattern with Headcode
 
-        //$pattern = "|\b[0-9]{1}[A-Za-z]{1}[0-9]{2}\b|";
-        //if (preg_match($pattern, $this->to)) {
-//echo "headcode responded " . $headcode->response."\n";
-//var_dump(!$headcode->response);
-//var_dump($headcode->head_codes);
-//var_dump($headcode->response);
 
 if ($headcode->response === true) {
 // pass echo "not a headcode...";
@@ -492,23 +484,6 @@ if ($headcode->response === true) {
 
 }
 
-//}
-/*
-
-        $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
-        $headcode = new Headcode($this->thing, "headcode");
-        $headcode->extractHeadcodes();
-var_dump($headcode->head_codes);
-        if(isset($this->headcode)) {echo "Burp";}
-//var_dump($headcode);
-//exit();
-        $this->thing_report = $headcode->thing_report;
-//        $this->thing_report = $headcode_thing->thing_report;
-//        return $this->thing_report;
-//    }
-
-
-*/
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
         $this->thing->log( '<pre> Agent created a Robot agent</pre>', "INFORMATION" );
@@ -530,7 +505,6 @@ var_dump($headcode->head_codes);
 
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
-//var_dump($arr);
 
         // Added this March 6, 2018.  Testing.
         if ($this->agent_input == null) {
@@ -604,6 +578,12 @@ var_dump($headcode->head_codes);
                 $this->thing->log( $this->agent_prefix .'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
 				//$agent = new $agent_class_name($this->thing);
                 $agent = new $agent_namespace_name($this->thing);
+
+                // If the agent returns true it states it's response is not to be used.
+                if ((isset($agent->response)) and ($agent->response === true)) {
+                    throw new Exception("Flagged true.");
+                }
+
 				$this->thing_report = $agent->thing_report;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
@@ -946,6 +926,23 @@ echo "place found";
         if ($this->from == "1327328917385978") { // Facebook Messenger Mordok
             $mordok_thing = new Mordok($this->thing);
             $this->thing_report = $mordok_thing->thing_report;
+            return $this->thing_report;
+        }
+
+
+
+        // Expand out emoji early
+        // devstack - replace this with a fast general character
+        // character recognizer of concepts.
+
+
+        $chinese_thing = new Chinese($this->thing, "chinese");
+        $this->thing_report = $chinese_thing->thing_report;
+
+        if ($chinese_thing->word != null) {
+            // Emoji found.
+            $chinese_thing = new Chinese($this->thing);
+            $this->thing_report = $chinese_thing->thing_report;
             return $this->thing_report;
         }
 
