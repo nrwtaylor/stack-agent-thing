@@ -111,7 +111,9 @@ class Eventful
         //    If count_only is set, an abbreviated version of the output will be returned. Only total_items and search_time elements are included in the result. (optional) 
 
         // devstack create City agent
-        $city = "vancouver";
+        //$city = "vancouver";
+        $c = new City($this->thing,"city");
+        $city = $c->city_name;
         // "America/Vancouver" apparently
 
         $keywords = "";

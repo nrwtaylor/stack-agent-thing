@@ -3,16 +3,9 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Geekenders
 {
-    // An exercise in augemented virtual collaboration. With water.
-    // But a Thing needs to know what minding the gap is.
+    // https://www.facebook.com/Geekenders/
 
 	public $var = 'hello';
-
-    // This will provide a splosh - a unit of energy converted into a sploshed unit of distance.
-    // This is useful for SPLOSH because it is the first step in provided the distance travelled down a path.
-    // When provided with a random time interval series of energy inputs.
-
-    // See getEnergy() for dev
 
     function __construct(Thing $thing, $agent_input = null)
     {
@@ -40,7 +33,6 @@ class Geekenders
         $this->thing->log( 'received this Agent Input "' . $this->subject . '"');
 
         // Get some stuff from the stack which will be helpful.
-        // Until SPLOSH gets its own.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
@@ -52,16 +44,11 @@ class Geekenders
 
 		$this->readSubject();
 
-        //$this->doCriticalhit();
-//        $this->criticalhitDo();
-
-
 		$this->respond();
 
         $this->set();
 
 		$this->thing->log( 'completed.');
-
 
 		return;
     }
@@ -71,14 +58,9 @@ class Geekenders
     {
         // UK Commonwealth spelling
         $this->thing->json->setField("variables");
-        //$names = $this->thing->json->writeVariable( array("critical_hit", "roll"), $this->roll );
 
         $time_string = $this->thing->time();
         $this->thing->json->writeVariable( array("geekenders", "refreshed_at"), $time_string );
-
-//        $splosh_timestamp = $this->thing->microtime();
-//        $this->thing->json->writeVariable( array("splosh", "timestamp"), $splosh_timestamp );
-
     }
 
     function get()
@@ -86,25 +68,17 @@ class Geekenders
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("geekenders", "refreshed_at") );
 
-        //$micro_timestamp = $this->thing->json->readVariable( array("splosh", "timestamp") );
-
-        // Keep second level timestamp because I'm not
-        // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable( array("geekenders", "refreshed_at"), $time_string );
         }
-
     }
 
-// -----------------------
+    // -----------------------
 
     public function getClocktime()
     {
         $this->clocktime = new Clocktime($this->thing, "clocktime");
-
-
-
     }
 
 	private function respond() {
@@ -128,7 +102,6 @@ class Geekenders
 
         $this->makeWeb();
 
-
 		return $this->thing_report;
 	}
 
@@ -143,15 +116,15 @@ class Geekenders
     private function geekendersDo()
     {
         // What does this do?
-
     }
 
     public function doGeekenders()
     {
-        $this->earliest_event_string = "Eventful didn't find anything. Which is weird, because there has to be a geekenders show.";
+        $this->earliest_event_string = "Didn't find anything. Which is weird, because there has to be a geekenders show. Check https://www.facebook.com/Geekenders/";
 
         // What is a Geekenders.
         $this->eventful = new Eventful($this->thing, "eventful geekenders");
+
         foreach($this->eventful->events as $eventful_id=>$event) {
 
             $event_name = $event['event'];
@@ -169,13 +142,9 @@ class Geekenders
                 if ($time_to_earliest_event > $time_to_event) {
 
                     $time_to_earliest_event = $time_to_event;
-//                    $earliest_event_name = $event_name;
-//                    $earliest_event_time = $event_time;
-//                    $earliest_event_place = $event_place;
                     $event_string = $this->eventful->eventString($event);
 
                     $this->earliest_event_string = $this->thing->human_time($time_to_earliest_event) . " until " . $event_string . ".";
-
 
                     if ($time_to_event < 0) {
                         $this->earliest_event_string = "About to happen. Happening. Or just happened. " . $event_string . ".";
@@ -189,14 +158,9 @@ class Geekenders
                     if ($this->runat->isToday($event_time)) {
                         $this->response = "Got today's Geekenders.";
                     }
+                }
             }
-            }
-                    
-
         }
-
-
-  //      $this->response = "Got the next Geekenders.";
     }
 
 	public function readSubject()
@@ -238,8 +202,6 @@ class Geekenders
 
         $html = "<b>GEEKENDERS WATCHER</b>";
 
-
-
         $html .= '<br>Geekenders watcher says , "';
         $html .= $this->sms_message. '"';
 
@@ -254,10 +216,6 @@ class Geekenders
         $this->web_message = $html;
         $this->thing_report['web'] = $html;
     }
-
-
-
-
 
 }
 

@@ -83,8 +83,12 @@ $this->channel_name = $channel->channel_name;
 //echo "channel name is " .$this->channel_name;
 
 //		$this->readSubject();
-		$this->respond();
 
+//        if ($this->from == "17787920847") {
+		$this->respond();
+//        } else {
+//            echo "address ignored";
+//        }
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("message",
@@ -255,6 +259,17 @@ $this->channel_name = $channel->channel_name;
         return;
     }
 
+    function checkMicrosoft($searchfor = null)
+    {
+//return false;
+        // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
+        // Don't make assumptions about characters in slack id.
+//$channel = new Channel($this->thing, "channel");
+//var_dump($channel);
+        if ($this->channel_name == "microsoft") {return true;}
+      return false; // in dev
+    }
+
     function checkSlack($searchfor)
     {
 //return false;
@@ -342,11 +357,6 @@ $this->channel_name = $channel->channel_name;
 
             $this->channel_name = 'facebook';
 
-            // See what sorry state Mordok is in.
-            //$mordok_thing = new Mordok($this->thing);
-
-            //$this->thing->log( '<pre> ' . $mordok_thing->thing_report['info'] . '</pre>' );
-
             // Cost is handled by sms.php
             // So here we should pull in the token limiter and proof
             // it's capacity to token limit outgoing SMS
@@ -377,6 +387,42 @@ $this->channel_name = $channel->channel_name;
 
             return $this->thing_report;
         }
+
+        // Recognize and then handle Facebook messenger chat.
+        if ( $this->checkMicrosoft($to)  ) { // The FB Skype number of Edna
+
+            //$this->channel_name = 'facebook';
+            // Cost is handled by sms.php
+            // So here we should pull in the token limiter and proof
+            // it's capacity to token limit outgoing SMS
+
+            $token_thing = new Tokenlimiter($this->thing, 'microsoft');
+
+            $dev_overide = null;
+            if ( ($token_thing->thing_report['token'] == 'microsoft' ) or ($dev_overide == true) ) {
+
+                $microsoft_thing = new Microsoft($this->thing, $this->sms_message);
+
+                $thing_report['info'] = $fb_thing->thing_report['info'];
+
+                $this->thing_report['channel'] = 'microsoft'; // one of sms, email, keyword etc
+                $this->thing_report['info'] = 'Agent "Message" sent a Microsoft message.'; 
+
+                $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "INFORMATION" );
+
+                $this->tallyMessage();
+
+            } else {
+
+                $this->thing_report['channel'] = 'facebook'; // one of sms, email, keyword etc
+                $this->thing_report['info'] = "You were sent this link through " . $this->thing_report['channel'];
+            }
+
+           $this->thing->log( $this->agent_prefix . ' said, "' . $this->thing_report['info'] .'"', "WARNING");
+
+            return $this->thing_report;
+        }
+
 
 //echo "message";
         if ( $this->checkSlack($to) ) { // The Slack app of Mordok the Magnificent

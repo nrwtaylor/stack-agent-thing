@@ -9,13 +9,12 @@ ini_set("allow_url_fopen", 1);
 
 class Brownpapertickets
 {
-    // This gets Forex from an API.
+    // This gets events from the Brownpapertickets API. Only Vancouver at the moment.
 
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
     {
-        // $this->start_time = microtime(true);
         $this->start_time = $thing->elapsed_runtime();
         $this->agent_input = $agent_input;
 
@@ -39,7 +38,6 @@ class Brownpapertickets
         $this->keywords = array('brownpapertickets','brown', 'paper', 'tickets', 'event','show','happening');
 
         $this->current_time = $this->thing->json->time();
-
 
         $this->developer_id = $this->thing->container['api']['brownpapertickets'];
 
@@ -73,8 +71,6 @@ class Brownpapertickets
 
 	}
 
-
-
     function set()
     {
         $this->thing->log( $this->agent_prefix .  'set counter  ' . $this->counter . ".", "DEBUG");
@@ -84,7 +80,6 @@ class Brownpapertickets
 
         return;
     }
-
 
     function get()
     {
@@ -98,10 +93,6 @@ class Brownpapertickets
         return;
     }
 
-
-
-
-
     function getApi($sort_order = null)
     {
         if (isset($this->events)) {return $this->events;}
@@ -109,6 +100,19 @@ class Brownpapertickets
         if ($sort_order == null) {$sort_order = "popularity";}
 
         $city = "vancouver";
+        $c = new City($this->thing,"city");
+        $city = $c->city_name; 
+
+        if (strtolower($city) != "vancouver") {
+            $this->response = "Events not enabled for " . $city . ".";
+            $this->available_events_count = 0;
+            $this->events = true;
+            $this->events_count = 0;
+            $this->thing->log( 'did not get any events.');
+
+            return true;
+
+        }
         // "America/Vancouver" apparently
 
         $keywords = "";
@@ -138,8 +142,9 @@ class Brownpapertickets
 
         $this->eventsBrownpapertickets($events);
 
-        $this->available_events_count = count($this->events);
 
+
+        $this->available_events_count = count($this->events);
         $this->thing->log('getApi got ' . $this->available_events_count . " available events.");
 
         return false;
@@ -170,6 +175,8 @@ class Brownpapertickets
         if (!isset($this->events)) {$this->events = array();}
         if($events == null) {$this->events_count = 0;return;}
 
+        // devstack sort
+
         foreach($events['event'] as $not_used=>$event) {
 
             $city = "vancouver";
@@ -199,7 +206,6 @@ class Brownpapertickets
                 $link = $event['link'];
             }
 
-
             $event_array = array("event"=>$event_name, "runat"=>$run_at, "runtime"=>$runtime, "place"=>$venue_name, "link"=>$link, "datagram"=>$event);
 
             $pieces = $this->array_flatten($event_array, " ");
@@ -214,6 +220,18 @@ class Brownpapertickets
                 $this->events[$id] = $event_array;
             }
         }
+
+/*
+$runat = array();
+foreach ($this->events as $key => $row)
+{
+    $runat[$key] = strtotime($row['runat']);
+var_dump($row[$key]);
+}
+array_multisort($runat, SORT_ASC, $this->events);
+$this->thing->log("end sort");
+*/
+
 
         $this->events_count = count($this->events);
     }
@@ -243,17 +261,17 @@ class Brownpapertickets
 
     public function makeEvent($event)
     {
-        throw new Exception('Under construction.');
+        throw new Exception('devstack.');
 
         // Need to check whether the events exists...
-        // This can be post response.   
+        // This can be post response.
 
         // devstack this will be an Event function
         // Just needs to pass the source to Event.
 
         // Load as new event things onto stack
         $thing = new Thing(null);
-        $thing->Create("eventful@stackr.ca","events", "s/ event brownpapertickets " . $eventful_id);
+        $thing->Create("brownpapertickets@stackr.ca","events", "s/ event brownpapertickets " . $eventful_id);
 
         // make sure the right fields are directly given
 
@@ -263,59 +281,6 @@ class Brownpapertickets
         new Link($thing, "link is " . $event['link']);
 
     }
-
-/*
-    function getVariable($variable_name = null, $variable = null) {
-
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
-
-/*
-    function getFlag() 
-    {
-        $this->flag_thing = new Flag($this->variables_agent->thing, 'flag');
-        $this->flag = $this->flag_thing->state; 
-
-        return $this->flag;
-    }
-
-    function setFlag($colour) 
-    {
-        $this->flag_thing = new Flag($this->variables_agent->thing, 'flag '.$colour);
-        $this->flag = $this->flag_thing->state; 
-
-        return $this->flag;
-    }
-*/
-
 
 	private function respond()
     {
@@ -340,7 +305,6 @@ class Brownpapertickets
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
-
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -389,8 +353,10 @@ class Brownpapertickets
         $html = "<b>BROWN PAPER TICKETS " . $s . "</b>";
         $html .= "<p><b>Brown Paper Tickets Events</b>";
 
-        if (!isset($this->events)) {$html .= "<br>No events found on Brown Paper Tickets.";} else {
- 
+        if ((!isset($this->events)) or ($this->events === true)) {
+            $html .= "<br>No events found on Brown Paper Tickets.";
+        } else {
+
         foreach ($this->events as $id=>$event) {
 
             $event_html = $this->eventString($event);
@@ -459,7 +425,6 @@ class Brownpapertickets
 
         $sms .= " | " . $this->response;
 
-        // Really need to refactor this double :/
         $this->sms_message = $sms;
     }
 
@@ -469,7 +434,7 @@ class Brownpapertickets
 
         switch ($this->events_count) {
             case 0:
-                $message .= "did not find any events.";
+                $message .= " did not find any events.";
                 break;
             case 1:
                 $event = reset($this->events);

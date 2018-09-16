@@ -26,6 +26,8 @@ class Slack
 
     function __construct(Thing $thing, $input = null)
     {
+//echo "slack.php meep";
+//exit();
 		$this->cost = 50;
 
 		$this->test= "Development code";
@@ -46,7 +48,8 @@ class Slack
        	$this->subject = $thing->subject;
 		$this->sqlresponse = null;
 
-        if($this->from == "null@stackr.ca") {return;}
+var_dump($this->from);
+if($this->from == "null@stackr.ca") {return;}
 
 		$this->node_list = array("sms send"=>array("sms send"));
 
@@ -75,6 +78,8 @@ $input =
         "event_time": 1234567890
 }';
 */
+//echo "foobar";
+//echo $input;
 
 $this->set();
 
@@ -238,7 +243,7 @@ exit();
 		$this->channel_id = $this->getChannel();
 		$this->user = $this->getUser();
 		$this->text = $this->getText();
-
+//var_dump($this->body);
 		$this->response_url = $this->body['response_url'];
 
 		return;
@@ -904,12 +909,16 @@ $array =
         );
 
 		// Prepare choice buttons
-
-		if (isset($this->choices)){
+        $button = true;
+        $max_buttons = 1;
+        $buttons_count = 0;
+		if ((isset($this->choices)) and ($button == true)) {
 			$actions= null;
 
 			foreach ($this->choices['words'] as $word) {
-
+                if (strtolower($word) == "forget") {continue;}
+                $buttons_count += 1;
+                if ($buttons_count > $max_buttons) {break;}
                 $action = [
                     "name" => $word,
                     "text" => $word,
@@ -918,6 +927,7 @@ $array =
                 		];
 
 				$actions[] = $action;
+                $buttons_count += 1;
 			}
 
         //} else {

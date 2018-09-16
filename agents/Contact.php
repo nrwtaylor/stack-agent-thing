@@ -68,13 +68,13 @@ class Contact
 
 	}
 
-    public function contact() 
+    public function contact()
     {
 
         $mail_regulatory = str_replace("\r", "", $this->mail_regulatory);
         $mail_regulatory = str_replace("\n", " ", $mail_regulatory);
 
-        $this->sms_message = 'CONTACT | ' . ucwords($this->nominal) . ' | ' . $this->email . ' | ' . $mail_regulatory ;
+        $this->sms_message = 'CONTACT | ' . ucwords($this->nominal) . ' | ' . $this->email . ' | ' . ltrim($mail_regulatory) ;
  
         $this->message = $this->sms_message;
 
@@ -152,7 +152,7 @@ class Contact
             $input = $this->subject;
             if ($input == "contact") {
 			    $this->response = "Single word contact received";
-                $this->thing->log('got a single question mark.');
+                $this->thing->log('got a single keyword.');
                 $this->contact();
                 return;
             }
@@ -161,7 +161,7 @@ class Contact
             $this->response = "Provided contact details.";
             return;
         }
-
+/*
 		// If there are more than one piece then look at order.
         $this->thing->log('now checking pieces.');
 
@@ -199,7 +199,9 @@ class Contact
         }
 		// Message not understood
         $this->contact();
-        $this->response = "Message not understood.";
+*/
+        $this->response = true;
+        //$this->response = "Message not understood.";
         return;
 	}
 

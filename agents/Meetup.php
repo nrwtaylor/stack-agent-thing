@@ -10,20 +10,20 @@ ini_set("allow_url_fopen", 1);
 class Meetup 
 {
 
-    // This gets Forex from an API.
+    // This gets events from the Meetup API.
 
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
     {
-        $this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime();
 
         $this->agent_input = $agent_input;
 
-        $this->keyword = "mordok";
+        $this->keyword = "meetup";
 
         $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['thing'] = $thing;
 
         $this->test= "Development code"; // Always
 
@@ -33,15 +33,12 @@ class Meetup
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
-
         $this->agent_prefix = 'Agent "Meetup" ';
-
         //$this->node_list = array("off"=>array("on"=>array("off")));
 
         $this->keywords = array('meetup','meet-up','event','show','happening');
 
-        $this->current_time = $this->thing->json->time();
-
+        $this->current_time = $this->thing->time();
 
         $this->api_key = $this->thing->container['api']['meetup'];
 
@@ -50,10 +47,7 @@ class Meetup
         $this->variables_agent = new Variables($this->thing, "variables " . "meetup" . " " . $this->from);
 
         // Loads in variables.
-        $this->get(); 
-
-//        if ($this->verbosity == false) {$this->verbosity = 2;}
-
+        $this->get();
 
 		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
 		$this->thing->log('received this Thing "'.  $this->subject . '".');
@@ -64,32 +58,21 @@ class Meetup
 
 		$this->respond();
 
-        $this->end_time = microtime(true);
-        $this->actual_run_time = $this->end_time - $this->start_time;
-        $milliseconds = round($this->actual_run_time * 1000);
-
-        $this->thing->log( 'ran for ' . $milliseconds . 'ms.' );
-
 		$this->thing->log( 'completed.');
+
+        $this->thing->log(' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
 
         $this->thing_report['log'] = $this->thing->log;
 
 		return;
-
 	}
-
-
 
     function set()
     {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-//        $this->thing->choice->save('usermanager', $this->state);
-
         return;
     }
-
 
     function get()
     {
@@ -106,12 +89,11 @@ class Meetup
     function getMeetup($sort_order = null)
     {
         if ($sort_order == null) {$sort_order = "popularity";}
-        // http://api.eventful.com/docs/events/search
-
-        // count_only boolean
-        //    If count_only is set, an abbreviated version of the output will be returned. Only total_items and search_time elements are included in the result. (optional) 
 
         $city = "vancouver";
+        $c = new City($this->thing,"city");
+        $city = $c->city_name; 
+
         // "America/Vancouver" apparently
         $keywords = "";
         if (isset($this->search_words)) {$keywords = $this->search_words;}
@@ -120,13 +102,8 @@ class Meetup
 
         $keywords = urlencode($keywords);
 
-        //$keywords = "meeples%20%marpole";
-        //$keywords = "games";
-
         // Let's use eventful's popularity...
         $data_source = "https://api.meetup.com/2/open_events.xml?format=json&and_text=true&text=" . $keywords . "&time=,1w&key=". $this->api_key;
-
-//country=ca&offset=1&city=vancouver&
 
         $time = "&time=,1w";
         $time = ""; // turn time paramaters off
@@ -149,44 +126,19 @@ class Meetup
             // Invalid query of some sort.
         }
 
-        // Strange plank. API says it returns JSON.  But it is returning XML. 
-        // Because there was an format switch.
-
-        // Easy enough to read XML. Translink.php does this.
-
-/*
-        $xml = simplexml_load_string($data);  
-foreach($xml as $id=>$x) {
-
-var_dump($x);
-exit();
-}
-var_dump($xml);
-exit();
-                $t = $xml->NextBus;
-*/
-
         $json_data = json_decode($data, TRUE);
 
-
         $total_items = $json_data['meta']['total_count'];
-        //$page_number = $json_data['page_number']; // meetup doesn;t return these.
-        //$page_count = $json_data['page_count']; // Nor use pages.
-        //$page_size = $json_data['page_size']; // It does just give 10 though ...
-
-        //$search_time = $json_data['search_time'];
 
         $this->thing->log('got ' . $total_items . " Event things.");
 
         $this->available_events_count = $total_items;
-
 
         $meetup_events = $json_data['results'];
 
         $this->eventsMeetup($meetup_events); // Custom function to match Meetup API variables to Events.
         return false;
     }
-
 
     function eventsMeetup($meetup_events)
     {
@@ -203,7 +155,10 @@ exit();
             //if (!isset($event['venue']['state'])) {var_dump($event);}
             //var_dump($event['venue']['state']);
             //$region_abbr = $event['venue']['state'];
-            if ((isset($event['venue']['state'])) and (strtolower($event['venue']['state']) != "bc")) {echo "bc";continue;} // Restrict to BC events in dev/test/prod
+            if ((isset($event['venue']['state'])) and (strtolower($event['venue']['state']) != "bc")) {
+                //ignore
+                continue;
+            } // Restrict to BC events in dev/test/prod
 
             // Get the longest text string (promoter provided) available.
             if (!isset($event['description'])) {$description = "X";} else {$description = $event['description'];}
@@ -229,35 +184,15 @@ exit();
             //    $run_at = $event['time']; // local event time?  check.
             $run_at = date('c',$event['time']/1000); // Apply the necessary conversions.
 
-
-            if (!isset($event['duration'])) {$runtime = "X";} else {$runtime = $event['duration'];}
-            //$runtime = $event['duration']; // used? units?
-
-            //$end_at = $eventful_event['stop_time']; // local event time
-
-
-            // runtime not available.  Perhaps that is what the full day flag tells people
-            //$runtime = strtotime($end_at) - strtotime($run_at);
-            //if ($runtime <= 0) {$runtime = "X";}
-
-            //if ($runtime > $this->run_time_max) {$continue;}
-
-            //   $venue_name = $event['venue']['name'];
-
-            //$all_day_flag = $eventful_event['all_day'];
-
+            if (!isset($event['duration'])) {$runtime = "X";} else {$runtime = $event['duration']/1000;}
 
             $link = $event['event_url'];
 
-
-            //    $runtime = $this->thing->human_time($runtime);
-
             $this->events[$meetup_id] = array("event"=>$event_name, "runat"=>$run_at, "runtime"=>$runtime, "place"=>$venue_name, "link"=>$link);
 
-            }
+        }
 
-            $this->events_count = count($this->events);
-
+        $this->events_count = count($this->events);
     }
 
     function getLink($ref)
@@ -282,57 +217,6 @@ exit();
         new Runat($thing, "runat is ". $event['runat']);
         new Place($thing, "place is ". $event['place']);
         new Link($thing, "link is " . $event['link']);
-    }
-
-/*
-    function getVariable($variable_name = null, $variable = null) {
-
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
-
-
-    function getFlag() 
-    {
-        $this->flag_thing = new Flag($this->variables_agent->thing, 'flag');
-        $this->flag = $this->flag_thing->state; 
-
-        return $this->flag;
-    }
-
-    function setFlag($colour) 
-    {
-        $this->flag_thing = new Flag($this->variables_agent->thing, 'flag '.$colour);
-        $this->flag = $this->flag_thing->state; 
-
-        return $this->flag;
     }
 
 	private function respond()
@@ -385,18 +269,7 @@ exit();
 
     public function eventString($event)
     {
-       // if (is_numeric($event['runat'])) {
-            //$weekday = date('N', $timestamp); // 1-7
-//            $event_date['month'] = date('m', $event['runat']); // 1-12
-//            $event_date['day'] = date('d', $event['runat']); // 1-31
-//var_dump(date($event['runat']));
-//exit();
-//            $event_date['month'] = "X"; // 1-12
-//            $event_date['day'] = "X"; // 1-31
-
- //       } else {
-            $event_date = date_parse($event['runat']);
-   //     }
+        $event_date = date_parse($event['runat']);
 
         $month_number = $event_date['month'];
         if ($month_number == "X") {$month_name = "XXX";} else {
@@ -413,20 +286,14 @@ exit();
         $event_string .= " "  . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
         $event_string .= ":"  . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
 
-//var_dump($event['runtime']);
 
-$run_time = new Runtime($this->thing, "extract " . $event['runtime']);
-//var_dump($run_time->minutes);
+        $run_time = new Runtime($this->thing, "extract " . $event['runtime']);
 
-if ($event['runtime'] != "X") {
-    $event_string .= " " . $this->thing->human_time($run_time->minutes);
-}
-//var_dump($event_string);
-//        $event_string .= " "  . $endat->day;
-//        $event_string .= " "  . $endat->hour;
-//        $event_string .= ":"  . $endat->minute;
+        if ($event['runtime'] != "X") {
+            $event_string .= " " . $this->thing->human_time($run_time->minutes);
+        }
 
-                $event_string .= " "  . $event['place'];
+        $event_string .= " "  . $event['place'];
 
 
         return $event_string;
@@ -438,27 +305,19 @@ if ($event['runtime'] != "X") {
         $html = "<b>MEETUP</b>";
         $html .= "<p><b>Meetup Events</b>";
 
-        if (!isset($this->events)) {$html .= "<br>No events found on Meetup.";} else {
-        
-        foreach ($this->events as $id=>$event) {
-            //var_dump($event['event']);
-            //var_dump($event['runat']);
-            //var_dump($event['place']);
-            //var_dump($event['link']);
-//            $event_html = $event['event'] . " " . $event['runat'] . " " . $event['place'];
+        if (!isset($this->events)) {
+            $html .= "<br>No events found on Meetup.";
+        } else {
+            foreach ($this->events as $id=>$event) {
+                $event_html = $this->eventString($event);
 
-            $event_html = $this->eventString($event);
+                $link = $event['link'];
+                $html_link = '<a href="' . $link . '">';
+                $html_link .= "meetup";
+                $html_link .= "</a>";
 
-//        $link = $this->web_prefix . 'thing/' . $this->uuid . '/splosh';
-        $link = $event['link'];
-        $html_link = '<a href="' . $link . '">';
-//        $web .= $this->html_image;
-        $html_link .= "meetup";
-        $html_link .= "</a>";
-
-            $html .= "<br>" . $event_html . " " . $html_link;
-            //exit();
-        }
+                $html .= "<p>" . $event_html . " " . $html_link;
+            }
         }
 
         $this->html_message = $html;
@@ -473,28 +332,6 @@ if ($event['runtime'] != "X") {
                 $sms .= " | No events found.";
                 break;
             case 1:
-/*
-                $event = reset($this->events);
-                $event_date = date_parse($event['runat']);
-
-                $month_number = $event_date['month'];
-                $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
-
-                $simple_date_text = $month_name . " " . $event_date['day'];
-*/
-/*
-                $sms .= " "  . $simple_date_text;
-
-                $sms .= " "  . $event['event'];
-
-                $runat = new Runat($this->thing, $event['runat']);
-
-                $sms .= " "  . $runat->day;
-                $sms .= " "  . $runat->hour;
-                $sms .= ":"  . $runat->minute;
-
-                $sms .= " "  . $event['place'];
-*/
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
                 $sms .= " | " .$event_html;
@@ -521,9 +358,7 @@ if ($event['runtime'] != "X") {
 
         $sms .= " | " . $this->response;
 
-        // Really need to refactor this double :/
         $this->sms_message = $sms;
-
     }
 
     public function makeMessage()
@@ -532,39 +367,22 @@ if ($event['runtime'] != "X") {
 
         switch ($this->events_count) {
             case 0:
-                $message .= "did not find any events.";
+                $message .= " did not find any events.";
                 break;
             case 1:
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
-
                 $message .= " found "  . $event_html . ".";
-
-                //if ($this->available_events_count != $this->events_count) {
-                //    $message .= $this->events_count. " events retrieved.";
-                //}
-
-
                 break;
             default:
                 $message .= " found "  . $this->available_events_count . ' events.';
-                //if ($this->available_events_count != $this->events_count) {
-                //    $message .= $this->events_count. " retrieved";
-                //}
-
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
                 $message .= " This was one of them. " . $event_html .".";
         }
 
-       // $message .= " | " . $this->response;
-
-        // Really need to refactor this double :/
-
         $this->message = $message;
-
     }
-
 
     private function thingreportMeetup()
     {
@@ -582,7 +400,6 @@ if ($event['runtime'] != "X") {
         // Extract number
         $matches = 0;
         foreach ($pieces as $key=>$piece) {
-
             if (is_numeric($piece)) {
                 $number = $piece;
                 $matches += 1;
@@ -604,14 +421,9 @@ if ($event['runtime'] != "X") {
 
     public function readSubject()
     {
-//        $this->response = "Asked Eventful about events.";
         $this->response = null;
 
-
         $this->num_hits = 0;
-        // Extract uuids into
-
-        //$this->number = extractNumber();
 
         $keywords = $this->keywords;
 
@@ -623,16 +435,13 @@ if ($event['runtime'] != "X") {
             $input = strtolower($this->agent_input);
 
         } else {
-
             $input = strtolower($this->subject);
-
         }
 
         $this->input = $input;
 
-		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-
-        $prior_uuid = null;
+		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        //$prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
@@ -648,26 +457,6 @@ if ($event['runtime'] != "X") {
 
         }
 
-    foreach ($pieces as $key=>$piece) {
-        foreach ($keywords as $command) {
-            if (strpos(strtolower($piece),$command) !== false) {
-
-                switch($piece) {
-
-   case 'run':
-   //     //$this->thing->log("read subject nextblock");
-        $this->runTrain();
-        break;
-
-    default:
-                                        }
-
-                                }
-                        }
-
-                }
-
-
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), "meetup is")) !== FALSE) { 
             $whatIWant = substr(strtolower($input), $pos+strlen("meetup is")); 
@@ -677,132 +466,17 @@ if ($event['runtime'] != "X") {
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
-    if ($filtered_input != "") {
-        $this->search_words = $filtered_input;
-        $this->response = "Asked Meetup about " . $this->search_words . " events";
-        return false;
-    }
-
-
+        if ($filtered_input != "") {
+            $this->search_words = $filtered_input;
+            $this->response = "Asked Meetup about " . $this->search_words . " events";
+            return false;
+        }
 
         $this->response = "Message not understood";
 		return true;
 
-	
 	}
-
-
-
-
-
-
-	function kill() {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-
-       function discriminateInput($input, $discriminators = null) {
-
-
-                //$input = "optout opt-out opt-out";
-
-                if ($discriminators == null) {
-                        $discriminators = array('accept', 'clear');
-                }       
-
-
-
-                $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
-
-                if (count($discriminators) > 4) {
-                        $minimum_discrimination = $default_discriminator_thresholds[4];
-                } else {
-                        $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
-                }
-
-
-
-                $aliases = array();
-
-                $aliases['accept'] = array('accept','add','+');
-                $aliases['clear'] = array('clear','drop', 'clr', '-');
-
-
-
-                $words = explode(" ", $input);
-
-                $count = array();
-
-                $total_count = 0;
-                // Set counts to 1.  Bayes thing...     
-                foreach ($discriminators as $discriminator) {
-                        $count[$discriminator] = 1;
-
-                       $total_count = $total_count + 1;
-                }
-                // ...and the total count.
-
-
-
-                foreach ($words as $word) {
-
-                        foreach ($discriminators as $discriminator) {
-
-                                if ($word == $discriminator) {
-                                        $count[$discriminator] = $count[$discriminator] + 1;
-                                        $total_count = $total_count + 1;
-                                                //echo "sum";
-                                }
-
-                                foreach ($aliases[$discriminator] as $alias) {
-
-                                        if ($word == $alias) {
-                                                $count[$discriminator] = $count[$discriminator] + 1;
-                                                $total_count = $total_count + 1;
-                                                //echo "sum";
-                                        }
-                                }
-                        }
-
-                }
-
-                //echo "total count"; $total_count;
-                // Set total sum of all values to 1.
-
-                $normalized = array();
-                foreach ($discriminators as $discriminator) {
-                        $normalized[$discriminator] = $count[$discriminator] / $total_count;            
-                }
-
-
-                // Is there good discrimination
-                arsort($normalized);
-
-
-                // Now see what the delta is between position 0 and 1
-
-                foreach ($normalized as $key=>$value) {
-                    //echo $key, $value;
-
-                    if ( isset($max) ) {$delta = $max-$value; break;}
-                        if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
-                }
-
-
-                        //echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-
-                if ($delta >= $minimum_discrimination) {
-                        //echo "discriminator" . $discriminator;
-                        return $selected_discriminator;
-                } else {
-                        return false; // No discriminator found.
-                } 
-
-                return true;
-        }
 
 }
 
 ?>
-

@@ -227,7 +227,7 @@ $this->thing->choice->Choose($this->state);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
 
-        $this->tokens = array('red','red','blue','red','orange','orange','sms','facebook','slack','email','satoshi','satoshi');
+        $this->tokens = array('red','red','blue','red','orange','orange','sms','facebook','slack','email','satoshi','satoshi','microsoft');
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
