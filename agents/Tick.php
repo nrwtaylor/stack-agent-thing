@@ -106,10 +106,10 @@ class Tick
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage"));
                 $client->doLowBackground("call_agent", $arr);
 */
-/*
-                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"stack", "subject"=>"s/ stack"));
-                $client->doLowBackground("call_agent", $arr);
-*/
+
+//                $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"stack", "subject"=>"s/ stack"));
+//                $client->doLowBackground("call_agent", $arr);
+
 /* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"dummyload", "subject"=>"s/ dummyload"));
                 $client->doLowBackground("call_agent", $arr);

@@ -11,7 +11,6 @@ class Ticketmaster
 {
 
     // This gets Forex from an API.
-
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
@@ -20,7 +19,7 @@ class Ticketmaster
 
         $this->agent_input = $agent_input;
 
-        $this->keyword = "mordok";
+        $this->keyword = "event";
 
         $this->thing = $thing;
         $this->thing_report['thing'] = $this->thing->thing;
@@ -33,12 +32,11 @@ class Ticketmaster
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
-
         $this->agent_prefix = 'Agent "Ticket Master" ';
 
         //$this->node_list = array("off"=>array("on"=>array("off")));
 
-        $this->keywords = array('ticket master','event','show','happening');
+        $this->keywords = array('ticketmaster','event','events','show','happening');
 
         $this->current_time = $this->thing->json->time();
 
@@ -55,7 +53,6 @@ class Ticketmaster
 
 //        if ($this->verbosity == false) {$this->verbosity = 2;}
 
-
 		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
 		$this->thing->log('received this Thing "'.  $this->subject . '".');
 
@@ -63,7 +60,6 @@ class Ticketmaster
 
         $this->getApi("popularity");
         if ($this->available_events_count > 10) {$this->getApi('date');}
-
 
 		$this->respond();
 
@@ -80,8 +76,6 @@ class Ticketmaster
 		return;
 
 	}
-
-
 
     function set()
     {
@@ -106,28 +100,22 @@ class Ticketmaster
         return;
     }
 
-
-
-
-
     function getApi($sort_order = null)
     {
 
         if ($sort_order == null) {$sort_order = "popularity";}
-        // http://api.eventful.com/docs/events/search
 
-        // https://developer.picatic.com/v2/api/#methods-event-update
-        // https://api.picatic.com/v2/event/:id
+        $c = new City($this->thing,"city");
+        $city = $c->city_name;
 
-        // 'authorization: Bearer sk_live_xxxxxxxxxxxxxxxxxxxxxxxx'
+        $city = "&city=" . strtolower($city);
+        $country_code = "&countryCode=CA"; 
 
-        // 'https://api.picatic.com/v2/event?filter\[user_id\]=5533&page\[limit\]=2&page\[offset\]=0'
+        $api_key = "&apikey=" . $this->consumer_key;
 
 
-        //count_only boolean
-        //    If count_only is set, an abbreviated version of the output will be returned. Only total_items and search_time elements are included in the result. (optional) 
 
-        $city = "vancouver";
+//        $city = "vancouver";
         // "America/Vancouver" apparently
 
         $keywords = "";
@@ -135,19 +123,21 @@ class Ticketmaster
 
         $keywords = str_replace(" ", "%20%", $keywords);
 
-        $data_source = "https://app.ticketmaster.com/discovery/v2/events.json?size=1&keyword=" . $keywords  . "&city=vancouver&countryCode=CA&apikey=" . $this->consumer_key;
-        if ($keywords == "") {
-            $data_source = "https://app.ticketmaster.com/discovery/v2/events.json?size=1&city=vancouver&countryCode=CA&apikey=" . $this->consumer_key;
-        }
+        $keyword = "&keyword=" . $keywords;
+        if ($keywords == "") {$keyword = "";}
 
-//        $data_source = "https://api.picatic.com/v2/event";
+        $size = "size=10";
 
-        //echo $data_source;
-        //$data_source = "http://api.eventful.com/json/events/search?app_key=" . $this->api_key . "&location=" . $city . "&keywords=" . $keywords . "&sort_order=popularity&count_only=true";
 
+//        $data_source = "https://app.ticketmaster.com/discovery/v2/events.json?size=10&keyword=" . $keywords  . "&city=vancouver&countryCode=CA&apikey=" . $this->consumer_key;
+
+        $data_source = "https://app.ticketmaster.com/discovery/v2/events.json?" . $size . $keyword . $city . $country_code . $api_key;
+
+//        if ($keywords == "") {
+//            $data_source = "https://app.ticketmaster.com/discovery/v2/events.json?size=10&city=vancouver&countryCode=CA&apikey=" . $this->consumer_key;
+//        }
 
         //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
-
         //$data = file_get_contents($data_source, false, $context);
         $data = @file_get_contents($data_source);
 
@@ -159,105 +149,94 @@ class Ticketmaster
             // Invalid query of some sort.
         }
         $json_data = json_decode($data, TRUE);
-var_dump($json_data);
-// devstack here on
-return;
 
-$total_items = $json_data['total_items'];
-$page_number = $json_data['page_number'];
-$page_count = $json_data['page_count'];
-$page_size = $json_data['page_size'];
+        $total_items = $json_data['page']['totalElements'];
+        $page_number = $json_data['page']['number'];
+        $page_count = $json_data['page']['totalPages'];
+        $page_size = $json_data['page']['size'];
 
-$search_time = $json_data['search_time'];
+        //$search_time = $json_data['search_time'];
 
-$this->thing->log('says Picatic reported a runtime of ' . $search_time . "?");
+        $this->thing->log('read page ' . $page_number . " of " . $page_count . " pages.");
+        $this->thing->log('read page ' . $page_size . " of " . $total_items . " Event things.");
 
-$this->thing->log('read page ' . $page_number . " of " . $page_count . " pages.");
-$this->thing->log('read page ' . $page_size . " of " . $total_items . " Event things.");
+        $this->events = array();
+        $this->available_events_count = 0;
 
-$this->available_events_count = $total_items;
-
-$eventful_json = $json_data['events'];
-
-$eventful_events = $eventful_json['event'];
-
-$this->eventsEventful($eventful_events);
-return false;
+        if (isset($json_data['_embedded'])) {
+            $ticketmaster_events = $json_data['_embedded']['events'];
+            $this->available_events_count = $total_items;
+            $this->eventsTicketmaster($ticketmaster_events);
+        }
+        return false;
 
     }
 
 
-    function eventsEventful($eventful_events)
+    function eventsTicketmaster($events)
     {
         if (!isset($this->events)) {$this->events = array();}
-        if($eventful_events == null) {$this->events_count = 0;return;}
+        if($events == null) {$this->events_count = 0;return;}
 
-foreach($eventful_events as $id=>$event) {
-//var_dump($id);
-    $eventful_event = $event;
-//var_dump($event);
-//exit();
-    $privacy = $eventful_event['privacy'];
-if ($privacy != 1) {echo "privacy";continue;}
+        foreach($events as $id=>$event) {
 
-    $region_abbr = $eventful_event['region_abbr'];
+//            $privacy = $event['privacy'];
+//            if ($privacy != 1) {echo "privacy";continue;}
 
-if ($region_abbr != "BC") {echo "bc";continue;} // Restrict to BC events in dev/test/prod
+//            $region_abbr = $event['region_abbr'];
 
-    $all_day_flag = $eventful_event['all_day'];
+//if ($region_abbr != "BC") {echo "bc";continue;} // Restrict to BC events in dev/test/prod
+
+//    $all_day_flag = $event['all_day'];
 
 
 
-    $description = $eventful_event['description'];
+    $description = null;
 
     // devstack extract dates from description
     // resolve multi-day events
 
 
-/* Not today but good to learn performer names
-    $eventful_performers = $eventful_event['performers'];
-    $eventful_performer_names = array();
-    if ($eventful_performers != null) {
-        foreach($eventful_performers['performer'] as $id=>$eventful_performer) {
-            $eventful_performer_names[] = $eventful_performer['name'];
-        }
+    $event_title = $event['name'];
+
+    $ref = $event['id'];
+
+//    $all_day_flag = $event['all_day'];
+
+    foreach ($event['_embedded']['venues'] as $id=>$venue) {
+        $venue_name = $venue['name'];
+        $venue_id = $venue['id'];
     }
-*/
 
-    $eventful_venue_id = $eventful_event['venue_id'];
+    $event_venue_id = $venue_id;
+    $event_venue_name = $venue_name;
 
-    $eventful_title = $eventful_event['title'];
 
-    $eventful_id = $eventful_event['id'];
+    $link = $event['url'];
 
-    $run_at = $eventful_event['start_time']; // local event time
+    foreach ($event['dates'] as $id=>$date) {
+        $run_at =  ($date['localDate'] . " " . $date['localTime']);
 
-    $end_at = $eventful_event['stop_time']; // local event time
+//exit();
+//    $run_at = $date['localDate'] . " " . $date['localTime']; // local event time
 
+//    $end_at = $event['stop_time']; // local event time
+    $end_at = null;
 
     // runtime not available.  Perhaps that is what the full day flag tells people
-    $runtime = strtotime($end_at) - strtotime($run_at);
-    if ($runtime <= 0) {$runtime = "X";}
+        $runtime = strtotime($end_at) - strtotime($run_at);
+        if ($runtime <= 0) {$runtime = "X";}
 
-    if ($runtime > $this->run_time_max) {$continue;}
-
-    $venue_name = $eventful_event['venue_name'];
-
-    $all_day_flag = $eventful_event['all_day'];
-
-    $eventful_address = $eventful_event['venue_address'];
+        if ($runtime > $this->run_time_max) {$continue;}
 
 
-    $link = $eventful_event['url'];
-//var_dump($eventful_event);
-//exit();
 
-//    $runtime = $this->thing->human_time($runtime);
 
-  //  echo $eventful_title . " " .$runtime . "\n";
-    $this->events[$eventful_id] = array("event"=>$eventful_title, "runat"=>$run_at, "runtime"=>$runtime, "place"=>$venue_name, "link"=>$link);
+    $this->events[$ref] = array("event"=>$event_title, "runat"=>$run_at, "runtime"=>$runtime, "place"=>$venue_name, "link"=>$link);
+        break;
+    }
 
-}      
+}
 
 
 $this->events_count = count($this->events);
@@ -273,7 +252,7 @@ $this->events_count = count($this->events);
         $this->link = "https://www.google.com/search?q=" . $ref; 
         return $this->link;
     }
-
+/*
     public function makeEvent()
     {
 
@@ -285,12 +264,11 @@ $this->events_count = count($this->events);
 
     // Load as new event things onto stack
     $thing = new Thing(null);
-//    $thing->Create("eventful@stackr.ca","events", "event is eventful #" . $eventful_id);
-    $thing->Create("eventful@stackr.ca","events", "s/ event eventful " . $eventful_id);
+    $thing->Create("ticketmaster@stackr.ca","events", "s/ event ticketmaster " . $ref);
 
     // make sure the right fields are directly given
 
-    new Event($thing, "event is ". $eventful_title);
+    new Event($thing, "event is ". $event_title);
     new Runat($thing, "runat is ". $run_at);
     new Place($thing, "place is ". $venue_name);
     new Link($thing, "link is " . $link);
@@ -301,7 +279,7 @@ $this->events_count = count($this->events);
 
 
     }
-
+*/
 
     function getVariable($variable_name = null, $variable = null) {
 
@@ -363,7 +341,7 @@ $this->events_count = count($this->events);
 		// Generate email response.
 
 		$to = $this->thing->from;
-		$from = "eventful";
+		$from = "ticketmaster";
 
 		//echo "<br>";
 
@@ -388,7 +366,7 @@ $this->events_count = count($this->events);
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
-        $this->thingreportEventful();
+        $this->thingreportTicketmaster();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -397,7 +375,6 @@ $this->events_count = count($this->events);
 
         $this->thing_report['help'] = 'This triggers provides currency prices using the 1forge API.';
 
-//        $this->thingreportEventful();
 
 		return;
 	}
@@ -474,7 +451,11 @@ if ($event['runtime'] != "X") {
     {
         $sms = "TICKETMASTER";
 
-        switch ($this->events_count) {
+        if (!isset($this->events_count)) {$events_count = 0;} else {
+            $events_count = $this->events_count;
+        }
+
+        switch ($events_count) {
             case 0:
                 $sms .= " | No events found.";
                 break;
@@ -534,7 +515,12 @@ if ($event['runtime'] != "X") {
     {
         $message = "Ticketmaster";
 
-        switch ($this->events_count) {
+        if (!isset($this->events_count)) {$events_count = 0;} else {
+            $events_count = $this->events_count;
+        }
+
+
+        switch ($events_count) {
             case 0:
                 $message .= "did not find any events.";
                 break;
@@ -570,7 +556,7 @@ if ($event['runtime'] != "X") {
     }
 
 
-    private function thingreportEventful()
+    private function thingreportTicketmaster()
     {
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
@@ -608,7 +594,6 @@ if ($event['runtime'] != "X") {
 
     public function readSubject()
     {
-//        $this->response = "Asked Eventful about events.";
         $this->response = null;
 
 

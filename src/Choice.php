@@ -529,6 +529,7 @@ if ($prod == true) {
 
 		// Forget is always a choice.
 		$message[] = "forget";
+        $message = array();
 
 		// $this->current_node is inconsistently set.
 		// Need to track this down.  This is place to re-factor to 

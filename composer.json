@@ -4,7 +4,12 @@
     "description": "Stack Agent Thing framework",
     "require": {
         "nrwtaylor/stack-agent-thing": "@dev",
-        "symfony/console": "^4.1"
+        "symfony/console": "^4.1",
+        "spatie/robots-txt":"^1.0",
+        "t1gor/robots-txt-parser": "dev-master",
+        "webignition/robots-txt-file": "^2.1" 
+
+
     },
     "require-dev": {
     },

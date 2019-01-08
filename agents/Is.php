@@ -96,16 +96,23 @@ class Is {
 		return $this->thing_report;
 	}
 
-    function makeSMS() {
+    function makeSMS()
+    {
+        if (!isset($this->alias_thing)) {
+            $this->sms_message = "IS | Not yet a Thing.";
+            return;
+        }
 
-    if ($this->alias_thing->alias_id != null) {
+        if ($this->alias_thing->alias_id != null) {
 
-        $this->sms_message = "IS | alias_id = " . $this->alias_thing->alias_id;
-        return;
-    } else {
-        $this->sms_message = "IS | Message not used by Agent 'Is'.";
-        return;
-    }
+//            $this->sms_message = "IS | alias_id = " . $this->alias_thing->alias_id;
+            $this->sms_message = "IS | " . $this->alias_thing->alias_id;
+
+            return;
+        } else {
+            $this->sms_message = "IS | Seen as a thing.";
+            return;
+        }
 
         // Why did we get here?
         return true;

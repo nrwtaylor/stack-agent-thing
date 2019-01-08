@@ -5,7 +5,7 @@ Stack Agent Thing frame work for Thing based Agent processing with Stack seriali
 
 To share a Thing's state.  With other Things.
 
-Copyright 2018. Stackr Interactive Ltd.
+Copyright 2018-2019. Stackr Interactive Ltd.
 
 Requirements
 ============
@@ -19,7 +19,7 @@ Installation
 
     composer require nrwtaylor/stack-agent-thing
 
-    Stack build recipe.
+    Stack build recipe. See BUILD in root folder.
 
     1.  Install Ubuntu.
 
@@ -57,6 +57,8 @@ mysql> DESCRIBE stack;
 
 
     5.  Configure private/settings.php
+
+        Not all the settings need to be set. But you will need to enter the MySQL database settings.
 
     6.  Test localhost serving to local-wide TCP/IP
         php -S localhost:8080 -t public public/index.php

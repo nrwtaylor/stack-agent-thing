@@ -597,8 +597,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 //					return "Invalid input";	
                 }
 
-
-
 				for ($i = 1; $i <= $N_rolls; $i++) {
 					$d = rand(1, $die_N);
 					$result[] = array('d'.$die_N=>$d);
@@ -611,7 +609,9 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 		$result[] = array('roll'=>$roll);
 
         $this->result = $result;
-        $this->sum = $result;
+        $this->sum = $roll;
+
+
 
 		return $result;
     }

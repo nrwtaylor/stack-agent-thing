@@ -936,15 +936,20 @@ echo "place found";
         // character recognizer of concepts.
 
 
-        $chinese_thing = new Chinese($this->thing, "chinese");
-        $this->thing_report = $chinese_thing->thing_report;
+        // Temptation here is to create a Thing agent.  Bad idea.
+
+        // This will see if the word is in the Chinese dictionary.
+        // Because that makes it probably a Thing worth noting.
+
+        $chinese_thing = new Chinese($this->thing);
 
         if ($chinese_thing->word != null) {
-            // Emoji found.
-            $chinese_thing = new Chinese($this->thing);
-            $this->thing_report = $chinese_thing->thing_report;
+            // So it is something worth noting.
+            $is_thing = new Is($this->thing);
+            $this->thing_report = $is_thing->thing_report;
             return $this->thing_report;
         }
+
 
 
 
@@ -952,7 +957,6 @@ echo "place found";
 		$redpanda_thing = new Redpanda($this->thing);
 
 		$this->thing_report = $redpanda_thing->thing_report;
-
 
 
 	return $this->thing_report;		
