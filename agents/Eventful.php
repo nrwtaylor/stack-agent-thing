@@ -34,6 +34,9 @@ class Eventful
         $this->sqlresponse = null;
 
 
+        // Get some stuff from the stack which will be helpful.
+        $this->state = $thing->container['stack']['state'];
+
         $this->agent_prefix = 'Agent "Eventful" ';
 
         //$this->node_list = array("off"=>array("on"=>array("off")));
@@ -60,8 +63,18 @@ class Eventful
 
 		$this->readSubject();
 
-        $this->getEventful("popularity");
-        if ($this->available_events_count > 10) {$this->getEventful('date');}
+//        $this->getEventful("popularity");
+//        if ($this->available_events_count > 10) {$this->getEventful('date');}
+
+        // is this production
+        if ($this->state != 'prod') {
+            $this->response = "Asked Eventful about " . $this->search_words . " events.";
+            $this->getEventful("popularity");
+            if ($this->available_events_count > 10) {$this->getEventful('date');}
+        } else {
+            $this->response = "Eventful not licensed for production.";
+        }
+
 
 
 		$this->respond();
@@ -361,7 +374,16 @@ class Eventful
     {
         $sms = "EVENTFUL";
 
-        switch ($this->events_count) {
+        if (!isset($this->events_count)) {
+            $events_count = 0;
+        } else {
+            $events_count = $this->events_count;
+        }
+
+        switch ($events_count) {
+            case true:
+                $sms .= " | Request not made.";
+                break;
             case 0:
                 $sms .= " | No events found.";
                 break;
@@ -399,7 +421,14 @@ class Eventful
     {
         $message = "Eventful";
 
-        switch ($this->events_count) {
+        if (!isset($this->events_count)) {
+            $events_count = 0;
+        } else {
+            $events_count = $this->events_count;
+        }
+
+
+        switch ($events_count) {
             case 0:
                 $message .= " did not find any events.";
                 break;
@@ -459,7 +488,7 @@ class Eventful
 
             if ($input == 'eventful') {
                 //$this->search_words = null;
-                $this->response = "Asked Eventful about events.";
+                $this->response = "Eventful requested.";
                 return;
             }
 
@@ -488,7 +517,7 @@ class Eventful
 
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            $this->response = "Asked Eventful about " . $this->search_words . " events";
+            $this->response = 'Eventful requested for "' . $this->search_words . '" events.';
             return false;
         }
 

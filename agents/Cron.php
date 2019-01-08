@@ -3,6 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 require '/var/www/stackr.test/vendor/autoload.php';
 //require '/var/www/html/stackr.ca/vendor/autoload.php';
 
+//var_dump($_SERVER['DOCUMENT_ROOT']);
+
 $GLOBALS['stack'] = '/var/www/stackr.test/';
 //$GLOBALS['stack'] = '/var/www/html/stackr.ca/';
 

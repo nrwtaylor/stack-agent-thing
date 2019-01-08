@@ -102,7 +102,7 @@ class Meetup
 
         $keywords = urlencode($keywords);
 
-        // Let's use eventful's popularity...
+        // Let's use meetup popularity...
         $data_source = "https://api.meetup.com/2/open_events.xml?format=json&and_text=true&text=" . $keywords . "&time=,1w&key=". $this->api_key;
 
         $time = "&time=,1w";

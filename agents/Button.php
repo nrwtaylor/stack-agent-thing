@@ -9,13 +9,12 @@ ini_set("allow_url_fopen", 1);
 
 class Button
 {
-
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
     {
-        $start_time = $thing->elapsed_runtime();
-        $this->start_time = microtime(true);
+        $this->start_time = $thing->elapsed_runtime();
+        //$this->start_time = microtime(true);
 
         $this->agent_name = "button";
 
@@ -23,6 +22,7 @@ class Button
         $this->agent_input = $agent_input;
 
         $this->keyword = "button";
+        $this->keywords = array($this->keyword,"on","off", "press");
 
         $this->agent_prefix = 'Agent "Button" ';
 
@@ -82,19 +82,16 @@ $this->getBody();
 "text":"Roll","type":"button","value":"Roll","style":""}]}],"type":"message","subtype":"bot_message",
 "ts":"1536625765.000100"},"response_url":"https:\/\/hooks.slack.com\/actions\/T6M85G0RE\/433921910887\/V07CYVQFXUPxX5HnWJQ3EzaB","trigger_id":"432877505426.225277544864.bd6f0e4cf3baef4748f832ec8340dd4a"}}';
 
-
-
         $bodies = json_decode($this->thing->thing->message0, true);
         $this->body = $bodies['slack'];
 
-$this->body = json_decode($t);
-//var_dump($this->body);
+        $this->body = json_decode($t);
 
     }
 
+
     function set($requested_state = null)
     {
-        // Refactor
 
         if ($requested_state == null) {
             $requested_state = $this->requested_state;
@@ -109,31 +106,49 @@ $this->body = json_decode($t);
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
-
-        return;
     }
-
 
     function get()
     {
         $this->previous_state = $this->variables_thing->getVariable("state")  ;
         $this->refreshed_at = $this->variables_thing->getVariables("refreshed_at");
 
-        $this->thing->choice->Create($this->keyword, $this->node_list, $this->previous_state);
+        if (!isset($this->requested_state)) {
+            if (isset($this->state)) {
+                $this->requested_state = $this->state;
+            } else {
+                $this->requested_state = false;
 
-        if (isset($this->requested_state)) {
-            $this->thing->choice->Choose($this->requested_state);
-            $this->state = $this->thing->choice->current_node;
-        } else {
-            $this->state = $this->previous_state;
+            }
         }
 
-        return;
+        $this->thing->choice->Create($this->keyword, $this->node_list, $this->previous_state);
+        $this->thing->choice->Choose($this->requested_state);
+
+        $this->state = $this->thing->choice->current_node;
+        $this->state = $this->previous_state;
+    }
+
+    function buttonPress()
+    {
+        $this->response = "Pressed a button";
+
+    }
+
+    function buttonOn()
+    {
+        $this->state = "on";
+        $this->set($this->state);
+    }
+
+    function buttonOff()
+    {
+        $this->state = "off";
+        $this->set($this->state);
     }
 
     function extractButtons($input = null)
     {
-        
         $this->buttons = array();
         if ($input == null) {$input = $this->subject;}
         $input = strtolower($input);
@@ -187,6 +202,9 @@ $this->body = json_decode($t);
 //        $this->subject = "button is yes | no";
 //        $this->subject = "orange brown";
 //        $this->subject = "button";
+//        $this->subject = "button on";
+//        $this->subject = "button off";
+
 
 //        $this->getButtons();
         $this->extractButtons();
@@ -247,8 +265,8 @@ $this->body = json_decode($t);
 //        $sms_message .= " | another nuuid " . substr($this->variables_thing->uuid,0,4); 
         $s .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
         $s .= " | " . $this->web_prefix . "thing/" . $this->uuid . "/button"; 
-
-
+        $s .= " | ".  $this->state;
+        $s .= " | " . $this->response;
 
         //if ($this->state == "off") {
         //    $sms_message .= " | TEXT BUTTON ON";
@@ -303,6 +321,10 @@ $this->body = json_decode($t);
 		$from = "button";
 
 
+        $choices = $this->variables_thing->thing->choice->makeLinks($this->state);
+        $this->thing_report['choices'] = $choices;
+
+
         $this->makeChoices();
         $this->makeSMS();
 
@@ -351,6 +373,37 @@ $this->body = json_decode($t);
                 return;
             }
             // return "Request not understood";
+        }
+
+        $keywords = $this->keywords;
+
+        foreach ($pieces as $key=>$piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) 
+                    {
+
+                        case 'off':
+                            $this->thing->log('switch off');
+                            $this->buttonOff();
+                            return;
+                        case 'on':
+                            $this->buttonOn();
+                            return;
+                        case 'press':
+                            $this->buttonPress();
+                            return;
+
+                        case 'next':
+
+
+                        default:
+
+                    }
+
+                }
+            }
+
         }
 
 

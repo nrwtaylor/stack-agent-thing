@@ -26,8 +26,6 @@ class Slack
 
     function __construct(Thing $thing, $input = null)
     {
-//echo "slack.php meep";
-//exit();
 		$this->cost = 50;
 
 		$this->test= "Development code";
@@ -202,31 +200,24 @@ exit();
         $this->thing->json->writeVariable(array("slack",
             "refreshed_at"),  $this->thing->json->time()
             );
-//        $this->thing->json->writeVariable(array("slack",
-//            "name"),  $this->channel_name
-//            );
-
     }
 
 
     function eventSet()
     {
-
-        $this->thing->log( '<pre> Agent "Slack" called eventSet()' );
+        $this->thing->log( 'called eventSet().' );
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable( array("slack") , $this->body  );
 
-        //$this->thing->flagGreen();
-
 	    return;
     }
 
     function eventGet()
     {
-        $this->thing->log( '<pre> Agent "Slack" called eventGet()</pre>' );
+        $this->thing->log( 'called eventGet().' );
 
         $this->thing->db->setFrom($this->from);
 
@@ -243,7 +234,7 @@ exit();
 		$this->channel_id = $this->getChannel();
 		$this->user = $this->getUser();
 		$this->text = $this->getText();
-//var_dump($this->body);
+
 		$this->response_url = $this->body['response_url'];
 
 		return;
@@ -256,10 +247,7 @@ exit();
 		$this->thing->flagGreen();
 
 		// Generate email response.
-
-		//if ( $this->isCommand() ) {
-			$to = $this->getChannel();
-		//}
+        $to = $this->getChannel();
 
 		if ($this->input != null) {
 			$test_message = $this->input;
@@ -292,7 +280,6 @@ exit();
 
 		if (!isset($test_message)) { $test_message = "null message"; } else {}
 
-
     	$this->chat_postMessage($this->channel_id, $test_message);
 
         $this->thing->log("Slack message sent to " . $this->channel_id);
@@ -303,26 +290,7 @@ exit();
         $this->thing_report['log'] = $this->thing->log;
 
         $this->thing->flagGreen();
-    return $this->thing_report;
-
-
-//		if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
-//			$this->sendMessage($to, $test_message);
-
-//			$this->thing->account['stack']->Debit($this->cost);
-
-//                        $message_thing = new Message($this->thing, $this->thing_report);
-//                        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-//
-//		} else {
-//
-//			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
-//		}
-
-
-//		return;
-
+        return $this->thing_report;
 
 	}
 
@@ -909,8 +877,10 @@ $array =
         );
 
 		// Prepare choice buttons
+
         $button = true;
         $max_buttons = 1;
+
         $buttons_count = 0;
 		if ((isset($this->choices)) and ($button == true)) {
 			$actions= null;
@@ -934,7 +904,7 @@ $array =
             //$actions = array($action,$action);
         //}
 
-		$attachments = array ([
+    		$attachments = array ([
 				"text" => null,
             			"fallback" => "TEXT [ ".implode(" | ", $this->choices['words']). " ]",
             			"callback_id" => "slack_button_" . $this->uuid,
@@ -942,6 +912,10 @@ $array =
             			"attachment_type" => "default",
 				"actions" => $actions 
 			]);
+//echo $button->state;
+$button = new Button($this->thing, "button");
+//        if ($button->state == "off") {$attachments = null;}
+if ($button->state == "off") {$attachments = null;}
 
 			if ( ($type == null) or ($type == 'event') ) {
 

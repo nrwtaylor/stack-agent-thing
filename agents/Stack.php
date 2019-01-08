@@ -114,13 +114,7 @@ class Stack
         $this->stack->setVariable("count", $this->count );
         $this->stack->setVariable("identity", $this->identity );
 
-
-        //$this->makeChoices();
-        //$this->makePNG();
-
         $this->thing->log($this->agent_prefix . 'set Stack to ' . $this->state, "INFORMATION");
-
-        return;
     }
 
     function get()
@@ -145,12 +139,6 @@ class Stack
         }
 
         if ($f == true) {echo "Failed to retrieve thing"; return;}
-// else {
-//            $this->getStart();
-//        }
-        //var_dump($identity);
-
-
 
         $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
 
@@ -163,16 +151,7 @@ class Stack
             $this->state = $this->default_state;
         }
 
-
-//        $this->getThing();
-
-       
-
-//        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
-//        $check = $this->thing->choice->current_node;
-
-        $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
-
+        $this->thing->log('got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
         return;
     }
@@ -195,7 +174,6 @@ class Stack
 
     function getStart()
     {
-
         // This returns an uuid
 
         $thing_json = file_get_contents($this->web_prefix . "api/redpanda/start");
@@ -229,23 +207,12 @@ class Stack
 
         $this->variables = $thing["variables"];
         $this->settings = $thing['settings'];
-
-        return;
-/*
-        $this->stack = $thing_array;
-
-        $this->agent = $this->variables['agent'];
-        $this->account = $this->variables['account'];
-*/
-
     }
 
     function variablesStack()
     {
-
         $this->agent = $this->variables['agent'];
         $this->account = $this->variables['account'];
-
     }
 
     function printArrayList($array, $h = null, $depth = 0)
@@ -268,12 +235,10 @@ class Stack
             }
             if (($v == null) or ($v == false)) {$v= "X";}
             $h .= "<li>" . $k . " is " .  $v . "</li>";
-            //echo "<li>" . $v . "</li>";
         }
         $h .= "</ul>";
         $depth = $depth - 1;
         return $h;
-        //echo "</ul>";
     }
 
     public function makeWeb()
@@ -340,11 +305,11 @@ class Stack
     {
         return is_numeric($number);
     }
-// -----------------------
 
-	private function respond() {
+    // -----------------------
 
-
+	private function respond()
+    {
 		$this->thing->flagGreen();
 
 		// This should be the code to handle non-matching responses.
@@ -359,12 +324,7 @@ class Stack
 
 		$message = 'Stack checker.';
 
-		//$email->sendGeneric($to,$from,$this->subject, $message);
-		//$thing->thing->email->sendGeneric($to,$from,$this->subject, $message);
-
 		$received_at = strtotime($this->thing->thing->created_at);
-
-		//$ago = Thing::human_time ( time() - $received_at );
 
         $ago = $this->thing->human_time ( time() - $received_at );
 
@@ -380,27 +340,17 @@ class Stack
         $this->messageStack($this->response);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		
+        $this->thing_report['keyword'] = 'pingback';
+        $this->thing_report['help'] = 'Useful for checking the stack.';
 
-	//	$this->thing_report = array('thing'=>$this->thing, 'keyword'=>'pingback', 'info'=>'Ping agent pinged back', 'help'=>'Useful for checking the stack.');
-
-//                $this->thing_report['thing'] = $this->thing; 
-$this->thing_report['keyword'] = 'pingback';
-//$this->thing_report['info'] = 'Ping agent pinged back';
-$this->thing_report['help'] = 'Useful for checking the stack.';
-
-            $this->makeWeb();
+        $this->makeWeb();
 
 		return $this->thing_report;
-
-
 	}
 
     function messageStack($text = null)
     {
-        //file_get_contents($this->web_prefix . "api/redpanda/" . $text);
         file_get_contents($this->web_prefix . "api/redpanda/" . "stack");
-
     }
 
     function makeSMS()
@@ -416,8 +366,6 @@ $this->thing_report['help'] = 'Useful for checking the stack.';
 
 	public function readSubject()
     {
-		return;
-
 	}
 
 }

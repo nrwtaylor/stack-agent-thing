@@ -123,9 +123,9 @@ class Geekenders
         $this->earliest_event_string = "Didn't find anything. Which is weird, because there has to be a geekenders show. Check https://www.facebook.com/Geekenders/";
 
         // What is a Geekenders.
-        $this->eventful = new Eventful($this->thing, "eventful geekenders");
+        $this->events = new Events($this->thing, "events geekenders");
 
-        foreach($this->eventful->events as $eventful_id=>$event) {
+        foreach($this->events->events as $ref=>$event) {
 
             $event_name = $event['event'];
             $event_time = $event['runat'];
@@ -134,7 +134,7 @@ class Geekenders
             $time_to_event =  strtotime($event_time) - strtotime($this->current_time) ;
             if (!isset($time_to_earliest_event)) {
                $time_to_earliest_event = $time_to_event;
-               $event_string = $this->eventful->eventString($event);
+               $event_string = $this->events->eventString($event);
                $this->earliest_event_string = $this->thing->human_time($time_to_earliest_event) . " until " . $event_string . ".";
 
             } else {
@@ -142,7 +142,7 @@ class Geekenders
                 if ($time_to_earliest_event > $time_to_event) {
 
                     $time_to_earliest_event = $time_to_event;
-                    $event_string = $this->eventful->eventString($event);
+                    $event_string = $this->events->eventString($event);
 
                     $this->earliest_event_string = $this->thing->human_time($time_to_earliest_event) . " until " . $event_string . ".";
 
@@ -175,7 +175,7 @@ class Geekenders
 
     public function makeMessage()
     {
-        $message = $this->eventful->message;
+        $message = $this->events->message;
 
 
         $this->message = $this->earliest_event_string; //. ".";
@@ -206,8 +206,8 @@ class Geekenders
         $html .= $this->sms_message. '"';
 
         $html .= "<p>";
-        foreach($this->eventful->events as $id=>$event) {
-            $e = $this->eventful->eventString($event);
+        foreach($this->events->events as $id=>$event) {
+            $e = $this->events->eventString($event);
             $html .= "<br>" . ($e);
         }
 

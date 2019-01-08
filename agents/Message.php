@@ -27,6 +27,7 @@ class Message
 		// If it null, then it is a non-agent calling the Message function.
 		// So address that first
 
+        $this->button = new Button($this->thing, "button");
 
 		if ($agent_input == null) {
 			$this->thing_report = false;
@@ -80,15 +81,12 @@ class Message
 $channel = new Channel($this->thing, "channel");
 $this->channel_name = $channel->channel_name;
 
-//echo "channel name is " .$this->channel_name;
 
-//		$this->readSubject();
+//$this->button = new Button($this->thing, "button");
+//var_dump($this->button->state);
+//exit();
 
-//        if ($this->from == "17787920847") {
 		$this->respond();
-//        } else {
-//            echo "address ignored";
-//        }
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("message",
@@ -189,36 +187,21 @@ $this->channel_name = $channel->channel_name;
 					$this->sms_message = $this->thing_report['sms'];
 					continue;
                 case 'choices':
-                    $this->choices = $this->thing_report['choices'];
+
+                    if ($this->button->state == "on") {
+                        $this->choices = $this->thing_report['choices'];
+                    } else {
+                        $this->choices = false;
+                    }
 					continue;
 
-
-/*
-                                case 'message':
-					if ( !isset($this->thing_report['message']) ) {
-                                        	$this->message = $this->sms_message;
-					} else {
-					        $this->message = $this->thing_report['message'];
-					}
-*/
                 case 'email':
-//					if (isset($this->thing_report['email']) ) {
-//						$this->message = $this->thing_report['message'];
-						$this->email = $this->thing_report['email'];
-//					}
-        				//echo "email";
-        				//break;
+                    $this->email = $this->thing_report['email'];
 					continue;
   				case 'web':
-
-//$this->thing->log('<pre> Agent "Message" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
-
-        				//$this->thing->log( "web channel sent to message - no action" );
-        				//break;
 					continue;
-    				default:
-       					//
-					continue;
+                default:
+                    continue;
 			}
 		}
 		return;
@@ -226,10 +209,10 @@ $this->channel_name = $channel->channel_name;
 
     function isOpen()
     {
+
         // See if the channel is open.
         $u = new Usermanager($this->thing, "usermanager");
         if (($u->state == "opt-in") or ($u->state == "start") or ($u->state == "new user")) {
-
             $this->messaging = "on";
         } else {
             $this->messaging = "off";
@@ -261,25 +244,20 @@ $this->channel_name = $channel->channel_name;
 
     function checkMicrosoft($searchfor = null)
     {
-//return false;
-        // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
-        // Don't make assumptions about characters in slack id.
-//$channel = new Channel($this->thing, "channel");
-//var_dump($channel);
         if ($this->channel_name == "microsoft") {return true;}
-      return false; // in dev
+        return false; // in dev
     }
 
     function checkSlack($searchfor)
     {
-//return false;
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
+
 //$channel = new Channel($this->thing, "channel");
-//var_dump($channel);
+
         if ($this->channel_name == "slack") {return true;}
-      return false; // in dev
-//exit();
+        return false; // in dev
+
         // Check address against the beta list
 
         $file = $this->resource_path . 'slack/id.txt';
@@ -293,6 +271,7 @@ $this->channel_name = $channel->channel_name;
 
             $m = $matches[0][0];
             return $m;
+
         } else {
             return false;
         }

@@ -174,31 +174,61 @@ class Events
         $this->events = array();
 
         $this->eventful = new Eventful($this->thing, "eventful ". $keywords);
-        $this->events = array_merge($this->events, $this->eventful->events);
+        if (isset($this->eventful->events)) {
+foreach($this->eventful->events as &$event) {
+    $event['source'] = "eventful";
+}
+
+            $this->events = array_merge($this->events, $this->eventful->events);
+        }
 
         $this->meetup = new Meetup($this->thing, "meetup ". $keywords);
 
-
-        $this->events = array_merge($this->events, $this->meetup->events);
-
-        $this->brownpapertickets = new Brownpapertickets($this->thing, "brownpapertickets ". $keywords);
-        $this->events = array_merge($this->events, $this->brownpapertickets->events);
-
-$this->thing->log("start sort");
-$runat = array();
-foreach ($this->events as $key => $row)
-{
-    $runat[$key] = $row['runat'];
+        if (isset($this->meetup->events)) {
+foreach($this->meetup->events as &$event) {
+    $event['source'] = "meetup";
 }
-array_multisort($runat, SORT_ASC, $this->events);
-$this->thing->log("end sort");
+            $this->events = array_merge($this->events, $this->meetup->events);
+        }
+
+            $this->brownpapertickets = new Brownpapertickets($this->thing, "brownpapertickets ". $keywords);
+
+        if ((isset($this->brownpapertickets->events)) and ($this->brownpapertickets->events != true)) {
+
+foreach($this->brownpapertickets->events as &$event) {
+    $event['source'] = "brownpapertickets";
+}
+
+            $this->events = array_merge($this->events, $this->brownpapertickets->events);
+        }
+
+        $this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
+
+        if (isset($this->ticketmaster->events)) {
+
+foreach($this->ticketmaster->events as &$event) {
+    $event['source'] = "ticketmaster";
+}
+
+
+            $this->events = array_merge($this->events, $this->ticketmaster->events);
+        }
+
+        $this->available_events_count = count($this->events);
+
+        $this->thing->log("start sort");
+
+        $runat = array();
+        foreach ($this->events as $key => $row)
+        {
+            $runat[$key] = $row['runat'];
+        }
+        array_multisort($runat, SORT_ASC, $this->events);
+        $this->thing->log("end sort");
 
         //$this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
 
 
-//var_dump($this->eventful->events);
-//var_dump($this->meetup->events);
-//var_dump($this->brownpapertickets->events);
 
 
 //exit();
@@ -330,7 +360,7 @@ if (empty($parsed['scheme'])) {
 }
 
                 $html_link = '<a href="' . $link . '">';
-                $html_link .= "link";
+                $html_link .= $event['source'];
                 $html_link .= "</a>";
 
                 $html .= "<p>" . $event_html . " " . $html_link;

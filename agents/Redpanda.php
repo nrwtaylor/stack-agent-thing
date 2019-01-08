@@ -104,124 +104,72 @@ $this->node_list = array("start"=>array("useful"=>array("bonus"=>"100","250")), 
 
 
 
-	public function readSubject() {
+	public function readSubject()
+    {
 		// No real reason to read the subject.
-
-	return true;		
+    	return true;
 	}
 
+	public function respond()
+    {
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(array("redpanda"), array(
+            'log:{"start_at":' . $this->thing->json->time() . '}'
+            ));
 
-	public function respond() {
-		$this->thing->json->setField("settings");
-		$this->thing->json->writeVariable(array("redpanda"), array(
-			'log:{"start_at":' . $this->thing->json->time() . '}'
-			));
+        $thing_report = $this->chooseResponse();
 
-		$thing_report = $this->chooseResponse();
-
-
-		//$this->thing_report = array('thing' => $this->thing->thing, 'choices' => null, 'info' => 'This is a reminder.','help' => 'This is probably stuff you want to remember.  Or forget.');
+        //$this->thing_report = array('thing' => $this->thing->thing, 'choices' => null, 'info' => 'This is a reminder.','help' => 'This is probably stuff you want to remember.  Or forget.');
 
         $this->thing_report['choices'] = false;
         $this->thing_report['info'] = 'This is a reminder.';
         $this->thing_report['help'] = 'This is probably stuff you want to remember.  Or forget.';
 
+        return $this->thing_report;
+    }
 
-		//$response = null;
-
-	return $this->thing_report;
-	}
-
-
-
-
-	public function chooseResponse($i = NULL) {
-
+	public function chooseResponse($n = null)
+    {
 		// Choose a response stochastically.
 
-		//echo "chooseResponse()\r";
-		if ($i == NULL) {
+		if ($n == null) {
+            $roll = new Roll($this->thing, "roll d20");
+            $n = $roll->sum;
+        }
 
-// Tweaked this for PRODUCTION
-// Need to create a Stochastics class
-//			 $i = NDie(20);
-			$i = rand(1,20);
-			}
-	
-		//%$i = NDie(20);
 
-		//%$i = 1;
-
-		//$this->testFunc();
-
-//		$this->thing->test($i, 'redpanda', 'rolled D20 from');
-
-		switch ($i) {
+		switch ($n) {
 			case 1:
 				//echo "sendKey";
 				return $this->sendReminder();
-				break;
 			case 2:
-				//echo "D2 - sendReminder";
-				//$this->sendKey();
 				return $this->randomComment();
 			case 3:
-				//echo "D2 - sendReminder";
 				return $this->sendReminder();
-				break;
 			case 4:
-				//echo "D2 - sendReminder";
 				return $this->sendReminder();
-				break;
 			case 5:
-				//echo "D2 - sendReminder";
 				return $this->sendReminder();
-				break;
-
 			case 20:
-				//echo "D20 - sendReminder";
-
 				return $this->sendReminder();
-
-				break;
 			default:
-                                return $this->randomComment();
-
-			   //echo "i is not equal to 0, 1 or 2";
+                return $this->randomComment();
 			}
-		return $i;
+		return $n;
 	}
 
-
-
-	public function sendReminder() {
-		//echo "send reminder";
+	public function sendReminder()
+    {
 		$thing_report = new Reminder($this->thing);
 		$this->thing->flagGreen();
 
 		return $thing_report;
-
 	}
 
-
-
-	public function randomComment() {
-
-                $thing_report = new Hey($this->thing);
-                $this->thing->flagGreen();
-
-
-	}	
-
-
+	public function randomComment()
+    {
+        $thing_report = new Hey($this->thing);
+        $this->thing->flagGreen();
+	}
 }
-
-
-
-
-
-
-
-
-
 ?>

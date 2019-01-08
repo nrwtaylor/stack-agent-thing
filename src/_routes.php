@@ -355,24 +355,13 @@ $app->group('/api', function () use ($app) {
         	if ( isset( $body['payload'] ) ) {
 				echo "Slack datagram transmitted.";
                 //$sender_id = $body['user_id'];
-                //$sender_id = "not extracted";
-
-                $payload_text = $body['payload'];
-                $payload_json = json_decode($payload_text, true);
-                $sender_id = $payload_json['user']['id'];
-
-				$page_id = "button";
+                $sender_id = "not extracted";
+				$page_id = "mordok";
                 $text = "s/ button press"; //$body['text'];
-
                 $slack_thing->Create($sender_id, $page_id, $text );
 
                 $slack_agent = new Slack($slack_thing, $body);
                 $slack_thing->flagRed();
-
-                $channel = new Channel($slack_thing,"slack");
-
-
-                $agent = new Agent($slack_thing);
 
                 $response_text ="";
 

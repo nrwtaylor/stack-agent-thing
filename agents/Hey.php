@@ -67,14 +67,7 @@ class Hey {
 
         $this->readSubject();
 
-		$this->thing->log( '<pre> Agent "Hey" startHey() </pre>' );
-                $this->startHey();
-
-
-//		$this->readSubject();
-
-		//if ($input != 'screen') {
-    	$this->thing->log( '<pre> Agent "Hey" respond() </pre>' );
+        $this->startHey();
 
 		$this->respond();
 
@@ -82,10 +75,10 @@ class Hey {
         $this->thing_report['help'] = "An agent which says, 'Hey'. Type 'Web' on the next line.";
         $this->thing_report['num_hits'] = $this->num_hits;
 
-
-		$this->thing->log( '<pre> Agent "Hey" completed.</pre>' );
+		$this->thing->log( 'completed.' );
 
         $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report['response'] = $this->response;
 
 		return;
 
@@ -93,7 +86,6 @@ class Hey {
 
     public function startHey($type = null)
     {
-
         $litany = array("Meh.", "Hhhhhh.", "Hi", 'Received "'. $this->subject. '"');
         $key = array_rand($litany);
         $value = $litany[$key];
@@ -124,7 +116,6 @@ class Hey {
 
 	private function respond()
     {
-
 		// Thing actions
 		$this->thing->flagGreen();
 
@@ -135,8 +126,7 @@ class Hey {
 
 		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
 		$choices = $this->thing->choice->makeLinks('start');
-	        $this->thing_report['choices'] = $choices;
-
+        $this->thing_report['choices'] = $choices;
 
 		$this->sms_message = "HEY | " . $this->sms_message . "";
 		$this->thing_report['sms'] = $this->sms_message;
@@ -161,7 +151,6 @@ class Hey {
 
         $html .= "<br>Last nod sms " . $this->nod->last_created_at;
 
-
         $timestamp = $this->nod->last_timestamp;
         $t = explode(" ",$timestamp);
         $timestamp = $t[0] ." " .$t[1];
@@ -172,13 +161,10 @@ class Hey {
         $html_time =  (strtotime($this->current_time) - $t1);
         $sms_time = (strtotime($this->current_time) - $t2);
 
-
         $nearest_time = min($html_time, $sms_time);
-
 
         $html .= "<br>Last nod was " . $this->thing->human_time($nearest_time) . " ago.";
 
-      
         $warranty = new Warranty($this->thing, "warranty");
 
         $html .= "<p><br>" . "This is a developmental tool. Sometimes it might not work. If you have resources, we hope you can make it more reliable.";
@@ -186,23 +172,16 @@ class Hey {
         $html .= "<p><br>" . $warranty->message;
 
         $this->thing_report['web'] = $html;
-
-
     }
 
 	public function readSubject()
     {
         $this->nod = new Nod($this->thing, "nod");
 
-      //var_dump($nod->sms_message);
-//echo ($nod->last_timestamp);
 		$this->response = null;
 		return;
 	}
 
 }
-
-
-
 
 ?>

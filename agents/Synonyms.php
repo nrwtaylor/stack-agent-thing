@@ -7,7 +7,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Oxforddictionaries 
+class Synonyms 
 {
 
     // This gets Forex from an API.
@@ -16,7 +16,7 @@ class Oxforddictionaries
 
     function __construct(Thing $thing, $agent_input = null)
     {
-        $this->start_time = $thing->elapsed_runtime();
+        $this->start_time = microtime(true);
 
         $this->agent_input = $agent_input;
 
@@ -34,48 +34,61 @@ class Oxforddictionaries
         $this->sqlresponse = null;
 
 
-        $this->agent_prefix = 'Agent "Oxford Dictionaries" ';
+        $this->agent_prefix = 'Agent "Synonyms" ';
 
         //$this->node_list = array("off"=>array("on"=>array("off")));
 
-        $this->keywords = array('oxford','dictionary','dictionaries','synonyms', 'antonyms','english','spanish','german');
+        $this->keywords = array('synonyms','synonym','english');
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
 
-        $this->application_id = $this->thing->container['api']['oxford_dictionaries']['application_id'];
-        $this->application_key = $this->thing->container['api']['oxford_dictionaries']['application_key']; 
+        //$this->application_id = $this->thing->container['api']['oxford_dictionaries']['application_id'];
+        //$this->application_key = $this->thing->container['api']['oxford_dictionaries']['application_key']; 
 
         $this->run_time_max = 360; // 5 hours
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "oxford_dictionaties" . " " . $this->from);
+        //$this->variables_agent = new Variables($this->thing, "variables " . "oxford_dictionaties" . " " . $this->from);
 
         // Loads in variables.
         $this->get(); 
+
+//        if ($this->verbosity == false) {$this->verbosity = 2;}
+
 
 		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
 		$this->thing->log('received this Thing "'.  $this->subject . '".');
 
 		$this->readSubject();
 
-        $this->getApi("dictionary");
+        //$this->getApi("dictionary");
+        $this->getSynonyms();
 
 		$this->respond();
 
+        $this->end_time = microtime(true);
+        $this->actual_run_time = $this->end_time - $this->start_time;
+        $milliseconds = round($this->actual_run_time * 1000);
+
+        $this->thing->log( 'ran for ' . $milliseconds . 'ms.' );
+
+		$this->thing->log( 'completed.');
+
         $this->thing_report['log'] = $this->thing->log;
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-
-        $this->thing_report['response'] = $this->response;
 
 		return;
 
 	}
 
+
+
     function set()
     {
+return;
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
+
+//        $this->thing->choice->save('usermanager', $this->state);
 
         return;
     }
@@ -83,6 +96,7 @@ class Oxforddictionaries
 
     function get()
     {
+return;
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
@@ -93,154 +107,38 @@ class Oxforddictionaries
         return;
     }
 
-    function getApi($type = "dictionary")
+    public function getSynonyms()
     {
-        if ($type == null) {$type = "dictionary";}
+        if (isset($this->definitions)) {return;}
+        $this->definitions = array();
 
-        $keywords = "";
-        if (isset($this->search_words)) {$keywords = $this->search_words;}
+        $oxford_dictionaries = new Oxforddictionaries($this->thing, "synonyms " . $this->search_words);
 
-        $keywords = urlencode($keywords);
-
-        $options = array(
-            'http'=>array(
-                'method'=>"GET",
-                'header'=>"Accept-language: application/json\r\n" .
-                    "app_id: " . $this->application_id . "\r\n" .  // check function.stream-context-create on php.net
-                    "app_key: " . $this->application_key . "\r\n" . 
-                    "" // i.e. An iPad 
-            )
-        );
-
-        $context = stream_context_create($options);
-
-        $data_source = "https://od-api.oxforddictionaries.com:443/api/v1/entries/en/". $keywords;
-
-//get /entries/{source_lang}/{word_id}/synonyms
-
-        $data = @file_get_contents($data_source, false, $context);
-        if ($data == false) {
-            $this->response = "Could not ask Oxford Dictionaries.";
-            $this->definitions_count = 0;
-            //$this->events_count = 0;
-            return true;
-            // Invalid query of some sort.
-        }
-        $json_data = json_decode($data, TRUE);
-
-        $definitions = $json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'];
-
-        $count = 0;
-        foreach ($definitions as $id=>$definition) {
-            if (!isset($definition['definitions'][0])) {continue;}
-            $this->definitions[] = $definition['definitions'][0];
-            $count += 1;
+        if (isset($oxford_dictionaries->synonyms)) {
+            $this->synonyms = $oxford_dictionaries->synonyms;
         }
 
-        $this->definitions_count = $count;
+        $this->synonyms_count = count($this->synonyms);
 
-        return false;
+        if ($this->synonyms_count == 0) {
+            // No word found. Check wikipedia.
+
+            $wikipedia = new Wikipedia($this->thing, "wikipedia ." .$this->search_words);
+            $this->definitions[] = $wikipedia->text;
+        }
+
+        $this->synonyms_count = count($this->synonyms);
+
+        if ($this->synonyms_count == 0) {
+            // Still no word found
+        }
     }
-
-
-    function getSynonyms()
-    {
-        $keywords = "";
-        if (isset($this->search_words)) {$keywords = $this->search_words;}
-
-        $keywords = urlencode($keywords);
-
-        $options = array(
-            'http'=>array(
-                'method'=>"GET",
-                'header'=>"Accept: application/json\r\n" .
-                    "app_id: " . $this->application_id . "\r\n" .  // check function.stream-contex$
-                    "app_key: " . $this->application_key . "\r\n" . 
-                    "" // i.e. An iPad 
-            )
-        );
-
-        $context = stream_context_create($options);
-        $data_source = "https://od-api.oxforddictionaries.com:443/api/v1/entries/en/". $keywords . "/synonyms";
-
-        $data = file_get_contents($data_source, false, $context);
-        if ($data == false) {
-            $this->response = "Could not ask Oxford Dictionaries about synonyms.";
-            $this->definitions_count = 0;
-            //$this->events_count = 0;
-            return true;
-            // Invalid query of some sort.
-        }
-        $json_data = json_decode($data, TRUE);
-$items = $json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'];
-$synonyms_list = $items[0]['synonyms'];
-
-$count = 0;
-foreach($synonyms_list as $key=>$item) {
-    //var_dump($item['text']);
-    $this->synonyms[] = $item['text'];
-            $count += 1;
-
-}
-
-        $this->synonyms_count = $count;
-
-        return false;
-    }
-
-    function getAntonyms()
-    {
-        $keywords = "";
-        if (isset($this->search_words)) {$keywords = $this->search_words;}
-
-        $keywords = urlencode($keywords);
-
-        $options = array(
-            'http'=>array(
-                'method'=>"GET",
-                'header'=>"Accept: application/json\r\n" .
-                    "app_id: " . $this->application_id . "\r\n" .  // check function.stream-contex$
-                    "app_key: " . $this->application_key . "\r\n" . 
-                    "" // i.e. An iPad 
-            )
-        );
-
-        $context = stream_context_create($options);
-        $data_source = "https://od-api.oxforddictionaries.com:443/api/v1/entries/en/". $keywords . "/antonyms";
-
-        $data = file_get_contents($data_source, false, $context);
-        if ($data == false) {
-            $this->response = "Could not ask Oxford Dictionaries about antonyms.";
-            $this->definitions_count = 0;
-            //$this->events_count = 0;
-            return true;
-            // Invalid query of some sort.
-        }
-        $json_data = json_decode($data, TRUE);
-$items = $json_data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'];
-//var_dump($items);
-//exit();
-$antonyms_list = $items[0]['antonyms'];
-
-$count = 0;
-foreach($antonyms_list as $key=>$item) {
-    //var_dump($item['text']);
-    $this->antonyms[] = $item['text'];
-            $count += 1;
-
-}
-
-        $this->antonyms_count = $count;
-
-        return false;
-    }
-
 
     function getLink($ref)
     {
         // Give it the message returned from the API service
 
-        $this->link = "https://www.oxforddictionaries.com";
+        $this->link = "https://www.google.com/search?q=" . $ref; 
         return $this->link;
     }
 
@@ -252,10 +150,17 @@ foreach($antonyms_list as $key=>$item) {
 		// Generate email response.
 
 		$to = $this->thing->from;
-		$from = "oxforddictionaries";
+		$from = "synonyms";
 
+		//echo "<br>";
+
+		//$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
 		$this->thing_report['choices'] = $choices;
+
+        //$interval = date_diff($datetime1, $datetime2);
+        //echo $interval->format('%R%a days');
+        //$available = $this->thing->human_time($this->available);
 
         $this->flag = "green";
 
@@ -267,7 +172,7 @@ foreach($antonyms_list as $key=>$item) {
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
-        $this->thingreportOxforddictionaries();
+        $this->thingreportSynonyms();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -276,20 +181,25 @@ foreach($antonyms_list as $key=>$item) {
 
         $this->thing_report['help'] = 'This triggers provides currency prices using the 1forge API.';
 
+//        $this->thingreportEventful();
+
 		return;
 	}
 
     public function makeWeb()
     {
-        $html = "<b>OXFORD DICTIONARIES</b>";
-        $html .= "<p><b>Oxford Dictionaries definitions</b>";
+        if (!isset($this->definitions)) {$this->getSynonyms();}
 
-        if (!isset($this->events)) {$html .= "<br>No definitions found on Oxford Dictionaries.";} else {
+        $html = "<b>SYNONYMS</b>";
+        $html .= "<p><b>Oxford dictionaries synonyms</b>";
+
+        if (!isset($this->definitions)) {$html .= "<br>No definitions found on Oxford Dictionaries.";} else {
         
-            foreach ($this->events as $id=>$event) {
-
+            foreach ($this->definitions as $id=>$definition) {
+/*
                 $event_html = $this->eventString($event);
 
+                //        $link = $this->web_prefix . 'thing/' . $this->uuid . '/splosh';
                 $link = $event['link'];
                 $html_link = '<a href="' . $link . '">';
                 //        $web .= $this->html_image;
@@ -297,6 +207,8 @@ foreach($antonyms_list as $key=>$item) {
                 $html_link .= "</a>";
 
                 $html .= "<br>" . $event_html . " " . $html_link;
+                //exit();
+*/
             }
         }
 
@@ -305,33 +217,11 @@ foreach($antonyms_list as $key=>$item) {
 
     public function makeSms()
     {
-        //$sms = "OXFORD DICTIONARIES";
+        //$sms = "DICTIONARYIES";
         $sms = strtoupper($this->search_words);
-
-    if ($this->search_type == "dictionary") {
-
-        switch ($this->definitions_count) {
-            case 0:
-                $sms .= " | No definitions found.";
-                break;
-            case 1:
-                $sms .= " | " .$this->definitions[0];
-
-
-
-
-                break;
-            default:
-                foreach($this->definitions as $definition) {
-                    $sms .= " / " . $definition;
-                }
-        }
-    }
-
-    if ($this->search_type == "synonyms") {
         switch ($this->synonyms_count) {
             case 0:
-                $sms .= " | No synonyms found.";
+                $sms .= " | No definitions found.";
                 break;
             case 1:
                 $sms .= " | " .$this->synonyms[0];
@@ -345,27 +235,6 @@ foreach($antonyms_list as $key=>$item) {
                     $sms .= " / " . $synonym;
                 }
         }
-    }
-
-    if ($this->search_type == "antonyms") {
-        switch ($this->antonyms_count) {
-            case 0:
-                $sms .= " | No antonyms found.";
-                break;
-            case 1:
-                $sms .= " | " .$this->antonyms[0];
-
-
-
-
-                break;
-            default:
-                foreach($this->antonyms as $antonym) {
-                    $sms .= " / " . $antonym;
-                }
-        }
-    }
-
 
         $sms .= " | " . $this->response;
 
@@ -376,27 +245,40 @@ foreach($antonyms_list as $key=>$item) {
 
     public function makeMessage()
     {
-        $message = "Oxford Dictionaries";
+        $message = "Synonyms";
 
-        switch ($this->definitions_count) {
+        switch ($this->synonyms_count) {
             case 0:
-                $message .= " did not find any definitions.";
+                $message .= " did not find any synonyms.";
                 break;
             case 1:
-                $message .= ' found, "' .$this->definitions[0] . '"';
+                $message .= ' found, "' .$this->synonyms[0] . '"';
+
+//                $message .= " found "  . $event_html . ".";
+
+                //if ($this->available_events_count != $this->events_count) {
+                //    $message .= $this->events_count. " events retrieved.";
+                //}
+
+
                 break;
             default:
-                foreach($this->definitions as $definition) {
-                    $message .= " / " . $definition;
+                foreach($this->synonyms as $synonym) {
+                    $message .= " / " . $synonym;
                 }
 
         }
+
+       // $message .= " | " . $this->response;
+
+        // Really need to refactor this double :/
 
         $this->message = $message;
 
     }
 
-    private function thingreportOxforddictionaries()
+
+    private function thingreportSynonyms()
     {
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
@@ -437,7 +319,6 @@ foreach($antonyms_list as $key=>$item) {
 //        $this->response = "Asked Eventful about events.";
         $this->response = null;
 
-        $this->search_type = "dictionary";
 
         $this->num_hits = 0;
         // Extract uuids into
@@ -471,9 +352,10 @@ foreach($antonyms_list as $key=>$item) {
 		// Keyword
         if (count($pieces) == 1) {
 
-            if ($input == 'oxforddictionaries') {
+            if (($input == 'synonyms') or ($input == 'synonym')) {
                 //$this->search_words = null;
-                $this->response = "Asked Oxford Dicionaries about nothing.";
+                $this->search_words = "synonyms";
+                $this->response = "Asked Synonyms about nothing.";
                 return;
             }
 
@@ -485,60 +367,10 @@ foreach($antonyms_list as $key=>$item) {
 
                 switch($piece) {
 
-   case 'synonyms':
-
-//        $input = $whatIWant;
-        if (($pos = strpos(strtolower($input), "synonyms is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("synonyms is")); 
-        } elseif (($pos = strpos(strtolower($input), "synonyms")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("synonyms")); 
-        }
-
-
-        $filtered_input = ltrim(strtolower($whatIWant), " ");
-
-        if ($filtered_input != "") {
-
-            $this->search_words = $filtered_input;
-            $this->search_type = "synonyms";
-            $this->getSynonyms();
-
-            $this->response = "Asked Oxford Dictionaries about the word " . $this->search_words . ".";
-            return false;
-        }
-
-
-
-        return;
+   case 'run':
+   //     //$this->thing->log("read subject nextblock");
+        $this->runTrain();
         break;
-
-   case 'antonyms':
-
-//        $input = $whatIWant;
-        if (($pos = strpos(strtolower($input), "antonyms is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("antonyms is")); 
-        } elseif (($pos = strpos(strtolower($input), "antonyms")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("antonyms")); 
-        }
-
-
-        $filtered_input = ltrim(strtolower($whatIWant), " ");
-
-        if ($filtered_input != "") {
-
-            $this->search_words = $filtered_input;
-            $this->search_type = "antonyms";
-            $this->getAntonyms();
-
-            $this->response = "Asked Oxford Dictionaries about the word " . $this->search_words . ".";
-            return false;
-        }
-
-
-
-        return;
-        break;
-
 
     default:
                                         }
@@ -550,26 +382,17 @@ foreach($antonyms_list as $key=>$item) {
 
 
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "oxforddictionaries is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("oxforddictionaries is")); 
-        } elseif (($pos = strpos(strtolower($input), "oxforddictionaries")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("oxforddictionaries")); 
-        }
-
-
-        $input = $whatIWant;
-        if (($pos = strpos(strtolower($input), "synonyms is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("synonyms is")); 
+        if (($pos = strpos(strtolower($input), "synonyms are")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("synonyms are")); 
         } elseif (($pos = strpos(strtolower($input), "synonyms")) !== FALSE) { 
             $whatIWant = substr(strtolower($input), $pos+strlen("synonyms")); 
         }
-
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
     if ($filtered_input != "") {
         $this->search_words = $filtered_input;
-        $this->response = "Asked Oxford Dictionaries about the word " . $this->search_words . ".";
+        $this->response = "Asked Synonyms about the word " . $this->search_words . ".";
         return false;
     }
 

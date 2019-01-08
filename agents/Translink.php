@@ -80,17 +80,6 @@ class Translink
 //echo $this->network_time_string;
 //exit();
         $this->readSubject();
-
-        $this->getStop($this->stop);
-
-
-
-        $this->gtfs = new Gtfs($this->thing, "gtfs");
-        $stop_id = $this->gtfs->idStation(51380);
-        $stop = $this->gtfs->getStop($stop_id);
-        $this->stop_name = $stop['stop_name'];
-
-
   		$this->respond();
 
 		$this->thing->log('Agent "Translink" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
@@ -117,17 +106,8 @@ class Translink
 
     }
 
-    function getStop($text)
-    {
-        $this->gtfs = new Gtfs($this->thing, "gtfs");
-        $stop_id = $this->gtfs->idStation($text);
-        $stop = $this->gtfs->getStop($stop_id);
-        $this->stop_name = $stop['stop_name'];
-    }
-
     function get($file_name, $selector_array = null)
     {
-/*
         echo "Getting " . $file_name . "\n";
 
         $matches = array();
@@ -136,7 +116,7 @@ class Translink
         foreach ($iterator as $iteration) {
             $matches[] = $iteration;
         }
-*/
+
 /*
         foreach ($iterator as $iteration) {
             //echo $iteration;
@@ -492,9 +472,6 @@ exit();
     {
         if (!isset($this->events)) {$this->getEvents();}
 
-
-
-
 $this->routes = array();
         $routes = $this->nextGtfs("routes");
         $stop_events = array();
@@ -685,28 +662,8 @@ ksort($lines);
 
     function makeWeb()
     {
-        $web = "<b>" . $this->stop . " " . ucwords($this->stop_name). "</b>";
-        //$web .= "<br>" . $this->network_time_string . "<br>";
-
-/*
-        $stop_id = $this->gtfs->idStation($this->stop);
-        $this->gtfs->getRoutes($stop_id);
-
-        foreach (        $this->gtfs->routes[$stop_id] as $route_id=>$route) {
-            $web .= "<br>" . $route['route_short_name'] . " " . $route['route_long_name'] . "";
-        }
-
-        //var_dump($this->gtfs->getStop($stop_id));
-
-        if (!isset($this->gtfs->trips[$stop_id])) {$this->gtfs->getTrips($stop_id);}
-        $trips =  $this->gtfs->trips[$stop_id];
-*/
-
-
-        $web .= "<p><br>" . $this->sms_message;
+        $web = "meep";
         $this->thing_report['web'] = $web;
-
-
 
     }
 /*
@@ -972,7 +929,8 @@ ksort($lines);
 
 			$file = 'http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
 
-			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
+//			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
+//var_dump($web_input);
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $file);
@@ -982,6 +940,7 @@ ksort($lines);
 
 			$web_input = $xmldata;
 
+//var_dump($web_input);
 			$this->error = "";
 
 		} catch (Exception $e) {
@@ -1013,7 +972,6 @@ ksort($lines);
 		$message .= "";
 		$message .= "Source: Translink real-time data feed.";
 
-$this->getStop($this->stop);
 
 // Hacky here to be refactored.
 // Generate a special short SMS message
@@ -1031,9 +989,11 @@ $response ="";
 
 
                 	$this->sms_message = "NEXT BUS";
-			if (count($t) > 1) {$this->sms_message .= "ES";}
 
-//            $this->sms_message = ucwords($this->stop_name);
+            if ( (is_array($t)) and (count($t) > 1) ) {
+			//if (count($t) > 1) {
+                $this->sms_message .= "ES";
+            }
 
 			$this->sms_message .= " | ";
 
@@ -1046,8 +1006,8 @@ $response ="";
 			$output = preg_replace('/(\d{4}[\.\/\-][01]\d[\.\/\-][0-3]\d)/', '', $input);
 
 			//echo $output;
-
-			if (count($t) == 0) {
+            if ( (is_array($t)) and (count($t) == 0) ) {
+			// if (count($t) == 0) {
 				$this->sms_message .= "No information returned for stop " . $this->stop . ' | ';
 			} else {
 				$this->sms_message .= ucwords(strtolower($output))  ;
@@ -1065,9 +1025,9 @@ $response ="";
 
 
 
-    public function busTranslink($bus_id)
-    {
-        try {
+        public function busTranslink($bus_id) {
+
+                try {
 
                         $file = 'http://api.translink.ca/rttiapi/v1/buses/' . $bus_id . '?apikey=' . $this->api_key;
 
@@ -1165,7 +1125,7 @@ $response ="";
 	    $this->thing_report['help'] = 'Connector to Translink API.';
 
         //$this->thing->log('Agent "Translink". End Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-        //$this->makeTxt();
+        $this->makeTxt();
         $this->makeweb();
 
 		return $this->thing_report;

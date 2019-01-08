@@ -83,41 +83,16 @@ class Stackgraph {
 
     function set()
     {
-
         $this->thing->json->setField("variables");
-
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "count"),  $this->count
-//            );
-
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "display"),  $this->display
-//            );
-
-
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "refreshed_at"),  $this->thing->json->time()
-//            );
-
-
-  //      $this->variables->setVariable("count", $this->count);
-
-    //    $this->variables->setVariable("display", $this->display);
-
-      //  $this->variables->setVariable("refreshed_at", $this->current_time);
-
-
-        return;
     }
 
 
     function get()
     {
-        return;
     }
 
-    function getData() {
-
+    function getData()
+    {
         $this->identity = "null" . $this->mail_postfix;
 
         // We will probably want a getThings at some point.
@@ -129,6 +104,7 @@ class Stackgraph {
 
         $this->points = array();
         foreach ($things as $thing) {
+
             // Check each of the three Things.
 /*
             $this->variables_thing = new Thing($thing['uuid']);
@@ -168,10 +144,6 @@ class Stackgraph {
 
     function getAgent() 
     {
-        // Tallycounter
-//        $this->getTallycounter();
-
-        return;
     }
 
 	function getVariables($agent = null) {
@@ -225,14 +197,7 @@ return;
                 $next_uuid = $this->getVariable('next_uuid');
 
                 if (($this->name == $name))  {
-
-                    //$next_uuid = $uuid;
                     $this->counter_uuids[] = $uuid;
-
-     //               $this->thing->log( 'Agent "Tallycounter" loaded the tallycounter variable: ' . $this->variables_thing->variable . '.','INFORMATION' );
-     //               $this->thing->log( 'Agent "Tallycounter" loaded the tallycounter name: ' . $this->variables_thing->name . '.','INFORMATION' );
-     //               $this->thing->log( 'Agent "Tallycounter" next counter pointer is: ' . substr($this->variables_thing->next_uuid,0,4) . "." ,'DEBUG');
-
                     break;
                 }
 
@@ -279,19 +244,12 @@ return;
 
 	function startVariables() 
     {
-        $this->thing->log( 'Agent "Stackgraph" started a count.' );
+        $this->thing->log( 'started a count.' );
 
         if (!isset($this->variables_thing)) { $this->variables_thing = $this->thing;}
 
         $this->setVariable("variable", 0);
         $this->setVariable("name", $this->name);
-//exit();
-
-//        $thing = new Thing(null);
-//        $this->setVariable("next_uuid", $thing->uuid);
-
-
-		return;
 	}
 
 

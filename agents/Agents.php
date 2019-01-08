@@ -36,7 +36,6 @@ class Agents
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['log'] = $this->thing->log;
 
-
 		return;
 
 	}

@@ -151,7 +151,7 @@ class Criticalhit
     public function doCriticalhit()
     {
         // What is a Critical Hit.
-        $this->eventful = new Eventful($this->thing, "eventful critical%20%hit");
+        $this->events = new Events($this->thing, "events critical%20%hit");
         $this->response = "Rolled a " . $this->die_roll. ".";
     }
 
@@ -159,12 +159,6 @@ class Criticalhit
     {
 
         // What is a Critical Hit.
-
-        //$this->eventful = new Eventful($this->thing, "eventful critical%20%hit");
-
-        //var_dump($eventful->message);
-
-        // I think a Splosh is not the catching oars.  It's the rhythm tick interval.
         $this->response = "Didn't roll a 20.";
     }
 
@@ -206,7 +200,6 @@ class Criticalhit
 	public function readSubject()
     {
 		$this->response = "Rolled.";
-		//$this->sms_message = "SPLOSH | https://dictionary.cambridge.org/dictionary/english/splosh";
 		$this->message = "http://riotheatre.ca/event/the-critical-hit-show-a-live-dd-comedy-experience/";
 		$this->keyword = "critical";
 
@@ -222,11 +215,15 @@ class Criticalhit
 
     public function makeSms()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/criticalhit';
 
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/criticalhit';
         if ($this->outcome == "critical hit") {
             $sms = "CRITICAL HIT " . $this->roll->roll ." " . $this->die_roll;
-            $sms .= " | " . $this->eventful->message;
+            if ($this->events->available_events_count != 0) {
+                $sms .= " | " . $this->events->message;
+            } else {
+                $sms .= " | No events seen. " . $this->message;
+            }
 
         } else {
             $sms = "MERP " . $this->roll->roll . " " . $this->die_roll;
