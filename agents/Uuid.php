@@ -92,6 +92,25 @@ class Uuid
 
     }
 
+    function extractUuid($input)
+    {
+        $uuids = $this->extractUuids($input);
+        if (!(is_array($uuids))) {return true;}
+
+        if ((is_array($uuids)) and (count($uuids) == 1)) {
+            $this->uuid = $uuids[0];
+            $this->thing->log('Agent "Uuid" found a uuid (' . $this->uuid . ') in the text.');
+            return $this->uuid;
+        }
+
+        if  ((is_array($uuids)) and (count($uuids) == 0)){return false;}
+        if  ((is_array($uuids)) and (count($uuids) > 1)) {return true;}
+
+        return true;
+    }
+
+
+
     function makeWeb() {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
@@ -115,10 +134,10 @@ class Uuid
         //$received_at = strtotime($this->thing->thing->created_at);
         //$ago = $this->thing->human_time ( $this->created_at );
         //$web .= "Created about ". $ago . " ago.";
-        $web.= "<b>UUID Agent</b><br>";
-        $web.= "uuid is " . $this->uuid. "<br>";
+        //$web.= "<b>UUID Agent</b><br>";
+        //$web.= "uuid is " . $this->uuid. "<br>";
 
-        $web.= "created at " . strtoupper(date('Y M d D H:m',$this->created_at)). "<br>";
+        $web.= "CREATED AT " . strtoupper(date('Y M d D H:m',$this->created_at)). "<br>";
 
         $web .= "<br>";
 
@@ -184,6 +203,7 @@ class Uuid
         $this->thing->log('Agent "UUID" looking for UUID in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
 
+//        $this->response = "Made a snowflake. Which will melt.";
 
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 //echo $this->to;

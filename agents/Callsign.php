@@ -55,7 +55,7 @@ class Callsign {
 
         if ($this->agent_input == null) {$this->Respond();}
 
-        if (count($this->callsigns) != 0) {
+        if (isset($this->callsigns) and count($this->callsigns) != 0) {
 		    $this->thing->log($this->agent_prefix . 'completed with a reading of ' . implode($this->callsign) . '.');
         } else {
             $this->thing->log($this->agent_prefix . 'did not find callsigns.');
@@ -350,7 +350,7 @@ if ($i >10) {break;}
                 $file = $this->resource_path . 'special_callsign.txt';
                 $contents .= file_get_contents($file);
 
-
+v
         $callsigns = explode("\n", $contents);
 
         $nearness_min = 1e6;
@@ -430,9 +430,11 @@ if ($i >10) {break;}
 
         $this->makeWeb();
 
-
-        $this->reading = count($this->callsigns);
-        $this->thing->json->writeVariable(array("callsign", "reading"), $this->reading);
+        $this->reading = "X";
+        if (isset($this->callsigns)) {
+            $this->reading = count($this->callsigns);
+        }
+    $this->thing->json->writeVariable(array("callsign", "reading"), $this->reading);
 
 
 

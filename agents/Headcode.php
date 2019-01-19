@@ -650,11 +650,9 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
 
     function extractHeadcodes($input = null)
     {
-
         if (!isset($this->head_codes)) {
             $this->head_codes = array();
         }
-
         //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
         //$pattern = "|[A-Za-z]{4}|"; echo $input;
 
@@ -676,16 +674,10 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
             return $this->head_code;
         }
 
-        //if (count($head_codes == 0)) {return false;}
-        //if (count($head_codes > 1)) {return true;}
-
         if  ((is_array($head_codes)) and (count($head_codes) == 0)){return false;}
         if  ((is_array($head_codes)) and (count($head_codes) > 1)) {return true;}
 
-
-
         return true;
-
     }
 
 

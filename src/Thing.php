@@ -405,15 +405,8 @@ $query = true;
 
 
 
-	public function newAccount($account_uuid, $account_name, $balance = null) {
-//echo '<pre> thing.php newAccount $balance: '; print_r($balance); echo '</pre>';
-
-//echo $account_uuid;
-//echo $account_name;
-
-		// Condition received input.
-//		if ( ($account_uuid == null) or ($account_name == null) or ($balance == null)) {
- 
+	public function newAccount($account_uuid, $account_name, $balance = null)
+    {
 
 		if ( ($account_uuid == null) or ($account_name == null) ) {
 
@@ -454,13 +447,12 @@ $query = true;
 	return false;
 	}
 
-	public function loadAccounts() {
-		//echo "loadAccounts()";
+	public function loadAccounts()
+    {
 		$this->json->setField("variables");
 
 		$accounts = $this->json->readVariable(array("account"));
 
-		
 		// At this point we have a PHP array of all accounts on
 		// this Thing.
 
@@ -477,10 +469,11 @@ $query = true;
 			}
 
 		return;
-		}
+    }
 
 
-	function stackBalance() {
+	function stackBalance()
+    {
 		// Query stack for matching uuid and nom_from
 
 		echo "WORK ON STACK BALANCE";
@@ -543,7 +536,6 @@ $query = true;
         $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
 
         return $this->time;
-        //return $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
     }
 
     function microtime($time = null)
@@ -586,7 +578,8 @@ $query = true;
 		echo '<pre> Agent "'.$agent.'" ' . $action . ' this Thing at ';print_r($variable);echo'</pre>';
     }
 
-    public function getVariable($variable_set, $variable) {
+    public function getVariable($variable_set, $variable)
+    {
 
 //                $thing= new Thing($uuid);
         $variables = $this->account['stack']->json->array_data;
@@ -691,29 +684,28 @@ $query = true;
     }
 
 	// Yeah - it's amber.  Cycles red > red + amber > green > amber > red
-	public function isAmber() {
+	public function isAmber()
+    {
 		$var_path = array("thing", "status");
 		if ($this->json->readVariable($var_path) == "amber") {return true;}
 		return false;
-		}
+	}
 
-
-    function isData($variable) {
-        if ( 
+    function isData($variable)
+    {
+        if (
             ($variable !== false) and
             ($variable !== true) and
             ($variable !== null) and
             ($variable !== "")
             ) {
- 
+
             return true;
 
         } else {
             return false;
         }
     }
-
-
 
 	public function flagGet()
     {
