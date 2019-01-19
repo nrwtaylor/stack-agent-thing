@@ -1,11 +1,24 @@
-(c) 2018. NRW Taylor
+(c) 2018-2019. NRW Taylor
 
-These are the current build instructions as of May 2018.
+These are the current build instructions as of January 2019.
 
 1. Install Ubuntu latest.
 2. Install LAMP stack.
 
 3. Set-up InnoDB.
+
+mysql -u root -p
+
+GRANT ALL PRIVILEGES ON *.* TO 'stackuser'@'localhost' IDENTIFIED BY 'password';
+
+mysql -u stackuser -p
+
+CREATE DATABASE dbname;
+
+mysql -u stackuser -p stack_db < database_schema.sql
+
+mysql> USE  stack_db;
+
 
 mysql> DESC stack;
 +--------------+---------------+------+-----+-------------------+-------+
@@ -32,28 +45,138 @@ mysql> DESC stack;
 +--------------+---------------+------+-----+-------------------+-------+
 
 
-4. Verify localhost serving to local-wide TCP/IP
+pager less -SFX;
+
+SELECT * FROM stack ORDER BY created_at DESC limit 99;
+
+4. Setup Apache 2
+
+mkdir /var/www/stackr.test
+composer.json from nrwtaylor/stack-agent-thing
+cp nrwtaylor/stack-agent-thing/public
+cp nrwtaylor/stack-agent-thing/private
+composer install
+
+cd /etc/apache2/sites-available
+sudo nano 000-default.conf
+
+<VirtualHost *:80>
+
+<Directory /var/www/stackr.test/public>
+    Options FollowSymLinks
+    DirectoryIndex index.php
+    AllowOverride All
+        Require all granted
+</Directory>
+
+    ServerAdmin nrwtaylor@gmail.com
+    DocumentRoot /var/www/stackr.test/public
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+sudo service apache2 restart
+
+No changes to apache2.conf
+
+sudo nano stackr.test.conf
+
+<Directory /var/www/stackr.test/public>
+        Require all granted
+</Directory>
+
+<VirtualHost *:80>
+    # The ServerName directive sets the request scheme, hostname and port that
+    # the server uses to identify itself. This is used when creating
+    # redirection URLs. In the context of virtual hosts, the ServerName
+    # specifies what hostname must appear in the request's Host: header to
+    # match this virtual host. For the default virtual host (this file) this
+    # value is not decisive as it is used as a last resort host regardless.
+    # However, you must set it for any further virtual host explicitly.
+    #ServerName www.example.com
+
+    ServerName stackr.test
+    ServerAlias www.stackr.test
+    ServerAdmin webmaster@localhost
+
+
+    DocumentRoot /var/www/stackr.test/public/
+
+#    <Directory /var/www/stackr.test/public/>
+#        Options Indexes FollowSymLinks MultiViews
+#        AllowOverride All
+#        Require all granted
+#    </Directory>
+
+    # Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+    # error, crit, alert, emerg.
+    # It is also possible to configure the loglevel for particular
+    # modules, e.g.
+    #LogLevel info ssl:warn
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+
+sudo a2ensite stackr.test.conf
+
+.htaccess in var/www/stackr.test
+
+RewriteEngine On
+RewriteBase /My-Project/
+
+RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]
+RewriteRule ^ %1 [L,NE,R=302]
+
+RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
+
+install mod_rewrite module
+ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+
+sudo service apache2 reload
+
+6. Build resources
+
+The resources folder contains custom resources for this stack.
+
+
+7. Verify localhost serving to local-wide TCP/IP
 
 php -S localhost:8080 -t public public/index.php
 
-5. Verify Ping, Latency
-6. Verify Roll PNG
+8. Verify Ping, Latency
+9. Verify Roll PNG
 
-7. Install PHP extensions
+10. Install PHP extensions
 sudo apt install php7.2-bcmath
+
+sudo apt install php7.0-gd
+
+ignore php7.0 module already enabled, not enabling PHP 7.2
+
+
 #sudo apt-get install php-bcmath
 sudo apt-get install php7.2-gd
-restart.
+//restart.
 
 and curl
 sudo apt-get install php-curl
 sudo service apache2 restart
 
-8. Set-up cron
+11. Set-up cron
 
+sudo crontab -e
 * * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/agents/Cron.php >/dev/null 2>&1
+sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thign/agents/Cron.php
+Correct require line for the current environment.
+sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thign/agents/Tick.php
+Remove forward slash from /Gearman in line 62.
 
-9. Verify Snowflake (web, PNG, PDF) - Failing
+12. Verify Snowflake (web, PNG, PDF)
+
+
 
 Some stuff to get the stack whirring.
 
@@ -72,6 +195,10 @@ sudo apt-get upgrade
 10. Install Gearman.
 
 ---
+sudo nano vendor/nrwtaylor/stack-agent-thing/src/worker.php
+Update require path.
+
+---
 Folder Permissions
 
 https://askubuntu.com/questions/767504/permissions-problems-with-var-www-html-and-my-own-home-directory-for-a-website
@@ -87,6 +214,9 @@ cd ~
 wget https://launchpad.net/gearmand/1.2/1.1.12/+download/gearmand-1.1.12.tar.gz
 tar -xvf gearmand-1.1.12.tar.gz
 cd gearmand-1.1.12
+
+sudo apt-get install gperf
+
 ./configure
 sudo make
 sudo make install
@@ -220,7 +350,7 @@ sudo nano /etc/supervisor/conf.d/supervisor.conf
 [program:gearman-worker]
 command=php /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/worker.php
 autostart=true
-autorestart=true
+autorestart=false
 numprocs=3
 process_name=gearman-worker-%(process_num)s
 
@@ -381,9 +511,43 @@ query_cache_type = 0
 
 INSTALL POSTFIX
 
-master.cf
+sudo apt-get update
+sudo DEBIAN-PRIORITY=low apt-get install postfix
+sudo dpkg-reconfigure postfix
+
+cd /etc/postfix
+sudo nano master.cf
 
 mytransportname   unix  -       n       n       -       -       pipe
   flags=FR user=<username> argv=<path>/src/emailhandler.php
   ${nexthop} ${user}
+
+To check status
+sudo postfix status
+
+---
+
+Fix PhpSerial
+
+        //https://www.phpclasses.org/discuss/package/3679/thread/13/
+        //    "custom"   => "-brkint -icrnl -imaxbel -opost -isig -icanon -iexten -echo",
+        // "custom" => "ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke raw",
+
+// last working         "custom"   => "-brkint -icrnl -imaxbel -opost -isig -icanon -iexten -echo",
+
+
+        $linuxModes = array(
+            "custom" => "ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke raw",
+            "none"     => "clocal -crtscts -ixon -ixoff",
+            "rts/cts"  => "-clocal crtscts -ixon -ixoff",
+            "xon/xoff" => "-clocal -crtscts ixon ixoff"
+        );
+        $windowsModes = array(
+            "none"     => "xon=off octs=off rts=on",
+            "rts/cts"  => "xon=off octs=on rts=hs",
+            "xon/xoff" => "xon=on octs=off rts=on",
+        );
+
+        if ($mode !== "custom"  and $mode !== "none" and $mode !== "rts/cts" and $mode !== "xon/xoff") {
+            trigger_error("Invalid flow control mode specified", E_USER_ERROR);
 

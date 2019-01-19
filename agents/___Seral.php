@@ -9,8 +9,6 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-// https://gist.github.com/ahutchings/51342
-
 class Serial
 {
 
@@ -34,51 +32,26 @@ class Serial
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
-$this->deviceOpen("/dev/ttyUSB0", 115200);
 
 // Let's start the class
-//$this->serial = new \PhpSerial;
+$this->serial = new \PhpSerial;
 
-//$this->serial->deviceSet("/dev/ttyUSB0");
-//$this->serial->confBaudRate(115200);
-
-
-// Arduino detected as ttyACM0
-//$serial->deviceSet("/dev/ttyACM0");
-//$serial->confBaudRate(9600);
-echo "conf";
-echo "\n";
-  //  $serial->confBaudRate(9600);
-  //  $serial->confParity("none");
-  //  $serial->confCharacterLength(8);
-  //  $serial->confStopBits(1);
-    $this->serial->deviceOpen();
-    //sleep(2);
-//echo "start";
-// Then we need to open it
-//$serial->deviceOpen('w+');
-// We may need to return if nothing happens for 10 seconds
-//stream_set_timeout($serial->_dHandle, 10);
-
-// We can change the baud rate
-//$serial->confBaudRate(9600);
-// SMS inbox query - mode command and list command
-//$serial->sendMessage("AT+CMGF=1",1);
-
-
-// SMS inbox query - mode command and list command
-//$serial->sendMessage("ATI",1);
-//var_dump($serial->readPort());
-
-// If you want to change the configuration, the device must be closed
-//$serial->deviceClose();
-
-//exit();
-//return;
-//$serial->sendMessage("ATI",1);
+$this->serial->deviceSet("/dev/ttyUSB0");
+$this->serial->confBaudRate(115200);
 
 return;
+echo "Prepare to send\n";
+$this->serial->sendMessage("AT+CMGF=1\r",1);
+$text = $this->serial->readPort();
+var_dump($this->subject);
+$message = str_replace("smsmodem", "", $this->subject);
+$this->serial->sendMessage("AT+CMGS=\"+17787920847\"\r",1);
+sleep(2);
+$this->serial->sendMessage($message . chr(26),1);
+echo "Should have sent\n";
 
+$this->serial->deviceClose();
+exit();
 //$serial->sendMessage("AT",1);
         $start_time = $this->thing->elapsed_runtime();
 $elapsed = 0;
@@ -146,17 +119,6 @@ $theResult = '';
     }
 echo $theResult;
 
-//$string = preg_replace('/\s+/', '', $theResult);
-//echo substr($string,0,1000);
-exit();
-
-
-        // Example
-
-//        $this->api_key = $this->thing->container['api']['nexmo']['api_key'];
-//        $this->api_secret = $this->thing->container['api']['nexmo']['api_secret'];
-
-
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
@@ -221,32 +183,24 @@ exit();
 
 	}
 
-function deviceClose()
-{
-    $this->serial->deviceClose();
+    private function readPort($returnBufffer = false)
+    {
+        $out = null;
+        list($last, $buffer) = $this->serial->readPort();
+        if ($returnBufffer) {
+            $out = $buffer;
+        } else {
+            $out = strtoupper($last);
+        }
+        if ($this->_debug == true) {
+            echo $out . "\n";
+        }
+        return $out;
+    }
 
-}
-
-function deviceOpen($address, $baud)
-{
-
-$this->serial = new \PhpSerial;
-
-//$this->serial->deviceSet("/dev/ttyUSB0");
-//$this->serial->confBaudRate(115200);
-
-
-$this->serial->deviceSet("/dev/ttyUSB0");
-$this->serial->confBaudRate(115200);
-$this->serial->confFlowControl("custom");
-
-$this->serial->deviceOpen();
-
-
-}
 
 // -----------------------
-public function sendSerial($text) {
+private function sendSerial($text) {
     //$serial->sendMessage("ATI",1);
     echo "Prepare to send " . $text ."\n";
     $this->serial->sendMessage($text,1);
@@ -358,43 +312,45 @@ if (strlen($text) != strlen(utf8_decode($text)))
     }
 */
 
-    public function readPort($returnBufffer = false)
+
+    function sendUSshortcode($to, $text)
     {
-        $this->serial->serialflush();
-        $this->debug = true;
-        echo "readPort Serial.php";
-        $out = null;
-        list($last, $buffer) = $this->serial->readPort(10);
-//$serial_string = "";
-$elapsed = 0;
-$start_time = $this->thing->elapsed_runtime();
-while ($elapsed < 5000) {
-$text = $this->serial->readPort();
-if ($text != "") {
-//var_dump($text);
-$serial_string .= $text;
-$elapsed = $this->thing->elapsed_runtime() - $start_time;
+return;
+        //https://rest.nexmo.com/sc/us/alert/json?api_key={$your_key}&api_secret={$your_secret}&
+        // to={$to}&key1={$value1}&key2={$value2}
 
-//echo "ELAPSED | " . $elapsed;
+        $url = 'https://rest.nexmo.com/sc/us/alert/json?' . http_build_query(
+            [
+      'api_key' =>  $this->api_key,
+      'api_secret' => $this->api_secret,
+      'to' => $to,
+	'message' => $text
+    ]
+);
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+
+// devstack log to db
+//echo $response;
+
+
+  //Decode the json object you retrieved when you ran the request.
+  $decoded_response = json_decode($response, true);
+//echo $decoded_response;
+
+  error_log('You sent ' . $decoded_response['message-count'] . ' messages.');
+
+  foreach ( $decoded_response['messages'] as $message ) {
+      if ($message['status'] == 0) {
+          error_log("Success " . $message['message-id']);
+      } else {
+          error_log("Error {$message['status']} {$message['error-text']}");
+      }
+  }
+return;
 }
-echo $serial_string;
-}
-
-
-echo "last\n";
-var_dump($last);
-echo "buffer\n";
-var_dump($buffer);
-        if ($returnBufffer) {
-            $out = $buffer;
-        } else {
-            $out = strtoupper($last);
-        }
-        if ($this->debug == true) {
-            echo $out . "\n";
-        }
-        return $out;
-    }
 
 
 }

@@ -326,7 +326,14 @@ class Variables
         // From a loaded Thing.
 
 
+        if (!isset($this->variables_thing->account['stack'])) {
+            // No stack balance available.
+            //echo "not set";
+            return null;
+        }
+
         $variables = $this->variables_thing->account['stack']->json->array_data;
+
         if (isset($variables[$this->variable_set_name])) {
             $this->context = "train";
             $t = $variables[$this->variable_set_name];

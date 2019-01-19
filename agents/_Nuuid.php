@@ -147,39 +147,6 @@ class Nuuid {
 
 	}
 
-    function extractNuuids($input = null)
-    {
-        if (!isset($this->head_codes)) {
-            $this->nuuids = array();
-        }
-        //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
-//        $pattern = "|[A-Za-z0-9]{4}|"; echo $input;
-        $pattern = "|[A-Fa-f0-9]{4}|";
-
-        //$pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
-        preg_match_all($pattern, $input, $m);
-        $this->nuuids = $m[0];
-
-        return $this->nuuids;
-    }
-
-    function extractNuuid($input)
-    {
-        $nuuids = $this->extractNuuids($input);
-        if (!(is_array($nuuids))) {return true;}
-
-        if ((is_array($nuuids)) and (count($nuuids) == 1)) {
-            $this->nuuid = $nuuids[0];
-            $this->thing->log('Agent "Nuuid" found a nuuid (' . $this->nuuid . ') in the text.');
-            return $this->nuuid;
-        }
-
-        if  ((is_array($nuuids)) and (count($nuuids) == 0)){return false;}
-        if  ((is_array($nuuids)) and (count($nuuids) > 1)) {return true;}
-
-        return true;
-    }
-
     function makeChoices ()
     {
        $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );

@@ -9,8 +9,6 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-// https://gist.github.com/ahutchings/51342
-
 class Serial
 {
 
@@ -34,13 +32,12 @@ class Serial
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
-$this->deviceOpen("/dev/ttyUSB0", 115200);
 
 // Let's start the class
-//$this->serial = new \PhpSerial;
+$this->serial = new \PhpSerial;
 
-//$this->serial->deviceSet("/dev/ttyUSB0");
-//$this->serial->confBaudRate(115200);
+$this->serial->deviceSet("/dev/ttyUSB0");
+$this->serial->confBaudRate(115200);
 
 
 // Arduino detected as ttyACM0
@@ -76,9 +73,33 @@ echo "\n";
 //exit();
 //return;
 //$serial->sendMessage("ATI",1);
+/*
+echo "sendSerial";
+$this->sendSerial("AT+CMGF=1\r");
 
+$message = str_replace("smsmodem", "", $this->subject);
+$this->sendSerial('AT+CMGS="+17787920847"\r');
+sleep(2);
+$this->sendSerial($message . chr(26));
+
+
+$this->serial->deviceClose();
+echo "device closed";
+exit();
+*/
 return;
+echo "Prepare to send\n";
+$this->serial->sendMessage("AT+CMGF=1\r",1);
+$text = $this->serial->readPort();
+var_dump($this->subject);
+$message = str_replace("smsmodem", "", $this->subject);
+$this->serial->sendMessage("AT+CMGS=\"+17787920847\"\r",1);
+sleep(2);
+$this->serial->sendMessage($message . chr(26),1);
+echo "Should have sent\n";
 
+$this->serial->deviceClose();
+exit();
 //$serial->sendMessage("AT",1);
         $start_time = $this->thing->elapsed_runtime();
 $elapsed = 0;
@@ -149,12 +170,26 @@ echo $theResult;
 //$string = preg_replace('/\s+/', '', $theResult);
 //echo substr($string,0,1000);
 exit();
+//var_dump($serial->readPort());
+
+exit();
+
+$serial->sendMessage("AT+CMGF=1\n\r",1);
+var_dump($serial->readPort());
+$serial->sendMessage("AT+CMGL=\"ALL\"\n\r",2);
+var_dump($serial->readPort());
+// If you want to change the configuration, the device must be closed
+$serial->deviceClose();
+
+
+//echo "meep";
+exit();
 
 
         // Example
 
-//        $this->api_key = $this->thing->container['api']['nexmo']['api_key'];
-//        $this->api_secret = $this->thing->container['api']['nexmo']['api_secret'];
+        $this->api_key = $this->thing->container['api']['nexmo']['api_key'];
+        $this->api_secret = $this->thing->container['api']['nexmo']['api_secret'];
 
 
         $this->uuid = $thing->uuid;
@@ -230,17 +265,9 @@ function deviceClose()
 function deviceOpen($address, $baud)
 {
 
-$this->serial = new \PhpSerial;
-
-//$this->serial->deviceSet("/dev/ttyUSB0");
-//$this->serial->confBaudRate(115200);
-
-
 $this->serial->deviceSet("/dev/ttyUSB0");
 $this->serial->confBaudRate(115200);
-$this->serial->confFlowControl("custom");
 
-$this->serial->deviceOpen();
 
 
 }
@@ -360,31 +387,10 @@ if (strlen($text) != strlen(utf8_decode($text)))
 
     public function readPort($returnBufffer = false)
     {
-        $this->serial->serialflush();
         $this->debug = true;
         echo "readPort Serial.php";
         $out = null;
-        list($last, $buffer) = $this->serial->readPort(10);
-//$serial_string = "";
-$elapsed = 0;
-$start_time = $this->thing->elapsed_runtime();
-while ($elapsed < 5000) {
-$text = $this->serial->readPort();
-if ($text != "") {
-//var_dump($text);
-$serial_string .= $text;
-$elapsed = $this->thing->elapsed_runtime() - $start_time;
-
-//echo "ELAPSED | " . $elapsed;
-}
-echo $serial_string;
-}
-
-
-echo "last\n";
-var_dump($last);
-echo "buffer\n";
-var_dump($buffer);
+        list($last, $buffer) = $this->serial->readPort();
         if ($returnBufffer) {
             $out = $buffer;
         } else {

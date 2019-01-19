@@ -565,16 +565,13 @@ if ($headcode->response === true) {
                 continue;
             }
 
-
 			try {
 
 // devstack This needs to be refactored out.
 // devstack How do I link to the packagist name programatically.
 
-
                 $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-                //echo $agent_class_name."<br>";
                 $this->thing->log( $this->agent_prefix .'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
 				//$agent = new $agent_class_name($this->thing);
                 $agent = new $agent_namespace_name($this->thing);
@@ -587,9 +584,8 @@ if ($headcode->response === true) {
 				$this->thing_report = $agent->thing_report;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-                //echo "Error meep<br>";      
-                  $this->thing->log( $this->agent_prefix .'could not load "' . $agent_class_name . '".' , "WARNING" );
-
+                $this->thing->log( $this->agent_prefix .'could not load "' . $agent_class_name . '".' , "WARNING" );
+echo $ex;
     			$message = $ex->getMessage();
 	    		//$code = $ex->getCode();
 		    	$file = $ex->getFile();
@@ -603,6 +599,7 @@ if ($headcode->response === true) {
 	    		continue;
 
 			}
+
 			return $this->thing_report;
 		}
 
