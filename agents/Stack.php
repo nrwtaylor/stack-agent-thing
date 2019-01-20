@@ -115,7 +115,28 @@ class Stack
         $this->stack->setVariable("identity", $this->identity );
 
         $this->thing->log($this->agent_prefix . 'set Stack to ' . $this->state, "INFORMATION");
+        $this->alsoset();
     }
+
+
+
+    private function alsoset()
+    {
+
+        //$this->current_time = $this->thing->json->time();
+
+        // Borrow this from iching
+        $this->thing->json->setField("variables");
+
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("stack", "refreshed_at"), $time_string );
+
+            $this->thing->json->writeVariable( array("stack", "count"), $this->count);
+
+  //      }
+    }
+
+
 
     function get()
     {

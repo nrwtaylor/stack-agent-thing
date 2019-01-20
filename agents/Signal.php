@@ -409,20 +409,29 @@ class Signal
             }
         }
 
-$green_x = 30;
-$green_y = 50;
+        // Bevel top of signal image
 
-$red_x = 30;
-$red_y = 100;
+        $points = array(0,0,6,0,0,6);
+        imagefilledpolygon($this->image, $points, 3, $this->white);
 
-$yellow_x = 30;
-$yellow_y = 75;
+        $points = array(60,0,60-6,0,60,6);
+        imagefilledpolygon($this->image, $points, 3, $this->white);
 
-$double_yellow_x = 30;
-$double_yellow_y = 25;
 
-if ($this->state == "green") {
-    imagefilledellipse($this->image, $green_x, $green_y, 20, 20, $this->green);
+        $green_x = 30;
+        $green_y = 50;
+
+        $red_x = 30;
+        $red_y = 100;
+
+        $yellow_x = 30;
+        $yellow_y = 75;
+
+        $double_yellow_x = 30;
+        $double_yellow_y = 25;
+
+        if ($this->state == "green") {
+            imagefilledellipse($this->image, $green_x, $green_y, 20, 20, $this->green);
 }
 
 if ($this->state == "red") {

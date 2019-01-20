@@ -59,8 +59,13 @@ class Tick
         $this->get();
         $this->readSubject();
 
-            $client= new GearmanClient();
-            $client->addServer();
+        //    $client= new GearmanClient();
+        //    $client->addServer();
+
+        //$t = new Thing(null);
+        //require_once '/var/www/html/stackr.ca/agents/tallycounter.php';
+        //$tallycounter_thing = new Tallycounter($t, 'tallycounter message tally@stackr.ca');
+
 
 
 /*
@@ -145,13 +150,24 @@ class Tick
 
         //$this->doTick();
 
-        if ($this->tick_count > 8) {
-            $this->tick_count = 0; 
+       // $t = new Thing(null);
+       // $t->Create(null,"tick", 's/ tick ' . $this->tick_count);
+       // //require_once '/var/www/html/stackr.ca/agents/tallycounter.php';
+       // $tick_thing = new Tallycounter($t, 'tick');
+
+
+
+        if ($this->tick_count > 4) {
+
+            $this->tick_count = 1;
+
+            $this->doBar();
+
             //$bar = new Bar($this->thing, "bar");
             //$bar = new Bar($this->thing, "bar");
 
-            $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ bar"));
-            $client->doLowBackground("call_agent", $arr);
+            //$arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ bar"));
+            //$client->doLowBackground("call_agent", $arr);
         }
 
 
@@ -163,9 +179,10 @@ class Tick
         }
 
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("tick",
-            "refreshed_at"),  $this->thing->json->time()
-            );
+
+//        $this->thing->json->writeVariable(array("tick",
+//            "refreshed_at"),  $this->thing->json->time()
+//            );
 
 
 
@@ -176,9 +193,37 @@ class Tick
         }
 
 
+    function doBar()
+    {
+
+//        $bar = new Bar($this->thing, "bar");
+
+        $client= new \GearmanClient();
+        $client->addServer();
+
+
+        $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ bar"));
+        $client->doLowBackground("call_agent", $arr);
+
+    }
+
+
     function set()
     {
-        $this->variables->setVariable("ticks", $this->tick_count);
+
+        $this->thing->json->setField("variables");
+
+
+        $this->thing->json->writeVariable(array("tick",
+            "refreshed_at"),  $this->thing->json->time()
+            );
+
+        $this->thing->json->writeVariable(array("tick",
+            "count"),  $this->tick_count
+            );
+
+
+        $this->variables->setVariable("count", $this->tick_count);
         $this->variables->setVariable("refreshed_at", $this->current_time);
 
 //        $this->thing->choice->save('usermanager', $this->state);
@@ -189,7 +234,7 @@ class Tick
 
     function get()
     {
-        $this->tick_count = $this->variables->getVariable("ticks");
+        $this->tick_count = $this->variables->getVariable("count");
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
 
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->tick_count . ".", "DEBUG");
@@ -514,13 +559,5 @@ class Timer_tick {
 	}
 	
 }
-
-
-
-
-
-
-
-
 
 ?>
