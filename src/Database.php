@@ -871,21 +871,6 @@ $c['errorHandler'] = function ($c) {
 
         return $thingreport;
 
-        // Get all red items on the stack.
-        // Not an identity function.
-        //http://www.sqltrainingonline.com/sql-not-like-with-multiple-values/
-
-        $search_term = "'%{\"stack}%'";
-
-        $query = "SELECT * FROM stack WHERE variables LIKE " . $search_term;
-
-        $sth = $this->container->db->prepare($query);
-        $sth->execute();
-        $things = $sth->fetchAll();
-
-        $thingreport = array('things' => $things, 'info' => 'So here are Things which are flagged as stack reports.','help' => 'This reports on stack health');
-
-        return $thingreport;
     }
 
 
