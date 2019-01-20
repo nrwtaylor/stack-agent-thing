@@ -18,9 +18,11 @@ error_reporting(-1);
 ini_set("allow_url_fopen", 1);
 
 
-        $from = "null@stackr.ca";
-        $stack_agent = "cron";
-        $subject = "s/ cron 60s tick";
+// Set-up for command-line/cron job run
+
+$from = "null@stackr.ca";
+$stack_agent = "cron";
+$subject = "s/ cron 60s tick";
 
 
         $thing = new Thing(null);
@@ -54,8 +56,19 @@ class Cron
                 //$client->doNormal("call_agent", $arr);
 //                $client->doHighBackground("call_agent", $arr);
 
+        $arr = json_encode(array("to"=>null, "from"=>"tick", "subject"=>"s/ tick"));
 
-        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
+                $client= new \GearmanClient();
+                $client->addServer();
+                $client->doNormal("call_agent", $arr);
+
+//                $client->doHighBackground("call_agent", $arr);
+
+
+//        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
+
+        //$tick_agent = new Tick($this->thing);
+
 
 /*
         $client= new \GearmanClient();

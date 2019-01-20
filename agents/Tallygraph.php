@@ -120,7 +120,7 @@ class Tallygraph
     function getData() {
 
         $this->identity = "null" . $this->mail_postfix;
-echo $this->identity;
+//echo $this->identity;
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
         $thing_report = $this->thing->db->agentSearch("tallycounter", 99);
@@ -163,7 +163,7 @@ echo $created_at;
 //echo $refreshed_at;
 //if (!isset($created_at)) {$created_at = $refreshed_at;}
 
-echo $variable . " " . $refreshed_at . "<br>";
+//echo $variable . " " . $refreshed_at . "<br>";
 
             if ((($variable == null) or ($variable == 0)) and ($this->ignore_empty)) {
                 continue;

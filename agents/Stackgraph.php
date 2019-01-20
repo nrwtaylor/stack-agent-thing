@@ -97,8 +97,13 @@ class Stackgraph {
 
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
-        $thing_report = $this->thing->db->agentSearch("stack", 99);
+        //$thing_report = $this->thing->db->agentSearch("stack", 99);
+        $thing_report = $this->thing->db->getStack();
+
         $things = $thing_report['things'];
+
+//var_dump($things);
+//exit();
 
         if ( $things == false  ) {return;}
 
@@ -137,7 +142,7 @@ class Stackgraph {
 
             $this->points[] = array("refreshed_at"=>$refreshed_at, "series_0"=>$count, "series_1"=>null);
         }
-
+//var_dump($this->points);
     }
 
 
@@ -480,7 +485,7 @@ if (!isset($y_old)) {$y_old = $y;}
             $i += 1;
 //if ($i = 10) {break;}
         }
-$allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500);
+$allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500,10000,25000,50000,100000);
 $inc = ($y_max - $y_min)/ 5;
 //echo "inc" . $inc . "\n";
 $closest_distance = $y_max;

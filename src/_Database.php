@@ -846,49 +846,6 @@ $c['errorHandler'] = function ($c) {
 		return $thingreport;
 	}
 
-    function getStack($max = null)
-    {
-
-        if ($max == null) {$max = 99;}
-        $max = (int) $max;
-
-        $agent = "stack";
-        $user_search = "null@stackr.ca";
-        //$user_search= "%$user_search%"; // Value to search for in Variables
-
-        //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-        $query = "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-
-        $sth = $this->container->db->prepare($query);
-        $sth->bindParam(":user_search", $user_search);
-        $sth->bindParam(":agent", $agent);
-        $sth->bindParam(":max", $max, PDO::PARAM_INT);
-        $sth->execute();
-
-        $things = $sth->fetchAll();
-
-        $thingreport = array('things' => $things, 'info' => 'So here are Things which are flagged as stack reports.','help' => 'This reports on stack health');
-
-        return $thingreport;
-
-        // Get all red items on the stack.
-        // Not an identity function.
-        //http://www.sqltrainingonline.com/sql-not-like-with-multiple-values/
-
-        $search_term = "'%{\"stack}%'";
-
-        $query = "SELECT * FROM stack WHERE variables LIKE " . $search_term;
-
-        $sth = $this->container->db->prepare($query);
-        $sth->execute();
-        $things = $sth->fetchAll();
-
-        $thingreport = array('things' => $things, 'info' => 'So here are Things which are flagged as stack reports.','help' => 'This reports on stack health');
-
-        return $thingreport;
-    }
-
-
 	public static function getNew()
     {
 		$query = "SELECT * FROM stack WHERE variables is NULL";

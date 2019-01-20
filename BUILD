@@ -445,6 +445,9 @@ Problem #1
 Increase Max connections
 https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-foo/
 
+sudo nano /etc/mysql/mysqld.cnf
+max_connection = 1000
+
 
 Posted on June 13, 2017 by peter
 MySQL max_connections limited to 214 on Ubuntu Foo
