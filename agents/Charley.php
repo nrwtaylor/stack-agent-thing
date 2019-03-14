@@ -107,7 +107,6 @@ class Charley
 
             $this->readSubject();
 
-
             $this->thing->json->writeVariable( array("charley", "nom"), $this->nom );
             $this->thing->json->writeVariable( array("charley", "suit"), $this->suit );
 
@@ -116,25 +115,17 @@ class Charley
             $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
         }
 
+        // $this->readSubject();
 
+        // $this->init();
+        // $this->get();
 
-
-
-
-  //      $this->readSubject();
-
-//        $this->init();
-//        $this->get();
-
-//        $this->getCast();
-//        $this->getCards();
+        // $this->getCast();
+        // $this->getCards();
 
         if ($this->agent_input == null) {$this->setSignals();}
 
-//        $this->set();
-
-
-
+        // $this->set();
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
@@ -143,12 +134,8 @@ class Charley
 		return;
 	}
 
-
-
-
-// https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
-
-// -----------------------
+    // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
+    // -----------------------
 
     function getNuuid()
     {
