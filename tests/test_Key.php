@@ -16,8 +16,6 @@ echo "test_key.php";
 echo "<br>";
 echo "Test 1: Test create Key agent";
 
-//$thing1 = new Thing(null);
-//$thing1->makeThing("nick@wildnomad.com", "associator", "Create a thing" . time());
 
 
 $thing = new Thing(null);
