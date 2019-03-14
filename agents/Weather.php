@@ -188,9 +188,12 @@ class Weather
         // Condition text
         $forecast_conditions = explode($searchfor, $this->conditions[0])[0];
         $forecast_timestamp = trim(explode($searchfor, $this->conditions[0])[1]);
- 
-        $this->forecast_timestamp_date = explode("PDT", $forecast_timestamp)[1];
-        $this->forecast_timestamp_time = explode("PDT", $forecast_timestamp)[0];
+//        $this->forecast_timestamp_date = explode("PDT|PST", $forecast_timestamp)[1];
+
+        $this->forecast_timestamp_date = preg_split( "/ (PDT|PST) /", $forecast_timestamp )[1];
+
+//        $this->forecast_timestamp_time = explode("PDT|PST", $forecast_timestamp)[0];
+        $this->forecast_timestamp_time = preg_split( "/ (PDT|PST) /", $forecast_timestamp )[0];
 
 //var_dump($this->forecast_timestamp_date);
 //var_dump($this->forecast_timestamp_time);

@@ -67,11 +67,8 @@ class Signal
         // Get the current Identities signal
         $this->signal = new Variables($this->thing, "variables signal " . $this->from);
 
-//        $this->associations = new Associations($this->thing, "associations " . $this->from);
-        $this->associations = new Associations($this->thing, $this->subject);
+        $this->associations = new Associations($this->thing, "associations " . $this->from);
 
-//var_dump($this->associations->associations_list);
-//exit();
         //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
 
         $this->thing->log($this->agent_prefix . ' got signal variables. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
@@ -99,7 +96,7 @@ class Signal
 
     function set($requested_state = null)
     {
-
+ 
         if ($requested_state == null) {
             if (!isset($this->requested_state)) {
                 // Set default behaviour.
@@ -318,6 +315,8 @@ foreach ($this->old_signals as $key =>$row)
 }
 
 
+//exit();
+    //exit();
 
         // Add in a set of default places
          $file = $this->resource_path .'signal/signals.txt';
@@ -715,98 +714,17 @@ return;
 
         $pieces = explode(" ", strtolower($input));
 
-        // This gives us the other Things which are associated with the signal
-        var_dump($this->associations->agent_associations);
-
-//        var_dump($this->associations->association_name);
-
-        foreach($this->associations->thing_objects as $key=>$thing_object) {
 
 
-                $uuid = $thing_object['uuid'];
-$agent = $thing_object['nom_to'];
-echo "agent: " . $agent;
-echo "uuid: ". $thing_object['uuid'];
+        $nuuid = new Nuuid($this->thing);
+        $nuuid->extractNuuid($input);
 
-                $variables_json= $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
-
-                if (isset($variables['agent'])) {
-
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
-
-                    if(isset($variables['thing']['status'])) {$thing_status = $variables['thing']['status'];}
-                    if(isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
-                }
-
-
-                if (isset($variables['agent'])) {
-
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
-
-                    if(isset($variables['agent']['state'])) {$agent_state = $variables['agent']['state'];}
-                    if(isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
-
-                }
-
-                if (isset($variables['flag'])) {
-
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
-
-                    if(isset($variables['flag']['state'])) {$flag_state = $variables['flag']['state'];}
-                    if(isset($variables['flag']['refreshed_at'])) {$refreshed_at = $variables['flag']['refreshed_at'];}
-                }
-
-                if (isset($variables['signal'])) {
-
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
-
-                    if(isset($variables['signal']['id'])) {$signal_id = $variables['signal']['id'];}
-                    if(isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['place']['refreshed_at'];}
-                }
-
-                if (isset($variables['block'])) {
-
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
-
-                    if(isset($variables['block']['id'])) {$block_id = $variables['block']['id'];}
-                    if(isset($variables['block']['refreshed_at'])) {$refreshed_at = $variables['block']['refreshed_at'];}
-                }
-
-                if (!isset($thing_status)) {$thing_status = "X";}
-                if (!isset($agent_state)) {$agent_state = "X";}
-                if (!isset($flag_state)) {$flag_state = "X";}
-                if (!isset($signal_id)) {$signal_id = "X";}
-                if (!isset($block_id)) {$block_id = "X";}
-
-                echo $uuid . " " . $thing_status . " " .$agent_state . " " . $flag_state . " " . $signal_id . " " . $block_id. "\n";
-
-
-
-
+        if (isset($nuuid->nuuid)) {
+            echo "Found: ".$nuuid->nuuid;
         }
 
-
-
-        //$nuuid = new Nuuid($this->thing);
-        //$nuuid->extractNuuid($input);
-
-        //if (isset($nuuid->nuuid)) {
-        //    echo "Found: ".$nuuid->nuuid;
-        //}
-
-        //$uuid = new Uuid($this->thing);
-        //$uuid->extractUuid($input);
+        $uuid = new Uuid($this->thing);
+        $uuid->extractUuid($input);
 
         if (isset($uuid->uuid)) {
             echo "Found: ".$uuid->uuid;

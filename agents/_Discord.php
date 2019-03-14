@@ -7,10 +7,6 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-//$loop = \React\EventLoop\Factory::create();
-//$client = new \CharlotteDunois\Yasmin\Client(array(), $loop);
-
-
 class Discord {
 
 	public $var = 'hello';
@@ -54,9 +50,6 @@ class Discord {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-
-$this->test2();
-
 $this->test();
 exit();
 
@@ -82,49 +75,6 @@ exit();
 
 		}
 
-    function test2()
-    {
-
-$loop = \React\EventLoop\Factory::create();
-$client = new \CharlotteDunois\Yasmin\Client(array(), $loop);
-
-
-$client->once('ready', function () use ($client) {
-    try {
-        //https://discordapp.com/channels/494664998434373632/494664998434373637
-        $channel = $client->channels->get('494664998434373632');
-        /*
-          or (not recommended if the bot is in more than 1 guild):
-            $channel = $client->channels->first(function ($channel) {
-                return ($channel->name === 'general');
-            });
-        */
-
-        // Making sure the channel exists
-        if($channel) {
-
-            // We do not need another promise here, so
-            // we call done, because we want to consume the promise
-            $channel->send('Ping.')
-                    ->done(null, function ($error) {
-                        // We will just echo any errors for this example
-                        echo $error.PHP_EOL;
-                    });
-        }
-    } catch(\Exception $error) {
-
-        var_dump($error);
-        // Handle exception
-    }
-
-});
-
-$client->login($this->token);
-$loop->run();
-
-
-
-    }
 
     function getDiscord()
     {

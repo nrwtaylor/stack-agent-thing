@@ -54,22 +54,16 @@ class Bar
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
 
-        $this->variables = new Variables($this->thing, "variables tick " . $this->from);
+        $this->variables = new Variables($this->thing, "variables bar " . $this->from);
         $this->current_time = $this->thing->time();
+
+        $this->max_bar_count = 80;
+        $this->response = "";
+
 
         $this->get();
         $this->readSubject();
 
-        $this->thing->log($this->agent_prefix . "called Tallycounter.");
-
-
-        $this->max_bar_count = 4;
-
-        $this->response ="";
-
-        $this->doBar();
-
-// devstack bring in settings variable
 //        if ($this->bar_count > 8) {$this->bar_count = 0;}
 
         $this->set();
@@ -82,32 +76,35 @@ class Bar
         $this->thing_report['log'] = $this->thing->log;
     }
 
-    function set()
+    public function set()
     {
-
-        $this->thing->json->writeVariable(array("bar",
-            "refreshed_at"),  $this->thing->json->time()
-            );
-
-        $this->thing->json->writeVariable(array("bar",
-            "count"),  $this->bar_count
-            );
-
-
-
         $this->variables->setVariable("count", $this->bar_count);
         $this->variables->setVariable("refreshed_at", $this->current_time);
+
+        return;
     }
 
-    function get()
+
+    public function get()
     {
         $this->bar_count = $this->variables->getVariable("count");
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
 
-        $this->thing->log( $this->agent_prefix .  'loaded ' . $this->bar_count . ".", "DEBUG");
+        $this->thing->log($this->agent_prefix .  'loaded ' . $this->bar_count . ".");
 
-        $this->bar_count = $this->bar_count + 1;
+        return;
     }
+
+
+
+    public function countBar()
+    {
+        // devstack count snowflakes on stack identity
+        // This is a count of all snow everywhere.
+        $this->bar_count += 1;
+    }
+
+
 
     function respond()
     {
@@ -140,10 +137,14 @@ class Bar
     }
 
 
-    function readSubject() {}
+    function readSubject() {
+//        if ($this->agent_input == "display") {return;}
+        $this->doBar();
+    }
 
     function doBar($depth = null)
     {
+        $this->countBar();
 
         if ($this->bar_count >= $this->max_bar_count) {
             $this->bar_count = 0;
@@ -160,7 +161,7 @@ class Bar
 
 //        $tallycounter = new Tallycounter($this->thing, 'tallycounter message tally@stackr.ca');
 
-        if ($this->bar_count == 1) {
+        if ($this->bar_count == 0) {
 
 //            $stack_thing = new Stack($this->thing);
 
@@ -305,9 +306,9 @@ class Bar
 //        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
 
-return;
+        return;
 
-}
+    }
 
     public function makePNG()
     {
@@ -323,8 +324,6 @@ return;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
     }
-
-
 }
 
 ?>

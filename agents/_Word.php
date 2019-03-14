@@ -68,7 +68,7 @@ class Word {
 
             if ($this->agent_input == null) {$this->Respond();}
 
-        if ((isset($this->words) and count($this->words)) != 0) {
+        if (count($this->words) != 0) {
 
 		    $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->word . '.');
 
@@ -252,27 +252,11 @@ class Word {
         return;
     }
 
-    function randomWord($number = null)
-    {
-        $min_number = 3;
-        $max_number = $number;
-        if ($number == false) {$max_number = 7;}
-        if ($number == null) {$max_number = 7;}
-
-        while(true) {
-	    $this->ewolWords();
-	    $word = array_rand($this->ewol_dictionary);
-            if ( (strlen($word) >= $min_number) and (strlen($word) <= $max_number)) {
-                break;
-            }
-	}
-        $this->word = $word;
-    }
-
     function nearestWord($input)
     {
-        $file = $this->resource_path . 'words.txt';
-        $contents = file_get_contents($file);
+//var_dump($input);
+                $file = $this->resource_path . 'words.txt';
+                $contents = file_get_contents($file);
 
         $words = explode("\n", $contents);
 
@@ -440,7 +424,7 @@ class Word {
 //            return;
 //        }
 
-        $keywords = array('word','random');
+        $keywords = array('word');
         $pieces = explode(" ", strtolower($input));
 
 
@@ -450,25 +434,6 @@ class Word {
                 if (strpos(strtolower($piece),$command) !== false) {
 
                     switch($piece) {
-
-                        case 'random':   
-
-                            $number_agent = new Number($this->thing, "number");
-			    $number_agent->extractNumber($input);
-
-
-
-//                            $prefix = 'word';
-//                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-//                            $words = ltrim($words);
-//                            $this->search_words = $words;
-
-//                            $this->extractWords($words);
-                            $this->randomWord($number_agent->number); 
-
-                            if ($this->word != null) {return;}
-                            //return;
-
 
                         case 'word':   
 
@@ -493,16 +458,14 @@ class Word {
 
         }
 
-        if(isset($this->search_words)) {
-
-            $this->nearest_word = $this->nearestWord($this->search_words);
+        $this->nearest_word = $this->nearestWord($this->search_words);
 //var_dump($this->word);
         //$this->extractWords($input);
-            $status = true;
+
+		$status = true;
 
 
-	    return $status;
-        }
+	return $status;		
 	}
 
 

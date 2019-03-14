@@ -1,6 +1,6 @@
 {
     "name": "nrwtaylor/stack-agent-thing",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "Stack Agent Thing framework",
     "require": {
         "nrwtaylor/stack-agent-thing": "@dev",
@@ -8,8 +8,6 @@
         "spatie/robots-txt":"^1.0",
         "t1gor/robots-txt-parser": "dev-master",
         "webignition/robots-txt-file": "^2.1" 
-
-
     },
     "require-dev": {
     },

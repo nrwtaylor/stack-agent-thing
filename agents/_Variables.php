@@ -145,9 +145,6 @@ class Variables
 
     }
 
-
-
-
     function getAgent()
     {
         return;

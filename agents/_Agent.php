@@ -455,39 +455,18 @@ and the user UX/UI
         $this->thing->log('Agent "Agent" looking for UUID in address.');
 
         // Is Identity Context?
-
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
         if (preg_match($pattern, $this->to)) {
             $this->thing->log('Agent "Agent" found a  UUID in address.', "INFORMATION");
 
             $uuid_thing = new Uuid($this->thing);
-
             $this->thing_report = $uuid_thing->thing_report;
             return $this->thing_report;
         }
-
-
-        $this->thing->log('Agent "Agent" looking for UUID in input.');
-
-        // Is Identity Context?
-        $uuid = new Uuid($this->thing, "extract");
-        $uuid->extractUuids($input);
-
-//var_dump($uuid->uuids);
-//echo "meep";
-
-        if ((isset($uuid->uuids)) and (count($uuid->uuids) > 0)) {
-            $this->thing->log('Agent "Agent" found a  UUID in input.', "INFORMATION");
-//            $this->thing_report = $uuid->thing_report;
-//            return $this->thing_report;
-
-            // And then ignored it.
-
-        }
+//echo 'input is "' . $input . "'";
 
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
-
 
 
 
