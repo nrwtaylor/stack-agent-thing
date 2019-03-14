@@ -1,15 +1,17 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-require '/var/www/stackr.test/vendor/autoload.php';
+
+if ($_SERVER['DOCUMENT_ROOT'] == "") {
+    // Is not being run by apache.    require '/var/www/stackr.test/vendor/autoload.php';
+
+    require '/var/www/stackr.test/vendor/autoload.php';
+}
 //require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 //var_dump($_SERVER['DOCUMENT_ROOT']);
 
-$GLOBALS['stack'] = '/var/www/stackr.test/';
+//$GLOBALS['stack'] = '/var/www/stackr.test/';
 //$GLOBALS['stack'] = '/var/www/html/stackr.ca/';
-
-//use GearmanClient;
-//https://stackoverflow.com/questions/36787079/php-class-not-found-when-using-namespace
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -24,11 +26,10 @@ $from = "null@stackr.ca";
 $stack_agent = "cron";
 $subject = "s/ cron 60s tick";
 
+$thing = new Thing(null);
+$thing->Create($from, $stack_agent,$subject);
 
-        $thing = new Thing(null);
-        $thing->Create($from, $stack_agent,$subject);
-
-        $cron = new Cron($thing);
+$cron = new Cron($thing);
 
 
 class Cron
@@ -45,44 +46,26 @@ class Cron
 
 		$this->thing->flagGreen(); // Just make sure
 
-        //$arr = json_encode(array("to"=>$from, "from"=>$stack_agent, "subject"=>$subject));
-        //$arr = json_encode(array("uuid"=>$this->thing->uuid));
-        //$arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
-
-//        $arr = json_encode(array("to"=>null, "from"=>"tick", "subject"=>"s/ tick"));
-
-    //            $client= new GearmanClient();
-  //              $client->addServer();
-                //$client->doNormal("call_agent", $arr);
-//                $client->doHighBackground("call_agent", $arr);
-
         $arr = json_encode(array("to"=>null, "from"=>"tick", "subject"=>"s/ tick"));
 
-                $client= new \GearmanClient();
-                $client->addServer();
-                $client->doNormal("call_agent", $arr);
+        // use GearmanClient;
+        // https://stackoverflow.com/questions/36787079/php-class-not-found-when-using-namespace
 
-//                $client->doHighBackground("call_agent", $arr);
-
-
-//        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
-
-        //$tick_agent = new Tick($this->thing);
-
-
-/*
         $client= new \GearmanClient();
         $client->addServer();
-        //$client->doNormal("call_agent", $arr);
-        $client->doLowBackground("call_agent", $arr);
-*/
-        //exit();
+        $client->doNormal("call_agent", $arr);
+
+        // Capture the tick as quickly as possible. Alternatives below.
+
+        // $client->doHighBackground("call_agent", $arr);
+
+        // $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
+        // $tick_agent = new Tick($this->thing);
 
         $this->thing_report['sms'] = "CRON | Tick";
         $this->thing_report['help'] = "This Agent connects the computer's clock tick to the stack.";
 
         return;
-
     }
 }
 
