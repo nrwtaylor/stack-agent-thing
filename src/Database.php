@@ -400,6 +400,56 @@ $c['errorHandler'] = function ($c) {
         return;
     }
 
+    function associationSearch($value, $max = null)
+    {
+
+        if ($max == null) {$max = 3;}
+        $max = (int) $max;
+
+        $user_search = $this->from;
+
+        // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
+        $value = "%$value%"; // Value to search for in Variables
+  //      $value = "*$value*"; // Value to search for in Variables
+
+//        $max = (int) $max;
+
+        $thingreport['things'] = array();
+
+        try{
+            $value = "%$value%"; // Value to search for in Variables
+            $query = "SELECT * FROM stack WHERE nom_from=:user_search AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
+            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
+            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
+            // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_searc$
+
+            // $value = "*$value*"; // Value to search for in Variables
+            // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) $
+
+            $sth = $this->container->db->prepare($query);
+
+            $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":value", $value);
+            $sth->bindParam(":max", $max, PDO::PARAM_INT);
+            $sth->execute();
+
+            $things = $sth->fetchAll();
+
+            $thingreport['info'] = 'So here are Things with the association you provided. That\'s what you want';
+                $thingreport['things'] = $things;
+
+        } catch(\PDOException $e) {
+            // echo "Error in PDO: ".$e->getMessage()."<br>";
+            $thingreport['info'] = $e->getMessage();
+            $thingreport['things'] = [];
+        }
+
+
+        return $thingreport;
+    }
+
+
+
 
     function variableSearch($path, $value, $max = null)
     {

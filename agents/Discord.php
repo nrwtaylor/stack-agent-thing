@@ -7,11 +7,13 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+//$loop = \React\EventLoop\Factory::create();
+//$client = new \CharlotteDunois\Yasmin\Client(array(), $loop);
+
+
 class Discord {
-	
 
 	public $var = 'hello';
-
 
     function __construct(Thing $thing, $agent_input = null)
     {
@@ -52,6 +54,9 @@ class Discord {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+
+$this->test2();
+
 $this->test();
 exit();
 
@@ -77,6 +82,49 @@ exit();
 
 		}
 
+    function test2()
+    {
+
+$loop = \React\EventLoop\Factory::create();
+$client = new \CharlotteDunois\Yasmin\Client(array(), $loop);
+
+
+$client->once('ready', function () use ($client) {
+    try {
+        //https://discordapp.com/channels/494664998434373632/494664998434373637
+        $channel = $client->channels->get('494664998434373632');
+        /*
+          or (not recommended if the bot is in more than 1 guild):
+            $channel = $client->channels->first(function ($channel) {
+                return ($channel->name === 'general');
+            });
+        */
+
+        // Making sure the channel exists
+        if($channel) {
+
+            // We do not need another promise here, so
+            // we call done, because we want to consume the promise
+            $channel->send('Ping.')
+                    ->done(null, function ($error) {
+                        // We will just echo any errors for this example
+                        echo $error.PHP_EOL;
+                    });
+        }
+    } catch(\Exception $error) {
+
+        var_dump($error);
+        // Handle exception
+    }
+
+});
+
+$client->login($this->token);
+$loop->run();
+
+
+
+    }
 
     function getDiscord()
     {
@@ -512,7 +560,9 @@ $jsonData = '{"type": "message",
 //$channel_id = "494664998434373632";
 //494664998434373632
 
-        //$this->authorize();
+        $this->authorize();
+
+
 
 
         $channel_id = "494664998434373637";
@@ -547,6 +597,8 @@ $jsonData = '{"type": "message",
         //if( !empty($message_to_reply) ){
             $result = curl_exec($ch);
         //}
+
+
 var_dump($result);
 exit();
 
@@ -560,46 +612,21 @@ exit();
 
     function authorize()
    {
-
+        $this->permissions_integer = 0;
         $url = "https://discordapp.com/api/oauth2/authorize?client_id=" . $this->client_id. "&scope=bot&permissions=" . $this->permissions_integer;
+
+
+$url = "https://discordapp.com/oauth2/authorize?client_id=" . $this->client_id . "&scope=bot&permissions=0";
+
 echo "\n";
-echo $url;
+echo "Positing" . $url;
 echo "\n";
         //Initiate cURL.
         $ch = curl_init($url);
 
-        //$jsonDataEncoded = "grant_type=client_credentials&client_id=" . $this->app_id . "&c$
-        $jsonDataEncoded = '{"content":"Posting as a bot"}';
+         $result = curl_exec($ch);
 
-        //Tell cURL that we want to send a POST request.
-        //curl_setopt($ch, CURLOPT_POST, 1);
-
-        //Initiate cURL.
-        $ch = curl_init($url);
-
-        //$jsonDataEncoded = "grant_type=client_credentials&client_id=" . $this->app_id . "&c$
-        //$jsonDataEncoded = '{"content":"Posting as a bot"}';
-
-        //Tell cURL that we want to send a POST request.
-//        curl_setopt($ch, CURLOPT_POST, 1);
-
-        //Attach our encoded JSON string to the POST fields.
-//        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-
-        //Set the content type to application/json
-
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
-        //Execute the request
-        //if( !empty($message_to_reply) ){
-            $result = curl_exec($ch);
-        //}
-//var_dump($result);
-//exit();
-
-//        $result_json = json_decode($result,true);
-//        $this->access_token = $result_json['access_token'];
-
-
+var_dump($result);
 
         return;
     }
