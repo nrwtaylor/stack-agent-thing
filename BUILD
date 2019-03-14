@@ -554,3 +554,10 @@ Fix PhpSerial
         if ($mode !== "custom"  and $mode !== "none" and $mode !== "rts/cts" and $mode !== "xon/xoff") {
             trigger_error("Invalid flow control mode specified", E_USER_ERROR);
 
+---
+Set nano to 4 space indenting
+sudo nano /etc/nanorc (others?)
+set tabsize 4
+
+## Convert typed tabs to spaces.
+set tabstospaces
