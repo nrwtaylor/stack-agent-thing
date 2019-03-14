@@ -33,6 +33,7 @@ $app->group('/api', function () use ($app) {
 		    $google_agent = new GoogleCalendar($thing, array('code'=>$code, 'state'=>$state) );
 
             return $this->renderer->render($response, 'thing.phtml', $google_agent->thing_report);
+
         });
 
 		// Non-operational SMS end-point.
@@ -76,8 +77,6 @@ $app->group('/api', function () use ($app) {
         $app->post('/webhook_microsoft_qvhs6s4y', function ($request, $response, $args)  {
 //        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
             $body = $request->getParsedBody();
-
-            //$body = $response->getBody();
 
 
             ignore_user_abort(true);
@@ -130,8 +129,8 @@ $app->group('/api', function () use ($app) {
 
                 $client= new \GearmanClient();
                 $client->addServer();
-//$client->addServer("10.0.0.24");
-//$client->addServer("10.0.0.25");
+                //$client->addServer("10.0.0.24");
+                //$client->addServer("10.0.0.25");
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
 
@@ -201,8 +200,10 @@ $app->group('/api', function () use ($app) {
 
                 $client= new \GearmanClient();
                 $client->addServer();
-//$client->addServer("10.0.0.24");
-//$client->addServer("10.0.0.25");
+
+                //$client->addServer("10.0.0.24");
+                //$client->addServer("10.0.0.25");
+
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
 
@@ -213,7 +214,6 @@ $app->group('/api', function () use ($app) {
             $message = "Stackr received a message from ";
             $message .= $body['msisdn'] . " to " . $body['to'];
             $message .= " which said " . $body['text'] . ".";
-
 
             return $response->withHeader('HTTP/1.0 200 OK')
                 ->withStatus(200);
@@ -228,8 +228,6 @@ $app->group('/api', function () use ($app) {
 		    // Retrieve the body of the request
             $body = $request->getParsedBody();
 */
-//var_dump($body);
-
             ob_start();
 
             $prod = true;
@@ -489,7 +487,7 @@ $app->group('/api', function () use ($app) {
 			$thingreport = array('thing' => $thing->thing, 
 				'info' => 'This is a GET connector to create new Things.  It does not extract any 
 				other information from the datagram.  And only uses the text in the URI provided.',
-				'help' => $app->web_prefix .'thing/<34 char>/to/<agent name>/subject/<998 characters>',
+				'help' => 'thing/<34 char>/to/<agent name>/subject/<998 characters>',
 				'whatisthis' => 'This is the API creation endpoint for submitting to-subject pairs to this stack');
 
 			return $this->response->withJson($thingreport);
