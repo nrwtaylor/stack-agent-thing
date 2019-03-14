@@ -168,10 +168,10 @@ sudo service apache2 restart
 11. Set-up cron
 
 sudo crontab -e
-* * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/agents/Cron.php >/dev/null 2>&1
-sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thign/agents/Cron.php
+* * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1
+sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 Correct require line for the current environment.
-sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thign/agents/Tick.php
+sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
 Remove forward slash from /Gearman in line 62.
 
 12. Verify Snowflake (web, PNG, PDF)
@@ -561,3 +561,17 @@ set tabsize 4
 
 ## Convert typed tabs to spaces.
 set tabstospaces
+
+-
+Why is the ibdata1 file continuously growing in MySQL
+
+https://www.percona.com/blog/2013/08/20/why-is-the-ibdata1-file-continuously-growing-in-mysql/
+
+ The only way is to start the database with fresh ibdata1. To do that you would need to take a full logical backup with mysqldump. Then stop MySQL and remove all the databases, ib_logfile* and ibdata* files. When you start MySQL again it will create a new fresh shared tablespace. Then, recover the logical dump.
+
+mysqldump project_stack_dev_db -u root -p | gzip -c | ssh nick@ash "cat > /home/nick/snapshots/project_stack_dev_db_snapshot_2019-21-01.sql"
+
+Which created at 31 Mb file.
+
+sudo apt install ncdu
+And work through removing files.

@@ -34,7 +34,6 @@ class Json {
         $this->char_max = $this->container['stack']['char_max'];
 
         $this->write_on_destruct = false;
-
 		// Consider factor this out.  Json should not need to call 
 		// Database functions.  Database should do the reading and writing 
 		// to the database.  Guess Json needs to be able to trigger
@@ -65,6 +64,11 @@ class Json {
         return;
         echo "<pre>";
 
+//echo $this->field;
+//echo $this->json_data;
+
+//var_dump($this->thing_array);
+//exit();
 
         foreach($this->thing_array as $field=>$json_data) {
             echo $field;
@@ -194,10 +198,10 @@ echo "</pre>";
 			$this->initField();
 			}
 
-        // Set point to first element
 		reset($this->array_data);
 
 		$first_key = key($this->array_data);
+
 		if ($first_key == null){
 			$this->initField();
 			$first_key = key($this->array_data);
@@ -252,28 +256,21 @@ echo "</pre>";
 
 
    	function pushStream($value, $pos = -1) {
-//$this->read();
-//echo "\n";
-//var_dump($this->uuid);
+
 		$stream_id = $this->idStream();
-//echo "start json " . $this->json_data . "\n";
+
 		if ($pos == -1) {
 			$pos = count($this->array_data[$stream_id]);
 		}
 
-//echo "pre arraydata";var_dump($this->array_data);
-
 		//echo $stream_id;
 		array_splice($this->array_data[$stream_id], $pos, 0, $value);
-
-//echo "post arraydata";var_dump($this->array_data);
 		$this->setArray($this->array_data);
 
-//echo "arraydata";var_dump($this->array_data);
-//echo "end json ". $this->json_data . "\n";
-//$this->write();
 		return;
-    }
+
+
+		}
 
    	function publishDocument(Array $array_data) {
 
@@ -464,6 +461,7 @@ echo "</pre>";
 		// Now write to defined column.
 		//print_r($this->json_data);echo "<br>";
 		//print_r($this->field);echo "<br>";
+
         if ($this->field == null) {return;}
 //$this->char_max = 30;
         if (strlen($this->json_data) > $this->char_max) {
@@ -494,11 +492,7 @@ echo "</pre>";
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
                 //$this->write_field_list[] = $this->field;
             } else {
-
-if ($this->field == "associations") {
-echo "write associations ";
-echo "" . $this->json_data . "\n";
-}
+                
                 $this->db->writeField($this->field, $this->json_data);
             }
             return true;
@@ -509,18 +503,19 @@ echo "" . $this->json_data . "\n";
     function read()
     {
 
-        $this->json_data = $this->db->readField($this->field);
+			$this->json_data = $this->db->readField($this->field);
 
-if ($this->field == "associations") {
-echo "read associations " .  $this->json_data . "\n";
+
+			if ($this->json_data == null) {$this->initField();}
+
+			$array = $this->jsontoArray();
+	$array= $this->array_data;
+
+		return $array;
+		}
+	
+
 }
 
-        if ($this->json_data == null) {$this->initField();}
-
-        $array = $this->jsontoArray();
-        $array= $this->array_data;
-        return $array;
-	}
-}
 
 ?>

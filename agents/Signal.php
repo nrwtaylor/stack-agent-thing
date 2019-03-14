@@ -31,6 +31,9 @@ class Signal
 
         $this->test= "Development code"; // Always
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
+
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
@@ -38,6 +41,10 @@ class Signal
         $this->sqlresponse = null;
         $this->thing->log($this->agent_prefix . 'received this Thing, "' . $this->subject .  '".', "DEBUG") ;
 
+
+        // Get the current identities uuid.
+        $default_signal_id = new Identity($this->thing, "identity");
+        $this->default_signal_id = $default_signal_id->uuid;
 
         // Set up default signal settings
         $this->verbosity = 1;
@@ -59,6 +66,12 @@ class Signal
 
         // Get the current Identities signal
         $this->signal = new Variables($this->thing, "variables signal " . $this->from);
+
+//        $this->associations = new Associations($this->thing, "associations " . $this->from);
+        $this->associations = new Associations($this->thing, $this->subject);
+
+//var_dump($this->associations->associations_list);
+//exit();
         //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
 
         $this->thing->log($this->agent_prefix . ' got signal variables. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
@@ -86,7 +99,7 @@ class Signal
 
     function set($requested_state = null)
     {
- 
+
         if ($requested_state == null) {
             if (!isset($this->requested_state)) {
                 // Set default behaviour.
@@ -102,6 +115,11 @@ class Signal
 
         $this->signal->setVariable("state", $this->state);
 
+        if (!isset($this->signal_id)) {$this->signal_id = $this->uuid;}
+
+        $this->associations->setAssociation($this->signal_id);
+
+
         //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
         //$this->variables_thing->setVariable("signal_id", $this->nuuid);
 
@@ -115,6 +133,12 @@ class Signal
 
         return;
     }
+
+    function is_positive_integer($str)
+    {
+        return (is_numeric($str) && $str > 0 && $str == round($str));
+    }
+
 
     function isSignal($signal = null)
     {
@@ -142,9 +166,7 @@ class Signal
         // get gets the state of the Signal the last time
         // it was saved into the stack (serialized).
         $this->previous_state = $this->signal->getVariable("state");
-
         $this->signal_id = $this->signal->getVariable("signal_id");
-
         $this->refreshed_at = $this->signal->getVariable("refreshed_at");
 
         $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
@@ -167,6 +189,171 @@ class Signal
 
     }
 
+    function getSignal($selector = null)
+    {
+//var_dump($this->signals);
+        foreach ($this->signals as $signal) {
+            // Match the first matching place
+            if (($selector == null) or ($selector == "")) {
+                $this->refreshed_at = $this->last_refreshed_at; // This is resetting the count.
+                $this->signal_id = $this->last_signal_id;
+                $this->signal = new Variables($this->thing, "variables " . $this->signal_id . " " . $this->from);
+                return $this->signal_id;
+            }
+
+            if (($signal['is'] == $selector)) {
+                $this->refreshed_at = $place['refreshed_at'];
+                $this->signal_id = $signal['is'];
+                $this->signal = new Variables($this->thing, "variables " . $this->signal_id . " " . $this->from);
+                return $this->signal_id;
+            }
+       }
+
+       return true;
+    }
+
+    function getSignals()
+    {
+        $this->signalid_list = array();
+        $this->signals = array();
+
+        // See if a headcode record exists.
+        $findagent_thing = new Findagent($this->thing, 'signal');
+        $count = count($findagent_thing->thing_report['things']);
+        $this->thing->log('Agent "Signal" found ' . count($findagent_thing->thing_report['things']) ." signal Things." );
+
+//        if ($findagent_thing->thing_reports['things'] == false) {
+//                $place_code = $this->default_place_code;
+//                $place_name = $this->default_place_name;
+//            return array($this->placecode_list, $this->placename_list, $this->places);
+//        }
+
+        if ( ($findagent_thing->thing_report['things'] == true)) {}
+
+        //var_dump(count($findagent_thing->thing_report['things'])); 
+        //var_dump($findagent_thing->thing_report['things'] == true);
+
+
+        if (!$this->is_positive_integer($count))
+        {
+            // No places found
+        } else {
+
+
+
+
+            foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object)
+            {
+                $uuid = $thing_object['uuid'];
+
+                $associations_json= $thing_object['associations'];
+                $associations = $this->thing->json->jsontoArray($associations_json);
+var_dump($associations);
+                if (isset($variables['signal'])) {
+
+                    $signal_id = $this->default_signal_id;
+                    $refreshed_at = "meep getSignal";
+
+                    if(isset($variables['signal']['signal_id'])) {$signal_id = $variables['signal']['signal_id'];}
+                    if(isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['signal']['refreshed_at'];}
+
+
+                        $this->signals[] = array("id"=>$signal_id, "refreshed_at"=>$refreshed_at);
+                        $this->signalid_list[] = $signal_id;
+  //                  }
+                }
+            }
+        }
+
+        // Return this-places filtered by latest check-in at each location.
+
+        // Check if the place is already in the the list (this->places)
+        $found = false;
+
+        $filtered_places = array();
+        foreach(array_reverse($this->signals) as $key=>$signal) {
+
+            $signal_id = $signal['id'];
+
+            if (!isset($signal['refreshed_at'])) {continue;}
+           $refreshed_at = $signal['refreshed_at'];
+
+            if (isset($filtered_signals[$signal_id]['refreshed_at'])) {
+                if (strtotime($refreshed_at) > strtotime($filtered_signals[$signal_id]['refreshed_at'])) {
+                    $filtered_places[$signal_name] = array("id"=>$signal_id, 'refreshed_at' => $refreshed_at);
+                }
+                continue;
+            } 
+
+            $filtered_places[$signal_id] = array("id"=>$signal_id, 'refreshed_at' => $refreshed_at);
+
+
+        }
+
+$refreshed_at = array();
+foreach ($this->signals as $key => $row)
+{
+    $refreshed_at[$key] = $row['refreshed_at'];
+}
+array_multisort($refreshed_at, SORT_DESC, $this->signals);
+
+/*
+// Get latest per place
+$this->places = array();
+foreach($filtered_places as $key=>$filtered_place) {
+//var_dump($filtered_place);
+
+        $this->places[] = $filtered_place;
+}
+*/
+$this->old_signals = $this->signals;
+$this->signals = array();
+foreach ($this->old_signals as $key =>$row)
+{
+
+//var_dump( strtotime($row['refreshed_at']) );
+    if ( strtotime($row['refreshed_at']) != false) { 
+      $this->signals[] = $row;
+    }
+}
+
+
+
+        // Add in a set of default places
+         $file = $this->resource_path .'signal/signals.txt';
+         $contents = file_get_contents($file);
+
+        $handle = fopen($file, "r");
+
+
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                // process the line read.
+
+                // It's just a list of place names.
+                // Common ones.
+                $signal_id= $line;
+                // This is where the place index will be called.
+//                $signal_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
+
+                $this->signalid_list[] = $signal_id;
+
+
+               $this->signals[] = array("id"=>$signal_id); 
+
+            }
+
+            fclose($handle);
+        } else {
+            // error opening the file.
+        }
+
+       // Indexing not implemented
+        $this->max_index = 0;
+
+        return array($this->signalid_list, $this->signals);
+
+    }
 
     function read()
     {
@@ -265,6 +452,8 @@ class Signal
         $this->makeChoices();
         $this->makeWeb();
 
+
+
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
@@ -318,16 +507,22 @@ class Signal
             $sms_message .= " requested state " . strtoupper($this->requested_state);
             $sms_message .= " current node " . strtoupper($this->base_thing->choice->current_node);
         }
-        if ($this->verbosity > 2) {
-            $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
+//        if ($this->verbosity > 2) {
+//            $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
+//        }
+
+        if ($this->verbosity > 0) {
+            $sms_message .= " | signal id " . strtoupper($this->signal_id);
         }
+
+
         if ($this->verbosity >= 9) {
             $sms_message .= " | base nuuid " . strtoupper($this->signal->thing->nuuid);
         }
 
-        if ($this->verbosity > 0) {
-            $sms_message .= " | nuuid " . $this->signal->nuuid; 
-        }
+        //if ($this->verbosity > 0) {
+        //    $sms_message .= " | nuuid " . $this->signal->nuuid; 
+        //}
 
         if ($this->verbosity > 2) {
             if ($this->state == "red") {
@@ -520,17 +715,98 @@ return;
 
         $pieces = explode(" ", strtolower($input));
 
+        // This gives us the other Things which are associated with the signal
+        var_dump($this->associations->agent_associations);
+
+//        var_dump($this->associations->association_name);
+
+        foreach($this->associations->thing_objects as $key=>$thing_object) {
 
 
-        $nuuid = new Nuuid($this->thing);
-        $nuuid->extractNuuid($input);
+                $uuid = $thing_object['uuid'];
+$agent = $thing_object['nom_to'];
+echo "agent: " . $agent;
+echo "uuid: ". $thing_object['uuid'];
 
-        if (isset($nuuid->nuuid)) {
-            echo "Found: ".$nuuid->nuuid;
+                $variables_json= $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                if (isset($variables['agent'])) {
+
+                    //$place_code = $this->default_place_code;
+                    //$place_name = $this->default_place_name;
+                    //$refreshed_at = "meep getPlaces";
+
+                    if(isset($variables['thing']['status'])) {$thing_status = $variables['thing']['status'];}
+                    if(isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
+                }
+
+
+                if (isset($variables['agent'])) {
+
+                    //$place_code = $this->default_place_code;
+                    //$place_name = $this->default_place_name;
+                    //$refreshed_at = "meep getPlaces";
+
+                    if(isset($variables['agent']['state'])) {$agent_state = $variables['agent']['state'];}
+                    if(isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
+
+                }
+
+                if (isset($variables['flag'])) {
+
+                    //$place_code = $this->default_place_code;
+                    //$place_name = $this->default_place_name;
+                    //$refreshed_at = "meep getPlaces";
+
+                    if(isset($variables['flag']['state'])) {$flag_state = $variables['flag']['state'];}
+                    if(isset($variables['flag']['refreshed_at'])) {$refreshed_at = $variables['flag']['refreshed_at'];}
+                }
+
+                if (isset($variables['signal'])) {
+
+                    //$place_code = $this->default_place_code;
+                    //$place_name = $this->default_place_name;
+                    //$refreshed_at = "meep getPlaces";
+
+                    if(isset($variables['signal']['id'])) {$signal_id = $variables['signal']['id'];}
+                    if(isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['place']['refreshed_at'];}
+                }
+
+                if (isset($variables['block'])) {
+
+                    //$place_code = $this->default_place_code;
+                    //$place_name = $this->default_place_name;
+                    //$refreshed_at = "meep getPlaces";
+
+                    if(isset($variables['block']['id'])) {$block_id = $variables['block']['id'];}
+                    if(isset($variables['block']['refreshed_at'])) {$refreshed_at = $variables['block']['refreshed_at'];}
+                }
+
+                if (!isset($thing_status)) {$thing_status = "X";}
+                if (!isset($agent_state)) {$agent_state = "X";}
+                if (!isset($flag_state)) {$flag_state = "X";}
+                if (!isset($signal_id)) {$signal_id = "X";}
+                if (!isset($block_id)) {$block_id = "X";}
+
+                echo $uuid . " " . $thing_status . " " .$agent_state . " " . $flag_state . " " . $signal_id . " " . $block_id. "\n";
+
+
+
+
         }
 
-        $uuid = new Uuid($this->thing);
-        $uuid->extractUuid($input);
+
+
+        //$nuuid = new Nuuid($this->thing);
+        //$nuuid->extractNuuid($input);
+
+        //if (isset($nuuid->nuuid)) {
+        //    echo "Found: ".$nuuid->nuuid;
+        //}
+
+        //$uuid = new Uuid($this->thing);
+        //$uuid->extractUuid($input);
 
         if (isset($uuid->uuid)) {
             echo "Found: ".$uuid->uuid;
@@ -556,6 +832,7 @@ echo var_dump($variables["signal"]);
 
         // Is there a headcode in the provided datagram
 
+$part_uuid = $uuid;
 
 		// So this is really the 'sms' section
 		// Keyword
@@ -564,6 +841,9 @@ echo var_dump($variables["signal"]);
             if ($input == $this->keyword) {
                 $this->get();
                 $this->response = "Got the signal.";
+$this->getSignals();
+$this->getSignal();
+
 
                 return;
             }
@@ -581,6 +861,13 @@ echo var_dump($variables["signal"]);
             }
 
         }
+
+        // Lets think about Signals.
+        // A signal is connected to another signal.  Directly.
+
+        // So look up the signal in associations.
+
+        // signal - returns the uuid and the state of the current signal
 
 
         foreach ($pieces as $key=>$piece) {
@@ -604,6 +891,12 @@ echo var_dump($variables["signal"]);
 
                             $this->selectChoice('yellow');
                             $this->response = "Selected a yellow signal.";
+                            return;
+
+                        case 'list':
+                            $this->getSignals();
+                            $this->response = "Got a list of signals.";
+var_dump ($this->signals);
                             return;
 
                         case 'back':

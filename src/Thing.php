@@ -223,11 +223,11 @@ class Thing
 
             // And fire up the stack balance calculation to make 
             // sure stack balance snapshot is latest.
+
+            // Clearly I'm quite keen that a Thing can return the stack balance.
+            // But there is an agent to do that.
             //$this->stackBalance();
         }
-
-
-
     }
 
 	function getUUid()
@@ -498,38 +498,6 @@ $query = true;
 		return;
 		}
 
-
-//	public function receiptPNG() {
-//		return;
-//		$param = $_GET['id'];
-//
-//		ob_start("callback");
-//		// here DB request or some processing
-//		$codeText = "thing:".$this->uuid;
-//		// end of processing here
-//		$debugLog = ob_get_contents();
-//		ob_end_clean();
-//		QRcode::png($codeText,false,QR_ECLEVEL_Q,4); 
-//
-//		return;
-//		}
-
-//        public function PNG()  {
-//		return;
-//                $param = $_GET['id'];
-//
-//                ob_start("callback");
-//                // here DB request or some processing
-//                $codeText = "thing:".$this->uuid;
-//                // end of processing here
-//                $debugLog = ob_get_contents();
-//                ob_end_clean();
-//                QRcode::png($codeText,false,QR_ECLEVEL_Q,4); 
-//
-//               return;
-//                }
-
-
     function time($time = null)
     {
         if ( $time == null ) {$time = time();}
@@ -644,6 +612,7 @@ $query = true;
 
     public function flagRed()
     {
+        // Make the Thing show Red
         $this->json->setField("variables");
         $this->json->writeVariable(array("thing","status"), "red");
         $this->Get();
@@ -652,6 +621,7 @@ $query = true;
 
     public function flagAmber()
     {
+        // Make the Thing show Amber
         $this->json->setField("variables");
         $this->json->writeVariable(array("thing","status"), "amber");
         $this->Get();
@@ -659,6 +629,7 @@ $query = true;
 
 	public function flagGreen()
     {
+        // Make the Thing show Green
         $this->json->setField("variables");
         $this->json->writeVariable(array("thing","status"), "green");
         $this->Get();
@@ -666,6 +637,7 @@ $query = true;
 
 	public function isRed()
     {
+        // Ask if the Thing is Red
         $var_path = array("thing", "status");
         if ($this->json->readVariable($var_path) == "red") {
             return true;
@@ -673,9 +645,9 @@ $query = true;
         return false;
     }
 
-
 	public function isGreen()
     {
+        // Ask if the Thing is Green
         $var_path = array("thing", "status");
         if ($this->json->readVariable($var_path) == "green") {
             return true;
@@ -686,6 +658,7 @@ $query = true;
 	// Yeah - it's amber.  Cycles red > red + amber > green > amber > red
 	public function isAmber()
     {
+        // Ask if the Thing is Amber.  Is it ready to go?
 		$var_path = array("thing", "status");
 		if ($this->json->readVariable($var_path) == "amber") {return true;}
 		return false;
@@ -693,6 +666,9 @@ $query = true;
 
     function isData($variable)
     {
+        // Ask if the Thing carries data.
+        // Thing has four ways to answer.
+
         if (
             ($variable !== false) and
             ($variable !== true) and
@@ -709,12 +685,14 @@ $query = true;
 
 	public function flagGet()
     {
+        // More open way to ask a thing for its flag
         $var_path = array("thing", "status");
         return $this->json->readVariable($var_path);
     }
 
     public function flagSet($color = null)
     {
+        // And to tell a thing to set its flag to a particular one
 		if ($color == null) {$color = 'red';}
 
         $this->json->setField("variables");
@@ -743,7 +721,6 @@ $query = true;
 	        	$this->subject = null;
 		} else {
 
-
 			// This just makes sure these four variables
 			// are consistently available 
 			// as top level Thing objects.
@@ -757,7 +734,6 @@ $query = true;
 //$thingreport = $this->db->from = $this->from;
 
 	      		$this->subject = $thing->task;
-
 
 			// Factor this out as an agent 'RFC822'
 			//$this->email = new Email($this->uuid, $this->from, $this->to, $this->subject);
@@ -795,20 +771,6 @@ $query = true;
 		return false;
 		}
 
-/*
-	function currentState() {
-
-		throw new Exception('devstack deprecate');
-
-// Needed for opt-in state.  Should be replaceable by a custom state
-// agent for the Thing.
-
-		$this->db->setUser($this->from);
-		$this->current_state = $this->db->userState();
-		return $this->current_state;
-
-		}
-*/
 	function getState($agent = null) {
 
 // This can probably be deprecated after updating usermanager
@@ -816,8 +778,6 @@ $query = true;
 
 		if ($agent == null) {$agent = 'thing';}
 		// Need to find latest record with a usermanager state in it for $from.
-
-
 
 		// LET'S START HERE
 		// Have we dealt with this nom_from before?
@@ -923,8 +883,9 @@ $query = true;
 		if ( is_array($uuids) ) {
 			foreach($uuids as $uuid) {
 
-			    	$this->json->setField("associations");
-                                $this->json->pushStream($uuid);
+			    $this->json->setField("associations");
+                $this->json->pushStream($uuid);
+                // $this->json->fallingWater($uuid);
 
 			}
 			return false;

@@ -39,6 +39,9 @@ class Tallygraph
         $this->width = 300;
 
 
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
+
         $this->readInput();
 
         $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
@@ -243,12 +246,7 @@ return;
 
                 if (($this->name == $name))  {
 
-                    //$next_uuid = $uuid;
                     $this->counter_uuids[] = $uuid;
-
-     //               $this->thing->log( 'Agent "Tallycounter" loaded the tallycounter variable: ' . $this->variables_thing->variable . '.','INFORMATION' );
-     //               $this->thing->log( 'Agent "Tallycounter" loaded the tallycounter name: ' . $this->variables_thing->name . '.','INFORMATION' );
-     //               $this->thing->log( 'Agent "Tallycounter" next counter pointer is: ' . substr($this->variables_thing->next_uuid,0,4) . "." ,'DEBUG');
 
                     break;
                 }
@@ -271,7 +269,6 @@ return;
                 //$name = $this->getVariable('name');
                 $next_uuid = $this->getVariable('next_uuid');
 
-
                 if ($name == $match_uuid)  {
 
                     $this->counter_uuids[] = $uuid;
@@ -288,12 +285,8 @@ return;
 
         }
 
-
         return;
 	}
-
-
-
 
 	function startVariables() 
     {
@@ -303,15 +296,9 @@ return;
 
         $this->setVariable("variable", 0);
         $this->setVariable("name", $this->name);
-//exit();
-
-//        $thing = new Thing(null);
-//        $this->setVariable("next_uuid", $thing->uuid);
-
 
 		return;
 	}
-
 
     function getVariable($variable = null) {
 
@@ -330,14 +317,11 @@ return;
 
         if ($variable == null) {$variable = 'variable';}
 
-//echo $this->identity;
-//echo "meep";
-//exit();
 
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
 
-$this->variables_agent = "tallycounter";
+        $this->variables_agent = "tallycounter";
 
         $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variables_agent, $variable) );
 
@@ -358,48 +342,32 @@ $this->variables_agent = "tallycounter";
         // a logic perspective.
 
         if ($variable == null) {$variable = 'variable';}
-//        if (!isset($this->variables_thing)) { $this->variables_thing = $this->thing;}
 
         $this->variables_thing->$variable = $value;
-
-//echo $value;
-//echo $this->identity;
-//exit();
 
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
         $this->variables_thing->json->writeVariable( array($this->variables_agent, $variable), $value );
 
-//        $this->$variable = $value;
-//        $this->variables_thing->flagGreen();
-
         return $this->variables_thing->$variable;
     }
 
-
-
-
-
-	public function Respond() {
-
+	public function Respond()
+    {
 		// Develop the various messages for each channel.
 
 		// Thing actions
 		// Because we are making a decision and moving on.  This Thing
 		// can be left alone until called on next.
-		$this->thing->flagGreen(); 
 
-
-//        $this->thing->log( 'Agent "Tallycounter" variable is ' . $this->variables_thing->variable . '.' );
+        $this->thing->flagGreen();
 
 		$this->sms_message = "TALLY GRAPH  | " . $this->web_prefix . "tallygraph/" . $this->uuid;
-
-  //      $this->sms_message .= " | " . $this->display;
-  //      $this->sms_message .= " | " . $this->name;
 
         if (isset($this->function_message)) {
             $this->sms_message .= " | " . $this->function_message;
         }
+
 		$this->sms_message .= ' | TEXT ?';
 
 		$this->thing_report['thing'] = $this->thing->thing;
@@ -407,6 +375,7 @@ $this->variables_agent = "tallycounter";
 
         $this->makePNG();
 
+        $this->makeTXT();
 
 		// While we work on this
 		$this->thing_report['email'] = $this->sms_message;
@@ -418,8 +387,8 @@ $this->variables_agent = "tallycounter";
 		return $this->thing_report;
 	}
 
-    function drawGraph() {
-
+    function drawGraph()
+    {
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
 
@@ -452,58 +421,22 @@ $this->variables_agent = "tallycounter";
             $i += 1;
         }
 
-      $x_max = strtotime($this->current_time);
-//var_dump($x_max);
-//exit();
-      $i = 0;
+        $x_max = strtotime($this->current_time);
+
+        $i = 0;
 
         foreach ($this->points as $point) {
 
-     //       if (($point['variable'] == null) or ($point['variable'] == 0)) {
-     //           continue;
-     //       }
+            $y_spread = $y_max - $y_min;
+            if ($y_spread == 0) {$y_spread = 100;}
 
-//var_dump($this->chart_height);
-//var_dump($y_max);
-//var_dump($y_min);
-
-$y_spread = $y_max - $y_min;
-if ($y_spread == 0) {$y_spread = 100;}
-        //    var_dump($point);
             $y = 10 + $this->chart_height - ($point['variable'] - $y_min) / ($y_spread) * $this->chart_height;
             $x = 10 + ($point['created_at'] - $x_min) / ($x_max - $x_min) * $this->chart_width;
 
-if (!isset($x_old)) {$x_old = $x;}
-if (!isset($y_old)) {$y_old = $y;}
+            if (!isset($x_old)) {$x_old = $x;}
+            if (!isset($y_old)) {$y_old = $y;}
 
-
-//echo $x . " " . $y; 
-//echo "<br>";
-
-//            imagefilledrectangle($this->image,
-//                    $i * $column_width, $this->height,
-//                    $i * $column_width + $column_width, $p,
-//                    $this->black);
-/*
-            imagefilledrectangle($this->image,
-                    $i * $column_width, 200,
-                    $i * $column_width + $column_width, $y,
-                    $this->black);
-
-            imagerectangle($this->image,
-                    $i * $column_width, 200,
-                    $i * $column_width + $column_width, $y,
-                    $this->white);
-*/
-
-        //foreach(range(-1,1,1) as $key=>$offset) {
             $width = $x - $x_old;
-
-//            imageline($this->image,
-//                    $x_old + $offset , $y_old + $offset,
-//                    $x, $y,
-//                    $this->green);
-
             $offset = 1.5;
 
             imagefilledrectangle($this->image,
@@ -521,57 +454,24 @@ if (!isset($y_old)) {$y_old = $y;}
                     $x + $offset, $y + $offset ,
                     $this->red);
 
-
-
-        //}
-/*
-            imageline($this->image,
-                    $x_old+1 , $y_old+1,
-                    $x+1, $y+1,
-                    $this->black);
-
-            imageline($this->image,
-                    $x_old-1 , $y_old-1,
-                    $x-1, $y-1,
-                    $this->black);
-*/
-
-
-
-
-
-/*
-            imagefilledrectangle($this->image,
-                    $x -2 , $y - 2,
-                    $x + 2, $y + 2,
-                    $this->black);
-*/
-
             $y_old = $y;
             $x_old = $x;
 
             $i += 1;
-//if ($i = 10) {break;}
         }
-$allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500);
-$inc = ($y_max - $y_min)/ 5;
-//echo "inc" . $inc . "\n";
-$closest_distance = $y_max;
-foreach ($allowed_steps as $key=>$step) {
 
-    $distance = abs($inc - $step);
-//echo $distance . "\n";
-    if ($distance < $closest_distance) {
-         $closest_distance = $distance;
-         $preferred_step = $step;
-    }
-}
-//echo $closest_distance;
-//echo "<br>";
-//$inc = $closest_distance;
+        $allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500);
+        $inc = ($y_max - $y_min)/ 5;
+        $closest_distance = $y_max;
 
-
-$this->drawGrid($y_min, $y_max, $preferred_step);
+        foreach ($allowed_steps as $key=>$step) {
+            $distance = abs($inc - $step);
+            if ($distance < $closest_distance) {
+                $closest_distance = $distance;
+                $preferred_step = $step;
+            }
+        }
+        $this->drawGrid($y_min, $y_max, $preferred_step);
     }
 
     private function drawGrid($y_min, $y_max, $inc)
@@ -586,27 +486,27 @@ $this->drawGrid($y_min, $y_max, $preferred_step);
             //                   $i before the increment
             //                   (post-increment) */
 
-//echo $y;
-//exit();
-$y_spread = $y_max - $y_min;
-if ($y_spread == 0) {$y_spread = 100;}
+            $y_spread = $y_max - $y_min;
+            if ($y_spread == 0) {$y_spread = 100;}
 
             $plot_y = 10 + $this->chart_height - ($y - $y_min) / $y_spread * $this->chart_height;
 
 
-                imageline($this->image,
+            imageline($this->image,
                     10 , $plot_y,
                     300-10, $plot_y,
                     $this->black);
 
 
-$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
-$text = $y;
-// Add some shadow to the text
-//imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+            $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
-$size = 6;
-$angle = 0;
+            $text = $y;
+            // Add some shadow to the text
+            //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+
+            $size = 6;
+            $angle = 0;
+
 //$bbox = imagettfbbox ($size, $angle, $font, $text); 
 //$bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
 //$bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
@@ -616,31 +516,25 @@ $angle = 0;
 //check width of the image 
 //$width = imagesx($this->image); 
 //$height = imagesy($this->image);
-$pad = 0;
 
-imagettftext($this->image, $size, $angle, 10, $plot_y-1, $this->grey, $font, $text);
+            $pad = 0;
 
-
-
-    $y = $y + $inc;
-}
+            imagettftext($this->image, $size, $angle, 10, $plot_y-1, $this->grey, $font, $text);
 
 
+            $y = $y + $inc;
+        }
     }
 
-function roundUpToAny($n,$x=5) {
-    return round(($n+$x/2)/$x)*$x;
-}
+    function roundUpToAny($n,$x=5) {
+        return round(($n+$x/2)/$x)*$x;
+    }
 
     private function drawBar() {
-
-
     }
 
     public function makePNG()
     {
-    //    $this->height = 200;
-    //    $this->width = 300;
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
@@ -654,36 +548,37 @@ function roundUpToAny($n,$x=5) {
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
-
-
         $this->drawGraph();
 
         // Write the string at the top left
         $border = 30;
         $radius = 1.165 * (125 - 2 * $border) / 3;
 
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
-$font = $GLOBALS['stack'] . 'resources/roll/KeepCalm-Medium.ttf';
-$text = "test";
-// Add some shadow to the text
-//imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+        $text = "test";
 
-$size = 72;
-$angle = 0;
-$bbox = imagettfbbox ($size, $angle, $font, $text); 
-$bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-$bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-//check width of the image 
-$width = imagesx($this->image); 
-$height = imagesy($this->image);
-$pad = 0;
-//imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+
+        $size = 72;
+        $angle = 0;
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+
+        //check width of the image 
+        $width = imagesx($this->image); 
+        $height = imagesy($this->image);
+        $pad = 0;
+        // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
 
 
-//     imagestring($this->image, 2, 100, 0, $this->thing->nuuid, $textcolor);
+        // imagestring($this->image, 2, 100, 0, $this->thing->nuuid, $textcolor);
 
         ob_start();
         imagepng($this->image);
@@ -700,12 +595,10 @@ $pad = 0;
 
         return $response;
 
-
-
-        $this->PNG = $image;    
+        $this->PNG = $image;
         $this->thing_report['png'] = $image;
- 
-       return;
+
+        return;
     }
 
 
@@ -730,27 +623,47 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $web .= "</a>";
         $web .= "<br>";
 
-//        $web .= $this->sms_message;
-//        $web .= "<br>";
-
-//var_dump($this->points[0]);
-    //$arr = $this->points;
         if (count($this->points) != 0) {
             $tally =  $this->points[0]['variable'];
             $web .= number_format($tally) . " messages";
         }
 
         $web .= "<br><br>";
-        //$web .= $head;
-
-        //$web .= $this->choices['button'];
-        //$web .= $foot;
 
         $this->thing_report['web'] = $web;
 
     }
 
+    function makeTXT()
+    {
+        $txt = 'This is a TALLY for RAILWAY ' . $this->variables_agent->nuuid . '. ';
+        $txt .= "\n";
 
+        $count = 0;
+        if (is_array($this->points)) {
+          $count =  count($this->points);
+        }
+
+        $txt .= $count . ' points retrieved.';
+
+        $txt .= "\n";
+        $txt .= str_pad("VARIABLE", 7, ' ', STR_PAD_LEFT);
+
+        $txt .= " " . str_pad("CREATED AT", 6, " ", STR_PAD_LEFT);
+
+        $txt .= "\n";
+        $txt .= "\n";
+
+        foreach($this->points as $key=>$point) {
+            $txt .= str_pad($point['variable'], 7, '0', STR_PAD_LEFT);
+            $txt .= " " . str_pad(strtoupper(date('Y M d D H:i', $point['created_at'])), 6, " ", STR_PAD_LEFT) . "";
+            $txt .= "\n";
+        }
+
+        $this->thing_report['txt'] = $txt;
+        $this->txt = $txt;
+
+    }
 
     public function defaultCommand() 
     {
@@ -760,7 +673,6 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $this->identity = $this->from;
         return;
     }
-
 
     public function readInstruction() 
     {
@@ -776,8 +688,6 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         $this->identity = $pieces[2];
 
 
-//        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agent . ' ' . $this->limit . ' ' . $this->name . ' ' . $this->identity . "." );
-
         return;
 
     }
@@ -786,7 +696,6 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
     {
         // No need to read text.  Any identity input to Tally
         // increments the tally.
-     
         return;
 	}
 
