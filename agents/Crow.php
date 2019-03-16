@@ -89,7 +89,7 @@ class Crow
 		$info .= 'from the web.  The Management suggests you explore the NEST MAINTENANCE button';
 
 		// The 90s script
-		$n = 'Information iss stored as Things. Things are how ' . $this->short_name . '.';
+		$n = 'Information is stored as Things. Things are how ' . $this->short_name . '.';
 		$n .= 'Stuff comes into a Thing, a Thing has several Agents that help it deal with Things.';
 		$n .= 'Agents work for ' . $this->short_name . '.  Most of them providing ai interfaces';
 		$n .= 'to services.  Basic SMS commands you can perform are "51380" or any other Translink';
@@ -545,7 +545,6 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
                     switch($piece) {
 
                         case 'left':
-var_dump($this->left_count);
                             $this->left_count += 1;
                             $this->response = "Crow moved left.";
                             break;
