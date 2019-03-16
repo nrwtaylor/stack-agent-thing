@@ -7,14 +7,14 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Ant extends Agent
+class Ant
 {
 	public $var = 'hello';
 
-    function init()
-//    function __construct(Thing $thing, $agent_input = null)
+
+    function __construct(Thing $thing, $agent_input = null)
     {
-//        $this->agent_input = $agent_input;
+        $this->agent_input = $agent_input;
         // Ant is a proof of the Thing's choice engine.
 
 
@@ -39,20 +39,30 @@ class Ant extends Agent
 // On.
 
         // Setup Agent
-//        $this->agent = strtolower(get_class());
-//        $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
+        $this->agent = strtolower(get_class());
+        $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
 
 		$this->test= "Development code";
 
-		// Load in some characterizations.
-		$this->short_name = $this->thing->container['stack']['short_name'];
+		$this->thing = $thing;
+        $this->thing_report['thing'] = $thing;
 
-        $this->sms_seperator = $this->thing->container['stack']['sms_separator'];
+        // Example API
+        $this->api_key = $this->thing->container['api']['translink'];
+
+		// Load in some characterizations.
+		$this->short_name = $this->thing->container['stack']['short_name']; 
+		$this->web_prefix = $this->thing->container['stack']['web_prefix']; 
+		$this->mail_prefix = $this->thing->container['stack']['mail_prefix']; 
+		$this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+
+        $this->sms_seperator = $this->thing->container['stack']['sms_separator']; // |
 		$this->sms_address = $this->thing->container['stack']['sms_address'];
 
         // Get some stuff from the stack which will be helpful.
-        $this->word = $this->thing->container['stack']['word'];
-        $this->email = $this->thing->container['stack']['email'];
+        $this->word = $thing->container['stack']['word'];
+        $this->email = $thing->container['stack']['email'];
+
 
 		// Load in time quantums
         $this->cron_period = $this->thing->container['stack']['cron_period']; // 60s
@@ -63,13 +73,13 @@ class Ant extends Agent
 
 		// Now create some shortcut conventions.
 		// devstack sqlresponse as a flag code
-//        $this->uuid = $thing->uuid;
-//        $this->to = $thing->to;
-//        $this->from = $thing->from;
-//        $this->subject = $thing->subject;
+        $this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
 
         // For the Ant
-        $this->created_at = $this->thing->thing->created_at;
+        $this->created_at = $thing->thing->created_at;
 
 		$this->sqlresponse = null;
 
@@ -113,31 +123,83 @@ class Ant extends Agent
 
 		$why = $this->short_name . ' is intended as a vehicle to leverage Venture Capital investment in individual impact.';
 
-		$this->state = $this->thing->choice->load('hive');
-    }
+		$this->thing->log( '<pre> Agent "Ant" running on Thing ' . $this->uuid . ' </pre>' );
+		$this->thing->log( '<pre> Agent "Ant" received this Thing "' . $this->subject .'"</pre>' );
 
-    public function run()
-    {
+		// Read the subject as passed to this class.
+		// No charge to read the subject line.  By machine.
+
+		$this->state = $thing->choice->load('hive');
+
+$this->get();
+		$this->readSubject();
+
+		$this->respond();
+
+$this->set();
+//var_dump($this->thing);
+
         // Err ... making sure the state is saved.
         $this->thing->choice->Choose($this->state);
 
-        $this->state = $this->thing->choice->load('hive');
+        $this->state = $thing->choice->load('hive');
 
         $this->thing->log($this->agent_prefix . 'state is "' . $this->state . '".');
+        $this->thing->log($this->agent_prefix . 'completed.');
+
+        $this->thing_report['log'] = $this->thing->log;
+
+        return;
 
     }
+
+
+
+
+//	function createAccount(String $account_name, $amount) {
+
+//		$scalar_account = new Account($this->uuid, 'scalar', $amount, "happiness", "Things forgotten"); // Yup.
+//		$this->thing->scalar = $scalar_account;
+//		return;
+//	}
+
 
 // -----------------------
 
-    public function set()
+    function set()
     {
-        $this->thing->json->writeVariable( array("ant", "left_count"), $this->left_count );
-        $this->thing->json->writeVariable( array("ant", "right_count"), $this->right_count );
+/*
+        if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
+        //$this->refreshed_at = $this->current_time;
+        $ant = new Variables($this->thing, "variables ant " . $this->from);
 
-        $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+        $ant->setVariable("left_count", $this->left_count);
+        $ant->setVariable("right_count", $this->right_count);
+
+        $ant->setVariable("refreshed_at", $this->refreshed_at);
+
+        $ant->thing->log( $this->agent_prefix .' set ' . $this->left_count . ' and ' . $this->right_count . ".", "INFORMATION" );
+*/
+//        $ant = new Variables($this->thing, "variables " . $this->uuid . " " . $this->from);
+//        $ant->setVariable("left_count", $this->left_count);
+//        $ant->setVariable("right_count", $this->right_count);
+//        $ant->setVariable("refreshed_at", $this->refreshed_at);
+
+//        if ( ($this->roll == false) or ($this->result == false) ) {
+
+
+            $this->thing->json->writeVariable( array("ant", "left_count"), $this->left_count );
+            $this->thing->json->writeVariable( array("ant", "right_count"), $this->right_count );
+
+            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+//        }
+
+
+
+        return;
     }
 
-    public function get($ant_code = null)
+    private function get($ant_code = null)
     {
 
         $this->current_time = $this->thing->json->time();
@@ -145,6 +207,7 @@ class Ant extends Agent
         // Borrow this from iching
         $this->thing->json->setField("variables");
         $this->time_string = $this->thing->json->readVariable( array("ant", "refreshed_at") );
+
 
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
@@ -170,23 +233,35 @@ class Ant extends Agent
         $this->left_count = strtolower($this->thing->json->readVariable( array("ant", "left_count") ));
         $this->right_count = $this->thing->json->readVariable( array("ant", "right_count") );
 
-        if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-        if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+
+
+
 
         return array($this->left_count, $this->right_count);
     }
 
-	public function respond()
+
+
+
+	private function respond()
     {
+
 		// Thing actions
+
+
 		$this->thing->flagGreen();
 
 		// Generate SMS response
 
+//		$this->message['sms'] = $litany[$this->state];
         $this->makeMessage();
         $this->makeSMS();
+        // . " " . if (isset($this->response)) {$this->response;};
 
-        $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . ' service is accessed, Stackr creates a uniquely identifable Thing.
+
+$this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . ' service is accessed, Stackr creates a uniquely identifable Thing.
 				This one is ' . $this->uuid . '.
 				This message from the "Ant" ai which was been tasked with mediating web access to this Thing. 
 				Manage Things on ' . $this->short_name . ' using the [ NEST MAINTENANCE ] command.  
@@ -470,6 +545,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
                     switch($piece) {
 
                         case 'left':
+var_dump($this->left_count);
                             $this->left_count += 1;
                             $this->response = "Ant moved left.";
                             break;
@@ -495,6 +571,8 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 
 		return false;
 	}
+
+
 
     function middenwork()
     {
@@ -634,8 +712,9 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 	function kill()
     {
 		// No messing about.
-        // An Ant dies.
 		return $this->thing->Forget();
 	}
 
 }
+
+?>

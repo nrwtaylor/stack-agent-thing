@@ -1,70 +1,33 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-//use QR_Code\QR_Code;
-//use Endroid\QrCode\QrCode;
-
-//QR_Code::png('Hello World');
-
-// Recognizes and handles UUIDS.  Does not generate.  That is a Thing function.
+// Recognizes and handles UUIDS.
+// Does not generate them.  That is a Thing function.
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Uuid
+class Uuid extends Agent
 {
 
-	function __construct(Thing $thing, $agent_input = null)
+	function init()
     {
-        $this->thing_report['thing'] = $thing;
+		$this->stack_state = $this->thing->container['stack']['state'];
+		$this->short_name = $this->thing->container['stack']['short_name'];
 
-        if ($agent_input == null) {$agent_input = '';}
-        $this->agent_input = $agent_input;
-        $this->agent_name = "uuid";
-        // Given a "thing".  Instantiate a class to identify and create the
-        // most appropriate agent to respond to it.
-        $this->thing = $thing;
+        $this->created_at =  strtotime($this->thing->thing->created_at);
 
-        //$this->thing_report['thing'] = $this->thing->thing;
+        $this->thing->log('started running on Thing ' . date("Y-m-d H:i:s") . '');
 
-		// Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-		$this->stack_state = $thing->container['stack']['state'];
-		$this->short_name = $thing->container['stack']['short_name'];
-
-		// Create some short-cuts.
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		//$this->sqlresponse = null;
-        $this->created_at =  strtotime($thing->thing->created_at);
-
-        $this->thing->log('Agent "Uuid" started running on Thing ' . date("Y-m-d H:i:s") . '');
 		$this->node_list = array("uuid"=>
 						array("uuid","snowflake"));
 
 		$this->aliases = array("learning"=>array("good job"));
 
-		$this->readSubject();
-
-        if ($this->agent_input == null) {
-		    $this->respond();
-        }
-
         $this->makePNG();
 
         $this->thing->log('Agent "Uuid" found ' . $this->uuid);
-
-        //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
-        //echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
-
 	}
 
     function getQuickresponse()
@@ -72,7 +35,6 @@ class Uuid
         $agent = new Qr($this->thing, "qr");
         $this->quick_response_png = $agent->PNG_embed;
     }
-
 
     function extractUuids($input)
     {
@@ -88,8 +50,6 @@ class Uuid
         //array_pop($arr);
         $this->uuids = $arr;
         return $arr;
-
-
     }
 
     function extractUuid($input)
@@ -99,7 +59,7 @@ class Uuid
 
         if ((is_array($uuids)) and (count($uuids) == 1)) {
             $this->uuid = $uuids[0];
-            $this->thing->log('Agent "Uuid" found a uuid (' . $this->uuid . ') in the text.');
+            $this->thing->log('found a uuid (' . $this->uuid . ') in the text.');
             return $this->uuid;
         }
 
@@ -170,12 +130,6 @@ class Uuid
 
         $this->makeSMS();
 
-//        $this->thing_report['email'] = array('to'=>$from,
-//					'from'=>'uuid',
-//					'subject'=>$subject,
-//					'message'=>$message,
-//					'choices'=>$choices);
-
         $this->thing_report['email'] = $this->thing_report['sms'];
 
 		$this->makePNG();
@@ -188,50 +142,24 @@ class Uuid
 		//$this->thing_report['thing'] = $this->thing->thing;
 
         $this->makeWeb();
-		return;
 	}
 
-	public function readSubject() {
-
-        // If the to line is a UUID, then it needs
-        // to be sent a receipt.
-        
-        //        $message_thing = new Message($this->thing, $this->thing_report);
-        //        $thing_report['info'] = $message_thing->thing_report['info'] ;
-
+	public function readSubject()
+    {
         // Then look for messages sent to UUIDS
         $this->thing->log('Agent "UUID" looking for UUID in address.');
-        //    $uuid_thing = new Uuid($this->thing, 'uuid');
-
-//        $this->response = "Made a snowflake. Which will melt.";
 
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-//echo $this->to;
-//        preg_match_all($pattern, $this->to, $m);
+
         if (preg_match($pattern, $this->to)) {
-        $this->thing->log('Agent "UUID" found a  UUID in address.');
-
-
-//        $arr = $m[0];
-//        $this->uuids = $arr;
-//var_dump($arr);
-
-            //$uuid_thing = new Receipt($this->thing);
-            //$this->thing_report['info'] = $receipt_thing->thing_report['info'];
-
-            return;
-
-
+            $this->thing->log('Agent "UUID" found a  UUID in address.');
         }
 
-
-
-
 		$status = true;
-	return $status;		
+    	return $status;
 	}
 
-    function makeSMS() 
+    function makeSMS()
     {
         $this->sms_message = "UUID | ";
         $this->sms_message .= $this->uuid;
@@ -249,24 +177,13 @@ class Uuid
         $this->choices = $choices;
     }
 
-
-
     public function makePNG()
     {
         if (isset($this->PNG)) {return;}
 
-
-
-        //if (headers_sent()) {return;}  
-      // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
         $codeText = $this->web_prefix . "thing/".$this->uuid;
 
         $agent = new Qr($this->thing, $codeText);
-      //  $this->thing_report['png'] = $agent->PNG;
-
-     //   return $this->thing_report['png'];
-
         $image = $agent->PNG;
 
         $this->PNG_embed = "data:image/png;base64,".base64_encode($image);
@@ -278,4 +195,3 @@ class Uuid
 
     }
 }
-?>
