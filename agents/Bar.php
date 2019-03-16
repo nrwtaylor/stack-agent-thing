@@ -133,7 +133,7 @@ class Bar extends Agent
             $this->response .= "Did a stack count. ";
         }
 
-        if ($this->bar_count == 2) {
+        if (($this->bar_count % 2) == 0) {
 
             $thing = new Thing(null);
             $thing->Create(null,"latency", 's/ latency check');
