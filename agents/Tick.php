@@ -99,14 +99,14 @@ class Tick
             $client->doLowBackground("call_agent", $arr);
 */
 
-/* prod
+
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"latency", "subject"=>"s/ latency"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
-*/
+
 /* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage"));
                 $client->doLowBackground("call_agent", $arr);
