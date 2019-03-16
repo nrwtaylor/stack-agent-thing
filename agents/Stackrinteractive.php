@@ -1,36 +1,18 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Stackrinteractive {
+class Stackrinteractive extends Agent
+{
 
-	function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-
-        $this->start_time = microtime(true);
-        if ($agent_input == null) {}
-        $this->agent_input = $agent_input;
-		$this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-
         $this->agent_prefix = 'Agent "Stackr Interactive" ';
-
-        $this->thing_report['thing'] = $thing;
-
-	    $this->uuid = $thing->uuid;
-
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/stackrinteractive/';
-
-        if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
-        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-	    if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
-
-		$this->sqlresponse = null;
-
-		$this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-		$this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
-
         $this->keywords = array();
+	}
 
+    public function get()
+    {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("stackrinteractive", "refreshed_at") );
 
@@ -42,19 +24,12 @@ class Stackrinteractive {
 
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable( array("stackrinteractive", "reading") );
+    }
 
-            $this->readSubject();
-
-            $this->thing->json->writeVariable( array("interactive", "reading"), $this->reading );
-
-            if ($this->agent_input == null) {$this->Respond();}
-
-        $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
-
-        $this->thing_report['log'] = $this->thing->log;
-
-
-	}
+    public function set()
+    {
+        $this->thing->json->writeVariable( array("interactive", "reading"), $this->reading );
+    }
 
     function getWord() {
         if (!isset($this->words)) {
@@ -71,36 +46,28 @@ class Stackrinteractive {
         $file = $this->resource_path . 'stackrinteractive.txt';
         $contents = file_get_contents($file);
 
-$nuggets = explode("s/ ", $contents);
+        $nuggets = explode("s/ ", $contents);
 
+        $agents = new Agents($this->thing, "agents");
 
-$agents = new Agents($this->thing, "agents");
+        $this->content = array();
 
+        foreach($nuggets as $nugget) {
+            foreach($agents->agencies as $id=>$agent) {
+                $agent = strtolower($agent);
+                $first_word = substr($nugget, 0, mb_strlen($agent) );
 
-$this->content = array();
+                if (strtolower($agent) == strtolower($first_word)) {
+                    $this->content[$agent][] = $nugget;
+                    continue;
+                }
 
-foreach($nuggets as $nugget) {
-        foreach($agents->agencies as $id=>$agent) {
-            $agent = strtolower($agent);
-            $first_word = substr($nugget, 0, mb_strlen($agent) ); 
-
-            if (strtolower($agent) == strtolower($first_word)) {
-
-                $this->content[$agent][] = $nugget;
-                continue;
-
+                if (strtolower($agent) == strtolower("make".$first_word)) {
+                    $this->content[$agent][] = $nugget;
+                    continue;
+                }
             }
-
-            if (strtolower($agent) == strtolower("make".$first_word)) {
-                $this->content[$agent][] = $nugget;
-                continue;
-            }
-
-
-
         }
-}
-
         return;
     }
 
@@ -110,8 +77,6 @@ foreach($nuggets as $nugget) {
 		$this->cost = 100;
 
 		// Thing stuff
-
-
 		$this->thing->flagGreen();
 
         // Make SMS
@@ -123,19 +88,10 @@ foreach($nuggets as $nugget) {
 
         // Make email
         $this->makeEmail(); 
-
         $this->thing_report['email'] = $this->sms_message;
 
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
-
-
-//            $this->reading = count($this->words);
-//            $this->thing->json->writeVariable(array("eyemole", "reading"), $this->reading);
-
-
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 		return $this->thing_report;
 	}
@@ -186,7 +142,6 @@ foreach($nuggets as $nugget) {
 
     }
 
-
     function makeEmail()
     {
         $this->email_message = "STACKR INTERACTIVE";
@@ -219,11 +174,10 @@ foreach($nuggets as $nugget) {
 
                             $this->getStackrinteractive();
 
-//                            if ($this->word != null) {return;}
-                            //return;
+                            // if ($this->word != null) {return;}
+                            // return;
 
                         default:
-
                     }
 
                 }
@@ -234,9 +188,7 @@ foreach($nuggets as $nugget) {
         $this->getStackrinteractive();
 
 		$status = true;
-    	return $status;		
+    	return $status;
 	}
 
 }
-
-?>

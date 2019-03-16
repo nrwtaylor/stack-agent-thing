@@ -268,7 +268,7 @@ class Place
         $this->places = array();
 
         // See if a headcode record exists.
-        $findagent_thing = new Findagent($this->thing, 'place');
+        $findagent_thing = new FindAgent($this->thing, 'place');
         $count = count($findagent_thing->thing_report['things']);
         $this->thing->log('Agent "Place" found ' . count($findagent_thing->thing_report['things']) ." place Things." );
 

@@ -1,53 +1,27 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Ping
+class Ping extends Agent
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        $this->agent_input = $agent_input;
-        $this->thing = $thing;
-        $this->agent_name = 'ping';
-
- 		$this->thing_report['thing']  = $thing;
-
         // So I could call
         $this->test = false;
         if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
         // I think.
         // Instead.
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
         $this->node_list = array("ping"=>array("pong"));
-
-        $this->thing->log('Agent "Ping" running on Thing ' . $this->thing->nuuid . '.', "INFORMATION");
-
-		// create container and configure
-		$this->api_key = $this->thing->container['api']['watson'];
-
-		$this->readSubject();
-		$this->respond();
-
-		$this->thing->log('Agent "Ping" completed.', "INFORMATION");
-
-        $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
-
-		return;
-
     }
 
+    public function run()
+    {
+        $this->getPing();
+    }
 
-// -----------------------
-
-	private function respond()
+	public function respond()
     {
 		$this->thing->flagGreen();
 
@@ -75,38 +49,39 @@ class Ping
 
     public function makeSms()
     {
-
-        $received_at = strtotime($this->thing->thing->created_at);
-        $ago = $this->thing->human_time ( time() - $received_at );
-
         $this->sms_message = "PING | A message from this Identity pinged us.";
-        $this->sms_message .= " | Received " . $ago . " ago.";
+        $this->sms_message .= " | Received " . $this->ping_text . " ago.";
 
         $this->sms_message .= " | TEXT WATSON";
         $this->thing_report['sms'] = $this->sms_message;
+    }
 
+    public function getPing()
+    {
+        $received_at = strtotime($this->thing->thing->created_at);
+        $this->ping_time = time() - $received_at;
+
+        if ($this->ping_time < 1) {
+            $this->ping_text = "<1 second";
+            // Database clock precision is 1 second.
+            // So this doesn't do much.
+            // $this->ping_text = ($this->ping_time *1000) ."ms";
+        } else {
+            $this->ping_text = $this->thing->human_time ( $ping_time );
+        }
     }
 
     public function makeMessage()
     {
-
-        $received_at = strtotime($this->thing->thing->created_at);
-        $ago = $this->thing->human_time ( time() - $received_at );
-
-
         $message = "A message from this Identity pinged us.";
-        $message .= " Received " . $ago . " ago.";
+        $message .= " Received " . $this->ping_text . " ago.";
 
         $this->sms_message = $message;
         $this->thing_report['message'] = $message;
-
     }
-
 
 	public function readSubject()
     {
         $this->response = "Responded to a ping.";
-		return;
 	}
-
 }

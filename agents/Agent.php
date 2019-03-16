@@ -16,23 +16,37 @@ class Agent
         //microtime(true);
 
 		$this->agent_input = strtolower($input);
-        $this->agent_name = "Agent";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+//        $this->agent_name = "Agent";
+//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+
+        $this->agent_name = 'agent';
+
+        $this->agent_name = strtolower(get_class());
+        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
+
+
 
 		// Given a "thing".  Instantiate a class to identify
 		// and create the most appropriate agent to respond to it.
 
 		$this->thing = $thing;
 //        $this->thing->elapsed_runtime();
-		$this->agent_name = 'agent';
+//		$this->agent_name = 'agent';
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
         //$this->thing->container->db->commit();
 
+        $this->getMeta();
 
-        $this->getMeta($thing);
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+        $this->word = $thing->container['stack']['word'];
+        $this->email = $thing->container['stack']['email'];
+
+
 
 //        $this->uuid = $thing->uuid;
 //      	$this->to = $thing->to;
@@ -41,8 +55,8 @@ class Agent
 
 		$this->sqlresponse = null;
 
-		$this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . '.');
-        $this->thing->log($this->agent_prefix . 'read "' . $this->subject . '".');
+		$this->thing->log('running on Thing ' . $this->thing->nuuid . '.');
+        $this->thing->log('read "' . $this->subject . '".');
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
         $this->agents_path = $GLOBALS['stack_path'] . 'agents/';
@@ -70,8 +84,15 @@ and the user UX/UI
 
 }
 */
-            $this->readSubject();
+        $this->init();
 
+        $this->get();
+
+        $this->readSubject();
+
+        $this->run();
+
+        $this->set();
 
         if ($this->agent_input == null) {
             $this->respond();
@@ -82,7 +103,7 @@ and the user UX/UI
 
 		//$this->thing_report = $thing_report;
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
+        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
@@ -90,13 +111,35 @@ and the user UX/UI
 		return;
 	}
 
+    public function init()
+    {
+    }
+
+    public function get()
+    {
+    }
+
+    public function set()
+    {
+    }
+
+    public function run()
+    {
+    }
+
     public function getMeta($thing = null)
     {
+
+        if ($thing == null) {$thing = $this->thing;}
+
         $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 
         if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
         if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-        if (!isset($this->subject)) {$this->subject = null;} else {$this->subject = $thing->subject;}
+        if (!isset($thing->subject)) {$this->subject = null;} else {$this->subject = $thing->subject;}
     }
 
 	public function respond()
@@ -105,7 +148,7 @@ and the user UX/UI
 		return;
 	}
 
-    function getPrior()
+    private function getPrior()
     {
         // See if the previous subject line is relevant
         $this->thing->db->setUser($this->from);
@@ -117,9 +160,8 @@ and the user UX/UI
         $temp_haystack = $nom_to . ' ' . $task;
     }
 
-    function getNgrams($input, $n = 3)
+    private function getNgrams($input, $n = 3)
     {
-
         $words = explode(' ',$input);
         $ngrams = array();
 
@@ -237,33 +279,29 @@ and the user UX/UI
 
         if (strpos($this->agent_input, 'whatis') !== false) {
 
-                $this->thing->log( '<pre> Agent created a Whatis agent</pre>' );
-                        $whatis_thing = new Whatis($this->thing);
-                        $this->thing_report = $whatis_thing->thing_report;
-                        return $this->thing_report;
-                }
+            $this->thing->log( '<pre> Agent created a Whatis agent</pre>' );
+            $whatis_thing = new Whatis($this->thing);
+            $this->thing_report = $whatis_thing->thing_report;
+            return $this->thing_report;
+        }
 
+        if (strpos($this->agent_input, 'train') !== false) {
+            $this->thing->log( '<pre> Agent created a Train agent</pre>' );
+            $train_thing = new Train($this->thing);
+            $this->thing_report = $train_thing->thing_report;
+            return $this->thing_report;
+        }
 
-                if (strpos($this->agent_input, 'train') !== false) {
-
-                $this->thing->log( '<pre> Agent created a Train agent</pre>' );
-                        $train_thing = new Train($this->thing);
-                        $this->thing_report = $train_thing->thing_report;
-                        return $this->thing_report;
-                }
-                if (strpos($this->agent_input, 'snowflake') !== false) {
-
-                $this->thing->log( '<pre> Agent created a Snowflake agent</pre>' );
-                        $snowflake_thing = new Snowflake($this->thing);
-                        $this->thing_report = $snowflake_thing->thing_report;
-                        return $this->thing_report;
-                }
-
-
+        if (strpos($this->agent_input, 'snowflake') !== false) {
+            $this->thing->log( '<pre> Agent created a Snowflake agent</pre>' );
+            $snowflake_thing = new Snowflake($this->thing);
+            $this->thing_report = $snowflake_thing->thing_report;
+            return $this->thing_report;
+        }
 
         // First things first.  Special instructions to ignore.
         if (strpos($input, 'cronhandler run') !== false) {
-        $this->thing->log( 'Agent "Agent" ignored "cronhandler run".' );
+            $this->thing->log( 'Agent "Agent" ignored "cronhandler run".' );
             $this->thing->flagGreen();
             //$thing_report['thing'] = $this->thing;
             $this->thing_report['thing'] = $this->thing->thing;
@@ -473,37 +511,28 @@ and the user UX/UI
         $uuid = new Uuid($this->thing, "extract");
         $uuid->extractUuids($input);
 
-//var_dump($uuid->uuids);
-//echo "meep";
 
         if ((isset($uuid->uuids)) and (count($uuid->uuids) > 0)) {
             $this->thing->log('Agent "Agent" found a  UUID in input.', "INFORMATION");
-//            $this->thing_report = $uuid->thing_report;
-//            return $this->thing_report;
-
+            // $this->thing_report = $uuid->thing_report;
             // And then ignored it.
-
         }
 
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
 
+        if ($headcode->response === true) {
+            // pass echo "not a headcode...";
+        } else {
+            //if ( is_string($headcode->head_code)) { 
 
-
-
-if ($headcode->response === true) {
-// pass echo "not a headcode...";
-} else {
-        //if ( is_string($headcode->head_code)) { 
-
-        if ( (is_array($headcode->head_codes) and (count($headcode->head_codes) > 0))) { 
-            $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
-            $headcode_thing = new Headcode($this->thing);
-            $this->thing_report = $headcode_thing->thing_report;
-            return $this->thing_report;
+            if ( (is_array($headcode->head_codes) and (count($headcode->head_codes) > 0))) { 
+                $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
+                $headcode_thing = new Headcode($this->thing);
+                $this->thing_report = $headcode_thing->thing_report;
+                return $this->thing_report;
+            }
         }
-
-}
 
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
@@ -513,8 +542,7 @@ if ($headcode->response === true) {
             return $this->thing_report;
         }
 
-
-        $this->thing->log( $this->agent_prefix .'now looking at Words (and Places and Characters).  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
+        $this->thing->log( 'now looking at Words (and Places and Characters).  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
 		// See if there is an agent with the first workd
 		$arr = explode(' ',trim($input));
@@ -538,10 +566,8 @@ if ($headcode->response === true) {
 		//set_error_handler("warning_handler", E_WARNING);
 
 		$this->thing->log('Agent "Agent" looking for keyword matches with available agents.', "INFORMATION");
-//var_dump($arr);
-//exit();
+
 		foreach ($arr as $keyword) {
-            
             // Don't allow agent to be recognized
             if (strtolower($keyword) == 'agent') {continue;}
 
@@ -569,7 +595,6 @@ if ($headcode->response === true) {
         });
 
 		foreach ($agents as $agent_class_name) {
-
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
 			// Allow for doing something smarter here with 
 			// word position and Bayes.  Agent scoring
@@ -588,13 +613,9 @@ if ($headcode->response === true) {
 
 			try {
 
-// devstack This needs to be refactored out.
-// devstack How do I link to the packagist name programatically.
-
                 $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-                $this->thing->log( $this->agent_prefix .'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
-				//$agent = new $agent_class_name($this->thing);
+                $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
                 $agent = new $agent_namespace_name($this->thing);
 
                 // If the agent returns true it states it's response is not to be used.
@@ -605,15 +626,15 @@ if ($headcode->response === true) {
 				$this->thing_report = $agent->thing_report;
 
 			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-                $this->thing->log( $this->agent_prefix .'could not load "' . $agent_class_name . '".' , "WARNING" );
-echo $ex;
+                $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+                // echo $ex;
     			$message = $ex->getMessage();
-	    		//$code = $ex->getCode();
+	    		// $code = $ex->getCode();
 		    	$file = $ex->getFile();
 			    $line = $ex->getLine();
 
     			$input = $message . '  ' . $file . ' line:' . $line;
-                $this->thing->log( $this->agent_prefix .$input , "WARNING" );
+                $this->thing->log($input , "WARNING" );
 
                 // This is an error in the Place, so Bork and move onto the next context.
         		// $bork_agent = new Bork($this->thing, $input);
@@ -624,12 +645,12 @@ echo $ex;
 			return $this->thing_report;
 		}
 
-        $this->thing->log( $this->agent_prefix .'did not find an Ngram agent to run.', "INFORMATION" );
+        $this->thing->log( 'did not find an Ngram agent to run.', "INFORMATION" );
 
         //$run_time = microtime(true) - $this->start_time;
         //$milliseconds = round($run_time * 1000);
 
-        $this->thing->log( $this->agent_prefix .'now looking at Group Context.' );
+        $this->thing->log( 'now looking at Group Context.' );
 
         // So no agent ran.
 
@@ -638,10 +659,6 @@ echo $ex;
 
         // Treat a single emoji as a request
         // for information on the emoji.
-//        $emoji_thing = new Emoji($this->thing, "emoji " . $this->subject );
-//        $thing_report = $emoji_thing->thing_report;
-//var_dump($emoji_thing->emojis);
-//exit();
 
         if ( (isset($emoji_thing->emojis)) and (count($emoji_thing->emojis)>0) ) {
             $emoji_thing = new Emoji($this->thing);
@@ -671,7 +688,7 @@ var_dump($place_thing->place_name);
         }
 */
 
-        $this->thing->log( $this->agent_prefix .'now looking at Transit Context.' );
+        $this->thing->log( 'now looking at Transit Context.' );
 
         $transit_thing = new Transit($this->thing, "extract");
         $this->thing_report = $transit_thing->thing_report;
@@ -684,8 +701,7 @@ var_dump($place_thing->place_name);
 
         }
 
-
-        $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
+        $this->thing->log( 'now looking at Place Context.' );
         $place_thing = new Place($this->thing, "extract");
         $this->thing_report = $place_thing->thing_report;
 
@@ -717,7 +733,7 @@ echo "place found";
 */
 
 
-        $this->thing->log( $this->agent_prefix .'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
+        $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
 
 		if (strpos($input, 'nest maintenance') !== false) {
@@ -764,7 +780,7 @@ echo "place found";
         $this->context_id = $context_thing->context_id;
 
 
-        $this->thing->log( $this->agent_prefix .'ran Context ' . number_format($this->thing->elapsed_runtime()- $split_time) . 'ms.' );
+        $this->thing->log( 'ran Context ' . number_format($this->thing->elapsed_runtime()- $split_time) . 'ms.' );
 
 
 
@@ -904,7 +920,6 @@ echo "place found";
 
         }
 
-
         // So if it falls through to here ... then we are really struggling.
 
         // This is going to be the most generic form of matching.
@@ -913,7 +928,6 @@ echo "place found";
         // aliases ie Ivor.
        $alias_thing = new Alias($this->thing,'extract');
        $this->alias = $alias_thing->alias;
-
 
        if ($this->alias != null) {
             // Alias was recognized.
@@ -927,10 +941,7 @@ echo "place found";
         $this->thing_report = $this->timeout(45000, "No matching aliases found. ");
         if ($this->thing_report != false) {return $this->thing_report;}
 
-
-
-        $this->thing->log( $this->agent_prefix .'now looking at Identity Context.', "OPTIMIZE" );
-
+        $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
         // Is this a request for a specific named agent?
         //$this->thing->log( $input . " " . $this->from );
@@ -947,12 +958,9 @@ echo "place found";
             return $this->thing_report;
         }
 
-
-
         // Expand out emoji early
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
-
 
         // Temptation here is to create a Thing agent.  Bad idea.
 
@@ -968,32 +976,23 @@ echo "place found";
             return $this->thing_report;
         }
 
-
-
-
 		$this->thing->log( '<pre> Agent "Agent" created a Redpanda agent.</pre>', "WARNING" );
 		$redpanda_thing = new Redpanda($this->thing);
 
 		$this->thing_report = $redpanda_thing->thing_report;
 
-
-	return $this->thing_report;		
+    	return $this->thing_report;
 	}
 
+    function warning_handler($errno, $errstr) {
+        //throw new \Exception('Class not found.');
 
-function warning_handler($errno, $errstr) { 
-    //throw new \Exception('Class not found.');
+        //trigger_error("Fatal error", E_USER_ERROR);
 
-    //trigger_error("Fatal error", E_USER_ERROR);
-
-    //echo $errno;
-    //echo $errstr;
-    // do something
-}
-
-
-
-
+        //echo $errno;
+        //echo $errstr;
+        // do something
+    }
 }
 
 
@@ -1011,6 +1010,3 @@ function warning_handler($errno, $errstr) {
 }
 */
 
-
-
-?>

@@ -46,7 +46,7 @@ class Qr
 		//$this->sqlresponse = null;
         $this->created_at =  strtotime($thing->thing->created_at);
 
-        $this->thing->log('Agent "QR" started running on Thing ' . date("Y-m-d H:i:s") . '');
+        $this->thing->log('started running on Thing ' . date("Y-m-d H:i:s") . '');
 		$this->node_list = array("qr"=>
 						array("qr","uuid","snowflake"));
 
@@ -70,7 +70,7 @@ class Qr
         $this->makePNG();
 
 
-        $this->thing->log('Agent "QR" found ' . $this->quick_response);
+        $this->thing->log('found ' . $this->quick_response);
 
         //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
         //echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
@@ -190,13 +190,13 @@ class Qr
         //        $thing_report['info'] = $message_thing->thing_report['info'] ;
 
         // Then look for messages sent to UUIDS
-        $this->thing->log('Agent "QR" looking for QR in address.');
+        $this->thing->log('looking for QR in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
 
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
 
         if (preg_match($pattern, $this->to)) {
-            $this->thing->log('Agent "QR" found a QR in address.');
+            $this->thing->log('found a QR in address.');
         }
         return;
 

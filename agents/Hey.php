@@ -4,17 +4,13 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-
-
 ini_set("allow_url_fopen", 1);
 
-class Hey {
+class Hey extends Agent
+{
 
 	public $var = 'hello';
-
+/*
 
     function __construct(Thing $thing, $agent_input = null)
     {
@@ -83,6 +79,52 @@ class Hey {
 		return;
 
 		}
+*/
+
+    public function run()
+    {
+        $this->startHey();
+    }
+
+    public function init()
+    {
+
+        //$this->agent_input = $agent_input;
+        if ($this->agent_input == null) {
+            $this->requested_agent = "Hey";
+        } else {
+            $this->requested_agent = $input;
+        }
+
+        $this->retain_for = 4; // Retain for at least 4 hours.
+
+
+        $this->num_hits = 0;
+
+        $this->sqlresponse = null;
+
+        // Allow for a new state tree to be introduced here.
+        $this->node_list = array("start"=>array("useful", "useful?"));
+
+//        $this->thing->log( '<pre> Agent "Hey" running on Thing ' . $this->thing->nuuid . '.</pre>' );
+//        $this->thing->log( '<pre> Agent "Hey" received this Thing "' . $this->subject . '".</pre>');
+
+
+//        $this->readSubject();
+
+//        $this->startHey();
+
+
+        $this->thing_report['info'] = 'Hey';
+        $this->thing_report['help'] = "An agent which says, 'Hey'. Type 'Web' on the next line.";
+
+
+
+        return;
+
+
+
+    }
 
     public function startHey($type = null)
     {
@@ -114,7 +156,7 @@ class Hey {
 
 // -----------------------
 
-	private function respond()
+	public function respond()
     {
 		// Thing actions
 		$this->thing->flagGreen();
