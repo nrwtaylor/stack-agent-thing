@@ -99,13 +99,16 @@ class Tick
             $client->doLowBackground("call_agent", $arr);
 */
 
+//            $this->doLatency();
 
+/* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"latency", "subject"=>"s/ latency"));
 
                 $client= new \GearmanClient();
                 $client->addServer();
                 //$client->doNormal("call_agent", $arr);
                 $client->doLowBackground("call_agent", $arr);
+*/
 
 /* prod
                 $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage"));
@@ -204,7 +207,19 @@ class Tick
         $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ advance bar"));
         $client->doLowBackground("call_agent", $arr);
     }
+/*
+    function doLatency()
+    {
 
+//        $latency = new Latency($this->thing, "latency");
+
+        $client= new \GearmanClient();
+        $client->addServer();
+
+        $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"latency", "subject"=>"s/ latency"));
+        $client->doLowBackground("call_agent", $arr);
+    }
+*/
 
     function set()
     {
@@ -260,7 +275,9 @@ class Tick
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-    function readSubject() {}
+    function readSubject()
+    {
+    }
 
     function doTick($depth = null)
     {
