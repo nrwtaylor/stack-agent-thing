@@ -893,9 +893,6 @@ $query = true;
 		return true;
 	}
 
-
-//	function log($text = "|", $logging_level = null)
-//    {
     function log($text = null, $logging_level = null)
     {
 

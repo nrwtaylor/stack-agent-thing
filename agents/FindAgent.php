@@ -82,9 +82,9 @@ class FindAgent
             $this->thing_report['num_hits'] = $this->num_hits;
 
             if ($this->verbosity >= 2) {
-                $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
+                $this->thing->log( 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
             }
-            $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
+            $this->thing->log( 'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
 
 
             $this->thing_report['log'] = $this->thing->log;
@@ -101,10 +101,10 @@ class FindAgent
 
 
         if ($this->verbosity >= 2) {
-            $this->thing->log( $this->agent_prefix . 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
+            $this->thing->log( 'returned ' . count($this->thing_report['things']) .' Things.', "DEBUG" );
         }
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
+        $this->thing->log( 'ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['log'] = $this->thing->log;
 
@@ -119,7 +119,7 @@ class FindAgent
 		$thingreport = $this->thing->db->variableSearch(null, $name, $this->horizon);
 
         $run_time = $this->thing->elapsed_runtime() - $ref_time;
-        $this->thing->log( $this->agent_prefix .'db call ran for ' . $run_time . 'ms.', "OPTIMIZE" );
+        $this->thing->log( 'database call ran for ' . $run_time . 'ms.', "OPTIMIZE" );
 
 
 		$groups = array();

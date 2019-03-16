@@ -7,83 +7,27 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Bar
+class Bar extends Agent
 {
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        // Ticks are just a sub-division of a bar.
-        // Tick variable = 15 minutes
-
-        // Play a bar when asked.
-
-        $this->agent_name = 'bar';
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-        $this->test= "Development code";
-
-        $this->agent_input = $agent_input;
-
-        $this->thing = $thing;
-
-        $this->thing_report['thing']  = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-
-        // Thing stuff
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
         $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
-        //$this->value_destroyed = 0;
-        //$this->things_destroyed = 0;
-
-        $this->stack_idle_mode = 'use'; // Prevents stack generated execution when idle.
-        $this->cron_period = $this->thing->container['stack']['cron_period'];
-        $this->start_time = $this->thing->elapsed_runtime();
-
         $this->state = "red"; // running
-
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
 
         $this->variables = new Variables($this->thing, "variables bar " . $this->from);
         $this->current_time = $this->thing->time();
 
         $this->max_bar_count = 80;
         $this->response = "";
-
-
-        $this->get();
-        $this->readSubject();
-
-//        if ($this->bar_count > 8) {$this->bar_count = 0;}
-
-        $this->set();
-
-        if ($this->agent_input == null) {
-            $this->respond();
-        }
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format( $this->thing->elapsed_runtime() - $this->start_time ) . 'ms.' );
-        $this->thing_report['log'] = $this->thing->log;
     }
 
     public function set()
     {
         $this->variables->setVariable("count", $this->bar_count);
         $this->variables->setVariable("refreshed_at", $this->current_time);
-
-        return;
     }
-
 
     public function get()
     {
@@ -91,20 +35,12 @@ class Bar
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
 
         $this->thing->log($this->agent_prefix .  'loaded ' . $this->bar_count . ".");
-
-        return;
     }
-
-
 
     public function countBar()
     {
-        // devstack count snowflakes on stack identity
-        // This is a count of all snow everywhere.
         $this->bar_count += 1;
     }
-
-
 
     function respond()
     {
@@ -116,7 +52,7 @@ class Bar
     function makeSMS()
     {
         $this->sms_message = "BAR";
-        $this->sms_message .= " | " . $this->bar_count . " " . $this->response;
+        $this->sms_message .= " | " . $this->bar_count . " of " . $this->max_bar_count . ". " . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
     }
 
@@ -125,7 +61,7 @@ class Bar
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $web = '<a href="' . $link . '">';
-//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
+        // $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
         $web .= $this->html_image;
 
         $web .= "</a>";
@@ -136,10 +72,35 @@ class Bar
         $this->thing_report['web'] = $web;
     }
 
+    public function readSubject()
+    {
+        $input = strtolower($this->subject);
+        $pieces = explode(" ", strtolower($input));
+        $keywords = array("bar", "advance");
+        foreach ($pieces as $key=>$piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    $this->read($piece);
+                }
+            }
+        }
+    }
 
-    function readSubject() {
-//        if ($this->agent_input == "display") {return;}
-        $this->doBar();
+    public function read($piece)
+    {
+        switch($piece) {
+           case 'stack':    
+            $from = "null@stackr.ca";    
+            $this->variables = new Variables($this->thing, "variables bar " . $this->from);
+            $this->get();
+            return;
+
+           case 'advance':
+               $this->doBar();
+               return;
+           case 'on':
+           default:
+        }
     }
 
     function doBar($depth = null)
@@ -170,36 +131,23 @@ class Bar
             $stackcount = new Stack($thing, 'stack count');
 
             $this->response .= "Did a stack count. ";
-
         }
 
         if ($this->bar_count == 2) {
-
-//            $stack_thing = new Stack($this->thing);
 
             $thing = new Thing(null);
             $thing->Create(null,"latency", 's/ latency check');
             $stackcount = new Latency($thing, 'latency check');
 
-            //$this->response .= "Did a stack count. ";
+            $this->response .= "Checked stack latency. ";
 
         }
-
-
-//        echo $tallycounter->count;
-
     }
 
 
     public function makeImage()
     {
-//var_dump ($this->state);
-//exit();
-        // here DB request or some processing
-//        $codeText = "thing:".$this->state;
-
-// Create a 55x30 image
-
+        // Create a x_width x y_width image
         $x_width = 200;
         $y_width = 125;
 
@@ -227,23 +175,9 @@ class Bar
                                     $this->green);
 
 
-       imagefilledrectangle($this->image, 0, 0, 200, 125, $this->white);
+        imagefilledrectangle($this->image, 0, 0, 200, 125, $this->white);
 
-
-//        if ((!isset($this->state)) or ($this->state == false)) {
-//            $color = $this->grey;
-//        } else {
-//            if (isset($this->{$this->state})) {
-//                $color = $this->{$this->state};
-//            } elseif (isset($this->{'flag_' . $this->state})) {
-//                $color = $this->{'flag_' . $this->state};
-//            }
-//        }
-
-
-        // Bevel top of signal image
-
-        $border = 10;
+        $border = 25;
 
         $lines = array("e","g", "b", "d","f");
         $i = 0;
@@ -259,25 +193,6 @@ class Bar
         imageline($this->image, 0+$border, 25, 0+$border, 4 * 15 + 25, $this->black);
         imageline($this->image, 200-$border, 25, 200-$border, 4 * 15 + 25, $this->black);
 
-        //$points = array(0,0,6,0,0,6);
-        //imagefilledpolygon($this->image, $points, 3, $this->white);
-
-        //$points = array(60,0,60-6,0,60,6);
-        //imagefilledpolygon($this->image, $points, 3, $this->white);
-
-
-        $green_x = 30;
-        $green_y = 50;
-
-        $red_x = 30;
-        $red_y = 100;
-
-        $yellow_x = 30;
-        $yellow_y = 75;
-
-        $double_yellow_x = 30;
-        $double_yellow_y = 25;
-
         $textcolor = $this->black;
 
         //imagestring($this->image, 2, 0+10, 110, $this->bar_count - 1, $this->black);
@@ -292,10 +207,10 @@ class Bar
 
         if (($count_notation <> 1) or ($count_notation == $this->max_bar_count)) {
             imagettftext($this->image, $size, $angle, 0 + 10, 110, $this->black, $font, $count_notation);
-        }        
+        }
 
         if (($count_notation + 1 <> 1) or ($count_notation + 1 == $this->max_bar_count + 1)) {
-            imagettftext($this->image, $size, $angle, 200 - 10, 110, $this->black, $font, $count_notation + 1);
+            imagettftext($this->image, $size, $angle, 200 - 25, 110, $this->black, $font, $count_notation + 1);
         }
 //        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $text);
         //imagestring($this->image, 2, $image_width-75, 10, $this->place_code, $textcolor);
@@ -325,5 +240,3 @@ class Bar
         $this->PNG_embed = $agent->PNG_embed;
     }
 }
-
-?>

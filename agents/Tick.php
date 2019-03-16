@@ -201,18 +201,14 @@ class Tick
         $client= new \GearmanClient();
         $client->addServer();
 
-
-        $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ bar"));
+        $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ advance bar"));
         $client->doLowBackground("call_agent", $arr);
-
     }
 
 
     function set()
     {
-
         $this->thing->json->setField("variables");
-
 
         $this->thing->json->writeVariable(array("tick",
             "refreshed_at"),  $this->thing->json->time()
@@ -222,15 +218,13 @@ class Tick
             "count"),  $this->tick_count
             );
 
-
         $this->variables->setVariable("count", $this->tick_count);
         $this->variables->setVariable("refreshed_at", $this->current_time);
 
-//        $this->thing->choice->save('usermanager', $this->state);
+        // $this->thing->choice->save('usermanager', $this->state);
 
         return;
     }
-
 
     function get()
     {
@@ -244,12 +238,10 @@ class Tick
         return;
     }
 
-
-    function respond() {
-
+    function respond()
+    {
         $this->makeSMS();
         $this->makeMessage();
-
     }
 
     public function makeMessage() 
@@ -329,8 +321,7 @@ for($i = 0; $i < $num_die; $i++) {
 
         $this->thing->choice->Create('cronhandler', $this->node_list, "start");
 
-
-                $this->state = $this->thing->choice->load('cronhandler');
+        $this->state = $this->thing->choice->load('cronhandler');
 
                 echo "initial state is " . $this->state . "<br>";
 
@@ -342,13 +333,6 @@ for($i = 0; $i < $num_die; $i++) {
         $this->timeWindow();
 
         $this->exitCronhandler(100); //with a 100 bonus for completing
-
-
-
-
-
-
-
     }
 
 	function timeWindow($depth = null) {
@@ -426,9 +410,9 @@ for($i = 0; $i < $num_die; $i++) {
 
     function dispatchhandler() {
         $t = new Dispatchhandler();
-                $value = $t->Apply();
-                $this->value_created += $value;
-                $this->budget += $value;
+        $value = $t->Apply();
+        $this->value_created += $value;
+        $this->budget += $value;
     return;
     }
 
@@ -442,8 +426,7 @@ for($i = 0; $i < $num_die; $i++) {
 	}
 
 	function damagehandler() {
-		//echo "damagehandler called";
-                $t = new Damagehandler();
+        $t = new Damagehandler();
 		if ($this->budget <= 0) {$hits = 100;} else {$hits = $this->budget;}
 		$value = $t->Apply( $hits );
                 $this->value_destroyed += $value;
@@ -452,8 +435,8 @@ for($i = 0; $i < $num_die; $i++) {
 	return;
 	}
 
-        function retentionhandler() {
-                //echo "damagehandler called";
+    function retentionhandler() {
+    //echo "damagehandler called";
                 $t = new Retentionhandler();
 		$t->Apply();
                 //if ($this->budget <= 0) {$hits = 100;} else {$hits = $this->budget;}
@@ -487,41 +470,36 @@ for($i = 0; $i < $num_die; $i++) {
 	}
 
 
-function exitCronhandler($bonus = null) {
+    function exitCronhandler($bonus = null) {
 
-	if ($bonus == null) {$bonus = 0;}
-	echo "exitCronhandler()";
+	    if ($bonus == null) {$bonus = 0;}
+    	echo "exitCronhandler()";
 
-	// So there will be some damage budget left over.
-	// Created value from newly created user interaction with Things.
-	// Destroyed value by randomly deleted Things up to the value created.
-	// Net creation rate will be marginal but positive.
+	    // So there will be some damage budget left over.
+    	// Created value from newly created user interaction with Things.
+    	// Destroyed value by randomly deleted Things up to the value created.
+	    // Net creation rate will be marginal but positive.
 
-	// No need to credit the remaining budget
-	// stack value was created and destroyed in the process
-	// stackbalance is where this accounting is reckoned.
+    	// No need to credit the remaining budget
+    	// stack value was created and destroyed in the process
+	    // stackbalance is where this accounting is reckoned.
 
-//var_dump( $this->thing->account['stack']->balance );
+        //var_dump( $this->thing->account['stack']->balance );
 
-// Credit the Thing 
+        // Credit the Thing 
 
-//$this->thing->account['stack']->Credit( $this->value_destroyed );
-$this->thing->account['thing']->Credit( $bonus + $this->value_destroyed );
+        //$this->thing->account['stack']->Credit( $this->value_destroyed );
+        $this->thing->account['thing']->Credit( $bonus + $this->value_destroyed );
 
-//var_dump( $this->thing->account['thing']->balance );
-
-
-//	$this->thing->account['thing']->Credit($remaining_budget);
-
-	// Do we pay the Thing though?  Already paid it 100.  And it owes us 100.
-
-	//exit();
+        //var_dump( $this->thing->account['thing']->balance );
 
 
+        //	$this->thing->account['thing']->Credit($remaining_budget);
+
+    	// Do we pay the Thing though?  Already paid it 100.  And it owes us 100.
+
+    	//exit();
 	}
-
-
-
 
 }
 

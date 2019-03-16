@@ -5,13 +5,13 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Nuuid {
+class Nuuid extends Agent
+{
 
 	public $var = 'hello';
-
-
-    function __construct(Thing $thing, $agent_input = null) {
-
+/*
+    public function __construct(Thing $thing, $agent_input = null)
+    {
         $this->agent_input = $agent_input;
 
 		$this->agent_name = "nuuid";
@@ -49,7 +49,6 @@ class Nuuid {
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
         $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
 
-
         $this->current_time = $this->thing->time();
 
         $this->thing->log( $this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
@@ -83,26 +82,57 @@ class Nuuid {
 
 		return;
 	}
-
+*/
 // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
 
 // -----------------------
 
     function init()
     {
+       $command_line = null;
 
+        $this->node_list = array("nuuid"=>array("nuuid"));
+
+        // Get some stuff from the stack which will be helpful.
+        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+        $this->word = $this->thing->container['stack']['word'];
+        $this->email = $this->thing->container['stack']['email'];
+
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
+        $this->haystack = $this->thing->uuid . 
+        $this->thing->to . 
+        $this->thing->subject . 
+        $command_line .
+        $this->agent_input;
+
+        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
+        $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
+
+        $this->current_time = $this->thing->time();
+
+        $this->thing->log( $this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable( array("nuuid", "refreshed_at") );
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("nuuid", "refreshed_at"), $time_string );
+        }
+
+        $this->makePNG();
     }
 
-	private function setSignals() {
+    public function respond() {
 
 		$this->thing->flagGreen();
 
 		// This should be the code to handle non-matching responses.
 
 		$to = $this->thing->from;
-
-		//echo "to:". $to;
-
 		$from = "nuuid";
 
 // This choice element is super slow.  It 
@@ -111,40 +141,27 @@ class Nuuid {
 
         $this->makePNG();
 
-//        $this->thing->json->setField("variables");
-//          $this->thing->json->writeVariable( array("snowflake", "decimal"), $this->decimal_snowflake );
-
-        $this->thing->log( $this->agent_prefix .'completed makePNG. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
         $this->makeSMS();
         $this->makeMessage();
         $this->makeTXT();
-        $this->thing->log( $this->agent_prefix .'completed makeTXT. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
         $this->makeChoices();
         $this->thing->log( $this->agent_prefix .'completed makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
         $this->makeWeb();
         $this->thing->log( $this->agent_prefix .'completed makeWeb. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
 
  		$this->thing_report["info"] = "This creates a not UUID.  Rememberable. Machine guessable. Short.";
  		$this->thing_report["help"] = "This is about keeping track of things.";
 
         $this->thing->log( $this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
         $this->thing->log( $this->agent_prefix .'completed message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
 		return $this->thing_report;
-
-
 	}
 
     function extractNuuids($input = null)
@@ -190,15 +207,8 @@ class Nuuid {
         $this->choices = $this->thing->choice->makeLinks('nuuid');
         $this->thing->log( $this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-
         $this->thing_report['choices'] = $this->choices;
-
-     //  $this->thing_report['choices'] = false;
-
-
     }
-
-
 
     function makeSMS()
     {
@@ -208,7 +218,7 @@ class Nuuid {
         $this->thing_report['sms'] = $sms;
     }
 
-    function makeMessage()
+    public function makeMessage()
     {
 
         $message = "Stackr has a nuuid for you.<br>";
@@ -218,17 +228,12 @@ class Nuuid {
         $message .= "Keep on stacking.\n\n<p>" . $this->web_prefix . "thing/$uuid/nuuid.png\n \n\n<br> ";
         $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/nuuid.png" alt="nuuid" height="92" width="92">';
 
-
         $this->thing_report['message'] = $message;
 
-
         return;
-
     }
 
-
-
-    function makeWeb()
+    public function makeWeb()
     {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
@@ -243,9 +248,7 @@ class Nuuid {
 
     }
 
-
-
-    function makeTXT()
+    public function makeTXT()
     {
         $txt = 'This is a NUUID';
         $txt .= "\n";
@@ -253,18 +256,9 @@ class Nuuid {
 
         $txt .= "\n";
 
-
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
-
-
     }
-
-
-
-
-
-
 
     public function makePNG()
     {
@@ -286,48 +280,31 @@ class Nuuid {
         $border = 30;
         $radius = 1.165 * (164 - 2 * $border) / 3;
 
-//$number = 6;
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $text = $this->thing->nuuid;
 
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
-//if ($number>99) {return;}
+        $size = 26;
+        $angle = 0;
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
 
-//if ($this->roll == "d8") {
+        //check width of the image 
+        $width = imagesx($this->image); 
+        $height = imagesy($this->image);
+        $pad = 0;
 
-//$this->drawSnowflake();
+        // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
+        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->grey, $font, $text);
 
-
-
-
-//$number = ($this->result[0]);
-//var_dump($number);
-//exit();
-$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-$text = $this->thing->nuuid;
-// Add some shadow to the text
-//imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
-
-$size = 26;
-$angle = 0;
-$bbox = imagettfbbox ($size, $angle, $font, $text); 
-$bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-$bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-//check width of the image 
-$width = imagesx($this->image); 
-$height = imagesy($this->image);
-$pad = 0;
-//imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
-
-imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->grey, $font, $text);
-
-//var_dump ($width);
-       //imagestring($image, 2, 100, 0, $this->roll, $textcolor);
-     //imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
-
-
-
+        // imagestring($image, 2, 100, 0, $this->roll, $textcolor);
+        // imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
 
         // Save the image
         //header('Content-Type: image/png');
@@ -343,34 +320,18 @@ imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_h
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="snowflake"/>';
 
-$this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
+        $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
-//        $this->thing_report['png'] = $image;
-
-//        $this->PNG = $this->image;    
         $this->PNG = $imagedata;
         imagedestroy($this->image);
 
         return $response;
-
-
-
-        $this->PNG = $image;    
-        $this->thing_report['png'] = $image;
- 
-       return;
     }
-
-
-
 
     function read()
     {
         return $this->state;
     }
-
-
-
 
 	public function readSubject()
     {
@@ -380,13 +341,8 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
         // So this is really the 'sms' section
         // Keyword
-//var_dump($input);
-//exit();
-
         if (count($pieces) == 1) {
-
             if ($input == 'nuuid') {
-
                 return;
             }
         }
@@ -408,20 +364,15 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
             }
         }
 
-        return;
+//        return;
 
         if (strpos($input, 'nuuid') !== false) {
-            //    $this->uuidSnowflake();
-    
+
         }
 
         if ($this->agent_input == "nuuid test") {
-            $this->thing->log($this->agent_prefix . 'received a command to do something with the nuuid.', "INFORMATION");
+            $this->thing->log($this->agent_prefix . 'received a command to test nuuid.', "INFORMATION");
 		    return;
         }
-
     }
-
-    
-
 }

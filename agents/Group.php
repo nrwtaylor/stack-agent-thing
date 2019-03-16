@@ -1,6 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+//use QR_Code\QR_Code;
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -14,9 +16,14 @@ class Group
 
     public function __construct(Thing $thing, $agent_input = null)
     {
+        // Not implemented
+        $this->thing_report = false;
+        return;
+
         if ($agent_input == null) {
             $agent_input = null;
         }
+  
         $this->agent_input = strtolower($agent_input);
         $this->thing = $thing;
 
@@ -39,7 +46,6 @@ class Group
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-
         $this->api_key = $this->thing->container['api']['translink'];
 
         $this->retain_for = 4; // Retain for at least 4 hours.
@@ -50,7 +56,6 @@ class Group
         $this->from = $thing->from;
         $this->subject = $thing->subject;
 
-
         $this->num_hits = 0;
 
         $this->sms_message = "";
@@ -60,6 +65,7 @@ class Group
         $this->sqlresponse = null;
 
         // Allow for a new state tree to be introduced here.
+        $this->default_group_id = "#general";
 
         $this->node_list = array( "start"=> array("listen"=> array("say hello"=> array("listen") ),
                                                    "new group"=>array("say hello")
@@ -68,10 +74,8 @@ class Group
         $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
         $this->choices = $this->thing->choice->makeLinks('start');
 
-
-        $this->thing->log('<pre> Agent "Group" running on Thing ' . $this->thing->nuuid . '.</pre>');
-        $this->thing->log('<pre> Agent "Group" received this Thing "' . $this->subject . '".</pre>');
-
+        $this->thing->log('Agent "Group" running on Thing ' . $this->thing->nuuid . '.');
+        $this->thing->log('Agent "Group" received this Thing "' . $this->subject . '".');
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable(array("group", "refreshed_at"));
@@ -85,25 +89,7 @@ class Group
         $this->thing->json->setField("variables");
         $this->group_id = $this->thing->json->readVariable(array("group", "group_id"));
 
-        //$this->group_id = false;
-
-
-        // So if there is no group_id set on the Thing, and
-//                if ( ($this->group_id == false) and ($this->agent_input == null) ) {
-        //echo "meep";
-        //			$this->thing->log( '<pre> Agent "Group" startGroup() </pre>' );
-
-        // First try to find an existing group.
-        //			$thingreport = $this->findGroup();
-        //			if ( count($thingreport['things']) == 0 ) {
-        //                      	$this->startGroup();
-        //			}
-
-
-        //              }
-
-
-
+        if ($this->group_id == false) {$this->group_id = $this->default_group_id;}
 
         $this->readSubject();
 
@@ -112,60 +98,54 @@ class Group
             $this->thing_report['help'] = 'This is the group manager.  NEW.  JOIN <4 char>.  LEAVE <4 char>.';
             $this->thing_report['num_hits'] = $this->num_hits;
 
-
-            $this->thing->log('<pre> Agent "Group" completed with ' . $this->num_hits . ' hits.</pre>');
+            $this->thing->log('Agent "Group" completed with ' . $this->num_hits . ' hits.');
 
             return;
         }
 
-
         if (($this->agent_input != 'screen')) {
-            $this->thing->log('<pre> Agent "Group" respond() </pre>');
-
             $this->thing_report = $this->respond();
         }
 
-        $this->PNG();
+        $this->makePNG();
 
         $this->thing_report['info'] = 'This is the group manager responding to a request.';
         $this->thing_report['help'] = 'This is the group manager.  NEW.  JOIN <4 char>.  LEAVE <4 char>.';
         $this->thing_report['num_hits'] = $this->num_hits;
 
-        $this->thing->log('<pre> Agent "Group" completed</pre>');
+        $this->thing->log('Agent "Group" completed.');
         $this->thing_report['log'] = $this->thing->log;
 
         return;
     }
+
+    function getQuickresponse()
+    {
+        $agent = new Qr($this->thing, "qr");
+        $this->quick_response_png = $agent->PNG_embed;
+    }
+
 
     public function joinGroup($group_id = null)
     {
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable(array("group", "action"), 'join');
 
-        // Find out if the group exists
+        $this->listenGroup($group_id);
 
-        //$thing_report = $this->thing->db->byWordlist( array($group_id) );
-        //$c = count( $thing_report['things'] );
+        $c = count($this->things);
 
-        $thing_report = $this->listenGroup($group_id);
-        $c = count($thing_report['things']);
-
-        $this->sms_message .= ' | Joined group '. strtoupper($group_id);
-
+        // Old style. Re-factor.
+        $this->sms_message .= ' | Joined group '. strtoupper($group_id) . ".";
+        $this->response = 'Joined group '. strtoupper($group_id) . ".";
 
         if ($c == 0) {
-            $this->thing->log('<pre> Agent "Group" group ' . $group_id . ' nothing heard </pre>');
+            $this->thing->log('Agent "Group" group ' . $group_id . ' nothing heard.');
         } else {
-            //$this->thing->log( '<pre> Agent "Group" group ' . $group_id . ' not found </pre>' );
-                  //      $this->message = 'Joined group. Activity heard (' . $c . ') in Group: '. $group_id;
-                  //      $this->sms_message = 'Joined group. Activity heard ('. $c .') in Group: ' . $group_id;
         }
 
         $this->thing->log('<pre> Agent "Group" joined group ' . $group_id . ' </pre>');
         $this->group_id = $group_id;
-
-        //$this->message = "joinGroup " . $this->group_id;
-        //$this->sms_message = $this->group_id;
 
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable(array("group", "group_id"), $this->group_id);
@@ -175,12 +155,11 @@ class Group
         $time_string = $this->thing->json->time();
         $this->thing->json->writeVariable(array("group", "refreshed_at"), $time_string);
 
-        $this->thing->log('<pre> Agent "Group" joined group ' . $group_id . ' </pre>');
+        $this->thing->log('Agent "Group" joined group ' . $group_id . '.');
 
         $this->thing_report['group'] = $this->group_id;
 
-        return $this->message;
-
+        return;
     }
 
     public function nullAction()
@@ -191,9 +170,8 @@ class Group
         $this->message = "Request not understood.";
         $this->sms_message = "Request not understood.";
         $this->response = true;
-        return $this->message;
+        return;
     }
-
 
     public function leaveGroup($group = null)
     {
@@ -208,29 +186,21 @@ class Group
         return $this->message;
     }
 
-
     public function startGroup($type = null)
     {
         $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(array("group", "action"), 'start');
-
+        $names = $this->thing->json->writeVariable(array("group"), 'start');
 
         if ($type == null) {
             $type = 'alphafour';
         }
 
-//
-        //		if ($this->group_id == null) {
-
         $s = substr(str_shuffle(str_repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 4)), 0, 4);
         $this->group_id = $s;
 
-        //		}
-
         $this->message = $this->group_id;
-        //$this->sms_message .= " | "  .$this->group_id;
-        $this->sms_message .= " | " . "Type 'SAY' followed by your message.";
 
+        $this->sms_message .= " | " . "Type 'SAY' followed by your message.";
 
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable(array("group", "group_id"), $this->group_id);
@@ -240,13 +210,10 @@ class Group
         $time_string = $this->thing->json->time();
         $this->thing->json->writeVariable(array("group", "refreshed_at"), $time_string);
 
-
-
         $this->thing->choice->Create($this->agent_name, $this->node_list, "new group");
         $this->choices = $this->thing->choice->makeLinks('new group');
 
         $this->sms_message = " | ". strtoupper($this->group_id) . " | " .$this->sms_message;
-
 
         return $this->message;
     }
@@ -254,14 +221,11 @@ class Group
     public function findGroup($name = null)
     {
         // Retries the last <99> group names.
-
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable(array("group", "action"), 'find');
 
         $thingreport = $this->thing->db->setUser($this->from);
         $thingreport = $this->thing->db->variableSearch(null, "group_id", 99);
-
-        //		echo "<br>";
 
         $groups = array();
 
@@ -280,29 +244,27 @@ class Group
             $refreshed_at = $thing->json->readVariable(array("group", "refreshed_at"));
         }
 
-
         if (count($groups) == 0) {
             $this->sms_message .= "";
             $this->sms_message .= " | No group found.";
-            $this->thingreport['groups'] = false;
-            $this->group_id = null;
+            $group_id = "X";
+            $groups[] = $group_id;
         } else {
-            $this->group_id = $groups[0];
-
-            $this->thing->json->writeVariable(array("group", "group_id"), $this->group);
-
+            $group_id = $groups[0];
             $this->sms_message .= " | This is the Group chat function.  Commands: SAY, LISTEN, JOIN.";
-            $this->thingreport['groups'] = $groups;
         }
+
+
+
+        $this->group_id = $group_id;
+        $this->groups = $groups;
+
+        $this->thing->json->writeVariable(array("group", "group_id"), $this->group_id);
+
 
         $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
         $this->choices = $this->thing->choice->makeLinks("listen");
 
-        //$this->sms_message = " | ". strtoupper( $this->group_id ) . " | " .$this->sms_message;
-
-
-        return $this->thingreport['groups'];
-        //exit();
     }
 
     public function listenGroup($group = null)
@@ -320,15 +282,15 @@ class Group
 
         $agent = "say:" . $group;
 
-        $this->thing->db->setFrom("null" . $mail_postfix);
+        $this->thing->db->setFrom("null" . $this->mail_postfix);
         $t = $this->thing->db->agentSearch($agent, 10);
 
         $this->thing->db->agentSearch($this->from);
 
 
-        $this->thing_report['things'] = $t['things'];
+//        $this->thing_report['things'] = $t['things'];
 
-
+        $this->things = $t['things'];
 
         $age_low = null;
         $age_high = null;
@@ -336,53 +298,32 @@ class Group
         //$this->sms_message .= " | " . $group ;
         $ages = array();
 
-        if (count($this->thing_report['things']) != 0) {
+        if (count($this->things) != 0) {
             $this->sms_message .= " |";
         }
 
-        foreach ($this->thing_report['things'] as $thing) {
+        foreach ($this->things as $thing) {
             $age = (time() - strtotime($thing['created_at']));
             $ages[] = $age;
-            //echo $age;
-            //exit();
-            //echo $thing['task'];
-            //$this->sms_message .= ' | "' . $thing['task'] . '" ' . $age . "s ago.";
-
-            //			$heard = substr(strstr($thing['task']," "), 1);
-
             $heard = $thing['task'];
-
             $this->sms_message .= " '" . $heard . "'";
-
-
-            //			if ( ($age_low == null) or ($age_low < $age) ) {$age_low = $age;}
-//			if ( ($age_high == null) or ($age_high > $age) ) {$age_high = $age;}
         }
 
-
-
-
-        //$this->sms_message .= ' | Showing messages ' . $this->retain_for . $this->time_units . " and more recent.";
-        //$this->sms_message .= "meep";
-
-        if (count($this->thing_report['things']) == 0) {
+        if (count($this->things) == 0) {
             $this->sms_message .= ' | Nothing heard.';
-        } elseif (count($this->thing_report['things']) == 1) {
+        } elseif (count($this->things) == 1) {
             $this->sms_message .= ' | Earliest heard ' . $this->thing->human_time(max($ages)) . ' ago';
         } else {
             $this->sms_message .= ' | Earliest heard ' . $this->thing->human_time(max($ages)) . ' ago';
         }
-
-
-
 
         $this->thing->choice->Create($this->agent_name, $this->node_list, "listen");
         $this->choices = $this->thing->choice->makeLinks("listen");
 
         $this->sms_message = strtoupper($this->group_id) . $this->sms_message;
 
-        //$to = "say:". $this->group_id
-        return $this->thingreport['things'];
+        return;
+        //return $this->thingreport['things'];
     }
 
     public function getGroup($input)
@@ -398,7 +339,6 @@ class Group
 
         return false;
     }
-
 
     public function extractGroups($input = null)
     {
@@ -421,24 +361,15 @@ class Group
         return $this->groups;
     }
 
-
-
-
     // -----------------------
-
     private function respond()
     {
-
-
+var_dump($this->group_id);
         // Thing actions
         $this->thing->flagGreen();
 
-
-
         // Generate email response.
-
         $to = $this->thing->from;
-
         $from = "group";
 
         $this->thing_report['choices'] = $this->choices;
@@ -519,7 +450,7 @@ class Group
         //exit();
         // agent passes a group - valid or not
 
-
+        if ($this->group_id == false) {$this->group_id = "#general";}
 
         if (strpos(strtolower($this->subject), strtolower($this->group_id)) !== false) {
             $this->listenGroup($this->group_id);
@@ -527,12 +458,18 @@ class Group
 
             return $this->response;
         }
-            
 
         // Or we see if the group name matches one of the users.
 
         $this->findGroup(); // Might need to call this in the set-up.
-        foreach ($this->thingreport['groups'] as $group) {
+
+//        var_dump($this->thingreport['groups']);
+
+//var_dump($this->groups);
+
+        foreach ($this->groups as $group) {
+
+echo $this->subject . " --- " . $group . "\n";
 
             if (strpos(strtolower($this->subject), strtolower($group)) !== false) {
                 if ($this->group_id == $group) {
@@ -549,18 +486,6 @@ class Group
             }
         }
 
-        //		echo $group;
-        //		$this->listenGroup($group);
-        //$this->num_hits += 1;
-//
-        //				return $this->response;
-        //			}
-        //}
-
-        //echo "meep";
-        //exit();
-
-
         if (strpos(strtolower($this->agent_input), "listen:") !== false) {
             //$this->sms_message .= "meep b";
             echo $this->agent_input;
@@ -570,6 +495,7 @@ class Group
             $this->listenGroup($group);
             return $this->response;
         }
+
         // added 18 Jul
         if (strpos(strtolower($this->agent_input), "join:") !== false) {
             echo $this->agent_input;
@@ -611,7 +537,9 @@ class Group
                     $this->sms_message = strtoupper($this->group_id);
                     $this->message = strtoupper($this->group_id);
                 } else {
-                    $this->response = $this->findGroup();
+                    //$this->response = 
+                    $this->findGroup();
+                    $this->response = $this->group_id;
                     //echo $this->group_id;
                     //$this->listenGroup();
                 }
@@ -632,15 +560,12 @@ class Group
                     //$this->message = $this->group_id;
                 } else {
                     $this->response = $this->findGroup();
-                    $this->joinGroup($this->thingreport['groups'][0]);
+                    $this->joinGroup($this->groups[0]);
                 }
 
                 $this->num_hits += 1;
                 return $this->response;
             }
-
-
-
 
             if (ctype_alpha($this->subject[0]) == true) {
                 // Strip out first letter and process remaning 4 or 5 digit number
@@ -657,8 +582,6 @@ class Group
 
             $this->nullAction();
             return $this->response;
-
-            return "Request '" . $input . " 'not understood: ";
         }
 
         foreach ($pieces as $key=>$piece) {
@@ -762,50 +685,12 @@ $this->num_hits += 1;
         return "Message not understood";
     }
 
-
-
-    public function PNG()
+    public function makePNG()
     {
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
+        $codeText = $this->group_id;
 
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and tes$
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
-
-        //http://php.net/manual/en/function.imagepng.php
-
-        //header('Content-Type: text/html');
-        //echo "Hello World";
-        //exit();
-
-        //header('Content-Type: image/png');
-        //QRcode::png('PHP QR Code :)');
-        //exit();
-        // here DB request or some processing
-
-        //		if ($this->group_id == null) {
-        //			$this->findGroup();
-        //		}
-
-        $codeText = "group:".$this->group_id;
-
-        ob_clean();
-        ob_start();
-
-        QRcode::png($codeText, false, QR_ECLEVEL_Q, 4);
-        $image = ob_get_contents();
-
-        ob_clean();
-        // Can't get this text editor working yet 10 June 2017
-
-        //$textcolor = imagecolorallocate($image, 0, 0, 255);
-        // Write the string at the top left
-        //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
-
-        $this->thing_report['png'] = $image;
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
+        $agent = new Qr($this->thing, $codeText);
+        $this->thing_report['png'] = $agent->PNG;
 
         return $this->thing_report['png'];
     }
