@@ -293,6 +293,7 @@ echo "failed to read site";
 
     function makeLink($url)
     {
+        // https://www.the-art-of-web.com/php/parse-robots/
         $this->search_url = $url;
         // https://www.the-art-of-web.com/php/parse-robots/
         // parse url to retrieve host and path
@@ -303,7 +304,6 @@ echo "failed to read site";
 
         //$robotstxt = "{$parsed['scheme']}://{$parsed['host']}/robots.txt";
         $robotstxt = $scheme . "://{$parsed['host']}/robots.txt";
-
         $this->url_robots_txt = $robotstxt;
     }
 
