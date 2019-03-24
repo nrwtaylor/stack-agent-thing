@@ -67,7 +67,7 @@ class Ping extends Agent
             // So this doesn't do much.
             // $this->ping_text = ($this->ping_time *1000) ."ms";
         } else {
-            $this->ping_text = $this->thing->human_time ( $ping_time );
+            $this->ping_text = $this->thing->human_time ( $this->ping_time );
         }
     }
 

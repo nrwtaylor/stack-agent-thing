@@ -151,7 +151,6 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 
 
         $this->destination_list = array();
-if (!isset($this->gtfs->places)) {return;}
         $places = $this->gtfs->places;
 //var_dump($places);
 //exit();
@@ -323,7 +322,6 @@ if (!isset($this->gtfs->places)) {return;}
 //var_dump($this->gtfs->response);
 var_dump($this->gtfs->thing_report['sms']);
 
-if (!isset($this->gtfs->stations)) {$this->route_list_text = ">"; $this->response = "No route."; return;}
 
 foreach ($this->gtfs->stations as $station) {
 

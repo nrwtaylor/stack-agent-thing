@@ -127,20 +127,61 @@ and the user UX/UI
     {
     }
 
+    public function kill()
+    {
+        // No messing about.
+        return $this->thing->Forget();
+    }
+
+
     public function getMeta($thing = null)
     {
-
         if ($thing == null) {$thing = $this->thing;}
 
+        // Non-nominal
         $this->uuid = $thing->uuid;
-//        $this->to = $thing->to;
-//        $this->from = $thing->from;
-//        $this->subject = $thing->subject;
-
         if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
-        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
+
+        // Potentially nominal
         if (!isset($thing->subject)) {$this->subject = null;} else {$this->subject = $thing->subject;}
+
+        // Treat as nomina
+        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
     }
+
+    function getVariable($variable_name = null, $variable = null) {
+
+        // This function does a minor kind of magic
+        // to resolve between $variable, $this->variable,
+        // and $this->default_variable.
+
+        if ($variable != null) {
+            // Local variable found.
+            // Local variable takes precedence.
+            return $variable;
+        }
+
+        if (isset($this->$variable_name)) {
+            // Class variable found.
+            // Class variable follows in precedence.
+            return $this->$variable_name;
+        }
+
+        // Neither a local or class variable was found.
+        // So see if the default variable is set.
+        if (isset( $this->{"default_" . $variable_name} )) {
+
+            // Default variable was found.
+            // Default variable follows in precedence.
+            return $this->{"default_" . $variable_name};
+        }
+
+        // Return false ie (false/null) when variable
+        // setting is found.
+        return false;
+    }
+
+
 
 	public function respond()
     {

@@ -142,6 +142,26 @@ class Bar extends Agent
             $this->response .= "Checked stack latency. ";
 
         }
+
+        if (($this->bar_count % 7) == 0) {
+
+            $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage 10000"));
+
+            $client= new \GearmanClient();
+            $client->addServer();
+                //$client->doNormal("call_agent", $arr);
+            $client->doLowBackground("call_agent", $arr);
+
+
+            //$thing = new Thing(null);
+            //$thing->Create(null,"damage", 's/ damage 10000');
+            //$damage= new Damage($thing, 'damage 10000);
+
+            $this->response .= "Damage. ";
+
+        }
+
+
     }
 
 

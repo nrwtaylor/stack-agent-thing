@@ -598,6 +598,8 @@ $query = true;
         // Stack Engine No.1 7ms 10ms 8ms
 
 		// Call Db and forget the record.
+//        if ($this->uuid == null) {return;}
+        if (!isset($this->db)) {return;}
 		$thingreport = $this->db->Forget($this->uuid);
 
 		// To be developed.  PHP object destruction.

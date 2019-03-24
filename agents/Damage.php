@@ -1,69 +1,71 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Damage
+class Damage extends Agent
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $text = null)
+    function init()
+    //function __construct(Thing $thing, $text = null)
     {
-        $this->start_time = $thing->elapsed_runtime();
-//echo "meep";
-//exit();
 
-		$this->agent_name = 'damage';
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+//        $this->start_time = $thing->elapsed_runtime();
+
+//		$this->agent_name = 'damage';
+//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-        $this->agent_input = $text;
+//        $this->agent_input = $text;
 
 //      This is how old roll.php is.
 //		$thingy = $thing->thing;
-		$this->thing = $thing;
-        $this->thing_report['thing']  = $thing;
+//		$this->thing = $thing;
+//        $this->thing_report['thing']  = $thing;
 
 
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+  //      $this->uuid = $thing->uuid;
+  //      $this->to = $thing->to;
+  //      $this->from = $thing->from;
+  //      $this->subject = $thing->subject;
 
 
         $this->default_damage_budget = $this->thing->container['api']['damage']['budget'];
 
 
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
-        $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
+    //    $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
+     //   $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
         $this->variables_agent = new Variables($this->thing, "variables " . "damage " . $this->from);
         $this->current_time = $this->thing->json->time();
+
+
 
         $this->damage_budget = $this->default_damage_budget;
         $this->time_budget = 10000; //ms
         $this->shell_impact = 50;
         $this->shell_cost = 50;
 
-        $this->value_destroyed = $this->doDamage();
-
-        $this->Set();
-
-		$this->readSubject();
-
-		if ($this->agent_input == null) {$this->respond();}
+        //$this->value_destroyed = $this->doDamage();
+       // $this->set();
+	//	$this->readSubject();
+		//if ($this->agent_input == null) {$this->respond();}
 
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format( $this->thing->elapsed_runtime() - $this->start_time ) . 'ms.' );
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
+        //$this->thing->log( $this->agent_prefix .'ran for ' . number_format( $this->thing->elapsed_runtime() - $this->start_time ) . 'ms.' );
+        //$this->thing_report['log'] = $this->thing->log;
+		//return;
 
 	}
+
+    public function run()
+    {
+        $this->value_destroyed = $this->doDamage();
+    }
 
 
 // -----------------------
 
-    function Set() {
+    public function set() {
 
         $this->variables_agent->setVariable("value_destroyed", $this->value_destroyed);
         $this->variables_agent->setVariable("things_destroyed", $this->things_destroyed);
@@ -77,7 +79,7 @@ class Damage
 
 
 
-	private function respond() {
+	public function respond() {
 
 
 		$this->thing->flagGreen();
@@ -125,7 +127,6 @@ class Damage
     function makeWeb() {
         $web_message = '<p class="description">';
         foreach ($this->things as $t) {
-            //var_dump($t);
             $web_message .=  str_pad($t['nuuid'], 6 ," ");
             $web_message .= " " . str_pad($t['balance'], 10, " ");
             $web_message .= " " . str_pad($t['destroyed'], 10, " ");
@@ -181,10 +182,13 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
 	public function readSubject()
     {
+        $input = strtolower($this->subject);
 
-
-        //$input = strtolower($this->subject);
-
+        $number_agent = new Number($this->thing,"number");
+        $number_agent->extractNumber($input);
+        if ($number_agent->number != false) {
+            $this->damage_budget = $number_agent->number;
+        }
 
 		return false;
     }
@@ -198,8 +202,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         $thingreport = $this->thing->db->random(null,50); // Leaving this blank selects any record for deletion.
         $this->uuids = array();
         foreach($thingreport['things'] as $thing) {
-
-
             $this->uuids[] = $thing['uuid'];
         }
         $this->thing->log($this->agent_prefix . "completed getThings " . count($this->uuids) . ".");
@@ -218,9 +220,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         $this->thing->log($this->agent_prefix . "got a random UUID ". $uuid .".");
 
         $thing = new Thing($uuid);
-
         $this->thing->log($this->agent_prefix . "instantiated Thing.");
-
 
         return $thing;
 
@@ -230,8 +230,8 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     {
         if ($thing == null) {$thing = $this->getThing();}
 
-        $this->thing->log($this->agent_prefix . 'randomly selected a "' . ucwords($thing->to) . ' Thing "'.  $thing->subject . '".');
-        $this->thing->log("DEVLOG " . $this->agent_prefix . "associated with ID " . $thing->from .  '".');
+//        $this->thing->log($this->agent_prefix . 'randomly selected a "' . ucwords($thing['nom_to']) . ' Thing "'.  $thing->subject . '".');
+//        $this->thing->log("DEVLOG " . $this->agent_prefix . "associated with ID " . $thing->from .  '".');
 
         if ( $thing->isRed() ) {
             $this->thing->log($this->agent_prefix . "choose a Red flagged thing.  No action.");
@@ -260,7 +260,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             } // Critical success
             return;
         }
-
         // The stack balance is distributed.  So debiting the
         // stack balance on the Thing destroys stack value.
 
@@ -288,8 +287,6 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         } // Critical fail
 
         $hit = round( ($modifier + $d20)/20  * $this->shell_impact);
-
-
 
         $thing->account['stack']->Debit($hit);
 
@@ -325,9 +322,9 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             // Acquire a shell.
             // Is there enough remaining of the damage_budget to buy another shell?
             if ($remaining_budget < $this->shell_cost ) {
-//            $value_destroyed = $damage_budget - $remaining_budget;
-//            echo "Value destroyed: " . $value_destroyed;
-//            return $value_destroyed;
+                // $value_destroyed = $damage_budget - $remaining_budget;
+                // echo "Value destroyed: " . $value_destroyed;
+                // return $value_destroyed;
                 break;
             }
 
@@ -336,24 +333,22 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             // Select a random target and fire a 50 shell at it.
             $thing = $this->getThing();
             $destroyed = $this->doHit($thing);
+            if (!isset($thing->account['stack']->balance['amount'])) {
+                $balance = null;
+            } else {
+                $balance = $thing->account['stack']->balance['amount'];
+            }
 
-if (!isset($thing->account['stack']->balance['amount'])) {$balance = null;} else {
-
-
-$balance = $thing->account['stack']->balance['amount'];
-}
-//echo $thing->thing->created_at;
+            if (!isset($thing->thing->created_at)) {$created_at = null;} else {
+                $created_at = $thing->thing->created_at;
+            }
+            // echo $thing->thing->created_at;
             $this->things[] = array("nuuid"=>$thing->nuuid,"balance"=> $balance,
-                 "destroyed"=>$destroyed,
-                 "created_at"=>$thing->thing->created_at);
-
-//                 "created_at"=>$thing['created_at']);
-            //$this->thing->log($this->agent_prefix . "got a stack balance of " . $stack_balance['amount'] . ".");
-
+                "destroyed"=>$destroyed,
+                "created_at"=>$created_at);
             // So make sure at least one hit runs, then check whether time limit is up.
             // A unit of damage is 1s.  So apply maximum 1s.  (Or one shell.)
         } while ($this->thing->elapsed_runtime() - $this->split_time < $this->time_budget);
-
 
         $value_destroyed = $damage_budget - $remaining_budget;
 
@@ -365,12 +360,7 @@ $balance = $thing->account['stack']->balance['amount'];
         //$this->thing_destroyed = $things_destroyed;
 
         return $value_destroyed;
-
-
-
-
     }
 
 }
 
-?>

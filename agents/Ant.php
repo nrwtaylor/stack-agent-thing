@@ -120,10 +120,14 @@ class Ant extends Agent
     {
         // Err ... making sure the state is saved.
         $this->thing->choice->Choose($this->state);
-
         $this->state = $this->thing->choice->load('hive');
+        $this->thing->log('state is "' . $this->state . '".');
 
-        $this->thing->log($this->agent_prefix . 'state is "' . $this->state . '".');
+    }
+
+
+    public function loop()
+    {
 
     }
 
@@ -139,7 +143,6 @@ class Ant extends Agent
 
     public function get($ant_code = null)
     {
-
         $this->current_time = $this->thing->json->time();
 
         // Borrow this from iching
@@ -150,13 +153,6 @@ class Ant extends Agent
         // and if that doesn't work then from the Stack.
         if ($ant_code == null) {$ant_code = $this->uuid;}
 
-        //$this->ant = new Variables($this->thing, "variables " . $place_code . " " . $this->from);
-
-//        $this->left_count = $this->thing->getVariable("left_count");
-//        $this->right_count = $this->thing->getVariable("right_count");
-//        $this->refreshed_at = $this->place->getVariable("refreshed_at");
-
-
         if ($this->time_string == false) {
             $this->thing->json->setField("variables");
             $this->time_string = $this->thing->json->time();
@@ -164,7 +160,6 @@ class Ant extends Agent
         }
 
         $this->refreshed_at = strtotime($this->time_string);
-
 
         $this->thing->json->setField("variables");
         $this->left_count = strtolower($this->thing->json->readVariable( array("ant", "left_count") ));
@@ -619,6 +614,12 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 
 	function spawn()
     {
+
+
+        $object = new Object($this->thing, "ant");
+        $coordinate = new Coordinate($this->thing, "(0,0)");
+        //var_dump($ant->uuid);
+
         $ant_pheromone['stack'] = 4;
         if ((rand(0,5) + 1) <= $ant_pheromone['stack']) {
            $this->thing->choice->Create('hive', $this->node_list, "inside nest");
@@ -630,12 +631,12 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 
 		return;
 	}
-
+/*
 	function kill()
     {
 		// No messing about.
         // An Ant dies.
 		return $this->thing->Forget();
 	}
-
+*/
 }
