@@ -172,6 +172,7 @@ class Meetup
                 $venue_name = $event['venue']['name'];
                 $venue_city = $event['venue']['city'];
                 $venue_address = $event['venue']['address_1'];
+var_dump($event['venue']);
             }
 
             // What is this Thing called?

@@ -9,19 +9,19 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Charley
+class Charley extends Agent
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+   function __construct(Thing $thing, $agent_input = null)
     {
         $this->agent_input = $agent_input;
 
-		$this->agent_name = "charley";
+        $this->agent_name = "charley";
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
+        $this->test= "Development code";
 
-		$this->thing = $thing;
+        $this->thing = $thing;
 
         $this->thing_report['thing']  = $thing;
 
@@ -35,13 +35,13 @@ class Charley
         $this->from = $thing->from;
         $this->subject = $thing->subject;
 
-        $this->node_list = array("charley"=>array("index", "uuid"));
+        $this->node_list = array("charley"=>array("charley", "rocky", "nonsense"));
 
-		$this->haystack = $thing->uuid . 
-    		$thing->to . 
-			$thing->subject . 
-			$command_line .
-	        $this->agent_input;
+        $this->haystack = $thing->uuid . 
+            $thing->to . 
+            $thing->subject . 
+            $command_line .
+            $this->agent_input;
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
         $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
@@ -51,6 +51,8 @@ class Charley
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+
+
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
@@ -81,8 +83,8 @@ class Charley
         $this->init();
 //        $this->get();
 
-        $this->getCast();
-        $this->getCards();
+//        $this->getCast();
+//        $this->getCards();
 
         // Borrow this from iching
         $this->thing->json->setField("variables");
@@ -102,9 +104,11 @@ class Charley
         $this->number = $this->thing->json->readVariable( array("charley", "number") );
         $this->suit = $this->thing->json->readVariable( array("charley", "suit") );
 
-
+//        $this->getCard();
+        $this->readSubject();
+/*
         if ( ($this->nom == false) or ($this->number == false) ) {
-
+            // No existing card found.
             $this->readSubject();
 
             $this->thing->json->writeVariable( array("charley", "nom"), $this->nom );
@@ -114,28 +118,40 @@ class Charley
 
             $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
         }
+*/
+        if ($this->agent_input == null) {$this->respond();}
 
-        // $this->readSubject();
-
-        // $this->init();
-        // $this->get();
-
-        // $this->getCast();
-        // $this->getCards();
-
-        if ($this->agent_input == null) {$this->setSignals();}
-
-        // $this->set();
+        $this->set();
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['log'] = $this->thing->log;
 
-		return;
-	}
+        return;
+    }
 
-    // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
+
     // -----------------------
+
+    public function run()
+    {
+    }
+
+    public function get()
+    {
+    }
+
+    public function set()
+    {
+
+            $this->thing->json->writeVariable( array("charley", "nom"), $this->nom );
+            $this->thing->json->writeVariable( array("charley", "suit"), $this->suit );
+            $this->thing->json->writeVariable( array("charley", "number"), $this->number );
+//            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+
+    }
+
+
 
     function getNuuid()
     {
@@ -168,10 +184,10 @@ class Charley
         // $this->setRules();
     }
 
-	private function setSignals()
+	public function respond()
     {
 
-        $this->getResponse($this->nom, $this->suit);
+//        $this->getResponse($this->nom, $this->suit);
 
 		$this->thing->flagGreen();
 
@@ -209,7 +225,7 @@ class Charley
 
     function makeSMS()
     {
-        $sms = "CHARLEY | ";
+        $sms = "CHARLEY >\n";
 
         $sms .= $this->response;
 
@@ -254,11 +270,13 @@ class Charley
         if ($role == "X") {$this->charley = "Rocky"; return;}
 
         $this->charley = array_rand(array("Charley", "Charlie"));
-
         $input = array("Charlie", "Charley", "Charles", "Charlene", "Charlize", "Carl", "Karl", "Carlos", "Caroline", "Charlotte");
 
         // Pick a random Charles.
-        $this->charley = $input[array_rand($input)];
+
+        $charley_index = $this->refreshed_at % count($input);
+        $this->charley = $input[$charley_index];
+
         if (isset($this->name_list[$role])) {$this->charley = $this->name_list[$role];}
 
         return $this->charley;
@@ -268,13 +286,13 @@ class Charley
     {
 
         if (isset($this->response)) {return;}
+        $this->getCards();
 
-        $text = $this->texts[$nom][$suit];
-        $number = $this->numbers[$nom][$suit];
-var_dump($text);
-var_dump($number);
 
-        $this->response = $text;
+        $this->getCard();
+
+
+        $this->response = $this->text;
 
     }
 
@@ -288,12 +306,14 @@ var_dump($number);
 
         $handle = fopen($file, "r");
 
+        $this->cards = array();
+
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
                 $arr = explode(",",$line);
 
                 $nom = $arr[0]; // Describer of the card
-                $suit = $arr[1];
+                $suit = trim($arr[1]);
                 $number = trim($arr[2]);
                 $text = trim($arr[3]);
 
@@ -312,7 +332,11 @@ var_dump($number);
                 $this->numbers[$nom][$suit] = $number;
 
 
-                $this->cards[] = array("nom"=>$nom, "suit"=>$suit, "number"=>$number, "text"=>$text, "from"=>$from, "to"=>$to ); 
+                $this->card_list[] = array("nom"=>$nom, "suit"=>$suit, "number"=>$number, "text"=>$text, "from"=>$from, "to"=>$to ); 
+
+                $this->cards[$nom][$suit] = array("nom"=>$nom, "suit"=>$suit, "number"=>$number, "text"=>$text, "from"=>$from, "to"=>$to ); 
+
+
             }
 
             fclose($handle);
@@ -324,7 +348,11 @@ var_dump($number);
     function getCard()
     {
         $this->getCards();
-        $this->card = $this->cards[array_rand($this->cards)];
+
+        $this->card = $this->card_list[array_rand($this->card_list)];
+        if (isset($this->cards[$this->nom][$this->suit])) {
+            $this->card = $this->cards[$this->nom][$this->suit];
+        }
 
         $this->nom = $this->card['nom'];
         $this->suit = $this->card['suit'];
@@ -345,18 +373,20 @@ var_dump($number);
         $this->fictional_to = $this->getName($this->role_to);
         $this->fictional_from = $this->getName($this->role_from);
 
-        $this->response = "to: " . $this->fictional_to . ", " . $this->role_to . " from: " . $this->fictional_from . ", " . $this->role_from . " / " . $this->text . " / " . $this->number . " " . $this->unit . ".";
+//        $this->response = "to: " . $this->fictional_to . ", " . $this->role_to . " from: " . $this->fictional_from . ", " . $this->role_from . " / " . $this->text . " / " . $this->number . " " . $this->unit . ".";
+        $this->response = "to: " . $this->fictional_to . ", " . $this->role_to . "\nfrom: " . $this->fictional_from . ", " . $this->role_from . "\n" . $this->text . "\n" . $this->number . " " . $this->unit . ".";
+
 
         if (($this->role_to == "X") and ($this->role_from == "X") and ($this->text == "X")) {
             $this->response = $this->number . " " . $this->unit . ".";
         }
 
         if (($this->role_to == "X") and ($this->role_from == "X") and ($this->text != "X")) {
-            $this->response = $this->text . " / " . $this->number. " " . $this->unit . ".";
+            $this->response = $this->text . "\n" . $this->number. " " . $this->unit . ".";
         }
 
         if (($this->role_to == "X") and ($this->role_from != "X") and ($this->text != "X")) {
-            $this->response = "to: < ? >" . " from: " . $this->fictional_from .  ", " . $this->role_from . " / " . $this->text . " / " . $this->number. " " . $this->unit . ".";
+            $this->response = "to: < ? >" . " from: " . $this->fictional_from .  ", " . $this->role_from . " / " . $this->text . "\n" . $this->number. " " . $this->unit . ".";
         }
 
     }
@@ -394,23 +424,78 @@ var_dump($number);
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/charley';
 
-        $this->node_list = array("charley"=>array("rocky", "bullwinkle","charley"));
+        $this->node_list = array("charley"=>array("charley", "rocky", "nonsense"));
+        // $this->node_list = array("charley"=>array("rocky", "bullwinkle","charley"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "charley");
-        $choices = $this->thing->choice->makeLinks('charley');
+        //$this->thing->choice->Create($this->agent_name, $this->node_list, "charley");
+        //$choices = $this->thing->choice->makeLinks('charley');
 
         if (!isset($this->html_image)) {$this->makePNG();}
 
-        $web = '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web = "<b>Charley Agent</b>";
+        $web .= "<p>";
+
+
+        $web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         $web .= "<br>";
 
-        $web .= $this->response . "<br";
+        $web .= "<p>";
+
+        //$web .= $this->nom;
+
+        switch (trim($this->suit)) {
+            case "diamonds":
+                $web .= "OPERATIONS inject received.";
+                break;
+            case "hearts":
+                $web .= "PLANNING inject received.";
+                break;
+            case "clubs":
+                $web .= "LOGISTICS inject received.";
+                break;
+            case "spades":
+                $web .= "FINANCE inject received.";
+                break;
+            default:
+                $web .= "UNRECOGNIZED inject received.";
+        }
+
+        $web .= "<p>";
+
+        if ((isset($this->fictional_to)) and
+            (isset($this->role_to)) and
+            (isset($this->fictional_from)) and
+            (isset($this->role_from))) {
+    
+
+        $web .= "<b>TO (NAME)</b> " .  $this->fictional_to . "<br>";
+        $web .= "<b>TO (ROLE)</b> " . $this->role_to . "<br>";
+        $web .= "<b>FROM (NAME)</b> " . $this->fictional_from . "<br>";
+        $web .= "<b>FROM (ROLE)</b> " . $this->role_from . "<br>";
+
+        }
+
+
+        $web .= "<p>";
+        $web .= "<b>". $this->number . " " . $this->unit . "</b><br>";
+        $web .= "<p>";
+
+
+        //if(isset($this->role_from)) {$web .= $this->role_from;}
+        //if(isset($this->role_to)) {$web .= $this->role_to;}
+
+        //if(isset($this->text)) {$web .= "<p>" . $this->text;}
+
+
+        $web .= "<p>";
+
+        $web .= "SMS Inject<p>" . $this->response . "<br";
         $web .= "<br>";
 
-
+        $web .= "<p>";
         //$received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time ( time() - $this->refreshed_at );
-        $web .= "Injected about ". $ago . " ago.";
+        $web .= "This inject was created about ". $ago . " ago.";
 
         $web .= "<br>";
 
@@ -439,6 +524,9 @@ var_dump($number);
 
         $this->image = imagecreatetruecolor(164, 164);
 
+        $width = imagesx($this->image); 
+        $height = imagesy($this->image);
+
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
@@ -448,81 +536,76 @@ var_dump($number);
 
         $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
 
-
-//var_dump($this->suit);
-//exit();
-switch (trim($this->suit)) {
-    case "diamonds":
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->red);
-        $textcolor = imagecolorallocate($this->image, 255, 255, 255);
-        break;
-    case "hearts":
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->blue);
-        $textcolor = imagecolorallocate($this->image, 255, 255, 255);
-        break;
-    case "clubs":
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->flag_yellow);
-        $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        break;
-    case "spades":
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->grey);
-        $textcolor = imagecolorallocate($this->image, 255, 255, 255);
-        break;
-
-    default:
-
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->white);
-        $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-}
-
-//        $this->drawCharley(164/2,164/2);
+        switch (trim($this->suit)) {
+            case "diamonds":
+                imagefilledrectangle($this->image, 0, 0, $width, $height, $this->red);
+                $textcolor = imagecolorallocate($this->image, 255, 255, 255);
+                break;
+            case "hearts":
+                imagefilledrectangle($this->image, 0, 0, $width, $height, $this->blue);
+                $textcolor = imagecolorallocate($this->image, 255, 255, 255);
+                break;
+            case "clubs":
+                imagefilledrectangle($this->image, 0, 0, $width, $height, $this->flag_yellow);
+                $textcolor = imagecolorallocate($this->image, 0, 0, 0);
+                break;
+            case "spades":
+                imagefilledrectangle($this->image, 0, 0, $width, $height, $this->grey);
+                $textcolor = imagecolorallocate($this->image, 255, 255, 255);
+                break;
+            default:
+                imagefilledrectangle($this->image, 0, 0, $width, $height, $this->white);
+                $textcolor = imagecolorallocate($this->image, 0, 0, 0);
+        }
 
         // Write the string at the top left
         $border = 30;
-        $radius = 1.165 * (164 - 2 * $border) / 3;
+        $radius = 1.165 * ($width - 2 * $border) / 3;
+
+        // devstack add path
+        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
+        $text = "ROCKY";
+
+        $text = strtoupper($this->nom);
+
+        if (!isset($this->bar)) {$this->getBar();}
+
+        $bar_count = $this->bar->bar_count;
+
+        // Add some shadow to the text
+
+        imagettftext($this->image, 40 , 0, 0 - $this->bar->bar_count*5, 75, $this->grey, $font, $text);
+
+        $size = 72;
+        $angle = 0;
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+        $pad = 0;
+
+        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $textcolor, $font, $text);
+
+        $text= $this->number . " " . strtoupper($this->unit);
+
+        $size = 9.5;
+        $angle = 0;
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+
+        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height*11/12, $textcolor, $font, $text);
 
 
-
-// devstack add path
-//$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
-$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-$text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
-$text = "ROCKY";
-$text = $this->nom;
-
-if (!isset($this->bar)) {$this->getBar();}
-
-$bar_count = $this->bar->bar_count;
-
-
-// Add some shadow to the text
-
-imagettftext($this->image, 40 , 0, 0 - $this->bar->bar_count*5, 75, $this->grey, $font, $text);
-
-$size = 72;
-$angle = 0;
-$bbox = imagettfbbox ($size, $angle, $font, $text); 
-$bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-$bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-$bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-//check width of the image 
-$width = imagesx($this->image); 
-$height = imagesy($this->image);
-$pad = 0;
-
-imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $textcolor, $font, $this->nom);
-
-$size = 10;
-
-imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height*4/5, $textcolor, $font, $this->number . " FUEL");
-
-
-    // Small nuuid text for back-checking.
-     imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
-
-
+        // Small nuuid text for back-checking.
+        imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
 
         // Save the image
@@ -530,8 +613,8 @@ imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_h
         //imagepng($im);
         //xob_clean();
 
-// https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
-if (ob_get_contents()) ob_clean();
+        // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
+        if (ob_get_contents()) ob_clean();
 
         ob_start();
         imagepng($this->image);
@@ -544,38 +627,14 @@ if (ob_get_contents()) ob_clean();
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="snowflake"/>';
 
-$this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
+        $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
-//        $this->thing_report['png'] = $image;
-
-//        $this->PNG = $this->image;    
          $this->PNG = $imagedata;
-        //imagedestroy($this->image);
-//        $this->thing_report['png'] = $imagedata;
-
-
-
-//        $this->PNG_data = "data:image/png;base64,'.base64_encode($imagedata).'";
 
         $this->html_image = $response;
-        //$this->image = $agent->image;
-
-        //$this->thing_report['png'] = $agent->PNG;
-//        $this->thing_report['png'] = $agent->image_string;
-
-
 
         return $response;
-
-
-
-
-        $this->PNG = $image;    
-        $this->thing_report['png'] = $image;
- 
-       return;
     }
-
 
 
     function setRules()
@@ -667,6 +726,7 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 	public function readSubject()
     {
 
+
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
@@ -676,13 +736,10 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
             if ($input == 'charley') {
                 $this->getCard();
 
-                if ((!isset($this->index)) or 
-                    ($this->index == null)) {
-                    $this->index = 1;
-                }
-//                $this->max = 400;
-//                $this->size = 4;
-                //$this->lattice_size = 40;
+//                if ((!isset($this->index)) or 
+//                    ($this->index == null)) {
+//                    $this->index = 1;
+//                }
                 return;
             }
         }
@@ -711,14 +768,13 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
         $this->getCard();
 
-        if ((!isset($this->index)) or 
-            ($this->index == null)) {
-            $this->index = 1;
-        }
+//        if ((!isset($this->index)) or 
+//            ($this->index == null)) {
+//            $this->index = 1;
+//        }
 
-    return;
+//    return;
     }
 
 }
 
-?>
