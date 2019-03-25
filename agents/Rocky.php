@@ -78,6 +78,10 @@ class Rocky extends Agent
             $this->state = $this->default_state;
         }
 
+        if ($this->state == false) {
+            $this->state = $this->default_state;
+        }
+
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
         $this->thing->json->setField("variables");
@@ -198,8 +202,8 @@ class Rocky extends Agent
 
     function makeSMS()
     {
-        $sms = "ROCKY " . $this->inject . " | ";
-        $sms .= $this->short_message . " | " . $this->response;
+        $sms = "ROCKY " . $this->inject . " > \n";
+        $sms .= $this->short_message . "\n" . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -352,8 +356,12 @@ class Rocky extends Agent
                 $organization_from = $message[9];
                 $number_from = $message[10];
 
-                $message_array = array("meta"=>$meta, "name_to"=>$name_to,  "position_to"=>$position_to,  "organization_to"=>$organization_to,"number_to"=>$number_to, "text"=>$text, 
-                    "name_from"=>$name_from, "position_from"=>$position_from, "organization_from"=>$organization_from, "number_from"=>$number_from ); 
+                $message_array = array("meta"=>$meta, "name_to"=>$name_to,
+                    "position_to"=>$position_to,  "organization_to"=>$organization_to,
+                    "number_to"=>$number_to, "text"=>$text,
+                    "name_from"=>$name_from, "position_from"=>$position_from,
+                    "organization_from"=>$organization_from,
+                    "number_from"=>$number_from );
 
                 $this->messages[] = $message_array;
 
@@ -401,7 +409,7 @@ class Rocky extends Agent
 
         $this->message = $this->messages[$this->num];
 
-        $this->meta = $this->message['meta'];
+        $this->meta = trim($this->message['meta'], "//");
 
         $this->name_to = $this->message['name_to'];
         $this->position_to = $this->message['position_to'];
@@ -417,8 +425,13 @@ class Rocky extends Agent
         $this->number_from = $this->message['number_from'];
 
 
-        $this->short_message = $this->meta . " " . $this->name_to . ", " . $this->position_to . ", " . $this->organization_to.", " . $this->number_to. ". " .
-             $this->text ." " . $this->name_from . ", " . $this->position_from . ", " . $this->organization_from . ", " . $this->number_from. ".";
+        $this->short_message = $this->meta . "\n" .
+             $this->name_to . ", " . $this->position_to . ", " .
+             $this->organization_to.", " . $this->number_to. ". " . "\n" .
+             $this->text ." " . "\n" .
+             $this->name_from . ", " .
+             $this->position_from . ", " . $this->organization_from . ", " .
+             $this->number_from. ".";
 
         $arr = explode("/",$this->meta);
         $this->message['number'] = $arr[0];
@@ -486,7 +499,6 @@ class Rocky extends Agent
 
         $web .= $this->inject . "<br>";
 
-
         $web .= $this->short_message . "<br>";
 
         $web .= "<p>";
@@ -527,7 +539,7 @@ class Rocky extends Agent
         $web .= "<p>";
 
 
-        $web .= $this->short_message . "<br>";
+        $web .= nl2br($this->short_message) . "<br>";
 
 
         $web .= "<p>";
@@ -811,6 +823,7 @@ class Rocky extends Agent
         if (count($pieces) == 1) {
 
             if ($input == 'rocky') {
+
                 $this->getMessage();
 
                 if ((!isset($this->index)) or 

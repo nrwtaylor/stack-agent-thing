@@ -16,22 +16,16 @@ class Agent
         //microtime(true);
 
 		$this->agent_input = strtolower($input);
-//        $this->agent_name = "Agent";
-//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 
         $this->agent_name = 'agent';
 
         $this->agent_name = strtolower(get_class());
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
 
-
-
 		// Given a "thing".  Instantiate a class to identify
 		// and create the most appropriate agent to respond to it.
 
 		$this->thing = $thing;
-//        $this->thing->elapsed_runtime();
-//		$this->agent_name = 'agent';
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
@@ -45,13 +39,6 @@ class Agent
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
-
-
-
-//        $this->uuid = $thing->uuid;
-//      	$this->to = $thing->to;
-//      	$this->from = $thing->from;
-//      	$this->subject = $thing->subject;
 
 		$this->sqlresponse = null;
 

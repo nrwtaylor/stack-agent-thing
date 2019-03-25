@@ -496,8 +496,8 @@ echo "</pre>";
             } else {
 
 if ($this->field == "associations") {
-echo "write associations ";
-echo "" . $this->json_data . "\n";
+//echo "write associations ";
+//echo "" . $this->json_data . "\n";
 }
                 $this->db->writeField($this->field, $this->json_data);
             }
@@ -512,7 +512,7 @@ echo "" . $this->json_data . "\n";
         $this->json_data = $this->db->readField($this->field);
 
 if ($this->field == "associations") {
-echo "read associations " .  $this->json_data . "\n";
+//echo "read associations " .  $this->json_data . "\n";
 }
 
         if ($this->json_data == null) {$this->initField();}
