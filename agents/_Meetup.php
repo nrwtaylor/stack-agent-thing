@@ -15,7 +15,6 @@ class Meetup
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
-    //function init()
     {
         $this->start_time = $thing->elapsed_runtime();
 

@@ -134,6 +134,8 @@ class Contextualweb
 
         $related = $json_data['relatedSearch'];
 
+        if (!isset($json_data['value'][0])) {return true;}
+
         $url = $json_data['value'][0]['url'];
         $definition = strip_tags($json_data['value'][0]['description']);
 
@@ -342,6 +344,11 @@ foreach ($definitions as $id=>$definition) {
 
     public function makeSms()
     {
+        if (!isset($this->definitions_count)) {
+            $this->sms_message = strtoupper($this->search_words) . " | No thing found." . " | " . $this->response;
+            return;
+        }
+
         $sms = strtoupper($this->search_words);
         switch ($this->definitions_count) {
             case 0:
@@ -365,6 +372,11 @@ foreach ($definitions as $id=>$definition) {
     public function makeMessage()
     {
         $message = "Contextual Web";
+
+        if (!isset($this->definitions_count)) {
+            $this->message = $message .  " did not find a thing.";
+            return;
+        }
 
         switch ($this->definitions_count) {
             case 0:

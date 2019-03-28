@@ -225,5 +225,3 @@ class Hey extends Agent
 	}
 
 }
-
-?>
