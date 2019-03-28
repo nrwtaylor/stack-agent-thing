@@ -608,33 +608,6 @@ and the user UX/UI
                 $agents[] = $agent_class_name;  
             }
 
-            // 2nd way
-            $agent_class_name = strtolower($keyword);
-
-            // Can probably do this quickly by loading path list into a variable
-            // and looping, or a direct namespace check.
-            $filename = $this->agents_path .  $agent_class_name . ".php";
-            if (file_exists($filename)) {
-                $agents[] = $agent_class_name;  
-            }
-
-            // 3rd way
-            $agent_class_name = strtoupper($keyword);
-
-            // Can probably do this quickly by loading path list into a variable
-            // and looping, or a direct namespace check.
-            $filename = $this->agents_path .  $agent_class_name . ".php";
-            if (file_exists($filename)) {
-                $agents[] = $agent_class_name;  
-            }
-
-
-
-
-
-
-
-
 		}
 
 		//set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
