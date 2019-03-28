@@ -15,6 +15,7 @@ class Meetup
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
+    //function init()
     {
         $this->start_time = $thing->elapsed_runtime();
 
@@ -171,8 +172,8 @@ class Meetup
             } else {
                 $venue_name = $event['venue']['name'];
                 $venue_city = $event['venue']['city'];
-                $venue_address = $event['venue']['address_1'];
-var_dump($event['venue']);
+                $venue_address = null;
+                if (isset($event['venue']['address_1'])) {$venue_address = $event['venue']['address_1'];}
             }
 
             // What is this Thing called?

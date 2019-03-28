@@ -7,112 +7,11 @@ error_reporting(-1);
 
 class Nuuid extends Agent
 {
-
 	public $var = 'hello';
-/*
-    public function __construct(Thing $thing, $agent_input = null)
-    {
-        $this->agent_input = $agent_input;
-
-		$this->agent_name = "nuuid";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
-
-		$this->thing = $thing;
-        $this->thing_report['thing']  = $thing;
-
-        $this->start_time = $this->thing->elapsed_runtime(); 
-
-        $command_line = null;
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        $this->node_list = array("nuuid"=>array("nuuid"));
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
-		$this->haystack = $thing->uuid . 
-		$thing->to . 
-		$thing->subject . 
-		$command_line .
-        $this->agent_input;
-
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
-        $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
-
-        $this->current_time = $this->thing->time();
-
-        $this->thing->log( $this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("nuuid", "refreshed_at") );
-
-        if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("nuuid", "refreshed_at"), $time_string );
-        }
-
-        $this->readSubject();
-
-        $this->init();
-
-        if ($this->agent_input == null) {$this->setSignals();}
-
-        $this->thing->log( $this->agent_prefix .'completed setSignals. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-        $this->makePNG();
-
-        $this->thing->log( $this->agent_prefix .'completed setSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-
-
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
-	}
-*/
-// https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
-
-// -----------------------
 
     function init()
     {
-       $command_line = null;
-
         $this->node_list = array("nuuid"=>array("nuuid"));
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
-        $this->word = $this->thing->container['stack']['word'];
-        $this->email = $this->thing->container['stack']['email'];
-
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
-        $this->haystack = $this->thing->uuid . 
-        $this->thing->to . 
-        $this->thing->subject . 
-        $command_line .
-        $this->agent_input;
-
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
-        $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
-
-        $this->current_time = $this->thing->time();
-
-        $this->thing->log( $this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("nuuid", "refreshed_at") );
@@ -126,18 +25,14 @@ class Nuuid extends Agent
         $this->makePNG();
     }
 
-    public function respond() {
-
+    public function respond()
+    {
 		$this->thing->flagGreen();
 
 		// This should be the code to handle non-matching responses.
 
-		$to = $this->thing->from;
-		$from = "nuuid";
-
-// This choice element is super slow.  It 
-// is the difference between 6s and 351ms.
-// Hard to justify a button question in response to a die roll.
+//		$to = $this->thing->from;
+//		$from = "nuuid";
 
         $this->makePNG();
 
@@ -146,22 +41,17 @@ class Nuuid extends Agent
         $this->makeTXT();
 
         $this->makeChoices();
-        $this->thing->log( $this->agent_prefix .'completed makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
         $this->makeWeb();
-        $this->thing->log( $this->agent_prefix .'completed makeWeb. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
  		$this->thing_report["info"] = "This creates a not UUID.  Rememberable. Machine guessable. Short.";
  		$this->thing_report["help"] = "This is about keeping track of things.";
 
-        $this->thing->log( $this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->thing->log( $this->agent_prefix .'completed message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-		return $this->thing_report;
+//		return $this->thing_report;
 	}
 
     function extractNuuids($input = null)
@@ -170,7 +60,7 @@ class Nuuid extends Agent
             $this->nuuids = array();
         }
         //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
-//        $pattern = "|[A-Za-z0-9]{4}|"; echo $input;
+        // $pattern = "|[A-Za-z0-9]{4}|"; // Nope just a-f.
         $pattern = "|[A-Fa-f0-9]{4}|";
 
         //$pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
@@ -187,7 +77,7 @@ class Nuuid extends Agent
 
         if ((is_array($nuuids)) and (count($nuuids) == 1)) {
             $this->nuuid = $nuuids[0];
-            $this->thing->log('Agent "Nuuid" found a nuuid (' . $this->nuuid . ') in the text.');
+            $this->thing->log('found a nuuid (' . $this->nuuid . ') in the text.');
             return $this->nuuid;
         }
 
@@ -199,13 +89,8 @@ class Nuuid extends Agent
 
     function makeChoices ()
     {
-       $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
         $this->thing->choice->Create($this->agent_name, $this->node_list, "nuuid");
-        $this->thing->log( $this->agent_prefix .'completed create choice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
         $this->choices = $this->thing->choice->makeLinks('nuuid');
-        $this->thing->log( $this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
         $this->thing_report['choices'] = $this->choices;
     }
@@ -352,7 +237,6 @@ class Nuuid extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
                     switch($piece) {
-
                         case 'nuuid':
                             return;
 
@@ -363,8 +247,6 @@ class Nuuid extends Agent
                 }
             }
         }
-
-//        return;
 
         if (strpos($input, 'nuuid') !== false) {
 

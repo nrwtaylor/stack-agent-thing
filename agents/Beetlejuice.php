@@ -3,7 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-class Beetlejuice{
+class Beetlejuice extends Agent
+{
 
     // Looks for a repeat.  Three times.
 
@@ -74,13 +75,14 @@ class Beetlejuice{
 
 //        $this->addTally();
         $this->get();
-
         $this->getDistance();
 
-        if ($this->agent_command == null) {$this->Respond();}
+//        if ($this->agent_command == null) {$this->Respond();}
+
+        $this->Respond();
+
 
         $this->set();
-
         $this->end_time = microtime(true);
         $this->actual_run_time = $this->end_time - $this->start_time;
         $milliseconds = round($this->actual_run_time * 1000);
@@ -88,6 +90,7 @@ class Beetlejuice{
         $this->thing->log( 'Agent "Beetlejuice" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
 
         $this->thing_report['log'] = $this->thing->log;
+
 		return;
 	}
 
@@ -110,8 +113,6 @@ class Beetlejuice{
         if ($requested_state == null) {
             $requested_state = $this->requested_state;
         }
-
-
 
         $this->variables_agent->setVariable("state", $requested_state);
 
@@ -280,7 +281,6 @@ function makeRandomString($length = 200) {
             $this->sms_message .= " | " . $this->flag;
         }
 		$this->sms_message .= ' | TEXT ?';
-
 		$this->thing_report['thing'] = $this->thing->thing;
 		$this->thing_report['sms'] = $this->sms_message;
 
@@ -382,5 +382,3 @@ function makeRandomString($length = 200) {
 
 
 }
-
-?>
