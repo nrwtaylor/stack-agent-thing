@@ -92,21 +92,16 @@ class Charley extends Agent
 
 
         if ($time_string == false) {
-            $this->refreshed_at = strtotime($this->thing->json->time());
-            $this->getCard();
-
             $this->thing->json->setField("variables");
-            $this->set();
-//            $this->thing->json->writeVariable( array("charley", "refreshed_at"), $time_string );
-
-        } else {
-            $this->refreshed_at = strtotime($time_string);
-
-
-            $this->nom = strtolower($this->thing->json->readVariable( array("charley", "nom") ));
-            $this->number = $this->thing->json->readVariable( array("charley", "number") );
-            $this->suit = $this->thing->json->readVariable( array("charley", "suit") );
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("charley", "refreshed_at"), $time_string );
         }
+
+        $this->refreshed_at = strtotime($time_string);
+
+        $this->nom = strtolower($this->thing->json->readVariable( array("charley", "nom") ));
+        $this->number = $this->thing->json->readVariable( array("charley", "number") );
+        $this->suit = $this->thing->json->readVariable( array("charley", "suit") );
 
 //        $this->getCard();
         $this->readSubject();
@@ -125,7 +120,7 @@ class Charley extends Agent
 */
         if ($this->agent_input == null) {$this->respond();}
 
-        //$this->set();
+        $this->set();
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
@@ -148,13 +143,9 @@ class Charley extends Agent
     public function set()
     {
 
-
             $this->thing->json->writeVariable( array("charley", "nom"), $this->nom );
             $this->thing->json->writeVariable( array("charley", "suit"), $this->suit );
             $this->thing->json->writeVariable( array("charley", "number"), $this->number );
-            $this->thing->json->writeVariable( array("charley", "refreshed_at"), $this->refreshed_at );
-
-
 //            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
 
     }
@@ -357,11 +348,10 @@ class Charley extends Agent
     {
         $this->getCards();
 
-        if ((!isset($this->nom)) or (!isset($this->suit))) {
-            $this->card = $this->card_list[array_rand($this->card_list)];
-        } else {
+        $this->card = $this->card_list[array_rand($this->card_list)];
 
-        //if (isset($this->cards[$this->nom][$this->suit])) {
+
+        if (isset($this->cards[$this->nom][$this->suit])) {
             $this->card = $this->cards[$this->nom][$this->suit];
         }
 

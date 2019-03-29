@@ -39,7 +39,7 @@ class Nonsense
         $this->from = $thing->from;
         $this->subject = $thing->subject;
 
-        $this->node_list = array("nonsense"=>array("index", "uuid"));
+        $this->node_list = array("nonsense"=>array("nonsense", "rocky", "charley"));
 
 		$this->haystack = $thing->uuid . 
 				$thing->to . 
@@ -248,7 +248,8 @@ class Nonsense
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
         $this->node_list = array("web"=>array("nonsense","nuuid"));
 
-        $web = "";
+        $web = "<b>Nonsense Agent</b>";
+        $web .= "<p>";
 
         //$web = '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';

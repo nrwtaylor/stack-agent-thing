@@ -63,9 +63,10 @@ class Secondnarrows {
         // Second narrows
         // http://www.waterlevels.gc.ca/eng/data/table/2018/curr_ref/4100
 
-        $this->sms_message = "Second Narrows | http://tides.mobilegeographics.com/locations/5715.html";
+        //$this->sms_message = "Second Narrows | http://tides.mobilegeographics.com/locations/5715.html";
+        $this->sms_message = "Second Narrows | https://tides.mobilegeographics.com/locations/7266.html | Provided a link.";
 
-		$this->message = "http://tides.mobilegeographics.com/locations/5715.html";
+		$this->message = "http://tides.mobilegeographics.com/locations/7266.html";
 		$this->keyword = "tide";
 
 		$this->thing_report['keyword'] = $this->keyword;
