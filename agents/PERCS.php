@@ -9,18 +9,18 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Rocky extends Agent
+class PERCS extends Agent
 {
 	public $var = 'hello';
 
     public function init()
     {
 
-        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
+        $this->node_list = array("percs"=>array("percs"));
 
         $this->unit = "FUEL";
 
-        $this->default_state = "easy";
+        $this->default_state = "X";
 
         $this->getNuuid();
 
@@ -31,10 +31,10 @@ class Rocky extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->rocky = new Variables($this->thing, "variables rocky " . $this->from);
+        $this->variable = new Variables($this->thing, "variables percs " . $this->from);
 	}
 
-    function isRocky($state = null)
+    function isPERCS($state = null)
     {
 
         if ($state == null) {
@@ -51,28 +51,27 @@ class Rocky extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable( array("rocky", "inject"), $this->inject );
+        $this->thing->json->writeVariable( array("percs", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
+//var_dump($this->state);
+        $this->variable->setVariable("state", $this->state);
+        $this->variable->setVariable("refreshed_at", $this->current_time);
 
-        $this->rocky->setVariable("state", $this->state);
-
-        $this->rocky->setVariable("refreshed_at", $this->current_time);
-
-        $this->thing->log($this->agent_prefix . 'set Rocky to ' . $this->state, "INFORMATION");
+        $this->thing->log($this->agent_prefix . 'set PERCS to ' . $this->state, "INFORMATION");
     }
 
     function get()
     {
-        $this->previous_state = $this->rocky->getVariable("state");
+        $this->previous_state = $this->variable->getVariable("state");
 
-        $this->refreshed_at = $this->rocky->getVariable("refreshed_at");
+        $this->refreshed_at = $this->variable->getVariable("refreshed_at");
 
         $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
-        if (!$this->isRocky($this->previous_state)) {
+        if (!$this->isPERCS($this->previous_state)) {
             $this->state = $this->previous_state;
         } else {
             $this->state = $this->default_state;
@@ -85,17 +84,17 @@ class Rocky extends Agent
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("rocky", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable( array("percs", "refreshed_at") );
 
         if ($time_string == false) {
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("rocky", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable( array("percs", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable( array("rocky", "inject") );
+        $this->inject = $this->thing->json->readVariable( array("percs", "inject") );
     }
 
     function getNuuid()
@@ -121,7 +120,7 @@ class Rocky extends Agent
     function setState($state)
     {
         $this->state = "easy";
-        if ((strtolower($state) == "16ln") or (strtolower($state) == "hard") or (strtolower($state) == "easy")) {
+        if ((strtolower($state) == "hard") or (strtolower($state) == "easy")) {
             $this->state = $state;
         }
     }
@@ -135,40 +134,25 @@ class Rocky extends Agent
 
     function setBank($bank = null)
     {
-        if (($bank == "easy") or ($bank == null)) {
-            $this->bank = "easy-a03";
-        }
+        //if (($bank == "easy") or ($bank == null)) {
+        //    $this->bank = "easy-a03";
+        //}
 
-        if ($bank == "hard") {
-            $this->bank = "hard-a05";
-        }
+        //if ($bank == "hard") {
+        //    $this->bank = "hard-a05";
+        //}
 
-        if ($bank == "16ln") {
+        //if ($bank == "16ln") {
             $this->bank = "16ln-a00";
-        }
+        //}
 
     }
 
     function getBank()
     {
-        if ((!isset($this->state)) or ($this->state == "easy")) {
-            $this->bank = "easy-a03";
-        }
-
-//        if (!isset($this->bank)) {
-//            $this->bank = "easy-a03";
-//        }
-
-
-
-        if ($this->state == "hard") {
-            $this->bank = "hard-a05";
-        }
-
-        if ($this->state == "16ln") {
+        if (!isset($this->bank)) {
             $this->bank = "16ln-a00";
         }
-
 
         if (isset($this->inject) and ($this->inject != false)) {
             $arr = explode("-",$this->inject);
@@ -185,8 +169,7 @@ class Rocky extends Agent
 		$this->thing->flagGreen();
 
 		$to = $this->thing->from;
-		$from = "rocky";
-        $this->makeACP125G();
+		$from = "percs";
 
         $this->makePNG();
 
@@ -209,16 +192,17 @@ class Rocky extends Agent
 
     function makeChoices ()
     {
-       $this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
-       $this->choices = $this->thing->choice->makeLinks('rocky');
+       $this->thing->choice->Create($this->agent_name, $this->node_list, "percs");
+       $this->choices = $this->thing->choice->makeLinks('percs');
 
        $this->thing_report['choices'] = $this->choices;
     }
 
     function makeSMS()
     {
-        $sms = "ROCKY " . $this->inject . " > \n";
-        $sms .= $this->short_message . "\n" . $this->response;
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/percs.pdf';
+
+        $sms = "PERCS " . $this->inject . " | " . $link . " | " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -230,57 +214,6 @@ class Rocky extends Agent
 
     }
 
-
-    function getCast()
-    {
-        // Load in the cast. And roles.
-        // Use the Charley cast.
-
-        // Not used yet.  But will allow use of
-        // message bank messages with scenario specific team.
-
-        $file = $this->resource_path .'/charley/charley.txt';
-        $contents = file_get_contents($file);
-
-        $handle = fopen($file, "r");
-
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-
-                $person_name = $line;
-                $arr = explode(",",$line);
-                $name= trim($arr[0]);
-                if(isset($arr[1])) {$role = trim($arr[1]);} else {$role = "X";}
-
-                // Unique name <> Role mappings. Check?
-                $this->name_list[$role] = $name;
-                $this->role_list[$name] = $role;
-
-                $this->cast[] = array("name"=>$name, "role"=>$role); 
-            }
-
-            fclose($handle);
-        } else {
-            // error opening the file.
-        }
-    }
-
-    function getName($role = null)
-    {
-        if (!isset($this->name_list)) {$this->getCast();}
-
-        if ($role == "X") {$this->name = "Rocky"; return;}
-
-        $this->name = array_rand(array("Rocky", "Rocket J. Squirrel"));
-
-        $input = array("Rocky", "Rocket");
-
-        // Pick a random Charles.
-        $this->name = $input[array_rand($input)];
-        if (isset($this->name_list[$role])) {$this->name = $this->name_list[$role];}
-
-        return $this->name;
-    }
 
     function getResponse()
     {
@@ -329,7 +262,7 @@ class Rocky extends Agent
 
         // Latest transcribed sets.
         $filename = "/vector/messages-" . $this->bank . ".txt";
-var_dump($filename);
+
         $this->filename = $this->bank . ".txt";
 
         $file = $this->resource_path . $filename;
@@ -352,9 +285,6 @@ var_dump($filename);
 
                 $line_count = count($message) - 1;
 
-var_dump($line_count);
-          //  if ($line_count == 10) {
-                // recognize as J-format
                 if ($bank_info == null) {
                     $this->title = $message[1];
                     $this->author = $message[2];
@@ -368,7 +298,7 @@ var_dump($line_count);
                     continue;
                 }
 
-
+/*
                 if ($line_count == 10) {
                 // recognize as J-format
 
@@ -394,55 +324,9 @@ var_dump($line_count);
                     "number_from"=>$number_from );
 
 
-                
-
                 $this->messages[] = $message_array;
                 }
-
-
-                if ($line_count == 10) {
-                // recognize as J-format
-
-                $meta = $message[1];
-
-                $name_to = $message[2];
-                $position_to = $message[3];
-                $organization_to = $message[4];
-                $number_to = $message[5];
-
-                $text = $message[6];
-
-                $name_from = $message[7];
-                $position_from = $message[8];
-                $organization_from = $message[9];
-                $number_from = $message[10];
-
-                $message_array = array("meta"=>$meta, "name_to"=>$name_to,
-                    "position_to"=>$position_to,  "organization_to"=>$organization_to,
-                    "number_to"=>$number_to, "text"=>$text,
-                    "name_from"=>$name_from, "position_from"=>$position_from,
-                    "organization_from"=>$organization_from,
-                    "number_from"=>$number_from );
-
-
-                 
-
-                $this->messages[] = $message_array;
-                }
-
-
-
-                $count = 0;
-                $message = null;
-                //}
-            }
-
-
-            $message[] = $line;
-            //continue;
-           //}
-        
-
+*/
         if ($line_count == 16) {
 
                 $line = array();
@@ -466,9 +350,19 @@ var_dump($message);
                 );
 
                 $this->messages[] = $message_array;
-
-
         }
+
+
+
+
+                $count = 0;
+                $message = null;
+                //}
+            }
+
+
+            $message[] = $line;
+
 
         }
 
@@ -482,7 +376,7 @@ var_dump($message);
     {
         $this->getMessages();
 
-        if ($this->inject == false) {
+        if ((!isset($this->inject)) or ($this->inject == false)) {
             $this->num = array_rand($this->messages);
             $this->inject = $this->bank . "-" .$this->num; 
         }
@@ -497,7 +391,8 @@ var_dump($message);
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }
-    }
+ 
+   }
 
     function getMessage()
     {
@@ -507,46 +402,82 @@ var_dump($message);
 
         $this->message = $this->messages[$this->num];
 
-        $this->meta = trim($this->message['meta'], "//");
+        $this->line_1 = $this->message['line_1'];
+        $this->line_2 = $this->message['line_2'];
+        $this->line_3 = $this->message['line_3'];
+        $this->line_4 = $this->message['line_4'];
+        $this->line_5 = $this->message['line_5'];
+        $this->line_6 = $this->message['line_6'];
+        $this->line_7 = $this->message['line_7'];
+        $this->line_8 = $this->message['line_8'];
+        $this->line_9 = $this->message['line_9'];
+        $this->line_10 = $this->message['line_10'];
+        $this->line_11 = $this->message['line_11'];
+        $this->line_12 = $this->message['line_12'];
+        $this->line_13 = $this->message['line_13'];
+        $this->line_14 = $this->message['line_14'];
+        $this->line_15 = $this->message['line_15'];
+        $this->line_16 = $this->message['line_16'];
 
-        $this->name_to = $this->message['name_to'];
-        $this->position_to = $this->message['position_to'];
-        $this->organization_to = $this->message['organization_to'];
-        $this->number_to = trim($this->message['number_to'],"//");
+        $this->short_message = $this->line_1 . "\n" .
+            $this->line_2 . "\n" .
+            $this->line_3 . "\n" .
+            $this->line_4 . "\n" .
+            $this->line_5 . "\n" .
+            $this->line_6 . "\n" .
+            $this->line_7 . "\n" .
+            $this->line_8 . "\n" .
+            $this->line_9 . "\n" .
+            $this->line_10 . "\n" .
+            $this->line_11. "\n" .
+            $this->line_12 . "\n" .
+            $this->line_13 . "\n" .
+            $this->line_14 . "\n" .
+            $this->line_15 . "\n" . 
+            $this->line_16 . "\n";
 
+        $from = explode("/", $this->message['line_6']);
+        $this->message['name_from'] = $from[0];
+        $this->message['position_from'] = $from[1];
+        $this->message['organization_from'] = $from[2];
+        if(isset($from[3])) {$this->message['number_from'] = $from[3];}
 
-        $this->text = trim($this->message['text'],"//");
+        $to = explode("/", $this->message['line_7']);
 
-        $this->name_from = $this->message['name_from'];
-        $this->position_from = $this->message['position_from'];
-        $this->organization_from = $this->message['organization_from'];
-        $this->number_from = $this->message['number_from'];
+        $this->message['name_to'] = $to[0];
+        $this->message['position_to'] = $to[1];
+        $this->message['organization_to'] = $to[2];
+        if(isset($to[3])) {$this->message['number_to'] = $to[3];}
 
+        $this->message['text'] = $this->message['line_12'];
 
-        $this->short_message = $this->meta . "\n" .
-             $this->name_to . ", " . $this->position_to . ", " .
-             $this->organization_to.", " . $this->number_to. ". " . "\n" .
-             $this->text ." " . "\n" .
-             $this->name_from . ", " .
-             $this->position_from . ", " . $this->organization_from . ", " .
-             $this->number_from. ".";
-
-        $arr = explode("/",$this->meta);
-        $this->message['number'] = $arr[0];
-        $this->message['precedence'] = $arr[1];
+        $this->message['number'] = $this->message['line_4'];
+        $this->message['precedence'] = $this->message['line_5'];
         $this->message['hx'] = null; // Not used?
-        $this->message['station_origin'] = $arr[2];
-        $this->message['check'] = $arr[3];
-        $this->message['place_filed'] = $arr[4];
-        $this->message['time_filed'] = $arr[5];
-        $this->message['date_filed'] = $arr[6];
+        $this->message['station_origin'] = $this->message['line_3'];
+        $this->message['station_destination'] = $this->message['line_2'];
+
+        $this->message['check'] = null;
+        $this->message['place_filed'] = null;
+
+        $clocktime = new Clocktime($this->thing, "clocktime");
+        $clocktime->extractClocktime($this->message['line_5']);
+        $time_string = $clocktime->hour . ":" . $clocktime->minute;
+
+        $this->message['time_filed'] = $time_string;
+
+        $calendardate = new Calendardate($this->thing, "calendardate");
+        $calendardate->extractCalendardate($this->message['line_5']);
+        $date_string = $calendardate->year . "-" . $calendardate->month ."-" . $calendardate->day;
+
+        $this->message['date_filed'] = $date_string;
     }
 
     function makeMessage()
     {
         $message = $this->short_message . "<br>";
         $uuid = $this->uuid;
-        $message .= "<p>" . $this->web_prefix . "thing/$uuid/rocky\n \n\n<br> ";
+        $message .= "<p>" . $this->web_prefix . "thing/$uuid/percs\n \n\n<br> ";
         $this->thing_report['message'] = $message;
     }
 
@@ -556,26 +487,26 @@ var_dump($message);
     }
 
 
-    function setRocky()
+    function setInject()
     {
     }
 
-    function getRocky()
-    {
-    }
+    //function getInject()
+    //{
+    //}
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/percs';
 
-        $this->node_list = array("rocky"=>array("rocky", "bullwinkle","charley"));
+        $this->node_list = array("percs"=>array("percs", "rocky", "bullwinkle","charley"));
         // Make buttons
         //$this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
         //$choices = $this->thing->choice->makeLinks('rocky');
 
         if (!isset($this->html_image)) {$this->makePNG();}
 
-        $web = "<b>Rocky Agent</b>";
+        $web = "<b>PERCS Agent</b>";
         $web .= "<p>";
 
 
@@ -592,69 +523,19 @@ var_dump($message);
 
 
         $web .= "<p>";
-        $web .= "Raw inject";
-        $web .= "<p>";
-
-        $web .= $this->inject . "<br>";
-
-        $web .= $this->short_message . "<br>";
-
-        $web .= "<p>";
-        $web .= "Parsed inject";
-        $web .= "<p>";
-
-
-        $web .= "# " . $this->message['number'] . "<br>";
-        $web .= "PRECEDENCE " . $this->message['precedence'] . "<br>";
-        $web .= "HX " .  $this->message['hx'] . "<br>"; // Not used?
-        $web .= "STATION ORIGIN " . $this->message['station_origin'] . "<br>";
-        $web .= "CHECKSUM " .$this->message['check'] . "<br>";
-        $web .= "PLACE FILED " . $this->message['place_filed'] . "<br>";
-        $web .= "TIME FILED " . $this->message['time_filed'] . "<br>";
-        $web .= "DATE FILED " . $this->message['date_filed'] . "<br>";
-
-        $web .= "<p>";
-
-        $web .= "TO (NAME) " . $this->name_to . "<br>";
-        $web .= "TO (POSITION) " . $this->position_to . "<br>";
-        $web .= "TO (ORGANIZATION) " . $this->organization_to . "<br>";
-        $web .= "TO (NUMBER) " . $this->number_to . "<br>";
-
-        $web .= "<p>";
-
-        $web .= $this->text . "<br>";
-
-        $web .= "<p>";
-
-        $web .= "FROM (NAME) " . $this->name_from . "<br>";
-        $web .= "FROM (POSITION) " . $this->position_from . "<br>";
-        $web .= "FROM (ORGANIZATION) " . $this->organization_from . "<br>";
-        $web .= "FROM (NUMBER) " . $this->number_from . "<br>";
-
-
-        $web .= "<p>";
 
         $web .= "ACP 125(G) inject";
         $web .= "<p>";
 
-
-        $this->makeACP125G($this->message);
-        $web .= nl2br($this->acp125g->thing_report['acp125g']);
-
-        $web .= "<p>";
-
-        $web .= "SMS inject";
-        $web .= "<p>";
-
+        $web .= $this->inject . "<br>";
 
         $web .= nl2br($this->short_message) . "<br>";
 
-
         $web .= "<p>";
-        $web .= "PDF inject";
+        $web .= "PERCS PDF inject";
         $web .= "<p>";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky.pdf';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/percs.pdf';
         $web .= '<a href="' . $link . '">'. $link . "</a>";
         $web .= "<br>";
         $web .= "<p>";
@@ -680,11 +561,11 @@ var_dump($message);
 
     function makeTXT()
     {
-        $txt = "Traffic for ROCKY.\n";
+        $txt = "PERCS traffic.\n";
         $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
         $txt .= "\n";
 
-        $txt .= $this->acp125g->thing_report['acp125g'];
+        $txt .= $this->short_message;
 
         $txt .= "\n";
 
@@ -722,7 +603,7 @@ var_dump($message);
         //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
-        $text = "ROCKY";
+        $text = "INJET";
         $text = $this->message['text'];
 
         if (!isset($this->bar)) {$this->getBar();}
@@ -787,6 +668,12 @@ var_dump($message);
         return $this->duplicables;
     }
 
+    public function makePERCS()
+    {
+        $this->makePDF();
+        $this->thing_report['percs'] = $this->thing_report['pdf'];
+    }
+
     public function makePDF()
     {
         $txt = $this->thing_report['txt'];
@@ -814,7 +701,7 @@ var_dump($message);
         $pdf->Write(0, $text);
 
 
-            $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\rocky');
+            $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\percs');
             $pdf->Image($this->quick_response_png,199,2,10,10,'PNG');
 
         //$pdf->SetXY(15, 20);
@@ -896,8 +783,7 @@ var_dump($message);
         //$i = 1;
 
         $i =0;
-        $words = explode(" ", $this->text);
-
+        $words = explode(" ", $this->message['text']);
 
         $col_offset = 59;
         $row_offset = 122;
@@ -930,7 +816,7 @@ var_dump($message);
 
         if (count($pieces) == 1) {
 
-            if ($input == 'rocky') {
+            if ($input == 'percs') {
 
                 $this->getMessage();
 
@@ -942,7 +828,7 @@ var_dump($message);
             }
         }
 
-        $keywords = array("hard", "16ln", "easy","hey", "rocky","charley","bullwinkle","natasha","boris");
+        $keywords = array("percs","acp125g", "inject", "hard", "16ln", "easy","hey", "rocky","charley","bullwinkle","natasha","boris");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
@@ -951,7 +837,8 @@ var_dump($message);
                         case 'hard':
                         case 'easy':
                         case '16ln':
-var_dump($piece);
+                        case 'acp125g':
+                        case 'percs':
                             $this->setState($piece);
                             $this->setBank($piece);
 
