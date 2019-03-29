@@ -182,10 +182,12 @@ $this->channel_name = $channel->channel_name;
 			switch ($key) {
                 case 'keyword':
                     $this->keyword = $this->thing_report['keyword'];
-					continue;
+                    break;
+//					continue;
     			case 'sms':
 					$this->sms_message = $this->thing_report['sms'];
-					continue;
+                    break;
+//					continue;
                 case 'choices':
 
                     if ($this->button->state == "on") {
@@ -193,15 +195,19 @@ $this->channel_name = $channel->channel_name;
                     } else {
                         $this->choices = false;
                     }
-					continue;
+                    break;
+//					continue;
 
                 case 'email':
                     $this->email = $this->thing_report['email'];
-					continue;
+                    break;
+//					continue;
   				case 'web':
-					continue;
+                    break;
+//					continue;
                 default:
-                    continue;
+                    break;
+//                    continue;
 			}
 		}
 		return;

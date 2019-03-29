@@ -575,3 +575,28 @@ Which created at 31 Mb file.
 
 sudo apt install ncdu
 And work through removing files.
+
+#
+
+Enable Soap
+# /etc/php5/apache2/php.ini
+# sudo apt-get install php7.3-soap
+
+# /etc/php/7.3/apache/php.ini
+# uncomment ;extension=soap
+
+Check phpinfo.
+/etc/php/7.2/apache2/php.ini
+uncomment ;extension=soap
+
+sudo apt-get install php7.2-soap
+sudo service apache2 restart
+
+Install bcmath extension
+
+#sudo apt install yu
+#yum install php-bcmath
+https://ourcodeworld.com/articles/read/679/how-to-solve-the-requested-php-extension-bcmath-is-missing-from-your-system-when-installing-a-library-via-composer-in-ubuntu-16-04
+sudo apt install php7.3-bcmath
+
+
