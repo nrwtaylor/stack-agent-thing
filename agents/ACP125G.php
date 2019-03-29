@@ -202,20 +202,23 @@ class ACP125G extends Agent
     {
         $sms = "ACP 125(G) " . $this->inject . " > \n";
         $sms .= $this->short_message . "\n" . $this->response;
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
     function makeACP125G($message = null)
     {
+        if (!isset($message['station_destination'])) {$message['station_destination']="X";}
+
         $sms = "ACP 125(G) " . $this->inject . " > \n";
         $line[1] = "."; // not used
         $line[2] = $message['station_destination'];
         $line[3] = "DE " . $message['station_origin'] . " " . $message['place_filed'];
         $line[4] = $message['number'];
         $line[5] = $message['precedence'] . " " . $message['date_filed'] . " " . $message['time_filed'];
-        $line[6] = $message['name_from'] ."/" . $message['name_from'] ."/" .$message['organization_from'] ."/" . $message['organization_number'];
-        $line[7] = $message['name_to'] ."/" . $message['name_to'] ."/" .$message['organization_to'] ."/" . $message['organization_to'];
+        $line[6] = $message['name_from'] ."/" . $message['name_from'] ."/" .$message['organization_from'] ."/" . $message['number_from'];
+        $line[7] = $message['name_to'] ."/" . $message['name_to'] ."/" .$message['organization_to'] ."/" . $message['number_to'];
 
         $line[8] = "."; // not used - information_addresses
         $line[9] = "."; // not used - exempted_addresses;
@@ -509,6 +512,7 @@ class ACP125G extends Agent
         $this->message['name_from'] = $from[0];
         $this->message['position_from'] = $from[1];
         $this->message['organization_from'] = $from[2];
+        $this->message['number_from'] = "X";
         if(isset($from[3])) {$this->message['number_from'] = $from[3];}
 
         $to = explode("/", $this->message['line_7']);
@@ -516,6 +520,7 @@ class ACP125G extends Agent
         $this->message['name_to'] = $to[0];
         $this->message['position_to'] = $to[1];
         $this->message['organization_to'] = $to[2];
+        $this->message['number_to'] = "X";
         if(isset($to[3])) {$this->message['number_to'] = $to[3];}
 
         $this->message['text'] = $this->message['line_12'];

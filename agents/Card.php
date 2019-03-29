@@ -70,7 +70,7 @@ class Card
 
         return;
     }
-
+/*
     public function set()
     {
         $this->variables_agent->setVariable("id", $this->id);
@@ -78,6 +78,16 @@ class Card
 
         return;
     }
+*/
+    public function set()
+    {
+
+            $this->thing->json->writeVariable( array("charley", "nom"), $this->nom );
+            $this->thing->json->writeVariable( array("charley", "suit"), $this->suit );
+//            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+
+    }
+
 
 
     public function get()
@@ -124,9 +134,12 @@ class Card
         $k = array_rand($array);
         $v = $array[$k];
 
-        $this->face = strtolower($v);
+        $this->nom = strtolower($v);
 
-        $this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
+        //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
+
+        $this->response = "". strtoupper($this->nom) . " of " . ucwords($this->suit) . " [" . strtoupper($this->colour) . "].";
+
 
 //echo "make a thing":
         //$thing = new Thing(null);
@@ -174,7 +187,7 @@ class Card
     {
         switch ($this->id) {
             case 1:
-                $sms = "CARD | A snowflake falls. Text SNOWFLAKE.";
+                $sms = "CARD | A card is drawn. Text CARD.";
                 break;
             case 2:
                 $sms = "CARD | Another one.  Appears. Text CARD.";
@@ -187,7 +200,7 @@ class Card
 
         }
 
-        $sms .= " | id " . $this->id;
+        //$sms .= " | id " . $this->id;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;

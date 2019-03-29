@@ -66,9 +66,9 @@ class Firstnarrows {
 		$this->response = "Made a link.";
 
 		// $this->sms_message = "Second Narrows | authorative http://www.tides.gc.ca/eng/data/table/2018/curr_ref/4100";
-        $this->sms_message = "First Narrows | http://tides.mobilegeographics.com/locations/1921.html";
-
-		$this->message = "http://tides.mobilegeographics.com/locations/1921.html";
+        //$this->sms_message = "First Narrows | http://tides.mobilegeographics.com/locations/1921.html";
+        $this->sms_message = "First Narrows | https://tides.mobilegeographics.com/locations/2504.html | Provided a link.";
+		$this->message = "http://tides.mobilegeographics.com/locations/2504.html";
 		$this->keyword = "tide";
 
 		$this->thing_report['keyword'] = $this->keyword;
@@ -79,5 +79,3 @@ class Firstnarrows {
 		return $this->response;
 	}
 }
-
-?>

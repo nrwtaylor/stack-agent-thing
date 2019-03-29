@@ -92,17 +92,21 @@ class Charley extends Agent
 
 
         if ($time_string == false) {
+            $this->refreshed_at = strtotime($this->thing->json->time());
+            $this->getCard();
+
             $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("charley", "refreshed_at"), $time_string );
+            $this->set();
+//            $this->thing->json->writeVariable( array("charley", "refreshed_at"), $time_string );
+
+        } else {
+            $this->refreshed_at = strtotime($time_string);
+
+
+            $this->nom = strtolower($this->thing->json->readVariable( array("charley", "nom") ));
+            $this->number = $this->thing->json->readVariable( array("charley", "number") );
+            $this->suit = $this->thing->json->readVariable( array("charley", "suit") );
         }
-
-        $this->refreshed_at = strtotime($time_string);
-
-
-        $this->nom = strtolower($this->thing->json->readVariable( array("charley", "nom") ));
-        $this->number = $this->thing->json->readVariable( array("charley", "number") );
-        $this->suit = $this->thing->json->readVariable( array("charley", "suit") );
 
 //        $this->getCard();
         $this->readSubject();
@@ -121,7 +125,7 @@ class Charley extends Agent
 */
         if ($this->agent_input == null) {$this->respond();}
 
-        $this->set();
+        //$this->set();
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
@@ -144,9 +148,13 @@ class Charley extends Agent
     public function set()
     {
 
+
             $this->thing->json->writeVariable( array("charley", "nom"), $this->nom );
             $this->thing->json->writeVariable( array("charley", "suit"), $this->suit );
             $this->thing->json->writeVariable( array("charley", "number"), $this->number );
+            $this->thing->json->writeVariable( array("charley", "refreshed_at"), $this->refreshed_at );
+
+
 //            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
 
     }
@@ -349,10 +357,16 @@ class Charley extends Agent
     {
         $this->getCards();
 
-        $this->card = $this->card_list[array_rand($this->card_list)];
-        if (isset($this->cards[$this->nom][$this->suit])) {
+        if ((!isset($this->nom)) or (!isset($this->suit))) {
+            $this->card = $this->card_list[array_rand($this->card_list)];
+        } else {
+
+        //if (isset($this->cards[$this->nom][$this->suit])) {
             $this->card = $this->cards[$this->nom][$this->suit];
         }
+
+//var_dump($this->card['nom']);
+//var_dump($this->card['suit']);
 
         $this->nom = $this->card['nom'];
         $this->suit = $this->card['suit'];
@@ -374,7 +388,10 @@ class Charley extends Agent
         $this->fictional_from = $this->getName($this->role_from);
 
 //        $this->response = "to: " . $this->fictional_to . ", " . $this->role_to . " from: " . $this->fictional_from . ", " . $this->role_from . " / " . $this->text . " / " . $this->number . " " . $this->unit . ".";
-        $this->response = "to: " . $this->fictional_to . ", " . $this->role_to . "\nfrom: " . $this->fictional_from . ", " . $this->role_from . "\n" . $this->text . "\n" . $this->number . " " . $this->unit . ".";
+        $this->response = "TO " . $this->fictional_to .
+             ", " . $this->role_to . "\nFROM " . 
+            $this->fictional_from . ", " . $this->role_from . "\n" .
+             "INJECT " . $this->text . "\n" . $this->number . " " . $this->unit . ".";
 
 
         if (($this->role_to == "X") and ($this->role_from == "X") and ($this->text == "X")) {
@@ -475,6 +492,9 @@ class Charley extends Agent
 
         }
 
+        $web .= "<p>";
+        if(isset($this->text)) {$web .= "" . $this->text;}
+
 
         $web .= "<p>";
         $web .= "<b>". $this->number . " " . $this->unit . "</b><br>";
@@ -484,18 +504,21 @@ class Charley extends Agent
         //if(isset($this->role_from)) {$web .= $this->role_from;}
         //if(isset($this->role_to)) {$web .= $this->role_to;}
 
-        //if(isset($this->text)) {$web .= "<p>" . $this->text;}
 
+        //$web .= "SMS Inject<p>" . $this->response . "<br";
+        //$web .= "<br>";
 
-        $web .= "<p>";
-
-        $web .= "SMS Inject<p>" . $this->response . "<br";
-        $web .= "<br>";
-
-        $web .= "<p>";
+        //$web .= "<p>";
         //$received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time ( time() - $this->refreshed_at );
-        $web .= "This inject was created about ". $ago . " ago.";
+        $web .= "This inject was created about ". $ago . " ago. ";
+
+        $link = $this->web_prefix . "privacy";
+        $privacy_link = '<a href="' . $link . '">'. $link . "</a>";
+
+
+        $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $privacy_link . ".";
+
 
         $web .= "<br>";
 

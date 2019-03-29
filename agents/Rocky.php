@@ -18,7 +18,8 @@ class Rocky extends Agent
 
         $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
 
-        $this->unit = "FUEL";
+        $this->number = null;
+        $this->unit = "";
 
         $this->default_state = "easy";
 
@@ -218,7 +219,10 @@ class Rocky extends Agent
     function makeSMS()
     {
         $sms = "ROCKY " . $this->inject . " > \n";
+//        $sms .= $this->response;
+
         $sms .= $this->short_message . "\n" . $this->response;
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -329,7 +333,7 @@ class Rocky extends Agent
 
         // Latest transcribed sets.
         $filename = "/vector/messages-" . $this->bank . ".txt";
-var_dump($filename);
+
         $this->filename = $this->bank . ".txt";
 
         $file = $this->resource_path . $filename;
@@ -352,7 +356,6 @@ var_dump($filename);
 
                 $line_count = count($message) - 1;
 
-var_dump($line_count);
           //  if ($line_count == 10) {
                 // recognize as J-format
                 if ($bank_info == null) {
@@ -400,53 +403,10 @@ var_dump($line_count);
                 }
 
 
-                if ($line_count == 10) {
-                // recognize as J-format
-
-                $meta = $message[1];
-
-                $name_to = $message[2];
-                $position_to = $message[3];
-                $organization_to = $message[4];
-                $number_to = $message[5];
-
-                $text = $message[6];
-
-                $name_from = $message[7];
-                $position_from = $message[8];
-                $organization_from = $message[9];
-                $number_from = $message[10];
-
-                $message_array = array("meta"=>$meta, "name_to"=>$name_to,
-                    "position_to"=>$position_to,  "organization_to"=>$organization_to,
-                    "number_to"=>$number_to, "text"=>$text,
-                    "name_from"=>$name_from, "position_from"=>$position_from,
-                    "organization_from"=>$organization_from,
-                    "number_from"=>$number_from );
-
-
-                 
-
-                $this->messages[] = $message_array;
-                }
-
-
-
-                $count = 0;
-                $message = null;
-                //}
-            }
-
-
-            $message[] = $line;
-            //continue;
-           //}
-        
 
         if ($line_count == 16) {
 
                 $line = array();
-var_dump($message);
                 $message_array = array("line_1"=>$message[1],
                     "line_2"=>$message[2],
                     "line_3"=>$message[3],
@@ -469,6 +429,12 @@ var_dump($message);
 
 
         }
+                $count = 0;
+                $message = null;
+            }
+
+
+            $message[] = $line;
 
         }
 
@@ -522,7 +488,7 @@ var_dump($message);
         $this->organization_from = $this->message['organization_from'];
         $this->number_from = $this->message['number_from'];
 
-
+/*
         $this->short_message = $this->meta . "\n" .
              $this->name_to . ", " . $this->position_to . ", " .
              $this->organization_to.", " . $this->number_to. ". " . "\n" .
@@ -530,6 +496,40 @@ var_dump($message);
              $this->name_from . ", " .
              $this->position_from . ", " . $this->organization_from . ", " .
              $this->number_from. ".";
+*/
+
+        $name_to = ucwords($this->name_to);
+        $position_to = ucwords($this->position_to);
+        $organization_to = strtoupper($this->organization_to);
+
+        $name_from = ucwords($this->name_to);
+        $position_from = ucwords($this->position_from);
+        $organization_from = strtoupper($this->organization_to);
+
+        $this->short_message = "TO " . $name_to . 
+             ", " . $position_to . " [" . $organization_to . "]" . "\nFROM " . 
+            $name_from . ", " . $position_from .  " [" . $organization_from . "]" . 
+            "\n" . "TRAFFIC " . $this->text . "\n" .
+            $this->number . " " . $this->unit . "";
+
+
+        if (($this->position_to == "X") and ($this->position_from == "X") and ($this->text == "X")) {
+            //$this->response = $this->number . " " . $this->unit . ".";
+            $this->response = "No message to pass.";
+        }
+
+        if (($this->position_to == "X") and ($this->position_from == "X") and ($this->text != "X")) {
+            //$this->response = $this->text . "\n" . $this->number. " " . $this->unit . ".";
+            $this->response = "Unaddressed message.";
+        }
+
+        if (($this->position_to == "X") and ($this->position_from != "X") and ($this->text != "X")) {
+            $this->response = "TO < ? >" . " FROM " . $this->fictional_from .  ", " . $this->role_from . " / " . $this->text . "\n" . $this->number. " " . $this->unit . ".";
+        }
+
+
+
+
 
         $arr = explode("/",$this->meta);
         $this->message['number'] = $arr[0];
@@ -600,6 +600,7 @@ var_dump($message);
         $web .= $this->short_message . "<br>";
 
         $web .= "<p>";
+/*
         $web .= "Parsed inject";
         $web .= "<p>";
 
@@ -631,7 +632,7 @@ var_dump($message);
         $web .= "FROM (ORGANIZATION) " . $this->organization_from . "<br>";
         $web .= "FROM (NUMBER) " . $this->number_from . "<br>";
 
-
+*/
         $web .= "<p>";
 
         $web .= "ACP 125(G) inject";
@@ -647,7 +648,7 @@ var_dump($message);
         $web .= "<p>";
 
 
-        $web .= nl2br($this->short_message) . "<br>";
+        $web .= nl2br($this->short_message);
 
 
         $web .= "<p>";
@@ -669,7 +670,12 @@ var_dump($message);
         $web .= " and will expire in " . $togo. ".<br>";
 
         $web .= "<br>";
-        $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
+
+        $link = $this->web_prefix . "privacy";
+        $privacy_link .= '<a href="' . $link . '">'. $link . "</a>";
+
+
+        $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $privacy_link . ".";
 
         $web .= "<br>";
 
@@ -951,7 +957,6 @@ var_dump($message);
                         case 'hard':
                         case 'easy':
                         case '16ln':
-var_dump($piece);
                             $this->setState($piece);
                             $this->setBank($piece);
 
