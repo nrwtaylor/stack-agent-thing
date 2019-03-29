@@ -54,7 +54,7 @@ class ACP125G extends Agent
         $this->thing->json->writeVariable( array("acp125g", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
-//var_dump($this->state);
+
         $this->variable->setVariable("state", $this->state);
         $this->variable->setVariable("refreshed_at", $this->current_time);
 
@@ -206,26 +206,47 @@ class ACP125G extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
-    function makeACP125G()
+    function makeACP125G($message = null)
     {
         $sms = "ACP 125(G) " . $this->inject . " > \n";
-        $line[1] = null;
-        $line[2] = $call;
-        $line[3] = $call;
-        $line[4] = $transmission_id;
-        $line[5] = $precedence_date_time_instructions;
-        $line[6] = $originator;
-        $line[7] = $action_addresses;
-        $line[8] = $information_addresses;
-        $line[9] = $exempted_addresses;
-        $line[10] = $accounting;
-        $line[11] = "BREAK";
-        $line[12] = $subject_matter;
-        $line[13] = "BREAK";
+        $line[1] = "."; // not used
+        $line[2] = $message['station_destination'];
+        $line[3] = "DE " . $message['station_origin'] . " " . $message['place_filed'];
+        $line[4] = $message['number'];
+        $line[5] = $message['precedence'] . " " . $message['date_filed'] . " " . $message['time_filed'];
+        $line[6] = $message['name_from'] ."/" . $message['name_from'] ."/" .$message['organization_from'] ."/" . $message['organization_number'];
+        $line[7] = $message['name_to'] ."/" . $message['name_to'] ."/" .$message['organization_to'] ."/" . $message['organization_to'];
 
-        $acp125g = "meep". " | " . $this->response;
-        $this->acp125g_message = $acp125g;
-        $this->thing_report['ACP 125(G)'] = $acp125g;
+        $line[8] = "."; // not used - information_addresses
+        $line[9] = "."; // not used - exempted_addresses;
+        $line[10] = "."; // accounting
+        $line[11] = "BT";
+        $line[12] = $message['text'];
+        $line[13] = "BT";
+        $line[14] = ".";
+        $line[15] = ".";
+        $line[16] = "NNNN";
+
+        //$acp125g = "meep". " | " . $this->response;
+        $this->acp125g_message = $line[1] . "\n" .
+            $line[2] . "\n" . 
+            $line[3] . "\n" . 
+            $line[4] . "\n" . 
+            $line[5] . "\n" . 
+            $line[6] . "\n" . 
+            $line[7] . "\n" . 
+            $line[8] . "\n" . 
+            $line[9] . "\n" . 
+            $line[10] . "\n" . 
+            $line[11] . "\n" . 
+            $line[12] . "\n" . 
+            $line[13] . "\n" . 
+            $line[14] . "\n" . 
+            $line[15] . "\n" . 
+            $line[16] . "\n"; 
+
+        $this->thing_report['acp125g'] = $this->acp125g_message;
+
     }
 
 
@@ -310,7 +331,7 @@ class ACP125G extends Agent
 
         // Latest transcribed sets.
         $filename = "/vector/messages-" . $this->bank . ".txt";
-var_dump($filename);
+
         $this->filename = $this->bank . ".txt";
 
         $file = $this->resource_path . $filename;
@@ -333,9 +354,6 @@ var_dump($filename);
 
                 $line_count = count($message) - 1;
 
-var_dump($line_count);
-          //  if ($line_count == 10) {
-                // recognize as J-format
                 if ($bank_info == null) {
                     $this->title = $message[1];
                     $this->author = $message[2];
@@ -349,7 +367,7 @@ var_dump($line_count);
                     continue;
                 }
 
-
+/*
                 if ($line_count == 10) {
                 // recognize as J-format
 
@@ -377,11 +395,11 @@ var_dump($line_count);
 
                 $this->messages[] = $message_array;
                 }
-
+*/
         if ($line_count == 16) {
 
                 $line = array();
-var_dump($message);
+
                 $message_array = array("line_1"=>$message[1],
                     "line_2"=>$message[2],
                     "line_3"=>$message[3],
@@ -413,14 +431,6 @@ var_dump($message);
 
 
             $message[] = $line;
-            //continue;
-           //}
-        
-
-
-
-
-
 
 
         }
@@ -922,7 +932,7 @@ var_dump($message);
                         case 'easy':
                         case '16ln':
                         case 'acp125g':
-var_dump($piece);
+
                             $this->setState($piece);
                             $this->setBank($piece);
 
