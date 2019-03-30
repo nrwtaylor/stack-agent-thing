@@ -106,9 +106,6 @@ $this->makeMessage($input);
 /*
 */
 
-
-
-
         $this->thing->log( 'Agent "Email" running on Thing ' .  $this->thing->nuuid . '.',"INFORMATION" );
         $this->thing->log( 'Agent "Email" received this Thing "' .  $this->subject . '".' ,"INFORMATION");
 
@@ -182,7 +179,10 @@ $this->makeMessage($input);
 
         if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
             //$this->sendSms($to, $test_message);
-
+//echo $to;
+//echo "/n";
+//echo $from;
+//echo "/n";
             $this->sendGeneric($to,$from,$this->subject,$this->message, null);
             $this->thing->account['stack']->Debit($this->cost);
 
@@ -283,8 +283,6 @@ $this->thing_report['help'] = "This agent is responsible for sending emails.";
         }
 
 
-//var_dump($this->message);
-//exit();
     }
 
 
@@ -305,7 +303,6 @@ $this->thing_report['help'] = "This agent is responsible for sending emails.";
         //$file = '/var/www/stackr.test/resources/limitedbeta/limitedbeta.txt';
         //$file = '/var/www/html/stackr.ca/resources/limitedbeta/limitedbeta.txt';
         $file = $this->resource_path . 'limitedbeta/limitedbeta.txt';
-
 
         $contents = file_get_contents($file);
 
@@ -339,8 +336,6 @@ if ($this->checkAddress($to) != false) {
        $donotsend = true;
 }
 
-
-
 		$subject = $this->mail_prefix . ' ' . $subject;
 
 		if (strpos(strtolower($subject),strtolower("Stack record: ")) !== false) {
@@ -350,22 +345,18 @@ if ($this->checkAddress($to) != false) {
 		if (strpos(strtolower($subject),strtolower("Stack record: Opt-in verification request ")) !== false) {
 			$donotsend = true;
 		}
-
 		// Do not send an email to stack domain.
 		if (strpos(strtolower($this->from), strtolower($this->mail_postfix)) != false) {
 			$donotsend = true;
 		}
-
 		$email_thing = new Thing(null);
 		$email_thing->Create($to, 'ant' , 's/ record email authorization');
 		$email_thing->flagGreen();
 
 		$user_state = $email_thing->getState('usermanager');
 
-
 //		$db = new Database($this->uuid, $this->from);	
 //		$db->setUser($this->from);
-
 
 		if ($donotsend) {return true;}
 
@@ -380,10 +371,11 @@ if ($this->checkAddress($to) != false) {
 
 
 
-
+//var_dump($to);
+//var_dump($headers);
 		
-		mail($to,$subject,$message, $headers);
-
+		
+mail($to,$subject,$message, $headers);
 
         $this->thing->log( '<pre> Agent "Email" sent an email to ' . $to . ".");
         $this->thing->log( 'Agent "Email" said "' . $subject . '".');
@@ -657,7 +649,6 @@ $this->generateHTML($raw_message, $choices);
 	public function sendGeneric($to,$from,$subject,$raw_message, $choices = null) {
 
 		$from = $from .$this->mail_postfix;
-
 
 
 //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
