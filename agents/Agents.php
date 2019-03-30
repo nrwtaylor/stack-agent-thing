@@ -60,6 +60,7 @@ class Agents extends Agent
 
     public function report()
     {
+        $this->thing_report['thing'] = $this->thing;
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;

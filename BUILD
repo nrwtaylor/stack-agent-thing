@@ -514,6 +514,10 @@ query_cache_type = 0
 
 INSTALL POSTFIX
 
+Test connection with.
+sudo apt-get install mailutils
+echo "test winlink message 2" | mailx -s 'TEST whiskey india november lima india november kilo' < example email address >
+
 sudo apt-get update
 sudo DEBIAN-PRIORITY=low apt-get install postfix
 sudo dpkg-reconfigure postfix
@@ -527,6 +531,7 @@ mytransportname   unix  -       n       n       -       -       pipe
 
 To check status
 sudo postfix status
+
 
 ---
 
