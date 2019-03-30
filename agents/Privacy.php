@@ -60,8 +60,7 @@ class Privacy {
 		$this->thing->log('Agent "Privacy" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . "ms.");
 
 		return;
-
-		}
+    }
 
     public function privacy()
     {
@@ -99,10 +98,7 @@ class Privacy {
 
         $message .= 'For a full statement of our privacy policy, please goto to <a href="' . $this->web_prefix . ' privacy">' . $this->web_prefix . 'privacy</a>';
 
-
         $this->thing_report['email'] = $message;
-
-        return;
     }
 
     public function makeChoices()

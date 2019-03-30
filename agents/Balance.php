@@ -89,8 +89,8 @@ class Balance extends Agent {
     {
         $this->sms_message = "BALANCE | ";
         $this->sms_message .= number_format( $this->stack_balance ) . ' units' ;
-        $this->sms_message .= " ";
-        $this->sms_message .= number_format( $this->thing_balance ) . ' units' ;
+        //$this->sms_message .= " ";
+        //$this->sms_message .= number_format( $this->thing_balance ) . ' units' ;
         $this->sms_message .= ' | TEXT AGE';
 
         $this->thing_report['sms'] = $this->sms_message;

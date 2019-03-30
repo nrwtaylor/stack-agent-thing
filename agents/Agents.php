@@ -1,52 +1,30 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Agents
+class Agents extends Agent
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->start_time = $thing->elapsed_runtime();
-        $this->agent_input = $agent_input;
-
-        $this->start_time = microtime(true);
-
-		$this->agent_name = "agents";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
-
-		$this->thing = $thing;
-        $this->thing_report['thing']  = $thing;
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
-        $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
-
-        $this->getAgencies();
-
-		$this->readSubject();
-
-		$this->respond();
-
-        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
-
+        $this->thing_report["agency"] = "Prepare a list of ALL stack agents.";
+        $this->thing_report["info"] = "This shares what agents the stack has.";
+        $this->thing_report["help"] = "This gives a list of the Agents available to the Stack.";
 	}
 
-    function getAgencies()
+    function run()
     {
+        $this->getAgents();
+    }
 
-        $this->agencies = array();
+    function getAgents()
+    {
+        $this->agent_list = array();
+        $this->agents = array();
 
         // Only use Stackr agents for now
-        $dir    = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents'; 
+        // Single source folder ensures uniqueness of N-grams
+        $dir    = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents';
         $files = scandir($dir);
 
         foreach ($files as $key=>$file) {
@@ -56,62 +34,54 @@ class Agents
             if (!ctype_upper($file[0])) {continue;}
 
             $agent_name = substr($file, 0, -4);
-            $this->agencies[] =  ucwords($agent_name);
+            $this->agent_list[] =  ucwords($agent_name);
+
+            $this->agents[$agent_name] =  array("name"=>$agent_name);
         }
-
-        $this->agent_names = $this->agencies;
-
     }
 
-// -----------------------
-
-	private function respond()
+	public function respond()
     {
+		$this->thing->flagGreen(); // Test report
 
-		$this->thing->flagGreen();
-
-
-		$to = $this->thing->from;
-		$from = "agents";
-
-        $s = "AGENTS | ";
-        $rand_keys = array_rand($this->agencies, 3);
-        $s .= $this->agencies[$rand_keys[0]] . " ";
-        $s .= $this->agencies[$rand_keys[1]] . " ";
-        $s .= $this->agencies[$rand_keys[2]];
-
-        $this->sms_message = $s;
+        $this->makeSMS();
+        $this->makeWeb();
 
         $choices = false;
-
 		$this->thing_report[ "choices" ] = $choices;
 
-        //$this->thing_report["agency"] = "Prepare a list of stack agents."; 
-
- 		$this->thing_report["info"] = "This shares what agents the stack has."; 
- 		$this->thing_report["help"] = "This gives a list of the Agents available to the Stack.";
-
-		$this->thing_report['sms'] = $this->sms_message;
-		$this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->report();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
-
-        $this->makeWeb();
-
-		return $this->thing_report;
 	}
+
+    public function report()
+    {
+        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+    }
+
+    function makeSMS()
+    {
+        $sms = "AGENTS | ";
+        $rand_agents = array_rand($this->agents, 3);
+        $sms .= $this->agents[$rand_agents[0]]['name'] . " ";
+        $sms .= $this->agents[$rand_agents[1]]['name'] . " ";
+        $sms .= $this->agents[$rand_agents[2]]['name'];
+        $this->sms_message = $sms;
+    }
 
     function makeWeb()
     {
-        $w = '<b>Agents</b>';
-        foreach ($this->agencies as $key=>$agent) {
-        $w .= "<br>" . $agent;
+        $web = '<b>Agents</b>';
+        foreach ($this->agents as $key=>$agent) {
+        $web .= "<br>" . $agent['name'];
         }
-        $this->thing_report['web'] = $w;
+        $this->thing_report['web'] = $web;
     }
 
 	public function readSubject()
