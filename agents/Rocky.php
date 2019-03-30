@@ -218,10 +218,13 @@ class Rocky extends Agent
 
     function makeSMS()
     {
-        $sms = "ROCKY " . $this->inject . " > \n";
+        $sms = "ROCKY " . $this->inject . "\n";
 //        $sms .= $this->response;
 
-        $sms .= $this->short_message . "\n" . $this->response;
+        $sms .= trim($this->short_message) . "\n";
+
+        $sms .= "TEXT WEB";
+        // $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -359,10 +362,16 @@ class Rocky extends Agent
           //  if ($line_count == 10) {
                 // recognize as J-format
                 if ($bank_info == null) {
-                    $this->title = $message[1];
-                    $this->author = $message[2];
-                    $this->date = $message[3];
-                    $this->version = $message[4];
+                    $title = trim(explode(":",$message[1])[1]);
+                    $this->title = $title;
+                    $author = trim(explode(":",$message[2])[1]);
+                    $this->author = $author;
+
+                    $date = trim(explode(":",$message[3])[1]);
+                    $this->date = $date;
+
+                    $version = trim(explode(":",$message[4])[1]);
+                    $this->version = $version;
 
                     $count = 0;
                     $message = null;
@@ -582,44 +591,44 @@ class Rocky extends Agent
         //$web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         //$web .= "<br>";
 
-        $web .= "Inject Bank";
-        $web .= "<p>";
-        $web .= $this->filename . "<br>";
-        $web .= $this->title . "<br>";
-        $web .= $this->author . "<br>";
-        $web .= $this->date . "<br>";
-        $web .= $this->version . "<br>";
+//        $web .= "Inject Bank";
+//        $web .= "<p>";
+//        $web .= $this->filename . "<br>";
+//        $web .= $this->title . "<br>";
+//        $web .= $this->author . "<br>";
+//        $web .= $this->date . "<br>";
+//        $web .= $this->version . "<br>";
 
 
-        $web .= "<p>";
-        $web .= "Raw inject";
-        $web .= "<p>";
+//        $web .= "<p>";
+//        $web .= "Raw inject";
+//        $web .= "<p>";
 
-        $web .= $this->inject . "<br>";
+//        $web .= $this->inject . "<br>";
 
-        $web .= $this->short_message . "<br>";
+//        $web .= $this->short_message . "<br>";
 
-        $web .= "<p>";
+//        $web .= "<p>";
+
+//        $web .= "Parsed inject";
+//        $web .= "<p>";
+
+
+//        $web .= "# " . $this->message['number'] . "<br>";
+//        $web .= "PRECEDENCE " . $this->message['precedence'] . "<br>";
+//        $web .= "HX " .  $this->message['hx'] . "<br>"; // Not used?
+//        $web .= "STATION ORIGIN " . $this->message['station_origin'] . "<br>";
+//        $web .= "CHECKSUM " .$this->message['check'] . "<br>";
+//        $web .= "PLACE FILED " . $this->message['place_filed'] . "<br>";
+//        $web .= "TIME FILED " . $this->message['time_filed'] . "<br>";
+//        $web .= "DATE FILED " . $this->message['date_filed'] . "<br>";
 /*
-        $web .= "Parsed inject";
         $web .= "<p>";
 
-
-        $web .= "# " . $this->message['number'] . "<br>";
-        $web .= "PRECEDENCE " . $this->message['precedence'] . "<br>";
-        $web .= "HX " .  $this->message['hx'] . "<br>"; // Not used?
-        $web .= "STATION ORIGIN " . $this->message['station_origin'] . "<br>";
-        $web .= "CHECKSUM " .$this->message['check'] . "<br>";
-        $web .= "PLACE FILED " . $this->message['place_filed'] . "<br>";
-        $web .= "TIME FILED " . $this->message['time_filed'] . "<br>";
-        $web .= "DATE FILED " . $this->message['date_filed'] . "<br>";
-
-        $web .= "<p>";
-
-        $web .= "TO (NAME) " . $this->name_to . "<br>";
-        $web .= "TO (POSITION) " . $this->position_to . "<br>";
-        $web .= "TO (ORGANIZATION) " . $this->organization_to . "<br>";
-        $web .= "TO (NUMBER) " . $this->number_to . "<br>";
+        $web .= "<b>TO (NAME)</b> " . $this->name_to . "<br>";
+        $web .= "<b>TO (POSITION)</b> " . $this->position_to . "<br>";
+        $web .= "<b>TO (ORGANIZATION)</b> " . $this->organization_to . "<br>";
+        $web .= "<b>TO (NUMBER)</b> " . $this->number_to . "<br>";
 
         $web .= "<p>";
 
@@ -635,44 +644,105 @@ class Rocky extends Agent
 */
         $web .= "<p>";
 
-        $web .= "ACP 125(G) inject";
+
+
         $web .= "<p>";
+
+        if ((isset($this->name_to)) and
+            (isset($this->position_to)) and
+            (isset($this->name_from)) and
+            (isset($this->position_from))) {
+    
+
+        $web .= "<b>TO (NAME)</b> " .  $this->name_to . "<br>";
+        $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
+        $web .= "<b>FROM (NAME)</b> " . $this->name_from . "<br>";
+        $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
+
+        }
+
+        $web .= "<p>";
+        if(isset($this->text)) {$web .= "" . $this->text;}
+
+
+        $web .= "<p>";
+        $web .= "<b>". "PASS THIS MESSAGE</b><br>";
+        $web .= "<p>";
+
+
+//        //$received_at = strtotime($this->thing->thing->created_at);
+//        $ago = $this->thing->human_time ( time() - $this->refreshed_at );
+//        $web .= "This inject was created about ". $ago . " ago. ";
+
+//        $link = $this->web_prefix . "privacy";
+//        $privacy_link = '<a href="' . $link . '">'. $link . "</a>";
+
+
+
+        $web .= "ACP 125(G) inject - ";
+//        $web .= "<p>";
 
 
         $this->makeACP125G($this->message);
-        $web .= nl2br($this->acp125g->thing_report['acp125g']);
+//        $web .= nl2br($this->acp125g->thing_report['acp125g']);
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky.txt';
+        $web .= '<a href="' . $link . '">'. $link . "</a>";
+        $web .= "<br>";
+//        $web .= "<p>";
+
+
+
+//        $web .= "<p>";
+
+//        $web .= "SMS inject";
+//        $web .= "<p>";
+
+
+//        $web .= nl2br($this->short_message);
+
 
         $web .= "<p>";
-
-        $web .= "SMS inject";
-        $web .= "<p>";
-
-
-        $web .= nl2br($this->short_message);
-
-
-        $web .= "<p>";
-        $web .= "PDF inject";
-        $web .= "<p>";
+        $web .= "PDF inject - ";
+  //      $web .= "<p>";
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky.pdf';
         $web .= '<a href="' . $link . '">'. $link . "</a>";
         $web .= "<br>";
         $web .= "<p>";
 
-        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
 
-        $web .= "Inject was created about ". $ago . " ago.";
+        $web .= "Inject Bank - ";
+//        $web .= "<p>";
+        $web .= $this->filename . " - ";
+        $web .= $this->title . " - ";
+        $web .= $this->author . " - ";
+        $web .= $this->date . " - ";
+        $web .= $this->version . "";
+
         $web .= "<p>";
-        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
+        $web .= "Inject Metadata - ";
+//        $web .= "<p>";
+
+        $web .= $this->inject . " - " . $this->thing->nuuid . " - " . $this->thing->thing->created_at;
+
+
+//        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
+
+//        $web .= "Inject was created about ". $ago . " ago.";
+//        $web .= "<p>";
+//        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
 
         $togo = $this->thing->human_time($this->time_remaining);
-        $web .= " and will expire in " . $togo. ".<br>";
+        $web .= " - " . $togo. " remaining.<br>";
 
         $web .= "<br>";
 
         $link = $this->web_prefix . "privacy";
-        $privacy_link .= '<a href="' . $link . '">'. $link . "</a>";
+        $privacy_link = '<a href="' . $link . '">'. $link . "</a>";
+
+        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
+        $web .= "Inject was created about ". $ago . " ago. ";
 
 
         $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $privacy_link . ".";
