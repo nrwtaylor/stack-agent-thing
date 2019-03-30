@@ -6,55 +6,18 @@ class Damage extends Agent
 	public $var = 'hello';
 
     function init()
-    //function __construct(Thing $thing, $text = null)
     {
-
-//        $this->start_time = $thing->elapsed_runtime();
-
-//		$this->agent_name = 'damage';
-//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
-
-//        $this->agent_input = $text;
-
-//      This is how old roll.php is.
-//		$thingy = $thing->thing;
-//		$this->thing = $thing;
-//        $this->thing_report['thing']  = $thing;
-
-
-  //      $this->uuid = $thing->uuid;
-  //      $this->to = $thing->to;
-  //      $this->from = $thing->from;
-  //      $this->subject = $thing->subject;
-
 
         $this->default_damage_budget = $this->thing->container['api']['damage']['budget'];
 
-
-    //    $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
-     //   $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
-
         $this->variables_agent = new Variables($this->thing, "variables " . "damage " . $this->from);
         $this->current_time = $this->thing->json->time();
-
-
 
         $this->damage_budget = $this->default_damage_budget;
         $this->time_budget = 10000; //ms
         $this->shell_impact = 50;
         $this->shell_cost = 50;
-
-        //$this->value_destroyed = $this->doDamage();
-       // $this->set();
-	//	$this->readSubject();
-		//if ($this->agent_input == null) {$this->respond();}
-
-
-        //$this->thing->log( $this->agent_prefix .'ran for ' . number_format( $this->thing->elapsed_runtime() - $this->start_time ) . 'ms.' );
-        //$this->thing_report['log'] = $this->thing->log;
-		//return;
-
 	}
 
     public function run()
@@ -62,34 +25,22 @@ class Damage extends Agent
         $this->value_destroyed = $this->doDamage();
     }
 
-
-// -----------------------
-
-    public function set() {
-
+    public function set()
+    {
         $this->variables_agent->setVariable("value_destroyed", $this->value_destroyed);
         $this->variables_agent->setVariable("things_destroyed", $this->things_destroyed);
 
         //$this->thing->setVariable("damage_cost", $this->damage_cost);
 
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-
     }
 
-
-
-	public function respond() {
-
-
+	public function respond()
+    {
 		$this->thing->flagGreen();
 
 		$to = $this->thing->from;
 		$from = "damage";
-
-
-
-
 
 //        $response = $input . "Try " . strtoupper($v) . ".";
 
@@ -160,25 +111,6 @@ class Damage extends Agent
 
 
     }
-/*
-    function extractRoll($input) {
-
-//echo $input;
-//exit();
-
-preg_match('/^(\\d)?d(\\d)(\\+\\d)?$/',$input,$matches);
-
-print_r($matches);
-
-$t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
-                '$a="$1"? : 1;for(; $i++<$a; $s+=rand(1,$2) );echo$s$3;',
-                $input)?:'echo"Invalid input";';
-
-
-    }
-*/
-
-
 
 	public function readSubject()
     {
@@ -363,4 +295,3 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     }
 
 }
-

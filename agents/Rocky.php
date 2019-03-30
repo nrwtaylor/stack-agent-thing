@@ -511,9 +511,9 @@ class Rocky extends Agent
         $position_to = ucwords($this->position_to);
         $organization_to = strtoupper($this->organization_to);
 
-        $name_from = ucwords($this->name_to);
+        $name_from = ucwords($this->name_from);
         $position_from = ucwords($this->position_from);
-        $organization_from = strtoupper($this->organization_to);
+        $organization_from = strtoupper($this->organization_from);
 
         $this->short_message = "TO " . $name_to . 
              ", " . $position_to . " [" . $organization_to . "]" . "\nFROM " . 
