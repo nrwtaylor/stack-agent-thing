@@ -41,12 +41,51 @@ class Card
         $this->subject = $thing->subject;
         //$this->sqlresponse = null;
 
-        $this->node_list = array("card"=>array("stop","play"));
+        $this->node_list = array("card"=>array("card","charley"));
 
         $this->thing->log('Agent "Card" running on Thing '. $this->thing->nuuid . '.');
 
         $this->variables_agent = new Variables($this->thing, "variables card " . $this->from);
         $this->current_time = $this->thing->time();
+
+        // Borrow this from iching
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable( array("card", "refreshed_at") );
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("card", "refreshed_at"), $time_string );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
+
+        $this->thing->json->setField("variables");
+        $this->nom = strtolower($this->thing->json->readVariable( array("card", "nom") ));
+        $this->suit = $this->thing->json->readVariable( array("card", "suit") );
+
+//        $this->getCard();
+
+        if ( ($this->nom == false) or ($this->suit == false) ) {
+
+//            $this->readSubject();
+            $this->getCard();
+
+            $this->thing->json->writeVariable( array("card", "nom"), $this->nom );
+            $this->thing->json->writeVariable( array("card", "suit"), $this->suit );
+
+
+            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+        }
+
+        $this->getCard();
+
+
+/*
+
+
+
         $this->get();
         $this->readSubject();
 
@@ -63,6 +102,9 @@ class Card
         }
         $this->thing->flagGreen();
 
+*/
+
+        $this->respond();
         $this->thing->log($this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
@@ -79,6 +121,7 @@ class Card
         return;
     }
 */
+/*
     public function set()
     {
 
@@ -87,9 +130,9 @@ class Card
 //            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
 
     }
+*/
 
-
-
+/*
     public function get()
     {
         $this->id = $this->variables_agent->getVariable("id");
@@ -99,7 +142,7 @@ class Card
 
         return;
     }
-
+*/
 
 /*
     public function countCard()
@@ -117,12 +160,25 @@ class Card
 
         // But for now create a standard face card randomly independent of prior deck selection.
 
-        
-        $array = array('spades','hearts','diamonds','clubs');
-        $k = array_rand($array);
-        $v = $array[$k];
+        if (($this->nom == false) or ($this->suit == false)) {
 
-        $this->suit = strtolower($v);
+            $this->newCard();
+/*
+            $array = array('spades','hearts','diamonds','clubs');
+            $k = array_rand($array);
+            $v = $array[$k];
+
+            $this->suit = strtolower($v);
+
+            $array = array('A','2','3','4','5','6','7','8','9','J','Q','K');
+            $k = array_rand($array);
+            $v = $array[$k];
+
+            $this->nom = strtolower($v);
+*/
+        }
+
+        //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
 
         if (($this->suit == 'spades') or ($this->suit == 'clubs')) {
             $this->colour = "black";
@@ -130,13 +186,6 @@ class Card
             $this->colour = "red";
         }
 
-        $array = array('A','2','3','4','5','6','7','8','9','J','Q','K');
-        $k = array_rand($array);
-        $v = $array[$k];
-
-        $this->nom = strtolower($v);
-
-        //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
 
         $this->response = "". strtoupper($this->nom) . " of " . ucwords($this->suit) . " [" . strtoupper($this->colour) . "].";
 
@@ -159,9 +208,22 @@ class Card
 
     public function newCard()
     {
-        $this->card = new Thing(null);
-        $this->card->Create(null, "card", "s/ new card");
+//        $this->card = new Thing(null);
+//        $this->card->Create(null, "card", "s/ new card");
 //echo "made card";
+
+            $array = array('spades','hearts','diamonds','clubs');
+            $k = array_rand($array);
+            $v = $array[$k];
+
+            $this->suit = strtolower($v);
+
+            $array = array('A','2','3','4','5','6','7','8','9','J','Q','K');
+            $k = array_rand($array);
+            $v = $array[$k];
+
+            $this->nom = strtolower($v);
+
 
     }
 
@@ -185,20 +247,20 @@ class Card
 
     private function makeSMS()
     {
-        switch ($this->id) {
-            case 1:
-                $sms = "CARD | A card is drawn. Text CARD.";
-                break;
-            case 2:
-                $sms = "CARD | Another one.  Appears. Text CARD.";
-                break;
+//        switch ($this->id) {
+//            case 1:
+//                $sms = "CARD | A card is drawn. Text CARD.";
+//                break;
+//            case 2:
+//                $sms = "CARD | Another one.  Appears. Text CARD.";
+//                break;
 
-            case null:
+//            case null:
 
-            default:
+//            default:
                 $sms = "CARD | " . $this->response;
 
-        }
+//        }
 
         //$sms .= " | id " . $this->id;
 
@@ -208,19 +270,19 @@ class Card
 
     private function makeEmail()
     {
-        switch ($this->id) {
-            case 1:
-                $subject = "Card request received";
-                $message = "Carding.\n\n";
+//        switch ($this->id) {
+//            case 1:
+//                $subject = "Card request received";
+//                $message = "Carding.\n\n";
 
-                break;
+//                break;
 
-            case null:
+//            case null:
 
-            default:
-               $subject = "Card request received";
+//            default:
+//               $subject = "Card request received";
                $message = "It is still playing.\n\n";
-        }
+//        }
 
         $this->message = $message;
         $this->thing_report['email'] = $message;
@@ -228,7 +290,7 @@ class Card
 
     private function makeChoices()
     {
-        $choices = $this->thing->choice->makeLinks('snow');
+        $choices = $this->thing->choice->makeLinks('card');
 
         $this->choices = $choices;
         $this->thing_report['choices'] = $choices;

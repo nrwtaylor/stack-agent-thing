@@ -354,7 +354,11 @@ class Charley extends Agent
 
         $this->text = $this->card['text'];
 
-        if ($this->text == "ROCKY") {$this->text = "Send a ROCKY inject to the last station.";}
+        if ($this->text == "ROCKY") {
+
+            $rocky = new Rocky($this->thing, '
+
+        }
 
         $this->role_from = $this->card['from'];
         $this->role_to = $this->card['to'];
