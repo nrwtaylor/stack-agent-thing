@@ -161,6 +161,18 @@ $this->set();
     }
 
 
+
+
+//	function createAccount(String $account_name, $amount) {
+
+//		$scalar_account = new Account($this->uuid, 'scalar', $amount, "happiness", "Things forgotten"); // Yup.
+//		$this->thing->scalar = $scalar_account;
+//		return;
+//	}
+
+
+// -----------------------
+
     function set()
     {
 /*
@@ -278,7 +290,6 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 
         $this->makeChoices();
         $this->makeWeb();
-        $this->makeTXT();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -287,17 +298,12 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 
         $this->thing_report['help'] = 'This is the "Crow" Agent. It organizes your Things.' ;
 
-//		return;
+		return;
 	}
 
     private function getCrow($requested_nuuid = null)
     {
         if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
-
-        $entity = new Entity($this->thing, "crow");
-
-        $this->thing = $entity->thing;
-return;
 
         // Get up to 10000 crows.
         $crow = new FindAgent($this->thing, "crow");
@@ -319,14 +325,12 @@ return;
             }
         }
 
-        if (!isset($this->crows[0])) {return true;}
-
-        $this->thing = $this->crows[0];
+        $this->crow = $this->crows[0];
     }
 
     public function makeWeb()
     {
-        $test_message = "<b>CROW " . strtoupper($this->thing->nuuid) . "</b>" . '<br>';
+        $test_message = "<b>CROW " . strtoupper($this->crow->nuuid) . "</b>" . '<br>';
         $test_message .= "<p>";
         $test_message .= '<p><b>Crow State</b>';
 
@@ -368,24 +372,9 @@ return;
 
     }
 
-    public function makeTXT()
-    {
-//        $txt = "";
-//        foreach($this->crows as $key=>$crow) {
-//            $txt .= "ghet" . "\n";
-//        }
-
-//        $this->thing_report['txt'] = $txt;
-//        $this->txt = $txt;
-
-
-
-    }
-
-
     public function makeChoices()
     {
-        $choices = $this->thing->choice->makeLinks($this->state);
+        $choices = $this->crow->choice->makeLinks($this->state);
         $this->choices = $choices;
         $this->thing_report['choices'] = $choices ;
     }
@@ -463,7 +452,7 @@ return;
             'start'=>"TEXT WEB / MIDDEN WORK / NEST MAINTENANCE"
         );
 
-        $sms = "CROW | " . $this->thing->nuuid;
+        $sms = "CROW | " . $this->crow->nuuid;
 //        $sms .= " | " . $this->thing_behaviour[$this->state];
         $sms .= " | " . $this->crow_behaviour[$this->state];
         $sms .= " " . $this->response;
@@ -484,8 +473,6 @@ return;
         if (isset($nuuid_agent->nuuid)) {$nuuid = $nuuid_agent->nuuid;}
 
         $this->getCrow($nuuid);
-
-//        if ($this->crow == null) {$this->getCrow(); $this->response = "Crow " . $nuuid . " was not found. Got last crow.";}
 
 		$this->response = null;
 

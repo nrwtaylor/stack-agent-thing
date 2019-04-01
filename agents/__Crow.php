@@ -83,9 +83,6 @@ class Crow
 
 		$this->sqlresponse = null;
 
-        $this->entity = new Entity ($this->thing, "crow");
-var_dump($this->entity->id);
-
         $this->node_list = array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging","foraging")),"midden work"=>"foraging");
 
         $info = 'The "Crow" agent provides an button driven interface to manage access to your information on '. $this->short_name;
@@ -132,7 +129,7 @@ var_dump($this->entity->id);
 		// Read the subject as passed to this class.
 		// No charge to read the subject line.  By machine.
 
-		$this->state = $thing->choice->load('roost');
+//		$this->state = $thing->choice->load('roost');
 
 $this->get();
 
@@ -147,9 +144,9 @@ $this->set();
 //var_dump($this->thing);
 
         // Err ... making sure the state is saved.
-        $this->thing->choice->Choose($this->state);
+        $this->crow->choice->Choose($this->crow->state);
 
-        $this->state = $thing->choice->load('roost');
+        $this->crow->state = $this->crow->choice->load('roost');
 
         $this->thing->log($this->agent_prefix . 'state is "' . $this->state . '".');
         $this->thing->log($this->agent_prefix . 'completed.');
@@ -160,6 +157,18 @@ $this->set();
 
     }
 
+
+
+
+//	function createAccount(String $account_name, $amount) {
+
+//		$scalar_account = new Account($this->uuid, 'scalar', $amount, "happiness", "Things forgotten"); // Yup.
+//		$this->thing->scalar = $scalar_account;
+//		return;
+//	}
+
+
+// -----------------------
 
     function set()
     {
@@ -183,8 +192,9 @@ $this->set();
 //        if ( ($this->roll == false) or ($this->result == false) ) {
 
 
-            $this->thing->json->writeVariable( array("crow", "left_count"), $this->left_count );
-            $this->thing->json->writeVariable( array("crow", "right_count"), $this->right_count );
+            $this->crow->json->writeVariable( array("crow", "left_count"), $this->left_count );
+            $this->crow->json->writeVariable( array("crow", "right_count"), $this->right_count );
+            $this->crow->json->writeVariable( array("crow", "id"), $this->crow->nuuid );
 
             $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
 //        }
@@ -224,10 +234,13 @@ $this->set();
         $this->refreshed_at = strtotime($this->time_string);
 
 
-        $this->thing->json->setField("variables");
+//        $this->crow->json->setField("variables");
+        $this->crow_id = strtolower($this->thing->json->readVariable( array("crow", "id") ));
+
         $this->left_count = strtolower($this->thing->json->readVariable( array("crow", "left_count") ));
         $this->right_count = $this->thing->json->readVariable( array("crow", "right_count") );
 
+//if( ($this->crow_id == false) or ($this->crow_id = "")) {$this->crow_id = $this->thing->nuuid;}
 if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
 if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
 
@@ -246,7 +259,7 @@ if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_cou
 		// Thing actions
 
 
-		$this->thing->flagGreen();
+		$this->crow->flagGreen();
 
 		// Generate SMS response
 
@@ -273,69 +286,75 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 
 		// Generate email response.
 
-		$to = $this->thing->from;
+		$to = $this->crow->from;
 		$from = "crow";
 
         $this->makeChoices();
         $this->makeWeb();
-        $this->makeTXT();
 
         if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
+            $message_thing = new Message($this->crow, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
         $this->thing_report['help'] = 'This is the "Crow" Agent. It organizes your Things.' ;
 
-//		return;
+		return;
 	}
 
     private function getCrow($requested_nuuid = null)
     {
-        if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
+$requested_nuuid = "ae20";
+//        if ($requested_nuuid == null) {$this->crow = $this->thing; return;}
+  
+//        if ($requested_nuuid == null) {$requested_nuuid = $this->crow_id;}
 
-        $entity = new Entity($this->thing, "crow");
-
-        $this->thing = $entity->thing;
-return;
-
-        // Get up to 10000 crows.
         $crow = new FindAgent($this->thing, "crow");
         $crow->horizon = 10000;
         $crow->findAgent("crow");
         $crow_things = $crow->thing_report['things'];
+        foreach($crow_things as $key=>$crow) {
+            //echo $crow['uuid'] . " " . $crow['created_at'] . "\n";
+        }
 
 
+        if ($requested_nuuid == null) {
+//echo "null requested";
+            $crow_uuid = array_reverse($crow_things)[0]['uuid'];
+            $crow_uuid = $crow_things[1]['uuid'];
+            $this->crow = new Thing($crow_uuid);
+            return;
+
+        }
 
 
         $matching_uuids = array();
 
         foreach($crow_things as $key=>$crow) {
             $crow_nuuid = substr($crow['uuid'], 0, 4);
+            if ($crow_nuuid == $requested_nuuid) {
 
-            if (strtolower($crow_nuuid) == strtolower($requested_nuuid)) {
                 // Consistently match the nuuid to a specific uuid.
                 $this->crows[] = new Thing($crow['uuid']);
             }
         }
 
-        if (!isset($this->crows[0])) {return true;}
-
-        $this->thing = $this->crows[0];
+        $this->crow = $this->crows[0];
+//        var_dump($this->crow);
     }
 
     public function makeWeb()
     {
-        $test_message = "<b>CROW " . strtoupper($this->thing->nuuid) . "</b>" . '<br>';
+        $test_message = "<b>CROW " . strtoupper($this->crow->nuuid) . "</b>" . '<br>';
         $test_message .= "<p>";
         $test_message .= '<p><b>Crow State</b>';
 
         $test_message .= '<br>Last thing heard: "' . $this->subject . '"<br>' . 'The next Crow choices are [ ' . $this->choices['link'] . '].';
-        $test_message .= '<br>Roost state: ' . $this->state;
+        $test_message .= '<br>Roost state: ' . $this->crow->state;
         $test_message .= '<br>left_count is ' . $this->left_count;
         $test_message .= '<br>right count is ' . $this->right_count;
 
-        $test_message .= '<br>' .$this->crow_behaviour[$this->state] . '<br>';
+        $test_message .= '<br>' .$this->crow_behaviour[$this->crow->state] . '<br>';
 
 
         $test_message .= "<p>";
@@ -344,13 +363,13 @@ return;
         $test_message .= 'created_at: ' . $this->created_at . '<br>';
         $test_message .= 'from: ' . $this->from . '<br>';
         $test_message .= 'to: ' . $this->to . '<br>';
-        $test_message .= '<br>' .$this->thing_behaviour[$this->state] . '<br>';
+        $test_message .= '<br>' .$this->thing_behaviour[$this->crow->state] . '<br>';
 
 
         $test_message .= "<p>";
         $test_message .= '<p><b>Narratives</b>';
-        $test_message .= '<br>' .$this->litany[$this->state] . '<br>';
-        $test_message .= '<br>' .$this->crow_narrative[$this->state] . '<br>';
+        $test_message .= '<br>' .$this->litany[$this->crow->state] . '<br>';
+        $test_message .= '<br>' .$this->crow_narrative[$this->crow->state] . '<br>';
 
        // $test_message .= '<p>Agent "Crow" is responding to your web view of datagram subject "' . $this->subject . '", ';
        // $test_message .= "which was received " . $this->thing->human_time($this->thing->elapsed_runtime()) . " ago.";
@@ -368,24 +387,9 @@ return;
 
     }
 
-    public function makeTXT()
-    {
-//        $txt = "";
-//        foreach($this->crows as $key=>$crow) {
-//            $txt .= "ghet" . "\n";
-//        }
-
-//        $this->thing_report['txt'] = $txt;
-//        $this->txt = $txt;
-
-
-
-    }
-
-
     public function makeChoices()
     {
-        $choices = $this->thing->choice->makeLinks($this->state);
+        $choices = $this->crow->choice->makeLinks($this->crow->state);
         $this->choices = $choices;
         $this->thing_report['choices'] = $choices ;
     }
@@ -463,11 +467,11 @@ return;
             'start'=>"TEXT WEB / MIDDEN WORK / NEST MAINTENANCE"
         );
 
-        $sms = "CROW | " . $this->thing->nuuid;
+        $sms = "CROW | " . $this->crow->nuuid;
 //        $sms .= " | " . $this->thing_behaviour[$this->state];
-        $sms .= " | " . $this->crow_behaviour[$this->state];
+        $sms .= " | " . $this->crow_behaviour[$this->crow->state];
         $sms .= " " . $this->response;
-        $sms .= " | " . $this->prompt_litany[$this->state];
+        $sms .= " | " . $this->prompt_litany[$this->crow->state];
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -480,49 +484,47 @@ return;
         $nuuid_agent = new Nuuid($this->thing, "nuuid");
         $nuuid_agent->extractNuuid($this->subject);
 
-        $nuuid = $this->entity->id;
-        if (isset($nuuid_agent->nuuid)) {$nuuid = $nuuid_agent->nuuid;}
-
-        $this->getCrow($nuuid);
-
-//        if ($this->crow == null) {$this->getCrow(); $this->response = "Crow " . $nuuid . " was not found. Got last crow.";}
+        if (isset($nuuid_agent->nuuid)) {
+            $this->getCrow($nuuid_agent->nuuid);
+        } else {
+            $this->getCrow();
+        }
 
 		$this->response = null;
 
-		if ($this->state == null) {
+		if ((!isset($this->crow->state)) or ($this->crow->state == null)) {
 		    //$this->response = "detected state null - run subject discriminator";
             $this->thing->log($this->agent_prefix . 'state is null.  Subject discriminator run.');
 
 
 		    switch ($this->subject) {
 			    case "spawn":
-				    //echo "spawn";
-				    $this->spawn();
-                    $place = new Place($this->thing, "roost");
+				    $this->crow->spawn();
+                    $place = new Place($this->crow, "roost");
                     $this->response = "Spawned an Crow at Roost.";
 				    break;
 			    case "kill":
-				    $this->kill();
+				    $this->crow->kill();
                     $this->response = "Killed this Crow.";
 				    break;
 			    case "foraging":
-				    $this->thing->choice->Choose("foraging");
+				    $this->crow->choice->Choose("foraging");
                     $this->response = "This Crow is Foraging.";
 				    break;
 			    case "inside nest":
-				    $this->thing->choice->Choose("inside nest");
+				    $this->crow->choice->Choose("inside nest");
                     $this->response = "This Crow is Inside the Roost.";
 				    break;
 			    case "nest maintenance":
-				    $this->thing->choice->Choose("nest maintenance");
+				    $this->crow->choice->Choose("nest maintenance");
                     $this->response = "This Crow is doing Nest Maintenance.";
 				    break;
 			    case "patrolling":
-				    $this->thing->choice->Choose("patrolling");
+				    $this->crow->choice->Choose("patrolling");
                     $this->response = "This Crow is Patrolling.";
 				    break;
 			    case "midden work":
-				    $this->thing->choice->Choose("midden work");
+				    $this->crow->choice->Choose("midden work");
                     $this->response = "This Crow is doing Midden Work.";
 				    $this->middenwork();
 
@@ -532,22 +534,15 @@ return;
 				    break;
 			    default:
                     $this->response = "Crow spawned.";
-			        // echo "not found => spawn()";
 				    $this->spawn();
 		    }
 		}
 
-		$this->state = $this->thing->choice->load('roost');
+		$this->crow->state = $this->crow->choice->load('roost');
 
-		//echo "this state is " .$this->state;
-		//echo "meep";
-        if ($this->state == false) {
-            $this->state = $this->subject;
-            return;
-        }
 
 		// Will need to develop this to only only valid state changes.
-        switch ($this->state) {
+        switch ($this->crow->state) {
             case "spawn":
                 //echo "spawn";
                 //$this->spawn();
@@ -590,7 +585,7 @@ $this->response = array_rand ($responses);
             case false:
 
             default:
-                $this->thing->log($this->agent_prefix . 'invalid state provided "' . $this->state .'".');
+                $this->thing->log($this->agent_prefix . 'invalid state provided "' . $this->crow->state .'".');
                 $this->response = "Crow is broken.";
                 // echo "not found";
 
@@ -652,7 +647,7 @@ $this->response = array_rand ($responses);
         }
 
         // Update Crow's state tree
-		$this->thing->choice->Create('roost', $this->node_list, $this->state);
+		$this->crow->choice->Create('roost', $this->node_list, $this->crow->state);
 
 		return false;
 	}
@@ -704,7 +699,7 @@ $this->response = array_rand ($responses);
         // ->db->userSearch($keyword)
         // ->UUids($uuid = null)
 
-    	echo "crow state: " . $this->thing->getState('roost');
+    	echo "crow state: " . $this->crow->getState('roost');
 
         // Form a haystack from the whole thing.
     	$haystack ="";
@@ -784,12 +779,12 @@ $this->response = array_rand ($responses);
     {
         $crow_pheromone['stack'] = 4;
         if ((rand(0,5) + 1) <= $crow_pheromone['stack']) {
-           $this->thing->choice->Create('roost', $this->node_list, "inside nest");
+           $this->crow->choice->Create('roost', $this->node_list, "inside nest");
         } else {
-            $this->thing->choice->Create('roost', $this->node_list, "midden work");
+            $this->crow->choice->Create('roost', $this->node_list, "midden work");
         }
 
-		$this->thing->flagGreen();
+		$this->crow->flagGreen();
 
 		return;
 	}
@@ -797,9 +792,7 @@ $this->response = array_rand ($responses);
 	function kill()
     {
 		// No messing about.
-		return $this->thing->Forget();
+		return $this->crow->Forget();
 	}
 
 }
-
-?>
