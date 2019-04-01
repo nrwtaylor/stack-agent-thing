@@ -294,34 +294,6 @@ class Variables
 
         return $this->{$variable . "_overflow_flag"};
     }
-/*
-    function oldgetVariableset()
-    {
-        // Pulls in the full set from the db in one operation.
-        // From a loaded Thing.
-
-        $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $t = $this->variables_thing->json->readVariable( array($this->variable_set_name ) );
-
-        if ($t == false) {
-            // Variable set name was not found on the Thing.
-            // So don't load variables.
-            return null;
-        }
-        $this->agent_variables = array();
-        // Load to Thing variable for operations.
-        foreach ($t as $name=>$variable) 
-        {
-            $this->variables_thing->$name = $variable;
-            $this->agent_variables[] = $name;
-        }
-
-
-        return false;
-
-    }
-*/
 
     function getVariableset()
     {
@@ -372,7 +344,6 @@ class Variables
         }
         echo "<br>";
     }
-
 
     function getVariable($variable = null)
     {
