@@ -616,7 +616,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
     {
 
 
-        $object = new Object($this->thing, "ant");
+        //$object = new Object($this->thing, "ant");
         $coordinate = new Coordinate($this->thing, "(0,0)");
         //var_dump($ant->uuid);
 

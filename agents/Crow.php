@@ -83,6 +83,9 @@ class Crow
 
 		$this->sqlresponse = null;
 
+        $this->entity = new Entity ($this->thing, "crow");
+var_dump($this->entity->id);
+
         $this->node_list = array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging","foraging")),"midden work"=>"foraging");
 
         $info = 'The "Crow" agent provides an button driven interface to manage access to your information on '. $this->short_name;
@@ -129,9 +132,13 @@ class Crow
 		// Read the subject as passed to this class.
 		// No charge to read the subject line.  By machine.
 
-		$this->state = $thing->choice->load('hive');
+		$this->state = $thing->choice->load('roost');
 
 $this->get();
+
+        //$this->getCrow();
+
+//        $this->state = $this->crow->state;
 		$this->readSubject();
 
 		$this->respond();
@@ -142,7 +149,7 @@ $this->set();
         // Err ... making sure the state is saved.
         $this->thing->choice->Choose($this->state);
 
-        $this->state = $thing->choice->load('hive');
+        $this->state = $thing->choice->load('roost');
 
         $this->thing->log($this->agent_prefix . 'state is "' . $this->state . '".');
         $this->thing->log($this->agent_prefix . 'completed.');
@@ -153,18 +160,6 @@ $this->set();
 
     }
 
-
-
-
-//	function createAccount(String $account_name, $amount) {
-
-//		$scalar_account = new Account($this->uuid, 'scalar', $amount, "happiness", "Things forgotten"); // Yup.
-//		$this->thing->scalar = $scalar_account;
-//		return;
-//	}
-
-
-// -----------------------
 
     function set()
     {
@@ -272,7 +267,7 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
         'nest maintenance'=>'A Things of yours was displayed again, perhaps by yourself.  This Crow is doing some nest maintenance.',
         'patrolling'=>"A Thing associated with " . "this identity" ." was displayed (or requested by) a device.  That's twice now.  This Crow is patrolling.",
         'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
-        'midden work'=>'One of your records was displayed, perhaps by yourself.  An Crow spawned and is doing midden work.',
+        'midden work'=>'One of your records was displayed, perhaps by yourself.  A Crow hatched and is doing midden work.',
         'start'=>"Start. Not normally means that you displayed a record, let's see if we get any more Crow messages."
 );
 
@@ -283,6 +278,7 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 
         $this->makeChoices();
         $this->makeWeb();
+        $this->makeTXT();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -291,8 +287,42 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 
         $this->thing_report['help'] = 'This is the "Crow" Agent. It organizes your Things.' ;
 
-		return;
+//		return;
 	}
+
+    private function getCrow($requested_nuuid = null)
+    {
+        if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
+
+        $entity = new Entity($this->thing, "crow");
+
+        $this->thing = $entity->thing;
+return;
+
+        // Get up to 10000 crows.
+        $crow = new FindAgent($this->thing, "crow");
+        $crow->horizon = 10000;
+        $crow->findAgent("crow");
+        $crow_things = $crow->thing_report['things'];
+
+
+
+
+        $matching_uuids = array();
+
+        foreach($crow_things as $key=>$crow) {
+            $crow_nuuid = substr($crow['uuid'], 0, 4);
+
+            if (strtolower($crow_nuuid) == strtolower($requested_nuuid)) {
+                // Consistently match the nuuid to a specific uuid.
+                $this->crows[] = new Thing($crow['uuid']);
+            }
+        }
+
+        if (!isset($this->crows[0])) {return true;}
+
+        $this->thing = $this->crows[0];
+    }
 
     public function makeWeb()
     {
@@ -301,7 +331,7 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
         $test_message .= '<p><b>Crow State</b>';
 
         $test_message .= '<br>Last thing heard: "' . $this->subject . '"<br>' . 'The next Crow choices are [ ' . $this->choices['link'] . '].';
-        $test_message .= '<br>Hive state: ' . $this->state;
+        $test_message .= '<br>Roost state: ' . $this->state;
         $test_message .= '<br>left_count is ' . $this->left_count;
         $test_message .= '<br>right count is ' . $this->right_count;
 
@@ -338,6 +368,21 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 
     }
 
+    public function makeTXT()
+    {
+//        $txt = "";
+//        foreach($this->crows as $key=>$crow) {
+//            $txt .= "ghet" . "\n";
+//        }
+
+//        $this->thing_report['txt'] = $txt;
+//        $this->txt = $txt;
+
+
+
+    }
+
+
     public function makeChoices()
     {
         $choices = $this->thing->choice->makeLinks($this->state);
@@ -355,51 +400,71 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
     public function makeSMS()
     {
         // Generate SMS response
-$this->litany = array('inside nest'=>'One of your records was displayed, perhaps by yourself.  An Crow spawned and is waiting in the nest.',
-    'nest maintenance'=>'A record of yours was displayed again, perhaps by yourself.  This Crow is doing some nest maintenance.',
-    'patrolling'=>"A record of yours was displayed.  That's twice now.  This Crow is patrolling.",
-    'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
-    'midden work'=>'One of your records was displayed, perhaps by yourself.  An Crow spawned and is doing midden work.',
-    'start'=>"Start.  Not normally means that you displayed a record, let's see if we get any more Crow messages."
-);
 
-$this->thing_behaviour = array('inside nest'=>'A Thing was instantiated.',
-    'nest maintenance'=>'A Thing was instantiated again.',
-    'patrolling'=>"A Thing was instantiated twice.",
-    'foraging'=>"A Thing is searching the stack.",
-    'midden work'=>'A Thing is doing stack work.',
-    'start'=>"Start. A Thing started."
-);
+        $narratives = array("predator"=>"Crow is Watching for predators.",
+            "human"=>"Crow is analyzing humans.",
+            "quest"=>"Crow is questing for the oracle.",
+            "funnies"=>"Crow has found a Peanut's comic strip.");
+        $key = array_rand($narratives);
+        $patrolling_narrative = $narratives[$key];
 
-// Behaviour
-$this->crow_behaviour = array('inside nest'=>'Crow spawned and is waiting in the nest.',
-    'nest maintenance'=>'Crow is doing some nest maintenance.',
-    'patrolling'=>"That's twice now. This Crow is patrolling.",
-    'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
-    'midden work'=>'An Crow spawned and is doing midden work.',
-    'start'=>"Crow egg."
-);
+        $behaviours = array("predator"=>"Crow is Watching for predators.",
+            "human"=>"Crow is analyzing humans.",
+            "quest"=>"Crow is questing for the oracle.",
+            "funnies"=>"Crow has found a Peanut's comic strip.");
+        $patrolling_behaviour = $behaviours[$key];
 
-// Narrative
-$this->crow_narrative = array('inside nest'=>'Everything is dark.',
-    'nest maintenance'=>'You are a Nest Maintainer. What does that even mean?',
-    'patrolling'=>"Now you are a Patroller.",
-    'foraging'=>"Now you are a Forager. What are you foraging for?",
-    'midden work'=>'You are a Midden Worker. Have fun.',
-    'start'=>"Crow egg."
-);
+        $litanies = array("predator"=>"Crow is Watching for predators.",
+            "human"=>"Crow is analyzing humans.",
+            "quest"=>"Crow is questing for the oracle.",
+            "funnies"=>"Crow has found a Peanut's comic strip.");
+        $patrolling_litany = $litanies[$key];
 
+        $this->litany = array('inside nest'=>'One of your records was displayed, perhaps by yourself.  A Crow arrived and is waiting in the nest.',
+            'nest maintenance'=>'A record of yours was displayed again, perhaps by yourself.  This Crow is doing some nest maintenance.',
+            'patrolling'=>$patrolling_litany,
+            'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
+            'midden work'=>'One of your records was displayed, perhaps by yourself.  An Crow arrived and is doing midden work.',
+            'start'=>"Start.  Not normally means that you displayed a record, let's see if we get any more Crow messages."
+        );
 
-$this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
-    'nest maintenance'=>'TEXT WEB / PATROLLING / FORAGING',
-    'patrolling'=>"TEXT WEB / FORGET",
-    'foraging'=>"TEXT WEB / FORGET",
-    'midden work'=>'TEXT WEB / FORGET',
-    'start'=>"TEXT WEB / MIDDEN WORK / NEST MAINTENANCE"
-);
+        // Not used. Consider removing.
+        $this->thing_behaviour = array('inside nest'=>'A Thing was instantiated.',
+            'nest maintenance'=>'A Thing was instantiated again.',
+            'patrolling'=>"A Thing was instantiated twice.",
+            'foraging'=>"A Thing is searching the stack.",
+            'midden work'=>'A Thing is doing stack work.',
+            'start'=>"Start. A Thing started."
+        );
+
+        // Behaviour
+        $this->crow_behaviour = array('inside nest'=>'Crow hatched and is waiting in the nest.',
+            'nest maintenance'=>'Crow is doing some nest maintenance.',
+            'patrolling'=>$patrolling_behaviour,
+            'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
+            'midden work'=>'An Crow spawned and is doing midden work.',
+            'start'=>"Crow egg."
+        );
+
+        // Narrative
+        $this->crow_narrative = array('inside nest'=>'Everything is dark.',
+            'nest maintenance'=>'You are a Nest Maintainer. What does that even mean?',
+            'patrolling'=>$patrolling_narrative,
+            'foraging'=>"Now you are a Forager. What are you foraging for?",
+            'midden work'=>'You are a Midden Worker. Have fun.',
+            'start'=>"Crow egg."
+        );
+
+        $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
+            'nest maintenance'=>'TEXT WEB / PATROLLING / FORAGING',
+            'patrolling'=>"TEXT WEB / FORGET",
+            'foraging'=>"TEXT WEB / FORGET",
+            'midden work'=>'TEXT WEB / FORGET',
+            'start'=>"TEXT WEB / MIDDEN WORK / NEST MAINTENANCE"
+        );
 
         $sms = "CROW | " . $this->thing->nuuid;
-        $sms .= " | " . $this->thing_behaviour[$this->state];
+//        $sms .= " | " . $this->thing_behaviour[$this->state];
         $sms .= " | " . $this->crow_behaviour[$this->state];
         $sms .= " " . $this->response;
         $sms .= " | " . $this->prompt_litany[$this->state];
@@ -411,6 +476,17 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 
 	public function readSubject()
     {
+
+        $nuuid_agent = new Nuuid($this->thing, "nuuid");
+        $nuuid_agent->extractNuuid($this->subject);
+
+        $nuuid = $this->entity->id;
+        if (isset($nuuid_agent->nuuid)) {$nuuid = $nuuid_agent->nuuid;}
+
+        $this->getCrow($nuuid);
+
+//        if ($this->crow == null) {$this->getCrow(); $this->response = "Crow " . $nuuid . " was not found. Got last crow.";}
+
 		$this->response = null;
 
 		if ($this->state == null) {
@@ -422,8 +498,8 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 			    case "spawn":
 				    //echo "spawn";
 				    $this->spawn();
-                    $place = new Place($this->thing, "hive");
-                    $this->response = "Spawned an Crow at Hive.";
+                    $place = new Place($this->thing, "roost");
+                    $this->response = "Spawned an Crow at Roost.";
 				    break;
 			    case "kill":
 				    $this->kill();
@@ -435,7 +511,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 				    break;
 			    case "inside nest":
 				    $this->thing->choice->Choose("inside nest");
-                    $this->response = "This Crow is Inside the Hive.";
+                    $this->response = "This Crow is Inside the Roost.";
 				    break;
 			    case "nest maintenance":
 				    $this->thing->choice->Choose("nest maintenance");
@@ -461,13 +537,16 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 		    }
 		}
 
-		$this->state = $this->thing->choice->load('hive');
+		$this->state = $this->thing->choice->load('roost');
 
 		//echo "this state is " .$this->state;
 		//echo "meep";
+        if ($this->state == false) {
+            $this->state = $this->subject;
+            return;
+        }
 
 		// Will need to develop this to only only valid state changes.
-
         switch ($this->state) {
             case "spawn":
                 //echo "spawn";
@@ -491,7 +570,12 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
                 //$this->thing->choice->Choose("nest maintenance");
                 break;
             case "patrolling":
-                $this->response = "Crow is Patrolling.";
+                $responses = array("Crow is Watching for predators.",
+                    "Crow is analyzing humans.",
+                    "Crow is questing for the oracle.",
+                    "Crow has found a Peanut's comic strip.");
+$this->response = array_rand ($responses);
+                //$this->response = "Crow is Patrolling.";
                 //$this->thing->choice->Choose("patrolling");
                 break;
             case "midden work":
@@ -503,6 +587,8 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 
                 break;
 
+            case false:
+
             default:
                 $this->thing->log($this->agent_prefix . 'invalid state provided "' . $this->state .'".');
                 $this->response = "Crow is broken.";
@@ -513,9 +599,9 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
 
 
 		        //if (rand(0,5)<=3) {
-               	//         $this->thing->choice->Create('hive', $this->node_list, "inside nest");
+               	//         $this->thing->choice->Create('roost', $this->node_list, "inside nest");
                 //} else {
-                //	$this->thing->choice->Create('hive', $this->node_list, "midden work");
+                //	$this->thing->choice->Create('roost', $this->node_list, "midden work");
                 //}
 
 
@@ -566,7 +652,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
         }
 
         // Update Crow's state tree
-		$this->thing->choice->Create('hive', $this->node_list, $this->state);
+		$this->thing->choice->Create('roost', $this->node_list, $this->state);
 
 		return false;
 	}
@@ -618,7 +704,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
         // ->db->userSearch($keyword)
         // ->UUids($uuid = null)
 
-    	echo "crow state: " . $this->thing->getState('hive');
+    	echo "crow state: " . $this->thing->getState('roost');
 
         // Form a haystack from the whole thing.
     	$haystack ="";
@@ -698,9 +784,9 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / NEST MAINTENANCE',
     {
         $crow_pheromone['stack'] = 4;
         if ((rand(0,5) + 1) <= $crow_pheromone['stack']) {
-           $this->thing->choice->Create('hive', $this->node_list, "inside nest");
+           $this->thing->choice->Create('roost', $this->node_list, "inside nest");
         } else {
-            $this->thing->choice->Create('hive', $this->node_list, "midden work");
+            $this->thing->choice->Create('roost', $this->node_list, "midden work");
         }
 
 		$this->thing->flagGreen();
