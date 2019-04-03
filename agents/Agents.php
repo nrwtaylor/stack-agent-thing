@@ -19,6 +19,8 @@ class Agents extends Agent
 
     function getAgents()
     {
+        if (isset($this->agents)) {return;}
+
         $this->agent_list = array();
         $this->agents = array();
 
@@ -66,6 +68,35 @@ class Agents extends Agent
         $this->thing_report['txt'] = $this->sms_message;
     }
 
+    public function test()
+    {
+        $this->getAgents();
+        foreach ($this->agents as $key=>$agent) {
+            $agent_name = $agent['name'];
+
+            if ($agent_name == "Agent") {continue;}
+            if ($agent_name == "Agents") {continue;}
+/* dev
+            $this->thing = new Thing(null);
+            $subject = "s/ " . $agent_name;
+            $this->thing->Create(null, "test", $subject);
+
+
+            $this->getAgent($agent_name);
+            echo $this->thing_report['sms'] . "\n";
+
+            try {
+                $this->agent->test();
+                echo $agent_name . "[ GREEN ] ". "\n";
+
+            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptio$
+                echo $agent_name . "[ RED ]" . "\n";
+                continue;
+            }
+*/
+        }
+    }
+
     function makeSMS()
     {
         $sms = "AGENTS | ";
@@ -87,6 +118,7 @@ class Agents extends Agent
 
 	public function readSubject()
     {
+        $this->test();
 		return false;
     }
 

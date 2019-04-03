@@ -89,8 +89,10 @@ class Translink
 
     public function nullAction()
     {
+
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable( array("character", "action"), 'null' );
+
 
         $this->message = "TRANSIT | Request not understood. | TEXT SYNTAX";
         $this->sms_message = "TRANSIT | Request not understood. | TEXT SYNTAX";

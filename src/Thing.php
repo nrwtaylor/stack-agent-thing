@@ -83,7 +83,6 @@ class Thing
 		$this->associate_posterior = $this->container['stack']['associate_posterior'];
 
         $this->web_prefix = $this->container['stack']['web_prefix'];
-
         $this->engine_state = $this->container['stack']['engine_state'];
 
         try {
@@ -237,16 +236,15 @@ class Thing
 
 	function Shuffle()
     {
-
 		$this->uuid = $this->getUUid();
 		$this->nuuid = substr($this->uuid, 0, 4);
 
 		$this->db->writeField('uuid', $this->uuid);
 		$this->Forget();
-
 	}
 
-	function Create($from = null, $to = "", $subject = "") {
+	function Create($from = null, $to = "", $subject = "")
+    {
 		if ($from == null) {$from = 'null' . $this->mail_postfix ;}
 		$message0 = array();
 		$message0['50 words'] = null;
@@ -258,22 +256,18 @@ class Thing
 		// Which I suppose would be a message to nonnom.  Saying
 		// I found and deleted an @ sign.
 
-		if (strpos($to, "@") !== false) {	
+		if (strpos($to, "@") !== false) {
 			//echo "@ sign found";
 			$to = "";
 			//echo "email address removed completely<br>";
 			$message0['50 words'] .= $this->uuid . " found and removed an @ sign";
 		}
 
-
-
 		//echo "Problem is here with associatePosterior";
 		// I hear ya.
 		// This is the most likely candidate for the 1040 25 Apr
 		// This function needs ->db.
 		$this->db = new Database($this->uuid, $from);
-
-
 
 		// All records are associated with a posterior record.  Ideally
 		// one of the two latest records matching the newly created
@@ -317,20 +311,18 @@ $query = true;
 
 		if($query == true) { // will return true if successfull else it will return false
 
-				$this->sqlresponse =  "New record created successfully.";
-				$message0['500 words'] .= $this->sqlresponse;
+            // This increases the expectation of unreliability.
+            // User must expect that logging might not have happened.
+            $this->sqlresponse =  "New record created successfully.";
+            $message0['500 words'] .= $this->sqlresponse;
 
-			} else {
+        } else {
 
-				//$error = $query->errorInfo();
-				//$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
-				$this->sqlresponse = "Error: " .implode(":",$query->errorInfo());
-				$message0['50 words'] .= $this->sqlresponse;
-
-			}
-
-
-
+            //$error = $query->errorInfo();
+            //$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
+            $this->sqlresponse = "Error: " .implode(":",$query->errorInfo());
+            $message0['50 words'] .= $this->sqlresponse;
+        }
 
 		if($query == true) {// will return true if succefull else it will return false
 
@@ -401,7 +393,7 @@ $query = true;
 
 
 		return $this->Get();
-		}
+    }
 
 
 

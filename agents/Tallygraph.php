@@ -636,7 +636,9 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
     function makeTXT()
     {
-        $txt = 'This is a TALLY for RAILWAY ' . $this->variables_agent->nuuid . '. ';
+//        $txt = 'This is a TALLY for RAILWAY ' . $this->variables_agent->nuuid . '. ';
+        $txt = 'This is a MESSAGE TALLY. ';
+
         $txt .= "\n";
 
         $count = 0;
@@ -708,5 +710,3 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
 
 }
-
-?>

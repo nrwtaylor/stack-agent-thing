@@ -74,6 +74,7 @@ class Sms
         }
 */
 
+
 		if ( $this->readSubject() == true) {
 			$this->thing_report = array('thing' => $this->thing->thing, 
 				'choices' => false,
@@ -83,6 +84,7 @@ class Sms
 		        $this->thing->log( '<pre> Agent "Sms" completed without sending a SMS</pre>' );
 			return;
 		}
+
 		$this->respond();
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
@@ -113,6 +115,8 @@ class Sms
 
         $this->thing_report['sms'] = "SMS | " . $test_message;
 
+        //$test_message = str_replace(" | ", "\n", $test_message);
+
         $received_at = strtotime($this->thing->thing->created_at);
         $time_ago = time() - $received_at;
 
@@ -122,6 +126,10 @@ class Sms
 		if (($this->thing->account['stack']->balance['amount'] >= $this->cost ) and
             ($this->sms_count < $this->sms_per_message_responses) and
             ($time_ago < $this->sms_horizon )) {
+
+            // Dev stack Read in stack sms seperator value
+            // But for now replace sms seperators and translate to \n
+            $test_message = str_replace(" | ", "\n", $test_message);
 
 			$this->sendSms($to, $test_message);
 			$this->thing->account['stack']->Debit($this->cost);
@@ -238,11 +246,8 @@ $response = curl_exec($ch);
           error_log("Error {$message['status']} {$message['error-text']}");
       }
   }
-return;
-}
+    return;
+    }
 
 
 }
-
-?>
-

@@ -293,7 +293,7 @@ class Place extends Agent
 
                     $place_code = $this->default_place_code;
                     $place_name = $this->default_place_name;
-                    $refreshed_at = "meep getPlaces";
+                    $refreshed_at = "X";
 
                     if(isset($variables['place']['place_code'])) {$place_code = $variables['place']['place_code'];}
                     if(isset($variables['place']['place_name'])) {$place_name = $variables['place']['place_name'];}
@@ -650,7 +650,7 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
         $txt .= " " . str_pad("NAME", 40, " ", STR_PAD_RIGHT);
-        $txt .= " " . str_pad("CODE", 6, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("CODE", 6, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad("FRESHNESS", 15, " ", STR_PAD_LEFT);
 
 
@@ -687,7 +687,7 @@ foreach($filtered_places as $key=>$filtered_place) {
         foreach ($this->places as $key=>$place) {
 
             $txt .= " " . str_pad(strtoupper(trim($place['name'])), 40, " ", STR_PAD_RIGHT);
-            $txt .= " " . "  " .str_pad(strtoupper(trim($place['code'])), 6, " ", STR_PAD_LEFT);
+            $txt .= " " . "  " .str_pad(strtoupper(trim($place['code'])), 6, "X", STR_PAD_RIGHT);
             if (isset($place['refreshed_at'])) {
                 //if ($place['refreshed_at'] == $last_refreshed_at) {continue;}
                 $last_refreshed_at = $place['refreshed_at']; 
@@ -812,12 +812,15 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         $web .= "</a>";
         $web .= "<br>";
-        $web .= $this->sms_message;
+        $web .= nl2br($this->sms_message);
         $web .= "<br>";
+        $web .= "<p>";
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
         $web .= '<a href="' . $link . '">place.txt</a>';
+
         $web .= " | ";
+
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.log';
         $web .= '<a href="' . $link . '">place.log</a>';
 
@@ -831,20 +834,15 @@ foreach($filtered_places as $key=>$filtered_place) {
         $web .= '<a href="' . $link . '">'. "place" . '</a>';
 
         $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. urlencode($this->place_code);
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. $this->place_code;
 
         $web .= '<a href="' . $link . '">'. $this->place_code . '</a>';
 
 
 
+//        $web .= $this->place_code . '';
 
-/*
-        $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. "place";
-        $web .= $this->place_name. '';
-        $web .= " | ";
-        $web .= '<a href="' . $link . '">'. "place" . '</a>';
-*/
+
         $web .= "<br>";
 
         $web .= "<br>";

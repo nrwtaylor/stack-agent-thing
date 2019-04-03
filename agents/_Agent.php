@@ -802,9 +802,7 @@ var_dump($place_thing->place_name);
         }
 
         $this->thing->log( 'now looking at Place Context.' );
-        //$place_thing = new Place($this->thing, "extract");
-        $place_thing = new Place($this->thing, "place");
-
+        $place_thing = new Place($this->thing, "extract");
         $this->thing_report = $place_thing->thing_report;
 
         if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {

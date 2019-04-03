@@ -455,12 +455,7 @@ foreach($filtered_places as $key=>$filtered_place) {
             if (($place_code == $place['code']) or ($place_name == $place['name'])) {
                 $this->place_name = $place['name'];
                 $place_code =$place['code'];
-
-                if (isset($place['refreshed_at'])) {
-                    $this->last_refreshed_at = $place['refreshed_at'];
-                } else {
-                    $this->last_refreshed_at = "X";
-                }
+                $this->last_refreshed_at = $place['refreshed_at'];
             }
         }
         if ($place_code == null) {$place_code = $this->nextCode();}
@@ -650,7 +645,7 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
         $txt .= " " . str_pad("NAME", 40, " ", STR_PAD_RIGHT);
-        $txt .= " " . str_pad("CODE", 6, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("CODE", 6, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad("FRESHNESS", 15, " ", STR_PAD_LEFT);
 
 
@@ -687,7 +682,7 @@ foreach($filtered_places as $key=>$filtered_place) {
         foreach ($this->places as $key=>$place) {
 
             $txt .= " " . str_pad(strtoupper(trim($place['name'])), 40, " ", STR_PAD_RIGHT);
-            $txt .= " " . "  " .str_pad(strtoupper(trim($place['code'])), 6, " ", STR_PAD_LEFT);
+            $txt .= " " . "  " .str_pad(strtoupper(trim($place['code'])), 6, "X", STR_PAD_RIGHT);
             if (isset($place['refreshed_at'])) {
                 //if ($place['refreshed_at'] == $last_refreshed_at) {continue;}
                 $last_refreshed_at = $place['refreshed_at']; 
@@ -820,31 +815,12 @@ foreach($filtered_places as $key=>$filtered_place) {
         $web .= " | ";
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.log';
         $web .= '<a href="' . $link . '">place.log</a>';
-
-        $web .= " | ";
-
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. $this->place_name;
-            $web .= '<a href="' . $link . '">'. $this->place_name . '</a>';
-
-        $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. "place";
-        $web .= '<a href="' . $link . '">'. "place" . '</a>';
-
-        $web .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. urlencode($this->place_code);
-
-        $web .= '<a href="' . $link . '">'. $this->place_code . '</a>';
-
-
-
-
-/*
         $web .= " | ";
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. "place";
         $web .= $this->place_name. '';
         $web .= " | ";
         $web .= '<a href="' . $link . '">'. "place" . '</a>';
-*/
+
         $web .= "<br>";
 
         $web .= "<br>";
