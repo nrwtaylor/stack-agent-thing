@@ -838,24 +838,94 @@ echo "place found";
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
 
-        if (strpos($input, 'nest maintenance') !== false) {
 
-            $ant_thing = new Ant($this->thing);
+     $findagent_agent = new FindAgent($this->thing, "crow");
+        $things = $findagent_agent->thing_report['things'];
+        $crow_last_heard = strtotime($things[0]['created_at']);
+
+        $findagent_agent = new FindAgent($this->thing, "ant");
+        $temp_things = $findagent_agent->thing_report['things'];
+        $things = array();
+        foreach($temp_things as $key=>$thing) {
+            if ($thing['task'] == "ant") {
+                $things[] = $thing;
+            }
+        }
+        $ant_last_heard = strtotime($things[0]['created_at']);
+
+        if ($ant_last_heard > $crow_last_heard) {
+            $agent_name = "Ant";
+        } else {
+            $agent_name = "Crow";
+        }
+
+//        $agent_name = "Ant";
+        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;
+
+
+                if (strpos($input, 'nest maintenance') !== false) {
+  
+                      $ant_thing = new $agent_namespace_name($this->thing);
+                        $this->thing_report = $ant_thing->thing_report;
+                        return $this->thing_report;
+                }
+  
+                if (strpos($input, 'patrolling') !== false) {
+                      $ant_thing = new $agent_namespace_name($this->thing);
+                      $this->thing_report = $ant_thing->thing_report;
+                      return $this->thing_report;
+                }
+  
+                if (strpos($input, 'foraging') !== false) {
+                      $ant_thing = new $agent_namespace_name($this->thing);
+
+
             $this->thing_report = $ant_thing->thing_report;
             return $this->thing_report;
         }
 
-        if (strpos($input, 'patrolling') !== false) {
-            $ant_thing = new Ant($this->thing);
-            $this->thing_report = $ant_thing->thing_report;
-            return $this->thing_report;
+        $findagent_agent = new FindAgent($this->thing, "crow");
+        $things = $findagent_agent->thing_report['things'];
+        $crow_last_heard = strtotime($things[0]['created_at']);
+
+        $findagent_agent = new FindAgent($this->thing, "ant");
+        $temp_things = $findagent_agent->thing_report['things'];
+        $things = array();
+        foreach($temp_things as $key=>$thing) {
+            if ($thing['task'] == "ant") {
+                $things[] = $thing;
+            }
+        }
+        $ant_last_heard = strtotime($things[0]['created_at']);
+
+        if ($ant_last_heard > $crow_last_heard) {
+            $agent_name = "Ant";
+        } else {
+            $agent_name = "Crow";
         }
 
-        if (strpos($input, 'foraging') !== false) {
-            $ant_thing = new Ant($this->thing);
-            $this->thing_report = $ant_thing->thing_report;
-            return $this->thing_report;
-        }
+//        $agent_name = "Ant";
+        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;
+
+
+		if (strpos($input, 'nest maintenance') !== false) {
+
+			$ant_thing = new $agent_namespace_name($this->thing);
+			$this->thing_report = $ant_thing->thing_report;
+			return $this->thing_report;
+		}
+
+		if (strpos($input, 'patrolling') !== false) {
+			$ant_thing = new $agent_namespace_name($this->thing);
+			$this->thing_report = $ant_thing->thing_report;
+			return $this->thing_report;
+		}
+
+		if (strpos($input, 'foraging') !== false) {
+			$ant_thing = new $agent_namespace_name($this->thing);
+			$this->thing_report = $ant_thing->thing_report;
+			return $this->thing_report;
+		}
 
         $pattern = '/\?/';
 
