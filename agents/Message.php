@@ -26,7 +26,6 @@ class Message
 
 		// If it null, then it is a non-agent calling the Message function.
 		// So address that first
-
         $this->button = new Button($this->thing, "button");
 
 		if ($agent_input == null) {
@@ -48,8 +47,6 @@ class Message
 
 		$this->thing_report['thing'] = $this->thing->thing;
 
-
-
 		// Get some stuff from the stack which will be helpful.
 		$this->web_prefix = $thing->container['stack']['web_prefix'];
 		$this->stack_state = $thing->container['stack']['state'];
@@ -58,6 +55,7 @@ class Message
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
 		// Create some short-cuts.
@@ -65,7 +63,6 @@ class Message
      	$this->to = $thing->to;
       	$this->from = $thing->from;
        	$this->subject = $thing->subject;
-
 
         $this->thing->log($this->agent_prefix . 'started running on Thing ' . $this->thing->nuuid . '.</pre>', "INFORMATION");
 
@@ -76,17 +73,14 @@ class Message
 		$this->aliases = array("message"=>array("communicate"));
 
         // Find out what channel this is
-//echo "meep";
+        $channel = new Channel($this->thing, "channel");
+        $this->channel_name = $channel->channel_name;
 
-$channel = new Channel($this->thing, "channel");
-$this->channel_name = $channel->channel_name;
-
-
-//$this->button = new Button($this->thing, "button");
-//var_dump($this->button->state);
-//exit();
-
-		$this->respond();
+        // dev
+        //$button_agent = new Button($this->thing, "button");
+        //var_dump($button_agent->thing->state);
+        //exit();
+ 		$this->respond();
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("message",
@@ -99,15 +93,10 @@ $this->channel_name = $channel->channel_name;
         $this->thing_report['log'] = $this->thing->log;
 
         $timestamp =  new Timestamp($thing, "timestamp");
-
-
-		return;
-
 	}
 
     function get_calling_class()
     {
-
         //get the trace
         $trace = debug_backtrace();
 
@@ -117,21 +106,20 @@ $this->channel_name = $channel->channel_name;
         // +1 to i cos we have to account for calling this function
         for ( $i=1; $i<count( $trace ); $i++ ) {
             if ( isset( $trace[$i] ) ) // is it set?
-                 if ( $class != $trace[$i]['class'] ) // is it a different class
-                     return $trace[$i]['class'];
+            if ( $class != $trace[$i]['class'] ) // is it a different class
+                return $trace[$i]['class'];
+            }
         }
-    }
 
-    function quotaMessage() {
-
+    function quotaMessage()
+    {
         $this->quota = new Quota($this->thing, 'quota');
-        $this->quota_flag = $this->quota->flag; 
+        $this->quota_flag = $this->quota->flag;
 
         if ($this->quota_flag == "red") {
             $this->thing_report['info'] = 'Agent "Message" daily message quota exceeded. ' . $this->quota->counter_daily . ' of ' . $this->quota->quota_daily . ' messages sent.';
             return $this->thing_report;
         }
-
     }
 
     function tallyMessage()
@@ -144,10 +132,8 @@ $this->channel_name = $channel->channel_name;
         // sent 3 times.
     }
 
-
 	function setMessages() 
     {
-
 		// 'message' must be set always.  If not fall back to sms_message
 		if ( !isset($this->thing_report['message'] ) ) {
 			$this->message = "Message not set";
@@ -172,9 +158,6 @@ $this->channel_name = $channel->channel_name;
         } else {
 //			$this->from = $this->thing_report['thing']->nom_from;
 //			$this->to = $this->thing_report['thing']->nom_to;
-
-
-
         }
 
 		// As must 'thing'
@@ -183,11 +166,11 @@ $this->channel_name = $channel->channel_name;
                 case 'keyword':
                     $this->keyword = $this->thing_report['keyword'];
                     break;
-//					continue;
     			case 'sms':
 					$this->sms_message = $this->thing_report['sms'];
+                   // Some final conditioning.
+                   // Overide the sms seperator with the stack seperator
                     break;
-//					continue;
                 case 'choices':
 
                     if ($this->button->state == "on") {
@@ -196,21 +179,16 @@ $this->channel_name = $channel->channel_name;
                         $this->choices = false;
                     }
                     break;
-//					continue;
 
                 case 'email':
                     $this->email = $this->thing_report['email'];
                     break;
-//					continue;
   				case 'web':
                     break;
-//					continue;
                 default:
                     break;
-//                    continue;
 			}
 		}
-		return;
 	}
 
     function isOpen()
@@ -345,19 +323,16 @@ $this->channel_name = $channel->channel_name;
             // Cost is handled by sms.php
             // So here we should pull in the token limiter and proof
             // it's capacity to token limit outgoing SMS
-
             $token_thing = new Tokenlimiter($this->thing, 'facebook');
 
             $dev_overide = null;
             if ( ($token_thing->thing_report['token'] == 'facebook' ) or ($dev_overide == true) ) {
 
                 $fb_thing = new Facebook($this->thing, $this->sms_message);
-
                 $thing_report['info'] = $fb_thing->thing_report['info'];
 
                 $this->thing_report['channel'] = 'facebook'; // one of sms, email, keyword etc
                 $this->thing_report['info'] = 'Agent "Message" sent a Facebook message.'; 
-
                 $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "INFORMATION" );
 
                 $this->tallyMessage();
@@ -366,6 +341,7 @@ $this->channel_name = $channel->channel_name;
 
                 $this->thing_report['channel'] = 'facebook'; // one of sms, email, keyword etc
                 $this->thing_report['info'] = "You were sent this link through " . $this->thing_report['channel'] . '.'; 
+
             }
 
            $this->thing->log( $this->agent_prefix . ' said, "' . $this->thing_report['info'] .'"', "WARNING" );
@@ -393,7 +369,7 @@ $this->channel_name = $channel->channel_name;
                 $this->thing_report['channel'] = 'microsoft'; // one of sms, email, keyword etc
                 $this->thing_report['info'] = 'Agent "Message" sent a Microsoft message.'; 
 
-                $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "INFORMATION" );
+                $this->thing->log( '' . $this->thing_report['info'] . '', "INFORMATION" );
 
                 $this->tallyMessage();
 
@@ -409,69 +385,57 @@ $this->channel_name = $channel->channel_name;
         }
 
 
-//echo "message";
         if ( $this->checkSlack($to) ) { // The Slack app of Mordok the Magnificent
-//echo "slack";
             $this->thing->log('<pre> Agent "Message" responding via Slack.</pre>');
 
+            // Check how cost is tracked.
+            // So here we should pull in the token limiter and proof 
+            // it's capacity to token limit outgoing SMS
+            $token_thing = new Tokenlimiter($this->thing, 'slack');
 
-                        // Cost is handled by sms.php
-                        // So here we should pull in the token limiter and proof 
-                        // it's capacity to token limit outgoing SMS
+            $this->thing->log('Agent "Message" received a ' . $token_thing->thing_report['token'] . " Token.", "INFORMATION");
+            $dev_overide = null;
+            if ( ($token_thing->thing_report['token'] == 'slack' ) or ($dev_overide == true) ) {
 
-                       $token_thing = new Tokenlimiter($this->thing, 'slack');
+                $slack_thing = new Slack($this->thing, $this->thing_report);
+                // $slack_thing = new Slack($this->thing, $this->sms_message);
 
+                $thing_report['info'] = 'Slack message sent.';
 
-$this->thing->log('Agent "Message" received a ' . $token_thing->thing_report['token'] . " Token.", "INFORMATION");
-$dev_overide = null;
-                        if ( ($token_thing->thing_report['token'] == 'slack' ) or ($dev_overide == true) ) {
+                $this->thing_report['channel'] = 'slack'; // one of sms, email, keyword etc
+                $this->thing_report['info'] = 'Agent "Message" sent a Slack message'; 
 
-                       $slack_thing = new Slack($this->thing, $this->thing_report);
+                $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>' , "INFORMATION");
 
-// $slack_thing = new Slack($this->thing, $this->sms_message);
-
-
-                       $thing_report['info'] = 'Slack message sent.';
-
-                       $this->thing_report['channel'] = 'slack'; // one of sms, email, keyword etc
-                       $this->thing_report['info'] = 'Agent "Message" sent a Slack message'; 
-
-
-                        $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>' , "INFORMATION");
-
-$this->tallyMessage();
+                $this->tallyMessage();
 
 
-                        } else {
+            } else {
 
-                       $this->thing_report['channel'] = 'slack'; // one of sms, email, keyword etc
-                       $this->thing_report['info'] = 'Agent "Message" did not get a Slack token.'; 
-                        }
+                $this->thing_report['channel'] = 'slack'; // one of sms, email, keyword etc
+                $this->thing_report['info'] = 'Agent "Message" did not get a Slack token.'; 
+            }
 
-                        $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
-
-                        return $this->thing_report;
-                }
-
-
+            $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
+            return $this->thing_report;
+        }
 
         if ( is_numeric($from) and isset($this->sms_message) ) {
 
             $this->thing_report['channel'] = 'sms'; // one of sms, email, keyword etc
 
     		// Cost is handled by sms.php
-
             // Check both a thing token and a stack quota.
             $token_thing = new Tokenlimiter($this->thing, 'sms');
             $quota = new Quota($this->thing, 'quota');
 
-            //$this->thing->log( $this->agent_prefix . " Token is " . $token_thing->thing_report['token'] . ".");
-
-            //$dev_overide = null; //uncomment to stop sms messaging
-
-
             switch (true) {
                 case ($token_thing->thing_report['token'] != 'sms' ):
+
+                    //$this->thing->log( $this->agent_prefix . " Token is " . $token_thing->thing_report['token'] . ".");
+
+                    //$dev_overide = null; //uncomment to stop sms messaging
+
                     $this->thing_report['info'] = 'Agent "Message" did not get SMS token.';
                     break;
 
@@ -481,9 +445,9 @@ $this->tallyMessage();
                     $this->thing_report['info'] = 'Agent "Message" has exceeded the daily message quota.';
                     break;
 
-
 //            case (isset($dev_overide)):
                 case (true):
+  //                  strreplace(sms_separator' => '|',
 
                    $sms_thing = new Sms($this->thing, $this->sms_message);
 
@@ -499,14 +463,10 @@ $this->tallyMessage();
             }
 
             $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
-
-
 			return $this->thing_report;
         }
 
-
 //		$this->thing_report['message'] = null; // one of sms, email, keyword etc
-
 
         // Recognize and respond to email messages,
         // IF there is a formatted email message.
@@ -586,5 +546,3 @@ $this->tallyMessage();
 
 
 }
-
-?>

@@ -7,40 +7,18 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Wikipedia 
+class Wikipedia extends Agent 
 {
 
     // This gets Forex from an API.
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->start_time = $thing->elapsed_runtime();
-
-        $this->agent_input = $agent_input;
-
         $this->keyword = "know";
 
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->test= "Development code"; // Always
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-
-        $this->agent_prefix = 'Agent "Wikipedia" ';
-
-        //$this->node_list = array("off"=>array("on"=>array("off")));
-
         $this->keywords = array('wikipedia','definition');
-
-        $this->current_time = $this->thing->time();
 
         $this->application_id = null;
         $this->application_key = null;
@@ -48,35 +26,17 @@ class Wikipedia
         $this->run_time_max = 360; // 5 hours
 
         $this->variables_agent = new Variables($this->thing, "variables " . "wikipedia" . " " . $this->from);
-
-        // Loads in variables.
-        $this->get();
-
-		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
-		$this->thing->log('received this Thing "'.  $this->subject . '".');
-
-		$this->readSubject();
-
-        $this->getApi();
-
-		$this->respond();
-
-        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
-		$this->thing->log( 'completed.');
-
-        $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
-
-		return;
 	}
 
-
+    function run()
+    {
+        $this->getApi();
+    }
 
     function set()
     {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-        return;
     }
 
 
@@ -88,13 +48,7 @@ class Wikipedia
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".", "DEBUG");
 
         $this->counter = $this->counter + 1;
-
-        return;
     }
-
-
-
-
 
     function getApi($sort_order = null)
     {
@@ -162,10 +116,8 @@ $context = stream_context_create($options);
         $json_data = json_decode($data, TRUE);
 
         if (!isset($json_data['query']['search'][0]['snippet'])) {
-
             $this->text = "Wikipedia did not find anything.";
             return true;
-
         }
 
         $snippet = strip_tags($json_data['query']['search'][0]['snippet']);
@@ -177,19 +129,19 @@ $context = stream_context_create($options);
     {
         // Give it the message returned from the API service
 
-        $this->link = "https://www.google.com/search?q=" . $ref; 
+        $this->link = "https://en.wikipedia.org/wiki/" . $ref;
         return $this->link;
     }
 
-	private function respond()
+	public function respond()
     {
 		// Thing actions
 
 		$this->thing->flagGreen();
 		// Generate email response.
 
-		$to = $this->thing->from;
-		$from = "wikipedia";
+//		$to = $this->thing->from;
+//		$from = "wikipedia";
 
 		//echo "<br>";
 
@@ -205,7 +157,7 @@ $context = stream_context_create($options);
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
-        $this->thingreportWikipedia();
+        $this->report();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -219,16 +171,16 @@ $context = stream_context_create($options);
 
     public function makeWeb()
     {
-        $html = "<b>WIKIPEDIA</b>";
-        $html .= "<p><b>Wikipedia Text</b>";
-
+        $html = "<b>Wikipedia Agent</b>";
+        $html .= "<p>";
         if (!isset($this->text)) {
-            $html .= "<br>Nothing found on Wikipedia.";
+            $html .= "Nothing found on Wikipedia.";
         } else {
 
-            $html .= "<br>" . $this->text;
+            $html .= "" . $this->text;
         }
         $this->html_message = $html;
+        $this->thing_report['web'] = $html;
     }
 
     function truncate($string,$length=100,$append="[...]")
@@ -282,7 +234,7 @@ $context = stream_context_create($options);
         $this->message = $message;
     }
 
-    private function thingreportWikipedia()
+    private function report()
     {
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
@@ -378,5 +330,3 @@ $context = stream_context_create($options);
 	}
 
 }
-
-?>

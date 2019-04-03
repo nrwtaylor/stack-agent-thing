@@ -7,7 +7,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Place
+class Place extends Agent
 {
     // Timing 11 July 2018 
     // 4,232ms, 4,009ms, 3,057ms
@@ -102,7 +102,7 @@ class Place
         //$this->set();
 
         if ($this->agent_input == null) {
-		    $this->Respond();
+		    $this->respond();
         }
 
         if ($this->agent_input != "extract") {
@@ -122,9 +122,8 @@ class Place
 
     function set()
     {
-
         if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
-        //$this->refreshed_at = $this->current_time;
+
         $place = new Variables($this->thing, "variables place " . $this->from);
 
         $place->setVariable("place_code", $this->place_code);
@@ -137,16 +136,11 @@ class Place
         $place = new Variables($this->thing, "variables " . $this->place_code . " " . $this->from);
         $place->setVariable("place_name", $this->place_name);
         $place->setVariable("refreshed_at", $this->refreshed_at);
-
-
-        return;
     }
 
     function isCode()
     {
         $place_zone = "05";
-        //$place_code = $place_zone  . str_pad(rand(0,999) + 1,6,  '0', STR_PAD_LEFT);
-
 
         foreach (range(1,9999) as $n) {
             foreach($this->places as $place) {
@@ -163,30 +157,28 @@ class Place
                 return;
             }
         }
-}
+    }
 
-    function nextCode() {
-
-
+    function nextCode()
+    {
         $place_code_candidate = null;
+
+        $place_code_candidate = $this->thing->nuuid;
 
         foreach ($this->places as $place) {
             $place_code = strtolower($place['code']);
             if (($place_code == $place_code_candidate) or ($place_code_candidate == null)) {
-                $place_code_candidate = str_pad(rand(100,9999) , 8, "9", STR_PAD_LEFT);
+                //$place_code_candidate = str_pad(rand(100,9999) , 8, "9", STR_PAD_LEFT);
+                $place_code_candidate = $this->thing->nuuid;
             }
         }
-
-//        $place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
         return $place_code;
-
     }
 
-
-
-    function nextPlace() {
-
+    function nextPlace()
+    {
         $this->thing->log("next place");
+
         // Pull up the current headcode
         $this->get();
 
@@ -200,13 +192,11 @@ class Place
         $this->get($next_time);
 
         // So this should create a headcode in the next quantity unit.
-
         return $this->available;
-
     }
-
-    function getVariable($variable_name = null, $variable = null) {
-
+/*
+    function getVariable($variable_name = null, $variable = null)
+    {
         // This function does a minor kind of magic
         // to resolve between $variable, $this->variable,
         // and $this->default_variable.
@@ -236,7 +226,7 @@ class Place
         // setting is found.
         return false;
     }
-
+*/
     function getPlace($selector = null)
     {
         foreach ($this->places as $place) {
@@ -257,10 +247,17 @@ class Place
                 return array($this->place_code, $this->place_name);
             }
        }
-
        return true;
     }
 
+    // Factor a self-naming function in Agent to perform this magic.
+    function getQuantity()
+    {
+        $quantity_agent = new Quantity($this->thing, "quantity");
+        $this->quantity = $quantity_agent->quantity;
+    }
+
+    // very much dev
     function getPlaces()
     {
         $this->placecode_list = array();
@@ -270,7 +267,7 @@ class Place
         // See if a headcode record exists.
         $findagent_thing = new FindAgent($this->thing, 'place');
         $count = count($findagent_thing->thing_report['things']);
-        $this->thing->log('Agent "Place" found ' . count($findagent_thing->thing_report['things']) ." place Things." );
+        $this->thing->log('found ' . count($findagent_thing->thing_report['things']) ." place Things." );
 
 //        if ($findagent_thing->thing_reports['things'] == false) {
 //                $place_code = $this->default_place_code;
@@ -280,17 +277,10 @@ class Place
 
         if ( ($findagent_thing->thing_report['things'] == true)) {}
 
-        //var_dump(count($findagent_thing->thing_report['things'])); 
-        //var_dump($findagent_thing->thing_report['things'] == true);
-
-
         if (!$this->is_positive_integer($count))
         {
             // No places found
         } else {
-
-
-
 
             foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object)
             {
@@ -324,6 +314,7 @@ class Place
 $found = false;
 
 */
+
 //                    if ($found == false) {
 
 
@@ -364,12 +355,12 @@ $found = false;
 
         }
 
-$refreshed_at = array();
-foreach ($this->places as $key => $row)
-{
-    $refreshed_at[$key] = $row['refreshed_at'];
-}
-array_multisort($refreshed_at, SORT_DESC, $this->places);
+        $refreshed_at = array();
+        foreach ($this->places as $key => $row)
+        {
+            $refreshed_at[$key] = $row['refreshed_at'];
+        }
+        array_multisort($refreshed_at, SORT_DESC, $this->places);
 
 /*
 // Get latest per place
@@ -380,26 +371,20 @@ foreach($filtered_places as $key=>$filtered_place) {
         $this->places[] = $filtered_place;
 }
 */
-$this->old_places = $this->places;
-$this->places = array();
-foreach ($this->old_places as $key =>$row)
-{
 
-//var_dump( strtotime($row['refreshed_at']) );
-    if ( strtotime($row['refreshed_at']) != false) { 
-      $this->places[] = $row;
-    }
-}
-
-//exit();
-    //exit();
+        $this->old_places = $this->places;
+        $this->places = array();
+        foreach ($this->old_places as $key =>$row) {
+            if ( strtotime($row['refreshed_at']) != false) {
+                $this->places[] = $row;
+            }
+        }
 
         // Add in a set of default places
-         $file = $this->resource_path .'place/places.txt';
-         $contents = file_get_contents($file);
+        $file = $this->resource_path .'place/places.txt';
+        $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
-
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
@@ -409,24 +394,22 @@ foreach ($this->old_places as $key =>$row)
                 // Common ones.
                 $place_name = $line;
                 // This is where the place index will be called.
-                $place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
+                // $place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
+                $place_code = $this->thing->nuuid;
 
                 $this->placecode_list[] = $place_code;
                 $this->placename_list[] = $place_name;
-                $this->places[] = array("code"=>$place_code, "name"=>$place_name); 
-
+                $this->places[] = array("code"=>$place_code, "name"=>$place_name);
             }
-
             fclose($handle);
         } else {
             // error opening the file.
         }
 
-       // Indexing not implemented
+        // Indexing not implemented
         $this->max_index = 0;
 
         return array($this->placecode_list, $this->placename_list, $this->places);
-
     }
 
     function is_positive_integer($str)
@@ -434,7 +417,7 @@ foreach ($this->old_places as $key =>$row)
         return (is_numeric($str) && $str > 0 && $str == round($str));
     }
 
-    private function get($place_code = null)
+    public function get($place_code = null)
     {
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
@@ -449,9 +432,9 @@ foreach ($this->old_places as $key =>$row)
         return array($this->place_code, $this->place_name);
     }
 
-    function dropPlace() {
+    function dropPlace()
+    {
         $this->thing->log($this->agent_prefix . "was asked to drop a Place.");
-
 
         // If it comes back false we will pick that up with an unset headcode thing.
 
@@ -461,9 +444,7 @@ foreach ($this->old_places as $key =>$row)
         }
 
         $this->get();
- 
     }
-
 
     function makePlace($place_code = null, $place_name = null)
     {
@@ -474,7 +455,12 @@ foreach ($this->old_places as $key =>$row)
             if (($place_code == $place['code']) or ($place_name == $place['name'])) {
                 $this->place_name = $place['name'];
                 $place_code =$place['code'];
-                $this->last_refreshed_at = $place['refreshed_at'];
+
+                if (isset($place['refreshed_at'])) {
+                    $this->last_refreshed_at = $place['refreshed_at'];
+                } else {
+                    $this->last_refreshed_at = "X";
+                }
             }
         }
         if ($place_code == null) {$place_code = $this->nextCode();}
@@ -501,7 +487,7 @@ foreach ($this->old_places as $key =>$row)
             $this->current_place_name = $place_name;
             $this->place_name = $place_name;
             $this->refreshed_at = $this->current_time;
-  
+
             // This will write the refreshed at.
             $this->set();
 
@@ -511,8 +497,7 @@ foreach ($this->old_places as $key =>$row)
             $this->place_thing = $this->thing;
 
         }
-
-        $this->thing->log('Agent "Place" found a Place and pointed to it.');
+        $this->thing->log('found a Place and pointed to it.');
     }
 
     function placeTime($input = null)
@@ -559,14 +544,10 @@ foreach ($this->old_places as $key =>$row)
         preg_match_all($pattern, $input, $m);
         $this->place_codes = $m[0];
 
-
         // Look for an established list of places.
         //$default_placename_list = array("Eton", "Gilmore", "Hastings", "Vine", "Downtown", "Metrotown", "Triumph", "Main and Hastings", "Commercial and Broadway", "Granville Street", "Burrard Skytrain");
 
         //if (!isset($this->place_name_list)) {$this->get();}
-
-        //$this->place_names = array();
-        //foreach ($places as $place) {
 
         if (!isset($this->places)) {$this->getPlaces();}
 
@@ -576,9 +557,6 @@ foreach ($this->old_places as $key =>$row)
 
             if (empty($place_name)) {continue;}
             if (empty($place_code)) {continue;}
-//if ($place_name == null) {continue;}
-//if ($place_code == null) {continue;}
-//exit();
 
             // Thx. https://stackoverflow.com/questions/4366730/how-do-i-check-if-a-string-contains-a-specific-word
             if (strpos($input, $place_code) !== false)  {
@@ -612,20 +590,7 @@ foreach ($this->old_places as $key =>$row)
             return array($this->place_code, $this->place_name);
         }
 
-
-        //if (count($place_codes == 0)) {return false;}
-        //if (count($place_codes > 1)) {return true;}
-
-        // And then extract place names.
-        // Take out word 'place' at the start.
-//        $filtered_input = ltrim(strtolower($input), "place");
-
-
-//exit();
-
-
         if (count($place_names) == 1) {$this->place_name = $this->place_names[0];}
-//var_dump($place_names);
         return array($this->place_code, $this->place_name);
     }
 
@@ -646,21 +611,17 @@ foreach ($this->old_places as $key =>$row)
         }
     }
 
-
+/*
     function read()
     {
         $this->thing->log("read");
-
-//        $this->get();
-        //return $this->available;
     }
+*/
 
 
-
-    function addPlace() {
-        //$this->makeHeadcode();
+    function addPlace()
+    {
         $this->get();
-        return;
     }
 
     public function makeMessage()
@@ -670,6 +631,7 @@ foreach ($this->old_places as $key =>$row)
         $this->thing_report['message'] = $message;
     }
 
+    // dev
     function makeTXT()
     {
         if (!isset($this->placecode_list)) {$this->getPlaces();}
@@ -688,7 +650,8 @@ foreach ($this->old_places as $key =>$row)
 
         //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
         $txt .= " " . str_pad("NAME", 40, " ", STR_PAD_RIGHT);
-        $txt .= " " . str_pad("CODE", 8, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("CODE", 6, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad("FRESHNESS", 15, " ", STR_PAD_LEFT);
 
 
         $txt .= "\n";
@@ -724,9 +687,11 @@ foreach ($this->old_places as $key =>$row)
         foreach ($this->places as $key=>$place) {
 
             $txt .= " " . str_pad(strtoupper(trim($place['name'])), 40, " ", STR_PAD_RIGHT);
-            $txt .= " " . "  " .str_pad(strtoupper(trim($place['code'])), 5, "X", STR_PAD_LEFT);
+            $txt .= " " . "  " .str_pad(strtoupper(trim($place['code'])), 6, " ", STR_PAD_LEFT);
             if (isset($place['refreshed_at'])) {
-                $txt .= " " . "  " .str_pad(strtoupper($place['refreshed_at']), 15, "X", STR_PAD_LEFT);
+                //if ($place['refreshed_at'] == $last_refreshed_at) {continue;}
+                $last_refreshed_at = $place['refreshed_at']; 
+               $txt .= " " . "  " .str_pad(strtoupper($place['refreshed_at']), 15, "X", STR_PAD_LEFT);
             }
             $txt .= "\n";
 
@@ -735,8 +700,8 @@ foreach ($this->old_places as $key =>$row)
         }
 
         $txt .= "\n";
-        $txt .= "Last place " . $this->last_place_name . "\n";
-        $txt .= "Now at " . $this->place_name;
+        $txt .= "Last place " . strtoupper($this->last_place_name) . "\n";
+        $txt .= "Now at " . strtoupper($this->place_name);
 
 
 
@@ -745,8 +710,11 @@ foreach ($this->old_places as $key =>$row)
 
     }
 
-
-    private function makeSMS() {
+    // prod
+    private function makeSMS()
+    {
+        // Get available for place.  This would be an available agent.
+        $this->getQuantity();
 
         $this->inject = null;
         $s = $this->inject;
@@ -754,18 +722,28 @@ foreach ($this->old_places as $key =>$row)
 
         if ((!empty($this->inject))) {
             $sms .= " | " . $s;
-        } 
-
-        if ((!empty($this->place_code))) {
-        $sms .= " | " . trim(strtoupper($this->place_code));
         }
+
+        // Not there yet.
+        // if ((!empty($this->quantity))) {
+        //    $sms .= " | " . "quantity " . $this->quantity;
+        // }
+
+        //if ((!empty($this->place_code))) {
+        //    $sms .= " | " . trim(strtoupper($this->place_code));
+        //}
 
         if ((!empty($this->place_code))) {
             $sms .= " | " . $this->web_prefix . 'thing/' . $this->uuid . '/place';
         }
 
+        if ((!empty($this->place_code))) {
+            $sms .= " | " . "TEXT " . trim(strtoupper($this->place_code));
+        } else {
+            $sms .= "|" . "TEXT " . "AGENT"; 
+        }
 
-/*
+/* dev
 
 //        if (!isset($this->last_refreshed_at) {$this->lastPlace();}
 
@@ -789,6 +767,8 @@ foreach ($this->old_places as $key =>$row)
 
 */
 
+        $sms = str_replace(" | ", "\n", $sms);
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
 
@@ -800,7 +780,6 @@ foreach ($this->old_places as $key =>$row)
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $link_txt = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
-        
 
         $this->node_list = array("place"=>array("translink", "job"));
         // Make buttons
@@ -809,6 +788,7 @@ foreach ($this->old_places as $key =>$row)
 
         $web = '<a href="' . $link . '">';
 
+// dev
 // Insert other agents images...
 // $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
 //      width="100" height="100" 
@@ -817,53 +797,63 @@ foreach ($this->old_places as $key =>$row)
 // $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
 
 
-// Get aan html image if there is one
-if (!isset($this->html_image)) {
-    if (function_exists("makePNG")) {
-        $this->makePNG();
-    } else {
-        $this->html_image = true;
-    }
-}
+        // Get an html image if there is one
+        if (!isset($this->html_image)) {
+            if (function_exists("makePNG")) {
+                $this->makePNG();
+            } else {
+                $this->html_image = true;
+            }
+        }
 
-$this->makePNG();
+        $this->makePNG();
         $web .= $this->html_image;
-$web .= "<br>";
+        $web .= "<br>";
 
         $web .= "</a>";
         $web .= "<br>";
-$web .= $this->sms_message;
+        $web .= $this->sms_message;
         $web .= "<br>";
 
-
-        
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
         $web .= '<a href="' . $link . '">place.txt</a>';
         $web .= " | ";
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/place.log';
         $web .= '<a href="' . $link . '">place.log</a>';
+
+        $web .= " | ";
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. $this->place_name;
+            $web .= '<a href="' . $link . '">'. $this->place_name . '</a>';
+
+        $web .= " | ";
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. "place";
+        $web .= '<a href="' . $link . '">'. "place" . '</a>';
+
+        $web .= " | ";
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. urlencode($this->place_code);
+
+        $web .= '<a href="' . $link . '">'. $this->place_code . '</a>';
+
+
+
+
+/*
         $web .= " | ";
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/'. "place";
         $web .= $this->place_name. '';
         $web .= " | ";
         $web .= '<a href="' . $link . '">'. "place" . '</a>';
-
-
-
+*/
         $web .= "<br>";
 
-
-
         $web .= "<br>";
-
-
 
         //$received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($this->refreshed_at) );
         $web .= "Last asserted about ". $ago . " ago.";
 
         $web .= "<br>";
-
 
         $this->thing_report['web'] = $web;
     }
@@ -873,8 +863,8 @@ $web .= $this->sms_message;
     {
         $text = strtoupper($this->place_name);
 
-$image_height = 125;
-$image_width = 125*4;
+        $image_height = 125;
+        $image_width = 125*4;
 
         $image = imagecreatetruecolor($image_width, $image_height);
 
@@ -935,54 +925,7 @@ $image_width = 125*4;
         $this->thing_report['png'] = $agent->image_string;
     }
 
-/*
-    public function old_makePNG()
-    {
-$split_time = $this->thing->elapsed_runtime();
-
-        // Save the image
-        $this->makeImage();
-        $image = $this->image;
-        ob_start();
-        imagepng($image);
-        $imagedata = ob_get_contents();
-        ob_end_clean();
-
-        $this->thing_report['png'] = $imagedata;
-
-        $alt_text = "Place is " . $this->place_name;
-
-
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata). '"
-                width="100" height="100" 
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
-
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata). '"
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
-
-
-        $this->html_image = $response;
-
-//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg" 
-//                width="100" height="100" 
-//                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.txt">';
-
-
-//        $this->thing_report['png'] = $image;
-
-        imagedestroy($image);
-
-echo $this->thing->elapsed_runtime() - $split_time; 
-
-
-        return $response;
-
-//        $this->PNG = $image;    
-//        $this->thing_report['png'] = $image;
-
-//       return;
-    }
-*/
+    // Must be able to factor this out with Image. Eventually.
     function ImageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
         // draw rectangle without corners
@@ -997,7 +940,7 @@ echo $this->thing->elapsed_runtime() - $split_time;
     }
 
 
-	private function Respond()
+	public function respond()
     {
 		// Thing actions
 
@@ -1012,11 +955,8 @@ echo $this->thing->elapsed_runtime() - $split_time;
         $choices = false;
 		$this->thing_report['choices'] = $choices;
 
-        //$this->makeTXT();
-
-
-// Get available for place.  This would be an available agent.
-//$available = $this->thing->human_time($this->available);
+        // Get available for place.  This would be an available agent.
+        //$available = $this->thing->human_time($this->available);
 
         // Allow for indexing.
         if (!isset($this->index)) {
@@ -1066,15 +1006,17 @@ echo $this->thing->elapsed_runtime() - $split_time;
         }
     }
 
-    function lastPlace() {
-
+    function lastPlace()
+    {
         $this->last_place = new Variables($this->thing, "variables place " . $this->from);
         $this->last_place_code = $this->last_place->getVariable('place_code');
         $this->last_place_name = $this->last_place->getVariable('place_name');
 
         // This doesn't work
         $this->last_refreshed_at = $this->last_place->getVariable('refreshed_at');
-return;
+        return;
+
+
         // So do it the hard way
 
         if (!isset($this->places)) {$this->getPlaces();}
@@ -1206,8 +1148,6 @@ return;
         $this->getPlace($this->place_code);
         $this->thing->log($this->agent_prefix . 'using extracted place_code ' . $this->place_code . ".","INFORMATION");
         $this->response = $this->place_code . " used to retrieve a Place.";
-
-        return;
     }
 
     if ($this->place_name != null) {
@@ -1216,44 +1156,40 @@ return;
 
         $this->thing->log($this->agent_prefix . 'using extracted place_name ' . $this->place_name . ".","INFORMATION");
         $this->response = strtoupper($this->place_name) . " retrieved.";
-$this->assertPlace($this->place_name);
-        return;
+        $this->assertPlace($this->place_name);
     }
 
     if ($this->last_place_code != null) {
         $this->getPlace($this->last_place_code);
         $this->thing->log($this->agent_prefix . 'using extracted last_place_code ' . $this->last_place_code . ".","INFORMATION");
         $this->response = "Last place " . $this->last_place_code . " used to retrieve a Place.";
+    }
 
+    // so we get here and this is null placename, null place_id.
+    // so perhaps try just loading the place by name
+
+    $place = strtolower($this->subject);
+
+    if ( !$this->getPlace(strtolower($place)) ){
+        // Place was found
+        // And loaded
+        $this->response = $place . " used to retrieve a Place.";
+    }
+
+
+    $this->makePlace(null, $place);
+    $this->thing->log($this->agent_prefix . 'using default_place_code ' . $this->default_place_code . ".","INFORMATION");
+
+    $this->response = "Made a Place called " . $place . ".";
+
+    return;
+
+    if (($this->isData($this->place_name)) or ($this->isData($this->place_code)) ) {
+        $this->set();
         return;
     }
 
-        // so we get here and this is null placename, null place_id.
-        // so perhaps try just loading the place by name
-
-$place = strtolower($this->subject);
-
-if ( !$this->getPlace(strtolower($place)) ){
-    // Place was found
-    // And loaded
-    $this->response = $place . " used to retrieve a Place.";
-
-    return;
-}
-
-
-        $this->makePlace(null, $place);
-        $this->thing->log($this->agent_prefix . 'using default_place_code ' . $this->default_place_code . ".","INFORMATION");
-
-        $this->response = "Made a Place called " . $place . ".";
-        return;
-
-        if (($this->isData($this->place_name)) or ($this->isData($this->place_code)) ) {
-            $this->set();
-            return;
-        }
-
-		return false;
+	return false;
 
 	}
 
@@ -1268,6 +1204,6 @@ if ( !$this->getPlace(strtolower($place)) ){
 /* More on places
 
 Lots of different ways to number places.
+I choose four letters and numbers case-insentitive
 
 */
-?>

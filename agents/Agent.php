@@ -120,6 +120,10 @@ and the user UX/UI
         return $this->thing->Forget();
     }
 
+    public function test()
+    {
+    }
+
 
     public function getMeta($thing = null)
     {
@@ -254,6 +258,45 @@ and the user UX/UI
         }
 
         return false;
+
+    }
+
+    public function getAgent($agent_class_name = null)
+    {
+
+            try {
+
+                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+
+                $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+                $agent = new $agent_namespace_name($this->thing);
+
+                // If the agent returns true it states it's response is not to be used.
+                if ((isset($agent->response)) and ($agent->response === true)) {
+                    throw new Exception("Flagged true.");
+                }
+
+                $this->thing_report = $agent->thing_report;
+
+                $this->agent = $agent;
+
+
+            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+                $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+                // echo $ex;
+                $message = $ex->getMessage();
+                // $code = $ex->getCode();
+                $file = $ex->getFile();
+                $line = $ex->getLine();
+
+                $input = $message . '  ' . $file . ' line:' . $line;
+                $this->thing->log($input , "WARNING" );
+
+                // This is an error in the Place, so Bork and move onto the next context.
+                // $bork_agent = new Bork($this->thing, $input);
+                //continue;
+                return;
+            }
 
     }
 
@@ -666,6 +709,8 @@ and the user UX/UI
                 continue;
             }
 
+            $this->getAgent($agent_class_name);
+/*
             try {
 
                 $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
@@ -696,7 +741,7 @@ and the user UX/UI
                 continue;
 
             }
-
+*/
             return $this->thing_report;
         }
 
@@ -757,7 +802,9 @@ var_dump($place_thing->place_name);
         }
 
         $this->thing->log( 'now looking at Place Context.' );
-        $place_thing = new Place($this->thing, "extract");
+        //$place_thing = new Place($this->thing, "extract");
+        $place_thing = new Place($this->thing, "place");
+
         $this->thing_report = $place_thing->thing_report;
 
         if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {

@@ -560,6 +560,8 @@ Fix PhpSerial
             trigger_error("Invalid flow control mode specified", E_USER_ERROR);
 
 ---
+Configure nano
+
 Set nano to 4 space indenting
 sudo nano /etc/nanorc (others?)
 set tabsize 4
