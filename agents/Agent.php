@@ -85,6 +85,9 @@ and the user UX/UI
             $this->respond();
         }
 
+        if (!isset($this->response)) {$this->response = "No response found.";}
+        $this->thing_report['response'] = $this->response;
+
         // Following line stops Gearman error, but turns off images obvs Jul 11, 2018 
         //$this->thing_report['png'] = null;
 

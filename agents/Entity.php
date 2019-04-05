@@ -5,210 +5,39 @@ namespace Nrwtaylor\StackAgentThing;
 // constraints are good.  Remember arduinos.  So perhaps all agents don't get saved.
 // Only the necessary ones.
 
+// dev more work needed
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Entity extends Agent 
+class Entity extends Agent
 {
-
-    // This is a headcode.  You will probably want to read up about
-    // the locomotive headcodes used by British Rail.
-
-    // A headcode takes the form (or did in the 1960s),
-    // of NANN.  Where N is a digit from 0-9, and A is an uppercase character from A-Z.
-
-    // This implementation recognizes lowercase and uppercase characters as the same.
-    // 0t80. OT80. HEADODE 0t90.
-
-    // The headcode is used by the Train agent to create the proto-train.
-    // A Train must have a Headcode to run.  Rule #1.
-    // RUN TRAIN.
-
-    // A headcode must have a route. Route is a text string.  Examples of route are:
-    //  Gilmore > Hastings > Place
-    //  >> Gilmore >>
-    //  > Hastings
-    // ADD PLACE. ROUTE IS Gilmore> Hastings > Place.
-
-    // A headcode may have a consist. (Z - indicates train may fill consist.
-    // X - indicates train should specify the consist. (devstack: "Input" agent)
-    // NnXZ is therefore a valid consist. As is "X" or "Z".
-    // A consist must always resolve to a locomotive.  Specified as uppercase letter.
-    // The locomotive closest to the first character is the engine.  And gives
-    // commands to following locomotives to follow.
-    // #devstack
-    // The ordered-ness of Consist will come from building out of the orderness of Route.
-
-    // This is the headcode manager.  This person is pretty special.
-    // HEADCODE.
-
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) 
+    function init()
     {
-
-//        var_dump($agent_input);
-
-        $this->start_time = microtime(true);
-
-        //if ($agent_input == null) {$agent_input = "";}
-        $this->agent_name = "headcode";
-        $this->agent_input = $agent_input;
-
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->agent_prefix = 'Agent "Headcode" ';
-
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
-
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-
-        // I'm not sure quite what the node_list means yet
-        // in the context of headcodes.
-        // At the moment it seems to be the headcode routing.
-        // Which is leading to me to question whether "is"
-        // or "Place" is the next Agent to code up.  I think
-        // it will be "Is" because you have to define what 
-        // a "Place [is]".
-
- //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
- //       $this->thing->choice->load('headcode');
-
         $this->keywords = array('next', 'accept', 'clear', 'drop','add','new');
 
-//        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
-
-        // So around this point I'd be expecting to define the variables.
-        // But I can do that in each agent.  Though there will be some
-        // common variables?
-
-        // And Headcode is a context.
-
-        // So here is building block of putting a headcode in each Thing.
-        // And a little bit of work on a common variable framework.
-
-        // Factor in the following code.
-
-        // 'headcode' => array('default run_time'=>'105',
-        //                        'negative_time'=>'yes'),
-
-        //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
         $this->default_id = "ad20";
         if (isset($this->thing->container['api']['entity']['id'])) {
             $this->default_id = $this->thing->container['api']['entity']['id'];
         }
-        // But for now use this below.
-
-        // You will probably see these a lot.
-        // Unless you learn headcodes after typing SYNTAX.
-//        if (!isset($this->default_id)) {
-//            $this->default_id = "ae20";
-//        }
-        // devstack
-        //$this->head_code = "0Z" . str_pad($this->index + 11,2, '0', STR_PAD_LEFT);
 
         $this->default_alias = "Thing";
-        $this->current_time = $this->thing->time();
-
-        // Loads in headcode variables.
-        // This will attempt to find the latest head_code
-//        $this->get(); // Updates $this->elapsed_time as well as pulling in the current headcode
-
-        // Now at this point a  "$this->headcode_thing" will be loaded.
-        // Which will be re-factored eventaully as $this->variables_thing.
-
-        // This looks like a reminder below that the json time generator might be creating a token.
-
-		// So created a token_generated_time field.
-        //        $this->thing->json->setField("variables");
-        //        $this->thing->json->writeVariable( array("stopwatch", "request_at"), $this->thing->json->time() );
-
-		$this->test= "Development code"; // Always iterative.
 
         $this->entity_agent = $this->agent_input;
 
-        // Non-nominal
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        // Potentially nominal
-        $this->subject = $thing->subject;
-        // Treat as nominal
-        $this->from = $thing->from;
-
-        // Agent variables
-        $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
-
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/headcode';
-
-//        $this->thing->log('<pre> Agent "Headcode" running on Thing '. $this->thing->nuuid . '.</pre>');
-//        $this->thing->log('<pre> Agent "Headcode" received this Thing "'.  $this->subject . '".</pre>');
-
-//$split_time = $this->thing->elapsed_runtime();
-//        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
-//        $this->head_code = $this->headcode->getVariable('head_code', null);
-
-//$this->get();
-
-//$this->thing->log( $this->agent_prefix .' set up variables in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.' );
-
-        $this->state = null; // to avoid error messages
-
-        // Read the subject to determine intent.
-		$this->readSubject();
-
-        // Generate a response based on that intent.
-        // I think properly capitalized.
-        //$this->set();
-        if ($this->agent_input == null) {
-		    $this->respond();
-        }
-        $this->set();
-
-        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-        $this->thing_report['log'] = $this->thing->log;
-
-        if (!isset($this->response)) {$this->response = "No response found.";}
-
-        //var_dump($this->response);
-        $this->thing_report['response'] = $this->response;
-
-		return;
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/entity';
     }
 
     function set()
     {
-        // Apparently not needful of a variable.
-        // It is a context. The managing Agents define it.
-        // $this->head_code = "0Z15";
-        // $entity = new Variables($this->thing, "variables entity " . $this->from);
-
-        // Added test 26 July 2018
         $this->refreshed_at = $this->current_time;
 
-        // Write the entity with the Variables agent.
-        // No time needed(?).  Variables handles that.
-        // entity_id suggests that this is the identifier of the Entity.
-        // To distinguish from entity.   
         $this->entity_id->setVariable("id", $this->id);
-
-        // Don't use an index with entity.
-        // But allow Headcode to access the current index. 
-        // But won't need this line.  Keep it to just head_code.
-        // No Name either.  Trains have names.
-        //   $this->headcode->setVariable("index", $this->index);
-
         $this->entity_id->setVariable("refreshed_at", $this->current_time);
 
         $this->thing->json->writeVariable( array("entity", "id"), $this->id );
@@ -224,131 +53,90 @@ class Entity extends Agent
         // Pull up the current headcode
         $this->get();
 
-        // Find the end time of the headcode
-        // which is $this->end_at
-
-        // One minute into next headcode
+        // One minute into the next entity
         $quantity = 1;
         $next_time = $this->thing->json->time(strtotime($this->end_at . " " . $quantity . " minutes"));
 
         $this->get($next_time);
 
-        // So this should create a headcode in the next quantity unit.
-
         return $this->available;
-
-
     }
 
-    function getVariable($variable_name = null, $variable = null)
+    private function getEntity($requested_nuuid = null)
     {
-        // devstack remove?
+        $this->getEntities();
+        if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
 
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
+        $matching_things = array();
 
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
+        foreach($this->entities as $key=>$entity) {
+            $entity_nuuid = substr($entity['uuid'], 0, 4);
+
+            if (strtolower($entity_nuuid) == strtolower($requested_nuuid)) {
+                // Consistently match the nuuid to a specific uuid.
+                $this->things[] = new Thing($crow['uuid']);
+            }
         }
 
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
+        if (!isset($this->things[0])) {return true;}
 
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-
-    function getRoute()
-    {
-            //$this->route = $this->thing->json->readVariable( array("headcode", "route") );
-//            $this->route = "na";
-
-        //$route_agent = new Route($this->thing, $this->head_code);
-        //$this->route = $route_agent->route;
-        $this->route = "Place";
-    }
-
-    function getRunat()
-    {
-        if (isset($run_at)) {
-            $this->run_at = $run_at;
-        } else {
-            $this->run_at = "X";
-        }
-    }
-
-    function getQuantity ()
-    {
-        // $this->quantity = $this->thing->json->readVariable( array("headcode", "quantity"))  ;
-        $this->quantity = "X";
+        $this->thing = $this->things[0];
+        $this->id = $this->thing->nuuid;
     }
 
 
     function getEntities()
     {
+        if (isset($this->entities)) {return;}
+
+
         $this->entitycode_list = array();
-        // See if a entitycode record exists.
-        $findagent_thing = new FindAgent($this->thing, 'entity');
 
-        $this->thing->log('Agent "Entity" found ' . count($findagent_thing->thing_report['things']) ." entity Things." );
+        $entities = new FindAgent($this->thing, "entity");
+        // Get up to 10000 entities. Make this a stack variable.
+        $entities->horizon = 10000;
+        $entities->findAgent("entity");
+        $things = $entities->thing_report['things'];
 
-        foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object) {
-            // While timing is an issue of concern
+        $this->thing->log('Agent "Entity" found ' . count($things) ." entity Things." );
+
+        $entity_agents = array("Cat", "Dog", "Ant", "Crow");
+
+        foreach (array_reverse($things) as $thing_object) {
 
             $uuid = $thing_object['uuid'];
-
-//            $thing= new Thing($uuid);
-//            $variables = $thing->account['stack']->json->array_data;
 
             $variables_json= $thing_object['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['entity'])) {
+                if(!isset($variables['entity']['id'])) {continue;}
                 $id = $variables['entity']['id'];
+                $nuuid = substr($uuid, 0, 4);
+
                 $refreshed_at = $variables['entity']['refreshed_at'];
 
                 $variables['entity'][] = $thing_object['task'];
                 $this->entity_list[] = $variables['entity'];
+                foreach($entity_agents as $key=>$value) {
+                    if (isset($variables[$value])) {
+                    }
+                }
 
 
-
-                $entity = array("id"=>$id,
-                                    "refreshed_at"=>$refreshed_at,
-                                    "flag" =>$variables['flag'],
-                                    "consist" =>$variables['consist'],
-                                    "route" =>$variables['route'],
-                                    "runtime" =>$variables['runtime'],
-                                    "quantity" =>$variables['quantity'],
-                                    "route" =>$variables['route']
+                $entity = array("uuid"=>$uuid,
+                                    "nuuid"=>$nuuid,
+                                    "refreshed_at"=>$refreshed_at
                                     );
-
                 $this->entities[] = $entity;
-
             }
-
         }
-
         return $this->entity_list;
     }
 
     function get($entity_id = null)
     {
+        if (!isset($this->id)) {$this->getEntity();}
         // This is a request to get the headcode from the Thing
         // and if that doesn't work then from the Stack.
 
@@ -358,26 +146,10 @@ class Entity extends Agent
         // if you need 0Z00 ... you really need it.
 
         $agent_name = $this->entity_agent;
-    
+
         $this->entity = new Variables($this->thing, "variables entity_" . $agent_name . " " . $this->id . " " . $this->from);
-var_dump($this->entity->agent_command);
+
         $this->last_refreshed_at = $this->entity->getVariable("refreshed_at");
-
-        // Don't need this as can access headcode variables at $this->headcode
-        //$this->head_code = $this->headcode->getVariable("head_code");
-
-//        $this->consist = $this->entity->getVariable("consist");
-//        $this->run_at = $this->->getVariable("run_at");
-//        $this->quantity = $this->headcode->getVariable("quantity");
-//        $this->available = $this->headcode->getVariable("available");
-
-//        $this->getRoute();
-//        $this->getConsist();
-//        $this->getRunat();
-//        $this->getQuantity();
-//        $this->getAvailable();
-
-        return;
     }
 
     function dropEntity()
@@ -409,7 +181,6 @@ var_dump($this->entity->agent_command);
         imagefilledellipse($im, $x1+$radius, $y2-$radius, $radius*2, $radius*2, $color);
         imagefilledellipse($im, $x2-$radius, $y2-$radius, $radius*2, $radius*2, $color);
     }
-
 
     function makeWeb()
     {
@@ -445,7 +216,6 @@ var_dump($this->entity->agent_command);
         $this->message = $message;
         $this->thing_report['message'] = $message;
     }
-
 
     public function makePNG()
     {
@@ -496,28 +266,15 @@ var_dump($this->entity->agent_command);
             } else {
                 $this->run_at = "X";
             }
-
-            $this->getEndat();
-//            $this->getAvailable();
-
-            // devstack?
-            $this->entity_thing = $this->thing;
-
         }
 
-        // Need to code in the X and <number> conditions for creating new headcodes.
-
-        // Write the variables to the db.
         $this->set();
 
-        //$this->headcode_thing = $this->thing;
-
         $this->thing->log('Agent "Entity" found id a pointed to it.');
-
     }
 
-    function entityTime($input = null) {
-
+    function entityTime($input = null)
+    {
         if ($input == null) {
             $input_time = $this->current_time;
         } else {
@@ -540,69 +297,7 @@ var_dump($this->entity->agent_command);
         if ($input == null) {$this->headcode_time = $entity_time;}
 
         return $entity_time;
-
-
-
     }
-
-    function getEndat() {
-
-        if (($this->run_at != "x") and ($this->quantity != "x")) {
-            $this->end_at = $this->thing->json->time(strtotime($this->run_at . " " . $this->quantity . " minutes"));
-        } else {
-            $this->end_at = "x";
-        }
-
-        return $this->end_at;
-    }
-
-    function extractConsists($input) {
-
-        // devstack: probably need a word lookup 
-        // or at least some thinking on how to differentiate Entity from NnX
-        // as a valid consist.
-
-        if (!isset($this->consists)) {
-            $this->consists = array();
-        }
-
-        $pattern = "|[A-Za-z]|";
-
-        preg_match_all($pattern, $input, $m);
-//        return $m[0];
-        $this->consists = $m[0];
-        //array_pop($arr);
-
-        return $this->consists;
-
-
-    }
-
-    function getConsist($input = null) {
-
-        $consists = $this->extractConsists($input);
-
-        if ((is_array($consists)) and (count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
-
-//        if ((count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
-            $this->consist = $consists[0];
-            $this->thing->log('Agent "Entity" found a consist (' . $this->consist . ') in the text.');
-            return $this->consist;
-        }
-
-        $this->consist = "X";
-
-        if  ((is_array($consists)) and (count($consists) == 0)){return false;}
-        if  ((is_array($consists)) and (count($consists) > 1)){return false;}
-
-        //if (count($consists == 0)) {return false;}
-        //if (count($consists > 1)) {return true;}
-
-        return true;
-
-    }
-
-
 
     function extractEntities($input = null)
     {
@@ -610,17 +305,6 @@ var_dump($this->entity->agent_command);
         $thing->extractNuuids($input);
 
         $this->ids = $thing->nuuids;
-
-//        if (!isset($this->ids)) {
-//            $this->ids = array();
-//        }
-        //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
-        //$pattern = "|[A-Za-z]{4}|"; echo $input;
-
-//        $pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
-//        $pattern = "|\b\[0-9A-Za-z]{4}\b|";
-//        preg_match_all($pattern, $input, $m);
-//        $this->ids = $m[0];
 
         return $this->ids;
     }
@@ -642,7 +326,7 @@ var_dump($this->entity->agent_command);
         return true;
     }
 
-
+/*
     function read()
     {
         $this->thing->log("read");
@@ -650,7 +334,7 @@ var_dump($this->entity->agent_command);
 //        $this->get();
         return $this->available;
     }
-
+*/
 
 
     function addEntity() {
@@ -663,8 +347,8 @@ var_dump($this->entity->agent_command);
     {
         $text = strtoupper($this->id);
 
-$image_height = 125;
-$image_width = 125;
+        $image_height = 125;
+        $image_width = 125;
 
         // here DB request or some processing
 //        $this->result = 1;
@@ -773,7 +457,7 @@ $image_width = 125;
             $txt .= " " . str_pad($refreshed_at, 20, " ", STR_PAD_LEFT);
 
 
-            $txt .= " " . str_pad(strtoupper($entity['id']), 4, "X", STR_PAD_LEFT);
+            $txt .= " " . str_pad(strtoupper($entity['nuuid']), 4, "X", STR_PAD_LEFT);
 
             $flag_state = "X";
             if (isset($entity['flag']['state'])) {
@@ -835,7 +519,7 @@ $image_width = 125;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
 
-        $sms_message .= $this->route . " [" . $this->consist . "] " . $this->quantity;
+//        $sms_message .= $this->route . " [" . $this->consist . "] " . $this->quantity;
  
 //        $sms_message .= " | index " . $this->index;
 //        $sms_message .= " | available " . $this->available;
@@ -867,38 +551,14 @@ $image_width = 125;
         $choices = false;
 		$this->thing_report['choices'] = $choices;
 
-        //$this->makeTXT();
-
-
-$available = $this->thing->human_time($this->available);
-
-if (!isset($this->index)) {
-    $index = "0";
-} else {
-    $index = $this->index;//
-}
-
         $this->makeSMS();
-
-
-
-  
 
 		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
 		$test_message .= '<br>entity state: ' . $this->state . '<br>';
 
 		$test_message .= '<br>' . $this->sms_message;
 
-//		$test_message .= '<br>Current node: ' . $this->thing->choice->current_node;
-
-        $test_message .= '<br>run_at: ' . $this->run_at;
-        $test_message .= '<br>end_at: ' . $this->end_at;
-
-
-//		$test_message .= '<br>Requested state: ' . $this->requested_state;
-
-			//$this->thing_report['sms'] = $sms_message;
-			$this->thing_report['email'] = $this->sms_message;
+        $this->thing_report['email'] = $this->sms_message;
 
         $this->makeMessage();
 	    //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -907,9 +567,8 @@ if (!isset($this->index)) {
         $this->makeWeb();
 
         if (!$this->thing->isData($this->agent_input)) {
-                        $message_thing = new Message($this->thing, $this->thing_report);
-
-                        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         } else {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
@@ -917,28 +576,20 @@ if (!isset($this->index)) {
         $this->makeTXT();
 
         $this->thing_report['help'] = 'This is a entity.';
-
-
-
-		return;
-
-
 	}
 
     function isData($variable) {
-        if ( 
+        if (
             ($variable !== false) and
             ($variable !== true) and
             ($variable != null) ) {
- 
             return true;
-
         } else {
             return false;
         }
     }
 
-    public function readSubject() 
+    public function readSubject()
     {
 
         $this->response = null;
@@ -959,18 +610,12 @@ if (!isset($this->index)) {
             $input = strtolower($this->from . " " . $this->subject);
         }
 
-
-		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-
         $prior_uuid = null;
 
         // Is there a headcode in the provided datagram
         $x = $this->extractEntity($input);
 
-//        $agent_name = "crow";
-
         $agent_name = $this->entity_agent;
-
 
         $this->entity_id = new Variables($this->thing, "variables entity_" . $agent_name . " " . $this->from);
 
@@ -987,7 +632,6 @@ if (!isset($this->index)) {
                 }
             }
         }
-
 
         $this->get();
 
@@ -1010,113 +654,45 @@ if (!isset($this->index)) {
 		// So this is really the 'sms' section
 		// Keyword
         if (count($pieces) == 1) {
-
             if ($input == 'entity') {
-
                 $this->read();
                 $this->response = "Read entity";
                 return;
             }
-
         }
 
-    foreach ($pieces as $key=>$piece) {
-        foreach ($keywords as $command) {
-            if (strpos(strtolower($piece),$command) !== false) {
-
-                switch($piece) {
-
-
-    case 'next':
-        $this->thing->log("read subject nextentity");
-        $this->nextentity();
-        $this->response = "Got next entity";
-        break;
-
-   case 'drop':
-   //     //$this->thing->log("read subject nextheadcode");
-        $this->dropentity();
-        $this->response = "Dropped entity";
-        break;
-
-
-   case 'add':
-   //     //$this->thing->log("read subject nextheadcode");
-        //$this->makeheadcode();
-        $this->get();
-        $this->response = "Added entity";
-        break;
-
-
-    default:
-
-                                        }
-
-                                }
-                        }
-
+        foreach ($pieces as $key=>$piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) {
+                        case 'next':
+                            $this->thing->log("read subject nextentity");
+                            $this->nextentity();
+                            $this->response = "Got next entity";
+                            break;
+                        case 'drop':
+                            $this->dropentity();
+                            $this->response = "Dropped entity";
+                            break;
+                        case 'add':
+                            $this->get();
+                            $this->response = "Added entity";
+                            break;
+                        default:
+                    }
                 }
+            }
+        }
 
+        if ($this->isData($this->id)) {
+            $this->set();
+            $this->response = "Set entity to " . strtoupper($this->id);
+            return;
+        }
 
-// Check whether headcode saw a run_at and/or run_time
-// Intent at this point is less clear.  But headcode
-// might have extracted information in these variables.
-
-// $uuids, $head_codes, $this->run_at, $this->run_time
-
-    if ($this->isData($this->id)) {
-        $this->set();
-        $this->response = "Set entity to " . strtoupper($this->id);
-        return;
-    }
-
-    $this->read();
-    $this->response = "Read";
-
-
-
-                return "Message not understood";
-
-
-
-
+        $this->read();
+        $this->response = "Read";
+        //return "Message not understood";
 		return false;
-
-	
-	}
-
-
-
-
-
-
-	function kill() {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-
+    }
 }
-
-/* More on headcodes
-
-http://myweb.tiscali.co.uk/gansg/3-sigs/bellhead.htm
-1 Express passenger or mail, breakdown train en route to a job or a snow plough going to work.
-2 Ordinary passenger train or breakdown train not en route to a job
-3 Express parcels permitted to run at 90 mph or more
-4 Freightliner, parcels or express freight permitted to run at over 70 mph
-5 Empty coaching stock
-6 Fully fitted block working, express freight, parcels or milk train with max speed 60 mph
-7 Express freight, partially fitted with max speed of 45 mph
-8 Freight partially fitted max speed 45 mph
-9 Unfitted freight (requires authorisation) engineers train which might be required to stop in section.
-0 Light engine(s) with or without brake vans
-
-E     Train going to       Eastern Region
-M         "     "     "         London Midland Region
-N         "     "     "         North Eastern Region (disused after 1967)
-O         "     "     "         Southern Region
-S          "     "     "         Scottish Region
-V         "     "     "         Western Region
-
-*/
-?>
