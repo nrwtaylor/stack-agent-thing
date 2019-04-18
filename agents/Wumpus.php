@@ -459,7 +459,6 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
                         case 'start':
                             $this->start();
                             $this->thing->choice->Choose($piece);
-                            var_dump($this->thing->choice->current_node);
 
                             $this->response .= "Heard " . $this->thing->state .". ";
                             break;
@@ -549,7 +548,6 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
         } else {
             $this->thing->choice->Create($this->primary_place, $this->node_list, "midden work");
         }
-//var_dump($this->thing->choice->current_node);
 		$this->thing->flagGreen();
 
 		return;

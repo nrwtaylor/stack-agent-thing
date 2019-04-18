@@ -790,7 +790,6 @@ var_dump($place_thing->place_name);
 
         }
 */
-
         $this->thing->log( 'now looking at Transit Context.' );
 
         $transit_thing = new Transit($this->thing, "extract");
@@ -808,12 +807,14 @@ var_dump($place_thing->place_name);
         //$place_thing = new Place($this->thing, "extract");
         $place_thing = new Place($this->thing, "place");
 
+
         $this->thing_report = $place_thing->thing_report;
 
-        if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
-            //echo "place not found";
+        if (!$place_thing->isPlace($this->subject)) {
+        //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
+//            echo "place not found";
         } else {
-            //echo "place found";
+//            echo "place found";$
             $place_thing = new Place($this->thing);
             $this->thing_report = $place_thing->thing_report;
             return $this->thing_report;
@@ -842,14 +843,14 @@ echo "place found";
 
 
 
-     $findagent_agent = new FindAgent($this->thing, "crow");
+        $findagent_agent = new FindAgent($this->thing, "crow");
         $things = $findagent_agent->thing_report['things'];
         $last_heard['crow'] = strtotime($things[0]['created_at']);
 
-     $findagent_agent = new FindAgent($this->thing, "wumpus");
+        $findagent_agent = new FindAgent($this->thing, "wumpus");
         $things = $findagent_agent->thing_report['things'];
         $last_heard['wumpus'] = strtotime($things[0]['created_at']);
-
+/*
         $findagent_agent = new FindAgent($this->thing, "ant");
         $temp_things = $findagent_agent->thing_report['things'];
         $things = array();
@@ -859,6 +860,13 @@ echo "place found";
             }
         }
         $last_heard['ant'] = strtotime($things[0]['created_at']);
+*/
+
+        $findagent_agent = new FindAgent($this->thing, "ant");
+        $things = $findagent_agent->thing_report['things'];
+        $last_heard['ant'] = strtotime($things[0]['created_at']);
+
+
 
     //    if ($ant_last_heard > $crow_last_heard) {
     //        $agent_name = "Ant";
@@ -873,7 +881,6 @@ echo "place found";
                 $max_last_heard = $last_heard[$key];
             }
         }
-
 
 //        $agent_name = "Ant";
         $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;

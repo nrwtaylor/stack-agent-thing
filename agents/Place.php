@@ -88,6 +88,8 @@ class Place extends Agent
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/place';
 
 
+
+
         $this->lastPlace();
 
         // Read the subject to determine intent.
@@ -96,6 +98,9 @@ class Place extends Agent
 
 
 		$this->readSubject();
+
+        //$this->link = $this->web_prefix . 'thing/' . $this->uuid . '/' . $this->place_name;
+
 
         // Generate a response based on that intent.
         // I think properly capitalized.
@@ -255,6 +260,17 @@ class Place extends Agent
     {
         $quantity_agent = new Quantity($this->thing, "quantity");
         $this->quantity = $quantity_agent->quantity;
+    }
+
+    function isPlace($requested_place_identifier = null)
+    {
+        if(!isset($this->places)) {$this->getPlaces();}
+        foreach($this->places as $key=>$place) {
+            if ($requested_place_identifier == $place['code']) {return true;}
+            if ($requested_place_identifier == $place['name']) {return true;}
+        }
+
+        return false;
     }
 
     // very much dev
@@ -734,7 +750,8 @@ foreach($filtered_places as $key=>$filtered_place) {
         //}
 
         if ((!empty($this->place_code))) {
-            $sms .= " | " . $this->web_prefix . 'thing/' . $this->uuid . '/place';
+            //$sms .= " | " . $this->web_prefix . 'thing/' . $this->uuid . '/place';
+            $sms .= " | " . $this->link;
         }
 
         if ((!empty($this->place_code))) {
@@ -1145,9 +1162,11 @@ foreach($filtered_places as $key=>$filtered_place) {
 //        }
 
     if ($this->place_code != null) {
+
         $this->getPlace($this->place_code);
         $this->thing->log($this->agent_prefix . 'using extracted place_code ' . $this->place_code . ".","INFORMATION");
         $this->response = $this->place_code . " used to retrieve a Place.";
+        return;
     }
 
     if ($this->place_name != null) {
@@ -1157,12 +1176,14 @@ foreach($filtered_places as $key=>$filtered_place) {
         $this->thing->log($this->agent_prefix . 'using extracted place_name ' . $this->place_name . ".","INFORMATION");
         $this->response = strtoupper($this->place_name) . " retrieved.";
         $this->assertPlace($this->place_name);
+        return;
     }
 
     if ($this->last_place_code != null) {
         $this->getPlace($this->last_place_code);
         $this->thing->log($this->agent_prefix . 'using extracted last_place_code ' . $this->last_place_code . ".","INFORMATION");
         $this->response = "Last place " . $this->last_place_code . " used to retrieve a Place.";
+        return;
     }
 
     // so we get here and this is null placename, null place_id.
@@ -1174,6 +1195,7 @@ foreach($filtered_places as $key=>$filtered_place) {
         // Place was found
         // And loaded
         $this->response = $place . " used to retrieve a Place.";
+        return;
     }
 
 

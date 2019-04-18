@@ -21,7 +21,7 @@ class Entity extends Agent
     {
         $this->keywords = array('next', 'accept', 'clear', 'drop','add','new');
 
-        $this->default_id = "ad20";
+        $this->default_id = "def0";
         if (isset($this->thing->container['api']['entity']['id'])) {
             $this->default_id = $this->thing->container['api']['entity']['id'];
         }
@@ -45,6 +45,8 @@ class Entity extends Agent
         $this->thing->json->writeVariable( array("entity", "id"), $this->id );
         $this->thing->json->writeVariable( array("entity", "refreshed_at"), $this->current_time );
 
+        $this->refreshed_at = $this->current_time;
+
     }
 
     function nextEntitycode()
@@ -67,29 +69,31 @@ class Entity extends Agent
     private function getEntity($requested_nuuid = null)
     {
         $this->getEntities();
-        if (!isset($this->id)) {$this->id = $this->default_id;}
+//        if (!isset($this->id)) {$this->id = $this->default_id;}
 
         $matching_things = array();
 
-        if ($this->entities == null) {
+        //if ($this->entities == null) {
             // Make the current thing an entity.
             // Give it an id.
-            $this->id = $this->thing->nuuid;
-            return;
-        }
+        //    $this->id = $this->default_id;
+        //    return;
+        //}
+
 
         foreach($this->entities as $key=>$entity) {
             $entity_nuuid = substr($entity['uuid'], 0, 4);
 
             if (strtolower($entity_nuuid) == strtolower($requested_nuuid)) {
                 // Consistently match the nuuid to a specific uuid.
-                $this->things[] = new Thing($crow['uuid']);
+                $this->things[] = new Thing($entity['uuid']);
             }
         }
-
-        if (!isset($this->things[0])) {return true;}
-
-        $this->thing = $this->things[0];
+        if (!isset($this->things[0])) {
+            $this->thing = new Thing(array_reverse($this->entities)[0]['uuid']);
+        } else {
+            $this->thing = $this->things[0];
+        }
         $this->id = $this->thing->nuuid;
     }
 
@@ -109,7 +113,7 @@ class Entity extends Agent
 
         $this->thing->log('Agent "Entity" found ' . count($things) ." entity Things." );
 
-        $entity_agents = array("Cat", "Dog", "Ant", "Crow");
+        $entity_agents = array("Cat", "Dog", "Ant", "Crow", "Wumpus");
 
         if ($things === true) {
             $this->entities = null;
@@ -151,6 +155,7 @@ class Entity extends Agent
 
     function get($entity_id = null)
     {
+
         if (!isset($this->id)) {$this->getEntity();}
         // This is a request to get the headcode from the Thing
         // and if that doesn't work then from the Stack.
@@ -165,8 +170,7 @@ class Entity extends Agent
         $this->entity = new Variables($this->thing, "variables entity_" . $agent_name . " " . $this->id . " " . $this->from);
 
         $this->last_refreshed_at = $this->entity->getVariable("refreshed_at");
-
-        $this->state = $this->thing->choice->current_node;
+        $this->state = $this->entity->thing->choice->current_node;
 
     }
 
@@ -610,7 +614,7 @@ class Entity extends Agent
                 //var_dump($this->head_code);
 
                 if (!isset($this->id) or ($this->id == false)) {
-                    $this->id = "ae30";
+                    $this->id = $this->default_id;
                     //var_dump($this->head_code);
                 }
             }
