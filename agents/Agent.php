@@ -844,7 +844,11 @@ echo "place found";
 
      $findagent_agent = new FindAgent($this->thing, "crow");
         $things = $findagent_agent->thing_report['things'];
-        $crow_last_heard = strtotime($things[0]['created_at']);
+        $last_heard['crow'] = strtotime($things[0]['created_at']);
+
+     $findagent_agent = new FindAgent($this->thing, "wumpus");
+        $things = $findagent_agent->thing_report['things'];
+        $last_heard['wumpus'] = strtotime($things[0]['created_at']);
 
         $findagent_agent = new FindAgent($this->thing, "ant");
         $temp_things = $findagent_agent->thing_report['things'];
@@ -854,13 +858,22 @@ echo "place found";
                 $things[] = $thing;
             }
         }
-        $ant_last_heard = strtotime($things[0]['created_at']);
+        $last_heard['ant'] = strtotime($things[0]['created_at']);
 
-        if ($ant_last_heard > $crow_last_heard) {
-            $agent_name = "Ant";
-        } else {
-            $agent_name = "Crow";
+    //    if ($ant_last_heard > $crow_last_heard) {
+    //        $agent_name = "Ant";
+    //    } else {
+    //        $agent_name = "Crow";
+    //    }
+        $agent_name = "Agent";
+        foreach($last_heard as $key=>$value) {
+            if (!isset($max_last_heard)) {$max_last_heard = $value;}
+            if ($last_heard[$key] > $max_last_heard) {
+                $agent_name = ucwords($key);
+                $max_last_heard = $last_heard[$key];
+            }
         }
+
 
 //        $agent_name = "Ant";
         $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;
@@ -886,7 +899,7 @@ echo "place found";
             $this->thing_report = $ant_thing->thing_report;
             return $this->thing_report;
         }
-
+/*
         $findagent_agent = new FindAgent($this->thing, "crow");
         $things = $findagent_agent->thing_report['things'];
         $crow_last_heard = strtotime($things[0]['created_at']);
@@ -929,7 +942,7 @@ echo "place found";
 			$this->thing_report = $ant_thing->thing_report;
 			return $this->thing_report;
 		}
-
+*/
         $pattern = '/\?/';
 
         if (preg_match($pattern, $input)) { // returns true with ? mark

@@ -44,6 +44,7 @@ class Bar extends Agent
 
     function respond()
     {
+        // looks like this could be factored out by default agent respond()
         $this->makeSMS();
         $this->makePNG();
         $this->makeWeb();
@@ -89,8 +90,8 @@ class Bar extends Agent
     public function read($piece)
     {
         switch($piece) {
-           case 'stack':    
-            $from = "null@stackr.ca";    
+           case 'stack':
+            $from = "null@stackr.ca";
             $this->variables = new Variables($this->thing, "variables bar " . $this->from);
             $this->get();
             return;
@@ -145,7 +146,8 @@ class Bar extends Agent
 
         if (($this->bar_count % 7) == 0) {
 
-            $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage 10000"));
+            // $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage 10000"));
+            $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage Z"));
 
             $client= new \GearmanClient();
             $client->addServer();
@@ -163,6 +165,8 @@ class Bar extends Agent
 
 
     }
+
+
 
 
     public function makeImage()

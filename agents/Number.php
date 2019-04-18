@@ -83,6 +83,13 @@ $this->test_count = null;
                 continue;
             }
 
+            // X - Specify. Z - Available.
+            if ((strtoupper($piece) == "X") or (strtoupper($piece == "Z"))) {
+                $this->numbers[] = $piece;
+                continue;
+            }
+
+
             // Treat () as accounting format number
             // Rare to see this in use.
 /*

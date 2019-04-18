@@ -31,6 +31,8 @@ class Entity extends Agent
         $this->entity_agent = $this->agent_input;
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/entity';
+
+        $this->state = "X";
     }
 
     function set()
@@ -65,9 +67,16 @@ class Entity extends Agent
     private function getEntity($requested_nuuid = null)
     {
         $this->getEntities();
-        if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
+        if (!isset($this->id)) {$this->id = $this->default_id;}
 
         $matching_things = array();
+
+        if ($this->entities == null) {
+            // Make the current thing an entity.
+            // Give it an id.
+            $this->id = $this->thing->nuuid;
+            return;
+        }
 
         foreach($this->entities as $key=>$entity) {
             $entity_nuuid = substr($entity['uuid'], 0, 4);
@@ -101,6 +110,12 @@ class Entity extends Agent
         $this->thing->log('Agent "Entity" found ' . count($things) ." entity Things." );
 
         $entity_agents = array("Cat", "Dog", "Ant", "Crow");
+
+        if ($things === true) {
+            $this->entities = null;
+            $this->entity_list = null;
+            return $this->entity_list;
+        }
 
         foreach (array_reverse($things) as $thing_object) {
 
@@ -150,6 +165,9 @@ class Entity extends Agent
         $this->entity = new Variables($this->thing, "variables entity_" . $agent_name . " " . $this->id . " " . $this->from);
 
         $this->last_refreshed_at = $this->entity->getVariable("refreshed_at");
+
+        $this->state = $this->thing->choice->current_node;
+
     }
 
     function dropEntity()
@@ -420,23 +438,6 @@ class Entity extends Agent
         $txt .= "\n";
         $txt .= "\n";
 
-        //$txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
-//        $txt .= " " . str_pad("RUN AT", 20, " ", STR_PAD_RIGHT);
-
-//        $txt .= " " . str_pad("HEAD", 4, " ", STR_PAD_LEFT);
-//        $txt.= " " . str_pad("FLAG", 8, " ", STR_PAD_LEFT);
-
-//        $txt .= " " . str_pad("ALIAS", 10, " " , STR_PAD_RIGHT);
-        //$txt .= " " . str_pad("DAY", 4, " ", STR_PAD_LEFT);
-
-        //$txt .= " " . str_pad("RUNAT", 6, " ", STR_PAD_LEFT);
-//        $txt .= " " . str_pad("RUNTIME", 8, " ", STR_PAD_LEFT);
-
-//        $txt .= " " . str_pad("AVAILABLE", 9, " ", STR_PAD_LEFT);
-//        $txt .= " " . str_pad("QUANTITY", 9, " ", STR_PAD_LEFT);
-//        $txt .= " " . str_pad("CONSIST",9, " ", STR_PAD_LEFT);
-//        $txt .= " " . str_pad("ROUTE", 9, " ", STR_PAD_LEFT);
-
         $txt .= "\n";
         $txt .= "\n";
 
@@ -475,22 +476,6 @@ class Entity extends Agent
            if (isset($entity['runtime']['minutes'])) {$runtime_minutes = $entity['runtime']['minutes'];}
            $txt .= " " . str_pad($runtime_minutes, 8, " ", STR_PAD_LEFT);
 
-
-//            if (isset($headcode['run_at'])) {
-//                $txt .= " " . str_pad($headcode['run_at'], 8, " ", STR_PAD_LEFT);
-//            }
-//            if (isset($headcode['available'])) {
-//                $txt .= " " . str_pad($headcode['available'], 9, " ", STR_PAD_LEFT);
-//            }
-//            if (isset($headcode['quantity'])) {
-//                $txt .= " " . str_pad($headcode['quantity'], 9, " ", STR_PAD_LEFT);
-//            }
-//            if (isset($headcode['consist'])) {
-//                $txt .= " " . str_pad($headcode['consist'], 9, " ", STR_PAD_LEFT);
-//            }
-//            if (isset($headcode['route'])) {
-//                $txt .= " " . str_pad($headcode['route'], 9, " ", STR_PAD_LEFT);
-//            }
             $txt .= "\n";
 
         }
@@ -502,7 +487,6 @@ class Entity extends Agent
 
     private function getFlag()
     {
-//        $this->flag = new Flag($this->thing, "flag " .$this->head_code);
         $this->flag = new Flag($this->thing, "flag");
 
         if (!isset($this->flag->state)) { $this->flag->state = "X";}
@@ -513,7 +497,6 @@ class Entity extends Agent
         //$s = "GREEN";
         if (!isset($this->flag->state)) {$this->getFlag();}
         //$s = strtoupper($this->flag->state);
-        
 
         $sms_message = "ENTITY " . strtoupper($this->id) ." | " . $this->flag->state;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
