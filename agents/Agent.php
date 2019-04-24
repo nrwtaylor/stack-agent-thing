@@ -1179,6 +1179,26 @@ echo "place found";
         return $this->thing_report;
     }
 
+    public function makePNG()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+
+        $agent = new Png($this->thing, "png");
+        $this->makeImage();
+
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+
+        //$this->thing_report['png'] = $agent->PNG;
+        $this->thing_report['png'] = $agent->image_string;
+
+    }
+
+
+
     function warning_handler($errno, $errstr) {
         //throw new \Exception('Class not found.');
 
