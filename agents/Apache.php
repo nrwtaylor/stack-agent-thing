@@ -1,60 +1,24 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Apache
+class Apache extends Agent
 {
 	public $var = 'hello';
-
-    function __construct(Thing $thing)
+    function init()
     {
-        // Uncomment to provide phpinfo report
-        phpinfo();
-
-
-		$this->thing = $thing;
-
-//        $this->api_key = $this->thing->container['api']['watson'];
-        $this->thing_report['thing'] = $this->thing->thing;
-
 		$this->retain_for = 24; // Retain for at least 24 hours.
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-    	$this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		$this->sqlresponse = null;
-
-		$this->thing->log ( 'Agent "Apache" running on Thing ' . $this->thing->nuuid . '' );
-		$this->thing->log ( 'Agent "Apache" received this Thing "' .  $this->subject .  '"' );
-
-		$this->readSubject();
-		$this->respond();
-
-		$this->thing->log( 'Agent "Apache" complete' );
-
-		return;
     }
 
-
-
-
-
-// -----------------------
-
-	private function respond()
+    private function getApache()
     {
-		$this->thing->flagGreen();
+         phpinfo();
+    }
 
-		$to = $this->thing->from;
-		$from = "apache";
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-		$this->thing_report['info'] = $message_thing->thing_report['info'] ;
+    public function test()
+    {
 
 
-		return $this->thing_report;
-	}
+    }
 
 	public function readSubject()
     {
@@ -72,8 +36,3 @@ class Apache
 		return $this->response;
 	}
 }
-
-
-
-
-return;

@@ -7,84 +7,19 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Crow
+class Crow extends Agent
 {
 	public $var = 'hello';
 
-
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        $this->agent_input = $agent_input;
-        // Crow is a proof of the Thing's choice engine.
-
-
-	//function __construct($arguments) {
-
-		//echo $arguments;
-		//var_dump($arguments);
-//  $defaults = array(
-//    'uuid' => Uuid::uuid4(),
-//    'from' => NULL,
-//	'to' => NULL,
-//	'subject' => NULL,
-//	'sqlresponse' => NULL
-//  );
-
-//  $arguments = array_merge($defaults, $arguments);
-
-//  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
-
-// So while that looks very clever, I am hesitant to implement it on a nice day.  Again I guess.
-// On.
-
-        // Setup Agent
-        $this->agent = strtolower(get_class());
-        $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
-
 		$this->test= "Development code";
 
-		$this->thing = $thing;
-        $this->thing_report['thing'] = $thing;
-
-        // Example API
-        $this->api_key = $this->thing->container['api']['translink'];
-
-		// Load in some characterizations.
 		$this->short_name = $this->thing->container['stack']['short_name']; 
-		$this->web_prefix = $this->thing->container['stack']['web_prefix']; 
-		$this->mail_prefix = $this->thing->container['stack']['mail_prefix']; 
-		$this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
-
-        $this->sms_seperator = $this->thing->container['stack']['sms_separator']; // |
 		$this->sms_address = $this->thing->container['stack']['sms_address'];
-
-        // Get some stuff from the stack which will be helpful.
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-
-		// Load in time quantums
-        $this->cron_period = $this->thing->container['stack']['cron_period']; // 60s
-		$this->thing_resolution = $this->thing->container['stack']['thing_resolution']; // 1ms
-
-		// Load in a pointer to the stack record.
 		$this->stack_uuid = $this->thing->container['stack']['uuid'];
 
-		// Now create some shortcut conventions.
-		// devstack sqlresponse as a flag code
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        // For the Crow
-        $this->created_at = $thing->thing->created_at;
-
-		$this->sqlresponse = null;
-
-        $this->entity = new Entity ($this->thing, "crow");
-var_dump($this->entity->id);
+        $this->created_at = $this->thing->thing->created_at;
 
         $this->node_list = array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging","foraging")),"midden work"=>"foraging");
 
@@ -125,78 +60,29 @@ var_dump($this->entity->id);
 		$what .= '';
 
 		$why = $this->short_name . ' is intended as a vehicle to leverage Venture Capital investment in individual impact.';
+    }
 
-		$this->thing->log( '<pre> Agent "Crow" running on Thing ' . $this->uuid . ' </pre>' );
-		$this->thing->log( '<pre> Agent "Crow" received this Thing "' . $this->subject .'"</pre>' );
+    public function run()
+    {
+        $this->getCrow();
+    }
 
-		// Read the subject as passed to this class.
-		// No charge to read the subject line.  By machine.
 
-		$this->state = $thing->choice->load('roost');
+    public function set()
+    {
+        $this->thing->json->writeVariable( array("crow", "left_count"), $this->left_count );
+        $this->thing->json->writeVariable( array("crow", "right_count"), $this->right_count );
 
-$this->get();
+        $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
 
-        //$this->getCrow();
 
-//        $this->state = $this->crow->state;
-		$this->readSubject();
-
-		$this->respond();
-
-$this->set();
-//var_dump($this->thing);
-
-        // Err ... making sure the state is saved.
         $this->thing->choice->Choose($this->state);
 
-        $this->state = $thing->choice->load('roost');
-
-        $this->thing->log($this->agent_prefix . 'state is "' . $this->state . '".');
-        $this->thing->log($this->agent_prefix . 'completed.');
-
-        $this->thing_report['log'] = $this->thing->log;
-
-        return;
-
+        $this->state = $this->thing->choice->load('roost');
     }
 
-
-    function set()
+    public function get($crow_code = null)
     {
-/*
-        if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
-        //$this->refreshed_at = $this->current_time;
-        $crow = new Variables($this->thing, "variables crow " . $this->from);
-
-        $crow->setVariable("left_count", $this->left_count);
-        $crow->setVariable("right_count", $this->right_count);
-
-        $crow->setVariable("refreshed_at", $this->refreshed_at);
-
-        $crow->thing->log( $this->agent_prefix .' set ' . $this->left_count . ' and ' . $this->right_count . ".", "INFORMATION" );
-*/
-//        $crow = new Variables($this->thing, "variables " . $this->uuid . " " . $this->from);
-//        $crow->setVariable("left_count", $this->left_count);
-//        $crow->setVariable("right_count", $this->right_count);
-//        $crow->setVariable("refreshed_at", $this->refreshed_at);
-
-//        if ( ($this->roll == false) or ($this->result == false) ) {
-
-
-            $this->thing->json->writeVariable( array("crow", "left_count"), $this->left_count );
-            $this->thing->json->writeVariable( array("crow", "right_count"), $this->right_count );
-
-            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
-//        }
-
-
-
-        return;
-    }
-
-    private function get($crow_code = null)
-    {
-
         $this->current_time = $this->thing->json->time();
 
         // Borrow this from iching
@@ -204,16 +90,7 @@ $this->set();
         $this->time_string = $this->thing->json->readVariable( array("crow", "refreshed_at") );
 
 
-        // This is a request to get the Place from the Thing
-        // and if that doesn't work then from the Stack.
         if ($crow_code == null) {$crow_code = $this->uuid;}
-
-        //$this->crow = new Variables($this->thing, "variables " . $place_code . " " . $this->from);
-
-//        $this->left_count = $this->thing->getVariable("left_count");
-//        $this->right_count = $this->thing->getVariable("right_count");
-//        $this->refreshed_at = $this->place->getVariable("refreshed_at");
-
 
         if ($this->time_string == false) {
             $this->thing->json->setField("variables");
@@ -228,24 +105,21 @@ $this->set();
         $this->left_count = strtolower($this->thing->json->readVariable( array("crow", "left_count") ));
         $this->right_count = $this->thing->json->readVariable( array("crow", "right_count") );
 
-if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+        if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+        if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
 
 
+        // For the Crow
+//        $this->created_at = $this->thing->thing->created_at;
 
+        $this->state = $this->thing->choice->load('roost');
+        $this->entity = new Entity ($this->thing, "crow");
 
         return array($this->left_count, $this->right_count);
     }
 
-
-
-
-	private function respond()
+	public function respond()
     {
-
-		// Thing actions
-
-
 		$this->thing->flagGreen();
 
 		// Generate SMS response
@@ -256,7 +130,7 @@ if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_cou
         // . " " . if (isset($this->response)) {$this->response;};
 
 
-$this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . ' service is accessed, Stackr creates a uniquely identifable Thing.
+        $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . ' service is accessed, Stackr creates a uniquely identifable Thing.
 				This one is ' . $this->uuid . '.
 				This message from the "Crow" ai which was been tasked with mediating web access to this Thing. 
 				Manage Things on ' . $this->short_name . ' using the [ NEST MAINTENANCE ] command.  
@@ -264,12 +138,12 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
 				to stop receiving notifications for the Thing, or you can turn [ CROW OFF ].
 				"Crow" is how ' . $this->short_name . ' manages interactions with your Things by other identities.
 				[CROW OFF] will stop any "Crow" agent responding.  You can say [ NEST MAINTENANCE ] later if you change your mind.',
-        'nest maintenance'=>'A Things of yours was displayed again, perhaps by yourself.  This Crow is doing some nest maintenance.',
-        'patrolling'=>"A Thing associated with " . "this identity" ." was displayed (or requested by) a device.  That's twice now.  This Crow is patrolling.",
-        'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
-        'midden work'=>'One of your records was displayed, perhaps by yourself.  A Crow hatched and is doing midden work.',
-        'start'=>"Start. Not normally means that you displayed a record, let's see if we get any more Crow messages."
-);
+            'nest maintenance'=>'A Things of yours was displayed again, perhaps by yourself.  This Crow is doing some nest maintenance.',
+            'patrolling'=>"A Thing associated with " . "this identity" ." was displayed (or requested by) a device.  That's twice now.  This Crow is patrolling.",
+            'foraging'=>"This crow is on it's last legs.  It has gone foraging for stack information about you to forget.",
+            'midden work'=>'One of your records was displayed, perhaps by yourself.  A Crow hatched and is doing midden work.',
+            'start'=>"Start. Not normally means that you displayed a record, let's see if we get any more Crow messages."
+        );
 
 		// Generate email response.
 
@@ -286,8 +160,6 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
         }
 
         $this->thing_report['help'] = 'This is the "Crow" Agent. It organizes your Things.' ;
-
-//		return;
 	}
 
     private function getCrow($requested_nuuid = null)
@@ -295,9 +167,9 @@ $this->whatisthis = array('inside nest'=>'Each time the ' . $this->short_name . 
         if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
 
         $entity = new Entity($this->thing, "crow");
-
         $this->thing = $entity->thing;
-return;
+
+        return;
 
         // Get up to 10000 crows.
         $crow = new FindAgent($this->thing, "crow");
@@ -323,6 +195,36 @@ return;
 
         $this->thing = $this->crows[0];
     }
+
+    private function getCrows()
+    {
+        if (isset($this->crows)) {return;}
+
+        //if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
+
+
+        // Get up to 10000 crows.
+        $crow = new FindAgent($this->thing, "crow");
+        $crow->horizon = 10000;
+        $crow->findAgent("crow");
+        $crow_things = $crow->thing_report['things'];
+
+        $matching_uuids = array();
+
+        foreach($crow_things as $key=>$crow) {
+            $crow_nuuid = substr($crow['uuid'], 0, 4);
+
+          //  if (strtolower($crow_nuuid) == strtolower($requested_nuuid)) {
+                // Consistently match the nuuid to a specific uuid.
+                $this->crows[] = new Thing($crow['uuid']);
+          //  }
+        }
+
+        if (!isset($this->crows[0])) {return true;}
+
+        //$this->thing = $this->crows[0];
+    }
+
 
     public function makeWeb()
     {
@@ -370,13 +272,16 @@ return;
 
     public function makeTXT()
     {
-//        $txt = "";
-//        foreach($this->crows as $key=>$crow) {
-//            $txt .= "ghet" . "\n";
-//        }
+        $txt = "";
+        $this->getCrows();
+        foreach($this->crows as $key=>$crow) {
+            $txt .= substr($crow->thing->uuid,0,4). " ";
+        }
 
-//        $this->thing_report['txt'] = $txt;
-//        $this->txt = $txt;
+        $txt .= "\n";
+
+        $this->thing_report['txt'] = $txt;
+        $this->txt = $txt;
 
 
 
@@ -704,7 +609,7 @@ $this->response = array_rand ($responses);
         // ->db->userSearch($keyword)
         // ->UUids($uuid = null)
 
-    	echo "crow state: " . $this->thing->getState('roost');
+    	//echo "crow state: " . $this->thing->getState('roost');
 
         // Form a haystack from the whole thing.
     	$haystack ="";
@@ -801,5 +706,3 @@ $this->response = array_rand ($responses);
 	}
 
 }
-
-?>

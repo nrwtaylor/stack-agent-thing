@@ -215,6 +215,7 @@ class Nuuid extends Agent
 
     function read()
     {
+        $this->state = null;
         return $this->state;
     }
 

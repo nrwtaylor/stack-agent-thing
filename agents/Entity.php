@@ -28,9 +28,19 @@ class Entity extends Agent
 
         $this->default_alias = "Thing";
 
-        $this->entity_agent = $this->agent_input;
+        $this->entity_agents = array("Cat", "Dog", "Ant", "Crow", "Wumpus");
+        $matches = array();
+        foreach($this->entity_agents as $key=>$entity_agent) {
+            if (strpos(strtolower($this->agent_input), strtolower($entity_agent)) !== false) {
+                $matches[] = $entity_agent;
+            }
+        }
+        $this->entity_agent = strtolower($this->entity_agents[0]);
+        if (isset($matches[0])) {$this->entity_agent = $matches[0];}
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/entity';
+echo $this->entity_agent;
+        // $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/entity';
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/' . $this->entity_agent;
 
         $this->state = "X";
     }
@@ -46,7 +56,6 @@ class Entity extends Agent
         $this->thing->json->writeVariable( array("entity", "refreshed_at"), $this->current_time );
 
         $this->refreshed_at = $this->current_time;
-
     }
 
     function nextEntitycode()
@@ -94,7 +103,7 @@ class Entity extends Agent
         } else {
             $this->thing = $this->things[0];
         }
-        $this->id = $this->thing->nuuid;
+        $this->id = $this->entity_agent . "_" . $this->thing->nuuid;
     }
 
 
@@ -113,7 +122,7 @@ class Entity extends Agent
 
         $this->thing->log('Agent "Entity" found ' . count($things) ." entity Things." );
 
-        $entity_agents = array("Cat", "Dog", "Ant", "Crow", "Wumpus");
+        //$this->entity_agents = array("Cat", "Dog", "Ant", "Crow", "Wumpus");
 
         if ($things === true) {
             $this->entities = null;
@@ -137,7 +146,7 @@ class Entity extends Agent
 
                 $variables['entity'][] = $thing_object['task'];
                 $this->entity_list[] = $variables['entity'];
-                foreach($entity_agents as $key=>$value) {
+                foreach($this->entity_agents as $key=>$value) {
                     if (isset($variables[$value])) {
                     }
                 }
@@ -166,10 +175,20 @@ class Entity extends Agent
         // if you need 0Z00 ... you really need it.
 
         $agent_name = $this->entity_agent;
+        //$this->entity = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $this->id . " " . $this->from);
+        $this->entity = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $this->thing->nuuid . " " . $this->from);
 
-        $this->entity = new Variables($this->thing, "variables entity_" . $agent_name . " " . $this->id . " " . $this->from);
 
         $this->last_refreshed_at = $this->entity->getVariable("refreshed_at");
+
+        if (!isset($this->entity->thing->choice->current_node)) {
+
+            //$this->entity->thing->choice->Create($choice_name = null , $node_list = null, $current_node = null)
+            $this->entity->thing->choice->Create();
+            // Hello
+
+        }
+
         $this->state = $this->entity->thing->choice->current_node;
 
     }
@@ -208,7 +227,7 @@ class Entity extends Agent
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
-        $this->node_list = array("entity web"=>array("entity", "entity 0Z99"));
+        $this->node_list = array("entity web"=>array("entity", "crow"));
 
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "entity web");

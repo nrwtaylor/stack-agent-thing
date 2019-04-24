@@ -135,6 +135,12 @@ class Jarvis {
 		return $this->thing_report;
 	}
 
+    public function test()
+    {
+echo "merp";
+        $this->test = false; // good
+        return "green";
+    }
 
 	public function readSubject()
     {
@@ -142,5 +148,3 @@ class Jarvis {
 		return;
 	}
 }
-
-?>

@@ -44,7 +44,7 @@ class Wumpus extends Agent
         $this->getCoordinate();
 
         $this->getTick();
-
+//$this->getWumpus();
 
         // For the Ant
         $this->created_at = $this->thing->thing->created_at;
@@ -59,39 +59,98 @@ class Wumpus extends Agent
 
     }
 
-    public function run()
+    public function set()
     {
-        $this->thing->choice->Choose($this->thing->state);
-        $this->thing->log('state is "' . $this->thing->state . '".');
+        $this->thing->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
+        $this->thing->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
 
+        $this->thing->choice->Choose($this->state);
+
+        $this->state = $this->thing->choice->load('lair');
     }
 
+    public function get($crow_code = null)
+    {
+        $this->current_time = $this->thing->json->time();
+
+        // Borrow this from iching
+        $this->thing->json->setField("variables");
+        $this->time_string = $this->thing->json->readVariable( array("wumpus", "refreshed_at") );
+
+
+        if ($crow_code == null) {$crow_code = $this->uuid;}
+
+        if ($this->time_string == false) {
+            $this->thing->json->setField("variables");
+            $this->time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
+        }
+
+        $this->refreshed_at = strtotime($this->time_string);
+
+
+        $this->thing->json->setField("variables");
+        $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
+        $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
+
+        if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+        if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+
+
+        // For the Crow
+//        $this->created_at = $this->thing->thing->created_at;
+
+        $this->state = $this->thing->choice->load('lair');
+        $this->entity = new Entity ($this->thing, "wumpus");
+
+        return array($this->left_count, $this->right_count);
+
+}
+
+
+    public function run()
+    {
+//        $this->thing->choice->Choose($this->state);
+//        $this->thing->log('state is "' . $this->state . '".');
+
+      //  $this->getWumpus();
+ //       $this->getClocktime();
+   //     $this->getBar();
+     //   $this->getCoordinate();
+
+     //   $this->getTick();
+
+
+    }
 
     public function loop()
     {
 
     }
 
-    public function set()
-    {
-        $this->thing->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
-        $this->thing->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
-
-        $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
-    }
-
     private function getWumpus($requested_nuuid = null)
     {
+
+        //if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
+
+        //$entity = new Entity($this->thing, "wumpus");
+        //$this->thing = $entity->thing;
+
+        //return;
+
         //if ($requested_nuuid == null) {$requested_nuuid = $this->id;}
 
         $entity = new Entity($this->thing, "wumpus");
 
         $this->thing = $entity->thing;
 
+        $this->state = $this->thing->choice->load('lair');
+
+        $this->uuid = $this->thing->uuid;
         $this->nuuid = $this->thing->nuuid;
         $this->subject = $this->thing->subject;
 
-        $this->choices = $this->thing->choice->makeLinks($this->thing->state);
+        $this->choices = $this->thing->choice->makeLinks($this->state);
     }
 
 
@@ -116,36 +175,6 @@ class Wumpus extends Agent
     private function getTick()
     {
         $this->thing->tick = new Tick($this->thing, "tick");
-    }
-
-    public function get($code = null)
-    {
-        $this->current_time = $this->thing->json->time();
-
-        // Get the last time this was refreshed.
-        $this->thing->json->setField("variables");
-        $this->time_string = $this->thing->json->readVariable( array("wumpus", "refreshed_at") );
-
-        // This is a request to get the Place from the Thing
-        // and if that doesn't work then from the Stack.
-        if ($code == null) {$code = $this->uuid;}
-
-        if ($this->time_string == false) {
-            $this->thing->json->setField("variables");
-            $this->time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
-        }
-
-        $this->refreshed_at = strtotime($this->time_string);
-
-        $this->thing->json->setField("variables");
-        $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
-        $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
-
-        if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-        if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-
-        return array($this->left_count, $this->right_count);
     }
 
 	public function respond()
@@ -200,11 +229,11 @@ class Wumpus extends Agent
         $test_message .= '<p><b>Wumpus State</b>';
 
         $test_message .= '<br>Last thing heard: "' . $this->subject . '"<br>' . 'The next Wumpus choices are [ ' . $this->choices['link'] . '].';
-        $test_message .= '<br>Lair state: ' . $this->thing->state;
+        $test_message .= '<br>Lair state: ' . $this->state;
         $test_message .= '<br>left_count is ' . $this->left_count;
         $test_message .= '<br>right count is ' . $this->right_count;
 
-        $test_message .= '<br>' .$this->behaviour[$this->thing->state] . '<br>';
+        $test_message .= '<br>' .$this->behaviour[$this->state] . '<br>';
 
 
         $test_message .= "<p>";
@@ -213,13 +242,13 @@ class Wumpus extends Agent
         $test_message .= 'created_at: ' . $this->created_at . '<br>';
         $test_message .= 'from: ' . $this->from . '<br>';
         $test_message .= 'to: ' . $this->to . '<br>';
-        $test_message .= '<br>' .$this->thing_behaviour[$this->thing->state] . '<br>';
+        $test_message .= '<br>' .$this->thing_behaviour[$this->state] . '<br>';
 
 
         $test_message .= "<p>";
         $test_message .= '<p><b>Narratives</b>';
-        $test_message .= '<br>' .$this->litany[$this->thing->state] . '<br>';
-        $test_message .= '<br>' .$this->narrative[$this->thing->state] . '<br>';
+        $test_message .= '<br>' .$this->litany[$this->state] . '<br>';
+        $test_message .= '<br>' .$this->narrative[$this->state] . '<br>';
 
        // $test_message .= '<p>Agent "Ant" is responding to your web view of datagram subject "' . $this->subject . '", ';
        // $test_message .= "which was received " . $this->thing->human_time($this->thing->elapsed_runtime()) . " ago.";
@@ -304,8 +333,8 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 );
 
 
-        $sms = "WUMPUS IS ";
-        $sms .= strtoupper($this->thing->state);
+        $sms = "WUMPUS " . strtoupper($this->nuuid) .  " IS ";
+        $sms .= strtoupper($this->state);
         $sms .= " AT ";
 
         $sms .= "(" . $this->x . ", " . $this->y . ")";
@@ -325,11 +354,11 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
     {
 		$this->response = null;
 
-        if ($this->thing->state == null) {
+        if ($this->state == null) {
             $this->getWumpus();
         }
 
-        switch ($this->thing->state) {
+        switch ($this->state) {
             case "start":
                 $this->start();
                 $this->response .= "Wumpus started. Welcome player.";
@@ -367,7 +396,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
                 break;
 
             default:
-                $this->thing->log($this->agent_prefix . 'invalid state provided "' . $this->thing->state .'".');
+                $this->thing->log($this->agent_prefix . 'invalid state provided "' . $this->state .'".');
                 $this->response .= "Wumpus is broken.";
 
 				// this case really shouldn't happen.
@@ -460,7 +489,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
                             $this->start();
                             $this->thing->choice->Choose($piece);
 
-                            $this->response .= "Heard " . $this->thing->state .". ";
+                            $this->response .= "Heard " . $this->state .". ";
                             break;
 
                         case 'spawn':
@@ -506,7 +535,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 
 //        $this->makeChoices();
 
-		$this->thing->choice->Create($this->primary_place, $this->node_list, $this->thing->state);
+		$this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
 
 		return false;
 	}

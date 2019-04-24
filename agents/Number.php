@@ -7,60 +7,107 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Number
+class Number extends Agent
 {
-	function __construct(Thing $thing, $agent_input = null)
+    function init()
+	//function __construct(Thing $thing, $agent_input = null)
     {
-		if ($agent_input == null) {$agent_input = '';}
-		$this->agent_input = $agent_input;
-        $this->agent_name = "number";
+//		if ($agent_input == null) {$agent_input = '';}
+//		$this->agent_input = $agent_input;
+//        $this->agent_name = "number";
 
 
 		// Given a "thing".  Instantiate a class to identify and create the
         // most appropriate agent to respond to it.
-		$this->thing = $thing;
+//		$this->thing = $thing;
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
 		// Get some stuff from the stack which will be helpful.
         //$this->web_prefix = $GLOBALS['web_prefix'];
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
 
-		$this->stack_state = $thing->container['stack']['state'];
-		$this->short_name = $thing->container['stack']['short_name'];
+//		$this->stack_state = $thing->container['stack']['state'];
+//		$this->short_name = $thing->container['stack']['short_name'];
 
 		// Create some short-cuts.
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 		//$this->sqlresponse = null;
 
 //$this->subject = "number ". "please 234,000 1,000,234 find (.3) the -1 20 503 numbers (34) 12.4 in here 12 if you can 12 / 4 = 100000 and some currencies perhaps $6 $23.90 but not $1.000, and in french €5.67";
 //$this->test_count = 15; // I think
-$this->test_count = null;
+//$this->test_count = null;
 // a french test string "or 5€67 or 66,50 £ or 66,50£ or 20 000 $ 99 999 but more rarely 99.999 or 99.999.999 but how about - 12 432,20";
 
-        $this->thing->log('<pre> Agent "Number" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
+  //      $this->thing->log('<pre> Agent "Number" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
 		$this->node_list = array("number"=>
 						array("number"));
 
+    //    $this->current_time = $this->thing->time();
+
+
+//        $this->variables = new Variables($this->thing, "variables number " . $this->from);
+
+//$this->get();
+
 		$this->aliases = array("learning"=>array("good job"));
 
-		$this->readSubject();
+//		$this->readSubject();
 
         $this->recognize_french = true; // Flag error
 
 
-        if ($this->agent_input == null) {
-		    $this->respond();
-        }
+//        if ($this->agent_input == null) {
+//		    $this->respond();
+//        }
 
-        $this->thing->log('Agent "Number" found ' . implode(" ",$this->numbers) .".");
+//        $this->set();
+
+//        $this->thing->log('Agent "Number" found ' . implode(" ",$this->numbers) .".");
 
         // Way to output test information to web page as a thing call
         // $this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
 	}
+
+    function get()
+    {
+//echo "get";
+
+        $this->number_agent = new Variables($this->thing, "variables number " . $this->from);
+
+        $this->number = $this->number_agent->getVariable("number");
+        $this->refreshed_at = $this->number_agent->getVariable("refreshed_at");
+    }
+
+    function set()
+    {
+//echo "set" . $this->number;
+//        $this->variables->setVariable("refreshed_at", $this->refreshed_at);
+
+//        $this->state = $requested_state;
+//        $this->refreshed_at = $this->current_time;
+
+        //$this->variables = new Variables($this->thing, "variables number " . $this->from);
+
+        $this->number_agent->setVariable("number", $this->number);
+
+
+
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
+        //$this->variables_thing->setVariable("flag_id", $this->nuuid);
+
+        $this->number_agent->setVariable("refreshed_at", $this->current_time);
+
+//        $city = new Variables($this->thing, "variables city " . $this->from);
+
+//        $city->setVariable("city_code", $this->city_code);
+//        $city->setVariable("city_name", $this->city_name);
+
+
+    }
 
     function extractNumbers($input = null)
     {
@@ -179,6 +226,8 @@ $this->test_count = null;
 
         $this->makeChoices();
 
+
+
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
@@ -204,12 +253,20 @@ $this->test_count = null;
         } else {
             $input = $this->agent_input;
         }
+
         //} elseif (explode(" ",$this->agent_input)[0] == "number") {
         //    $input = $this->agent_input;
         //}
 
-            $this->extractNumbers($input);
+        $this->extractNumbers($input);
         $this->extractNumber();
+
+//var_dump($this->number);
+
+        if ($this->number == false) {
+
+            $this->get();
+        }
 
 //var_dump($input);
         // Then look for messages sent to UUIDS
@@ -222,6 +279,21 @@ $this->test_count = null;
         //    $this->thing->log('Agent "Number" found a Number in address.');
         //    return;
         //}
+
+        // Keyword
+//var_dump($input);
+        $pieces = explode(" ", strtolower($input));
+
+        if (count($pieces) == 1) {
+
+            if ($input == 'number') {
+                $this->getNumber();
+                $this->response = "Last number retrieved.";
+//echo "meep";
+                return;
+
+            }
+        }
 
 		$status = true;
 
@@ -253,10 +325,10 @@ $this->test_count = null;
         }
 
         if ($this->recognize_french == true) {
-            if (count($this->numbers) == $this->test_count) {
+            //if (count($this->numbers) == $this->test_count) {
 //https://french.kwiziq.com/revision/grammar/how-to-write-decimal-numbers-in-french
-                $web .= "Found all the numbers.  Excluding the french format.";
-            }
+            //    $web .= "Found all the numbers.  Excluding the french format.";
+            //}
         }
 
      //   $web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
@@ -277,18 +349,15 @@ $this->test_count = null;
     function makeSMS()
     {
 
-        if (!isset($this->numbers)) {
-            $this->extractNumbers();
-        }
+        $sms = "NUMBER | ";
+        //foreach ($this->numbers as $key=>$number) {
+        //    $this->sms_message .= $number . " | ";
+        //}
+        $sms .= $this->number;
+        //$this->sms_message .= 'devstack';
 
-        $this->sms_message = "NUMBER | ";
-        foreach ($this->numbers as $key=>$number) {
-            $this->sms_message .= $number . " | ";
-        }
-
-        $this->sms_message .= 'devstack';
-
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     function makeChoices ()
@@ -347,5 +416,3 @@ $this->test_count = null;
     }
 
 }
-
-?>

@@ -70,31 +70,74 @@ class Agents extends Agent
 
     public function test()
     {
+        $this->test_results = array();
+
         $this->getAgents();
+
+        $skip_to_agent = "Bar";
+$flag = false;
+
+        $dev_agents = array("Agent","Agents","Agentstest",
+                        "Chart", "Discord", "Emailhandler","Forgetall",
+                        "Shuffleall","Googlehangouts","Makelog","Makepdf",
+                        "Makephp","Makepng","Maketxt","Makeweb","Number",
+                        "Nuuid","Object","PERCS","Ping","Place","Random",
+                        "Robot","Rocky","Search","Serial","Serialhandler",
+                        "Stackrinteractive","Tally","Thought","Timestamp",
+                        "Uuid","Variables","Wikipedia","Wordgame","Wumpus");
         foreach ($this->agents as $key=>$agent) {
-            $agent_name = $agent['name'];
 
-            if ($agent_name == "Agent") {continue;}
-            if ($agent_name == "Agents") {continue;}
-/* dev
-            $this->thing = new Thing(null);
-            $subject = "s/ " . $agent_name;
-            $this->thing->Create(null, "test", $subject);
+          //  if ( (!isset($skip_to_agent)) or ($skip_to_agent == null) or ($skip_to_agent == "")) {$flag = true;}
+//            if (strtolower($agent['name']) == strtolower($skip_to_agent)) {$flag = true;}
+
+//            if ($flag != true) {continue;}
+
+            $agent_class_name = $agent['name'];
 
 
-            $this->getAgent($agent_name);
-            echo $this->thing_report['sms'] . "\n";
-
-            try {
-                $this->agent->test();
-                echo $agent_name . "[ GREEN ] ". "\n";
-
-            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptio$
-                echo $agent_name . "[ RED ]" . "\n";
-                continue;
+            $agent_flag = false;
+            foreach($dev_agents as $key=>$dev_agent) {
+          // Big issue
+            if ($agent_class_name == $dev_agent) {$agent_flag = true; break;}
             }
-*/
+
+            if ($agent_flag == true) {continue;}
+
+            //$thing = new Thing(null);
+            //$subject = "s/ " . $agent_name;
+            //$thing->Create(null, "test", $subject);
+
+            //$test_agent = new $agent_name($this->thing, $agent_name);
+
+            //$this->getAgent($agent_name);
+            //echo $this->thing_report['sms'] . "\n";
+echo $agent_class_name . "\n\n";
+            $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+
+            
+            $ex = null;
+            try {
+//                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+
+                $test_agent = new $agent_namespace_name($this->thing, $agent_class_name); 
+                $flag = $test_agent->test();
+                $m = null;
+            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptio$
+                //echo $agent_name . "[ RED ]" . "\n";
+                $m = $ex->getMessage();
+                $flag = "red";
+                //continue;
+            }
+
+            $this->test_results[] = array("agent_name"=>$agent_class_name, "flag"=>$flag, "error"=>$m);
+
+            //echo $agent_class_name . "[ " . $flag . " ] ". "\n";
+
+
         }
+var_dump($this->test_results);
+//echo "done";
+exit();
     }
 
     function makeSMS()
@@ -118,7 +161,10 @@ class Agents extends Agent
 
 	public function readSubject()
     {
-        $this->test();
+        if ($this->agent_input == "agents test") {
+            $this->test();
+            return;
+        }
 		return false;
     }
 

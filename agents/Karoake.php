@@ -6,29 +6,10 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-
-
-//require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
-								// factored to
-								// call agent 'Agent'
-
 ini_set("allow_url_fopen", 1);
 
-class Karoake 
+class Karoake
 {
-
-    // This is a resource block.  It is a train which be run by the block scheduler.
-    // It will respond to trains with a signal.
-    // Red - Not available
-    // Green - Slot allocated
-    // Yellow - Next signal Red.
-    // Double Yellow - Next signal Yellow
-
-    // The block keeps track of the uuids of associated resources.
-    // And checks to see what the block signal should be.  And pass and collect tokens.
-
-    // This is the block manager.  They are an ex-British Rail signalperson.
-
     public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null) {
@@ -82,30 +63,14 @@ $this->agent_prefix = 'Agent "Read" ';
         // Loads in Train variables.
         $this->get(); 
 
-// Default to Long Island
-
 if ($this->verbosity == false) {$this->verbosity = 2;}
 
-//if ($this->notch_height == false) {$this->notch_height = 1.6;}
-//if ($this->notch_direction == false) {$this->notch_direction = 180;}
-//if ($this->notch_spread == false) {$this->notch_spread = 80;}
 if ($this->wordlist == false) {$this->wordlist = "estate sale";}
-//if ($this->noaa_buoy_id == false) {$this->noaa_buoy_id = 44025;}
-//if ($this->link == false) {$this->link = "http://www.27east.com/hamptons-classifieds/yard-sales.cfm";}
 
-if ($this->link == false) {$this->link = "http://rockgod.ca/rock-god-karaoke-schedule-canada-british-columbia-vancouver-000001.html";}
+if ($this->link == false) {$this->link = null;}
 
 
 $this->robot = new Robot($this->thing, $this->link);
-// Pending copyright notice confirmation.
-
-exit();
-//var_dump($this->robot->is_allowed);
-//exit();
-
-//echo $this->noaa_buoy_id;
-//exit();
-
 
 		$this->thing->log('<pre> Agent "Read" running on Thing '. $this->thing->nuuid . '.</pre>');
 		$this->thing->log('<pre> Agent "Read" received this Thing "'.  $this->subject . '".</pre>');
@@ -117,7 +82,7 @@ exit();
 		$this->readSubject();
 
 
-        $this->getWave();
+//        $this->getWave();
 
 		$this->respond();
 
@@ -129,11 +94,7 @@ exit();
 
         $this->thing_report['log'] = $this->thing->log;
 
-
-
-		return;
-
-		}
+    }
 
 
 

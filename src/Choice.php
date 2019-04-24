@@ -3,19 +3,11 @@ namespace Nrwtaylor\StackAgentThing;
 use RecursiveIteratorIterator;
 use RecursiveArrayIterator;
 
-
-//ini_set('display_startup_errors', 1);
-//ini_set('display_errors', 1);
-//error_reporting(-1);
-//require __DIR__ . '/vendor/autoload.php';
-//require 'vendor/autoload.php';
 ini_set("allow_url_fopen", 1);
 
 class Choice {
-	
 
 	public $var = 'hello';
-
 
     function __construct($uuid) {
 
@@ -24,22 +16,14 @@ class Choice {
 		$this->uuid = $uuid;
 
 		// Access state settings as required.
-//		$settings = require __DIR__ . '/settings.php';
         $settings = require $GLOBALS['stack_path'] . "private/settings.php";
 
-// '/var/www/html/stackr.ca/src/settings.php';
 		$this->container = new \Slim\Container($settings);
 
 		$this->container['stack'] = function ($c) {
 			$db = $c['settings']['stack'];
 			return $db;
 			};
-
-		//$this->web_prefix = $this->container['stack']['web_prefix'];
-
-//$actual_link = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-
-
 
         if (!isset($_SERVER['HTTP_HOST'])) {
             $this->web_prefix = $this->container['stack']['web_prefix'];
@@ -48,18 +32,10 @@ class Choice {
             $this->web_prefix = "http://$_SERVER[HTTP_HOST]/";
         }
 
-$prod = true;
-if ($prod == true) {
-    $this->web_prefix = $this->container['stack']['web_prefix'];
-}
-
-
-//var_dump($this->web_prefix);
-
-//            $this->web_prefix = $this->container['stack']['web_prefix'];
-
-
-
+        $prod = true;
+        if ($prod == true) {
+            $this->web_prefix = $this->container['stack']['web_prefix'];
+        }
 
 		$this->stack_state = $this->container['stack']['state'];
 
@@ -69,9 +45,6 @@ if ($prod == true) {
 		// Set default choice to be 'hive'
 		// Overwritten when a choice is created.
 		$this->name = 'hive';
-
-		return;
-
 	}
 
 	function Create($choice_name = null , $node_list = null, $current_node = null)
@@ -149,8 +122,6 @@ if ($prod == true) {
 
 		// format:
 		// {"<34 chars>":{"choices":["Red Team", "Blue Team"], "decision":null}
-		
-		return;
 	}
 
 	// Functions follow to manage the state map and naming and 
@@ -159,8 +130,8 @@ if ($prod == true) {
 	// Lots of echo statement's I'm afraid until I figure out the elegant
 	// way to do that.
 
-	function loadStateMap() {
-
+	function loadStateMap()
+    {
 		// A statemap can be saved in any alphanumeric field.
 		// So message0-7 and settings and variables.  As well as the from, to, subject, uuid.
 
@@ -179,7 +150,6 @@ if ($prod == true) {
 		// simplest solution.  For now.
 		$this->node_list = $this->json->readVariable(array("choice",$this->name,0));
 
-	
 		return $this->node_list;
 	}
 
@@ -229,9 +199,6 @@ if ($prod == true) {
 
 		$this->json->setField("variables");
 		$this->json->writeVariable(array($this->uuid,$variable), $value);
-
-
-		return;
 	}
 
 	function loadDecision() {
@@ -305,7 +272,7 @@ if ($prod == true) {
         // As of 27 Feb 2018 - 2,942ms 1169ms, 1134ms
         $this->split_time = microtime(true);
 
-		$choice_thing->Create(null, "ant", 's/ is ' . $choice . ' button');
+		$choice_thing->Create(null, "choice", 's/ is ' . $choice . ' button');
         // Timing at 199, 173, 368, 201ms
         //echo number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 

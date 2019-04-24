@@ -185,7 +185,7 @@ $client->setAuthConfig(array(
 ));
 
 $this->service = new \Google_Service_HangoutsChat($client);
-exit();
+//exit();
         // This passes the uuid through to the redirect url
         //$client->setState($this->uuid);
 

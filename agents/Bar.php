@@ -81,13 +81,13 @@ class Bar extends Agent
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
-                    $this->read($piece);
+                    $this->Perform($piece);
                 }
             }
         }
     }
 
-    public function read($piece)
+    public function Perform($piece)
     {
         switch($piece) {
            case 'stack':

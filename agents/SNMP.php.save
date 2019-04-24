@@ -1,0 +1,134 @@
+<?php
+namespace Nrwtaylor\StackAgentThing;
+
+class SNMP extends Agent
+{
+	public $var = 'hello';
+
+    public function init()
+    {
+        // So I could call
+        $this->test = false;
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+        // I think.
+        // Instead.
+
+        $this->node_list = array("snmp"=>array("snmp"));
+    }
+
+    public function run()
+    {
+        $this->getSNMP();
+    }
+
+	public function respond()
+    {
+		$this->thing->flagGreen();
+
+		// This should be the code to handle non-matching responses.
+		$to = $this->thing->from;
+		$from = "snmp";
+
+        $this->makeSms();
+        $this->makeMessage();
+		$this->thing_report['email'] = $this->sms_message;
+
+		//$this->thing_report['choices'] = false; 
+
+        if ($this->agent_input == null) {
+                $message_thing = new Message($this->thing, $this->thing_report);
+                $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
+
+        $this->thing_report['keyword'] = 'snmp';
+        $this->thing_report['help'] = 'Useful for checking the stack.';
+
+		return $this->thing_report;
+
+	}
+
+    public function makeSms()
+    {
+        $this->sms_message = "SNMP | A message from this Identity pinged us.";
+        $this->sms_message .= " | Received " . $this->snmp_text . " ago.";
+
+        $this->sms_message .= " | TEXT WATSON";
+        $this->thing_report['sms'] = $this->sms_message;
+    }
+
+    public function getSNMP()
+    {
+        $received_at = strtotime($this->thing->thing->created_at);
+        $this->snmp_time = time() - $received_at;
+
+//$syscontact = snmp2_get("192.168.1.1", "public", "system.SysContact.0");
+$outgoing = snmp2_get("192.168.1.1", "public", "1.3.6.1.2.1.2.2.1.16.1");
+$incoming = snmp2_get("192.168.1.1", "public", "1.3.6.1.2.1.2.2.1.10.1");
+
+//$test = snmp2_get("192.168.1.1", "public", "1.3.6.1.2.1.17.7.1.2.2.1");
+//$test = snmp2_get("192.168.1.1", "public", "1.3.6.1.2.1.17.7.1.2.2.1");
+$test = snmp2_get("192.168.1.1", "public", "");
+
+
+var_dump($test);
+exit();
+
+$ups = "ups.int.binarytaskforce.com";
+$sec_name = "netadmin";
+$sec_level = "authPriv";
+$auth_protocol = "MD5";
+$auth_passphrase = "sampleAuthpassphrase";
+$priv_protocol = "DES";
+$priv_passphrase = "samplePrivpassphrase";
+ 
+$OID = array(
+    ".1.3.6.1.4.1.318.1.1.1.1.1.1.0",
+    ".1.3.6.1.4.1.318.1.1.1.2.1.1.0",
+    ".1.3.6.1.4.1.318.1.1.1.2.2.1.0",
+    ".1.3.6.1.4.1.318.1.1.1.2.2.2.0",
+    ".1.3.6.1.4.1.318.1.1.1.2.2.3.0",
+    ".1.3.6.1.4.1.318.1.1.1.4.2.3.0",
+    );
+     
+for ($counter = 0; $counter <= sizeof($OID) - 1; $counter++)
+ {
+ $result[$counter] = snmp3_get($ups,$sec_name,$sec_level,$auth_protocol,$auth_passphrase,$priv_protocol,$priv_passphrase,$OID[$counter]); //SNMP V3
+ }
+ print_r ($result);
+
+
+/*
+  $session = new \SNMP(SNMP::VERSION_1, "192.168.1.1", "public");
+  $sysdescr = $session->get("sysDescr.0");
+  echo "$sysdescr\n";
+  $sysdescr = $session->get(array("sysDescr.0"));
+  print_r($sysdescr);
+*/
+exit();
+
+
+
+        if ($this->snmp_time < 1) {
+            $this->snmp_text = "<1 second";
+            // Database clock precision is 1 second.
+            // So this doesn't do much.
+            // $this->ping_text = ($this->ping_time *1000) ."ms";
+        } else {
+            $this->snmp_text = $this->thing->human_time ( $this->snmp_time );
+        }
+    }
+
+    public function makeMessage()
+    {
+        $message = "A message from this Identity snmped us.";
+        $message .= " Received " . $this->snmp_text . " ago.";
+
+        $this->sms_message = $message;
+        $this->thing_report['message'] = $message;
+    }
+
+	public function readSubject()
+    {
+        $this->response = "Responded to a snmp request.";
+	}
+}

@@ -297,11 +297,12 @@ if ($i >10) {break;}
 
         $words = preg_split('/[^a-z0-9.\']+/i', $line);
         $score = 0;
-    foreach(explode(" " ,$text) as $text_word) {
+char    foreach(explode(" " ,$text) as $text_word) {
         foreach($words as $word) {
-//echo $word . " " ;
+
+             if (($word == "") or ($text_word == "")) {continue;}
+
            if (strtolower($word) == strtolower($text_word)) {
-//echo $word . " " . $text_word . "\n";
                 $score += mb_strlen($text_word) * 10;
                 break;
             } 

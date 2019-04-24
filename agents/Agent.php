@@ -75,7 +75,7 @@ and the user UX/UI
 
         $this->get();
 
-        $this->readSubject();
+        $this->read();
 
         $this->run();
 
@@ -262,6 +262,11 @@ and the user UX/UI
 
         return false;
 
+    }
+
+    public function read()
+    {
+        $this->readSubject();
     }
 
     public function getAgent($agent_class_name = null)
@@ -841,15 +846,28 @@ echo "place found";
 
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
-
-
         $findagent_agent = new FindAgent($this->thing, "crow");
         $things = $findagent_agent->thing_report['things'];
         $last_heard['crow'] = strtotime($things[0]['created_at']);
 
+echo $last_heard['crow'] . "\n";
+
+        $last_heard['entity'] = $last_heard['crow'];
+        $agent_name = ucwords("crow");
+
+
         $findagent_agent = new FindAgent($this->thing, "wumpus");
         $things = $findagent_agent->thing_report['things'];
         $last_heard['wumpus'] = strtotime($things[0]['created_at']);
+
+echo $last_heard['wumpus']. "\n";
+
+        if ($last_heard['entity'] < $last_heard['wumpus']) {
+            $agent_name = ucwords("wumpus");
+            $last_heard['entity'] = $last_heard['wumpus'];
+        }
+
+
 /*
         $findagent_agent = new FindAgent($this->thing, "ant");
         $temp_things = $findagent_agent->thing_report['things'];
@@ -866,21 +884,29 @@ echo "place found";
         $things = $findagent_agent->thing_report['things'];
         $last_heard['ant'] = strtotime($things[0]['created_at']);
 
+echo $last_heard['ant'] . "\n";
 
+        if ($last_heard['entity'] < $last_heard['ant']) {
+            $agent_name = ucwords("ant");
+            $last_heard['entity'] = $last_heard['ant'];
+        }
+
+
+echo $agent_name;
 
     //    if ($ant_last_heard > $crow_last_heard) {
     //        $agent_name = "Ant";
     //    } else {
     //        $agent_name = "Crow";
     //    }
-        $agent_name = "Agent";
-        foreach($last_heard as $key=>$value) {
-            if (!isset($max_last_heard)) {$max_last_heard = $value;}
-            if ($last_heard[$key] > $max_last_heard) {
-                $agent_name = ucwords($key);
-                $max_last_heard = $last_heard[$key];
-            }
-        }
+        //$agent_name = "Agent";
+        //foreach($last_heard as $key=>$value) {
+        //    if (!isset($max_last_heard)) {$max_last_heard = $value;}
+        //    if ($last_heard[$key] > $max_last_heard) {
+        //        $agent_name = ucwords($key);
+        //        $max_last_heard = $last_heard[$key];
+        //    }
+        //}
 
 //        $agent_name = "Ant";
         $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;

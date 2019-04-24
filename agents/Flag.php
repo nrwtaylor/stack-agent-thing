@@ -678,5 +678,3 @@ class Flag
     return true;
     }
 }
-
-?>

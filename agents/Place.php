@@ -266,8 +266,8 @@ class Place extends Agent
     {
         if(!isset($this->places)) {$this->getPlaces();}
         foreach($this->places as $key=>$place) {
-            if ($requested_place_identifier == $place['code']) {return true;}
-            if ($requested_place_identifier == $place['name']) {return true;}
+            if (strtolower($requested_place_identifier) == strtolower($place['code'])) {return true;}
+            if (strtolower($requested_place_identifier) == strtolower($place['name'])) {return true;}
         }
 
         return false;

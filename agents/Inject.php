@@ -54,7 +54,6 @@ class Inject extends Agent
         $this->thing->json->writeVariable( array("inject", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
-//var_dump($this->state);
         $this->variable->setVariable("state", $this->state);
         $this->variable->setVariable("refreshed_at", $this->current_time);
 
@@ -176,7 +175,6 @@ class Inject extends Agent
         $this->makeSMS();
 
         $this->makeMessage();
-        // $this->makeTXT();
         $this->makeChoices();
 
  		$this->thing_report["info"] = "This creates an exercise message.";
@@ -228,6 +226,14 @@ class Inject extends Agent
         $this->thing_report['ACP 125(G)'] = $acp125g;
     }
 
+
+    function test()
+    {
+        $test_thing = new Thing(null);
+        $test_inject = new Inject($test_thing, "inject");
+
+
+    }
 
     function getCast()
     {
@@ -310,7 +316,6 @@ class Inject extends Agent
 
         // Latest transcribed sets.
         $filename = "/vector/messages-" . $this->bank . ".txt";
-var_dump($filename);
         $this->filename = $this->bank . ".txt";
 
         $file = $this->resource_path . $filename;
@@ -333,7 +338,6 @@ var_dump($filename);
 
                 $line_count = count($message) - 1;
 
-var_dump($line_count);
           //  if ($line_count == 10) {
                 // recognize as J-format
                 if ($bank_info == null) {
@@ -381,7 +385,6 @@ var_dump($line_count);
         if ($line_count == 16) {
 
                 $line = array();
-var_dump($message);
                 $message_array = array("line_1"=>$message[1],
                     "line_2"=>$message[2],
                     "line_3"=>$message[3],
@@ -921,7 +924,6 @@ var_dump($message);
                         case 'hard':
                         case 'easy':
                         case '16ln':
-var_dump($piece);
                             $this->setState($piece);
                             $this->setBank($piece);
 
