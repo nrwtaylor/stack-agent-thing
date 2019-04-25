@@ -53,13 +53,16 @@ class Callsign {
 
         $this->thing->json->writeVariable( array("callsign", "reading"), $this->reading );
 
-        if ($this->agent_input == null) {$this->Respond();}
+        if ($this->agent_input == null) {$this->respond();}
 
         if (isset($this->callsigns) and count($this->callsigns) != 0) {
 		    $this->thing->log($this->agent_prefix . 'completed with a reading of ' . implode($this->callsign) . '.');
         } else {
             $this->thing->log($this->agent_prefix . 'did not find callsigns.');
         }
+
+        $this->thing_report['help'] = "Looks up callsigns.";
+        $this->thing_report['info'] = "Possibly helpful to station operators.";
 
         $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
         $this->thing_report['log'] = $this->thing->log;
@@ -297,7 +300,7 @@ if ($i >10) {break;}
 
         $words = preg_split('/[^a-z0-9.\']+/i', $line);
         $score = 0;
-char    foreach(explode(" " ,$text) as $text_word) {
+        foreach(explode(" " ,$text) as $text_word) {
         foreach($words as $word) {
 
              if (($word == "") or ($text_word == "")) {continue;}
@@ -402,7 +405,7 @@ v
 
 
 
-	public function Respond() {
+	public function respond() {
 
 		$this->cost = 100;
 
@@ -560,5 +563,3 @@ v
         return $this->callsign_context;
     }
 }
-
-?>

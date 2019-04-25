@@ -121,7 +121,6 @@ class FindAgent
         $run_time = $this->thing->elapsed_runtime() - $ref_time;
         $this->thing->log( 'database call ran for ' . $run_time . 'ms.', "OPTIMIZE" );
 
-
 		$groups = array();
         $agent_things = array();
 
@@ -145,7 +144,6 @@ class FindAgent
 
                     $thing= new Thing($uuid);
                     $variables = $thing->account['stack']->json->array_data;
-
                     if (isset($variables[$name])) {
                         $agent_thing_id = $variables[$name][$name."_id"];
 
@@ -257,5 +255,3 @@ class FindAgent
 
 
 }
-
-?>

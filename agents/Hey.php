@@ -118,12 +118,6 @@ class Hey extends Agent
         $this->thing_report['info'] = 'Hey';
         $this->thing_report['help'] = "An agent which says, 'Hey'. Type 'Web' on the next line.";
 
-
-
-        return;
-
-
-
     }
 
     public function startHey($type = null)

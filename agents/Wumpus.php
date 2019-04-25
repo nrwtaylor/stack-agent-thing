@@ -38,15 +38,6 @@ class Wumpus extends Agent
 
         $this->primary_place = "lair";
 
-        $this->getWumpus();
-        $this->getClocktime();
-        $this->getBar();
-        $this->getCoordinate();
-
-        $this->getTick();
-//$this->getWumpus();
-
-        // For the Ant
         $this->created_at = $this->thing->thing->created_at;
 
 		$this->sqlresponse = null;
@@ -57,6 +48,16 @@ class Wumpus extends Agent
         $info = 'The "Wumpus" agent provides an text driven interface to manage a 3-D coordinate on '. $this->short_name;
 		$info .= 'from the web.  The Management suggests you explore the NEST MAINTENANCE button';
 
+    }
+
+    public function run()
+    {
+        $this->getWumpus();
+        $this->getClocktime();
+        $this->getBar();
+        $this->getCoordinate();
+
+        $this->getTick();
     }
 
     public function set()
@@ -71,6 +72,8 @@ class Wumpus extends Agent
 
     public function get($crow_code = null)
     {
+
+
         $this->current_time = $this->thing->json->time();
 
         // Borrow this from iching
@@ -107,7 +110,7 @@ class Wumpus extends Agent
 
 }
 
-
+/*
     public function run()
     {
 //        $this->thing->choice->Choose($this->state);
@@ -122,7 +125,7 @@ class Wumpus extends Agent
 
 
     }
-
+*/
     public function loop()
     {
 

@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Test {
+class Test extends Agent {
 
 	public $var = 'hello';
 
@@ -71,7 +71,7 @@ class Test {
 
 // -----------------------
 
-	private function respond()
+	public function respond()
     {
 		$this->thing->flagGreen();
 
@@ -129,13 +129,17 @@ class Test {
 
 	public function readSubject()
     {
+
+        var_dump( $this->isAgent("asdf"));
+
+        $agent_test = new Agent($this->thing, "agent");
+        $agent_test->test();
+echo $agent_test->test_result;
+
+        // See if an agent number appears in the subject
+
         //$input = strtolower($this->subject);
 		return false;
     }
 
 }
-
-
-
-return;
-?>

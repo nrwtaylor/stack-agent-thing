@@ -6,18 +6,12 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-
-class Pdf
+class Pdf extends Agent
 {
-	function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->start_time = $thing->elapsed_runtime();
-        $this->agent_input = $agent_input;
 
-		$this->thing_report['thing'] = false;
-
-		if ($thing->thing != true) {
+		if ($this->thing->thing != true) {
 
             $this->thing->log ( 'Agent "Pdf" ran on a null Thing ' .  $thing->uuid .  '.');
   	        $this->thing_report['info'] = 'Tried to run Pdf on a null Thing.';
@@ -26,23 +20,7 @@ class Pdf
             return $this->thing_report;
 		}
 
-		$this->thing = $thing;
-		$this->agent_name = 'pdf';
-        $this->agent_prefix = 'Agent "Pdf" ';
 		$this->agent_version = 'redpanda';
-
-		$this->thing_report['thing'] = $thing;
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
-
-       // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
@@ -50,37 +28,13 @@ class Pdf
 					array('useful', 'useful?'),
 				'start b'=>array('helpful','helpful?')
 					);
+  	}
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		$this->sqlresponse = null;
-
-		$this->thing->log ( 'Agent "Pdf" running on Thing ' .  $this->uuid . '.' );
-		$this->thing->log ( 'Agent "Pdf" received this Thing "' .  $this->subject .  '".' );
-
-//$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
-
-
-		// If readSubject is true then it has been responded to.
+    public function run()
+    {
         $this->getLink();
 
-		$this->readSubject();
-//        if ($this->agent_input == null) {
-		    $this->respond(); // Return $this->thing_report;
-//        }
-
-		$this->thing->log( 'Agent "Pdf" completed' );
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
-
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
-  	}
+    }
 
 	public function respond()
     {
@@ -146,6 +100,9 @@ class Pdf
         }
 
 
+        if (!$this->pdf_exists) {$this->sms_message = "PDF | No PDF available from the last agent.";}
+
+
         $this->sms_message .= " | TEXT INFO";
         $this->thing_report['sms'] = $this->sms_message;
 
@@ -163,6 +120,8 @@ class Pdf
 
         $match = 0;
 
+        $link_uuids = array();
+
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
             $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
@@ -170,17 +129,34 @@ class Pdf
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];
-                if ($match == 2) {break;}
+                $link_uuids[] = $block_thing['uuid'];
+                // if ($match == 2) {break;}
+                // Get upto 10 matches
+                if ($match == 10) {break;}
+
+
+            }
+        }
+        $this->prior_agent = "pdf";
+        foreach($link_uuids as $key=>$link_uuid) {
+            $previous_thing = new Thing($link_uuid);
+
+            if (isset($previous_thing->json->array_data['message']['agent'])) {
+
+                $this->prior_agent = $previous_thing->json->array_data['message']['agent'];
+
+                if (in_array(strtolower($this->prior_agent), array('web','pdf','txt','log','php'))) {
+                    continue;
+                }
+
+                $this->link_uuid = $link_uuid;
+                break;
             }
         }
 
-        $previous_thing = new Thing($block_thing['uuid']);
-
-        if (!isset($previous_thing->json->array_data['message']['agent'])) {
-            $this->prior_agent = "pdf";
-        } else {
-            $this->prior_agent = $previous_thing->json->array_data['message']['agent'];
-        }
+        $this->pdf_exists = true;
+        $agent_thing = new Agent($previous_thing);
+        if (!isset($agent_thing->thing_report['pdf'] )) {$this->pdf_exists = false;}
 
         return $this->link_uuid;
     }
@@ -195,7 +171,6 @@ class Pdf
 
     function makeChoices()
     {
-        //$this->node_list = array("web"=>array("iching", "roll"));
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "pdf");
         $choices = $this->thing->choice->makeLinks('pdf');
@@ -206,7 +181,6 @@ class Pdf
     public function makePDF()
     {
         $this->thing->report['pdf'] = false;
-        return;
     }
 
     function makeWeb()
@@ -228,7 +202,6 @@ class Pdf
 
         $web .= 'This Thing said it heard, "' . $this->subject . '".<br>';
         $web .= $this->sms_message . "<br>";
-        //$web .= 'About '. $this->thing->created_at;
 
         $received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time ( time() - $received_at );
@@ -245,13 +218,7 @@ class Pdf
 		} else {
 			$this->thing->choice->Create('pdf', $this->node_list, 'start b');
 		}
-
-		//$this->thing->choice->Choose("inside nest");
 		$this->thing->flagGreen();
-
-		return;
 	}
 
 }
-
-?>

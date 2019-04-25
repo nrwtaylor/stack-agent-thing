@@ -5,47 +5,48 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class N6 {
+class N6 extends Agent {
 
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
+//    function __construct(Thing $thing, $agent_input = null)
     {
-        $this->start_time = $thing->elapsed_runtime(); 
+//        $this->start_time = $thing->elapsed_runtime(); 
 
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
 
-		$this->agent_name = "n6";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+//		$this->agent_name = "n6";
+//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
-		$this->thing = $thing;
-        $this->thing_report['thing']  = $thing;
+//		$this->thing = $thing;
+//        $this->thing_report['thing']  = $thing;
 
         //$this->start_time = $this->thing->elapsed_runtime();
 
 
         //$command_line = null;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = strtolower($thing->subject);
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = strtolower($thing->subject);
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
+//        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+//        $this->word = $thing->container['stack']['word'];
+//        $this->email = $thing->container['stack']['email'];
 
         $this->node_list = array("n6"=>array("n6"));
 
-        $this->thing->log('running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
-        $this->thing->log('received this Thing "'.  $this->subject . '".', "DEBUG");
+//        $this->thing->log('running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
+//        $this->thing->log('received this Thing "'.  $this->subject . '".', "DEBUG");
 
 
-        $this->current_time = $this->thing->time();
-
+//        $this->current_time = $this->thing->time();
+/*
 
         // Borrow this from iching
         $this->thing->json->setField("variables");
@@ -63,9 +64,58 @@ class N6 {
 //        $this->thing->json->setField("variables");
         $this->number = $this->thing->json->readVariable( array("n6", "number"));
         $this->text = $this->thing->json->readVariable( array("n6", "text") ); // Test because this will become A6.
+*/
 
-$this->readSubject();
-            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+//$this->readSubject();
+//            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+/*
+        if ( ($this->number == false) or ($this->text == false) ) {
+
+            $this->makeN6();
+            $this->thing->json->writeVariable( array("n6", "number"), $this->number );
+            $this->thing->json->writeVariable( array("n6", "text"), $this->text );
+
+        }
+*/
+        //$this->readSubject();
+
+//        $this->respond();
+
+//        $this->set();
+
+//        $this->thing->log($this->agent_prefix . ' set response.', "OPTIMIZE") ;
+
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
+
+//        $this->thing_report['log'] = $this->thing->log;
+
+//		return;
+	}
+
+
+    public function get()
+    {
+
+        // Borrow this from iching
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable( array("n6", "refreshed_at") );
+
+        if ($time_string == false) {
+//            $this->thing->json->setField("variables");
+            $time_string = $this->thing->time();
+            $this->thing->json->writeVariable( array("n6", "refreshed_at"), $time_string );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
+
+//        $this->thing->json->setField("variables");
+        $this->number = $this->thing->json->readVariable( array("n6", "number"));
+        $this->text = $this->thing->json->readVariable( array("n6", "text") ); // Test because this will become A6.
+    }
+
+    public function set()
+    {
 
         if ( ($this->number == false) or ($this->text == false) ) {
 
@@ -75,20 +125,9 @@ $this->readSubject();
 
         }
 
-        //$this->readSubject();
 
-        $this->respond();
 
-//        $this->set();
-
-        $this->thing->log($this->agent_prefix . ' set response.', "OPTIMIZE") ;
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
-	}
+    }
 
     public function makeN6()
     {
@@ -100,15 +139,18 @@ $this->readSubject();
         $this->response = "Made this six-digit number.";
         // Built-in best PHP
         // PHP states cryptographically secure
-        $this->random = new Random($this->thing,"random");
-        $this->random->randomRandomint(100000,999999);
+//        $this->random = new Random($this->thing,"random");
+//        $this->random->randomRandomint(100000,999999);
+        $this->random = new Random($this->thing,"random 100000 999999");
+//        $this->random->randomRandomint(100000,999999);
+
         $this->number = $this->random->number;
     }
 
 
 // -----------------------
 
-	private function respond() {
+	public function respond() {
 
 
 		$this->thing->flagGreen();
@@ -261,11 +303,11 @@ $this->readSubject();
     }
 
 
-    function read()
-    {
-        $this->get();
-        return $this->state;
-    }
+//    function read()
+//    {
+//        $this->get();
+//        return $this->state;
+//    }
 
 /*
     function extractN6($input)

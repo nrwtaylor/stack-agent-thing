@@ -5,14 +5,12 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Web {
+class Web extends Agent {
 
-	function __construct(Thing $thing)
+    function init()
     {
 
-		$this->thing_report['thing'] = false;
-
-		if ($thing->thing != true) {
+		if ($this->thing->thing != true) {
 
             $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $thing->uuid .  '');
   	        $this->thing_report['info'] = 'Tried to run Web on a null Thing.';
@@ -21,72 +19,27 @@ class Web {
             return $this->thing_report;
 		}
 
-		$this->thing = $thing;
-		$this->agent_name = 'web';
-        $this->agent_prefix = 'Agent "Web" ';
 		$this->agent_version = 'redpanda';
-
-		$this->thing_report = array('thing' => $this->thing->thing);
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
 
 		$this->node_list = array('start a'=>
 					array('useful', 'useful?'),
 				'start b'=>array('helpful','helpful?')
 					);
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		$this->sqlresponse = null;
-
-		$this->thing->log ( '<pre> Agent "Web" running on Thing ' .  $this->uuid . '</pre>' );
-		$this->thing->log ( '<pre> Agent "Web" received this Thing "' .  $this->subject .  '"</pre>' );
-
-//$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
-
-
-		// If readSubject is true then it has been responded to.
-
-        $this->getLink();
-
-		$this->readSubject();
-		$this->respond(); // Return $this->thing_report;
-
-
-		$this->thing->log( '<pre> Agent "Web" completed</pre>' );
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
-
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
-
-
-		return;
 	}
+
+    public function run()
+    {
+        $this->getLink();
+    }
 
 	public function respond()
     {
 		// Thing actions
 
         $web_thing = new Thing(null);
-        //$web_thing->Create($this->from, 'ant' , 's/ web view ' . $web_thing->uuid);
         $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
 
-		//$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
         $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
 
 		$this->sms_message .= " | " . $this->response;
@@ -115,99 +68,62 @@ class Web {
 
         $this->makeWeb();
 
-
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-//        $this->thing_report['etime'] = "meep";
 
 		return $this->thing_report;
 	}
-/*
-    function getLink() {
+
+    function getLink()
+    {
 
         $block_things = array();
-        // See if a block record exists.
-        $findagent_thing = new FindAgent($this->thing, 'thing');
-
-        // This pulls up a list of other Block Things.
-        // We need the newest block as that is most likely to be relevant to
-        // what we are doing.
-
-//$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
-
-        $this->max_index =0;
-
-        $match = 0;
-
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-
-$this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
-
-
-
-            if ($block_thing['nom_to'] != "usermanager") {
-                $match += 1;
-                $this->link_uuid = $block_thing['uuid'];
-                if ($match == 2) {break;}
-            }
-        }
-        return $this->link_uuid;
-    
-    }
-*/
-    function getLink() {
-
-        $block_things = array();
-        // See if a block record exists.
-        //require_once '/var/www/html/stackr.ca/agents/findagent.php';
+        // See if a stack record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
 
-        // This pulls up a list of other Block Things.
-        // We need the newest block as that is most likely to be relevant to
-        // what we are doing.
-
-//$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
-
         $this->max_index =0;
 
         $match = 0;
+
+        $link_uuids = array();
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
             $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
 
-
-
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];
-                if ($match == 2) {break;}
+                $link_uuids[] = $block_thing['uuid'];
+                // if ($match == 2) {break;}
+                // Get upto 10 matches
+                if ($match == 10) {break;}
+
+
+            }
+        }
+        $this->prior_agent = "web";
+        foreach($link_uuids as $key=>$link_uuid) {
+            $previous_thing = new Thing($link_uuid);
+
+            if (isset($previous_thing->json->array_data['message']['agent'])) {
+
+                $this->prior_agent = $previous_thing->json->array_data['message']['agent'];
+
+                if (in_array(strtolower($this->prior_agent), array('web','pdf','txt','log','php'))) {
+                    continue;
+                }
+
+                $this->link_uuid = $link_uuid;
+                break;
             }
         }
 
-            $variables_json= $block_thing['variables'];
-            $variables = $this->thing->json->jsontoArray($variables_json);
-
-
-        //require_once '/var/www/html/stackr.ca/agents/variables.php';
-
-        //$previous_thing = new Thing($block_thing['uuid']);
-
-        //$this->agent = new Variables($message_thing, "variables message " . $this->from);
-
-
-        if (!isset($variables['message']['agent'])) {
-            $this->prior_agent = "web";
-        } else {
-            $this->prior_agent = $variables['message']['agent'];
-        }
+        $this->web_exists = true;
+        $agent_thing = new Agent($previous_thing);
+        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
 
         return $this->link_uuid;
-    
     }
-
-
-
 
 
 	public function readSubject() {
@@ -215,14 +131,14 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 		$this->defaultButtons();
 		$status = true;
         $this->response = "Made a web link.";
-		return $status;		
+		return $status;
 	}
 
     function makeWeb() {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
-      $this->node_list = array("web"=>array("iching", "roll"));
+        $this->node_list = array("web"=>array("iching", "roll"));
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "web");
         $choices = $this->thing->choice->makeLinks('web');
@@ -241,15 +157,6 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 
 
         $web .= "<br>";
-/*  
-      $web .= $head;
-        $web .= $choices['button'];
-        $web .= $foot;
-//        $web .= $this->thing_report['channel'];
-
-//echo        $this->thing->account['thing']->balance['amount'];
-  //  echo    $this->thing->account['stack']->balance['amount'];
-*/
 
         $this->thing_report['web'] = $web;
 
@@ -257,24 +164,13 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
 
 	function defaultButtons() {
 
-//$html_links = $this->thing->choice->makeLinks();
-
-
 		if (rand(1,6) <= 3) {
 			$this->thing->choice->Create('web', $this->node_list, 'start a');
 		} else {
 			$this->thing->choice->Create('web', $this->node_list, 'start b');
 		}
 
-		//$this->thing->choice->Choose("inside nest");
 		$this->thing->flagGreen();
-
-		return;
 	}
 
-
-
 }
-
-
-?>

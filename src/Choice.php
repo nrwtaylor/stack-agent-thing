@@ -298,13 +298,10 @@ class Choice {
 
 	}
 
-	function makeChoices() {
-        //$this->split_time = microtime(true);
-
+	function makeChoices()
+    {
 		$choice_uuid_array = array();
 		$choices = $this->getChoices($this->current_node);
-
-
 
 		if ($choices == null) {return false;}
 

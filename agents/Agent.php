@@ -125,6 +125,10 @@ and the user UX/UI
 
     public function test()
     {
+        // See if it can run an agent request
+        $agent_thing = new Agent($this->thing, "agent");
+        // No result for now
+        $this->test = null;
     }
 
 
@@ -307,6 +311,50 @@ and the user UX/UI
             }
 
     }
+
+    public function isAgent($agent_class_name = null)
+    {
+        if ($agent_class_name == null) {
+            $agent_class_name = strtolower($this->agent_name);
+        }
+            try {
+
+                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+
+                $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+                $agent = new $agent_namespace_name($this->thing);
+
+                return true;
+
+                // If the agent returns true it states it's response is not to be used.
+                if ((isset($agent->response)) and ($agent->response === true)) {
+                    throw new Exception("Flagged true.");
+                }
+
+                $this->thing_report = $agent->thing_report;
+
+                $this->agent = $agent;
+                return true;
+
+            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+                $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+                // echo $ex;
+                $message = $ex->getMessage();
+                // $code = $ex->getCode();
+                $file = $ex->getFile();
+                $line = $ex->getLine();
+
+                $input = $message . '  ' . $file . ' line:' . $line;
+                $this->thing->log($input , "WARNING" );
+
+                // This is an error in the Place, so Bork and move onto the next context.
+                // $bork_agent = new Bork($this->thing, $input);
+                //continue;
+                return false;
+            }
+
+    }
+
 
     public function readSubject()
     {
@@ -678,22 +726,12 @@ and the user UX/UI
             if (file_exists($filename)) {
                 $agents[] = $agent_class_name;  
             }
-
-
-
-
-
-
-
-
         }
 
-        //set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
         restore_error_handler();
 
         // What effect would this have?
         //$agents = array_reverse($agents);
-
 
         // Prefer longer agent names
         usort($agents, function($a, $b) {
@@ -843,95 +881,70 @@ echo "place found";
         }
 */
 
-
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
-        $findagent_agent = new FindAgent($this->thing, "crow");
-        $things = $findagent_agent->thing_report['things'];
-        $last_heard['crow'] = strtotime($things[0]['created_at']);
+        $entity_list = array("Crow","Wumpus","Ant");
+        //$agent_name = "entity";
+        foreach($entity_list as $key=>$entity_name) {
 
-echo $last_heard['crow'] . "\n";
+            $findagent_agent = new FindAgent($this->thing, $entity_name);
+            $things = $findagent_agent->thing_report['things'];
+            $uuid = ($things[0]['uuid']);
 
-        $last_heard['entity'] = $last_heard['crow'];
-        $agent_name = ucwords("crow");
+            $thing = new Thing($uuid);
+            $variables = $thing->account['stack']->json->array_data;
 
+            // Check
+            if (!isset($variables[strtolower($entity_name)])) {continue;}
 
-        $findagent_agent = new FindAgent($this->thing, "wumpus");
-        $things = $findagent_agent->thing_report['things'];
-        $last_heard['wumpus'] = strtotime($things[0]['created_at']);
+            $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
 
-echo $last_heard['wumpus']. "\n";
+            echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
 
-        if ($last_heard['entity'] < $last_heard['wumpus']) {
-            $agent_name = ucwords("wumpus");
-            $last_heard['entity'] = $last_heard['wumpus'];
-        }
+            if (!isset($last_heard['entity'])) {
+                $last_heard['entity'] = $last_heard[strtolower($entity_name)];
+                $agent_name = $entity_name;
+            }
 
-
-/*
-        $findagent_agent = new FindAgent($this->thing, "ant");
-        $temp_things = $findagent_agent->thing_report['things'];
-        $things = array();
-        foreach($temp_things as $key=>$thing) {
-            if ($thing['task'] == "ant") {
-                $things[] = $thing;
+            if ($last_heard['entity'] < $last_heard[strtolower($entity_name)]) {
+                $last_heard['entity'] = $last_heard[strtolower($entity_name)];
+                $agent_name = $entity_name;
             }
         }
-        $last_heard['ant'] = strtotime($things[0]['created_at']);
-*/
 
-        $findagent_agent = new FindAgent($this->thing, "ant");
-        $things = $findagent_agent->thing_report['things'];
-        $last_heard['ant'] = strtotime($things[0]['created_at']);
+//        echo $agent_name. " "  . $last_heard['entity'];
 
-echo $last_heard['ant'] . "\n";
-
-        if ($last_heard['entity'] < $last_heard['ant']) {
-            $agent_name = ucwords("ant");
-            $last_heard['entity'] = $last_heard['ant'];
-        }
+if (!isset($agent_name)) {$agent_name = "Ant";}
 
 
-echo $agent_name;
 
-    //    if ($ant_last_heard > $crow_last_heard) {
-    //        $agent_name = "Ant";
-    //    } else {
-    //        $agent_name = "Crow";
-    //    }
-        //$agent_name = "Agent";
-        //foreach($last_heard as $key=>$value) {
-        //    if (!isset($max_last_heard)) {$max_last_heard = $value;}
-        //    if ($last_heard[$key] > $max_last_heard) {
-        //        $agent_name = ucwords($key);
-        //        $max_last_heard = $last_heard[$key];
-        //    }
-        //}
+        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'. $agent_name;
+//        $entity_thing = new $agent_namespace_name($this->thing);
 
-//        $agent_name = "Ant";
-        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;
-
-
+//        $current_node = $entity_thing->thing->choice->current_node;
+//var_dump($current_node);
+//        $n = $entity_thing->thing->choice->makeChoice($current_node);
+//var_dump($n);
+//var_dump($this->thing->choice->node_list);
                 if (strpos($input, 'nest maintenance') !== false) {
-  
                       $ant_thing = new $agent_namespace_name($this->thing);
-                        $this->thing_report = $ant_thing->thing_report;
-                        return $this->thing_report;
+                      $this->thing_report = $ant_thing->thing_report;
+                      return $this->thing_report;
                 }
-  
+
                 if (strpos($input, 'patrolling') !== false) {
                       $ant_thing = new $agent_namespace_name($this->thing);
                       $this->thing_report = $ant_thing->thing_report;
                       return $this->thing_report;
                 }
-  
+
                 if (strpos($input, 'foraging') !== false) {
-                      $ant_thing = new $agent_namespace_name($this->thing);
+                    $ant_thing = new $agent_namespace_name($this->thing);
+                    $this->thing_report = $ant_thing->thing_report;
+                    return $this->thing_report;
+                }
 
 
-            $this->thing_report = $ant_thing->thing_report;
-            return $this->thing_report;
-        }
 /*
         $findagent_agent = new FindAgent($this->thing, "crow");
         $things = $findagent_agent->thing_report['things'];

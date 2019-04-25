@@ -28,7 +28,7 @@ class Entity extends Agent
 
         $this->default_alias = "Thing";
 
-        $this->entity_agents = array("Cat", "Dog", "Ant", "Crow", "Wumpus");
+        $this->entity_agents = array("Entity", "Cat", "Dog", "Ant", "Crow", "Wumpus");
         $matches = array();
         foreach($this->entity_agents as $key=>$entity_agent) {
             if (strpos(strtolower($this->agent_input), strtolower($entity_agent)) !== false) {
@@ -38,8 +38,6 @@ class Entity extends Agent
         $this->entity_agent = strtolower($this->entity_agents[0]);
         if (isset($matches[0])) {$this->entity_agent = $matches[0];}
 
-echo $this->entity_agent;
-        // $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/entity';
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/' . $this->entity_agent;
 
         $this->state = "X";
@@ -77,7 +75,7 @@ echo $this->entity_agent;
 
     private function getEntity($requested_nuuid = null)
     {
-        $this->getEntities();
+        if (!isset($this->entities)) {$this->getEntities(); }
 //        if (!isset($this->id)) {$this->id = $this->default_id;}
 
         $matching_things = array();
@@ -88,21 +86,38 @@ echo $this->entity_agent;
         //    $this->id = $this->default_id;
         //    return;
         //}
+        $match_list = array();
+        foreach($this->entities as $key=>$entity) {
 
+            if ( (strtolower($entity['nuuid']) == strtolower($requested_nuuid)) ) {
+                // Consistently match the nuuid to a specific uuid.
+                //$this->things[] = new Thing($entity['uuid']);
+                $match_list[] = $entity;
+            }
+        }
 
         foreach($this->entities as $key=>$entity) {
             $entity_nuuid = substr($entity['uuid'], 0, 4);
 
-            if (strtolower($entity_nuuid) == strtolower($requested_nuuid)) {
+            if ( (strtolower($this->entity_agent) == strtolower($entity['entity'])) ) {
                 // Consistently match the nuuid to a specific uuid.
-                $this->things[] = new Thing($entity['uuid']);
+                //$this->things[] = new Thing($entity['uuid']);
+                $match_list[] = $entity;
             }
         }
-        if (!isset($this->things[0])) {
-            $this->thing = new Thing(array_reverse($this->entities)[0]['uuid']);
-        } else {
-            $this->thing = $this->things[0];
-        }
+
+$match = $match_list[0];
+
+
+//        if (!isset($this->things[0])) {
+//            $this->thing = new Thing(array_reverse($this->entities)[0]['uuid']);
+//        } else {
+//            $this->thing = $this->things[0];
+//        }
+        $this->thing = new Thing ($match['uuid']);
+
+//        $this->thing = $entity->thing;
+
         $this->id = $this->entity_agent . "_" . $this->thing->nuuid;
     }
 
@@ -137,11 +152,25 @@ echo $this->entity_agent;
             $variables_json= $thing_object['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
 
+
             if (isset($variables['entity'])) {
+                $matches = array();
+                foreach($this->entity_agents as $key=>$entity_agent) {
+                    if (isset($variables[strtolower($entity_agent)])) {
+                        $matches[] = strtolower($entity_agent);
+                    }
+                }
+
+
+                if ((isset($matches)) and count($matches) != 2) {
+                    // Some sort of invalid entity with more than one agent...
+                    continue;
+                }
+
                 if(!isset($variables['entity']['id'])) {continue;}
+
                 $id = $variables['entity']['id'];
                 $nuuid = substr($uuid, 0, 4);
-
                 $refreshed_at = $variables['entity']['refreshed_at'];
 
                 $variables['entity'][] = $thing_object['task'];
@@ -151,12 +180,14 @@ echo $this->entity_agent;
                     }
                 }
 
-
                 $entity = array("uuid"=>$uuid,
+                                    "entity"=>$matches[1],
                                     "nuuid"=>$nuuid,
                                     "refreshed_at"=>$refreshed_at
                                     );
+
                 $this->entities[] = $entity;
+
             }
         }
         return $this->entity_list;
