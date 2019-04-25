@@ -304,7 +304,6 @@ class Flag
     {
 
         $sms_message = "FLAG IS " . strtoupper($this->state);
-
         if ($this->verbosity > 6) {
             $sms_message .= " | previous state " . strtoupper($this->previous_state);
             $sms_message .= " state " . strtoupper($this->state);
@@ -583,13 +582,6 @@ class Flag
 		return false;
 	}
 
-/*
-	function kill()
-    {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-*/
     function discriminateInput($input, $discriminators = null)
     {
         //$input = "optout opt-out opt-out";
