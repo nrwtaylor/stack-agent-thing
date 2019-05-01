@@ -52,33 +52,12 @@ class Json {
         $this->thing_array= array();
 		// Temporary hack.
 		$this->uuid = $uuid;
-
-		return;
 	}
 
     function __call($method, $args) {
-        return "meep";
-        //return $this->array_data;
-    } 
+    }
 
     function __destruct() {
-        return;
-        echo "<pre>";
-
-
-        foreach($this->thing_array as $field=>$json_data) {
-            echo $field;
-            echo $json_data;
-            $this->db->writeField($field, $json_data);
-
-        }
-//exit();
-        //if (strtolower($this->field) == 'variables') {
-
-        //$this->db->writeField($this->field, $this->json_data);
-        //}
-
-echo "</pre>";
     }
 
 	function time($time = null)
@@ -87,7 +66,6 @@ echo "</pre>";
         $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
 
         return $this->time;
-		//return $this->time = gmdate("Y-m-d\TH:i:s\Z", $time);
 	}
 
     function microtime($time = null)
@@ -113,23 +91,19 @@ echo "</pre>";
 		// If message field is null, then return false.
 		if ($this->thing->$field == null) {
 			return false;
-		} else {
-			return true;
 		}
-
-		return;
+	    return true;
     }
 
 	function setField($field)
     {
 		$this->field = $field;
 		$this->read();
-
-		return;
     }
 
-    function setArray(Array $array_data)
+    function setArray(Array $array_data = null)
     {
+        if ($array_data == null) {$array_data = $this->array_data;}
         $this->array_data = $array_data;
 
         foreach($array_data as $key=>$value) {
@@ -137,7 +111,6 @@ echo "</pre>";
         }
         $this->arraytoJson();
         $this->write();
-        return ;
     }
 
     function setJson($json_data)
@@ -145,33 +118,19 @@ echo "</pre>";
         $this->json_data = $json_data;
         $this->jsontoArray();
         $this->write();
-
-        return;
     }
 
-//	function streamOn() {
-//		$this->field_type = "stream";
-//	
-//		return;
-//		}
-
-//	function streamOff() {
-//		$this->field_type = "document";
-	
-//		return;
-//		}
 
    	function jsontoArray($json_data = null)
     {
         if ($json_data == null) {$json_data = $this->json_data;}
 
-	$array_data = json_decode($json_data, true);
+	    $array_data = json_decode($json_data, true);
 
-        if ($array_data == false) {return;}
-
+        if ($array_data == false) {$this->array_data = false; return;}
 
         foreach($array_data as $key=>$value) {
-	    if($key != "") {
+	        if($key != "") {
                 $this->{$key} = $value;
             }
         }
@@ -185,11 +144,12 @@ echo "</pre>";
     {
 		$this->json_data = json_encode($this->array_data, JSON_PRESERVE_ZERO_FRACTION);
         $this->thing_array[$this->field] = $this->json_data;
-        return;
 	}
 
-	function idStream()
+	function idStream($stream_text = null)
     {
+        if ($stream_text != null) {$this->stream_id = $stream_text;}
+
 		if ($this->array_data == null) {
 			$this->initField();
 			}
@@ -208,14 +168,13 @@ echo "</pre>";
 
 	}
 
-	function initField()
+    function initField()
     {
 		// I guess this is appropriate.  A default 'agent' fingers
 		// the thing and then identifies posterior associations.
 		$arr = array("agent" => array());
 		$this->setArray($arr);
-		return;
-		}
+    }
 
    	function popStream($pos = -1) {
 
@@ -230,8 +189,6 @@ echo "</pre>";
 
 		$this->array_data = array_map('array_values', $this->array_data);
 		$this->setArray($this->array_data);
-
-		return;
     }
 
 	function fallingWater($value)
@@ -242,45 +199,41 @@ echo "</pre>";
 		$this->pushStream($value, 0);
 
 		// Check if JSON string too long.
+        if ($this->db->last_update == true) {
+            // Failed to push
+            $this->popStream();
+            $this->popStream();
 
-		while (!$this->write()) {
-			//echo strlen($this->json_data);
-			$this->popStream();
-		}
-		return;
+        }
+
+        $this->pushStream($value,0);
+
+        if ($this->db->last_update == true) {
+            // Failed to push
+            $this->popStream();
+            $this->popStream();
+
+        }
+
+        $this->pushStream($value,0);
 	}
 
+   	function pushStream($value, $pos = -1)
+    {
+        $this->setField($this->field);
 
-   	function pushStream($value, $pos = -1) {
-//$this->read();
-//echo "\n";
-//var_dump($this->uuid);
 		$stream_id = $this->idStream();
-//echo "start json " . $this->json_data . "\n";
 		if ($pos == -1) {
 			$pos = count($this->array_data[$stream_id]);
 		}
-
-//echo "pre arraydata";var_dump($this->array_data);
-
-		//echo $stream_id;
 		array_splice($this->array_data[$stream_id], $pos, 0, $value);
-
-//echo "post arraydata";var_dump($this->array_data);
 		$this->setArray($this->array_data);
-
-//echo "arraydata";var_dump($this->array_data);
-//echo "end json ". $this->json_data . "\n";
-//$this->write();
-		return;
+        //var_dump($this->db->last_update);
     }
 
-   	function publishDocument(Array $array_data) {
-
-		return;
-
-
-		}
+   	function publishDocument(Array $array_data)
+    {
+    }
 
    	function deleteVariable(Array $var_path) {
 		{
@@ -294,10 +247,7 @@ echo "</pre>";
 		}
 
 		$this->arraytoJson();
-//		$this->write();
         $this->write();
-
-		return;
 		}
 
 
@@ -321,14 +271,15 @@ echo "</pre>";
 		// So here do a search for each element of the target_path
 		// regardless whether the 'key' or 'value' matches.
 		// Return the path.
+
+        if ($this->array_data == false) {return false;}
+
 		$var_path = $this->recursive_array_search($target_path, $this->array_data);
 
         // Report with array's match.
 
         if ($var_path == $target_path) {
 
-//	echo '<pre> json.php readVariable() $var_path: '; print_r($var_path); echo '</pre>';
-//	echo '<pre> json.php readVariable() $target_path: '; print_r($target_path); echo '</pre>';
 		    $value = $this->getValueFromPath($this->array_data, $var_path);
         } else {
             $value = false;
@@ -344,29 +295,22 @@ echo "</pre>";
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
         $t = $this->write();
-
         // Failing to write a variable isn't a problem.
         // The agents will do what they can.
 
-//        if ($t === false) {throw new \Exception("Thing state not saved.");}
+//        if ($t === false) {throw new \Exception("Stack write failed.");}
         $this->size_overflow = false;
         if ($t === false) {
             $this->size_overflow = strlen($this->json_data) - $this->char_max;
             $this->write_fail_count += 1;
+            $t = new Thing(null);
+            $t->Create("x","y","s/ error");
+            $a = new Hey($t);
         }
-        
-
-        return;
     }
-
-
-
-
 
 	private function getValueFromPath($arr, $path)
 	{
-//	echo '<pre> json.php getValueFromPath() $arr: '; print_r($arr); echo '</pre>';
-//	echo '<pre> json.php getValueFromPath() $path: '; print_r($path); echo '</pre>';
 
 		// Allow for condition where variable is not found.
 		// Consistent with the Thing = false.
@@ -377,14 +321,11 @@ echo "</pre>";
 		$dest = $arr;
 		$finalKey = array_pop($path);
 		
-//		echo "finalkey".$finalKey;
 
-//	echo '<pre> $path: '; print_r($path); echo '</pre>';
 		foreach ($path as $key) {
 			
 		    $dest = $dest[$key];
 
-//	echo '<pre> $dest: '; print_r($dest); echo '</pre>';
 		}
 		return $dest[$finalKey];
 	}
@@ -399,14 +340,10 @@ echo "</pre>";
 		}
 
 		$dest[$finalKey] = $value;
-		return;
 	}
 
-	private function recursive_array_search($target_path, $haystack, $var_path = array()) {
-
-//		echo '<pre> json.php recursive_array_search $target_path ';echo print_r($target_path);echo'</pre>';
-//		echo '<pre> json.php recursive_array_search $target_path ';echo print_r($var_path);echo'</pre>';
-
+	private function recursive_array_search($target_path, $haystack, $var_path = array())
+    {
 		// Pop off the first value of the array.
 		$find = array_shift($target_path);
 
@@ -423,49 +360,25 @@ echo "</pre>";
 					// If it is an array, call this function recursively to 
 					// explore the next level.
 
-			
 					$nextKey = $this->recursive_array_search($target_path, $haystack[$key],$var_path);
 
 					if ($nextKey) {	
 						return $nextKey;
 					}
 				} else {
-
-//					echo $var_path;
-//	echo '<pre>var_path a'; print_r($var_path); echo '</pre>';
-//$finalKey = array_pop($path);
-
-
 					return $var_path;
-		
 				}
 			} else {
-				//echo "Variable path not found";
 			}
-
-	
-
+        }
+        return $var_path;
     }
 
-//		echo '<pre> json.php $var_path ';echo print_r($var_path);echo'</pre>';
-//		echo '<pre> json.php $target_path ';echo print_r($target_path);echo'</pre>';
-   return $var_path;
-}
-
-
-
-
-
-
-
-
-	function write() 
+	function write()
     {
+
 		// Now write to defined column.
-		//print_r($this->json_data);echo "<br>";
-		//print_r($this->field);echo "<br>";
         if ($this->field == null) {return;}
-//$this->char_max = 30;
         if (strlen($this->json_data) > $this->char_max) {
             // devstack what do you do here?
             // This is the place where Json borks when asked to save too much.
@@ -477,30 +390,31 @@ echo "</pre>";
 
             // Nah. Do the hard work through exceptions.
 
-            //echo $this->json_data;
-            //echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.";
-            //$thing = new Thing(null);
-            //$thing->Create("","","");
-//echo "meep";
-            //throw new \Exception('Insufficient space in DB record.');
+
+            //echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.\n";
+            //echo $this->uuid . "\n";
+            $thing = new Thing(null);
+            $thing->Create("","","");
+            $thing_agent = new Hey($thing);
+
+            $this->last_write = true;
+
+            throw new \Exception('Insufficient space in DB record ' . $this->uuid . ".");
 
 //            $this->overload_length = strlen($this->json_data) - $this->char_max;
 
             return false;
         } else {
-
             //$this->thing_array[$this->field] = $this->json_data;
             if ($this->write_on_destruct) {
                 //$this->thing_array[] = array("field"=>$this->field,"data"=>$this->json_data);
                 //$this->write_field_list[] = $this->field;
             } else {
 
-if ($this->field == "associations") {
-//echo "write associations ";
-//echo "" . $this->json_data . "\n";
-}
-                $this->db->writeField($this->field, $this->json_data);
-            }
+                $this->last_write = $this->db->writeField($this->field, $this->json_data);
+//var_dump($var);
+                
+           }
             return true;
         }
         return;
@@ -508,19 +422,14 @@ if ($this->field == "associations") {
 
     function read()
     {
-
         $this->json_data = $this->db->readField($this->field);
 
-if ($this->field == "associations") {
-//echo "read associations " .  $this->json_data . "\n";
-}
-
-        if ($this->json_data == null) {$this->initField();}
+//        if ($this->json_data == null) {$this->initField();}
 
         $array = $this->jsontoArray();
         $array= $this->array_data;
+
         return $array;
 	}
 }
 
-?>

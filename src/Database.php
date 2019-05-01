@@ -239,9 +239,11 @@ $c['errorHandler'] = function ($c) {
         // user provided string_text
         // stack provided field_text
 
+        //if ($field_text == "associations") {
+        //    echo "db write uuid " . $this->uuid . " field " . $field_text . " string "  . $string_text . ".\n";}
+
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
-
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":uuid", $this->uuid);
@@ -253,6 +255,7 @@ $c['errorHandler'] = function ($c) {
 
             $sth->execute();
 
+            $this->last_update = false;
         } catch (\Exception $e) {
             // Devstack - decide how to handle thing full
             // Do this for now.
@@ -263,13 +266,13 @@ $c['errorHandler'] = function ($c) {
             echo "BORK | Thing is full.";
             //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
+            $this->last_update = true;
         }
         $this->operations_time += (microtime(true) - $this->split_time);
         $this->operations += 1;
+        //$this->test("writeField");
 
-        $this->test("writeField");
 
-		return;
 	}
 
 
@@ -337,7 +340,7 @@ $c['errorHandler'] = function ($c) {
 
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
-            $sth = $this->container->db->prepare("SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE uuid=:uuid");
+            $sth = $this->container->db->prepare("SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid");
 
             //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
             $sth->bindParam("uuid", $this->uuid);
@@ -935,6 +938,24 @@ $c['errorHandler'] = function ($c) {
 		$thingreport = array('thing' => $things, 'info' => 'So here are Things which are flagged red.','help' => 'It is up to you what you do with these.', 'whatisthis' => 'A list of Things which have status red.');
 
 		return $thingreport;
+    }
+
+    function length()
+    {
+        $query = "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
+        $sth = $this->container->db->prepare($query);
+        $sth->execute();
+        $response = $sth->fetchAll();
+
+        $keys = array_keys($response);
+
+        $thingreport = array('thing' => false, 'db' => $response, 'info' => 'So here is the length of the variables field.','help' => 'There is a limit to the variables the stack can keep track of.', 'whatisthis' => 'The maximum length of the variables field.');
+
+        //$thingreport = false;
+
+        return $thingreport;
+
+
     }
 
 	function connections()

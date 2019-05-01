@@ -16,9 +16,15 @@ class Thing
 
 	function __construct($uuid, $test_message = null)
     {
+        // Now at 0.0.8
+        // Imagine both a need not to touch anything.
+        // And a need to make this much tidier.
+        // So expect lots of comments.  And a few deletions.
+
         // Start the clock
         $this->elapsed_runtime();
         $this->log("Thing deserialization started.");
+
 		// At this point, we are presented a UUID.
 		// Whether or not the record exists is another question.
 
@@ -94,9 +100,6 @@ class Thing
 //		echo "Stack Balance<br>";
 //		$this->stackBalance($this->uuid);
         $this->log("Thing instantiation completed.");
-
-		return;
-
     }
 
     function __destruct()
@@ -139,6 +142,8 @@ class Thing
             // Variables are stuff that can be lost when the Thing
             // deinstantiates.
 
+            // Variable overflow is challenging. See VARIABLES.
+
             // Can't call db here, can only call it when $from is known.
             // $this->db = new Database($this->uuid, $this->from);
 
@@ -164,6 +169,7 @@ class Thing
             // returns false, and with a Thing instantiated.  For tasking.
 
         } else {
+
             $this->log("Thing was given a UUID.");
 
             // Reinstate existing Thing from Stack
@@ -263,17 +269,13 @@ class Thing
 			$message0['50 words'] .= $this->uuid . " found and removed an @ sign";
 		}
 
-		//echo "Problem is here with associatePosterior";
-		// I hear ya.
-		// This is the most likely candidate for the 1040 25 Apr
-		// This function needs ->db.
 		$this->db = new Database($this->uuid, $from);
 
 		// All records are associated with a posterior record.  Ideally
 		// one of the two latest records matching the newly created
 		// records created_at.
 
-		// Unfortunately this requires another database called to find that
+		// Unfortunately this requires another database call to find that
 		// record and get the uuid, and write it to the database.
 
 		// If it is called before the Create command, maybe we can save
@@ -281,17 +283,14 @@ class Thing
 //$ref_time = microtime(true);
 		$this->associatePosterior($from, $to); // 3s 2s 3s
         // Currently timing (27 Feb) at 268 ms 340ms 261ms
-//echo number_format((microtime(true)-$ref_time)*1000) . "s";
+        // Currently timing (1 May 2019) at 5-8ms
+//echo number_format((microtime(true)-$ref_time)*1000) . "ms";
 
-		// If stack is set for associating prior records, then associate the new
-		// record to the last create record.
-//		if ($this->container['settings']['stack']['associate_prior']===true) {
-//			$this->pushJson('associations', $prior_uuid);	
-//		}
-
-
-
-
+		// Is stack set for associating prior records?
+        // Associate the new record to the last create record.
+         if ($this->container['settings']['stack']['associate_prior']===true) {
+              $this->pushJson('associations', $prior_uuid);
+        }
 
 		// First query after instantiating Database. And after the associate
 		// Posterior business.
@@ -305,10 +304,6 @@ class Thing
 
         $query = $this->db->Create($subject, $to); // 3s
 
-$query = true;
-//echo number_format(microtime(true)-$ref_time) . "s";
-
-
 		if($query == true) { // will return true if successfull else it will return false
 
             // This increases the expectation of unreliability.
@@ -318,13 +313,12 @@ $query = true;
 
         } else {
 
-            //$error = $query->errorInfo();
-            //$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
-            $this->sqlresponse = "Error: " .implode(":",$query->errorInfo());
+            $error_text = $query->errorInfo();
+            $this->sqlresponse = "Error: " .implode(":",$query->error_text());
             $message0['50 words'] .= $this->sqlresponse;
         }
 
-		if($query == true) {// will return true if succefull else it will return false
+		if($query == true) {
 
 			$this->sqlresponse =  "New record created successfully.";
 			$this->to = $to;
@@ -357,7 +351,7 @@ $query = true;
 
 		// Kind of ugly.  But I guess this isn't Python.  And null
 		// accounts can't be allowed.
-		
+
 		if ($this->stack_account != null) {
 			$this->newAccount($this->stack_uuid,
 								$this->stack_account['account_name'],
@@ -395,49 +389,20 @@ $query = true;
 		return $this->Get();
     }
 
-
-
 	public function newAccount($account_uuid, $account_name, $balance = null)
     {
 
-		if ( ($account_uuid == null) or ($account_name == null) ) {
+		if ( ($account_uuid == null) or ($account_name == null) ) {return true;}
 
-			return true;}  // was false if there are problems
+        if ($balance == null) {$balance['amount'] = 0;}
 
+        if (!isset($this->account)) {$this->account = array();}
 
+        $this->account[$account_name] = new Account($this->uuid, $account_uuid, $account_name);
+        $this->account[$account_name]->Create($balance);
 
-		if ($balance == null) {$balance['amount'] = 0;}
-
-//		if (is_numeric($balance)) {$balance = array("amount"=>$balance, "attribute"=>null, "unit"=>null);}
-
-
-
-//		if ($balance['amount'] == null) {$balance['amount'] = 1234567890.07;}
-//		if ($balance['attribute'] == null) {$balance['attribute'] = 'undefined';}
-//		if ($balance['unit'] == null) {$balance['unit'] = 'undefined';}
-
-
-
-
-		if (!isset($this->account)) {$this->account = array();}
-
-//		echo "newAccount uuid:" . $account_uuid ."<br>";
-//		echo "account name:".$account_name ."<br>";
-//		echo "balance amount". $balance['amount'] . "<br>";
-	
-		$this->account[$account_name] = new Account($this->uuid, $account_uuid, $account_name);
-		$this->account[$account_name]->Create($balance);
-
-
-
-	// For debugging
-	//	$thingreport = $this->db->Get();
-	//echo '<pre> thingreport[ thing ]: '; print_r($thingreport['thing']); echo '</pre>';
-		
-
-
-	return false;
-	}
+    	return false;
+    }
 
 	public function loadAccounts()
     {
@@ -453,16 +418,13 @@ $query = true;
 
 
 		if ($accounts == null) {return false;}
-			foreach ($accounts as $uuid=>$account) {
-				foreach($account as $account_name=>$balance) {
-					if (($uuid == 'stack') or ($uuid == 'thing' )) {echo "corrupted account list";return true;}
-					$this->newAccount($uuid, $account_name,	$balance);
-				}
-			}
-
-		return;
+        foreach ($accounts as $uuid=>$account) {
+            foreach($account as $account_name=>$balance) {
+                if (($uuid == 'stack') or ($uuid == 'thing' )) {echo "corrupted account list";return true;}
+                $this->newAccount($uuid, $account_name,	$balance);
+	        }
+        }
     }
-
 
 	function stackBalance()
     {
@@ -475,7 +437,7 @@ $query = true;
 		$things = $thingreport['things'];
 
 		if ( ($things == null) or $things == array() ) {return false;}
-	
+
 		// Should have an array... which could be presumptuous.
 		if (!is_array($things)) {return false;}
 
@@ -483,12 +445,7 @@ $query = true;
 
 		// Okay pretty sure we can do this now.
 		$thingreport = $this->db->UUids($account_uuid);
-	
-		//$variables = $thingreport['variables'];
-
-		//echo $variables;
-		return;
-		}
+    }
 
     function time($time = null)
     {
@@ -540,8 +497,6 @@ $query = true;
 
     public function getVariable($variable_set, $variable)
     {
-
-//                $thing= new Thing($uuid);
         $variables = $this->account['stack']->json->array_data;
 
         if (isset($variables[$variable_set])) {
@@ -555,25 +510,15 @@ $query = true;
             return $this->$variable_set->$variable;
         }
 
-//        if (isset($this->$variable_set)) {
-//            $this->$variable_set = $variables[$variable_set];
-
-//            if (isset($this->$variable_set->$variable)) {
-//                return $this->$variable_set->$variable;
-//            }
-//        }
-
         return false;
-
     }
-
 
 	public function Forget()
     {
         $this->log("Thing Forget started.");
 
-		// Call to account destruction.  Both for DB and stack account, 
-		// and the Thing.
+		// Call to account destruction.  Both for DB and stack account.
+		// And the Thing.
 
 		// To be developed.  Stack account destruction.
 		// $this->account['scalar']->Destroy(100, '<not set>', '<not set>');
@@ -590,11 +535,9 @@ $query = true;
         // Stack Engine No.1 7ms 10ms 8ms
 
 		// Call Db and forget the record.
-//        if ($this->uuid == null) {return;}
+
         if (!isset($this->db)) {return;}
 		$thingreport = $this->db->Forget($this->uuid);
-
-		// To be developed.  PHP object destruction.
     }
 
 	public function Ignore()
@@ -610,8 +553,7 @@ $query = true;
         $this->json->setField("variables");
         $this->json->writeVariable(array("thing","status"), "red");
         $this->Get();
-
-		}
+    }
 
     public function flagAmber()
     {
@@ -694,7 +636,6 @@ $query = true;
         $this->Get();
     }
 
-
 	public function Get()
     {
         $this->log("Thing Get started.");
@@ -719,20 +660,15 @@ $query = true;
 			// are consistently available 
 			// as top level Thing objects.
 			//$this->uuid = $this->thing->uuid;
-        		$this->to = $thing->nom_to;
-        		$this->from = $thing->nom_from;
+            $this->to = $thing->nom_to;
+            $this->from = $thing->nom_from;
   
 // One of these looks promising.  
 
 //$thingreport = $this->db->setUser($this->from);
 //$thingreport = $this->db->from = $this->from;
 
-	      		$this->subject = $thing->task;
-
-			// Factor this out as an agent 'RFC822'
-			//$this->email = new Email($this->uuid, $this->from, $this->to, $this->subject);
-            // NRWTaylor 25 Sep 2017
-            // NRWTaylor 4 Oct 2017. Flag Green.
+	        $this->subject = $thing->task;
 		}
 
 		$this->thing = $thing;
@@ -761,11 +697,13 @@ $query = true;
 		return $thing;
 		}
 
-	public function readSubject() {
+	public function readSubject()
+    {
 		return false;
-		}
+    }
 
-	function getState($agent = null) {
+	function getState($agent = null)
+    {
 
 // This can probably be deprecated after updating usermanager
 //echo "agent provided";$agent;
@@ -778,8 +716,6 @@ $query = true;
 		// Get the latest 3 usermanager interactions.
 
 		$thingreport = $this->db->agentSearch($agent,3); // Get newest
-
-//		echo '<pre> Thing processed subject "';print_r($thingreport);echo'"</pre>';
 
 		$things = $thingreport['things'];
 
@@ -798,15 +734,9 @@ $query = true;
 				// unexpected
 				$t = true;
 			}
-
-//			echo $uuid . " " .$t . "<br>";
-				$states[] =	$t;
+            $states[] =	$t;
 
 		}
-
-
-	
-//			echo '<pre> Thing processed subject "';print_r($states);echo'"</pre>';
 
 		if ($states == array() ) {return $this->current_state = null;}
 
@@ -815,26 +745,14 @@ $query = true;
 		} else {
 			return $this->current_state = $states[0];
 		}
-	
-	return false;
+    	return false;
 
 	}
 
-
-/*
-	function setState() {
-		throw new Exception('devstack deprecate');
-		$this->test("Not implemented");
-		return;
-
-	}
-*/
     function associatePosterior ($nom_from, $nom_to)
     {
 		// Get the UUID of the last entry in the db with
 		// the same planned $to email address.
-
-//echo '<pre> thing.php associatePosterior() $this->uuid call priorGet: '; print_r($this->uuid); //echo '</pre>';
 
 		// This is likely to be a pretty intensive call.
 		// It search the db for the most recent last record.
@@ -853,7 +771,6 @@ $query = true;
 			// record if true.  Previous record updated to point to new record.
 
 			if ($this->associate_posterior===true) {
-
 				$posterior_thing->json = new Json($posterior_thing->uuid);
 				$posterior_thing->json->setField("associations");
 				$posterior_thing->json->pushStream($this->uuid);
@@ -863,9 +780,9 @@ $query = true;
 				//the time being.  25 Apr.
 				//unset($posterior_thing);
 			}
-
-		return 'Posterior uuid ' . $posterior_thing->uuid .
-				' associated with Thing uuid ' . $this->uuid;
+        return;
+//		return 'Posterior uuid ' . $posterior_thing->uuid .
+//				' associated with Thing uuid ' . $this->uuid;
 		}
 	}
 
@@ -876,12 +793,10 @@ $query = true;
 
 		if ( is_array($uuids) ) {
 			foreach($uuids as $uuid) {
-
 			    $this->json->setField("associations");
-                $this->json->pushStream($uuid);
-                // $this->json->fallingWater($uuid);
-
-			}
+                //$this->json->pushStream($uuid);
+                $this->json->fallingWater($uuid);
+            }
 			return false;
 		}
 		return true;

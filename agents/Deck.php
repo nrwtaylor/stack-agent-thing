@@ -89,7 +89,7 @@ class Deck
 
         //$this->setNuuids();
 
-        if ($this->agent_input == null) {$this->setSignals();}
+        if ($this->agent_input == null) {$this->respond();}
 
         $this->thing->log( $this->agent_prefix .'completed setSignals. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
@@ -97,8 +97,6 @@ class Deck
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['log'] = $this->thing->log;
-
-		return;
 	}
 
 // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
@@ -129,13 +127,13 @@ class Deck
     {
         if (!isset($this->deck)) {$this->deck = 1;}
         if (!isset($this->max)) {$this->max = "A";}
-        if (!isset($this->size)) {$this->size = 5;}
+        if (!isset($this->size)) {$this->size = 25;}
 
         //$this->setProbability();
        // $this->setRules();
     }
 
-	private function setSignals()
+	public function respond()
     {
 		$this->thing->flagGreen();
 
@@ -150,15 +148,10 @@ class Deck
 
         $this->makeMessage();
         //$this->makeTXT();
-        $this->thing->log( $this->agent_prefix .'completed makeTXT. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
         $this->makeChoices();
-        $this->thing->log( $this->agent_prefix .'completed makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-        $this->thing->log( $this->agent_prefix .'completed makeWeb. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-
- 		$this->thing_report["info"] = "This creates a duplicable number set.";
- 		$this->thing_report["help"] = 'Try "DUPLICABLE"';
+ 		$this->thing_report["info"] = "This creates a deck of cards.";
+ 		$this->thing_report["help"] = 'Try "CARD"';
 
         $this->thing->log( $this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
@@ -168,29 +161,23 @@ class Deck
 
         $this->makeTXT();
         $this->makePDF();
-        $this->thing->log( $this->agent_prefix .'completed message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
 		return $this->thing_report;
 	}
 
     function makeChoices ()
     {
-       $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-       $this->thing->choice->Create($this->agent_name, $this->node_list, "nuuids");
-       $this->thing->log( $this->agent_prefix .'completed create choice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "nuuids");
+        $this->thing->log( $this->agent_prefix .'completed create choice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
-       $this->choices = $this->thing->choice->makeLinks('nuuids');
-       $this->thing->log( $this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->choices = $this->thing->choice->makeLinks('nuuids');
+        $this->thing->log( $this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
 
 
         $this->thing_report['choices'] = $this->choices;
-
-     //  $this->thing_report['choices'] = false;
-
     }
-
-
 
     function makeSMS()
     {
@@ -205,14 +192,10 @@ class Deck
     {
 
         $message = "Stackr made a non-duplicable index for you.<br>";
-
         $uuid = $this->uuid;
-
         $message .= "Keep on stacking.\n\n<p>" . $this->web_prefix . "thing/$uuid/deck\n \n\n<br> ";
 
         $this->thing_report['message'] = $message;
-
-        return;
 
     }
 
@@ -525,128 +508,38 @@ $n = ltrim($n, '0');
 
 function makeCard()
 {
-//    $thing = new Thing(null);
+    $thing = new Thing(null);
 //echo $thing->uuid . "\n";
-//    $thing->Create(null,"deck", 's/ make card');
-    $card_thing = new Card($this->thing, "make card");
+
+    $thing->Create(null,"deck", 's/ make card');
+    $card_thing = new Card($thing, "card");
 
     //$associations_agent = new Associations($card_thing, $card_thing->uuid);
-
-var_dump($card_thing->card->uuid);
-    $this->thing->associate($card_thing->card->uuid);
+    $this->thing->associate($card_thing->uuid);
 
     return $card_thing;
 }
 
-function makeNumber($digits = 4)
-{
-    return str_pad(rand(0,pow(10, $digits)-1), $digits, "0", STR_PAD_LEFT);
-}
-
-function computeTranspositions($array) {
-//echo "foo";
-//echo count($array);
-//var_dump($array);
-    if (count($array) == 1) {return false;}
-//var_dump($array);
-    $result = [];
-    foreach(range(0,count($array)-2) as $i) {
-        $tmp_array = $array;
-        $tmp = $tmp_array[$i];
-        $tmp_array[$i] = $tmp_array[$i+1];
-        $tmp_array[$i+1] = $tmp;
-        //$this->array_swap($array, $i, $i+1);
-        $result[] = $tmp_array;
-//        var_dump($array);
+    function makeNumber($digits = 4)
+    {
+        return str_pad(rand(0,pow(10, $digits)-1), $digits, "0", STR_PAD_LEFT);
     }
 
-//exit();
-    return $result;
-
-}
-/*
-function array_swap(&$array,$swap_a,$swap_b){
-   list($array[$swap_a],$array[$swap_b]) = array($array[$swap_b],$array[$swap_a]);
-}
-*/
-/*
-function computePermutations($array) {
-    $result = [];
-
-    $recurse = function($array, $start_i = 0) use (&$result, &$recurse) {
-        if ($start_i === count($array)-1) {
-            array_push($result, $array);
+    function computeTranspositions($array) {
+        if (count($array) == 1) {return false;}
+        $result = [];
+        foreach(range(0,count($array)-2) as $i) {
+            $tmp_array = $array;
+            $tmp = $tmp_array[$i];
+            $tmp_array[$i] = $tmp_array[$i+1];
+            $tmp_array[$i+1] = $tmp;
+            //$this->array_swap($array, $i, $i+1);
+            $result[] = $tmp_array;
         }
 
-        for ($i = $start_i; $i < count($array); $i++) {
-            //Swap array value at $i and $start_i
-            $t = $array[$i]; $array[$i] = $array[$start_i]; $array[$start_i] = $t;
+        return $result;
 
-            //Recurse
-            $recurse($array, $start_i + 1);
-
-            //Restore old order
-            $t = $array[$i]; $array[$i] = $array[$start_i]; $array[$start_i] = $t;
-        }
-    };
-
-    $recurse($array);
-
-    return $result;
-}
-*/
-/*
-function permutations(array $elements)
-{
-    if (count($elements) <= 1) {
-        yield $elements;
-    } else {
-        foreach ($this->permutations(array_slice($elements, 1)) as $permutation) {
-            foreach (range(0, count($elements) - 1) as $i) {
-                yield array_merge(
-                    array_slice($permutation, 0, $i),
-                    [$elements[0]],
-                    array_slice($permutation, $i)
-                );
-            }
-        }
     }
-}
-*/
-/*
-function pc_permute($items, $perms = array( )) {
-    if (empty($items)) { 
-        print join(' ', $perms) . "<br>";
-    }  else {
-        for ($i = count($items) - 1; $i >= 0; --$i) {
-             $newitems = $items;
-             $newperms = $perms;
-             list($foo) = array_splice($newitems, $i, 1);
-             array_unshift($newperms, $foo);
-             $this->pc_permute($newitems, $newperms);
-         }
-    }
-}
-*/
-/*
-function comb ($n, $elems) {
-    if ($n > 0) {
-      $tmp_set = array();
-      $res = $this->comb($n-1, $elems);
-      foreach ($res as $ce) {
-          foreach ($elems as $e) {
-             array_push($tmp_set, $ce . $e);
-          }
-       }
-       return $tmp_set;
-    }
-    else {
-        return array('');
-    }
-}
-*/
-//$elems = array('A','B','C');
-//$v = comb(4, $elems);
 
     function read()
     {
@@ -853,7 +746,6 @@ while ($i<=$max_i) {
 
 	public function readSubject()
     {
-
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
@@ -907,15 +799,6 @@ while ($i<=$max_i) {
             $this->card = 1;
         }
 
-        //$this->max = 9999;
-        //$this->size = 4;
-        //$this->lattice_size = 40;
-
-    return;
     }
 
 }
-
-
-
-?>
