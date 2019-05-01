@@ -15,13 +15,16 @@ class Rocky extends Agent
 
     public function init()
     {
+        // Need to add in mode changing - origin / relay
 
-        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
+//        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
+        $this->node_list = array("rocky"=>array("rocky", "bullwinkle", "charley", "nonsense"));
 
         $this->number = null;
         $this->unit = "";
 
         $this->default_state = "easy";
+        $this->default_mode = "origin";
 
         $this->getNuuid();
 
@@ -33,6 +36,7 @@ class Rocky extends Agent
         $this->persist_to = $agent->persist_to;
 
         $this->rocky = new Variables($this->thing, "variables rocky " . $this->from);
+
 	}
 
     function isRocky($state = null)
@@ -52,11 +56,13 @@ class Rocky extends Agent
 
     function set($requested_state = null)
     {
+
         $this->thing->json->writeVariable( array("rocky", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
 
         $this->rocky->setVariable("state", $this->state);
+        $this->rocky->setVariable("mode", $this->mode);
 
         $this->rocky->setVariable("refreshed_at", $this->current_time);
 
@@ -65,8 +71,9 @@ class Rocky extends Agent
 
     function get()
     {
+        //$this->rocky = new Variables($this->thing, "variables rocky " . $this->from);
         $this->previous_state = $this->rocky->getVariable("state");
-
+        $this->previous_mode = $this->rocky->getVariable("mode");
         $this->refreshed_at = $this->rocky->getVariable("refreshed_at");
 
         $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
@@ -83,6 +90,13 @@ class Rocky extends Agent
             $this->state = $this->default_state;
         }
 
+        if ($this->previous_mode == false) {
+            $this->previous_mode = $this->default_mode;
+        }
+
+        $this->mode = $this->previous_mode;
+
+
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
 
         $this->thing->json->setField("variables");
@@ -97,6 +111,7 @@ class Rocky extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->inject = $this->thing->json->readVariable( array("rocky", "inject") );
+
     }
 
     function getNuuid()
@@ -137,23 +152,28 @@ class Rocky extends Agent
     function setBank($bank = null)
     {
         if (($bank == "easy") or ($bank == null)) {
-            $this->bank = "easy-a03";
+            $this->bank = "easy-a05";
         }
 
         if ($bank == "hard") {
-            $this->bank = "hard-a05";
+            $this->bank = "hard-a06";
         }
 
         if ($bank == "16ln") {
-            $this->bank = "16ln-a00";
+            $this->bank = "16ln-a02";
         }
+
+        if ($bank == "ics213") {
+            $this->bank = "ics213-a01";
+        }
+
 
     }
 
     function getBank()
     {
         if ((!isset($this->state)) or ($this->state == "easy")) {
-            $this->bank = "easy-a03";
+            $this->bank = "easy-a05";
         }
 
 //        if (!isset($this->bank)) {
@@ -163,11 +183,15 @@ class Rocky extends Agent
 
 
         if ($this->state == "hard") {
-            $this->bank = "hard-a05";
+            $this->bank = "hard-a06";
         }
 
         if ($this->state == "16ln") {
-            $this->bank = "16ln-a00";
+            $this->bank = "16ln-a02";
+        }
+
+        if ($this->state == "ics213") {
+            $this->bank = "ics213-a01";
         }
 
 
@@ -218,7 +242,7 @@ class Rocky extends Agent
 
     function makeSMS()
     {
-        $sms = "ROCKY " . $this->inject . "\n";
+        $sms = "ROCKY " . $this->inject . " " . $this->mode . "\n";
 //        $sms .= $this->response;
 
         $sms .= trim($this->short_message) . "\n";
@@ -301,7 +325,6 @@ class Rocky extends Agent
         // Load in the cast. And roles.
         $file = $this->resource_path .'/vector/members.txt';
         $contents = file_get_contents($file);
-
         $handle = fopen($file, "r");
 
         $count = 0;
@@ -492,6 +515,9 @@ class Rocky extends Agent
 
         $this->text = trim($this->message['text'],"//");
 
+        $this->words = explode(" ", $this->text);
+        $this->num_words = count($this->words);
+
         $this->name_from = $this->message['name_from'];
         $this->position_from = $this->message['position_from'];
         $this->organization_from = $this->message['organization_from'];
@@ -518,7 +544,7 @@ class Rocky extends Agent
         $this->short_message = "TO " . $name_to . 
              ", " . $position_to . " [" . $organization_to . "]" . "\nFROM " . 
             $name_from . ", " . $position_from .  " [" . $organization_from . "]" . 
-            "\n" . "TRAFFIC " . $this->text . "\n" .
+            "\n" . "" . $this->text . "\n" .
             $this->number . " " . $this->unit . "";
 
 
@@ -577,7 +603,7 @@ class Rocky extends Agent
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky';
 
-        $this->node_list = array("rocky"=>array("rocky", "bullwinkle","charley"));
+        //$this->node_list = array("rocky"=>array("rocky%20%hard%20%relay", "rocky hard origin", "rocky easy origin", "rocky easy relay" ,"bullwinkle","charley"));
         // Make buttons
         //$this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
         //$choices = $this->thing->choice->makeLinks('rocky');
@@ -666,7 +692,16 @@ class Rocky extends Agent
 
 
         $web .= "<p>";
-        $web .= "<b>". "PASS THIS MESSAGE</b><br>";
+
+        if ($this->mode == "origin") {
+        $web .= "<b>". "ORIGINATE THIS MESSAGE</b><br>";
+        }
+
+        if ($this->mode == "relay") {
+        $web .= "<b>". "RELAY THIS MESSAGE</b><br>";
+        }
+
+
         $web .= "<p>";
 
 
@@ -706,10 +741,13 @@ class Rocky extends Agent
         $web .= "PDF inject - ";
   //      $web .= "<p>";
 
+        if ($this->num_words > 25) {$web .= "No PERCS pdf available. Message > 25 words.<br><p>";} else {
+
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky.pdf';
         $web .= '<a href="' . $link . '">'. $link . "</a>";
         $web .= "<br>";
         $web .= "<p>";
+        }
 
 
         $web .= "Inject Bank - ";
@@ -757,7 +795,17 @@ class Rocky extends Agent
     function makeTXT()
     {
         $txt = "Traffic for ROCKY.\n";
-        $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
+
+        if ($this->mode == "relay") {
+            $txt .= "Relay this message.\n";
+            $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
+        }
+
+        if ($this->mode == "origin") {
+            $txt .= "Originate this message.\n";
+        }
+
+
         $txt .= "\n";
 
         $txt .= $this->acp125g->thing_report['acp125g'];
@@ -865,6 +913,7 @@ class Rocky extends Agent
 
     public function makePDF()
     {
+        if ($this->num_words > 25) {return;}
         $txt = $this->thing_report['txt'];
 
         // initiate FPDI
@@ -896,9 +945,33 @@ class Rocky extends Agent
         //$pdf->SetXY(15, 20);
         //$pdf->Write(0, $this->message['text']);
 
+        if ($this->mode == "relay") {
+    
+            $pdf->SetXY(8, 50);
+            $pdf->Write(0, $this->message['number']);
 
-        $pdf->SetXY(8, 50);
-        $pdf->Write(0, $this->message['number']);
+            $pdf->SetXY(50, 40);
+            $pdf->Write(0, $this->message['hx']);
+
+            $pdf->SetXY(80, 50);
+            $pdf->Write(0, $this->message['station_origin']);
+
+            $pdf->SetXY(112, 50);
+            $pdf->Write(0, $this->message['check']);
+
+
+            $pdf->SetXY(123, 50);
+            $pdf->Write(0, $this->message['place_filed']);
+
+            $pdf->SetXY(166, 50);
+            $pdf->Write(0, $this->message['time_filed']);
+
+            $pdf->SetXY(181, 50);
+            $pdf->Write(0, $this->message['date_filed']);
+
+
+
+        }
 
         switch (strtolower($this->message['precedence'])) {
             case 'r':
@@ -924,6 +997,7 @@ class Rocky extends Agent
             default:
         }
 
+
         $pdf->SetXY(30, 76);
         $pdf->Write(0, strtoupper($this->message['name_to']));
 
@@ -945,7 +1019,7 @@ class Rocky extends Agent
 
         //$pdf->SetXY(30, 40);
         //$pdf->Write(0, $this->message['precedence']);
-
+/*
         $pdf->SetXY(50, 40);
         $pdf->Write(0, $this->message['hx']);
 
@@ -964,7 +1038,7 @@ class Rocky extends Agent
 
         $pdf->SetXY(181, 50);
         $pdf->Write(0, $this->message['date_filed']);
-
+*/
         $num_rows = 5;
         $num_columns = 5;
         $offset = 0;
@@ -1018,7 +1092,7 @@ class Rocky extends Agent
             }
         }
 
-        $keywords = array("hard", "16ln", "easy","hey", "rocky","charley","bullwinkle","natasha","boris");
+        $keywords = array("hard", "16ln", "easy","hey", "rocky","charley","bullwinkle","natasha","boris","source","origin","relay");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
@@ -1033,6 +1107,18 @@ class Rocky extends Agent
                             $this->getMessage();
                             $this->response .= " Set messages to " . strtoupper($this->state) .".";
 
+                            return;
+
+                        case 'origin':
+                        case 'source':
+                            $this->response .= " Set mode to origin.";
+                            $this->setMode('origin');
+                            $this->getMessage();
+                            return;
+                        case 'relay':
+                            $this->response .= " Set mode to relay.";
+                            $this->setMode('relay');
+                            $this->getMessage();
                             return;
 
                         case 'hey':
@@ -1054,4 +1140,19 @@ class Rocky extends Agent
             $this->index = 1;
         }
     }
+
+    function setMode($mode = null)
+    {
+        if ($mode == null) {return;}
+        $this->mode = $mode;
+    }
+
+
+    function getMode()
+    {
+        if (!isset($this->mode)) {$this->mode = $this->default_mode;}
+        return $this->mode;
+
+    }
+
 }
