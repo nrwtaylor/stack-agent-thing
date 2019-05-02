@@ -136,7 +136,6 @@ class Entity extends Agent
     {
         if (isset($this->entities)) {return;}
 
-
         $this->entitycode_list = array();
 
         $entities = new FindAgent($this->thing, "entity");
@@ -200,6 +199,17 @@ class Entity extends Agent
 
             }
         }
+
+        if ((!isset($this->entity_list)) and (!isset($this->entities))) {
+            $entity_is = "wumpus";
+            $entity = array("uuid"=>$this->uuid,
+                "entity"=>$entity_is,
+                "nuuid"=>substr($this->uuid, 0, 4),
+                "refreshed_at"=>$this->current_time);
+            $this->entities[] = $entity;
+            $this->entity_list[] = $entity_is;
+        }
+
         return $this->entity_list;
     }
 

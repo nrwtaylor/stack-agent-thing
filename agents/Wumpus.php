@@ -151,7 +151,9 @@ class Wumpus extends Agent
 
         $this->uuid = $this->thing->uuid;
         $this->nuuid = $this->thing->nuuid;
-        $this->subject = $this->thing->subject;
+
+        // But not this ... use the provided input
+//        $this->subject = $this->thing->subject;
 
         $this->choices = $this->thing->choice->makeLinks($this->state);
     }
@@ -168,6 +170,7 @@ class Wumpus extends Agent
 
         $this->x = $this->coordinate->coordinates[0]['coordinate'][0];
         $this->y = $this->coordinate->coordinates[0]['coordinate'][1];
+
     }
 
     private function getBar()
@@ -431,6 +434,8 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
             $last_piece = $piece;
         }
 
+        $this->getCoordinate();
+
         foreach ($ngram_list as $key=>$piece) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
@@ -439,29 +444,35 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 
                         case 'news':
                             $this->response .= "May 19th might be Wumpus at Queen Elizabeth Park. ";
-                            return;
+                            break;
 
 
                         case 'north':
                             $this->response .= "Wumpus moved north. ";
                             $this->y += 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+           //$this->thing->choice->Create($this->primary_place, $this->node_list, "patrolling");
+                            $this->thing->choice->Choose("patrolling");
+
                             break;
 
                         case 'east':
                             $this->response .= "Wumpus moved east. ";
                             $this->x += 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+                            $this->thing->choice->Choose("patrolling");
                             break;
                         case 'south':
                             $this->response .= "Wumpus moved south. ";
                             $this->y -= 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+                            $this->thing->choice->Choose("patrolling");
                             break;
                         case 'west':
                             $this->response .= "Wumpus moved west. ";
                             $this->x -= 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+                            $this->thing->choice->Choose("patrolling");
                             break;
 
                         case 'left':
