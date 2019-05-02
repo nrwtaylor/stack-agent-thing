@@ -137,6 +137,24 @@ class Snowflake
         $this->uuid_png = $agent->PNG_embed;
     }
 */
+
+    function getWhatis($input)
+    {
+        $whatis = "snowflake";
+        $whatIWant = $input;
+        if (($pos = strpos(strtolower($input), $whatis . " is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen($whatis . " is")); 
+        } elseif (($pos = strpos(strtolower($input), $whatis)) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen($whatis)); 
+        }
+
+        //$filtered_input = ltrim(strtolower($whatIWant), " ");
+        $filtered_input = ltrim(($whatIWant), " ");
+
+        $this->whatis = $filtered_input;
+    }
+
+
     public function timestampSnowflake($t = null)
     {
         $s = $this->thing->thing->created_at;
@@ -1188,6 +1206,7 @@ $this->event = $this->events[0];
 
     public function makePDF()
     {
+	$this->getWhatis($this->subject);
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
@@ -1204,6 +1223,17 @@ $this->event = $this->events[0];
             $this->getNuuid();
             $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
             $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
+
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetXY(1, 1);
+
+            $pdf->SetFont('Helvetica', '', 26);
+            $this->txt = "".$this->whatis.""; // Pure uuid.
+
+            $pdf->SetXY(140, 7);
+            $text = $this->whatis;
+            $line_height = 20;
+            $pdf->MultiCell( 150, $line_height, $text, 0);
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
@@ -1230,7 +1260,7 @@ $this->event = $this->events[0];
 
             $y = $pdf->GetY() + 0.9;
             $pdf->SetXY(15, $y);
-            $text = "v0.0.2";
+            $text = "v0.0.3";
             $pdf->MultiCell( 150, $line_height, $this->agent_name . " " . $text, 0);
 
             $text = $this->timestampSnowflake();

@@ -106,7 +106,17 @@ class Entity extends Agent
             }
         }
 
-$match = $match_list[0];
+        if ($match_list == array()) {
+            $entity_is = "wumpus";
+            $entity = array("uuid"=>$this->uuid,
+                "entity"=>$entity_is,
+                "nuuid"=>substr($entity['uuid'], 0, 4),
+                "refreshed_at"=>$this->current_time
+        );
+	$match_list[] = $entity;
+     }
+
+     $match = $match_list[0];
 
 
 //        if (!isset($this->things[0])) {
