@@ -48,6 +48,27 @@ class Wumpus extends Agent
 
         $this->node_list = array("start"=>array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging","foraging")),"midden work"=>"foraging"));
 
+$this->caves = array(1=>array(2, 3, 4),
+			 2=>array(1, 5, 6),
+			 3=>array(1, 7, 8),
+			 4=>array(1, 9, 10),
+5=>array(2, 9, 11),
+6=>array(2, 7, 12),
+7=>array(3, 6, 13),
+8=>array(3, 10, 14),
+9=>array(4, 5, 15),
+10=>array(4, 8, 16),
+11=>array(5, 12, 17),
+12=>array(6, 11, 18),
+13=>array(7, 14, 18),
+14=>array(8, 13, 19),
+15=>array(9, 16, 17),
+16=>array(10, 15, 19),
+17=>array(11, 20, 15),
+18=>array(12, 13, 20),
+19=>array(14, 16, 20),
+20=>array(17, 18, 19));
+
         $info = 'The "Wumpus" agent provides an text driven interface to manage a 3-D coordinate on '. $this->short_name;
 		$info .= 'from the web.  The Management suggests you explore the NEST MAINTENANCE button';
 
@@ -67,6 +88,8 @@ class Wumpus extends Agent
     {
         $this->thing->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
         $this->thing->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
+
+        $this->thing->json->writeVariable( array("wumpus", "cave"), $this->cave );
 
         $this->thing->choice->Choose($this->state);
 
@@ -98,6 +121,10 @@ class Wumpus extends Agent
         $this->thing->json->setField("variables");
         $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
         $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
+        $this->cave = $this->thing->json->readVariable( array("wumpus", "cave") );
+
+        if( ($this->cave == false)) {$this->cave = random_int(1,20);}
+
 
         if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
         if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
@@ -342,16 +369,20 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 );
 
 
-        $sms = "WUMPUS " . strtoupper($this->nuuid) .  " IS ";
-        $sms .= strtoupper($this->state);
-        $sms .= " YOU ARE AT ";
+        $sms = "WUMPUS " . strtoupper($this->nuuid) .  "";
 
+	if (isset($this->state)) {
+             $sms .= " IS " . strtoupper($this->state);
+        }
+
+        $sms .= " YOU ARE AT ";
         $sms .= "(" . $this->x . ", " . $this->y . ")";
 
 
         $sms .= " | " . $this->response;
         $sms .= "| ";
-        $sms .= "AVAILABLE CHOICES ARE [" . $this->choices_text."] ";
+//        $sms .= "AVAILABLE CHOICES ARE [" . $this->choices_text."] ";
+        $sms .= "AVAILABLE CHOICES ARE [ NORTH EAST SOUTH WEST ] ";
 
 
         $this->sms_message = $sms;
@@ -359,7 +390,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 
     }
 
-	public function readSubject()
+    public function readSubject()
     {
 		$this->response = null;
 
@@ -406,7 +437,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 
             default:
                 $this->thing->log($this->agent_prefix . 'invalid state provided "' . $this->state .'".');
-                $this->response .= "Wumpus is broken.";
+                $this->response .= "You are in a dark cave. ";
 
 				// this case really shouldn't happen.
 				// but it does when a web button lands us here.

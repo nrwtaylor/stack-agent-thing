@@ -87,6 +87,9 @@ class Entity extends Agent
         //    return;
         //}
         $match_list = array();
+if (isset($this->entities[0])) {
+
+
         foreach($this->entities as $key=>$entity) {
 
             if ( (strtolower($entity['nuuid']) == strtolower($requested_nuuid)) ) {
@@ -106,11 +109,13 @@ class Entity extends Agent
             }
         }
 
+}
+
         if ($match_list == array()) {
             $entity_is = "wumpus";
             $entity = array("uuid"=>$this->uuid,
                 "entity"=>$entity_is,
-                "nuuid"=>substr($entity['uuid'], 0, 4),
+                "nuuid"=>substr($this->uuid, 0, 4),
                 "refreshed_at"=>$this->current_time
         );
 	$match_list[] = $entity;
@@ -144,15 +149,13 @@ class Entity extends Agent
         $entities->findAgent("entity");
         $things = $entities->thing_report['things'];
 
-        $this->thing->log('Agent "Entity" found ' . count($things) ." entity Things." );
-
-        //$this->entity_agents = array("Cat", "Dog", "Ant", "Crow", "Wumpus");
-
         if ($things === true) {
             $this->entities = null;
             $this->entity_list = null;
             return $this->entity_list;
         }
+
+        $this->thing->log('Agent "Entity" found ' . count($things) ." entity Things." );
 
         foreach (array_reverse($things) as $thing_object) {
 
