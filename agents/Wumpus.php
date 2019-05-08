@@ -15,6 +15,9 @@ class Wumpus extends Agent
     // Currently has persistent coordinate movement (north, east, south, west).
     // State selection is dev.
 
+    // Add a place array. Base it off a 20-node shape.
+    // Get path selecting throught the array for Wumpus and Player(s) working.
+
     function init()
     {
 		$this->test= "Development code";
@@ -151,7 +154,9 @@ class Wumpus extends Agent
 
         $this->uuid = $this->thing->uuid;
         $this->nuuid = $this->thing->nuuid;
-        $this->subject = $this->thing->subject;
+
+        // But not this ... use the provided input
+//        $this->subject = $this->thing->subject;
 
         $this->choices = $this->thing->choice->makeLinks($this->state);
     }
@@ -168,6 +173,7 @@ class Wumpus extends Agent
 
         $this->x = $this->coordinate->coordinates[0]['coordinate'][0];
         $this->y = $this->coordinate->coordinates[0]['coordinate'][1];
+
     }
 
     private function getBar()
@@ -338,7 +344,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 
         $sms = "WUMPUS " . strtoupper($this->nuuid) .  " IS ";
         $sms .= strtoupper($this->state);
-        $sms .= " AT ";
+        $sms .= " YOU ARE AT ";
 
         $sms .= "(" . $this->x . ", " . $this->y . ")";
 
@@ -364,7 +370,7 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
         switch ($this->state) {
             case "start":
                 $this->start();
-                $this->response .= "Wumpus started. Welcome player.";
+                $this->response .= "Wumpus started. Welcome player. ";
                 break;
 
             case "spawn":
@@ -379,18 +385,18 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
                 break;
             case "inside nest":
                 //$this->thing->choice->Choose("in nest");
-                $this->response .= "Wumpus is inside the " . $this->primary_place .".";
+                $this->response .= "Wumpus is inside the " . $this->primary_place .". ";
                 break;
             case "nest maintenance":
-                $this->response .= "Wumpus is doing Nest Maintenance.";
+                $this->response .= "Wumpus is doing Nest Maintenance. ";
                 //$this->thing->choice->Choose("nest maintenance");
                 break;
             case "patrolling":
-                $this->response .= "Wumpus is Patrolling.";
+                $this->response .= "Wumpus is Patrolling. ";
                 //$this->thing->choice->Choose("patrolling");
                 break;
             case "midden work":
-                $this->response .= "Wumpus is taking a look at the midden.";
+                $this->response .= "Wumpus is taking a look at the midden. ";
                 $this->middenwork();
 
                 // Need to figure out how to set flag to red given that respond will then reflag it as green.
@@ -431,6 +437,8 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
             $last_piece = $piece;
         }
 
+        $this->getCoordinate();
+
         foreach ($ngram_list as $key=>$piece) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
@@ -438,46 +446,52 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
                     switch($piece) {
 
                         case 'news':
-                            $this->response .= "May 19th might be Wumpus at Queen Elizabeth Park. ";
-                            return;
+                            $this->response .= "May 19th might be Wumpus hunt at Queen Elizabeth Park. ";
+                            break;
 
 
                         case 'north':
-                            $this->response .= "Wumpus moved north. ";
+                            $this->response .= "You moved north. ";
                             $this->y += 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+           //$this->thing->choice->Create($this->primary_place, $this->node_list, "patrolling");
+                            $this->thing->choice->Choose("patrolling");
+
                             break;
 
                         case 'east':
-                            $this->response .= "Wumpus moved east. ";
+                            $this->response .= "You moved east. ";
                             $this->x += 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+                            $this->thing->choice->Choose("patrolling");
                             break;
                         case 'south':
-                            $this->response .= "Wumpus moved south. ";
+                            $this->response .= "You moved south. ";
                             $this->y -= 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+                            $this->thing->choice->Choose("patrolling");
                             break;
                         case 'west':
-                            $this->response .= "Wumpus moved west. ";
+                            $this->response .= "You moved west. ";
                             $this->x -= 1; // left
                             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
+                            $this->thing->choice->Choose("patrolling");
                             break;
 
                         case 'left':
                             $this->left_count += 1;
-                            $this->response .= "Wumpus turned left. ";
+                            $this->response .= "You turned left. ";
 
                             break;
 
                         case 'right':
-                            $this->response .= "Wumpus turned right. ";
+                            $this->response .= "You turned right. ";
                             break;
 
                         case 'forward':
                             $this->left_count += 1;
                             $this->right_count += 1;
-                            $this->response .= "Wumpus moved forward. ";
+                            $this->response .= "You moved forward. ";
                             break;
 
                         case 'lair':
