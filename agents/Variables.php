@@ -47,7 +47,7 @@ class Variables
         $this->verbosity = 1;
         $this->log_verbosity = 1;
 
-        $this->agent_keywords = array('add', 'increment', 'equal', 'equals', '=', 'is', "&", "+", "-", "less", "plus", "subtract", "start", "init");
+        $this->agent_keywords = array('add', 'increment', 'equal', 'equals', '=', 'is', "&", "+", "-", "less", "plus", "subtract", "start", "init", "memory");
 
         $this->limit = 1e99;
 
@@ -97,7 +97,6 @@ class Variables
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', 'OPTIMIZE' );
 
         $this->thing_report['log'] = $this->thing->log;
-		return;
 	}
 
     function setVariables()
@@ -125,8 +124,6 @@ class Variables
                 $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
                 $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
 
-    //echo  "variables.php variable name  ".$variable_name . "\n";
-    //echo  "variables.php variable value ".$this->variables_thing->$variable_name . "\n";
             }
 
             if ($variable_name == "refreshed_at") {$refreshed_at = true;}
@@ -366,6 +363,10 @@ class Variables
         $this->variables_thing->json->setField("variables");
         $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variable_set_name, $variable) );
 
+
+$this->thing->log("GET " . $this->variables_thing->uuid . " " . $this->variable_set_name ." " . $variable . " " . $this->variables_thing->$variable. ".");
+
+
         // And then load it into the thing
 //        $this->$variable = $this->variables_thing->$variable;
 //        $this->variables_thing->flagGreen();
@@ -390,15 +391,42 @@ class Variables
         }
 
         $this->variables_thing->$variable = $value;
-
+try {
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
         $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
+        // What are the options for dealing with variable overflow.
+        // User will see this as the system not "remembering" things.
+
+        // And that is okay to the extent that the stack erodes.
+        // From an engineering perspective, we need to make the stack variables persstent in the face of random erosion.
+        // Which is done via PERSISTENCE.
+
+        // Here we are addressing a fundamental size limitation of any one thing to store all of an identitities variables
+        // Especially when those variables have lots of unique identifiers.
+
+
+$this->thing->log("overflow " . $this->variables_thing->json->size_overflow . " write_fail_count " . $this->variables_thing->json->write_fail_count . ".");
+$this->thing->log("SET " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+}
+
 
         // And save variable_set onto local Thing.
+try {
         $this->thing->db->setFrom($this->identity);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
+
+$this->thing->log("overflow " . $this->thing->json->size_overflow . " write_fail_count " . $this->thing->json->write_fail_count . ".");
+$this->thing->log("SET " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+}
+
 
         // bughunt 23 June 2018 if ($value == "usermanager") {exit();}
 
@@ -457,6 +485,7 @@ class Variables
 
         if ($this->verbosity >= 5) {
 		    $this->sms_message .= ' | TEXT ?';
+
         }
 		$this->thing_report['thing'] = $this->thing->thing;
 		$this->thing_report['sms'] = $this->sms_message;
@@ -614,11 +643,6 @@ with the start agent. And doesn't seem to be necessary
                             preg_match_all('/[A-Za-z0-9\.]+(?: [A-Za-z0-9\.]+)?/',
                                 $right_of_needle,$pairs);
                             $pairs = $pairs[0];
-echo "<pre>";
-var_dump($this->nom_input);
-echo "<br>";
-var_dump($pairs);
-echo "</pre>";
                             foreach ($pairs as $key=>$pair) {
 
                                 $words = explode(" ", strtolower($pair));
@@ -712,6 +736,14 @@ echo "</pre>";
                                 return;
                             }
 
+                        case 'memory':
+
+//$t = $this->thing->db->length();
+//var_dump($t);
+
+//                            echo "variable store size " . strlen(json_encode($this->variables_thing->variables)) . "\n";
+                            return;
+
 
 
                         default:
@@ -734,4 +766,3 @@ echo "</pre>";
         $this->setVariable($name, $value);
     }
 }
-?>
