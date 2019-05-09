@@ -53,10 +53,6 @@ class Place extends Agent
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-
-
-
-
         $this->keywords = array('place','next', 'accept', 'clear', 'drop','add','new','here','there');
 
         $this->default_place_name = $this->thing->container['api']['place']['default_place_name'];
@@ -168,15 +164,26 @@ class Place extends Agent
     {
         $place_code_candidate = null;
 
-        $place_code_candidate = $this->thing->nuuid;
+        $alpha_agent = new A4($this->thing,"a4");
+//var_dump($alpha_agent->alpha);
+//        $place_code_candidate = $this->thing->nuuid;
+        $place_code_candidate = $alpha_agent->alpha;
+
 
         foreach ($this->places as $place) {
-            $place_code = strtolower($place['code']);
-            if (($place_code == $place_code_candidate) or ($place_code_candidate == null)) {
+            $existing_place_code = strtolower($place['code']);
+//echo $place_code ." " . $place_code_candidate. "\n";
+            if (($existing_place_code == $place_code_candidate) or ($place_code_candidate == null)) {
                 //$place_code_candidate = str_pad(rand(100,9999) , 8, "9", STR_PAD_LEFT);
-                $place_code_candidate = $this->thing->nuuid;
+
+        $alpha_agent = new A4($this->thing,"a4");
+ //       $place_code_candidate = $this->thing->nuuid;
+        $place_code_candidate = $alpha_agent->alpha;
+
+//                $place_code_candidate = $this->thing->nuuid;
             }
         }
+$place_code = $place_code_candidate;
         return $place_code;
     }
 
@@ -244,7 +251,7 @@ class Place extends Agent
                 return array($this->place_code, $this->place_name);
             }
 
-            if (($place['code'] == $selector) or ($place['name'] == $selector)) {
+            if ((strtolower($place['code']) == strtolower($selector)) or ($place['name'] == $selector)) {
                 $this->refreshed_at = $place['refreshed_at'];
                 $this->place_name = $place['name'];
                 $this->place_code = $place['code'];
