@@ -485,8 +485,12 @@ if ( $this->x == 0  ) {
 //        $sms .= "" . strtoupper($this->cave_names[$this->x]) . "";
 
 
-        $sms .= " | " . $this->response;
+        $sms .= " | " . $this->response ." ";
         $sms .= "| ";
+
+        if (!isset($this->x)) {$this->x = random_int(1,20);}
+
+        if ($this->x == 0 ) {$this->x = random_int(1,20);}
 
         $this->cave_list_text = implode($this->caves[strval($this->x)]," ");
 
