@@ -1,6 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+use setasign\Fpdi;
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -237,6 +239,31 @@ class Wumpus extends Agent
 
     }
 
+    private function getNews()
+    {
+        //if (isset($this->cave_names)) {return;}
+
+        // Makes a one character dictionary
+
+        $file = $this->resource_path . 'wumpus/news.txt';
+        $contents = file_get_contents($file);
+
+
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+            $items = explode(",",$line);
+            $this->news = $items[2];
+            break;
+
+            # do something with $line
+            $line = strtok( $separator );
+        }
+
+    }
+
+
     private function getCave($cave_number = null)
     {
 
@@ -317,7 +344,8 @@ class Wumpus extends Agent
 		$from = "wumpus";
 
 
-        $this->makeChoices();
+        //$this->makeChoices();
+$this->choices = false;
         $this->makeMessage();
         $this->makeSMS();
 
@@ -328,6 +356,8 @@ class Wumpus extends Agent
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
+        $this->makePDF();
+
         $this->thing_report['help'] = 'This is the "Wumpus" Agent. It stumbles around Things.' ;
 	}
 
@@ -335,23 +365,38 @@ class Wumpus extends Agent
     {
 //        return;
         // No web response for now.
-        $test_message = "<b>WUMPUS " . strtoupper($this->thing->nuuid) . "</b>" . '<br>';
+        $test_message = "<b>WUMPUS " . strtoupper($this->thing->nuuid) . "" . ' NOW ';
 
-        $test_message .= "<b>IS AT " . strtoupper($this->x) . "</b>" . '<br>';
+        $test_message .= "AT ";
+        // . strtoupper($this->x) . "" . 
+        //$test_message .= '<br>';
 
         if (isset($this->caves[strval($this->x)])) {
             $this->choices_text = "";
             $this->cave_list_text = trim(implode($this->caves[strval($this->x)]," ")) . "";
         }
 
-        $test_message .= $this->cave_names[strval($this->x)];
+
+
+        $test_message .= strtoupper($this->cave_names[strval($this->x)]);
 
 //        $test_message .= "<b>WITH ROUTES TO " . strtoupper($this->cave_list_text) . "</b>" . '<br>';
 
+        $test_message .= "</b><p>";
+
+        //$test_message .= "".  nl2br($this->sms_message);
+        $test_message .= "YOUR CHOICES ARE";
         $test_message .= "<p>";
 
-        $test_message .= "Game said ".  $this->sms_message;
 
+        $test_message .= "PDF ";
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/wumpus.pdf';
+        $test_message .= '<a href="' . $link . '">wumpus.pdf</a>';
+        //$web .= " | ";
+
+
+        $test_message .="<br>";
         $test_message .= "<p>";
 
 
@@ -365,7 +410,7 @@ class Wumpus extends Agent
 $test_message .= "<p>";
         //$this->caves[$current_cave];
 foreach($this->caves[$current_cave] as $key=>$cave) {
-$test_message .= "ID " . $cave ." IS  " .(strtoupper($this->cave_names[$cave])) ."<br>";
+$test_message .= "Place " . $cave ." is the  " .(strtoupper($this->cave_names[$cave])) ."<br>";
 }
      //   $this->response .= "";
 
@@ -482,7 +527,7 @@ $this->narrative = array('inside nest'=>'Everything is dark.',
     'start'=>"Ant egg."
 );
 
-
+$this->choices_text = "WUMPUS";
 $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
     'nest maintenance'=>'TEXT WEB / ' . $this->choices_text,
     'patrolling'=>"TEXT WEB / " . $this->choices_text,
@@ -533,6 +578,42 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
+    }
+
+
+  public function makePDF()
+    {
+        $txt = $this->thing_report['sms'];
+
+        // initiate FPDI
+        $pdf = new Fpdi\Fpdi();
+
+
+        // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
+ //       $pdf->setSourceFile($this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf');
+        $pdf->setSourceFile($this->resource_path . 'wumpus/wumpus.pdf');
+
+        $pdf->SetFont('Helvetica','',10);
+
+        $tplidx1 = $pdf->importPage(1, '/MediaBox');
+
+        $s = $pdf->getTemplatesize($tplidx1);
+
+        $pdf->addPage($s['orientation'], $s);
+        // $pdf->useTemplate($tplidx1,0,0,215);
+        $pdf->useTemplate($tplidx1);
+
+        $pdf->SetTextColor(0,0,0);
+
+//        $text = "Inject generated at " . $this->thing->thing->created_at. ".";
+//        $pdf->SetXY(130, 10);
+//        $pdf->Write(0, $text);
+
+        $image = $pdf->Output('', 'S');
+//var_dump($image);
+        $this->thing_report['pdf'] = $image;
+
+        return $this->thing_report['pdf'];
     }
 
     public function readSubject()
@@ -613,10 +694,11 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
         if ($this->requested_cave_number == strval($this->x)) {$r = "Took a look around the cave. ";}
 
-        if (($match != true) and ($this->number_agent->number != false)) {$r = "Choose one of the three numbers. ";}
+        if (($match != true) and ($this->number_agent->number != false)) {$r = "Choose one of the three numbers. ";$this->response = $r;}
+        else {
 
         $this->response .= $r;
-
+        }
         // Accept wumpus commands
         $this->keywords = array("teleport","caves","look","arrow", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right","wumpus","meep","thing","lair","foraging","nest maintenance", "patrolling", "midden work", "nest maintenance", "start", "meep", "spawn");
 
@@ -650,7 +732,9 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
                     switch($piece) {
 
                         case 'news':
-                            $this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
+                            $this->getNews();
+                            $this->response .= $this->news;
+                            //$this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
                             break;
 
                         case 'arrow':
