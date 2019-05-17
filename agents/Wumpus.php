@@ -89,7 +89,9 @@ class Wumpus extends Agent
 
         // Err ... making sure the state is saved.
 //        $this->thing->choice->Choose($this->state);
-        $this->state = $this->thing->choice->load('lair');
+//        $this->state = $this->thing->choice->load('lair');
+        $this->state = $this->entity_agent->choice->load('lair');
+
         $this->thing->log('state is "' . $this->state . '".');
     }
 
@@ -98,17 +100,30 @@ class Wumpus extends Agent
 
 //$this->x = "9";
 
-        $this->thing->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
-        $this->thing->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
+//        $this->thing->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
+//        $this->thing->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
 
         // Which cave is the Wumpus in?  And is it a number or a name?
-        $this->thing->json->writeVariable( array("wumpus", "cave"), strval($this->x) );
+//        $this->thing->json->writeVariable( array("wumpus", "cave"), strval($this->x) );
 
-//echo "Wrote variable x " . $this->x . "\n";
 
-        $this->thing->choice->Choose($this->state);
+//        $this->thing->choice->Choose($this->state);
 
-        $this->state = $this->thing->choice->load($this->primary_place);
+//        $this->state = $this->thing->choice->load($this->primary_place);
+
+        $this->entity_agent->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
+        $this->entity_agent->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
+
+        // Which cave is the Wumpus in?  And is it a number or a name?
+        $this->entity_agent->json->writeVariable( array("wumpus", "cave"), strval($this->x) );
+
+
+        $this->entity_agent->choice->Choose($this->state);
+
+        $this->state = $this->entity_agent->choice->load($this->primary_place);
+
+
+
     }
 
 
@@ -118,28 +133,45 @@ class Wumpus extends Agent
     {
         $this->getWumpus();
 
-        $this->current_time = $this->thing->json->time();
+//        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->entity_agent->json->time();
+
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $this->time_string = $this->thing->json->readVariable( array("wumpus", "refreshed_at") );
+//        $this->thing->json->setField("variables");
+//        $this->time_string = $this->thing->json->readVariable( array("wumpus", "refreshed_at") );
+
+        $this->entity_agent->json->setField("variables");
+        $this->time_string = $this->entity_agent->json->readVariable( array("wumpus", "refreshed_at") );
 
 
         if ($crow_code == null) {$crow_code = $this->uuid;}
 
         if ($this->time_string == false) {
-            $this->thing->json->setField("variables");
-            $this->time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
+//            $this->thing->json->setField("variables");
+//            $this->time_string = $this->thing->json->time();
+//            $this->thing->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
+            $this->entity_agent->json->setField("variables");
+            $this->time_string = $this->entity_agent->json->time();
+            $this->entity_agent->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
+
+
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
 
-        $this->thing->json->setField("variables");
-        $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
-        $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
-        $this->x = $this->thing->json->readVariable( array("wumpus", "cave") );
+//        $this->thing->json->setField("variables");
+//        $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
+//        $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
+//        $this->x = $this->thing->json->readVariable( array("wumpus", "cave") );
+
+        $this->entity_agent->json->setField("variables");
+        $this->left_count = strtolower($this->entity_agent->json->readVariable( array("wumpus", "left_count") ));
+        $this->right_count = $this->entity_agent->json->readVariable( array("wumpus", "right_count") );
+        $this->x = $this->entity_agent->json->readVariable( array("wumpus", "cave") );
+
+
 
 //        if( ($this->cave == false)) {$this->cave = random_int(1,20);}
 
@@ -154,11 +186,13 @@ class Wumpus extends Agent
         // For the Crow
 //        $this->created_at = $this->thing->thing->created_at;
 
-        $this->state = $this->thing->choice->load($this->primary_place);
+//        $this->state = $this->thing->choice->load($this->primary_place);
+        $this->state = $this->entity_agent->choice->load($this->primary_place);
+
 
         if ($this->state == false) {$this->state = "foraging";}
 
-        $this->entity = new Entity ($this->thing, "wumpus");
+//        $this->entity = new Entity ($this->thing, "wumpus");
 
         return array($this->left_count, $this->right_count);
 
@@ -198,13 +232,23 @@ class Wumpus extends Agent
         //if ($requested_nuuid == null) {$requested_nuuid = $this->id;}
 
         $entity = new Entity($this->thing, "wumpus");
+        $this->entity_agent = $entity->thing;
 
-        $this->thing = $entity->thing;
+//        $this->thing = $entity->thing;
 
-        $this->state = $this->thing->choice->load('lair');
 
-        $this->uuid = $this->thing->uuid;
-        $this->nuuid = $this->thing->nuuid;
+
+//        $this->state = $this->thing->choice->load('lair');
+        $this->state = $this->entity_agent->choice->load('lair');
+
+
+
+//        $this->uuid = $this->thing->uuid;
+        $this->uuid = $this->entity_agent->uuid;
+
+//        $this->nuuid = $this->thing->nuuid;
+        $this->nuuid = $this->entity_agent->nuuid;
+
 
 //        if ($this->x == 0) {$this->x = random_int(1,20);}
 
@@ -213,7 +257,8 @@ class Wumpus extends Agent
         // But not this ... use the provided input
 //        $this->subject = $this->thing->subject;
 
-        $this->choices = $this->thing->choice->makeLinks($this->state);
+        //$this->choices = $this->thing->choice->makeLinks($this->state);
+        $this->choices = $this->entity_agent->choice->makeLinks($this->state);
     }
 
     private function getCaves()
@@ -283,11 +328,18 @@ class Wumpus extends Agent
     private function getState()
     {
 
-        $this->state = $this->thing->choice->load($this->primary_place);
-        $this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
-        $this->thing->choice->Choose($this->state);
+//        $this->state = $this->thing->choice->load($this->primary_place);
+//        $this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
+//        $this->thing->choice->Choose($this->state);
 
-        $choices = $this->thing->choice->makeLinks($this->state);
+//        $choices = $this->thing->choice->makeLinks($this->state);
+
+        $this->state = $this->entity_agent->choice->load($this->primary_place);
+        $this->entity_agent->choice->Create($this->primary_place, $this->node_list, $this->state);
+        $this->entity_agent->choice->Choose($this->state);
+
+        $choices = $this->entity_agent->choice->makeLinks($this->state);
+
 
      //   $this->state = "AWAKE";
     }
@@ -365,7 +417,9 @@ $this->choices = false;
     {
 //        return;
         // No web response for now.
-        $test_message = "<b>WUMPUS " . strtoupper($this->thing->nuuid) . "" . ' NOW ';
+//        $test_message = "<b>WUMPUS " . strtoupper($this->thing->nuuid) . "" . ' NOW ';
+        $test_message = "<b>WUMPUS " . strtoupper($this->entity_agent->nuuid) . "" . ' NOW ';
+
 
         $test_message .= "AT ";
         // . strtoupper($this->x) . "" . 
@@ -443,7 +497,9 @@ $test_message .= "Place " . $cave ." is the  " .(strtoupper($this->cave_names[$c
 
         $refreshed_at = max($this->created_at, $this->created_at);
         $test_message .= "<p>";
-        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
+//        $ago = $this->thing->human_time ( strtotime($this->thing->time()) - strtotime($refreshed_at) );
+        $ago = $this->thing->human_time ( strtotime($this->entity_agent->time()) - strtotime($refreshed_at) );
+
         $test_message .= "<br>Thing happened about ". $ago . " ago.";
 
         //$test_message .= '<br>' .$this->whatisthis[$this->state] . '<br>';
@@ -456,8 +512,13 @@ $test_message .= "Place " . $cave ." is the  " .(strtoupper($this->cave_names[$c
     {
 
 
-        $this->state = $this->thing->choice->load($this->primary_place);
-        $choices = $this->thing->choice->makeLinks($this->state);
+//        $this->state = $this->thing->choice->load($this->primary_place);
+//        $choices = $this->thing->choice->makeLinks($this->state);
+
+        $this->state = $this->entity_agent->choice->load($this->primary_place);
+        $choices = $this->entity_agent->choice->makeLinks($this->state);
+
+
         $this->choices = $choices;
 
 
@@ -470,7 +531,9 @@ $test_message .= "Place " . $cave ." is the  " .(strtoupper($this->cave_names[$c
 
 
 
-        $choices = $this->thing->choice->makeLinks();
+//        $choices = $this->thing->choice->makeLinks();
+        $choices = $this->entity_agent->choice->makeLinks();
+
         $this->choices = $choices;
       $this->thing_report['choices'] = $choices ;
     }
@@ -637,20 +700,28 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
                 //$this->response .= "Spawned Wumpus.";
                 break;
             case "foraging":
-                $this->thing->choice->Choose("foraging");
+//                $this->thing->choice->Choose("foraging");
+                $this->entity_agent->choice->Choose("foraging");
+
                 $this->response .= "Foraging. ";
                 break;
             case "inside nest":
-                $this->thing->choice->Choose("in nest");
+//                $this->thing->choice->Choose("in nest");
+                $this->entity_agent->choice->Choose("in nest");
+
                 $this->response .= "Wumpus is inside the " . $this->primary_place .". ";
                 break;
             case "nest maintenance":
                 $this->response .= "Wumpus is doing Nest Maintenance. ";
-                $this->thing->choice->Choose("nest maintenance");
+                //$this->thing->choice->Choose("nest maintenance");
+                $this->entity_agent->choice->Choose("nest maintenance");
+
                 break;
             case "patrolling":
                 $this->response .= "Wumpus is Patrolling. ";
-                $this->thing->choice->Choose("patrolling");
+                //$this->thing->choice->Choose("patrolling");
+                $this->entity_agent->choice->Choose("patrolling");
+
                 break;
             case "midden work":
                 $this->response .= "Wumpus is taking a look at the midden. ";
@@ -673,7 +744,9 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
         $r = "";
         $this->requested_cave_number = $this->x;
-        $this->number_agent = new Number($this->thing, $input);
+//        $this->number_agent = new Number($this->thing, $input);
+        $this->number_agent = new Number($this->entity_agent, $input);
+
         $this->number_agent->extractNumber($input);
 
         if ($this->number_agent->number != false) {$this->requested_cave_number = $this->number_agent->number;}
@@ -782,7 +855,8 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
                         case 'start':
                             $this->start();
-                            $this->thing->choice->Choose($piece);
+                            //$this->thing->choice->Choose($piece);
+                            $this->entity_agent->choice->Choose($piece);
 
                             $this->response .= "Heard " . $this->state .". ";
                             break;
@@ -794,37 +868,54 @@ $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
                             break;
 
                         case 'inside nest':
-                                $this->thing->choice->Choose($piece);
-                            $this->state = $this->thing->choice->current_node;
+//                                $this->thing->choice->Choose($piece);
+                            $this->entity_agent->choice->Choose($piece);
+
+//                            $this->state = $this->thing->choice->current_node;
+                            $this->state = $this->entity_agent->choice->current_node;
 
                             $this->response .= "Heard inside nest.";
                             break;
 
                         case 'foraging':
-                            $this->thing->choice->Choose($piece);
-                            $this->state = $this->thing->choice->current_node;
+                            //$this->thing->choice->Choose($piece);
+                            $this->entity_agent->choice->Choose($piece);
+
+//                            $this->state = $this->thing->choice->current_node;
+                            $this->state = $this->entity_agent->choice->current_node;
 
                             $this->response .= "Now foraging. ";
                             break;
 
                         case 'nest maintenance':
-                            $this->thing->choice->Choose($piece);
-                            $this->state = $this->thing->choice->current_node;
+//                            $this->thing->choice->Choose($piece);
+                            $this->entity_agent->choice->Choose($piece);
+
+                            // $this->state = $this->thing->choice->current_node;
+                            $this->state = $this->entity_agent->choice->current_node;
+
                             $this->response .= "Heard nest maintenance. ";
                             break;
 
                         case 'patrolling':
 
-                            $this->thing->choice->Choose($piece);
-                            $this->state = $this->thing->choice->current_node;
+//                            $this->thing->choice->Choose($piece);
+//                            $this->state = $this->thing->choice->current_node;
+
+                            $this->entity_agent->choice->Choose($piece);
+                            $this->state = $this->entity_agent->choice->current_node;
+
 
                             $this->response .= "Now " . $piece .". ";
                             break;
 
                         case 'midden work':
                             $this->middenwork();
-                            $this->thing->choice->Choose($piece);
-                            $this->state = $this->thing->choice->current_node;
+//                            $this->thing->choice->Choose($piece);
+//                            $this->state = $this->thing->choice->current_node;
+
+                            $this->entity_agent->choice->Choose($piece);
+                            $this->state = $this->entity_agent->choice->current_node;
 
 
                             $this->response .= "Heard midden work. Urgh. ";
@@ -895,14 +986,17 @@ $this->response .= "<" . $cave .">" .(strtoupper($this->cave_names[$cave])) ." "
     function foraging()
     {
 
-        $this->thing->choice->Create($this->primary_place, $this->node_list, "foraging");
+//        $this->thing->choice->Create($this->primary_place, $this->node_list, "foraging");
+        $this->entity_agent->choice->Create($this->primary_place, $this->node_list, "foraging");
 
         $this->response .= "Wumpus is foraging. ";
     }
 
     function patrolling()
     {
-        $this->thing->choice->Create($this->primary_place, $this->node_list, "patrolling");
+//        $this->thing->choice->Create($this->primary_place, $this->node_list, "patrolling");
+        $this->entity_agent->choice->Create($this->primary_place, $this->node_list, "patrolling");
+
         $this->response .= "Wumpus is patrolling. ";
     }
 
@@ -920,8 +1014,12 @@ $this->response .= "<" . $cave .">" .(strtoupper($this->cave_names[$cave])) ." "
 //        $coordinate = new Coordinate($this->thing, "(".$this->cave.",0)");
 
 
-        $this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
-		$this->thing->flagGreen();
+//        $this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
+        $this->entity_agent->choice->Create($this->primary_place, $this->node_list, $this->state);
+
+//		$this->thing->flagGreen();
+        $this->entity_agent->flagGreen();
+
 	}
 
     function start()
@@ -930,7 +1028,8 @@ $this->response .= "<" . $cave .">" .(strtoupper($this->cave_names[$cave])) ." "
         $this->getWumpus();
         //$this->thing->choice->Create($this->primary_place, $this->node_list, "start");
         $this->response .= "Welcome player. Wumpus has started.";
-        $this->thing->flagGreen();
+        //$this->thing->flagGreen();
+        $this->entity_agent->flagGreen();
     }
 
 }
