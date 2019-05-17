@@ -403,10 +403,10 @@ $this->choices = false;
 
         $this->makeWeb();
 
-        if ($this->agent_input == null) {
+        //if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-        }
+        //}
 
         $this->makePDF();
 
