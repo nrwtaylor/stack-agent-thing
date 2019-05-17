@@ -3,7 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 // Refactor to use GLOBAL variable
 //require $GLOBALS['stack_path'] . "vendor/autoload.php";
-require '/var/www/stackr.test/vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -86,8 +86,17 @@ function call_agent_function($job)
         $t->thing_report['png'] = base64_encode($t->thing_report['png']);
     }
 
+        $t->thing_report['png'] = null;
+        $t->thing_report['pdf'] = null;
+
+
+
     echo "worker ran for " . number_format($thing->elapsed_runtime() - $start_time) . "ms\n\n";
 
-    return json_encode($t->thing_report);
+$json = json_encode($t->thing_report, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    return $json;
+
+//    return json_encode($t->thing_report);
 }
 ?>

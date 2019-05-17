@@ -14,6 +14,8 @@ class Sms
 
     function __construct(Thing $thing, $input = null) 
     {
+
+            $this->body = $input;
 		$this->input = $input;
 		$this->cost = 50;
 
@@ -74,7 +76,7 @@ class Sms
         }
 */
 
-
+/*
 		if ( $this->readSubject() == true) {
 			$this->thing_report = array('thing' => $this->thing->thing, 
 				'choices' => false,
@@ -84,6 +86,27 @@ class Sms
 		        $this->thing->log( '<pre> Agent "Sms" completed without sending a SMS</pre>' );
 			return;
 		}
+*/
+
+        $this->eventSet($input);
+
+        // Setup Google Client
+
+        $this->getClient();
+
+        if ( $this->readSubject() == true) {
+            $this->thing_report = array('thing' => $this->thing->thing, 
+                'choices' => false,
+                'info' => "A cell number wasn't provided.",
+                'help' => 'from needs to be a number.');
+
+            $this->thing->log( 'completed without sending a message.' );
+            return;
+        }
+//        $this->respond();
+//        $this->thing->log ( 'completed.' );
+
+
 
 		$this->respond();
 
@@ -97,10 +120,62 @@ class Sms
 
 	}
 
+    function eventSet($input = null)
+    {
+      //  if ($input == null) {$input = $this->body;}
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $this->thing->json->writeVariable( array("sms") , $input  );
+    }
+
+
+    public function getClient()
+    {
+
+        // https://developers.google.com/api-client-library/php/auth/web-app
+//        $key_file_location = $this->thing->container['api']['google_service']['key_file_location'];
+
+//        $this->client = new \Google_Client();
+//        $this->client->setApplicationName("Stan");
+//        $this->client->setAuthConfig($key_file_location);
+//        $this->client->setScopes(['https://www.googleapis.com/auth/chat.bot']);
+
+//        $hangoutschat = new \Google_Service_HangoutsChat($this->client);
+
+//        $message = new \Google_Service_HangoutsChat_Message();
+
+        $text = $this->body['text'];
+
+        //$type = $this->body["type"];
+
+        $space_name = $this->body['msisdn'];
+
+        $user_name = $this->body['to'];
+
+
+//                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
+
+
+        $thing = new Thing(null);
+        $thing->Create($space_name,$user_name,$text);
+        $agent = new Agent($thing);
+
+        $response = $agent->thing_report['sms'];
+
+        //$message->setText($response);
+        $this->sms_message = $response;
+        //$hangoutschat->spaces_messages->create($space_name, $message);
+
+        $this->sendSMS($user_name, $response);
+
+    }
+
+
 // -----------------------
 
 	private function respond() {
-
 		// Thing actions
 		$this->thing->flagGreen();
 
@@ -126,7 +201,6 @@ class Sms
 		if (($this->thing->account['stack']->balance['amount'] >= $this->cost ) and
             ($this->sms_count < $this->sms_per_message_responses) and
             ($time_ago < $this->sms_horizon )) {
-
             // Dev stack Read in stack sms seperator value
             // But for now replace sms seperators and translate to \n
             $test_message = str_replace(" | ", "\n", $test_message);
@@ -196,7 +270,6 @@ if (strlen($text) != strlen(utf8_decode($text)))
         $decoded_response = json_decode($response, true);
 
         error_log('You sent ' . $decoded_response['message-count'] . ' messages.');
-
         foreach ( $decoded_response['messages'] as $message ) {
             if ($message['status'] == 0) {
                 error_log("Success " . $message['message-id']);

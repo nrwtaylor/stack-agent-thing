@@ -49,7 +49,7 @@ class Wumpus extends Agent
 
 
         $this->node_list = array("start"=>array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging","foraging")),"midden work"=>"foraging"));
-
+/*
         $this->caves = array("1"=>array("2", "3", "4"),
 			 "2"=>array("1", "5", "6"),
 			 "3"=>array("1", "7", "8"),
@@ -70,6 +70,28 @@ class Wumpus extends Agent
             "18"=>array("12", "13", "20"),
             "19"=>array("14", "16", "20"),
             "20"=>array("17", "18", "19"));
+*/
+
+        $this->caves = array("1"=>array("8", "20", "12"),
+             "2"=>array("5", "9", "13"),
+             "3"=>array("9", "11", "15"),
+             "4"=>array("5", "7", "14"),
+             "5"=>array("2", "4", "10"),
+             "6"=>array("14", "16", "19"),
+            "7"=>array("4", "10", "14"),
+            "8"=>array("1", "12", "17"),
+            "9"=>array("2", "3", "11"),
+            "10"=>array("5", "7", "20"),
+            "11"=>array("3", "9", "20"),
+            "12"=>array("1", "8", "17"),
+            "13"=>array("2", "15", "16"),
+            "14"=>array("4", "6", "7"),
+            "15"=>array("3", "13", "18"),
+            "16"=>array("6", "13", "18"),
+            "17"=>array("8", "12", "19"),
+            "18"=>array("15", "16", "19"),
+            "19"=>array("6", "17", "18"),
+            "20"=>array("1", "10", "11"));
 
 
         $info = 'The "Wumpus" agent provides an text driven interface to manage a 3-D coordinate on '. $this->short_name;
@@ -80,12 +102,12 @@ class Wumpus extends Agent
     public function run()
     {
         $this->getWumpus();
-        $this->getClocktime();
-        $this->getBar();
+//        $this->getClocktime();
+//        $this->getBar();
         //$this->getCoordinate();
         $this->getState();
 
-        $this->getTick();
+//        $this->getTick();
 
         // Err ... making sure the state is saved.
 //        $this->thing->choice->Choose($this->state);
