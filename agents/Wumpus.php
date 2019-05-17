@@ -80,7 +80,7 @@ class Wumpus extends Agent
         $this->getWumpus();
         $this->getClocktime();
         $this->getBar();
-        $this->getCoordinate();
+        //$this->getCoordinate();
         $this->getState();
 
         $this->getTick();
@@ -93,11 +93,16 @@ class Wumpus extends Agent
 
     public function set()
     {
+
+//$this->x = "9";
+
         $this->thing->json->writeVariable( array("wumpus", "left_count"), $this->left_count );
         $this->thing->json->writeVariable( array("wumpus", "right_count"), $this->right_count );
 
         // Which cave is the Wumpus in?  And is it a number or a name?
-        $this->thing->json->writeVariable( array("wumpus", "cave"), $this->cave );
+        $this->thing->json->writeVariable( array("wumpus", "cave"), strval($this->x) );
+
+//echo "Wrote variable x " . $this->x . "\n";
 
         $this->thing->choice->Choose($this->state);
 
@@ -109,7 +114,7 @@ class Wumpus extends Agent
 
     public function get($crow_code = null)
     {
-
+        $this->getWumpus();
 
         $this->current_time = $this->thing->json->time();
 
@@ -132,13 +137,16 @@ class Wumpus extends Agent
         $this->thing->json->setField("variables");
         $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
         $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
-        $this->cave = $this->thing->json->readVariable( array("wumpus", "cave") );
+        $this->x = $this->thing->json->readVariable( array("wumpus", "cave") );
 
-        if( ($this->cave == false)) {$this->cave = random_int(1,20);}
-
+//        if( ($this->cave == false)) {$this->cave = random_int(1,20);}
 
         if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
         if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
+
+
+//echo "Got variable x " . $this->x . "\n";
+
 
 
         // For the Crow
@@ -196,7 +204,7 @@ class Wumpus extends Agent
         $this->uuid = $this->thing->uuid;
         $this->nuuid = $this->thing->nuuid;
 
-        if ($this->x == 0) {$this->x = random_int(1,20);}
+//        if ($this->x == 0) {$this->x = random_int(1,20);}
 
         $this->getCave();
 
@@ -227,35 +235,22 @@ class Wumpus extends Agent
             $line = strtok( $separator );
         }
 
-
-
-/*
-        $this->cave_names = array("1"=>"CAMS","2"=>"Field Day Site","3"=>"Fountain","4"=>"Bloedel Conservatory","5"=>"Tennis Courts","6"=>"Quarry Gardens","7"=>"Off-leash area",
-            "8"=>"Quarry Bridge", "9"=>"Pond", "10"=>"Quarry overlook",
-            "11"=>"Midlothian Avenue",
-            "12"=>"Queen Elizabeth Pitch & Putt",
-            "13"=>"Disc Golf",
-            "14"=>"Rose Garden",
-            "15"=>"Celebration Pavilion",
-            "16"=>"Nat Bailey Stadium",
-            "17"=>"West Parking",
-            "18"=>"Centre Parking",
-            "19"=>"South Parking",
-            "20"=>"Lookout");
-*/
-
     }
 
-    private function getCave($number = null)
+    private function getCave($cave_number = null)
     {
+
         $this->getCaves();
+
         $cave_number = "X";
-        if ($number == null) {$cave_number = $this->x;}
-        if ($number == "") {$cave_number = $this->x;}
+
+
+        if ($cave_number == null) {$cave_number = $this->x;}
+
+
         $cave_name = "A dark room";
         if (isset($this->cave_names[strval($cave_number)])) {$cave_name = $this->cave_names[strval($cave_number)];}
         $this->cave_name = $cave_name;
-        $this->cave_number = $cave_number;
     }
 
     private function getState()
@@ -274,7 +269,7 @@ class Wumpus extends Agent
     {
         $this->clocktime_agent = new Clocktime($this->thing, "clocktime");
     }
-
+/*
     private function getCoordinate()
     {
         $this->coordinate = new Coordinate($this->thing, "coordinate");
@@ -283,7 +278,7 @@ class Wumpus extends Agent
         $this->y = $this->coordinate->coordinates[0]['coordinate'][1];
 
     }
-
+*/
     private function getBar()
     {
         $this->thing->bar = new Bar($this->thing, "bar stack");
@@ -325,7 +320,8 @@ class Wumpus extends Agent
         $this->makeChoices();
         $this->makeMessage();
         $this->makeSMS();
-        //$this->makeWeb();
+
+        $this->makeWeb();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -337,36 +333,68 @@ class Wumpus extends Agent
 
     public function makeWeb()
     {
-        return;
+//        return;
         // No web response for now.
         $test_message = "<b>WUMPUS " . strtoupper($this->thing->nuuid) . "</b>" . '<br>';
+
+        $test_message .= "<b>IS AT " . strtoupper($this->x) . "</b>" . '<br>';
+
+        if (isset($this->caves[strval($this->x)])) {
+            $this->choices_text = "";
+            $this->cave_list_text = trim(implode($this->caves[strval($this->x)]," ")) . "";
+        }
+
+        $test_message .= $this->cave_names[strval($this->x)];
+
+//        $test_message .= "<b>WITH ROUTES TO " . strtoupper($this->cave_list_text) . "</b>" . '<br>';
+
         $test_message .= "<p>";
+
+        $test_message .= "Game said ".  $this->sms_message;
+
+        $test_message .= "<p>";
+
+
+
+        $this->response = "";
+//$this->getCave();
+
+        $current_cave = $this->x;
+
+        trim($this->response);
+$test_message .= "<p>";
+        //$this->caves[$current_cave];
+foreach($this->caves[$current_cave] as $key=>$cave) {
+$test_message .= "ID " . $cave ." IS  " .(strtoupper($this->cave_names[$cave])) ."<br>";
+}
+     //   $this->response .= "";
+
+
+
+        if ($this->state != false) {
+
         $test_message .= '<p><b>Wumpus State</b>';
 
         $test_message .= '<br>Last thing heard: "' . $this->subject . '"<br>' . 'The next Wumpus choices are [ ' . $this->choices['link'] . '].';
         $test_message .= '<br>Lair state: ' . $this->state;
-        $test_message .= '<br>left_count is ' . $this->left_count;
-        $test_message .= '<br>right count is ' . $this->right_count;
+
+        //$test_message .= '<br>left_count is ' . $this->left_count;
+        //$test_message .= '<br>right count is ' . $this->right_count;
 
         $test_message .= '<br>' .$this->behaviour[$this->state] . '<br>';
-
-
-        $test_message .= "<p>";
-        $test_message .= '<p><b>Thing Information</b>';
-        $test_message .= '<br>subject: ' . $this->subject . '<br>';
-        $test_message .= 'created_at: ' . $this->created_at . '<br>';
-        $test_message .= 'from: ' . $this->from . '<br>';
-        $test_message .= 'to: ' . $this->to . '<br>';
         $test_message .= '<br>' .$this->thing_behaviour[$this->state] . '<br>';
-
-
-        $test_message .= "<p>";
-        $test_message .= '<p><b>Narratives</b>';
         $test_message .= '<br>' .$this->litany[$this->state] . '<br>';
         $test_message .= '<br>' .$this->narrative[$this->state] . '<br>';
 
-       // $test_message .= '<p>Agent "Ant" is responding to your web view of datagram subject "' . $this->subject . '", ';
-       // $test_message .= "which was received " . $this->thing->human_time($this->thing->elapsed_runtime()) . " ago.";
+}
+
+//        $test_message .= "<p>";
+//        $test_message .= '<p><b>Thing Information</b>';
+//        $test_message .= '<br>subject: ' . $this->subject . '<br>';
+//        $test_message .= 'created_at: ' . $this->created_at . '<br>';
+//        $test_message .= 'from: ' . $this->from . '<br>';
+//        $test_message .= 'to: ' . $this->to . '<br>';
+
 
         $refreshed_at = max($this->created_at, $this->created_at);
         $test_message .= "<p>";
@@ -468,14 +496,14 @@ $this->prompt_litany = array('inside nest'=>'TEXT WEB / ' . $this->choices_text,
 
 //$this->state = "hungry";
 	    if ((isset($this->state)) and ($this->state != false)) {
-             $sms .= " IS " . strtoupper($this->state);
+             $sms .= " is " . strtoupper($this->state);
         }
 
 if ( in_array($this->x, range(1,20)) ) {
-        $sms .= " IS AT ";
+        $sms .= " is at ";
 //        $sms .= "(" . $this->x . ", " . $this->y . ")";
         $sms .= "(" . $this->x  . ") ";
-        $sms .= "" . strtoupper($this->cave_names[$this->x]) . "";
+        $sms .= "" . trim(strtoupper($this->cave_names[$this->x])) . "";
 }
 
 if ( $this->x == 0  ) {
@@ -485,16 +513,23 @@ if ( $this->x == 0  ) {
 //        $sms .= "" . strtoupper($this->cave_names[$this->x]) . "";
 
 
-        $sms .= " | " . $this->response ." ";
-        $sms .= "| ";
+        $sms .= " \n" . $this->response;
+$sms .= "\n";
+$sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
-        if (!isset($this->x)) {$this->x = random_int(1,20);}
+        $sms .= "\n";
 
-        if ($this->x == 0 ) {$this->x = random_int(1,20);}
+//var_dump($this->x);
 
-        $this->cave_list_text = implode($this->caves[strval($this->x)]," ");
+        $this->cave_list_text = "";
+        $this->choices_text = "SPAWN";
 
-        $sms .= "AVAILABLE CHOICES ARE [ " . $this->cave_list_text . " " . $this->choices_text." ] ";
+        if (isset($this->caves[strval($this->x)])) {
+            $this->choices_text = "";
+            $this->cave_list_text = trim(implode($this->caves[strval($this->x)]," ")) . "";
+        }
+
+        $sms .= "YOUR CHOICES ARE [ " . $this->cave_list_text . " " . $this->choices_text."] ";
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -522,7 +557,7 @@ if ( $this->x == 0  ) {
                 break;
             case "foraging":
                 $this->thing->choice->Choose("foraging");
-                $this->response .= "Foraging.";
+                $this->response .= "Foraging. ";
                 break;
             case "inside nest":
                 $this->thing->choice->Choose("in nest");
@@ -556,38 +591,34 @@ if ( $this->x == 0  ) {
         $input = strtolower($this->subject);
 
         $r = "";
-        $this->requested_cave_number = (int)$this->cave;
+        $this->requested_cave_number = $this->x;
         $this->number_agent = new Number($this->thing, $input);
         $this->number_agent->extractNumber($input);
+
         if ($this->number_agent->number != false) {$this->requested_cave_number = $this->number_agent->number;}
 
-        $this->getCoordinate();
-        if ($this->x == 0) {$this->getWumpus();}
-
         // Check if this is one of the available caves.
+
+        if (!isset($this->caves[strval($this->x)])) {$this->spawn();}
         $available_cave_names = $this->caves[strval($this->x)];
+
         $match = false;
         foreach ($available_cave_names as $key=>$cave_name) {
             if ($cave_name == strval($this->requested_cave_number)) {
-                $this->cave_name = $cave_name;
                 $this->x = $this->requested_cave_number;
-                            $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
-
                 $match= true;
                 break;
-
             }
-
         }
 
-        if ($this->requested_cave_number == strval($this->x)) {$r = "Took a look around the cave.";}
- 
+        if ($this->requested_cave_number == strval($this->x)) {$r = "Took a look around the cave. ";}
+
         if (($match != true) and ($this->number_agent->number != false)) {$r = "Choose one of the three numbers. ";}
 
         $this->response .= $r;
 
         // Accept wumpus commands
-        $this->keywords = array("teleport","caves","look","arrow", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right","wumpus","meep","thing","lair","foraging","nest maintenance", "patrolling", "midden work", "nest maintenance", "start", "meep");
+        $this->keywords = array("teleport","caves","look","arrow", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right","wumpus","meep","thing","lair","foraging","nest maintenance", "patrolling", "midden work", "nest maintenance", "start", "meep", "spawn");
 
         $pieces = explode(" ", strtolower($input));
 
@@ -610,7 +641,7 @@ if ( $this->x == 0  ) {
             $last_piece = $piece;
         }
 
-        $this->getCoordinate();
+        //$this->getCoordinate();
 
         foreach ($ngram_list as $key=>$piece) {
             foreach ($this->keywords as $command) {
@@ -619,7 +650,7 @@ if ( $this->x == 0  ) {
                     switch($piece) {
 
                         case 'news':
-                            $this->response .= "May 19th might be Wumpus hunt at Queen Elizabeth Park. ";
+                            $this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
                             break;
 
                         case 'arrow':
@@ -637,41 +668,16 @@ if ( $this->x == 0  ) {
                             $this->caves();
                             break;
 
-                        case 'north':
-                            $this->response .= "North? ";
-//                            $this->y += 1; // left
-                     //       $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
-           //$this->thing->choice->Create($this->primary_place, $this->node_list, "patrolling");
-                   //         $this->thing->choice->Choose("patrolling");
-
-                            break;
-
-                        case 'east':
-                            $this->response .= "East? ";
-                   //         $this->x += 1; // left
-                 //           $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
-                    //        $this->thing->choice->Choose("patrolling");
-                            break;
-                        case 'south':
-                            $this->response .= "South? ";
-                 //           $this->y -= 1; // left
-                //            $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
-                  //          $this->thing->choice->Choose("patrolling");
-                            break;
                         case 'west':
-                            $this->response .= "West? ";
-                            $this->x -= 1; // left
-               //             $coordinate = new Coordinate($this->thing, "(". $this->x . "," . $this->y . ")");
-                //            $this->thing->choice->Choose("patrolling");
+                        case 'south':
+                        case 'east':
+                        case 'north':
+                            $this->response .= ucwords($piece) . "? ";
                             break;
 
                         case 'left':
-//                            $this->left_count += 1;
-//$available_cave_names[0];
                             $this->response .= "You turned left. ";
-
                             break;
-
                         case 'right':
                             $this->response .= "You turned right. ";
                             break;
@@ -702,7 +708,6 @@ if ( $this->x == 0  ) {
                             $this->spawn();
                             $this->response .= "Spawn. ";
                             break;
-
 
                         case 'inside nest':
                                 $this->thing->choice->Choose($piece);
@@ -747,11 +752,6 @@ if ( $this->x == 0  ) {
                 }
             }
         }
-
-        //$this->makeChoices();
-//var_dump($this->state);
-		//$this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
-
 		return false;
 	}
 
@@ -798,11 +798,11 @@ $this->getCave();
 
         trim($this->response);
 
-        $this->caves[$current_cave];
+        //$this->caves[$current_cave];
 foreach($this->caves[$current_cave] as $key=>$cave) {
-$this->response .= " <" . $cave ."> " .strtoupper($this->cave_names[$cave]);
+$this->response .= "<" . $cave .">" .(strtoupper($this->cave_names[$cave])) ." ";
 }
-        $this->response .= " ";
+        $this->response .= "";
     }
 
 
@@ -832,7 +832,8 @@ $this->response .= " <" . $cave ."> " .strtoupper($this->cave_names[$cave]);
 
         $this->cave = strval(random_int(1,20));
         $this->x = $this->cave;
-        $coordinate = new Coordinate($this->thing, "(".$this->cave.",0)");
+
+//        $coordinate = new Coordinate($this->thing, "(".$this->cave.",0)");
 
 
         $this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
@@ -841,6 +842,7 @@ $this->response .= " <" . $cave ."> " .strtoupper($this->cave_names[$cave]);
 
     function start()
     {
+        $this->x = "X";
         $this->getWumpus();
         //$this->thing->choice->Create($this->primary_place, $this->node_list, "start");
         $this->response .= "Welcome player. Wumpus has started.";
