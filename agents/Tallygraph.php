@@ -167,10 +167,15 @@ echo $created_at;
 //if (!isset($created_at)) {$created_at = $refreshed_at;}
 
 //echo $variable . " " . $refreshed_at . "<br>";
-
+//($variable);
             if ((($variable == null) or ($variable == 0)) and ($this->ignore_empty)) {
                 continue;
             }
+
+            // Until bug passes through database.
+            if ($variable > 1e6) {continue;}
+
+
 //            $this->points[] = array("created_at"=>$created_at, "variable"=>$variable);
             $this->points[] = array("created_at"=>$refreshed_at, "variable"=>$variable);
 
@@ -400,14 +405,13 @@ return;
 
         // Get min and max
         if (!isset($y_min)) { $y_min = $this->points[0]['variable']; }
-        if (!isset($y_max)) {$y_max = $this->points[0]['variable'];}
+        if (!isset($y_max)) { $y_max = $this->points[0]['variable']; }
 
         if (!isset($x_min)) { $x_min = $this->points[0]['created_at']; }
         if (!isset($x_max)) { $x_max = $this->points[0]['created_at']; }
 
         $i = 0;
         foreach ($this->points as $point) {
-
             if (($point['variable'] == null) or ($point['variable'] == 0)) {
                 continue;
             }
@@ -460,7 +464,7 @@ return;
             $i += 1;
         }
 
-        $allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500);
+        $allowed_steps = array(2,5,10,20,25,50,100,200,250,500,1000,2000,2500,10000,20000,25000,100000,200000,1000000,2000000,2500000,);
         $inc = ($y_max - $y_min)/ 5;
         $closest_distance = $y_max;
 
@@ -476,6 +480,7 @@ return;
 
     private function drawGrid($y_min, $y_max, $inc)
     {
+
 
         $y = $this->roundUpToAny($y_min, $inc);
 

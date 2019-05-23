@@ -181,7 +181,7 @@ class Tallycounter
             $name = $thing->json->readVariable( array("tally", "name") );
             $next_uuid = $thing->json->readVariable( array("tally", "next_uuid") );
 
-            $count = $count  + pow($limit,$index) * ($variable);
+            $count = $count  + pow($limit,$index-1) * ($variable);
             $display = $variable . "/" .$display;
             $index += 1;
         }
