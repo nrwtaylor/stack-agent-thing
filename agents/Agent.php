@@ -183,9 +183,14 @@ and the user UX/UI
 
     public function respond()
     {
+        $this->respondResponse();
         $this->thing->flagGreen();
-        return;
     }
+
+    public function respondResponse()
+    {
+    }
+
 
     private function getPrior()
     {
@@ -276,11 +281,11 @@ and the user UX/UI
     public function getAgent($agent_class_name = null)
     {
 
-            try {
+        try {
 
-                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+            $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-                $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+            $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
                 $agent = new $agent_namespace_name($this->thing);
 
                 // If the agent returns true it states it's response is not to be used.
@@ -623,7 +628,7 @@ and the user UX/UI
 
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
         if (preg_match($pattern, $this->to)) {
-            $this->thing->log('Agent "Agent" found a  UUID in address.', "INFORMATION");
+            $this->thing->log('found a  UUID in address.', "INFORMATION");
 
             $uuid_thing = new Uuid($this->thing);
 
@@ -632,7 +637,7 @@ and the user UX/UI
         }
 
 
-        $this->thing->log('Agent "Agent" looking for UUID in input.');
+        $this->thing->log('looking for UUID in input.');
 
         // Is Identity Context?
         $uuid = new Uuid($this->thing, "extract");
@@ -640,7 +645,7 @@ and the user UX/UI
 
 
         if ((isset($uuid->uuids)) and (count($uuid->uuids) > 0)) {
-            $this->thing->log('Agent "Agent" found a  UUID in input.', "INFORMATION");
+            $this->thing->log('found a  UUID in input.', "INFORMATION");
             // $this->thing_report = $uuid->thing_report;
             // And then ignored it.
         }
@@ -654,7 +659,7 @@ and the user UX/UI
             //if ( is_string($headcode->head_code)) { 
 
             if ( (is_array($headcode->head_codes) and (count($headcode->head_codes) > 0))) { 
-                $this->thing->log('Agent "Agent" found a headcode in address.', "INFORMATION");
+                $this->thing->log('found a headcode in address.', "INFORMATION");
                 $headcode_thing = new Headcode($this->thing);
                 $this->thing_report = $headcode_thing->thing_report;
                 return $this->thing_report;
@@ -663,7 +668,7 @@ and the user UX/UI
 
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
-        $this->thing->log( '<pre> Agent created a Robot agent</pre>', "INFORMATION" );
+        $this->thing->log( 'created a Robot agent.', "INFORMATION" );
             $robot_thing = new Robot($this->thing);
             $this->thing_report = $robot_thing->thing_report;
             return $this->thing_report;
@@ -892,6 +897,10 @@ echo "place found";
             $uuid = ($things[0]['uuid']);
 
             $thing = new Thing($uuid);
+
+            if ($thing == false) {continue;}
+            if (!isset($thing->account)) {continue;}
+
             $variables = $thing->account['stack']->json->array_data;
 
             // Check
@@ -1175,6 +1184,9 @@ if (!isset($agent_name)) {$agent_name = "Ant";}
         $this->thing_report = $this->timeout(45000, "No matching aliases found. ");
         if ($this->thing_report != false) {return $this->thing_report;}
 
+
+//var_dump($entity_name);
+
         $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
         // Is this a request for a specific named agent?
@@ -1201,11 +1213,21 @@ if (!isset($agent_name)) {$agent_name = "Ant";}
         // This will see if the word is in the Chinese dictionary.
         // Because that makes it probably a Thing worth noting.
 
-        $chinese_thing = new Chinese($this->thing);
+
+        $proword_thing = new Proword($this->thing,"proword");
+        if ($proword_thing->has_prowords) {
+            $proword_thing = new Proword($this->thing);
+            $this->thing_report = $proword_thing->thing_report;
+            return $this->thing_report;
+        }
+
+
+        $chinese_thing = new Chinese($this->thing,"chinese"); // execute quietly
 
         if ($chinese_thing->word != null) {
             // So it is something worth noting.
-            $is_thing = new Is($this->thing);
+            $is_thing = new Is($this->thing,"is");
+
             $this->thing_report = $is_thing->thing_report;
             return $this->thing_report;
         }
@@ -1233,9 +1255,7 @@ if (!isset($agent_name)) {$agent_name = "Ant";}
 
         //$this->thing_report['png'] = $agent->PNG;
         $this->thing_report['png'] = $agent->image_string;
-
     }
-
 
 
     function warning_handler($errno, $errstr) {

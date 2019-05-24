@@ -21,7 +21,9 @@ class Word {
 
 	    $this->uuid = $thing->uuid;
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/words/';
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path_words = $GLOBALS['stack_path'] . 'resources/words/';
+
         $this->resource_path_ewol = $GLOBALS['stack_path'] . 'resources/ewol/';
 
 
@@ -201,7 +203,7 @@ class Word {
                 // Drop through
             case 'list':
                 if (isset($this->words_list)) {$contents = $this->words_list;break;}
-                $file = $this->resource_path . 'words.txt';
+                $file = $this->resource_path_words . 'words.txt';
                 $contents = file_get_contents($file);
                 $this->words_list = $contents;
                 break;
@@ -220,7 +222,7 @@ class Word {
             case 'mordok':
                 if (isset($this->mordok_list)) {$contents = $this->mordok_list;break;}
 
-                $file =  $this->resource_path . 'mordok.txt';
+                $file =  $this->resource_path_words . 'mordok.txt';
                 $contents = file_get_contents($file);
                 $this->mordok_list = $contents;
                 break;
@@ -236,7 +238,7 @@ class Word {
             case 'emotion':
                 break;
             default:
-                $file = $this->resource_path .  'words.txt';
+                $file = $this->resource_path_words .  'words.txt';
 
         }
         $pattern = "|\b($searchfor)\b|";
@@ -271,7 +273,7 @@ class Word {
 
     function nearestWord($input)
     {
-        $file = $this->resource_path . 'words.txt';
+        $file = $this->resource_path_words . 'words.txt';
         $contents = file_get_contents($file);
 
         $words = explode("\n", $contents);
