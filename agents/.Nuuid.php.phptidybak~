@@ -1,11 +1,4 @@
 <?php
-/**
- * Nuuid.php
- *
- * @package default
- */
-
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -14,13 +7,10 @@ error_reporting(-1);
 
 class Nuuid extends Agent
 {
-    public $var = 'hello';
+	public $var = 'hello';
 
-
-    /**
-     *
-     */
-    function init() {
+    function init()
+    {
         $this->node_list = array("nuuid"=>array("nuuid"));
 
         $this->thing->json->setField("variables");
@@ -35,17 +25,14 @@ class Nuuid extends Agent
         $this->makePNG();
     }
 
+    public function respond()
+    {
+		$this->thing->flagGreen();
 
-    /**
-     *
-     */
-    public function respond() {
-        $this->thing->flagGreen();
+		// This should be the code to handle non-matching responses.
 
-        // This should be the code to handle non-matching responses.
-
-        //  $to = $this->thing->from;
-        //  $from = "nuuid";
+//		$to = $this->thing->from;
+//		$from = "nuuid";
 
         $this->makePNG();
 
@@ -57,26 +44,22 @@ class Nuuid extends Agent
 
         $this->makeWeb();
 
-        $this->thing_report["info"] = "This creates a not UUID.  Rememberable. Machine guessable. Short.";
-        $this->thing_report["help"] = "This is about keeping track of things.";
+ 		$this->thing_report["info"] = "This creates a not UUID.  Rememberable. Machine guessable. Short.";
+ 		$this->thing_report["help"] = "This is about keeping track of things.";
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-    }
+//		return $this->thing_report;
+	}
 
-
-    /**
-     *
-     * @param unknown $input (optional)
-     * @return unknown
-     */
-    function extractNuuids($input = null) {
+    function extractNuuids($input = null)
+    {
         if (!isset($this->head_codes)) {
             $this->nuuids = array();
         }
-        // Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
+        //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
         // $pattern = "|[A-Za-z0-9]{4}|"; // Nope just a-f.
         $pattern = "|[A-Fa-f0-9]{4}|";
 
@@ -87,13 +70,8 @@ class Nuuid extends Agent
         return $this->nuuids;
     }
 
-
-    /**
-     *
-     * @param unknown $input
-     * @return unknown
-     */
-    function extractNuuid($input) {
+    function extractNuuid($input)
+    {
         $nuuids = $this->extractNuuids($input);
         if (!(is_array($nuuids))) {return true;}
 
@@ -103,42 +81,30 @@ class Nuuid extends Agent
             return $this->nuuid;
         }
 
-        if  ((is_array($nuuids)) and (count($nuuids) == 0)) {return false;}
+        if  ((is_array($nuuids)) and (count($nuuids) == 0)){return false;}
         if  ((is_array($nuuids)) and (count($nuuids) > 1)) {return true;}
 
         return true;
     }
 
-
-    /**
-     *
-     */
-    function makeChoices() {
+    function makeChoices ()
+    {
         $this->thing->choice->Create($this->agent_name, $this->node_list, "nuuid");
         $this->choices = $this->thing->choice->makeLinks('nuuid');
 
         $this->thing_report['choices'] = $this->choices;
     }
 
-
-    /**
-     *
-     */
-    function makeSMS() {
-        $sms = "NUUID IS " . $this->thing->nuuid;
-//        $sms .= " | " . $this->web_prefix . "snowflake/".$this->uuid;
-        $sms .= " | " . $this->web_prefix . "thing/".$this->uuid ."/nuuid";
-        $sms .= " | " . "Made a non-unique identifier.";
-
+    function makeSMS()
+    {
+        $sms = "NUUID | " . $this->thing->nuuid;
+        $sms .= " | " . $this->web_prefix . "snowflake/".$this->uuid;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
-
-    /**
-     *
-     */
-    public function makeMessage() {
+    public function makeMessage()
+    {
 
         $message = "Stackr has a nuuid for you.<br>";
 
@@ -148,13 +114,12 @@ class Nuuid extends Agent
         $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/nuuid.png" alt="nuuid" height="92" width="92">';
 
         $this->thing_report['message'] = $message;
+
+        return;
     }
 
-
-    /**
-     *
-     */
-    public function makeWeb() {
+    public function makeWeb()
+    {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
@@ -168,11 +133,8 @@ class Nuuid extends Agent
 
     }
 
-
-    /**
-     *
-     */
-    public function makeTXT() {
+    public function makeTXT()
+    {
         $txt = 'This is a NUUID';
         $txt .= "\n";
         $txt .= $this->thing->nuuid;
@@ -183,12 +145,8 @@ class Nuuid extends Agent
         $this->txt = $txt;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function makePNG() {
+    public function makePNG()
+    {
 
         $this->image = imagecreatetruecolor(164, 164);
 
@@ -201,7 +159,7 @@ class Nuuid extends Agent
         imagefilledrectangle($this->image, 0, 0, 164, 164, $this->white);
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        //$this->drawSnowflake(164/2,164/2);
+        #$this->drawSnowflake(164/2,164/2);
 
         // Write the string at the top left
         $border = 30;
@@ -215,15 +173,15 @@ class Nuuid extends Agent
 
         $size = 26;
         $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0- min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0- min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] = max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] = max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
 
-        //check width of the image
-        $width = imagesx($this->image);
+        //check width of the image 
+        $width = imagesx($this->image); 
         $height = imagesy($this->image);
         $pad = 0;
 
@@ -234,6 +192,9 @@ class Nuuid extends Agent
         // imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
 
         // Save the image
+        //header('Content-Type: image/png');
+        //imagepng($im);
+
         ob_start();
         imagepng($this->image);
         $imagedata = ob_get_contents();
@@ -252,21 +213,14 @@ class Nuuid extends Agent
         return $response;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    function read() {
+    function read()
+    {
         $this->state = null;
         return $this->state;
     }
 
-
-    /**
-     *
-     */
-    public function readSubject() {
+	public function readSubject()
+    {
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
@@ -282,15 +236,15 @@ class Nuuid extends Agent
         $keywords = array("nuuid");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
-                    case 'nuuid':
-                        return;
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) {
+                        case 'nuuid':
+                            return;
 
-                    case 'on':
+                        case 'on':
 
-                    default:
-                    }
+                        default:
+                     }
                 }
             }
         }
@@ -301,9 +255,7 @@ class Nuuid extends Agent
 
         if ($this->agent_input == "nuuid test") {
             $this->thing->log($this->agent_prefix . 'received a command to test nuuid.', "INFORMATION");
-            return;
+		    return;
         }
     }
-
-
 }

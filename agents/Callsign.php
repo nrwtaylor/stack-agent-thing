@@ -6,13 +6,8 @@ class Callsign {
 // https://www.ic.gc.ca/eic/site/025.nsf/eng/h_00004.html
 // Download regularly
 
-
-	function __construct(Thing $thing, $agent_input = null)
+    function __construct(Thing $thing, $agent_input = null)
     {
-//echo "meep";
-//exit();
-//var_dump($agent_input);
-
         $this->start_time = microtime(true);
         if ($agent_input == null) {}
         $this->agent_input = $agent_input;
@@ -405,16 +400,15 @@ v
 
 
 
-	public function respond() {
+    public function respond()
+    {
 
-		$this->cost = 100;
+        $this->cost = 100;
 
-		// Thing stuff
+        // Thing stuff
+        $this->thing->flagGreen();
 
-
-		$this->thing->flagGreen();
-
-		// Compose email
+        // Compose email
 
         // Make SMS
         $this->makeSMS();
@@ -466,7 +460,12 @@ v
             } elseif (count($this->callsigns) == 1) {
                 $this->sms_message = "CALLSIGN IS ";
             }
-            $this->sms_message .= (implode(" ",$this->callsign));
+var_dump($this->callsign);
+
+$callsign_text = (implode(" ",$this->callsign));
+$callsign_text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $callsign_text);
+
+            $this->sms_message .= $callsign_text;
             return;
         }
 

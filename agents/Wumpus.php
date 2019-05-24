@@ -645,9 +645,20 @@ if ( $this->x == 0  ) {
 
         $sms .= " \n" . $this->response;
 $sms .= "\n";
+//$sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
+
+//        $sms .= "\n";
+
+
+if (strpos($this->web_prefix, '192.168') !== false) {
+    echo 'true';
+} else {
 $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
         $sms .= "\n";
+}
+
+
 
 //var_dump($this->x);
 
