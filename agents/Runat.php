@@ -614,10 +614,21 @@ class Runat
 
         $prior_uuid = null;
 
+
+//        if ($this->agent_input == "runat") {
+//	        $this->runat = new Variables($this->thing, "variables runat " . $this->from);
+//		return;
+//        }
+//        if ($this->agent_input != "runtime") { 
+
         // Is there a headcode in the provided datagram
         $this->extractNumbers($input);
         $this->extractRunat($input);
         $this->extractDay($input);
+
+
+
+  //      }
 
         //$this->runat = new Variables($this->thing, "variables runat " . $this->from);
 

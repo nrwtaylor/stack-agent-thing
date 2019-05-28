@@ -443,11 +443,21 @@ class Runtime
         $prior_uuid = null;
 
         // Is there a headcode in the provided datagram
+
+//        if ($this->agent_input == "runtime") {
+//	        $this->runtime = new Variables($this->thing, "variables runtime " . $this->from);
+//        	$this->getRuntime();
+//	return;
+//	}
+
+
         $this->extractRuntime($input);
 
         if ($this->minutes == "X") {
         $this->extractTime($input);
         }
+
+	
 
         //$this->runat = new Variables($this->thing, "variables runat " . $this->from);
 
@@ -455,8 +465,9 @@ class Runtime
 
         if ($this->agent_input == "extract") {return;}
 
+//        if ($this->agent_input == "runtime") {return;}
 
-        if (explode(" " , strtolower($this->agent_input))[0] == "extract") {return;}
+
 
 
         $this->runtime = new Variables($this->thing, "variables runtime " . $this->from);
