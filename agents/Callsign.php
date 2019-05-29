@@ -171,7 +171,17 @@ function isDate($x) {
             case 'list':
                 if (isset($this->callsigns_list)) {$contents = $this->callsigns_list;break;}
                 $file = $this->resource_path . 'amateur_delim.txt';
-                $contents = file_get_contents($file);
+                $pre_contents = file_get_contents($file);
+
+                // Remove address info from search space.
+                $arr = explode("\n", $pre_contents);
+                $contents = "";
+                foreach ($arr as $key=>$line) {
+                    $fields = explode(";",$line);
+                    if (!isset($fields[1])) {continue;}
+
+                    $contents .= $fields[0] .";". $fields[1] . ";" . $fields[2] . "\n";
+                }
 
                 $file = $this->resource_path . 'special_callsign.txt';
                 $contents .= file_get_contents($file);
@@ -460,7 +470,6 @@ v
             } elseif (count($this->callsigns) == 1) {
                 $this->sms_message = "CALLSIGN IS ";
             }
-var_dump($this->callsign);
 
 $callsign_text = (implode(" ",$this->callsign));
 $callsign_text = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $callsign_text);
