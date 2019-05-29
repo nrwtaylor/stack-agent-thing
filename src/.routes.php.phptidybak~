@@ -75,12 +75,11 @@ $nom_to = "null";
 $sender_id = "null";
 $test_text = "s/ google hangouts";
                     $thing->Create($sender_id, $nom_to, $test_text );
+                   $channel = new Channel($thing,"hangoutschat");
 
-                $channel = new Channel($thing,"hangoutschat");
+                   $agent = new Googlehangouts($thing, $body);
 
-                    $agent = new Googlehangouts($thing, $body);
-
-//                $agent = new Agent($thing);
+                $agent = new Agent($thing);
 
 
                     $thing->flagRed();
@@ -258,29 +257,29 @@ $test_text = "s/ google hangouts";
 
 
             //$input = json_encode($body);
-///            $thing = new Thing(null);
+            $thing = new Thing(null);
 // ---
-/// $nom_to = "null";
-///$sender_id = "null";
-///$test_text = "s/ nexmo sms";
-///                    $thing->Create($sender_id, $nom_to, $test_text );
+$nom_to = "null";
+$sender_id = "null";
+$test_text = "s/ nexmo sms";
+                    $thing->Create($sender_id, $nom_to, $test_text );
 
-///                $channel = new Channel($thing,"sms");
+                $channel = new Channel($thing,"sms");
 
-///                    $agent = new Sms($thing, $body);
+                    $agent = new Sms($thing, $body);
 
 //                $agent = new Agent($thing);
 
 
-///                    $thing->flagRed();
-///                    $response_text = "foo";
-///                    return $this->response->write($response_text)
-///                                ->withStatus(200);
+                    $thing->flagRed();
+                    $response_text = "foo";
+                    return $this->response->write($response_text)
+                                ->withStatus(200);
 
 // ---
 
 
-            $queue = false;
+            $queue = true;
 
             // Flag Red so that the agent handler picks it up.
             if ($queue) {

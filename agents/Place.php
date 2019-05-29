@@ -102,9 +102,9 @@ class Place extends Agent
         // I think properly capitalized.
         //$this->set();
 
-        if ($this->agent_input == null) {
+//        if ($this->agent_input == null) {
 		    $this->respond();
-        }
+//        }
 
         if ($this->agent_input != "extract") {
             $this->set();

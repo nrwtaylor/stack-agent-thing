@@ -158,17 +158,17 @@ class Sms
 //                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
 
 
-        $thing = new Thing(null);
-        $thing->Create($space_name,$user_name,$text);
-        $agent = new Agent($thing);
+///        $thing = new Thing(null);
+///        $thing->Create($space_name,$user_name,$text);
+///        $agent = new Agent($thing);
 
-        $response = $agent->thing_report['sms'];
+///        $response = $agent->thing_report['sms'];
 
         //$message->setText($response);
-        $this->sms_message = $response;
+///        $this->sms_message = $response;
         //$hangoutschat->spaces_messages->create($space_name, $message);
 
-        $this->sendSMS($user_name, $response);
+///        $this->sendSMS($user_name, $response);
 
     }
 
