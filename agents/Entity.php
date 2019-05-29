@@ -201,11 +201,6 @@ if (isset($this->entities[0])) {
                 $this->entities[] = $entity;
 
             }
-echo "\n";
-foreach($this->entities as $index=>$entity) {
-
-echo $entity['nuuid'] . " " . $entity['entity'] . " " . $entity['refreshed_at'] . "\n";
-}
 
         }
 
@@ -516,6 +511,13 @@ echo $entity['nuuid'] . " " . $entity['entity'] . " " . $entity['refreshed_at'] 
             $count = count($this->entities);
         }
 
+        $txt .= "\n";
+        foreach($this->entities as $index=>$entity) {
+
+            $txt .= $entity['nuuid'] . " " . $entity['entity'] . " " . $entity['refreshed_at'] . "\n";
+        }
+
+
         $txt .= "Last " . $count. ' Entities retrieved.';
 
         $txt .= "\n";
@@ -702,8 +704,6 @@ echo $entity['nuuid'] . " " . $entity['entity'] . " " . $entity['refreshed_at'] 
         $this->get();
 
         if ( ($this->agent_input == "extract") and (strpos(strtolower($this->subject),'roll') !== false )   ) {
-
-//            echo "headcode found was " . $this->head_code ."\n";
 
             if (strtolower($this->id[1]) == "d") {
                 $this->response = true; // Which flags not to use response.  
