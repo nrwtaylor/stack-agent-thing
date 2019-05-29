@@ -201,6 +201,12 @@ if (isset($this->entities[0])) {
                 $this->entities[] = $entity;
 
             }
+echo "\n";
+foreach($this->entities as $index=>$entity) {
+
+echo $entity['nuuid'] . " " . $entity['entity'] . " " . $entity['refreshed_at'] . "\n";
+}
+
         }
 
         if ((!isset($this->entity_list)) and (!isset($this->entities))) {

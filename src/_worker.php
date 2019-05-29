@@ -86,23 +86,8 @@ function call_agent_function($job)
         $t->thing_report['png'] = base64_encode($t->thing_report['png']);
     }
 
-//    if (isset($t->thing_report['sms'])) {
-//        $t->thing_report['sms'] = htmlentities($t->thing_report['sms']);
-//    }
-
-
-
-        $t->thing_report['png'] = null;
-        $t->thing_report['pdf'] = null;
-
-
-
     echo "worker ran for " . number_format($thing->elapsed_runtime() - $start_time) . "ms\n\n";
 
-$json = json_encode($t->thing_report, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-    return $json;
-
-//    return json_encode($t->thing_report);
+    return json_encode($t->thing_report);
 }
 ?>

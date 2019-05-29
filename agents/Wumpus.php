@@ -155,55 +155,29 @@ class Wumpus extends Agent
     {
         $this->getWumpus();
 
-//        $this->current_time = $this->thing->json->time();
         $this->current_time = $this->entity_agent->json->time();
 
-
         // Borrow this from iching
-//        $this->thing->json->setField("variables");
-//        $this->time_string = $this->thing->json->readVariable( array("wumpus", "refreshed_at") );
-
         $this->entity_agent->json->setField("variables");
         $this->time_string = $this->entity_agent->json->readVariable( array("wumpus", "refreshed_at") );
-
 
         if ($crow_code == null) {$crow_code = $this->uuid;}
 
         if ($this->time_string == false) {
-//            $this->thing->json->setField("variables");
-//            $this->time_string = $this->thing->json->time();
-//            $this->thing->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
             $this->entity_agent->json->setField("variables");
             $this->time_string = $this->entity_agent->json->time();
             $this->entity_agent->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
-
-
         }
 
         $this->refreshed_at = strtotime($this->time_string);
-
-
-//        $this->thing->json->setField("variables");
-//        $this->left_count = strtolower($this->thing->json->readVariable( array("wumpus", "left_count") ));
-//        $this->right_count = $this->thing->json->readVariable( array("wumpus", "right_count") );
-//        $this->x = $this->thing->json->readVariable( array("wumpus", "cave") );
 
         $this->entity_agent->json->setField("variables");
         $this->left_count = strtolower($this->entity_agent->json->readVariable( array("wumpus", "left_count") ));
         $this->right_count = $this->entity_agent->json->readVariable( array("wumpus", "right_count") );
         $this->x = $this->entity_agent->json->readVariable( array("wumpus", "cave") );
 
-
-
-//        if( ($this->cave == false)) {$this->cave = random_int(1,20);}
-
         if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
         if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-
-
-//echo "Got variable x " . $this->x . "\n";
-
-
 
         // For the Crow
 //        $this->created_at = $this->thing->thing->created_at;

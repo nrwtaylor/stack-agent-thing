@@ -1,35 +1,47 @@
 <?php
+/**
+ * Ngram.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 
 class Ngram {
 
-	function __construct(Thing $thing, $agent_input = null)
-    {
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function __construct(Thing $thing, $agent_input = null) {
 
         $this->start_time = microtime(true);
         if ($agent_input == null) {}
         $this->agent_input = $agent_input;
-		$this->thing = $thing;
+        $this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->agent_prefix = 'Agent "N-Gram" ';
 
         $this->thing_report['thing'] = $this->thing->thing;
 
-	    $this->uuid = $thing->uuid;
+        $this->uuid = $thing->uuid;
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/words/';
 
         if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
         if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-	    if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
+        if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
 
 
-		$this->sqlresponse = null;
+        $this->sqlresponse = null;
 
-		$this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-		$this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
+        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
+        $this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
 
 
 
@@ -47,20 +59,20 @@ class Ngram {
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable( array("ngram", "reading") );
 
-            $this->readSubject();
+        $this->readSubject();
 
-            $this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
+        $this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
 
-            if ($this->agent_input == null) {$this->Respond();}
+        if ($this->agent_input == null) {$this->Respond();}
 
         if (count($this->ngrams) != 0) {
             $this->ngram = $this->ngrams[0];
-		    $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->ngram . '.');
+            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->ngram . '.');
 
 
         } else {
             $this->ngram = null;
-                    $this->thing->log($this->agent_prefix . 'did not find words.');
+            $this->thing->log($this->agent_prefix . 'did not find words.');
         }
 
         $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
@@ -68,33 +80,42 @@ class Ngram {
         $this->thing_report['log'] = $this->thing->log;
 
 
-	}
+    }
 
 
-    function getWords($message=null)
-    {
-
-        $agent = new \Nrwtaylor\Stackr\Word($this->thing,$this->subject);
+    /**
+     *
+     * @param unknown $message (optional)
+     */
+    function getWords($message=null) {
+        //        $agent = new \Nrwtaylor\Stackr\Word($this->thing,$this->subject);
+        if ($message == null) {$message = $this->subject;}
+        $agent = new Word($this->thing, $message);
         $this->words = $agent->words;
 
         //var_dump($agent->words);
-//exit();
+        //exit();
 
     }
 
 
 
 
-    function extractNgrams($input, $n = 3)
-    {
+    /**
+     *
+     * @param unknown $input (optional)
+     * @param unknown $n     (optional)
+     * @return unknown
+     */
+    function extractNgrams($input = null, $n = 3) {
 
         if (!isset($this->ngrams)) {$this->ngrams = array();}
-        if (!isset($this->words)) {$this->getWords();}
+        if (!isset($this->words)) {$this->getWords($input);}
 
         $words = $this->words;
         $ngrams = array();
 
-        if (count($words) == 0) {return $ngrams;}
+        if (!isset($words) or count($words) == 0) {return $ngrams;}
 
         foreach ($words as $key=>$value) {
 
@@ -115,7 +136,7 @@ class Ngram {
         if (count($ngrams) != 0) {
             array_push($this->ngrams, ...$ngrams);
         }
-//        array_merge($this->ngrams, $ngram);
+        //        array_merge($this->ngrams, $ngram);
         return $ngrams;
     }
 
@@ -123,34 +144,38 @@ class Ngram {
 
 
 
-	public function Respond() {
+    /**
+     *
+     * @return unknown
+     */
+    public function Respond() {
 
-		$this->cost = 100;
+        $this->cost = 100;
 
-		// Thing stuff
+        // Thing stuff
 
 
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// Compose email
+        // Compose email
 
-//		$status = false;//
-//		$this->response = false;
+        //  $status = false;//
+        //  $this->response = false;
 
-//		$this->thing->log( "this reading:" . $this->reading );
+        //  $this->thing->log( "this reading:" . $this->reading );
 
 
 
 
         // Make SMS
         $this->makeSMS();
-		$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
-		$this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail(); 
+        $this->makeEmail();
 
         $this->thing_report['email'] = $this->sms_message;
 
@@ -161,78 +186,88 @@ class Ngram {
         $this->thing->json->writeVariable(array("word", "reading"), $this->reading);
 
         return $this->thing_report;
-	}
+    }
 
 
-    function makeSMS()
-    {
+    /**
+     *
+     */
+    function makeSMS() {
 
         if (isset($this->words)) {
 
-        if (count($this->words) == 0) {
-            $this->sms_message = "WORD | no words found";
+            if (count($this->words) == 0) {
+                $this->sms_message = "WORD | no words found";
+                return;
+            }
+
+
+            if ($this->words[0] == false) {
+                $this->sms_message = "WORD | no words found";
+                return;
+            }
+
+            if (count($this->words) > 1) {
+                $this->sms_message = "WORDS ARE ";
+            } elseif (count($this->words) == 1) {
+                $this->sms_message = "WORD IS ";
+            }
+            $this->sms_message .= implode(" ", $this->words);
             return;
         }
 
-
-        if ($this->words[0] == false) {
-            $this->sms_message = "WORD | no words found";
-            return;
-        }
-
-        if (count($this->words) > 1) {
-            $this->sms_message = "WORDS ARE ";
-        } elseif (count($this->words) == 1) {
-            $this->sms_message = "WORD IS ";
-        }
-        $this->sms_message .= implode(" ",$this->words);
+        $this->sms_message = "WORD | no match found";
         return;
     }
 
-        $this->sms_message = "WORD | no match found";
-   return;
-    }
 
-
-    function makeEmail()
-    {
+    /**
+     *
+     */
+    function makeEmail() {
         $this->email_message = "WORD | ";
     }
 
 
 
-	public function readSubject()
-    {
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
         $input = strtolower($this->subject);
+        if ($this->agent_input != null) {
+            $input = $this->agent_input;
+        }
 
 
-        $keywords = array('ngram','n-gram');
+        $keywords = array('ngram', 'n-gram');
         $pieces = explode(" ", strtolower($input));
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
+                if (strpos(strtolower($piece), $command) !== false) {
 
-                    switch($piece) {
-                        case 'ngram':   
-                            $prefix = 'ngram';
-                        case 'n-gram':
-                            if (!isset($prefix)) {$prefix = 'n-gram';}
-                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-                            $words = ltrim($words);
+                    switch ($piece) {
+                    case 'ngram':
+                        $prefix = 'ngram';
+                    case 'n-gram':
+                        if (!isset($prefix)) {$prefix = 'n-gram';}
+                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+                        $words = ltrim($words);
 
-                            //$this->search_words = $words;
+                        //$this->search_words = $words;
 
-                            $this->extractNgrams($words, 3);
-                            $this->extractNgrams($words, 2);
-                            $this->extractNgrams($words, 1);
+                        $this->extractNgrams($words, 3);
+                        $this->extractNgrams($words, 2);
+                        $this->extractNgrams($words, 1);
 
 
-                            return;
+                        return;
 
-                        default:
+                    default:
 
-                            //echo 'default';
+                        //echo 'default';
 
                     }
 
@@ -246,28 +281,34 @@ class Ngram {
         $this->extractNgrams($input, 1);
 
 
-		$status = true;
+        $status = true;
 
 
 
-//        }
+        //        }
 
-	return $status;		
-	}
-
-
+        return $status;
+    }
 
 
 
 
-    function contextWord () 
-    {
 
-$this->word_context = '
+
+    /**
+     *
+     * @return unknown
+     */
+    function contextWord() {
+
+        $this->word_context = '
 ';
 
-return $this->word_context;
+        return $this->word_context;
+    }
+
+
 }
-}
+
 
 ?>

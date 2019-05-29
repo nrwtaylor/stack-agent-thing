@@ -1,25 +1,38 @@
 <?php
+/**
+ * Word.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 class Word {
 
-	function __construct(Thing $thing, $agent_input = null)
-    {
-//echo "meep";
-//var_dump($agent_input);
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function __construct(Thing $thing, $agent_input = null) {
+        //echo "meep";
+        var_dump($thing->subject);
+        var_dump($agent_input);
 
         $this->start_time = microtime(true);
         if ($agent_input == null) {}
         $this->agent_input = $agent_input;
-		$this->thing = $thing;
+        $this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->agent_prefix = 'Agent "Word" ';
 
-//        $this->thing_report  = array("thing"=>$this->thing->thing);
+        //        $this->thing_report  = array("thing"=>$this->thing->thing);
         $this->thing_report['thing'] = $this->thing->thing;
 
-	    $this->uuid = $thing->uuid;
+        $this->uuid = $thing->uuid;
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
         $this->resource_path_words = $GLOBALS['stack_path'] . 'resources/words/';
@@ -30,24 +43,13 @@ class Word {
 
         if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
         if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-	    if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
+        if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
 
 
-		$this->sqlresponse = null;
+        $this->sqlresponse = null;
 
-		$this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-		$this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
-
-//        $test = "6     U+1F604     😄   grinning face with smiling eyes     eye | face | grinning face with smiling eyes | mouth | open | smile";
-
-
-//        $string =  $this->subject;
-
-//        $words =$this->extractWord($string);
-
-//        $this->getWord();
-
-
+        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
+        $this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
 
 
         $this->keywords = array();
@@ -64,19 +66,19 @@ class Word {
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable( array("word", "reading") );
 
-            $this->readSubject();
+        $this->readSubject();
 
-            $this->thing->json->writeVariable( array("word", "reading"), $this->reading );
+        $this->thing->json->writeVariable( array("word", "reading"), $this->reading );
 
-            if ($this->agent_input == null) {$this->Respond();}
+        if ($this->agent_input == null) {$this->Respond();}
 
         if ((isset($this->words) and count($this->words)) != 0) {
 
-		    $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->word . '.');
+            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->word . '.');
 
 
         } else {
-                    $this->thing->log($this->agent_prefix . 'did not find words.');
+            $this->thing->log($this->agent_prefix . 'did not find words.');
         }
 
         $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
@@ -84,11 +86,15 @@ class Word {
         $this->thing_report['log'] = $this->thing->log;
 
 
-	}
+    }
 
 
-    function getWords($test)
-    {
+    /**
+     *
+     * @param unknown $test
+     * @return unknown
+     */
+    function getWords($test) {
         if ($test == false) {
             return false;
         }
@@ -98,7 +104,7 @@ class Word {
         if ($test == "") {return $new_words;}
 
         $pattern = '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){1,}/';
-  //      $t = explode("  ", $test);
+        //      $t = explode("  ", $test);
         $t = preg_split($pattern, $test);
 
         //$n = count($t)-1;
@@ -106,17 +112,22 @@ class Word {
         //$words = explode(" | ", $t[4] );
         //$new_words = array();
 
-        foreach($t as $key=>$word) {
+        foreach ($t as $key=>$word) {
             $new_words[] = trim($word);
         }
-//
-//var_dump($new_words);
+        //
+        //var_dump($new_words);
         return $new_words;
     }
 
 
-    public function stripPunctuation($input, $replace_with = " ")
-    {
+    /**
+     *
+     * @param unknown $input
+     * @param unknown $replace_with (optional)
+     * @return unknown
+     */
+    public function stripPunctuation($input, $replace_with = " ") {
         $unpunctuated = preg_replace('/[\:\;\/\!\?\#\.\,\'\"\{\}\[\]\<\>\(\)]/i', $replace_with, $input);
         return $unpunctuated;
     }
@@ -124,21 +135,24 @@ class Word {
 
 
 
-    function extractWords($string)
-    {
-//echo "\n";
-//                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
-//echo $string . "\n";
+    /**
+     *
+     * @param unknown $string
+     * @return unknown
+     */
+    function extractWords($string) {
+        //echo "\n";
+        //                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
+        //echo $string . "\n";
 
         preg_match_all('/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){2,}/', $string, $words);
-        //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 ) 
+        //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 )
         $w = $words[0];
 
-//echo implode("_",$w) . "\n";
+        //echo implode("_",$w) . "\n";
 
 
         $this->words = array();
-
         foreach ($w as $key=>$value) {
 
             // Return dictionary entry.
@@ -147,19 +161,19 @@ class Word {
             $text = $this->findWord('list', $value);
 
             if ($text != false) {
-                 //   echo "word is " . $text . "\n";
+                //   echo "word is " . $text . "\n";
                 $this->words[] = $text;
             } else {
-                 //   echo "word is not " . $value . "\n";
+                //   echo "word is not " . $value . "\n";
             }
         }
 
         if (count($this->words) != 0) {
             $this->word = $this->words[0];
         } else {
-//            $text = $this->nearestWord($value);
-//echo $text;
-//exit();
+            //            $text = $this->nearestWord($value);
+            //echo $text;
+            //exit();
             $this->word = null;
         }
 
@@ -168,6 +182,10 @@ class Word {
     }
 
 
+    /**
+     *
+     * @return unknown
+     */
     function getWord() {
         if (!isset($this->words)) {
             $this->extractWords($this->subject);
@@ -177,74 +195,83 @@ class Word {
         return $this->word;
     }
 
-    function ewolWords()
-    {
+
+    /**
+     *
+     */
+    function ewolWords() {
         if (isset($this->ewol_dictionary)) {$contents = $this->ewol_dictionary;return;}
         $contents = "";
-        foreach(range("A","Z") as $v) {
+        foreach (range("A", "Z") as $v) {
             $file = $this->resource_path_ewol . $v . ' Words.txt';
             $contents .= file_get_contents($file);
         }
 
-        $arr = explode("\n",$contents);
-        foreach($arr as $key=>$line) {
+        $arr = explode("\n", $contents);
+        foreach ($arr as $key=>$line) {
             if (mb_strlen($line) <=1 ) {continue;}
             $this->ewol_dictionary[$line] = true;
         }
 
     }
 
-    function findWord($librex, $searchfor)
-    {
+
+    /**
+     *
+     * @param unknown $librex
+     * @param unknown $searchfor
+     * @return unknown
+     */
+    function findWord($librex, $searchfor) {
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
 
         switch ($librex) {
-            case null:
-                // Drop through
-            case 'list':
-                if (isset($this->words_list)) {$contents = $this->words_list;break;}
-                $file = $this->resource_path_words . 'words.txt';
-                $contents = file_get_contents($file);
-                $this->words_list = $contents;
-                break;
-            case 'ewol':
-                $searchfor = strtolower($searchfor);
-                if (isset($this->ewol_list)) {$contents = $this->ewol_list;break;}
-                $contents = "";
-                foreach(range("A","Z") as $v) {
-                    $file = $this->resource_path_ewol . $v . ' Words.txt';
-                    $contents .= file_get_contents($file);
-                }
-                $this->ewol_list = $contents;
-                break;
+        case null:
+            // Drop through
+        case 'list':
+            if (isset($this->words_list)) {$contents = $this->words_list;break;}
+            $file = $this->resource_path_words . 'words.txt';
+            $contents = file_get_contents($file);
+            $this->words_list = $contents;
+            break;
+        case 'ewol':
+            $searchfor = strtolower($searchfor);
+            if (isset($this->ewol_list)) {$contents = $this->ewol_list;break;}
+            $contents = "";
+            foreach (range("A", "Z") as $v) {
+                $file = $this->resource_path_ewol . $v . ' Words.txt';
+                $contents .= file_get_contents($file);
+            }
+            $this->ewol_list = $contents;
+            break;
 
 
-            case 'mordok':
-                if (isset($this->mordok_list)) {$contents = $this->mordok_list;break;}
+        case 'mordok':
+            if (isset($this->mordok_list)) {$contents = $this->mordok_list;break;}
 
-                $file =  $this->resource_path_words . 'mordok.txt';
-                $contents = file_get_contents($file);
-                $this->mordok_list = $contents;
-                break;
-            case 'context':
-                if (isset($this->context_list)) {$contents = $this->context_list;break;}
+            $file =  $this->resource_path_words . 'mordok.txt';
+            $contents = file_get_contents($file);
+            $this->mordok_list = $contents;
+            break;
+        case 'context':
+            if (isset($this->context_list)) {$contents = $this->context_list;break;}
 
-                $this->contextWord();
-                $contents = $this->word_context;
-                $file = null;
-                $this->context_list = $contents;
-                break;
+            $this->contextWord();
+            $contents = $this->word_context;
+            $file = null;
+            $this->context_list = $contents;
+            break;
 
-            case 'emotion':
-                break;
-            default:
-                $file = $this->resource_path_words .  'words.txt';
+        case 'emotion':
+            break;
+        default:
+            $file = $this->resource_path_words .  'words.txt';
 
         }
         $pattern = "|\b($searchfor)\b|";
 
         // search, and store all matching occurences in $matches
-        if(preg_match_all($pattern, $contents, $matches)){
+        if (preg_match_all($pattern, $contents, $matches)) {
             $m = $matches[0][0];
             return $m;
         } else {
@@ -254,25 +281,34 @@ class Word {
         return;
     }
 
-    function randomWord($number = null)
-    {
+
+    /**
+     *
+     * @param unknown $number (optional)
+     */
+    function randomWord($number = null) {
         $min_number = 3;
         $max_number = $number;
         if ($number == false) {$max_number = 7;}
         if ($number == null) {$max_number = 7;}
 
-        while(true) {
-	    $this->ewolWords();
-	    $word = array_rand($this->ewol_dictionary);
+        while (true) {
+            $this->ewolWords();
+            $word = array_rand($this->ewol_dictionary);
             if ( (strlen($word) >= $min_number) and (strlen($word) <= $max_number)) {
                 break;
             }
-	}
+        }
         $this->word = $word;
     }
 
-    function nearestWord($input)
-    {
+
+    /**
+     *
+     * @param unknown $input
+     * @return unknown
+     */
+    function nearestWord($input) {
         $file = $this->resource_path_words . 'words.txt';
         $contents = file_get_contents($file);
 
@@ -316,8 +352,8 @@ class Word {
 
         if (!isset($new_word_list) or ($new_word_list == null)) {
             $nearest_word = false;
-        } else { 
-            $nearest_word = implode(" " ,$new_word_list);
+        } else {
+            $nearest_word = implode(" " , $new_word_list);
         }
 
         return $nearest_word;
@@ -326,100 +362,109 @@ class Word {
 
 
 
-	public function Respond() {
+    /**
+     *
+     * @return unknown
+     */
+    public function Respond() {
 
-		$this->cost = 100;
+        $this->cost = 100;
 
-		// Thing stuff
+        // Thing stuff
 
 
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// Compose email
+        // Compose email
 
-//		$status = false;//
-//		$this->response = false;
+        //  $status = false;//
+        //  $this->response = false;
 
-//		$this->thing->log( "this reading:" . $this->reading );
+        //  $this->thing->log( "this reading:" . $this->reading );
 
 
 
 
         // Make SMS
         $this->makeSMS();
-		$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
-		$this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail(); 
+        $this->makeEmail();
 
-//        $this->thing_report['email'] = array('to'=>$this->from,
-//                'from'=>'emoji',
-//                'subject' => $this->subject,
-//                'message' => $this->email_message,
-//                'choices' => false);
+        //        $this->thing_report['email'] = array('to'=>$this->from,
+        //                'from'=>'emoji',
+        //                'subject' => $this->subject,
+        //                'message' => $this->email_message,
+        //                'choices' => false);
 
-//		$email = new Makeemail($this->thing);
-//		$this->thing_report['email'] = $email->thing_report['email'];
+        //  $email = new Makeemail($this->thing);
+        //  $this->thing_report['email'] = $email->thing_report['email'];
         $this->thing_report['email'] = $this->sms_message;
 
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 
 
 
-            $this->reading = count($this->words);
-            $this->thing->json->writeVariable(array("word", "reading"), $this->reading);
+        $this->reading = count($this->words);
+        $this->thing->json->writeVariable(array("word", "reading"), $this->reading);
 
 
 
-		return $this->thing_report;
-	}
+        return $this->thing_report;
+    }
 
 
+    /**
+     *
+     */
     function makeSMS() {
 
-//var_dump($this->words);
-    if (isset($this->words)) {
+        //var_dump($this->words);
+        if (isset($this->words)) {
 
-        if (count($this->words) == 0) {
-            if (isset($this->nearest_word)) {
-                $this->sms_message = "WORD | closest match " . $this->nearest_word;
-            } else {
-                $this->sms_message = "WORD | no words found";
+            if (count($this->words) == 0) {
+                if (isset($this->nearest_word)) {
+                    $this->sms_message = "WORD | closest match " . $this->nearest_word;
+                } else {
+                    $this->sms_message = "WORD | no words found";
+                }
+
+                //            $this->sms_message = "WORD | no words found";
+                return;
             }
 
-//            $this->sms_message = "WORD | no words found";
-            return;
-        }
 
-
-        if ($this->words[0] == false) {
-            if (isset($this->nearest_word)) {
-                $this->sms_message = "WORD | closest match " . $this->nearest_word;
-            } else {
-                $this->sms_message = "WORD | no words found";
+            if ($this->words[0] == false) {
+                if (isset($this->nearest_word)) {
+                    $this->sms_message = "WORD | closest match " . $this->nearest_word;
+                } else {
+                    $this->sms_message = "WORD | no words found";
+                }
+                return;
             }
+
+            if (count($this->words) > 1) {
+                $this->sms_message = "WORDS ARE ";
+            } elseif (count($this->words) == 1) {
+                $this->sms_message = "WORD IS ";
+            }
+            $this->sms_message .= implode(" ", $this->words);
             return;
         }
-
-        if (count($this->words) > 1) {
-            $this->sms_message = "WORDS ARE ";
-        } elseif (count($this->words) == 1) {
-            $this->sms_message = "WORD IS ";
-        }
-        $this->sms_message .= implode(" ",$this->words);
-        return;
-    }
 
         $this->sms_message = "WORD | no match found";
-   return;
     }
 
 
+    /**
+     *
+     */
     function makeEmail() {
 
         $this->email_message = "WORD | ";
@@ -428,65 +473,78 @@ class Word {
 
 
 
-	public function readSubject() {
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
 
-//        $this->translated_input = $this->wordsEmoji($this->subject);
+        //        $this->translated_input = $this->wordsEmoji($this->subject);
 
         if ($this->agent_input == null) {
-        $input = strtolower($this->subject);
+            $input = strtolower($this->subject);
         } else {
             $input = strtolower($this->agent_input);
+
+                        $prefix = 'word';
+                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+                        $words = ltrim($words);
+                        $this->search_words = $words;
+                        $this->extractWords($words);
+
+                        if ($this->word != null) {return;}
+
         }
 
-//        if (count($this->words) == 0) {
-//            return;
-//        }
 
-        $keywords = array('word','random');
+        //        if (count($this->words) == 0) {
+        //            return;
+        //        }
+
+        $keywords = array('word', 'random');
         $pieces = explode(" ", strtolower($input));
 
 
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
+                if (strpos(strtolower($piece), $command) !== false) {
 
-                    switch($piece) {
+                    switch ($piece) {
 
-                        case 'random':   
+                    case 'random':
 
-                            $number_agent = new Number($this->thing, "number");
-			    $number_agent->extractNumber($input);
-
-
-
-//                            $prefix = 'word';
-//                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-//                            $words = ltrim($words);
-//                            $this->search_words = $words;
-
-//                            $this->extractWords($words);
-                            $this->randomWord($number_agent->number); 
-
-                            if ($this->word != null) {return;}
-                            //return;
+                        $number_agent = new Number($this->thing, "number");
+                        $number_agent->extractNumber($input);
 
 
-                        case 'word':   
 
-                            $prefix = 'word';
-                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-                            $words = ltrim($words);
-                            $this->search_words = $words;
+                        //                            $prefix = 'word';
+                        //                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+                        //                            $words = ltrim($words);
+                        //                            $this->search_words = $words;
 
-                            $this->extractWords($words);
+                        //                            $this->extractWords($words);
+                        $this->randomWord($number_agent->number);
 
-                            if ($this->word != null) {return;}
-                            //return;
+                        if ($this->word != null) {return;}
+                        //return;
 
-                        default:
 
-                            //echo 'default';
+                    case 'word':
+
+                        $prefix = 'word';
+                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+                        $words = ltrim($words);
+                        $this->search_words = $words;
+                        $this->extractWords($words);
+
+                        if ($this->word != null) {return;}
+                        //return;
+
+                    default:
+
+                        //echo 'default';
 
                     }
 
@@ -495,31 +553,36 @@ class Word {
 
         }
 
-        if(isset($this->search_words)) {
+        if (isset($this->search_words)) {
 
             $this->nearest_word = $this->nearestWord($this->search_words);
-//var_dump($this->word);
-        //$this->extractWords($input);
+            //var_dump($this->word);
+            //$this->extractWords($input);
             $status = true;
 
 
-	    return $status;
+            return $status;
         }
-	}
+    }
 
 
 
 
 
 
-    function contextWord () 
-    {
+    /**
+     *
+     * @return unknown
+     */
+    function contextWord() {
 
-$this->word_context = '
+        $this->word_context = '
 ';
 
-return $this->word_context;
-}
+        return $this->word_context;
+    }
+
+
 }
 
 
