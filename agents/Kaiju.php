@@ -406,6 +406,7 @@ class Kaiju extends Agent
         $temperature_1 =  $dict[8];
         $temperature_2 =  $dict[9];
         $temperature_3 =  $dict[10];
+        $bilge_level =  $dict[11];
 
 
         //        $dict = explode(",",$text);
@@ -421,7 +422,9 @@ class Kaiju extends Agent
             "vertical_acceleration" =>  $dict[7],
             "temperature_1" =>  $dict[8],
             "temperature_2" =>  $dict[9],
-            "temperature_3" =>  $dict[10]);
+            "temperature_3" =>  $dict[10],
+            "bilge_level" =>  $dict[11]);
+
         return $parsed_line;
     }
 
@@ -569,23 +572,43 @@ class Kaiju extends Agent
         $web = "<b>Kaiju Agent</b>";
         $web .= "<p>";
 
+        $web .= "<p>";
+
 
         //$web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         //$web .= "<br>";
 
+        $web .= $this->sms_message;
+        $web .= "\n";
+
+        $web .= "<p>";
+
 
         $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
 
-        $web .= "Inject was created about ". $ago . " ago.";
+        $txt = '<a href="' . $link . ".txt" . '">';
+        $txt .= 'TEXT';
+        $txt .= "</a>";
+
+        $web .= "Kaiju report here " . $txt .".";
         $web .= "<p>";
-        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
+
+        $web .= "Requested about ". $ago . " ago.";
+//        $web .= "<p>";
+//        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
 
         $togo = $this->thing->human_time($this->time_remaining);
-        $web .= " and will expire in " . $togo. ".<br>";
+        $web .= "This link will expire in " . $togo. ".<br>";
 
         $web .= "<br>";
-        $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
 
+        $privacy = '<a href="' . $this->web_prefix . "privacy" . '">';
+        $privacy .= $this->web_prefix . 'privacy';
+        $privacy .= "</a>";
+
+        $web .= "This Kaiju thing is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $privacy .".";
+
+//        $web .= "This Kaiju thing is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -606,7 +629,24 @@ class Kaiju extends Agent
 
         $txt .= $this->sms_message;
 
-        $txt .= "\n";
+        $txt .= "\n\n";
+
+        $txt .= "Full log follows.\n";
+        //var_dump($kaiju_messages);
+//        $this->kaiju_things = array();
+        foreach ($this->kaiju_things as $key=>$thing) {
+
+            $flat_thing = implode($thing, " ");
+//            if ($parsed_thing != null) {
+//                $txt .= $parsed_thing['created_at'] . "\n";
+                $txt .=  $flat_thing . "\n";
+//            }
+            //var_dump($thing['created_at']);
+
+        }
+
+
+
 
 
         $this->thing_report['txt'] = $txt;
@@ -674,7 +714,7 @@ class Kaiju extends Agent
                         $this->setState($piece);
                         $this->setBank($piece);
 
-                        $this->getMessage();
+//                        $this->getMessage();
                         $this->response .= " Set messages to " . strtoupper($this->state) .".";
 
                         return;
@@ -691,7 +731,7 @@ class Kaiju extends Agent
             }
         }
 
-        $this->getMessage();
+//        $this->getMessage();
 
         if ((!isset($this->index)) or
             ($this->index == null)) {
