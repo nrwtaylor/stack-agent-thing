@@ -159,8 +159,8 @@ class Pdf extends Agent
 
 
         $this->pdf_exists = true;
-        $agent_thing = new Agent($previous_thing);
-        if (!isset($agent_thing->thing_report['pdf'] )) {$this->pdf_exists = false;}
+//        $agent_thing = new Agent($previous_thing);
+//        if (!isset($agent_thing->thing_report['pdf'] )) {$this->pdf_exists = false;}
 
         return $this->link_uuid;
     }

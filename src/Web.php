@@ -125,9 +125,9 @@ class Web extends Agent {
 //        $agent_thing = new Agent($previous_thing,"agent");
 //        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
         $previous_thing->silenceOn();
-        $quiet_thing = new Quiet($previous_thing, "on");
-        $agent_thing = new Agent($previous_thing);
-        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
+//        $quiet_thing = new Quiet($previous_thing, "on");
+//        $agent_thing = new Agent($previous_thing);
+//        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
 
 
         return $this->link_uuid;

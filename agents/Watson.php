@@ -56,7 +56,7 @@ class Watson
     {
 		$this->response = "Watson says hello";
 
-		$this->sms_message = "WATSON | Says hello | REPLY QUESTION";
+		$this->sms_message = "WATSON | Says hello. | REPLY QUESTION";
 		$this->message = "Watson says hello";
 		$this->keyword = "watson";
 

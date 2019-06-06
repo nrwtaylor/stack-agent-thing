@@ -22,6 +22,7 @@ class Crow extends Agent
      *
      */
     public function init() {
+
         $this->test= "Development code";
 
         $this->primary_place = "roost";
@@ -85,11 +86,11 @@ var_dump($this->signals);
 
 //        $choices = $this->thing->choice->makeLinks($this->state);
 
-        $this->state = $this->entity_agent->choice->load($this->primary_place);
-        $this->entity_agent->choice->Create($this->primary_place, $this->node_list, $this->state);
-        $this->entity_agent->choice->Choose($this->state);
+        $this->state = $this->crow_thing->choice->load($this->primary_place);
+        $this->crow_thing->choice->Create($this->primary_place, $this->node_list, $this->state);
+        $this->crow_thing->choice->Choose($this->state);
 
-        $choices = $this->entity_agent->choice->makeLinks($this->state);
+        $choices = $this->crow_thing->choice->makeLinks($this->state);
 
 
      //   $this->state = "AWAKE";
@@ -136,6 +137,23 @@ var_dump($this->signals);
     }
 
 
+    private function getPlace($place_name = null)
+    {
+        $place_agent = new Place($this->thing,"place");
+        var_dump($place_agent->place_name);
+
+//        $cave_number = "X";
+
+
+//        if ($cave_number == null) {$cave_number = $this->x;}
+
+
+//        $cave_name = "A dark room";
+//        if (isset($this->cave_names[strval($cave_number)])) {$cave_name = $this->cave_names[strval($cave_number)];}
+//        $this->cave_name = $cave_name;
+    }
+
+
 
 
     public function run()
@@ -143,7 +161,7 @@ var_dump($this->signals);
         $this->getCrow();
 //        $this->getClocktime();
 //        $this->getBar();
-        //$this->getCoordinate();
+        $this->getPlace();
         $this->getState();
 
 //        $this->getTick();
@@ -151,7 +169,7 @@ var_dump($this->signals);
         // Err ... making sure the state is saved.
 //        $this->thing->choice->Choose($this->state);
 //        $this->state = $this->thing->choice->load('lair');
-        $this->state = $this->entity_agent->choice->load('roost');
+        $this->state = $this->crow_thing->choice->load('roost');
 
         $this->thing->log('state is "' . $this->state . '".');
     }
@@ -189,16 +207,16 @@ var_dump($this->signals);
 
 //        $this->state = $this->thing->choice->load($this->primary_place);
 
-        $this->entity_agent->json->writeVariable( array("crow", "place_name"), $this->place_name );
-        $this->entity_agent->json->writeVariable( array("crow", "signal"), $this->signal );
+        $this->crow_thing->json->writeVariable( array("crow", "place_name"), $this->place_name );
+        $this->crow_thing->json->writeVariable( array("crow", "signal"), $this->signal );
 
         // Which cave is the Wumpus in?  And is it a number or a name?
 //        $this->entity_agent->json->writeVariable( array("wumpus", "cave"), strval($this->x) );
 
 
-        $this->entity_agent->choice->Choose($this->state);
+        $this->crow_thing->choice->Choose($this->state);
 
-        $this->state = $this->entity_agent->choice->load($this->primary_place);
+        $this->state = $this->crow_thing->choice->load($this->primary_place);
 
 
 
@@ -255,29 +273,29 @@ var_dump($this->signals);
 
    public function get($crow_code = null)
     {
-        $this->getCrow();
+        $this->getCrow($crow_code);
 
-        $this->current_time = $this->entity_agent->json->time();
+        $this->current_time = $this->crow_thing->json->time();
 
         // Borrow this from iching
-        $this->entity_agent->json->setField("variables");
-        $this->time_string = $this->entity_agent->json->readVariable( array("crow", "refreshed_at") );
+        $this->crow_thing->json->setField("variables");
+        $this->time_string = $this->crow_thing->json->readVariable( array("crow", "refreshed_at") );
 
         if ($crow_code == null) {$crow_code = $this->uuid;}
 
         if ($this->time_string == false) {
-            $this->entity_agent->json->setField("variables");
-            $this->time_string = $this->entity_agent->json->time();
-            $this->entity_agent->json->writeVariable( array("crow", "refreshed_at"), $this->time_string );
+            $this->crow_thing->json->setField("variables");
+            $this->time_string = $this->crow_thing->json->time();
+            $this->crow_thing->json->writeVariable( array("crow", "refreshed_at"), $this->time_string );
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->entity_agent->json->setField("variables");
+        $this->crow_thing->json->setField("variables");
 
 
-        $this->place_name = strtolower($this->entity_agent->json->readVariable( array("crow", "place_name") ));
-        $this->signal = $this->entity_agent->json->readVariable( array("crow", "signal") );
+        $this->place_name = strtolower($this->crow_thing->json->readVariable( array("crow", "place_name") ));
+        $this->signal = $this->crow_thing->json->readVariable( array("crow", "signal") );
 
 
         if ( ($this->place_name == false) or ($this->place_name = "")) {
@@ -298,7 +316,7 @@ var_dump($this->signals);
 //        $this->created_at = $this->thing->thing->created_at;
 
 //        $this->state = $this->thing->choice->load($this->primary_place);
-        $this->state = $this->entity_agent->choice->load($this->primary_place);
+        $this->state = $this->crow_thing->choice->load($this->primary_place);
 
 
         if ($this->state == false) {$this->state = "foraging";}
@@ -307,7 +325,7 @@ var_dump($this->signals);
 
         return array($this->place_name, $this->signal);
 
-}
+    }
 
 
 
@@ -401,6 +419,8 @@ var_dump($this->signals);
     private function getCrow($requested_nuuid = null)
     {
 
+echo "request crow " . $requested_nuuid ."\n";
+
         //if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
 
         //$entity = new Entity($this->thing, "wumpus");
@@ -410,28 +430,29 @@ var_dump($this->signals);
 
         //if ($requested_nuuid == null) {$requested_nuuid = $this->id;}
 
-	$entity_input = "";
-	if ($requested_nuuid != null) {$entity_input = "crow_".$requested_nuuid;}
+	$entity_input = "crow";
+	if ($requested_nuuid != null) {$entity_input = "crow ".$requested_nuuid;}
 
-        $entity_input = "crow";
+//        $entity_input = "crow";
 
         $entity = new Entity($this->thing, $entity_input );
-        $this->entity_agent = $entity->thing;
-
+        $this->crow_thing = $entity->thing;
+var_dump($entity->thing->uuid);
+//exit();
 //        $this->thing = $entity->thing;
 
 
 
 //        $this->state = $this->thing->choice->load('lair');
-        $this->state = $this->entity_agent->choice->load($this->primary_place);
+        $this->state = $this->crow_thing->choice->load($this->primary_place);
 
 
 
 //        $this->uuid = $this->thing->uuid;
-        $this->uuid = $this->entity_agent->uuid;
+        $this->uuid = $this->crow_thing->uuid;
 
 //        $this->nuuid = $this->thing->nuuid;
-        $this->nuuid = $this->entity_agent->nuuid;
+        $this->nuuid = $this->crow_thing->nuuid;
 
 
 //        if ($this->x == 0) {$this->x = random_int(1,20);}
@@ -442,10 +463,10 @@ var_dump($this->signals);
 //        $this->subject = $this->thing->subject;
 
         //$this->choices = $this->thing->choice->makeLinks($this->state);
-        $this->choices = $this->entity_agent->choice->makeLinks($this->state);
+        $this->choices = $this->crow_thing->choice->makeLinks($this->state);
 
-        echo "nuuid " . $this->entity_agent->nuuid;
-        echo "state " . $this->state;
+        echo "getCrow retrieved nuuid " . $this->crow_thing->nuuid;
+        echo "getCrow got state " . $this->state;
 
     }
 
@@ -473,15 +494,47 @@ var_dump($this->signals);
 
             //  if (strtolower($crow_nuuid) == strtolower($requested_nuuid)) {
             // Consistently match the nuuid to a specific uuid.
-            $this->crows[] = new Thing($crow['uuid']);
+            $this->crows[] = $crow;
+
+//            $this->crows[] = new Thing($crow['uuid']);
             //  }
         }
 
         if (!isset($this->crows[0])) {return true;}
+
+        // Let's get some crow information.
 echo "\n";
 echo "crows seen ";
 foreach( $this->crows as $index=>$crow_thing) {
-echo $crow_thing->nuuid ." ";
+            $crow_nuuid = substr($crow_thing['uuid'], 0, 4);
+
+$variables = json_decode($crow_thing['variables']);
+
+// thing // headcode // place // quantity // number // button // message // clocktime
+
+
+$thing_status = null;
+if (isset($variables->thing->status)) {$thing_status = $variables->thing->status;}
+
+$number_number = null;
+if (isset($variables->number->number)) {$thing_status = $variables->number->number;}
+
+$message_agent = null;
+if (isset($variables->message->agent)) {$message_agent = $variables->message->agent;}
+
+$message_outcome = null;
+if (isset($variables->message->outcome)) {$message_outcome = $variables->message->outcome;}
+
+$place = null;
+if (isset($variables->place)) {$this->place = $variables->place;}
+
+
+//var_dump($variables["crow"]);
+
+//var_dump($crow_thing["nuuid"]);
+//exit();
+//echo $crow_thing->nuuid ." ";
+echo $crow_nuuid ." ";
 
 }
 echo "\n";
@@ -543,7 +596,10 @@ echo "\n";
         $txt = "";
         $this->getCrows();
         foreach ($this->crows as $key=>$crow) {
-            $txt .= substr($crow->thing->uuid, 0, 4). " ";
+
+            if (isset($crow->thing->uuid)) {
+                $txt .= substr($crow->thing->uuid, 0, 4). " ";
+            }
         }
 
         $txt .= "\n";
@@ -644,7 +700,7 @@ echo "\n";
             'start'=>"TEXT WEB / MIDDEN WORK / NEST MAINTENANCE"
         );
 
-        $sms = "CROW | " . $this->entity_agent->nuuid;
+        $sms = "CROW | " . $this->crow_thing->nuuid;
         //        $sms .= " | " . $this->thing_behaviour[$this->state];
         $sms .= " | " . $this->crow_behaviour[$this->state];
         $sms .= " " . $this->response;
@@ -652,7 +708,40 @@ echo "\n";
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
+    }
 
+    function extractCrow($text) {
+
+//        $nuuid_agent = new Nuuid($this->thing,"nuuid");
+//        $nuuid_agent->extractNuuid($text);
+//var_dup($nuuid_agent->nuuid);
+
+        $nuuid_agent = new Nuuid($this->thing, "nuuid");
+        $nuuid_agent->extractNuuid($this->subject);
+
+        $nuuid = $this->crow_thing->nuuid;
+        if (isset($nuuid_agent->nuuid)) {$nuuid = $nuuid_agent->nuuid;}
+
+var_dump($nuuid);
+        $this->crow_id = $nuuid;
+
+    }
+
+    function nextCrow($nuuid = null) {
+
+$this->getCrows();
+$crow =  $this->crows[array_rand($this->crows)];
+$uuid = $crow['uuid'];
+//echo "next crow will be " . $uuid. ".\n";
+//$thing = new Thing($uuid);
+
+$crow_nuuid = substr($crow['uuid'], 0, 4);
+
+//$this->crow_thing = $thing;
+//$this->uuid = $this->crow_thing->uuid;
+//$this->nuuid = $this->crow_thing->nuuid;
+//$this->crow_id = $this->nuuid;
+$this->getCrow($crow_nuuid);
     }
 
     function doCrow($text) {
@@ -673,6 +762,13 @@ echo "\n";
 //                $place = new Place($this->thing, "roost");
 //                $this->place_name = $place->place_name;
                 $this->response .= "Tagged Crow " . $this->nuuid . ". ";
+                break;
+
+            case "next crow":
+            case "crow next":
+                //echo "spawn";
+                $this->nextCrow();
+                $this->response .= "Got the next Crow.";
                 break;
 
 
@@ -728,18 +824,18 @@ echo "\n";
 
         $this->response = "";
 
-        if ($this->state == null) {
-            $this->getCrow();
-        }
+//        if ($this->state == null) {
+//            $this->getCrow();
+//        }
 
+        $this->extractCrow($this->subject);
+//        $nuuid_agent = new Nuuid($this->thing, "nuuid");
+//        $nuuid_agent->extractNuuid($this->subject);
 
-        $nuuid_agent = new Nuuid($this->thing, "nuuid");
-        $nuuid_agent->extractNuuid($this->subject);
-
-        $nuuid = $this->entity_agent->nuuid;
-        if (isset($nuuid_agent->nuuid)) {$nuuid = $nuuid_agent->nuuid;}
-
-var_dump($nuuid);
+//        $nuuid = $this->entity_agent->nuuid;
+//        if (isset($nuuid_agent->nuuid)) {$nuuid = $nuuid_agent->nuuid;}
+$nuuid = $this->crow_id;
+echo "Extracted crow id " . $nuuid . ".\n";
 
         $this->getCrow($nuuid);
 
@@ -1045,11 +1141,14 @@ $this->doCrow($input);
      *
      */
     function spawn() {
+        $thing = new Thing(null);
+        $thing->Create("merp","merp","merp");
+        $this->crow_thing = $thing;
         $crow_pheromone['stack'] = 4;
         if ((rand(0, 5) + 1) <= $crow_pheromone['stack']) {
-            $this->thing->choice->Create('roost', $this->node_list, "inside nest");
+            $this->crow_thing->choice->Create('roost', $this->node_list, "inside nest");
         } else {
-            $this->thing->choice->Create('roost', $this->node_list, "midden work");
+            $this->crow_thing->choice->Create('roost', $this->node_list, "midden work");
         }
 
         $this->thing->flagGreen();

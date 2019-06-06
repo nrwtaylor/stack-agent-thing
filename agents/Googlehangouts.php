@@ -30,7 +30,7 @@ class GoogleHangouts
 
 	function __construct(Thing $thing, $input = null)
     {
-        $this->body = $input;
+        $this->body = $input['body'];
 
 		$this->agent_name = "Google Hangouts";
 
@@ -88,8 +88,6 @@ class GoogleHangouts
 
         $hangoutschat = new \Google_Service_HangoutsChat($this->client);
 
-        $message = new \Google_Service_HangoutsChat_Message();
-
         $text = $this->body["message"]["text"];
 
         $type = $this->body["type"];
@@ -98,6 +96,8 @@ class GoogleHangouts
 
         $user_name = $this->body["user"]["name"];
 
+        $thread_name = $this->body["message"]["thread"]["name"];
+
 
         $thing = new Thing(null);
         $thing->Create($space_name,"agent",$text);
@@ -105,9 +105,15 @@ class GoogleHangouts
 
         $response = $agent->thing_report['sms'];
 
-        $message->setText($response);
+        $t = array('name'=>$thread_name);
+
+        $message = new \Google_Service_HangoutsChat_Message(['text'=>$response,'thread'=>$t]);
+//        $message->setText($response);
+
+
         $this->sms_message = $response;
         $hangoutschat->spaces_messages->create($space_name, $message);
+
 	}
 
     private function respond()

@@ -764,7 +764,7 @@ foreach($filtered_places as $key=>$filtered_place) {
         if ((!empty($this->place_code))) {
             $sms .= " | " . "TEXT " . trim(strtoupper($this->place_code));
         } else {
-            $sms .= "|" . "TEXT " . "AGENT"; 
+            $sms .= " | " . "TEXT " . "AGENT"; 
         }
 
 /* dev
@@ -792,6 +792,7 @@ foreach($filtered_places as $key=>$filtered_place) {
 */
 
         $sms = str_replace(" | ", "\n", $sms);
+
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -1001,12 +1002,23 @@ foreach($filtered_places as $key=>$filtered_place) {
 		//$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $this->makeMessage();
-
+/*
         if (!$this->thing->isData($this->agent_input)) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+
+            if ($this->agent_input == null) {
+                $message_thing = new Message($this->thing, $this->thing_report);
+                $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            } else {
+                $this->thing_report['info'] = "This is a system message.";
+            }
         } else {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
+        }
+*/
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
         $this->makeWeb();

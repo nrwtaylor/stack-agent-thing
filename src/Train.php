@@ -1570,16 +1570,13 @@ $this->getConsist();
         $test_message .= '<br>quantity ' . $this->quantity;
         $test_message .= '<br>available ' . $this->available;
 
-
         $test_message .= "<p><b>Agents</b>";
         $test_message .= "<br>" .$this->choices['link'];
         //$test_message .= '<br>current_node ' . $this->thing->choice->current_node;
         //$test_message .= "<br>" . $this->thing_report['choices']['button']; //words link button
 
-
         $test_message .= '<p>Agent "Train" is responding to your web view of data gram subject "' . $this->subject . '", ';
         $test_message .= "which was received " . $this->thing->human_time($this->thing->elapsed_runtime()) . " ago.";
-
 
         $this->web = $test_message;
         $this->thing_report['web'] = $test_message;

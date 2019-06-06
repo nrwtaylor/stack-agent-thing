@@ -38,19 +38,8 @@ $app->group('/api', function () use ($app) {
         $app->post('/webhook_hangoutschat_a11nzr4tug', function ($request, $response, $args)  {
 
             $body = $request->getParsedBody();
-            $getParam = $request->getQueryParams();
-//$threadKey = $getParam('threadKey');
-$params_json = $getParam;
-$args_json = $args;
 
-//$uri = $request->getUri();
-//$method = $uri->getQuery();
-//$threadKey = $app->request()->params('threadKey');
-//$threadKey = $request->params('');
-//$data = json_decode($request->getBody()) ?: $request->params();
-//$data = json_decode( $app->request->getBody() ) ?: $app->request->params();
-$data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
-//$data = $body;
+
             ignore_user_abort(true);
             set_time_limit(0);
 
@@ -88,9 +77,8 @@ $test_text = "s/ google hangouts";
                     $thing->Create($sender_id, $nom_to, $test_text );
 
                 $channel = new Channel($thing,"hangoutschat");
-                    $agent = new Googlehangouts($thing, $data);
 
-//                    $agent = new Googlehangouts($thing, array($body, $threadKey));
+                    $agent = new Googlehangouts($thing, $body);
 
 //                $agent = new Agent($thing);
 
@@ -292,7 +280,7 @@ $test_text = "s/ google hangouts";
 // ---
 
 
-            $queue = true;
+            $queue = false;
 
             // Flag Red so that the agent handler picks it up.
             if ($queue) {

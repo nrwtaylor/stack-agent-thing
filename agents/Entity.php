@@ -75,6 +75,7 @@ class Entity extends Agent
 
     private function getEntity($requested_nuuid = null)
     {
+echo "requested_nuuid " . $requested_nuuid . "\n";
         if (!isset($this->entities)) {$this->getEntities(); }
 //        if (!isset($this->id)) {$this->id = $this->default_id;}
 
@@ -133,7 +134,7 @@ if (isset($this->entities[0])) {
 
 //        $this->thing = $entity->thing;
 
-        $this->id = $this->entity_agent . "_" . $this->thing->nuuid;
+        $this->id = strtolower($this->entity_agent . "_" . $this->thing->nuuid);
     }
 
 
@@ -677,15 +678,20 @@ if (isset($this->entities[0])) {
         } else {
             $input = strtolower($this->from . " " . $this->subject);
         }
-
         $prior_uuid = null;
 
         // Is there a headcode in the provided datagram
         $x = $this->extractEntity($input);
-
         $agent_name = $this->entity_agent;
+        $agent_name = strtolower($agent_name);
 
-        $this->entity_id = new Variables($this->thing, "variables entity_" . $agent_name . " " . $this->from);
+        $nuuid_agent = new Nuuid($this->thing,"nuuid");
+        $nuuid_agent->extractNuuid($input);
+$nuuid = $nuuid_agent->thing->nuuid;
+
+echo "entity says " . $agent_name . "_" . $nuuid . "\n";
+
+        $this->entity_id = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $nuuid . " " . $this->from);
 
         if (!isset($this->id) or ($this->id == false)) {
             $this->id = $this->entity_id->getVariable('id', null);
@@ -700,7 +706,7 @@ if (isset($this->entities[0])) {
                 }
             }
         }
-
+echo "this->id " . $this->id;
         $this->get();
 
         if ( ($this->agent_input == "extract") and (strpos(strtolower($this->subject),'roll') !== false )   ) {

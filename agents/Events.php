@@ -343,6 +343,9 @@ foreach($this->ticketmaster->events as &$event) {
 
         $html = "<b>EVENTS WATCHER</b>";
 
+        $html .= "<p>";
+
+
         $html .= '<br>Events watcher says , "';
         $html .= $this->sms_message. '"';
 

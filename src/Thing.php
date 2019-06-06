@@ -555,6 +555,34 @@ class Thing
         $this->Get();
     }
 
+    public function silenceOn()
+    {
+        // Make the Thing show Red
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","silence"), "on");
+        $this->Get();
+    }
+
+    public function silenceOff()
+    {
+        // Make the Thing show Red
+        $this->json->setField("variables");
+        $this->json->writeVariable(array("thing","silence"), "off");
+        $this->Get();
+    }
+
+    public function isSilent()
+    {
+        // Ask if the Thing is Green
+        $var_path = array("thing", "silence");
+        if ($this->json->readVariable($var_path) == "on") {
+            return true;
+        }
+        return false;
+    }
+
+
+
     public function flagAmber()
     {
         // Make the Thing show Amber

@@ -143,7 +143,7 @@ class ACP125G extends Agent
         //}
 
         //if ($bank == "16ln") {
-            $this->bank = "16ln-a00";
+            $this->bank = "16ln-a02";
         //}
 
     }
@@ -151,7 +151,7 @@ class ACP125G extends Agent
     function getBank()
     {
         if (!isset($this->bank)) {
-            $this->bank = "16ln-a00";
+            $this->bank = "16ln-a02";
         }
 
         if (isset($this->inject) and ($this->inject != false)) {
@@ -200,8 +200,12 @@ class ACP125G extends Agent
 
     function makeSMS()
     {
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/acp125g.txt';
+
         $sms = "ACP 125(G) " . $this->inject . " > \n";
-        $sms .= $this->short_message . "\n" . $this->response;
+//        $sms .= $this->short_message . "\n" . $this->response;
+        $sms .= $this->line_12 . " " . $link . "\n" . $this->response;
+
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;

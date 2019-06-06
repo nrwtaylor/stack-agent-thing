@@ -184,6 +184,17 @@ class Ticketmaster
 //            if ($privacy != 1) {echo "privacy";continue;}
 
 //            $region_abbr = $event['region_abbr'];
+$match = false;
+$places_list = array();
+foreach ($event['_embedded']['venues'] as $id=>$venue) {
+$city_name = $venue["city"]["name"];
+$state_code = $venue["state"]["stateCode"];
+$country_code = $venue["country"]["countryCode"];
+
+if (strtolower($state_code) == "bc") {$match = true;}
+
+}
+if ($match != true) {continue;}
 
 //if ($region_abbr != "BC") {echo "bc";continue;} // Restrict to BC events in dev/test/prod
 

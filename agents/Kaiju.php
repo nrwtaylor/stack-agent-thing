@@ -263,7 +263,7 @@ class Kaiju extends Agent
                 $link_uuids[] = $block_thing['uuid'];
                 //                $kaiju_messages[] = $block_thing['task'];
                 $kaiju_messages[] = $block_thing;
-                var_dump($block_thing['task']);
+                //var_dump($block_thing['task']);
                 // if ($match == 2) {break;}
                 // Get upto 10 matches
                 if ($match == 99) {break;}
@@ -272,7 +272,6 @@ class Kaiju extends Agent
             }
         }
 
-        //var_dump($kaiju_messages);
         $this->kaiju_things = array();
         foreach ($kaiju_messages as $key=>$thing) {
             $parsed_thing = $this->parseThing($thing['task']);
@@ -280,14 +279,10 @@ class Kaiju extends Agent
                 $parsed_thing['created_at'] = $thing['created_at'];
                 $this->kaiju_things[] = $parsed_thing;
             }
-            //var_dump($thing['created_at']);
 
         }
 
         $this->kaiju_thing = $this->kaiju_things[0];
-        //var_dump($this->kaiju_thing);
-        //echo "meep";
-        //exit();
         return $this->kaiju_thing;
     }
 
@@ -313,7 +308,6 @@ class Kaiju extends Agent
             // do something with $line
             $line = strtok( $separator );
         }
-        //var_dump($this->kaijus);
         $kaiju_list = array();
         foreach ($this->kaijus as $kaiju_name=>$arr) {
 
@@ -387,7 +381,6 @@ class Kaiju extends Agent
         if (mb_substr($test, 0, 1) == "#") {$word = false; return $word;}
 
         $dict = explode(" ", $test);
-        //var_dump($dict);
         if ( (!isset($dict[1])) or (!isset($dict[2])) or (!isset($dict[3])) ) {
             return null;
         }
@@ -632,8 +625,9 @@ class Kaiju extends Agent
         $txt .= "\n\n";
 
         $txt .= "Full log follows.\n";
-        //var_dump($kaiju_messages);
-//        $this->kaiju_things = array();
+
+        if (isset($this->kaiju_things)) {
+
         foreach ($this->kaiju_things as $key=>$thing) {
 
             $flat_thing = implode($thing, " ");
@@ -641,11 +635,10 @@ class Kaiju extends Agent
 //                $txt .= $parsed_thing['created_at'] . "\n";
                 $txt .=  $flat_thing . "\n";
 //            }
-            //var_dump($thing['created_at']);
 
         }
 
-
+        }
 
 
 
@@ -720,8 +713,6 @@ class Kaiju extends Agent
                         return;
 
                     case 'hey':
-                        $this->getMember();
-                        $this->response = "Hey " . strtoupper($this->member['call_sign']) . ".";
 
                         return;
                     case 'on':
