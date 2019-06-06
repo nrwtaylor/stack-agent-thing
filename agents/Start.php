@@ -36,6 +36,8 @@ class Start {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+//        $this->word = $thing->container['stack']['word'];
+var_dump($this->word);
 
 		$this->node_list = array("start"=>array("new user", "opt-in","opt-out"));
 
@@ -92,7 +94,7 @@ class Start {
 
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".", "DEBUG");
 
-        $this->counter = $this->counter + 1;
+//        $this->counter = $this->counter + 1;
 
         return;
     }
@@ -100,8 +102,12 @@ class Start {
     private function makeSMS() {
 
         switch ($this->counter) {
+            case false:
+                $sms = "START | Please read our Privacy Policy and text START.";
+                break;
+
             case 1:
-                $sms = "START | Thank you for starting to use Stackr.  Read our Privacy Policy " . $this->web_prefix . "privacy | Started.";
+                $sms = "START | Thank you for starting to use " . ucwords($this->word) . ".  Read our Privacy Policy " . $this->web_prefix . "privacy | Started.";
                 break;
             case 2:
                 $sms = "START | Read our Privacy Policy at " . $this->web_prefix . "privacy | Started. Again.";
@@ -184,7 +190,7 @@ class Start {
 
 
 	public function respond() {
-
+var_dump($this->counter);
 		// Thing actions
 
 		// New user is triggered when there is no nom_from in the db.
@@ -227,13 +233,62 @@ class Start {
 
 	public function readSubject()
     {
-        $this->start();
-		return;
+      //  $this->start();
+//		return;
+$this->keyword = "start";
+$keywords = array("start");
+        if (isset($this->agent_input)) {
+            $input = $this->agent_input;
+        } else {
+            $input = strtolower($this->subject);
+        }
+                //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        //$haystack = $this->agent_input . " " . $this->from;
+        //$haystack = $input . " " . $this->from;
+        $haystack = "";
+
+//              $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+
+        $prior_uuid = null;
+
+        $pieces = explode(" ", strtolower($input));
+
+                // So this is really the 'sms' section
+                // Keyword
+        if (count($pieces) == 1) {
+
+            if ($input == $this->keyword) {
+                $this->get();
+                $this->response = "Got the flag.";
+                return;
+            }
+        }
+
+
+        foreach ($pieces as $key=>$piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) 
+                    {
+
+                        case 'start':
+$this->start();
+                            return;
+                        default:
+
+                            return;
+                    }
+               }
+           }
+        }
+
 	}
 
 
 	function start()
     {
+        $this->counter = $this->counter + 1;
+
         // Call the Usermanager agent and update the state
         $agent = new Usermanager($this->thing, "usermanager start");
         $this->thing->log( $this->agent_prefix .'called the Usermanager and said "usermanager start".' );
