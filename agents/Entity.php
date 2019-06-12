@@ -670,7 +670,7 @@ if (isset($this->entities[0])) {
             // If agent input has been provided then
             // ignore the subject.
             // Might need to review this.
-            if ($this->agent_input == "extract") {
+            if ($this->agent_input == $this->agent_name) {
                 $input = strtolower($this->subject);
             } else {
                 $input = strtolower($this->agent_input);
@@ -717,7 +717,6 @@ echo "this->id " . $this->id;
                 return;
             }
         }
-
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {$this->response = "Extract";return;}
 

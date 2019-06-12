@@ -357,6 +357,9 @@ class Pace extends Agent {
         $this->run_at_hour = $runat_agent->hour;
         $this->run_at_minute = $runat_agent->minute;
 
+var_dump($this->run_at_hour);
+var_dump($this->run_at_minute);
+
         $runat_date = date_create($date . " " . $this->run_at_hour.":".$this->run_at_minute);
 
         $runend_date = clone $runat_date;
@@ -368,8 +371,8 @@ class Pace extends Agent {
             date_add($runend_date, date_interval_create_from_date_string("1 day"));
         }
 
-//        var_dump($runat_date);
-//        var_dump($runend_date);
+        var_dump($runat_date);
+        var_dump($runend_date);
 
         $this->runtime = $runend_date->getTimestamp() - $runat_date->getTimestamp();
         $this->elapsed = $current_date->getTimestamp() - $runat_date->getTimestamp();

@@ -73,6 +73,7 @@ function call_agent_function($job)
     echo "worker call agent\n";
     $t = new Agent($thing);
 
+echo "bar";
     if (!isset($t->thing_report['sms'])) {
         echo "WORKER | No SMS message found.". "\n";
     } else {
