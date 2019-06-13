@@ -174,9 +174,9 @@ $this->printRunat("get");
         }
         if ($this->isInput($day)) {$this->day = $day;}
 
-        if ($day == "X") {$this->day = $day;}
+        if (($day == "X") and (isset($this->day) and ($this->day == "X"))) {$this->day = $day;}
 
-        return array($this->day, $this->hour, $this->minute);
+//        return array($this->day, $this->hour, $this->minute);
     }
 
 
@@ -317,9 +317,16 @@ $this->printRunat("get");
         $hour_text = str_pad($this->hour, 2, "0", STR_PAD_LEFT);
         $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
 
-        $sms_message .= " | day " . $this->day . " hour " . $hour_text . " minute " . $minute_text;
+$day_text = $this->day;
+        $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text;
 
-        $sms_message .= " | nuuid " . strtoupper($this->runat->nuuid);
+if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
+
+$sms_message .= " | Set RUNAT. ";
+
+}
+
+        $sms_message .= "| nuuid " . strtoupper($this->runat->nuuid);
 //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;

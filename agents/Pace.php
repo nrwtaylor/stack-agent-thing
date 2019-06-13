@@ -138,6 +138,16 @@ class Pace extends Agent {
         return $this->thing_report;
     }
 
+    function isInput($input) {
+       if ($input === false) {return false;}
+       if (strtolower($input) == strtolower("X")) {return false;}
+
+       if (is_numeric($input)) {return true;}
+       if ($input == 0) {return true;}
+
+       return true;
+    }
+
 
     /**
      *
@@ -331,11 +341,11 @@ class Pace extends Agent {
 
         $runtime_agent = new Runtime($this->thing, "runtime");
 
-$response_text = "Please set a RUNTIME. ";
+$response_text = "Set a RUNTIME. ";
 $this->per_item_time = false;
 $this->runtime_minutes = "X";
 
-if ($runtime_agent->minutes != false) {
+if (($runtime_agent->minutes != false) and ($runtime_agent->minutes != "X")) {
         $this->runtime_minutes = $runtime_agent->minutes;
         $response_text = "";
 
@@ -369,26 +379,50 @@ $this->response .= $response_text;
 //        $this->run_at_hour = $runat_agent->hour;
 //        $this->run_at_minute = $runat_agent->minute;
 
-
+$this->run_at_day= "X";
 $this->run_at_hour = "X";
 $this->run_at_minute = "X";
-$response_text = "Please set a RUNAT time. ";
 
+   $response_text = "";
 
-if (($runat_agent->hour != false) and ($runat_agent->minute != false)) {
-
+if ($this->isInput($runat_agent->hour)) {
+//echo "load runat";
         $this->run_at_hour = $runat_agent->hour;
+   $response_text = "";
+} else {
+   $response_text = "Set RUNAT. ";
+}
+//$this->response .= $response_text;
+
+
+if ($this->isInput($runat_agent->minute)) {
         $this->run_at_minute = $runat_agent->minute;
-        $response_text = "";
+//   $response_text = "";
+} else {
+   $response_text = "Set RUNAT. ";
+}
+//$this->response .= $response_text;
+
+
+if ($this->isInput($runat_agent->day)) {
+//echo "load runat";
+        $this->run_at_day = $runat_agent->day;
+   $response_text = "";
+} else {
+   $response_text = "Set RUNAT. ";
 }
 
-if (($runat_agent->hour == "X") and ($runat_agent->minute == "X")) {
 
-        $this->run_at_hour = $runat_agent->hour;
-        $this->run_at_minute = $runat_agent->minute;
-        $response_text = "Please set a RUNAT time. ";
-}
 
+
+//if (($runat_agent->hour == "X") and ($runat_agent->minute == "X")) {
+
+//        $this->run_at_hour = $runat_agent->hour;
+//        $this->run_at_minute = $runat_agent->minute;
+//        $response_text = "Please set a RUNAT time. ";
+//}
+
+$this->response .= $response_text;
 
 
         $runat_date = date_create($date . " " . $this->run_at_hour.":".$this->run_at_minute);
@@ -398,8 +432,10 @@ if (($runat_agent->hour == "X") and ($runat_agent->minute == "X")) {
         }
         $runend_date = clone $runat_date;
 
-if ($runtime_agent->minutes != false) {
+//$response_text = "Set RUNTIME.";
+if (($runtime_agent->minutes != false) and ($runtime_agent->minutes != "X")) {
         $runend_date = date_add($runend_date, date_interval_create_from_date_string($runtime_agent->minutes . " minutes"));
+$response_text = "";
 }
 
 
@@ -413,7 +449,7 @@ if ($runend_date != false) {
 
 
 }
-$this->response .= $response_text;
+//$this->response .= $response_text;
 
 //        $this->runtime = $runend_date->getTimestamp() - $runat_date->getTimestamp();
         $this->elapsed = $current_date->getTimestamp() - $runat_date->getTimestamp();
@@ -478,14 +514,15 @@ $minute_text = str_pad($this->run_at_minute,2,"0",STR_PAD_LEFT);
 
 //            if (isset($this->run_at_day)) {$sms .= $hour_text . ":" . $minute_text;} 
             $sms .= $hour_text . ":" . $minute_text;
+$sms .= " " . $this->run_at_day;
 
         }
 
 
-        if ( (isset($this->run_at_day)) and (isset($this->run_at_minute)) ) { 
-            $sms .= " "; 
-            if (isset($this->run_at_day)) {$sms .= $this->run_at_day;} 
-        }
+//        if ( (isset($this->run_at_day)) and (isset($this->run_at_minute)) ) { 
+//            $sms .= " "; 
+//            if (isset($this->run_at_day)) {$sms .= $this->run_at_day;} 
+//        }
 
 
 

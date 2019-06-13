@@ -125,9 +125,7 @@ class Runtime extends Agent {
 
             $previous_piece = $piece;
         }
-        //var_dump($input);
-        //var_dump($list);
-        //exit();
+
         // If nothing found assume a lone number represents minutes
         if (count($list) == 0) {
             foreach ($pieces as $key=>$piece) {
@@ -144,12 +142,7 @@ class Runtime extends Agent {
             }
         }
 
-        //var_dump($input);
-        //var_dump($list);
-
         if (count($list) == 1) { $this->minutes = $list[0];}
-
-        //exit();
 
         return $this->minutes;
     }
@@ -217,12 +210,12 @@ class Runtime extends Agent {
      */
     private function makeSMS() {
         $sms_message = "RUNTIME";
-        //$sms_message .= " | " . $this->headcodeTime($this->start_at);
-
-//        $sms_message .= " | minutes " . $this->minutes;
 
         $sms_message .= $this->response;
 
+        if ($this->minutes == "X") {
+            $sms_message .= " Set RUNTIME.";
+        }
 
         $sms_message .= " | nuuid " . strtoupper($this->runtime->nuuid);
 //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
@@ -239,11 +232,12 @@ class Runtime extends Agent {
         // Thing actions
 
         $this->thing->flagGreen();
-$response_text = "Please set RUNTIME. ";
-if ($this->minutes != false) {
-$response_text = "" . $this->minutes . " minutes.";
-}
-$this->response .= "| " . $response_text;
+
+        $response_text = "Please set RUNTIME. ";
+        if ($this->minutes != false) {
+            $response_text = "" . $this->minutes . " minutes.";
+        }
+        $this->response .= "| " . $response_text;
 
         // Generate email response.
 
@@ -313,6 +307,12 @@ $this->response .= "| " . $response_text;
 //        $keywords = $this->keywords;
 
         if (strpos($this->agent_input, "runtime") !== false) {
+            return;
+        }
+
+        if (strpos($this->input, "reset") !== false) {
+            $this->minutes = "X";
+	
             return;
         }
 
