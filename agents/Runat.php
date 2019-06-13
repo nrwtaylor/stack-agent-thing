@@ -39,6 +39,11 @@ class Runat extends Agent {
 
         if ($this->runat == false) {return;}
 
+        if (!isset($this->day)) {$this->day = "X";}
+        if (!isset($this->hour)) {$this->hour = "X";}
+        if (!isset($this->minute)) {$this->minute = "X";}
+
+
         $this->runat->setVariable("refreshed_at", $this->current_time);
         $this->runat->setVariable("day", $this->day);
         $this->runat->setVariable("hour", $this->hour);
@@ -120,11 +125,11 @@ $this->printRunat("get");
     }
 
     function isInput($input) {
-       if ($input === false) {echo "false";return false;}
-       if (strtolower($input) == strtolower("X")) {echo "X";return false;}
+       if ($input === false) {return false;}
+       if (strtolower($input) == strtolower("X")) {return false;}
 
-       if (is_numeric($input)) {echo "numeric";return true;}
-       if ($input == 0) {echo "0";return true;}
+       if (is_numeric($input)) {return true;}
+       if ($input == 0) {return true;}
 
        return true;
     }
@@ -167,8 +172,9 @@ $this->printRunat("get");
             if ($this->isInput($minute)) {$this->minute = $minute;}
             if ($this->isInput($hour)) {$this->hour = $hour%24;}
         }
-
         if ($this->isInput($day)) {$this->day = $day;}
+
+        if ($day == "X") {$this->day = $day;}
 
         return array($this->day, $this->hour, $this->minute);
     }
@@ -389,7 +395,7 @@ $this->printRunat("get");
     }
 
     function printRunat($text = null) {
-
+return;
         echo $text . "\n";
 
         if (!isset($this->day)) {$day = "X";} else {$day = $this->day;}

@@ -47,6 +47,7 @@ class Pace extends Agent {
         $this->time_travel_unit_name = "s";
         $this->time_unit_name = "seconds";
 
+
     }
 
     public function run() {
@@ -103,7 +104,7 @@ class Pace extends Agent {
 
 
         $this->time_travelled = $this->thing->json->readVariable( array("pace", "time_travelled") );
-        $this->response = "Loaded Pace time travelled and microsecond timestamp."; // Because
+//        $this->response .= "Loaded Pace time travelled and microsecond timestamp."; // Because
     }
 
 
@@ -314,7 +315,7 @@ class Pace extends Agent {
         $input = strtolower($this->subject);
 
         $number_agent = new Number($this->thing, "number");
-//        var_dump($number_agent->numbers);
+
 
         $this->min = 1;
         $this->max = 1;
@@ -330,8 +331,22 @@ class Pace extends Agent {
 
         $runtime_agent = new Runtime($this->thing, "runtime");
 
+$response_text = "Please set a RUNTIME. ";
+$this->per_item_time = false;
+$this->runtime_minutes = "X";
+
+if ($runtime_agent->minutes != false) {
+        $this->runtime_minutes = $runtime_agent->minutes;
+        $response_text = "";
+
+
         $item_count = $this->max - $this->min + 1;
         $this->per_item_time = ((float)$runtime_agent->minutes / (float)$item_count);
+}
+
+
+$this->response .= $response_text;
+
 
         //        $runat_agent = new Runat($this->thing, "runat");
         //        $this->run_at_hour = $runat_agent->hour;
@@ -349,40 +364,66 @@ class Pace extends Agent {
         $time = explode(" ", $this->current_timestamp)[1];
 
         $current_date = date_create($date . " " . $time);
-//        var_dump($current_date);
-
-        // Build run at time
 
         $runat_agent = new Runat($this->thing, "runat");
+//        $this->run_at_hour = $runat_agent->hour;
+//        $this->run_at_minute = $runat_agent->minute;
+
+
+$this->run_at_hour = "X";
+$this->run_at_minute = "X";
+$response_text = "Please set a RUNAT time. ";
+
+
+if (($runat_agent->hour != false) and ($runat_agent->minute != false)) {
+
         $this->run_at_hour = $runat_agent->hour;
         $this->run_at_minute = $runat_agent->minute;
+        $response_text = "";
+}
 
-var_dump($this->run_at_hour);
-var_dump($this->run_at_minute);
+if (($runat_agent->hour == "X") and ($runat_agent->minute == "X")) {
+
+        $this->run_at_hour = $runat_agent->hour;
+        $this->run_at_minute = $runat_agent->minute;
+        $response_text = "Please set a RUNAT time. ";
+}
+
+
 
         $runat_date = date_create($date . " " . $this->run_at_hour.":".$this->run_at_minute);
-
+        if ($runat_date == false) {
+            // No runat date set.
+            $runat_date = clone $current_date;
+        }
         $runend_date = clone $runat_date;
 
+if ($runtime_agent->minutes != false) {
         $runend_date = date_add($runend_date, date_interval_create_from_date_string($runtime_agent->minutes . " minutes"));
+}
+
 
         if ($runend_date < $current_date) {
             date_add($runat_date, date_interval_create_from_date_string("1 day"));
             date_add($runend_date, date_interval_create_from_date_string("1 day"));
         }
 
-        var_dump($runat_date);
-        var_dump($runend_date);
-
+if ($runend_date != false) {
         $this->runtime = $runend_date->getTimestamp() - $runat_date->getTimestamp();
+
+
+}
+$this->response .= $response_text;
+
+//        $this->runtime = $runend_date->getTimestamp() - $runat_date->getTimestamp();
         $this->elapsed = $current_date->getTimestamp() - $runat_date->getTimestamp();
         $this->togo = $this->runtime - $this->elapsed;
-
+$this->percent = null;
+if ($this->runtime != 0) {
         $this->percent = $this->elapsed / $this->runtime;
-
+}
         $this->runat_date = $runat_date;
         $this->runend_date = $runend_date;
-
 //        echo "elapsed " . $this->elapsed. "\n";
 //        echo "togo " . $this->togo . "\n";
 //        echo "percent " . $this->percent . "\n";
@@ -392,7 +433,7 @@ var_dump($this->run_at_minute);
         $this->items_ghost = ($this->max - $this->min) * $this->percent + $this->min;
 
 
-        $this->response = "Paced.";
+//        $this->response .= "Paced. ";
         $this->message = "https://www.urbandictionary.com/define.php?term=pace";
         $this->keyword = "pace";
 
@@ -420,8 +461,39 @@ var_dump($this->run_at_minute);
             $sms = "PACE";
         }
 
+
+        if ( (isset($this->runtime_minutes)) ) {
+            $sms .= " | runtime " . $this->runtime_minutes;
+        }
+
+
+        if ( (isset($this->run_at_day)) or (isset($this->run_at_hour)) or (isset($this->run_at_minute)) ) { 
+            $sms .= " runat";
+        }
+
+        if ( (isset($this->run_at_hour)) and (isset($this->run_at_minute)) ) { 
+            $sms .= " "; 
+$hour_text = str_pad($this->run_at_hour,2, "0",STR_PAD_LEFT);
+$minute_text = str_pad($this->run_at_minute,2,"0",STR_PAD_LEFT);
+
+//            if (isset($this->run_at_day)) {$sms .= $hour_text . ":" . $minute_text;} 
+            $sms .= $hour_text . ":" . $minute_text;
+
+        }
+
+
+        if ( (isset($this->run_at_day)) and (isset($this->run_at_minute)) ) { 
+            $sms .= " "; 
+            if (isset($this->run_at_day)) {$sms .= $this->run_at_day;} 
+        }
+
+
+
+
         $link = "";
-        $this->response = $this->per_item_time . " minute block";
+if ($this->per_item_time != 0) {
+        $this->response .= $this->per_item_time . " minute block";
+
 
         $percent = (intval($this->percent*100));
 
@@ -442,7 +514,7 @@ var_dump($this->run_at_minute);
 
         $this->response .= $progress_text;
         $this->response .= " " . $this->thing->human_time($this->togo) . " to go.";
-
+}
         //$sms .= " | https://www.urbandictionary.com/define.php?term=pace";
         //        $sms .= " | " . $link . " | " . $this->response;
         $sms .= " | " . $this->response;

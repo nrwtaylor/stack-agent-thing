@@ -60,6 +60,7 @@ class Agent
         $this->verbosity = 9;
 
         $this->context = null;
+        $this->response = "";
 // First things first... see if Mordok is on.
 /* Think about how this should work 
 and the user UX/UI
@@ -281,12 +282,12 @@ and the user UX/UI
 
     public function read()
     {
-echo "\n";
-echo "agent_name ";
-$arr = explode("\\",$this->agent_name);
-$agent_name = array_values(array_slice($arr, -1))[0];
-echo $agent_name;
-echo "\n";
+//echo "\n";
+//echo "agent_name ";
+//$arr = explode("\\",$this->agent_name);
+//$agent_name = array_values(array_slice($arr, -1))[0];
+//echo $agent_name;
+//echo "\n";
 
 //        if (strtolower($this->agent_input) != $agent_name) {
 //            // If agent input has been provided then
@@ -300,19 +301,19 @@ echo "\n";
 switch (true) {
     case ($this->agent_input == null):
     case (strtolower($this->agent_input) == "extract"):
-    case (strtolower($this->agent_input) == strtolower($agent_name)) :
+    case (strtolower($this->agent_input) == strtolower($this->agent_name)) :
         $this->input = strtolower($this->subject);
         break;
     default:
        $this->input = strtolower($this->agent_input);
 }
 
-echo "subject " . $this->subject;
-echo "\n";
+//echo "subject " . $this->subject;
+//echo "\n";
 
 
-echo "input " . $this->input;
-echo "\n";
+//echo "input " . $this->input;
+//echo "\n";
 
         $this->readSubject();
     }

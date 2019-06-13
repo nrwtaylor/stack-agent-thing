@@ -171,8 +171,6 @@ class Event
         $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
         $this->thing_report['log'] = $this->thing->log;
 
-		return;
-
     }
 
 
@@ -1053,34 +1051,54 @@ $web .= "<br>";
         }
 
         $sms_message = "EVENT";
+//$sms_message .= $this->event->nuuid ." ";
 // . strtoupper($this->event_code) ." | " . $s;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
-        $sms_message .= " | ";
+        $sms_message .= " ";
 
 //var_dump($this->event_name);
-
         $sms_message .= $this->event_name;
-        $sms_message .= " | " . trim($this->event_code);
 
-        if ( (isset($this->minutes)) ) {
-            $sms_message .= " | runtime " . $this->minutes;
+        $event_code_text = "X";
+        if ($this->event_code != false) {
+            $event_code_text = trim($this->event_code);
         }
+        $sms_message .= " " . $event_code_text;
 
+
+        $minutes_text = "Set RUNTIME. ";
+        if ( (isset($this->minutes)) and ($this->minutes != false)) {
+            $minutes_text = "runtime " . $this->minutes . " minutes. ";
+        }
+        $sms_message .= " | " . $minutes_text;
+
+
+        $run_at_text = "Set RUNAT. ";
 
         if ( (isset($this->day)) or (isset($this->hour)) or (isset($this->minute)) ) { 
-            $sms_message .= " | runat";
-        }
+
 
         if ( (isset($this->hour)) and (isset($this->minute)) ) { 
-            $sms_message .= " "; 
-            if (isset($this->day)) {$sms_message .= $this->hour . ":" . $this->minute;} 
+            $run_at_text .= " "; 
+$hour_text = str_pad($this->hour,2, "0",STR_PAD_LEFT);
+$minute_text = str_pad($this->minute,2,"0",STR_PAD_LEFT);
+$day_text = $this->day;
+
+
+            $run_at_text = "runat " . $hour_text . ":" . $minute_text . " " . $day_text . " ";} 
+        }
+
+//        if ( (isset($this->day)) and (isset($this->minute)) ) { 
+//            $run_at_text .= " "; 
+//            if (isset($this->day)) {$sms_message .= $this->day;} 
+//        }
+
+        if ( ($this->day == "X") or ($this->hour == "X") or ($this->minute == "X" )) { 
+            $run_at_text = "Set RUNAT. ";
         }
 
 
-        if ( (isset($this->day)) and (isset($this->minute)) ) { 
-            $sms_message .= " "; 
-            if (isset($this->day)) {$sms_message .= $this->day;} 
-        }
+        $sms_message .= $run_at_text;
 
 
 

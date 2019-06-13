@@ -218,7 +218,11 @@ class Runtime extends Agent {
     private function makeSMS() {
         $sms_message = "RUNTIME";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
-        $sms_message .= " | minutes " . $this->minutes;
+
+//        $sms_message .= " | minutes " . $this->minutes;
+
+        $sms_message .= $this->response;
+
 
         $sms_message .= " | nuuid " . strtoupper($this->runtime->nuuid);
 //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
@@ -235,6 +239,11 @@ class Runtime extends Agent {
         // Thing actions
 
         $this->thing->flagGreen();
+$response_text = "Please set RUNTIME. ";
+if ($this->minutes != false) {
+$response_text = "" . $this->minutes . " minutes.";
+}
+$this->response .= "| " . $response_text;
 
         // Generate email response.
 
