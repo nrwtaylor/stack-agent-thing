@@ -690,6 +690,12 @@ switch (true) {
             // And then ignored it.
         }
 
+        // Remove references to named chatbot agents
+//        $chatbot = new Chatbot($this->thing,"chatbot");
+//        $input =  $chatbot->filtered_input;
+
+
+
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
 
@@ -894,15 +900,14 @@ var_dump($place_thing->place_name);
         $this->thing->log( 'now looking at Place Context.' );
         //$place_thing = new Place($this->thing, "extract");
         $place_thing = new Place($this->thing, "place");
+//        $this->thing_report = $place_thing->thing_report;
 
-
-        $this->thing_report = $place_thing->thing_report;
-
-        if (!$place_thing->isPlace($this->subject)) {
+        if (!$place_thing->isPlace($input)) {
+//        if (!$place_thing->isPlace($this->subject)) {
         //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
 //            echo "place not found";
         } else {
-//            echo "place found";$
+//            echo "place found";
 
             $place_thing = new Place($this->thing);
 
@@ -1234,17 +1239,17 @@ if (!isset($agent_name)) {$agent_name = "Ant";}
         // Is this a request for a specific named agent?
         //$this->thing->log( $input . " " . $this->from );
 
-        if (strpos($input, 'mordok') !== false) {
-            $mordok_thing = new Mordok($this->thing);
-            $this->thing_report = $mordok_thing->thing_report;
-            return $this->thing_report;
-        }
+//        if (strpos($input, 'mordok') !== false) {
+//            $mordok_thing = new Mordok($this->thing);
+//            $this->thing_report = $mordok_thing->thing_report;
+//            return $this->thing_report;
+//        }
 
-        if ($this->from == "1327328917385978") { // Facebook Messenger Mordok
-            $mordok_thing = new Mordok($this->thing);
-            $this->thing_report = $mordok_thing->thing_report;
-            return $this->thing_report;
-        }
+//        if ($this->from == "1327328917385978") { // Facebook Messenger Mordok
+//            $mordok_thing = new Mordok($this->thing);
+//            $this->thing_report = $mordok_thing->thing_report;
+//            return $this->thing_report;
+//        }
 
         // Expand out emoji early
         // devstack - replace this with a fast general character
@@ -1273,6 +1278,12 @@ if (!isset($agent_name)) {$agent_name = "Ant";}
             $this->thing_report = $is_thing->thing_report;
             return $this->thing_report;
         }
+
+        // If a chatbot name is seen, respond. 
+//        if ((is_array($chatbot->chatbot_names)) and (count($chatbot->chatbot_names) > 0)) {
+//            $this->thing_report = $chatbot->thing_report;
+//            return $this->thing_report;
+//        }
 
         $this->thing->log( '<pre> Agent "Agent" created a Redpanda agent.</pre>', "WARNING" );
         $redpanda_thing = new Redpanda($this->thing);

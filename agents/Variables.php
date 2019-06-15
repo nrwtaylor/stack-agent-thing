@@ -364,7 +364,7 @@ class Variables
         $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variable_set_name, $variable) );
 
 
-$this->thing->log("GET " . $this->variables_thing->uuid . " " . $this->variable_set_name ." " . $variable . " " . $this->variables_thing->$variable. ".");
+$this->thing->log("get " . $this->variables_thing->uuid . " " . $this->variable_set_name ." " . $variable . " " . $this->variables_thing->$variable. ".");
 
 
         // And then load it into the thing
@@ -407,7 +407,7 @@ try {
 
 
 $this->thing->log("overflow " . $this->variables_thing->json->size_overflow . " write_fail_count " . $this->variables_thing->json->write_fail_count . ".");
-$this->thing->log("SET " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+$this->thing->log("set " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
 
 } catch (Exception $e) {
     echo 'Caught exception: ',  $e->getMessage(), "\n";
@@ -421,7 +421,7 @@ try {
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
 
 $this->thing->log("overflow " . $this->thing->json->size_overflow . " write_fail_count " . $this->thing->json->write_fail_count . ".");
-$this->thing->log("SET " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+$this->thing->log("set " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
 
 } catch (Exception $e) {
     echo 'Caught exception: ',  $e->getMessage(), "\n";

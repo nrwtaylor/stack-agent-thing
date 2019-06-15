@@ -233,11 +233,11 @@ class Runtime extends Agent {
 
         $this->thing->flagGreen();
 
-        $response_text = "Please set RUNTIME. ";
+        $response_text = "Please set RUNTIME.";
         if ($this->minutes != false) {
             $response_text = "" . $this->minutes . " minutes.";
         }
-        $this->response .= "| " . $response_text;
+        $this->response .= " | " . $response_text;
 
         // Generate email response.
 

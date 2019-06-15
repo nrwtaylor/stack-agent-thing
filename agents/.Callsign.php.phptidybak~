@@ -21,22 +21,65 @@ class Callsign extends Agent {
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
+//    function __construct(Thing $thing, $agent_input = null) {
+
     function init() {
         $this->start_time = microtime(true);
+//        if ($agent_input == null) {}
+//        $this->agent_input = $agent_input;
+//        $this->thing = $thing;
+//        $this->start_time = $this->thing->elapsed_runtime();
 
-        $this->assert_callsign = false;
+//        $this->agent_prefix = 'Agent "Callsign" ';
+
+//        $this->thing_report['thing'] = $this->thing->thing;
+
+//        $this->uuid = $thing->uuid;
+$this->assert_callsign = false;
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/callsign/';
+
+//        if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
+//        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
+//        if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
+
+//        $this->sqlresponse = null;
+
+//        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
+//        $this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
 
         $this->keywords = array();
 
+//        $this->thing->json->setField("variables");
+//        $time_string = $this->thing->json->readVariable( array("callsign", "refreshed_at") );
+
+//        if ($time_string == false) {
+//            $time_string = $this->thing->json->time();
+//            $this->thing->json->writeVariable( array("callsign", "refreshed_at"), $time_string );
+//        }
+
+        // If it has already been processed ...
+//        $this->reading = $this->thing->json->readVariable( array("callsign", "reading") );
+
+//        $this->readSubject();
+
+//        $this->thing->json->writeVariable( array("callsign", "reading"), $this->reading );
+
+//        if ($this->agent_input == null) {$this->respond();}
+
+//        if (isset($this->callsigns) and count($this->callsigns) != 0) {
+//            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . implode($this->callsign) . '.');
+//        } else {
+//            $this->thing->log($this->agent_prefix . 'did not find callsigns.');
+//        }
+
         $this->thing_report['help'] = "Looks up callsigns.";
         $this->thing_report['info'] = "Possibly helpful to station operators.";
+
+//        $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+//        $this->thing_report['log'] = $this->thing->log;
+//        $this->thing_report['response'] = $this->response;
     }
 
-
-    /**
-     *
-     */
     function get() {
 
         $this->thing->json->setField("variables");
@@ -50,16 +93,15 @@ class Callsign extends Agent {
         $this->reading = $this->thing->json->readVariable( array("callsign", "reading") );
 
 
+        //if ($place_code == null) {$place_code = $this->place_code;}
+
         $callsign = new Variables($this->thing, "variables callsign " . $this->from);
 
         $this->callsign_text = $callsign->getVariable("callsign");
         $this->refreshed_at = $callsign->getVariable("refreshed_at");
+
     }
 
-
-    /**
-     *
-     */
     function set() {
 
         $this->thing->json->writeVariable( array("callsign", "reading"), $this->reading );
@@ -72,17 +114,13 @@ class Callsign extends Agent {
         }
     }
 
-
-    /**
-     *
-     * @param unknown $input
-     */
-    function assertCallsign($input) {
+    function assertCallsign($input)
+    {
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "callsign is")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("callsign is"));
-        } elseif (($pos = strpos(strtolower($input), "callsign")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("callsign"));
+        if (($pos = strpos(strtolower($input), "callsign is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("callsign is")); 
+        } elseif (($pos = strpos(strtolower($input), "callsign")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("callsign")); 
         }
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         $callsigns = $this->extractCallsigns($filtered_input);
@@ -199,7 +237,6 @@ class Callsign extends Agent {
 
     /**
      *
-     * @param unknown $text (optional)
      * @return unknown
      */
     function getCallsign($text = null) {
@@ -276,7 +313,18 @@ class Callsign extends Agent {
         $test_array = array();
         foreach ($line_matches as $line) {
             $score = $this->getCloseness($line, $searchfor);
+            /*
+            //if ($score != 0) {$matches[] = $line;}
 
+            if ($score >= $best_score) {
+                // Add to the top
+                $best_score = $score;
+                $best_match = $line;
+                array_unshift($test_array, array("line"=>$line,"score"=>$score));
+                array_unshift($sorted_matches, $line);
+
+            } else
+*/
             if ($score != 0) {
                 // Add to the bottom.
                 $test_array[] = array("line"=>$line, "score"=>$score);
@@ -297,6 +345,53 @@ class Callsign extends Agent {
             $i += 1;
             if ($i >10) {break;}
         }
+        //var_dump($test_array);
+        //exit();
+        //var_dump($sorted_matches);
+        //exit();
+        /*
+        $pattern = preg_quote($searchfor, '/');
+        // finalise the regular expression, matching the whole line
+
+        $pattern = "/^.*". $pattern. ".*\$/mi";
+
+        $regex_pieces = "";
+        $pieces = explode(" ", $searchfor);
+        foreach($pieces as $piece) {
+            $regex_pieces .= "(?=.*" . $piece . ")";
+        }
+        $pattern = "/^" . $regex_pieces . ".*$/mi";
+
+        // search, and store all matching occurences in $matches
+        $m = false;
+        if(preg_match_all($pattern, $contents, $matches)){
+
+
+//echo "meep";
+//$searchfor = strtoupper($searchfor);
+
+       // $pattern = "|\b($searchfor)\b|";
+
+        // search, and store all matching occurences in $matches
+            echo $word ." " . $text . "\n";
+//        if(preg_match_all($pattern, $contents, $matches)){
+           // $m = $matches[0][0];
+//var_dump($matches);
+//var_dump($m);
+            $m = $matches[0];
+//exit();
+            return $m;
+        } else {
+            return false;
+        }
+
+//var_dump($matches);
+//exit();
+*/
+        //var_dump($matches[0]);
+        //exit();
+        //var_dump($matches[0]);
+        //return $best_match;
         return $test_array;
     }
 
@@ -308,6 +403,8 @@ class Callsign extends Agent {
      * @return unknown
      */
     function getCloseness($line, $text) {
+        //$line = 'VA1SAR;Darren   Bruce;Mac Leod;3567 MORLEY AVE;NEW WATERFORD;NS;B1H2"3;;;;;E;;;;;;';
+        //$text = "darren hodder";
 
         $words = preg_split('/[^a-z0-9.\']+/i', $line);
         $score = 0;
@@ -325,22 +422,33 @@ class Callsign extends Agent {
                     $score += 2;
                 }
 
+                //else {
+                //echo mb_strlen($text);
                 $lev = levenshtein(strtolower($text_word), strtolower($word));
                 if (mb_strlen($text_word) != $lev) {
                     $score += 1;
+                    //echo $lev. " " . $word . " - " . $text . "\n";
                 }
 
                 if (mb_substr(strtolower($text_word), 0, 3) == mb_substr(strtolower($word), 0, 3)) {
+                    //echo $text ." " . $word . "\n";
                     $score += 2;
+                    //echo $lev. " " . $word . " - " . $text . "\n";
                 }
 
 
+                //$lev = levenshtein($text, $word);
                 if (mb_substr(strtolower($text_word), 0, 1) == mb_substr(strtolower($word), 0, 1)) {
                     //echo $text ." " . $word . "\n";
                     $score += 1;
+                    //echo $lev. " " . $word . " - " . $text . "\n";
                 }
             }
         }
+        //echo $score;
+        //exit();
+
+        //      echo $score . " - " . $text . " - " . $line . "\n";
         return $score;
     }
 
@@ -393,13 +501,7 @@ class Callsign extends Agent {
      */
     function makeSMS() {
 
-//$callsign_text = (implode(" ",$this->callsign));
-$r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
-
-//            $this->sms_message .= $callsign_text;
-
-
-        $sms = "CALLSIGN | " . $r;
+        $sms = "CALLSIGN | " . $this->response;
         $this->sms_message = $sms;
         return;
     }
@@ -411,18 +513,18 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
     function makeWeb() {
         $web = "";
 
-        //        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+//        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
-        //        $web = '<a href="' . $link . '">';
-        //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
-        //        $web .= $this->html_image;
+//        $web = '<a href="' . $link . '">';
+//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
+//        $web .= $this->html_image;
 
         $web .= "</a>";
         $web .= "<br>";
-        $web .= '<b>Callsign Agent</b><br>';
-        $web .= "<p>";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+$web .= "<p>";
         $web .= $this->sms_message;
-        $web .= "<p>";
+$web .= "<p>";
         if (isset($this->callsigns)) {
             foreach ($this->callsigns as $id=>$callsign) {
                 $callsign_text = $callsign["callsign"] . " " . $callsign["first_name"];
@@ -441,7 +543,7 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
      */
     function makeEmail() {
 
-        $this->email_message = "CALLSIGN | " . $this->response;
+        $this->email_message = "CALLSIGN | ";
 
     }
 
@@ -460,11 +562,11 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
         }
 
 
-        $prefix = 'callsign';
-        $callsigns = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $this->input);
-        $callsigns = ltrim($callsigns);
-        $this->search_callsigns = $callsigns;
-        $this->extractCallsigns($callsigns);
+                        $prefix = 'callsign';
+                        $callsigns = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $this->input);
+                        $callsigns = ltrim($callsigns);
+                        $this->search_callsigns = $callsigns;
+                        $this->extractCallsigns($callsigns);
 
 
 
@@ -473,15 +575,15 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
 
         if (count($pieces) == 1) {
             if ($this->input == 'callsign') {
-                //                $this->getCallsigns($this->callsign_text);
-                $this->extractCallsigns($this->callsign_text);
-                if (isset($this->callsign)) {
-                    $this->response = $this->callsign["callsign"] . " " . $this->callsign["first_name"] . ". " . "Asserted callsign retrieved.";
-                    return;
-                }
-
-                $this->response = "No match found.";
+//                $this->getCallsigns($this->callsign_text);
+$this->extractCallsigns($this->callsign_text);
+if (isset($this->callsign)) {
+                $this->response = $this->callsign["callsign"] . " " . $this->callsign["first_name"] . ". " . "Asserted callsign retrieved.";
                 return;
+}
+
+$this->response = "No match found.";
+return;
             }
 
         }
@@ -493,42 +595,76 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
 
                     switch ($piece) {
 
-                    case 'is':
+   case 'is':
+//                    case 'callsign':
+//echo "FOO";
+//                        $prefix = 'callsign';
+//                        $callsigns = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $this->input);
+//                        $callsigns = ltrim($callsigns);
+//                        $this->search_callsigns = $callsigns;
+//                        $this->extractCallsigns($callsigns);
+                        //if ($this->callsign != null) {$this->response .= "Found callsign(s). ";}
 
-                        $this->assertCallsign(strtolower($this->input));
+        $this->assertCallsign(strtolower($this->input));
 
-                        if (empty($this->callsign)) {
-                            $this->response = "Did not find a callsign.";
-                        } else {
+        //$this->refreshed_at = $this->thing->time();
+        if (empty($this->callsign)) {
+        $this->response = "Did not find a callsign.";
+} else {
 
-                            $this->response = 'Callsign asserted to be ' . strtoupper($this->callsign["callsign"]) .".";
-                        }
+        $this->response = 'Asserted Callsign and found ' . strtoupper($this->callsign["callsign"]) .".";
+}
 
+//                        $this->response = "Did not find a callsign.";
                         return;
 
+
+
                     default:
+
                         //echo 'default';
+
                     }
+
                 }
             }
-        }
 
-        if (!isset($this->callsigns)) {
-            $this->response = "No match found.";
-            return;
         }
-
-        if (count($this->callsigns) > 1) {
-            $this->response = "Found " . count($this->callsigns) . " callsigns. Best " . $this->callsign["callsign"]. " ". $this->callsign["first_name"] . ".";
-            return;
-        }
-
-        if (count($this->callsigns) == 1) {
-            $this->response = "Found " . $this->callsign["callsign"]. " ". $this->callsign["first_name"] . ".";
-            return;
-        }
-
+if (!isset($this->callsigns)) {
         $this->response = "No match found.";
+        return;
+}
+
+
+if (count($this->callsigns) > 1) {
+        $this->response = "Found " . count($this->callsigns) . " callsigns. Best " . $this->callsign["callsign"]. " ". $this->callsign["first_name"] . ".";
+        return;
+}
+
+if (count($this->callsigns) == 1) {
+        $this->response = "Found " . $this->callsign["callsign"]. " ". $this->callsign["first_name"] . ".";
+        return;
+}
+
+
+$this->response = "No match found.";
     }
+
+
+
+
+
+
+    /**
+     *
+     * @return unknown
+     */
+    function contextCallsign() {
+        $this->callsign_context = '
+';
+
+        return $this->callsign_context;
+    }
+
 
 }

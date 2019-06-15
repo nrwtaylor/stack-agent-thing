@@ -318,9 +318,14 @@ $this->printRunat("get");
         $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
 
 $day_text = $this->day;
-        $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text;
+        $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text . " ";
 
-if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
+
+if ( (!$this->isInput($this->day)) or
+     (!$this->isInput($this->hour)) or
+     (!$this->isInput($this->minute)) ) {
+
+//if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 
 $sms_message .= " | Set RUNAT. ";
 

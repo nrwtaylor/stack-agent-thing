@@ -271,14 +271,32 @@ $place_code = $place_code_candidate;
 
     function isPlace($requested_place_identifier = null)
     {
+if ($requested_place_identifier == "") {return false;}
+
         if(!isset($this->places)) {$this->getPlaces();}
         foreach($this->places as $key=>$place) {
-            if (strtolower($requested_place_identifier) == strtolower($place['code'])) {return true;}
+
+            if (strtolower($requested_place_identifier) == strtolower($place['code'])) {
+                return true;
+            }
             if (strtolower($requested_place_identifier) == strtolower($place['name'])) {return true;}
+
+            $words = explode(" ",$requested_place_identifier);
+            foreach ($words as $index=>$word) {
+                $word = trim($word);
+                if (strtolower($word) == strtolower($place['code'])) {return true;}
+                if (strtolower($word) == strtolower($place['name'])) {return true;}
+
+            }
+
+
         }
+
+
 
         return false;
     }
+
 
     // very much dev
     function getPlaces()
