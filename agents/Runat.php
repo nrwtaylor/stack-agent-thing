@@ -25,7 +25,6 @@ class Runat extends Agent {
      * @param unknown $agent_input (optional)
      */
     function init() {
-
         $this->keywords = array('next', 'accept', 'clear', 'drop', 'add', 'new');
         $this->test= "Development code"; // Always iterative.
         $this->runat = new Variables($this->thing, "variables runat " . $this->from);
@@ -42,6 +41,10 @@ class Runat extends Agent {
         if (!isset($this->day)) {$this->day = "X";}
         if (!isset($this->hour)) {$this->hour = "X";}
         if (!isset($this->minute)) {$this->minute = "X";}
+
+        $datetime = $this->day ." " . $this->hour.":".$this->minute;
+        $this->datetime = date_parse($datetime);
+
 
 
         $this->runat->setVariable("refreshed_at", $this->current_time);
@@ -102,9 +105,13 @@ $this->printRunat("get");
      * @param unknown $input (optional)
      */
     function extractNumbers($input =  null) {
+
+if ($input == null) {$input = $this->input;}
+
         $this->numbers = array();
 
-        $agent = new Number($this->thing, "number");
+        $agent = new Number($this->thing, "number " . $input);
+//$agent->extractNumber($input);
         $numbers = $agent->numbers;
         if (count($numbers) > 0) {
             $this->numbers = $numbers;
@@ -144,12 +151,16 @@ $this->printRunat("get");
 
         $minute = $this->parsed_date['minute'];
         $hour = $this->parsed_date['hour'];
-
         $day = $this->extractDay($input);
 
         // See what numbers are in the input
         if (!isset($this->numbers)) {$this->extractNumbers($input);}
 
+//var_dump($this->numbers);
+$this->extractNumbers($input);
+if ( (isset($this->numbers)) and (count($this->numbers) ==0) ) {
+
+} else {
 
         if (($minute == 0) and ($hour == 0)) {
 
@@ -172,8 +183,9 @@ $this->printRunat("get");
             if ($this->isInput($minute)) {$this->minute = $minute;}
             if ($this->isInput($hour)) {$this->hour = $hour%24;}
         }
-        if ($this->isInput($day)) {$this->day = $day;}
 
+}
+        if ($this->isInput($day)) {$this->day = $day;}
         if (($day == "X") and (isset($this->day) and ($this->day == "X"))) {$this->day = $day;}
 
 //        return array($this->day, $this->hour, $this->minute);
@@ -435,12 +447,18 @@ return;
             $this->day = "X";
             return;
         }
+//        $this->extractRunat($this->input);
 
-        if (strpos($this->agent_input, "runat") !== false) {
+        if ($this->agent_input == "runat")  {
+
             return;
         }
 
+        if (strpos($this->agent_input, "runat") !== false) {
+        $this->extractRunat($this->agent_input);
 
+            return;
+        }
         $this->extractRunat($this->input);
 
     }

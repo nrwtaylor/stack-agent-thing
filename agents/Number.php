@@ -242,8 +242,10 @@ class Number extends Agent
 
 	public function readSubject()
     {
+//var_dump($this->input);
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
+
         if ($this->agent_input == null) {
             $input = $this->subject;
         }
@@ -254,6 +256,7 @@ class Number extends Agent
             $input = $this->agent_input;
         }
 
+//$input = $this->input;
         //} elseif (explode(" ",$this->agent_input)[0] == "number") {
         //    $input = $this->agent_input;
         //}
@@ -286,8 +289,8 @@ class Number extends Agent
 
         if (count($pieces) == 1) {
 
-            if ($input == 'number') {
-                $this->getNumber();
+            if ($this->input == 'number') {
+                //$this->getNumber();
                 $this->response = "Last number retrieved.";
 //echo "meep";
                 return;
@@ -416,3 +419,4 @@ class Number extends Agent
     }
 
 }
+
