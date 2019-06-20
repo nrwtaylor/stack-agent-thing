@@ -52,12 +52,13 @@ class Runat extends Agent {
         $this->runat->setVariable("hour", $this->hour);
         $this->runat->setVariable("minute", $this->minute);
 
-$this->printRunat("set");
+        $this->printRunat("set");
 
 
         $this->thing->log( $this->agent_prefix .' saved ' . $this->day . " " . $this->hour . " " . $this->minute . ".", "DEBUG" );
 
     }
+
 
     /**
      *
@@ -76,7 +77,7 @@ $this->printRunat("set");
         if ($this->isInput($minute)) {$this->minute = $minute;}
 
 
-$this->printRunat("get");
+        $this->printRunat("get");
     }
 
 
@@ -106,12 +107,12 @@ $this->printRunat("get");
      */
     function extractNumbers($input =  null) {
 
-if ($input == null) {$input = $this->input;}
+        if ($input == null) {$input = $this->input;}
 
         $this->numbers = array();
 
         $agent = new Number($this->thing, "number " . $input);
-//$agent->extractNumber($input);
+        //$agent->extractNumber($input);
         $numbers = $agent->numbers;
         if (count($numbers) > 0) {
             $this->numbers = $numbers;
@@ -131,15 +132,22 @@ if ($input == null) {$input = $this->input;}
 
     }
 
+
+    /**
+     *
+     * @param unknown $input
+     * @return unknown
+     */
     function isInput($input) {
-       if ($input === false) {return false;}
-       if (strtolower($input) == strtolower("X")) {return false;}
+        if ($input === false) {return false;}
+        if (strtolower($input) == strtolower("X")) {return false;}
 
-       if (is_numeric($input)) {return true;}
-       if ($input == 0) {return true;}
+        if (is_numeric($input)) {return true;}
+        if ($input == 0) {return true;}
 
-       return true;
+        return true;
     }
+
 
     /**
      *
@@ -156,39 +164,38 @@ if ($input == null) {$input = $this->input;}
         // See what numbers are in the input
         if (!isset($this->numbers)) {$this->extractNumbers($input);}
 
-//var_dump($this->numbers);
-$this->extractNumbers($input);
-if ( (isset($this->numbers)) and (count($this->numbers) ==0) ) {
-
-} else {
-
-        if (($minute == 0) and ($hour == 0)) {
-
-            // Deal with edge case(s)
-            if ((isset($this->numbers[0])) and ($this->numbers[0] = "0000")) {
-               $this->hour = 0;
-               $this->minute = 0;
-            }
-            if (($this->numbers[0] = "00") and
-               ((isset($this->numbers[1])) and ($this->numbers[1] == "00") )) {
-
-               $this->hour = $hour;
-               $this->minute = $minute;
-
-            }
-
+        $this->extractNumbers($input);
+        if ( (isset($this->numbers)) and (count($this->numbers) ==0) ) {
 
         } else {
 
-            if ($this->isInput($minute)) {$this->minute = $minute;}
-            if ($this->isInput($hour)) {$this->hour = $hour%24;}
-        }
+            if (($minute == 0) and ($hour == 0)) {
 
-}
+                // Deal with edge case(s)
+                if ((isset($this->numbers[0])) and ($this->numbers[0] = "0000")) {
+                    $this->hour = 0;
+                    $this->minute = 0;
+                }
+                if (($this->numbers[0] = "00") and
+                    ((isset($this->numbers[1])) and ($this->numbers[1] == "00") )) {
+
+                    $this->hour = $hour;
+                    $this->minute = $minute;
+
+                }
+
+
+            } else {
+
+                if ($this->isInput($minute)) {$this->minute = $minute;}
+                if ($this->isInput($hour)) {$this->hour = $hour%24;}
+            }
+
+        }
         if ($this->isInput($day)) {$this->day = $day;}
         if (($day == "X") and (isset($this->day) and ($this->day == "X"))) {$this->day = $day;}
 
-//        return array($this->day, $this->hour, $this->minute);
+        //        return array($this->day, $this->hour, $this->minute);
     }
 
 
@@ -329,22 +336,22 @@ if ( (isset($this->numbers)) and (count($this->numbers) ==0) ) {
         $hour_text = str_pad($this->hour, 2, "0", STR_PAD_LEFT);
         $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
 
-$day_text = $this->day;
+        $day_text = $this->day;
         $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text . " ";
 
 
-if ( (!$this->isInput($this->day)) or
-     (!$this->isInput($this->hour)) or
-     (!$this->isInput($this->minute)) ) {
+        if ( (!$this->isInput($this->day)) or
+            (!$this->isInput($this->hour)) or
+            (!$this->isInput($this->minute)) ) {
 
-//if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
+            //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 
-$sms_message .= " | Set RUNAT. ";
+            $sms_message .= " | Set RUNAT. ";
 
-}
+        }
 
         $sms_message .= "| nuuid " . strtoupper($this->runat->nuuid);
-//        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
+        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -418,8 +425,13 @@ $sms_message .= " | Set RUNAT. ";
         }
     }
 
+
+    /**
+     *
+     * @param unknown $text (optional)
+     */
     function printRunat($text = null) {
-return;
+        return;
         echo $text . "\n";
 
         if (!isset($this->day)) {$day = "X";} else {$day = $this->day;}
@@ -430,6 +442,7 @@ return;
         echo $day . " "  .$hour . " " . $minute ."\n";
 
     }
+
 
     /**
      *
@@ -447,15 +460,15 @@ return;
             $this->day = "X";
             return;
         }
-//        $this->extractRunat($this->input);
+        //        $this->extractRunat($this->input);
 
-        if ($this->agent_input == "runat")  {
+        if ($this->agent_input == "runat") {
 
             return;
         }
 
         if (strpos($this->agent_input, "runat") !== false) {
-        $this->extractRunat($this->agent_input);
+            $this->extractRunat($this->agent_input);
 
             return;
         }

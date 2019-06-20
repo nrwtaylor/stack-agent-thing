@@ -56,15 +56,14 @@ class Rundate extends Agent {
         $this->rundate->setVariable("month", $this->month);
         $this->rundate->setVariable("year", $this->year);
 
-        $this->printRundate("set");
+$this->printRundate("set");
 
 
         $this->thing->log( $this->agent_prefix .' saved ' . $this->day . " " . $this->month . " " . $this->year . ".", "DEBUG" );
 
-        $this->setRunat();
+$this->setRunat();
 
     }
-
 
     /**
      *
@@ -82,21 +81,17 @@ class Rundate extends Agent {
         if ($this->isInput($year)) {$this->year = $year;}
 
         if ($this->isInput($day)) {$this->day = $day;}
-        // Check the day in Runat.
-        //$this->getRunat();
+// Check the day in Runat.
+//$this->getRunat();
 
 
-        //        if ($this->isInput($month)) {$this->month = $month;}
-        //        if ($this->isInput($year)) {$this->year = $year;}
+//        if ($this->isInput($month)) {$this->month = $month;}
+//        if ($this->isInput($year)) {$this->year = $year;}
 
 
-        $this->printRundate("get");
+$this->printRundate("get");
     }
 
-
-    /**
-     *
-     */
     function setRunat() {
         // $runat = new Runat($this->thing, "runat");
         $date_string = $this->year ."-" . $this->month ."-" . $this->day;
@@ -106,12 +101,12 @@ class Rundate extends Agent {
 
         $runat = new Runat($this->thing, "runat");
 
-        if (strtoupper($runat->day) != strtoupper($day)) {
+if (strtoupper($runat->day) != strtoupper($day)) {
 
-            $command = "runat " . $day;
-            $this->response .= "Changed runat day to " . $day. ".";
-            $runat = new Runat($this->thing, $command);
-        }
+        $command = "runat " . $day;
+$this->response .= "Changed runat day to " . $day. ".";
+        $runat = new Runat($this->thing, $command);
+}
     }
 
 
@@ -162,28 +157,22 @@ class Rundate extends Agent {
 
     }
 
-
-    /**
-     *
-     * @param unknown $input
-     * @return unknown
-     */
     function isInput($input) {
-        if ($input === false) {return false;}
-        if (strtolower($input) == strtolower("X")) {return false;}
+       if ($input === false) {return false;}
+       if (strtolower($input) == strtolower("X")) {return false;}
 
-        if (is_numeric($input)) {return true;}
-        if ($input == 0) {return true;}
+       if (is_numeric($input)) {return true;}
+       if ($input == 0) {return true;}
 
-        return true;
+       return true;
     }
-
 
     /**
      *
      * @param unknown $input (optional)
      * @return unknown
      */
+
     function extractRundate($input = null) {
         $this->parsed_date = date_parse($input);
 
@@ -195,9 +184,9 @@ class Rundate extends Agent {
         if (!isset($this->numbers)) {$this->extractNumbers($input);}
 
 
-        if ($day > 0) {$this->day = $day;}
-        if ($month > 0) {$this->month = $month;}
-        if ($year > 0) {$this->year = $year;}
+        if ($day > 0)  {$this->day = $day;}
+        if ($month > 0)  {$this->month = $month;}
+        if ($year > 0)  {$this->year = $year;}
 
 
     }
@@ -227,25 +216,25 @@ class Rundate extends Agent {
         $month_text = str_pad($this->month, 2, "0", STR_PAD_LEFT);
         $year_text = str_pad($this->year, 2, "0", STR_PAD_LEFT);
 
-        $day_text = $this->day;
-        $month_text = $this->month;
-        $year_text = $this->year;
+$day_text = $this->day;
+$month_text = $this->month;
+$year_text = $this->year;
         $sms_message .= " | day " . $day_text . " month " . $month_text . " year " . $year_text . " ";
-        if (isset($this->response)) {
-            $sms_message .= "| " . trim($this->response) . " ";
-        }
-        if ( (!$this->isInput($this->day)) or
-            (!$this->isInput($this->month)) or
-            (!$this->isInput($this->year)) ) {
+if (isset($this->response)) {
+$sms_message .= "| " . trim($this->response) . " ";
+}
+if ( (!$this->isInput($this->day)) or
+     (!$this->isInput($this->month)) or
+     (!$this->isInput($this->year)) ) {
 
-            //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
+//if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 
-            $sms_message .= "| Set RUNDATE. ";
+$sms_message .= "| Set RUNDATE. ";
 
-        }
+}
 
         $sms_message .= "| nuuid " . strtoupper($this->rundate->nuuid);
-        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
+//        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -276,9 +265,9 @@ class Rundate extends Agent {
 
         $this->makeSMS();
 
-        //        $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
+//        $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
 
-        //        $test_message .= '<br>' . $this->sms_message;
+//        $test_message .= '<br>' . $this->sms_message;
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -317,13 +306,8 @@ class Rundate extends Agent {
         }
     }
 
-
-    /**
-     *
-     * @param unknown $text (optional)
-     */
     function printRundate($text = null) {
-        //return;
+//return;
         //echo $text . "\n";
 
         if (!isset($this->day)) {$day = "X";} else {$day = $this->day;}
@@ -334,7 +318,6 @@ class Rundate extends Agent {
         //echo $day . " "  .$month . " " . $year ."\n";
 
     }
-
 
     /**
      *

@@ -28,7 +28,7 @@ class Runtime extends Agent {
         $this->keywords = array('next', 'accept', 'clear', 'drop', 'add', 'new');
         $this->test= "Development code"; // Always iterative.
 
-//        $this->runtime = false;
+        //        $this->runtime = false;
 
     }
 
@@ -218,7 +218,7 @@ class Runtime extends Agent {
         }
 
         $sms_message .= " | nuuid " . strtoupper($this->runtime->nuuid);
-//        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
+        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -304,7 +304,7 @@ class Runtime extends Agent {
         $this->response = null;
         $this->num_hits = 0;
 
-//        $keywords = $this->keywords;
+        //        $keywords = $this->keywords;
 
         if (strpos($this->agent_input, "runtime") !== false) {
             return;
@@ -312,7 +312,7 @@ class Runtime extends Agent {
 
         if (strpos($this->input, "reset") !== false) {
             $this->minutes = "X";
-	
+
             return;
         }
 
@@ -337,5 +337,6 @@ class Runtime extends Agent {
         }
 
     }
+
 
 }

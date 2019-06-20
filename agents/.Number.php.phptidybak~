@@ -1,11 +1,4 @@
 <?php
-/**
- * Number.php
- *
- * @package default
- */
-
-
 // Uniqueness.  Is valuable.
 namespace Nrwtaylor\StackAgentThing;
 
@@ -16,80 +9,72 @@ error_reporting(-1);
 
 class Number extends Agent
 {
-
-
-    /**
-     *
-     */
     function init()
-        //function __construct(Thing $thing, $agent_input = null)
-        {
-        //  if ($agent_input == null) {$agent_input = '';}
-        //  $this->agent_input = $agent_input;
-        //        $this->agent_name = "number";
+	//function __construct(Thing $thing, $agent_input = null)
+    {
+//		if ($agent_input == null) {$agent_input = '';}
+//		$this->agent_input = $agent_input;
+//        $this->agent_name = "number";
 
 
-        // Given a "thing".  Instantiate a class to identify and create the
+		// Given a "thing".  Instantiate a class to identify and create the
         // most appropriate agent to respond to it.
-        //  $this->thing = $thing;
+//		$this->thing = $thing;
 
-        //        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
-        // Get some stuff from the stack which will be helpful.
+		// Get some stuff from the stack which will be helpful.
         //$this->web_prefix = $GLOBALS['web_prefix'];
-        //        $this->web_prefix = $thing->container['stack']['web_prefix'];
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
 
-        //  $this->stack_state = $thing->container['stack']['state'];
-        //  $this->short_name = $thing->container['stack']['short_name'];
+//		$this->stack_state = $thing->container['stack']['state'];
+//		$this->short_name = $thing->container['stack']['short_name'];
 
-        // Create some short-cuts.
-        //        $this->uuid = $thing->uuid;
-        //        $this->to = $thing->to;
-        //        $this->from = $thing->from;
-        //        $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
+		// Create some short-cuts.
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
+		//$this->sqlresponse = null;
 
-        //$this->subject = "number ". "please 234,000 1,000,234 find (.3) the -1 20 503 numbers (34) 12.4 in here 12 if you can 12 / 4 = 100000 and some currencies perhaps $6 $23.90 but not $1.000, and in french €5.67";
-        //$this->test_count = 15; // I think
-        //$this->test_count = null;
-        // a french test string "or 5€67 or 66,50 £ or 66,50£ or 20 000 $ 99 999 but more rarely 99.999 or 99.999.999 but how about - 12 432,20";
+//$this->subject = "number ". "please 234,000 1,000,234 find (.3) the -1 20 503 numbers (34) 12.4 in here 12 if you can 12 / 4 = 100000 and some currencies perhaps $6 $23.90 but not $1.000, and in french €5.67";
+//$this->test_count = 15; // I think
+//$this->test_count = null;
+// a french test string "or 5€67 or 66,50 £ or 66,50£ or 20 000 $ 99 999 but more rarely 99.999 or 99.999.999 but how about - 12 432,20";
 
-        //      $this->thing->log('<pre> Agent "Number" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
-        $this->node_list = array("number"=>
-            array("number"));
+  //      $this->thing->log('<pre> Agent "Number" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
+		$this->node_list = array("number"=>
+						array("number"));
 
-        //    $this->current_time = $this->thing->time();
+    //    $this->current_time = $this->thing->time();
 
 
-        //        $this->variables = new Variables($this->thing, "variables number " . $this->from);
+//        $this->variables = new Variables($this->thing, "variables number " . $this->from);
 
-        //$this->get();
+//$this->get();
 
-        $this->aliases = array("learning"=>array("good job"));
+		$this->aliases = array("learning"=>array("good job"));
 
-        //  $this->readSubject();
+//		$this->readSubject();
 
         $this->recognize_french = true; // Flag error
 
 
-        //        if ($this->agent_input == null) {
-        //      $this->respond();
-        //        }
+//        if ($this->agent_input == null) {
+//		    $this->respond();
+//        }
 
-        //        $this->set();
+//        $this->set();
 
-        //        $this->thing->log('Agent "Number" found ' . implode(" ",$this->numbers) .".");
+//        $this->thing->log('Agent "Number" found ' . implode(" ",$this->numbers) .".");
 
         // Way to output test information to web page as a thing call
         // $this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
-    }
+	}
 
-
-    /**
-     *
-     */
-    function get() {
-        //echo "get";
+    function get()
+    {
+//echo "get";
 
         $this->number_agent = new Variables($this->thing, "variables number " . $this->from);
 
@@ -97,16 +82,13 @@ class Number extends Agent
         $this->refreshed_at = $this->number_agent->getVariable("refreshed_at");
     }
 
+    function set()
+    {
+//echo "set" . $this->number;
+//        $this->variables->setVariable("refreshed_at", $this->refreshed_at);
 
-    /**
-     *
-     */
-    function set() {
-        //echo "set" . $this->number;
-        //        $this->variables->setVariable("refreshed_at", $this->refreshed_at);
-
-        //        $this->state = $requested_state;
-        //        $this->refreshed_at = $this->current_time;
+//        $this->state = $requested_state;
+//        $this->refreshed_at = $this->current_time;
 
         //$this->variables = new Variables($this->thing, "variables number " . $this->from);
 
@@ -114,26 +96,21 @@ class Number extends Agent
 
 
 
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
         //$this->variables_thing->setVariable("flag_id", $this->nuuid);
 
         $this->number_agent->setVariable("refreshed_at", $this->current_time);
 
-        //        $city = new Variables($this->thing, "variables city " . $this->from);
+//        $city = new Variables($this->thing, "variables city " . $this->from);
 
-        //        $city->setVariable("city_code", $this->city_code);
-        //        $city->setVariable("city_name", $this->city_name);
+//        $city->setVariable("city_code", $this->city_code);
+//        $city->setVariable("city_name", $this->city_name);
 
 
     }
 
-
-    /**
-     *
-     * @param unknown $input (optional)
-     * @return unknown
-     */
-    function extractNumbers($input = null) {
+    function extractNumbers($input = null)
+    {
         if ($input == null) {
             $input = $this->subject;
         }
@@ -144,7 +121,7 @@ class Number extends Agent
             $this->numbers = array();
         }
 
-        $pieces = explode(" ", $input);
+        $pieces = explode(" ",$input);
         $this->numbers = [];
         foreach ($pieces as $key=>$piece) {
 
@@ -162,7 +139,7 @@ class Number extends Agent
 
             // Treat () as accounting format number
             // Rare to see this in use.
-            /*
+/*
     if (is_numeric(substr($piece,0,-1))) {
             $this->numbers[] = substr($piece,0,-1);
             continue;
@@ -175,25 +152,25 @@ class Number extends Agent
 */
 
 
-            if (is_numeric(substr($piece, 1, -1))) {
-                if ((substr($piece, 0, 1) == "(") and (substr($piece, -1, 1) == ")")) {
-                    $this->numbers[] = -1 * substr($piece, 1, -1);
+            if (is_numeric(substr($piece,1,-1))) {
+                if ((substr($piece,0,1) == "(") and (substr($piece,-1,1) == ")")) {
+                    $this->numbers[] = -1 * substr($piece,1,-1);
                     continue;
                 }
 
-                $this->numbers[] = substr($piece, 1, -1);
+                $this->numbers[] = substr($piece,1,-1);
                 continue;
             }
 
             if (is_numeric(str_replace(",", "", $piece))) {
-                $this->numbers[] = str_replace(",", "", $piece);
+                $this->numbers[] = str_replace(",","",$piece);
                 continue;
             }
 
             // preg_match_all('!\d+!', $piece, $matches);
             preg_match_all('/([\d]+)/',  $piece, $matches);
 
-            foreach ($matches[0] as $key=>$match) {
+            foreach ($matches[0] as $key=>$match){
                 $this->numbers[] = $match;
             }
 
@@ -202,11 +179,8 @@ class Number extends Agent
         return $this->numbers;
     }
 
-
-    /**
-     *
-     */
-    function extractNumber() {
+    function extractNumber()
+    {
         $this->number = false; // No numbers.
         if (!isset($this->numbers)) {$this->extractNumbers();}
 
@@ -217,27 +191,25 @@ class Number extends Agent
     }
 
 
-    /**
-     *
-     */
-    public function respond() {
-        // Thing actions
+	public function respond()
+    {
+		// Thing actions
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(array("number",
-                "received_at"),  $this->thing->json->time()
-        );
+		$this->thing->json->setField("settings");
+		$this->thing->json->writeVariable(array("number",
+			"received_at"),  $this->thing->json->time()
+			);
 
-        $this->thing->flagGreen();
+		$this->thing->flagGreen();
 
-        $from = $this->from;
-        $to = $this->to;
+		$from = $this->from;
+		$to = $this->to;
 
-        $subject = $this->subject;
+		$subject = $this->subject;
 
-        // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+		// Now passed by Thing object
+		$uuid = $this->uuid;
+		$sqlresponse = "yes";
 
         //$message = "Thank you here is a Number.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
         //$message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
@@ -245,12 +217,12 @@ class Number extends Agent
         $this->makeSMS();
 
         //$this->thing_report['email'] = array('to'=>$from,
-        //   'from'=>'uuid',
-        //   'subject'=>$subject,
-        //   'message'=>$message,
-        //   'choices'=>$choices);
+		//			'from'=>'uuid',
+		//			'subject'=>$subject,
+		//			'message'=>$message,
+		//			'choices'=>$choices);
 
-        //$this->makePNG();
+		//$this->makePNG();
 
         $this->makeChoices();
 
@@ -261,20 +233,16 @@ class Number extends Agent
 
         $this->makeWeb();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+		$this->thing_report['thing'] = $this->thing->thing;
 
         $this->thing_report['help'] = "This extracts numbers from the datagram.";
 
-        return;
-    }
+		return;
+	}
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function readSubject() {
-        //var_dump($this->input);
+	public function readSubject()
+    {
+//var_dump($this->input);
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
 
@@ -288,7 +256,7 @@ class Number extends Agent
             $input = $this->agent_input;
         }
 
-        //$input = $this->input;
+//$input = $this->input;
         //} elseif (explode(" ",$this->agent_input)[0] == "number") {
         //    $input = $this->agent_input;
         //}
@@ -296,14 +264,14 @@ class Number extends Agent
         $this->extractNumbers($input);
         $this->extractNumber();
 
-        //var_dump($this->number);
+//var_dump($this->number);
 
         if ($this->number == false) {
 
             $this->get();
         }
 
-        //var_dump($input);
+//var_dump($input);
         // Then look for messages sent to UUIDS
         //$this->thing->log('Agent "Number" looking for UUID in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
@@ -316,7 +284,7 @@ class Number extends Agent
         //}
 
         // Keyword
-        //var_dump($input);
+//var_dump($input);
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
@@ -324,21 +292,17 @@ class Number extends Agent
             if ($this->input == 'number') {
                 //$this->getNumber();
                 $this->response = "Last number retrieved.";
-                //echo "meep";
+//echo "meep";
                 return;
 
             }
         }
 
-        $status = true;
+		$status = true;
 
-        return $status;
-    }
+    	return $status;
+	}
 
-
-    /**
-     *
-     */
     function makeWeb() {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
@@ -365,31 +329,28 @@ class Number extends Agent
 
         if ($this->recognize_french == true) {
             //if (count($this->numbers) == $this->test_count) {
-            //https://french.kwiziq.com/revision/grammar/how-to-write-decimal-numbers-in-french
+//https://french.kwiziq.com/revision/grammar/how-to-write-decimal-numbers-in-french
             //    $web .= "Found all the numbers.  Excluding the french format.";
             //}
         }
 
-        //   $web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
-
+     //   $web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
+        
 
         //$web .= "<a href='"  . $link . "'>" . $link . "</a>";
         //$web .= "<br>";
-        //$link = "https://en.wikipedia.org/wiki/Universally_unique_identifier";
+        //$link = "https://en.wikipedia.org/wiki/Universally_unique_identifier";        
         //$web .= "<a href='"  . $link . "'>" . $link . "</a>";
 
         $web .= "<br>";
 
-        //        $web .= $this->help . "<br>";
+//        $web .= $this->help . "<br>";
 
         $this->thing_report['web'] = $web;
     }
 
-
-    /**
-     *
-     */
-    function makeSMS() {
+    function makeSMS()
+    {
 
         $sms = "NUMBER | ";
         //foreach ($this->numbers as $key=>$number) {
@@ -402,11 +363,8 @@ class Number extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
-
-    /**
-     *
-     */
-    function makeChoices() {
+    function makeChoices ()
+    {
         $this->thing->choice->Create("number", $this->node_list, "number");
 
         $choices = $this->thing->choice->makeLinks("number");
@@ -416,11 +374,8 @@ class Number extends Agent
 
 
 
-    /**
-     *
-     * @return unknown
-     */
-    public function makePNG() {
+    public function makePNG()
+    {
         // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
 
         //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
@@ -442,11 +397,11 @@ class Number extends Agent
         // here DB request or some processing
         $text = "thing:".$this->numbers[0];
 
-        ob_clean();
+		ob_clean();
 
         ob_start();
 
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
+        QRcode::png($text,false,QR_ECLEVEL_Q,4);
 
         $image = ob_get_contents();
 
@@ -454,14 +409,14 @@ class Number extends Agent
         //echo $image;
         //exit();
 
-        ob_clean();
+		ob_clean();
 
         $this->thing_report['png'] = $image;
 
         //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
-        return $this->thing_report['png'];
+    return $this->thing_report['png'];
     }
 
-
 }
+

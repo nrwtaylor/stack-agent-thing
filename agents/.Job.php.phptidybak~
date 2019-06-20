@@ -1,11 +1,4 @@
 <?php
-/**
- * Job.php
- *
- * @package default
- */
-
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -17,12 +10,7 @@ use setasign\Fpdi;
 
 class Job extends Agent {
 
-
-    /**
-     *
-     */
     function init() {
-
         $this->short_name = '<us?>';
 
         $this->web_prefix = $this->thing->container['stack']['web_prefix'];
@@ -36,90 +24,73 @@ class Job extends Agent {
 
         $this->index_type = "index";
 
-        $this->node_list = array("receipt management"=>
-            array("learning", "communicating"=>
-                array("more", "less"), "channeling"=>
-                array("narrowing", "broadening")),
-            "receipt start"=>
-            array("more"=>"receipt management",
-                "less"=>"receipt management"));
+		$this->node_list = array("receipt management"=>
+						array("learning","communicating"=>
+							array("more","less"),"channeling"=>
+								array("narrowing","broadening")),
+							"receipt start"=>
+								array("more"=>"receipt management",
+									"less"=>"receipt management"));
 
 
-        $this->aliases = array("learning"=>array("good job"));
+		$this->aliases = array("learning"=>array("good job"));
 
         $this->PNG();
 
         $this->thing_report['help'] = "Creates a unique reference for a job. Try WEB.";
 
 
-    }
+	}
 
-
-    /**
-     *
-     * @param unknown $text (optional)
-     */
-    function getQuickresponse($text = null) {
+    function getQuickresponse($text = null)
+    {
         if ($text == null) {$text = $this->web_prefix;}
         $agent = new Qr($this->thing, $text);
         $this->quick_response_png = $agent->PNG_embed;
     }
 
-
-    /**
-     *
-     */
-    public function getNuuid() {
+    public function getNuuid()
+    {
         $agent = new Nuuid($this->thing, "nuuid");
         $this->nuuid_png = $agent->PNG_embed;
     }
 
-
-    /**
-     *
-     */
-    public function getIndex() {
+    public function getIndex()
+    {
         $agent = new Index($this->thing, "index");
         $this->index_png = $agent->PNG_embed;
     }
 
 
-    /**
-     *
-     */
     function set() {
 
         // Record receipt of the request.
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("job",
-                "refreshed_at"),  $this->thing->json->time()
-        );
+            "refreshed_at"),  $this->thing->json->time()
+            );
 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function respond() {
-        // Thing actions
-        $this->thing->flagGreen();
+	public function respond()
+    {
+		// Thing actions
+		$this->thing->flagGreen();
 
         $choices = false;
 
         $this->makePNG();
 
 
-        $from = $this->from;
-        $to = $this->to;
+		$from = $this->from;
+		$to = $this->to;
 
 
-        $subject = $this->subject;
+		$subject = $this->subject;
 
-        // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+		// Now passed by Thing object
+		$uuid = $this->uuid;
+		$sqlresponse = "yes";
 
         $this->makeSMS();
 
@@ -134,14 +105,11 @@ class Job extends Agent {
 
         $this->makePDF();
 
-        return $this->thing_report;
-    }
+		return $this->thing_report;
+	}
 
-
-    /**
-     *
-     */
-    public function makeImage() {
+   public function makeImage()
+    {
         $text = "job";
         $text = strtoupper($text);
 
@@ -168,20 +136,20 @@ class Job extends Agent {
 
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
-        $sizes_allowed = array(72, 36, 24, 12, 6);
+        $sizes_allowed = array(72,36,24,12,6);
 
-        foreach ($sizes_allowed as $size) {
+        foreach($sizes_allowed as $size) {
 
             $angle = 0;
-            $bbox = imagettfbbox($size, $angle, $font, $text);
-            $bbox["left"] = 0- min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-            $bbox["top"] = 0- min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            $bbox["width"] = max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-            $bbox["height"] = max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            $bbox = imagettfbbox ($size, $angle, $font, $text); 
+            $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+            $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+            $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]);
+            $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]);
+            extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
 
-            //check width of the image
-            $width = imagesx($image);
+            //check width of the image 
+            $width = imagesx($image); 
             $height = imagesy($image);
             if ($bbox['width'] < $image_width - 50) {break;}
 
@@ -195,11 +163,8 @@ class Job extends Agent {
         $this->image = $image;
     }
 
-
-    /**
-     *
-     */
-    function makeMessage() {
+    function makeMessage()
+    {
         $uuid = $this->uuid;
         $nuuid = $this->thing->nuuid;
 
@@ -224,35 +189,63 @@ class Job extends Agent {
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
-    function makeTXT() {
+    function makeTXT()
+    {
 
         $this->verbosity = 1;
 
-        $job_name = "<two or three words>";
-        $job_commitment = "Provide <sometime?> hours during <promised block(s) of time>.";
-        $job_mandate = "Provide the results of <some work> doing some <thing> for <us?>.";
-        $job_proof = "I will need this <thing> from <you?> to prove it is done.";
-        $job_first = "Thing <thing?> is the first job.";
-        $job_manager = "<messagable person identity>";
-        $job_address = "<mailable address>";
-        $job_payment = "<some monies>";
+        //if ($job_name == null) {
+            $job_name = "<two or three words>";
+        //}
+
+        //if ($job_commitment == null) {
+            $job_commitment = "Provide <sometime?> hours during <promised block(s) of time>.";
+        //}
+
+        //if ($job_mandate == null) {
+            $job_mandate = "Provide the results of <some work> doing some <thing> for <us?>.";
+        //}
+
+        //if ($job_proof == null) {
+            $job_proof = "I will need this <thing> from <you?> to prove it is done.";
+        //}
+
+        //if ($job_first == null) {
+            $job_first = "Thing <thing?> is the first job.";
+        //}
+
+        //if ($job_manager == null) {
+            $job_manager = "<messagable person identity>";
+        //}
+
+        //if ($job_address == null) {
+            $job_address = "<mailable address>";
+        //}
+
+        //if ($job_payment == null) {
+            $job_payment = "<some monies>";
+        //}
         $job_work = "<some work>";
-        $job_summary = "Basically " . $job_payment . " for " . $job_work. ".";
-        $job_insurance = "With <some insurance requirements?>.";
+
+        //if ($job_summary == null) {
+            $job_summary = "Basically " . $job_payment . " for " . $job_work. ".";
+        //}
+
+        //if ($job_insurance == null) {
+            $job_insurance = "With <some insurance requirements?>.";
+        //}
+
 
         $this->txt_message = "JOB DESCRIPTION\n\n";
 
         $this->txt_message .= 'Here is the "' . $job_name . '" job description.';
         $this->txt_message .= " ";
-        $this->txt_message .= $job_commitment . " ";
+        $this->txt_message .= $job_commitment . " ";  
         $this->txt_message .= $job_mandate . " ";
         $this->txt_message .= $job_proof. " ";
 
         $this->txt_message .= "\n\n";
+        //$this->txt_message .= "\n";
 
         $this->txt_message .= $job_summary;
         $this->txt_message .="\n\n";
@@ -295,9 +288,6 @@ class Job extends Agent {
     }
 
 
-    /**
-     *
-     */
     function makeWeb() {
 
         $head = '<p class="description">';
@@ -307,18 +297,18 @@ class Job extends Agent {
         $web_message = nl2br($web_message);
 
 
-        switch ($this->index_type) {
-        case "index":
-            $web_message .= '<img src="' . $this->web_prefix . 'thing/' . $this->uuid . '/index.png" alt="look a 4 digit index">';
+switch ($this->index_type) {
+    case "index":
+        $web_message .= '<img src="' . $this->web_prefix . 'thing/' . $this->uuid . '/index.png" alt="look a 4 digit index">';
 
-            break;
-        case "nuuid":
-            $web_message .= '<img src="' . $this->web_prefix . 'thing/' . $this->uuid . '/nuuid.png" alt="look a 4 character semi-unique id">';
-            break;
-        default:
-            $web_message .= '<img src="' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png" alt="look a freezing snowflake">';
+        break;
+    case "nuuid":
+        $web_message .= '<img src="' . $this->web_prefix . 'thing/' . $this->uuid . '/nuuid.png" alt="look a 4 character semi-unique id">';
+        break;
+    default:
+        $web_message .= '<img src="' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png" alt="look a freezing snowflake">';
 
-        }
+}
 
 
 
@@ -338,12 +328,8 @@ class Job extends Agent {
         $this->thing_report['web'] = $this->web_message;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function makePDF() {
+    public function makePDF()
+    {
 
         try {
             // initiate FPDI
@@ -352,11 +338,11 @@ class Job extends Agent {
             $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
             $pdf->SetFont('Helvetica', '', 10);
 
-            $tplidx1 = $pdf->importPage(3, '/MediaBox');
+            $tplidx1 = $pdf->importPage(3, '/MediaBox');  
             $s = $pdf->getTemplatesize($tplidx1);
 
-            $pdf->addPage($s['orientation'], $s);
-            $pdf->useTemplate($tplidx1);
+            $pdf->addPage($s['orientation'], $s);  
+            $pdf->useTemplate($tplidx1);  
 
             $pdf->SetFont('Helvetica', '', 12);
             $line_height = 5;
@@ -365,25 +351,25 @@ class Job extends Agent {
 
 
 
-            switch ($this->index_type) {
-            case "index":
-                $this->getIndex();
-                $pdf->Image($this->index_png, 5, 18, 20, 20, 'PNG');
+switch ($this->index_type) {
+    case "index":
+        $this->getIndex();
+        $pdf->Image($this->index_png, 5, 18, 20, 20, 'PNG');
 
-                break;
-            case "nuuid":
-                $this->getNuuid();
-                $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
-                break;
-            default:
-                $this->getNuuid();
-                $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+        break;
+    case "nuuid":
+        $this->getNuuid();
+        $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+        break;
+    default:
+        $this->getNuuid();
+        $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
 
-            }
+}
 
             $pdf->SetFont('Helvetica', '', 12);
 
-            $pdf->SetXY(20, 40);
+             $pdf->SetXY(20, 40);
             $pdf->MultiCell( 175, 8, $this->txt_message, 0);
 
 
@@ -391,7 +377,7 @@ class Job extends Agent {
             $tplidx2 = $pdf->importPage(2);
 
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s['orientation'], $s);  
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
@@ -399,7 +385,7 @@ class Job extends Agent {
             $this->txt = "".$this->uuid.""; // Pure uuid.
 
             $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\job');
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
+            $pdf->Image($this->quick_response_png,175,5,30,30,'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -436,11 +422,8 @@ class Job extends Agent {
         return $this->thing_report['pdf'];
     }
 
-
-    /**
-     *
-     */
-    public function makePNG() {
+    public function makePNG()
+    {
         $agent = new Png($this->thing, "png"); // long run
 
         $this->makeImage();
@@ -454,11 +437,6 @@ class Job extends Agent {
         $this->thing_report['png'] = $agent->image_string;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
     function makeSMS() {
 
         $this->verbosity = 1;
@@ -485,44 +463,34 @@ class Job extends Agent {
 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function readSubject() {
+	public function readSubject() {
 
         $this->index = "meep";
         $this->response = "Made a new job sheet.";
-        $status = true;
-        return $status;
-    }
+		$status = true;
+	    return $status;
+	}
 
+        public function PNG() {
 
-    /**
-     *
-     * @return unknown
-     */
-    public function PNG() {
+// Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
 
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
+//I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
+//No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
+//So beware of your included files!
+//Make sure they are not encoded in UTF or otherwise in UTF without BOM.
+//Hope it save someone's time.
 
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
+//http://php.net/manual/en/function.imagepng.php
 
-        //http://php.net/manual/en/function.imagepng.php
+//header('Content-Type: text/html');
+//echo "Hello World";
+//exit();
 
-        //header('Content-Type: text/html');
-        //echo "Hello World";
-        //exit();
-
-        //header('Content-Type: image/png');
-        //QRcode::png('PHP QR Code :)');
-        //exit();
-        // here DB request or some processing
+//header('Content-Type: image/png');
+//QRcode::png('PHP QR Code :)');
+//exit();
+                // here DB request or some processing
 
         $snowflake_agent = new Snowflake($this->thing, "snowflake");
 
@@ -537,6 +505,5 @@ class Job extends Agent {
         return $response;
 
     }
-
 
 }
