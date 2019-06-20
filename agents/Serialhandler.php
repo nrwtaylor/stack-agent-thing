@@ -11,7 +11,7 @@
 // sudo pecl install dio-0.0.8
 // /etc/php/7.1/cli
 // extension=dio.so
-
+return;
 $portName = '/dev/ttyACM0';
 $baudRate = 4800;
 $bits = 8;

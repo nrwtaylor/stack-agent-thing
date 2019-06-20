@@ -307,7 +307,7 @@ class Ack extends Agent {
 
         $this->extractAcks($input);
 
-        if ($this->ack == null) {
+        if ((!isset($this->ack)) or ($this->ack == null)) {
             $this->ack = "X";
         }
     }

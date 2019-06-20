@@ -45,10 +45,18 @@ class Agentstest extends Agent
         $this->getAgentsTest();
     }
 
+//    function run()
+//    {
+
+//        $this->getAgentsTest();
+
+//    }
+
     function getAgentsTest()
     {
-        $agent = new Agents($this->thing, "agents test");
-        $this->thing = $agent->thing;
+echo "GETAGENTSTEST\n";
+        $this->test = new Agents($this->thing, "agents test");
+        //$this->thing = $agent->thing;
     }
 
 	public function respond()
@@ -65,7 +73,7 @@ class Agentstest extends Agent
 		$this->thing_report['choices'] = $choices;
 
         $this->makeSms();
-        $this->makeMessage();
+//        $this->makeMessage();
 
         $this->thing_report['email'] = $this->sms_message;
         //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -98,12 +106,23 @@ class Agentstest extends Agent
     public function makeSms()
     {
 
-        if (!isset($this->forecast_conditions)) {$this->forecast_conditions = "No forecast available.";}
+//var_dump($this->test->test_results);
 
-        $sms_message = "TIDES | " . null;
-        $sms_message .= $this->forecast_conditions;
+        if (!isset($this->test->test_results)) {$this->response = "No test results available.";}
+//var_dump($this->test->test_results);
+$test_text = "results ";
+foreach ($this->test->test_results as $index=>$test_result) {
+
+$test_text .= $test_result["agent_name"] . " " . strtoupper($test_result["flag"]) . " ";
+echo  $test_result["agent_name"] . " " . $test_result["flag"] . $test_result["error"] . ".\n";
+}
+
+
+$this->response = $test_text;
+
+        $sms_message = "AGENTS TEST | " . null;
+        $sms_message .= $this->response;
 //        $sms_message .= " | link " . $this->link;
-        $sms_message .= " | source CHS";
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -111,5 +130,6 @@ class Agentstest extends Agent
 
     }
 
+    function readSubject() {}
 
 }

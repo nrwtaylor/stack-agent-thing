@@ -85,36 +85,24 @@ $flag = false;
                         "Robot","Rocky","Search","Serial","Serialhandler",
                         "Stackrinteractive","Tally","Thought","Timestamp",
                         "Uuid","Variables","Wikipedia","Wordgame","Wumpus");
-        foreach ($this->agents as $key=>$agent) {
 
-          //  if ( (!isset($skip_to_agent)) or ($skip_to_agent == null) or ($skip_to_agent == "")) {$flag = true;}
-//            if (strtolower($agent['name']) == strtolower($skip_to_agent)) {$flag = true;}
+$this->split_time = $this->thing->elapsed_runtime();
+$this->time_budget = 2000;
 
-//            if ($flag != true) {continue;}
+        do {
+//echo "MERP";
+            //$array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
+            $k = array_rand($this->agents);
+            $v = $this->agents[$k];
 
-            $agent_class_name = $agent['name'];
-
-
-            $agent_flag = false;
-            foreach($dev_agents as $key=>$dev_agent) {
-          // Big issue
-            if ($agent_class_name == $dev_agent) {$agent_flag = true; break;}
-            }
-
-            if ($agent_flag == true) {continue;}
-
-            //$thing = new Thing(null);
-            //$subject = "s/ " . $agent_name;
-            //$thing->Create(null, "test", $subject);
-
-            //$test_agent = new $agent_name($this->thing, $agent_name);
-
-            //$this->getAgent($agent_name);
-            //echo $this->thing_report['sms'] . "\n";
-echo $agent_class_name . "\n\n";
+            $agent_class_name = $v["name"];
             $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-            
+
+if (strtolower($agent_class_name) =="agents") {continue;}
+if (strtolower($agent_class_name) =="agentstest") {continue;}
+
+            $flag = "red";
             $ex = null;
             try {
 //                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
@@ -122,6 +110,7 @@ echo $agent_class_name . "\n\n";
                 $test_agent = new $agent_namespace_name($this->thing, $agent_class_name); 
                 $flag = $test_agent->test();
                 $m = null;
+
             } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptio$
                 //echo $agent_name . "[ RED ]" . "\n";
                 $m = $ex->getMessage();
@@ -131,13 +120,12 @@ echo $agent_class_name . "\n\n";
 
             $this->test_results[] = array("agent_name"=>$agent_class_name, "flag"=>$flag, "error"=>$m);
 
-            //echo $agent_class_name . "[ " . $flag . " ] ". "\n";
 
+        } while ($this->thing->elapsed_runtime() - $this->split_time < $this->time_budget);
 
-        }
-var_dump($this->test_results);
+//var_dump($this->test_results);
 //echo "done";
-exit();
+//exit();
     }
 
     function makeSMS()
@@ -147,6 +135,8 @@ exit();
         $sms .= $this->agents[$rand_agents[0]]['name'] . " ";
         $sms .= $this->agents[$rand_agents[1]]['name'] . " ";
         $sms .= $this->agents[$rand_agents[2]]['name'];
+
+
         $this->sms_message = $sms;
     }
 
