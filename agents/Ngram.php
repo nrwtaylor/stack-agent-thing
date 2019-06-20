@@ -90,11 +90,13 @@ class Ngram {
     function getWords($message=null) {
         //        $agent = new \Nrwtaylor\Stackr\Word($this->thing,$this->subject);
         if ($message == null) {$message = $this->subject;}
-        $agent = new Word($this->thing, $message);
+        $agent = new Word($this->thing, "word");
+
+
+        $agent->extractWords($message);
+
         $this->words = $agent->words;
 
-        //var_dump($agent->words);
-        //exit();
 
     }
 

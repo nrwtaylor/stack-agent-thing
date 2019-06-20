@@ -44,11 +44,15 @@ class Proword extends Word
     function set()
     {
         $this->thing->json->writeVariable( array("proword", "reading"), $this->has_prowords );
+
+$this->thing_report['help'] = "Reads the short message for prowords.";
     }
 
     function thingreportProword()
     {
         $this->thing_report['log'] = $this->thing->log;
+$this->thing_report['help'] = "Reads the short message for prowords.";
+
     }
 
     function prowordThing()
@@ -91,6 +95,43 @@ class Proword extends Word
         return $match;
 
     }
+
+    function extractProwords($text)
+    {
+        $words = explode(" ", $text);
+
+        $this->getProwords('acp125g');
+        $prowords_list = array();
+
+        foreach ($this->prowords as $proword=>$arr) {
+            if ($proword == "") {continue;}
+            if (strpos(strtolower($text), strtolower($proword)) !== false) {
+                $prowords_list[] = $proword;
+            }
+        }
+        $this->extracted_prowords = $prowords_list;
+        return $prowords_list;
+    }
+
+    function countProwords($text)
+    {
+
+        $words = explode(" ",$text);
+
+        $this->getProwords('acp125g');
+        $count = 0;
+        foreach($words as $word) {
+            foreach ($this->prowords as $proword=>$arr) {
+                if ($proword == "") {continue;}
+                if (strpos(strtolower($word), strtolower($proword)) !== false) {
+                    $count += 1; break;
+                }
+            }
+        }
+
+        return $count;
+    }
+
 
     function extractProword($string)
     {
@@ -155,14 +196,15 @@ class Proword extends Word
         // search, and store all matching occurences in $matches
         $m = false;
         if(preg_match_all($pattern, strtolower($contents), $matches)){
-            //echo "Found matches:\n";
-            $m = implode("\n", $matches[0]);
-            $word = $this->parseProword($matches[0][0]);
-            $this->matches[$word['proword']] = $word;
+            foreach ($matches[0] as $match) {
+
+                $word = $this->parseProword($match);
+                if ($word == false) {continue;}
+                $this->matches[$word['proword']] = $word;
+            }
         }
 
         if (!isset($this->matches)) {$this->matches = array();}
-
         return $m;
     }
 
@@ -183,14 +225,14 @@ class Proword extends Word
         $text =  $dict[0];
 
         $dict = explode(",",$text);
-        $proword = $dict[0];
-        $words = $dict[1];
+        $proword = trim($dict[0]);
+        $words = trim($dict[1]);
 
         $instruction = null;
         $english_phrases = null;
-        $words = $dict[1];
-        if (isset($dict[2])) {$english_phrases = $dict[2];}
-        if (isset($dict[3])) {$instruction = $dict[3];}
+        $words = trim($dict[1]);
+        if (isset($dict[2])) {$english_phrases = trim($dict[2]);}
+        if (isset($dict[3])) {$instruction = trim($dict[3]);}
 
 
         $parsed_line = array("proword"=>$proword,"words"=>$words,
@@ -200,7 +242,7 @@ class Proword extends Word
 
     }
 
-	public function respond()
+    public function respond()
     {
 		$this->cost = 100;
 
@@ -225,8 +267,10 @@ class Proword extends Word
 
         $this->makeWeb();
 
-		return $this->thing_report;
-	}
+        $this->thing_report['help'] = "Reads the short message for prowords.";
+
+	return $this->thing_report;
+    }
 
     function makeWeb()
     {
@@ -238,16 +282,14 @@ class Proword extends Word
         $html = "<b>PROWORD " . $input . " </b>";
         $html .= "<p><br>";
 
-        foreach($this->matches as $proword=>$word) {
-            $line = $word["proword"] . " " . $word["words"] . " " . $word["instruction"];
-            $i = 0;
+        if (isset($this->matches)) {
 
-	    if ($word["words"] == null) {continue;}
-//            foreach ($word["english"] as $english) {
-//                $line .= " / " . $english;
-//            }
+            foreach($this->matches as $proword=>$word) {
+                $line = "<b>" . strtoupper($word["proword"]) . "</b> " . $word["words"];
+                if ($word["words"] == null) {continue;}
+                $html .= $line . "<br>";
+            }
 
-            $html .= $line . "<br>";
         }
 
         $this->web_message = $html;
@@ -263,7 +305,13 @@ class Proword extends Word
     function makeSMS()
     {
         $sms = "PROWORD | ";
-        $sms .= $this->response;
+
+        $response_text = $this->response;
+        if ($this->response == null) {
+            $response_text = "X";
+        }
+
+        $sms .= $response_text;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -294,7 +342,7 @@ class Proword extends Word
         return $input;
     }
 
-	public function readSubject()
+    public function readSubject()
     {
 
         $this->response = "";
@@ -318,13 +366,25 @@ class Proword extends Word
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         $string_length = mb_strlen($filtered_input);
 
+$this->extractProwords($filtered_input);
+
         $this->has_prowords = $this->isProword($filtered_input);
 
-        $this->extractProword($filtered_input);
-
-        $this->getProwords('acp125g');
-
         $this->getProwords('acp125g', $filtered_input);
+
+
+        $ngram = new Ngram($this->thing, "ngram");
+        $ngram->extractNgrams($filtered_input,3);
+        $search_phrases = $ngram->ngrams;
+        usort($search_phrases, function($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
+
+        foreach($search_phrases as $search_phrase) {
+            $this->getProwords('acp125g', $search_phrase);
+        }
+        $this->filtered_input = $filtered_input;
+
 
         if ($this->has_prowords) {
 
@@ -342,17 +402,64 @@ class Proword extends Word
             }
         }
 
+        // devstack closeness
+        $this->results = $this->matches;
+        $words = explode(" " ,$filtered_input);
+
+        $closest = 0;
+        foreach ($this->results as &$result) {
+            $closeness = 0;
+            foreach ($words as $word) {
+
+                $p_words = explode(" " , $result['words']);
+                foreach($p_words as $p_word) {
+
+                    // Ignore 1 and 2 letter words
+                    if (strlen($word) <= 2) {continue;}
+
+                    if ( strtolower( $word) == strtolower($p_word)) {$closeness += 1;}
+
+                }
+                if ($closeness > $closest) {$closest = $closeness; $best_proword = $result;}
+             }
+        }
 
         $sms = "";
         $count = 0;
-        foreach ($this->matches as $proword=>$arr) {
-            if (mb_strlen($sms) > 140) {$sms .= "";break;}
-                $sms .= $proword . " / ";
+        $flag_long = false;
+
+        foreach ($this->matches as $proword=>$word) {
+            if (mb_strlen($sms) > 140) {$flag_long = true;}
+            $sms .= strtoupper($word["proword"]) . " " . $word['words']. " / ";
+            $count += 1;
+        }
+
+        // If too long, then try without the definition.
+        if ($flag_long) {
+            $sms = "";
+            $flag_long = false;
+            foreach ($this->matches as $proword=>$word) {
+                if (mb_strlen($sms) > 140) {$flag_long = true;}
+                $sms .= strtoupper($word["proword"]) . " / ";
                 $count += 1;
             }
-        $this->response = $sms;
-        $this->hits = $count;
+        }
 
-	}
+        // If still too long, select the 'best' proword.
+        if ($flag_long) {
+//            foreach ($this->matches as $proword=>$word) {
+//                if (mb_strlen($sms) > 131) {$sms .= "TEXT WEB";break;}
+//                $sms .= $word["proword"] . " / ";
+//                $count += 1;
+            $sms = strtoupper($best_proword["proword"]) . " " . $best_proword['words'];
+//            }
+//            $this->response = $sms;
+            $this->hits = $count;
+        }
+
+        $this->response = $sms;
+
+   }
+
 
 }

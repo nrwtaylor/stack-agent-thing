@@ -18,8 +18,6 @@ class Word {
      */
     function __construct(Thing $thing, $agent_input = null) {
         //echo "meep";
-        var_dump($thing->subject);
-        var_dump($agent_input);
 
         $this->start_time = microtime(true);
         if ($agent_input == null) {}
@@ -116,7 +114,6 @@ class Word {
             $new_words[] = trim($word);
         }
         //
-        //var_dump($new_words);
         return $new_words;
     }
 
@@ -425,7 +422,6 @@ class Word {
      */
     function makeSMS() {
 
-        //var_dump($this->words);
         if (isset($this->words)) {
 
             if (count($this->words) == 0) {
@@ -486,13 +482,13 @@ class Word {
         } else {
             $input = strtolower($this->agent_input);
 
-                        $prefix = 'word';
-                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-                        $words = ltrim($words);
-                        $this->search_words = $words;
-                        $this->extractWords($words);
-
-                        if ($this->word != null) {return;}
+           //             $prefix = 'word';
+//                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+//                        $words = ltrim($words);
+//                        $this->search_words = $words;
+//                        $this->extractWords($words);
+//
+//                        if ($this->word != null) {return;}
 
         }
 
@@ -556,8 +552,6 @@ class Word {
         if (isset($this->search_words)) {
 
             $this->nearest_word = $this->nearestWord($this->search_words);
-            //var_dump($this->word);
-            //$this->extractWords($input);
             $status = true;
 
 

@@ -19,7 +19,7 @@ class Entity extends Agent
 
     function init()
     {
-        $this->keywords = array('next', 'accept', 'clear', 'drop','add','new');
+        $this->keywords = array('next', 'accept', 'clear', 'drop','add','new', 'spawn','get');
 
         $this->default_id = "def0";
         if (isset($this->thing->container['api']['entity']['id'])) {
@@ -28,7 +28,12 @@ class Entity extends Agent
 
         $this->default_alias = "Thing";
 
+// Default to
+$this->requested_agent_name = "wumpus";
+
+
         $this->entity_agents = array("Entity", "Cat", "Dog", "Ant", "Crow", "Wumpus");
+
         $matches = array();
         foreach($this->entity_agents as $key=>$entity_agent) {
             if (strpos(strtolower($this->agent_input), strtolower($entity_agent)) !== false) {
@@ -36,6 +41,7 @@ class Entity extends Agent
             }
         }
         $this->entity_agent = strtolower($this->entity_agents[0]);
+
         if (isset($matches[0])) {$this->entity_agent = $matches[0];}
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/' . $this->entity_agent;
@@ -56,6 +62,7 @@ class Entity extends Agent
         $this->refreshed_at = $this->current_time;
     }
 
+
     function nextEntitycode()
     {
         // #devstack
@@ -73,9 +80,46 @@ class Entity extends Agent
         return $this->available;
     }
 
-    private function getEntity($requested_nuuid = null)
+    private function getEntity($requested_id = null)
     {
-echo "requested_nuuid " . $requested_nuuid . "\n";
+//echo "entity agent is looking for " . $requested_id .  ".\n";
+
+$nuuid = new Nuuid($this->thing, "nuuid");
+$nuuid->extractNuuid($requested_id);
+
+if (!isset($nuuid->nuuid)) {
+     //echo "entity did not find a nuuid.\n";
+     $requested_nuuid = $this->thing->nuuid;
+
+}
+
+if ( (isset($nuuid->nuuid)) and ($nuuid->nuuid != null) ) {$requested_nuuid = $nuuid->nuuid;}
+
+//$requested_agent_name = "wumpus";
+if (isset(explode("_", $requested_id)[1])) {
+   $requested_agent_name = explode("_", $requested_id)[1];
+}
+
+$input = "entity";
+if (isset($this->agent_input)) {$input = $this->agent_input;}
+if (isset($this->input)) {$input = $this->input;}
+if ( (isset($requested_agent_name)) and (isset($requested_nuuid)) ) {
+    $input = $requested_agent_name . " " . $requested_nuuid;
+}
+$this->extractEntity($input);
+
+$requested_agent_name = $this->entity_agent_name;
+
+
+
+//$requested_agent = $this->entity_agent;
+
+
+$this->thing->log("entity requested is " . $requested_id . ".");
+
+//echo "entity heard " . $requested_id . " " . ".\n";
+//echo "entity interprets " . $requested_agent_name . " " . $requested_nuuid . ".\n";
+
         if (!isset($this->entities)) {$this->getEntities(); }
 //        if (!isset($this->id)) {$this->id = $this->default_id;}
 
@@ -89,48 +133,103 @@ echo "requested_nuuid " . $requested_nuuid . "\n";
         //}
         $match_list = array();
 if (isset($this->entities[0])) {
+//echo "entities seen";
+//        foreach($this->entities as $key=>$entity) {
+//echo " ";
+//echo $entity["entity"] . "_" . $entity['nuuid'];
+//        }
+//echo ".\n";
+
 
 
         foreach($this->entities as $key=>$entity) {
 
+//echo $entity['nuuid'] . " " . $entity["entity"] . "\n";
+
             if ( (strtolower($entity['nuuid']) == strtolower($requested_nuuid)) ) {
+
+//echo "matched " . $entity['nuuid'] . "\n";
                 // Consistently match the nuuid to a specific uuid.
                 //$this->things[] = new Thing($entity['uuid']);
                 $match_list[] = $entity;
             }
         }
 
+$flag_nuuid = false;
+
         foreach($this->entities as $key=>$entity) {
             $entity_nuuid = substr($entity['uuid'], 0, 4);
 
-            if ( (strtolower($this->entity_agent) == strtolower($entity['entity'])) ) {
+            if ( (strtolower($requested_agent_name) == strtolower($entity['entity'])) ) {
                 // Consistently match the nuuid to a specific uuid.
                 //$this->things[] = new Thing($entity['uuid']);
                 $match_list[] = $entity;
+$flag_nuuid = true;
+
+//            if ( (strtolower($entity['nuuid']) == strtolower($requested_nuuid)) ) {
+//                // Consistently match the nuuid to a specific uuid.
+//                //$this->things[] = new Thing($entity['uuid']);
+//                $match_list[] = $entity;
+//            }
+
+
             }
         }
 
 }
 
-        if ($match_list == array()) {
-            $entity_is = "wumpus";
+if (!$flag_nuuid) {
+//            $entity_is = "wumpus";
+//$entity_is = $this->entity_agent;
             $entity = array("uuid"=>$this->uuid,
-                "entity"=>$entity_is,
+                "entity"=>strtolower($requested_agent_name),
+                "nuuid"=>substr($this->uuid, 0, 4),
+                "refreshed_at"=>$this->current_time
+        );
+        $match_list[] = $entity;
+     }
+
+
+
+
+        if ($match_list == array()) {
+//            $entity_is = "wumpus";
+//$entity_is = $this->entity_agent;
+            $entity = array("uuid"=>$this->uuid,
+                "entity"=>strtolower($requested_agent_name),
                 "nuuid"=>substr($this->uuid, 0, 4),
                 "refreshed_at"=>$this->current_time
         );
 	$match_list[] = $entity;
      }
 
+     // Return the matching nuuid.
+     // If not return the current crow.
+// Final run through.
+
      $match = $match_list[0];
 
+foreach ($match_list as $match) {
 
-//        if (!isset($this->things[0])) {
-//            $this->thing = new Thing(array_reverse($this->entities)[0]['uuid']);
-//        } else {
-//            $this->thing = $this->things[0];
-//        }
+
+if ((strtolower($match["entity"])  == strtolower($requested_agent_name)) and
+     (strtolower($match['nuuid']) == strtolower($requested_nuuid))) {
+//    $match = $match;
+    break;
+
+}
+
+}
+
+
+//echo "entity loaded thing " . $match['uuid']. ".\n";
+
         $this->thing = new Thing ($match['uuid']);
+
+$this->uuid = $this->thing->uuid;
+$this->subject = $this->thing->subject;
+$this->nom_from = null;
+$this->nom_to = null;
 
 //        $this->thing = $entity->thing;
 
@@ -167,6 +266,8 @@ if (isset($this->entities[0])) {
 
 
             if (isset($variables['entity'])) {
+
+
                 $matches = array();
                 foreach($this->entity_agents as $key=>$entity_agent) {
                     if (isset($variables[strtolower($entity_agent)])) {
@@ -214,7 +315,6 @@ if (isset($this->entities[0])) {
             $this->entities[] = $entity;
             $this->entity_list[] = $entity_is;
         }
-
         return $this->entity_list;
     }
 
@@ -230,10 +330,14 @@ if (isset($this->entities[0])) {
         // 10. Because starting at the beginning is probably a mistake. 
         // if you need 0Z00 ... you really need it.
 
-        $agent_name = $this->entity_agent;
-        //$this->entity = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $this->id . " " . $this->from);
-        $this->entity = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $this->thing->nuuid . " " . $this->from);
+if (!isset($this->requested_agent_name)) {$agent_name = "wumpus";} else {
+        $agent_name = $this->requested_agent_name;
+}
 
+//if ($entity_id == null) {$entity_id = "entity_" . $agent_name . "_" . $this->thing->nuuid ;}
+        //$this->entity = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $this->id . " " . $this->from);
+        $this->entity = new Variables($this->thing, "variables entity " . $this->from);
+//$this->entity = new Variables($this->thing, "variables " " . $entity_id . " " . $this->from);
 
         $this->last_refreshed_at = $this->entity->getVariable("refreshed_at");
 
@@ -244,6 +348,8 @@ if (isset($this->entities[0])) {
             // Hello
 
         }
+
+$this->start_nuuid = $this->thing->nuuid;
 
         $this->state = $this->entity->thing->choice->current_node;
 
@@ -329,15 +435,74 @@ if (isset($this->entities[0])) {
         $this->thing_report['png'] = $agent->image_string;
     }
 
-    function makeEntity($id = null)
+    function makeEntity($agent_name = null)
     {
-        $id = $this->getVariable('id', $id);
 
-        $this->thing->log('Agent "Entity" will make a id for ' . $id . ".");
+//        $id = $this->getVariable('id', $id);
+//echo "make entity " . $agent_name .".\n";
+
+$this->entity_agent = $agent_name;
+       $this->id = strtolower($this->entity_agent . "_" . $this->thing->nuuid);
+
+//echo "make entity " . $this->id .".\n";
+
+
+return;
+
+        $this->thing->log('Agent "Entity" will make a ' . $agent_name . ".");
+
+$agent_class_name = strtolower($agent_name);
+
+
+        if ($agent_class_name == null) {
+            $agent_class_name = strtolower($this->agent_name);
+        }
+            try {
+
+                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+
+                $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+                $agent = new $agent_namespace_name($this->thing, $agent_name . " spawn");
+//echo $agent->thing_report['sms'];
+                return true;
+
+//                // If the agent returns true it states it's response is not to be used.
+//                if ((isset($agent->response)) and ($agent->response === true)) {
+//                    throw new Exception("Flagged true.");
+//                }
+
+//                $this->thing_report = $agent->thing_report;
+
+//                $this->agent = $agent;
+//                return true;
+
+            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+echo "The agent is broken.";
+
+                $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+                // echo $ex;
+                $message = $ex->getMessage();
+                // $code = $ex->getCode();
+                $file = $ex->getFile();
+                $line = $ex->getLine();
+
+                $input = $message . '  ' . $file . ' line:' . $line;
+                $this->thing->log($input , "WARNING" );
+
+                // This is an error in the Place, so Bork and move onto the next context.
+                // $bork_agent = new Bork($this->thing, $input);
+                //continue;
+                return false;
+            }
+
+
+
+
+
 
         $ad_hoc = true;
         if ( ($ad_hoc != false) ) {
-
+echo "The agent is broken.";
             // Ad-hoc headcodes allows creation of headcodes on the fly.
             // 'Z' indicates the associated 'Place' is offering whatever it has.
             // Block is a Place.  Train is a Place (just a moving one).
@@ -398,16 +563,45 @@ if (isset($this->entities[0])) {
 
     function extractEntities($input = null)
     {
+
         $thing = new Nuuid($this->thing, "nuuid");
         $thing->extractNuuids($input);
 
         $this->ids = $thing->nuuids;
 
+foreach($this->entity_agents as $index=>$entity_agent) {
+
+if (strpos(strtolower($input), strtolower($entity_agent)) !== false) {
+
+//echo $entity_agent.  " " . $input . "\n";
+
+
+  $this->entity_agent_names[] = $entity_agent;
+
+}
+
+
+}
+
+
         return $this->ids;
     }
 
-    function extractEntity($input)
+    function extractEntity($input = null)
     {
+        $this->extractEntities($input);
+
+if (!isset($this->entity_agent_names)) {return true;}
+
+if ((count($this->entity_agent_names)) == 1) {
+   $this->entity_agent_name = $this->entity_agent_names[0];
+} else {
+   // Given more than one entity type.
+   // No shapeshifters. Yet.
+   return true;
+}
+
+
         $ids = $this->extractEntities($input);
         if (!(is_array($ids))) {return true;}
 
@@ -666,47 +860,51 @@ if (isset($this->entities[0])) {
 
         $keywords = $this->keywords;
 
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            if ($this->agent_input == $this->agent_name) {
-                $input = strtolower($this->subject);
-            } else {
-                $input = strtolower($this->agent_input);
-            }
-        } else {
-            $input = strtolower($this->from . " " . $this->subject);
-        }
+$this->requested_agent_name = null;
+$this->requested_agent_name = "wumpus";
+
+$this->thing->log( "input to entity agent is " . $this->input .".");
         $prior_uuid = null;
 
         // Is there a headcode in the provided datagram
-        $x = $this->extractEntity($input);
-        $agent_name = $this->entity_agent;
-        $agent_name = strtolower($agent_name);
+        $x = $this->extractEntity($this->input);
+//        $agent_name = $this->entity_agent;
+if (isset($agent_name)) {       
+ $agent_name = strtolower($agent_name);
+$this->requested_agent_name = $agent_name;
+}
+
+$this->thing->log("entity says agent is " . $this->requested_agent_name . ".");
 
         $nuuid_agent = new Nuuid($this->thing,"nuuid");
-        $nuuid_agent->extractNuuid($input);
-$nuuid = $nuuid_agent->thing->nuuid;
+        $nuuid_agent->extractNuuid($this->input);
 
-echo "entity says " . $agent_name . "_" . $nuuid . "\n";
+if (isset($nuuid_agent->nuuid)) {
+    $nuuid = $nuuid_agent->nuuid;
+} else {
+    $nuuid = null;
+}
 
-        $this->entity_id = new Variables($this->thing, "variables entity_" . $agent_name . "_" . $nuuid . " " . $this->from);
+$entity_id = "entity_". $this->requested_agent_name . "_" .$nuuid;
+
+$this->thing->log("entity says entity_id is " . $entity_id . ".");
+
+        $this->entity_id = new Variables($this->thing, "variables entity " . $this->from);
 
         if (!isset($this->id) or ($this->id == false)) {
             $this->id = $this->entity_id->getVariable('id', null);
-            //var_dump($this->head_code);
             if (!isset($this->id) or ($this->id == false)) {
                 $this->id = $this->getVariable('id', null);
-                //var_dump($this->head_code);
 
                 if (!isset($this->id) or ($this->id == false)) {
                     $this->id = $this->default_id;
-                    //var_dump($this->head_code);
                 }
             }
         }
-echo "this->id " . $this->id;
+$this->thing->log("this->id " . $this->id . ".");
+
+        $this->getEntity($nuuid);
+
         $this->get();
 
         if ( ($this->agent_input == "extract") and (strpos(strtolower($this->subject),'roll') !== false )   ) {
@@ -720,12 +918,12 @@ echo "this->id " . $this->id;
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {$this->response = "Extract";return;}
 
-        $pieces = explode(" ", strtolower($input));
+        $pieces = explode(" ", strtolower($this->input));
 
 		// So this is really the 'sms' section
 		// Keyword
         if (count($pieces) == 1) {
-            if ($input == 'entity') {
+            if ($this->input == 'entity') {
                 $this->read();
                 $this->response = "Read entity";
                 return;
@@ -736,6 +934,29 @@ echo "this->id " . $this->id;
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
                     switch($piece) {
+                        case 'spawn':
+
+//echo "entity heard spawn set the nuuid as " . $nuuid . ".";
+                        case 'get':
+
+if (!isset($nuuid)) {
+
+// No nuuid.  So set it now to current one.
+$nuuid = $this->thing->nuuid;
+
+
+}
+
+//echo "entity get ". $this->input . ".\n";
+$id = "entity_". strtolower($this->entity_agent) . "_"  . $nuuid;
+
+//$this->makeEntity(strtolower($this->entity_agent));
+$this->getEntity($id);
+//                            $this->get();
+                            $this->response = "Got entity devstack";
+                            break;
+
+
                         case 'next':
                             $this->thing->log("read subject nextentity");
                             $this->nextentity();

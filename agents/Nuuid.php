@@ -58,7 +58,7 @@ class Nuuid extends Agent
         $this->makeWeb();
 
         $this->thing_report["info"] = "This creates a not UUID.  Rememberable. Machine guessable. Short.";
-        $this->thing_report["help"] = "This is about keeping track of things.";
+        $this->thing_report["help"] = "This is a 'not unique' identifier to help keep track of things.";
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -165,6 +165,23 @@ class Nuuid extends Agent
         $web .= "<br><br>";
 
         $this->thing_report['web'] = $web;
+
+
+//        $web .= $this->html_image;
+//        $web .= "</a>";
+//        $web .= "<br>";
+
+        //$web .= $this->selector_hex . "<br>";
+        //$web .= $this->selector_dec . "<br>";
+        //$web .= $this->angle . "<br>";
+        //$web .= $this->selector . "<br>";
+
+//        $this->timestampSnowflake($this->retain_to);
+//        $web .= ucwords($this->timestamp). "<br>";
+
+        $web .= "<br><br>";
+        $this->thing_report['web'] = $web;
+
 
     }
 

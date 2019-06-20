@@ -134,7 +134,13 @@ $this->node_list = array("start"=>array("useful"=>array("bonus"=>"100","250")), 
 
 		if ($n == null) {
             $roll = new Roll($this->thing, "roll d20");
-            $n = $roll->sum;
+
+$n = 1;
+if (isset($roll->sum)) {$n = $roll->sum;}
+
+//            $n = $roll->sum;
+
+
         }
 
 

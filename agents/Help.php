@@ -92,6 +92,7 @@ class Help {
         try {
             $this->thing->log( $this->agent_prefix .'trying Agent "' . $this->prior_agent . '".', "INFORMATION" );
             $agent_class_name = $this->namespace . ucwords(strtolower($this->prior_agent));
+
             $agent = new $agent_class_name($this->prior_thing);
 
             $thing_report = $agent->thing_report;

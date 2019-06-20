@@ -19,7 +19,11 @@ class Agent
 
         $this->agent_name = 'agent';
 
-        $this->agent_name = strtolower(get_class());
+//var_dump( strtolower(get_class()), "\" );
+//var_dump ( end( explode( "\\", strtolower(get_class()) ) ) );
+
+//exit(); $this->agent_name = strtolower(get_class());
+        $this->getName();
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
 
         // Given a "thing".  Instantiate a class to identify
@@ -137,6 +141,13 @@ and the user UX/UI
         $this->test = null;
     }
 
+    public function getName()
+    {
+
+       $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
+
+
+    }
 
     public function getMeta($thing = null)
     {
@@ -282,13 +293,6 @@ and the user UX/UI
 
     public function read()
     {
-//echo "\n";
-//echo "agent_name ";
-//$arr = explode("\\",$this->agent_name);
-//$agent_name = array_values(array_slice($arr, -1))[0];
-//echo $agent_name;
-//echo "\n";
-
 //        if (strtolower($this->agent_input) != $agent_name) {
 //            // If agent input has been provided then
             // ignore the subject.
@@ -307,13 +311,6 @@ switch (true) {
     default:
        $this->input = strtolower($this->agent_input);
 }
-
-//echo "subject " . $this->subject;
-//echo "\n";
-
-
-//echo "input " . $this->input;
-//echo "\n";
 
         $this->readSubject();
     }
@@ -352,8 +349,10 @@ switch (true) {
                 // This is an error in the Place, so Bork and move onto the next context.
                 // $bork_agent = new Bork($this->thing, $input);
                 //continue;
-                return;
+                return false;
             }
+//if (!isset($this->thing_report['sms'])) {return false;}
+        return true; 
 
     }
 
@@ -806,7 +805,13 @@ switch (true) {
                 continue;
             }
 
-            $this->getAgent($agent_class_name);
+//            if ($this->getAgent($agent_class_name)) {break;}
+            if ($this->getAgent($agent_class_name)) {
+               //echo $this->thing_report['help'];
+               return $this->thing_report;
+            }
+
+//var_dump($this->thing_report['help']);
 /*
             try {
 
@@ -839,7 +844,7 @@ switch (true) {
 
             }
 */
-            return $this->thing_report;
+//            return $this->thing_report;
         }
 
         $this->thing->log( 'did not find an Ngram agent to run.', "INFORMATION" );
@@ -955,7 +960,7 @@ echo "place found";
 
             $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
 
-            echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
+            //echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
 
             if (!isset($last_heard['entity'])) {
                 $last_heard['entity'] = $last_heard[strtolower($entity_name)];
