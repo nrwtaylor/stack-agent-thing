@@ -620,9 +620,25 @@ switch (true) {
 
 
         if (isset($emoji_thing->emojis)) {
-            // Emoji found.
+          // Emoji found.
             $input = $emoji_thing->translated_input;
         }
+
+//echo "foo";
+        // And then compress
+        // devstack - replace this with a fast general character
+        // character recognizer of concepts.
+        $compression_thing = new Compression($this->thing, $input);
+//        $this->thing_report = $compression_thing->thing_report;
+
+//var_dump($compression_thing->filtered_inputhes);
+
+        if (isset($compression_thing->filtered_input)) {
+            // Compressions found.
+            $input = $compression_thing->filtered_input;
+        }
+
+
 
         $this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>', "DEBUG");
 

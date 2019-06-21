@@ -8,7 +8,7 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-class Word {
+class Word extends Agent {
 
 
     /**

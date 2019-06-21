@@ -79,6 +79,9 @@ class Runtime extends Agent {
         if ($this->runtime == false) {return;}
 
         $this->minutes = $this->runtime->getVariable("minutes");
+
+        $this->refreshed_at = $this->runtime->getVariable("refreshed_at");
+
     }
 
 

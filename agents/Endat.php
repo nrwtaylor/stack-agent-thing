@@ -1,6 +1,6 @@
 <?php
 /**
- * Runat.php
+ * Endat.php
  *
  * @package default
  */
@@ -14,7 +14,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Runat extends Agent {
+class Endat extends Agent {
 
     public $var = 'hello';
 
@@ -27,7 +27,7 @@ class Runat extends Agent {
     function init() {
         $this->keywords = array('next', 'accept', 'clear', 'drop', 'add', 'new');
         $this->test= "Development code"; // Always iterative.
-        $this->runat = new Variables($this->thing, "variables runat " . $this->from);
+        $this->endat = new Variables($this->thing, "variables endat " . $this->from);
     }
 
 
@@ -36,7 +36,7 @@ class Runat extends Agent {
      */
     function set() {
 
-        if ($this->runat == false) {return;}
+        if ($this->endat == false) {return;}
 
         if (!isset($this->day)) {$this->day = "X";}
         if (!isset($this->hour)) {$this->hour = "X";}
@@ -47,15 +47,104 @@ class Runat extends Agent {
 
 
 
-        $this->runat->setVariable("refreshed_at", $this->current_time);
-        $this->runat->setVariable("day", $this->day);
-        $this->runat->setVariable("hour", $this->hour);
-        $this->runat->setVariable("minute", $this->minute);
+        $this->endat->setVariable("refreshed_at", $this->current_time);
+        $this->endat->setVariable("day", $this->day);
+        $this->endat->setVariable("hour", $this->hour);
+        $this->endat->setVariable("minute", $this->minute);
 
-        $this->printRunat("set");
+        $this->printEndat("set");
 
 
         $this->thing->log( $this->agent_prefix .' saved ' . $this->day . " " . $this->hour . " " . $this->minute . ".", "DEBUG" );
+
+    }
+
+
+    function setRunat() {
+
+
+// Calculate Enddatetime
+
+        $hour_text = str_pad($this->hour, 2, "0", STR_PAD_LEFT);
+        $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
+
+//        $day_text = $this->day;
+//        $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text . " ";
+
+//        $d = strtotime($date_string);
+
+
+        // $runat = new Runat($this->thing, "runat");
+        $date_string = $this->enddate->year ."-" . $this->enddate->month ."-" . $this->enddate->day . $hour_text .":" . $minute_text;
+        $d = strtotime($date_string);
+
+// note this will set to today's current date since you are not specifying it in your passed parameter. This probably doesn't matter if you are just going to add time to it.
+$datetime = DateTime::createFromFormat('Y-n-j g:i:s', $date_string);
+$datetime->modify('-' . $this->runtime->minutes . ' minutes');
+
+$runat_string = $datetime->format('g:i D');
+
+
+//        $day = strtoupper(date("D", $d));
+
+        $runat = new Runat($this->thing, "runat");
+
+        if (strtoupper($runat->day) != strtoupper($day)) {
+
+            $command = "runat " . $runat_string;
+            $this->response .= "Changed runat to " . $runat_string. ".";
+            $runat = new Runat($this->thing, $command);
+        }
+
+
+    }
+
+    function getRuntime() {
+
+            $command = "runtime";
+//            $this->response .= "Got runtime " . $day. ".";
+            $this->runtime = new Runtime($this->thing, $command);
+            $this->response .= "Got runtime " . $this->runtime->minutes. " at " . $this->runtime->refreshed_at . ".";
+
+    }
+
+    function getRunat() {
+
+            $command = "runat";
+//            $this->response .= "Got runtime " . $day. ".";
+            $this->runat = new Runat($this->thing, $command);
+
+        $hour_text = str_pad($this->runat->hour, 2, "0", STR_PAD_LEFT);
+        $minute_text = str_pad($this->runat->minute, 2, "0", STR_PAD_LEFT);
+
+//        $day_text = $this->day;
+//        $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text . " ";
+
+//        $d = strtotime($date_string);
+
+
+        // $runat = new Runat($this->thing, "runat");
+        $date_string = $this->runat->day . " " . $hour_text .":" . $minute_text;
+
+
+            $this->response .= "Got runat " . $this->runat->hour . "minutes" . " set at  ". $this->runat->refreshed_at . ".";
+    }
+
+
+    function getEnddate() {
+
+            $command = "enddate";
+//            $this->response .= "Got runtime " . $day. ".";
+            $this->enddate = new Enddate($this->thing, $command);
+
+//        $hour_text = str_pad($this->hour, 2, "0", STR_PAD_LEFT);
+//        $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
+
+//        $day_text = $this->day;
+//        $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text . " ";
+
+            $this->response .= "Got enddate " . $this->enddate->year . "-". $this->enddate->month . "-" . $this->enddate->day. ".";
+            $this->response .= "Refreshed at  ". $this->enddate->refreshed_at . ".";
 
     }
 
@@ -66,23 +155,37 @@ class Runat extends Agent {
      */
     function get($run_at = null) {
 
-        if ($this->runat == false) {return;}
+        if ($this->endat == false) {return;}
 
-        $day = $this->runat->getVariable("day");
-        $hour = $this->runat->getVariable("hour");
-        $minute = $this->runat->getVariable("minute");
+        $day = $this->endat->getVariable("day");
+        $hour = $this->endat->getVariable("hour");
+        $minute = $this->endat->getVariable("minute");
 
-        $this->refreshed_at = $this->runat->getVariable("refreshed_at");
-
+        $this->refreshed_at = $this->endat->getVariable("refreshed_at");
 
         if ($this->isInput($day)) {$this->day = $day;}
         if ($this->isInput($hour)) {$this->hour = $hour;}
         if ($this->isInput($minute)) {$this->minute = $minute;}
 
 
-        $this->printRunat("get");
+        $this->printEndat("get");
+
+
+$this->getRunat();
+var_dump($this->runat->refreshed_at);
+
+//$this->getEnddate();
+//var_dump($this->enddate->refreshed_at);
+
+$this->getRuntime();
+var_dump($this->runtime->refreshed_at);
+
+//$this->getEndat();
+//$this->getEnddate();
+//$this->getRuntime();
     }
 
+    function getEndat() {}
 
     /**
      *
@@ -157,7 +260,7 @@ class Runat extends Agent {
      * @param unknown $input (optional)
      * @return unknown
      */
-    function extractRunat($input = null) {
+    function extractEndat($input = null) {
         $this->parsed_date = date_parse($input);
 
         $minute = $this->parsed_date['minute'];
@@ -195,7 +298,6 @@ class Runat extends Agent {
             }
 
         }
-
         if ($this->isInput($day)) {$this->day = $day;}
         if (($day == "X") and (isset($this->day) and ($this->day == "X"))) {$this->day = $day;}
 
@@ -279,8 +381,8 @@ class Runat extends Agent {
 
         $days = array("MON"=>array("mon", "monday", "M"),
             "TUE"=>array("tue", "tuesday", "Tu"),
-            "WED"=>array("wed", "wednesday", "W", "wday"),
-            "THU"=>array("thur", "thursday", "Th", "Thu"),
+            "WED"=>array("wed", "wednesday", "W"),
+            "THU"=>array("thur", "thursday", "Th"),
             "FRI"=>array("fri", "friday", "F", "Fr"),
             "SAT"=>array("sat", "saturday", "Sa"),
             "SUN"=>array("sun", "sunday", "Su"));
@@ -335,7 +437,7 @@ class Runat extends Agent {
      */
     private function makeSMS() {
 
-        $sms_message = "RUNAT";
+        $sms_message = "ENDAT";
 
         $hour_text = str_pad($this->hour, 2, "0", STR_PAD_LEFT);
         $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
@@ -350,11 +452,11 @@ class Runat extends Agent {
 
             //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 
-            $sms_message .= " | Set RUNAT. ";
+            $sms_message .= " | Set ENDAT. ";
 
         }
 
-        $sms_message .= "| nuuid " . strtoupper($this->runat->nuuid);
+        $sms_message .= "| nuuid " . strtoupper($this->endat->nuuid);
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
@@ -376,7 +478,7 @@ class Runat extends Agent {
         // Generate email response.
 
         $to = $this->thing->from;
-        $from = "runat";
+        $from = "endat";
 
 
         //$choices = $this->thing->choice->makeLinks($this->state);
@@ -434,7 +536,7 @@ class Runat extends Agent {
      *
      * @param unknown $text (optional)
      */
-    function printRunat($text = null) {
+    function printEndat($text = null) {
         return;
         echo $text . "\n";
 
@@ -466,17 +568,17 @@ class Runat extends Agent {
         }
         //        $this->extractRunat($this->input);
 
-        if ($this->agent_input == "runat") {
+        if ($this->agent_input == "endat") {
 
             return;
         }
 
-        if (strpos($this->agent_input, "runat") !== false) {
-            $this->extractRunat($this->agent_input);
+        if (strpos($this->agent_input, "endat") !== false) {
+            $this->extractEndat($this->agent_input);
 
             return;
         }
-        $this->extractRunat($this->input);
+        $this->extractEndat($this->input);
 
     }
 

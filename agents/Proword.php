@@ -17,6 +17,8 @@ class Proword extends Word
 
         $this->getProwords();
 
+$this->librex_name = "acp125g";
+
 	}
 
     function run()
@@ -83,7 +85,7 @@ $this->thing_report['help'] = "Reads the short message for prowords.";
 
     function isProword($test)
     {
-        $this->getProwords('acp125g');
+        $this->getProwords($this->librex_name);
         $match = false;
         foreach ($this->prowords as $proword=>$arr) {
             if ($proword == "") {continue;}
@@ -100,7 +102,7 @@ $this->thing_report['help'] = "Reads the short message for prowords.";
     {
         $words = explode(" ", $text);
 
-        $this->getProwords('acp125g');
+        $this->getProwords($this->librex_name);
         $prowords_list = array();
 
         foreach ($this->prowords as $proword=>$arr) {
@@ -118,7 +120,7 @@ $this->thing_report['help'] = "Reads the short message for prowords.";
 
         $words = explode(" ",$text);
 
-        $this->getProwords('acp125g');
+        $this->getProwords($this->librex_name);
         $count = 0;
         foreach($words as $word) {
             foreach ($this->prowords as $proword=>$arr) {
@@ -155,6 +157,10 @@ $this->thing_report['help'] = "Reads the short message for prowords.";
             case 'vector':
                 $file = $this->resource_path . 'proword/vector.txt';
                 break;
+            case 'compression':
+                $file = $this->resource_path . 'compression/compression.txt';
+                break;
+
             default:
                 $file = $this->resource_path . 'proword/prowords.txt';
         }
@@ -346,20 +352,36 @@ $this->thing_report['help'] = "Reads the short message for prowords.";
     {
 
         $this->response = "";
-        $input = $this->subject;
 
-        if (strtolower($input) == "proword") {
+$this->input = $this->agent_input;
+if ($this->agent_input == null) {
+        $this->input = $this->subject;
+}
+
+$librexes = array('acp125g', 'compression');
+
+$this->librex_name = 'acp125g';
+foreach($librexes as $librex) {
+if (strpos(strtolower($this->input), strtolower($librex)) !== false) {
+
+$this->librex_name = $librex;
+break;
+}
+}
+
+
+        if (strtolower($this->input) == "proword") {
             $this->prowordThing();
             $this->response = "Retrieved a message with Proword in it.";
             return;
         }
 
         // Ignore "proword is" or "proword"
-        $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "proword is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("proword is")); 
-        } elseif (($pos = strpos(strtolower($input), "proword")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("proword")); 
+        $whatIWant = $this->input;
+        if (($pos = strpos(strtolower($this->input), "proword is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("proword is")); 
+        } elseif (($pos = strpos(strtolower($this->input), "proword")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("proword")); 
         }
 
         // Clean input
@@ -370,7 +392,9 @@ $this->extractProwords($filtered_input);
 
         $this->has_prowords = $this->isProword($filtered_input);
 
-        $this->getProwords('acp125g', $filtered_input);
+
+
+        $this->getProwords($this->librex_name, $filtered_input);
 
 
         $ngram = new Ngram($this->thing, "ngram");
@@ -381,7 +405,7 @@ $this->extractProwords($filtered_input);
         });
 
         foreach($search_phrases as $search_phrase) {
-            $this->getProwords('acp125g', $search_phrase);
+            $this->getProwords($this->librex_name, $search_phrase);
         }
         $this->filtered_input = $filtered_input;
 
