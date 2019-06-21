@@ -18,19 +18,11 @@ class Test extends Agent {
      * @param Thing   $thing
      * @param unknown $text  (optional)
      */
-
-
-    /**
-     * function __construct(Thing $thing, $text = null) {
-     */
+//    function __construct(Thing $thing, $text = null) {
     function init() {
         $this->test= "Development code";
     }
 
-
-    /**
-     *
-     */
     function run() {
         $this->doTest("ping");
     }
@@ -38,53 +30,53 @@ class Test extends Agent {
 
     /**
      *
-     * @param unknown $input_agent_name (optional)
+     * @param unknown $input (optional)
      */
     function doTest($input_agent_name = null) {
-        $agent_class_name = ucwords($input_agent_name);
-        $this->test_agent_name = $agent_class_name;
+$agent_class_name = ucwords($input_agent_name);
+$this->test_agent_name = $agent_class_name;
 
 
 
         if ($agent_class_name == null) {
             $agent_class_name = strtolower($this->agent_name);
         }
-        $flag = "red";
-        try {
-            $message = "OK";
-            $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
+$flag = "red";
+            try {
+$message = "OK";
+                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-            $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
-            $agent_test = new $agent_namespace_name($this->thing, $agent_class_name);
-            $flag = "green";
-        } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-            // echo $ex;
-            $message = $ex->getMessage();
-            // $code = $ex->getCode();
-            $file = $ex->getFile();
-            $line = $ex->getLine();
+                $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+                $agent_test = new $agent_namespace_name($this->thing, $agent_class_name);
+$flag = "green";
+            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+                $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+                // echo $ex;
+                $message = $ex->getMessage();
+                // $code = $ex->getCode();
+                $file = $ex->getFile();
+                $line = $ex->getLine();
 
-            $input = $message . '  ' . $file . ' line:' . $line;
-            $this->thing->log($input , "WARNING" );
+                $input = $message . '  ' . $file . ' line:' . $line;
+                $this->thing->log($input , "WARNING" );
 
-            // This is an error in the Place, so Bork and move onto the next context.
-            // $bork_agent = new Bork($this->thing, $input);
-            //continue;
-            //                return true;
-        }
-
-
-        $this->test_result = array("agent_name"=>$agent_class_name, "flag"=>$flag, "error"=>$message);
+                // This is an error in the Place, so Bork and move onto the next context.
+                // $bork_agent = new Bork($this->thing, $input);
+                //continue;
+//                return true;
+            }
 
 
-        //        var_dump( $this->isAgent("asdf"));
+$this->test_result = array("agent_name"=>$agent_class_name, "flag"=>$flag, "error"=>$message);
 
-        //        $this->doTest();
 
-        //        $agent_test = new Agent($this->thing, "agent");
+//        var_dump( $this->isAgent("asdf"));
+
+//        $this->doTest();
+
+//        $agent_test = new Agent($this->thing, "agent");
         $agent_test->test();
-        if (isset($agent_test->test_result)) {$this->response .= $agent_test->test_result;} else {$this->response .= "No test result found. ";}
+if (isset($agent_test->test_result)) {$this->response .= $agent_test->test_result;} else {$this->response .= "No test result found. ";}
 
 
     }
@@ -125,7 +117,7 @@ class Test extends Agent {
         $from = "test";
 
         $this->makeSMS();
-        //        $this->makeChoices();
+//        $this->makeChoices();
 
         $this->thing_report["info"] = "This is saying you are here, when someone needs you.";
         $this->thing_report["help"] = "This is about being very consistent.";
@@ -158,11 +150,11 @@ class Test extends Agent {
     /**
      *
      */
-    //    function makeChoices() {
-    //        $this->thing->choice->Create('channel', $this->node_list, "test");
-    //        $choices = $this->thing->choice->makeLinks('test');
-    //        $this->thing_report['choices'] = $choices;
-    //    }
+//    function makeChoices() {
+//        $this->thing->choice->Create('channel', $this->node_list, "test");
+//        $choices = $this->thing->choice->makeLinks('test');
+//        $this->thing_report['choices'] = $choices;
+//    }
 
 
     /**

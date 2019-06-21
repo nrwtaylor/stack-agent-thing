@@ -36,34 +36,34 @@ class Negativetime extends Agent {
      *
      */
     function getNegativetime() {
-        $this->runat = new Runat($this->thing, "runat"); // get runat for the currently focused event
-        $rundate = new Rundate($this->thing, "rundate");
+        $this->endat = new Endat($this->thing, "endat"); // get runat for the currently focused event
+        $enddate = new Enddate($this->thing, "enddate");
 
 
 
-        if ( ($rundate->year == "X") or
-            ($rundate->month == "X") or
-            ($rundate->day == "X") or
-            ($this->runat->day == "X") or
-            (($this->runat->hour == "X") and ($this->runat->hour != 0)) or
-            (($this->runat->minute == "X") and ($this->runat->minute != 0))  ) {
+        if ( ($enddate->year == "X") or
+            ($enddate->month == "X") or
+            ($enddate->day == "X") or
+            ($this->endat->day == "X") or
+            (($this->endat->hour == "X") and ($this->endat->hour != 0)) or
+            (($this->endat->minute == "X") and ($this->endat->minute != 0))  ) {
 
 
             $this->negative_time = null;
             return;
         }
 
-        $date_text = $rundate->year . "-" . $rundate->month . "-" . $rundate->day ." " . $this->runat->hour . ":" . $this->runat->minute;
-        $run_time = strtotime($date_text);
-
+        $date_text = $enddate->year . "-" . $enddate->month . "-" . $enddate->day ." " . $this->endat->hour . ":" . $this->endat->minute;
+        $end_time = strtotime($date_text);
+var_dump($date_text);
         $now = (strtotime($this->current_time));
-
-        $negative_time = $run_time - $now;
+var_dump($this->current_time);
+        $negative_time = $end_time - $now;
 
 
         if ($negative_time > 0) {
             //var_dump($runat->datetime);
-            $this->negative_time = $run_time - $now;
+            $this->negative_time = $end_time - $now;
         } else {
             $this->negative_time = null;
         }
@@ -128,13 +128,13 @@ class Negativetime extends Agent {
             $neg = $array[$k];
 
             if ($this->negative_time < 0) {
-                $response = "NEGATIVE TIME | " . $this->thing->human_time( $this->negative_time / -1)."";
+                $response = "NEGATIVE TIME | " . "-" .$this->thing->human_time( $this->negative_time / -1)." since ";
             } else {
-                $response = "NEGATIVE TIME | " . $this->thing->human_time( $this->negative_time)."";
+                $response = "NEGATIVE TIME | " . "+".$this->thing->human_time( $this->negative_time)." until ";
             }
-            $response .= " until " . $this->runat->day . " " . str_pad("0", 2, $this->runat->hour, STR_PAD_LEFT) . ":" . str_pad("0", 2, $this->runat->minute, STR_PAD_LEFT) .".";
+            $response .= "" . $this->endat->day . " " . str_pad("0", 2, $this->endat->hour, STR_PAD_LEFT) . ":" . str_pad("0", 2, $this->endat->minute, STR_PAD_LEFT) .".";
 
-            if ($this->negative_time == null) {$response = "NEGATIVE TIME | Event not set. Set RUNDATE and/or RUNAT.";}
+            if ($this->negative_time == null) {$response = "NEGATIVE TIME | Event not set. Set ENDDATE and/or ENDAT.";}
 
             $this->cat_message = $response;
         } else {

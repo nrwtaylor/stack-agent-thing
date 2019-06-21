@@ -16,41 +16,31 @@ class Word extends Agent {
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-    function __construct(Thing $thing, $agent_input = null) {
-        //echo "meep";
-
-        $this->start_time = microtime(true);
-        if ($agent_input == null) {}
-        $this->agent_input = $agent_input;
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-
-        $this->agent_prefix = 'Agent "Word" ';
-
-        //        $this->thing_report  = array("thing"=>$this->thing->thing);
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->uuid = $thing->uuid;
+     function init() {
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
         $this->resource_path_words = $GLOBALS['stack_path'] . 'resources/words/';
 
         $this->resource_path_ewol = $GLOBALS['stack_path'] . 'resources/ewol/';
-
-
-
-        if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
-        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-        if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
-
-
-        $this->sqlresponse = null;
-
-        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-        $this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
-
-
         $this->keywords = array();
+
+    }
+
+    function set() {
+
+        $this->thing->json->writeVariable( array("word", "reading"), $this->reading );
+
+        if ((isset($this->words) and count($this->words)) != 0) {
+
+            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->word . '.');
+
+
+        } else {
+            $this->thing->log($this->agent_prefix . 'did not find words.');
+        }
+    }
+
+    function get() {
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("word", "refreshed_at") );
@@ -64,28 +54,8 @@ class Word extends Agent {
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable( array("word", "reading") );
 
-        $this->readSubject();
-
-        $this->thing->json->writeVariable( array("word", "reading"), $this->reading );
-
-        if ($this->agent_input == null) {$this->Respond();}
-
-        if ((isset($this->words) and count($this->words)) != 0) {
-
-            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->word . '.');
-
-
-        } else {
-            $this->thing->log($this->agent_prefix . 'did not find words.');
-        }
-
-        $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
-
-        $this->thing_report['log'] = $this->thing->log;
-
 
     }
-
 
     /**
      *
@@ -363,24 +333,12 @@ class Word extends Agent {
      *
      * @return unknown
      */
-    public function Respond() {
+    public function respond() {
 
         $this->cost = 100;
 
         // Thing stuff
-
-
         $this->thing->flagGreen();
-
-        // Compose email
-
-        //  $status = false;//
-        //  $this->response = false;
-
-        //  $this->thing->log( "this reading:" . $this->reading );
-
-
-
 
         // Make SMS
         $this->makeSMS();
@@ -392,26 +350,13 @@ class Word extends Agent {
         // Make email
         $this->makeEmail();
 
-        //        $this->thing_report['email'] = array('to'=>$this->from,
-        //                'from'=>'emoji',
-        //                'subject' => $this->subject,
-        //                'message' => $this->email_message,
-        //                'choices' => false);
-
-        //  $email = new Makeemail($this->thing);
-        //  $this->thing_report['email'] = $email->thing_report['email'];
         $this->thing_report['email'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-
-
-
         $this->reading = count($this->words);
         $this->thing->json->writeVariable(array("word", "reading"), $this->reading);
-
-
 
         return $this->thing_report;
     }
@@ -578,7 +523,3 @@ class Word extends Agent {
 
 
 }
-
-
-
-?>

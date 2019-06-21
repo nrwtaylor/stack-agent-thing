@@ -10,51 +10,19 @@ ini_set("allow_url_fopen", 1);
 // Canadian Hydrographic Service
 class Agentstest extends Agent
 {
-    // SOAP needs enabling in PHP.ini
-
-    // https://www.waterlevels.gc.ca/docs/Specifications%20-%20Spine%20observation%20and%20predictions%202.0.3(en).pdf
-
-    // https://www.waterlevels.gc.ca/eng/info/Webservices
-    // Canadian Hydrographic Service
-
-    // License required from Canadian Hydrographic Service to re-publish.
-    // https://www.waterlevels.gc.ca/eng/info/Licence
-
-    //  “This product has been produced by or for
-    // [insert User's corporate name] and includes data and
-    // services provided by the Canadian Hydrographic Service
-    // of the Department of Fisheries and Oceans. The
-    // incorporation of data sourced from the Canadian
-    //  Hydrographic Service of the Department of Fisheries
-    // and Oceans within this product does NOT constitute an
-    // endorsement by the Canadian Hydrographic Service or
-    // the Department of Fisheries and Oceans of this product.”
-
     public $var = 'hello';
 
     function init()
     {
         $this->keyword = "environment";
-
         $this->agent_prefix = 'Agent "Weather" ';
-
         $this->keywords = array('agents', 'test', 'unit test');
-
         if ($this->verbosity == false) {$this->verbosity = 2;}
-
         $this->getAgentsTest();
     }
 
-//    function run()
-//    {
-
-//        $this->getAgentsTest();
-
-//    }
-
     function getAgentsTest()
     {
-echo "GETAGENTSTEST\n";
         $this->test = new Agents($this->thing, "agents test");
         //$this->thing = $agent->thing;
     }
