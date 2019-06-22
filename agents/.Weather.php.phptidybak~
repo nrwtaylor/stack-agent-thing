@@ -47,7 +47,11 @@ class Weather extends Agent {
 
         $this->default_state = "green";
 
+        // Loads in Weather variables.
+//        $this->get();
+
         if ($this->verbosity == false) {$this->verbosity = 2;}
+
 
         // devstack identify place as vancouver
         $this->link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
@@ -57,18 +61,29 @@ class Weather extends Agent {
         $link = str_replace("/rss/city/", "/city/pages/", $this->xml_link);
         $this->link = str_replace("_e.xml", "_metric_e.html", $link);
 
+
+        $this->thing->log('<pre> Agent "Weather" running on Thing '. $this->thing->nuuid . '.</pre>');
+        $this->thing->log('<pre> Agent "Weather" received this Thing "'.  $this->subject . '".</pre>');
+
+//        $this->readSubject();
+
+//        $this->getWeather();
+
+//        $this->respond();
+
+//        $this->thing->log( $this->agent_prefix .'ran for ' . $this->thing->elapsed_runtime() . 'ms.' );
+
+//        $this->thing->log($this->agent_prefix . 'completed.');
+//        $this->thing_report['log'] = $this->thing->log;
+
+//        return;
     }
 
-
-    /**
-     *
-     */
     function run() {
 
         $this->getWeather();
 
     }
-
 
     /**
      *
@@ -107,10 +122,10 @@ class Weather extends Agent {
                     $this->set();
                 }
                 break;
-                //            case 'weather':
-                //                $this->getWeather();
-                //                $this->response .= $this->current_conditions . " > " . $this->forecast_conditions . ". ";
-                //                break;
+//            case 'weather':
+//                $this->getWeather();
+//                $this->response .= $this->current_conditions . " > " . $this->forecast_conditions . ". ";
+//                break;
 
 
             default:
@@ -174,13 +189,13 @@ class Weather extends Agent {
 
         $weather_text = str_replace("\n", "", $weather_text);
         $weather_text = str_replace("  ", " ", $weather_text);
-        $weather_text = trim($weather_text);
+$weather_text = trim($weather_text);
 
-        if (strpos(strrev($weather_text), '.') !== 0) {
-            $weather_text .= ". ";
-        } else {
-            $weather_text .= " ";
-        }
+if (strpos(strrev($weather_text), '.') !== 0) {
+  $weather_text .= ". ";
+} else {
+$weather_text .= " ";
+} 
 
         $this->response .= $weather_text;
 
@@ -200,6 +215,10 @@ class Weather extends Agent {
      *
      */
     function set() {
+
+        //if (!isset($this->wave_thing)) {
+        //    $this->wave_thing = $this->thing;
+        //}
 
         if ( (!isset($requested_state)) or ($requested_state == null) ) {
             if (!isset($this->requested_state)) {$this->requested_state = $this->state;}
@@ -338,7 +357,6 @@ class Weather extends Agent {
         return true;
     }
 
-
     /**
      *
      */
@@ -397,7 +415,7 @@ class Weather extends Agent {
 
         $web .= "Environment Canada feed last queried " . $ago .  " ago.<br>";
 
-        $this->sms_message = $sms_message;
+        //$this->sms_message = $sms_message;
         $this->thing_report['web'] = $web;
     }
 
@@ -481,13 +499,26 @@ class Weather extends Agent {
      */
     public function readSubject() {
         if ((!isset($this->input)) or ($this->input == null)) {return;}
-        //        $this->response .= 'Weather heard, "' . $this->input .'". ';
+//        $this->response .= 'Weather heard, "' . $this->input .'". ';
 
         $this->doWeather($this->input);
 
+
+
+
+        //        $this->response = null;
         $this->num_hits = 0;
 
+        //$this->number = extractNumber();
         $keywords = $this->keywords;
+
+        $input=$this->input;
+
+        $prior_uuid = null;
+
+        //        $this->getWave();
+
+
 
         $pieces = explode(" ", strtolower($this->input));
 
@@ -495,7 +526,7 @@ class Weather extends Agent {
         // Keyword
         if (count($pieces) == 1) {
 
-            if ($this->input == 'weather') {
+            if ($input == 'weather') {
                 $this->response = $this->current_conditions . " > " . $this->forecast_conditions;
                 return;
 

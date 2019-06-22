@@ -311,7 +311,6 @@ switch (true) {
     default:
        $this->input = strtolower($this->agent_input);
 }
-
         $this->readSubject();
     }
 
