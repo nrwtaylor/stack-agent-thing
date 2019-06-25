@@ -837,7 +837,9 @@ $image_width = 125;
                 $txt .= " " . str_pad($headcode['available'], 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['quantity'])) {
-                $txt .= " " . str_pad($headcode['quantity'], 9, " ", STR_PAD_LEFT);
+$quantity_text = $headcode['quantity'];
+if (is_array($quantity_text)) {$quantity_text = $quantity_text['quantity'];}
+                $txt .= " " . str_pad($quantity_text, 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['consist'])) {
                 $txt .= " " . str_pad($headcode['consist'], 9, " ", STR_PAD_LEFT);

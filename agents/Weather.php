@@ -157,9 +157,13 @@ class Weather extends Agent {
                 }
             }
         }
-
+//var_dump($this->daily_forecast);
         $weather_text = "";
-        foreach (array(0) as $week_index) {
+
+$index = 0;
+if(!isset($this->daily_forecast['sunday'][0]['night'])) {$index = 1;}
+
+        foreach (array($index) as $week_index) {
             foreach (array("friday", "saturday", "sunday") as $day) {
                 foreach (array("day", "night") as $night) {
                     $night_text = "";
@@ -397,7 +401,7 @@ class Weather extends Agent {
 
         $web .= "Environment Canada feed last queried " . $ago .  " ago.<br>";
 
-        $this->sms_message = $sms_message;
+//        $this->sms_message = $sms_message;
         $this->thing_report['web'] = $web;
     }
 
