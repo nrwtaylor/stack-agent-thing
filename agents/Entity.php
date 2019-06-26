@@ -334,7 +334,6 @@ class Entity extends Agent
                 $this->entities[] = $entity;
 
             }
-
         }
 
         if ((!isset($this->entity_list)) and (!isset($this->entities))) {
@@ -355,7 +354,6 @@ class Entity extends Agent
      * @param unknown $entity_id (optional)
      */
     function get($entity_id = null) {
-
         if (!isset($this->id)) {$this->getEntity();}
         // This is a request to get the coding from the Thing
         // and if that doesn't work then from the Stack.
@@ -376,7 +374,7 @@ class Entity extends Agent
         }
 
         $this->start_nuuid = $this->thing->nuuid;
-
+echo "entity start nuuid " . $this->start_nuuid. ".\n";
         $this->state = $this->entity->thing->choice->current_node;
 
     }

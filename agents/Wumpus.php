@@ -138,7 +138,7 @@ class Wumpus extends Agent
      *
      */
     public function run() {
-        $this->getWumpus();
+///        $this->getWumpus();
         //        $this->getClocktime();
         //        $this->getBar();
         //$this->getCoordinate();
@@ -146,12 +146,17 @@ class Wumpus extends Agent
 
         //        $this->getTick();
 
+
+$input_agent = new Input($this->thing, "wumpus");
+
+
+
         // Err ... making sure the state is saved.
         //        $this->thing->choice->Choose($this->state);
         //        $this->state = $this->thing->choice->load('lair');
-        $this->state = $this->entity_agent->choice->load('lair');
+///        $this->state = $this->entity_agent->choice->load('lair');
 
-        $this->thing->log('state is "' . $this->state . '".');
+///        $this->thing->log('state is "' . $this->state . '".');
     }
 
 
@@ -159,6 +164,18 @@ class Wumpus extends Agent
      *
      */
     public function set() {
+echo "set wumpus tag " . $this->wumpus_tag . ".\n";
+        $this->wumpus_tag= $this->entity_agent->nuuid;
+        if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
+
+        $variables = new Variables($this->thing, "variables wumpus " . $this->from);
+
+        $variables->setVariable("tag", $this->wumpus_tag);
+
+        $variables->setVariable("refreshed_at", $this->refreshed_at);
+
+echo "set wumpus tag " . $this->wumpus_tag . ".\n";
+
 
         //$this->x = "9";
 
@@ -189,15 +206,26 @@ class Wumpus extends Agent
     }
 
 
-
-
     /**
      *
      * @param unknown $crow_code (optional)
      * @return unknown
      */
     public function get($crow_code = null) {
-        $this->getWumpus();
+
+        $wumpus = new Variables($this->thing, "variables wumpus " . $this->from);
+
+        $this->wumpus_tag = $wumpus->getVariable("tag");
+        $this->refreshed_at = $wumpus->getVariable("refreshed_at");
+
+echo "got wumpus tag " . $this->wumpus_tag . ".\n";
+
+
+        if ($crow_code == null) {$crow_code = $this->wumpus_tag;}
+
+
+
+        $this->getWumpus($crow_code);
 
         $this->current_time = $this->entity_agent->json->time();
 
@@ -207,15 +235,16 @@ class Wumpus extends Agent
 
         if ($crow_code == null) {$crow_code = $this->uuid;}
 
+        $this->entity_agent->json->setField("variables");
         if ($this->time_string == false) {
-            $this->entity_agent->json->setField("variables");
+//            $this->entity_agent->json->setField("variables");
             $this->time_string = $this->entity_agent->json->time();
             $this->entity_agent->json->writeVariable( array("wumpus", "refreshed_at"), $this->time_string );
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->entity_agent->json->setField("variables");
+//        $this->entity_agent->json->setField("variables");
         $this->left_count = strtolower($this->entity_agent->json->readVariable( array("wumpus", "left_count") ));
         $this->right_count = $this->entity_agent->json->readVariable( array("wumpus", "right_count") );
         $this->x = $this->entity_agent->json->readVariable( array("wumpus", "cave") );
@@ -270,6 +299,10 @@ class Wumpus extends Agent
      */
     private function getWumpus($requested_nuuid = null) {
 
+        $entity_input = "get wumpus";
+        if ($requested_nuuid != null) {$entity_input = "get wumpus ".$requested_nuuid;} else {$entity_input = "get wumpus";}
+
+echo "getWumpus " . $entity_input . "\n";
         //if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
 
         //$entity = new Entity($this->thing, "wumpus");
@@ -279,7 +312,7 @@ class Wumpus extends Agent
 
         //if ($requested_nuuid == null) {$requested_nuuid = $this->id;}
 
-        $entity = new Entity($this->thing, "wumpus");
+        $entity = new Entity($this->thing, $entity_input);
         $this->entity_agent = $entity->thing;
 
         //        $this->thing = $entity->thing;
@@ -297,6 +330,8 @@ class Wumpus extends Agent
         //        $this->nuuid = $this->thing->nuuid;
         $this->nuuid = $this->entity_agent->nuuid;
 
+echo "got wumpus " . $this->nuuid . "\n";
+
 
         //        if ($this->x == 0) {$this->x = random_int(1,20);}
 
@@ -308,6 +343,7 @@ class Wumpus extends Agent
         //$this->choices = $this->thing->choice->makeLinks($this->state);
         $this->choices = $this->entity_agent->choice->makeLinks($this->state);
     }
+
 
 
     /**
@@ -606,6 +642,10 @@ class Wumpus extends Agent
         $this->choices_text = "";
         if ($this->choices['words'] != null) {
             $this->choices_text = strtoupper(implode(" / " , $this->choices['words']));
+
+
+
+
         }
 
 
@@ -685,8 +725,9 @@ class Wumpus extends Agent
             'start'=>"TEXT WEB / " . $this->choices_text
         );
 
+//        $sms = "WUMPUS " . strtoupper($this->wumpus_tag) .  "";
 
-        $sms = "WUMPUS " . strtoupper($this->nuuid) .  "";
+        $sms = "WUMPUS " . strtoupper($this->entity_agent->nuuid) .  "";
 
         //$this->state = "hungry";
         if ((isset($this->state)) and ($this->state != false)) {
@@ -784,12 +825,14 @@ class Wumpus extends Agent
      *
      * @return unknown
      */
-    public function readSubject() {
-        $this->response = null;
+//    public function readSubject() {
+//        $this->response = null;
+//
+//        if ($this->state == null) {
+//            $this->getWumpus();
+//        }
 
-        if ($this->state == null) {
-            $this->getWumpus();
-        }
+    public function doState() {
 
         switch ($this->state) {
         case "start":
@@ -843,6 +886,16 @@ class Wumpus extends Agent
             // this case really shouldn't happen.
             // but it does when a web button lands us here.
         }
+    }
+
+    public function readSubject() {
+        $this->response = null;
+
+        if ($this->state == null) {
+            $this->getWumpus();
+        }
+
+$this->doState();
 
         $input = strtolower($this->subject);
 
@@ -1023,6 +1076,16 @@ class Wumpus extends Agent
 
 
                         $this->response .= "Heard midden work. Urgh. ";
+                        break;
+
+                   case 'break':
+                        $this->middenwork();
+                        //                            $this->thing->choice->Choose($piece);
+                        //                            $this->state = $this->thing->choice->current_node;
+
+$i = new Input($this->thing, "break");
+echo "BBBB";
+                        $this->response .= "Heard break. Stopped program. ";
                         break;
 
 

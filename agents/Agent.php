@@ -211,11 +211,12 @@ and the user UX/UI
 
 
 
-    private function getPrior()
+    public function getPrior()
     {
         // See if the previous subject line is relevant
         $this->thing->db->setUser($this->from);
         $prior_thing_report = $this->thing->db->priorGet();
+$this->prior_thing = $prior_thing_report;
 
         $task = $prior_thing_report['thing']->task ;
         $nom_to = $prior_thing_report['thing']->nom_to ;
@@ -639,6 +640,25 @@ switch (true) {
         }
 
 
+// Okay here check for input
+//echo "input is ".  $input;
+
+
+if ( strtolower($this->subject) == "break" ) {
+
+    $input_thing = new Input($this->thing, "break");
+    $this->thing_report = $input_thing->thing_report;
+    return $this->thing_report;
+
+}
+
+
+$input_thing = new Input($this->thing, "input");
+var_dump($input_thing->route_to_agent);
+
+if ($input_thing->route_to_agent != null) {$input = $input_thing->route_to_agent . " " . $input;}
+
+echo "input is " . $input;
 
         $this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>', "DEBUG");
 
