@@ -53,6 +53,8 @@ class Wumpus extends Agent
 
         $this->primary_place = "lair";
 
+//$this->run_flag = false;
+
         $this->created_at = $this->thing->thing->created_at;
 
         $this->sqlresponse = null;
@@ -131,6 +133,16 @@ class Wumpus extends Agent
         $info = 'The "Wumpus" agent provides an text driven interface to manage a 3-D coordinate on '. $this->short_name;
         $info .= 'from the web.  The Management suggests you explore the NEST MAINTENANCE button';
 
+
+// dev stack 
+$t = new Input($this->thing, "wumpus");
+echo "route to  " . $t->route_to_agent . ".\n";
+
+$this->run_flag = $t->route_to_agent;
+echo "run run_flag " . $this->run_flag . ".\n";
+$this->run_flag = "wumpus";
+
+
     }
 
 
@@ -147,8 +159,9 @@ class Wumpus extends Agent
         //        $this->getTick();
 
 
-$input_agent = new Input($this->thing, "wumpus");
-
+//$t = new Input($this->thing, "wumpus");
+//$this->run_flag = $t->route_to_agent;
+//echo "run run_flag " . $this->run_flag . ".\n";
 
 
         // Err ... making sure the state is saved.
@@ -775,8 +788,12 @@ echo "got wumpus " . $this->nuuid . "\n";
             $this->cave_list_text = trim(implode($this->caves[strval($this->x)], " ")) . "";
         }
 
+echo "makesms run flag " . $this->run_flag . "\n";
+if ($this->run_flag == "wumpus") {
         $sms .= "YOUR CHOICES ARE [ " . $this->cave_list_text . " " . $this->choices_text."] ";
-
+} else {
+$sms .= "TEXT RUN WUMPUS.";
+}
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -930,7 +947,7 @@ $this->doState();
             $this->response .= $r;
         }
         // Accept wumpus commands
-        $this->keywords = array("teleport", "caves", "look", "arrow", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right", "wumpus", "meep", "thing", "lair", "foraging", "nest maintenance", "patrolling", "midden work", "nest maintenance", "start", "meep", "spawn");
+        $this->keywords = array("teleport", "caves", "look", "arrow", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right", "wumpus", "meep", "thing", "lair", "foraging", "nest maintenance", "patrolling", "midden work", "nest maintenance", "start", "meep", "spawn", "run");
 
         $pieces = explode(" ", strtolower($input));
 
@@ -952,30 +969,41 @@ $this->doState();
             $last_last_piece = $last_piece;
             $last_piece = $piece;
         }
-
         //$this->getCoordinate();
-
+$wumpus_response = "";
         foreach ($ngram_list as $key=>$piece) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
 
                     switch ($piece) {
+//                    case 'run':
+//$t = new Input($this->thing, "wumpus");
+//$wumpus_response = "Saw run. ";
+//$this->run_flag = $t->route_to_agent;
+//echo "run flag ".  $t->route_to_agent . "\n";
+//echo "run flag ".  $this->run_flag . "\n";
 
+//break;
+//$t = new Input($this->thing, "input");
+//$this->run_flag = $t->route_to_agent;
+//echo "route to agent " . $t->route_to_agent . ".\n";
+//                        break; 
                     case 'news':
                         $this->getNews();
-                        $this->response .= $this->news;
+                        $wumpus_response = $this->news;
                         //$this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
                         break;
 
                     case 'arrow':
                         $this->arrow();
+$wumpus_response = 'Fired a wonky arrow. ';
                         //$this->response .= "Fired a wonky arrow. ";
                         break;
 
 
                     case 'look':
                         $this->getCave($this->x);
-                        $this->response .= "You see " . $this->cave_name . ". ";
+                        $wumpus_response = "You see " . $this->cave_name . ". ";
                         break;
 
                     case 'caves':
@@ -986,28 +1014,28 @@ $this->doState();
                     case 'south':
                     case 'east':
                     case 'north':
-                        $this->response .= ucwords($piece) . "? ";
+                        $wumpus_response = ucwords($piece) . "? ";
                         break;
 
                     case 'left':
-                        $this->response .= "You turned left. ";
+                        $wumpus_response = "You turned left. ";
                         break;
                     case 'right':
-                        $this->response .= "You turned right. ";
+                        $wumpus_response = "You turned right. ";
                         break;
 
                     case 'forward':
                         $this->left_count += 1;
                         $this->right_count += 1;
-                        $this->response .= "You bumped into the wall. ";
+                        $wumpus_response = "You bumped into the wall. ";
                         break;
 
                     case 'lair':
-                        $this->response .= "Lair. ";
+                        $wumpus_response = "Lair. ";
                         break;
 
                     case 'meep':
-                        $this->response .= "Merp. ";
+                        $wumpus_response = "Merp. ";
                         break;
 
                     case 'start':
@@ -1015,7 +1043,7 @@ $this->doState();
                         //$this->thing->choice->Choose($piece);
                         $this->entity_agent->choice->Choose($piece);
 
-                        $this->response .= "Heard " . $this->state .". ";
+                        $wumpus_response = "Heard " . $this->state .". ";
                         break;
 
                     case 'teleport';
@@ -1031,7 +1059,7 @@ $this->doState();
                         //                            $this->state = $this->thing->choice->current_node;
                         $this->state = $this->entity_agent->choice->current_node;
 
-                        $this->response .= "Heard inside nest.";
+                        $wumpus_response = "Heard inside nest.";
                         break;
 
                     case 'foraging':
@@ -1041,7 +1069,7 @@ $this->doState();
                         //                            $this->state = $this->thing->choice->current_node;
                         $this->state = $this->entity_agent->choice->current_node;
 
-                        $this->response .= "Now foraging. ";
+                        $wumpus_response = "Now foraging. ";
                         break;
 
                     case 'nest maintenance':
@@ -1051,7 +1079,7 @@ $this->doState();
                         // $this->state = $this->thing->choice->current_node;
                         $this->state = $this->entity_agent->choice->current_node;
 
-                        $this->response .= "Heard nest maintenance. ";
+                        $wumpus_response .= "Heard nest maintenance. ";
                         break;
 
                     case 'patrolling':
@@ -1063,7 +1091,7 @@ $this->doState();
                         $this->state = $this->entity_agent->choice->current_node;
 
 
-                        $this->response .= "Now " . $piece .". ";
+                        $wumpus_response .= "Now " . $piece .". ";
                         break;
 
                     case 'midden work':
@@ -1075,7 +1103,7 @@ $this->doState();
                         $this->state = $this->entity_agent->choice->current_node;
 
 
-                        $this->response .= "Heard midden work. Urgh. ";
+                        $wumpus_response .= "Heard midden work. Urgh. ";
                         break;
 
                    case 'break':
@@ -1083,9 +1111,11 @@ $this->doState();
                         //                            $this->thing->choice->Choose($piece);
                         //                            $this->state = $this->thing->choice->current_node;
 
-$i = new Input($this->thing, "break");
+$t = new Input($this->thing, "break");
+$this->run_flag = $t->route_to_agent;
+
 echo "BBBB";
-                        $this->response .= "Heard break. Stopped program. ";
+                        $wumpus_response .= "Heard break. Stopped program. ";
                         break;
 
 
@@ -1094,6 +1124,9 @@ echo "BBBB";
                 }
             }
         }
+
+if ($wumpus_response == "") {$wumpus_response = "The Wumpus did not understand.";}
+$this->response .= $wumpus_response;
         return false;
     }
 
@@ -1117,6 +1150,9 @@ echo "BBBB";
      */
     function arrow() {
 
+$this->response .= "How far (1-5)?";
+return;
+// devstack
         $current_cave = $this->x;
         $arrow_cave_previous = $current_cave;
         $arrow_cave = $current_cave;

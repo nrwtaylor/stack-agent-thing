@@ -120,6 +120,7 @@ $input_agent = $this->input_agent;
 $this->input_agent = null;
 //$this->assertIs($this->input);
 $input_agent_text = $input_agent . " is expecting input. ";
+echo $input_agent_text . "\n";
 if ($input_agent == false) {$input_agent_text = "No input expected. ";}
 $this->route_to_agent = $input_agent;
                 $this->response .= $input_agent_text;

@@ -44,6 +44,7 @@ class Crow extends Agent
 
     }
 
+
     private function getState()
     {
         $this->state = $this->crow_thing->choice->load($this->primary_place);
@@ -59,6 +60,7 @@ if($this->state == false) {$this->state = $this->default_state;}
 //        $this->crow_thing->choice->Create($this->primary_place, $this->node_list, $this->state);
         $this->crow_thing->choice->Choose($this->state);
         $choices = $this->crow_thing->choice->makeLinks($this->state);
+//var_dump($choices);
     }
 
     private function getCaves()
@@ -138,7 +140,7 @@ if($this->state == false) {$this->state = $this->default_state;}
 
 //        $this->crow_thing->choice->Choose($this->state);
 //        $this->state = $this->crow_thing->choice->load($this->primary_place);
-
+        $this->setState();
     }
 
     public function get($crow_code = null)
@@ -539,18 +541,20 @@ $this->getCrow($crow_nuuid);
     }
 
     function doState() {
+echo "doState start state " . $this->state .".\n";
        if ((!isset($this->state)) or ($this->state == null)) {
             //$this->response = "detected state null - run subject discriminator";
             $this->thing->log($this->agent_prefix . 'state is null.');
         }
 
-        $this->state = $this->thing->choice->load('roost');
+        $this->state = $this->crow_thing->choice->load('roost');
 
         //echo "this state is " .$this->state;
         //echo "meep";
         if ($this->state == false) {
-            $this->state = "inside nest";
-            $this->setState();
+//            $this->state = "inside nest";
+            $this->getState();
+var_dump($this->state);
         }
 
         // Will need to develop this to only only valid state changes.
@@ -591,6 +595,10 @@ $this->getCrow($crow_nuuid);
             $this->response = "Crow is broken. ";
         }
 
+//            $this->setState();
+
+echo "doState end state " . $this->state .".\n";
+
 
     }
 
@@ -600,7 +608,7 @@ $this->getCrow($crow_nuuid);
         // If there is no state. Give the crow one.
 //var_dump($this->state);
         if (!isset($this->state)) {$this->state = $this->default_state;}
-
+$this->getState();
         $filtered_text = strtolower($text);
 
 
@@ -655,25 +663,25 @@ $this->assertCrow($filtered_text);
                 break;
             case "forage":
             case "foraging":
-                $this->thing->choice->Choose("foraging");
+                $this->crow_thing->choice->Choose("foraging");
                 $this->response .= "This Crow is Foraging. ";
                 break;
             case "inside nest":
-                $this->thing->choice->Choose("inside nest");
+                $this->crow_thing->choice->Choose("inside nest");
                 $this->response .= "This Crow is Inside the Roost. ";
                 break;
             case "nest maintenance":
-                $this->thing->choice->Choose("nest maintenance");
+                $this->crow_thing->choice->Choose("nest maintenance");
                 $this->response .= "This Crow is doing Nest Maintenance. ";
                 break;
             case "patrol":
             case "patrolling":
-                $this->thing->choice->Choose("patrolling");
+                $this->crow_thing->choice->Choose("patrolling");
                 $this->response .= "This Crow is Patrolling. ";
                 break;
             case "midden":
             case "midden work":
-                $this->thing->choice->Choose("midden work");
+                $this->crow_thing->choice->Choose("midden work");
                 $this->response .= "This Crow is doing Midden Work. ";
                 $this->middenwork();
 
@@ -701,6 +709,7 @@ $this->assertCrow($filtered_text);
                 //$this->spawn();
             }
         }
+//$this->setState();
     }
 
     function assertCrow($input)
