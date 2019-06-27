@@ -136,11 +136,8 @@ class Wumpus extends Agent
 
 // dev stack 
 $t = new Input($this->thing, "wumpus");
-echo "route to  " . $t->route_to_agent . ".\n";
+$this->run_flag = $t->input_agent;
 
-$this->run_flag = $t->route_to_agent;
-echo "run run_flag " . $this->run_flag . ".\n";
-$this->run_flag = "wumpus";
 
 
     }
@@ -156,20 +153,6 @@ $this->run_flag = "wumpus";
         //$this->getCoordinate();
         $this->getState();
 
-        //        $this->getTick();
-
-
-//$t = new Input($this->thing, "wumpus");
-//$this->run_flag = $t->route_to_agent;
-//echo "run run_flag " . $this->run_flag . ".\n";
-
-
-        // Err ... making sure the state is saved.
-        //        $this->thing->choice->Choose($this->state);
-        //        $this->state = $this->thing->choice->load('lair');
-///        $this->state = $this->entity_agent->choice->load('lair');
-
-///        $this->thing->log('state is "' . $this->state . '".');
     }
 
 
@@ -177,7 +160,7 @@ $this->run_flag = "wumpus";
      *
      */
     public function set() {
-echo "set wumpus tag " . $this->wumpus_tag . ".\n";
+
         $this->wumpus_tag= $this->entity_agent->nuuid;
         if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
 
@@ -187,7 +170,6 @@ echo "set wumpus tag " . $this->wumpus_tag . ".\n";
 
         $variables->setVariable("refreshed_at", $this->refreshed_at);
 
-echo "set wumpus tag " . $this->wumpus_tag . ".\n";
 
 
         //$this->x = "9";
@@ -231,7 +213,6 @@ echo "set wumpus tag " . $this->wumpus_tag . ".\n";
         $this->wumpus_tag = $wumpus->getVariable("tag");
         $this->refreshed_at = $wumpus->getVariable("refreshed_at");
 
-echo "got wumpus tag " . $this->wumpus_tag . ".\n";
 
 
         if ($crow_code == null) {$crow_code = $this->wumpus_tag;}
@@ -315,7 +296,6 @@ echo "got wumpus tag " . $this->wumpus_tag . ".\n";
         $entity_input = "get wumpus";
         if ($requested_nuuid != null) {$entity_input = "get wumpus ".$requested_nuuid;} else {$entity_input = "get wumpus";}
 
-echo "getWumpus " . $entity_input . "\n";
         //if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
 
         //$entity = new Entity($this->thing, "wumpus");
@@ -343,7 +323,6 @@ echo "getWumpus " . $entity_input . "\n";
         //        $this->nuuid = $this->thing->nuuid;
         $this->nuuid = $this->entity_agent->nuuid;
 
-echo "got wumpus " . $this->nuuid . "\n";
 
 
         //        if ($this->x == 0) {$this->x = random_int(1,20);}
@@ -769,7 +748,7 @@ echo "got wumpus " . $this->nuuid . "\n";
 
 
         if (strpos($this->web_prefix, '192.168') !== false) {
-            echo 'true';
+            //echo 'true';
         } else {
             $sms .= $this->web_prefix . "thing/". $this->uuid . "/wumpus" . "";
 
@@ -788,7 +767,6 @@ echo "got wumpus " . $this->nuuid . "\n";
             $this->cave_list_text = trim(implode($this->caves[strval($this->x)], " ")) . "";
         }
 
-echo "makesms run flag " . $this->run_flag . "\n";
 if ($this->run_flag == "wumpus") {
         $sms .= "YOUR CHOICES ARE [ " . $this->cave_list_text . " " . $this->choices_text."] ";
 } else {
@@ -859,9 +837,6 @@ $sms .= "TEXT RUN WUMPUS.";
 
         case "spawn":
             $this->spawn();
-            //echo "spawn";
-            //$this->spawn();
-            //$this->response .= "Spawned Wumpus.";
             break;
         case "foraging":
             //                $this->thing->choice->Choose("foraging");
@@ -976,8 +951,8 @@ $wumpus_response = "";
                 if (strpos(strtolower($piece), $command) !== false) {
 
                     switch ($piece) {
-//                    case 'run':
-//$t = new Input($this->thing, "wumpus");
+                    case 'run':
+$t = new Run($this->thing, "run");
 //$wumpus_response = "Saw run. ";
 //$this->run_flag = $t->route_to_agent;
 //echo "run flag ".  $t->route_to_agent . "\n";
@@ -987,7 +962,7 @@ $wumpus_response = "";
 //$t = new Input($this->thing, "input");
 //$this->run_flag = $t->route_to_agent;
 //echo "route to agent " . $t->route_to_agent . ".\n";
-//                        break; 
+                        break; 
                     case 'news':
                         $this->getNews();
                         $wumpus_response = $this->news;
@@ -1079,7 +1054,7 @@ $wumpus_response = 'Fired a wonky arrow. ';
                         // $this->state = $this->thing->choice->current_node;
                         $this->state = $this->entity_agent->choice->current_node;
 
-                        $wumpus_response .= "Heard nest maintenance. ";
+                        $wumpus_response = "Heard nest maintenance. ";
                         break;
 
                     case 'patrolling':
@@ -1111,10 +1086,16 @@ $wumpus_response = 'Fired a wonky arrow. ';
                         //                            $this->thing->choice->Choose($piece);
                         //                            $this->state = $this->thing->choice->current_node;
 
-$t = new Input($this->thing, "break");
-$this->run_flag = $t->route_to_agent;
+//$input = new Input($this->thing, "break");
+$run = new Run($this->thing, "break");
 
-echo "BBBB";
+//$this->run_flag = $input->route_to_agent;
+$this->run_flag = $run->agent_text;
+
+$t = new Input($this->thing, "wumpus");
+$this->run_flag = $t->input_agent;
+
+
                         $wumpus_response .= "Heard break. Stopped program. ";
                         break;
 
@@ -1125,7 +1106,7 @@ echo "BBBB";
             }
         }
 
-if ($wumpus_response == "") {$wumpus_response = "The Wumpus did not understand.";}
+if ($wumpus_response == "") {$wumpus_response = "Text BREAK to stop running Wumpus.";}
 $this->response .= $wumpus_response;
         return false;
     }

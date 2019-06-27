@@ -1,4 +1,11 @@
 <?php
+/**
+ * CHS.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -32,30 +39,69 @@ class CHS extends Agent
 
     public $var = 'hello';
 
-    function init()
-    {
+
+    /**
+     *
+     */
+    function init() {
         $this->keyword = "environment";
 
         $this->agent_prefix = 'Agent "Weather" ';
 
         $this->keywords = array('water', 'level', 'tide', 'tides',
-            'height', 'prediction', 'metocean', 'tides','nautical');
+            'height', 'prediction', 'metocean', 'tides', 'nautical');
 
         $this->variables_agent = new Variables($this->thing, "variables " . "weather" . " " . $this->from);
+
+$this->default_station_name = "Vancouver";
 
         // Loads in Weather variables.
 
         if ($this->verbosity == false) {$this->verbosity = 2;}
 
         // Create the SoapClient instance
-        $url         = "https://ws-shc.qc.dfo-mpo.gc.ca/predictions" . "?wsdl"; 
+        $url         = "https://ws-shc.qc.dfo-mpo.gc.ca/predictions" . "?wsdl";
         $this->client     = new \SoapClient($url, array("trace" => 1, "exception" => 0));
 
         $this->getWeather();
     }
 
-    function set()
-    {
+    function run() {
+        $this->doCHS($this->input);
+    }
+
+    function doCHS($text) {
+
+        // Well first off.
+        // If there is no state. Give the crow one.
+
+// No state awareness.
+//        if (!isset($this->state)) {$this->state = $this->default_state;}
+//        $this->getState();
+
+        $filtered_text = strtolower($text);
+        $ngram_agent = new Ngram($this->thing,$filtered_text);
+
+        foreach ($ngram_agent->ngrams as $index=>$ngram) {
+            switch ($ngram) {
+            case "list":
+$t = "Available stations are ";
+                foreach($this->stations as $name => $prediction) {
+$t .= $name . " / ";
+                }
+                $this->response .= $t;
+                break;
+
+            default:
+            }
+        }
+    }
+
+
+    /**
+     *
+     */
+    function set() {
         $this->variables_agent->setVariable("state", $this->state);
 
         $this->variables_agent->setVariable("verbosity", $this->verbosity);
@@ -71,8 +117,11 @@ class CHS extends Agent
         $this->refreshed_at = $this->current_time;
     }
 
-    function get()
-    {
+
+    /**
+     *
+     */
+    function get() {
         $this->state = $this->variables_agent->getVariable("state")  ;
 
         $this->last_current_conditions = $this->variables_agent->getVariable("current_conditions")  ;
@@ -83,8 +132,11 @@ class CHS extends Agent
         $this->verbosity = $this->variables_agent->getVariable("verbosity")  ;
     }
 
-    function getWeather()
-    {
+
+    /**
+     *
+     */
+    function getWeather() {
         $this->predictions = array();
         $this->stations = array();
         $today = date("Y-m-d");
@@ -92,12 +144,14 @@ class CHS extends Agent
         $date = "2018-03-30"; // for testing
         $date = $today;
 
+        // Area around Vancouver.
         $lat = 49.30;
         $long = -122.86;
 
         $units = "m";
 
-        $size = 0.5;
+//        $size = 0.5;
+       $size = 1;
 
         // example from CHS
         // $m = $client->search("hilo", 47.5, 47.7, -61.6, -61.4, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
@@ -121,32 +175,46 @@ class CHS extends Agent
             }
 
             $name = $item->metadata[1]->value;
+            $name = str_replace("* "," ",$name);
+            $name = str_replace(" *"," ",$name);
+            $name = trim($name);
+
             $id = $item->metadata[0]->value;
             $value = $item->value;
 
-            $prediction = array("date"=>$date, "name"=>$name, "id"=>$id, "value"=>$value ,"units"=>$units,"item"=>$item);
+            $prediction = array("date"=>$date, "name"=>$name, "id"=>$id, "value"=>$value , "units"=>$units, "item"=>$item);
             $this->predictions[] = $prediction;
-            $this->stations[$name] = $prediction;
+
+            $this->stations[$name][] = $prediction;
         }
 
         $this->refreshed_at = $this->current_time;
     }
 
-    function getTemperature()
-    {
+
+    /**
+     *
+     */
+    function getTemperature() {
         // devstack not finished
         if (!isset($this->conditions)) {$this->getWeather();}
         $this->current_temperature = -1;
 
     }
 
-    function match_all($needles, $haystack)
-    {
-        if(empty($needles)){
+
+    /**
+     *
+     * @param unknown $needles
+     * @param unknown $haystack
+     * @return unknown
+     */
+    function match_all($needles, $haystack) {
+        if (empty($needles)) {
             return false;
         }
 
-        foreach($needles as $needle) {
+        foreach ($needles as $needle) {
             if (strpos($haystack, $needle) == false) {
                 return false;
             }
@@ -154,18 +222,21 @@ class CHS extends Agent
         return true;
     }
 
-	public function respond()
-    {
 
-		// Thing actions
-		$this->thing->flagGreen();
-		// Generate email response.
+    /**
+     *
+     */
+    public function respond() {
 
-		$to = $this->thing->from;
-		$from = "chs";
+        // Thing actions
+        $this->thing->flagGreen();
+        // Generate email response.
+
+        $to = $this->thing->from;
+        $from = "chs";
 
         $choices = false;
-		$this->thing_report['choices'] = $choices;
+        $this->thing_report['choices'] = $choices;
 
         $this->makeSms();
         $this->makeMessage();
@@ -182,15 +253,18 @@ class CHS extends Agent
         $this->makeWeb();
 
         $this->thing_report['help'] = 'This reads a web resource.';
-		return;
-	}
+        return;
+    }
 
-    public function makeWeb()
-    {
+
+    /**
+     *
+     */
+    public function makeWeb() {
         $web = "<b>CHS Agent</b>";
         $web .= "<p>";
 
-        foreach($this->predictions as $key=>$prediction) {
+        foreach ($this->predictions as $key=>$prediction) {
 
             $web .= $prediction['date'] . " ";
             $web .= $prediction['id'] . " ";
@@ -202,10 +276,10 @@ class CHS extends Agent
 
 
         $web .= "<p>";
-//        $web .= "current conditions are " . $this->current_conditions . "<br>";
+        //        $web .= "current conditions are " . $this->current_conditions . "<br>";
         $web .= "forecast conditions becoming " . $this->forecast_conditions . "<br>";
 
-//        $web .= "data from " . $this->link . "<br>";
+        //        $web .= "data from " . $this->link . "<br>";
         $web .= "source is CHS" . "<br>";
 
 
@@ -221,15 +295,36 @@ class CHS extends Agent
 
     }
 
-    public function makeSms()
-    {
 
-        if (!isset($this->forecast_conditions)) {$this->forecast_conditions = "No forecast available.";}
+    /**
+     *
+     */
+    public function makeSms() {
+
+        if (!isset($this->forecast_conditions)) {$this->forecast_conditions = "";}
 
         $sms_message = "TIDES | " . null;
-        $sms_message .= $this->forecast_conditions;
-//        $sms_message .= " | link " . $this->link;
-        $sms_message .= " | source CHS";
+
+if (isset($this->station_name)) {
+        $sms_message .= strtoupper($this->station_name) . " ";
+}
+
+$prediction_text = "";
+if ($this->response == ""){
+$predictions =  $this->stations[$this->station_name];
+
+foreach($predictions as $index=>$prediction) {
+//$prediction = $predictions[0];
+   $prediction_text .= $prediction["date"] . " " . $prediction["value"]  . $prediction["units"]. " ";
+}
+}
+
+$sms_message .= trim($prediction_text);
+
+        $sms_message .= $this->forecast_conditions . " ";
+        $sms_message .= trim($this->response);
+        //        $sms_message .= " | link " . $this->link;
+        $sms_message .= "| Licensed by Canadian Hydrographic Service.";
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -237,8 +332,11 @@ class CHS extends Agent
 
     }
 
-    public function makeMessage()
-    {
+
+    /**
+     *
+     */
+    public function makeMessage() {
         $message = "Tides are " . null . ".";
         $message .= " " . "Licensed by Canadian Hydrographic Service.";
 
@@ -247,8 +345,12 @@ class CHS extends Agent
     }
 
 
-    public function extractNumber($input = null)
-    {
+    /**
+     *
+     * @param unknown $input (optional)
+     * @return unknown
+     */
+    public function extractNumber($input = null) {
         if ($input == null) {$input = $this->subject;}
 
         $pieces = explode(" ", strtolower($input));
@@ -276,8 +378,12 @@ class CHS extends Agent
         return $this->number;
     }
 
-    public function readSubject()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
         $this->response = null;
         $this->num_hits = 0;
 
@@ -297,16 +403,21 @@ class CHS extends Agent
 
         $this->input = $input;
 
-		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+$this->filtered_input = str_replace("tides", "", $this->input);
+$this->filtered_input = str_replace("tide", "", $this->filtered_input);
+$this->filtered_input = str_replace("chs", "", $this->filtered_input);
 
-//		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+
+        $haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+
+        //  $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
-		// So this is really the 'sms' section
-		// Keyword
+        // So this is really the 'sms' section
+        // Keyword
         if (count($pieces) == 1) {
 
             if ($input == 'weather') {
@@ -323,29 +434,51 @@ class CHS extends Agent
 
         }
 
+
+
+$this->station_name = $this->default_station_name;
+
+                foreach($this->stations as $name => $prediction) {
+$score = levenshtein($this->input, $name);
+if (!isset($min)) {$min = $score; $selected_name = $name;}
+
+if ($score < $min) {$selected_name = $name; $min = $score;}
+
+$this->station_name = $selected_name;
+
+                }
+
+
+
+
+
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
+                if (strpos(strtolower($piece), $command) !== false) {
 
-                    switch($piece) {
-                        case 'verbosity':
-                        case 'mode':
-                            $number = $this->extractNumber();
-                            if (is_numeric($number)) {
-                                $this->verbosity = $number;
-                                $this->set();
-                            }
-                            return;
+                    switch ($piece) {
+                    case 'verbosity':
+                    case 'mode':
+                        $number = $this->extractNumber();
+                        if (is_numeric($number)) {
+                            $this->verbosity = $number;
+                            $this->set();
+                        }
+                        return;
 
-                        default:
-                            //$this->read();
-                           //echo 'default';
+                    default:
+                        //$this->read();
+                        //echo 'default';
 
                     }
                 }
             }
         }
+
+
         return "Message not understood";
-		return false;
-	}
+        return false;
+    }
+
+
 }

@@ -21,7 +21,13 @@ class Compression extends Agent
 
     function doCompression() {
         $this->filtered_input = $this->input;
-        foreach($this->agent->matches as $agent_name=>$compression){
+
+$matches = $this->agent->matches;
+
+$keys = array_map('strlen', array_keys($matches));
+array_multisort($keys, SORT_DESC, $matches);
+
+        foreach($matches as $agent_name=>$compression){
 
              $this->filtered_input = str_ireplace($compression['words'], 
                  $agent_name, $this->filtered_input);

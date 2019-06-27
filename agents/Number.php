@@ -145,6 +145,10 @@ class Number extends Agent
         }
 
         $pieces = explode(" ", $input);
+
+$i = str_replace(array(',',':','-','/'), ' ', $input);
+$pieces = explode(" ", $i);
+
         $this->numbers = [];
         foreach ($pieces as $key=>$piece) {
 
@@ -198,7 +202,6 @@ class Number extends Agent
             }
 
         }
-
         return $this->numbers;
     }
 

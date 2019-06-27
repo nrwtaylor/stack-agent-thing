@@ -129,9 +129,6 @@ class Entity extends Agent
         if (!isset($this->entity_agent_name)) {$this->entity_agent_name = "entity";}
         $requested_agent_name = $this->entity_agent_name;
 
-        //echo "requested entity is " . $requested_agent_name . "\n";
-
-        //$requested_agent = $this->entity_agent;
 
 
         $this->thing->log("entity requested is " . $requested_id . ".");
@@ -152,24 +149,15 @@ class Entity extends Agent
 
         //var_dump($this->entities);
         if (isset($this->entities[0])) {
-            //echo "entities seen";
-            //        foreach($this->entities as $key=>$entity) {
-            //echo " ";
-            //echo $entity["entity"] . "_" . $entity['nuuid'];
-            //        }
-            //echo ".\n";
 
 
 
             foreach ($this->entities as $key=>$entity) {
 
-                //echo $entity['nuuid'] . " " . $entity["entity"] . "\n";
 
                 if ( (strtolower($entity['nuuid']) == strtolower($requested_nuuid)) ) {
 
-                    //echo "matched " . $entity['nuuid'] . "\n";
                     // Consistently match the nuuid to a specific uuid.
-                    //$this->things[] = new Thing($entity['uuid']);
                     $match_list[] = $entity;
                 }
             }
@@ -374,7 +362,6 @@ class Entity extends Agent
         }
 
         $this->start_nuuid = $this->thing->nuuid;
-echo "entity start nuuid " . $this->start_nuuid. ".\n";
         $this->state = $this->entity->thing->choice->current_node;
 
     }
@@ -509,7 +496,6 @@ echo "entity start nuuid " . $this->start_nuuid. ".\n";
 
             $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
             $agent = new $agent_namespace_name($this->thing, $agent_name . " spawn");
-            //echo $agent->thing_report['sms'];
             return true;
 
             //                // If the agent returns true it states it's response is not to be used.

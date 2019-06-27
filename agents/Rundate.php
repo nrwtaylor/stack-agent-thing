@@ -147,6 +147,7 @@ class Rundate extends Agent {
         if (count($numbers) > 0) {
             $this->numbers = $numbers;
         }
+
     }
 
 
@@ -193,6 +194,47 @@ class Rundate extends Agent {
 
         // See what numbers are in the input
         if (!isset($this->numbers)) {$this->extractNumbers($input);}
+
+if (($day != false) and ($month != false)) {
+
+if ((($this->numbers[0] == $day) and ($this->numbers[1] == $month)) or 
+(($this->numbers[0] == $month) and ($this->numbers[1] == $day))) {
+ //ok
+} else {
+
+ if (($this->numbers[0] >12) and ($this->numbers[0] <= 31)) {$day = $this->numbers[0];}
+ if (($this->numbers[0] >= 1000) and ($this->numbers[0] <= 9999)) {$year = $this->numbers[0];}
+
+
+}
+
+}
+
+if (($day == false) and ($month == false) and ($year == false)) {
+
+
+
+// Two numbers in string - month and day?
+if (isset($this->numbers[1])) {
+
+ if (($this->numbers[0] >12) and ($this->numbers[0] <= 31) and
+    ($this->numbers[1] >= 1) and ($this->numbers[1] <= 12)) {
+
+  if (($this->numbers[0] >= 1000) and ($this->numbers[0] <= 9999)) {$year = $this->numbers[0];}
+  if (($this->numbers[1] >= 1000) and ($this->numbers[1] <= 9999)) {$year = $this->numbers[1];}
+
+  $day = $this->numbers[0];
+  $month = $this->numbers[1];
+//  return;
+ }
+} elseif (!isset($this->numbers[1])) {
+
+ if (($this->numbers[0] >12) and ($this->numbers[0] <= 31)) {$day = $this->numbers[0];}
+ if (($this->numbers[0] >= 1000) and ($this->numbers[0] <= 9999)) {$year = $this->numbers[0];}
+// return;
+
+}
+}
 
 
         if ($day > 0) {$this->day = $day;}
@@ -324,14 +366,12 @@ class Rundate extends Agent {
      */
     function printRundate($text = null) {
         //return;
-        //echo $text . "\n";
 
         if (!isset($this->day)) {$day = "X";} else {$day = $this->day;}
         if (!isset($this->month)) {$month = "X";} else {$month = $this->month;}
         if (!isset($this->year)) {$year = "X";} else {$year = $this->year;}
 
 
-        //echo $day . " "  .$month . " " . $year ."\n";
 
     }
 

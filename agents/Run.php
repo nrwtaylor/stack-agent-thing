@@ -13,7 +13,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Input extends Agent {
+class Run extends Agent {
 
     public $var = 'hello';
 
@@ -29,9 +29,8 @@ class Input extends Agent {
      * function __construct(Thing $thing, $text = null) {
      */
     function init() {
-
         $this->test= "Development code";
-$this->input_agent = null;
+$this->route_to_agent = null;
 //        $this->current_time = $this->thing->json->time();
 
     }
@@ -41,8 +40,7 @@ $this->input_agent = null;
 
     function assertIs($input)
     {
-$this->input_agent = null;
-$agent_name = "input";
+$agent_name = "run";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $agent_name. " is")) !== FALSE) { 
             $whatIWant = substr(strtolower($input), $pos+strlen($agent_name. " is")); 
@@ -51,16 +49,26 @@ $agent_name = "input";
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
-        $this->input_agent = $filtered_input;
+//echo "filtered_input " . $filtered_input . "\n";
+        $input = $filtered_input;
 
+        if ($input) {
+
+$this->agent_text = $input;
+
+return;
+        }
+$this->agent_text = null;
 }
 
     /**
      *
      * @param unknown $text (optional)
      */
-    function doInput($text = null) {
+    function doRun($text = null) {
 
+//        echo "do input.\n";
+//var_dump($text);
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
 
@@ -68,21 +76,47 @@ $agent_name = "input";
 
             switch ($ngram) {
 
-            case "break":
-                $this->input_agent = null;
-                $this->response = "Break. ";
-                return;
-
             case "input":
 
-$input_agent = $this->input_agent;
-$this->input_agent = null;
+//$agent_text = $this->agent_text;
+//$this->agent_text = null;
 //$this->assertIs($this->input);
-$input_agent_text = $input_agent . " is expecting input. ";
+//echo $agent_text . "\n";
+//if ($agent_text == false) {$response_text = "No input expected. ";}
+$this->agent_text = "input";
+$response_text = $this->agent_text . ". ";
 
-if ($input_agent == false) {$input_agent_text = "No input expected. ";}
-$this->input_agent = $input_agent;
-                $this->response .= $input_agent_text;
+                $this->response .= $response_text;
+                return;
+
+
+//            case "is input":
+
+//$this->assertIs($this->input);
+
+//                $this->response .= "Expecting input. ";
+//                break;
+            case "off":
+            case "break":
+//echo "break heard";
+
+$t = new Input($this->thing, "break");
+$this->agent_text = "off";
+$this->response = "Break. ";
+return;
+
+
+            case "run":
+
+//$agent_text = $this->agent_text;
+//$this->agent_text = null;
+//$this->assertIs($this->input);
+//echo $agent_text . "\n";
+//if ($agent_text == false) {$response_text = "No input expected. ";}
+$this->agent_text = "on";
+$response_text = $this->agent_text . ". ";
+
+                $this->response .= $response_text;
                 return;
 
             default:
@@ -90,10 +124,9 @@ $this->input_agent = $input_agent;
 
         }
 
-
-
+//echo "Assertion heard " . $text . ".\n";
 $this->assertIs($this->input);
-$this->response .= "Said that input response is expected to the current agent. ";
+                $this->response .= "Said that the agent is now running. ";
 
                 //                if (($pos = strpos(strtolower($filtered_text), "uuid")) !== FALSE) {
 
@@ -120,13 +153,14 @@ $this->response .= "Said that input response is expected to the current agent. "
 public function get() {
 
 
+    //        echo "Asked to get basket " . $basket_code . ".\n";
 
-    $this->variables_agent = new Variables($this->thing, "variables " . "input " . $this->from);
+    $this->variables_agent = new Variables($this->thing, "variables " . "run " . $this->from);
 
 
     //        $input = new Variables($this->thing, "variables basket " . $this->from);
 
-    $this->input_agent = $this->variables_agent->getVariable("agent");
+    $this->agent_text = $this->variables_agent->getVariable("text");
     $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
     //        if ($this->input_flag != false) {$basket_code = $this->input_flag;}
@@ -137,9 +171,9 @@ public function get() {
  *
  * @param unknown $input_flag (optional)
  */
-function set($input_agent = null) {
+function set($agent_text = null) {
 $this->respond();
-    if ($input_agent == null) {$input_agent = $this->input_agent;}
+    if ($agent_text == null) {$agent_text = $this->agent_text;}
     if (!isset($this->variables_agent)) {$this->get();}
     //$this->variables_agent->setVariable("value_destroyed", $this->value_destroyed);
 
@@ -147,8 +181,9 @@ $this->respond();
 
     //$this->thing->setVariable("damage_cost", $this->damage_cost);
 
-    $this->variables_agent->setVariable("agent", $input_agent);
+    $this->variables_agent->setVariable("text", $agent_text);
     $this->variables_agent->setVariable("refreshed_at", $this->current_time);
+//echo $this->response . "\n";
 }
 
 /**
@@ -163,7 +198,7 @@ function makeSMS() {
 //        $sms = "INPUT | " . $this->subject;
 
 //    }
-$sms = "INPUT | " . $this->response;
+$sms = "RUN | " . $this->response;
     $this->sms_message = $sms;
     $this->thing_report['sms'] = $sms;
 
@@ -180,7 +215,7 @@ public function respond() {
     $this->thing->flagGreen();
 
     $to = $this->thing->from;
-    $from = "input";
+    $from = "run";
 
 
     $this->makeSMS();
@@ -188,8 +223,8 @@ public function respond() {
     $choices = false;
 
     $this->thing_report[ "choices" ] = $choices;
-    $this->thing_report["info"] = "This makes an input thing.";
-    $this->thing_report["help"] = "This is about input variables.";
+    $this->thing_report["info"] = "This makes an run thing.";
+    $this->thing_report["help"] = "This is about run variables.";
 
     //$this->thing_report['sms'] = $this->sms_message;
     $this->thing_report['message'] = $this->sms_message;
@@ -211,7 +246,9 @@ public function respond() {
  * @return unknown
  */
 public function readSubject() {
-    $this->doInput($this->input);
+//echo "read subject \n";
+//echo $this->input . "\n";
+    $this->doRun($this->input);
     //$input = strtolower($this->subject);
     //$this->getInput();
 
@@ -238,7 +275,7 @@ public function readSubject() {
  *
  * @return unknown
  */
-function getInput() {
+function getRun() {
 
     $block_things = array();
     // See if a block record exists.
@@ -267,7 +304,7 @@ function getInput() {
             $variables = $thing->account['stack']->json->array_data;
             //                $input_uuid = null;
 
-            if ((isset($variables['input'])) and ($match == 2)) {
+            if ((isset($variables['run'])) and ($match == 2)) {
                 //                    if (!isset($input_uuid = $variables['input']['uuid'])) {
                 break;
                 //                    }
@@ -279,13 +316,14 @@ function getInput() {
         }
     }
 
+    //echo "meep";
 
-    $input_uuid = $variables['input']['uuid'];
+    $input_uuid = $variables['run']['uuid'];
 
     if ($input_uuid == null) {
         // This is input
-        $this->variables_agent = new Variables($thing, "variables " . "input " . $this->from);
-        $this->variables_agent->setVariable("uuid", $this->uuid);
+        $this->variables_agent = new Variables($thing, "variables " . "run " . $this->from);
+        $this->variables_agent->setVariable("text", $this->agent_text);
 
         $this->state = false;
     } else {

@@ -610,8 +610,6 @@ echo "doState end state " . $this->state .".\n";
         if (!isset($this->state)) {$this->state = $this->default_state;}
 $this->getState();
         $filtered_text = strtolower($text);
-
-
 	$ngram_agent = new Ngram($this->thing,$filtered_text);
 
         foreach ($ngram_agent->ngrams as $index=>$ngram) {
@@ -635,9 +633,6 @@ $this->getState();
             case "spawn crow":
             case "spawn":
                 $this->spawnCrow();
-//                $response = "Spawned Crow " . $this->crow_thing->nuuid . " at " . $this->place_name . ". ";
-//                $response .= "Text LOAD CROW " . strtoupper($this->crow_thing->nuuid). ". ";
-//                $this->response .= $response;
                 break;
 
             case "is":
@@ -645,19 +640,13 @@ $this->getState();
             case "crow load":
             case "run":
             case "run crow":
-//                $this->getCrow($text);
-//$this->set();
-$this->assertCrow($filtered_text);
+                $this->assertCrow($filtered_text);
                 break;
-
-
             case "call":
                 $this->callCrow();
                 break;
-
             case "end":
             case "kill":
-
                 $this->kill();
                 $this->response .= "Killed this Crow. ";
                 break;

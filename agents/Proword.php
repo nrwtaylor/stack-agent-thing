@@ -256,11 +256,13 @@ class Proword extends Word
         if ($searchfor == null) {return null;}
 
 
-
         // devstack add \b to Word
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
-        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
+//        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
+        $pattern = "/^.*\b". strtolower($pattern). "\b.*\$/m";
+
+
         //$pattern = "/^.*". strtolower($pattern). ".*\$/m";
 
         //$pattern = '/^.*\b' . strtolower($searchfor) . '\b.*$/m';
@@ -492,6 +494,7 @@ class Proword extends Word
             $whatIWant = substr(strtolower($this->input), $pos+strlen("proword"));
         }
 
+
         // Clean input
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         $string_length = mb_strlen($filtered_input);
@@ -504,6 +507,7 @@ class Proword extends Word
 
         $ngram = new Ngram($this->thing, "ngram");
         $ngram->extractNgrams($filtered_input, 3);
+
         $search_phrases = $ngram->ngrams;
         usort($search_phrases, function($a, $b) {
                 return strlen($b) <=> strlen($a);
