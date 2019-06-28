@@ -22,6 +22,11 @@ class Compression extends Agent
     function doCompression() {
         $this->filtered_input = $this->input;
 
+if (!isset($this->agent->matches)) {
+   $this->thing_report['sms'] = "COMPRESSION | No matches.";
+   return;
+}
+
 $matches = $this->agent->matches;
 
 $keys = array_map('strlen', array_keys($matches));

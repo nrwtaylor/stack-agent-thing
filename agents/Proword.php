@@ -57,6 +57,7 @@ class Proword extends Word
      *
      */
     function set() {
+if (!isset($this->has_prowords)) {$this->has_prowords = true;}
         $this->thing->json->writeVariable( array("proword", "reading"), $this->has_prowords );
 
         $this->thing_report['help'] = "Reads the short message for prowords.";
@@ -536,6 +537,9 @@ class Proword extends Word
         }
 
         // devstack closeness
+
+if (!isset($this->matches)) {$this->response .= "No matches found. ";return;}
+
         $this->results = $this->matches;
         $words = explode(" " , $filtered_input);
 

@@ -286,7 +286,11 @@ $this->assertCrow($filtered_text);
 
 //$n = $this->nuuid_agent->extractNuuid($filtered_text);
 //var_dump($n);
+$n = null;
+if (isset($this->register_nuuid)) {
 $n = $this->register_nuuid;
+}
+
                 $this->getBasket($n);
                 $this->response .= "Looked at the basket " . $this->basket_tag . " ";
                 $this->response .= "basket name ". $this->name . " basket sign " . $this->sign . ".";

@@ -238,7 +238,8 @@ class Fuel
 
         $this->fuel_name = $this->last_fuel_name;
         $this->fuel_quantity = $this->last_fuel_quantity;
-        $this->fuel_units = $this->fuel_units;
+
+        $this->fuel_units = $this->last_fuel_units;
     }
 
     function is_positive_integer($str)
@@ -685,6 +686,7 @@ var_dump($last_fuel['fuel']);
 		// So this is really the 'sms' section
 		// Keyword
 
+$this->getFuel();
 
 
 
@@ -727,7 +729,7 @@ var_dump($last_fuel['fuel']);
                             return;
 
                         case 'subtract':
-                            $this->fuel = $this->fuel - $number_agent->number;
+                            $this->fuel_quantity= $this->fuel_quantity - $number_agent->number;
                             return;
 
                         case 'make':
@@ -736,7 +738,7 @@ var_dump($last_fuel['fuel']);
                         case 'create':
 //                        case 'add':
 
-                            if (is_numeric($this->fuel)) {
+                            if (is_numeric($this->fuel_quantity)) {
                                 $this->response = 'Asserted fuel and found ' . $this->stringFuel($this->fuel) .".";
                                 return;
                             }

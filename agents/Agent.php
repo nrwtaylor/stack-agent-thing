@@ -687,18 +687,18 @@ class Agent {
         // character recognizer of concepts.
         $emoji_thing = new Emoji($this->thing, "emoji");
         $this->thing_report = $emoji_thing->thing_report;
-
-
         if (isset($emoji_thing->emojis)) {
             // Emoji found.
             $input = $emoji_thing->translated_input;
         }
 
+        // devstack
+        // expand out chinese characters
+
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
         $compression_thing = new Compression($this->thing, $input);
-
         if (isset($compression_thing->filtered_input)) {
             // Compressions found.
             $input = $compression_thing->filtered_input;

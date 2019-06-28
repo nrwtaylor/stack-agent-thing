@@ -152,7 +152,9 @@ $this->run_flag = $t->input_agent;
         //        $this->getBar();
         //$this->getCoordinate();
         $this->getState();
+$this->getBottomlesspits();
 
+$this->doWumpus();
     }
 
 
@@ -286,6 +288,15 @@ $this->run_flag = $t->input_agent;
 
     }
 
+
+function getBottomlesspits() {
+
+     // Get the place names of the locations of the bottomless pits
+     $agent = new Bottomlesspits($this->entity_agent,"bottomless pits");
+
+$this->bottomless_pits = $agent->bottomless_pits;
+
+}
 
     /**
      *
@@ -613,6 +624,44 @@ $this->run_flag = $t->input_agent;
         $this->thing_report['web'] = $test_message;
     }
 
+
+function doWumpus() {
+
+        if (isset($this->caves[strval($this->x)])) {
+            $cave_names = $this->caves[strval($this->x)];
+        }
+
+
+
+
+foreach($this->bottomless_pits as $index=>$bottomless_pit_name) {
+
+
+
+foreach($cave_names as $index=>$cave_name) {
+
+if ( ( strtolower(strval($this->x))) == (strtolower($bottomless_pit_name))){
+
+$agent = new Input($this->thing, "break");
+
+$this->response .= "You fell down a bottomless pit. Text RUN WUMPUS. ";
+return;
+
+}
+
+
+if ((strtolower($cave_name)) == (strtolower($bottomless_pit_name))){
+
+$this->response .= "You feel a draft. ";
+break;
+
+}
+
+}
+
+}
+
+}
 
     /**
      *

@@ -147,7 +147,6 @@ class Rundate extends Agent {
         if (count($numbers) > 0) {
             $this->numbers = $numbers;
         }
-
     }
 
 

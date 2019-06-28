@@ -2,8 +2,6 @@
 namespace Nrwtaylor\StackAgentThing;
 // (c) 2018 Stackr Interactive Ltd
 
-// whitefox 27 June 2019
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -14,12 +12,7 @@ error_reporting(-1);
 
 // API group
 $app->group('/api', function () use ($app) {
-
-
-    // This is the whitefox API.  Accessible at api/whitefox/
-        $app->group('/whitefox', function () use ($app) {
-        });
-
+    // This is the red panda API.  Accessible at api/redpanda/
 	// Introducing redpanda
 	$app->group('/redpanda', function () use ($app) {
 
@@ -42,7 +35,7 @@ $app->group('/api', function () use ($app) {
             return $this->renderer->render($response, 'thing.phtml', $google_agent->thing_report);
         });
 
-        $app->post($app->getContainer()->get('settings')['api']['google']['google hangouts']['webhook'], function ($request, $response, $args)  {
+        $app->post('/webhook_hangoutschat_a11nzr4tug', function ($request, $response, $args)  {
 
             $body = $request->getParsedBody();
             $getParam = $request->getQueryParams();
@@ -89,16 +82,16 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
             $input = json_encode($body);
             $thing = new Thing(null);
 
-            $nom_to = "null";
-            $sender_id = "null";
-            $test_text = "s/ google hangouts";
+$nom_to = "null";
+$sender_id = "null";
+$test_text = "s/ google hangouts";
+                    $thing->Create($sender_id, $nom_to, $test_text );
 
-            $thing->Create($sender_id, $nom_to, $test_text );
+                $channel = new Channel($thing,"hangoutschat");
+                    $agent = new Googlehangouts($thing, $data);
 
-            $channel = new Channel($thing,"hangoutschat");
-            $agent = new Googlehangouts($thing, $data);
+//                    $agent = new Googlehangouts($thing, array($body, $threadKey));
 
-//                $agent = new Googlehangouts($thing, array($body, $threadKey));
 //                $agent = new Agent($thing);
 
 
@@ -142,7 +135,10 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
 
                 $client= new \GearmanClient();
                 $client->addServer();
+//$client->addServers("10.0.0.24,10.0.0.25");
 
+//$client->addServer("10.0.0.24");
+//$client->addServer('10.0.0.25');
                 //$client->doNormal("call_agent", $arr);
                 $client->doHighBackground("call_agent", $arr);
                 //echo "Gearman worker called";
@@ -152,8 +148,8 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
 //                ->withStatus(200);
         });
 
-        // Operational end-point for Microsoft
-        $app->post($app->getContainer()->get('settings')['api']['microsoft']['webhook'], function ($request, $response, $args)  {
+        // Operational end-point for NEXMO
+        $app->post('/webhook_microsoft_qvhs6s4y', function ($request, $response, $args)  {
 //        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
             $body = $request->getParsedBody();
 
@@ -210,7 +206,8 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
 
                 $client= new \GearmanClient();
                 $client->addServer();
-
+//$client->addServer("10.0.0.24");
+//$client->addServer("10.0.0.25");
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
 
@@ -220,6 +217,10 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
                 $microsoft_thing->Create( $body['conversation']['id'], $body['from']['id'], $body['text'] );
 
                 $m = new Microsoft($microsoft_thing, $body);
+
+//        $microsoft_thing->json->setField("message0");
+//        $microsoft_thing->json->writeVariable( array("edna") , $body  );
+
 
                 $agent = new Agent($microsoft_thing);
             }
@@ -408,6 +409,7 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
 					$test_text = $body['event']['text'];
 
 					$test_text = ltrim( str_replace("<@U6N5VCYDT>","",$test_text) );
+//$nom_to = "mordok";
 					$slack_thing->Create($sender_id, $nom_to, $test_text );
 
                 $channel = new Channel($slack_thing,"slack");
@@ -497,7 +499,7 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
             $slack_thing->Create($sender_id, $page_id, $test_text );
         });
 
-        $app->post($app->getContainer()->get('settings')['api']['facebook']['webhook'], function ($request, $response, $args)  {
+        $app->post('/webhook_fb_ygu2c0u2', function ($request, $response, $args)  {
 
             $body = $request->getParsedBody();
 
@@ -685,7 +687,6 @@ $web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_
 
 // Route handler for everything after the /
 $app->get('[/{params:.*}]', function ($request, $response, $args)  {
-
 //    ini_set("max_input_time", 2); //s
 //set_time_limit(2);
 

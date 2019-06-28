@@ -56,7 +56,7 @@ class Bottomlesspits extends Agent
 $this->bottomless_pits = array("1","2");
 
 $this->node_list = $this->bottomless_pits;
-var_dump($this->bottomless_pits);
+//var_dump($this->bottomless_pits);
 
 
         $info = 'The "Bottomless Pits" agent creates and manages some bottomless pits.';

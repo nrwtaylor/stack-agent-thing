@@ -13,7 +13,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Input extends Agent {
+class More extends Agent {
 
     public $var = 'hello';
 
@@ -63,7 +63,7 @@ $agent_name = "input";
      *
      * @param unknown $text (optional)
      */
-    function doInput($text = null) {
+    function doMore($text = null) {
 
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
@@ -72,21 +72,28 @@ $agent_name = "input";
 
             switch ($ngram) {
 
-            case "break":
-                $this->input_agent = null;
-                $this->response = "Break. ";
-                return;
+            case "more":
 
-            case "input":
+$web = new Web($this->thing, "web");
+var_dump($web->prior_agent);
 
-$input_agent = $this->input_agent;
-$this->input_agent = null;
+if ( (strtolower($web->prior_agent)) == (strtolower("more")) ) {
+$this->response .= "More more? ";
+return;}
+
+//var_dump($this->input_agent->input_agent);
+//$input_agent = $this->input_agent;
+//$this->input_agent = null;
 //$this->assertIs($this->input);
-$input_agent_text = $input_agent . " is expecting input. ";
+//$input_agent_text = $input_agent . " is expecting input. ";
 
-if ($input_agent == false) {$input_agent_text = "No input expected. ";}
-$this->input_agent = $input_agent;
-                $this->response .= $input_agent_text;
+//if ($input_agent == false) {$input_agent_text = "No input expected. ";}
+//$this->input_agent = $input_agent;
+
+$this->getMore($web->prior_agent);
+//var_dump($this->agent->thing_report['sms']);
+$this->response .= $this->agent->thing_report['sms'];
+//                $this->response .= "Hello more. ";
                 return;
 
             default:
@@ -108,6 +115,7 @@ $this->response .= "Said that input response is expected to the current agent. "
     }
 
 
+
     // Get the basket
     //$this->getBasket($basket_uuid);
 
@@ -123,15 +131,16 @@ $this->response .= "Said that input response is expected to the current agent. "
  */
 public function get() {
 
+$this->input_agent = new Input($this->thing, "input");
 
 
-    $this->variables_agent = new Variables($this->thing, "variables " . "input " . $this->from);
+//    $this->variables_agent = new Variables($this->thing, "variables " . "input " . $this->from);
 
 
     //        $input = new Variables($this->thing, "variables basket " . $this->from);
 
-    $this->input_agent = $this->variables_agent->getVariable("agent");
-    $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
+//    $this->input_agent = $this->variables_agent->getVariable("agent");
+//    $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
     //        if ($this->input_flag != false) {$basket_code = $this->input_flag;}
 }
@@ -142,17 +151,17 @@ public function get() {
  * @param unknown $input_flag (optional)
  */
 function set($input_agent = null) {
-$this->respond();
-    if ($input_agent == null) {$input_agent = $this->input_agent;}
-    if (!isset($this->variables_agent)) {$this->get();}
+//$this->respond();
+//    if ($input_agent == null) {$input_agent = $this->input_agent;}
+//    if (!isset($this->variables_agent)) {$this->get();}
     //$this->variables_agent->setVariable("value_destroyed", $this->value_destroyed);
 
     //$this->variables_agent->setVariable("things_destroyed", $this->things_destroyed);
 
     //$this->thing->setVariable("damage_cost", $this->damage_cost);
 
-    $this->variables_agent->setVariable("agent", $input_agent);
-    $this->variables_agent->setVariable("refreshed_at", $this->current_time);
+//    $this->variables_agent->setVariable("agent", $input_agent);
+//    $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 }
 
 /**
@@ -167,7 +176,8 @@ function makeSMS() {
 //        $sms = "INPUT | " . $this->subject;
 
 //    }
-$sms = "INPUT | " . $this->response;
+
+$sms = "MORE " . $this->response;
     $this->sms_message = $sms;
     $this->thing_report['sms'] = $sms;
 
@@ -184,7 +194,7 @@ public function respond() {
     $this->thing->flagGreen();
 
     $to = $this->thing->from;
-    $from = "input";
+    $from = "more";
 
 
     $this->makeSMS();
@@ -199,10 +209,9 @@ public function respond() {
     $this->thing_report['message'] = $this->sms_message;
     $this->thing_report['txt'] = $this->sms_message;
 
-    if ($this->agent_input == null) {
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-    }
+    $message_thing = new Message($this->thing, $this->thing_report);
+    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+
     return $this->thing_report;
 
 
@@ -216,7 +225,7 @@ public function respond() {
  * @return unknown
  */
 public function readSubject() {
-    $this->doInput($this->input);
+    $this->doMore($this->input);
     //$input = strtolower($this->subject);
     //$this->getInput();
 
@@ -243,65 +252,44 @@ public function readSubject() {
  *
  * @return unknown
  */
-function getInput() {
+function getMore($agent_class_name) {
 
-    $block_things = array();
-    // See if a block record exists.
-    $findagent_thing = new FindAgent($this->thing, 'thing');
+        try {
 
-    // This pulls up a list of other Block Things.
-    // We need the newest block as that is most likely to be relevant to
-    // what we are doing.
+            $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
-    //$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
+            $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+            $agent = new $agent_namespace_name($this->thing, strtolower($agent_class_name));
 
-    $this->max_index =0;
-
-    $match = 0;
-
-    foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-
-        $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
-
-        if ($block_thing['nom_to'] != "usermanager") {
-            $match += 1;
-
-            $this->link_uuid = $block_thing['uuid'];
-
-            $thing= new Thing($this->link_uuid);
-            $variables = $thing->account['stack']->json->array_data;
-            //                $input_uuid = null;
-
-            if ((isset($variables['input'])) and ($match == 2)) {
-                //                    if (!isset($input_uuid = $variables['input']['uuid'])) {
-                break;
-                //                    }
+            // If the agent returns true it states it's response is not to be used.
+            if ((isset($agent->response)) and ($agent->response === true)) {
+                throw new Exception("Flagged true.");
             }
 
+            $this->thing_report = $agent->thing_report;
+
+            $this->agent = $agent;
 
 
-            //if ($match == 2) {break;}
+        } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+            // echo $ex;
+            $message = $ex->getMessage();
+            // $code = $ex->getCode();
+            $file = $ex->getFile();
+            $line = $ex->getLine();
+
+            $input = $message . '  ' . $file . ' line:' . $line;
+            $this->thing->log($input , "WARNING" );
+
+            // This is an error in the Place, so Bork and move onto the next context.
+            // $bork_agent = new Bork($this->thing, $input);
+            //continue;
+            return false;
         }
-    }
+        //if (!isset($this->thing_report['sms'])) {return false;}
+        return true;
 
-
-    $input_uuid = $variables['input']['uuid'];
-
-    if ($input_uuid == null) {
-        // This is input
-        $this->variables_agent = new Variables($thing, "variables " . "input " . $this->from);
-        $this->variables_agent->setVariable("uuid", $this->uuid);
-
-        $this->state = false;
-    } else {
-        $this->state = true;
-        // This isn't input
-    }
-
-
-
-
-    return $this->link_uuid;
 
 }
 

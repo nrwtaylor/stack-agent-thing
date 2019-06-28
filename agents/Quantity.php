@@ -431,6 +431,7 @@ foreach ($this->old_quantities as $key =>$row)
     function makeQuantity($quantity = null)
     {
         if ($quantity == null) {return true;}
+if (!is_numeric($quantity)) {return true;}
 //var_dump($coordinate);
 
 
@@ -955,7 +956,6 @@ var_dump($last_quantity['quantity']);
 
         //    function makePlace($place_code = null, $place_name = null) {
         $this->makeQuantity($quantity);
-
         $this->thing->log($this->agent_prefix . 'using default_quantity ' . implode(" ",$this->default_quantity) . ".","INFORMATION");
 
         $this->response = "Made a Quantity called " . $quantity . ".";
@@ -978,10 +978,3 @@ var_dump($last_quantity['quantity']);
 	}
 */
 }
-
-/* More on places
-
-Lots of different ways to number places.
-
-*/
-?>

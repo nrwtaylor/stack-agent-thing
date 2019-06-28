@@ -72,9 +72,6 @@ $this->default_station_name = "Vancouver";
 
     function doCHS($text) {
 
-        // Well first off.
-        // If there is no state. Give the crow one.
-
 // No state awareness.
 //        if (!isset($this->state)) {$this->state = $this->default_state;}
 //        $this->getState();
@@ -85,9 +82,9 @@ $this->default_station_name = "Vancouver";
         foreach ($ngram_agent->ngrams as $index=>$ngram) {
             switch ($ngram) {
             case "list":
-$t = "Available stations are ";
+                $t = "Available stations are ";
                 foreach($this->stations as $name => $prediction) {
-$t .= $name . " / ";
+                    $t .= $name . " / ";
                 }
                 $this->response .= $t;
                 break;
@@ -139,10 +136,14 @@ $t .= $name . " / ";
     function getWeather() {
         $this->predictions = array();
         $this->stations = array();
-        $today = date("Y-m-d");
 
-        $date = "2018-03-30"; // for testing
-        $date = $today;
+        $now = date("Y-m-d H:i:s");
+
+//        $date = "2018-03-30"; // for testing
+//        $date = $today;
+
+$start_time = date('Y-m-d H:i:s',strtotime('-12 hour',strtotime($now)));
+$end_time = date('Y-m-d H:i:s',strtotime('+48 hour +30 minutes',strtotime($now)));
 
         // Area around Vancouver.
         $lat = 49.30;
@@ -156,9 +157,9 @@ $t .= $name . " / ";
         // example from CHS
         // $m = $client->search("hilo", 47.5, 47.7, -61.6, -61.4, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
 
-        $m = $this->client->search("hilo", $lat - $size, $lat + $size, $long - $size, $long + $size, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
+//        $m = $this->client->search("hilo", $lat - $size, $lat + $size, $long - $size, $long + $size, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
+        $m = $this->client->search("hilo", $lat - $size, $lat + $size, $long - $size, $long + $size, 0.0, 0.0, $start_time, $end_time, 1, 500, true, "", "asc");
 
-        //var_dump($m->data);
         foreach ($m->data as $key=>$item) {
 
             //echo "station" . $value->metadata[0]->value . " ";
@@ -313,10 +314,39 @@ $prediction_text = "";
 if ($this->response == ""){
 $predictions =  $this->stations[$this->station_name];
 
+$i=0;
 foreach($predictions as $index=>$prediction) {
 //$prediction = $predictions[0];
-   $prediction_text .= $prediction["date"] . " " . $prediction["value"]  . $prediction["units"]. " ";
+
+$d = date('H:i',strtotime($prediction["date"]));
+
+   $date = date('Y/m/d',strtotime($prediction["date"]));
+
+
+if ($i == 0) {
+   $d = date('Y/m/d H:i',strtotime($prediction["date"]));
+//   $date = date('Y/m/d',strtotime($prediction["date"]));
+$old_date = $date;
 }
+
+//echo $date . " " . $old_date ."\n";
+
+if ($old_date!=$date) {
+   $d = date('m/d H:i',strtotime($prediction["date"]));
+}
+
+$i+=1;
+
+
+   $prediction_text .= $d . " " . $prediction["value"]  . $prediction["units"]. " ";
+
+$old_date = $date;
+
+if ($i >= 6) {break;}
+
+}
+
+
 }
 
 $sms_message .= trim($prediction_text);
@@ -378,6 +408,47 @@ $sms_message .= trim($prediction_text);
         return $this->number;
     }
 
+public function getStation() {
+
+//$ngrams = new Ngram($this->thing,"ngram");
+//$ngrams->extractNgrams($this->input);
+//var_dump($ngrams->ngrams);
+
+$this->station_name = $this->default_station_name;
+
+                foreach($this->stations as $station_name => $prediction) {
+
+if(strpos(strtolower($this->input), strtolower($station_name)) != false) {
+
+$station_names[] = $station_name;
+
+}
+
+                }
+
+if (isset($station_names[0])) {
+$this->station_name = $station_names[0];
+return;
+}
+
+// Otherwise try harder to find a match.
+                foreach($this->stations as $name => $prediction) {
+
+
+
+$score = levenshtein($this->filtered_input, $name);
+if (!isset($min)) {$min = $score; $selected_name = $name;}
+
+if ($score < $min) {$selected_name = $name; $min = $score;}
+
+$this->station_name = $selected_name;
+
+                }
+
+
+
+}
+
 
     /**
      *
@@ -402,11 +473,20 @@ $sms_message .= trim($prediction_text);
         }
 
         $this->input = $input;
+$keywords = $this->keywords;
+      usort($keywords, function($a, $b) {
+                return strlen($b) <=> strlen($a);
+            });
 
-$this->filtered_input = str_replace("tides", "", $this->input);
-$this->filtered_input = str_replace("tide", "", $this->filtered_input);
-$this->filtered_input = str_replace("chs", "", $this->filtered_input);
+$this->filter_input = $this->input;
+foreach ($keywords as $keyword) {
 
+$this->filtered_input = str_replace($keyword, "", $this->input);
+//$this->filtered_input = str_replace("chs", "", $this->filtered_input);
+
+}
+$this->filtered_input = str_replace("  ", "", $this->filtered_input);
+$this->filtered_input = trim($this->filtered_input);
 
         $haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
@@ -434,12 +514,33 @@ $this->filtered_input = str_replace("chs", "", $this->filtered_input);
 
         }
 
-
+$this->getStation();
+/*
+$ngrams = new Ngram($this->thing,"ngram");
+$ngrams->extractNgrams($this->input);
+var_dump($ngrams->ngrams);
 
 $this->station_name = $this->default_station_name;
 
+                foreach($this->stations as $station_name => $prediction) {
+
+if(strpos(strtolower($this->input), strtolower($station_name)) != false) {
+
+$station_names[] = $station_name;
+
+}
+
+                }
+
+$this->station_name = $station_names[0];
+var_dump($this->station_name);
+exit();
+
                 foreach($this->stations as $name => $prediction) {
-$score = levenshtein($this->input, $name);
+
+
+
+$score = levenshtein($this->filtered_input, $name);
 if (!isset($min)) {$min = $score; $selected_name = $name;}
 
 if ($score < $min) {$selected_name = $name; $min = $score;}
@@ -447,7 +548,7 @@ if ($score < $min) {$selected_name = $name; $min = $score;}
 $this->station_name = $selected_name;
 
                 }
-
+*/
 
 
 
