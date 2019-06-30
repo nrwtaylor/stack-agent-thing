@@ -1,33 +1,25 @@
 <?php
+/**
+ * Chinese.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 // An agent to recognize and understand Chinese characters.
 
-class Chinese
-{
-
-	function __construct(Thing $thing, $agent_input = null)
-    {
-
-        $this->start_time = microtime(true);
+class Chinese extends Agent {
 
 
-        $this->agent_input = $agent_input;
-		$this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function init() {
 
-        $this->agent_prefix = 'Agent "Chinese" ';
-
-        $this->thing_report['thing'] = $this->thing->thing;
-
-	    $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-	    $this->subject = $thing->subject;
-		$this->sqlresponse = null;
-
-		$this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-		$this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
@@ -42,7 +34,7 @@ class Chinese
         $this->getChinese();
 
         $searchfor = $this->convert_chinese($this->chinese);
-        $arr = explode(" ",$searchfor);
+        $arr = explode(" ", $searchfor);
         $this->words = array();
         $this->word = null;
 
@@ -51,10 +43,10 @@ class Chinese
             // Return dictionary entry.
             $text = $this->findChinese('list', $value);
             //echo $value . " " .$text . "<br>";
-            $words = $this->getWords($text);
+            $words = $this->getConcept($text);
             if ($words != false) {
-                $this->words = array_merge($this->getWords($text));
-               $this->word = $this->words[0];
+                $this->words = array_merge($this->getConcept($text));
+                $this->word = $this->words[0];
             }
         }
 
@@ -62,18 +54,20 @@ class Chinese
         $this->keyword = "chinese";
 
         foreach ($arr as $key=>$value) {
-            $text = $this->findChinese('mordok', $value); 
+            $text = $this->findChinese('mordok', $value);
             if ($value == "U+FE0F") {continue;}
 
-            $words = $this->getWords($text);
+            $words = $this->getConcept($text);
 
             if ($words != false) {
-                $this->keywords = array_merge($this->getWords($text));
+                $this->keywords = array_merge($this->getConcept($text));
                 $this->keyword = $this->keywords[0];
             }
         }
 
+    }
 
+function get() {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("chinese", "refreshed_at") );
 
@@ -84,177 +78,84 @@ class Chinese
 
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable( array("chinese", "reading") );
-        $this->readSubject();
+
+
+}
+
+function set() {
 
         $this->thing->json->writeVariable( array("chinese", "reading"), $this->reading );
 
-        // Review
-        if ($this->agent_input == null) {$this->Respond();}
+
+
+}
+
+    function run() {
 
         if ($this->chinese != false) {
             $this->thing->log('keyword '. $this->keyword . " word  ". $this->word["traditional"] . '.');
-		    $this->thing->log('completed with a reading of ' . $this->chinese . '.');
+            $this->thing->log('completed with a reading of ' . $this->chinese . '.');
         } else {
             $this->thing->log('did not find chinese.');
         }
 
-        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+//        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
         $this->thingreportChinese();
-	}
 
-    function thingreportChinese()
-    {
+
+
+    }
+
+    /**
+     *
+     */
+
+    function thingreportChinese() {
+$this->makeSMS();
+
+        $this->thing_report['sms'] = $this->sms_message;
+
         $this->thing_report['log'] = $this->thing->log;
-//        $this->thing_report['sms'] = $this->sms_message;
+        //        $this->thing_report['sms'] = $this->sms_message;
     }
 
-    function chineseThing()
-    {
-        // Get all of this users Things
-        // To search for the last Chinese text provided.
-        $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
 
-        $things = $thingreport['thing'];
-
-        // Get the earliest from the current data set
-        foreach (array_reverse($things) as $thing) {
-            $this->extractChinese( $thing['task'] );
-            if ($this->chineses != array()) {break;}
-        }
-    }
-
-    function makeDictionary()
-    {
-        // Makes a one character dictionary
-
-        $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
-        $contents = file_get_contents($file);
-
-
+    /**
+     *
+     * @param unknown $text     (optional)
+     * @param unknown $logogram (optional)
+     * @return unknown
+     */
+    function getWord($text = null, $logogram = null) {
+$logogram = trim($logogram);
+        //if ($concept == null) {return;}
+$this->thing->log("logo gram " . $logogram ."\n");
         $separator = "\r\n";
-        $line = strtok($contents, $separator);
-
+        $line = strtok($text, $separator);
+        //$matches = array();
+        $maximum_word_length = 0;
         while ($line !== false) {
-            $word = $this->getWords($line);
 
-            if (mb_strlen($word['traditional']) == 1) {
+            // do something with $line
 
-            //v/ar_dump($word);
-            //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " " . $word['pin_yin'] . implode("/",$word['english']) . "\n";
-            //echo $dictionary_entry;
-            $dictionary[$word['traditional']] = $line . "\n";
+            $word = $this->getConcept($line);
 
-            }
-            # do something with $line
-            $line = strtok( $separator );
-        }
+            // Look for the shortest matching logogram sequences
+            // Or for an exact match.
+            $word_length = mb_strlen($word["traditional"]) ;
+            //                $sub_string = mb_substr($input, $pointer, $word_length);
 
-        $file = fopen($this->resource_path . 'chinese/chinese_mordok_new.txt', 'w');
-        foreach ($dictionary as $character=>$line) {
-            fwrite($file, $line);
-        }
-    }
+            //echo $word["traditional"] ." ".$text . "\n";
 
-    function getWords($test)
-    {
-        // Take a CE-CCEDICT line and de-parse it
-        // Traditional Simplified [pin1 yin1] /English equivalent 1/equivalent 2/
+            //echo "traditional " . $word["traditional"] . " " . $character_string . "\n";
+            //echo "simplified " . $word["simplified"] . " " . $character_string . "\n";
+            if ((strcasecmp($word["traditional"], $logogram) == 0 ) or (strcasecmp($word["simplified"], $logogram) == 0 )) {
 
-        if ($test == false) {
-            return false;
-        }
 
-        if (mb_substr($test,0,1) == "#") {$word = false; return $word;}
 
-        $dict = explode("/",$test);
-
-        if ( (!isset($dict[1])) or (!isset($dict[2])) ) {
-//            var_dump($dict);
-        }
-
-        foreach($dict as $index=>$phrase) {
-            if ($index == 0) {continue;}
-            if ($phrase == "") {continue;}
-            $english_phrases[] = $phrase;
-        }
-
-        $text =  $dict[0];
-
-        preg_match_all("/\[([^\]]*)\]/", $text, $matches);
-        $pin_yin = $matches[0][0];
-
-        $dict = explode(" ",$text);
-
-        $traditional = $dict[0];
-        $simplified = $dict[1];
-
-        $word = array("traditional"=>$traditional,"simplified"=>$simplified,
-                    "pin_yin"=>$pin_yin, "english"=>$english_phrases);
-
-        return $word;
-    }
-
-    function extractChinese($string)
-    {
-        //https://stackoverflow.com/questions/17944961/php-separate-chinese-from-english-characters
-        //$str = 'Hello 你怎么样？ How are you?';
-
-        $english = preg_replace(array('/[\p{Han}？]/u', '/(\s)+/'), array('', '$1'), $string);
-        $chinese = preg_replace(array('/[^\p{Han}？]/u', '/(\s)+/'), array('', '$1'), $string);
-        $this->chinese_text = $chinese;
-        $this->thing->log('reads english ' . $english . " and chinese " . $chinese);
-
-        //https://stackoverflow.com/questions/1396434/what-is-the-best-way-to-split-a-string-into-an-array-of-unicode-characters-in-ph
-        $this->chineses = preg_split('//u', $chinese, -1, PREG_SPLIT_NO_EMPTY);
-
-        return $this->chineses;
-    }
-
-    function isChinese($string)
-    {
-        //https://stackoverflow.com/questions/17944961/php-separate-chinese-from-english-characters
-        //$str = 'Hello 你怎么样？ How are you?';
-        $chinese = preg_replace(array('/[^\p{Han}？]/u', '/(\s)+/'), array('', '$1'), $string);
-    }
-
-    function wordsChinese($input)
-    {
-        //throw new Exception('Devstack.')
-        $string_length = mb_strlen($input);
-        $pointer = 0;
-        $window = 1;
-        // https://stackoverflow.com/questions/4601032/php-iterate-on-string-characters
-        //$characters = mb_str_split($input);
-
-        $characters =  (preg_split('//u', $input, null, PREG_SPLIT_NO_EMPTY));
-
-        while ($pointer !== $string_length) {
-            $character = $characters[$pointer];
-
-            // Process phrase seperators
-            if ($character == '，') {$pointer += 1; continue;}
-            if ($character == '　') {$pointer += 1; continue;}
-            if ($character == '。') {$pointer += 1; continue;}
-            if ($character == '
-') {$pointer += 1; continue;}
-
-            $text = $this->findChinese('list', $character);
-            $separator = "\r\n";
-            $line = strtok($text, $separator);
-
-            //$matches = array();
-            $maximum_word_length = 0;
-            while ($line !== false) {
-
-                # do something with $line
-
-                $word = $this->getWords($line);
-                $word_length = mb_strlen($word["traditional"]) ;
-                $sub_string = mb_substr($input,$pointer,$word_length);
-
-                if ((strcasecmp($word["traditional"],$sub_string) == 0 ) or (strcasecmp($word["simplified"], $sub_string) == 0 )) {
+//                                echo "traditional " . $word["traditional"] . " " . $character_string . "\n";
+//                                echo "simplified " . $word["simplified"] . " " . $character_string . "\n";
 
                 if ($word_length > $maximum_word_length) {
                     $match = array();
@@ -269,56 +170,323 @@ class Chinese
             $line = strtok( $separator );
         }
 
+
+        if (!isset($match)) {return true;}
+
+
         $description = "";
         $shortest_concept_length = 1e6;
 
+        $best_concept = "";
+        $best_concept_length = 1e6;
+        $best_concept_num_words = 1e6;
+        if (!isset($match)) {return true;}
         foreach ($match as $i=>$word) {
-            foreach($word["english"] as $j=>$concept) {
+
+            $description = "";
+            foreach ($word["english"] as $j=>$concept) {
+
+                // Use only the first three matching english concepts.
+                if ($j >= 2) {break;}
                 $description .= " / " .  $concept;
-                if ((mb_strlen($concept) < $shortest_concept_length) and (mb_strlen($concept) != 0)) {
-                    $shortest_concept = $concept;
-                    $shortest_concept_length = mb_strlen($concept);
+
+                //                    if ((mb_strlen($concept) < $shortest_concept_length) and (mb_strlen($concept) != 0)) {
+                if (mb_strlen($concept) != 0) {
+
+
+                    $words = explode(" " , $concept);
+                    //echo "Counted " . count($words) . " words.\n";
+                    $num_words = count($words);
+                    $concept_length = mb_strlen($concept);
+
+                    // Get longest word if only one word available.
+                    // As proxy for concept complexity.
+                    if (($num_words == 1) and ($best_concept_num_words == 1)) {
+
+                        if ((mb_strlen($concept)) > (mb_strlen($best_concept))) {
+                            $best_concept = $concept;
+                            $best_concept_num_words = 1;
+                            $best_concept_length = mb_strlen($concept);
+                        }
+
+                    } else {
+
+                        if ($best_concept_length > $concept_length) {
+
+                            $best_concept = $concept;
+                            $best_concept_num_words = $num_words;
+                            $best_concept_length = $concept_length;
+
+                        }
+
+                    }
                 }
             }
         }
-        $pointer += $maximum_word_length;
 
-        }
-
-        // devstack
-
-        if (!isset($this->chineses)) {
-            $this->chineses = $this->getChinese($input);
-        }
-
-        $patterns = array();
-        //$patterns[0] = '/quick/';
-        //$patterns[1] = '/brown/';
-        //$patterns[2] = '/fox/';
-
-        $replacements = array();
-
-        $chinese_string = implode($this->chineses,"");
-
-        $text = $this->findChinese('mordok', $chinese_string);
-
-        // devstack
-        $words = $this->getWords($text);
-
-        if ($words == false) {
-            $word = "?";
-        } else {
-            $word = $words[0];
-        }
-        $replacements[] = " ". $word . " ";
-
-        $translation = preg_replace($patterns, $replacements, $input);
-
-        return $translation;
+return $best_concept;
     }
 
-    function getChinese($input = null)
-    {
+
+    //echo $translation;
+
+
+    //}
+
+
+    /**
+     *
+     */
+    function chineseThing() {
+        // Get all of this users Things
+        // To search for the last Chinese text provided.
+        $this->thing->db->setUser($this->from);
+        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
+
+        $things = $thingreport['thing'];
+
+        // Get the earliest from the current data set
+        foreach (array_reverse($things) as $thing) {
+            $this->extractChinese( $thing['task'] );
+            if ($this->chineses != array()) {break;}
+        }
+    }
+
+
+    /**
+     *
+     */
+    function makeDictionary() {
+        // Makes a one character dictionary
+
+        $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+        $contents = file_get_contents($file);
+
+
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+            $word = $this->getConcept($line);
+
+            if (mb_strlen($word['traditional']) == 1) {
+
+                //v/ar_dump($word);
+                //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " " . $word['pin_yin'] . implode("/",$word['english']) . "\n";
+                //echo $dictionary_entry;
+                $dictionary[$word['traditional']] = $line . "\n";
+
+            }
+            // do something with $line
+            $line = strtok( $separator );
+        }
+
+        $file = fopen($this->resource_path . 'chinese/chinese_mordok_new.txt', 'w');
+        foreach ($dictionary as $character=>$line) {
+            fwrite($file, $line);
+        }
+    }
+
+
+    /**
+     *
+     * @param unknown $test
+     * @return unknown
+     */
+    function getConcept($test) {
+        // Take a CE-CCEDICT line and de-parse it
+        // Traditional Simplified [pin1 yin1] /English equivalent 1/equivalent 2/
+
+        if ($test == false) {
+            return false;
+        }
+
+        if (mb_substr($test, 0, 1) == "#") {$word = false; return $word;}
+
+        $dict = explode("/", $test);
+
+        if ( (!isset($dict[1])) or (!isset($dict[2])) ) {
+        }
+
+        foreach ($dict as $index=>$phrase) {
+            if ($index == 0) {continue;}
+            if ($phrase == "") {continue;}
+            $english_phrases[] = $phrase;
+        }
+
+        $text =  $dict[0];
+
+        preg_match_all("/\[([^\]]*)\]/", $text, $matches);
+        $pin_yin = $matches[0][0];
+
+        $dict = explode(" ", $text);
+
+        $traditional = $dict[0];
+        $simplified = $dict[1];
+
+        $word = array("traditional"=>$traditional, "simplified"=>$simplified,
+            "pin_yin"=>$pin_yin, "english"=>$english_phrases);
+
+        return $word;
+    }
+
+
+    /**
+     *
+     * @param unknown $string
+     * @return unknown
+     */
+    function extractChinese($string) {
+        //https://stackoverflow.com/questions/17944961/php-separate-chinese-from-english-characters
+        //$str = 'Hello 你怎么样？ How are you?';
+
+        $english = preg_replace(array('/[\p{Han}？]/u', '/(\s)+/'), array('', '$1'), $string);
+        $chinese = preg_replace(array('/[^\p{Han}？]/u', '/(\s)+/'), array('', '$1'), $string);
+        $this->chinese_text = $chinese;
+        $this->thing->log('reads english ' . $english . " and chinese " . $chinese);
+
+        //https://stackoverflow.com/questions/1396434/what-is-the-best-way-to-split-a-string-into-an-array-of-unicode-characters-in-ph
+        $this->chineses = preg_split('//u', $chinese, -1, PREG_SPLIT_NO_EMPTY);
+
+        return $this->chineses;
+    }
+
+
+    /**
+     *
+     * @param unknown $string
+     * @return unknown
+     */
+    function isChinese($string) {
+        // Are there chinese (Han) characters in the string.
+
+        //https://stackoverflow.com/questions/17944961/php-separate-chinese-from-english-characters
+        //$str = 'Hello 你怎么样？ How are you?';
+        $chinese = preg_replace(array('/[^\p{Han}？]/u', '/(\s)+/'), array('', '$1'), $string);
+        if ($chinese == "") {return false;}
+        return true;
+
+    }
+
+
+    /**
+     *
+     * @param unknown $input
+     * @return unknown
+     */
+    function wordsChinese($input) {
+
+        $translation = "";
+
+        //$input = "短信机";
+        //throw new Exception('Devstack.')
+        $string_length = mb_strlen($input);
+        $pointer = 0;
+        $window = 1;
+        // https://stackoverflow.com/questions/4601032/php-iterate-on-string-characters
+        //$characters = mb_str_split($input);
+
+        $characters =  (preg_split('//u', $input, null, PREG_SPLIT_NO_EMPTY));
+
+        $logogram_sequence_length = mb_strlen(implode("", $characters));
+        $end_flag = false;
+        while ($pointer !== $string_length) {
+
+            //echo "----------------- " . $pointer . " -----------". "\n";
+            //echo "translation " . $translation . "\n";
+            if ($end_flag) {break;}
+            $character = $characters[$pointer];
+
+            // Process phrase seperators
+            if ($character == '，') {$pointer += 1; $translation .= ", ";continue;}
+            if ($character == '　') {$pointer += 1; $translation .= " ";continue;}
+            if ($character == '。') {$pointer += 1; $translation .= ". ";continue;}
+            if ($character == ' ') {$pointer += 1; $translation .= " ";continue;}
+
+            if ($character == '
+') {$pointer += 1; continue;}
+
+            $character_string = "";
+            $test_character_string = "";
+$text = "";
+            $match_flag = false;
+
+            foreach (array(0, 1, 2, 3, 4, 5, 6) as $index=>$value) {
+                if (($pointer + $value) >= $logogram_sequence_length) {$end_flag = true; break;}
+
+
+                $test_character_string .= $characters[$pointer + $value];
+  
+
+            if ($this->isChinese($test_character_string) == false) {
+                //echo "no chinese found in test character string: " . $test_character_string . "\n";
+                //$pointer += mb_strlen($character_string);
+                $character_string = $test_character_string;
+                $pointer += $value + 1;
+                break;
+            }
+
+
+
+              //echo "test if character string " . $test_character_string . " is in dictionary.\n";
+                $text_temp = $this->findChinese('list', $test_character_string);
+
+                if ($text_temp == false) {
+                    //echo "Not in dictionary" . "\n";
+
+                    $pointer += $value;
+                    //echo "character string " . $character_string . "\n";
+                    break;
+                }
+                //echo "Is in dictionary." . "\n";
+
+                $match_flag = true;
+                //if ($match_flag = false) {break;}
+                $text = $text_temp;
+                $character_string = $test_character_string;
+                //                $character_string_temp = $character_string;
+
+            }
+
+            //echo "character string " . $character_string . "\n";
+            //echo "translation " . $translation . "\n";
+
+//            if ($this->isChinese($character_string) == false) {
+//                echo "no chinese found in character string: " . $character_string . "\n";
+                //$pointer += mb_strlen($character_string);
+//                $translation .= $character_string;
+//                continue;
+//            }
+
+            //if ($match_flag == false) {continue;}
+
+            //            if ( $this->isChinese($character_string) == false ) {
+            //                continue;
+            //            }
+
+
+$english_word = $this->getWord($text, $character_string);
+
+if ($english_word === true) {
+//true I guess
+$translation .= $character_string ;
+
+} else {
+
+$translation .= $english_word . " " ;
+
+}
+        }
+        return $translation;
+  }
+
+
+    /**
+     *
+     * @param unknown $input (optional)
+     * @return unknown
+     */
+    function getChinese($input = null) {
         // Get an array with all the Chinese character words.
         if ($input == null) {$input = $this->subject;}
         if (!isset($this->chineses)) {
@@ -331,8 +499,13 @@ class Chinese
         return $this->chinese;
     }
 
-    function convertChinese($chinese)
-    {
+
+    /**
+     *
+     * @param unknown $chinese
+     * @return unknown
+     */
+    function convertChinese($chinese) {
         // Convert Chinese encoding to UTF-8
         $str = str_replace('"', "", json_encode($chinese, JSON_HEX_APOS));
 
@@ -344,18 +517,28 @@ class Chinese
         return  iconv("UTF-16BE", "UTF-8", $myBinString);
     }
 
-    function utf8($num)
-    {
+
+    /**
+     *
+     * @param unknown $num
+     * @return unknown
+     */
+    function utf8($num) {
         // More UTF nonsense.
-        if($num<=0x7F)       return chr($num);
-        if($num<=0x7FF)      return chr(($num>>6)+192).chr(($num&63)+128);
-        if($num<=0xFFFF)     return chr(($num>>12)+224).chr((($num>>6)&63)+128).chr(($num&63)+128);
-        if($num<=0x1FFFFF)   return chr(($num>>18)+240).chr((($num>>12)&63)+128).chr((($num>>6)&63)+128).chr(($num&63)+128);
+        if ($num<=0x7F)       return chr($num);
+        if ($num<=0x7FF)      return chr(($num>>6)+192).chr(($num&63)+128);
+        if ($num<=0xFFFF)     return chr(($num>>12)+224).chr((($num>>6)&63)+128).chr(($num&63)+128);
+        if ($num<=0x1FFFFF)   return chr(($num>>18)+240).chr((($num>>12)&63)+128).chr((($num>>6)&63)+128).chr(($num&63)+128);
         return '';
     }
 
-    function uniord($c)
-    {
+
+    /**
+     *
+     * @param unknown $c
+     * @return unknown
+     */
+    function uniord($c) {
         // And back again.
         $ord0 = ord($c{0}); if ($ord0>=0   && $ord0<=127) return $ord0;
         $ord1 = ord($c{1}); if ($ord0>=192 && $ord0<=223) return ($ord0-192)*64 + ($ord1-128);
@@ -364,14 +547,24 @@ class Chinese
         return false;
     }
 
-    function convert_chinese($chinese)
-    {
+
+    /**
+     *
+     * @param unknown $chinese
+     * @return unknown
+     */
+    function convert_chinese($chinese) {
         $u =  $this->uniord($chinese);
         return strtoupper("U+".dechex($u));
     }
 
-    function format($str)
-    {
+
+    /**
+     *
+     * @param unknown $str
+     * @return unknown
+     */
+    function format($str) {
         $copy = false;
         $len = strlen($str);
         $res = '';
@@ -397,46 +590,51 @@ class Chinese
     }
 
 
-    function findChinese($librex, $searchfor)
-    {
+    /**
+     *
+     * @param unknown $librex
+     * @param unknown $searchfor
+     * @return unknown
+     */
+    public function findChinese($librex, $searchfor) {
         // Look up the meaning in the dictionary.
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
 
         switch ($librex) {
-            case null:
-                // Drop through
-            case 'keywords':
-                $file = $this->resource_path .'chinese/chinese-keywords.txt';
-                $contents = file_get_contents($file);
-                break;
-            case 'mordok':
-                $file = $this->resource_path . 'chinese/chinese-mordok.txt';
-                $contents = file_get_contents($file);
+        case null:
+            // Drop through
+        case 'keywords':
+            $file = $this->resource_path .'chinese/chinese-keywords.txt';
+            $contents = file_get_contents($file);
+            break;
+        case 'mordok':
+            $file = $this->resource_path . 'chinese/chinese-mordok.txt';
+            $contents = file_get_contents($file);
 
-                break;
-            case 'list':
-                $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
-                $contents = file_get_contents($file);
-                break;
+            break;
+        case 'list':
+            $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+            $contents = file_get_contents($file);
+            break;
 
-            case 'english-chinese':
-                $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
-                $contents = file_get_contents($file);
-                break;
+        case 'english-chinese':
+            $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+            $contents = file_get_contents($file);
+            break;
 
-            case 'unicode':
-                $file = $this->resource_path . 'chinese/unicode.txt';
-                $contents = file_get_contents($file);
-                break;
-            case 'context':
-                $this->contextChinese();
-                $contents = $this->chinese_context;
-                $file = null;
-                break;
-            case 'emotion':
-                break;
-            default:
-                $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+        case 'unicode':
+            $file = $this->resource_path . 'chinese/unicode.txt';
+            $contents = file_get_contents($file);
+            break;
+        case 'context':
+            $this->contextChinese();
+            $contents = $this->chinese_context;
+            $file = null;
+            break;
+        case 'emotion':
+            break;
+        default:
+            $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
         }
 
         // devstack add \b to Word
@@ -459,7 +657,7 @@ class Chinese
 
         // search, and store all matching occurences in $matches
         $m = false;
-        if(preg_match_all($pattern, $contents, $matches)){
+        if (preg_match_all($pattern, $contents, $matches)) {
             //echo "Found matches:\n";
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
@@ -468,19 +666,23 @@ class Chinese
         return $m;
     }
 
-	public function Respond()
-    {
-		$this->cost = 100;
 
-		// Thing stuff
+    /**
+     *
+     * @return unknown
+     */
+    public function respond() {
+        $this->cost = 100;
+
+        // Thing stuff
         $this->thing->flagGreen();
 
         // Make SMS
         $this->makeSMS();
-		$this->thing_report['sms'] = $this->sms_message;
+//        $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
-		$this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         // Make email
         $this->makeEmail();
@@ -496,11 +698,14 @@ class Chinese
         $this->reading = $this->chinese;
         $this->thing->json->writeVariable(array("chinese", "reading"), $this->reading);
 
-		return $this->thing_report;
-	}
+        return $this->thing_report;
+    }
 
-    function makeWeb()
-    {
+
+    /**
+     *
+     */
+    function makeWeb() {
         if (!isset($this->filtered_input)) {
             $input = "X";
         } else {
@@ -510,7 +715,7 @@ class Chinese
         $html = "<b>CHINESE " . $input . " </b>";
         $html .= "<p><br>";
 
-        foreach($this->words as $index=>$word) {
+        foreach ($this->words as $index=>$word) {
             $line = $word["traditional"] . " " . $word["simplified"] . " " . $word["pin_yin"];
             $i = 0;
             foreach ($word["english"] as $english) {
@@ -523,16 +728,22 @@ class Chinese
         $this->thing_report['web'] = $html;
     }
 
-    function makeSMS()
-    {
+
+    /**
+     *
+     */
+    function makeSMS() {
         if (isset($this->word)) {
             if (!$this->has_chinese_characters) {
 
                 // Assume english to chinese
                 $sms = "CHINESE | ";
                 foreach ($this->words as $word) {
-                    if (mb_strlen($sms) > 60) {$sms .= "Text 'Web'.";break;}
-                    $sms .= $word["traditional"] . " / ";
+                    if (mb_strlen($sms) > 60) {$sms .= "TEXT WEB";break;}
+
+$w = $this->wordsChinese($word["traditional"]);
+
+                    $sms .= trim($word["traditional"] . " " . $w) . " / ";
                 }
                 $this->sms_message = $sms;
                 return;
@@ -544,7 +755,7 @@ class Chinese
             $this->sms_message .= count($this->words) . " phrases found.";
             $this->sms_message .= " | ";
 
-            $this->sms_message .= implode(" / " ,$this->word["english"]);
+            $this->sms_message .= implode(" / " , $this->word["english"]);
         }
 
         if (isset($this->chinese_from_words)) {
@@ -563,8 +774,12 @@ class Chinese
 
         if ((isset($this->chinese)) and ($this->chinese != false)) {
 
-            $this->sms_message = "CHINESE CHARACTER IS ";
-            $this->sms_message .= $this->chinese_text;
+            if (mb_strlen($this->chinese_text) > 6) {
+                $this->sms_message = "CHINESE";
+            } else {
+                $this->sms_message = "CHINESE CHARACTER IS ";
+                $this->sms_message .= $this->chinese_text;
+            }
 
             if ($this->words != false) {
                 if (count($this->words) > 1) {
@@ -584,20 +799,29 @@ class Chinese
                 }
 
             } else {
-                $this->sms_message .= " | character not recognized";
+                if (isset($this->translated_input)) {
+                    $this->sms_message .= " | " . $this->translated_input;
+                } else {
+                    $this->sms_message .= " | character not recognized";
+                }
             }
 
-            $this->sms_message .= " | mordok hears " . $this->keyword;
+            $this->sms_message .= " | Heard " . $this->keyword . ". ";
             $this->sms_message .= " | TEXT ?";
             return;
         }
 
         $this->sms_message = "CHINESE | no match found.";
-       return;
+        return;
     }
 
-    function chineseString($word)
-    {
+
+    /**
+     *
+     * @param unknown $word
+     * @return unknown
+     */
+    function chineseString($word) {
         $traditional = $word['traditional'];
         $simplified = $word['simplified'];
         $pin_yin = $word['pin_yin'];
@@ -607,13 +831,34 @@ class Chinese
         return $word_string ;
     }
 
-    function makeEmail()
-    {
+
+    /**
+     *
+     * @param unknown $logogram_sequence (optional)
+     * @return unknown
+     */
+    function readChinese($logogram_sequence = null) {
+
+        if ($logogram_sequence == null) {return;}
+
+        $translated_logogram_sequence = $this->wordsChinese($logogram_sequence);
+        return $translated_logogram_sequence;
+    }
+
+
+    /**
+     *
+     */
+    function makeEmail() {
         $this->email_message = "CHINESE | ";
     }
 
-    public function test()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    public function test() {
         $short_input = "短信机";
         $short_input = "因應短信";
 
@@ -622,12 +867,23 @@ class Chinese
 王先生的一位老朋友是老年大学的老师，　他经常在这个大学教日语。
 
 他的一个学生在师大工作。　他有汉语书，法语书和日语书。　他天天教留学生现代汉语。现在他有五个男学生，八个女学生。";
+
+        $input = "This is a mix of chinese 短信 characters 机 and english words.";
+
+
         return $input;
     }
 
-	public function readSubject()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
         $input = $this->subject;
+
+//        $input = $this->test();
+//$input = $this->input;
 
         if (strtolower($input) == "chinese") {
             $this->chineseThing();
@@ -635,16 +891,28 @@ class Chinese
             return;
         }
 
-        $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "chinese is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("chinese is")); 
-        } elseif (($pos = strpos(strtolower($input), "chinese")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("chinese")); 
-        }
+
+$halves=explode(' ',$input,2);  // create a two-element(maximum) array
+
+$first=array_splice($halves,0,1)[0];  // assign first element to $first, now $halves is a single, reindexed element
+
+$filtered_input = $input;
+if (strtolower($first) == "chinese") {
+  $filtered_input=$halves[0];
+}
+
+
+//        $whatIWant = $input;
+//        if (($pos = strpos(strtolower($input), "chinese is")) !== FALSE) {
+//            $whatIWant = substr(strtolower($input), $pos+strlen("chinese is"));
+//        } elseif (($pos = strpos(strtolower($input), "chinese")) !== FALSE) {
+//            $whatIWant = substr(strtolower($input), $pos+strlen("chinese"));
+//        }
 
         // Clean input
-
-        $filtered_input = ltrim(strtolower($whatIWant), " ");
+$filtered_input = strtolower($filtered_input);
+$filtered_input = trim($filtered_input);
+//        $filtered_input = ltrim(strtolower($whatIWant), " ");
 
         $string_length = mb_strlen($filtered_input);
 
@@ -656,26 +924,28 @@ class Chinese
 
         if ($has_chinese_characters) {
 
-            $text =  $this->findChinese("list",$filtered_input) ;
+            $t=            $this->readChinese($filtered_input);
+            //$this->translation = $t;
+$this->translated_input = $t;
+            //echo "translation " . $t. "\n";
+
+            $text =  $this->findChinese("list", $filtered_input) ;
             $separator = "\r\n";
             $line = strtok($text, $separator);
-
             $this->words = array();
             while ($line !== false) {
-                $word = $this->getWords($line);
+                $word = $this->getConcept($line);
                 $this->words[] = $word;
-                # do something with $line
+                // do something with $line
                 $line = strtok( $separator );
             }
-
             if (count($this->words) == 0) {
                 $this->response = "No Chinese translation found.";
             }
 
             // Sort by length of phrase. Shortest first.
             $traditional = array();
-            foreach ($this->words as $key => $row)
-            {
+            foreach ($this->words as $key => $row) {
                 $traditional[$key] = mb_strlen($row['traditional']);
             }
             array_multisort($traditional, SORT_ASC, $this->words);
@@ -685,7 +955,7 @@ class Chinese
                 $this->response = "Did not find a Chinese translation";
             } else {
                 $this->word = $this->words[0];
-                foreach($this->words as $word) {
+                foreach ($this->words as $word) {
                     if (($word['traditional'] == $filtered_input) or ($word['simplified'] == $filtered_input)) {
                         $this->word = $word;
                         break;
@@ -699,17 +969,17 @@ class Chinese
 
         if ($filtered_input == "") {$filtered_input = "hello";}
 
-        $text =  $this->findChinese("english-chinese",$filtered_input) ;
+        $text =  $this->findChinese("english-chinese", $filtered_input) ;
 
         $separator = "\r\n";
         $line = strtok($text, $separator);
 
         $this->words = array();
         while ($line !== false) {
-           $word = $this->getWords($line);
-           $this->words[] = $word;
-           # do something with $line
-           $line = strtok( $separator );
+            $word = $this->getConcept($line);
+            $this->words[] = $word;
+            // do something with $line
+            $line = strtok( $separator );
         }
 
         if (count($this->words) == 0) {
@@ -718,7 +988,7 @@ class Chinese
 
         if (!isset($this->words[0])) {$this->word = null;} else {
             $this->word = $this->words[0];
-        } 
+        }
 
         $this->response = "Found English translation.";
         $this->filtered_input = $filtered_input;
@@ -753,62 +1023,66 @@ class Chinese
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
+                if (strpos(strtolower($piece), $command) !== false) {
 
-                    switch($piece) {
-                        case 'chinese':   
+                    switch ($piece) {
+                    case 'chinese':
 
-                            $prefix = 'chinese';
-                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-                            $words = ltrim($words);
-                            $this->search_words = $words;
-                            $t = $this->findChinese('list', $words);
+                        $prefix = 'chinese';
+                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+                        $words = ltrim($words);
+                        $this->search_words = $words;
+                        $t = $this->findChinese('list', $words);
 
-                            // Strip out non-word matches
-                            $arr = array();
-                            foreach ($this->matches[0] as $match) {
+                        // Strip out non-word matches
+                        $arr = array();
+                        foreach ($this->matches[0] as $match) {
                             ///    /\b($word)\b/i
-                                $text = preg_replace('/[^a-z\s]/', '', strtolower($match));
-                                $text = preg_split('/\s+/', $text, NULL, PREG_SPLIT_NO_EMPTY);
-                                $text = array_flip($text);
+                            $text = preg_replace('/[^a-z\s]/', '', strtolower($match));
+                            $text = preg_split('/\s+/', $text, NULL, PREG_SPLIT_NO_EMPTY);
+                            $text = array_flip($text);
 
-                                $word = strtolower($words);
-                                if (isset($text[$word])) $arr[] = $match;
-                            }
+                            $word = strtolower($words);
+                            if (isset($text[$word])) $arr[] = $match;
+                        }
 
-                            if ($arr == null) {
-                                $this->chineses = null;
-                            } else {
-                                //$array = $this->matches[0];
-                                $k = array_rand($arr);
-                                $v = $arr[$k];
+                        if ($arr == null) {
+                            $this->chineses = null;
+                        } else {
+                            //$array = $this->matches[0];
+                            $k = array_rand($arr);
+                            $v = $arr[$k];
 
-                                $this->chinese_from_words = $v;
+                            $this->chinese_from_words = $v;
 
-                                $this->chineses = $this->extractChinese(implode(" ", $arr));
-                            }
-                            return;
+                            $this->chineses = $this->extractChinese(implode(" ", $arr));
+                        }
+                        return;
 
-                        default:
-                            // 'default';
+                    default:
+                        // 'default';
 
                     }
                 }
             }
         }
-		$status = true;
+        $status = true;
 
-	    return $status;
-	}
+        return $status;
+    }
 
-    function contextChinese ()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    function contextChinese() {
 
         $this->chinese_context = '
 ';
 
         return $this->chinese_context;
     }
-}
 
-?>
+
+}

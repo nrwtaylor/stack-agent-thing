@@ -395,6 +395,7 @@ class Agent {
             if ((isset($agent->response)) and ($agent->response === true)) {
                 throw new Exception("Flagged true.");
             }
+
             $this->thing_report = $agent->thing_report;
 
             $this->agent = $agent;
@@ -708,7 +709,7 @@ class Agent {
             $input = $compression_thing->filtered_input;
         }
 
-        $input = trim($input);
+$input = trim($input);
 
 
         // Okay here check for input
@@ -893,6 +894,7 @@ class Agent {
         usort($agents, function($a, $b) {
                 return strlen($b) <=> strlen($a);
             });
+
         foreach ($agents as $agent_class_name) {
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
             // Allow for doing something smarter here with
@@ -1283,12 +1285,12 @@ echo "place found";
 
         $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
-        if ((isset($chinese_thing->chineses)) or (isset($chinese_thing->emojis))) {
-            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
-            return $this->thing_report;
-            //exit();
+if ((isset($chinese_thing->chineses)) or (isset($chinese_thing->emojis))) {
+$this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
+return $this->thing_report;
+//exit();
 
-        }
+}
 
 
 

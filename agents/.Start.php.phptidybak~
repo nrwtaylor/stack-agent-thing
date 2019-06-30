@@ -1,11 +1,4 @@
 <?php
-/**
- * Start.php
- *
- * @package default
- */
-
-
 namespace Nrwtaylor\StackAgentThing;
 
 
@@ -16,26 +9,21 @@ error_reporting(-1);
 
 class Start {
 
-
-    /**
-     *
-     * @param Thing   $thing
-     */
-    function __construct(Thing $thing) {
+	function __construct(Thing $thing) {
 
         // $timestamp =  new Timestamp($thing, "timestamp");
 
 
-        $this->thing = $thing;
-        $this->agent_name = 'start';
+		$this->thing = $thing;
+		$this->agent_name = 'start';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 
         $this->thing_report['thing'] = $this->thing->thing;
 
-        // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-        // I think.
-        // Instead.
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+		// I think.
+		// Instead.
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -48,9 +36,9 @@ class Start {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        //        $this->word = $thing->container['stack']['word'];
+//        $this->word = $thing->container['stack']['word'];
 
-        $this->node_list = array("start"=>array("new user", "opt-in", "opt-out"));
+		$this->node_list = array("start"=>array("new user", "opt-in","opt-out"));
 
         $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.</pre>', "INFORMATION");
 
@@ -67,75 +55,67 @@ class Start {
 
         $this->thing->log( $this->agent_prefix .'readSubject().', "OPTIMIZE" );
 
-        $this->readSubject();
+		$this->readSubject();
 
         $this->set();
 
         $this->thing->log( $this->agent_prefix .'respond().', "OPTIMIZE" );
 
-        $this->respond();
+ 		$this->respond();
 
-        $this->thing->flagGreen();
+		$this->thing->flagGreen();
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
 
-        return;
-    }
+    	return;
+	}
 
 
 
-    /**
-     *
-     */
-    function set() {
+    function set()
+    {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 
-        //        $this->thing->choice->save('usermanager', $this->state);
+//        $this->thing->choice->save('usermanager', $this->state);
 
         return;
     }
 
 
-    /**
-     *
-     */
-    function get() {
+    function get()
+    {
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".", "DEBUG");
 
-        //        $this->counter = $this->counter + 1;
+//        $this->counter = $this->counter + 1;
 
         return;
     }
 
-
-    /**
-     *
-     */
     private function makeSMS() {
 
         switch ($this->counter) {
-        case false:
-            $sms = "START | Please read our Privacy Policy and text START.";
-            break;
+            case false:
+                $sms = "START | Please read our Privacy Policy and text START.";
+                break;
 
-        case 1:
-            $sms = "START | Thank you for starting to use " . ucwords($this->word) . ".  Read our Privacy Policy " . $this->web_prefix . "privacy | Started.";
-            break;
-        case 2:
-            $sms = "START | Read our Privacy Policy at " . $this->web_prefix . "privacy | Started. Again.";
-            break;
+            case 1:
+                $sms = "START | Thank you for starting to use " . ucwords($this->word) . ".  Read our Privacy Policy " . $this->web_prefix . "privacy | Started.";
+                break;
+            case 2:
+                $sms = "START | Read our Privacy Policy at " . $this->web_prefix . "privacy | Started. Again.";
+                break;
 
-        case null;
+            case null;
 
-        default:
-            $sms = "START | " . $this->web_prefix ."privacy | Started.";
+            default:
+                $sms = "START | " . $this->web_prefix ."privacy | Started.";
 
         }
 
@@ -148,16 +128,14 @@ class Start {
     }
 
 
-    /**
-     *
-     */
-    private function makeEmail() {
+    private function makeEmail()
+    {
         switch ($this->counter) {
-        case 1:
+            case 1:
 
-            $subject = "Start Stackr?";
+                $subject = "Start Stackr?";
 
-            $message = "So an action you took (or someone else took) opted you into
+                $message = "So an action you took (or someone else took) opted you into 
                     Stackr.
                     <br>
                     There is always that little element of uncertainity.  So we clearly think
@@ -166,38 +144,36 @@ class Start {
                     helpful or useful to you.
                     <br>
                     So thanks for that and be sure to keep an eye on your stack balance. Which
-                    will be maintained at least until you opt-out.
+                    will be maintained at least until you opt-out.  
                     <br>
                     Keep on stacking.
 
                     ";
-            break;
-        case 2:
-            $subject = "Opt-in request accepted";
+                break;
+            case 2:
+                $subject = "Opt-in request accepted";
 
-            $message = "Thank you for your opt-in request.  'optin' has
+                $message = "Thank you for your opt-in request.  'optin' has 
                     added ".$this->from." to the accepted list of Stackr emails.
                     You can now use Stackr.  Keep on stacking.\n\n";
 
-            break;
+                break;
 
-        case null;
+            case null;
 
-        default:
-            $message = "START | Acknowledged. " . $this->web_prefix;
+            default:
+                $message = "START | Acknowledged. " . $this->web_prefix;
 
         }
 
-        $this->message = $message;
-        $this->thing_report['email'] = $message;
+            $this->message = $message;
+            $this->thing_report['email'] = $message;
 
     }
 
 
-    /**
-     *
-     */
-    public function makeChoices() {
+    public function makeChoices()
+    {
         // Make buttons
         $this->thing->log( $this->agent_prefix .'Create(...).', "OPTIMIZE" );
 
@@ -212,21 +188,18 @@ class Start {
 
 
 
-    /**
-     *
-     */
-    public function respond() {
-        //var_dump($this->counter);
-        // Thing actions
+	public function respond() {
+var_dump($this->counter);
+		// Thing actions
 
-        // New user is triggered when there is no nom_from in the db.
-        // If this is the case, then Stackr should send out a response
-        // which explains what stackr is and asks either
-        // for a reply to the email, or to send an email to opt-in@<email postfix>.
+		// New user is triggered when there is no nom_from in the db.
+		// If this is the case, then Stackr should send out a response
+		// which explains what stackr is and asks either
+		// for a reply to the email, or to send an email to opt-in@<email postfix>.
 
-        $this->thing->flagGreen();
+		$this->thing->flagGreen();
 
-        // Get the current user-state.
+		// Get the current user-state.
 
         $this->thing->log( $this->agent_prefix .'makeSMS().', "OPTIMIZE" );
 
@@ -252,37 +225,35 @@ class Start {
         $this->thing_report['help'] = $this->agent_prefix  .'responding to an instruction to start.';
 
 
-        return;
-    }
+		return;
+	}
 
 
 
-    /**
-     *
-     */
-    public function readSubject() {
-        //  $this->start();
-        //  return;
-        $this->keyword = "start";
-        $keywords = array("start");
+	public function readSubject()
+    {
+      //  $this->start();
+//		return;
+$this->keyword = "start";
+$keywords = array("start");
         if (isset($this->agent_input)) {
             $input = $this->agent_input;
         } else {
             $input = strtolower($this->subject);
         }
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+                //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
         //$haystack = $this->agent_input . " " . $this->from;
         //$haystack = $input . " " . $this->from;
         $haystack = "";
 
-        //              $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+//              $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
-        // So this is really the 'sms' section
-        // Keyword
+                // So this is really the 'sms' section
+                // Keyword
         if (count($pieces) == 1) {
 
             if ($input == $this->keyword) {
@@ -295,27 +266,26 @@ class Start {
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) 
+                    {
 
-                    case 'start':
-                        $this->start();
-                        return;
-                    default:
+                        case 'start':
+$this->start();
+                            return;
+                        default:
 
-                        return;
+                            return;
                     }
-                }
-            }
+               }
+           }
         }
 
-    }
+	}
 
 
-    /**
-     *
-     */
-    function start() {
+	function start()
+    {
         $this->counter = $this->counter + 1;
 
         // Call the Usermanager agent and update the state
@@ -323,8 +293,7 @@ class Start {
         $this->thing->log( $this->agent_prefix .'called the Usermanager and said "usermanager start".' );
         $timestamp =  new Timestamp($this->thing, "timestamp");
 
-        return;
-    }
-
+		return;
+	}
 
 }
