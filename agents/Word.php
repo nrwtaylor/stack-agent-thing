@@ -24,6 +24,9 @@ class Word extends Agent {
         $this->resource_path_ewol = $GLOBALS['stack_path'] . 'resources/ewol/';
         $this->keywords = array();
 
+        $this->thing_report['help'] = "Screens against a list of over four hundred thousand words.";
+
+
     }
 
     function set() {

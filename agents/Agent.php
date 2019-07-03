@@ -174,7 +174,6 @@ class Agent {
 
         $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
 
-
     }
 
 
@@ -844,7 +843,6 @@ class Agent {
         } else {
             $arr = explode(' ' , $this->agent_input);
         }
-
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
         //set_error_handler("warning_handler", E_WARNING);
 
@@ -1283,7 +1281,7 @@ echo "place found";
 
         $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
-        if ((isset($chinese_thing->chineses)) or (isset($chinese_thing->emojis))) {
+        if ((isset($chinese_thing->chineses)) or (isset($emoji_thing->emojis))) {
             $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
             return $this->thing_report;
             //exit();

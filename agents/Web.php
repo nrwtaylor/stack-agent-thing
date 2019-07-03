@@ -21,6 +21,7 @@ class Web extends Agent {
      */
     function init() {
 
+
         if ($this->thing->thing != true) {
 
             $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $thing->uuid .  '');

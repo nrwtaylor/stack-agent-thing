@@ -47,6 +47,7 @@ class Pace extends Agent {
         $this->time_travel_unit_name = "s";
         $this->time_unit_name = "seconds";
 
+        $this->thing_report['help'] = "Helps set the pace during a block of time.";
 
     }
 

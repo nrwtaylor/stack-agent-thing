@@ -1,18 +1,12 @@
 <?php
-/**
- * Nod.php
- *
- * @package default
- */
-
-
 namespace Nrwtaylor\StackAgentThing;
 
-class Nod {
+class Nod
+{
     // An exercise in augemented virtual collaboration. With water.
     // But a Thing needs to know what minding the gap is.
 
-    public $var = 'hello';
+	public $var = 'hello';
 
     // This will provide a nod - a unit of energy converted into a nodded unit of distance.
     // This is useful for NOD because it is the first step in provided the distance travelled down a path.
@@ -20,34 +14,29 @@ class Nod {
 
     // See getEnergy() for dev
 
-
-    /**
-     *
-     * @param Thing   $thing
-     * @param unknown $agent_input (optional)
-     */
-    function __construct(Thing $thing, $agent_input = null) {
+    function __construct(Thing $thing, $agent_input = null)
+    {
         // Precise timing
         $this->start_time = $thing->elapsed_runtime();
 
         $this->agent_input = $agent_input;
-        $this->thing = $thing;
+		$this->thing = $thing;
 
         $this->thing_report['thing'] = $thing;
         $this->agent_name = "nod";
 
-        $this->retain_for = 24; // Retain for at least 24 hours.
+		$this->retain_for = 24; // Retain for at least 24 hours.
 
         $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
+      	$this->to = $thing->to;
+       	$this->from = $thing->from;
+       	$this->subject = $thing->subject;
+		$this->sqlresponse = null;
 
         $this->state = "dev";
 
-        $this->thing->log( 'running on Thing ' . $this->thing->nuuid . '.');
-        $this->thing->log( 'received this Thing "' . $this->subject . '"');
+		$this->thing->log( 'running on Thing ' . $this->thing->nuuid . '.');
+		$this->thing->log( 'received this Thing "' . $this->subject . '"');
         $this->thing->log( 'received this Agent Input "' . $this->subject . '"');
 
         // Get some stuff from the stack which will be helpful.
@@ -62,28 +51,26 @@ class Nod {
 
         $this->get(); // load in last known position variables for current player
 
-        $this->readSubject();
+		$this->readSubject();
 
         $this->doNod();
 
-        $this->respond();
+		$this->respond();
 
         if ($this->agent_input != "nod") {
-            $this->set();
+        $this->set();
         }
-        $this->thing->log( 'completed.');
+		$this->thing->log( 'completed.');
 
         //echo $this->thing->elapsed_runtime() - $this->start_time;
 
 
-        return;
+		return;
     }
 
-
-    /**
-     * Add in code for setting the current distance travelled.
-     */
-    function set() {
+    // Add in code for setting the current distance travelled.
+    function set()
+    {
         // UK Commonwealth spelling
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable( array("nod", "time_travelled"), $this->time_travelled );
@@ -95,11 +82,8 @@ class Nod {
         $this->thing->json->writeVariable( array("nod", "timestamp"), $nod_timestamp );
     }
 
-
-    /**
-     *
-     */
-    function get() {
+    function get()
+    {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("nod", "refreshed_at") );
 
@@ -127,26 +111,22 @@ class Nod {
         $this->response = "Loaded Nod time travelled and microsecond timestamp."; // Because
     }
 
+    // -----------------------
+	private function respond()
+    {
+		$this->thing->flagGreen();
 
-    /**
-     * -----------------------
-     *
-     * @return unknown
-     */
-    private function respond() {
-        $this->thing->flagGreen();
+		// This should be the code to handle non-matching responses.
 
-        // This should be the code to handle non-matching responses.
-
-        $to = $this->thing->from;
-        $from = "nod";
+		$to = $this->thing->from;
+		$from = "nod";
 
         $this->makeMessage();
         $this->makeSms();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+		    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
         $this->makeWeb();
@@ -154,14 +134,11 @@ class Nod {
 
         $this->thing_report['sms'] = $this->sms_message;
 
-        return $this->thing_report;
-    }
+		return $this->thing_report;
+	}
 
-
-    /**
-     *
-     */
-    private function nodDo() {
+    private function nodDo()
+    {
         // What does nod do. doNod is doing a Nod.
 
         // Nod is a tool to connect to our world.  Welcome.
@@ -185,7 +162,7 @@ class Nod {
 
         // Welcome to <Insert Robot Name Here>.  The Robot Coxswain.
 
-        // Yeah we want to steer the path too.  But this is Nod.
+        // Yeah we want to steer the path too.  But this is Nod.  
         // For Nodders.
 
         // If you don't want to worry about where you are going, don't worry about <Insert Robot Name Here>.
@@ -196,15 +173,12 @@ class Nod {
 
         $this->getEnergy();
 
-
+        
 
     }
 
-
-    /**
-     *
-     */
-    public function lastNod() {
+    public function lastNod()
+    {
         $this->getTime();
 
         $findagent_thing = new FindAgent($this->thing, 'nod');
@@ -214,11 +188,8 @@ class Nod {
         $this->last_created_at =  $findagent_thing->thing_report['things'][0]['created_at'];
     }
 
-
-    /**
-     *
-     */
-    public function doNod() {
+    public function doNod()
+    {
         // What is to do a Nod.
 
         // This will be the full cycle of a Nod.
@@ -244,13 +215,8 @@ class Nod {
 
     }
 
-
-    /**
-     *
-     * @param unknown $energy_text (optional)
-     * @return unknown
-     */
-    private function nodEnergy($energy_text = null) {
+    private function nodEnergy($energy_text = null)
+    {
         if ($energy_text == null) {$energy_text = $this->energy->number;}
 
         $scalar = 0;
@@ -269,12 +235,8 @@ class Nod {
 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function getTime() {
+    public function getTime()
+    {
         if (isset($this->elapsed_clock)) {return $this->elapsed_clock;}
         // Only do this once.
         // Can't have calculations based on different timestamps.
@@ -285,15 +247,9 @@ class Nod {
         return $this->elapsed_clock;
     }
 
-
-    /**
-     * https://gist.github.com/hadl/5721816
-     *
-     * @param unknown $start
-     * @param unknown $end
-     * @return unknown
-     */
-    function microtime_diff($start, $end) {
+    // https://gist.github.com/hadl/5721816
+    function microtime_diff($start, $end)
+    {
         // Lots of testing needed on this :/
         // Date maths.  Urgh.
 
@@ -309,12 +265,9 @@ class Nod {
         return floatval($diff_date) + floatval($diff_clock) + $diff_usec;
     }
 
-
-    /**
-     *
-     */
-    private function getEnergy() {
-        // Insert code to talk to Concept2.
+    private function getEnergy()
+    {
+        // Insert code to talk to Concept2.  
         $text = "Nonsense text string, json string, or other text representation of 1 energy units";
 
         // Going to be a call from a peeple for a nod.  So it should be provided.
@@ -322,18 +275,11 @@ class Nod {
         // Call that a custom Nod function to read and write the energy to a nod variable.
         $this->energy = new Number($this->thing, "energy " . $text); // test uniqueness?
 
-        // Which means we now have
+        // Which means we now have 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function readSubject() {
-
-        $this->thing_report['help'] = "Helps folk check if you are okay. TEXT WEB.";
-
+	public function readSubject()
+    {
 
         if ($this->agent_input == "nod") {$this->lastNod(); return;}
 
@@ -346,27 +292,24 @@ class Nod {
         }
 
 
-        $this->response = "Nodded.";
-        //$this->sms_message = "SPLOSH | https://dictionary.cambridge.org/dictionary/english/splosh";
-        $this->message = "https://www.urbandictionary.com/define.php?term=nod";
-        $this->keyword = "nod";
+		$this->response = "Nodded.";
+		//$this->sms_message = "SPLOSH | https://dictionary.cambridge.org/dictionary/english/splosh";
+		$this->message = "https://www.urbandictionary.com/define.php?term=nod";
+		$this->keyword = "nod";
 
-        $this->thing_report['keyword'] = $this->keyword;
-        //  $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['email'] = $this->message;
+		$this->thing_report['keyword'] = $this->keyword;
+//		$this->thing_report['sms'] = $this->sms_message;
+		$this->thing_report['email'] = $this->message;
 
 
         $this->nodDo();
 
 
-        return $this->response;
-    }
+		return $this->response;
+	}
 
-
-    /**
-     *
-     */
-    public function makeSms() {
+    public function makeSms()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
         if ((!isset($this->tick_time)) or ($this->tick_time == 0)) {
@@ -384,11 +327,8 @@ class Nod {
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-
-    /**
-     *
-     */
-    public function makeMessage() {
+    public function makeMessage()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
         if ((!isset($this->tick_time)) or ($this->tick_time == 0)) {
@@ -405,10 +345,8 @@ class Nod {
     }
 
 
-    /**
-     *
-     */
-    public function makeWeb() {
+    public function makeWeb()
+    {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
@@ -419,7 +357,7 @@ class Nod {
 
         $html = "<b>NOD " . $flag;
         $html = "</b>";
-
+        
 
 
         $html .= "<p><b>Nod Variables</b>";
@@ -442,7 +380,7 @@ class Nod {
         $html .= "<br>";
 
         $html .= '<a href="' . $link . '">';
-        //        $web .= $this->html_image;
+//        $web .= $this->html_image;
         $html .= $link;
 
         $html .= "</a>";
@@ -458,14 +396,14 @@ class Nod {
 
         $html .= "<p><br>" . "Thank you for your recent nod. " . $warranty->message;
 
-        //exit();
+//exit();
 
         $html .= "<p>";
         $html .= "<br>Last nod time " . $this->last_timestamp;
 
 
 
-        //$html .= "<br>Check-in was " . intval($this->time_travelled) . "ms ago."; // Commonwealth spelling
+    //$html .= "<br>Check-in was " . intval($this->time_travelled) . "ms ago."; // Commonwealth spelling
 
 
 
@@ -478,6 +416,5 @@ class Nod {
 
 
 }
-
 
 ?>

@@ -64,7 +64,7 @@ class Cron
 
 //                $client->doHighBackground("call_agent", $arr);
 
-        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
+//        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
 
         $tick_agent = new Tick($this->thing);
 

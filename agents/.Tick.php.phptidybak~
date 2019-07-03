@@ -25,12 +25,41 @@ class Tick extends Agent {
      * @param unknown $start_time
      * @param unknown $max_time    (optional)
      */
-
-
-    /**
-     * function __construct(Thing $thing, $agent_input = null) {
-     */
+//    function __construct(Thing $thing, $agent_input = null) {
     function init() {
+
+        //echo "Not ticking";
+        //exit();
+
+        // Spawn of cronhandler
+        //echo '<pre> cronhandler started running ';echo date("Y-m-d H:i:s");echo'</pre>';
+        //echo '<pre> cronhandler version v1/api 1 5 June 2017';echo'</pre>';
+
+//        $this->agent_name = 'tick';
+//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+//        $this->test= "Development code";
+
+//        $this->agent_input = $agent_input;
+
+///        $this->thing = $thing;
+
+//        $this->thing_report  = array("thing"=>$this->thing->thing);
+//        $this->start_time = $this->thing->elapsed_runtime();
+
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
+
+        // Get some stuff from the stack which will be helpful.
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
+//        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+//        $this->word = $thing->container['stack']['word'];
+//        $this->email = $thing->container['stack']['email'];
+
+
+//        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
+//        $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
         $this->value_destroyed = 0;
         $this->things_destroyed = 0;
@@ -43,14 +72,37 @@ class Tick extends Agent {
         $this->variables = new Variables($this->thing, "variables tick " . $this->from);
         $this->current_time = $this->thing->json->time();
 
+
+//        $this->get();
+//        $this->readSubject();
+
+//        if ($this->tick_count > 4) {
+//            $this->tick_count = 1;
+//            $this->doBar();
+//        }
+
+
+//        $this->set();
+
+        //$this->thing_report = $this->respond();
+//        if ($this->agent_input == null) {
+//            $this->respond();
+//        }
+
         $this->thing->json->setField("variables");
+
+        //        $this->thing->json->writeVariable(array("tick",
+        //            "refreshed_at"),  $this->thing->json->time()
+        //            );
+
+
+
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format( $this->thing->elapsed_runtime() - $this->start_time ) . 'ms.' );
+//        $this->thing_report['log'] = $this->thing->log;
+
 
     }
 
-
-    /**
-     *
-     */
     function run() {
 
         $this->tick_count = $this->tick_count + 1;
@@ -62,7 +114,6 @@ class Tick extends Agent {
 
     }
 
-
     /**
      *
      */
@@ -73,7 +124,6 @@ class Tick extends Agent {
         $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ advance bar"));
         $client->doLowBackground("call_agent", $arr);
     }
-
 
     /**
      *
@@ -101,8 +151,15 @@ class Tick extends Agent {
         $this->tick_count = $this->variables->getVariable("count");
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->tick_count . ".", "DEBUG");
-        //        $this->tick_count = $this->tick_count + 1;
+//        $this->tick_count = $this->tick_count + 1;
     }
+
+//function doTick() {
+
+//        $this->tick_count = $this->tick_count + 1;
+
+
+//}
 
     /**
      *
@@ -139,6 +196,7 @@ class Tick extends Agent {
      *
      */
     function readSubject() {
+//$this->doTick();
     }
 
 
@@ -414,9 +472,11 @@ class Timer_tick {
 
     /**
      *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
      * @param unknown $timer_name
      * @param unknown $start_time
-     * @param unknown $max_time   (optional)
+     * @param unknown $max_time    (optional)
      */
     function __construct($timer_name, $start_time, $max_time = 60/7) {
         $this->timer_name = $timer_name;
