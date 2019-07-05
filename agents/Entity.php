@@ -242,7 +242,6 @@ class Entity extends Agent
 
 
         // Otherwise use the found match.
-
         $this->thing = new Thing ($match['uuid']);
 
         $this->uuid = $this->thing->uuid;
@@ -479,12 +478,14 @@ class Entity extends Agent
         $this->entity_agent = $agent_name;
         $this->id = strtolower($this->entity_agent . "_" . $this->thing->nuuid);
 
+        $agent_class_name = strtolower($agent_name);
+
         return;
 
         // So don't have to do this...
         $this->thing->log('Agent "Entity" will make a ' . $agent_name . ".");
 
-        $agent_class_name = strtolower($agent_name);
+//        $agent_class_name = strtolower($agent_name);
 
 
         if ($agent_class_name == null) {
@@ -868,15 +869,13 @@ class Entity extends Agent
      */
     public function respond() {
 
-        // Thing actions
 
+        // Thing actions
         $this->thing->flagGreen();
 
         // Generate email response.
-
         $to = $this->thing->from;
         $from = "entity";
-
 
         //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
@@ -933,6 +932,7 @@ class Entity extends Agent
      */
     public function readSubject() {
 
+
         $this->response = null;
         $this->num_hits = 0;
 
@@ -966,7 +966,6 @@ class Entity extends Agent
         $entity_id = "entity_". $this->requested_agent_name . "_" .$nuuid;
 
         $this->thing->log("entity says entity_id is " . $entity_id . ".");
-
         $this->entity_id = new Variables($this->thing, "variables entity " . $this->from);
 
         if (!isset($this->id) or ($this->id == false)) {
@@ -1002,11 +1001,12 @@ class Entity extends Agent
         // Keyword
         if (count($pieces) == 1) {
             if ($this->input == 'entity') {
-                $this->read();
+//                $this->read();
                 $this->response = "Read entity";
                 return;
             }
         }
+
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {

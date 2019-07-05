@@ -1000,6 +1000,7 @@ echo "place found";
 
             if ($thing == false) {continue;}
             if (!isset($thing->account)) {continue;}
+            if (!isset($thing->account['stack'])) {continue;}
 
             $variables = $thing->account['stack']->json->array_data;
 
