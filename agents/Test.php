@@ -24,6 +24,7 @@ class Test extends Agent {
      * function __construct(Thing $thing, $text = null) {
      */
     function init() {
+
         $this->test= "Development code";
     }
 
@@ -32,7 +33,7 @@ class Test extends Agent {
      *
      */
     function run() {
-        $this->doTest("ping");
+        $this->doTest($this->test_name);
     }
 
 
@@ -110,7 +111,31 @@ class Test extends Agent {
         $this->expected_value = $expected_value;
     }
 
+    function assertTest($input)
+    {
+        $whatIWant = $input;
+        if (($pos = strpos(strtolower($input), "test is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("test is")); 
+        } elseif (($pos = strpos(strtolower($input), "test")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("test")); 
+        }
 
+        $filtered_input = ltrim(strtolower($whatIWant), " ");
+        $this->getTest($filtered_input);
+//        if ($place) {
+//            //true so make a place
+//            $this->makePlace(null, $filtered_input);
+//        }
+    }
+
+    function getTest($filtered_input = null) {
+$this->test_name = $filtered_input;
+if ($filtered_input == null) {return;}
+
+       if ($this->isAgent($filtered_input)) {
+$this->test_name = $filtered_input;
+}
+    }
 
     // -----------------------
 
@@ -170,6 +195,17 @@ class Test extends Agent {
      * @return unknown
      */
     public function readSubject() {
+//echo "meep";
+var_dump($this->input);
+$this->assertTest($this->input);
+var_dump($this->test_name);
+
+//$input = "The quick brown fox jumps over the lazy dog.";
+//$tagger = new \BrillTagger();
+//$tagger->tag($input);
+//echo "foo";
+//var_dump($tagger);
+
     }
 
 

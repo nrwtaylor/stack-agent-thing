@@ -25,6 +25,9 @@ class Proword extends Word
         $this->keyword = "proword";
 
         $this->default_librex_name = "acp125g";
+
+        $this->proword_variables = new Variables($this->thing, "variables proword " . $this->from);
+
     }
 
 
@@ -40,6 +43,11 @@ class Proword extends Word
      *
      */
     function get() {
+
+        $this->previous_librex_name = $this->proword_variables->getVariable("librex");
+//$this->librex_name = $this->previous_librex_name;
+
+
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("proword", "refreshed_at") );
 
@@ -47,6 +55,14 @@ class Proword extends Word
             $time_string = $this->thing->time();
             $this->thing->json->writeVariable( array("proword", "refreshed_at"), $time_string );
         }
+
+//        $this->librex_name = $this->thing->json->readVariable( array("proword", "librex") );
+
+
+        if ((!isset($this->librex_name)) or ($this->librex_name == false)) {
+            $this->librex_name = $this->default_librex_name;
+        }
+
 
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable( array("proword", "reading") );
@@ -57,7 +73,10 @@ class Proword extends Word
      *
      */
     function set() {
-if (!isset($this->has_prowords)) {$this->has_prowords = true;}
+        if (!isset($this->has_prowords)) {$this->has_prowords = true;}
+
+        $this->proword_variables->setVariable("librex", $this->librex_name);
+
         $this->thing->json->writeVariable( array("proword", "reading"), $this->has_prowords );
 
         $this->thing_report['help'] = "Reads the short message for prowords.";
@@ -212,6 +231,11 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
         case 'acp125g':
             $file = $this->resource_path .'proword/prowords.txt';
             break;
+        case 'arrl':
+            // devstack create file
+            $file = $this->resource_path .'proword/arrl.txt';
+            break;
+
         case 'vector':
             $file = $this->resource_path . 'proword/vector.txt';
             break;
@@ -222,7 +246,9 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
         default:
             $file = $this->resource_path . 'proword/prowords.txt';
         }
+
         $this->librex_name = $librex_name;
+
         $this->librex = file_get_contents($file);
 
 
@@ -255,8 +281,6 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
         }
 
         if ($searchfor == null) {return null;}
-
-
         // devstack add \b to Word
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
@@ -306,11 +330,15 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
 
         $dict = explode(",", $text);
         $proword = trim($dict[0]);
-        $words = trim($dict[1]);
+//        $words = trim($dict[1]);
 
+        $words = null;
         $instruction = null;
         $english_phrases = null;
-        $words = trim($dict[1]);
+        if (isset($dict[1])) {$words = trim($dict[1]);}
+        if (!isset($dict[1])) {$words = trim($dict[0]);}
+
+
         if (isset($dict[2])) {$english_phrases = trim($dict[2]);}
         if (isset($dict[3])) {$instruction = trim($dict[3]);}
 
@@ -399,7 +427,9 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
      *
      */
     function makeSMS() {
-        $sms = "PROWORD | ";
+        $sms = "PROWORD ";
+
+        $sms .= strtoupper($this->librex_name) . " | ";
 
         $response_text = $this->response;
         if ($this->response == null) {
@@ -455,14 +485,16 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
      * @return unknown
      */
     public function readSubject() {
+
         $this->response = "";
 
         $this->input = $this->agent_input;
+
         if ($this->agent_input == null) {
             $this->input = $this->subject;
         }
 
-        $librexes = array('acp125g', 'compression');
+        $librexes = array('acp125g', 'compression', 'arrl');
 
         $match = false;
         foreach ($librexes as $librex_candidate) {
@@ -473,12 +505,12 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
         }
 
         if ($match == true) {
-            $librex_name = $librex_candidate;
+            $this->librex_name  = $librex_candidate;
         }
 
-        if (!isset($librex_name)) {$librex_name = $this->default_librex_name;}
-
-        $this->librex_name = $librex_name;
+//        if (!isset($librex_name)) {$librex_name = $this->default_librex_name;}
+//        if (!isset($this->librex_name)) {$librex_name = $this->default_librex_name;}
+//        $this->librex_name = $librex_name;
 
 
         if (strtolower($this->input) == "proword") {
@@ -486,7 +518,6 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
             $this->response = "Retrieved a message with Proword in it.";
             return;
         }
-
         // Ignore "proword is" or "proword"
         $whatIWant = $this->input;
         if (($pos = strpos(strtolower($this->input), "proword is")) !== FALSE) {
@@ -504,18 +535,19 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
 
         $this->has_prowords = $this->isProword($filtered_input);
 
-        $this->getProwords($librex_name, $filtered_input);
+        $this->getProwords($this->librex_name, $filtered_input);
 
         $ngram = new Ngram($this->thing, "ngram");
         $ngram->extractNgrams($filtered_input, 3);
 
         $search_phrases = $ngram->ngrams;
+
         usort($search_phrases, function($a, $b) {
                 return strlen($b) <=> strlen($a);
             });
 
         foreach ($search_phrases as $search_phrase) {
-            $this->getProwords($librex_name, $search_phrase);
+            $this->getProwords($this->librex_name, $search_phrase);
         }
         $this->filtered_input = $filtered_input;
 
@@ -538,12 +570,14 @@ if (!isset($this->has_prowords)) {$this->has_prowords = true;}
 
         // devstack closeness
 
-if (!isset($this->matches)) {$this->response .= "No matches found. ";return;}
+        if (!isset($this->matches)) {$this->response .= "No matches found. ";return;}
 
         $this->results = $this->matches;
         $words = explode(" " , $filtered_input);
 
         $closest = 0;
+
+
         foreach ($this->results as &$result) {
             $closeness = 0;
             foreach ($words as $word) {
@@ -553,7 +587,6 @@ if (!isset($this->matches)) {$this->response .= "No matches found. ";return;}
 
                     // Ignore 1 and 2 letter words
                     if (strlen($word) <= 2) {continue;}
-
                     if ( strtolower( $word) == strtolower($p_word)) {$closeness += 1;}
 
                 }

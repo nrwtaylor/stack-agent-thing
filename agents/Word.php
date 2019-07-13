@@ -114,7 +114,7 @@ class Word extends Agent {
         //echo "\n";
         //                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
         //echo $string . "\n";
-
+        $string = strtolower($string);
         preg_match_all('/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){2,}/', $string, $words);
         //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 )
         $w = $words[0];

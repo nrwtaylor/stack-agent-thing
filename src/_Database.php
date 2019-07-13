@@ -549,7 +549,7 @@ class Database {
         $thingreport['things'] = array();
 
         try{
-//            $value = "%$value%"; // Value to search for in Variables
+            $value = "%$value%"; // Value to search for in Variables
             $query = "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
             // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
             // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";

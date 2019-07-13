@@ -1,5 +1,4 @@
-<?php
-/**
+<?php /**
  * Agent.php
  *
  * @package default
@@ -175,7 +174,6 @@ class Agent {
         $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
 
     }
-
 
     /**
      *
@@ -709,7 +707,6 @@ class Agent {
 
         $input = trim($input);
 
-
         // Okay here check for input
         //echo "input is ".  $input;
 
@@ -836,7 +833,6 @@ class Agent {
 
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
-
         // Added this March 6, 2018.  Testing.
         if ($this->agent_input == null) {
             $arr[] = $this->to;
@@ -845,7 +841,6 @@ class Agent {
         }
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
         //set_error_handler("warning_handler", E_WARNING);
-
         $this->thing->log('Agent "Agent" looking for keyword matches with available agents.', "INFORMATION");
 
         foreach ($arr as $keyword) {
@@ -988,6 +983,8 @@ echo "place found";
 
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
+if (strtolower($this->from) != "null@stackr.ca") {
+
         $entity_list = array("Crow", "Wumpus", "Ant");
         //$agent_name = "entity";
         foreach ($entity_list as $key=>$entity_name) {
@@ -1048,7 +1045,7 @@ echo "place found";
             return $this->thing_report;
         }
 
-
+}
         /*
         $findagent_agent = new FindAgent($this->thing, "crow");
         $things = $findagent_agent->thing_report['things'];
@@ -1282,13 +1279,21 @@ echo "place found";
 
         $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
+        if (isset($chinese_thing->chineses)) {
+$c = new Chinese($this->thing, "chinese");
+$this->thing_report = $c->thing_report;
+//            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
+            return $this->thing_report;
+            //exit();
+
+        }
+
         if ((isset($chinese_thing->chineses)) or (isset($emoji_thing->emojis))) {
             $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
             return $this->thing_report;
             //exit();
 
         }
-
 
 
         // If a chatbot name is seen, respond.

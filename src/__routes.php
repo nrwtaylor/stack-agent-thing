@@ -291,31 +291,12 @@ $data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
 // ---
 
 
-$message_id =  $body['messageId'];
-
-//$id_array = $this->get('messageids');
-//$id_array[] = $message_id;
-//if (!isset($app->nexmo_ids)) {$app->nexmo_ids = "";}
-
-//    if($this->has('ids')) {
-//$inject_text = "merp";
-//    }
-//$c = $app->getContainer();
-//$inject_text = $app->getContainer()['message_ids'];
-////$inject_text = $c['message_ids'];
-
-//$app->nexmo_ids .= $message_id;
-//$inject_text = " " . $app->nexmo_ids;
-//$inject_text = $app->get('ids');
-//$inject_text = implode(" " ,$id_array->id_list);
-$inject_text = "";
-//$inject_text = " " .implode(" " , $id_array);
             $queue = true;
 
             // Flag Red so that the agent handler picks it up.
             if ($queue) {
 
-                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text'] . $inject_text, "body"=>$body));
+                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
 
                 $client= new \GearmanClient();
                 $client->addServer();

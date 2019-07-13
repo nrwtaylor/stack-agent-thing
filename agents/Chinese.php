@@ -20,7 +20,6 @@ class Chinese extends Agent {
      */
     function init() {
 
-
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $string =  $this->subject;
@@ -115,8 +114,6 @@ class Chinese extends Agent {
 
         $this->thingreportChinese();
 
-
-
     }
 
 
@@ -124,9 +121,9 @@ class Chinese extends Agent {
      *
      */
     function thingreportChinese() {
-        $this->makeSMS();
+//        $this->makeSMS();
 
-        $this->thing_report['sms'] = $this->sms_message;
+//        $this->thing_report['sms'] = $this->sms_message;
 
         $this->thing_report['log'] = $this->thing->log;
         //        $this->thing_report['sms'] = $this->sms_message;
@@ -722,7 +719,10 @@ if ($value == 6) {$pointer += 1;}
      *
      */
     function makeSMS() {
-        if (isset($this->word)) {
+
+switch (true) {
+    case (isset($this->word)):
+
             if (!$this->has_chinese_characters) {
 
                 // Assume english to chinese
@@ -735,7 +735,7 @@ if ($value == 6) {$pointer += 1;}
                     $sms .= trim($word["traditional"] . " " . $w) . " / ";
                 }
                 $this->sms_message = $sms;
-                return;
+                break;
 
             }
 
@@ -745,9 +745,9 @@ if ($value == 6) {$pointer += 1;}
             $this->sms_message .= " | ";
 
             $this->sms_message .= implode(" / " , $this->word["english"]);
-        }
 
-        if (isset($this->chinese_from_words)) {
+        break;
+    case (isset($this->chinese_from_words)):
 
             if (count($this->chineses) > 1) {
                 $this->sms_message = "CHINESE CHARACTERS ARE ";
@@ -758,10 +758,11 @@ if ($value == 6) {$pointer += 1;}
             $this->sms_message .= $this->chinese_text;
             $this->sms_message .= " | " . $this->search_words;
 
-            return;
-        }
+  //          return;
 
-        if ((isset($this->chinese)) and ($this->chinese != false)) {
+
+        break;
+    case ((isset($this->chinese)) and ($this->chinese != false)):
 
             if (mb_strlen($this->chinese_text) > 6) {
                 $this->sms_message = "CHINESE";
@@ -797,11 +798,16 @@ if ($value == 6) {$pointer += 1;}
 
             $this->sms_message .= " | Heard " . $this->keyword . ". ";
             $this->sms_message .= " | TEXT ?";
-            return;
-        }
+//            return;
 
+        break;
+    default:
         $this->sms_message = "CHINESE | no match found.";
-        return;
+}
+
+$this->thing_report['sms'] = $this->sms_message;
+
+
     }
 
 

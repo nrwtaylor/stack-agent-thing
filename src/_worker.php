@@ -3,7 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 // Refactor to use GLOBAL variable
 //require $GLOBALS['stack_path'] . "vendor/autoload.php";
-require '/var/www/html/stackr.ca/vendor/autoload.php';
+require '/var/www/stackr.test/vendor/autoload.php';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -69,42 +69,11 @@ function call_agent_function($job)
     echo "worker timestamp " . $thing->microtime(). "\n";
     echo "job timestamp " . $thing->thing->created_at. "\n";
 
-$do_not_respond = false;
-    if (isset($arr['body']['messageId'])) {
-    $message_id = $arr['body']['messageId'];
-    
-
-//$message_id = "170000024b36ffdb";
-$m = $thing->db->variableSearch(null, $message_id);
-
-//if ( (isset($m['things'])) and (count($m['things']) > 0) ) {
-//echo "Found existing message already.";
-//}
-var_dump(count($m['things']));
-if (count($m['things']) > 0) {
-
-echo "Found message already.";
-$do_not_respond = true;
-}
-
-new Messageidentifier($thing, $message_id);
-
-}
-        $thing->db->setFrom($thing->from);
-
-        $thing->json->setField("message0");
-        $thing->json->writeVariable( array("msg") , $arr  );
-
-
-
     //$thing = new Thing($uuid);
-if ($do_not_respond == false) {
-
     echo "worker call agent\n";
     $t = new Agent($thing);
 
 echo "bar";
-}
     if (!isset($t->thing_report['sms'])) {
         echo "WORKER | No SMS message found.". "\n";
     } else {

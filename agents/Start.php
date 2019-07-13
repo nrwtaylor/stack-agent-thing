@@ -122,7 +122,7 @@ class Start {
 
         switch ($this->counter) {
         case false:
-            $sms = "START | Please read our Privacy Policy and text START.";
+            $sms = "START | Carrier SMS rates apply. Read our Privacy Policy " . $this->web_prefix . "privacy.";
             break;
 
         case 1:
