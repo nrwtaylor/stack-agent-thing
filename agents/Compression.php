@@ -47,16 +47,30 @@ class Compression extends Agent
         }
 
         $matches = $this->agent->matches;
-
         $keys = array_map('strlen', array_keys($matches));
         array_multisort($keys, SORT_DESC, $matches);
 
-        foreach ($matches as $agent_name=>$compression) {
+//        foreach ($matches as $agent_name=>$compression) {
+//echo $agent_name . " < " . $compression['words'] . "\n";
 
-            $this->filtered_input = str_ireplace($compression['words'],
-                $agent_name, $this->filtered_input);
+//            $this->filtered_input = str_ireplace($compression['words'],
+//                $agent_name, $this->filtered_input);
+//        }
+
+$text = $this->filtered_input;
+
+        foreach ($matches as $agent_name=>$compression) {
+//echo $text . "\n";
+//echo $agent_name . " < " . $compression['words'] . "\n";
+
+            $text = str_ireplace($compression[0]['words'],
+                $agent_name, $text);
         }
+
+$this->filtered_input = $text;
+
         $this->thing_report['sms'] = "COMPRESSION | " . $this->filtered_input . "";
+//var_dump($this->filtered_input);
     }
 
 

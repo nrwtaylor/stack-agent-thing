@@ -364,7 +364,7 @@ class Variables
         $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variable_set_name, $variable) );
 
 
-$this->thing->log("get " . $this->variables_thing->uuid . " " . $this->variable_set_name ." " . $variable . " " . $this->variables_thing->$variable. ".");
+//$this->thing->log("get " . $this->variables_thing->uuid . " " . $this->variable_set_name ." " . $variable . " " . $this->variables_thing->$variable. ".", DEBUG);
 
 
         // And then load it into the thing
@@ -405,9 +405,10 @@ try {
         // Here we are addressing a fundamental size limitation of any one thing to store all of an identitities variables
         // Especially when those variables have lots of unique identifiers.
 
-
+if ($this->variables_thing->json->write_fail_count > 0) {
 $this->thing->log("overflow " . $this->variables_thing->json->size_overflow . " write_fail_count " . $this->variables_thing->json->write_fail_count . ".");
 $this->thing->log("set " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+}
 
 } catch (Exception $e) {
     echo 'Caught exception: ',  $e->getMessage(), "\n";
@@ -419,10 +420,11 @@ try {
         $this->thing->db->setFrom($this->identity);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
+if ($this->variables_thing->json->write_fail_count > 0) {
 
 $this->thing->log("overflow " . $this->thing->json->size_overflow . " write_fail_count " . $this->thing->json->write_fail_count . ".");
 $this->thing->log("set " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
-
+}
 } catch (Exception $e) {
     echo 'Caught exception: ',  $e->getMessage(), "\n";
 }

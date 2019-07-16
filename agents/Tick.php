@@ -67,10 +67,16 @@ class Tick extends Agent {
      *
      */
     function doBar() {
+
+//$thing = new Thing(null);
+//$thing->Create("null@stackr.ca", "bar", "s/ advance bar");
+//$bar_agent = new Bar($thing, "bar");
+//return;
+
         $client= new \GearmanClient();
         $client->addServer();
-
         $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ advance bar"));
+
         $client->doLowBackground("call_agent", $arr);
     }
 

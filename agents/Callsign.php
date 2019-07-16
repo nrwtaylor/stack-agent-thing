@@ -33,7 +33,6 @@ class Callsign extends Agent {
         $this->thing_report['info'] = "Possibly helpful to station operators.";
     }
 
-
     /**
      *
      */
@@ -56,11 +55,19 @@ class Callsign extends Agent {
         $this->refreshed_at = $callsign->getVariable("refreshed_at");
     }
 
+function run() {
+
+}
 
     /**
      *
      */
     function set() {
+
+$this->makeSMS();
+
+
+//  $this->thing_report['sms'] = strtoupper($this->agent_name) . " | " . $this->response;
 
         $this->thing->json->writeVariable( array("callsign", "reading"), $this->reading );
 
@@ -70,6 +77,7 @@ class Callsign extends Agent {
             $callsign->setVariable("callsign", $this->callsign["callsign"]);
             $callsign->setVariable("refreshed_at", $this->refreshed_at);
         }
+
     }
 
 
@@ -349,7 +357,8 @@ class Callsign extends Agent {
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
+  //  public function respond() {
 
         $this->cost = 100;
 
@@ -401,6 +410,7 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
 
         $sms = "CALLSIGN | " . $r;
         $this->sms_message = $sms;
+$this->thing_report['sms'] = $sms;
         return;
     }
 
@@ -452,12 +462,12 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
      * @return unknown
      */
     public function readSubject() {
-
-        if ($this->agent_input == null) {
-            $this->input = strtolower($this->subject);
-        } else {
-            $this->input = strtolower($this->agent_input);
-        }
+//        if ($this->agent_input == null) {
+//            $this->input = strtolower($this->subject);
+//        } else {
+//            $this->input = strtolower($this->agent_input);
+//        }
+//var_dump($this->input);
 
 
         $prefix = 'callsign';
@@ -486,7 +496,6 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
 
         }
 
-
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -494,7 +503,6 @@ $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
                     switch ($piece) {
 
                     case 'is':
-
                         $this->assertCallsign(strtolower($this->input));
 
                         if (empty($this->callsign)) {

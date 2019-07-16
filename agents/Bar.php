@@ -11,6 +11,7 @@ class Bar extends Agent
 {
     public function init()
     {
+echo "init\n";
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
         $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
@@ -40,6 +41,7 @@ class Bar extends Agent
     public function countBar()
     {
         $this->bar_count += 1;
+echo $this->bar_count . "\n";
     }
 
     function respond()
@@ -151,17 +153,12 @@ class Bar extends Agent
 
             $client= new \GearmanClient();
             $client->addServer();
-                //$client->doNormal("call_agent", $arr);
             $client->doLowBackground("call_agent", $arr);
 
-
-            //$thing = new Thing(null);
-            //$thing->Create(null,"damage", 's/ damage 10000');
-            //$damage= new Damage($thing, 'damage 10000);
-
             $this->response .= "Damage. ";
-
         }
+
+
 
 
     }

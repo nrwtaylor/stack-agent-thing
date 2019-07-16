@@ -56,6 +56,7 @@ class Queenelizabethpark extends Agent
 //$this->getBottomlesspits();
 
 $this->doMap();
+$this->makeSMS();
     }
 
 
@@ -186,14 +187,14 @@ $this->doMap();
         $test_message .= "</b><p>";
 
         //$test_message .= "".  nl2br($this->sms_message);
-        $test_message .= "YOUR CHOICES ARE";
+        $test_message .= "YOUR CHOICE IS FIND THE BEARS. OR FIND THE PICNICS.";
         $test_message .= "<p>";
 
 
         $test_message .= "PDF ";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/wumpus.pdf';
-        $test_message .= '<a href="' . $link . '">wumpus.pdf</a>';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/queenelizabethpark.pdf';
+        $test_message .= '<a href="' . $link . '">queenelizabethpark.pdf</a>';
         //$web .= " | ";
 
 
@@ -323,8 +324,8 @@ function doMap() {
     public function readSubject() {
         $this->response = null;
 
-        $input = strtolower($this->subject);
-
+//        $input = strtolower($this->subject);
+$input = strtolower($this->input);
         // Accept wumpus commands
         $this->keywords = array("teleport", "look", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right", "wumpus", "meep", "thing", "start", "meep", "spawn");
 
