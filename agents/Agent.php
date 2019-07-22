@@ -288,7 +288,13 @@ if (!isset($this->thing_report['sms'])) {
     if (isset($this->sms_message)) {$this->thing_report['sms'] = $this->sms_message;}
 
 if (!isset($this->thing_report['sms'])) {
-    $sms = strtoupper($this->agent_name) . " | " . $this->response;
+    $sms = strtoupper($this->agent_name);
+
+if ($this->response == "") {$sms .= " >";} else {
+ $sms .= " | " . $this->response;
+}
+
+
     $this->thing_report['sms'] = $sms;
 }
 
@@ -412,11 +418,17 @@ if (!isset($this->sms_message)) {
         //            $this->input = strtolower($this->subject);
         //        }
 
+//$i = $this->subject;
+
+
 if ($text == null) {$text = $this->subject;} // Always.
 
 if (isset($this->filtered_input)) {$text = $this->filtered_input;}
 
 if (isset($this->translated_input)) {$text = $this->translated_input;}
+
+
+
 
 
         switch (true) {
@@ -432,6 +444,18 @@ if (isset($this->translated_input)) {$text = $this->translated_input;}
         default:
             $this->input = strtolower($this->agent_input);
         }
+
+
+
+       $whatIWant = $this->input;
+        if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        }
+$this->input = trim($whatIWant);
+
+
 
 
         $this->readSubject();
@@ -777,6 +801,7 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
+//var_dump($input);
         $compression_thing = new Compression($this->thing, $input);
         if (isset($compression_thing->filtered_input)) {
             // Compressions found.
@@ -804,7 +829,7 @@ if ( strtolower( substr($input,0,2)) != "s/") {
         // Where is input routed to?
         $input_thing = new Input($this->thing, "input");
 
-var_dump($input);
+//var_dump($input);
 
         if ($input_thing->input_agent != null) {$input = $input_thing->input_agent . " " . $input;}
 

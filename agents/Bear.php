@@ -46,7 +46,7 @@ class Bear extends Agent {
         $this->thing->flagGreen();
 
         $to = $this->thing->from;
-        $from = "ranger";
+        $from = "bear";
 
         $this->makeSMS();
         $this->makeChoices();
@@ -87,14 +87,70 @@ class Bear extends Agent {
     function doBear($text = null) {
         // Yawn.
 
-//        $this->getNegativeTime();
+        // Wake up. It's not as cold.
+
+//        $whatIWant = $this->input;
+//        if (($pos = strpos(strtolower($this->input), "\@ednabot")) !== FALSE) { 
+//            $whatIWant = substr(strtolower($this->input), $pos+strlen("\@ednabot")); 
+//        } elseif (($pos = strpos(strtolower($this->input), "\@ednabot")) !== FALSE) { 
+//            $whatIWant = substr(strtolower($this->input), $pos+strlen("\@ednabot")); 
+//        }
+//$this->input = $whatIWant;
+
+
+if ( ( strtolower($text) != "bear") ) {
+    $this->bear_message = $this->bear_response;
+$this->response = $this->bear_response;
+return;
+}
 
         if ($this->agent_input == null) {
-            $array = array('Find the picanic(s). There is at least one picnic basket broadcasting on 146.580. Contact VE7RVF control for help and support.');
+
+// Simple.
+//            $array = array('Find the picanic(s). There is at least one picnic basket broadcasting on 146.580. Contact VE7RVF control for help and support.');
+
+// But bears like variety.
+
+            $array = array('Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). A picanic has been heard on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). A picnicker is broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). The camper is broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Amateur call tagged CAMPER is broadcasting on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). There has been a picnic beaconing on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Use the proword NO PLAY during games for real things. Contact VE7RVF control for help and support.',
+'Find the picanic(s). A pic-a-nic has been heard on 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). A picnic has been heard on Simplex 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). A picnic has been heard on Amateur Radio Service Simplex 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). A picnic has been heard on Amateur Radio Service Simplex 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Listen to 146.580. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Bear query Ginko Yurishiro. I SPELL. GOLF INDIA ETC. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Bear query Kozlov Leifonovich Grebnev. I SPELL. KILO OSCAR ZULU ETC. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Bear query Vladimir Goudenov Grizzlikof. I SPELL. VICTOR LIMA ETC. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Bear query Herbert Percival. I SPELL. HOTEL ECHO ROMEO ETC. Contact VE7RVF control for help and support.',
+'Find the picanic(s). Let control know that you might be Iorek Byrnison. I SPELL. INDIA OSCAR ROMEO ETC. Contact VE7RVF control for help and support.'
+);
+
+// Please help me understand how to use these words.
+// Halkomelem
+// s.pέ:θ
+// x̌əyƛ̕έls
+// k̕ʷí:cəl
+// s.péʔeθ
+// Moksgm'ol
+
             $k = array_rand($array);
             $v = $array[$k];
 
+
+            // Say what the bear picked.
+
             $this->response = $v;
+
+            // Bear goes back to sleep.
             $this->bear_message = $this->response;
         } else {
             $this->bear_message = $this->agent_input;
@@ -110,7 +166,59 @@ class Bear extends Agent {
      */
     public function readSubject() {
 
-        $this->doBear($this->input);
+//var_dump($this->input);
+//        $this->doBear($this->input);
+
+$t = new Compression($this->thing, "compression bear");
+
+
+$i = $this->input;
+
+        $whatIWant = $this->input;
+        if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        }
+$i = trim($whatIWant);
+var_dump($i);
+$bear_name = "ted";
+$bear_response = "Quiet.";
+$min_lev = 1e99;
+foreach($t->agent->matches as $type=>$bears) {
+shuffle($bears);
+foreach($bears as $key=>$value) {
+
+$bear_text = $value['proword']. " " .$value['words'] . "\n";
+
+$lev = levenshtein($i, $bear_text);
+//$lev = levenshtein($this->input, $bear_text);
+if ($lev < $min_lev) {$min_lev = $lev;
+$bear_name = $value['words'];
+$bear_response = ucwords($value['words']) . " is a " . $value['proword'] . ".";
+}
+
+}
+}
+
+//if (strtolower($bear_name) == strtolower($this->input)) {
+if (stripos($i, $bear_name) !== false) {
+//if (stripos($this->input, $bear_name) !== false) {
+$bear_response = "Found bear. ". $bear_response;
+
+} else {
+
+//$bear_response = "Did not find bear. ". $bear_response;
+
+
+}
+
+$this->bear_response = $bear_response;
+var_dump($this->bear_response);
+//var_dump($bear_response);
+
+//        $this->doBear($this->input);
+        $this->doBear($i);
         return false;
     }
 
