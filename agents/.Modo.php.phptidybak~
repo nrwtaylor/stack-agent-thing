@@ -40,15 +40,11 @@ class Modo extends Agent
     }
 
 
-    /**
-     *
-     */
-    function run() {
+function run() {
 
-        $this->makeSms();
+$this->makeSms();
 
-    }
-
+}
 
     /**
      *
@@ -189,33 +185,32 @@ class Modo extends Agent
     }
 
 
-    /**
-     * Calculates the great-circle distance between two points, with
-     * the Haversine formula.
-     *
-     * @param float   $latitudeFrom  Latitude of start point in [deg decimal]
-     * @param float   $longitudeFrom Longitude of start point in [deg decimal]
-     * @param float   $latitudeTo    Latitude of target point in [deg decimal]
-     * @param float   $longitudeTo   Longitude of target point in [deg decimal]
-     * @param float   $earthRadius   (optional) Mean earth radius in [m]
-     * @return float Distance between points in [m] (same as earthRadius)
-     */
-    function haversineGreatCircleDistance(
-        $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000) {
-        // convert from degrees to radians
-        $latFrom = deg2rad($latitudeFrom);
-        $lonFrom = deg2rad($longitudeFrom);
-        $latTo = deg2rad($latitudeTo);
-        $lonTo = deg2rad($longitudeTo);
+/**
+ * Calculates the great-circle distance between two points, with
+ * the Haversine formula.
+ * @param float $latitudeFrom Latitude of start point in [deg decimal]
+ * @param float $longitudeFrom Longitude of start point in [deg decimal]
+ * @param float $latitudeTo Latitude of target point in [deg decimal]
+ * @param float $longitudeTo Longitude of target point in [deg decimal]
+ * @param float $earthRadius Mean earth radius in [m]
+ * @return float Distance between points in [m] (same as earthRadius)
+ */
+function haversineGreatCircleDistance(
+  $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
+{
+  // convert from degrees to radians
+  $latFrom = deg2rad($latitudeFrom);
+  $lonFrom = deg2rad($longitudeFrom);
+  $latTo = deg2rad($latitudeTo);
+  $lonTo = deg2rad($longitudeTo);
 
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
+  $latDelta = $latTo - $latFrom;
+  $lonDelta = $lonTo - $lonFrom;
 
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-                cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-        return $angle * $earthRadius;
-    }
-
+  $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+    cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+  return $angle * $earthRadius;
+}
 
     /**
      *
@@ -242,11 +237,11 @@ class Modo extends Agent
                 $latitude = $location['latitude'];
                 $longitude = $location['longitude'];
 
-                //                $distance = pow(( pow($latitude - $search_latitude, 2) + pow($longitude - $search_longitude, 2)), 0.5);
-
-                $distance = $this->haversineGreatCircleDistance($latitude, $longitude, $search_latitude, $search_longitude);
-                $car['distance'] = $distance;
-                if ($distance < $min_distance) {
+//                $distance = pow(( pow($latitude - $search_latitude, 2) + pow($longitude - $search_longitude, 2)), 0.5);
+ 
+$distance = $this->haversineGreatCircleDistance($latitude, $longitude, $search_latitude, $search_longitude);
+$car['distance'] = $distance;
+               if ($distance < $min_distance) {
                     $min_distance = $distance;
                     echo $min_distance . "\n";
                     $this->nearest_cars[$distance] = $car;
@@ -501,8 +496,8 @@ class Modo extends Agent
         $l = "";
         foreach ($car["locations"] as $i=>$location) {
 
-            //var_dump($location);
-            //            $l .= $location['neighbourhood'] . " ";
+//var_dump($location);
+//            $l .= $location['neighbourhood'] . " ";
             $l .= $location['description'] . " ";
 
         }
@@ -516,8 +511,8 @@ class Modo extends Agent
         }
         $simple_date_text = $month_name . " " . $car_date['day'];
 
-        //        $car_string = ""  . $simple_date_text;
-        $car_string = "";
+//        $car_string = ""  . $simple_date_text;
+$car_string = "";
         $car_string .= $l . " "  . $car['description'] . " ";
 
         return $car_string;
@@ -566,31 +561,31 @@ class Modo extends Agent
             $sms .= " | " .$car_html;
 
 
-            //          if ($this->available_cars_count != $this->cars_count) {
-            //            $sms .= $this->cars_count. " retrieved";
-            //      }
+  //          if ($this->available_cars_count != $this->cars_count) {
+    //            $sms .= $this->cars_count. " retrieved";
+      //      }
 
             break;
         default:
-            //            $sms .= " "  . $this->available_cars_count . ' cars ';
+//            $sms .= " "  . $this->available_cars_count . ' cars ';
             if ($this->available_cars_count != $this->cars_count) {
                 $sms .= $this->cars_count. " retrieved";
             }
 
             $car = reset($this->cars);
-            //          $car_html = $this->carString($car);
-            $sms .= " | " . $this->response;
+  //          $car_html = $this->carString($car);
+        $sms .= " | " . $this->response;
 
-            //            $sms .= " | " . $car_html;
+//            $sms .= " | " . $car_html;
 
 
         }
 
-        //$this->response = str_replace("  ", " ", $this->response);
+//$this->response = str_replace("  ", " ", $this->response);
 
-        //        $sms .= " | " . $this->response;
+//        $sms .= " | " . $this->response;
 
-        $sms = str_replace("  ", " ", $sms);
+$sms = str_replace("  ", " ", $sms);
 
 
         $this->sms_message = $sms;
@@ -841,9 +836,9 @@ class Modo extends Agent
 
             $this->nearestCar($best_match['coordinates']);
 
-            foreach (array_reverse($this->nearest_cars) as $i=>$nearest_car) {
-                $this->response .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'], 0) . "m)". " / ";
-            }
+foreach(array_reverse($this->nearest_cars) as $i=>$nearest_car) {
+            $this->response .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'],0) . "m)". " / ";
+}
 
 
             $this->response .= "Asked Modo about " . $this->search_words . " cars. ";
