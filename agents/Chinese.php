@@ -985,7 +985,7 @@ $this->thing_report['sms'] = $this->sms_message;
             $this->word = $this->words[0];
         }
 
-        $this->response = "Found English translation.";
+        $this->response = "No response.";
         $this->filtered_input = $filtered_input;
         return;
 

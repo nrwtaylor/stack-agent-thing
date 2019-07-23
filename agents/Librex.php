@@ -308,6 +308,7 @@ class Librex extends Word
         if ($searchfor == null) {return null;}
         // devstack add \b to Word
         $pattern = preg_quote($searchfor, '/');
+
         // finalise the regular expression, matching the whole line
         //        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
         $pattern = "/^.*\b". strtolower($pattern). "\b.*\$/m";
@@ -353,6 +354,18 @@ class Librex extends Word
         return $dict;
     }
 
+function hasUrl($text) {
+
+    $reg_exUrl = "/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))/";
+
+    // Check if there is a url in the text
+    if(preg_match($reg_exUrl, $text, $url)) {
+//echo "found link\n";
+return true;
+    }
+return false;
+
+}
 
     /**
      *
@@ -362,7 +375,13 @@ class Librex extends Word
     private function parseMatch($test) {
         if (mb_substr($test, 0, 1) == "#") {$word = false; return $word;}
 
-        $dict = explode("/", $test);
+$dict = explode("/", $test);
+if ($this->hasUrl($test)) {
+    $dict[0] = $test;
+//var_dump($dict);
+}
+
+//        $dict = explode("/", $test);
 
         if ( (!isset($dict[1])) or (!isset($dict[2])) ) {
         }
@@ -722,7 +741,6 @@ return;
 
 
 
-
 //$this->getMatch($filtered_input);
 $this->getMatch($filtered_input);
 
@@ -731,27 +749,13 @@ $this->getMatch($filtered_input);
     }
 
 function getMatch($text) {
-//$text = "pond"; //test
-//var_dump($this->librex_name);
+
 $this->getMatches($this->librex_name, $text);
 
 //var_dump($text);
 $filtered_input = trim($text);
 
       $this->results = $this->matches;
-//$r = reset($this->matches); 
-//var_dump($r);
-//$this->best_match = $r;
-//$this->response = "Merp";
-//return;
-
-//var_dump($this->matches);
-///
-
-//var_dump($this->results);
-
-///
-//        var_dump($this->results);
         $words = explode(" " , $filtered_input);
 
         $closest = 0;
@@ -901,3 +905,4 @@ $this->best_match = $best_proword;
 }
 
 }
+
