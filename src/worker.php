@@ -105,6 +105,7 @@ if ($do_not_respond == false) {
 
 echo "bar";
 }
+
     if (!isset($t->thing_report['sms'])) {
         echo "WORKER | No SMS message found.". "\n";
     } else {

@@ -396,7 +396,9 @@ class Choice {
 			foreach ($choice_list as $item) {
 				//$url = "http://project-stack.dev:8080/public/thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
 				$word = $item['choice'];
-				$url = $this->web_prefix . "thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
+				//$url = $this->web_prefix . "thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
+
+                $url = $this->web_prefix . "thing/".$item['uuid']."/".rawurlencode($item['choice']);
 
 				$pos = strrpos($url, '/');
 				$to = $pos === false ? $url : substr($url, $pos + 1);
@@ -460,8 +462,8 @@ class Choice {
 	return $links;
 	}
 
-	function makeButton($url_link, $word = null) {
-
+	function makeButton($url_link, $word = null)
+    {
 		$html_button = '
 			<td style="background-color: #0066dd; font-family: \'Helvetica Neue\',Arial,sans-serif;
 			font-size: 14px; 

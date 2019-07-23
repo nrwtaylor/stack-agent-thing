@@ -307,10 +307,7 @@ class Librex extends Word
 
         if ($searchfor == null) {return null;}
         // devstack add \b to Word
-
-
         $pattern = preg_quote($searchfor, '/');
-
 
         // finalise the regular expression, matching the whole line
         //        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
@@ -743,7 +740,6 @@ return;
 
 
 
-echo "filtered_input " . $filtered_input . "\n";
 
 //$this->getMatch($filtered_input);
 $this->getMatch($filtered_input);
@@ -751,64 +747,15 @@ $this->getMatch($filtered_input);
 
 
     }
+
 function getMatch($text) {
-//var_dump($text);
-//exit();
-//$text = "pond"; //test
-//var_dump($this->librex_name);
+
 $this->getMatches($this->librex_name, $text);
 
 //var_dump($text);
 $filtered_input = trim($text);
 
-
       $this->results = $this->matches;
-/*
-$this->results = array();
-
-foreach($this->matches as $proword=>$matches) {
-var_dump($matches);
-foreach ($matches as $index=>$match) {
-
-if (is_string($match)) {
-//$match = $matches;
-var_dump($matches);
-var_dump($filtered_input);
-if (stripos(implode($matches," "), $filtered_input) !== false) {
-    $this->results[$proword] = $match;
-}
-continue;
-}
-var_dump($match);
-var_dump($filtered_input);
-if (stripos(implode(" ",$match), $filtered_input) !== false) {
-
-echo "found " . $text . "\n";
-    $this->results[$proword][] = $match;
-}
-}
-
-}
-
-var_dump($this->results[$text]);
-*/
-
-//var_dump($this->results);
-//exit();
-
-//$r = reset($this->matches); 
-//var_dump($r);
-//$this->best_match = $r;
-//$this->response = "Merp";
-//return;
-
-//var_dump($this->matches);
-///
-
-//var_dump($this->results);
-
-///
-//        var_dump($this->results);
         $words = explode(" " , $filtered_input);
 
         $closest = 0;
@@ -959,51 +906,3 @@ $this->best_match = $best_proword;
 
 }
 
-/*
-WASHROOMS, Toilet
-WASHROOMS, Aseos
-# Observed in use http://www.toiletinspector.com/toilet-names
-WASHROOMS, Lavatory
-WASHROOMS, Loo
-WASHROOMS, WC
-WASHROOMS, W.C.
-WASHROOMS, Jacks
-WASHROOMS, House of Office
-WASHROOMS, Khazi
-WASHROOMS, Bog
-WASHROOMS, Dunny
-WASHROOMS, Netty
-WASHROOMS, Shithouse
-WASHROOMS, John
-WASHROOMS, Privy
-WASHROOMS, Crapper
-WASHROOMS, Vin
-WASHROOMS, Latrine
-WASHROOMS, Comfort Room
-# https://english.stackexchange.com/questions/8281/washroom-restroom-bathroom-lavatory-toilet-or-toilet-r$
-WASHROOMS, washroom
-WASHROOMS, restroom
-WASHROOMS, bathroom
-WASHROOMS, lavatory
-WASHROOMS, toilet
-WASHROOMS, toilet room
-WASHROOMS, ladies' room
-WASHROOMS, women's room
-WASHROOMS, gentlemen's room
-WASHROOMS, men's room
-WASHROOMS, gentlemen's (or ladies') room
-WASHROOMS, men's (or women's) room
-WASHROOMS, ladies's (or gentlemen') room
-WASHROOMS, women's (or men's) room
-WASHROOMS, facility
-WASHROOMS, john
-WASHROOMS, jakes
-WASHROOMS, crapper
-WASHROOMS, shitter
-WASHROOMS, latrine
-WASHROOMS, loo
-WASHROOMS, water closet
-#
-WASHROOMS, john
-
-*/
