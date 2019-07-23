@@ -26,6 +26,7 @@ class Modo extends Agent
      *
      */
     function init() {
+$this->agent_name = "modo";
         $this->keyword = "modo";
         $this->test= "Development code"; // Always
 
@@ -35,7 +36,7 @@ class Modo extends Agent
 
         $this->variables_agent = new Variables($this->thing, "variables " . "modo" . " " . $this->from);
 
-        $this->getModo();
+     //   $this->getModo();
 
     }
 
@@ -45,9 +46,18 @@ class Modo extends Agent
      */
     function run() {
 
-        $this->makeSms();
-
+        $this->make();
     }
+
+function make(){
+
+        $this->makeMessage();
+        $this->makeSms();
+        $this->makeWeb();
+        $this->thingreportModo();
+
+
+}
 
 
     /**
@@ -130,6 +140,30 @@ class Modo extends Agent
         return false;
     }
 
+    public function respondResponse() {
+        $this->thing->flagGreen();
+
+        // This should be the code to handle non-matching responses.
+
+        $to = $this->thing->from;
+        $from = "modo";
+
+        //$this->makeMessage();
+        //$this->makeSms();
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
+
+        //$this->makeWeb();
+
+
+        $this->thing_report['sms'] = $this->sms_message;
+
+        return $this->thing_report;
+    }
+
 
     /**
      *
@@ -195,10 +229,8 @@ if (!isset($this->cars)) {$this->getCars();}
 $available_cars_count = 0;
 $in_use_count =0;
 $x = strtotime($this->current_time);
-//var_dump($x);
 foreach($this->cars as $modo_id=>$car) {
 
-//var_dump($car);
 $available_flag = true;
 foreach($car['locations'] as $i=>$location) {
 
@@ -208,17 +240,17 @@ foreach($car['locations'] as $i=>$location) {
 $start_time = $location['start_time'];
 $end_time = $location['end_time'];
 
-//echo $modo_id . " / " . $x . " / " . $start_time.  " / " . $end_time . " " ;
+echo $modo_id . " / " . $x . " / " . $start_time.  " / " . $end_time . " " ;
 
 if (($start_time != null) and ($start_time < $x) and ($end_time == null)) {$available_flag = false;} // Not available.
 if (($start_time < $x) and ($end_time > $x)) {$available_flag = false;} // Not available.
 
 if($available_flag) {
-//echo "available";
+echo "available";
 } else {$in_use_count += 1; 
-//echo "not available";
+echo "not available";
 }
-//echo " " . "\n";
+echo " " . "\n";
 
 
 
@@ -304,9 +336,30 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
 
         }
         $this->nearest_car = $this->nearest_cars[$min_distance];
-
     }
 
+    /**
+     *
+     * @return unknown
+
+    public function respond() {
+        $this->thing->flagGreen();
+
+        $to = $this->thing->from;
+        $from = "modo";
+
+        $this->makeSMS();
+        $this->makeChoices();
+
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $thing_report['info'] = $message_thing->thing_report['info'] ;
+
+        return $this->thing_report;
+    }
+*/
 
 
     /**
@@ -413,7 +466,6 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
         return;
 
     }
-
 
     /**
      *
@@ -545,11 +597,11 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
      * @return unknown
      */
     public function carString($car) {
+        if ($car == null) {return;}
         if (!is_array($car)) {return;}
         $l = "";
         foreach ($car["locations"] as $i=>$location) {
 
-            //var_dump($location);
             //            $l .= $location['neighbourhood'] . " ";
             $l .= $location['description'] . " ";
 
@@ -577,21 +629,26 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
      *
      */
     public function makeWeb() {
+//var_dump($this->response);
+if (isset($this->html_message)) {return;}
+if (isset($this->nearest_cars)) {echo "nearest";$this->nearestWeb(); return;}
+if (isset($this->matches)) {echo "matches";$this->matchesWeb(); return;}
+
         $html = "<b>MODO</b>";
         $html .= "<p><b>Modo Cars</b>";
 
-        if (!isset($this->events)) {
+        if (!isset($this->cars)) {
             $html .= "<br>No cars found on Modo.";
         } else {
-            foreach ($this->events as $id=>$event) {
-                $event_html = $this->eventString($event);
+            foreach ($this->cars as $id=>$car) {
+                $car_html = $this->carString($car);
 
-                $link = $event['link'];
+                $link = "https://bookit.modo.coop/cars/" .$id;
                 $html_link = '<a href="' . $link . '">';
                 $html_link .= "modo";
                 $html_link .= "</a>";
 
-                $html .= "<p>" . $event_html . " " . $html_link;
+                $html .= "<p>" . $car_html . " " . $html_link;
             }
         }
 
@@ -603,6 +660,10 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
      *
      */
     public function makeSms() {
+if (isset($this->sms_message)) {return;}
+if (isset($this->nearest_cars)) {$this->nearestSms(); return;}
+if (isset($this->matches)) {$this->matchesSms(); return;}
+
         $sms = "MODO";
         switch ($this->cars_count) {
         case 0:
@@ -651,11 +712,13 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
     public function makeMessage() {
         $message = "Modo";
 
-        switch ($this->cars_count) {
-        case 0:
+if (!isset($this->cars_count)) {$this->cars_count = null;}
+
+        switch (true) {
+        case ($this->cars_count == 0):
             $message .= " did not find any events.";
             break;
-        case 1:
+        case ($this->cars_count == 1):
             $car = reset($this->cars);
             $car_html = $this->carString($car);
             $message .= " found "  . $car_html . ".";
@@ -671,10 +734,12 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
     }
 
 
+
     /**
      *
      */
     private function thingreportModo() {
+
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
         $this->thing_report['message'] = $this->message;
@@ -765,7 +830,7 @@ $this->response = $in_use_count . "/" . $total_cars_count . " " .number_format($
 
         $input = $this->input;
 
-
+//var_dump($this->input);
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
@@ -806,16 +871,78 @@ $this->doModo();
 
                 //if ( (isset($this->matches)) and (count($this->matches) == 0)) { $this->response .= "No cars found. ";}
 
+//$this->modoWeb();
+                return;
+            }
+
+            // At this point the Agent has not matched the words against a neighbourhood.
+            // See what best match.
+            // Using the neighbourhood and street address.
+
+//            $this->getLocation($filtered_input);
+
+  //          $geolocation = new Geolocation($this->thing, $filtered_input);
+    //        $best_match = $geolocation->best_matches[0];
+
+
+      //      $this->nearestCar($best_match['coordinates']);
+
+     //       foreach (array_reverse($this->nearest_cars) as $i=>$nearest_car) {
+     //           $this->response .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'], 0) . "m)". " / ";
+     //       }
+
+
+//            $this->getCar($filtered_input);
+//            $this->response .= "Asked Modo about " . $this->search_words . " cars. ";
+//            return false;
+
+           // At this point the Agent has not matched the words against a neighbourhood.
+            // See what best match.
+            // Using the neighbourhood and street address.
+
+            $this->getLocation($filtered_input);
+
+            $geolocation = new Geolocation($this->thing, $filtered_input);
+            $best_match = $geolocation->best_matches[0];
+$this->location_best_match = $best_match;
+if ($best_match == null) {$this->response = 'Place "' . $filtered_input . '" could not be found.'; return;}
+
+            $this->nearestCar($best_match['coordinates']);
+/*
+            foreach (array_reverse($this->nearest_cars) as $i=>$nearest_car) {
+                $this->response .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'], 0) . "m)". " / ";
+            }
+*/
+//$this->nearestSms();
+//$this->response .= $this->sms_message;
+
+            $this->response .= "Asked Modo about " . $this->search_words . " cars. ";
+            return false;
+
+        }
+        $this->response .= "Message not understood";
+        return true;
+
+    }
+
+
+function nearestSms() {
+$sms = "";
+            foreach (array_reverse($this->nearest_cars) as $i=>$nearest_car) {
+                $sms .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'], 0) . "m)". " / ";
+            }
+
+$this->sms_message = $sms;
+
+}
+
+function matchesSms() {
+$response = "";
+
                 // Then sort by the location description
-
-
-                //echo "Found ". $modo_id . " " . $car['description'] . " " .$location['description']. " " . $location['start_time'] ." to " . $location['end_time']. " is " . $location['neighbourhood'] ." " . $location["city"] . " " . $modo_id . "\n" ;
                 $r = "";
-                //$r .= $location['neighbourhood'] ." " . $location[city"] . " - " ;
-
 
                 foreach ($this->matches as $location_name=>$matches) {
-
 
 $arr = explode(" - ",$location_name );
 $city = $arr[0];
@@ -832,16 +959,12 @@ $r2 = "";
 
                         foreach ($car['locations'] as $i=>$location) {
                             if (!isset($location_text)) {$location_text = $location['description'];}
-                            //echo "Found ". $modo_id . " " . $car['description'] . " " .$location['description']. " " . $location['start_time'] ." to " . $location['end_time']. " is " . $location['neighbourhood'] ." " . $location["city"] . " " . $modo_id . "\n" ;
+                            //echo "Found ". $modo_id . " " . $car['description'] . " " .$location['description']. " " . $location['s$
                             $start_time_text = $this->timeString($location['start_time']);
                             $end_time_text = $this->timeString($location['end_time']);
 
-
-                            //                            $r2 .= $location['description'] . " from " . $start_time_text ." to " . $end_time_text . "\n " ;
-                            //  $r2 .= " from " . $start_time_text ." to " . $end_time_text . " " ;
-
                             if (($start_time_text == "X") and ($end_time_text == "X")) {
-                                $r2 .= "available " ;
+                                //$r2 .= "available " ;
                             }
 
                             if (($start_time_text == "X") and ($end_time_text != "X")) {
@@ -856,75 +979,87 @@ $r2 = "";
                                 //    $r2 .= "not availale ";
                             }
 
-
-                            //                            if ($location['description'] != $location_text) {$flag_error = true;}
-
                         }
-
-                        //                        if ($flag_error === true) {$this->response = "No response."; return;}
-
-                        //$r .= $location['neighbourhood'] ." " . $location["city"] . " - " ;
-
-                        //                        $r .= $modo_id . " " . $location_name . " " . $car['description'] . " " .$location['description'] . $r2;
-                        //                        $r .= $modo_id . " " . $location_name . " " . $car['description'] . " "  . $r2;
-                        //                        $r .= $modo_id . " "  . $car['description'] . " "  . $r2;
 
                         $r .= $r2 . $car['description'] . " "  . "[".$modo_id . "] / " ;
 
+
                     }
+$old_r = $r;
 $r .= "\n";
+if (mb_strlen($r) >= 136) {$r = $old_r .= " TEXT WEB"; break;}
 
                 }
-                $this->response .= $r;
-                return;
+
+$this->sms_message = "MODO | " . $r;
+          //      $this->response .= $r;
+
+
+
+}
+
+function nearestWeb() {
+
+        $html = "<b>MODO</b>";
+        $html .= "<p><b>Available Modo Cars</b>";
+
+//var_dump($this->location_best_match);
+
+$html .= "<p>Best match location is " .  $this->location_best_match['description'].". ";
+$html .= "Best match coordinates are (" .  $this->location_best_match['coordinates'][0] . ", " . $this->location_best_match['coordinates'][1].").";
+$html .= "<p>";
+$count = 0;
+        if (!isset($this->nearest_cars)) {
+            $html .= "<br>No nearest cars found on Modo.";
+        } else {
+            foreach ($this->cars as $id=>$car) {
+$count += 1;
+if ($count > 10) {break;}
+                $car_html = $this->carString($car);
+
+                $link = "https://bookit.modo.coop/cars/" .$id;
+                $html_link = '<a href="' . $link . '">';
+                $html_link .= "modo";
+                $html_link .= "</a>";
+
+                $html .= "<p>" . $car_html . " " . $html_link;
             }
-
-            // At this point the Agent has not matched the words against a neighbourhood.
-            // See what best match.
-            // Using the neighbourhood and street address.
-
-            $this->getLocation($filtered_input);
-
-            $geolocation = new Geolocation($this->thing, $filtered_input);
-            $best_match = $geolocation->best_matches[0];
-
-
-            $this->nearestCar($best_match['coordinates']);
-
-            foreach (array_reverse($this->nearest_cars) as $i=>$nearest_car) {
-                $this->response .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'], 0) . "m)". " / ";
-            }
-
-
-//            $this->getCar($filtered_input);
-//            $this->response .= "Asked Modo about " . $this->search_words . " cars. ";
-//            return false;
-
-           // At this point the Agent has not matched the words against a neighbourhood.
-            // See what best match.
-            // Using the neighbourhood and street address.
-
-            $this->getLocation($filtered_input);
-
-            $geolocation = new Geolocation($this->thing, $filtered_input);
-            $best_match = $geolocation->best_matches[0];
-
-
-            $this->nearestCar($best_match['coordinates']);
-
-            foreach (array_reverse($this->nearest_cars) as $i=>$nearest_car) {
-                $this->response .= $this->carString($nearest_car) . " (" . number_format($nearest_car['distance'], 0) . "m)". " / ";
-            }
-
-
-            $this->response .= "Asked Modo about " . $this->search_words . " cars. ";
-            return false;
-
         }
-        $this->response .= "Message not understood";
-        return true;
 
-    }
+        $this->html_message = $html;
+
+
+}
+
+function matchesWeb() {
+
+        $html = "<b>MODO</b>";
+        $html .= "<p><b>Available Modo Cars</b>";
+
+$html .= '<p>Matched neighbourbood "' .  $this->neighbourhood .'". ';
+$html .= "<p>";
+//var_dump($this->matches);
+        if (!isset($this->matches)) {
+            $html .= "<br>No matching cars found on Modo.";
+        } else {
+            foreach ($this->matches as $street_address=>$cars) {
+foreach($cars as $id=>$car) {
+                $car_html = $this->carString($car);
+
+                $link = "https://bookit.modo.coop/cars/" .$id;
+                $html_link = '<a href="' . $link . '">';
+                $html_link .= "modo";
+                $html_link .= "</a>";
+
+                $html .= "<p>" . $car_html . " " . $html_link;
+            }
+        }
+}
+
+        $this->html_message = $html;
+
+
+}
 
 
 }

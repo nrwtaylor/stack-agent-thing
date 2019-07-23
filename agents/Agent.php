@@ -96,6 +96,8 @@ public $input;
 
         $this->run();
 
+        $this->make();
+
         $this->set();
 
         if ($this->agent_input == null) {
@@ -142,6 +144,11 @@ public $input;
     public function set() {
     }
 
+    public function make() {
+        $this->makeSMS();
+        $this->makeWeb();
+
+    }
 
     /**
      *
@@ -256,18 +263,24 @@ public $input;
      *
      */
     public function respondResponse() {
-        $this->makeSMS();
-
+//        $this->makeSMS();
+//        $this->makeWeb();
 // Could make this random...
 $agent_flag = false;
 
+
 if ($agent_flag == true) {
+//        if ($this->agent_input == null) {
+  //          $this->respond();
+  //      }
+
 
 if (!isset($this->thing_report['sms'])) {
     $this->thing_report['sms'] = "AGENT | Standby.";
 }
 
     $message_thing = new Message($this->thing, $this->thing_report);
+    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 }
 
     }
@@ -277,6 +290,11 @@ private function makeResponse() {
 if (isset($this->response)) {return;}
 
 $this->response = "Standby.";
+
+}
+
+    private function makeWeb() {
+
 
 }
 
