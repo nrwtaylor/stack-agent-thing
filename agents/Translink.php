@@ -468,7 +468,8 @@ exit();
 
     function makeTxt()
     {
-        if (!isset($this->events)) {$this->getEvents();}
+return;
+        //if (!isset($this->events)) {$this->getEvents();}
 
 $this->routes = array();
         $routes = $this->nextGtfs("routes");
@@ -926,9 +927,9 @@ ksort($lines);
 		try {
 
 			$file = 'http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
-
 //			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
 //var_dump($web_input);
+//exit();
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $file);
@@ -937,8 +938,12 @@ ksort($lines);
 			curl_close($ch);
 
 			$web_input = $xmldata;
-
 //var_dump($web_input);
+if ($web_input == "") {
+            $web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
+}
+
+
 			$this->error = "";
 
 		} catch (Exception $e) {
@@ -951,7 +956,6 @@ ksort($lines);
 		}
 
 		//echo $web_input;
-
 
                 $xml = simplexml_load_string($web_input);  
                 $t = $xml->NextBus;

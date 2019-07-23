@@ -15,7 +15,7 @@ error_reporting(-1);
 
 class Agent {
 
-
+public $input;
     /**
      *
      * @param Thing   $thing
@@ -110,6 +110,11 @@ class Agent {
 
         //$this->thing_report = $thing_report;
 
+  //      $message_thing = new Message($this->thing, $this->thing_report);
+        //$thing_report['info'] = $message_thing->thing_report['info'];
+
+//var_dump($this->thing_report);
+
         $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
@@ -142,6 +147,9 @@ class Agent {
      *
      */
     public function run() {
+
+        //$message_thing = new Message($this->thing, $this->thing_report);
+        //$thing_report['info'] = $message_thing->thing_report['info'];
     }
 
 
@@ -230,6 +238,7 @@ class Agent {
         // Return false ie (false/null) when variable
         // setting is found.
         return false;
+
     }
 
 
@@ -247,8 +256,56 @@ class Agent {
      *
      */
     public function respondResponse() {
+        $this->makeSMS();
+
+// Could make this random...
+$agent_flag = false;
+
+if ($agent_flag == true) {
+
+if (!isset($this->thing_report['sms'])) {
+    $this->thing_report['sms'] = "AGENT | Standby.";
+}
+
+    $message_thing = new Message($this->thing, $this->thing_report);
+}
+
     }
 
+private function makeResponse() {
+
+if (isset($this->response)) {return;}
+
+$this->response = "Standby.";
+
+}
+
+    private function makeSMS() {
+$this->makeResponse();
+// So this is the response if nothing else has responded.
+
+if (!isset($this->thing_report['sms'])) { 
+    if (isset($this->sms_message)) {$this->thing_report['sms'] = $this->sms_message;}
+
+if (!isset($this->thing_report['sms'])) {
+    $sms = strtoupper($this->agent_name);
+
+if ($this->response == "") {$sms .= " >";} else {
+ $sms .= " | " . $this->response;
+}
+
+
+    $this->thing_report['sms'] = $sms;
+}
+
+if (!isset($this->sms_message)) {
+    $this->sms_message = $this->thing_report['sms'];
+}
+
+
+}
+
+    }
 
 
     /**
@@ -351,7 +408,7 @@ class Agent {
     /**
      *
      */
-    public function read() {
+    private function read($text = null) {
         //        if (strtolower($this->agent_input) != $agent_name) {
         //            // If agent input has been provided then
         // ignore the subject.
@@ -361,15 +418,46 @@ class Agent {
         //            $this->input = strtolower($this->subject);
         //        }
 
+//$i = $this->subject;
+
+
+if ($text == null) {$text = $this->subject;} // Always.
+
+if (isset($this->filtered_input)) {$text = $this->filtered_input;}
+
+if (isset($this->translated_input)) {$text = $this->translated_input;}
+
+
+
+
+
         switch (true) {
+        case (isset($this->input)) :
+
+            break;
+
         case ($this->agent_input == null):
         case (strtolower($this->agent_input) == "extract"):
         case (strtolower($this->agent_input) == strtolower($this->agent_name)) :
-            $this->input = strtolower($this->subject);
+            $this->input = strtolower($text);
             break;
         default:
             $this->input = strtolower($this->agent_input);
         }
+
+
+
+       $whatIWant = $this->input;
+        if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        }
+$this->input = trim($whatIWant);
+
+
+
+
         $this->readSubject();
     }
 
@@ -379,21 +467,35 @@ class Agent {
      * @param unknown $agent_class_name (optional)
      * @return unknown
      */
-    public function getAgent($agent_class_name = null) {
+    public function getAgent($agent_class_name = null, $agent_input = null) {
 
         try {
 
             $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
             $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
+
+if (isset($this->input)) {$this->thing->subject = $this->input;}
+
+//$this->thing->subject = $this->input;
+
             $agent = new $agent_namespace_name($this->thing);
+
+
+//var_dump($agent->thing_report);
+
+//if (!isset($agent->thing_report['sms'])) {
+//
+//$agent->thing_report['sms'] = "Merp";
+//$agent->thing_report['response'] = "Merpity";
+//}
 
             // If the agent returns true it states it's response is not to be used.
             if ((isset($agent->response)) and ($agent->response === true)) {
                 throw new Exception("Flagged true.");
             }
             $this->thing_report = $agent->thing_report;
-
+//var_dump($this->thing_report['sms']);
             $this->agent = $agent;
 
 
@@ -699,6 +801,7 @@ class Agent {
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
+//var_dump($input);
         $compression_thing = new Compression($this->thing, $input);
         if (isset($compression_thing->filtered_input)) {
             // Compressions found.
@@ -706,6 +809,10 @@ class Agent {
         }
 
         $input = trim($input);
+$this->input = $input;
+
+// Check if it is a command (starts with s slash)
+if ( strtolower( substr($input,0,2)) != "s/") {
 
         // Okay here check for input
         //echo "input is ".  $input;
@@ -722,9 +829,14 @@ class Agent {
         // Where is input routed to?
         $input_thing = new Input($this->thing, "input");
 
+//var_dump($input);
 
         if ($input_thing->input_agent != null) {$input = $input_thing->input_agent . " " . $input;}
+
+}
         echo "input is routed to " . $input . ".\n";
+
+
 
         $this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>', "DEBUG");
 
@@ -882,6 +994,7 @@ class Agent {
         // What effect would this have?
         //$agents = array_reverse($agents);
 
+$this->input = $input;
         // Prefer longer agent names
         usort($agents, function($a, $b) {
                 return strlen($b) <=> strlen($a);
@@ -904,7 +1017,14 @@ class Agent {
             }
 
             //            if ($this->getAgent($agent_class_name)) {break;}
+
+// devstack pass filtered input to callsign.
+// Make universal.
+//$i = null;
+//if (strtolower($agent_class_name) == "callsign") {$i = $input;}
+//echo "Called get Agent " . $agent_class_name . " saying " . $this->input. "\n";
             if ($this->getAgent($agent_class_name)) {
+//            if ($this->getAgent($agent_class_name, $input)) {
                 //echo $this->thing_report['help'];
                 return $this->thing_report;
             }

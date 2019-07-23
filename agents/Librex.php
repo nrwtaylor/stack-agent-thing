@@ -10,7 +10,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 // An agent to recognize and understand Prowords.
 
-class Proword extends Word
+class Librex extends Word
 {
 
 
@@ -24,9 +24,9 @@ class Proword extends Word
         $this->keywords = array();
         $this->keyword = "proword";
 
-        $this->default_librex_name = "acp125g";
+        $this->default_librex_name = "compression/acp125g";
 
-        $this->proword_variables = new Variables($this->thing, "variables proword " . $this->from);
+        $this->librex_variables = new Variables($this->thing, "variables librex " . $this->from);
 
     }
 
@@ -35,7 +35,7 @@ class Proword extends Word
      *
      */
     function run() {
-        $this->thingreportProword();
+        $this->thingreportLibrex();
     }
 
 
@@ -44,19 +44,19 @@ class Proword extends Word
      */
     function get() {
 
-        $this->previous_librex_name = $this->proword_variables->getVariable("librex");
-//$this->librex_name = $this->previous_librex_name;
+        $this->previous_librex_name = $this->librex_variables->getVariable("librex_name");
+        //$this->librex_name = $this->previous_librex_name;
 
 
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("proword", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable( array("librex", "refreshed_at") );
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable( array("proword", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable( array("librex", "refreshed_at"), $time_string );
         }
 
-//        $this->librex_name = $this->thing->json->readVariable( array("proword", "librex") );
+        //        $this->librex_name = $this->thing->json->readVariable( array("proword", "librex") );
 
 
         if ((!isset($this->librex_name)) or ($this->librex_name == false)) {
@@ -65,7 +65,7 @@ class Proword extends Word
 
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable( array("proword", "reading") );
+        $this->reading = $this->thing->json->readVariable( array("librex", "reading") );
     }
 
 
@@ -73,22 +73,22 @@ class Proword extends Word
      *
      */
     function set() {
-        if (!isset($this->has_prowords)) {$this->has_prowords = true;}
+        if (!isset($this->has_matches)) {$this->has_matches = true;}
 
-        $this->proword_variables->setVariable("librex", $this->librex_name);
+        $this->librex_variables->setVariable("librex", $this->librex_name);
 
-        $this->thing->json->writeVariable( array("proword", "reading"), $this->has_prowords );
+        $this->thing->json->writeVariable( array("librex", "reading"), $this->has_matches );
 
-        $this->thing_report['help'] = "Reads the short message for prowords.";
+        $this->thing_report['help'] = "Reads the short message for a librex reference.";
     }
 
 
     /**
      *
      */
-    function thingreportProword() {
+    function thingreportLibrex() {
         $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['help'] = "Reads the short message for prowords.";
+        $this->thing_report['help'] = "Reads the short message for librexes.";
 
     }
 
@@ -96,7 +96,7 @@ class Proword extends Word
     /**
      *
      */
-    function prowordThing() {
+    function librexThing() {
         // Get all of this users Things
         // To search for the last Proword text provided.
         $this->thing->db->setUser($this->from);
@@ -106,8 +106,8 @@ class Proword extends Word
 
         // Get the earliest from the current data set
         foreach (array_reverse($things) as $thing) {
-            $this->extractProwords ( $thing['task'] );
-            if ($this->prowords != array()) {break;}
+            $this->extractLibrexes ( $thing['task'] );
+            if ($this->librexes != array()) {break;}
         }
     }
 
@@ -118,7 +118,7 @@ class Proword extends Word
      * @param unknown $searchfor
      */
     function findWord($librex, $searchfor) {
-        $this->findProword($librex, $searchfor);
+        $this->findLibrex($librex, $searchfor);
     }
 
 
@@ -127,7 +127,7 @@ class Proword extends Word
      * @param unknown $test
      */
     function getWords($test) {
-        $this->getProwords($test);
+        $this->getMatches($test);
     }
 
 
@@ -136,12 +136,26 @@ class Proword extends Word
      * @param unknown $test
      * @return unknown
      */
-    function isProword($test) {
-        $this->getProwords($this->librex_name);
+    function isLibrex($test) {
+
+        // Not working
+        // Rewrite to check file directly.
+        // Not needed at the moment can get the file with a try/catch.
+        try {
+            $this->getLibrex($test);
+            return true;
+        } catch (Exception $e) {
+            return false;
+
+        }
+
+
+        return;
+        $this->getMatches($this->librex_name);
         $match = false;
-        foreach ($this->prowords as $proword=>$arr) {
-            if ($proword == "") {continue;}
-            if (strpos(strtolower($test), strtolower($proword)) !== false) {
+        foreach ($this->librexes as $proword=>$arr) {
+            if ($librex == "") {continue;}
+            if (strpos(strtolower($test), strtolower($librex)) !== false) {
                 $match = true; break;
             }
         }
@@ -156,20 +170,20 @@ class Proword extends Word
      * @param unknown $text
      * @return unknown
      */
-    function extractProwords($text) {
+    function extractLibrexes($text) {
         $words = explode(" ", $text);
 
-        $this->getProwords($this->librex_name);
-        $prowords_list = array();
+        $this->getMatches($this->librex_name);
+        $matches_list = array();
 
-        foreach ($this->prowords as $proword=>$arr) {
-            if ($proword == "") {continue;}
-            if (strpos(strtolower($text), strtolower($proword)) !== false) {
-                $prowords_list[] = $proword;
+        foreach ($this->matches as $match=>$arr) {
+            if ($match == "") {continue;}
+            if (strpos(strtolower($text), strtolower($match)) !== false) {
+                $matches_list[] = $match;
             }
         }
-        $this->extracted_prowords = $prowords_list;
-        return $prowords_list;
+        $this->extracted_librexes = $matches_list;
+        return $matches_list;
     }
 
 
@@ -178,16 +192,16 @@ class Proword extends Word
      * @param unknown $text
      * @return unknown
      */
-    function countProwords($text) {
+    function countMatches($text) {
 
         $words = explode(" ", $text);
 
-        $this->getProwords($this->librex_name);
+        $this->getMatches($this->librex_name);
         $count = 0;
         foreach ($words as $word) {
-            foreach ($this->prowords as $proword=>$arr) {
-                if ($proword == "") {continue;}
-                if (strpos(strtolower($word), strtolower($proword)) !== false) {
+            foreach ($this->librexes as $librex=>$arr) {
+                if ($librex == "") {continue;}
+                if (strpos(strtolower($word), strtolower($librex)) !== false) {
                     $count += 1; break;
                 }
             }
@@ -201,7 +215,7 @@ class Proword extends Word
      *
      * @param unknown $string
      */
-    function extractProword($string) {
+    function extractLibrex($string) {
         // devstack
     }
 
@@ -221,31 +235,39 @@ class Proword extends Word
         if (($librex_name == "") or ($librex_name == " ") or ($librex_name == null)) {
             return false;
         }
-
+        /*
         switch ($librex_name) {
         case null:
             // Drop through
-        case 'prowords':
+        case 'proword/prowords':
             $file = $this->resource_path .'proword/prowords.txt';
             break;
-        case 'acp125g':
+        case 'proword/acp125g':
             $file = $this->resource_path .'proword/prowords.txt';
             break;
-        case 'arrl':
+        case 'proword/arrl':
             // devstack create file
             $file = $this->resource_path .'proword/arrl.txt';
             break;
 
-        case 'vector':
+        case 'proword/vector':
             $file = $this->resource_path . 'proword/vector.txt';
             break;
-        case 'compression':
+        case 'proword/compression':
             $file = $this->resource_path . 'compression/compression.txt';
             break;
+
+        case 'vancouverparksboard/queen_elizabeth_park':
+            $file = $this->resource_path . $librex_name . '.txt';
+            break;
+
 
         default:
             $file = $this->resource_path . 'proword/prowords.txt';
         }
+*/
+        $file = $this->resource_path . $librex_name . '.txt';
+
 
         $this->librex_name = $librex_name;
 
@@ -261,31 +283,35 @@ class Proword extends Word
      * @param unknown $searchfor   (optional)
      * @return unknown
      */
-    function getProwords($librex_name, $searchfor = null) {
+    function getMatches($librex_name, $searchfor = null) {
 
         $this->getLibrex($librex_name);
 
         $contents = $this->librex;
 
-        $this->prowords = array();
+        $this->matches = array();
         $separator = "\r\n";
         $line = strtok($contents, $separator);
 
         while ($line !== false) {
 
-            $word = $this->parseProword($line);
-            $this->prowords[$word['proword']] = $word;
-            // do something with $line
+            $word = $this->parseMatch($line);
             $line = strtok( $separator );
+
+                if ($word == false) {continue;}
+
+            $this->matches[$word['proword']] = $word;
+            // do something with $line
+//            $line = strtok( $separator );
         }
 
         if ($searchfor == null) {return null;}
         // devstack add \b to Word
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
-//        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
+        //        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
         $pattern = "/^.*\b". strtolower($pattern). "\b.*\$/m";
-//        $pattern = "/^.*\b". strtolower($pattern). "\b.*$/m";
+        //        $pattern = "/^.*\b". strtolower($pattern). "\b.*$/m";
         //$pattern = "/^.*". strtolower($pattern). ".*\$/m";
 
         //$pattern = '/^.*\b' . strtolower($searchfor) . '\b.*$/m';
@@ -293,10 +319,13 @@ class Proword extends Word
         // search, and store all matching occurences in $matches
         $m = false;
         if (preg_match_all($pattern, strtolower($contents), $matches)) {
+
+            //var_dump($matches[0]);
             foreach ($matches[0] as $match) {
 
-                $word = $this->parseProword($match);
+                $word = $this->parseMatch($match);
                 if ($word == false) {continue;}
+
                 // Multiple matches.
                 $this->matches[$word['proword']][] = $word;
             }
@@ -308,23 +337,29 @@ class Proword extends Word
     }
 
 
-function parseArrl($text) {
+    /**
+     *
+     * @param unknown $text
+     * @return unknown
+     */
+    function parseArrl($text) {
 
-//        $dict = explode(",", $text);
-//if ($this->librex == "arrl") {$comma = "";}
-//$dict=explode($comma,str_replace(array('  ', '--',':',';'),$comma,$text));
-$dict=explode("  ",str_replace(array('--',':',';'),"  ",$text));
+        //        $dict = explode(",", $text);
+        //if ($this->librex == "arrl") {$comma = "";}
+        //$dict=explode($comma,str_replace(array('  ', '--',':',';'),$comma,$text));
+        $dict=explode("  ", str_replace(array('--', ':', ';'), "  ", $text));
 
-$dict = array_values(array_filter($dict, 'strlen'));
-return $dict;
-}
+        $dict = array_values(array_filter($dict, 'strlen'));
+        return $dict;
+    }
+
 
     /**
      *
      * @param unknown $test
      * @return unknown
      */
-    private function parseProword($test) {
+    private function parseMatch($test) {
         if (mb_substr($test, 0, 1) == "#") {$word = false; return $word;}
 
         $dict = explode("/", $test);
@@ -346,21 +381,21 @@ return $dict;
 
 
         $dict = explode(",", $text);
-//$comma = ",";
+        //$comma = ",";
 
-// Special instructions for ARRL librex.
+        // Special instructions for ARRL librex.
 
-if ($this->librex_name == "arrl") {$dict = $this->parseArrl($text);}
+        if ($this->librex_name == "arrl") {$dict = $this->parseArrl($text);}
 
 
         $proword = trim($dict[0]);
-//if (strlen($proword) > 10) {$proword = "N/A";}
+        //if (strlen($proword) > 10) {$proword = "N/A";}
 
 
 
 
 
-//        $words = trim($dict[1]);
+        //        $words = trim($dict[1]);
 
         $words = null;
         $instruction = null;
@@ -368,15 +403,23 @@ if ($this->librex_name == "arrl") {$dict = $this->parseArrl($text);}
         if (isset($dict[1])) {$words = trim($dict[1]);}
         if (!isset($dict[1])) {
 
-$words = trim($dict[0]);
-$proword = strtoupper(trim(explode(" ",$dict[0])[0]));
+            $words = trim($dict[0]);
+            $proword = strtoupper(trim(explode(" ", $dict[0])[0]));
 
-}
+        }
 
 
         if (isset($dict[2])) {$english_phrases = trim($dict[2]);}
         if (isset($dict[3])) {$instruction = trim($dict[3]);}
 
+$prowords_count = count(explode($proword," "));
+if ($prowords_count >= 3) {
+$proword = "INJECT";
+$words = $line;
+$english_phrases = null;
+$instruction = null;
+
+}
 
         $parsed_line = array("proword"=>$proword, "words"=>$words,
             "instruction"=>$instruction, "english"=>$english_phrases);
@@ -414,7 +457,7 @@ $proword = strtoupper(trim(explode(" ",$dict[0])[0]));
 
         $this->makeWeb();
 
-        $this->thing_report['help'] = "Reads the short message for prowords.";
+        $this->thing_report['help'] = "Reads the short message for matches against a librex.";
 
         return $this->thing_report;
     }
@@ -429,14 +472,14 @@ $proword = strtoupper(trim(explode(" ",$dict[0])[0]));
         } else {
             $input = $this->filtered_input;
         }
-        $html = "<b>PROWORD " . $input . " </b>";
+        $html = "<b>LIBREX " . $input . " </b>";
         $html .= "<p><br>";
 
         if (isset($this->matches)) {
 
             foreach ($this->matches as $proword=>$word) {
-// Use the first match.
-$word = $word[0];
+                // Use the first match.
+                $word = $word[0];
                 $line = "<b>" . strtoupper($word["proword"]) . "</b> " . $word["words"];
                 if ($word["words"] == null) {continue;}
                 $html .= $line . "<br>";
@@ -525,35 +568,37 @@ $word = $word[0];
 
         $this->response = "";
 
-        $this->input = $this->agent_input;
+//        $this->input = $this->agent_input;
 
         $librexes = array('acp125g', 'compression', 'arrl');
 
 
+
         if ($this->agent_input == null) {
             $this->input = $this->subject;
-$text = $this->input;
+            $text = $this->input;
         } else {
 
-$text = $this->agent_input;
-$words = explode(" ", $this->agent_input);
-foreach($words as $index=>$word) {
-foreach($librexes as $index=>$strip_word) {
+            $text = $this->agent_input;
+            $words = explode(" ", $this->agent_input);
+            foreach ($words as $index=>$word) {
+                foreach ($librexes as $index=>$strip_word) {
 
 
-        $whatIWant = $text;
-        if (($pos = strpos(strtolower($text), $strip_word. " is")) !== FALSE) {
-            $whatIWant = substr(strtolower($text), $pos+strlen($strip_word . " is"));
-        } elseif (($pos = strpos(strtolower($text), $strip_word)) !== FALSE) {
-            $whatIWant = substr(strtolower($text), $pos+strlen($strip_word));
+                    $whatIWant = $text;
+                    if (($pos = strpos(strtolower($text), $strip_word. " is")) !== FALSE) {
+                        $whatIWant = substr(strtolower($text), $pos+strlen($strip_word . " is"));
+                    } elseif (($pos = strpos(strtolower($text), $strip_word)) !== FALSE) {
+                        $whatIWant = substr(strtolower($text), $pos+strlen($strip_word));
+                    }
+
+                    $text = $whatIWant;
+                }
+            }
+
         }
 
-     $text = $whatIWant;
-}
-}
-
-        }
-
+        /*(
 
         $match = false;
         foreach ($librexes as $librex_candidate) {
@@ -566,15 +611,19 @@ foreach($librexes as $index=>$strip_word) {
         if ($match == true) {
             $this->librex_name  = $librex_candidate;
         }
+*/
+//        $librex_candidate = $this->agent_input;
 
-//        if (!isset($librex_name)) {$librex_name = $this->default_librex_name;}
-//        if (!isset($this->librex_name)) {$librex_name = $this->default_librex_name;}
-//        $this->librex_name = $librex_name;
+$this->librex_name = $this->agent_input;
+
+        //        if (!isset($librex_name)) {$librex_name = $this->default_librex_name;}
+        //        if (!isset($this->librex_name)) {$librex_name = $this->default_librex_name;}
+        //        $this->librex_name = $librex_name;
 
 
-        if (strtolower($this->input) == "proword") {
+        if (strtolower($this->input) == "librex") {
             $this->prowordThing();
-            $this->response = "Retrieved a message with Proword in it.";
+            $this->response = "Retrieved a message with Librex in it.";
             return;
         }
         // Ignore "proword is" or "proword"
@@ -582,32 +631,47 @@ foreach($librexes as $index=>$strip_word) {
 
         $whatIWant = $text;
 
-//        $whatIWant = $this->input;
-        if (($pos = strpos(strtolower($whatIWant), "proword is")) !== FALSE) {
-            $whatIWant = substr(strtolower($whatIWant), $pos+strlen("proword is"));
-        } elseif (($pos = strpos(strtolower($whatIWant), "proword")) !== FALSE) {
-            $whatIWant = substr(strtolower($whatIWant), $pos+strlen("proword"));
+        //        $whatIWant = $this->input;
+        if (($pos = strpos(strtolower($whatIWant), "librex is")) !== FALSE) {
+            $whatIWant = substr(strtolower($whatIWant), $pos+strlen("librex is"));
+        } elseif (($pos = strpos(strtolower($whatIWant), "librex")) !== FALSE) {
+            $whatIWant = substr(strtolower($whatIWant), $pos+strlen("librex"));
         }
 
-
-// Do the same 
+        /*
+// Do the same
         if (($pos = strpos(strtolower($whatIWant), "arrl is")) !== FALSE) {
             $whatIWant = substr(strtolower($whatIWant), $pos+strlen("arrl is"));
         } elseif (($pos = strpos(strtolower($whatIWant), "arrl")) !== FALSE) {
             $whatIWant = substr(strtolower($whatIWant), $pos+strlen("arrl"));
         }
-
+*/
 
 
         // Clean input
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         $string_length = mb_strlen($filtered_input);
 
-        $this->extractProwords($filtered_input);
-        $this->has_prowords = $this->isProword($filtered_input);
+return;
 
-        $this->getProwords($this->librex_name, $filtered_input);
+        //var_dump($filtered_input);
+        //        $this->extractLibrexes($filtered_input);
+        //        $this->has_librexes = $this->isLibrex($filtered_input);
 
+        //var_dump($this->librexes);
+        //exit();
+
+        if ($this->isLibrex($filtered_input)) {
+
+            $this->getMatches($this->librex_name, $filtered_input);
+
+        }
+
+        //var_dump($this->matches);
+//exit();
+
+        //echo "foo";
+        //exit();
         $ngram = new Ngram($this->thing, "ngram");
         $ngram->extractNgrams($filtered_input, 3);
 
@@ -618,15 +682,15 @@ foreach($librexes as $index=>$strip_word) {
             });
 
         foreach ($search_phrases as $search_phrase) {
-            $this->getProwords($this->librex_name, $search_phrase);
+            $this->getMatches($this->librex_name, $search_phrase);
         }
         $this->filtered_input = $filtered_input;
 
 
-        if ($this->has_prowords) {
+        if (true) {
 
             if (count($this->matches) == 0 ) {
-                $this->response = "No proword found.";
+                $this->response = "No match found.";
                 return;
             }
 
@@ -634,19 +698,18 @@ foreach($librexes as $index=>$strip_word) {
             if (count($this->matches) ==1 ) {
                 $key   = key($this->matches);
                 $value = reset($this->matches);
-// Use first match. For now.
-$k = strtoupper($key);
-$w = $value[0]['words'];
+                // Use first match. For now.
+                $k = strtoupper($key);
+                $w = $value[0]['words'];
 
-if (strtolower($k) == strtolower($w)) {
+                if (strtolower($k) == strtolower($w)) {
 
-$k = strtoupper(explode(" ",$w)[0]);
+                    $k = strtoupper(explode(" ", $w)[0]);
 
-}
+                    //
+
+                }
                 $this->response = $k . " " . $w;
-
-
-
                 return;
             }
 
@@ -656,29 +719,86 @@ $k = strtoupper(explode(" ",$w)[0]);
 
         if (!isset($this->matches)) {$this->response .= "No matches found. ";return;}
 
-        $this->results = $this->matches;
+
+
+
+
+//$this->getMatch($filtered_input);
+$this->getMatch($filtered_input);
+
+
+
+    }
+
+function getMatch($text) {
+//$text = "pond"; //test
+//var_dump($this->librex_name);
+$this->getMatches($this->librex_name, $text);
+
+//var_dump($text);
+$filtered_input = trim($text);
+
+      $this->results = $this->matches;
+//$r = reset($this->matches); 
+//var_dump($r);
+//$this->best_match = $r;
+//$this->response = "Merp";
+//return;
+
+//var_dump($this->matches);
+///
+
+//var_dump($this->results);
+
+///
+//        var_dump($this->results);
         $words = explode(" " , $filtered_input);
 
         $closest = 0;
-
+//var_dump($this->results);
         foreach ($this->results as &$result) {
+//        foreach ($this->results as &$result) {
+
+//var_dump($result);
+if ($result == false) {continue;}
+if (!isset($result[0])) {continue;}
+
+if ($result[0] == null) {continue;}
+//$r = array_pop(array_reverse($result)); // Get first item
+//$r = reset($this->matches); 
+//$best_proword = $r; // Just in case...
+
+$r = $result[0];
+  //              $p_words = explode(" " , $result[0]['words']);
+
+//if (!isset($result[0])) {var_dump($r);exit();}
+
+                $p_words = explode(" " , $r['words']);
             $closeness = 0;
             foreach ($words as $word) {
+                // For now only use the first match
+//var_dump($result);
+//exit();
+//if (!isset($result[0])) {continue;}
+//$r = array_pop(array_reverse($result)); // Get first item
+  //              $p_words = explode(" " , $result[0]['words']);
+//                $p_words = explode(" " , $r['words']);
 
-// For now only use the first match
-                $p_words = explode(" " , $result[0]['words']);
-
-//                $p_words = explode(" " , $result['words'][0]);
+                //                $p_words = explode(" " , $result['words'][0]);
                 foreach ($p_words as $p_word) {
                     // Ignore 1 and 2 letter words
                     if (strlen($word) <= 2) {continue;}
-
-                    if ( strtolower( $word) == strtolower($p_word)) {$closeness += 1;}
+//echo $word ." ". $p_word ."\n";
+                    if ( strtolower( $word) == strtolower($p_word)) {echo "match\n";$closeness += 1;}
 
                 }
-                if ($closeness > $closest) {$closest = $closeness; $best_proword = $result[0];}
+                if ($closeness > $closest) {$closest = $closeness; $best_proword = $r;}
             }
         }
+
+
+//exit();
+
 
 
         $sms = "";
@@ -687,7 +807,13 @@ $k = strtoupper(explode(" ",$w)[0]);
 
         foreach ($this->matches as $proword=>$word) {
             if (mb_strlen($sms) > 140) {$flag_long = true;}
+if (!isset($word[0])) {continue;}
             $sms .= strtoupper($word[0]["proword"]) . " " . $word[0]['words']. " / ";
+
+if (!isset($best_proword)) {
+$best_proword = $word[0];
+}
+
             $count += 1;
         }
 
@@ -697,10 +823,18 @@ $k = strtoupper(explode(" ",$w)[0]);
             $flag_long = false;
             foreach ($this->matches as $proword=>$word) {
                 if (mb_strlen($sms) > 140) {$flag_long = true;}
+if (!isset($word[0])) {continue;}
                 $sms .= strtoupper($word[0]["proword"]) . " / ";
-                $count += 1;
+
+if (!isset($best_proword)) {
+$best_proword = $word[0];
+}
+
+               $count += 1;
             }
         }
+
+//var_dump($this->results);
 
         // If still too long, select the 'best' proword.
         if ($flag_long) {
@@ -713,9 +847,57 @@ $k = strtoupper(explode(" ",$w)[0]);
             //            $this->response = $sms;
             $this->hits = $count;
         }
+
+if (!isset($best_proword)) {
+$best_proword = null;
+//var_dump($this->matches);
+
+
+$bear_name = "ted";
+$bear_response = "Quiet.";
+$min_lev = 1e99;
+foreach($this->matches as $index=>$match) {
+//shuffle($bears);
+//foreach($bears as $key=>$value) {
+
+$librex_text = $match['proword']. " " .$match['words'] ." " .$match['instruction'] ." " .$match['english'] . "\n";
+//$librex_text = $match['proword']. " " .$match['words'];
+/*
+try {
+$lev = levenshtein($filtered_input, $librex_text);
+} catch (Exception $e) {
+continue;
+
+}
+
+//$lev = levenshtein($this->input, $bear_text);
+if ($lev < $min_lev) {$min_lev = $lev;
+//$bear_name = $value['words'];
+$librex_response = ucwords($match['words']) . " is a " . $match['proword'] . ".";
+$best_proword = $match;
+}
+*/
+//echo $librex_text;
+//echo $filtered_input. "\n";
+if (stripos($librex_text, $filtered_input) !== false) {
+$best_proword = $match;
+$sms = $librex_text;
+break;
+}
+
+}
+
+
+
+
+
+}
+$this->best_match = $best_proword;
+
         $this->response = $sms;
 
-    }
 
+
+}
 
 }

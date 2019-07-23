@@ -91,7 +91,7 @@ $this->doMap();
 
         // Makes a one character dictionary
 
-        $file = $this->resource_path . 'wumpus/news.txt';
+        $file = $this->resource_path . 'vancouverparksboard/news.txt';
         $contents = file_get_contents($file);
 
 
@@ -107,6 +107,115 @@ $this->doMap();
             $line = strtok( $separator );
         }
 
+    }
+
+    private function getInject() {
+        //if (isset($this->cave_names)) {return;}
+
+        // Makes a one character dictionary
+
+        $file = $this->resource_path . 'vancouverparksboard/queen_elizabeth_park.txt';
+        $contents = file_get_contents($file);
+
+
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+            //$items = explode(",", $line);
+            //$this->injects[] = $line;
+if (substr($line,0,1) != "#") {$this->injects[] = $line;}
+if ($line == "# places") {break;}
+
+//if (substr($line,0,2) == "//") {continue;}
+
+            //break;
+
+            // do something with $line
+            $line = strtok( $separator );
+
+        }
+
+            $k = array_rand($this->injects);
+            $v = $this->injects[$k];
+
+$this->inject = $v;
+
+    }
+
+function getLibrex($text) {
+
+$librex_agent = new Librex($this->thing, "vancouverparksboard/queen_elizabeth_park");
+//$librex_agent->getMatches($this->input, $text);
+
+// test
+//$text = "fountain";
+
+
+$librex_agent->getMatch($text);
+
+//echo "matching " . $text .".\n";
+//var_dump($librex_agent->matches);
+//var_dump($librex_agent->response);
+//var_dump($librex_agent->best_match);
+
+$this->librex_response = $librex_agent->response;
+$this->librex_best_match = $librex_agent->best_match;
+
+//return($librex_agent->best_match);
+return $librex_agent->response;
+}
+
+
+   private function getPlace($number = null) {
+        //if (isset($this->cave_names)) {return;}
+
+        // Makes a one character dictionary
+
+        $file = $this->resource_path . 'vancouverparksboard/queen_elizabeth_park.txt';
+        $contents = file_get_contents($file);
+
+
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+$place_flag = false;
+        while ($line !== false) {
+//var_dump($line);
+            //$items = explode(",", $line);
+            //$this->injects[] = $line;
+//if ((substr($line,0,8) != "# places") and ($place_flag == false)) {continue;}
+if ($line == "# places") {$place_flag = true;}
+if ($place_flag == false) {
+    $line = strtok( $separator );
+    continue;
+}
+
+if (substr($line,0,1) != "#") {
+$t = explode(",", $line);
+//var_dump($t);
+if (!isset($t[2])) {$t[2] = null;}
+if (!isset($t[1])) {$t[1] = null;}
+if (!isset($t[3])) {$t[3] = null;}
+
+$this->places[$t[0]] = array("place_name"=>trim($t[1]),"link"=>trim($t[3]),"text"=>trim($t[2]));
+
+}
+//echo $line;
+
+//if (substr($line,0,2) == "//") {continue;}
+
+            //break;
+
+            // do something with $line
+            $line = strtok( $separator );
+
+        }
+
+//            $k = array_rand($this->injects);
+//            $v = $this->injects[$k];
+
+$this->place = $this->places[$number];
+//var_dump($this->place);
     }
 
 
@@ -256,8 +365,14 @@ function doMap() {
         //     }
 
 //        $sms = "WUMPUS " . strtoupper($this->wumpus_tag) .  "";
+//var_dump($this->response);
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/queenelizabethpark.pdf';
-        $sms = "PARK | " . $link . " Made a link to a map. ";
+        $sms = "PARK | ";
+
+if (stripos($this->response, 'join us') !== false) {
+        $sms .= $link . " Made a link to a map. ";
+
+}
 
 
         $sms .= $this->response;
@@ -325,8 +440,102 @@ function doMap() {
 
         $input = strtolower($this->subject);
 
+// Let's see if there is a number between 1 and 28
+//var_dump($input);
+$number = new Number($this->thing, "number");
+$number->extractNumbers($input);
+$number->extractNumber();
+//var_dump($number->number);
+
+if ( (isset($number->number)) and ($number->number != 0)) {
+
+$this->getPlace($number->number);
+
+//$t = implode($this->place," ");
+
+$this->response .= "Place " . $number->number . " is " . $this->place['place_name'] .". ";
+if ((isset($this->place['link'])) and ($this->place['link'] != null)) {$this->response .= $this->place['link'] . " ";}
+if ((isset($this->place['text'])) and ($this->place['text'] != null)) {$this->response .= $this->place['text'] . " ";}
+        return;
+}
+
+if ($input != "queen elizabeth park") {
+//var_dump($input);
+$text = $input;
+
+
+
+$t = new Compression($this->thing, "compression queen elizabeth park");
+
+
+//$bear_name = "ted";
+//$bear_response = "Quiet.";
+//$min_lev = 1e99;
+foreach($t->agent->matches as $type=>$strip_words) {
+
+foreach($strip_words as $i=>$strip_word){
+//if (!isset($strip_word['words'])) {var_dump($strip_word); exit();}
+
+$strip_word = $strip_word['words'];
+//var_dump($strip_word);
+
+
+
+
+//$strip_word = "park";
+                    $whatIWant = $input;
+                    if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
+                        $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
+                    } elseif (($pos = strpos(strtolower($input), $strip_word)) !== FALSE) {
+                        $whatIWant = substr(strtolower($input), $pos+strlen($strip_word));
+                    }
+
+                    $input = $whatIWant;
+}
+}
+
+
+
+
+
+//$input = "fountain";
+//echo "foo";
+$t = $this->getLibrex($input);
+
+//echo "getLibrex got " . $t . "\n";
+//echo "bar";
+//exit();
+//echo "best match";
+//var_dump($this->librex_best_match);
+//echo "response";
+//var_dump($this->librex_response);
+//echo "merp";
+
+if ($this->librex_best_match != null) {
+//var_dump($t['words']);
+//$this->response = ucfirst($t['words']);
+
+//$this->response = $t;
+
+$this->response = ucwords($this->librex_best_match['words']) . ". " . ucfirst($this->librex_best_match['english']);
+
+
+return;
+}
+
+$this->getInject();
+$this->response = $this->inject;
+return;
+
+}
+//exit();
+
+
+//$librex_agent = new Librex($this->thing, "vancouverparksboard/queen_elizabeth_park");
+//var_dump($librex_agent->matches);
+
         // Accept wumpus commands
-        $this->keywords = array("teleport", "look", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right", "wumpus", "meep", "thing", "start", "meep", "spawn");
+        $this->keywords = array("trivia", "more you know", "history", "info", "information", "teleport", "look", "news", "forward", "north", "east", "south", "west", "up", "down", "left", "right", "wumpus", "meep", "thing", "start", "meep", "spawn");
 
         $pieces = explode(" ", strtolower($input));
 
@@ -359,7 +568,18 @@ $park_response = "";
                         $this->getNews();
                         $park_response = $this->news;
                         //$this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
+
                         break;
+                    case 'more you know':
+                    case 'trivia':
+                    case 'history':
+                    case 'information':
+                    case 'info':
+                        $this->getInject();
+                        $park_response = $this->inject;
+                        //$this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
+                        break;
+
 
                     case 'look':
                         $this->getCave($this->x);
