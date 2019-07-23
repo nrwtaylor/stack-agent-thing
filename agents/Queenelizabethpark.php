@@ -632,7 +632,7 @@ $park_response = "";
             }
         }
 
-if ($park_response == "") {$park_response = "Join us Saturday 20 July 1pm to 4.30pm at Queen Elizabeth Park. Contact VE7RVF control.";}
+if ($park_response == "") {$park_response = "Join us Saturday 17 August 1pm to 4.30pm at Queen Elizabeth Park. Contact VE7RVF control.";}
 
 $this->response .= $park_response;
         return false;
