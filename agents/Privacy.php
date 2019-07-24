@@ -33,6 +33,8 @@ class Privacy extends Agent {
         $this->privacy();
 
         $this->thing_report['thing']  = $this->thing;
+        $this->thing_report['help'] = 'This is the Privacy manager. Email ' . $this->email .'.';
+
     }
 
 
@@ -58,9 +60,9 @@ class Privacy extends Agent {
      * @return unknown
      */
     public function makeSMS() {
-        $this->sms_message = "PRIVACY | Records of the subject/chat, originating address and destination agent are retained until they are forgotten.  Records may be forgotten at anytime either by the system or by the Identity. Forgetall will forget all of an Identity's Things. Things may contain nominal key accessible information.";
+        $this->sms_message = "PRIVACY | Records of the subject/chat, originating address and destination agent are retained until they are forgotten.  Records may be forgotten at anytime either by the system or by the Identity. Forgetall will forget all of an Identity's Things. Things may contain nominal key accessible information. ";
         $this->sms_message .= " | " . $this->web_prefix ."privacy" ;
-        $this->sms_message .= " | " . "TEXT ?" ;
+        $this->sms_message .= " | " . "TEXT HELP" ;
 
         $this->thing_report['sms'] = $this->sms_message;
         $this->message = $this->sms_message;
@@ -103,7 +105,7 @@ class Privacy extends Agent {
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
         $this->thing->flagGreen();
 

@@ -14,7 +14,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Read 
+class Read extends Agent
 {
 
     // This is a resource block.  It is a train which be run by the block scheduler.
@@ -31,31 +31,32 @@ class Read
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
+function init() {
+//    function __construct(Thing $thing, $agent_input = null) {
 
 
-        if ($agent_input == null) {$agent_input = "";}
+//        if ($agent_input == null) {$agent_input = "";}
 
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
 
-        $this->keyword = "mordok";
+//        $this->keyword = "mordok";
 
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
+//        $this->thing = $thing;
+//        $this->start_time = $this->thing->elapsed_runtime();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->test= "Development code"; // Always
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
+//        $this->sqlresponse = null;
 
 
-$this->agent_prefix = 'Agent "Read" ';
-
+//$this->agent_prefix = 'Agent "Read" ';
+//
 //$this->node_list = array("off"=>array("on"=>array("off")));
 //$this->thing->choice->load('train');
 
@@ -66,11 +67,11 @@ $this->agent_prefix = 'Agent "Read" ';
 //                'block' => array('default run_time'=>'105',
 //                                'negative_time'=>'yes'),
 
-        $this->current_time = $this->thing->json->time();
+  //      $this->current_time = $this->thing->json->time();
 
 
 
-    $default_train_name = "";
+    //$default_train_name = "";
 
         $this->variables_agent = new Variables($this->thing, "variables " . "read" . " " . $this->from);
 
@@ -80,61 +81,33 @@ $this->agent_prefix = 'Agent "Read" ';
 
 
         // Loads in Train variables.
-        $this->get(); 
+//        $this->get(); 
 
 // Default to Long Island
 
 if ($this->verbosity == false) {$this->verbosity = 2;}
 
-//if ($this->notch_height == false) {$this->notch_height = 1.6;}
-//if ($this->notch_direction == false) {$this->notch_direction = 180;}
-//if ($this->notch_spread == false) {$this->notch_spread = 80;}
 if ($this->wordlist == false) {$this->wordlist = "estate sale";}
-//if ($this->noaa_buoy_id == false) {$this->noaa_buoy_id = 44025;}
-//if ($this->link == false) {$this->link = "http://www.27east.com/hamptons-classifieds/yard-sales.cfm";}
 
+//$this->link = "https://vectorradio.ca/ops/frequency-list/";
+//$this->link = "https://docs.google.com/spreadsheets/d/1hU_4UoC1JYg-G2V-HUjoIWcxSyPOlPKBO6XED6ppmRE/pubhtml?gid=1722778777&amp;single=true&amp;widget=true&amp;headers=false";
+//$this->link = "https://docs.google.com/spreadsheets/d/1hU_4UoC1JYg-G2V-HUjoIWcxSyPOlPKBO6XED6ppmRE/pubhtml?gid=1722778777&amp;s";
+
+//https://docs.google.com/spreadsheets/d/<KEY>/export?gid=0&format=csv
+$this->link = "https://docs.google.com/spreadsheets/d/1hU_4UoC1JYg-G2V-HUjoIWcxSyPOlPKBO6XED6ppmRE/export?gid=0&format=csv";
 if ($this->link == false) {$this->link = "http://justshows.com/vancouver/";}
 
-
+echo "prerobot " . $this->link . "\n";
 $this->robot = new Robot($this->thing, $this->link);
-
-//var_dump($this->robot->is_allowed);
-//exit();
-
-//echo $this->noaa_buoy_id;
-//exit();
-
-
-		$this->thing->log('<pre> Agent "Read" running on Thing '. $this->thing->nuuid . '.</pre>');
-		$this->thing->log('<pre> Agent "Read" received this Thing "'.  $this->subject . '".</pre>');
-
-
-
-
-
-		$this->readSubject();
-
-
-        $this->getWave();
-
-		$this->respond();
-
-
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . $this->thing->elapsed_runtime() . 'ms.' );
-
-		$this->thing->log($this->agent_prefix . 'completed.');
-
-        $this->thing_report['log'] = $this->thing->log;
-
-
-
-		return;
+echo "postrobot" . "\n";
 
 		}
 
 
+function run() {
+        $this->getWave();
 
+}
 
 
     function set()
@@ -192,15 +165,17 @@ $this->robot = new Robot($this->thing, $this->link);
 
     function getWave()
     {
+echo "fooooo";
+$this->link = "https://docs.google.com/spreadsheets/d/1hU_4UoC1JYg-G2V-HUjoIWcxSyPOlPKBO6XED6ppmRE/export?gid=0&format=csv";
 
         $data_source = $this->link;
-
-        if (!($this->robot->is_allowed)) {return true;}
+var_dump($data_source);
+//        if (!($this->robot->is_allowed)) {return true;}
 
         //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
 
         $data = file_get_contents($data_source);
-
+var_dump($data_source);
 
         //$this->thing_report['txt'] = $this->txt;
 
@@ -408,7 +383,7 @@ function match_all($needles, $haystack)
 
 
 
-	private function respond() {
+	public function respond() {
 
 		// Thing actions
 
@@ -556,6 +531,7 @@ $this->thing_report['help'] = 'This reads a web resource.';
 
     public function readSubject() 
     {
+echo "wubbke";
         $this->response = null;
         $this->num_hits = 0;
         // Extract uuids into
@@ -563,6 +539,7 @@ $this->thing_report['help'] = 'This reads a web resource.';
 
 //        $headcodes_in_input
 
+//$this->link = $this->agent_input;
 
 
         //$this->number = extractNumber();
@@ -590,8 +567,8 @@ $this->thing_report['help'] = 'This reads a web resource.';
 
         $prior_uuid = null;
 
-//        $this->getWave();
-
+        $this->getWave();
+//exit();
 
         $pieces = explode(" ", strtolower($input));
 
@@ -710,7 +687,8 @@ echo "valid state";
 
                 }
 
-
+echo "foo";
+var_dump($this->link);
 
                 return "Message not understood";
 
