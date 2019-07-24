@@ -131,8 +131,8 @@ $this->channel['vector'] = $data;
         $this->makeSMS();
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This is a cat keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
+        $this->thing_report["info"] = "This reads a web page and provide the information by text message.";
+        $this->thing_report["help"] = "This provides Amateur Radio Service co-ordinated frequencies.";
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
@@ -219,7 +219,7 @@ $t_sql_output_tone = trim($t[8]); if ($t_sql_output_tone == null) {$t_sql_output
 
 $notes = trim($t[9]);
 
-$channel_string = "channel id " . $channel . " " . strtoupper($channel_name) ." | rx freq " . $rx_freq . " offset " . $offset . "TX freq " . $tx_freq . " TX tone " . $tx_tone . " TSQL output tone " . $t_sql_output_tone . " note " . $notes;
+$channel_string = "channel id " . $channel . " " . strtoupper($channel_name) ." rx freq " . $rx_freq . " offset " . $offset . "TX freq " . $tx_freq . " TX tone " . $tx_tone . " TSQL output tone " . $t_sql_output_tone . " note " . $notes;
 
         return $channel_string;
 

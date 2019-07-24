@@ -145,9 +145,9 @@ public $input;
     }
 
     public function make() {
+        $this->makeResponse();
         $this->makeSMS();
         $this->makeWeb();
-
     }
 
     /**
@@ -289,7 +289,8 @@ private function makeResponse() {
 
 if (isset($this->response)) {return;}
 
-$this->response = "Standby.";
+//$this->response = "Standby.";
+$this->response = "";
 
 }
 
@@ -299,7 +300,7 @@ $this->response = "Standby.";
 }
 
     private function makeSMS() {
-$this->makeResponse();
+//$this->makeResponse();
 // So this is the response if nothing else has responded.
 
 if (!isset($this->thing_report['sms'])) { 

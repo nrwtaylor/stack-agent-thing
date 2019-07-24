@@ -253,7 +253,7 @@ $now = $dt->format('Y-m-d H:i:s');
     /**
      *
      */
-    public function respond() {
+    public function respondResponse() {
 
         // Thing actions
         $this->thing->flagGreen();
