@@ -5,8 +5,31 @@ error_reporting(E_ALL);ini_set('display_errors', 1);
 
 class Chart extends Agent
 {
+    // Latencygraph shows the stack latency history.
+
+    // refactor
     function init()
+	//function __construct(Thing $thing, $agent_command = null)
     {
+  //      $this->start_time = $thing->elapsed_runtime();
+
+        // Setup Thing
+  //      $this->thing = $thing;
+  //     $this->uuid = $thing->uuid;
+  //      $this->to = $thing->to;
+  //      $this->from = $thing->from;
+  //      $this->subject = $thing->subject;
+
+        // Setup Agent
+  //      $this->agent = strtolower(get_class());
+  //      $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
+
+        // Setup logging
+ //       $this->thing_report['thing'] = $this->thing->thing;
+
+  //      if ($agent_command == null) {
+  //          $this->thing->log( 'Agent "Chart" did not find an agent command.' );
+  //      }
         $agent_command = $this->agent_input; //
         $this->agent_command = $agent_command;
 
@@ -20,9 +43,36 @@ class Chart extends Agent
 
         $this->read();
 
+//        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
+
+
+		// So I could call
+//		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+		// I think.
+		// Instead.
+
+
+        // Get some stuff from the stack which will be helpful.
+  //      $this->web_prefix = $thing->container['stack']['web_prefix'];
+  //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+  //      $this->word = $thing->container['stack']['word'];
+  //      $this->email = $thing->container['stack']['email'];
+
+  //      $this->current_time = $this->thing->json->time();
+
 		$this->node_list = array("chart");
 
+//		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>','INFORMATION' );
+
         $this->getData();
+
+//        if ($agent_command == null) {
+//		    $this->respond();
+//        }
+
+  //      $this->thing->log('Agent "chart" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
+
+   //     $this->thing_report['log'] = $this->thing->log;
 	}
 
     function set()
@@ -41,6 +91,7 @@ class Chart extends Agent
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
         $thing_report = $this->thing->db->agentSearch($agent_name, 99);
+
         $things = $thing_report['things'];
 
         if ( $things == false  ) {return;}
@@ -76,10 +127,11 @@ class Chart extends Agent
         }
 
         $this->thing->log('Agent "charth" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
+
     }
 
-	public function respond()
-    {
+	public function respond() {
+
 		// Develop the various messages for each channel.
 
 		// Thing actions
@@ -124,6 +176,7 @@ $this->makePNG();
 
         $this->thing_report['sms'] = $this->sms_message;
     }
+
 
     function drawGraph()
     {
@@ -204,7 +257,7 @@ $this->makePNG();
         //exit();
         while ($y <= $y_max) {
             $y_spread = $y_max - $y_min;
-            if ($this->y_spread == 0) {$this->y_spread = 100;}
+            if ((!isset($this->y_spread)) or ($this->y_spread == 0)) {$this->y_spread = 100;}
 
             $plot_y = 10 + $this->chart_height - ($y - $y_min) / $y_spread * $this->chart_height;
 

@@ -873,13 +873,12 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
             $thing = new Thing($uuid);
 
+
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
 
-
             if ( $thing->thing == false ) {
-
                 $datagram = [];
                 $datagram['thing'] = false;
                 $datagram['thing_report'] = false;

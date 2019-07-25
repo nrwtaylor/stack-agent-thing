@@ -37,6 +37,7 @@ public $input;
         // and create the most appropriate agent to respond to it.
 
         $this->thing = $thing;
+        $this->thing_report['thing'] = $this->thing;
 
         // So I could call
         if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
