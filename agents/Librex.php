@@ -568,7 +568,7 @@ $instruction = null;
      *
      */
     function makeSMS() {
-        $sms = "PROWORD ";
+        $sms = "LIBREX ";
 
         $sms .= strtoupper($this->librex_name) . " | ";
 
@@ -635,7 +635,7 @@ $instruction = null;
 
 
 
-        if ($this->agent_input == null) {
+        if (($this->agent_input == null) or (strtolower($this->agent_input) == "librex")) {
             $this->input = $this->subject;
             $text = $this->input;
         } else {

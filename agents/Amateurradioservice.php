@@ -21,9 +21,9 @@ class Amateurradioservice extends Agent {
     function init() {
         $this->agent_name = "amateurradioservice";
         $this->test= "Development code";
-        $this->thing_report["info"] = "This is a cat keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
 
+        $this->thing_report["info"] = "This is an operator with frequencies.";
+        $this->thing_report["help"] = "Provides information useful to the Amateur Radio Service. Try HAM 146.480.";
 
         $data_source = $this->resource_path . "vector/channels.url";
 
@@ -34,9 +34,6 @@ class Amateurradioservice extends Agent {
 
         $data = file_get_contents($data_source);
 $this->link = $data;
-
-
-
     }
 
     function run() {
@@ -73,6 +70,7 @@ $this->link = $data;
         }
         }
 $this->data = $data;
+
 }
 
 function getVector() {
@@ -131,14 +129,17 @@ $this->channel['vector'] = $data;
         $this->makeSMS();
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This reads a web page and provide the information by text message.";
-        $this->thing_report["help"] = "This provides Amateur Radio Service co-ordinated frequencies.";
+        $this->thing_report["info"] = "This is an operator with frequencies.";
+        $this->thing_report["help"] = "Provides information useful to the Amateur Radio Service. Try HAM 146.480.";
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
 
+if ($this->agent_input == null) {
+
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'] ;
+}
 
         return $this->thing_report;
     }
@@ -148,6 +149,8 @@ $this->channel['vector'] = $data;
      *
      */
     function makeSMS() {
+//if ((!isset($this->response)) or ($this->response == null)){$this->response = "Standby.";}
+var_dump($this->response);
         $this->node_list = array("amateur radio service"=>array("amateur radio service"));
         $m = strtoupper("AMATEUR RADIO SERVICE") . " | " . $this->response;
         $this->sms_message = $m;
@@ -170,7 +173,7 @@ $text = trim($text);
 $this->getVector();
 $data = $this->channel['vector'];
 
-$librex = new Librex($this->thing);
+$librex = new Librex($this->thing, "librex");
 
 $librex->librex = $data;
 $librex->getMatches($text, "CSV");
@@ -219,7 +222,7 @@ $t_sql_output_tone = trim($t[8]); if ($t_sql_output_tone == null) {$t_sql_output
 
 $notes = trim($t[9]);
 
-$channel_string = "channel id " . $channel . " " . strtoupper($channel_name) ." rx freq " . $rx_freq . " offset " . $offset . "TX freq " . $tx_freq . " TX tone " . $tx_tone . " TSQL output tone " . $t_sql_output_tone . " note " . $notes;
+$channel_string = "channel id " . $channel . " " . strtoupper($channel_name) ." | rx freq " . $rx_freq . " offset " . $offset . "TX freq " . $tx_freq . " TX tone " . $tx_tone . " TSQL output tone " . $t_sql_output_tone . " note " . $notes;
 
         return $channel_string;
 

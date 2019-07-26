@@ -11,7 +11,6 @@ namespace Nrwtaylor\StackAgentThing;
 class Compression extends Agent
 {
 
-
     /**
      *
      */

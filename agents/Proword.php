@@ -389,7 +389,7 @@ $proword = strtoupper(trim(explode(" ",$dict[0])[0]));
     /**
      *
      * @return unknown
-     */
+     
     public function respondResponse() {
         $this->cost = 100;
 
@@ -418,7 +418,7 @@ $proword = strtoupper(trim(explode(" ",$dict[0])[0]));
 
         return $this->thing_report;
     }
-
+*/
 
     /**
      *
@@ -470,7 +470,7 @@ $word = $word[0];
 
         $response_text = $this->response;
         if ($this->response == null) {
-            $response_text = "X";
+            $response_text = "Standby";
         }
 
         $sms .= $response_text;

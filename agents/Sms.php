@@ -14,8 +14,9 @@ class Sms
 
     function __construct(Thing $thing, $input = null) 
     {
+        $this->body = null;
+        if (is_array($input)) {$this->body = $input;}
 
-            $this->body = $input;
 		$this->input = $input;
 		$this->cost = 50;
 
@@ -133,7 +134,8 @@ class Sms
 
     public function getClient()
     {
-
+return;
+if (!isset($this->body)) {return;}
         // https://developers.google.com/api-client-library/php/auth/web-app
 //        $key_file_location = $this->thing->container['api']['google_service']['key_file_location'];
 
@@ -145,7 +147,7 @@ class Sms
 //        $hangoutschat = new \Google_Service_HangoutsChat($this->client);
 
 //        $message = new \Google_Service_HangoutsChat_Message();
-
+//var_dump($this->body);
         $text = $this->body['text'];
 
         //$type = $this->body["type"];
@@ -184,6 +186,7 @@ class Sms
 
 		if ($this->input != null) {
 			$test_message = $this->input;
+var_dump($test_message);
 		} else {
 			$test_message = $this->subject;
 		}
