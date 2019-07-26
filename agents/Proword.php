@@ -390,7 +390,7 @@ $proword = strtoupper(trim(explode(" ",$dict[0])[0]));
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         $this->cost = 100;
 
         // Thing stuff

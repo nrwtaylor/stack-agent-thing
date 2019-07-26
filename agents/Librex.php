@@ -1,6 +1,6 @@
 <?php
 /**
- * Proword.php
+ * Librex.php
  *
  * @package default
  */
@@ -23,7 +23,7 @@ class Librex extends Word
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->keywords = array();
-        $this->keyword = "proword";
+        $this->keyword = "librex";
 
         $this->default_librex_name = "compression/acp125g";
 
@@ -494,7 +494,7 @@ $instruction = null;
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         $this->cost = 100;
 
         // Thing stuff

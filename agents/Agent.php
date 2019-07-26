@@ -280,8 +280,13 @@ if (!isset($this->thing_report['sms'])) {
     $this->thing_report['sms'] = "AGENT | Standby.";
 }
 
+if ($this->agent_input == null) {
+
     $message_thing = new Message($this->thing, $this->thing_report);
     $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+
+}
+
 }
 
     }
@@ -830,7 +835,6 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
 
         $input = trim($input);
 $this->input = $input;
-
 // Check if it is a command (starts with s slash)
 if ( strtolower( substr($input,0,2)) != "s/") {
 
@@ -1008,13 +1012,14 @@ if ( strtolower( substr($input,0,2)) != "s/") {
                 $agents[] = $agent_class_name;
             }
         }
-
+//var_dump($agents);
         restore_error_handler();
 
         // What effect would this have?
         //$agents = array_reverse($agents);
 
 $this->input = $input;
+//var_dump($input);
         // Prefer longer agent names
         usort($agents, function($a, $b) {
                 return strlen($b) <=> strlen($a);

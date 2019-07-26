@@ -498,6 +498,7 @@ class Json {
         // Now write to defined column.
         if ($this->field == null) {return;}
         if (strlen($this->json_data) > $this->char_max) {
+var_dump($this->json_data);
             // devstack what do you do here?
             // This is the place where Json borks when asked to save too much.
 

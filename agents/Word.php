@@ -355,10 +355,13 @@ class Word extends Agent {
 
         $this->thing_report['email'] = $this->sms_message;
 
+if ($this->agent_input == null) {
+
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-        $this->reading = count($this->words);
+}
+$this->reading = null;
+if (isset($this->words)) {$this->reading = count($this->words);}
         $this->thing->json->writeVariable(array("word", "reading"), $this->reading);
 
         return $this->thing_report;

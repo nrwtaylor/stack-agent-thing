@@ -25,10 +25,10 @@ class Compression extends Agent
     function run() {
         $command = "compression ". $this->input;
         $this->agent = new Proword($this->thing, $command);
-        $this->thing_report = $this->agent->thing_report;
+//        $this->thing_report = $this->agent->thing_report;
 
-        $this->agent->makeSMS();
-        $this->thing_report['sms'] = $this->agent->sms_message;
+//        $this->agent->makeSMS();
+//        $this->thing_report['sms'] = $this->agent->sms_message;
 
         $this->doCompression();
     }
