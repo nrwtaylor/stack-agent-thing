@@ -24,6 +24,8 @@ class Kaiju extends Chart
      *
      */
     public function init() {
+
+if ((isset($this->test_flag)) and ($this->test_flag === true)) {$this->test();}
         $this->node_list = array("kaiju"=>array("kaiju"));
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
@@ -437,9 +439,20 @@ $this->points[] = null;
 
 $kaiju_array = explode("|" , $thing_subject);
 $data_array = explode(" " ,$kaiju_array[1]);
-$voltage = (float)str_replace("V","",$data_array[2]);
+//$voltage = (float)str_replace("V","",$data_array[2]);
+
+$voltage = $this->parseData($data_array[2]);
+//$array = array();
+//$array["refreshed_at"] = $parsed_thing['created_at'];
+//$array["series_1"] = $voltage;
+//$array["series_2"] = 0;
+//var_dump($array);
+
+
 //var_dump($data_array[2]);
-$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=>$voltage, "series_2"=>0);
+$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=>$voltage["voltage"], "series_2"=>0);
+//$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], $voltage, "series_2"=>0);
+
    //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
 
 
@@ -452,6 +465,26 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
         return $this->kaiju_thing;
     }
 
+function parseData($text) {
+
+$map = array("V" => "voltage", "Pa"=>"pressure", "uT"=>"magnetic_field", "g"=>"acceleration",
+"mm"=>"bilge");
+
+foreach($map as $symbol=>$name) {
+
+if (strpos($text, $symbol) !== false) {
+$voltage = (float)str_replace($symbol,"",$text);
+//echo $symbol . " " . $name ." " . $voltage.  "\n";
+
+$a[$name] = $voltage;
+return $a;
+
+}
+}
+
+return null;
+
+}
 
     /**
      *
@@ -511,10 +544,13 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
 
     /**
      *
-     * @param unknown $test
+     * @param unknown $Wtest
      * @return unknown
      */
     private function parseKaiju($test) {
+
+if (isset($this->test_string)) {$test = $this->test_string;}
+
         if (mb_substr($test, 0, 1) == "#") {$word = false; return $word;}
 
         $dict = explode("/", $test);
@@ -551,6 +587,9 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
             return null;
         }
 
+if (!isset($dict[4])) {return;}
+
+
         //foreach($dict as $index=>$phrase) {
         //    if ($index == 0) {continue;}
         //    if ($phrase == "") {continue;}
@@ -559,7 +598,7 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
         $nuuid =  $dict[2];
         $kaiju_voltage =  $dict[3];
         $kaiju_temperature =  $dict[4];
-        $pressure =  $dict[5];
+        $pressure = $dict[5];
         $magnetic_field =  $dict[6];
         $vertical_acceleration =  $dict[7];
         $temperature_1 =  $dict[8];
@@ -571,6 +610,7 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
         //        $dict = explode(",",$text);
         //        $kaiju_owner = $dict[0];
         //        $kaiju_address = trim($dict[1]);
+
 
         $parsed_line = array(
             "nuuid" =>  $dict[2],
@@ -586,6 +626,12 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
 
         return $parsed_line;
     }
+
+function test() {
+
+$this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6C 25.8C 516mm 1564091111";
+
+}
 
 
     /**
@@ -855,9 +901,12 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
      */
     public function readSubject() {
 
+
+
 //        if (!$this->getMember()) {$this->response = "Generated an inject.";}
 
         $input = strtolower($this->subject);
+if ((isset($this->test_flag)) and ($this->test_flag === true)) {$input = $this->test_string;}
 
         $pieces = explode(" ", strtolower($input));
 
@@ -875,7 +924,7 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
             }
         }
 
-        $keywords = array("kaiju", "hard", "easy", "hey", "on", "off");
+        $keywords = array("test","kaiju", "hard", "easy", "hey", "on", "off");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -894,6 +943,14 @@ $this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=
                     case 'hey':
 
                         return;
+
+                    case 'test':
+$this->test_flag = true;
+$this->test();
+$l = $this->parseThing($this->test_string);
+var_dump($l);
+                        return;
+
                     case 'on':
                     default:
                     }

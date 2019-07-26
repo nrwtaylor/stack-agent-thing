@@ -7,94 +7,87 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Forex extends Agent 
+class Oneforge 
 {
 
     // This gets Forex from an API.
 
     public $var = 'hello';
-    function init() {
-//    function __construct(Thing $thing, $agent_input = null) {
 
-//        $this->start_time = microtime(true);
+    function __construct(Thing $thing, $agent_input = null) {
+// deprecated
+return;
+        $this->start_time = microtime(true);
 
-//        if ($agent_input == null) {$agent_input = "";}
+        if ($agent_input == null) {$agent_input = "";}
 
-//        $this->agent_input = $agent_input;
+        $this->agent_input = $agent_input;
 
-//        $this->keyword = "mordok";
+        $this->keyword = "mordok";
 
-//        $this->thing = $thing;
-//        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing = $thing;
+        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->test= "Development code"; // Always
 
-//        $this->uuid = $thing->uuid;
-//        $this->to = $thing->to;
-//        $this->from = $thing->from;
-//        $this->subject = $thing->subject;
-//        $this->sqlresponse = null;
+        $this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
+        $this->sqlresponse = null;
 
 
-//        $this->agent_prefix = 'Agent "Forex" ';
+        $this->agent_prefix = 'Agent "Forex" ';
 
         //$this->node_list = array("off"=>array("on"=>array("off")));
 
         $this->keywords = array('forex');
 
-//        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->json->time();
 
 
-//        $this->api_key = $this->thing->container['api']['1forge'];
+        $this->api_key = $this->thing->container['api']['1forge'];
 
-//        $this->variables_agent = new Variables($this->thing, "variables " . "forex" . " " . $this->from);
+        $this->variables_agent = new Variables($this->thing, "variables " . "forex" . " " . $this->from);
 
         // Loads in variables.
-//        $this->get(); 
+        $this->get(); 
 
-//        if ($this->verbosity == false) {$this->verbosity = 2;}
+        if ($this->verbosity == false) {$this->verbosity = 2;}
 
-//        if ($this->currency_pair == false) {$this->currency_pair = "USDCAD";}
+        if ($this->currency_pair == false) {$this->currency_pair = "USDCAD";}
 
-//		$this->thing->log('<pre> Agent "Forex" running on Thing '. $this->thing->nuuid . '.</pre>');
-//		$this->thing->log('<pre> Agent "Forex" received this Thing "'.  $this->subject . '".</pre>');
+		$this->thing->log('<pre> Agent "Forex" running on Thing '. $this->thing->nuuid . '.</pre>');
+		$this->thing->log('<pre> Agent "Forex" received this Thing "'.  $this->subject . '".</pre>');
 
-//		$this->readSubject();
+		$this->readSubject();
 
-//        $this->getForex();
+        $this->getOneforge();
 
-//		$this->respond();
+		$this->respond();
 
-//        $this->end_time = microtime(true);
-//        $this->actual_run_time = $this->end_time - $this->start_time;
-//        $milliseconds = round($this->actual_run_time * 1000);
+        $this->end_time = microtime(true);
+        $this->actual_run_time = $this->end_time - $this->start_time;
+        $milliseconds = round($this->actual_run_time * 1000);
 
-//        $this->thing->log( $this->agent_prefix .'ran for ' . $milliseconds . 'ms.' );
+        $this->thing->log( $this->agent_prefix .'ran for ' . $milliseconds . 'ms.' );
 
-//		$this->thing->log($this->agent_prefix . 'completed.');
+		$this->thing->log($this->agent_prefix . 'completed.');
 
-//        $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report['log'] = $this->thing->log;
 
-        $this->thing_report['help'] = 'Provides the latest US to Canadian conversion rate from the European Central Bank.';
-
-//		return;
+		return;
 
 	}
 
-function run() {
 
-   $this->getForex();
-
-
-}
 
 
 
     function set()
     {
 
-        if ((!isset($requested_state)) or ($requested_state == null)) {
-            if (!isset($this->requested_state)) {$this->requested_state = null;}
+        if ($requested_state == null) {
             $requested_state = $this->requested_state;
         }
 
@@ -110,7 +103,7 @@ function run() {
 
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 
-//        $this->thing->choice->save('wave', $this->state);
+        $this->thing->choice->save('wave', $this->state);
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
@@ -121,9 +114,7 @@ function run() {
     function get()
     {
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "forex" . " " . $this->from);
-
-        // Loads in variables.
+        //$this->variables_thing->getVariables();
 
         $this->currency_pair = $this->variables_agent->getVariable("currency_pair")  ;
         $this->bid = $this->variables_agent->getVariable("bid")  ;
@@ -132,44 +123,32 @@ function run() {
 
         $this->verbosity = $this->variables_agent->getVariable("verbosity")  ;
 
-        if ($this->verbosity == false) {$this->verbosity = 2;}
-
-        if ($this->currency_pair == false) {$this->currency_pair = "USDCAD";}
-
         return;
 
     }
 
 
-    function getForex()
+    function getOneforge()
     {
 
-$forex = new Exchangeratesapi($this->thing, $this->currency_pair);
-//var_dump($forex->price);
-//exit();
-
         $this->getLink($this->currency_pair);
-//        $data_source = "https://forex.1forge.com/1.0.3/quotes?pairs=" . $this->currency_pair . "&api_key=" .$this->api_key;
+        $data_source = "https://forex.1forge.com/1.0.3/quotes?pairs=" . $this->currency_pair . "&api_key=" .$this->api_key;
 
         //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
 
-//        $data = file_get_contents($data_source);
+        $data = file_get_contents($data_source);
 
-//        if ($data == false) {
-//            return true;
+        if ($data == false) {
+            return true;
             // Invalid query of some sort.
-//        }
+        }
 
-//        $json_data = json_decode($data, TRUE);
-
-        $this->bid = $forex->bid;
-        $this->price = $forex->price;
-        $this->ask = $forex->ask;
+        $json_data = json_decode($data, TRUE);
 
 
-//        $this->bid = $json_data[0]['bid'];
-//        $this->price = $json_data[0]['price'];
-//        $this->ask = $json_data[0]['ask'];
+        $this->bid = $json_data[0]['bid'];
+        $this->price = $json_data[0]['price'];
+        $this->ask = $json_data[0]['ask'];
 
         return $this->price;
     }
@@ -237,7 +216,7 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
 
 
 
-	public function respond() {
+	private function respond() {
 
 		// Thing actions
 
@@ -269,14 +248,14 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
 
 
         if ($this->verbosity >= 2) {
-//            $sms_message .= " | flag " . strtoupper($this->flag);
-            $sms_message .= " | price " . trim(number_format($this->price,4)) . "";
-            if ($this->bid != null) {$sms_message .= " | bid " . $this->bid. " ";}
-            if ($this->ask != null) {$sms_message .= " | ask " . $this->ask. " ";}
-            $sms_message .= " | source exchangeratesapi ";
+            $sms_message .= " | flag " . strtoupper($this->flag);
+            $sms_message .= " | price " . $this->price . " ";
+            $sms_message .= " | bid " . $this->bid. " ";
+            $sms_message .= " | ask " . $this->ask. " ";
+            $sms_message .= " | source 1forge ";
         }
 
-        $sms_message .= "| curated link " . $this->link;
+        $sms_message .= " | curated link " . $this->link;
 
         if ($this->verbosity >=9) {
             $sms_message .= " | nuuid " . substr($this->variables_agent->thing->uuid,0,4); 
@@ -288,7 +267,7 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
             $sms_message .= " | rtime " . number_format($milliseconds) . 'ms';
         }
 
-//        $sms_message .=  " | TEXT HELP";
+        $sms_message .=  " | TEXT ?";
 
 
 		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
@@ -305,6 +284,7 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
+        $this->thing_report['help'] = 'This triggers provides currency prices using the 1forge API.';
 
 		return;
 	}
@@ -404,13 +384,83 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
     }
 
 
+/*
+    if ((isset($this->run_time)) and (isset($this->run_at))) {
+        // Good chance with both these set that asking for a new
+        // block to be created, or to override existing block.
+        $this->thing->log('Agent "Block" found a run time.');
+
+        $this->nextBlock();
+        return;
+    }
+*/
 
     foreach ($pieces as $key=>$piece) {
         foreach ($keywords as $command) {
             if (strpos(strtolower($piece),$command) !== false) {
 
                 switch($piece) {
+/*
+                                                case 'stopwatch':    
 
+                                                        if ($key + 1 > count($pieces)) {
+                                                                //echo "last word is stop";
+                                                                $this->stop = false;
+                                                                return "Request not understood";
+                                                        } else {
+                                                                //echo "next word is:";
+                                                                //var_dump($pieces[$index+1]);
+                                                                $command = $pieces[$key+1];
+
+								if ( $this->thing->choice->isValidState($command) ) {
+                                                                	return $command;
+								}
+                                                        }
+                                                        break;
+*/
+
+   case 'buoy':
+   case 'bouy';
+        $number = $this->extractNumber();
+        if (is_numeric($number)) {
+            $this->noaa_buoy_id = $number;
+            $this->set();
+        }
+       return;
+
+   case 'direction':
+   case 'dir';
+        $number = $this->extractNumber();
+        if (is_numeric($number)) {
+            $this->notch_direction = $number;
+            $this->set();
+        }
+       return;
+
+   case 'spread':
+        $number = $this->extractNumber();
+        if (is_numeric($number)) {
+            $this->notch_spread = $number;
+            $this->set();
+        }
+       return;
+
+
+   case 'period':
+        $number = $this->extractNumber();
+        if (is_numeric($number)) {
+            $this->notch_min_period = $number;
+            $this->set();
+        }
+       return;
+
+   case 'height':
+        $number = $this->extractNumber();
+        if (is_numeric($number)) {
+            $this->notch_height = $number;
+            $this->set();
+        }
+       return;
 
 
    case 'verbosity':
@@ -424,8 +474,69 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
 
 
 
+   case 'red':
+   //     //$this->thing->log("read subject nextblock");
+        $this->setFlag('red');
+        break;
+
+
+   case 'green':
+   //     //$this->thing->log("read subject nextblock");
+        $this->setFlag('green');
+        break;
+
+
+    case 'accept':
+        $this->acceptThing();
+        break;
+
+    case 'clear':
+        $this->clearThing();
+        break;
+
+
+    case 'start':
+        $this->start();
+        break;
+    case 'stop':
+        $this->stop();
+        break;
+    case 'reset':
+        $this->reset();
+        break;
+    case 'split':
+        $this->split();
+        break;
+
+    case 'next':
+        $this->thing->log("read subject nexttrain");
+        $this->nextTrain();
+        break;
+
+   case 'drop':
+   //     //$this->thing->log("read subject nextblock");
+        $this->dropTrain();
+        break;
+
+
+   case 'add':
+   //     //$this->thing->log("read subject nextblock");
+        $this->makeTrain();
+        break;
+
+   case 'run':
+   //     //$this->thing->log("read subject nextblock");
+        $this->runTrain();
+        break;
+
+//   case 'red':
+   //     //$this->thing->log("read subject nextblock");
+//        $this->setFlag('red');
+//        break;
+
 
     default:
+        //$this->read();                                                    //echo 'default';
 
                                         }
 
@@ -605,4 +716,5 @@ $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
 
 }
 
+?>
 

@@ -824,7 +824,7 @@ $string_coordinate = $this->stringCoordinate($this->coordinate);
 
         $this->makeTXT();
 
-        $this->thing_report['help'] = 'This is a Coordinate.';
+        $this->thing_report['help'] = 'Stores a 1- 2- or 3-dimensional co-ordinate on the stack. Try COORDINATE 2.5,7.3,23.2';
 
 		return;
 	}
