@@ -116,7 +116,8 @@ $this->makePNG();
             $series_1 = $point['series_1'];
             $queue_time = $point['series_2'];
             $elapsed_time = $series_1 + $series_2;
-                    $refreshed_at = $point['refreshed_at'];
+
+            $refreshed_at = $point['refreshed_at'];
 
             if (($elapsed_time == null) or ($elapsed_time == 0 )) {
                 continue;
@@ -431,6 +432,9 @@ $this->points[] = null;
         foreach ($kaiju_messages as $key=>$thing) {
             $parsed_thing = $this->parseThing($thing['task']);
             if ($parsed_thing != null) {
+
+//                $parsed_thing['created_at'] = $thing['created_at'];
+
                 $parsed_thing['created_at'] = strtotime($thing['created_at']);
                 $this->kaiju_things[] = $parsed_thing;
 
@@ -588,13 +592,15 @@ if (isset($this->test_string)) {$test = $this->test_string;}
         }
 
 if (!isset($dict[4])) {return;}
-
+//var_dump($dict);
+//var_dump(count($dict));
 
         //foreach($dict as $index=>$phrase) {
         //    if ($index == 0) {continue;}
         //    if ($phrase == "") {continue;}
         //    $english_phrases[] = $phrase;
         //}
+if (count($dict) == 12) {
         $nuuid =  $dict[2];
         $kaiju_voltage =  $dict[3];
         $kaiju_temperature =  $dict[4];
@@ -605,24 +611,127 @@ if (!isset($dict[4])) {return;}
         $temperature_2 =  $dict[9];
         $temperature_3 =  $dict[10];
         $bilge_level =  $dict[11];
+$pitch = null;
+$roll = null;
+$heading = null;
+$clock_time = null;
+}
 
+if (count($dict) == 13) {
+        $nuuid =  $dict[2];
+        $kaiju_voltage =  $dict[3];
+        $kaiju_temperature =  $dict[4];
+        $pressure = $dict[5];
+        $magnetic_field =  $dict[6];
+        $vertical_acceleration =  $dict[7];
+        $temperature_1 =  $dict[8];
+        $temperature_2 =  $dict[9];
+        $temperature_3 =  $dict[10];
+        $bilge_level =  $dict[11];
+$pitch = null;
+$roll = null;
+$heading = null;
+$clock_time = $dict[12];
+}
+
+if (count($dict) == 14) {
+        $nuuid =  $dict[2];
+        $kaiju_voltage =  $dict[3];
+        $kaiju_temperature =  $dict[4];
+        $pressure = $dict[5];
+        $magnetic_field =  $dict[6];
+        $vertical_acceleration =  $dict[7];
+        $temperature_1 =  $dict[8];
+        $temperature_2 =  $dict[9];
+        $temperature_3 =  $dict[10];
+        $bilge_level =  $dict[11];
+$pitch = null;
+$roll = null;
+$heading = null;
+$clock_time = $dict[12] . " " . $dict[13];
+}
+
+if (count($dict) == 15) {
+
+            $nuuid =  $dict[2];
+            $kaiju_voltage =  $dict[3];
+            $kaiju_temperature =  $dict[4];
+            $pressure =  $dict[5];
+            $magnetic_field =  $dict[6];
+            $vertical_acceleration =  $dict[7];
+        $pitch =  $dict[8];
+        $roll =  $dict[9];
+        $heading =  $dict[10];
+
+            $temperature_1 =  $dict[11];
+            $temperature_2 =  $dict[12];
+            $temperature_3 =  $dict[13];
+           $bilge_level =  $dict[14];
+            $clock_time =  null;
+}
+
+
+if (count($dict) == 16) {
+
+            $nuuid =  $dict[2];
+            $kaiju_voltage =  $dict[3];
+            $kaiju_temperature =  $dict[4];
+            $pressure =  $dict[5];
+            $magnetic_field =  $dict[6];
+            $vertical_acceleration =  $dict[7];
+        $pitch =  $dict[8];
+        $roll =  $dict[9];
+        $heading =  $dict[10];
+
+            $temperature_1 =  $dict[11];
+            $temperature_2 =  $dict[12];
+            $temperature_3 =  $dict[13];
+           $bilge_level =  $dict[14];
+            $clock_time =  $dict[15];
+}
+
+if (count($dict) == 17) {
+
+            $nuuid =  $dict[2];
+            $kaiju_voltage =  $dict[3];
+            $kaiju_temperature =  $dict[4];
+            $pressure =  $dict[5];
+            $magnetic_field =  $dict[6];
+            $vertical_acceleration =  $dict[7];
+        $pitch =  $dict[8];
+        $roll =  $dict[9];
+        $heading =  $dict[10];
+
+            $temperature_1 =  $dict[11];
+            $temperature_2 =  $dict[12];
+            $temperature_3 =  $dict[13];
+           $bilge_level =  $dict[14];
+            $clock_time =  $dict[15]. " " . $dict[16];
+}
 
         //        $dict = explode(",",$text);
         //        $kaiju_owner = $dict[0];
         //        $kaiju_address = trim($dict[1]);
 
+if (!isset($nuuid)) {var_dump($dict);}
 
         $parsed_line = array(
-            "nuuid" =>  $dict[2],
-            "kaiju_voltage" =>  $dict[3],
-            "kaiju_temperature" =>  $dict[4],
-            "pressure" =>  $dict[5],
-            "magnetic_field" =>  $dict[6],
-            "vertical_acceleration" =>  $dict[7],
-            "temperature_1" =>  $dict[8],
-            "temperature_2" =>  $dict[9],
-            "temperature_3" =>  $dict[10],
-            "bilge_level" =>  $dict[11]);
+            "nuuid" =>  $nuuid,
+            "kaiju_voltage" =>  $kaiju_voltage,
+            "kaiju_temperature" =>  $kaiju_temperature,
+            "pressure" =>  $pressure,
+            "magnetic_field" =>  $magnetic_field,
+            "vertical_acceleration" =>  $vertical_acceleration,
+        "pitch" =>  $pitch,
+        "roll" =>  $roll,
+        "heading" =>  $heading,
+
+            "temperature_1" =>  $temperature_1,
+            "temperature_2" =>  $temperature_2,
+            "temperature_3" =>  $temperature_3,
+            "bilge_level" =>  $bilge_level,
+            "clocktime" =>  $clock_time
+);
 
         return $parsed_line;
     }
@@ -786,8 +895,23 @@ $this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6
         //$web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         //$web .= "<br>";
 
+//$this->kaiju_thing
+
         $web .= $this->sms_message;
         $web .= "\n";
+
+        $web .= "<p>";
+
+        $web .= "NUUID " . $this->kaiju_thing['nuuid'] . "<br>";
+
+        $web .= "kaiju voltage " . $this->kaiju_thing['kaiju_voltage'];
+if ($this->kaiju_thing['kaiju_voltage'] < 11.50) {$web .= " WARN";}
+$web.= "<br>";
+
+        $web .= "bilge level " . $this->kaiju_thing['bilge_level']; 
+if ($this->kaiju_thing['bilge_level'] >200) {$web .= " WARN";} 
+$web.= "<br>";
+
 
         $web .= "<p>";
 

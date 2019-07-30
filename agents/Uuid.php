@@ -37,6 +37,8 @@ class Uuid extends Agent
 
         $this->makePNG();
 
+        $this->thing_report['help'] = "Makes a universally unique identifier. Try NUUID.";
+
         $this->thing->log('Agent "Uuid" found ' . $this->uuid);
     }
 

@@ -1,4 +1,4 @@
-<?php /**
+<?php /*
  * Agent.php
  *
  * @package default
@@ -1102,6 +1102,43 @@ $this->input = $input;
             $this->thing_report = $place_thing->thing_report;
             return $this->thing_report;
         }
+
+
+
+// Here are some other places
+
+        $frequency_thing = new Frequency($this->thing, "extract");
+        $this->thing_report = $frequency_thing->thing_report;
+
+        if ($frequency_thing->hasFrequency($input)) {
+//            $ars_thing = new Amateurradioservice($this->thing, $input);
+            $ars_thing = new Amateurradioservice($this->thing);
+            $this->thing_report = $ars_thing->thing_report;
+            return $this->thing_report;
+
+        }
+
+        $repeater_thing = new Repeater($this->thing, "extract");
+        $this->thing_report = $repeater_thing->thing_report;
+
+        if ($repeater_thing->hasRepeater($input)) {
+
+            $ars_thing = new Amateurradioservice($this->thing, $input);
+if ($ars_thing->response == false) {
+
+            $ars_thing = new Callsign($this->thing);
+            $this->thing_report = $ars_thing->thing_report;
+            return $this->thing_report;
+
+
+} else {
+            $ars_thing = new Amateurradioservice($this->thing);
+            $this->thing_report = $ars_thing->thing_report;
+            return $this->thing_report;
+}
+        }
+
+
 
         /*
         // This would allow web based agent to update state

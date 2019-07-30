@@ -340,7 +340,7 @@ $this->matches = array();
             }
         }
         if (!isset($this->matches)) {$this->matches = array();}
-
+//var_dump($this->matches);
 
         return $m;
     }
