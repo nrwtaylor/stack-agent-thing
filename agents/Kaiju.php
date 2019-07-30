@@ -90,6 +90,7 @@ $this->makePNG();
 
     function drawGraph() {
 
+if (!isset($this->points)) {return true;}
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
@@ -902,6 +903,8 @@ $this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6
 
         $web .= "<p>";
 
+if (isset($this->kaiju_thing)) {
+
         $web .= "NUUID " . $this->kaiju_thing['nuuid'] . "<br>";
 
         $web .= "kaiju voltage " . $this->kaiju_thing['kaiju_voltage'];
@@ -912,11 +915,13 @@ $web.= "<br>";
 if ($this->kaiju_thing['bilge_level'] >200) {$web .= " WARN";} 
 $web.= "<br>";
 
-
+}
         $web .= "<p>";
 
 
         $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
+
+if (isset($this->points)) {
 
         $txt = '<a href="' . $link . ".txt" . '">';
         $txt .= 'TEXT';
@@ -924,6 +929,9 @@ $web.= "<br>";
 
         $web .= "Kaiju report here " . $txt .".";
         $web .= "<p>";
+}
+
+if (isset($this->points)) {
 
         $web .= '<a href="' . $link . '">';
         $web .= $this->image_embedded;
@@ -933,7 +941,7 @@ $web.= "<br>";
         $web .= "kaiju graph";
 
         $web .= "<br><br>";
-
+}
 
         $web .= "Requested about ". $ago . " ago.";
 //        $web .= "<p>";
