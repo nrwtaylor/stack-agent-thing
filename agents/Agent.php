@@ -13,6 +13,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+
 class Agent {
 
 public $input;
@@ -209,6 +210,49 @@ public $input;
         if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
     }
 
+
+    /**
+     *
+     * @return unknown
+     */
+    function getLink() {
+
+        $block_things = array();
+        // See if a block record exists.
+        $findagent_thing = new FindAgent($this->thing, 'thing');
+
+        // This pulls up a list of other Block Things.
+        // We need the newest block as that is most likely to be relevant to
+        // what we are doing.
+
+        //$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report$
+
+        $this->max_index =0;
+
+        $match = 0;
+
+        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+
+     //       $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " .$
+
+            if ($block_thing['nom_to'] != "usermanager") {
+                $match += 1;
+                $this->link_uuid = $block_thing['uuid'];
+                if ($match == 2) {break;}
+            }
+        }
+
+
+        $previous_thing = new Thing($block_thing['uuid']);
+        $this->prior_thing = $previous_thing;
+        if (!isset($previous_thing->json->array_data['message']['agent'])) {
+            $this->prior_agent = "help";
+        } else {
+            $this->prior_agent = $previous_thing->json->array_data['message']['agent'];
+        }
+
+        return $this->link_uuid;
+    }
 
     /**
      *
@@ -498,9 +542,9 @@ $this->input = trim($whatIWant);
 if (isset($this->input)) {$this->thing->subject = $this->input;}
 
 //$this->thing->subject = $this->input;
-
+//echo "foo";
             $agent = new $agent_namespace_name($this->thing);
-
+///echo "bar";
 
 //var_dump($agent->thing_report);
 
@@ -518,6 +562,7 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
 //var_dump($this->thing_report['sms']);
             $this->agent = $agent;
 
+//        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
@@ -862,6 +907,19 @@ if ( strtolower( substr($input,0,2)) != "s/") {
 
         // Now pick up obvious cases where the keywords are embedded
         // in the $input string.
+
+        if (strtolower($input) == 'agent') {
+            $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+//            $usermanager_thing = new Usermanager($this->thing);
+//$link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
+$this->getLink();
+//$link = $this->link_uuid;
+$link = $this->web_prefix . "agent/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
+
+            $this->thing_report['sms'] = "AGENT | " . $link . " Made an agent link.";
+            return $this->thing_report;
+        }
+
 
         $this->thing->log('<pre> Agent "Agent" looking for optin/optout.</pre>');
         //    $usermanager_thing = new Usermanager($this->thing,'usermanager');
@@ -1528,8 +1586,8 @@ $this->thing_report = $c->thing_report;
 
 
 
-
 /*
+
 function warning_handler($errno, $errstr) {
     throw new Exception('Class not found.');
 
@@ -1539,4 +1597,5 @@ function warning_handler($errno, $errstr) {
     //echo $errstr;
     // do something
 }
+
 */

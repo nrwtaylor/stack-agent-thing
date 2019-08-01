@@ -21,11 +21,14 @@ class Help extends Agent {
      * @param Thing   $thing
      * @return unknown
      */
+//    function __construct(Thing $thing) {
     function init() {
+
+//        $this->thing_report['thing'] = false;
 
         if ($this->thing != true) {
 
-            $this->thing->log ( ' ran on a null Thing ' .  $thing->uuid .  '</pre>');
+            $this->thing->log ( '<pre> Agent "Help" ran on a null Thing ' .  $thing->uuid .  '</pre>');
             $this->thing_report['info'] = 'Tried to run Help on a null Thing.';
             $this->thing_report['help'] = "That isn't going to work";
 
@@ -35,7 +38,9 @@ class Help extends Agent {
         $this->agent_name = 'help';
         $this->agent_version = 'redpanda';
 
-        $this->node_list = array('help'=>array('who', 'agents')
+        $this->node_list = array('help'=>array('privacy', 'whatis'), 'start a'=>
+            array('useful', 'useful?'),
+            'start b'=>array('helpful', 'helpful?')
         );
 
         $this->namespace = "\\Nrwtaylor\\StackAgentThing\\";
@@ -64,6 +69,7 @@ class Help extends Agent {
             $this->thing_report['help'] = "Asks the Agent for help.";
             return;
         }
+
         try {
             $this->thing->log( $this->agent_prefix .'trying Agent "' . $this->prior_agent . '".', "INFORMATION" );
             $agent_class_name = $this->namespace . ucwords(strtolower($this->prior_agent));
@@ -83,7 +89,9 @@ class Help extends Agent {
 
             // This is an error in the Place, so Bork and move onto the next context.
             $bork_agent = new Bork($this->thing, $input);
-            $thing_report['help'] = $bork_agent->thing_report['help'] . " " . $input;
+//            $thing_report['help'] = $bork_agent->thing_report['help'] . " " . $input;
+
+            $thing_report['help'] = "Could not retrieve help for that agent.";
             //continue;
         }
 
@@ -101,7 +109,7 @@ class Help extends Agent {
     public function makeSMS() {
 
         $this->sms_message = "HELP | " . ucwords($this->prior_agent) . " | " . $this->help;
-//        $this->sms_message .= " | TEXT WHO";
+        //$this->sms_message .= " | TEXT INFO";
         $this->thing_report['sms'] = $this->sms_message;
 
     }
@@ -128,7 +136,7 @@ class Help extends Agent {
         $this->thing->flagGreen();
 
         $this->thing_report['info'] = 'This is the help agent.';
-        $this->thing_report['help'] = 'This is the help agent. TEXT AGENTS.';
+        $this->thing_report['help'] = 'This agent takes a Thing and runs the Help agent on it.';
 
         $this->thing->log ( '<pre> Agent "Help" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
 

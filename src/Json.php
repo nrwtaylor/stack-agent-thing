@@ -498,7 +498,9 @@ class Json {
         // Now write to defined column.
         if ($this->field == null) {return;}
         if (strlen($this->json_data) > $this->char_max) {
-var_dump($this->json_data);
+
+//var_dump($this->json_data);
+
             // devstack what do you do here?
             // This is the place where Json borks when asked to save too much.
 
@@ -513,7 +515,7 @@ var_dump($this->json_data);
             //echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.\n";
             //echo $this->uuid . "\n";
             $thing = new Thing(null);
-            $thing->Create("", "", "");
+            $thing->Create(null, "human", 'Insufficient space in DB record ' . $this->uuid . ".");
             $thing_agent = new Hey($thing);
 
             $this->last_write = true;

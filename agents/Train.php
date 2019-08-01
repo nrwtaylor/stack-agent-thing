@@ -1801,7 +1801,7 @@ $this->getConsist();
 
     function extractEvents($input)
     {
-        if ($input == null) {$input = $this-subject;}
+        if ($input == null) {$input = $this->subject;}
 
         // Extract runat signal
         $pieces = explode(" ", strtolower($input));

@@ -515,7 +515,12 @@ function makeCard()
     $card_thing = new Card($thing, "card");
 
     //$associations_agent = new Associations($card_thing, $card_thing->uuid);
-    $this->thing->associate($card_thing->uuid);
+//    $this->thing->associate($card_thing->uuid);
+
+// Okay the associations field is not going to be enough to hold a deck.
+// So rely on the cards to point to the deck.
+
+    $card_thing->associate($this->uuid);
 
     return $card_thing;
 }

@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Contact {
+class Contactstack {
 
 	public $var = 'hello';
 
@@ -9,7 +9,7 @@ class Contact {
     function __construct(Thing $thing, $text = null)
     {
 
-		$this->agent_name = 'contact';
+		$this->agent_name = 'contactstack';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 		$this->test= "Development code";
 
@@ -69,7 +69,7 @@ class Contact {
             $k = array_rand($array);
             $v = $array[$k];
 
-            $response = "CONTACT | " . $v;
+            $response = "CONTACT STACK | " . $v;
 
 
             $this->contact_message = $response;

@@ -25,7 +25,8 @@ class Wikipedia extends Agent
 
         $this->run_time_max = 360; // 5 hours
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "wikipedia" . " " . $this->from);
+        $this->thing_report['help'] = 'This asks Wikipedia about the words provided.';
+
 	}
 
     function run()
@@ -42,6 +43,8 @@ class Wikipedia extends Agent
 
     function get()
     {
+        $this->variables_agent = new Variables($this->thing, "variables " . "wikipedia" . " " . $this->from);
+
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
@@ -164,9 +167,6 @@ $context = stream_context_create($options);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
-        $this->thing_report['help'] = 'This asks Wikipedia about the words provided.';
-
-		return;
 	}
 
     public function makeWeb()

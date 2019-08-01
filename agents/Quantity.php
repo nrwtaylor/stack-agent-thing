@@ -956,7 +956,7 @@ var_dump($last_quantity['quantity']);
 
         //    function makePlace($place_code = null, $place_name = null) {
         $this->makeQuantity($quantity);
-        $this->thing->log($this->agent_prefix . 'using default_quantity ' . implode(" ",$this->default_quantity) . ".","INFORMATION");
+//        $this->thing->log($this->agent_prefix . 'using default_quantity ' . implode(" ",$this->default_quantity) . ".","INFORMATION");
 
         $this->response = "Made a Quantity called " . $quantity . ".";
         return;

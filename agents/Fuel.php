@@ -240,6 +240,7 @@ class Fuel
         $this->fuel_quantity = $this->last_fuel_quantity;
 
         $this->fuel_units = $this->last_fuel_units;
+$this->refreshed_at = $this->last_refreshed_at;
     }
 
     function is_positive_integer($str)
@@ -262,7 +263,7 @@ class Fuel
 //        $this->quantity = $this->arrayQuantity($quantity);
         $this->fuel = $fuel;
 
-        $this->refreshed_at = $this->variables_fuel->getVariable("refreshed_at");
+        $this->last_refreshed_at = $this->variables_fuel->getVariable("refreshed_at");
 
 //var_dump($this->fuel);
 
@@ -829,10 +830,3 @@ $this->getFuel();
 	}
 */
 }
-
-/* More on places
-
-Lots of different ways to number places.
-
-*/
-?>

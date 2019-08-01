@@ -89,10 +89,11 @@ if ($queue_uuid == null) return true;
 $queue = new Thing($queue_uuid);
 
 // And inventory the contents
-//var_dump($queue->thing->associations);
+if (!isset($queue->thing->associations)) {return true;}
+
 $items = json_decode($queue->thing->associations);
 
-var_dump($items);
+//var_dump($items);
 
 
 // Try some other things.

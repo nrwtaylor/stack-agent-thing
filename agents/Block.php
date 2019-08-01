@@ -308,6 +308,7 @@ $match = true;
             $this->block_thing->json->setField("associations");
             $this->associations = $this->block_thing->json->readVariable( array("agent") );
 
+if ($this->associations === false) {return;}
             foreach ($this->associations as $association_uuid) {
 
                 $association_thing = new Thing($association_uuid);

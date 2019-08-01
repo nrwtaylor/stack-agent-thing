@@ -41,6 +41,8 @@ if ((isset($this->test_flag)) and ($this->test_flag === true)) {$this->test();}
         $this->height = 200;
         $this->width = 300;
 
+$this->horizon = 5*24*60/15;
+
         $this->series = array('kaiju');
 
 
@@ -400,7 +402,7 @@ $this->points[] = null;
 
         $block_things = array();
         // See if a stack record exists.
-        $findagent_thing = new Findagent($this->kaiju_thing, 'thing');
+        $findagent_thing = new Findagent($this->kaiju_thing, 'thing '. $this->horizon);
         $this->max_index =0;
 
         $match = 0;
@@ -410,7 +412,7 @@ $this->points[] = null;
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
-            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
+//            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
             //echo $block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from'] . "\n";
             if ($block_thing['nom_from'] != $this->kaiju_address) {continue;}
 
@@ -423,7 +425,7 @@ $this->points[] = null;
                 //var_dump($block_thing['task']);
                 // if ($match == 2) {break;}
                 // Get upto 10 matches
-                if ($match == 99) {break;}
+                if ($match == $this->horizon) {break;}
 
 
             }
@@ -434,9 +436,9 @@ $this->points[] = null;
             $parsed_thing = $this->parseThing($thing['task']);
             if ($parsed_thing != null) {
 
-//                $parsed_thing['created_at'] = $thing['created_at'];
+                $parsed_thing['created_at'] = $thing['created_at'];
 
-                $parsed_thing['created_at'] = strtotime($thing['created_at']);
+//                $parsed_thing['created_at'] = strtotime($thing['created_at']);
                 $this->kaiju_things[] = $parsed_thing;
 
 
@@ -455,7 +457,7 @@ $voltage = $this->parseData($data_array[2]);
 
 
 //var_dump($data_array[2]);
-$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], "series_1"=>$voltage["voltage"], "series_2"=>0);
+$this->points[] = array("refreshed_at"=>strtotime($parsed_thing['created_at']), "series_1"=>$voltage["voltage"], "series_2"=>0);
 //$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], $voltage, "series_2"=>0);
 
    //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);

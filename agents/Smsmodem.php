@@ -220,9 +220,10 @@ var_dump($arr);
     function modemOpen()
     {
         if (!isset($this->serial_agent)) {
+//            $this->serial_agent = new Serial();
             $this->serial_agent = new Serial($this->thing);
-            $this->serial_agent->deviceOpen("/dev/ttyUSB0", 115200);
 
+            $this->serial_agent->deviceOpen("/dev/ttyUSB0", 115200);
 //https://www.phpclasses.org/discuss/package/3679/thread/13/
         }
     }

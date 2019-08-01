@@ -71,7 +71,7 @@ class Age extends Chart
 
                 if(isset($variables['age']['earliest'])) {$this->earliest_known = strtotime($variables['age']['earliest']);}
 
-				if ( ($this->age == false) or
+				if ( (!isset($this->age)) or ($this->age == false) or
 					($this->count == false) or
 					($this->sum == false) or
 					($this->sum_squared == false) or

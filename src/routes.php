@@ -619,6 +619,8 @@ $inject_text = "";
 				$uuid = $args['uuid'];
 				$thing = new Thing($uuid);
                 //$j = json_decode ($thing->thing);
+
+if ($thing->thing != false) {
                 $t = $thing->thing;
 
 
@@ -641,7 +643,9 @@ $inject_text = "";
 
                 $t->settings = false;
                 $t->variables = $thing->json->array_data;
-
+} else {
+$t = false;
+}
                 // Just display the thing.
 
 $web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/";

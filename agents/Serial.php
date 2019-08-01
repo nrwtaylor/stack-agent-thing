@@ -230,17 +230,26 @@ function deviceClose()
 function deviceOpen($address, $baud)
 {
 
+try {
+
 $this->serial = new \PhpSerial;
 
 //$this->serial->deviceSet("/dev/ttyUSB0");
 //$this->serial->confBaudRate(115200);
 
-
 $this->serial->deviceSet("/dev/ttyUSB0");
 $this->serial->confBaudRate(115200);
-$this->serial->confFlowControl("custom");
+
+
+// This needed a tweek to hyperthese php-serial
+//$this->serial->confFlowControl("custom");
 
 $this->serial->deviceOpen();
+
+} catch (Throwable $t) {
+echo "merp";
+return true;
+}
 
 
 }

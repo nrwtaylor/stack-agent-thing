@@ -27,22 +27,21 @@ namespace Nrwtaylor\StackAgentThing;
 //vhttps://www.youtube.com/watch?v=41U78QP8nBk
 // Hello Cortana.
 
-class Note
+class Note extends Agent
 {
-	function __construct(Thing $thing, $agent_command = null) {
-//echo "meep";
-//    function __construct()
-//    {
-        //$this->thing = new Agent(null); // State contains uuid
 
-        $this->thing = $thing;
+function init() {
 
+//        $this->thing = $thing;
         $verbosity = 1;
 
         // $this->thing = new \Nrwtaylor\Stackr\Thing(null); // State contains uuid
         //https://github.com/kite1988/nus-sms-corpus/blob/master/README.md
         //https://stackoverflow.com/questions/28053226/generate-wav-tone-in-php
         //https://stackoverflow.com/questions/28053226/generate-wav-tone-in-php
+
+        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
 
         $this->sample_rate = 44100;
 
@@ -1271,8 +1270,10 @@ $str = call_user_func_array("pack",
 
 
 
-        $file_name = "daisy3.wav"; // Portal
-        $myfile = fopen($file_name, "wb") or die("Unable to open file!");
+        $file_name = $this->resource_path . "note/". "daisy3.wav"; // Portal
+//        $myfile = fopen($file_name, "wb") or echo "Unable to open file!";
+       $myfile = fopen($file_name, "wb") or die("Problem");
+
         fwrite($myfile, $str);
         fclose($myfile);
         echo "file written\n";
@@ -1809,6 +1810,8 @@ $x = round($s/$n);
         }
 
     }
+
+function readSubject() {}
 
 }
 ?>

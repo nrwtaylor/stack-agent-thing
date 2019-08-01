@@ -120,7 +120,7 @@ class Makelog
             preg_match_all('/[0-9,]+/',$line,$matches);
             $numbers = $matches[0];
 
-            if (strtolower($words[1]) == "thing") {continue;}
+            if ((isset($words[1])) and (strtolower($words[1]) == "thing")) {continue;}
 
             $agent_name = $words[2];
 
@@ -146,6 +146,3 @@ class Makelog
         }
     }
 }
-
-
-?>

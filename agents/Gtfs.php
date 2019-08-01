@@ -1047,6 +1047,7 @@ $route_id = $this->trip_routes[$trip_id];
         $input = str_replace("gtfs " , "", $input);
         $arr =  $this->findStop($input);
 
+$count = 0;
         if (is_array($arr)) {$count = count($arr);}
 
         if ($count > 1) {
