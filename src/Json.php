@@ -445,7 +445,6 @@ class Json {
         foreach ($path as $key) {
             $dest = &$dest[$key];
         }
-
         $dest[$finalKey] = $value;
     }
 

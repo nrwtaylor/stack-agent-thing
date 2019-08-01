@@ -158,14 +158,15 @@ $count += 1;
 $match_flag = false;
 
 foreach($exclude_agents as $i=>$agent_name) {
-echo $agent['name'] ." " .$agent_name ."\n";
+//echo $agent['name'] ." " .$agent_name ."\n";
 if (strtolower($agent['name']) == strtolower($agent_name)) {
+echo $agent['name'] ." " .$agent_name ."\n";
 
 $match_flag = true; break;
 
 }
 
-if (($match_flag)) {break;}
+if (($match_flag)) {continue;}
 
 
 }

@@ -29,8 +29,9 @@ class MakeWeb
             //$this->thing_report['web'] = $this->agent_thing->thing_report['web'];
         }
 
-            $web = $this->agent_thing->thing_report['web'];
-
+//            $web = $this->agent_thing->thing_report['web'];
+$web = "";
+if (isset($this->agent_thing->thing_report['web'])) {$web = $this->agent_thing->thing_report['web'];}
 
 
 $head= '
@@ -55,7 +56,11 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
         
         //$web .= "<center>";
         $web .= $head;
-        $web .= $this->agent_thing->thing_report['choices']['button'];
+
+$button_text = "";
+if (isset($this->agent_thing->thing_report['choices']['button'])) {$button_text = $this->agent_thing->thing_report['choices']['button'];}
+
+        $web .= $button_text;
         $web .= $foot;
 
 

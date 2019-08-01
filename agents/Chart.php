@@ -11,25 +11,7 @@ class Chart extends Agent
     function init()
 	//function __construct(Thing $thing, $agent_command = null)
     {
-  //      $this->start_time = $thing->elapsed_runtime();
 
-        // Setup Thing
-  //      $this->thing = $thing;
-  //     $this->uuid = $thing->uuid;
-  //      $this->to = $thing->to;
-  //      $this->from = $thing->from;
-  //      $this->subject = $thing->subject;
-
-        // Setup Agent
-  //      $this->agent = strtolower(get_class());
-  //      $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
-
-        // Setup logging
- //       $this->thing_report['thing'] = $this->thing->thing;
-
-  //      if ($agent_command == null) {
-  //          $this->thing->log( 'Agent "Chart" did not find an agent command.' );
-  //      }
         $agent_command = $this->agent_input; //
         $this->agent_command = $agent_command;
 
@@ -126,7 +108,7 @@ class Chart extends Agent
             $this->points[] = array($tock_series=>${$tock_series}, $dimension[0]=>${$dimension[0]}, $dimension[1]=>${$dimension[1]});
         }
 
-        $this->thing->log('Agent "charth" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
+        $this->thing->log('getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
 
     }
 

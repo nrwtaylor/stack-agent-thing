@@ -46,7 +46,7 @@ class Firstnarrows {
 		$to = $this->thing->from;
 		$from = "first narrows";
 
-        $this->thing_report['help'] = "This agent provides a link to tides and currents at Second Narrows.";
+        $this->thing_report['help'] = "This agent provides a link to tides and currents at First Narrows.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
 		$this->thing_report['info'] = $message_thing->thing_report['info'] ;

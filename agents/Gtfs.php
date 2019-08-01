@@ -1,4 +1,11 @@
 <?php
+/**
+ * Gtfs.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -9,25 +16,29 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Gtfs
-{
+class Gtfs {
 
-	public $var = 'hello';
+    public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
-    {
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function __construct(Thing $thing, $agent_input = null) {
 
         $this->channel = new Channel($thing, "channel");
         $this->channel_name = $this->channel->channel_name;
 
         // Handle stations specifically.
         // And if the context is Transit handle Translink Stops.
-//        $this->context = new Context($thing, "context");
+        //        $this->context = new Context($thing, "context");
         // 1 word messages don't action.
 
-//       $this->transit = new Transit($thing,"translink");
-//$this->findStop("Madison and Hastings");
-//exit();
+        //       $this->transit = new Transit($thing,"translink");
+        //$this->findStop("Madison and Hastings");
+        //exit();
 
 
         // Some notes
@@ -51,20 +62,20 @@ class Gtfs
 
         $this->agent_input = $agent_input;
 
-		$this->thing = $thing;
-		$this->agent_name = 'gtfs';
+        $this->thing = $thing;
+        $this->agent_name = 'gtfs';
 
         $this->thing_report['thing'] = $thing;
 
         $this->start_time = $this->thing->elapsed_runtime();
 
 
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+        // So I could call
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
-		$this->api_key = $this->thing->container['api']['translink'];
+        $this->api_key = $this->thing->container['api']['translink'];
 
-		$this->retain_for = 2; // Retain for at least 2 hours.
+        $this->retain_for = 2; // Retain for at least 2 hours.
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -73,7 +84,7 @@ class Gtfs
 
 
 
-		$this->sqlresponse = null;
+        $this->sqlresponse = null;
 
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -82,31 +93,32 @@ class Gtfs
         $this->email = $thing->container['stack']['email'];
 
 
-		// Allow for a new state tree to be introduced here.
-		$this->node_list = array("start"=>array("useful", "useful?"));
+        // Allow for a new state tree to be introduced here.
+        $this->node_list = array("start"=>array("useful", "useful?"));
 
-		$this->thing->log('running on Thing ' . $this->thing->nuuid . '.');
-		$this->thing->log('received this Thing "' . $this->subject .  '".');
+        $this->thing->log('running on Thing ' . $this->thing->nuuid . '.');
+        $this->thing->log('received this Thing "' . $this->subject .  '".');
 
-$this->max_hops = 10;
+        $this->max_hops = 10;
 
 
-//        $this->getNetworktime();
+        //        $this->getNetworktime();
 
-//        $this->getDestinations(); // Get the stops available from this stop.  Availability includes runat.
+        //        $this->getDestinations(); // Get the stops available from this stop.  Availability includes runat.
 
         $this->readSubject();
 
-  		$this->respond();
-		$this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+        $this->respond();
+        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
         $this->thing_report['response'] = $this->response;
 
-		return;
+        return;
 
     }
 
-/*
+
+    /*
     function depr_getTrains()
     {
         if (!isset($this->routes)) {$this->getRoutes();}
@@ -120,15 +132,19 @@ $this->max_hops = 10;
     }
 */
 
-    function getRailway()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    function getRailway() {
         if (isset($this->railway)) {return $this->railway;}
-//echo "making railway\n";
+        //echo "making railway\n";
         // Running in 15s.  4 Aug 2018.
         $split_time = $this->thing->elapsed_runtime();
         $this->thing->log ( "Making railway - transit context");
         //echo $this->thing->log();
-//exit();
+        //exit();
         // stop_times is a large file
         // this looks through and identifies all the blocks.
         // From one stop to the next.
@@ -136,11 +152,11 @@ $this->max_hops = 10;
         for ($channels = $this->nextGtfs("stop_times"); $channels->valid(); $channels->next()) {
 
             $channel = $channels->current();
-//var_dump($channel);
+            //var_dump($channel);
             $station_id = $channel['stop_id'];
             $train_id = $channel['trip_id'];
 
-        //$this->thing->log ( "got " . $station_id . " " . $train_id . ".");
+            //$this->thing->log ( "got " . $station_id . " " . $train_id . ".");
 
             $stop_sequence = $channel['stop_sequence'];
             if ($stop_sequence == 1) {unset($last_station);}
@@ -155,16 +171,21 @@ $this->max_hops = 10;
 
     }
 
-    function getStop($station_id = null)
-    {
-//echo "get stop " . $station_id . "\n";
+
+    /**
+     *
+     * @param unknown $station_id (optional)
+     * @return unknown
+     */
+    function getStop($station_id = null) {
+        //echo "get stop " . $station_id . "\n";
         if ($station_id == null) {$station_id = $this->station_id;}
 
         if (isset($this->stops[$station_id])) {return $this->stops[$station_id];}
         $stop = $this->getStops($station_id);
         $this->thing->log("Got stop ".$station_id .".");
         return $stop;
-/*
+        /*
         // Use Translink file language.  This is a station in train context.
         if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
         $stop_count = $this->searchForsId($station_id, $this->stops_db);
@@ -177,8 +198,13 @@ $this->max_hops = 10;
 */
     }
 
-    function findStop($text = null)
-    {
+
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
+    function findStop($text = null) {
         if ($text == null) {return null;}
 
         if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
@@ -188,8 +214,12 @@ $this->max_hops = 10;
     }
 
 
-    function getStops($station_id = null)
-    {
+    /**
+     *
+     * @param unknown $station_id (optional)
+     * @return unknown
+     */
+    function getStops($station_id = null) {
         if ($station_id == null) {$station_id = $this->station_id;}
 
         if (isset($this->stops[$station_id])) {return $this->stops[$station_id];}
@@ -200,19 +230,23 @@ $this->max_hops = 10;
         $stop = null;
         if (!($stop_count == null)) {$stop = $this->stops_db[$stop_count];}
         $this->stops[$station_id] = $stop;
-$this->thing->log("got station " . $station_id . " and stop " . $stop['stop_id']. ".");
+        $this->thing->log("got station " . $station_id . " and stop " . $stop['stop_id']. ".");
         return $this->stops[$station_id];
 
     }
 
 
-    function getStations($station_id = null)
-    {
+    /**
+     *
+     * @param unknown $station_id (optional)
+     * @return unknown
+     */
+    function getStations($station_id = null) {
 
 
         if (isset($this->stations[$station_id])) {return $this->stations;}
 
-$this->thing->log("get stations " . $station_id . ".");
+        $this->thing->log("get stations " . $station_id . ".");
 
         // This needs to get a list of all the stations connected to this station (stop) by a train (trip)
 
@@ -225,35 +259,35 @@ $this->thing->log("get stations " . $station_id . ".");
         // And this should do that.  Let's check.
         //$stop_code = $this->idStation($text);
         //$text = 51380;
-//        $stop_id = $this->idStation($text);
+        //        $stop_id = $this->idStation($text);
 
         // Make the networks
         $this->getRailway();
-//        $station_id = $stop_id; // Work in train context
+        //        $station_id = $stop_id; // Work in train context
 
 
         // Use Translink file language.  This is a station in train context.
-//        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
-//        $stop_count = $this->searchForsId($station_id, $this->stops_db);
-//        $stop = $this->stops_db[$stop_count];
+        //        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
+        //        $stop_count = $this->searchForsId($station_id, $this->stops_db);
+        //        $stop = $this->stops_db[$stop_count];
 
-$stop = $this->getStops($station_id);
+        $stop = $this->getStops($station_id);
 
 
-        $visible_stations[$station_id] = array("visited"=>false,"station_id"=>$station_id);
+        $visible_stations[$station_id] = array("visited"=>false, "station_id"=>$station_id);
 
         $completed = false;
         $hops = 0;
 
         $this->thing->log("Looking for visible stations.");
 
-        while($completed == false) {
+        while ($completed == false) {
             $completed = true;
             foreach ($visible_stations as $visible_station_id=>$visible_station) {
                 if ($visible_station['visited'] == false) {
                     $station_id_pointer = $visible_station_id;
                     $completed = false;
-       //             break;
+                    //             break;
                 }
             }
 
@@ -265,7 +299,7 @@ $stop = $this->getStops($station_id);
 
 
             foreach ($stations as $station_id=>$station) {
-                $visible_stations[$station_id] = array("visited"=>false,"station_id"=>$station_id,"station"=>$this->getStops($station_id));
+                $visible_stations[$station_id] = array("visited"=>false, "station_id"=>$station_id, "station"=>$this->getStops($station_id));
                 echo $station_id . " ";
                 $completed = false;
             }
@@ -282,19 +316,26 @@ $stop = $this->getStops($station_id);
         echo "\n";
 
         $this->stations = $visible_stations;
-//var_dump($this->stations);
-//exit();
+        //var_dump($this->stations);
+        //exit();
 
         return $this->stations;
     }
 
-    public function getDestinations()
-    {
+
+    /**
+     *
+     */
+    public function getDestinations() {
         $this->destinations = array(); // Fair enough.
     }
 
-    public function nullAction()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    public function nullAction() {
 
         $this->thing->json->setField("variables");
 
@@ -304,8 +345,13 @@ $stop = $this->getStops($station_id);
         return $this->message;
     }
 
-    function idStation($text = null)
-    {
+
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
+    function idStation($text = null) {
         // Curiously one of the harder things to do.
         // dev create a CSV file when recognize version number has changed.
 
@@ -323,8 +369,14 @@ $stop = $this->getStops($station_id);
         return $this->station_id;
     }
 
-    function get($file_name, $selector_array = null)
-    {
+
+    /**
+     *
+     * @param unknown $file_name
+     * @param unknown $selector_array (optional)
+     * @return unknown
+     */
+    function get($file_name, $selector_array = null) {
         //$this->thing->log("Getting " . $file_name . ".txt.");
 
         $matches = array();
@@ -337,34 +389,47 @@ $stop = $this->getStops($station_id);
         return $matches;
     }
 
-    function makeStop($iteration)
-    {
-    $trip_id =  $iteration['trip_id'];
-    $stop_id =  $iteration['stop_id'];
-    $arrival_time =  $iteration['arrival_time'];
-    $departure_time =  $iteration['departure_time'];
-    $shape_dist_traveled =  $iteration['shape_dist_traveled'];
 
-    $stop = array("trip_id"=>$trip_id,
-                "stop_id"=>$stop_id,
-                "arrival_time"=>$arrival_time,
-                "departure_time"=>$departure_time,
-                "shape_dist_traveled"=>$shape_dist_traveled,
-                "elapsed_travel_time"=>null);
+    /**
+     *
+     * @param unknown $iteration
+     * @return unknown
+     */
+    function makeStop($iteration) {
+        $trip_id =  $iteration['trip_id'];
+        $stop_id =  $iteration['stop_id'];
+        $arrival_time =  $iteration['arrival_time'];
+        $departure_time =  $iteration['departure_time'];
+        $shape_dist_traveled =  $iteration['shape_dist_traveled'];
+
+        $stop = array("trip_id"=>$trip_id,
+            "stop_id"=>$stop_id,
+            "arrival_time"=>$arrival_time,
+            "departure_time"=>$departure_time,
+            "shape_dist_traveled"=>$shape_dist_traveled,
+            "elapsed_travel_time"=>null);
         return $stop;
 
     }
 
-// To handle >24 hours.  Urgh:/
-// https://stackoverflow.com/questions/12708419/strtotime-function-for-hours-more-than-24
-function getTimeFromString($time){
-    $time = explode(':', $time);
-    return mktime($time[0], $time[1], $time[2]);
-}
+
+    /**
+     * To handle >24 hours.  Urgh:/
+     * https://stackoverflow.com/questions/12708419/strtotime-function-for-hours-more-than-24
+     *
+     * @param unknown $time
+     * @return unknown
+     */
+    function getTimeFromString($time) {
+        $time = explode(':', $time);
+        return mktime($time[0], $time[1], $time[2]);
+    }
 
 
-    function echoTuple()
-    {
+    /**
+     *
+     */
+    function echoTuple() {
         // Deploy
         $stop_tuple = $this->stop_tuples['51380']['9130759']["27:54:00"];
 
@@ -376,14 +441,21 @@ function getTimeFromString($time){
         echo $txt;
     }
 
-    function getStation($station_id = null)
-    {
 
-       if (isset($this->stations[$station_id]['station'])) {return $this->stations[$station_id];}
+    /**
+     *
+     * @param unknown $station_id (optional)
+     * @return unknown
+     */
+    function getStation($station_id = null) {
+
+        if (isset($this->stations[$station_id]['station'])) {return $this->stations[$station_id];}
         $this->getStations($station_id);
         return $this->stations[$station_id];
     }
-/*
+
+
+    /*
         if (isset($this->routes[$station_id])) {return $this->routes[$station_id];}
         if ($station_id == null) {$station_id = $this->station_id;}
 
@@ -417,8 +489,14 @@ function getTimeFromString($time){
 
     }
 */
-    function tripRoute($station_id)
-    {
+
+
+    /**
+     *
+     * @param unknown $station_id
+     * @return unknown
+     */
+    function tripRoute($station_id) {
         if (isset($this->trip_routes[$station_id])) {return $this->trip_routes;}
 
         for ($routes = $this->nextGtfs("trips", array(array("stop_id"=>$station_id))); $routes->valid(); $routes->next()) {
@@ -430,23 +508,36 @@ function getTimeFromString($time){
         return $this->trip_routes;
     }
 
-// This is ugly.
 
-function searchForId($id, $array) {
-   foreach ($array as $key => $val) {
-       if ($val['trip_id'] === $id) {
-           return $key;
-       }
-   }
-   return null;
-}
+    // This is ugly.
 
 
-    function searchForText($text, $array)
-    {
+    /**
+     *
+     * @param unknown $id
+     * @param unknown $array
+     * @return unknown
+     */
+    function searchForId($id, $array) {
+        foreach ($array as $key => $val) {
+            if ($val['trip_id'] === $id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     *
+     * @param unknown $text
+     * @param unknown $array
+     * @return unknown
+     */
+    function searchForText($text, $array) {
         //$text = "commercial broadway";
         $text = strtolower($text);
-        $pieces = explode(" ",$text);
+        $pieces = explode(" ", $text);
         $match = false;
         $match_array = array();
         $num_words = count($pieces);
@@ -457,7 +548,7 @@ function searchForId($id, $array) {
             $stop_code = strtolower($val['stop_code']);
 
             $count = 0;
-            foreach($pieces as $piece) {
+            foreach ($pieces as $piece) {
 
 
                 if (preg_match("/\b$piece\b/i", $stop_desc)) {
@@ -473,40 +564,57 @@ function searchForId($id, $array) {
 
             }
             if ($count == $num_words) {$match_array[] = array("stop_desc"=>$stop_desc,
-                                                                "stop_id"=>$stop_id,
-                                                                "stop_code"=>$stop_code);}
-   }
+                    "stop_id"=>$stop_id,
+                    "stop_code"=>$stop_code);}
+        }
 
-   return $match_array;
-}
-
-
-function searchForsId($id, $array) {
-   foreach ($array as $key => $val) {
-//echo $val['stop_id'] . " " . $id. "\n";
-       if ($val['stop_id'] == $id) {
-           return $key;
-       }
-   }
-   return null;
-}
-
-function searchForrId($id, $array) {
-   foreach ($array as $key => $val) {
-       if ($val['route_id'] === $id) {
-           return $key;
-       }
-   }
-   return null;
-}
+        return $match_array;
+    }
 
 
-    function getRoutes($station_id)
-    {
+    /**
+     *
+     * @param unknown $id
+     * @param unknown $array
+     * @return unknown
+     */
+    function searchForsId($id, $array) {
+        foreach ($array as $key => $val) {
+            //echo $val['stop_id'] . " " . $id. "\n";
+            if ($val['stop_id'] == $id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     *
+     * @param unknown $id
+     * @param unknown $array
+     * @return unknown
+     */
+    function searchForrId($id, $array) {
+        foreach ($array as $key => $val) {
+            if ($val['route_id'] === $id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     *
+     * @param unknown $station_id
+     * @return unknown
+     */
+    function getRoutes($station_id) {
 
         $this->tripRoute($station_id); // trip_routes (quick trip to route conversion)
 
-       // $this->getTrips($station_id);
+        // $this->getTrips($station_id);
 
         $this->split_time = $this->thing->elapsed_runtime();
 
@@ -517,31 +625,31 @@ function searchForrId($id, $array) {
 
         if (!isset($this->routes[$station_id])) {$this->routes[$station_id] = array();}
 
-//        if (!isset($this->trips_db)) {$this->trips_db = $this->get("trips");}
+        //        if (!isset($this->trips_db)) {$this->trips_db = $this->get("trips");}
         if (!isset($this->routes_db)) {$this->routes_db = $this->get("routes");}
 
 
 
         // For each trip_id get the route
-        foreach($this->trips[$station_id] as $trip) {
+        foreach ($this->trips[$station_id] as $trip) {
             // Translate trip_id to route_id
-          //  $route_id =  $this->trip_routes[$trip_id];
+            //  $route_id =  $this->trip_routes[$trip_id];
             // Have we processed it?
 
-//var_dump($trip);
-$trip_id = $trip['trip_id'];
-$route_id = $this->trip_routes[$trip_id];
+            //var_dump($trip);
+            $trip_id = $trip['trip_id'];
+            $route_id = $this->trip_routes[$trip_id];
 
             if (isset($this->routes[$station_id][$route_id])) {continue;}
 
             $index = $this->searchForrId($route_id, $this->routes_db);
             $route = $this->routes_db[$index];
 
-        //    $route_id = $route['route_id'];
+            //    $route_id = $route['route_id'];
 
             $this->routes[$station_id][$route_id] = $route;
 
-//            echo ".";
+            //            echo ".";
             $this->thing->log('Got station ' . $station_id . ' and route ' . $route_id . ".");
         }
 
@@ -551,8 +659,13 @@ $route_id = $this->trip_routes[$trip_id];
         return $this->routes;
     }
 
-    function getTrips($station_id_input)
-    {
+
+    /**
+     *
+     * @param unknown $station_id_input
+     * @return unknown
+     */
+    function getTrips($station_id_input) {
         //echo "\n";
         $this->thing->log("Getting trips connecting through station_id " . $station_id_input . ".");
         //if (isset($this->trips[$station_ids])) {return $this->trips[$station_ids];}
@@ -566,14 +679,14 @@ $route_id = $this->trip_routes[$trip_id];
             // Get all the stations (which is all visible).
             // And see whether they appear in the list of served routes.
             // Travelling salesman?
- //           foreach($station_id_input as $key=>$station_id) {
-                //if (!isset($this->trips[$station_id])) {$this->trips[$station_id] = array();}
-//                $selector_array[] = array($key=>$station_id);
-//            }
+            //           foreach($station_id_input as $key=>$station_id) {
+            //if (!isset($this->trips[$station_id])) {$this->trips[$station_id] = array();}
+            //                $selector_array[] = array($key=>$station_id);
+            //            }
             $selector_array = $station_id_input;
 
         } else {
-                $selector_array = array(array("stop_id"=>$station_id_input));
+            $selector_array = array(array("stop_id"=>$station_id_input));
         }
         for ($stops = $this->nextGtfs("stop_times", $selector_array); $stops->valid(); $stops->next()) {
 
@@ -581,7 +694,7 @@ $route_id = $this->trip_routes[$trip_id];
             $trip_id = $stop['trip_id'];
             $stop_id = $stop['stop_id'];
 
-          if (!isset($this->trips[$stop_id])) {$this->trips[$stop_id] = array();}
+            if (!isset($this->trips[$stop_id])) {$this->trips[$stop_id] = array();}
             $this->trips[$stop_id][$trip_id] = $stop;
 
         }
@@ -592,8 +705,11 @@ $route_id = $this->trip_routes[$trip_id];
         return $this->trips;
     }
 
-    function makeSms()
-    {
+
+    /**
+     *
+     */
+    function makeSms() {
         if (isset($this->message)) {
 
             $this->sms_message = "GTFS | " . $this->message;
@@ -608,7 +724,7 @@ $route_id = $this->trip_routes[$trip_id];
         // Produce a list of stops
         $s ="";
         $stops = $this->getStations($this->station_id);
-        foreach($stops as $stop_id=>$stop) {
+        foreach ($stops as $stop_id=>$stop) {
 
             $station =  ($stop['station']);
             $stop_text = $station['stop_desc'];
@@ -618,7 +734,7 @@ $route_id = $this->trip_routes[$trip_id];
             $r = "";
             if (!isset($stop['routes'])) {
                 $routes = $this->getRoutes($stop_id);
-                foreach($routes[$stop_id] as $route_id=>$route){
+                foreach ($routes[$stop_id] as $route_id=>$route) {
                     $r .= $route['route_short_name'] . " ";
                 }
                 $s .= $r . "] ";
@@ -629,13 +745,13 @@ $route_id = $this->trip_routes[$trip_id];
             $route_text = "";
 
             foreach ($routes as $station_id=>$station_routes) {
-                foreach($station_routes as $route_id=>$route) {
+                foreach ($station_routes as $route_id=>$route) {
                     $route_short_name = $route['route_short_name'];
                     $route_short_name_array[$route_short_name] = true;
                 }
             }
 
-            foreach($route_short_name_array as $route_short_name=>$value) {
+            foreach ($route_short_name_array as $route_short_name=>$value) {
                 $route_text .= $route_short_name ." ";
             }
             $s .= $route_text . "]";
@@ -654,8 +770,11 @@ $route_id = $this->trip_routes[$trip_id];
         $this->thing_report['sms'] = $sms;
     }
 
-    function makeTxt()
-    {
+
+    /**
+     *
+     */
+    function makeTxt() {
         if (true) {return;}
 
         if (!isset($this->stations)) {$this->getStations();}
@@ -665,10 +784,10 @@ $route_id = $this->trip_routes[$trip_id];
 
         $txt .= "\n";
 
-        foreach($this->stations as $station_id=>$station) {
+        foreach ($this->stations as $station_id=>$station) {
             if ($station['visited']) {
 
-            $txt .= "[".$station_id ."] ";
+                $txt .= "[".$station_id ."] ";
             } else {
                 $txt .= $station_id ." ";
 
@@ -677,7 +796,7 @@ $route_id = $this->trip_routes[$trip_id];
 
 
         $j = 0;
-        foreach($this->stations as $station_id=>$station) {
+        foreach ($this->stations as $station_id=>$station) {
             $txt .= $station_id . "\n";
 
             $this->split_time = $this->thing->elapsed_runtime();
@@ -707,9 +826,9 @@ $route_id = $this->trip_routes[$trip_id];
                 // But does have a full route list indexed by stop_id and route_id
                 $route_text = "";
                 foreach ($station['routes'] as $routes) {
-                    foreach($routes as $route) {
-//var_dump($route);
-//exit();
+                    foreach ($routes as $route) {
+                        //var_dump($route);
+                        //exit();
                         $route_short_name = $route['route_short_name'];
                         $route_long_name = $route['route_long_name'];
                         $route_text .= $route_short_name ." " .$route_long_name . " ";
@@ -721,30 +840,41 @@ $route_id = $this->trip_routes[$trip_id];
 
             $txt .= $stop_text .  $route_text . "\n\n";
 
-//            $stop_id =  ($station['station']['stop_id']);
-//            $next_stop_distance = $station['station']['shape_dist_traveled'];
+            //            $stop_id =  ($station['station']['stop_id']);
+            //            $next_stop_distance = $station['station']['shape_dist_traveled'];
 
 
         }
         $this->thing_report['txt'] = $txt;
     }
 
-    function makeWeb()
-    {
+
+    /**
+     *
+     */
+    function makeWeb() {
         $web = "Not implemented.";
         $this->thing_report['web'] = $web;
 
     }
 
-    function getNetworktime()
-    {
-        $agent = new Clocktime($this->thing,"now");
-        $this->network_time_string = str_pad($agent->hour, 2, "0",STR_PAD_LEFT).":".str_pad($agent->minute,2,"0",STR_PAD_LEFT).":"."00";
+
+    /**
+     *
+     */
+    function getNetworktime() {
+        $agent = new Clocktime($this->thing, "now");
+        $this->network_time_string = str_pad($agent->hour, 2, "0", STR_PAD_LEFT).":".str_pad($agent->minute, 2, "0", STR_PAD_LEFT).":"."00";
 
     }
 
-    function departuretimeNetwork($departure_time_text = null)
-    {
+
+    /**
+     *
+     * @param unknown $departure_time_text (optional)
+     * @return unknown
+     */
+    function departuretimeNetwork($departure_time_text = null) {
         //$this->network_time_string = "20:07:00";
         if (!isset($this->network_time_string)) {$this->network_time_string = "16:01:00";}
         $network_time = strtotime($this->network_time_string);
@@ -756,8 +886,13 @@ $route_id = $this->trip_routes[$trip_id];
 
     }
 
-    function nextGtfs($file_name, $selector_array = null)
-    {
+
+    /**
+     *
+     * @param unknown $file_name
+     * @param unknown $selector_array (optional)
+     */
+    function nextGtfs($file_name, $selector_array = null) {
         $this->thing->log("nextGtfs " . $file_name . " ");
         $split_time = $this->thing->elapsed_runtime();
 
@@ -766,16 +901,16 @@ $route_id = $this->trip_routes[$trip_id];
         $handle = fopen($file, "r");
         $line_number = 0;
 
-        while(!feof($handle)) {
+        while (!feof($handle)) {
             $line = trim(fgets($handle));
             $line_number += 1;
             //echo ".";
             // Get headers
             if ($line_number == 1) {
                 $i = 0;
-                $field_names = explode(",",$line);
+                $field_names = explode(",", $line);
 
-                foreach ($field_names as $field){ 
+                foreach ($field_names as $field) {
                     $field_names[$i] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
                     $i += 1;
                 }
@@ -785,9 +920,9 @@ $route_id = $this->trip_routes[$trip_id];
 
             //$line = trim(fgets($handle));
             $arr = array();
-            $field_values = explode(",",$line);
+            $field_values = explode(",", $line);
             $i = 0;
-            foreach($field_names as $field_name) {
+            foreach ($field_names as $field_name) {
                 if (!isset($field_values[$i])) {$field_values[$i] = null;}
                 $arr[$field_name] = $field_values[$i];
                 $i += 1;
@@ -796,9 +931,9 @@ $route_id = $this->trip_routes[$trip_id];
             // If there is no selector array, just return it.
             if ($selector_array == null) {yield $arr;continue;}
 
-            if (array_key_exists(0,$selector_array)) {
+            if (array_key_exists(0, $selector_array)) {
             } else {
-                 $selector_array = array($selector_array);
+                $selector_array = array($selector_array);
             }
 
             // Otherwise see if it matches the selector array.
@@ -822,7 +957,7 @@ $route_id = $this->trip_routes[$trip_id];
 
                             $match_count += 1;
                         } else {
-                            $match = false; 
+                            $match = false;
                             break;
                         }
                     }
@@ -844,31 +979,41 @@ $route_id = $this->trip_routes[$trip_id];
 
     }
 
-    function isMatch($selector_array = null)
-    {
+
+    /**
+     *
+     * @param unknown $selector_array (optional)
+     */
+    function isMatch($selector_array = null) {
 
 
 
     }
 
-    function getGtfs($file_name, $index_name = null)
-    {
+
+    /**
+     *
+     * @param unknown $file_name
+     * @param unknown $index_name (optional)
+     * @return unknown
+     */
+    function getGtfs($file_name, $index_name = null) {
         //$file_name = "stops.txt";
         // Load in data files
- //       $searchfor = strtoupper($this->search_words);
+        //       $searchfor = strtoupper($this->search_words);
         //$searchfor = "MAIN HASTINGS";
         $file = $GLOBALS['stack_path'] . 'resources/translink/' . $file_name . '.txt';
 
-/*
+        /*
         $contents = file_get_contents($file);
-        $lines = explode("\n", $contents); // this is your array of words $line 
+        $lines = explode("\n", $contents); // this is your array of words $line
 
         $field_names = explode(",",$lines[0]);
 
         // Tidy up headers
         // https://gist.github.com/josephspurrier/8780545
         $i = 0;
-        foreach ($field_names as $field){ 
+        foreach ($field_names as $field){
             $field_names[$i] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
             $i += 1;
 
@@ -887,16 +1032,16 @@ $route_id = $this->trip_routes[$trip_id];
 
                 if ($line_number == 1) {
                     $i = 0;
-                    $field_names = explode(",",$line);
+                    $field_names = explode(",", $line);
 
-                    foreach ($field_names as $field){ 
+                    foreach ($field_names as $field) {
                         $field_names[$i] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
                         $i += 1;
                     }
 
                     $i = 0;
                     $field_index = 0;
-                    foreach($field_names as $field_name) {
+                    foreach ($field_names as $field_name) {
                         if (($field_name == $index_name) or ($index_name == null)) {$field_index = $i;break;}
                         $i += 1;
                     }
@@ -904,7 +1049,7 @@ $route_id = $this->trip_routes[$trip_id];
                     continue;
                 }
 
-                $field_values = explode(",",$line);
+                $field_values = explode(",", $line);
 
                 //$field_index = 0;
                 $arr = array();
@@ -936,10 +1081,13 @@ $route_id = $this->trip_routes[$trip_id];
         return $output_array;
     }
 
-    function gtfsInfo()
-    {
+
+    /**
+     *
+     */
+    function gtfsInfo() {
         $this->sms_message = "GTFS";
-//                      if (count($t) > 1) {$this->sms_message .= "ES";}
+        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
         $this->sms_message .= " | ";
         $this->sms_message .= 'Analysis of the TransLink network data files. | https://developer.translink.ca/ | ';
         $this->sms_message .= "TEXT HELP";
@@ -947,23 +1095,30 @@ $route_id = $this->trip_routes[$trip_id];
         return;
     }
 
-        function translinkHelp() {
 
-                        $this->sms_message = "TRANSIT";
-//                      if (count($t) > 1) {$this->sms_message .= "ES";}
-                        $this->sms_message .= " | ";
-                        $this->sms_message .= 'Text the five-digit stop number for live Translink stop inforation. | For example, "51380". | ';
-                        $this->sms_message .= "TEXT <5-digit stop number>";
-                return;
+    /**
+     *
+     */
+    function translinkHelp() {
+
+        $this->sms_message = "TRANSIT";
+        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
+        $this->sms_message .= " | ";
+        $this->sms_message .= 'Text the five-digit stop number for live Translink stop inforation. | For example, "51380". | ';
+        $this->sms_message .= "TEXT <5-digit stop number>";
+        return;
 
 
-        }
+    }
 
-    function translinkSyntax()
-    {
+
+    /**
+     *
+     */
+    function translinkSyntax() {
 
         $this->sms_message = "GTFS";
-//                      if (count($t) > 1) {$this->sms_message .= "ES";}
+        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
         $this->sms_message .= " | ";
         $this->sms_message .= 'Syntax: "51380". | ';
         $this->sms_message .= "TEXT HELP";
@@ -977,13 +1132,16 @@ $route_id = $this->trip_routes[$trip_id];
 
 
 
-// -----------------------
+    // -----------------------
 
-	private function respond()
-    {
+    /**
+     *
+     * @return unknown
+     */
+    private function respond() {
         //$this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-		// Thing actions
-		$this->thing->flagGreen();
+        // Thing actions
+        $this->thing->flagGreen();
 
 
         //$this->thing_report['sms'] = $this->sms_message;
@@ -993,10 +1151,10 @@ $route_id = $this->trip_routes[$trip_id];
         $this->thing_report['choices'] = false;
         $this->thing_report['info'] = 'SMS sent';
 
-		// Generate email response.
+        // Generate email response.
 
-		$to = $this->thing->from;
-		$from = "station";
+        $to = $this->thing->from;
+        $from = "station";
 
         $this->thing_report['info'] = 'This is the Station Agent responding to a request.';
 
@@ -1006,48 +1164,56 @@ $route_id = $this->trip_routes[$trip_id];
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
-//        if (strtolower($thing->state) == "on") {
-//            $thing = new Transit($this->thing, "transit " . $this->stop);
-//        }
+        //        if (strtolower($thing->state) == "on") {
+        //            $thing = new Transit($this->thing, "transit " . $this->stop);
+        //        }
 
-	    $this->thing_report['help'] = 'This agent is developmental (and slow ~160,000ms).  See what you think.  Let me know at ' . $this->email . ".";
+        $this->thing_report['help'] = 'This agent is developmental (and slow ~160,000ms).  See what you think.  Let me know at ' . $this->email . ".";
 
         $this->makeWeb();
 
 
         $this->makeTxt(); // Do last because this needs some processing.
 
-		return $this->thing_report;
-	}
-
-	private function nextWord($phrase)
-    {
+        return $this->thing_report;
+    }
 
 
-	}
+    /**
+     *
+     * @param unknown $phrase
+     */
+    private function nextWord($phrase) {
 
-	public function readSubject()
-    {
+
+    }
+
+
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
 
         $this->thing->log("reading subject.");
 
-		$this->response = null;
+        $this->response = null;
 
 
-		$keywords = array('stop', 'bus', 'route');
+        $keywords = array('stop', 'bus', 'route');
 
         if ($this->agent_input == null) {
-		    $input = strtolower($this->subject);
+            $input = strtolower($this->subject);
         } else {
             $input = strtolower($this->agent_input);
         }
-//var_dump($input);
-//exit();
+        //var_dump($input);
+        //exit();
 
         $input = str_replace("gtfs " , "", $input);
         $arr =  $this->findStop($input);
 
-$count = 0;
+        $count = 0;
         if (is_array($arr)) {$count = count($arr);}
 
         if ($count > 1) {
@@ -1056,20 +1222,20 @@ $count = 0;
             foreach ($arr as $stop) {
 
                 $station_id = $stop['stop_id'];
-                $this->stations[$station_id] = array("visited"=>false,"station_id"=>$station_id);
+                $this->stations[$station_id] = array("visited"=>false, "station_id"=>$station_id);
                 //var_dump($stop);
                 $this->places[$stop['stop_desc']][$stop['stop_id']] = $stop;
 
                 $temp_array[$stop['stop_desc']][] = $stop['stop_code'];
             }
 
-            foreach($temp_array as $stop_desc=>$stops) {
-                $m .= trim(implode(" " ,$stops)) . " " .$stop_desc . " / " ;
+            foreach ($temp_array as $stop_desc=>$stops) {
+                $m .= trim(implode(" " , $stops)) . " " .$stop_desc . " / " ;
             }
 
             //$this->places = $temp_array;
 
-/*
+            /*
             foreach ($arr as $stop) {
                 $m .= $stop['stop_code'] . " " . $stop['stop_desc'] . " /  ";
             }
@@ -1088,7 +1254,7 @@ $count = 0;
 
         $number = new Number($this->thing, $input);
 
-        if(isset($number->numbers[0])) {
+        if (isset($number->numbers[0])) {
 
             $transit_id = $number->numbers[0];
             $station_id =  $this->idStation($transit_id);
@@ -1111,120 +1277,120 @@ $count = 0;
         $this->message = $m;
         return;
 
-////        $stop_id = $this->idStation($text);
+        ////        $stop_id = $this->idStation($text);
 
 
-return;
-//exit();
+        return;
+        //exit();
 
-		$prior_uuid = null;
+        $prior_uuid = null;
 
-		$pieces = explode(" ", strtolower($input));
-
-
-                if (count($pieces) == 1) {
-
-                        $input = $this->subject;
-
-                        if (ctype_alpha($this->subject[0]) == true) {
-                                // Strip out first letter and process remaning 4 or 5 digit number
-                                $input = substr($input, 1);
-	                        if (is_numeric($input) and strlen($input) == 4 ) {
-        	                        return $this->busTranslink($input);
-                	                //return $this->response;
-                        	}
-
-                                if (is_numeric($input) and strlen($input) == 5 ) {
-                                        return $this->busTranslink($input);
-                                        //return $this->response;
-                                }
+        $pieces = explode(" ", strtolower($input));
 
 
-                                if (is_numeric($input) and strlen($input) == 6 ) {
-                                        return $this->busTranslink($input);
-                                        //return $this->response;
-                                }
+        if (count($pieces) == 1) {
+
+            $input = $this->subject;
+
+            if (ctype_alpha($this->subject[0]) == true) {
+                // Strip out first letter and process remaning 4 or 5 digit number
+                $input = substr($input, 1);
+                if (is_numeric($input) and strlen($input) == 4 ) {
+                    return $this->busTranslink($input);
+                    //return $this->response;
+                }
+
+                if (is_numeric($input) and strlen($input) == 5 ) {
+                    return $this->busTranslink($input);
+                    //return $this->response;
+                }
+
+
+                if (is_numeric($input) and strlen($input) == 6 ) {
+                    return $this->busTranslink($input);
+                    //return $this->response;
+                }
 
 
 
-			}
+            }
 
-                        if (is_numeric($this->subject) and strlen($input) == 5 ) {
-                                return $this->stopTranslink($input);
-                                //return $this->response;
+            if (is_numeric($this->subject) and strlen($input) == 5 ) {
+                return $this->stopTranslink($input);
+                //return $this->response;
+            }
+
+            if (is_numeric($this->subject) and strlen($input) == 4 ) {
+                return $this->busTranslink($input);
+                //return $this->response;
+            }
+
+
+
+            //                        return "Request not understood";
+
+        }
+
+
+        foreach ($pieces as $key=>$piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece), $command) !== false) {
+
+                    switch ($piece) {
+                    case 'stop':
+
+                        if ($key + 1 > count($pieces)) {
+                            //echo "last word is stop";
+                            $this->stop = false;
+                            return "Request not understood";
+                        } else {
+                            //echo "next word is:";
+                            //var_dump($pieces[$index+1]);
+                            $this->stop = $pieces[$key+1];
+                            $this->response = $this->stopTranslink($this->stop);
+                            return $this->response;
                         }
+                        break;
 
-                        if (is_numeric($this->subject) and strlen($input) == 4 ) {
-                                return $this->busTranslink($input);
-                                //return $this->response;
-                        }
+                    case 'bus':
 
+                        //echo 'bus';
+                        break;
 
+                    case 'translink':
+                        $this->translinkInfo();
+                        return;
 
-//                        return "Request not understood";
+                    case 'info':
+                        $this->translinkInfo();
+                        return;
 
-        	}
+                    case 'information':
+                        $this->translinkInfo();
+                        return;
 
+                    case 'help':
+                        $this->translinkHelp();
+                        return;
 
-		foreach ($pieces as $key=>$piece) {
-			foreach ($keywords as $command) {
-				if (strpos(strtolower($piece),$command) !== false) {
-
-					switch($piece) {
-						case 'stop':	
-
-							if ($key + 1 > count($pieces)) {
-								//echo "last word is stop";
-								$this->stop = false;
-								return "Request not understood";
-							} else {
-								//echo "next word is:";
-								//var_dump($pieces[$index+1]);
-								$this->stop = $pieces[$key+1];
-								$this->response = $this->stopTranslink($this->stop);
-								return $this->response;
-							}
-							break;
-
-						case 'bus':
-
-							//echo 'bus';
-							break;
-
-						case 'translink':
-							$this->translinkInfo();
-							return;
-
-                                                case 'info':
-                                                        $this->translinkInfo();
-                                                        return;
-
-                                                case 'information':
-                                                        $this->translinkInfo();
-                                                        return;
-
-                                                case 'help':
-                                                        $this->translinkHelp();
-                                                        return;
-
-                                                case 'syntax':
-                                                        $this->translinkSyntax();
-                                                        return;
+                    case 'syntax':
+                        $this->translinkSyntax();
+                        return;
 
 
-						default:
+                    default:
 
-							//echo 'default';
+                        //echo 'default';
 
-					}
+                    }
 
-				}
-			}
+                }
+            }
 
-		}
-		$this->nullAction();
-		return "Message not understood";
-	}
+        }
+        $this->nullAction();
+        return "Message not understood";
+    }
 
 
 
