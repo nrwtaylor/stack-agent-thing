@@ -1,4 +1,11 @@
 <?php
+/**
+ * Signal.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -7,13 +14,17 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Signal
-{
+class Signal {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
-    {
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function __construct(Thing $thing, $agent_input = null) {
         $this->start_time = $thing->elapsed_runtime();
 
         //if ($agent_input == null) {$agent_input = "";}
@@ -67,19 +78,19 @@ class Signal
         // Get the current Identities signal
         $this->signal = new Variables($this->thing, "variables signal " . $this->from);
 
-//        $this->associations = new Associations($this->thing, "associations " . $this->from);
+        //        $this->associations = new Associations($this->thing, "associations " . $this->from);
         $this->associations = new Associations($this->thing, $this->subject);
 
-//var_dump($this->associations->associations_list);
-//exit();
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
+        //var_dump($this->associations->associations_list);
+        //exit();
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
 
         $this->thing->log($this->agent_prefix . ' got signal variables. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
 
 
         // At this point the signal object
         // has the current signal variables loaded.
-		$this->readSubject();
+        $this->readSubject();
         $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
 
         if ($this->agent_input == null) {$this->Respond();}
@@ -89,16 +100,19 @@ class Signal
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['log'] = $this->thing->log;
-        if(isset($this->response)) {$this->thing_report['response'] = $this->response;}
+        if (isset($this->response)) {$this->thing_report['response'] = $this->response;}
 
 
-		return;
+        return;
 
     }
 
 
-    function set($requested_state = null)
-    {
+    /**
+     *
+     * @param unknown $requested_state (optional)
+     */
+    function set($requested_state = null) {
 
         if ($requested_state == null) {
             if (!isset($this->requested_state)) {
@@ -120,7 +134,7 @@ class Signal
         $this->associations->setAssociation($this->signal_id);
 
 
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
         //$this->variables_thing->setVariable("signal_id", $this->nuuid);
 
         $this->signal->setVariable("refreshed_at", $this->current_time);
@@ -134,14 +148,23 @@ class Signal
         return;
     }
 
-    function is_positive_integer($str)
-    {
-        return (is_numeric($str) && $str > 0 && $str == round($str));
+
+    /**
+     *
+     * @param unknown $str
+     * @return unknown
+     */
+    function is_positive_integer($str) {
+        return is_numeric($str) && $str > 0 && $str == round($str);
     }
 
 
-    function isSignal($signal = null)
-    {
+    /**
+     *
+     * @param unknown $signal (optional)
+     * @return unknown
+     */
+    function isSignal($signal = null) {
         // Validates whether the Signal is green or red.
         // Nothing else is allowed.
 
@@ -151,18 +174,21 @@ class Signal
             $signal = $this->state;
         }
 
-        if (($signal == "red") or 
-                ($signal == "green") or
-                ($signal == "yellow") or  
-                ($signal == "double yellow")
+        if (($signal == "red") or
+            ($signal == "green") or
+            ($signal == "yellow") or
+            ($signal == "double yellow")
 
-            ) {return false;}
+        ) {return false;}
 
         return true;
     }
 
-    function get()
-    {
+
+    /**
+     *
+     */
+    function get() {
         // get gets the state of the Signal the last time
         // it was saved into the stack (serialized).
         $this->previous_state = $this->signal->getVariable("state");
@@ -180,8 +206,8 @@ class Signal
             $this->state = $this->default_state;
         }
 
-//        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
-//        $check = $this->thing->choice->current_node;
+        //        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
+        //        $check = $this->thing->choice->current_node;
 
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' SIGNAL.' , "INFORMATION");
 
@@ -189,9 +215,14 @@ class Signal
 
     }
 
-    function getSignal($selector = null)
-    {
-//var_dump($this->signals);
+
+    /**
+     *
+     * @param unknown $selector (optional)
+     * @return unknown
+     */
+    function getSignal($selector = null) {
+        //var_dump($this->signals);
         foreach ($this->signals as $signal) {
             // Match the first matching place
             if (($selector == null) or ($selector == "")) {
@@ -207,13 +238,17 @@ class Signal
                 $this->signal = new Variables($this->thing, "variables " . $this->signal_id . " " . $this->from);
                 return $this->signal_id;
             }
-       }
+        }
 
-       return true;
+        return true;
     }
 
-    function getSignals()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    function getSignals() {
         $this->signalid_list = array();
         $this->signals = array();
 
@@ -222,45 +257,43 @@ class Signal
         $count = count($findagent_thing->thing_report['things']);
         $this->thing->log('Agent "Signal" found ' . count($findagent_thing->thing_report['things']) ." signal Things." );
 
-//        if ($findagent_thing->thing_reports['things'] == false) {
-//                $place_code = $this->default_place_code;
-//                $place_name = $this->default_place_name;
-//            return array($this->placecode_list, $this->placename_list, $this->places);
-//        }
+        //        if ($findagent_thing->thing_reports['things'] == false) {
+        //                $place_code = $this->default_place_code;
+        //                $place_name = $this->default_place_name;
+        //            return array($this->placecode_list, $this->placename_list, $this->places);
+        //        }
 
         if ( ($findagent_thing->thing_report['things'] == true)) {}
 
-        //var_dump(count($findagent_thing->thing_report['things'])); 
+        //var_dump(count($findagent_thing->thing_report['things']));
         //var_dump($findagent_thing->thing_report['things'] == true);
 
 
-        if (!$this->is_positive_integer($count))
-        {
+        if (!$this->is_positive_integer($count)) {
             // No places found
         } else {
 
 
 
 
-            foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object)
-            {
+            foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object) {
                 $uuid = $thing_object['uuid'];
 
                 $associations_json= $thing_object['associations'];
                 $associations = $this->thing->json->jsontoArray($associations_json);
-var_dump($associations);
+                var_dump($associations);
                 if (isset($variables['signal'])) {
 
                     $signal_id = $this->default_signal_id;
                     $refreshed_at = "meep getSignal";
 
-                    if(isset($variables['signal']['signal_id'])) {$signal_id = $variables['signal']['signal_id'];}
-                    if(isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['signal']['refreshed_at'];}
+                    if (isset($variables['signal']['signal_id'])) {$signal_id = $variables['signal']['signal_id'];}
+                    if (isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['signal']['refreshed_at'];}
 
 
-                        $this->signals[] = array("id"=>$signal_id, "refreshed_at"=>$refreshed_at);
-                        $this->signalid_list[] = $signal_id;
-  //                  }
+                    $this->signals[] = array("id"=>$signal_id, "refreshed_at"=>$refreshed_at);
+                    $this->signalid_list[] = $signal_id;
+                    //                  }
                 }
             }
         }
@@ -271,33 +304,32 @@ var_dump($associations);
         $found = false;
 
         $filtered_places = array();
-        foreach(array_reverse($this->signals) as $key=>$signal) {
+        foreach (array_reverse($this->signals) as $key=>$signal) {
 
             $signal_id = $signal['id'];
 
             if (!isset($signal['refreshed_at'])) {continue;}
-           $refreshed_at = $signal['refreshed_at'];
+            $refreshed_at = $signal['refreshed_at'];
 
             if (isset($filtered_signals[$signal_id]['refreshed_at'])) {
                 if (strtotime($refreshed_at) > strtotime($filtered_signals[$signal_id]['refreshed_at'])) {
                     $filtered_places[$signal_name] = array("id"=>$signal_id, 'refreshed_at' => $refreshed_at);
                 }
                 continue;
-            } 
+            }
 
             $filtered_places[$signal_id] = array("id"=>$signal_id, 'refreshed_at' => $refreshed_at);
 
 
         }
 
-$refreshed_at = array();
-foreach ($this->signals as $key => $row)
-{
-    $refreshed_at[$key] = $row['refreshed_at'];
-}
-array_multisort($refreshed_at, SORT_DESC, $this->signals);
+        $refreshed_at = array();
+        foreach ($this->signals as $key => $row) {
+            $refreshed_at[$key] = $row['refreshed_at'];
+        }
+        array_multisort($refreshed_at, SORT_DESC, $this->signals);
 
-/*
+        /*
 // Get latest per place
 $this->places = array();
 foreach($filtered_places as $key=>$filtered_place) {
@@ -306,22 +338,21 @@ foreach($filtered_places as $key=>$filtered_place) {
         $this->places[] = $filtered_place;
 }
 */
-$this->old_signals = $this->signals;
-$this->signals = array();
-foreach ($this->old_signals as $key =>$row)
-{
+        $this->old_signals = $this->signals;
+        $this->signals = array();
+        foreach ($this->old_signals as $key =>$row) {
 
-//var_dump( strtotime($row['refreshed_at']) );
-    if ( strtotime($row['refreshed_at']) != false) { 
-      $this->signals[] = $row;
-    }
-}
+            //var_dump( strtotime($row['refreshed_at']) );
+            if ( strtotime($row['refreshed_at']) != false) {
+                $this->signals[] = $row;
+            }
+        }
 
 
 
         // Add in a set of default places
-         $file = $this->resource_path .'signal/signals.txt';
-         $contents = file_get_contents($file);
+        $file = $this->resource_path .'signal/signals.txt';
+        $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
 
@@ -334,12 +365,12 @@ foreach ($this->old_signals as $key =>$row)
                 // Common ones.
                 $signal_id= $line;
                 // This is where the place index will be called.
-//                $signal_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
+                //                $signal_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
 
                 $this->signalid_list[] = $signal_id;
 
 
-               $this->signals[] = array("id"=>$signal_id); 
+                $this->signals[] = array("id"=>$signal_id);
 
             }
 
@@ -348,15 +379,19 @@ foreach ($this->old_signals as $key =>$row)
             // error opening the file.
         }
 
-       // Indexing not implemented
+        // Indexing not implemented
         $this->max_index = 0;
 
         return array($this->signalid_list, $this->signals);
 
     }
 
-    function read()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    function read() {
         //$this->thing->log("read");
 
         $this->get();
@@ -365,8 +400,12 @@ foreach ($this->old_signals as $key =>$row)
 
 
 
-    function selectChoice($choice = null)
-    {
+    /**
+     *
+     * @param unknown $choice (optional)
+     * @return unknown
+     */
+    function selectChoice($choice = null) {
 
         if ($choice == null) {
             if (!isset($this->state)) {
@@ -390,10 +429,14 @@ foreach ($this->old_signals as $key =>$row)
         return $this->state;
     }
 
-    function makeChoices () {
 
-//        $this->thing->choice->Choose($this->state);
-//        $this->thing->choice->save($this->keyword, $this->state);
+    /**
+     *
+     */
+    function makeChoices() {
+
+        //        $this->thing->choice->Choose($this->state);
+        //        $this->thing->choice->save($this->keyword, $this->state);
 
         $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
 
@@ -402,12 +445,16 @@ foreach ($this->old_signals as $key =>$row)
         $this->choices = $choices;
     }
 
+
+    /**
+     *
+     */
     function makeWeb() {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $web = '<a href="' . $link . '">';
-//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/signal.png">';
+        //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/signal.png">';
         $web .= $this->html_image;
 
         $web .= "</a>";
@@ -418,20 +465,23 @@ foreach ($this->old_signals as $key =>$row)
         $this->thing_report['web'] = $web;
     }
 
-	private function Respond()
-    {
+
+    /**
+     *
+     */
+    private function Respond() {
 
         // At this point state is set
         $this->set($this->state);
 
-		// Thing actions
+        // Thing actions
 
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// Generate email response.
+        // Generate email response.
 
-		$to = $this->thing->from;
-		$from = $this->keyword;
+        $to = $this->thing->from;
+        $from = $this->keyword;
 
         if ($this->state == "inside nest") {
             $t = "NOT SET";
@@ -442,10 +492,10 @@ foreach ($this->old_signals as $key =>$row)
         $this->makeSMS();
         $this->makeMessage();
 
-		$this->thing_report['email'] = $this->message;
+        $this->thing_report['email'] = $this->message;
 
         $this->makePNG();
-//        $this->makeChoices(); // Turn off because it is too slow.
+        //        $this->makeChoices(); // Turn off because it is too slow.
 
         $this->makeTXT();
 
@@ -460,11 +510,14 @@ foreach ($this->old_signals as $key =>$row)
         //$this->thing_report['help'] = 'This Signal is either RED, GREEN, YELLOW or DOUBLE YELLOW. RED means danger.';
         $this->makeHelp();
 
-		return;
-	}
+        return;
+    }
 
-    function makeHelp()
-    {
+
+    /**
+     *
+     */
+    function makeHelp() {
         if ($this->state == "green") {
             $this->thing_report['help'] = 'This Signal is either RED, GREEN, YELLOW or DOUBLE YELLOW. GREEN means available.';
         }
@@ -484,8 +537,11 @@ foreach ($this->old_signals as $key =>$row)
 
     }
 
-    function makeTXT()
-    {
+
+    /**
+     *
+     */
+    function makeTXT() {
         $txt = 'This is SIGNAL POLE ' . $this->signal->nuuid . '. ';
         $txt .= 'There is a '. strtoupper($this->state) . " SIGNAL. ";
         if ($this->verbosity >= 5) {
@@ -496,8 +552,11 @@ foreach ($this->old_signals as $key =>$row)
         $this->txt = $txt;
     }
 
-    function makeSMS()
-    {
+
+    /**
+     *
+     */
+    function makeSMS() {
 
         $sms_message = "SIGNAL IS " . strtoupper($this->state);
 
@@ -507,9 +566,9 @@ foreach ($this->old_signals as $key =>$row)
             $sms_message .= " requested state " . strtoupper($this->requested_state);
             $sms_message .= " current node " . strtoupper($this->base_thing->choice->current_node);
         }
-//        if ($this->verbosity > 2) {
-//            $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
-//        }
+        //        if ($this->verbosity > 2) {
+        //            $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
+        //        }
 
         if ($this->verbosity > 0) {
             $sms_message .= " | signal id " . strtoupper($this->signal_id);
@@ -521,7 +580,7 @@ foreach ($this->old_signals as $key =>$row)
         }
 
         //if ($this->verbosity > 0) {
-        //    $sms_message .= " | nuuid " . $this->signal->nuuid; 
+        //    $sms_message .= " | nuuid " . $this->signal->nuuid;
         //}
 
         if ($this->verbosity > 2) {
@@ -540,8 +599,10 @@ foreach ($this->old_signals as $key =>$row)
     }
 
 
-    function makeMessage()
-    {
+    /**
+     *
+     */
+    function makeMessage() {
 
         $message = 'This is a SIGNAL POLE.  The signal is a ' . trim(strtoupper($this->state)) . " SIGNAL. ";
 
@@ -561,14 +622,17 @@ foreach ($this->old_signals as $key =>$row)
 
     }
 
-    public function makeImage()
-    {
-//var_dump ($this->state);
-//exit();
-        // here DB request or some processing
-//        $codeText = "thing:".$this->state;
 
-// Create a 55x30 image
+    /**
+     *
+     */
+    public function makeImage() {
+        //var_dump ($this->state);
+        //exit();
+        // here DB request or some processing
+        //        $codeText = "thing:".$this->state;
+
+        // Create a 55x30 image
 
         $this->image = imagecreatetruecolor(60, 125);
         //$red = imagecolorallocate($this->image, 255, 0, 0);
@@ -590,8 +654,8 @@ foreach ($this->old_signals as $key =>$row)
         $this->green = imagecolorallocate($this->image, 0, 129, 31);
 
         $this->color_palette = array($this->red,
-                                    $this->yellow,
-                                    $this->green);
+            $this->yellow,
+            $this->green);
 
         // Draw a white rectangle
         if ((!isset($this->state)) or ($this->state == false)) {
@@ -606,10 +670,10 @@ foreach ($this->old_signals as $key =>$row)
 
         // Bevel top of signal image
 
-        $points = array(0,0,6,0,0,6);
+        $points = array(0, 0, 6, 0, 0, 6);
         imagefilledpolygon($this->image, $points, 3, $this->white);
 
-        $points = array(60,0,60-6,0,60,6);
+        $points = array(60, 0, 60-6, 0, 60, 6);
         imagefilledpolygon($this->image, $points, 3, $this->white);
 
 
@@ -627,34 +691,34 @@ foreach ($this->old_signals as $key =>$row)
 
         if ($this->state == "green") {
             imagefilledellipse($this->image, $green_x, $green_y, 20, 20, $this->green);
-}
+        }
 
-if ($this->state == "red") {
-    imagefilledellipse($this->image, $red_x, $red_y, 20, 20, $this->red);
-}
+        if ($this->state == "red") {
+            imagefilledellipse($this->image, $red_x, $red_y, 20, 20, $this->red);
+        }
 
-if ($this->state == "yellow") {
-    imagefilledellipse($this->image, $yellow_x, $yellow_y, 20, 20, $this->yellow);
-}   
+        if ($this->state == "yellow") {
+            imagefilledellipse($this->image, $yellow_x, $yellow_y, 20, 20, $this->yellow);
+        }
 
-if ($this->state == "double yellow") {
-    imagefilledellipse($this->image, $yellow_x, $yellow_y, 20, 20, $this->yellow);
+        if ($this->state == "double yellow") {
+            imagefilledellipse($this->image, $yellow_x, $yellow_y, 20, 20, $this->yellow);
 
-    imagefilledellipse($this->image, $double_yellow_x, $double_yellow_y, 20, 20, $this->yellow);
+            imagefilledellipse($this->image, $double_yellow_x, $double_yellow_y, 20, 20, $this->yellow);
 
-}
+        }
 
-return;
+        return;
 
-//imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
+        //imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
         if ($this->state == "rainbow") {
-//    $color = $this->grey;
-            foreach(range(0,5) as $n) {
+            //    $color = $this->grey;
+            foreach (range(0, 5) as $n) {
                 $a = $n * (200/6);
                 $b = $n *(200/6) + (200/6);
                 $color = $this->color_palette[$n];
 
-//                imagefilledrectangle($this->image, $a, 0, $b, 125, $color);
+                //                imagefilledrectangle($this->image, $a, 0, $b, 125, $color);
                 $a = $n * (125/6);
                 $b = $n *(125/6) + (200/6);
 
@@ -677,8 +741,11 @@ return;
         imagestring($this->image, 2, 150, 100, $this->signal->nuuid, $textcolor);
     }
 
-    public function makePNG()
-    {
+
+    /**
+     *
+     */
+    public function makePNG() {
         if (!isset($this->image)) {$this->makeImage();}
         $agent = new Png($this->thing, "png");
 
@@ -692,8 +759,12 @@ return;
         $this->PNG_embed = $agent->PNG_embed;
     }
 
-    public function readSubject() 
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
 
         $this->response = null;
 
@@ -704,12 +775,12 @@ return;
         } else {
             $input = strtolower($this->subject);
         }
-		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
         //$haystack = $this->agent_input . " " . $this->from;
         //$haystack = $input . " " . $this->from;
         $haystack = "";
 
-//		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+        //  $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
         $prior_uuid = null;
 
@@ -718,78 +789,78 @@ return;
         // This gives us the other Things which are associated with the signal
         var_dump($this->associations->agent_associations);
 
-//        var_dump($this->associations->association_name);
+        //        var_dump($this->associations->association_name);
 
-        foreach($this->associations->thing_objects as $key=>$thing_object) {
-
-
-                $uuid = $thing_object['uuid'];
-$agent = $thing_object['nom_to'];
-echo "agent: " . $agent;
-echo "uuid: ". $thing_object['uuid'];
-
-                $variables_json= $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
-
-                if (isset($variables['agent'])) {
-
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
-
-                    if(isset($variables['thing']['status'])) {$thing_status = $variables['thing']['status'];}
-                    if(isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
-                }
+        foreach ($this->associations->thing_objects as $key=>$thing_object) {
 
 
-                if (isset($variables['agent'])) {
+            $uuid = $thing_object['uuid'];
+            $agent = $thing_object['nom_to'];
+            echo "agent: " . $agent;
+            echo "uuid: ". $thing_object['uuid'];
 
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
 
-                    if(isset($variables['agent']['state'])) {$agent_state = $variables['agent']['state'];}
-                    if(isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
+            if (isset($variables['agent'])) {
 
-                }
+                //$place_code = $this->default_place_code;
+                //$place_name = $this->default_place_name;
+                //$refreshed_at = "meep getPlaces";
 
-                if (isset($variables['flag'])) {
+                if (isset($variables['thing']['status'])) {$thing_status = $variables['thing']['status'];}
+                if (isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
+            }
 
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
 
-                    if(isset($variables['flag']['state'])) {$flag_state = $variables['flag']['state'];}
-                    if(isset($variables['flag']['refreshed_at'])) {$refreshed_at = $variables['flag']['refreshed_at'];}
-                }
+            if (isset($variables['agent'])) {
 
-                if (isset($variables['signal'])) {
+                //$place_code = $this->default_place_code;
+                //$place_name = $this->default_place_name;
+                //$refreshed_at = "meep getPlaces";
 
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
+                if (isset($variables['agent']['state'])) {$agent_state = $variables['agent']['state'];}
+                if (isset($variables['agent']['refreshed_at'])) {$refreshed_at = $variables['agent']['refreshed_at'];}
 
-                    if(isset($variables['signal']['id'])) {$signal_id = $variables['signal']['id'];}
-                    if(isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['place']['refreshed_at'];}
-                }
+            }
 
-                if (isset($variables['block'])) {
+            if (isset($variables['flag'])) {
 
-                    //$place_code = $this->default_place_code;
-                    //$place_name = $this->default_place_name;
-                    //$refreshed_at = "meep getPlaces";
+                //$place_code = $this->default_place_code;
+                //$place_name = $this->default_place_name;
+                //$refreshed_at = "meep getPlaces";
 
-                    if(isset($variables['block']['id'])) {$block_id = $variables['block']['id'];}
-                    if(isset($variables['block']['refreshed_at'])) {$refreshed_at = $variables['block']['refreshed_at'];}
-                }
+                if (isset($variables['flag']['state'])) {$flag_state = $variables['flag']['state'];}
+                if (isset($variables['flag']['refreshed_at'])) {$refreshed_at = $variables['flag']['refreshed_at'];}
+            }
 
-                if (!isset($thing_status)) {$thing_status = "X";}
-                if (!isset($agent_state)) {$agent_state = "X";}
-                if (!isset($flag_state)) {$flag_state = "X";}
-                if (!isset($signal_id)) {$signal_id = "X";}
-                if (!isset($block_id)) {$block_id = "X";}
+            if (isset($variables['signal'])) {
 
-                echo $uuid . " " . $thing_status . " " .$agent_state . " " . $flag_state . " " . $signal_id . " " . $block_id. "\n";
+                //$place_code = $this->default_place_code;
+                //$place_name = $this->default_place_name;
+                //$refreshed_at = "meep getPlaces";
+
+                if (isset($variables['signal']['id'])) {$signal_id = $variables['signal']['id'];}
+                if (isset($variables['signal']['refreshed_at'])) {$refreshed_at = $variables['place']['refreshed_at'];}
+            }
+
+            if (isset($variables['block'])) {
+
+                //$place_code = $this->default_place_code;
+                //$place_name = $this->default_place_name;
+                //$refreshed_at = "meep getPlaces";
+
+                if (isset($variables['block']['id'])) {$block_id = $variables['block']['id'];}
+                if (isset($variables['block']['refreshed_at'])) {$refreshed_at = $variables['block']['refreshed_at'];}
+            }
+
+            if (!isset($thing_status)) {$thing_status = "X";}
+            if (!isset($agent_state)) {$agent_state = "X";}
+            if (!isset($flag_state)) {$flag_state = "X";}
+            if (!isset($signal_id)) {$signal_id = "X";}
+            if (!isset($block_id)) {$block_id = "X";}
+
+            echo $uuid . " " . $thing_status . " " .$agent_state . " " . $flag_state . " " . $signal_id . " " . $block_id. "\n";
 
 
 
@@ -815,15 +886,15 @@ echo "uuid: ". $thing_object['uuid'];
             echo "Loaded thing";
 
             $variables = $this->signal_thing->account['stack']->json->array_data;
-//var_dump($variables);
-echo var_dump($variables["signal"]);
+            //var_dump($variables);
+            echo var_dump($variables["signal"]);
 
-//                $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
-                $this->signal_thing->json->writeVariable( array("signal", "state"), "yellow" );
+            //                $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
+            $this->signal_thing->json->writeVariable( array("signal", "state"), "yellow" );
 
             $variables = $this->signal_thing->account['stack']->json->array_data;
 
-echo var_dump($variables["signal"]);
+            echo var_dump($variables["signal"]);
 
 
 
@@ -832,17 +903,17 @@ echo var_dump($variables["signal"]);
 
         // Is there a headcode in the provided datagram
 
-$part_uuid = $uuid;
+        //$part_uuid = $uuid;
 
-		// So this is really the 'sms' section
-		// Keyword
+        // So this is really the 'sms' section
+        // Keyword
         if (count($pieces) == 1) {
 
             if ($input == $this->keyword) {
                 $this->get();
                 $this->response = "Got the signal.";
-$this->getSignals();
-$this->getSignal();
+                $this->getSignals();
+                $this->getSignal();
 
 
                 return;
@@ -872,56 +943,54 @@ $this->getSignal();
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
-                    switch($piece) 
-                    {
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
 
-                        case 'red':
-                            $this->thing->log($this->agent_prefix . 'received request for RED SIGNAL.', "INFORMATION");
-                            $this->selectChoice('red');
-                            $this->response = "Selected a red signal.";
-                            return;
+                    case 'red':
+                        $this->thing->log($this->agent_prefix . 'received request for RED SIGNAL.', "INFORMATION");
+                        $this->selectChoice('red');
+                        $this->response = "Selected a red signal.";
+                        return;
 
-                        case 'green':
-                            $this->selectChoice('green');
-                            $this->response = "Selected a green signal.";
-                            return;
+                    case 'green':
+                        $this->selectChoice('green');
+                        $this->response = "Selected a green signal.";
+                        return;
 
-                        case 'yellow':
+                    case 'yellow':
 
-                            $this->selectChoice('yellow');
-                            $this->response = "Selected a yellow signal.";
-                            return;
+                        $this->selectChoice('yellow');
+                        $this->response = "Selected a yellow signal.";
+                        return;
 
-                        case 'list':
-                            $this->getSignals();
-                            $this->response = "Got a list of signals.";
-var_dump ($this->signals);
-                            return;
+                    case 'list':
+                        $this->getSignals();
+                        $this->response = "Got a list of signals.";
+                        var_dump($this->signals);
+                        return;
 
-                        case 'back':
+                    case 'back':
 
-                        case 'next':
+                    case 'next':
 
-                        default:
+                    default:
 
                     }
                 }
             }
         }
         // If all else fails try the discriminator.
-//        if (!isset($haystack)) {$this->response = "Did nothing."; return;} 
+        //        if (!isset($haystack)) {$this->response = "Did nothing."; return;}
         $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-        switch($this->requested_state)
-        {
-            case 'green':
-                $this->selectChoice('green');
-                $this->response = "Asserted a Green Signal.";
-                return;
-            case 'red':
-                $this->selectChoice('red');
-                $this->response = "Asserted a Red Signal.";
-                return;
+        switch ($this->requested_state) {
+        case 'green':
+            $this->selectChoice('green');
+            $this->response = "Asserted a Green Signal.";
+            return;
+        case 'red':
+            $this->selectChoice('red');
+            $this->response = "Asserted a Red Signal.";
+            return;
         }
 
         $this->read();
@@ -929,18 +998,26 @@ var_dump ($this->signals);
 
         // devstack
         return "Message not understood";
-		return false;
-	}
+        return false;
+    }
 
-/*
+
+    /*
 	function kill()
     {
 		// No messing about.
 		return $this->thing->Forget();
 	}
 */
-    function discriminateInput($input, $discriminators = null)
-    {
+
+
+    /**
+     *
+     * @param unknown $input
+     * @param unknown $discriminators (optional)
+     * @return unknown
+     */
+    function discriminateInput($input, $discriminators = null) {
         //$input = "optout opt-out opt-out";
 
         if ($discriminators == null) {
@@ -959,8 +1036,8 @@ var_dump ($this->signals);
 
         $aliases = array();
 
-        $aliases['red'] = array('r', 'red','on');
-        $aliases['green'] = array('g','grn','gren','green', 'gem', 'off');
+        $aliases['red'] = array('r', 'red', 'on');
+        $aliases['green'] = array('g', 'grn', 'gren', 'green', 'gem', 'off');
         //$aliases['reset'] = array('rst','reset','rest');
         //$aliases['lap'] = array('lap','laps','lp');
 
@@ -993,12 +1070,12 @@ var_dump ($this->signals);
             }
         }
 
-        $this->thing->log('Agent "Signal" matched ' . $total_count . ' discriminators.',"DEBUG");
+        $this->thing->log('Agent "Signal" matched ' . $total_count . ' discriminators.', "DEBUG");
         // Set total sum of all values to 1.
 
         $normalized = array();
         foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;            
+            $normalized[$discriminator] = $count[$discriminator] / $total_count;
         }
 
         // Is there good discrimination
@@ -1024,8 +1101,11 @@ var_dump ($this->signals);
             return false; // No discriminator found.
         }
 
-    return true;
+        return true;
     }
+
+
 }
+
 
 ?>

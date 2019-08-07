@@ -473,10 +473,13 @@ if ($this->hasUrl($test)) {
         if (isset($dict[2])) {$english_phrases = trim($dict[2]);}
         if (isset($dict[3])) {$instruction = trim($dict[3]);}
 
-$prowords_count = count(explode($proword," "));
+$t = explode(" ", $proword);
+
+$prowords_count = count(explode(" ", $proword));
+
 if ($prowords_count >= 3) {
 $proword = "INJECT";
-$words = $line;
+$words = $text;
 $english_phrases = null;
 $instruction = null;
 

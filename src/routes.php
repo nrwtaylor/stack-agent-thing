@@ -844,9 +844,11 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
             ob_clean();
             if (!isset($agent->thing_report[strtolower($ext_name)])) {
-                //var_dump($ext_name);
-                //echo "meep";
-                exit();
+                // Review this
+                           return $response->withHeader('HTTP/1.0 200 OK')
+                ->withStatus(200);
+
+                //exit();
             }
 
             $content = $agent->thing_report[strtolower($ext_name)];

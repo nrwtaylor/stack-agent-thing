@@ -23,7 +23,7 @@ class Chart extends Agent
         $this->width = 300;
 
 
-        $this->read();
+//        $this->read();
 
 //        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
 
@@ -89,19 +89,24 @@ class Chart extends Agent
 
             ${$agent_name} = $variables[$agent_name];
 
+            if ((!isset($dimension[0])) or (!isset($dimension[1])) or (!isset($tock_series))  ) {
+                continue;
+            }
+
+
             ${$dimension[0]} = $agent_name[$dimension[0]];
             ${$dimension[1]} = $agent_name[$dimension[1]];
             ${$tock_series} = strtotime($agent_name[$tock_series]);
 
             $elapsed_time = $run_time + $queue_time;
 
-            if ((($dimension[0] == null) or ($dimension[0] == 0)) and ($this->ignore_empty)) {
+            if ((!isset($dimension[0])) or (($dimension[0] == null) or ($dimension[0] == 0)) and ($this->ignore_empty)) {
                 continue;
             }
-            if ((($dimension[1] == null) or ($dimension[1] == 0)) and ($this->ignore_empty)) {
+            if ((!isset($dimension[1])) or (($dimension[1] == null) or ($dimension[1] == 0)) and ($this->ignore_empty)) {
                 continue;
             }
-            if ((($tock_series == null) or ($tock_series == 0)) and ($this->ignore_empty)) {
+            if ((!isset($tock_series)) or (($tock_series == null) or ($tock_series == 0)) and ($this->ignore_empty)) {
                 continue;
             }
 
@@ -166,6 +171,8 @@ $this->makePNG();
         $this->chart_height = $this->height - 20;
 
         $num_points = count($this->points);
+
+if ($num_points == 0) {return true;}
         $column_width = $this->width / $num_points;
 
 
@@ -371,6 +378,15 @@ $this->makePNG();
 
         $txt .= $count . '' . ' Points retrieved.\n';
 
+if ($count == 0) {
+$txt = "No chart available.\n";
+        $this->thing_report['txt'] = $txt;
+        $this->txt = $txt;
+return;
+
+}
+
+
         $tubs = array();
         $dimension[0] = "age";
         $dimension[1] = "bin_sum";
@@ -453,7 +469,7 @@ $this->makePNG();
         // increments the tally.
 	}
 
-    public function read()
+    public function readSubject()
     {
         $this->readInstruction();
         $this->readText();

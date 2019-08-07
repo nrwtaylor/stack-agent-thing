@@ -157,7 +157,7 @@ class Amateurradioservice extends Agent {
      *
      */
     function makeSMS() {
-        //if ((!isset($this->response)) or ($this->response == null)){$this->response = "Standby.";}
+        if ((!isset($this->response)) or ($this->response == null)){$this->response = "Not found.";}
         //var_dump($this->response);
         $this->node_list = array("amateur radio service"=>array("amateur radio service"));
         $m = strtoupper("AMATEUR RADIO SERVICE") . " | " . $this->response;
@@ -250,7 +250,7 @@ class Amateurradioservice extends Agent {
 
         $input= $this->input;
         //var_dump($this->input);
-        $strip_words = array("amateur radio service", "ham", "ars", "amateur radio", "amateurradioservice");
+        $strip_words = array("amateur radio service", "ham", "ars", "amateur radio", "amateurradioservice", "frequency");
 
 
         foreach ($strip_words as $i=>$strip_word) {

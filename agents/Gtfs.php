@@ -111,6 +111,8 @@ class Gtfs {
         $this->respond();
         $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
+$this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADISON HASTINGS.';
+
         $this->thing_report['response'] = $this->response;
 
         return;
@@ -1168,7 +1170,7 @@ class Gtfs {
         //            $thing = new Transit($this->thing, "transit " . $this->stop);
         //        }
 
-        $this->thing_report['help'] = 'This agent is developmental (and slow ~160,000ms).  See what you think.  Let me know at ' . $this->email . ".";
+//        $this->thing_report['help'] = 'This agent is developmental (and slow ~160,000ms).  See what you think.  Let me know at ' . $this->email . ".";
 
         $this->makeWeb();
 
@@ -1243,8 +1245,8 @@ class Gtfs {
             $this->message = $m;
             return;
         }
-
-        if (count($arr) == 1) {
+//var_dump($arr);
+        if (($arr != null) and (count($arr) == 1)) {
             $this->station_id = $arr[0]['stop_id'];
             $m = $arr[0]['stop_code'] . " " . $arr[0]['stop_desc'];
             $this->message = $m . " | " . "http://www.transitdb.ca/stop/" . $arr[0]['stop_code'] ."/ | TEXT WEB";

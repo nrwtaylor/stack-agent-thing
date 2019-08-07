@@ -188,7 +188,7 @@ function makeRandomString($length = 200) {
     {
         $sum = 0;
         if (count($string1) < count($string2)) {$string_temp = $string2; $string2 = $string1; $string1= $string_temp;}
-
+//        if (mb_strlen($string1) < mb_strlen($string2)) {$string_temp = $string2; $string2 = $string1; $string1= $string_temp;}
         $arr1 = str_split($string1);
         $arr2 = str_split($string2);
  

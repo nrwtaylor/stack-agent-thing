@@ -37,7 +37,6 @@ class Brilltagger extends Agent
 
     }
 
-
     /**
      *
      * @param unknown $tags
@@ -99,6 +98,19 @@ class Brilltagger extends Agent
 
         // Strip out brilltagger commands.
         $input = $this->input;
+
+        if (strtolower($input) == "brilltagger") {
+            $this->getTask();
+//            $this->doSyllables($this->link_task);
+        // Then run it through the classifier.
+        $tags = $this->tag($this->link_task);
+//        $this->printTag($tags);
+        $this->textTag($tags);
+
+            return;
+        }
+
+
         $whatIWant = $this->input;
         if (($pos = strpos(strtolower($input), "brill tagger")) !== FALSE) { 
             $whatIWant = substr(strtolower($input), $pos+strlen("brill tagger")); 

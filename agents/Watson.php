@@ -4,6 +4,8 @@ namespace Nrwtaylor\StackAgentThing;
 class Watson
 {
 	public $var = 'hello';
+    // https://www.wired.com/2011/03/0310bell-invents-telephone-mr-watson-come-here/
+    // Mr. Watson – come here – I want to see you.
 
     function __construct(Thing $thing)
     {

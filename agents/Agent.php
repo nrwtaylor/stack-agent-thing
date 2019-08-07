@@ -254,6 +254,54 @@ public $input;
         return $this->link_uuid;
     }
 
+   /**
+     *
+     * @return unknown
+     */
+    function getTask() {
+
+        $block_things = array();
+        // See if a stack record exists.
+        $findagent_thing = new Findagent($this->thing, 'thing');
+
+        $this->max_index =0;
+        $match = 0;
+        $link_uuids = array();
+
+        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+
+            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
+            if ($block_thing['nom_to'] != "usermanager") {
+                $match += 1;
+                $this->link_task = $block_thing['task'];
+                $link_tasks[] = $block_thing['task'];
+                // if ($match == 2) {break;}
+                // Get upto 10 matches
+                if ($match == 10) {break;}
+            }
+        }
+        $this->prior_agent = "web";
+        foreach ($link_tasks as $key=>$link_task) {
+            //            $previous_thing = new Thing($link_uuid);
+            var_dump($link_task);
+            //            if (isset($previous_thing->json->array_data['message']['agent'])) {
+            if (isset($link_task)) {
+
+                if (in_array(strtolower($link_task), array('web', 'pdf', 'txt', 'log', 'php', 'syllables', 'brilltagger'))) {
+                    continue;
+                }
+
+                $this->link_task = $link_task;
+                break;
+            }
+        }
+
+        $this->web_exists = true;
+        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
+
+        return $this->link_task;
+    }
+
     /**
      *
      * @param unknown $variable_name (optional)
@@ -903,7 +951,7 @@ if ( strtolower( substr($input,0,2)) != "s/") {
 
 
 
-        $this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>', "DEBUG");
+        $this->thing->log('processed haystack "' .  $input . '".', "DEBUG");
 
         // Now pick up obvious cases where the keywords are embedded
         // in the $input string.
@@ -1031,7 +1079,7 @@ $link = $this->web_prefix . "agent/" . $this->link_uuid . "/" . strtolower($this
         }
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
         //set_error_handler("warning_handler", E_WARNING);
-        $this->thing->log('Agent "Agent" looking for keyword matches with available agents.', "INFORMATION");
+        $this->thing->log('looking for keyword matches with available agents.', "INFORMATION");
 
         foreach ($arr as $keyword) {
             // Don't allow agent to be recognized
@@ -1170,8 +1218,10 @@ $this->input = $input;
 
         if ($frequency_thing->hasFrequency($input)) {
 //            $ars_thing = new Amateurradioservice($this->thing, $input);
-            $ars_thing = new Amateurradioservice($this->thing);
-            $this->thing_report = $ars_thing->thing_report;
+        $frequency_thing = new Frequency($this->thing, "extract");
+
+//            $ars_thing = new Amateurradioservice($this->thing);
+            $this->thing_report = $frequency_thing->thing_report;
             return $this->thing_report;
 
         }
