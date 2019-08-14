@@ -7,68 +7,29 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Button
+class Button extends Agent
 {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $start_time = $thing->elapsed_runtime();
-        $this->start_time = microtime(true);
 
         $this->agent_name = "button";
-
-        if ($agent_input == null) {$agent_input = "";}
-        $this->agent_input = $agent_input;
-
         $this->keyword = "button";
-
-        $this->agent_prefix = 'Agent "Button" ';
-
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
-
         $this->test= "Development code"; // Always
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-
         $this->node_list = array("off"=>array("on"=>array("off")));
-
-        $this->current_time = $this->thing->json->time();
-
-        $this->variables_thing = new Variables($this->thing, "variables button " . $this->from);
-
-        $this->get(); // Updates $this->elapsed_time;
-
-		$this->thing->log('Agent "Button" running on Thing ' . $this->thing->nuuid . ".");
-		$this->thing->log('Agent "Button" received this Thing, "' . $this->subject .  '".') ;
-
-$this->getBody();
-
-		$this->readSubject();
-        if ($this->agent_input == null) {
-		    $this->respond();
-        }
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
 
     }
 
+function run()
+{
+ //       $this->variables_thing = new Variables($this->thing, "variables button " . $this->from);
+
+//        $this->variables_thing = new Variables($this->thing, "variables button " . $this->from);
+//$this->getBody();
+$this->makeSMS();
+}
 
     function getBody()
     {
@@ -88,7 +49,6 @@ $this->getBody();
         $this->body = $bodies['slack'];
 
 $this->body = json_decode($t);
-//var_dump($this->body);
 
     }
 
@@ -97,7 +57,7 @@ $this->body = json_decode($t);
         // Refactor
 
         if ($requested_state == null) {
-            $requested_state = $this->requested_state;
+            $requested_state = $this->state;
         }
 
         $this->variables_thing->setVariable("state", $requested_state);
@@ -109,13 +69,16 @@ $this->body = json_decode($t);
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
-
-        return;
     }
 
 
     function get()
     {
+
+        if (!isset($this->variables_thing)) {
+            $this->variables_thing = new Variables($this->thing, "variables button " . $this->from);
+        }
+
         $this->previous_state = $this->variables_thing->getVariable("state")  ;
         $this->refreshed_at = $this->variables_thing->getVariables("refreshed_at");
 
@@ -126,6 +89,7 @@ $this->body = json_decode($t);
             $this->state = $this->thing->choice->current_node;
         } else {
             $this->state = $this->previous_state;
+//            $this->requested_state = $this->state; 
         }
 
         return;
@@ -133,9 +97,9 @@ $this->body = json_decode($t);
 
     function extractButtons($input = null)
     {
-        
         $this->buttons = array();
         if ($input == null) {$input = $this->subject;}
+
         $input = strtolower($input);
         $breaks = count(explode("|",$input)) - 1;
 
@@ -156,7 +120,7 @@ $this->body = json_decode($t);
             case($breaks >= 1):
                 $buttons = explode("|",strtolower($input));
                 break;
-            case (count($words) == 1):
+            case ( $words == 1):
                 $buttons = array($input);
                 break;
             default:
@@ -171,43 +135,48 @@ $this->body = json_decode($t);
           //  }
             $button=trim($button);
             $this->buttons[] = $button;
-            //echo $button . "<br>";
 
         }
 
     }
 
-//    function read()
-//    {
+    function test()
+    {
 // Test corpus
 //        $this->subject = "button yes | no";
 //        $this->subject = "yes | no";
 //        $this->subject = "button is yes";
-//        $this->subject = "button is yes no";
+        $this->subject = "button is yes no";
 //        $this->subject = "button is yes | no";
 //        $this->subject = "orange brown";
 //        $this->subject = "button";
-
+return true;
 //        $this->getButtons();
 //        $this->extractButtons();
 //        return $this->state;
-//    }
+    }
 
+
+// Make buttons from a choice
     function getButtons()
     {
+        if ((!isset($this->choices)) or ($this->choices == null)) {$this->makeChoices();}
+
         $this->words = $this->choices['words'];
         $this->links = $this->choices['links'];
         $this->url = $this->choices['url']; // nl version of links array
         $this->link = $this->choices['link'];
+
         $this->buttons = $this->choices['button'];
     }
 
-    function makeWeb()
+    public function makeWeb()
     {
         if (!isset($this->words)) {$this->getButtons();}
         $w = "<b>Button Agent</b>";
         $w .= "<br><br>";
-        $w .= implode(" ",$this->words);
+        $w .= "Made text and web buttons.";
+//        $w .= implode(" ",$this->words);
         $w .= "<br><br>";
 
         //foreach($this->links as $key=>$link) {
@@ -228,24 +197,8 @@ $this->body = json_decode($t);
 
     function makeSMS()
     {
-
-        if (!isset($this->words)) {$this->getButtons();}
-
-//        if ($this->state == "inside nest") {
-//            $t = "NOT SET";
-//} else {
-//       $t = $this->state;
-//}
-        $s = "BUTTONS ARE " . implode(" | ",$this->words);
-//        $sms_message .= " | Previous " . strtoupper($this->previous_state);
-//        $sms_message .= " | Now " . strtoupper($this->state);
-//        $sms_message .= " | Requested " . strtoupper($this->requested_state);
-//        $sms_message .= " | Current " . strtoupper($this->base_thing->choice->current_node);
-//        $sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
-//        $sms_message .= " | base nuuid " . strtoupper($this->variables_thing->thing->nuuid);
-
-//        $sms_message .= " | another nuuid " . substr($this->variables_thing->uuid,0,4); 
-        $s .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
+        $s = "BUTTONS ARE " . implode(" | ",$this->buttons);
+//        $s .= " | nuuid " . substr($this->variables_thing->variables_thing->uuid,0,4); 
         $s .= " | " . $this->web_prefix . "thing/" . $this->uuid . "/button"; 
 
 
@@ -260,20 +213,10 @@ $this->body = json_decode($t);
 
     function makeChoices()
     {
-        $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
-        $this->buttons[] = "flag green";
-
         $this->node_list = array("button"=>$this->buttons);
         $this->thing->choice->Create($this->agent_name, $this->node_list, "button");
-
         $this->choices = $this->thing->choice->makeLinks('button');
-
-        $this->thing->log( $this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
         $this->thing_report['choices'] = $this->choices;
-
-        $this->thing->log( $this->agent_prefix .'completed create choice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
     }
 
     function selectChoice($choice = null)
@@ -283,16 +226,14 @@ $this->body = json_decode($t);
             return $this->state;
         }
 
-        $this->thing->log('Agent "' . ucwords($this->keyword) . '" chose "' . $choice . '".');
-
         $this->set($choice);
 
         return $this->state;
     }
 
-
-	private function respond() {
-
+/*
+	public function respond() {
+echo "respond";
 		// Thing actions
 
 		$this->thing->flagGreen();
@@ -322,23 +263,33 @@ $this->body = json_decode($t);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
         $this->thing_report['help'] = 'This is a set of buttons.  Buttons tells a stack what you have decided.';
 
 		return;
 	}
-
+*/
 
     public function readSubject() 
     {
 
+
+//echo "readSubject " . $this->input ."<br>";
         if ($this->agent_input != null) {
-            $this->response = "Saw an agent instruction and didn't read further.";
+//echo $this->agent_input;
+//            $this->response = "Saw an agent instruction and didn't read further.";
             return;
         }
 
-        $input = strtolower($this->subject);
+//var_dump($this->input);
+
+        $this->extractButtons($this->subject);
+return;
+
+
+$input = $this->input;
+//        $input = strtolower($this->subject);
         $pieces = explode(" ", strtolower($input));
 
 
@@ -347,7 +298,7 @@ $this->body = json_decode($t);
         if (count($pieces) == 1) {
 
             if ($input == $this->keyword) {
-        $this->extractButtons();
+//        $this->extractButtons("button");
 
 //                $this->read();
                 return;
@@ -355,8 +306,8 @@ $this->body = json_decode($t);
             // return "Request not understood";
         }
 
-        $this->extractButtons();
-
+//        $this->extractButtons($input);
+//$this->getButtons();
 //        $this->read();
 
         return "Message not understood";

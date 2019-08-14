@@ -21,8 +21,21 @@ class Camper extends Agent {
     function init() {
         $this->agent_name = "camper";
         $this->test= "Development code";
-        $this->thing_report["info"] = "This is a ranger who keeps an eye open for picnickers. And bears.";
-        $this->thing_report["help"] = "Find the bears. However you can. Text BEAR.";
+
+       $this->thing_report["info"] = "This is a camper in a park with a picnic basket.";
+        $this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text BEAR. Or RANGER. Or PARK TRIVIA.";
+
+
+        $this->game_name = "pic-a-nic";
+
+        $this->contact = "VE7RVF control";
+        $this->primary_channel = "146.580";
+
+        if ($this->game_name == "pic-a-nic") {
+            $this->contact = "146.580 CONTROL";
+            $this->primary_channel = "146.565";
+        }
+
     }
 
     /**
@@ -51,8 +64,8 @@ class Camper extends Agent {
         $this->makeSMS();
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This is a camper in a park with a picnic basket.";
-        $this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text BEAR. Or RANGER.";
+//        $this->thing_report["info"] = "This is a camper in a park with a picnic basket.";
+//        $this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text BEAR. Or RANGER.";
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
@@ -90,7 +103,7 @@ class Camper extends Agent {
 //        $this->getNegativeTime();
 
         if ($this->agent_input == null) {
-            $array = array('Get a basket. Go to a place on the map. Broadcast a repeating beacon on 146.580. Contact VE7RVF control.');
+            $array = array('Get a pic-a-nic basket. Go to a numbered place on the map. Broadcast a repeating beacon on ' . $this->primary_channel . '. Contact ' . $this->contact .'.');
             $k = array_rand($array);
             $v = $array[$k];
 

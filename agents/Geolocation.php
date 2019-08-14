@@ -27,6 +27,8 @@ class Geolocation extends Agent
      *
      */
     function init() {
+
+//        $this->agent_name = "Geolocation";
         $this->keyword = "geolocation";
         $this->test= "Development code"; // Always
 
@@ -331,7 +333,8 @@ class Geolocation extends Agent
      *
      */
     public function makeWeb() {
-        $html = "<b>GEOLOCATION</b>";
+return;
+        $html = "<b>Geolocation Agent</b>";
         $html .= "<p><b>Geolocation Cars</b>";
 
         if (!isset($this->events)) {
@@ -356,40 +359,11 @@ class Geolocation extends Agent
     /**
      *
      */
-    public function makeSms() {
-        $sms = "GEOLOCATION";
-        switch ($this->cars_count) {
-        case 0:
-            $sms .= " | No car found.";
-            break;
-        case 1:
-            $car = reset($this->cars);
-            $car_html = $this->carString($car);
-            $sms .= " | " .$car_html;
-
-
-            if ($this->available_cars_count != $this->cars_count) {
-                $sms .= $this->cars_count. " retrieved";
-            }
-
-            break;
-        default:
-            $sms .= " "  . $this->available_cars_count . ' cars ';
-            if ($this->available_cars_count != $this->cars_count) {
-                $sms .= $this->cars_count. " retrieved";
-            }
-
-            $car = reset($this->cars);
-            $car_html = $this->carString($car);
-
-            $sms .= " | " . $car_html;
-
-
-        }
-
-        $sms .= " | " . $this->response;
+    private function makeSMS() {
+        $sms = "GEOLOCATION" . " | " . $this->response;
 
         $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
 
@@ -502,6 +476,34 @@ class Geolocation extends Agent
 
         return $m;
 
+    }
+
+    /**
+     *
+     * @return unknown
+     */
+    public function respondResponse() {
+        $this->thing->flagGreen();
+
+        // This should be the code to handle non-matching responses.
+
+        $to = $this->thing->from;
+        $from = "geolocation";
+
+        //$this->makeMessage();
+        $this->makeSms();
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
+
+        //$this->makeWeb();
+
+
+        $this->thing_report['sms'] = $this->sms_message;
+
+        return $this->thing_report;
     }
 
 

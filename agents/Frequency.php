@@ -206,6 +206,7 @@ $matches = array();
         $this->getFrequencies();
         $this->makeTable();
         $this->makeResponse();
+        $this->makeSMS();
     }
 
 
@@ -422,10 +423,12 @@ $matches = array();
 
             }
 
-
             if (strpos(strtolower($t), "amateur")) {
                 $ars_thing = new Amateurradioservice($this->thing);
                 $this->thing_report = $ars_thing->thing_report;
+                $this->agent_name = $ars_thing->agent_name;
+                $this->response = $ars_thing->response;
+
                 return;
             }
 
@@ -493,7 +496,7 @@ $matches = array();
      */
     function makeSMS() {
 
-        $this->sms_message = "FREQUENCY | ";
+        $this->sms_message = strtoupper($this->agent_name) . " | ";
         $this->sms_message .= $this->response;
         $this->sms_message .= ' | TEXT CHANNEL';
 

@@ -23,6 +23,18 @@ class Ranger extends Agent {
         $this->test= "Development code";
         $this->thing_report["info"] = "This is a ranger who keeps an eye open for picnickers. And bears.";
         $this->thing_report["help"] = "Find the bears. However you can. Text BEAR.";
+
+        $this->game_name = "pic-a-nic";
+
+        $this->contact = "VE7RVF control";
+        $this->primary_channel = "146.580";
+
+        if ($this->game_name == "pic-a-nic") {
+            $this->contact = "146.580 CONTROL";
+            $this->primary_channel = "146.565";
+        }
+
+
     }
 
     /**
@@ -108,7 +120,7 @@ class Ranger extends Agent {
 //        $this->getNegativeTime();
 
         if ($this->agent_input == null) {
-            $array = array('Find the picanic(s) before the bears do and warn the camper(s). Or catch a bear. Contact VE7RVF control. Monitor 146.580.');
+            $array = array('Find the picanic(s) before the bears do and warn the campers. Or try catch a bear. Contact ' . $this->contact .'. Monitor ' . $this->primary_channel .'.');
             $k = array_rand($array);
             $v = $array[$k];
 

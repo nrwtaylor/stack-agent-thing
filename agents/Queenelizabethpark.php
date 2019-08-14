@@ -32,6 +32,7 @@ class Queenelizabethpark extends Agent
      *
      */
     function init() {
+        $this->agent_name = "queen elizabeth park";
         $this->test= "Development code";
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
@@ -254,6 +255,7 @@ $this->place = $this->places[$number];
     /**
      *
      */
+/*
     public function respond() {
         // Thing actions
         $this->thing->flagGreen();
@@ -280,7 +282,7 @@ $this->place = $this->places[$number];
 
         $this->thing_report['help'] = 'This is the "Park" Agent with information about the park.' ;
     }
-
+*/
 
     /**
      *

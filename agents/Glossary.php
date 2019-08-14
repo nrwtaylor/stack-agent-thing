@@ -291,6 +291,13 @@ function uc_first_word($string) {
     return $s;
 }
 
+function bold_first_word($string) {
+    $s = explode(' ', $string);
+    $s[0] = "<b>" . $s[0] . "</b>";
+    $s = implode(' ', $s);
+    return $s;
+}
+
     //}
 
 
@@ -302,7 +309,7 @@ function uc_first_word($string) {
 
         if (isset($this->response)) {$sms .= $this->response;}
         //        $rand_agents = array_rand($this->glossary_agents, 3);
-$sms .= $this->web_prefix . "/thing/" . $this->uuid . "/glossary";
+$sms .= $this->web_prefix . "thing/" . $this->uuid . "/glossary";
 $sms .= " Made a glossary. ";
 
 if ( (isset($this->glossary_agents)) and (count($this->glossary_agents) != 0) ) {
@@ -461,10 +468,10 @@ if ( (isset($this->glossary_agents)) and (count($this->glossary_agents) != 0) ) 
             if (!isset($prior_firstChar)) {$prior_firstChar = "";}
 
             $firstChar = mb_substr($agent_name, 0, 1, "UTF-8");
-            if ($prior_firstChar != $firstChar) {$web .= "<p>" . $firstChar ."<br>";}
+            if ($prior_firstChar != $firstChar) {$web .= "<p>" . "<b>" . $firstChar ."</b><br>";}
             $prior_firstChar = $firstChar;
 
-            $web .= $this->uc_first_word($packet['words']) ."<br>";
+            $web .= $this->bold_first_word($this->uc_first_word($packet['words']) ."<br>");
 //            $web .= $agent_name . " " .$packet['words'] ."<br>";
 
         }
@@ -485,7 +492,7 @@ if ( (isset($this->glossary_agents)) and (count($this->glossary_agents) != 0) ) 
 
 
         $input = $this->input;
-        var_dump($input);
+        //var_dump($input);
         if (strtolower($input) != "glossary") {
 
             $strip_word="glossary";

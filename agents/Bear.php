@@ -23,6 +23,17 @@ class Bear extends Agent {
         $this->test= "Development code";
         $this->thing_report["info"] = "This is a ranger who keeps an eye open for picnickers. And bears.";
         $this->thing_report["help"] = "Find the bears. However you can. Text BEAR.";
+        $this->game_name = "pic-a-nic";
+
+        $this->contact = "VE7RVF control";
+        $this->primary_channel = "146.580";
+
+        if ($this->game_name == "pic-a-nic") {
+            $this->contact = "146.580 CONTROL";
+            $this->primary_channel = "146.565";
+        }
+
+
     }
 
     /**
@@ -52,7 +63,7 @@ class Bear extends Agent {
         $this->makeChoices();
 
         $this->thing_report["info"] = "This is a bear in a park.";
-        $this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text RANGER.";
+        $this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text BEAR.";
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
@@ -111,27 +122,30 @@ return;
 
 // But bears like variety.
 
+$contact = $this->contact;
+$primary_channel = $this->primary_channel;
+
             $array = array('Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). There is at least one camper broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). A picanic has been heard on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). A picnicker is broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). The camper is broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Amateur call tagged CAMPER is broadcasting on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). There has been a picnic beaconing on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Use the proword NO PLAY during games for real things. Contact VE7RVF control for help and support.',
-'Find the picanic(s). A pic-a-nic has been heard on 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). A picnic has been heard on Simplex 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). A picnic has been heard on Amateur Radio Service Simplex 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). A picnic has been heard on Amateur Radio Service Simplex 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Listen to 146.580. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Bear query Ginko Yurishiro. I SPELL. GOLF INDIA ETC. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Bear query Kozlov Leifonovich Grebnev. I SPELL. KILO OSCAR ZULU ETC. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Bear query Vladimir Goudenov Grizzlikof. I SPELL. VICTOR LIMA ETC. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Bear query Herbert Percival. I SPELL. HOTEL ECHO ROMEO ETC. Contact VE7RVF control for help and support.',
-'Find the picanic(s). Let control know that you might be Iorek Byrnison. I SPELL. INDIA OSCAR ROMEO ETC. Contact VE7RVF control for help and support.'
+'Find the picanic(s). There is at least one camper broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). There is at least one camper broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). A picanic has been heard on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). A picnicker is broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). The camper is broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Amateur call tagged CAMPER is broadcasting on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). There has been a picnic beaconing on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Use the proword NO PLAY during games for real things. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). A pic-a-nic has been heard on ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). A picnic has been heard on Simplex ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). A picnic has been heard on Amateur Radio Service Simplex ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). A picnic has been heard on Amateur Radio Service Simplex ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Listen to ' . $primary_channel . '. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Bear query Ginko Yurishiro. I SPELL. GOLF INDIA ETC. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Bear query Kozlov Leifonovich Grebnev. I SPELL. KILO OSCAR ZULU ETC. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Bear query Vladimir Goudenov Grizzlikof. I SPELL. VICTOR LIMA ETC. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Bear query Herbert Percival. I SPELL. HOTEL ECHO ROMEO ETC. Contact ' . $contact . ' for help and support.',
+'Find the picanic(s). Let control know that you might be Iorek Byrnison. I SPELL. INDIA OSCAR ROMEO ETC. Contact ' . $contact . ' for help and support.'
 );
 
 // Please help me understand how to use these words.
@@ -181,7 +195,7 @@ $i = $this->input;
             $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
         }
 $i = trim($whatIWant);
-var_dump($i);
+//var_dump($i);
 $bear_name = "ted";
 $bear_response = "Quiet.";
 $min_lev = 1e99;
@@ -214,7 +228,7 @@ $bear_response = "Found bear. ". $bear_response;
 }
 
 $this->bear_response = $bear_response;
-var_dump($this->bear_response);
+//var_dump($this->bear_response);
 //var_dump($bear_response);
 
 //        $this->doBear($this->input);

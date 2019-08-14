@@ -168,6 +168,31 @@ class Optin {
 
     }
 
+    function makeWeb()
+    {
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/start';
+
+        $this->node_list = array("new user"=>array("glossary", "warranty"));
+
+        $this->makeChoices();
+
+//        if (!isset($this->html_image)) {$this->makePNG();}
+
+        $web = "<b>Opt-in Agent</b>";
+        $web .= "<p>";
+        $web .= "<p>";
+
+        $web .= "Text OPTIN in your text channel.";
+
+//        $web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web .= "<br>";
+
+        $web .= "<p>";
+
+        $this->thing_report['web'] = $web;
+    }
+
 
     private function makeChoices()
     {
@@ -215,7 +240,7 @@ class Optin {
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         $this->thing_report['help'] = 'Agent "Optin" responding to an instruction to opt-in.';
-
+        $this->makeWeb();
 
 		return;
 	}

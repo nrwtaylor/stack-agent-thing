@@ -32,6 +32,9 @@ class Newuser {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+        $this->thing_report['help'] = 'Responds to an instruction about a new user.';
+
+
 		$this->node_list = array("new user"=>array("opt-in"));
 
         $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.</pre>', "INFORMATION");
@@ -140,6 +143,31 @@ class Newuser {
 
     }
 
+    function makeWeb()
+    {
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/start';
+
+        $this->node_list = array("new user"=>array("glossary", "warranty"));
+
+        $this->makeChoices();
+
+//        if (!isset($this->html_image)) {$this->makePNG();}
+
+        $web = "<b>New User Agent</b>";
+        $web .= "<p>";
+        $web .= "<p>";
+
+        $web .= "Use your messaging service to send text messages to this stack. Try some of the words in the GLOSSARY.";
+
+//        $web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web .= "<br>";
+
+        $web .= "<p>";
+
+        $this->thing_report['web'] = $web;
+    }
+
 
     public function makeChoices()
     {
@@ -184,7 +212,7 @@ class Newuser {
 
         $this->thing_report['help'] = $this->agent_prefix  .'responding to an instruction to new user.';
 
-
+        $this->makeWeb();
 		return;
 	}
 

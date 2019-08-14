@@ -1,4 +1,5 @@
-<?php /*
+<?php
+/*
  * Agent.php
  *
  * @package default
@@ -16,7 +17,9 @@ error_reporting(-1);
 
 class Agent {
 
-public $input;
+    public $input;
+
+
     /**
      *
      * @param Thing   $thing
@@ -42,8 +45,6 @@ public $input;
 
         // So I could call
         if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
-        //$this->thing->container->db->commit();
 
         $this->getMeta();
 
@@ -97,27 +98,16 @@ public $input;
         $this->read();
 
         $this->run();
-
         $this->make();
 
         $this->set();
 
-        if ($this->agent_input == null) {
+        if (($this->agent_input == null) or ($this->agent_input == "")) {
             $this->respond();
         }
 
         if (!isset($this->response)) {$this->response = "No response found.";}
         $this->thing_report['response'] = $this->response;
-
-        // Following line stops Gearman error, but turns off images obvs Jul 11, 2018
-        //$this->thing_report['png'] = null;
-
-        //$this->thing_report = $thing_report;
-
-  //      $message_thing = new Message($this->thing, $this->thing_report);
-        //$thing_report['info'] = $message_thing->thing_report['info'];
-
-//var_dump($this->thing_report);
 
         $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
@@ -146,19 +136,21 @@ public $input;
     public function set() {
     }
 
+
+    /**
+     *
+     */
     public function make() {
         $this->makeResponse();
         $this->makeSMS();
         $this->makeWeb();
     }
 
+
     /**
      *
      */
     public function run() {
-
-        //$message_thing = new Message($this->thing, $this->thing_report);
-        //$thing_report['info'] = $message_thing->thing_report['info'];
     }
 
 
@@ -187,10 +179,9 @@ public $input;
      *
      */
     public function getName() {
-
         $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
-
     }
+
 
     /**
      *
@@ -233,7 +224,7 @@ public $input;
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
-     //       $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " .$
+            //       $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " .$
 
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
@@ -254,7 +245,8 @@ public $input;
         return $this->link_uuid;
     }
 
-   /**
+
+    /**
      *
      * @return unknown
      */
@@ -282,9 +274,7 @@ public $input;
         }
         $this->prior_agent = "web";
         foreach ($link_tasks as $key=>$link_task) {
-            //            $previous_thing = new Thing($link_uuid);
-            var_dump($link_task);
-            //            if (isset($previous_thing->json->array_data['message']['agent'])) {
+
             if (isset($link_task)) {
 
                 if (in_array(strtolower($link_task), array('web', 'pdf', 'txt', 'log', 'php', 'syllables', 'brilltagger'))) {
@@ -301,6 +291,7 @@ public $input;
 
         return $this->link_task;
     }
+
 
     /**
      *
@@ -356,66 +347,77 @@ public $input;
      *
      */
     public function respondResponse() {
-//        $this->makeSMS();
-//        $this->makeWeb();
-// Could make this random...
-$agent_flag = false;
+        $agent_flag = true;
 
 
-if ($agent_flag == true) {
-//        if ($this->agent_input == null) {
-  //          $this->respond();
-  //      }
+        if ($agent_flag == true) {
+            //        if ($this->agent_input == null) {
+            //          $this->respond();
+            //      }
 
 
-if (!isset($this->thing_report['sms'])) {
-    $this->thing_report['sms'] = "AGENT | Standby.";
-}
+            if (!isset($this->thing_report['sms'])) {
+                $this->thing_report['sms'] = "AGENT | Standby.";
+            }
 
-    $message_thing = new Message($this->thing, $this->thing_report);
-    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-}
+            //if ($this->agent_input == null) { 
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            //}
+        }
 
     }
 
-private function makeResponse() {
 
-if (isset($this->response)) {return;}
+    /**
+     *
+     */
+    private function makeResponse() {
 
-//$this->response = "Standby.";
-$this->response = "";
+        if (isset($this->response)) {return;}
 
-}
+        //$this->response = "Standby.";
+        $this->response = "";
 
-    private function makeWeb() {
+    }
 
 
-}
+    /**
+     *
+     */
+    public function makeWeb() {
 
+
+    }
+
+
+    /**
+     *
+     */
     private function makeSMS() {
-//$this->makeResponse();
-// So this is the response if nothing else has responded.
+        //$this->makeResponse();
+        // So this is the response if nothing else has responded.
 
-if (!isset($this->thing_report['sms'])) { 
-    if (isset($this->sms_message)) {$this->thing_report['sms'] = $this->sms_message;}
+        if (!isset($this->thing_report['sms'])) {
+            if (isset($this->sms_message)) {$this->thing_report['sms'] = $this->sms_message;}
 
-if (!isset($this->thing_report['sms'])) {
-    $sms = strtoupper($this->agent_name);
+            if (!isset($this->thing_report['sms'])) {
+                $sms = strtoupper($this->agent_name);
 
-if ($this->response == "") {$sms .= " >";} else {
- $sms .= " | " . $this->response;
-}
-
-
-    $this->thing_report['sms'] = $sms;
-}
-
-if (!isset($this->sms_message)) {
-    $this->sms_message = $this->thing_report['sms'];
-}
+                if ($this->response == "") {$sms .= " >";} else {
+                    $sms .= " | " . $this->response;
+                }
 
 
-}
+                $this->thing_report['sms'] = $sms;
+            }
+
+            if (!isset($this->sms_message)) {
+                $this->sms_message = $this->thing_report['sms'];
+            }
+
+
+        }
 
     }
 
@@ -519,33 +521,16 @@ if (!isset($this->sms_message)) {
 
     /**
      *
+     * @param unknown $text (optional)
      */
     private function read($text = null) {
-        //        if (strtolower($this->agent_input) != $agent_name) {
-        //            // If agent input has been provided then
-        // ignore the subject.
-        // Might need to review this.
-        //            $this->input = strtolower($this->agent_input);
-        //        } else {
-        //            $this->input = strtolower($this->subject);
-        //        }
 
-//$i = $this->subject;
-
-
-if ($text == null) {$text = $this->subject;} // Always.
-
-if (isset($this->filtered_input)) {$text = $this->filtered_input;}
-
-if (isset($this->translated_input)) {$text = $this->translated_input;}
-
-
-
-
+        if ($text == null) {$text = $this->subject;} // Always.
+        if (isset($this->filtered_input)) {$text = $this->filtered_input;}
+        if (isset($this->translated_input)) {$text = $this->translated_input;}
 
         switch (true) {
         case (isset($this->input)) :
-
             break;
 
         case ($this->agent_input == null):
@@ -559,16 +544,13 @@ if (isset($this->translated_input)) {$text = $this->translated_input;}
 
 
 
-       $whatIWant = $this->input;
-        if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
-            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
-        } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) { 
-            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot")); 
+        $whatIWant = $this->input;
+        if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
+        } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
+            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
         }
-$this->input = trim($whatIWant);
-
-
-
+        $this->input = trim($whatIWant);
 
         $this->readSubject();
     }
@@ -577,40 +559,28 @@ $this->input = trim($whatIWant);
     /**
      *
      * @param unknown $agent_class_name (optional)
+     * @param unknown $agent_input      (optional)
      * @return unknown
      */
     public function getAgent($agent_class_name = null, $agent_input = null) {
 
         try {
-
             $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
 
             $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
 
-if (isset($this->input)) {$this->thing->subject = $this->input;}
+            if (isset($this->input)) {$this->thing->subject = $this->input;}
 
-//$this->thing->subject = $this->input;
-//echo "foo";
             $agent = new $agent_namespace_name($this->thing);
-///echo "bar";
-
-//var_dump($agent->thing_report);
-
-//if (!isset($agent->thing_report['sms'])) {
-//
-//$agent->thing_report['sms'] = "Merp";
-//$agent->thing_report['response'] = "Merpity";
-//}
 
             // If the agent returns true it states it's response is not to be used.
             if ((isset($agent->response)) and ($agent->response === true)) {
                 throw new Exception("Flagged true.");
             }
             $this->thing_report = $agent->thing_report;
-//var_dump($this->thing_report['sms']);
             $this->agent = $agent;
 
-//        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
+            //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
@@ -628,7 +598,6 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
             //continue;
             return false;
         }
-        //if (!isset($this->thing_report['sms'])) {return false;}
         return true;
 
     }
@@ -699,6 +668,7 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
             $input = strtolower($this->agent_input);
         }
 
+        /*
         if (strpos($this->agent_input, 'receipt') !== false) {
             $this->thing->log( 'Agent created a Receipt agent' );
             $receipt_thing = new Receipt($this->thing);
@@ -753,6 +723,70 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
             $snowflake_thing = new Snowflake($this->thing);
             $this->thing_report = $snowflake_thing->thing_report;
             return $this->thing_report;
+        }
+*/
+
+        // Basically if the agent input directly matches an agent name
+        // Then run it.
+
+        // So look hear to generalize that.
+        //$agents = new Agents($this->thing, "agents");
+        //foreach ($agents->agents as $agent_class_name=>$agent_name) {
+        //echo $agent_id . " " ;
+        $text = urldecode($this->agent_input);
+        $text = strtolower($text);
+        //if ( $text == $this->agent_input) {
+        //}
+
+        $arr = explode(' ', trim($text));
+
+        $arr = explode('\%20', trim($text));
+
+        $agents = array();
+
+        $onegrams = $this->getNgrams($text, $n = 1);
+        $bigrams = $this->getNgrams($text, $n = 2);
+        $trigrams = $this->getNgrams($text, $n = 3);
+
+        $arr = array_merge($arr, $onegrams);
+        $arr = array_merge($arr, $bigrams);
+        $arr = array_merge($arr, $trigrams);
+
+        usort($arr, function($a, $b) {
+                return strlen($b) <=> strlen($a);
+            });
+        $matches = array();
+
+        foreach ($arr as $i=>$ngram) {
+            $ngram = ucfirst($ngram);
+            if ($ngram == "Thing") {
+                continue;
+            }
+
+            // Exclude incoming web links asking for buttons
+            if ($ngram == "Button") {
+                continue;
+            }
+
+            if ($ngram == "Agent") {
+                continue;
+            }
+
+            if ($ngram == "") {
+                continue;
+            }
+
+
+            if ($this->isAgent($ngram)) {
+                $matches[] = $ngram;
+                //                return $this->thing_report;
+            }
+        }
+        if (count($matches) == 1) {
+            $this->getAgent($matches[0]);
+
+            return $this->thing_report;
+
         }
 
         // First things first.  Special instructions to ignore.
@@ -892,7 +926,6 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
                     return $thing_report;
                 }
 */
-
         // Expand out emoji early
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
@@ -914,7 +947,6 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
-//var_dump($input);
         $compression_thing = new Compression($this->thing, $input);
         if (isset($compression_thing->filtered_input)) {
             // Compressions found.
@@ -922,32 +954,29 @@ if (isset($this->input)) {$this->thing->subject = $this->input;}
         }
 
         $input = trim($input);
-$this->input = $input;
+        $this->input = $input;
 
-// Check if it is a command (starts with s slash)
-if ( strtolower( substr($input,0,2)) != "s/") {
+        // Check if it is a command (starts with s slash)
+        if ( strtolower( substr($input, 0, 2)) != "s/") {
 
-        // Okay here check for input
-        //echo "input is ".  $input;
+            // Okay here check for input
+            //echo "input is ".  $input;
 
+            if ( strtolower($this->subject) == "break" ) {
 
-        if ( strtolower($this->subject) == "break" ) {
+                $input_thing = new Input($this->thing, "break");
+                $this->thing_report = $input_thing->thing_report;
+                return $this->thing_report;
 
-            $input_thing = new Input($this->thing, "break");
-            $this->thing_report = $input_thing->thing_report;
-            return $this->thing_report;
+            }
+
+            // Where is input routed to?
+            $input_thing = new Input($this->thing, "input");
+
+            if ($input_thing->input_agent != null) {$input = $input_thing->input_agent . " " . $input;}
 
         }
-
-        // Where is input routed to?
-        $input_thing = new Input($this->thing, "input");
-
-//var_dump($input);
-
-        if ($input_thing->input_agent != null) {$input = $input_thing->input_agent . " " . $input;}
-
-}
-        echo "input is routed to " . $input . ".\n";
+        //echo "input is routed to " . $input . ".\n";
 
 
 
@@ -958,11 +987,11 @@ if ( strtolower( substr($input,0,2)) != "s/") {
 
         if (strtolower($input) == 'agent') {
             $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
-//            $usermanager_thing = new Usermanager($this->thing);
-//$link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
-$this->getLink();
-//$link = $this->link_uuid;
-$link = $this->web_prefix . "agent/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
+            //            $usermanager_thing = new Usermanager($this->thing);
+            //$link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
+            $this->getLink();
+            //$link = $this->link_uuid;
+            $link = $this->web_prefix . "agent/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
 
             $this->thing_report['sms'] = "AGENT | " . $link . " Made an agent link.";
             return $this->thing_report;
@@ -1120,7 +1149,7 @@ $link = $this->web_prefix . "agent/" . $this->link_uuid . "/" . strtolower($this
         // What effect would this have?
         //$agents = array_reverse($agents);
 
-$this->input = $input;
+        $this->input = $input;
         // Prefer longer agent names
         usort($agents, function($a, $b) {
                 return strlen($b) <=> strlen($a);
@@ -1142,15 +1171,8 @@ $this->input = $input;
                 continue;
             }
 
-            //            if ($this->getAgent($agent_class_name)) {break;}
-
-// devstack pass filtered input to callsign.
-// Make universal.
-//$i = null;
-//if (strtolower($agent_class_name) == "callsign") {$i = $input;}
-//echo "Called get Agent " . $agent_class_name . " saying " . $this->input. "\n";
             if ($this->getAgent($agent_class_name)) {
-//            if ($this->getAgent($agent_class_name, $input)) {
+                //            if ($this->getAgent($agent_class_name, $input)) {
                 //echo $this->thing_report['help'];
                 return $this->thing_report;
             }
@@ -1201,26 +1223,25 @@ $this->input = $input;
             //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
             //            echo "place not found";
         } else {
-            //            echo "place found";
-
+            // place found
             $place_thing = new Place($this->thing);
-
             $this->thing_report = $place_thing->thing_report;
             return $this->thing_report;
         }
 
 
 
-// Here are some other places
+        // Here are some other places
 
         $frequency_thing = new Frequency($this->thing, "extract");
         $this->thing_report = $frequency_thing->thing_report;
 
         if ($frequency_thing->hasFrequency($input)) {
-//            $ars_thing = new Amateurradioservice($this->thing, $input);
-        $frequency_thing = new Frequency($this->thing, "extract");
+            //            $ars_thing = new Amateurradioservice($this->thing, $input);
+            //        $frequency_thing = new Frequency($this->thing, "extract");
+            $frequency_thing = new Frequency($this->thing);
 
-//            $ars_thing = new Amateurradioservice($this->thing);
+            //            $ars_thing = new Amateurradioservice($this->thing);
             $this->thing_report = $frequency_thing->thing_report;
             return $this->thing_report;
 
@@ -1232,18 +1253,17 @@ $this->input = $input;
         if ($repeater_thing->hasRepeater($input)) {
 
             $ars_thing = new Amateurradioservice($this->thing, $input);
-if ($ars_thing->response == false) {
+            if ($ars_thing->response == false) {
 
-            $ars_thing = new Callsign($this->thing);
-            $this->thing_report = $ars_thing->thing_report;
-            return $this->thing_report;
+                $ars_thing = new Callsign($this->thing);
+                $this->thing_report = $ars_thing->thing_report;
+                return $this->thing_report;
 
-
-} else {
-            $ars_thing = new Amateurradioservice($this->thing);
-            $this->thing_report = $ars_thing->thing_report;
-            return $this->thing_report;
-}
+            } else {
+                $ars_thing = new Amateurradioservice($this->thing);
+                $this->thing_report = $ars_thing->thing_report;
+                return $this->thing_report;
+            }
         }
 
 
@@ -1268,113 +1288,70 @@ echo "place found";
 
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
-if (strtolower($this->from) != "null@stackr.ca") {
+        if (strtolower($this->from) != "null@stackr.ca") {
 
-        $entity_list = array("Crow", "Wumpus", "Ant");
-        //$agent_name = "entity";
-        foreach ($entity_list as $key=>$entity_name) {
+            $entity_list = array("Crow", "Wumpus", "Ant");
+            //$agent_name = "entity";
+            foreach ($entity_list as $key=>$entity_name) {
 
-            $findagent_agent = new FindAgent($this->thing, $entity_name);
-            $things = $findagent_agent->thing_report['things'];
-            $uuid = ($things[0]['uuid']);
+                $findagent_agent = new FindAgent($this->thing, $entity_name);
+                $things = $findagent_agent->thing_report['things'];
+                $uuid = ($things[0]['uuid']);
 
-            $thing = new Thing($uuid);
+                $thing = new Thing($uuid);
 
-            if ($thing == false) {continue;}
-            if (!isset($thing->account)) {continue;}
-            if (!isset($thing->account['stack'])) {continue;}
+                if ($thing == false) {continue;}
+                if (!isset($thing->account)) {continue;}
+                if (!isset($thing->account['stack'])) {continue;}
 
-            $variables = $thing->account['stack']->json->array_data;
+                $variables = $thing->account['stack']->json->array_data;
 
-            // Check
-            if (!isset($variables[strtolower($entity_name)])) {continue;}
+                // Check
+                if (!isset($variables[strtolower($entity_name)])) {continue;}
 
-            $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
+                $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
 
-            //echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
+                //echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
 
-            if (!isset($last_heard['entity'])) {
-                $last_heard['entity'] = $last_heard[strtolower($entity_name)];
-                $agent_name = $entity_name;
+                if (!isset($last_heard['entity'])) {
+                    $last_heard['entity'] = $last_heard[strtolower($entity_name)];
+                    $agent_name = $entity_name;
+                }
+
+                if ($last_heard['entity'] < $last_heard[strtolower($entity_name)]) {
+                    $last_heard['entity'] = $last_heard[strtolower($entity_name)];
+                    $agent_name = $entity_name;
+                }
             }
 
-            if ($last_heard['entity'] < $last_heard[strtolower($entity_name)]) {
-                $last_heard['entity'] = $last_heard[strtolower($entity_name)];
-                $agent_name = $entity_name;
+            //        echo $agent_name. " "  . $last_heard['entity'];
+
+            if (!isset($agent_name)) {$agent_name = "Ant";}
+
+
+
+            $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'. $agent_name;
+
+            if (strpos($input, 'nest maintenance') !== false) {
+                $ant_thing = new $agent_namespace_name($this->thing);
+                $this->thing_report = $ant_thing->thing_report;
+                return $this->thing_report;
             }
-        }
 
-        //        echo $agent_name. " "  . $last_heard['entity'];
-
-        if (!isset($agent_name)) {$agent_name = "Ant";}
-
-
-
-        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'. $agent_name;
-
-        if (strpos($input, 'nest maintenance') !== false) {
-            $ant_thing = new $agent_namespace_name($this->thing);
-            $this->thing_report = $ant_thing->thing_report;
-            return $this->thing_report;
-        }
-
-        if (strpos($input, 'patrolling') !== false) {
-            $ant_thing = new $agent_namespace_name($this->thing);
-            $this->thing_report = $ant_thing->thing_report;
-            return $this->thing_report;
-        }
-
-        if (strpos($input, 'foraging') !== false) {
-            $ant_thing = new $agent_namespace_name($this->thing);
-            $this->thing_report = $ant_thing->thing_report;
-            return $this->thing_report;
-        }
-
-}
-        /*
-        $findagent_agent = new FindAgent($this->thing, "crow");
-        $things = $findagent_agent->thing_report['things'];
-        $crow_last_heard = strtotime($things[0]['created_at']);
-
-        $findagent_agent = new FindAgent($this->thing, "ant");
-        $temp_things = $findagent_agent->thing_report['things'];
-        $things = array();
-        foreach($temp_things as $key=>$thing) {
-            if ($thing['task'] == "ant") {
-                $things[] = $thing;
+            if (strpos($input, 'patrolling') !== false) {
+                $ant_thing = new $agent_namespace_name($this->thing);
+                $this->thing_report = $ant_thing->thing_report;
+                return $this->thing_report;
             }
+
+            if (strpos($input, 'foraging') !== false) {
+                $ant_thing = new $agent_namespace_name($this->thing);
+                $this->thing_report = $ant_thing->thing_report;
+                return $this->thing_report;
+            }
+
         }
-        $ant_last_heard = strtotime($things[0]['created_at']);
 
-        if ($ant_last_heard > $crow_last_heard) {
-            $agent_name = "Ant";
-        } else {
-            $agent_name = "Crow";
-        }
-
-//        $agent_name = "Ant";
-        $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_name;
-
-
-		if (strpos($input, 'nest maintenance') !== false) {
-
-			$ant_thing = new $agent_namespace_name($this->thing);
-			$this->thing_report = $ant_thing->thing_report;
-			return $this->thing_report;
-		}
-
-		if (strpos($input, 'patrolling') !== false) {
-			$ant_thing = new $agent_namespace_name($this->thing);
-			$this->thing_report = $ant_thing->thing_report;
-			return $this->thing_report;
-		}
-
-		if (strpos($input, 'foraging') !== false) {
-			$ant_thing = new $agent_namespace_name($this->thing);
-			$this->thing_report = $ant_thing->thing_report;
-			return $this->thing_report;
-		}
-*/
         $pattern = '/\?/';
 
         if (preg_match($pattern, $input)) { // returns true with ? mark
@@ -1565,9 +1542,9 @@ if (strtolower($this->from) != "null@stackr.ca") {
         $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
         if (isset($chinese_thing->chineses)) {
-$c = new Chinese($this->thing, "chinese");
-$this->thing_report = $c->thing_report;
-//            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
+            $c = new Chinese($this->thing, "chinese");
+            $this->thing_report = $c->thing_report;
+            //            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
             return $this->thing_report;
             //exit();
 

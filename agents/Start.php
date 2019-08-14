@@ -13,6 +13,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+// devstack refactor here as Start extends Agent.
 
 class Start {
 
@@ -49,6 +50,8 @@ class Start {
         $this->email = $thing->container['stack']['email'];
 
         //        $this->word = $thing->container['stack']['word'];
+
+        $this->thing_report['help'] = "Responds to an instruction to start.";
 
         $this->node_list = array("start"=>array("new user", "opt-in", "opt-out"));
 
@@ -148,6 +151,31 @@ class Start {
     }
 
 
+    function makeWeb()
+    {
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/start';
+
+        $this->node_list = array("start"=>array("glossary", "new user"));
+
+        $this->makeChoices();
+
+//        if (!isset($this->html_image)) {$this->makePNG();}
+
+        $web = "<b>Start Agent</b>";
+        $web .= "<p>";
+        $web .= "<p>";
+
+        $web .= "Text the word START to our BC SMS portal at (778) 401-2130.";
+
+//        $web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web .= "<br>";
+
+        $web .= "<p>";
+
+        $this->thing_report['web'] = $web;
+    }
+
     /**
      *
      */
@@ -210,7 +238,7 @@ class Start {
         return;
     }
 
-
+// devstack refactor out
 
     /**
      *
@@ -251,6 +279,7 @@ class Start {
 
         $this->thing_report['help'] = $this->agent_prefix  .'responding to an instruction to start.';
 
+        $this->makeWeb();
 
         return;
     }
@@ -270,12 +299,6 @@ class Start {
         } else {
             $input = strtolower($this->subject);
         }
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-        //$haystack = $this->agent_input . " " . $this->from;
-        //$haystack = $input . " " . $this->from;
-        $haystack = "";
-
-        //              $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
         $prior_uuid = null;
 
@@ -287,7 +310,7 @@ class Start {
 
             if ($input == $this->keyword) {
                 $this->get();
-                $this->response = "Got the flag.";
+                $this->response = "Got the start flag.";
                 return;
             }
         }
