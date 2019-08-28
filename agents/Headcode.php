@@ -105,7 +105,11 @@ class Headcode
         //                        'negative_time'=>'yes'),
 
         //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
-        $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
+        $this->default_head_code = "0Z99";
+
+if (isset($this->thing->container['api']['headcode']['head_code'])) {
+   $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
+}
 
         // But for now use this below.
 

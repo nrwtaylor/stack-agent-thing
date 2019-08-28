@@ -186,7 +186,7 @@ if (!isset($this->body)) {return;}
 
 		if ($this->input != null) {
 			$test_message = $this->input;
-var_dump($test_message);
+//var_dump($test_message);
 		} else {
 			$test_message = $this->subject;
 		}

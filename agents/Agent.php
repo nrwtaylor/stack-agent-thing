@@ -584,7 +584,7 @@ class Agent {
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-            // echo $ex;
+
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
@@ -633,7 +633,7 @@ class Agent {
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-            // echo $ex;
+
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
@@ -732,7 +732,7 @@ class Agent {
         // So look hear to generalize that.
         //$agents = new Agents($this->thing, "agents");
         //foreach ($agents->agents as $agent_class_name=>$agent_name) {
-        //echo $agent_id . " " ;
+
         $text = urldecode($this->agent_input);
         $text = strtolower($text);
         //if ( $text == $this->agent_input) {
@@ -782,6 +782,7 @@ class Agent {
                 //                return $this->thing_report;
             }
         }
+
         if (count($matches) == 1) {
             $this->getAgent($matches[0]);
 
@@ -960,7 +961,6 @@ class Agent {
         if ( strtolower( substr($input, 0, 2)) != "s/") {
 
             // Okay here check for input
-            //echo "input is ".  $input;
 
             if ( strtolower($this->subject) == "break" ) {
 
@@ -976,7 +976,6 @@ class Agent {
             if ($input_thing->input_agent != null) {$input = $input_thing->input_agent . " " . $input;}
 
         }
-        //echo "input is routed to " . $input . ".\n";
 
 
 
@@ -1044,13 +1043,11 @@ class Agent {
             return $this->thing_report;
         }
 
-
         $this->thing->log('Agent "Agent" looking for UUID in input.');
 
         // Is Identity Context?
         $uuid = new Uuid($this->thing, "extract");
         $uuid->extractUuids($input);
-
 
         if ((isset($uuid->uuids)) and (count($uuid->uuids) > 0)) {
             $this->thing->log('Agent "Agent" found a  UUID in input.', "INFORMATION");
@@ -1063,12 +1060,11 @@ class Agent {
         //        $input =  $chatbot->filtered_input;
 
 
-
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
 
         if ($headcode->response === true) {
-            // pass echo "not a headcode...";
+
         } else {
             //if ( is_string($headcode->head_code)) {
 
@@ -1087,7 +1083,6 @@ class Agent {
             $this->thing_report = $robot_thing->thing_report;
             return $this->thing_report;
         }
-
         $this->thing->log( 'now looking at Words (and Places and Characters).  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
         // See if there is an agent with the first workd
@@ -1173,7 +1168,6 @@ class Agent {
 
             if ($this->getAgent($agent_class_name)) {
                 //            if ($this->getAgent($agent_class_name, $input)) {
-                //echo $this->thing_report['help'];
                 return $this->thing_report;
             }
         }
@@ -1221,7 +1215,6 @@ class Agent {
         if (!$place_thing->isPlace($input)) {
             //        if (!$place_thing->isPlace($this->subject)) {
             //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
-            //            echo "place not found";
         } else {
             // place found
             $place_thing = new Place($this->thing);
@@ -1266,26 +1259,6 @@ class Agent {
             }
         }
 
-
-
-        /*
-        // This would allow web based agent to update state
-        // devstack think
-        // Now check for any place agent input
-        $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
-        $place_thing = new Place($this->thing, $this->agent_input);
-        $this->thing_report = $place_thing->thing_report;
-
-        if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
-echo "place not found";
-        } else {
-echo "place found";
-            $place_thing = new Place($this->thing, $this->agent_input);
-            $this->thing_report = $place_thing->thing_report;
-            return $this->thing_report;
-        }
-*/
-
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
         if (strtolower($this->from) != "null@stackr.ca") {
@@ -1311,8 +1284,6 @@ echo "place found";
 
                 $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
 
-                //echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
-
                 if (!isset($last_heard['entity'])) {
                     $last_heard['entity'] = $last_heard[strtolower($entity_name)];
                     $agent_name = $entity_name;
@@ -1323,8 +1294,6 @@ echo "place found";
                     $agent_name = $entity_name;
                 }
             }
-
-            //        echo $agent_name. " "  . $last_heard['entity'];
 
             if (!isset($agent_name)) {$agent_name = "Ant";}
 
@@ -1603,8 +1572,6 @@ echo "place found";
 
         //trigger_error("Fatal error", E_USER_ERROR);
 
-        //echo $errno;
-        //echo $errstr;
         // do something
     }
 
@@ -1620,8 +1587,6 @@ function warning_handler($errno, $errstr) {
 
     //trigger_error("Fatal error", E_USER_ERROR);
 
-    //echo $errno;
-    //echo $errstr;
     // do something
 }
 

@@ -424,9 +424,9 @@ $this->refreshed_at = $this->last_refreshed_at;
     {
         //$this->makeHeadcode();
         $this->get();
-        var_dump($this->fuel_quantity);
+        //var_dump($this->fuel_quantity);
         $this->fuel_quantity += $number;
-        var_dump($this->fuel_quantity);
+        //var_dump($this->fuel_quantity);
 
         return;
     }

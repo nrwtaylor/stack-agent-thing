@@ -55,8 +55,17 @@ class Place extends Agent
 
         $this->keywords = array('place','next', 'accept', 'clear', 'drop','add','new','here','there');
 
+$this->default_place_name = "Here";
+if (isset($this->thing->container['api']['place']['default_place_name'])) {
+
         $this->default_place_name = $this->thing->container['api']['place']['default_place_name'];
+}
+
+$this->default_place_code = "X";
+if (isset($this->thing->container['api']['place']['default_place_code'])) {
         $this->default_place_code = $this->thing->container['api']['place']['default_place_code'];
+}
+
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
@@ -165,8 +174,6 @@ class Place extends Agent
         $place_code_candidate = null;
 
         $alpha_agent = new A4($this->thing,"a4");
-//var_dump($alpha_agent->alpha);
-//        $place_code_candidate = $this->thing->nuuid;
         $place_code_candidate = $alpha_agent->alpha;
 
 

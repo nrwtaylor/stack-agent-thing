@@ -54,8 +54,6 @@ class Message {
 
         $this->thing_report['thing'] = $this->thing->thing;
 
-
-
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
         $this->stack_state = $thing->container['stack']['state'];
@@ -229,7 +227,6 @@ $this->thing_report['info'] = "Assemble a message.";
                 //      $this->message = $this->thing_report['message'];
                 $this->email = $this->thing_report['email'];
                 //     }
-                //echo "email";
                 //break;
                 continue;
             case 'web':
@@ -272,8 +269,10 @@ $this->thing_report['info'] = "Assemble a message.";
      */
     function checkFacebook($searchfor) {
         // Check address against the beta list
+
         $file = $this->resource_path . 'facebook/fbid.txt';
-        $contents = file_get_contents($file);
+        $contents = @file_get_contents($file);
+        if ($contents == false) {return false;}
 
         $pattern = "|\b($searchfor)\b|";
 
@@ -301,7 +300,6 @@ $this->thing_report['info'] = "Assemble a message.";
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
         //$channel = new Channel($this->thing, "channel");
-        //var_dump($channel);
         if ($this->channel_name == "microsoft") {return true;}
         return false; // in dev
     }
@@ -317,7 +315,6 @@ $this->thing_report['info'] = "Assemble a message.";
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
         //$channel = new Channel($this->thing, "channel");
-        //var_dump($channel);
         if ($this->channel_name == "slack") {return true;}
         return false; // in dev
         //exit();
@@ -474,9 +471,7 @@ $this->thing_report['info'] = "Assemble a message.";
         }
 
 
-        //echo "message";
         if ( $this->checkSlack($to) ) { // The Slack app of Mordok the Magnificent
-            //echo "slack";
             $this->thing->log('<pre> Agent "Message" responding via Slack.</pre>');
 
 
@@ -536,7 +531,6 @@ $this->thing_report['info'] = "Assemble a message.";
 
             switch (true) {
             case ($token_thing->thing_report['token'] != 'sms' ):
-                echo "no sms token " . $this->uuid . "\n";
                 $this->thing_report['info'] = 'Agent "Message" did not get SMS token.';
                 break;
 
@@ -561,7 +555,6 @@ $this->thing_report['info'] = "Assemble a message.";
             default:
             }
 
-            //echo $this->thing_report['info'];
 
             $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
 

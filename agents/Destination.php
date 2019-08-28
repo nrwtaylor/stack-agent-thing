@@ -258,7 +258,7 @@ class Destination extends Agent {
         $this->gtfs = new Gtfs($this->thing, $input);
 
         //var_dump($this->gtfs->response);
-        var_dump($this->gtfs->thing_report['sms']);
+        //var_dump($this->gtfs->thing_report['sms']);
 
         if (!isset($this->gtfs->stations)) {$this->route_list_text = ">"; $this->response = "No route."; return;}
 

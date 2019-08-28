@@ -53,7 +53,7 @@ class Identity extends Agent
      * @param unknown $requested_state (optional)
      */
     function set($requested_state = null) {
-        var_dump($this->requested_state);
+        //var_dump($this->requested_state);
 
         if ($requested_state == null) {
             if ((!isset($this->requested_state)) or ($this->requested_state == null)) {$this->requested_state = "X";}

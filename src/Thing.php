@@ -94,7 +94,7 @@ class Thing
         try {
             $this->getThing($uuid);
         } catch (\Exception $e) {
-           echo 'Caught exception: ',  $e->getMessage(), "\n";
+           //echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
 
 //		echo "Stack Balance<br>";
@@ -420,7 +420,10 @@ class Thing
 		if ($accounts == null) {return false;}
         foreach ($accounts as $uuid=>$account) {
             foreach($account as $account_name=>$balance) {
-                if (($uuid == 'stack') or ($uuid == 'thing' )) {echo "corrupted account list";return true;}
+                if (($uuid == 'stack') or ($uuid == 'thing' )) {
+                //    echo "corrupted account list";
+                    return true;
+                }
                 $this->newAccount($uuid, $account_name,	$balance);
 	        }
         }

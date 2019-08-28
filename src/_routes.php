@@ -708,7 +708,6 @@ $web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_
 
 // Route handler for everything after the /
 $app->get('[/{params:.*}]', function ($request, $response, $args)  {
-
 //    ini_set("max_input_time", 2); //s
 //set_time_limit(2);
 

@@ -246,11 +246,11 @@ $text = $this->text;
     public function makePNG($image = null)
     {
         if ((isset($this->PNG)) and ($image == null)) {return;}
-
         if ($image == null) {
             $this->makeImage();
         } else {
-            $this->image = $image;
+//            $this->image = $image;
+$image = $this->image;
             $this->width = imagesx($image) *0.85; 
             $this->height = imagesy($image) * 0.85;
         }

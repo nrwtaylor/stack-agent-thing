@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 // Recognizes and handles UUIDS.
@@ -23,6 +22,7 @@ class Uuid extends Agent
      *
      */
     function init() {
+
         $this->stack_state = $this->thing->container['stack']['state'];
         $this->short_name = $this->thing->container['stack']['short_name'];
 
@@ -224,10 +224,13 @@ class Uuid extends Agent
      */
     public function makePNG() {
         if (isset($this->PNG)) {return;}
-
         $codeText = $this->web_prefix . "thing/".$this->uuid;
 
         $agent = new Qr($this->thing, $codeText);
+
+$agent->makeImage();
+$agent->makePNG();
+
         $image = $agent->PNG;
 
         $this->PNG_embed = "data:image/png;base64,".base64_encode($image);

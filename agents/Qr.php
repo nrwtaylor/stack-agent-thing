@@ -12,45 +12,23 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Qr
+class Qr extends Agent
 {
-
-	function __construct(Thing $thing, $agent_input = null)
+    function init() 
     {
-        $this->thing_report['thing'] = $thing;
-
-//        if ($agent_input == null) {$agent_input = '';}
-        $this->agent_input = $agent_input;
         $this->agent_name = "qr";
-        // Given a "thing".  Instantiate a class to identify and create the
-        // most appropriate agent to respond to it.
-        $this->thing = $thing;
 
-        //$this->thing_report['thing'] = $this->thing->thing;
+		$this->stack_state = $this->thing->container['stack']['state'];
+		$this->short_name = $this->thing->container['stack']['short_name'];
 
-		// Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-		$this->stack_state = $thing->container['stack']['state'];
-		$this->short_name = $thing->container['stack']['short_name'];
-
-		// Create some short-cuts.
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		//$this->sqlresponse = null;
-        $this->created_at =  strtotime($thing->thing->created_at);
-
-        $this->thing->log('started running on Thing ' . date("Y-m-d H:i:s") . '');
 		$this->node_list = array("qr"=>
 						array("qr","uuid","snowflake"));
 
 		$this->aliases = array("learning"=>array("good job"));
+
+//        $this->created_at =  strtotime($this->thing->created_at);
+//        $this->created_at = $this->thing->created_at;
+$this->created_at = strtotime($this->thing->thing->created_at);
 
         if ($this->agent_input == null) {
             $this->quick_response = $this->web_prefix . "" . $this->uuid . "" . "/qr";
@@ -59,23 +37,11 @@ class Qr
         }
 
 
-		$this->readSubject();
+//        $this->makePNG();
 
 
-        if ($this->agent_input == null) {
-		    $this->respond();
-        }
+//        $this->thing->log('found ' . $this->quick_response);
 
-
-        $this->makePNG();
-
-
-        $this->thing->log('found ' . $this->quick_response);
-
-        //$this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
-        //echo '<pre> Agent "Receipt" completed on Thing ';echo ;echo'</pre>';
-
-        //echo $agent_input;
 
 	}
 
@@ -99,6 +65,7 @@ class Qr
 
     function makeWeb() {
 
+        if (!isset($this->html_image)) {$this->makeImage();}
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/qr';
 
         $this->node_list = array("qr"=>array("qr", "uuid"));
@@ -134,7 +101,15 @@ class Qr
         $this->thing_report['web'] = $web;
     }
 
+function set() {
 
+                $this->thing->json->setField("settings");
+                $this->thing->json->writeVariable(array("qr",
+                        "received_at"),  $this->thing->json->time()
+                        );
+
+}
+/*
 	public function respond()
     {
 		// Thing actions
@@ -180,6 +155,7 @@ class Qr
         $this->makeWeb();
 		return;
 	}
+*/
 
 	public function readSubject()
     {
@@ -221,9 +197,10 @@ class Qr
         $this->choices = $choices;
     }
 
-    public function makePNG()
+    public function makeImage()
+//    public function makePNG()
     {
-        if (isset($this->PNG)) {return;}
+//        if (isset($this->PNG)) {return;}
 
         if ($this->agent_input == null) {
             $codeText = $this->quick_response;
@@ -231,6 +208,8 @@ class Qr
         } else {
             $codeText = $this->agent_input;
         }
+
+/*
         if (ob_get_contents()) ob_clean();
 
         $qrCode = new QrCode($codeText);
@@ -241,9 +220,14 @@ class Qr
 
         ob_clean();
         ob_end_clean();
+*/
+        $qrCode = new QrCode($codeText);
+        $image = $qrCode->writeString();
 
-        $this->PNG_embed = "data:image/png;base64,".base64_encode($image);
-        $this->PNG = $image;
+
+  //      $this->PNG_embed = "data:image/png;base64,".base64_encode($image);
+//        $this->PNG = $image;
+$this->image = $image;
 
         $this->width = 100;
         $alt_text = $this->uuid;
@@ -262,11 +246,11 @@ class Qr
         // Write the string at the top left
         //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
 
-        $this->thing_report['png'] = $image;
+//        $this->thing_report['png'] = $image;
 
         //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
-        return $this->thing_report['png'];
+//        return $this->thing_report['png'];
     }
 /*
     public function makePNG()
@@ -289,6 +273,3 @@ class Qr
 */
 
 }
-
-
-?>

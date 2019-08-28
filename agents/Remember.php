@@ -18,7 +18,8 @@ class Remember {
                 if ($thing->thing != true) {
                         //print "falsey";
 
-	                echo '<pre> Agent "Remember" ran on a null Thing ';echo $thing->uuid;echo'</pre>';
+//	                echo '<pre> Agent "Remember" ran on a null Thing ';
+//echo $thing->uuid;echo'</pre>';
 
         	        $this->thing_report = array('thing' => false, 
 						'info' => 'Tried to run remember on a null Thing.',
