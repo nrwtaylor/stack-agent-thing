@@ -37,13 +37,9 @@ class Queenelizabethpark extends Agent
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-
         $this->node_list = array("start"=>array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging", "foraging")), "midden work"=>"foraging"));
-
         $info = 'The "Queen Elizabeth Park" agent provides a link to a map. ';
-
     }
-
 
     /**
      *
@@ -110,6 +106,29 @@ $this->doMap();
 
     }
 
+    public function respond() {
+        $this->thing->flagGreen();
+
+//        $to = $this->thing->from;
+//        $from = "camper";
+
+      $this->makeSMS();
+//        $this->makeChoices();
+
+//        $this->thing_report["info"] = "This is a camper in a park with a picnic basket.";
+//        $this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text BEAR. Or RANGER.";
+
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $thing_report['info'] = $message_thing->thing_report['info'] ;
+
+        return $this->thing_report;
+    }
+
+
+
     private function getInject() {
         //if (isset($this->cave_names)) {return;}
 
@@ -125,6 +144,7 @@ $this->doMap();
         while ($line !== false) {
             //$items = explode(",", $line);
             //$this->injects[] = $line;
+
 if (substr($line,0,1) != "#") {$this->injects[] = $line;}
 if ($line == "# places") {break;}
 
@@ -297,25 +317,24 @@ $this->place = $this->places[$number];
         $test_message .= "</b><p>";
 
         //$test_message .= "".  nl2br($this->sms_message);
-        $test_message .= "YOUR CHOICES ARE";
+        $test_message .= "PLACE INFORMATION";
         $test_message .= "<p>";
+        $test_message .= $this->response;
+        $test_message .= "<br>";
+
 
 
         $test_message .= "PDF ";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/wumpus.pdf';
-        $test_message .= '<a href="' . $link . '">wumpus.pdf</a>';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/queenelizabethpark.pdf';
+        $test_message .= '<a href="' . $link . '">queenelizabethpark.pdf</a>';
         //$web .= " | ";
-
 
         $test_message .="<br>";
         $test_message .= "<p>";
 
-
-
-        $this->response = "";
+        //$this->response = "";
         //$this->getCave();
-
 
         trim($this->response);
 
@@ -357,6 +376,7 @@ function doMap() {
     /**
      *
      */
+/*
     public function makeSMS() {
 
         //$this->makeChoices();
@@ -373,7 +393,6 @@ function doMap() {
 
 if (stripos($this->response, 'join us') !== false) {
         $sms .= $link . " Made a link to a map. ";
-
 }
 
 
@@ -385,7 +404,15 @@ if (stripos($this->response, 'join us') !== false) {
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
+*/
 
+    public function makeSMS() {
+//var_dump($this->response);
+        $this->node_list = array("park"=>array("camper", "bear", "ranger"));
+        $m = strtoupper($this->agent_name) . " | " . $this->response;
+        $this->sms_message = $m;
+        $this->thing_report['sms'] = $m;
+    }
 
     /**
      *
@@ -444,47 +471,38 @@ if (stripos($this->response, 'join us') !== false) {
 
 // Let's see if there is a number between 1 and 28
 //var_dump($input);
-$number = new Number($this->thing, "number");
-$number->extractNumbers($input);
-$number->extractNumber();
+        $number = new Number($this->thing, "number");
+        $number->extractNumbers($input);
+        $number->extractNumber();
 //var_dump($number->number);
 
-if ( (isset($number->number)) and ($number->number != 0)) {
+        if ( (isset($number->number)) and ($number->number != 0)) {
 
-$this->getPlace($number->number);
+            $this->getPlace($number->number);
 
 //$t = implode($this->place," ");
 
-$this->response .= "Place " . $number->number . " is " . $this->place['place_name'] .". ";
-if ((isset($this->place['link'])) and ($this->place['link'] != null)) {$this->response .= $this->place['link'] . " ";}
-if ((isset($this->place['text'])) and ($this->place['text'] != null)) {$this->response .= $this->place['text'] . " ";}
-        return;
-}
+            $this->response .= "Place " . $number->number . " is " . $this->place['place_name'] .". ";
+            if ((isset($this->place['link'])) and ($this->place['link'] != null)) {$this->response .= $this->place['link'] . " ";}
+            if ((isset($this->place['text'])) and ($this->place['text'] != null)) {$this->response .= $this->place['text'] . " ";}
+            return;
+        }
 
-if ($input != "queen elizabeth park") {
-//var_dump($input);
-$text = $input;
+        if ($input != "queen elizabeth park") {
+            //var_dump($input);
+            $text = $input;
 
+            $t = new Compression($this->thing, "compression queen elizabeth park");
 
-
-$t = new Compression($this->thing, "compression queen elizabeth park");
-
-
-//$bear_name = "ted";
-//$bear_response = "Quiet.";
+        //$bear_name = "ted";
+        //$bear_response = "Quiet.";
 //$min_lev = 1e99;
-foreach($t->agent->matches as $type=>$strip_words) {
-
-foreach($strip_words as $i=>$strip_word){
+            foreach($t->agent->matches as $type=>$strip_words) {
+                foreach($strip_words as $i=>$strip_word){
 //if (!isset($strip_word['words'])) {var_dump($strip_word); exit();}
 
-$strip_word = $strip_word['words'];
-//var_dump($strip_word);
+                    $strip_word = $strip_word['words'];
 
-
-
-
-//$strip_word = "park";
                     $whatIWant = $input;
                     if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
                         $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
@@ -493,46 +511,27 @@ $strip_word = $strip_word['words'];
                     }
 
                     $input = $whatIWant;
-}
-}
+                }
+            }
+            $input = trim($input);
+            //var_dump($input);
+            $park_response = "";
+/*
+            if ($input != "") {
+                $t = $this->getLibrex($input);
+                if ($this->librex_best_match != null) {
+                    $this->response = ucwords($this->librex_best_match['words']) . ". " . ucfirst($this->librex_best_match['english']);
+                    return;
+                }
 
+                $this->getInject();
+                $this->response = $this->inject;
+                return;
 
-
-
-
-//$input = "fountain";
-//echo "foo";
-$t = $this->getLibrex($input);
-
-//echo "getLibrex got " . $t . "\n";
-//echo "bar";
-//exit();
-//echo "best match";
-//var_dump($this->librex_best_match);
-//echo "response";
-//var_dump($this->librex_response);
-//echo "merp";
-
-if ($this->librex_best_match != null) {
-//var_dump($t['words']);
-//$this->response = ucfirst($t['words']);
-
-//$this->response = $t;
-
-$this->response = ucwords($this->librex_best_match['words']) . ". " . ucfirst($this->librex_best_match['english']);
-
-
-return;
-}
-
-$this->getInject();
-$this->response = $this->inject;
-return;
-
-}
-//exit();
-
-
+            }
+*/
+        }
+//var_dump($this->response);
 //$librex_agent = new Librex($this->thing, "vancouverparksboard/queen_elizabeth_park");
 //var_dump($librex_agent->matches);
 
@@ -560,7 +559,7 @@ return;
             $last_piece = $piece;
         }
         //$this->getCoordinate();
-$park_response = "";
+//$park_response = "";
         foreach ($ngram_list as $key=>$piece) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -634,9 +633,38 @@ $park_response = "";
             }
         }
 
-if ($park_response == "") {$park_response = "Join us Saturday 17 August 1pm to 4.30pm at Queen Elizabeth Park. Contact VE7RVF control.";}
+            if (($input != "") and ( (isset($park_response)) and ($park_response == "")) ) {
+                $t = $this->getLibrex($input);
+                if ($this->librex_best_match != null) {
+                    $this->response = ucwords($this->librex_best_match['words']) . ". " . ucfirst($this->librex_best_match['english']);
+                    return;
+                }
+
+                $this->getInject();
+                $this->response = $this->inject;
+                return;
+
+            }
+
+
+//var_dump($park_response);
+//if ((isset($park_response)) and ($park_response == "")) {
+if ((!isset($park_response)) or ($park_response == "")) {
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/queenelizabethpark.pdf';
+        $r = "";
+
+//if (stripos($this->response, 'join us') !== false) {
+        $r .= $link . " Made a link to a map. ";
+$park_response = $r;
+//return;
+
+
+$park_response .= "Join us Saturday 17 August 1pm to 4.30pm at Queen Elizabeth Park. Contact VE7RVF control.";
+
+}
 
 $this->response .= $park_response;
+//var_dump($this->response);
         return false;
     }
 

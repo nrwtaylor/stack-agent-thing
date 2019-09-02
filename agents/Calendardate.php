@@ -287,7 +287,7 @@ class Calendardate
 
     }
 
-    private function makeWeb() {
+    public function makeWeb() {
 
         if (!isset($this->response)) {$this->response = "meep";}
 
@@ -305,7 +305,7 @@ class Calendardate
 
 
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $sms_message = "CALENDARDATE";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);

@@ -445,6 +445,7 @@ class Json {
         foreach ($path as $key) {
             $dest = &$dest[$key];
         }
+
         $dest[$finalKey] = $value;
     }
 
@@ -519,8 +520,8 @@ class Json {
 
             $this->last_write = true;
 
-            throw new \Exception('Insufficient space in DB record ' . $this->uuid . ".");
-
+//            throw new \Error('Insufficient space in DB record ' . $this->uuid . ".");
+            throw new \OverflowException('Insufficient space in DB record ' . $this->uuid . ".");
             //            $this->overload_length = strlen($this->json_data) - $this->char_max;
 
             return false;

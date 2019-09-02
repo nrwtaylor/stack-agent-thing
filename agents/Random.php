@@ -89,7 +89,7 @@ class Random extends Agent
 
     }
 
-    private function makeWeb() {
+    public function makeWeb() {
 
         if (!isset($this->response)) {$this->response = "No response provided.";}
 
@@ -113,7 +113,7 @@ class Random extends Agent
     }
 
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $sms_message = "RANDOM";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);

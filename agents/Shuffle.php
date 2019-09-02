@@ -231,7 +231,7 @@ class Shuffle {
 
 	}
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $this->sms_message = "SHUFFLE | " . $this->response;
 

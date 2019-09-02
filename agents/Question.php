@@ -151,7 +151,7 @@ class Question
 
 	}
 
-    private function makeSMS()
+    public function makeSMS()
     {
         if (!isset($this->sms_message)) {
             $this->sms_message = "QUESTION | Question not understood.";
@@ -159,7 +159,7 @@ class Question
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-    private function makeChoice()
+    public function makeChoice()
     {
         $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
         $choices = $this->thing->choice->makeLinks('start');

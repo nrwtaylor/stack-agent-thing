@@ -837,7 +837,7 @@ class Entity extends Agent
      *
      * @return unknown
      */
-    private function makeSMS() {
+    public function makeSMS() {
 
         //$s = "GREEN";
         if (!isset($this->flag->state)) {$this->getFlag();}

@@ -49,21 +49,32 @@ class Web extends Agent {
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
-    public function respond() {
-        // Thing actions
-
-        //        $web_thing = new Thing(null);
-        //        $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
+function makeSMS() {
 
         $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
 
         $this->sms_message .= " | " . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
 
+
+}
+
+    /**
+     *
+     * @return unknown
+     */
+    public function respond() {
+$this->makeSMS();
+        // Thing actions
+
+        //        $web_thing = new Thing(null);
+        //        $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
+
+//        $this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
+
+//        $this->sms_message .= " | " . $this->response;
+//        $this->thing_report['sms'] = $this->sms_message;
+//var_dump($this->agent_name);
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("web",

@@ -89,7 +89,7 @@ class Resource
         // I think properly capitalized.
         //$this->set();
         if ($this->agent_input == null) {
-		    $this->Respond();
+		    $this->respond();
         }
 
         if ($this->agent_input != "extract") {
@@ -770,7 +770,7 @@ $filtered_input = ltrim(strtolower($whatIWant), " ");
     }
 
 
-    private function makeSMS() {
+    public function makeSMS() {
 
 $s = "NOT USED";
         $sms_message = "RESOURCE " . strtoupper($this->resource_name) ." | " . $s;
@@ -794,7 +794,7 @@ if (!isset($this->resource_quantity)) {$this->resource_quantity = "X";}
 
     }
 
-	private function Respond() {
+	private function respond() {
 
 		// Thing actions
 

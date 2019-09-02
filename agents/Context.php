@@ -505,7 +505,7 @@ $this->thing->log($this->agent_prefix . 'extracted ' . $this->context . ' ' . $t
         return;
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $sms_message = "CONTEXT IS " . strtoupper($this->context);
 
@@ -521,7 +521,7 @@ $this->thing->log($this->agent_prefix . 'extracted ' . $this->context . ' ' . $t
     }
 
 
-    private function makeTXT()
+    public function makeTXT()
     {
      //   if (!isset($this->previous_contexts)) {
      //       $this->getContexts();

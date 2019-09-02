@@ -754,7 +754,7 @@ if (is_array($input)) {$this->coordinate = true; return;}
         return $this->coordinate_string;
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $this->inject = null;
         $s = $this->inject;

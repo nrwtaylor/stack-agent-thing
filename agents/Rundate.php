@@ -249,7 +249,7 @@ if (isset($this->numbers[1])) {
     /**
      *
      */
-    function makeTXT() {
+    public function makeTXT() {
         $txt = $this->sms_message;
 
         $this->thing_report['txt'] = $txt;
@@ -260,7 +260,7 @@ if (isset($this->numbers[1])) {
     /**
      *
      */
-    private function makeSMS() {
+    public function makeSMS() {
 
         $sms_message = "RUNDATE";
 

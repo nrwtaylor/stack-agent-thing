@@ -333,7 +333,7 @@ class Runat extends Agent {
     /**
      *
      */
-    private function makeSMS() {
+    public function makeSMS() {
 
         $sms_message = "RUNAT";
 

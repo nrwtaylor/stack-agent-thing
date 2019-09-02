@@ -1,6 +1,6 @@
 <?php
 /**
- * Cat.php
+ * Minecraft.php
  *
  * @package default
  */
@@ -9,6 +9,10 @@
 namespace Nrwtaylor\StackAgentThing;
 
 class Minecraft extends Agent {
+
+    // PHP Minecraft Query code.
+    // https://github.com/thedudeguy/PHP-Minecraft-Query
+    // Original code by Chris Churchwell.
 
     public $var = 'hello';
 
@@ -38,11 +42,6 @@ class Minecraft extends Agent {
         $this->test= "Development code";
         $this->thing_report["info"] = "This is a minecraft keeping an eye on how late this Thing is.";
         $this->thing_report["help"] = "This is about being inscrutable.";
-
-        //        public function __construct($host, $port=25565, $timeout=3, $auto_connect = false) {
-
-
-
     }
 
 
@@ -71,22 +70,7 @@ class Minecraft extends Agent {
         if ($auto_connect === true) {
             $this->connect();
         }
-
-
     }
-
-
-    /**
-     *
-     */
-    private function getNegativetime() {
-
-        // And example of using another agent to get information the cat needs.
-        $agent = new Negativetime($this->thing, "minecraft");
-        $this->negative_time = $agent->negative_time; //negative time is asking
-
-    }
-
 
     /**
      *
@@ -140,10 +124,7 @@ class Minecraft extends Agent {
      * @param unknown $text (optional)
      */
     function doMinecraft($text = null) {
-        // Yawn.
-        //require_once('query.php');
 
-        //$server = new \Query('173.209.44.184');
         $this->doQuery('173.209.44.184');
 
         if ($this->connect()) {
@@ -155,16 +136,11 @@ class Minecraft extends Agent {
             $map = $info['map'];
             $players = $info['players'];
 
-
             $players_text = implode(" ", $players);
             if (mb_strlen($players_text) > 130) {$players_text = "Lots of players on the server.";}
             if (count($players) == 0) {$players_text = "No players on the server.";}
-
-            //  print_r($info);
         }
 
-
-        //        $this->getNegativeTime();
 
         if ($this->agent_input == null) {
             //            $array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
@@ -351,11 +327,5 @@ class Minecraft extends Agent {
     public function strip_color_codes($string) {
         return preg_replace('/[\x00-\x1F\x80-\xFF]./', '', $string);
     }
-
-
-
-
-
-
 
 }

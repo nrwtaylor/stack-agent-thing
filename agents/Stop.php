@@ -97,7 +97,7 @@ class Stop {
         return;
     }
 
-    private function makeSMS() {
+    public function makeSMS() {
 
         switch ($this->counter) {
             case 1:
@@ -119,7 +119,7 @@ class Stop {
     }
 
 
-    private function makeEmail() {
+    public function makeEmail() {
 
         switch ($this->counter) {
             case 1:
@@ -144,7 +144,7 @@ class Stop {
     }
 
 
-    private function makeChoices()
+    public function makeChoices()
     {
 
             $choices = $this->thing->choice->makeLinks('stop');

@@ -223,7 +223,7 @@ class Timestamp
 
     }
 
-    private function makeWeb() {
+    public function makeWeb() {
 
         if (!isset($this->response)) {$this->response = "meep";}
 
@@ -244,7 +244,7 @@ class Timestamp
 
 
 
-    private function makeSMS() {
+    public function makeSMS() {
 
         $sms_message = "TIMESTAMP";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);

@@ -136,18 +136,7 @@ class Clocktime
         //$this->head_code = "0Z15";
         //$headcode = new Variables($this->thing, "variables headcode " . $this->from);
 
-        //$this->refreshed_at = $this->current_time;
-
-        if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
-        //$string_coordinate = $this->stringCoordinate($this->coordinate);
-//        $quantity = $this->quantity;
-//        if (($this->quantity == true) and (!is_numeric($this->quantity))) {return;}
-
-        //$this->refreshed_at = $this->current_time;
-//        $quantity_variable = new Variables($this->thing, "variables quantity " . $this->from);
-
-
-        $this->clocktime->setVariable("refreshed_at", $this->refreshed_at);
+        $this->clocktime->setVariable("refreshed_at", $this->current_time);
         $this->clocktime->setVariable("hour", $this->hour);
         $this->clocktime->setVariable("minute", $this->minute);
 
@@ -206,9 +195,6 @@ class Clocktime
 
     function get($run_at = null)
     {
-
-        $this->last_refreshed_at = $this->clocktime->getVariable('refreshed_at');
-
 
         $this->hour = $this->clocktime->getVariable("hour");
         $this->minute = $this->clocktime->getVariable("minute");
@@ -275,7 +261,7 @@ class Clocktime
 
     }
 
-    private function makeWeb() {
+    public function makeWeb() {
 
         if (!isset($this->response)) {$this->response = "meep";}
 
@@ -293,7 +279,7 @@ class Clocktime
 
 
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $sms_message = "CLOCKTIME";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
@@ -391,9 +377,6 @@ class Clocktime
      if (count($pieces) == 1) {
             if ($input == 'clocktime') {
                 $this->get();
-
-                $this->refreshed_at = $this->last_refreshed_at;
-
                 $this->response = "Last 'clocktime' retrieved.";
                 return;
             }

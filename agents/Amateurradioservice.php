@@ -191,7 +191,6 @@ class Amateurradioservice extends Agent {
         $librex->librex = $data;
         $librex->getMatches($text, "CSV");
         $channel = reset($librex->matches)[0];
-
         //        if ($this->agent_input == null) {
 
         $channel_text =  $this->channelString($channel);
@@ -203,6 +202,16 @@ class Amateurradioservice extends Agent {
             $this->response = strtolower($v);
         }
         $this->response = $channel_text;
+
+if ($channel_text == null) {
+
+$c = new Callsign($this->thing, $this->agent_input);
+//var_dump($c->response);
+//echo "merp";
+$this->response = $c->response;
+}
+
+//        $this->response = $channel_text;
         $this->message = $this->response;
         //        } else {
 

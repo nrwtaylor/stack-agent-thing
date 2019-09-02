@@ -359,7 +359,7 @@ return;
     /**
      *
      */
-    private function makeSMS() {
+    public function makeSMS() {
         $sms = "GEOLOCATION" . " | " . $this->response;
 
         $this->sms_message = $sms;

@@ -110,13 +110,13 @@ class Who
 
 	}
 
-    private function makeMessage()
+    public function makeMessage()
     {
 
 
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
         if (!isset($this->sms_message)) {
             $this->sms_message = "WHO | Message not understood.";
@@ -124,7 +124,7 @@ class Who
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-    private function makeChoice()
+    public function makeChoice()
     {
         $this->thing->choice->Create($this->agent_name, $this->node_list, "who");
         $choices = $this->thing->choice->makeLinks('who');

@@ -130,7 +130,7 @@ class Quota {
         // Is this do our set?,  Setting signals.
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $sms = "QUOTA | ";
 
@@ -158,7 +158,7 @@ class Quota {
     }
 
 
-    private function makeEmail() {
+    public function makeEmail() {
 
         switch ($this->counter) {
             case 1:

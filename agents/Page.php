@@ -120,7 +120,7 @@ if ($this->page != $this->previous_page) {
     }
 
 
-    private function makeSMS()
+    public function makeSMS()
     {
         switch ($this->page) {
             case 1:
@@ -148,7 +148,7 @@ if ($this->page != $this->previous_page) {
         $this->thing_report['sms'] = $sms;
     }
 
-    private function makeEmail()
+    public function makeEmail()
     {
         switch ($this->page) {
             case 1:
@@ -172,7 +172,7 @@ if ($this->page != $this->previous_page) {
         $this->thing_report['email'] = $message;
     }
 
-    private function makeChoices()
+    public function makeChoices()
     {
         $choices = $this->thing->choice->makeLinks('page');
 

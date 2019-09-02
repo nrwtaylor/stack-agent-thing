@@ -124,7 +124,7 @@ class Index
     }
 
 
-    private function makeSMS()
+    public function makeSMS()
     {
         switch ($this->index) {
             case 1:
@@ -145,7 +145,7 @@ class Index
         $this->thing_report['sms'] = $sms;
     }
 
-    private function makeEmail()
+    public function makeEmail()
     {
         switch ($this->index) {
             case 1:

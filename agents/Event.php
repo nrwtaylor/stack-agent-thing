@@ -160,7 +160,7 @@ class Event
         // I think properly capitalized.
         //$this->set();
         if ($this->agent_input == null) {
-		    $this->Respond();
+		    $this->respond();
 
         }
 
@@ -1043,7 +1043,7 @@ $web .= "<br>";
     }
 
 
-    private function makeSMS() {
+    public function makeSMS() {
 
         if ((!isset($this->event_name)) or ($this->event_name == null)) {
             $this->event_name = "None found";
@@ -1115,7 +1115,7 @@ $day_text = $this->day;
 
     }
 
-	private function Respond()
+	private function respond()
     {
 		// Thing actions
 		$this->thing->flagGreen();

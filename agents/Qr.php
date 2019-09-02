@@ -213,7 +213,7 @@ function set() {
         if (ob_get_contents()) ob_clean();
 
         $qrCode = new QrCode($codeText);
-
+var_dump($codeText);
         ob_start();
         echo $qrCode->writeString();
         $image = ob_get_contents();

@@ -121,7 +121,7 @@ class Snow
         }
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
         switch ($this->snowflakes) {
             case 1:
@@ -144,7 +144,7 @@ class Snow
         $this->thing_report['sms'] = $sms;
     }
 
-    private function makeEmail()
+    public function makeEmail()
     {
         switch ($this->snowflakes) {
             case 1:

@@ -434,7 +434,7 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
     }
 
 
-    function makeWeb()
+    public function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
@@ -654,9 +654,11 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
 
     function extractHeadcodes($input = null)
     {
+
         if (!isset($this->head_codes)) {
             $this->head_codes = array();
         }
+
         //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
         //$pattern = "|[A-Za-z]{4}|"; echo $input;
 
@@ -678,10 +680,16 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
             return $this->head_code;
         }
 
+        //if (count($head_codes == 0)) {return false;}
+        //if (count($head_codes > 1)) {return true;}
+
         if  ((is_array($head_codes)) and (count($head_codes) == 0)){return false;}
         if  ((is_array($head_codes)) and (count($head_codes) > 1)) {return true;}
 
+
+
         return true;
+
     }
 
 
@@ -841,9 +849,7 @@ $image_width = 125;
                 $txt .= " " . str_pad($headcode['available'], 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['quantity'])) {
-$quantity_text = $headcode['quantity'];
-if (is_array($quantity_text)) {$quantity_text = $quantity_text['quantity'];}
-                $txt .= " " . str_pad($quantity_text, 9, " ", STR_PAD_LEFT);
+                $txt .= " " . str_pad($headcode['quantity'], 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['consist'])) {
                 $txt .= " " . str_pad($headcode['consist'], 9, " ", STR_PAD_LEFT);
@@ -868,7 +874,7 @@ if (is_array($quantity_text)) {$quantity_text = $quantity_text['quantity'];}
         if (!isset($this->flag->state)) { $this->flag->state = "X";}
     }
 
-    private function makeSMS() {
+    public function makeSMS() {
 
         //$s = "GREEN";
         if (!isset($this->flag->state)) {$this->getFlag();}

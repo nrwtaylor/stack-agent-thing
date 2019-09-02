@@ -672,7 +672,7 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
 		return;
 	}
 
-    private function makeChoices()
+    public function makeChoices()
     {
 
         if (!isset($this->choices)) {
@@ -684,7 +684,7 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
 
     }
 
-    private function makeSMS() 
+    public function makeSMS() 
     {
         if (!isset($this->sms_messages)) {
             $this->sms_messages = array();

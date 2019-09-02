@@ -3,7 +3,16 @@
 These are the current build instructions as of January 2019.
 
 1. Install Ubuntu latest.
+
+Which finds you here.
+sudo apt-get update
+sudo apt-get install php7.1-xml
+sudo apt-get install php-mbstring
+
 2. Install LAMP stack.
+
+Curated instructions here. Stop at configuration.
+https://www.linode.com/docs/web-servers/lamp/install-lamp-stack-on-ubuntu-18-04/
 
 3. Set-up InnoDB.
 
@@ -13,12 +22,12 @@ GRANT ALL PRIVILEGES ON *.* TO 'stackuser'@'localhost' IDENTIFIED BY 'password';
 
 mysql -u stackuser -p
 
-CREATE DATABASE dbname;
+CREATE DATABASE stack_db;
 
+wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/templates/database_schema.sql
 mysql -u stackuser -p stack_db < database_schema.sql
 
 mysql> USE  stack_db;
-
 
 mysql> DESC stack;
 +--------------+---------------+------+-----+-------------------+-------+
@@ -44,18 +53,39 @@ mysql> DESC stack;
 | variables    | varchar(3998) | YES  | MUL | NULL              |       |
 +--------------+---------------+------+-----+-------------------+-------+
 
+Useful commands.
 
 pager less -SFX;
-
 SELECT * FROM stack ORDER BY created_at DESC limit 99;
+
+3. Setup PHP
+
+10. Install PHP extensions
+
+sudo apt install php7.2-bcmath
+sudo apt install php7.0-gd
+(ignore php7.0 module already enabled, not enabling PHP 7.2)
+sudo apt-get install php7.2-gd
+sudo apt-get install php-curl
+sudo service apache2 restart
 
 4. Setup Apache 2
 
 mkdir /var/www/stackr.test
-composer.json from nrwtaylor/stack-agent-thing
-cp nrwtaylor/stack-agent-thing/public
-cp nrwtaylor/stack-agent-thing/private
+cd /var/www/stackr.test
+
+Set up folder permissions.
+https://stackoverflow.com/questions/22390001/runtimeexception-vendor-does-not-exist-and-could-not-be-created/43513522#43513522
+
+More on folder permissions.
+https://askubuntu.com/questions/767504/permissions-problems-with-var-www-html-and-my-own-home-directory-for-a-website
+
+wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/composer.json
+? cp nrwtaylor/stack-agent-thing/public
+? cp nrwtaylor/stack-agent-thing/private
+sudo apt install composer
 composer install
+
 
 cd /etc/apache2/sites-available
 sudo nano 000-default.conf
@@ -149,22 +179,6 @@ php -S localhost:8080 -t public public/index.php
 8. Verify Ping, Latency
 9. Verify Roll PNG
 
-10. Install PHP extensions
-sudo apt install php7.2-bcmath
-
-sudo apt install php7.0-gd
-
-ignore php7.0 module already enabled, not enabling PHP 7.2
-
-
-#sudo apt-get install php-bcmath
-sudo apt-get install php7.2-gd
-//restart.
-
-and curl
-sudo apt-get install php-curl
-sudo service apache2 restart
-
 11. Set-up cron
 
 sudo crontab -e
@@ -198,10 +212,6 @@ sudo apt-get upgrade
 sudo nano vendor/nrwtaylor/stack-agent-thing/src/worker.php
 Update require path.
 
----
-Folder Permissions
-
-https://askubuntu.com/questions/767504/permissions-problems-with-var-www-html-and-my-own-home-directory-for-a-website
 
 ---
 Install Gearman
@@ -588,7 +598,7 @@ And work through removing files.
 Enable Soap
 # /etc/php5/apache2/php.ini
 # sudo apt-get install php7.3-soap
-
+ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
 # /etc/php/7.3/apache/php.ini
 # uncomment ;extension=soap
 
@@ -606,4 +616,6 @@ Install bcmath extension
 https://ourcodeworld.com/articles/read/679/how-to-solve-the-requested-php-extension-bcmath-is-missing-from-your-system-when-installing-a-library-via-composer-in-ubuntu-16-04
 sudo apt install php7.3-bcmath
 
+
+# useful commands
 

@@ -121,7 +121,7 @@ class Start {
     /**
      *
      */
-    private function makeSMS() {
+    public function makeSMS() {
 
         switch ($this->counter) {
         case false:
@@ -179,7 +179,7 @@ class Start {
     /**
      *
      */
-    private function makeEmail() {
+    public function makeEmail() {
         switch ($this->counter) {
         case 1:
 

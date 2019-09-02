@@ -615,7 +615,7 @@ class City
 
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
         $this->inject = null;
         $s = $this->inject;

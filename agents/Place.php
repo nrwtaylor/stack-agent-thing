@@ -759,7 +759,7 @@ foreach($filtered_places as $key=>$filtered_place) {
     }
 
     // prod
-    private function makeSMS()
+    public function makeSMS()
     {
         // Get available for place.  This would be an available agent.
         $this->getQuantity();
@@ -831,10 +831,12 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         $link_txt = $this->web_prefix . 'thing/' . $this->uuid . '/place.txt';
 
-        $this->node_list = array("place"=>array("translink", "job"));
+//        $this->node_list = array("place"=>array("translink", "job"));
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "place");
-        $choices = $this->thing->choice->makeLinks('place');
+//        $this->thing->choice->Create($this->agent_name, $this->node_list, "place");
+//        $choices = $this->thing->choice->makeLinks('place');
+
+$choices = false;
 
         $web = '<a href="' . $link . '">';
 

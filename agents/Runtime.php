@@ -211,7 +211,7 @@ class Runtime extends Agent {
     /**
      *
      */
-    private function makeSMS() {
+    public function makeSMS() {
         $sms_message = "RUNTIME";
 
         $sms_message .= $this->response;

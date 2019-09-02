@@ -391,7 +391,10 @@ class Variables
         }
 
         $this->variables_thing->$variable = $value;
-try {
+
+//      set_error_handler(array($this, 'warning_handler'), E_WARNING);
+//set_exception_handler(array($this,'my_exception_handler'));
+//try {
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
         $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
@@ -410,13 +413,18 @@ $this->thing->log("overflow " . $this->variables_thing->json->size_overflow . " 
 $this->thing->log("set " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
 }
 
-} catch (Exception $e) {
-    echo 'Caught exception: ',  $e->getMessage(), "\n";
-}
+//} catch (Exception $e) {
+//    echo 'Caught exception: ',  $e->getMessage(), "\n";
+//} catch (Error $e) {
+//   echo 'Now you can catch me!';
+//}
+
+//        restore_error_handler();
+//restore_exception_handler();
 
 
         // And save variable_set onto local Thing.
-try {
+//try {
         $this->thing->db->setFrom($this->identity);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
@@ -425,12 +433,20 @@ if ($this->variables_thing->json->write_fail_count > 0) {
 $this->thing->log("overflow " . $this->thing->json->size_overflow . " write_fail_count " . $this->thing->json->write_fail_count . ".");
 $this->thing->log("set " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
 }
-} catch (Exception $e) {
-    echo 'Caught exception: ',  $e->getMessage(), "\n";
-}
+//} catch (Exception $e) {
+//    echo 'Caught exception: ',  $e->getMessage(), "\n";
+//}
+//} catch (Error $e) {
+//   echo 'Now you can catch me!';
+//}
+
 
 
         // bughunt 23 June 2018 if ($value == "usermanager") {exit();}
+
+//        restore_error_handler();
+//restore_exception_handler();
+
 
         return $this->variables_thing->$variable;
     }
@@ -767,4 +783,23 @@ with the start agent. And doesn't seem to be necessary
         }
         $this->setVariable($name, $value);
     }
+/*
+    function warning_handler($errno, $errstr) {
+        //throw new \Exception('Class not found.');
+
+        //trigger_error("Fatal error", E_USER_ERROR);
+//echo "sdfsdfsdfsdfs";
+//        echo $errno;
+//        echo $errstr;
+        // do something
+    }
+
+function my_exception_handler($e) {
+//$this->thing_report['sms'] = "Merp.";
+//echo $e;
+    // do some erorr handling here, such as logging, emailing errors
+    // to the webmaster, showing the user an error page etc
+}
+*/
+
 }

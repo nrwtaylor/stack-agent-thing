@@ -100,7 +100,7 @@ class Optin {
         return;
     }
 
-    private function makeSMS() {
+    public function makeSMS() {
 
         switch ($this->counter) {
             case 1:
@@ -125,7 +125,7 @@ class Optin {
     }
 
 
-    private function makeEmail() {
+    public function makeEmail() {
 
         switch ($this->counter) {
             case 1:

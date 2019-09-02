@@ -320,10 +320,6 @@ class Snowflake {
      *
      */
     public function setSnowflake() {
-        //        $this->thing->json->setField("message7");
-        //        $this->thing->json->writeVariable( array("snowflake", "lattice"), $this->lattice );
-        //echo "setSnowflake";
-        //var_dump($this->decimal_snowflake);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("snowflake", "decimal"), $this->decimal_snowflake);
 
@@ -842,8 +838,6 @@ class Snowflake {
                 $color_outline = $color;
             }
 
-            //var_dump($this->flag->state);
-            //exit();
             if (!isset($this->events[0])) {$this->event = false;} else {
                 $this->event = $this->events[0];
             }
@@ -1412,7 +1406,9 @@ class Snowflake {
             $pdf->SetFont('Helvetica', '', 10);
             $this->txt = "".$this->uuid.""; // Pure uuid.
 
-            $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\snowflake');
+            $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake';
+
+            $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
 
             $pdf->SetTextColor(0, 0, 0);

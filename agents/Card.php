@@ -65,11 +65,7 @@ class Card
         $this->nom = strtolower($this->thing->json->readVariable( array("card", "nom") ));
         $this->suit = $this->thing->json->readVariable( array("card", "suit") );
 
-        if (($this->nom == "J") or ($this->nom == "Q") or ($this->nom == "K")) {$this->face = $v;} else {$this->face = null;}
-
-
 //        $this->getCard();
-
 
         if ( ($this->nom == false) or ($this->suit == false) ) {
 
@@ -194,6 +190,20 @@ class Card
         $this->response = "". strtoupper($this->nom) . " of " . ucwords($this->suit) . " [" . strtoupper($this->colour) . "].";
 
 
+//echo "make a thing":
+        //$thing = new Thing(null);
+//echo "turn it into a snowflake";
+
+    //$thing->Create(null,"card", 's/ card message');
+//echo "made a card/n";
+    // Think about this :/
+    //$card = new Card($thing, "card message card@stackr.ca");
+
+
+        //$this->snowflake = new Snowflake($thing);
+//echo "count";
+        //$this->countCard();
+
     }
 
     public function newCard()
@@ -214,7 +224,6 @@ class Card
 
             $this->nom = strtolower($v);
 
-            if (($v == "J") or ($v == "Q") or ($v == "K")) {$this->face = $v;} else {$this->face = null;}
 
     }
 
@@ -236,7 +245,7 @@ class Card
         //}
     }
 
-    private function makeSMS()
+    public function makeSMS()
     {
 //        switch ($this->id) {
 //            case 1:
@@ -259,7 +268,7 @@ class Card
         $this->thing_report['sms'] = $sms;
     }
 
-    private function makeEmail()
+    public function makeEmail()
     {
 //        switch ($this->id) {
 //            case 1:
