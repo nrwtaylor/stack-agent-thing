@@ -19,7 +19,7 @@ class Googlelink extends Agent {
      * @param unknown $text  (optional)
      */
     function init() {
-        $this->agent_name = "time";
+        $this->agent_name = "googlelink";
         $this->test= "Development code";
         $this->thing_report["info"] = "This provides a google url link.";
         $this->thing_report["help"] = "You can help other people share your search.";
