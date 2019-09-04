@@ -8,6 +8,10 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
+//ini_set("max_execution_time",1 ); //s
+//ini_set("max_input_time", 2); //s
+//set_time_limit(2);
+
 // API group
 $app->group('/api', function () use ($app) {
 
@@ -840,11 +844,9 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
             ob_clean();
             if (!isset($agent->thing_report[strtolower($ext_name)])) {
-                // Review this
-                           return $response->withHeader('HTTP/1.0 200 OK')
-                ->withStatus(200);
-
-                //exit();
+                //var_dump($ext_name);
+                //echo "meep";
+                exit();
             }
 
             $content = $agent->thing_report[strtolower($ext_name)];

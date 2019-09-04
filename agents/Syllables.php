@@ -8,7 +8,7 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-require_once '/var/www/stackr.test/vendor/autoload.php';
+require_once '/var/www/html/stackr.ca/vendor/autoload.php';
 
 // Splits sentences into syllables.
 
@@ -173,9 +173,9 @@ class Syllables extends Agent
         $syllable = new Syllable('en-ca');
 
         $cache = $syllable->getCache();
-        $cache->setPath('/var/www/stackr.test/vendor/vanderlee/syllable/src/Cache');
+        $cache->setPath('/var/www/html/stackr.ca/vendor/vanderlee/syllable/src/Cache');
 
-        $syllable->getSource()->setPath('/var/www/stackr.test/vendor/vanderlee/syllable/languages');
+        $syllable->getSource()->setPath('/var/www/html/stackr.ca/vendor/vanderlee/syllable/languages');
 
 
         $syllable->setMinWordLength(0);

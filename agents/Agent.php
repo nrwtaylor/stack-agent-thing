@@ -32,7 +32,7 @@ class Agent {
 
         $this->agent_input = strtolower($input);
 
-        $this->agent_name = 'agent';
+//        $this->agent_name = 'agent';
 
         $this->getName();
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
@@ -100,8 +100,37 @@ class Agent {
         $this->run();
         $this->make();
 
-        $this->set();
 
+//set_error_handler(array($this,'my_exception_handler'));
+try {
+//            throw new \OverflowException('Insufficient space in DB record ' . $this->uuid . ".");
+
+        $this->set();
+}
+catch (\OverflowException $t)
+{
+$this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
+$this->thing_report['sms'] = "STACK | " . $this->response;
+
+//echo "caught throwable";
+   // Executed only in PHP 7, will not match in PHP 5
+}
+
+catch (\Throwable $t)
+{
+//$this->response = "STACK | Variable store is full. Text FORGET ALL.";
+//$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
+
+//echo "caught throwable";
+   // Executed only in PHP 7, will not match in PHP 5
+}
+catch (\Exception $e)
+{
+//echo "caught exception";
+   // Executed only in PHP 5, will not be reached in PHP 7
+}
+
+//restore_error_handler();
         if (($this->agent_input == null) or ($this->agent_input == "")) {
             $this->respond();
         }
@@ -142,8 +171,10 @@ class Agent {
      */
     public function make() {
         $this->makeResponse();
+        $this->makePNG();
         $this->makeSMS();
         $this->makeWeb();
+        $this->makePDF();
     }
 
 
@@ -179,7 +210,10 @@ class Agent {
      *
      */
     public function getName() {
-        $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
+//        $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
+//var_dump(get_class($this));
+        $this->agent_name =   explode( "\\", strtolower(get_class($this)) )[2] ;
+
     }
 
 
@@ -340,6 +374,7 @@ class Agent {
     public function respond() {
         $this->respondResponse();
         $this->thing->flagGreen();
+//        return $this->thing_report;
     }
 
 
@@ -348,6 +383,7 @@ class Agent {
      */
     public function respondResponse() {
         $agent_flag = true;
+if ($this->agent_name == "agent") {return;}
 
 
         if ($agent_flag == true) {
@@ -360,10 +396,14 @@ class Agent {
                 $this->thing_report['sms'] = "AGENT | Standby.";
             }
 
-            //if ($this->agent_input == null) { 
+            $this->thing_report['message'] = $this->thing_report['sms'];
+
+//var_dump($this->agent_input);
+            if (($this->agent_input == null) or ($this->agent_input == "")) { 
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-            //}
+//var_dump($message_thing->thing_report['info']);
+            }
         }
 
     }
@@ -387,14 +427,16 @@ class Agent {
      */
     public function makeWeb() {
 
-
     }
 
+public function makePDF() {
+
+}
 
     /**
      *
      */
-    private function makeSMS() {
+    public function makeSMS() {
         //$this->makeResponse();
         // So this is the response if nothing else has responded.
 
@@ -410,6 +452,8 @@ class Agent {
 
 
                 $this->thing_report['sms'] = $sms;
+                $this->thing_report['sms'] = null;
+
             }
 
             if (!isset($this->sms_message)) {
@@ -581,10 +625,12 @@ class Agent {
             $this->agent = $agent;
 
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
+        } catch (\Throwable $t) {
+            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-
+            // echo $ex;
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
@@ -631,16 +677,18 @@ class Agent {
             $this->agent = $agent;
             return true;
 
-        } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+} catch (\Throwable $t) {
 
+        } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+//            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+            // echo $ex;
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
             $line = $ex->getLine();
 
-            $input = $message . '  ' . $file . ' line:' . $line;
-            $this->thing->log($input , "WARNING" );
+//            $input = $message . '  ' . $file . ' line:' . $line;
+//            $this->thing->log($input , "WARNING" );
 
             // This is an error in the Place, so Bork and move onto the next context.
             // $bork_agent = new Bork($this->thing, $input);
@@ -732,7 +780,7 @@ class Agent {
         // So look hear to generalize that.
         //$agents = new Agents($this->thing, "agents");
         //foreach ($agents->agents as $agent_class_name=>$agent_name) {
-
+        //echo $agent_id . " " ;
         $text = urldecode($this->agent_input);
         $text = strtolower($text);
         //if ( $text == $this->agent_input) {
@@ -782,7 +830,6 @@ class Agent {
                 //                return $this->thing_report;
             }
         }
-
         if (count($matches) == 1) {
             $this->getAgent($matches[0]);
 
@@ -936,7 +983,6 @@ class Agent {
             // Emoji found.
             $input = $emoji_thing->translated_input;
         }
-
         // expand out chinese characters
         // Added to stack 29 July 2019 NRW Taylor
         $chinese_thing = new Chinese($this->thing, $input);
@@ -961,6 +1007,7 @@ class Agent {
         if ( strtolower( substr($input, 0, 2)) != "s/") {
 
             // Okay here check for input
+            //echo "input is ".  $input;
 
             if ( strtolower($this->subject) == "break" ) {
 
@@ -972,11 +1019,14 @@ class Agent {
 
             // Where is input routed to?
             $input_thing = new Input($this->thing, "input");
-
-            if ($input_thing->input_agent != null) {$input = $input_thing->input_agent . " " . $input;}
+//var_dump($input_thing->input_agent);
+            if (($input_thing->input_agent != null) and ($input_thing->input_agent != $input)) {
+//$input = $input_thing->input_agent . " " . $input;
+            }
 
         }
-
+//var_dump($input); 
+       //echo "input is routed to " . $input . ".\n";
 
 
         $this->thing->log('processed haystack "' .  $input . '".', "DEBUG");
@@ -985,7 +1035,7 @@ class Agent {
         // in the $input string.
 
         if (strtolower($input) == 'agent') {
-            $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+            $this->thing->log( 'created a Usermanager agent.' );
             //            $usermanager_thing = new Usermanager($this->thing);
             //$link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
             $this->getLink();
@@ -1001,35 +1051,35 @@ class Agent {
         //    $usermanager_thing = new Usermanager($this->thing,'usermanager');
 
         if (strpos($input, 'optin') !== false) {
-            $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+            $this->thing->log( 'created a Usermanager agent.' );
             $usermanager_thing = new Usermanager($this->thing);
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
 
         if (strpos($input, 'optout') !== false) {
-            $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+            $this->thing->log( 'created a Usermanager agent.' );
             $usermanager_thing = new Optout($this->thing);
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
 
         if (strpos($input, 'opt-in') !== false) {
-            $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+            $this->thing->log( 'Agent created a Usermanager agent.' );
             $usermanager_thing = new Optin($this->thing);
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
 
         if (strpos($input, 'opt-out') !== false) {
-            $this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+            $this->thing->log( 'Agent created a Usermanager agent.' );
             $usermanager_thing = new Optout($this->thing);
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
 
         // Then look for messages sent to UUIDS
-        $this->thing->log('Agent "Agent" looking for UUID in address.');
+        $this->thing->log('looking for UUID in address.', 'INFORMATION');
 
         // Is Identity Context?
 
@@ -1060,11 +1110,12 @@ class Agent {
         //        $input =  $chatbot->filtered_input;
 
 
+
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
 
         if ($headcode->response === true) {
-
+            // pass echo "not a headcode...";
         } else {
             //if ( is_string($headcode->head_code)) {
 
@@ -1083,6 +1134,7 @@ class Agent {
             $this->thing_report = $robot_thing->thing_report;
             return $this->thing_report;
         }
+
         $this->thing->log( 'now looking at Words (and Places and Characters).  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
         // See if there is an agent with the first workd
@@ -1168,6 +1220,7 @@ class Agent {
 
             if ($this->getAgent($agent_class_name)) {
                 //            if ($this->getAgent($agent_class_name, $input)) {
+                //echo $this->thing_report['help'];
                 return $this->thing_report;
             }
         }
@@ -1215,6 +1268,7 @@ class Agent {
         if (!$place_thing->isPlace($input)) {
             //        if (!$place_thing->isPlace($this->subject)) {
             //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
+            //            echo "place not found";
         } else {
             // place found
             $place_thing = new Place($this->thing);
@@ -1259,6 +1313,25 @@ class Agent {
             }
         }
 
+
+        /*
+        // This would allow web based agent to update state
+        // devstack think
+        // Now check for any place agent input
+        $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
+        $place_thing = new Place($this->thing, $this->agent_input);
+        $this->thing_report = $place_thing->thing_report;
+
+        if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
+echo "place not found";
+        } else {
+echo "place found";
+            $place_thing = new Place($this->thing, $this->agent_input);
+            $this->thing_report = $place_thing->thing_report;
+            return $this->thing_report;
+        }
+*/
+
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
         if (strtolower($this->from) != "null@stackr.ca") {
@@ -1284,6 +1357,8 @@ class Agent {
 
                 $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
 
+                //echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
+
                 if (!isset($last_heard['entity'])) {
                     $last_heard['entity'] = $last_heard[strtolower($entity_name)];
                     $agent_name = $entity_name;
@@ -1294,6 +1369,8 @@ class Agent {
                     $agent_name = $entity_name;
                 }
             }
+
+            //        echo $agent_name. " "  . $last_heard['entity'];
 
             if (!isset($agent_name)) {$agent_name = "Ant";}
 
@@ -1510,7 +1587,7 @@ class Agent {
 
         $this->thing->log( 'now looking at Identity Context.', "OPTIMIZE" );
 
-        if (isset($chinese_thing->chineses)) {
+        if ((isset($chinese_thing->chineses)) and ($chinese_thing->chineses != array())) {
             $c = new Chinese($this->thing, "chinese");
             $this->thing_report = $c->thing_report;
             //            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
@@ -1518,6 +1595,8 @@ class Agent {
             //exit();
 
         }
+
+return $this->thing_report;
 
         if ((isset($chinese_thing->chineses)) or (isset($emoji_thing->emojis))) {
             $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
@@ -1547,8 +1626,9 @@ class Agent {
      */
     public function makePNG() {
         //if (!isset($this->image)) {$this->makeImage();}
-
+try {
         $agent = new Png($this->thing, "png");
+//try{ 
         $this->makeImage();
 
         $agent->makePNG($this->image);
@@ -1559,6 +1639,11 @@ class Agent {
 
         //$this->thing_report['png'] = $agent->PNG;
         $this->thing_report['png'] = $agent->image_string;
+} catch (\Throwable $t) {
+
+$this->thing_report['png'] = null; 
+
+}
     }
 
 
@@ -1572,8 +1657,26 @@ class Agent {
 
         //trigger_error("Fatal error", E_USER_ERROR);
 
+        //echo $errno;
+        //echo $errstr;
         // do something
     }
+
+function my_exception_handler($e) {
+$this->thing_report['sms'] = "Test";
+//$this->respond();
+//            if (($this->agent_input == null) or ($this->agent_input == "")) { 
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+//var_dump($message_thing->thing_report['info']);
+//            }
+restore_exception_handler();
+echo "fatal exception";
+//$this->thing_report['sms'] = "Merp.";
+//echo $e;
+    // do some erorr handling here, such as logging, emailing errors
+    // to the webmaster, showing the user an error page etc
+}
 
 
 }
@@ -1587,6 +1690,8 @@ function warning_handler($errno, $errstr) {
 
     //trigger_error("Fatal error", E_USER_ERROR);
 
+    echo ;
+    //echo $errstr;
     // do something
 }
 

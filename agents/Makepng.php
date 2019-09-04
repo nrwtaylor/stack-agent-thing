@@ -25,10 +25,7 @@ class makePng
 
     	//require_once('/var/www/html/stackr.ca/agents/agent.php');
     	$this->agent_thing = new Agent($thing, $input);
-        $png = null;
-        if (isset($this->agent_thing->thing_report['png'])) {$png = $this->agent_thing->thing_report['png'];}
-
-        $this->thing_report = array('thing' => $thing, 'png' => $png);
+        $this->thing_report = array('thing' => $thing, 'png' => $this->agent_thing->thing_report['png']);
 	}
 }
 

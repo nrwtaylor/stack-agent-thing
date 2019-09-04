@@ -114,7 +114,6 @@ class FindAgent
 	function findAgent($name = null, $id = null)
     {
         $ref_time = $this->thing->elapsed_runtime();
-
 		$thingreport = $this->thing->db->setUser($this->from);
 		$thingreport = $this->thing->db->variableSearch(null, $name, $this->horizon);
 
@@ -123,6 +122,7 @@ class FindAgent
 
 		$groups = array();
         $agent_things = array();
+
 
 		foreach ($thingreport['things'] as $thing_obj) {
 

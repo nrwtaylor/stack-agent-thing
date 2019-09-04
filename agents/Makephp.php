@@ -12,6 +12,7 @@ class Makephp
 
     function __construct(Thing $thing, $input = null)
     {
+echo "meep";
 
 	    $this->input = $input;
 

@@ -17,9 +17,6 @@ class Rocky extends Agent
     {
         // Need to add in mode changing - origin / relay
 
-        $this->thing_report["help"] = 'Pulls a test message from a bank of messages. Try ROCKY HARD. Or ROCKY EASY.';
-
-
 //        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
         $this->node_list = array("rocky"=>array("rocky", "bullwinkle", "charley", "nonsense"));
 
@@ -225,7 +222,7 @@ class Rocky extends Agent
         $this->makeChoices();
 
  		$this->thing_report["info"] = "This creates an exercise message.";
-// 		$this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
+ 		$this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;

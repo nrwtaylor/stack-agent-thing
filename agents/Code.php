@@ -87,8 +87,8 @@ class Code
     {
 		// Thing actions
 
-        $web_thing = new Thing(null);
-        $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
+        //$web_thing = new Thing(null);
+        //$web_thing->Create($this->from, $this->agent_name, 's/ record web view');
         $this->makeSMS();
 /*
         if (strtolower($this->prior_agent) == "pdf") {

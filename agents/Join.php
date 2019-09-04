@@ -12,12 +12,6 @@ class Join {
 
 
     function __construct(Thing $thing) {
-
-        // Not implemented
-        $this->thing_report = false;
-        return;
-
-
 	//function __construct($arguments) {
 
 		//echo $arguments;
@@ -86,7 +80,9 @@ class Join {
 
 
                 } 
-        // Initialize message token
+		//else {$this->group_id = $group_id;}
+
+// Initialize message token
                        $token_thing = new Tokenlimiter($this->thing, 'message');
 		$this->token = $token_thing->thing_report['token'];
 
@@ -118,9 +114,7 @@ class Join {
 
 		//if ($group == null) {
 			$group_thing = new Group($this->thing, "join ".$group);
-			//$group = $group_thing->thing_report['group'];
-            $group = $group_thing->group_id;
-
+			$group = $group_thing->thing_report['group'];
 
 		//}
 

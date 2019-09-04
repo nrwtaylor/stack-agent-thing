@@ -99,6 +99,7 @@ class Getagent {
 
         $block_things = array();
         // See if a block record exists.
+        require_once '/var/www/html/stackr.ca/agents/findagent.php';
         $findagent_thing = new FindAgent($this->thing, 'thing');
 
         // This pulls up a list of other Block Things.
@@ -146,10 +147,11 @@ $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $b
         $this->prior_thing = new Thing($link_uuid);
 
 // Returns the same but only prior to message.
+                require_once '/var/www/html/stackr.ca/agents/callagent.php';
                 $prior_agent = new Callagent($this->prior_thing, "getagent");
-//var_dump($prior_agent->thing_report);
-//var_dump($this->prior_thing->log);
-//exit();
+var_dump($prior_agent->thing_report);
+var_dump($this->prior_thing->log);
+exit();
 
 //        $this->prior_thing = new Thing($link_uuid);
 
@@ -180,7 +182,7 @@ $newest= null;
 $newest_name = null;
             foreach ($variables as $name=>$variable) 
             {
-//echo $name;
+echo $name;
 
 if (isset($variable['refreshed_at'])) {
     $dt = strtotime($variable['refreshed_at']);
@@ -189,11 +191,9 @@ if (isset($variable['refreshed_at'])) {
 }
 
 
-if ($dt > $newest) {$newest = $dt;
-//echo "meep";
-$newest_name = $name;}
-//echo $dt;
-//echo "<br>";
+if ($dt > $newest) {$newest = $dt;echo "meep";$newest_name = $name;}
+echo $dt;
+echo "<br>";
 
 // Relies on JSON variable order
 // Because it is the message before message which
@@ -263,6 +263,7 @@ $this->agent_names = implode(" ", $this->agent_variables);
 //		echo $this->thing->account['thing']->balance['amount'];echo '</pre>';
 
 
+		require_once '/var/www/html/stackr.ca/agents/message.php';
 		$message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
@@ -298,3 +299,13 @@ $this->agent_names = implode(" ", $this->agent_variables);
 
 
 }
+
+
+
+
+
+
+
+
+
+?>

@@ -223,7 +223,7 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
 
     function getMessenger() 
     {
-        $this->channel_name .= "messenger";
+        $this->channel_name = "messenger";
         $this->plain_text_statement .= "Public plain text at some point";
 
         $this->retention_policy = "private potentially forever";

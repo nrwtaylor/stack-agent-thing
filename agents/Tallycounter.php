@@ -258,7 +258,10 @@ class Tallycounter
                     if(isset($variables['tally']['name'])) {$name = $variables['tally']['name'];}
                     if(isset($variables['tally']['next_uuid'])) {$next_uuid = $variables['tally']['next_uuid'];}
 
-                } else { continue;}
+                }
+
+
+
 
 
                 if (($this->name == $name))  {

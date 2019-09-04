@@ -28,8 +28,6 @@ class Jacket
     function __construct(Thing $thing, $agent_input = null)
     {
 
-        $this->thing_report['help'] = 'Reads the weather and suggests if you need a jacket. Try WEATHER.';
-
         $this->agent_input = $agent_input;
         $this->agent_input = $agent_input;
 
@@ -276,7 +274,7 @@ class Jacket
 
         $this->makeWeb();
 
-//        $this->thing_report['help'] = 'This reads a web resource.';
+        $this->thing_report['help'] = 'This reads a web resource.';
 		return;
 	}
 

@@ -445,7 +445,7 @@ class Tally{
         $this->agent = $pieces[0];
         $this->limit = $pieces[1];
         $this->name = $pieces[2];
-        if (isset($pieces[3])) {$this->identity = $pieces[3];}
+        $this->identity = $pieces[3];
 
         //if (!isset($pieces[4])) {
         //    $this->index = 0;
@@ -479,3 +479,8 @@ class Tally{
 
 }
 
+
+
+
+
+?>

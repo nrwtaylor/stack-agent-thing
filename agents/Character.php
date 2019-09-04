@@ -236,15 +236,18 @@ class Character
                                 }
 
                         }
-            if (!isset($this->characters)) {$this->characters = array();}
+if (!isset($this->characters)) {$this->characters = array();}
 //exit();
 //			$this->characters = array_unique($this->characters);
+
 			if (count($this->characters) == 0) {
 				return true;
+
 			}
 		}
 
-        return $this->characters;
+	    return $this->characters;
+
 
 	}
 

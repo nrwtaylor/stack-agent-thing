@@ -303,6 +303,9 @@ class Route
     function read()
     {
         $this->thing->log("read");
+
+//        $this->get();
+        return $this->available;
     }
 
 

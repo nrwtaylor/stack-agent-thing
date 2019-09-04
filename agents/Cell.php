@@ -82,6 +82,7 @@ class Cell
         $agent = new Coordinate($this->thing, "persistence");
         $this->coordinate = $agent->coordinate;
 
+
         $this->thing->log($this->agent_prefix .'got retention. ' . number_format($this->thing->elapsed_runtime() - $split_time) .  'ms.', "OPTIMIZE");
 
         $this->readSubject();

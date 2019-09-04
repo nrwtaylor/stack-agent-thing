@@ -65,7 +65,6 @@ class Grep
 
     function getGreps()
     {
-if ($this->grep_phrase == null) {return true;}
         $text = $this->grep_phrase;
 
         // Search how?
@@ -105,13 +104,11 @@ if ($this->grep_phrase == null) {return true;}
     public function makeSms()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/events';
-//        $count = count($this->greps);
+        $count = count($this->greps);
 
         if (!isset($this->greps[0])) {
             $sms = "GREP | ". $this->response;
         } else {
-        $count = count($this->greps);
-
                 $sms = "GREP " . $count;
                 $sms .= " | " . $this->greps[0]['task'];
                 $sms .= " | " . $this->response;
@@ -136,14 +133,6 @@ if ($this->grep_phrase == null) {return true;}
         $html .= $this->sms_message. "'";
 
         $html .= "<p>";
-
-if (!isset($this->greps)) {
-        $this->web_message = $html;
-        $this->thing_report['web'] = $html;
-return;
-}
-
-
         foreach($this->greps as $grep) {
             $html .= "<p>". $this->grepString($grep);
         }
@@ -155,15 +144,6 @@ return;
     function makeTxt()
     {
         $txt = "grep for " . $this->grep_phrase . "\n";
-
-if (!isset($this->things)) {
-//        $this->web_message = $html;
-        $this->thing_report['txt'] = $txt;
-return;
-}
-
-
-
         foreach($this->things as $thing) {
             $txt .= "created " . $thing['created_at']  . "";
             //$txt .= '"' . $thing['task'] .'". ';
@@ -217,9 +197,9 @@ return;
             return false;
         }
 
-$this->response = "No search phrase provided.";
-$this->grep_phrase = null;
-//        $this->grep_phrase = $this->search_words;
+        $this->grep_phrase = $this->search_words;
 	}
 
 }
+
+?>

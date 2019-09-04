@@ -14,11 +14,6 @@ class Listen {
     function __construct(Thing $thing)
     {
 
-        // Not implemented
-        $this->thing_report = false;
-        return;
-
-
 		$this->thing = $thing;
 		$this->agent_name = 'listen';
 

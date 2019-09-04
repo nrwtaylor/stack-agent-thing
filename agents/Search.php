@@ -13,7 +13,6 @@ class Search extends Agent
 
     public function run()
     {
-        // Deprecated. Contextualweb now charges.
         $input = $this->subject;
 
         $whatIWant = $input;
@@ -25,8 +24,8 @@ class Search extends Agent
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
-        //$search_agent = new Contextualweb($this->thing, $filtered_input);
-        //$this->thing_report = $search_agent->thing_report;
+        $search_agent = new Contextualweb($this->thing, $filtered_input);
+        $this->thing_report = $search_agent->thing_report;
     }
 
 	public function respond()

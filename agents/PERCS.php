@@ -1,11 +1,4 @@
 <?php
-/**
- * PERCS.php
- *
- * @package default
- */
-
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -18,12 +11,10 @@ ini_set("allow_url_fopen", 1);
 
 class PERCS extends Agent
 {
-    public $var = 'hello';
+	public $var = 'hello';
 
-    /**
-     *
-     */
-    public function init() {
+    public function init()
+    {
 
         $this->node_list = array("percs"=>array("percs"));
 
@@ -43,15 +34,10 @@ class PERCS extends Agent
         $this->persist_to = $agent->persist_to;
 
         $this->variable = new Variables($this->thing, "variables percs " . $this->from);
-    }
+	}
 
-
-    /**
-     *
-     * @param unknown $state (optional)
-     * @return unknown
-     */
-    function isPERCS($state = null) {
+    function isPERCS($state = null)
+    {
 
         if ($state == null) {
             if (!isset($this->state)) {$this->state = "easy";}
@@ -60,17 +46,13 @@ class PERCS extends Agent
         }
 
         if (($state == "easy") or ($state == "hard")
-        ) {return false;}
+            ) {return false;}
 
         return true;
     }
 
-
-    /**
-     *
-     * @param unknown $requested_state (optional)
-     */
-    function set($requested_state = null) {
+    function set($requested_state = null)
+    {
         $this->thing->json->writeVariable( array("percs", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;
@@ -81,11 +63,8 @@ class PERCS extends Agent
         $this->thing->log($this->agent_prefix . 'set PERCS to ' . $this->state, "INFORMATION");
     }
 
-
-    /**
-     *
-     */
-    function get() {
+    function get()
+    {
         $this->previous_state = $this->variable->getVariable("state");
 
         $this->refreshed_at = $this->variable->getVariable("refreshed_at");
@@ -120,64 +99,43 @@ class PERCS extends Agent
         $this->inject = $this->thing->json->readVariable( array("percs", "inject") );
     }
 
-
-    /**
-     *
-     */
-    function getNuuid() {
+    function getNuuid()
+    {
         $agent = new Nuuid($this->thing, "nuuid");
         $this->nuuid_png = $agent->PNG_embed;
     }
 
-
-    /**
-     *
-     */
-    function getUuid() {
+    function getUuid()
+    {
         $agent = new Uuid($this->thing, "uuid");
         $this->uuid_png = $agent->PNG_embed;
     }
 
-
-    /**
-     *
-     * @param unknown $text (optional)
-     */
-    function getQuickresponse($text = null) {
+    function getQuickresponse($text = null)
+    {
         if ($text == null) {$text = $this->web_prefix;}
         $agent = new Qr($this->thing, $text);
         $this->quick_response_png = $agent->PNG_embed;
     }
 
 
-    /**
-     *
-     * @param unknown $state
-     */
-    function setState($state) {
+    function setState($state)
+    {
         $this->state = "easy";
         if ((strtolower($state) == "hard") or (strtolower($state) == "easy")) {
             $this->state = $state;
         }
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    function getState() {
+    function getState()
+    {
         if (!isset($this->state)) {$this->state = "easy";}
         return $this->state;
 
     }
 
-
-    /**
-     *
-     * @param unknown $bank (optional)
-     */
-    function setBank($bank = null) {
+    function setBank($bank = null)
+    {
         //if (($bank == "easy") or ($bank == null)) {
         //    $this->bank = "easy-a03";
         //}
@@ -187,40 +145,33 @@ class PERCS extends Agent
         //}
 
         //if ($bank == "16ln") {
-        $this->bank = "16ln-a00";
+            $this->bank = "16ln-a02";
         //}
 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    function getBank() {
+    function getBank()
+    {
         if (!isset($this->bank)) {
-            $this->bank = "16ln-a00";
+            $this->bank = "16ln-a02";
         }
 
         if (isset($this->inject) and ($this->inject != false)) {
-            $arr = explode("-", $this->inject);
+            $arr = explode("-",$this->inject);
             $this->bank = $arr[0] . "-" . $arr[1];
         }
         return $this->bank;
     }
 
-
-    /**
-     *
-     */
-    public function respond() {
+	public function respond()
+    {
 
         $this->getResponse();
 
-        $this->thing->flagGreen();
+		$this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "percs";
+		$to = $this->thing->from;
+		$from = "percs";
 
         $this->makePNG();
 
@@ -230,8 +181,8 @@ class PERCS extends Agent
         // $this->makeTXT();
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This creates an exercise message.";
-        $this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
+ 		$this->thing_report["info"] = "This creates an exercise message.";
+ 		$this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
@@ -239,24 +190,18 @@ class PERCS extends Agent
 
         $this->makeTXT();
         $this->makePDF();
+	}
+
+    function makeChoices ()
+    {
+       $this->thing->choice->Create($this->agent_name, $this->node_list, "percs");
+       $this->choices = $this->thing->choice->makeLinks('percs');
+
+       $this->thing_report['choices'] = $this->choices;
     }
 
-
-    /**
-     *
-     */
-    function makeChoices() {
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "percs");
-        $this->choices = $this->thing->choice->makeLinks('percs');
-
-        $this->thing_report['choices'] = $this->choices;
-    }
-
-
-    /**
-     *
-     */
-    function makeSMS() {
+    function makeSMS()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/percs.pdf';
 
         $sms = "PERCS " . $this->inject . " | " . $link . " | " . $this->response;
@@ -264,29 +209,21 @@ class PERCS extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
-
-    /**
-     *
-     */
-    function makeACP125G() {
+    function makeACP125G()
+    {
         $this->acp125g = new ACP125G($this->thing, "acp125g");
         $this->acp125g->makeACP125G($this->message);
 
     }
 
 
-    /**
-     *
-     */
-    function getResponse() {
+    function getResponse()
+    {
         if (isset($this->response)) {return;}
     }
 
-
-    /**
-     *
-     */
-    function getMember() {
+    function getMember()
+    {
         if (isset($this->member)) {return;}
 
         // Load in the cast. And roles.
@@ -299,7 +236,7 @@ class PERCS extends Agent
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-                $arr = explode(",", $line);
+                $arr = explode(",",$line);
                 $member_call_sign = trim($arr[0]);
                 $member_sms = trim($arr[1]);
 
@@ -318,11 +255,8 @@ class PERCS extends Agent
         }
     }
 
-
-    /**
-     *
-     */
-    function getMessages() {
+    function getMessages()
+    {
         if (isset($this->messages)) {return;}
 
         // Load in the name of the message bank.
@@ -345,28 +279,28 @@ class PERCS extends Agent
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
 
-                $line = trim($line);
+            $line = trim($line);
 
-                $count += 1;
+            $count += 1;
 
-                if ($line == "---") {
+            if ($line == "---") {
 
-                    $line_count = count($message) - 1;
+                $line_count = count($message) - 1;
 
-                    if ($bank_info == null) {
-                        $this->title = $message[1];
-                        $this->author = $message[2];
-                        $this->date = $message[3];
-                        $this->version = $message[4];
+                if ($bank_info == null) {
+                    $this->title = $message[1];
+                    $this->author = $message[2];
+                    $this->date = $message[3];
+                    $this->version = $message[4];
 
-                        $count = 0;
-                        $message = null;
+                    $count = 0;
+                    $message = null;
 
-                        $bank_info = array("title"=>$this->title, "author"=>$this->author, "date"=>$this->date, "version"=>$this->version);
-                        continue;
-                    }
+                    $bank_info = array("title"=>$this->title, "author"=>$this->author, "date"=>$this->date, "version"=>$this->version);
+                    continue;
+                }
 
-                    /*
+/*
                 if ($line_count == 10) {
                 // recognize as J-format
 
@@ -395,49 +329,49 @@ class PERCS extends Agent
                 $this->messages[] = $message_array;
                 }
 */
-                    if ($line_count == 16) {
+        if ($line_count == 16) {
 
-                        $line = array();
+                $line = array();
 
-                        $message_array = array("line_1"=>$message[1],
-                            "line_2"=>$message[2],
-                            "line_3"=>$message[3],
-                            "line_4"=>$message[4],
-                            "line_5"=>$message[5],
-                            "line_6"=>$message[6],
-                            "line_7"=>$message[7],
-                            "line_8"=>$message[8],
-                            "line_9"=>$message[9],
-                            "line_10"=>$message[10],
-                            "line_11"=>$message[11],
-                            "line_12"=>$message[12],
-                            "line_13"=>$message[13],
-                            "line_14"=>$message[14],
-                            "line_15"=>$message[15],
-                            "line_16"=>$message[16]
-                        );
-
-
-                        $num_words = count(explode(" " , $message[12]));
-
-                        if ($num_words <= $this->max_words) {
-                            $this->messages[] = $message_array;
-                        }
-                    }
+                $message_array = array("line_1"=>$message[1],
+                    "line_2"=>$message[2],
+                    "line_3"=>$message[3],
+                    "line_4"=>$message[4],
+                    "line_5"=>$message[5],
+                    "line_6"=>$message[6],
+                    "line_7"=>$message[7],
+                    "line_8"=>$message[8],
+                    "line_9"=>$message[9],
+                    "line_10"=>$message[10],
+                    "line_11"=>$message[11],
+                    "line_12"=>$message[12],
+                    "line_13"=>$message[13],
+                    "line_14"=>$message[14],
+                    "line_15"=>$message[15],
+                    "line_16"=>$message[16]
+                );
 
 
+                $num_words = count(explode(" " , $message[12]));
 
-
-                    $count = 0;
-                    $message = null;
-                    //}
+                if ($num_words <= $this->max_words) {
+                    $this->messages[] = $message_array;
                 }
+        }
 
 
-                $message[] = $line;
 
 
+                $count = 0;
+                $message = null;
+                //}
             }
+
+
+            $message[] = $line;
+
+
+        }
 
             fclose($handle);
         } else {
@@ -445,16 +379,13 @@ class PERCS extends Agent
         }
     }
 
-
-    /**
-     *
-     */
-    function getInject() {
+    function getInject()
+    {
         $this->getMessages();
 
         if ((!isset($this->inject)) or ($this->inject == false)) {
             $this->num = array_rand($this->messages);
-            $this->inject = $this->bank . "-" .$this->num;
+            $this->inject = $this->bank . "-" .$this->num; 
         }
 
         if ($this->inject == null) {
@@ -463,18 +394,15 @@ class PERCS extends Agent
 
             $this->inject = $this->bank . "-" . $this->num;
         } else {
-            $arr = explode("-", $this->inject);
+            $arr = explode("-",$this->inject);
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }
+ 
+   }
 
-    }
-
-
-    /**
-     *
-     */
-    function getMessage() {
+    function getMessage()
+    {
         $this->getInject();
 
         $this->getMessages();
@@ -512,30 +440,30 @@ class PERCS extends Agent
             $this->line_12 . "\n" .
             $this->line_13 . "\n" .
             $this->line_14 . "\n" .
-            $this->line_15 . "\n" .
+            $this->line_15 . "\n" . 
             $this->line_16 . "\n";
 
         $from = explode("/", $this->message['line_6']);
         $this->message['name_from'] = $from[0];
         $this->message['position_from'] = $from[1];
         $this->message['organization_from'] = $from[2];
-        if (isset($from[3])) {$this->message['number_from'] = $from[3];}
+        if(isset($from[3])) {$this->message['number_from'] = $from[3];}
 
         $to = explode("/", $this->message['line_7']);
 
         $this->message['name_to'] = $to[0];
         $this->message['position_to'] = $to[1];
         $this->message['organization_to'] = $to[2];
-        if (isset($to[3])) {$this->message['number_to'] = $to[3];}
+        if(isset($to[3])) {$this->message['number_to'] = $to[3];}
 
         $this->message['text'] = $this->message['line_12'];
 
         $input = $this->message['line_4'];
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "number")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("number"));
-        } elseif (($pos = strpos(strtolower($input), "nr")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("nr"));
+        if (($pos = strpos(strtolower($input), "number")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("number")); 
+        } elseif (($pos = strpos(strtolower($input), "nr")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("nr")); 
         }
 
         $number = ltrim(strtolower($whatIWant), " ");
@@ -548,11 +476,11 @@ class PERCS extends Agent
 
 
         $input = $this->message['line_3'];
-        $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "from")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("from"));
-        } elseif (($pos = strpos(strtolower($input), "de")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("de"));
+        $whatIWant = $input; 
+        if (($pos = strpos(strtolower($input), "from")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("from")); 
+        } elseif (($pos = strpos(strtolower($input), "de")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen("de")); 
         }
 
         $origin = ltrim(strtolower($whatIWant), " ");
@@ -578,45 +506,33 @@ class PERCS extends Agent
         $this->message['date_filed'] = $date_string;
     }
 
-
-    /**
-     *
-     */
-    function makeMessage() {
+    function makeMessage()
+    {
         $message = $this->short_message . "<br>";
         $uuid = $this->uuid;
         $message .= "<p>" . $this->web_prefix . "thing/$uuid/percs\n \n\n<br> ";
         $this->thing_report['message'] = $message;
     }
 
-
-    /**
-     *
-     */
-    function getBar() {
+    function getBar()
+    {
         $this->bar = new Bar($this->thing, "display");
     }
 
 
-    /**
-     *
-     */
-    function setInject() {
+    function setInject()
+    {
     }
-
 
     //function getInject()
     //{
     //}
 
-
-    /**
-     *
-     */
-    function makeWeb() {
+    function makeWeb()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/percs';
 
-        $this->node_list = array("percs"=>array("percs", "rocky", "bullwinkle", "charley"));
+        $this->node_list = array("percs"=>array("percs", "rocky", "bullwinkle","charley"));
         // Make buttons
         //$this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
         //$choices = $this->thing->choice->makeLinks('rocky');
@@ -676,11 +592,8 @@ class PERCS extends Agent
 
     }
 
-
-    /**
-     *
-     */
-    function makeTXT() {
+    function makeTXT()
+    {
         $txt = "PERCS traffic.\n";
         $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
         $txt .= "\n";
@@ -694,12 +607,8 @@ class PERCS extends Agent
         $this->txt = $txt;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function makePNG() {
+    public function makePNG()
+    {
 
         $this->image = imagecreatetruecolor(164, 164);
 
@@ -740,14 +649,14 @@ class PERCS extends Agent
 
         $size = 72;
         $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0- min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0- min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] = max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] = max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-        //check width of the image
-        $width = imagesx($this->image);
+        $bbox = imagettfbbox ($size, $angle, $font, $text); 
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
+        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+        //check width of the image 
+        $width = imagesx($this->image); 
         $height = imagesy($this->image);
         $pad = 0;
 
@@ -776,20 +685,15 @@ class PERCS extends Agent
 
         $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
-        $this->PNG = $imagedata;
+         $this->PNG = $imagedata;
 
         $this->html_image = $response;
 
         return $response;
     }
 
-
-    /**
-     *
-     * @param unknown $input
-     * @return unknown
-     */
-    function extractNuuid($input) {
+    function extractNuuid($input)
+    {
         if (!isset($this->duplicables)) {
             $this->duplicables = array();
         }
@@ -797,21 +701,14 @@ class PERCS extends Agent
         return $this->duplicables;
     }
 
-
-    /**
-     *
-     */
-    public function makePERCS() {
+    public function makePERCS()
+    {
         $this->makePDF();
         $this->thing_report['percs'] = $this->thing_report['pdf'];
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function makePDF() {
+    public function makePDF()
+    {
         $txt = $this->thing_report['txt'];
 
         // initiate FPDI
@@ -820,7 +717,7 @@ class PERCS extends Agent
 
         // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
         $pdf->setSourceFile($this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf');
-        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetFont('Helvetica','',10);
 
         $tplidx1 = $pdf->importPage(1, '/MediaBox');
 
@@ -830,15 +727,15 @@ class PERCS extends Agent
         // $pdf->useTemplate($tplidx1,0,0,215);
         $pdf->useTemplate($tplidx1);
 
-        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetTextColor(0,0,0);
 
         $text = "Inject generated at " . $this->thing->thing->created_at. ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
 
 
-        $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\percs');
-        $pdf->Image($this->quick_response_png, 199, 2, 10, 10, 'PNG');
+            $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\percs');
+            $pdf->Image($this->quick_response_png,199,2,10,10,'PNG');
 
         //$pdf->SetXY(15, 20);
         //$pdf->Write(0, $this->message['text']);
@@ -847,27 +744,27 @@ class PERCS extends Agent
         $pdf->Write(0, $this->message['number']);
 
         switch (strtolower($this->message['precedence'])) {
-        case 'r':
-        case 'routine':
-            $pdf->SetXY(24, 52.5);
-            $pdf->Write(0, "X");
-            break;
-        case "p":
-        case "priority":
-            $pdf->SetXY(24, 46);
-            $pdf->Write(0, "X");
-            break;
-        case "w":
-        case "welfare":
-            $pdf->SetXY(24, 59);
-            $pdf->Write(0, "X");
-            break;
-        case "e":
-        case "emergency":
-            $pdf->SetXY(24, 39);
-            $pdf->Write(0, "X");
-            break;
-        default:
+            case 'r':
+            case 'routine':
+                $pdf->SetXY(24, 52.5);
+                $pdf->Write(0, "X");
+                break;
+            case "p":
+            case "priority":
+                $pdf->SetXY(24, 46);
+                $pdf->Write(0, "X");
+                break;
+            case "w":
+            case "welfare":
+                $pdf->SetXY(24, 59);
+                $pdf->Write(0, "X");
+                break;
+            case "e":
+            case "emergency":
+                $pdf->SetXY(24, 39);
+                $pdf->Write(0, "X");
+                break;
+            default:
         }
 
         $pdf->SetXY(30, 76);
@@ -926,7 +823,7 @@ class PERCS extends Agent
         $row_spacing = 9;
 
         $row = 0;
-        foreach ($words as $index=>$word) {
+        foreach($words as $index=>$word) {
             $col = $index % 5;
             $pdf->SetXY($col_offset + ($col-1) * $col_spacing, $row_offset + $row *$row_spacing);
             $pdf->Write(0, $word);
@@ -940,11 +837,8 @@ class PERCS extends Agent
         return $this->thing_report['pdf'];
     }
 
-
-    /**
-     *
-     */
-    public function readSubject() {
+	public function readSubject()
+    {
 
         if (!$this->getMember()) {$this->response = "Generated an inject.";}
 
@@ -958,7 +852,7 @@ class PERCS extends Agent
 
                 $this->getMessage();
 
-                if ((!isset($this->index)) or
+                if ((!isset($this->index)) or 
                     ($this->index == null)) {
                     $this->index = 1;
                 }
@@ -966,44 +860,42 @@ class PERCS extends Agent
             }
         }
 
-        $keywords = array("percs", "acp125g", "inject", "hard", "16ln", "easy", "hey", "rocky", "charley", "bullwinkle", "natasha", "boris");
+        $keywords = array("percs","acp125g", "inject", "hard", "16ln", "easy","hey", "rocky","charley","bullwinkle","natasha","boris");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
+                if (strpos(strtolower($piece),$command) !== false) {
+                    switch($piece) {
 
-                    case 'hard':
-                    case 'easy':
-                    case '16ln':
-                    case 'acp125g':
-                    case 'percs':
-                        $this->setState($piece);
-                        $this->setBank($piece);
+                        case 'hard':
+                        case 'easy':
+                        case '16ln':
+                        case 'acp125g':
+                        case 'percs':
+                            $this->setState($piece);
+                            $this->setBank($piece);
 
-                        $this->getMessage();
-                        $this->response .= " Set messages to " . strtoupper($this->state) .".";
+                            $this->getMessage();
+                            $this->response .= " Set messages to " . strtoupper($this->state) .".";
 
-                        return;
+                            return;
 
-                    case 'hey':
-                        $this->getMember();
-                        $this->response = "Hey " . strtoupper($this->member['call_sign']) . ".";
+                        case 'hey':
+                            $this->getMember();
+                            $this->response = "Hey " . strtoupper($this->member['call_sign']) . ".";
 
-                        return;
-                    case 'on':
-                    default:
-                    }
+                            return;
+                        case 'on':
+                        default:
+                     }
                 }
             }
         }
 
         $this->getMessage();
 
-        if ((!isset($this->index)) or
+        if ((!isset($this->index)) or 
             ($this->index == null)) {
             $this->index = 1;
         }
     }
-
-
 }

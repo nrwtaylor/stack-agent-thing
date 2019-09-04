@@ -60,8 +60,6 @@ class Frequency extends Agent
 
         if (!isset($this->channel['vector'])) {$this->getFrequencies();}
 
-        if (!isset($this->channel['vector'])) {return;}
-
         $data = $this->channel['vector'];
         //var_dump($data);
 
@@ -143,7 +141,7 @@ class Frequency extends Agent
     function printFrequencies() {
         $t = "";
         foreach ($this->band as $i=>$frequency) {
-            //var_dump($frequency);
+            var_dump($frequency);
             $text = implode(" / ", $frequency["lines"]);
 
             $text = str_replace("end primary service", "", $text);
@@ -229,7 +227,7 @@ $matches = array();
      *
      */
     function getFrequencies() {
-        $this->link = null;
+
         $data_source = $this->resource_path . "ised/frequencies.txt";
 
         $file_flag = true;

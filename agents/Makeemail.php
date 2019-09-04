@@ -317,6 +317,8 @@ $this->email_message = $message;
 		//Html body
 		$message .= quoted_printable_encode($this->generateHTML($raw_message, $choices)) . "\r\n";
 
+//		echo $choices['email_html'];
+
 		//$message .= "--PHP-alt-" . $boundary . "\r\n";
 		//$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip'))); 
 		//$attachment = "Meep";

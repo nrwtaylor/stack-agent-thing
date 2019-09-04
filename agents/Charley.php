@@ -15,7 +15,6 @@ class Charley extends Agent
 
    function __construct(Thing $thing, $agent_input = null)
     {
-
         $this->agent_input = $agent_input;
 
         $this->agent_name = "charley";
@@ -25,9 +24,6 @@ class Charley extends Agent
         $this->thing = $thing;
 
         $this->thing_report['thing']  = $thing;
-
-        $this->thing_report["help"] = 'Creates an exercise inject. Try NONSENSE.';
-
 
         $this->start_time = $this->thing->elapsed_runtime(); 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
@@ -196,7 +192,7 @@ class Charley extends Agent
         $this->makeChoices();
 
  		$this->thing_report["info"] = "This creates an exercise message.";
-// 		$this->thing_report["help"] = 'Try NONSENSE.';
+ 		$this->thing_report["help"] = 'Try NONSENSE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
@@ -780,6 +776,12 @@ class Charley extends Agent
 
         $this->getCard();
 
+//        if ((!isset($this->index)) or 
+//            ($this->index == null)) {
+//            $this->index = 1;
+//        }
+
+//    return;
     }
 
 }

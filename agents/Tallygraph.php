@@ -77,9 +77,6 @@ class Tallygraph
         //$this->thing->log( 'Agent "Tallycounter" ran for ' . $milliseconds . 'ms.', 'OPTIMIZE' );
         $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
-
-        $this->thing_report['help'] = "Makes a graph of the messages this stack has sent.";
-
         $this->thing_report['log'] = $this->thing->log;
 		return;
 	}

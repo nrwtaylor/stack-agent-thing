@@ -11,9 +11,11 @@ class Mordok
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
-    {
+    function __construct(Thing $thing, $agent_input = null) {
+
         $this->start_time = microtime(true);
+
+
 
         if ($agent_input == null) {$agent_input = "";}
 
@@ -91,31 +93,60 @@ $this->variables_thing = new Variables($this->thing, "variables mordok " . $this
             $requested_state = $this->requested_state;
         }
 
+//        $this->thing->json->setField("variables");
+//        $this->thing->json->writeVariable( array($this->keyword, "state"), $requested_state );
+//        $this->thing->json->writeVariable( array($this->keyword, "refreshed_at"), $this->current_time );
+
         $this->variables_thing->setVariable("state", $requested_state);
         $this->variables_thing->setVariable("refreshed_at", $this->current_time);
 
+      
+
         $this->thing->choice->Choose($requested_state);
+
 
         $this->thing->choice->save($this->keyword, $requested_state);
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
+
+
+//$this->thing->log("Result of choice->load() ". $this->thing->choice->load($this->keyword));
+
+
+        return;
     }
 
 
     function get()
     {
+
+        //$this->variables_thing->getVariables();
+
+
+
         $this->previous_state = $this->variables_thing->getVariable("state")  ;
         $this->refreshed_at = $this->variables_thing->getVariables("refreshed_at");
+
+//var_dump($this->variables_thing);
+
+//exit();
+
+
+        //$this->previous_state = $this->variables_thing->choice->load($this->keyword);
+//exit();
+//            $this->previous_state = $this->thing->choice->current_node;
 
         if (!isset($this->requested_state)) {
             if (isset($this->state)) {
                 $this->requested_state = $this->state;
             } else {
                 $this->requested_state = false;
+//                $this->requested_state = "off";
 
             }
         }
+
 
         $this->thing->choice->Create($this->keyword, $this->node_list, $this->previous_state);
         $this->thing->choice->Choose($this->requested_state);
@@ -124,6 +155,11 @@ $this->variables_thing = new Variables($this->thing, "variables mordok " . $this
 
 
         $this->state = $this->previous_state;
+//echo $this->state;
+//exit();
+
+        return;
+
     }
 
 
@@ -142,12 +178,17 @@ $this->variables_thing = new Variables($this->thing, "variables mordok " . $this
 
         if ($choice == null) {
             return $this->state;
+
+    //        $choice = 'off'; // Fail off.
         }
 
 
         $this->thing->log('Agent "' . ucwords($this->keyword) . '" chose "' . $choice . '".');
 
         $this->set($choice);
+
+
+        //$this->thing->log('Agent "' . ucwords($this->keyword) . '" choice selected was "' . $choice . '".');
 
         return $this->state;
     }

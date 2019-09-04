@@ -14,41 +14,35 @@ class Say
 	public $var = 'hello';
 
 
-    function __construct(Thing $thing)
+	function __construct(Thing $thing)
     {
-
-        // Not implemented
-        $this->thing_report = false;
-        return;
-
 
         // DEV
 
         // STiCKY FOUR DIGIT CODE GENERATE.
-        // Stick up a four digit code printed on 8.5x11"
-        // Shared situational awareness.
+        // JOIN AND LEAVE not yet created.
 
 		$this->thing = $thing;
-        $this->agent_name = 'say';
-        $this->thing_report = array('thing' => $this->thing->thing);
+		$this->agent_name = 'say';
+		$this->thing_report = array('thing' => $this->thing->thing);
 
-        // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
-        $this->api_key = $this->thing->container['api']['translink'];
+		$this->api_key = $this->thing->container['api']['translink'];
 
-        $this->retain_for = 4; // Retain for at least 4 hours.
+		$this->retain_for = 4; // Retain for at least 4 hours.
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
+      	$this->uuid = $thing->uuid;
+       	$this->to = $thing->to;
        	$this->from = $thing->from;
        	$this->subject = $thing->subject;
 
-        $this->num_hits = 0;
+		$this->num_hits = 0;
 
-        $this->pain_score = null;
+		$this->pain_score = null;
 
-        $this->sqlresponse = null;
+		$this->sqlresponse = null;
 
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -56,13 +50,14 @@ class Say
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        // Allow for a new state tree to be introduced here.
-        $this->node_list = array("start"=>array("useful", "useful?"));
 
-        $this->thing->log( '<pre> Agent "Say" running on Thing ' . $this->uuid . '</pre>' );
+		// Allow for a new state tree to be introduced here.
+		$this->node_list = array("start"=>array("useful", "useful?"));
+
+		$this->thing->log( '<pre> Agent "Say" running on Thing ' . $this->uuid . '</pre>' );
 		$this->thing->log( '<pre> Agent "Say" received this Thing "' . $this->subject . '"</pre>');
 
-        // Read the group agent variable
+		// Read the group agent variable
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable( array("say", "refreshed_at") );
 
@@ -77,105 +72,137 @@ class Say
         $this->group_id = $this->thing->json->readVariable( array("say", "group_id") );
 
         if ($this->group_id == false) {
-            // No group_id found on this Thing either.
+    		// No group_id found on this Thing either.
             $this->findGroup();
         }
 
-        $this->readSubject(); // Extract possible responses.
-        $this->thing_report = $this->respond();
+		$this->readSubject(); // Extract possible responses.
+		$this->thing_report = $this->respond();
 
-        $this->thing->log( '<pre> Agent "'.ucfirst($this->agent_name) . '" completed</pre>' );
+		$this->thing->log( '<pre> Agent "'.ucfirst($this->agent_name) . '" completed</pre>' );
 
-        return;
-	}
-
-    function findGroup() 
-    {
-        $group_thing = new Group($this->thing, "find");
-
-        $this->group_id = "open";
-        $this->group_id = $group_thing->thingreport['groups'][0];
-
-		//$path = null;
-		//$variable = 'group';
-		//$this->thing->db->variableSearch($path, $variable, 3);
 		return;
 	}
 
+	function findGroup() 
+    {
+
+		$group_thing = new Group($this->thing, "find");
+
+$this->group_id = "open";
+$this->group_id = $group_thing->thingreport['groups'][0];
+//var_dump($group_thing);
+//exit();
+
+//$path = null;
+//$variable = 'group';
+//$this->thing->db->variableSearch($path, $variable, 3);
+	return;
+}
+
+
+
+
 	public function notePain($text = null) {
 
-        if ( $this->pain_score != null ) {
-            // Then this Thing has no group information
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("say", "refreshed_at"), $time_string );
-            $this->thing->json->writeVariable( array("say", "group_id"), strtoupper($this->pain_score) );
 
-        }
+                if ( $this->pain_score != null ) {
+                        // Then this Thing has no group information
+                        $this->thing->json->setField("variables");
+                        $time_string = $this->thing->json->time();
+                        $this->thing->json->writeVariable( array("say", "refreshed_at"), $time_string );
+                        $this->thing->json->writeVariable( array("say", "group_id"), strtoupper($this->pain_score) );
 
-        // Generate a Thing 
-        $say_thing = new Thing(null);
-
-        // remove "say" at start
-
-        $group_message = substr(strstr($this->subject," "), 1);
+                }
 
 
-        if ( ($group_message == "") or ($group_message == null) or ($group_message == " ")) {
-            $this->sms_message = $group_message . "This agent broadcasts messages to your current group " . strtoupper($this->group_id) .".";
-        } else {
-            $say_thing->Create('null@stackr.ca', $to = "say:". strtoupper($this->group_id), $group_message);
-            $say_thing->flagGreen(); // to be sure
-		    $this->sms_message = "Message sent to group " . strtoupper($this->group_id) ;  
-        }
+                // Generate a Thing 
+
+                $say_thing = new Thing(null);
+
+                // remove "say" at start
+
+                $group_message = substr(strstr($this->subject," "), 1);
+
+
+                if ( ($group_message == "") or ($group_message == null) or ($group_message == " ")) {
+                        $this->sms_message = $group_message . "This agent broadcasts messages to your current group " . strtoupper($this->group_id) .".";
+                } else {
+                        $say_thing->Create('null@stackr.ca', $to = "say:". strtoupper($this->group_id), $group_message);
+                        $say_thing->flagGreen(); // to be sure
+			$this->sms_message = "Message sent to group " . strtoupper($this->group_id) ;  
+
+              }
+
+
+
+
 
 		$t = "Agent '" . ucfirst($this->agent_name) . "' is broadcasting to ". $this->group_id .".  Target message life " . $this->retain_for . " time units.";
 
 		$this->pain_score = null;
                 $this->message = $t;
 //		$this->sms_message = "Message sent to group " . $this->group_id ;
-        return $this->message;
-    }
 
-    // Vestigial. Review.
-    public function noteScore($value = null)
-    {
-        // $val = $pieces[$key + 1];
-        if ( is_numeric($value) ) {
 
-            $truth1 = $value >= 1 && $value <= 10; // true if 1 <= x <= 10
 
-            if ($truth1) {
-                $this->num_hits += 1;
+                return $this->message;
+        }
 
-                $t = "Agent '" . ucfirst($this->agent_name) . "' is watching for patterns.  This statement will be kept for " . $this->retain_for;
+        public function noteScore($value = null) {
+
+                                                  //              $val = $pieces[$key + 1];
+
+                                                                if ( is_numeric($value) ) {
+
+                                                                        $truth1 = $value >= 1 && $value <= 10; // true if 1 <= x <= 10
+
+                                                                        if ($truth1) {
+                                                                                $this->num_hits += 1;
+                                                                                //echo "next word is:";
+                                                                                //var_dump($pieces[$index+1]);
+
+                $t = "Agent '" . ucfirst($this->agent_name) . "' is watching for patterns.  This pain score observation will be kept for " . $this->retain_for;
+
 
                 $this->pain_score = $value;
                 $this->message = ucfirst($this->agent_name) . " score " . $this->pain_score . " noted.  Pattern watching." . $t;
                 $this->sms_message = ucfirst($this->agent_name) . " score = " . $this->pain_score . ".  Pattern watching.";
-            } else {
-                $this->message = "Pain score received but not understood.  It should be a number from 1 to 10";
-                $this->sms_message = "Not understood.  Pain score should be from 1 to 10";
-            }
+							
+
+                                                                        } else {
+
+                                                                                $this->message = "Pain score received but not understood.  It should be a number from 1 to 10";
+                                                                                $this->sms_message = "Not understood.  Pain score should be from 1 to 10";
+                                                                        }
+                                                                }
+
+
+
+
+                return $this->message;
         }
 
-        return $this->message;
-    }
+        public function painReport($text = null) {
 
-    public function painReport($text = null)
-    {
-        $this->sms_message = "s/devstack here will be a pain report";
+		$this->sms_message = "s/devstack here will be a pain report";
 		$this->message = "s/devstack here will be useful information on your pain";
 
+                                                        //$this->painReport($input);
 		$path = null;
 
 		$this->thing->db->setUser($this->from);
 		$thing_report = $this->thing->db->variableSearch($path, 'pain', 10);
 		
+//var_dump($thing_report['things']);
+//exit();
+
+//$this->thing->log( var_dump($thing_report) );
 		$priorDate = null;
 		$t = "<br>";
 		$t_sms = "";
 		foreach ($thing_report['things'] as $thing) {
+	//echo "meep";
 
 			$newDate = date("d/m", strtotime($thing['created_at']));
 
@@ -247,15 +274,15 @@ class Say
 
 
 		// Thing actions
-        $this->thing->flagGreen();
+		$this->thing->flagGreen();
 
-        $this->thing_report['num_hits'] = $this->num_hits;
+		$this->thing_report['num_hits'] = $this->num_hits;
 
 		// Generate email response.
 
-        $to = $this->thing->from;
+		$to = $this->thing->from;
 
-        $from = "say";
+		$from = "say";
 
 		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
 		$choices = $this->thing->choice->makeLinks('start');

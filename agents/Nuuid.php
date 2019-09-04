@@ -57,7 +57,7 @@ class Nuuid extends Agent
 
         $this->makeWeb();
 
-        $this->thing_report["info"] = "This creates a not UUID. Rememberable. Machine guessable. Short. Not unique.";
+        $this->thing_report["info"] = "This creates a not UUID.  Rememberable. Machine guessable. Short.";
         $this->thing_report["help"] = "This is a 'not unique' identifier to help keep track of things.";
 
 

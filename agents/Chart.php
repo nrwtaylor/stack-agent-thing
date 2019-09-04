@@ -11,7 +11,25 @@ class Chart extends Agent
     function init()
 	//function __construct(Thing $thing, $agent_command = null)
     {
+  //      $this->start_time = $thing->elapsed_runtime();
 
+        // Setup Thing
+  //      $this->thing = $thing;
+  //     $this->uuid = $thing->uuid;
+  //      $this->to = $thing->to;
+  //      $this->from = $thing->from;
+  //      $this->subject = $thing->subject;
+
+        // Setup Agent
+  //      $this->agent = strtolower(get_class());
+  //      $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
+
+        // Setup logging
+ //       $this->thing_report['thing'] = $this->thing->thing;
+
+  //      if ($agent_command == null) {
+  //          $this->thing->log( 'Agent "Chart" did not find an agent command.' );
+  //      }
         $agent_command = $this->agent_input; //
         $this->agent_command = $agent_command;
 
@@ -23,7 +41,7 @@ class Chart extends Agent
         $this->width = 300;
 
 
-//        $this->read();
+        $this->read();
 
 //        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
 
@@ -89,31 +107,26 @@ class Chart extends Agent
 
             ${$agent_name} = $variables[$agent_name];
 
-            if ((!isset($dimension[0])) or (!isset($dimension[1])) or (!isset($tock_series))  ) {
-                continue;
-            }
-
-
             ${$dimension[0]} = $agent_name[$dimension[0]];
             ${$dimension[1]} = $agent_name[$dimension[1]];
             ${$tock_series} = strtotime($agent_name[$tock_series]);
 
             $elapsed_time = $run_time + $queue_time;
 
-            if ((!isset($dimension[0])) or (($dimension[0] == null) or ($dimension[0] == 0)) and ($this->ignore_empty)) {
+            if ((($dimension[0] == null) or ($dimension[0] == 0)) and ($this->ignore_empty)) {
                 continue;
             }
-            if ((!isset($dimension[1])) or (($dimension[1] == null) or ($dimension[1] == 0)) and ($this->ignore_empty)) {
+            if ((($dimension[1] == null) or ($dimension[1] == 0)) and ($this->ignore_empty)) {
                 continue;
             }
-            if ((!isset($tock_series)) or (($tock_series == null) or ($tock_series == 0)) and ($this->ignore_empty)) {
+            if ((($tock_series == null) or ($tock_series == 0)) and ($this->ignore_empty)) {
                 continue;
             }
 
             $this->points[] = array($tock_series=>${$tock_series}, $dimension[0]=>${$dimension[0]}, $dimension[1]=>${$dimension[1]});
         }
 
-        $this->thing->log('getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
+        $this->thing->log('Agent "charth" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
 
     }
 
@@ -171,8 +184,6 @@ $this->makePNG();
         $this->chart_height = $this->height - 20;
 
         $num_points = count($this->points);
-
-if ($num_points == 0) {return true;}
         $column_width = $this->width / $num_points;
 
 
@@ -378,15 +389,6 @@ if ($num_points == 0) {return true;}
 
         $txt .= $count . '' . ' Points retrieved.\n';
 
-if ($count == 0) {
-$txt = "No chart available.\n";
-        $this->thing_report['txt'] = $txt;
-        $this->txt = $txt;
-return;
-
-}
-
-
         $tubs = array();
         $dimension[0] = "age";
         $dimension[1] = "bin_sum";
@@ -469,7 +471,7 @@ return;
         // increments the tally.
 	}
 
-    public function readSubject()
+    public function read()
     {
         $this->readInstruction();
         $this->readText();

@@ -22,8 +22,36 @@ class Time extends Agent {
         $this->agent_name = "time";
         $this->test= "Development code";
         $this->thing_report["info"] = "This connects to an authorative time server.";
-        $this->thing_report["help"] = "Get the stack server time.";
+        $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
     }
+
+
+    /**
+     *
+     * @return unknown
+     */
+
+    public function respond() {
+        $this->thing->flagGreen();
+
+        $to = $this->thing->from;
+        $from = "time";
+
+        $this->makeSMS();
+        $this->makeChoices();
+
+        //$this->thing_report["info"] = "This is a ntp in a park.";
+        //$this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text RANGER.";
+
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $thing_report['info'] = $message_thing->thing_report['info'] ;
+
+        return $this->thing_report;
+    }
+
 
     /**
      *
@@ -50,9 +78,8 @@ class Time extends Agent {
         // If we didn't receive the command NTP ...
 
 if (strtolower($this->input) != "time") {
-//    $this->time_message = $this->time_response;
-//$this->response = $this->time_response;
-//$this->response = null;
+    $this->time_message = $this->time_response;
+$this->response = $this->time_response;
 return;
 }
 
