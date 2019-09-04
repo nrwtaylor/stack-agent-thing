@@ -142,7 +142,6 @@ $per_page = "&per_page=50"; //max 50
 $sort = "&sort=date_desc"; //date_asc, date_desc, distance
 
         // Custom feed built in developer part of Brown Paper Tickets.
-//        $api_key = "TNENBWLPMZWIDJH5NHDW";
 $api_key = $this->api_key;
         //$data_source = "https://www.eventbriteapi.com/v3/events/search/?token=". $api_key . "&q=vancouver";
         //$data_source = "http://api.amp.active.com/search?{queryString params}&api_key=" . $api_key;

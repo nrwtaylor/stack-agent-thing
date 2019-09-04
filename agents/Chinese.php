@@ -704,12 +704,13 @@ if ($value == 6) {$pointer += 1;}
         foreach ($this->words as $index=>$word) {
             $line = $word["traditional"] . " " . $word["simplified"] . " " . $word["pin_yin"];
             $i = 0;
+if ($word["english"] != null) {
             foreach ($word["english"] as $english) {
                 $line .= " / " . $english;
             }
             $html .= $line . "<br>";
         }
-
+}
         $this->web_message = $html;
         $this->thing_report['web'] = $html;
     }

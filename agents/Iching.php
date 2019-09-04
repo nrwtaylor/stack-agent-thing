@@ -213,6 +213,23 @@ class IChing extends Agent {
         return $this->thing_report;
     }
 
+    public function makePNG() {
+        //if (!isset($this->image)) {$this->makeImage();}
+
+        $agent = new Png($this->thing, "png");
+        $this->makeImage();
+
+        $agent->makePNG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->PNG = $agent->PNG;
+
+        //$this->thing_report['png'] = $agent->PNG;
+        $this->thing_report['png'] = $agent->image_string;
+
+    }
+
 
     /**
      *
@@ -341,8 +358,8 @@ class IChing extends Agent {
         $response .= $this->html_image;
         $response .= '<br>';
 
-        //        $response .= '<img src = "' . $this->web_prefix . 'thing/' . $this->uuid . '/iching.png"
-        //            alt = "Hexagram ' . $this->hexagram_number . ' ' . $this->hexagram_text[0] . ' '.  $this->hexagram_text[1] . '" longdesc = "' . $this->web_prefix . 'thing/' . $this->uuid . '/iching.txt">';
+                $response .= '<img src = "' . $this->web_prefix . 'thing/' . $this->uuid . '/iching.png"
+                    alt = "Hexagram ' . $this->hexagram_number . ' ' . $this->hexagram_text[0] . ' '.  $this->hexagram_text[1] . '" longdesc = "' . $this->web_prefix . 'thing/' . $this->uuid . '/iching.txt">';
 
 
         $response .= '<br>';

@@ -1,10 +1,9 @@
 <?php
 /**
- * Time.php
+ * Cat.php
  *
  * @package default
  */
-
 
 namespace Nrwtaylor\StackAgentThing;
 
@@ -18,7 +17,6 @@ ini_set("allow_url_fopen", 1);
 class Time extends Agent {
 
     public $var = 'hello';
-
 
     /**
      *
@@ -40,7 +38,7 @@ class Time extends Agent {
      *
      * @return unknown
      */
-/*
+
     public function respond() {
         $this->thing->flagGreen();
 
@@ -61,7 +59,6 @@ class Time extends Agent {
 
         return $this->thing_report;
     }
-*/
 
     /**
      *
@@ -73,6 +70,7 @@ class Time extends Agent {
         $this->thing_report['sms'] = $m;
     }
 
+    // function query_time_server
 
     /**
      *
@@ -82,35 +80,47 @@ class Time extends Agent {
         $this->thing_report['choices'] = $choices;
     }
 
-
     /**
      *
      * @param unknown $text (optional)
-     * @return unknown
      */
     function doTime($text = null) {
-        $datum = null;
 
-        $timevalue = $text;
+$datum = null;
+
+//$timevalue = $this->current_time;
+echo "doTime\n";
+var_dump($text);
+$timevalue = $text;
         if (($this->agent_input == "time") and  ($text == null)) {$timevalue = $this->current_time;}
         if ($text == "time") {$timevalue = $this->current_time;}
 
-        if ($timevalue == null) {$timevalue = $this->current_time;}
+if ($timevalue == null) {$timevalue = $this->current_time;}
 
 var_dump($timevalue);
-        $m =  "Unfortunately, the time server was not available. ";
-        if (true) {
+            $m =  "Unfortunately, the time server was not available. ";
+echo "merp";
+            if (true) {
 
-            $datum = new \DateTime($timevalue, new \DateTimeZone("UTC"));
-            $datum->setTimezone(new \DateTimeZone($this->time_zone));
+//                $datum = new \DateTime("$timevalue", new \DateTimeZone("UTC"));
+                $datum = new \DateTime($timevalue, new \DateTimeZone("UTC"));
+var_dump($datum);
 
-            $m = "Time check from stack server ". $this->web_prefix. ". ";
-            $m .= "In the timezone " . $this->time_zone . ", it is " . $datum->format('l') . " " . $datum->format('d/m/Y, H:i:s') .". ";
+                $datum->setTimezone(new \DateTimeZone($this->time_zone));
 
-        }
+                $m = "Time check from stack server ". $this->web_prefix. ". ";
+                $m .= "In the timezone " . $this->time_zone . ", it is " . $datum->format('l') . " " . $datum->format('d/m/Y, H:i:s') .". ";
+
+            }
 
         $this->response = $m;
         $this->time_message = $this->response;
+
+//        } else {
+//            $this->time_message = $this->agent_input;
+//        }
+
+var_dump($this->response);
 
         $this->datum = $datum;
         return $datum;
@@ -118,13 +128,17 @@ var_dump($timevalue);
     }
 
 
+
     /**
      *
      * @return unknown
      */
     public function readSubject() {
+
+//        $this->doTime($this->input);
         $this->doTime();
         return false;
     }
+
 
 }

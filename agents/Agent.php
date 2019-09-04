@@ -171,9 +171,15 @@ catch (\Exception $e)
      */
     public function make() {
         $this->makeResponse();
+        $this->makeImage();
         $this->makePNG();
         $this->makeSMS();
         $this->makeWeb();
+
+$this->makeEmail();
+$this->makeMessage();
+$this->makeTXT();
+
         $this->makePDF();
     }
 
@@ -432,6 +438,30 @@ if ($this->agent_name == "agent") {return;}
 public function makePDF() {
 
 }
+
+public function makeImage() {
+
+}
+
+public function makeTXT() {
+//if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
+//        $this->thing_report['txt'] = $this->thing_report['sms'];
+}
+
+public function makeMessage() {
+//if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
+
+//        $this->thing_report['message'] = $this->thing_report['sms'];
+
+}
+
+public function makeEmail() {
+
+
+
+}
+
+
 
     /**
      *
@@ -1620,16 +1650,59 @@ return $this->thing_report;
         return $this->thing_report;
     }
 
+    function filterAgent($text = null) {
+
+//$input = strtolower($this->subject);
+$input = $this->input;
+if ($text != null) {$input = $text;}
+
+            $strip_words = array(
+                $this->agent_name, 
+                strtolower($this->agent_name),
+                ucwords($this->agent_name),
+                strtoupper($this->agent_name)
+            );
+            foreach ($strip_words as $i=>$strip_word) {
+            $strip_words[] = str_replace(" ", "", $strip_word);
+            }
+
+                foreach($strip_words as $i=>$strip_word){
+
+//                    $strip_word = $strip_word['words'];
+
+                    $whatIWant = $input;
+                    if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
+                        $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
+                    } elseif (($pos = strpos(strtolower($input), $strip_word)) !== FALSE) {
+                        $whatIWant = substr(strtolower($input), $pos+strlen($strip_word));
+                    }
+
+                    $input = $whatIWant;
+                }
+            $input = trim($input);
+
+$this->input = $input;
+return $input;
+    }
+
 
     /**
      *
      */
     public function makePNG() {
-        //if (!isset($this->image)) {$this->makeImage();}
+/*
+        $this->html_image = null;
+        $this->image = null;
+        $this->PNG = null;
+        $this->thing_report['png'] = null;
+
+
+
+        if (!isset($this->image)) {return;}
 try {
         $agent = new Png($this->thing, "png");
 //try{ 
-        $this->makeImage();
+//        $this->makeImage();
 
         $agent->makePNG($this->image);
 
@@ -1644,6 +1717,7 @@ try {
 $this->thing_report['png'] = null; 
 
 }
+*/
     }
 
 

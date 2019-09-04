@@ -98,6 +98,8 @@ class Snowflake {
         $this->readSubject();
         $this->init();
         $this->initSnowflake();
+
+        // test
         //$this->updateSnowflake();
 
         $this->draw_center = false;
@@ -566,6 +568,21 @@ class Snowflake {
 
         $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
 
+        $this->ice_green = imagecolorallocate($this->image, 126, 217, 195);
+        $this->blue_ice = imagecolorallocate($this->image, 111, 122, 159);
+        $this->artic_ice = imagecolorallocate($this->image, 195, 203, 217);
+        $this->ice_cold = imagecolorallocate($this->image, 165, 242, 243);
+        $this->white_ice = imagecolorallocate($this->image, 225, 231, 228);
+
+        $this->ice_color_palette = array(
+            $this->ice_green,
+            $this->blue_ice,
+            $this->artic_ice,
+            $this->ice_cold,
+            $this->white_ice
+            );
+
+
         // Patriarch as a color name.
         // https://www.schemecolor.com/lgbt-flag-colors.php
         $this->color_palette = array($this->electric_red,
@@ -755,7 +772,7 @@ class Snowflake {
      * @param unknown $size
      * @param unknown $color    (optional)
      */
-    public function drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color = null) {
+    public function drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color = null, $quantity = null) {
         //if ($color == null) {
         //    $color = $this->white;
         //    $color_outline = $this->grey;
@@ -841,6 +858,10 @@ class Snowflake {
             if (!isset($this->events[0])) {$this->event = false;} else {
                 $this->event = $this->events[0];
             }
+
+if ($quantity == null) {$quantity = 1;}
+$color = $this->ice_color_palette[$quantity];
+
 
             // Vancouver Pride 2018
             if ((isset($this->event)) and ($this->event != false) and
@@ -1314,24 +1335,37 @@ class Snowflake {
             $angle = $this->angle / 180 * 3.14159;
             $angle = 0; // override devstack
 
+
+            $cell = $this->lattice[$q][$r][$s];
+
+
+$n =0;
+if (isset($cell['p_melt'])) {$n = $cell['p_melt'];}
+if (isset($cell['p_frozen'])) {$n = $cell['p_frozen'];}
+//$n = $cell['neighbours'];
+//$quantity = intval($n * 10 - 5);
+//$quantity = random_int(0,4);
+//$quantity = intval($n*5);
+$quantity = 2;
+
             // Draw an individual hexagon (q,r,s) centred at at an angle and distance from (x,y)
-            $this->drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-1*$r, -1*$s, -1*$q, $center_x, $center_y, $angle, $size, $color);
+            $this->drawHexagon($q, $r, $s, $center_x, $center_y, $angle, $size, $color, $quantity);
+            $this->drawHexagon(-1*$r, -1*$s, -1*$q, $center_x, $center_y, $angle, $size, $color, $quantity);
 
-            $this->drawHexagon($r, $q, $s, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-1*$s, -1*$r, -1*$q, $center_x, $center_y, $angle, $size, $color);
+            $this->drawHexagon($r, $q, $s, $center_x, $center_y, $angle, $size, $color, $quantity);
+            $this->drawHexagon(-1*$s, -1*$r, -1*$q, $center_x, $center_y, $angle, $size, $color, $quantity);
 
-            $this->drawHexagon($q, $s, $r, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-$q, -$r, -$s, $center_x, $center_y, $angle, $size, $color);
+            $this->drawHexagon($q, $s, $r, $center_x, $center_y, $angle, $size, $color, $quantity);
+            $this->drawHexagon(-$q, -$r, -$s, $center_x, $center_y, $angle, $size, $color, $quantity);
 
-            $this->drawHexagon(-1*$s, -1*$q, -1*$r, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon(-1*$q, -1*$s, -1*$r, $center_x, $center_y, $angle, $size, $color);
+            $this->drawHexagon(-1*$s, -1*$q, -1*$r, $center_x, $center_y, $angle, $size, $color, $quantity);
+            $this->drawHexagon(-1*$q, -1*$s, -1*$r, $center_x, $center_y, $angle, $size, $color, $quantity);
 
-            $this->drawHexagon($s, $r, $q, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon($r, $s, $q, $center_x, $center_y, $angle, $size, $color);
+            $this->drawHexagon($s, $r, $q, $center_x, $center_y, $angle, $size, $color, $quantity);
+            $this->drawHexagon($r, $s, $q, $center_x, $center_y, $angle, $size, $color, $quantity);
 
-            $this->drawHexagon(-$r, -$q, -$s, $center_x, $center_y, $angle, $size, $color);
-            $this->drawHexagon($s, $q, $r, $center_x, $center_y, $angle, $size, $color);
+            $this->drawHexagon(-$r, -$q, -$s, $center_x, $center_y, $angle, $size, $color, $quantity);
+            $this->drawHexagon($s, $q, $r, $center_x, $center_y, $angle, $size, $color, $quantity);
 
             // devstack
             //                   $this->drawSnowflake($q,$r,$s,$size/10,$index);

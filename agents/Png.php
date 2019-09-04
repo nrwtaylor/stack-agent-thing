@@ -189,8 +189,6 @@ class Png {
         $message .= '<br>';
 
         $this->thing_report['message'] = $message;
-
-        return;
     }
 
     public function makeImage()
@@ -304,6 +302,8 @@ $text = $this->text;
         $this->html_image = $html;
 
         return $this->thing_report['png'];
+
+
     }
 
     function is_base64_encoded($data)

@@ -25,13 +25,11 @@ class Rundate extends Agent {
      * @param unknown $agent_input (optional)
      */
     function init() {
-
         $this->keywords = array('next', 'accept', 'clear', 'drop', 'add', 'new');
         $this->test= "Development code"; // Always iterative.
         $this->rundate = new Variables($this->thing, "variables rundate " . $this->from);
 
         $this->thing_report['help'] = "Reads text for the date of the next thing.";
-
     }
 
 
@@ -209,6 +207,8 @@ if ((($this->numbers[0] == $day) and ($this->numbers[1] == $month)) or
 
 }
 
+// What if nothing comes back from PHP's date parse.
+// But it is still a valid date.
 if (($day == false) and ($month == false) and ($year == false)) {
 
 
@@ -298,7 +298,9 @@ if (isset($this->numbers[1])) {
     /**
      *
      */
-    public function respond() {
+    public function respondResponse() {
+
+if ($this->response == null) {$this->response = "Retrieved run at day.";}
 
         // Thing actions
 
@@ -370,7 +372,10 @@ if (isset($this->numbers[1])) {
         if (!isset($this->month)) {$month = "X";} else {$month = $this->month;}
         if (!isset($this->year)) {$year = "X";} else {$year = $this->year;}
 
-
+echo "Test what Rundate parses.\n";
+var_dump($this->day);
+var_dump($this->month);
+var_dump($this->year);
 
     }
 
@@ -381,10 +386,12 @@ if (isset($this->numbers[1])) {
      */
     public function readSubject() {
 
+$this->input = $this->filterAgent();
         $this->response = null;
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
+
         if (strpos($this->input, "reset") !== false) {
             $this->day = "X";
             $this->month = "X";
@@ -392,12 +399,12 @@ if (isset($this->numbers[1])) {
             return;
         }
 
+        $this->extractRundate($this->input);
+
         if (strpos($this->agent_input, "rundate") !== false) {
             return;
         }
 
-
-        $this->extractRundate($this->input);
 
     }
 

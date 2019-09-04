@@ -103,7 +103,6 @@ if (!isset($this->response)) {$this->makeResponse();}
     function makeSMS() {
 
 
-
         $response = "merp";
         //        if ($this->agent_input == null) {
 
@@ -126,34 +125,32 @@ if (!isset($this->response)) {$this->makeResponse();}
         $date_string = $this->rundate->year . "/" . $this->rundate->month . "/" . $this->rundate->day;
         var_dump($date_string);
 
-        $time = new Time($this->thing, "time");
+        $time = new time($this->thing, "time");
         $time->doTime($date_string);
         $response .= " " . $time->datum->format('l') . " " . $time->datum->format('d/m/Y, H:i:s') ."";
         $response .= " in " . $time->time_zone;
         $response .= ".";
 
 
-
         //$response .= " " . $m . ".";
         if ($this->time_until == null) {$response = "TIME UNTIL | No response.";}
         $this->cat_message = $response;
-        //    } else {
-        //        $this->cat_message = $this->agent_input;
-        //    }
+//    } else {
+//        $this->cat_message = $this->agent_input;
+//    }
 
 
-        $this->response = $this->cat_message;
-        $this->node_list = array("cat"=>array("cat", "time until"));
-        $this->sms_message = "" . $this->cat_message;
-        $this->thing_report['sms'] = $this->sms_message;
+    $this->response = $this->cat_message;
+    $this->node_list = array("cat"=>array("cat", "time until"));
+    $this->sms_message = "" . $this->cat_message;
+    $this->thing_report['sms'] = $this->sms_message;
+}
 
-    }
 
-
-    /**
-     *
-     */
-    /*
+/**
+ *
+ */
+/*
     function makeChoices() {
         $this->thing->choice->Create('channel', $this->node_list, "cat");
         $choices = $this->thing->choice->makeLinks('cat');
@@ -161,15 +158,15 @@ if (!isset($this->response)) {$this->makeResponse();}
     }
 */
 
-    /**
-     *
-     * @return unknown
-     */
-    public function readSubject() {
+/**
+ *
+ * @return unknown
+ */
+public function readSubject() {
 
-        $this->filterAgent();
-        return false;
-    }
+    $this->filterAgent();
+    return false;
+}
 
 
 }

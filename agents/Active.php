@@ -1,4 +1,11 @@
 <?php
+/**
+ * Active.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -7,16 +14,20 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Active
-{
+class Active {
 
     // This gets Forex from an API.
     // Give this the word active. Until another endpoint is also needed.
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
-    {
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function __construct(Thing $thing, $agent_input = null) {
         // $this->start_time = microtime(true);
         $this->start_time = $thing->elapsed_runtime();
         $this->agent_input = $agent_input;
@@ -38,7 +49,7 @@ class Active
 
         //$this->node_list = array("off"=>array("on"=>array("off")));
 
-        $this->keywords = array('active', 'event','show','happening');
+        $this->keywords = array('active', 'event', 'show', 'happening');
 
         $this->current_time = $this->thing->json->time();
 
@@ -50,21 +61,21 @@ class Active
         $this->variables_agent = new Variables($this->thing, "variables " . "active" . " " . $this->from);
 
         // Loads in variables.
-        $this->get(); 
+        $this->get();
 
-//        if ($this->verbosity == false) {$this->verbosity = 2;}
+        //        if ($this->verbosity == false) {$this->verbosity = 2;}
 
 
-		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
-		$this->thing->log('received this Thing "'.  $this->subject . '".');
+        $this->thing->log('running on Thing '. $this->thing->nuuid . '.');
+        $this->thing->log('received this Thing "'.  $this->subject . '".');
 
-		$this->readSubject();
+        $this->readSubject();
 
         $this->getApi();
         //if ($this->available_events_count > 10) {$this->getApi('date');}
 
 
-		$this->respond();
+        $this->respond();
 
         $this->end_time = microtime(true);
         $this->actual_run_time = $this->end_time - $this->start_time;
@@ -72,29 +83,34 @@ class Active
 
         $this->thing->log( 'ran for ' . $milliseconds . 'ms.' );
 
-		$this->thing->log( 'completed.');
+        $this->thing->log( 'completed.');
 
         $this->thing_report['log'] = $this->thing->log;
 
-		return;
+        return;
 
-	}
+    }
 
-    function set()
-    {
+
+    /**
+     *
+     */
+    function set() {
         $this->thing->log( $this->agent_prefix .  'set counter  ' . $this->counter . ".", "DEBUG");
 
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 
-//        $this->thing->choice->save('usermanager', $this->state);
+        //        $this->thing->choice->save('usermanager', $this->state);
 
         return;
     }
 
 
-    function get()
-    {
+    /**
+     *
+     */
+    function get() {
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
@@ -105,8 +121,13 @@ class Active
         return;
     }
 
-    function getApi($sort_order = null)
-    {
+
+    /**
+     *
+     * @param unknown $sort_order (optional)
+     * @return unknown
+     */
+    function getApi($sort_order = null) {
         $this->thing->log('getApi answered.');
 
         if (isset($this->events)) {return $this->events;}
@@ -123,32 +144,31 @@ class Active
 
 
 
-$near = "&near=vancouver,ca";
-$city = "&city=vancouver";
-$country = "&country=canada";
-$query = "&query=" .$keywords;
+        $near = "&near=vancouver,ca";
+        $city = "&city=vancouver";
+        $country = "&country=canada";
+        $query = "&query=" .$keywords;
 
 
-//$start_date = "&start_date=2013-07-04..";
-$start_date ="";
-$start_date ="&start_date=2018-09-01..";
+        //$start_date = "&start_date=2013-07-04..";
+        $start_date ="";
+        $start_date ="&start_date=2018-09-01..";
 
 
-// events, races, tournaments, facilities, classes, leagues
-$category = "&category=event";
-$category = "";
+        // events, races, tournaments, facilities, classes, leagues
+        $category = "&category=event";
+        $category = "";
 
-$per_page = "&per_page=50"; //max 50
-$sort = "&sort=date_desc"; //date_asc, date_desc, distance
+        $per_page = "&per_page=50"; //max 50
+        $sort = "&sort=date_desc"; //date_asc, date_desc, distance
 
         // Custom feed built in developer part of Brown Paper Tickets.
-//        $api_key = "TNENBWLPMZWIDJH5NHDW";
-$api_key = $this->api_key;
+        $api_key = $this->api_key;
         //$data_source = "https://www.eventbriteapi.com/v3/events/search/?token=". $api_key . "&q=vancouver";
         //$data_source = "http://api.amp.active.com/search?{queryString params}&api_key=" . $api_key;
         $data_source = "http://api.amp.active.com/v2/search?query=running&category=event&start_date=2013-07-04..&near=San%20Diego,CA,US&radius=50&api_key=" . $api_key;
         $data_source = "http://api.amp.active.com/v2/search?query=running&category=event&start_date=2013-07-04.." . $city . $country ."&api_key=" . $api_key;
-//        $data_source = "http://api.amp.active.com/v2/search?". $query . "&category=event&start_date=2013-07-04.." . $city . $country ."&api_key=" . $api_key;
+        //        $data_source = "http://api.amp.active.com/v2/search?". $query . "&category=event&start_date=2013-07-04.." . $city . $country ."&api_key=" . $api_key;
 
         $data_source = "http://api.amp.active.com/v2/search?" . $query . $category . $start_date .  $city . $country . $per_page. $sort."&api_key=" . $api_key;
 
@@ -165,7 +185,7 @@ $api_key = $this->api_key;
             // Invalid query of some sort.
         }
 
-//        $data_xml = simplexml_load_string($data);
+        //        $data_xml = simplexml_load_string($data);
         $json_data = json_decode($data, TRUE);
 
         // devstack
@@ -180,21 +200,21 @@ $api_key = $this->api_key;
 
 
 
-$total_items = $json_data['total_results'];
-$page_number = $json_data['start_index'];
-//$page_count = $json_data['page_count'];
-$page_size = $json_data['items_per_page'];
-//var_dump($total_items);
-//var_dump($page_size);
-//exit();
-//search_time = $json_data['search_time'];
+        $total_items = $json_data['total_results'];
+        $page_number = $json_data['start_index'];
+        //$page_count = $json_data['page_count'];
+        $page_size = $json_data['items_per_page'];
+        //var_dump($total_items);
+        //var_dump($page_size);
+        //exit();
+        //search_time = $json_data['search_time'];
 
-//$this->thing->log('says Eventful reported a runtime of ' . $search_time . "?");
+        //$this->thing->log('says Eventful reported a runtime of ' . $search_time . "?");
 
-//$this->thing->log('read page ' . $page_number . " of " . $page_count . " pages.");
-$this->thing->log('read page ' . $page_size . " of " . $total_items . " Event things.");
+        //$this->thing->log('read page ' . $page_number . " of " . $page_count . " pages.");
+        $this->thing->log('read page ' . $page_size . " of " . $total_items . " Event things.");
 
-$this->available_events_count = $total_items;
+        $this->available_events_count = $total_items;
 
 
 
@@ -202,69 +222,77 @@ $this->available_events_count = $total_items;
 
     }
 
-function array_flatten(array $array)
-{
-    $flat = array(); // initialize return array
-    $stack = array_values($array); // initialize stack
-    while($stack) // process stack until done
-    {
-        $value = array_shift($stack);
-        if (is_array($value)) // a value to further process
-        {
-            $stack = array_merge(array_values($value), $stack);
+
+    /**
+     *
+     * @param array   $array
+     * @return unknown
+     */
+    function array_flatten(array $array) {
+        $flat = array(); // initialize return array
+        $stack = array_values($array); // initialize stack
+        while ($stack) // process stack until done
+            {
+            $value = array_shift($stack);
+            if (is_array($value)) // a value to further process
+                {
+                $stack = array_merge(array_values($value), $stack);
+            }
+            else // a value to take
+                {
+                $flat[] = $value;
+            }
         }
-        else // a value to take
-        {
-           $flat[] = $value;
-        }
+        return $flat;
     }
-    return $flat;
-}
 
 
-    function eventsActivecom($events)
-    {
+    /**
+     *
+     * @param unknown $events
+     */
+    function eventsActivecom($events) {
         if (!isset($this->events)) {$this->events = array();}
-        if($events == null) {$this->events_count = 0;return;}
+        if ($events == null) {$this->events_count = 0;return;}
 
-        foreach($events as $not_used=>$event) {
-//var_dump($event);
-//exit();
- //           $city = "vancouver";
-//            if (strtolower($event['city']) != $city) {continue;}
+        foreach ($events as $not_used=>$event) {
+            //var_dump($event);
+            //exit();
+            //           $city = "vancouver";
+            //            if (strtolower($event['city']) != $city) {continue;}
 
-       //     $id = $event['id'];
+            //     $id = $event['id'];
             $id = $event['assetGuid'];
 
             $event_name = $event['assetName'];
 
             //$description = $event['organizationDsc'];
-if (!isset($event['assetDescriptions'][0])) {$description = "No description found.";} else {
-//var_dump($event['assetDescriptions'][0]['description']);
-//exit();
-            $description = $event['assetDescriptions'][0]['description'];
-//exit();
-}
-        // devstack extract dates from description
-        // resolve multi-day events
+            if (!isset($event['assetDescriptions'][0])) {$description = "No description found.";} else {
+                //var_dump($event['assetDescriptions'][0]['description']);
+                //exit();
+                $description = $event['assetDescriptions'][0]['description'];
+                //exit();
+            }
+            // devstack extract dates from description
+            // resolve multi-day events
 
 
 
             $run_at = $event['activityStartDate']; // local event time
             $end_at = $event['activityEndDate']; // local event time
-//var_dump($run_at);
-//var_dump($end_at);
-//exit();
-        // runtime not available.  Perhaps that is what the full day flag tells people
+            //var_dump($run_at);
+            //var_dump($end_at);
+            //exit();
+            // runtime not available.  Perhaps that is what the full day flag tells people
             $runtime = strtotime($end_at) - strtotime($run_at);
             if ($runtime <= 0) {$runtime = "X";}
 
             //if ($runtime > $this->run_time_max) {echo "meep";continue;}
 
 
-// Will need to run a venue request.
+            // Will need to run a venue request.
 
-//var_dump($event['place']);
+            //var_dump($event['place']);
             if (!isset($event['organization']['organizationName'])) {$organization = "Not provided";} else {
                 $organization = $event['organization']['organizationName'];
             }
@@ -274,8 +302,8 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
             $venue_address = $event['place']['addressLine1Txt']; //$event['venue_address'];
 
 
-//var_dump($event);
-//exit();
+            //var_dump($event);
+            //exit();
 
             if (is_array($event['urlAdr'])) {
                 $link = null;
@@ -283,42 +311,42 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
                 $link = $event['urlAdr'];
             }
 
-// Extract activity recurrences
-// $event["activityRecurrences"]
+            // Extract activity recurrences
+            // $event["activityRecurrences"]
 
             $event_array = array("event"=>$event_name, "runat"=>$run_at, "runtime"=>$runtime, "place"=>$venue_name, "link"=>$link, "datagram"=>$event);
 
             //$event_haystack = $this->implode_multi(" ", $event_array);
-//var_dump($event_haystack);
+            //var_dump($event_haystack);
             $pieces = $this->array_flatten($event_array, " ");
-//var_dump($pieces);
-  //          var_dump($this->search_words);
+            //var_dump($pieces);
+            //          var_dump($this->search_words);
 
-//            $keywords = explode(" ", $this->search_words);
-//var_dump($this->search_words);
+            //            $keywords = explode(" ", $this->search_words);
+            //var_dump($this->search_words);
 
-        if (!isset($this->search_words)) {
-            $this->events[$id] = $event_array;
-        } else {
-
-
-            $keywords = explode(" ", $this->search_words);
+            if (!isset($this->search_words)) {
+                $this->events[$id] = $event_array;
+            } else {
 
 
-        foreach ($pieces as $key=>$phrase) {
-            $words = explode(" ",$phrase);
-            foreach ($words as $piece) {
-                foreach ($keywords as $command) {
-//echo $command. " " . $piece . "\n";
-//exit();
-                    if (strpos(strtolower($piece),strtolower($command)) !== false) {
-                        // Match found
-                        $this->events[$id] = $event_array;
+                $keywords = explode(" ", $this->search_words);
+
+
+                foreach ($pieces as $key=>$phrase) {
+                    $words = explode(" ", $phrase);
+                    foreach ($words as $piece) {
+                        foreach ($keywords as $command) {
+                            //echo $command. " " . $piece . "\n";
+                            //exit();
+                            if (strpos(strtolower($piece), strtolower($command)) !== false) {
+                                // Match found
+                                $this->events[$id] = $event_array;
+                            }
+                        }
                     }
                 }
             }
-        }
-        }
         }
 
 
@@ -326,38 +354,53 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
 
     }
 
-    function getLink($ref)
-    {
+
+    /**
+     *
+     * @param unknown $ref
+     * @return unknown
+     */
+    function getLink($ref) {
         // Give it the message returned from the API service
 
-        $this->link = "https://www.google.com/search?q=" . $ref; 
+        $this->link = "https://www.google.com/search?q=" . $ref;
         return $this->link;
     }
 
-    public function makeEvent($event)
-    {
+
+    /**
+     *
+     * @param unknown $event
+     */
+    public function makeEvent($event) {
         throw new Exception('Under construction.');
 
         // Need to check whether the events exists...
-        // This can be post response.   
+        // This can be post response.
 
         // devstack this will be an Event function
         // Just needs to pass the source to Event.
 
         // Load as new event things onto stack
         $thing = new Thing(null);
-        $thing->Create("active@stackr.ca","events", "s/ event active " . $eventful_id);
+        $thing->Create("active@stackr.ca", "events", "s/ event active " . $eventful_id);
 
         // make sure the right fields are directly given
 
         new Event($thing, "event is ". $event['event']);
         new Runat($thing, "runat is ". $event['runat']);
         new Place($thing, "place is ". $event['place']);
-        new Link($thing, "link is " . $event['link']);
+        new link($thing, "link is " . $event['link']);
 
     }
 
 
+    /**
+     *
+     * @param unknown $variable_name (optional)
+     * @param unknown $variable      (optional)
+     * @return unknown
+     */
     function getVariable($variable_name = null, $variable = null) {
 
         // This function does a minor kind of magic
@@ -392,39 +435,50 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
 
 
 
-    function getFlag() 
-    {
+    /**
+     *
+     * @return unknown
+     */
+    function getFlag() {
         $this->flag_thing = new Flag($this->variables_agent->thing, 'flag');
-        $this->flag = $this->flag_thing->state; 
+        $this->flag = $this->flag_thing->state;
 
         return $this->flag;
     }
 
-    function setFlag($colour) 
-    {
+
+    /**
+     *
+     * @param unknown $colour
+     * @return unknown
+     */
+    function setFlag($colour) {
         $this->flag_thing = new Flag($this->variables_agent->thing, 'flag '.$colour);
-        $this->flag = $this->flag_thing->state; 
+        $this->flag = $this->flag_thing->state;
 
         return $this->flag;
     }
 
 
 
-	private function respond() {
+    /**
+     *
+     */
+    private function respond() {
 
-		// Thing actions
+        // Thing actions
 
-		$this->thing->flagGreen();
-		// Generate email response.
+        $this->thing->flagGreen();
+        // Generate email response.
 
-		$to = $this->thing->from;
-		$from = "active";
+        $to = $this->thing->from;
+        $from = "active";
 
-		//echo "<br>";
+        //echo "<br>";
 
-		//$choices = $this->thing->choice->makeLinks($this->state);
+        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
-		$this->thing_report['choices'] = $choices;
+        $this->thing_report['choices'] = $choices;
 
         //$interval = date_diff($datetime1, $datetime2);
         //echo $interval->format('%R%a days');
@@ -449,13 +503,18 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
 
         $this->thing_report['help'] = 'This triggers provides currency prices using the 1forge API.';
 
-//        $this->thingreportEventful();
+        //        $this->thingreportEventful();
 
-		return;
-	}
+        return;
+    }
 
-    public function eventString($event) 
-    {
+
+    /**
+     *
+     * @param unknown $event
+     * @return unknown
+     */
+    public function eventString($event) {
         $event_date = date_parse($event['runat']);
 
         $month_number = $event_date['month'];
@@ -474,7 +533,7 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
 
         $run_time = new Runtime($this->thing, "extract " .$event['runtime']);
 
-//var_dump($run_time->minutes);
+        //var_dump($run_time->minutes);
 
         if ($event['runtime'] != "X") {
             $event_string .= " " . $this->thing->human_time($run_time->minutes);
@@ -485,10 +544,13 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
         return $event_string;
     }
 
-    public function makeWeb()
-    {
-// add registration
-// 'registrationUrlAdr'
+
+    /**
+     *
+     */
+    public function makeWeb() {
+        // add registration
+        // 'registrationUrlAdr'
 
         if (!isset($this->search_words)) {$s = "";} else {$s = $this->search_words;}
 
@@ -496,67 +558,70 @@ if (!isset($event['assetDescriptions'][0])) {$description = "No description foun
         $html .= "<p><b>Active.com Events</b>";
 
         if (!isset($this->events)) {$html .= "<br>No events found on Active.com.";} else {
- 
-        foreach ($this->events as $id=>$event) {
 
-            $event_html = $this->eventString($event);
+            foreach ($this->events as $id=>$event) {
 
-//$text =             $description = $event['assetDescriptions'][0]['description'];
-if (!isset($event['datagram']['assetDescriptions'][0]['description'])) {$text = "";} else {
+                $event_html = $this->eventString($event);
 
-$text = $event['datagram']['assetDescriptions'][0]['description'];
-}
-// https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
-preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $text, $match);
+                //$text =             $description = $event['assetDescriptions'][0]['description'];
+                if (!isset($event['datagram']['assetDescriptions'][0]['description'])) {$text = "";} else {
 
-$urls = $match[0];
-//var_dump($urls);
-//exit();
-$html_link_extracted = "";
-if (count($urls) != 0) {
-//var_dump($urls); 
-           // Make a link to the Brown Paper Tickets page
-            $link = "https://www.brownpapertickets.com/event/" . $id;
-            $html_link = '<a href="' . $urls[0] . '">';
-            $html_link .= "link";
-            $html_link .= "</a>";
+                    $text = $event['datagram']['assetDescriptions'][0]['description'];
+                }
+                // https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
+                preg_match_all('#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#', $text, $match);
 
-            $html_link_extracted = $html_link;
-}
-            // Get event link. Normally an artist/performer link.
-            $link = $event['link'];
+                $urls = $match[0];
+                //var_dump($urls);
+                //exit();
+                $html_link_extracted = "";
+                if (count($urls) != 0) {
+                    //var_dump($urls);
+                    // Make a link to the Brown Paper Tickets page
+                    $link = "https://www.brownpapertickets.com/event/" . $id;
+                    $html_link = '<a href="' . $urls[0] . '">';
+                    $html_link .= "link";
+                    $html_link .= "</a>";
 
-            if ($link != null) {
+                    $html_link_extracted = $html_link;
+                }
+                // Get event link. Normally an artist/performer link.
+                $link = $event['link'];
 
-                $scheme = parse_url($link, PHP_URL_SCHEME);
-                if (empty($scheme)) {
-                    $link = 'http://' . ltrim($link, '/');
+                if ($link != null) {
+
+                    $scheme = parse_url($link, PHP_URL_SCHEME);
+                    if (empty($scheme)) {
+                        $link = 'http://' . ltrim($link, '/');
+                    }
+
+                    $html_link_event = '<a href="' . $link . '">';
+                    $html_link_event .= "active.com";
+                    $html_link_event .= "</a>";
+                } else {
+                    $html_link_event = "";
                 }
 
-                $html_link_event = '<a href="' . $link . '">';
-                $html_link_event .= "active.com";
-                $html_link_event .= "</a>";
-            } else {
-                $html_link_event = "";
-            }
-
-            $html .= "<br>" . $event_html . " " . $html_link_event . " " . $html_link_extracted;
+                $html .= "<br>" . $event_html . " " . $html_link_event . " " . $html_link_extracted;
 
             }
         }
         $this->html_message = $html;
     }
 
-    public function makeSms()
-    {
+
+    /**
+     *
+     */
+    public function makeSms() {
         $sms = "ACTIVE";
 
         switch ($this->events_count) {
-            case 0:
-                $sms .= " | No events found.";
-                break;
-            case 1:
-/*
+        case 0:
+            $sms .= " | No events found.";
+            break;
+        case 1:
+            /*
                 $event = reset($this->events);
                 $event_date = date_parse($event['runat']);
 
@@ -565,7 +630,7 @@ if (count($urls) != 0) {
 
                 $simple_date_text = $month_name . " " . $event_date['day'];
 */
-/*
+            /*
                 $sms .= " "  . $simple_date_text;
 
                 $sms .= " "  . $event['event'];
@@ -578,26 +643,26 @@ if (count($urls) != 0) {
 
                 $sms .= " "  . $event['place'];
 */
-                $event = reset($this->events);
-                $event_html = $this->eventString($event);
-                $sms .= " | " .$event_html;
+            $event = reset($this->events);
+            $event_html = $this->eventString($event);
+            $sms .= " | " .$event_html;
 
 
-                if ($this->available_events_count != $this->events_count) {
-                    $sms .= $this->events_count. " retrieved";
-                }
+            if ($this->available_events_count != $this->events_count) {
+                $sms .= $this->events_count. " retrieved";
+            }
 
 
-                break;
-            default:
-                $sms .= " "  . $this->available_events_count . ' events ';
-                if ($this->available_events_count != $this->events_count) {
-                    $sms .= $this->events_count. " retrieved";
-                }
+            break;
+        default:
+            $sms .= " "  . $this->available_events_count . ' events ';
+            if ($this->available_events_count != $this->events_count) {
+                $sms .= $this->events_count. " retrieved";
+            }
 
-                $event = reset($this->events);
-                $event_html = $this->eventString($event);
-                $sms .= " | " . $event_html;
+            $event = reset($this->events);
+            $event_html = $this->eventString($event);
+            $sms .= " | " . $event_html;
         }
 
         $sms .= " | " . $this->response;
@@ -607,38 +672,41 @@ if (count($urls) != 0) {
 
     }
 
-    public function makeMessage()
-    {
+
+    /**
+     *
+     */
+    public function makeMessage() {
         $message = "Active.com";
 
         switch ($this->events_count) {
-            case 0:
-                $message .= "did not find any events.";
-                break;
-            case 1:
-                $event = reset($this->events);
-                $event_html = $this->eventString($event);
+        case 0:
+            $message .= "did not find any events.";
+            break;
+        case 1:
+            $event = reset($this->events);
+            $event_html = $this->eventString($event);
 
-                $message .= " found "  . $event_html . ".";
+            $message .= " found "  . $event_html . ".";
 
-                //if ($this->available_events_count != $this->events_count) {
-                //    $message .= $this->events_count. " events retrieved.";
-                //}
+            //if ($this->available_events_count != $this->events_count) {
+            //    $message .= $this->events_count. " events retrieved.";
+            //}
 
 
-                break;
-            default:
-                $message .= " found "  . $this->available_events_count . ' events.';
-                //if ($this->available_events_count != $this->events_count) {
-                //    $message .= $this->events_count. " retrieved";
-                //}
+            break;
+        default:
+            $message .= " found "  . $this->available_events_count . ' events.';
+            //if ($this->available_events_count != $this->events_count) {
+            //    $message .= $this->events_count. " retrieved";
+            //}
 
-                $event = reset($this->events);
-                $event_html = $this->eventString($event);
-                $message .= " This was one of them. " . $event_html .".";
+            $event = reset($this->events);
+            $event_html = $this->eventString($event);
+            $message .= " This was one of them. " . $event_html .".";
         }
 
-       // $message .= " | " . $this->response;
+        // $message .= " | " . $this->response;
 
         // Really need to refactor this double :/
 
@@ -647,15 +715,22 @@ if (count($urls) != 0) {
     }
 
 
-    private function thingreportEventful()
-    {
+    /**
+     *
+     */
+    private function thingreportEventful() {
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
         $this->thing_report['message'] = $this->message;
     }
 
-    public function extractNumber($input = null)
-    {
+
+    /**
+     *
+     * @param unknown $input (optional)
+     * @return unknown
+     */
+    public function extractNumber($input = null) {
         if ($input == null) {$input = $this->subject;}
 
         $pieces = explode(" ", strtolower($input));
@@ -683,9 +758,13 @@ if (count($urls) != 0) {
         return $this->number;
     }
 
-    public function readSubject()
-    {
-//        $this->response = "Asked Eventful about events.";
+
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
+        //        $this->response = "Asked Eventful about events.";
         $this->response = null;
 
         $this->num_hits = 0;
@@ -710,14 +789,14 @@ if (count($urls) != 0) {
 
         $this->input = $input;
 
-		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        $haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
-		// So this is really the 'sms' section
-		// Keyword
+        // So this is really the 'sms' section
+        // Keyword
         if (count($pieces) == 1) {
 
             if ($input == 'active') {
@@ -730,157 +809,169 @@ if (count($urls) != 0) {
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
+                if (strpos(strtolower($piece), $command) !== false) {
 
-                    switch($piece) {
+                    switch ($piece) {
 
-   case 'run':
-   //     //$this->thing->log("read subject nextblock");
-        $this->runTrain();
-        break;
+                    case 'run':
+                        //     //$this->thing->log("read subject nextblock");
+                        $this->runTrain();
+                        break;
 
-    default:
-                                        }
-
-                                }
-                        }
+                    default:
+                    }
 
                 }
+            }
+
+        }
 
 
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "active is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("active is")); 
-        } elseif (($pos = strpos(strtolower($input), "active")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("active")); 
+        if (($pos = strpos(strtolower($input), "active is")) !== FALSE) {
+            $whatIWant = substr(strtolower($input), $pos+strlen("active is"));
+        } elseif (($pos = strpos(strtolower($input), "active")) !== FALSE) {
+            $whatIWant = substr(strtolower($input), $pos+strlen("active"));
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
-    if ($filtered_input != "") {
-        $this->search_words = $filtered_input;
-        $this->response = "Asked Active.com about " . $this->search_words . " events";
-        return false;
-    }
+        if ($filtered_input != "") {
+            $this->search_words = $filtered_input;
+            $this->response = "Asked Active.com about " . $this->search_words . " events";
+            return false;
+        }
 
 
 
         $this->response = "Message not understood";
-		return true;
-
-	
-	}
+        return true;
 
 
+    }
 
 
 
 
-	function kill() {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-
-       function discriminateInput($input, $discriminators = null) {
 
 
-                //$input = "optout opt-out opt-out";
-
-                if ($discriminators == null) {
-                        $discriminators = array('accept', 'clear');
-                }       
-
-
-
-                $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
-
-                if (count($discriminators) > 4) {
-                        $minimum_discrimination = $default_discriminator_thresholds[4];
-                } else {
-                        $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
-                }
+    /**
+     *
+     * @return unknown
+     */
+    function kill() {
+        // No messing about.
+        return $this->thing->Forget();
+    }
 
 
-
-                $aliases = array();
-
-                $aliases['accept'] = array('accept','add','+');
-                $aliases['clear'] = array('clear','drop', 'clr', '-');
-
-                $words = explode(" ", $input);
-
-                $count = array();
-
-                $total_count = 0;
-                // Set counts to 1.  Bayes thing...     
-                foreach ($discriminators as $discriminator) {
-                        $count[$discriminator] = 1;
-
-                       $total_count = $total_count + 1;
-                }
-                // ...and the total count.
+    /**
+     *
+     * @param unknown $input
+     * @param unknown $discriminators (optional)
+     * @return unknown
+     */
+    function discriminateInput($input, $discriminators = null) {
 
 
+        //$input = "optout opt-out opt-out";
 
-                foreach ($words as $word) {
-
-                        foreach ($discriminators as $discriminator) {
-
-                                if ($word == $discriminator) {
-                                        $count[$discriminator] = $count[$discriminator] + 1;
-                                        $total_count = $total_count + 1;
-                                                //echo "sum";
-                                }
-
-                                foreach ($aliases[$discriminator] as $alias) {
-
-                                        if ($word == $alias) {
-                                                $count[$discriminator] = $count[$discriminator] + 1;
-                                                $total_count = $total_count + 1;
-                                                //echo "sum";
-                                        }
-                                }
-                        }
-
-                }
-
-                //echo "total count"; $total_count;
-                // Set total sum of all values to 1.
-
-                $normalized = array();
-                foreach ($discriminators as $discriminator) {
-                        $normalized[$discriminator] = $count[$discriminator] / $total_count;            
-                }
-
-
-                // Is there good discrimination
-                arsort($normalized);
-
-
-                // Now see what the delta is between position 0 and 1
-
-                foreach ($normalized as $key=>$value) {
-                    //echo $key, $value;
-
-                    if ( isset($max) ) {$delta = $max-$value; break;}
-                        if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
-                }
-
-
-                        //echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-
-                if ($delta >= $minimum_discrimination) {
-                        //echo "discriminator" . $discriminator;
-                        return $selected_discriminator;
-                } else {
-                        return false; // No discriminator found.
-                } 
-
-                return true;
+        if ($discriminators == null) {
+            $discriminators = array('accept', 'clear');
         }
+
+
+
+        $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
+
+        if (count($discriminators) > 4) {
+            $minimum_discrimination = $default_discriminator_thresholds[4];
+        } else {
+            $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
+        }
+
+
+
+        $aliases = array();
+
+        $aliases['accept'] = array('accept', 'add', '+');
+        $aliases['clear'] = array('clear', 'drop', 'clr', '-');
+
+        $words = explode(" ", $input);
+
+        $count = array();
+
+        $total_count = 0;
+        // Set counts to 1.  Bayes thing...
+        foreach ($discriminators as $discriminator) {
+            $count[$discriminator] = 1;
+
+            $total_count = $total_count + 1;
+        }
+        // ...and the total count.
+
+
+
+        foreach ($words as $word) {
+
+            foreach ($discriminators as $discriminator) {
+
+                if ($word == $discriminator) {
+                    $count[$discriminator] = $count[$discriminator] + 1;
+                    $total_count = $total_count + 1;
+                    //echo "sum";
+                }
+
+                foreach ($aliases[$discriminator] as $alias) {
+
+                    if ($word == $alias) {
+                        $count[$discriminator] = $count[$discriminator] + 1;
+                        $total_count = $total_count + 1;
+                        //echo "sum";
+                    }
+                }
+            }
+
+        }
+
+        //echo "total count"; $total_count;
+        // Set total sum of all values to 1.
+
+        $normalized = array();
+        foreach ($discriminators as $discriminator) {
+            $normalized[$discriminator] = $count[$discriminator] / $total_count;
+        }
+
+
+        // Is there good discrimination
+        arsort($normalized);
+
+
+        // Now see what the delta is between position 0 and 1
+
+        foreach ($normalized as $key=>$value) {
+            //echo $key, $value;
+
+            if ( isset($max) ) {$delta = $max-$value; break;}
+            if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
+        }
+
+
+        //echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
+
+
+        if ($delta >= $minimum_discrimination) {
+            //echo "discriminator" . $discriminator;
+            return $selected_discriminator;
+        } else {
+            return false; // No discriminator found.
+        }
+
+        return true;
+    }
+
 
 }
 
-?>
 
+?>

@@ -33,6 +33,7 @@ class Callsign extends Agent {
         $this->thing_report['info'] = "Possibly helpful to station operators.";
     }
 
+
     /**
      *
      */
@@ -55,19 +56,24 @@ class Callsign extends Agent {
         $this->refreshed_at = $callsign->getVariable("refreshed_at");
     }
 
-function run() {
 
-}
+    /**
+     *
+     */
+    function run() {
+
+    }
+
 
     /**
      *
      */
     function set() {
 
-$this->makeSMS();
+        $this->makeSMS();
 
 
-//  $this->thing_report['sms'] = strtoupper($this->agent_name) . " | " . $this->response;
+        //  $this->thing_report['sms'] = strtoupper($this->agent_name) . " | " . $this->response;
 
         $this->thing->json->writeVariable( array("callsign", "reading"), $this->reading );
 
@@ -358,7 +364,7 @@ $this->makeSMS();
      * @return unknown
      */
     public function respondResponse() {
-  //  public function respond() {
+        //  public function respond() {
 
         $this->cost = 100;
 
@@ -402,15 +408,15 @@ $this->makeSMS();
      */
     function makeSMS() {
 
-//$callsign_text = (implode(" ",$this->callsign));
-$r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
+        //$callsign_text = (implode(" ",$this->callsign));
+        $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
 
-//            $this->sms_message .= $callsign_text;
+        //            $this->sms_message .= $callsign_text;
 
 
         $sms = "CALLSIGN | " . $r;
         $this->sms_message = $sms;
-$this->thing_report['sms'] = $sms;
+        $this->thing_report['sms'] = $sms;
         return;
     }
 
@@ -462,12 +468,12 @@ $this->thing_report['sms'] = $sms;
      * @return unknown
      */
     public function readSubject() {
-//        if ($this->agent_input == null) {
-//            $this->input = strtolower($this->subject);
-//        } else {
-//            $this->input = strtolower($this->agent_input);
-//        }
-//var_dump($this->input);
+        //        if ($this->agent_input == null) {
+        //            $this->input = strtolower($this->subject);
+        //        } else {
+        //            $this->input = strtolower($this->agent_input);
+        //        }
+        //var_dump($this->input);
 
 
         $prefix = 'callsign';
@@ -521,22 +527,31 @@ $this->thing_report['sms'] = $sms;
             }
         }
 
+        $first_name = $this->callsign["first_name"];
+
+        // If more than one first name is returned.
+        $arr = explode(" ", $first_name);
+        if (count($arr) >= 2) {
+            if (strlen($arr[1]) != 1) {$first_name = $arr[0];}
+        }
+
         if (!isset($this->callsigns)) {
             $this->response = "No match found.";
             return;
         }
 
         if (count($this->callsigns) > 1) {
-            $this->response = "Found " . count($this->callsigns) . " callsigns. Best " . $this->callsign["callsign"]. " ". $this->callsign["first_name"] . ".";
+            $this->response = "Found " . count($this->callsigns) . " callsigns. Best " . $this->callsign["callsign"]. " ". $first_name . ".";
             return;
         }
 
         if (count($this->callsigns) == 1) {
-            $this->response = "Found " . $this->callsign["callsign"]. " ". $this->callsign["first_name"] . ".";
+            $this->response = "Found " . $this->callsign["callsign"]. " ". $first_name . ".";
             return;
         }
 
         $this->response = "No match found.";
     }
+
 
 }
