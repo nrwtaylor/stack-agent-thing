@@ -211,7 +211,15 @@ if ((($this->numbers[0] == $day) and ($this->numbers[1] == $month)) or
 // But it is still a valid date.
 if (($day == false) and ($month == false) and ($year == false)) {
 
+if ((count($this->numbers)) == 0) {
 
+$this->day = "X";
+$this->month = "X";
+$this->year = "X";
+return;
+
+
+}
 
 // Two numbers in string - month and day?
 if (isset($this->numbers[1])) {
@@ -227,6 +235,7 @@ if (isset($this->numbers[1])) {
 //  return;
  }
 } elseif (!isset($this->numbers[1])) {
+
 
  if (($this->numbers[0] >12) and ($this->numbers[0] <= 31)) {$day = $this->numbers[0];}
  if (($this->numbers[0] >= 1000) and ($this->numbers[0] <= 9999)) {$year = $this->numbers[0];}
@@ -261,6 +270,19 @@ if (isset($this->numbers[1])) {
      *
      */
     public function makeSMS() {
+
+$day = "X";
+if (isset($this->day)) {$hour = $this->day;}
+if ($day == null) {$day = "X";}
+
+$month = "X";
+if (isset($this->month)) {$month = $this->month;}
+if ($hour == null) {$hour = "X";}
+
+$year = "X";
+if (isset($this->year)) {$year = $this->year;}
+if ($year == null) {$year = "X";}
+
 
         $sms_message = "RUNDATE";
 
@@ -372,10 +394,6 @@ if ($this->response == null) {$this->response = "Retrieved run at day.";}
         if (!isset($this->month)) {$month = "X";} else {$month = $this->month;}
         if (!isset($this->year)) {$year = "X";} else {$year = $this->year;}
 
-echo "Test what Rundate parses.\n";
-var_dump($this->day);
-var_dump($this->month);
-var_dump($this->year);
 
     }
 

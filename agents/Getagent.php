@@ -19,7 +19,6 @@ error_reporting(-1);
 class Getagent {
 
 	function __construct(Thing $thing) {
-		//echo "Receipt called";
 
 
 		$this->thing_report['thing'] = false;
@@ -182,7 +181,6 @@ $newest= null;
 $newest_name = null;
             foreach ($variables as $name=>$variable) 
             {
-echo $name;
 
 if (isset($variable['refreshed_at'])) {
     $dt = strtotime($variable['refreshed_at']);
@@ -191,9 +189,8 @@ if (isset($variable['refreshed_at'])) {
 }
 
 
-if ($dt > $newest) {$newest = $dt;echo "meep";$newest_name = $name;}
-echo $dt;
-echo "<br>";
+if ($dt > $newest) {$newest = $dt;
+$newest_name = $name;}
 
 // Relies on JSON variable order
 // Because it is the message before message which
@@ -260,7 +257,6 @@ $this->agent_names = implode(" ", $this->agent_variables);
 
                 $this->thing->log ( '<pre> Agent "Getagent" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
  
-//		echo $this->thing->account['thing']->balance['amount'];echo '</pre>';
 
 
 		require_once '/var/www/html/stackr.ca/agents/message.php';

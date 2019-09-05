@@ -60,6 +60,8 @@ class Frequency extends Agent
 
         if (!isset($this->channel['vector'])) {$this->getFrequencies();}
 
+if (!isset($this->channel['vector'])) {return;}
+
         $data = $this->channel['vector'];
         //var_dump($data);
 
@@ -238,7 +240,7 @@ $matches = array();
             $this->thing->log( "Data source " . $data_source . " not accessible." );
 
             // Handle quietly.
-
+if (!isset($this->link)) {$this->link = null;}
             $data_source = trim($this->link);
 
             $data = @file_get_contents($data_source);

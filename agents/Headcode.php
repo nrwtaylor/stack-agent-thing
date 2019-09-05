@@ -50,7 +50,6 @@ class Headcode
     function __construct(Thing $thing, $agent_input = null) 
     {
 
-//        var_dump($agent_input);
 
         $this->start_time = microtime(true);
 
@@ -105,8 +104,10 @@ class Headcode
         //                        'negative_time'=>'yes'),
 
         //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
-        $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
-
+        $this->default_head_code = "0Z99";
+        if (isset($this->thing->container['api']['headcode']['head_code'])) {
+            $this->default_head_code = $this->thing->container['api']['headcode']['head_code'];
+        }
         // But for now use this below.
 
         // You will probably see these a lot.
@@ -177,7 +178,6 @@ class Headcode
 
         if (!isset($this->response)) {$this->response = "No response found.";}
 
-        //var_dump($this->response);
         $this->thing_report['response'] = $this->response;
 
 		return;
@@ -323,8 +323,6 @@ class Headcode
 //            $variables = $thing->account['stack']->json->array_data;
 
             $variables_json= $thing_object['variables'];
-//var_dump($variables_json);
-//exit();
             $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['headcode'])) {
@@ -656,7 +654,6 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
         }
 
         //Why not combine them into one character class? /^[0-9+#-]*$/ (for matching) and /([0$
-        //$pattern = "|[A-Za-z]{4}|"; echo $input;
 
         $pattern = "|\b\d{1}[A-Za-z]{1}\d{2}\b|";
         preg_match_all($pattern, $input, $m);
@@ -1017,14 +1014,11 @@ if (!isset($this->index)) {
 
         if (!isset($this->head_code) or ($this->head_code == false)) {
             $this->head_code = $this->headcode_id->getVariable('head_code', null);
-            //var_dump($this->head_code);
             if (!isset($this->head_code) or ($this->head_code == false)) {
                 $this->head_code = $this->getVariable('head_code', null);
-                //var_dump($this->head_code);
 
                 if (!isset($this->head_code) or ($this->head_code == false)) {
                     $this->head_code = "0Z10";
-                    //var_dump($this->head_code);
                 }
             }
         }
@@ -1034,7 +1028,6 @@ if (!isset($this->index)) {
 
         if ( ($this->agent_input == "extract") and (strpos(strtolower($this->subject),'roll') !== false )   ) {
 
-//            echo "headcode found was " . $this->head_code ."\n";
 
             if (strtolower($this->head_code[1]) == "d") {
                 $this->response = true; // Which flags not to use response.  

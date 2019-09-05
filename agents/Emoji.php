@@ -48,7 +48,6 @@ class Emoji
             if ($value == "U+FE0F") {continue;}
             // Return dictionary entry.
             $text = $this->findEmoji('list', $value);
-            //echo $value . " " .$text . "<br>";
             $words = $this->getWords($text);
             if ($words != false) {
                 $this->words = array_merge($this->getWords($text));
@@ -126,18 +125,15 @@ class Emoji
         $t = preg_split("/[\t]/", $test);
 
         //$n = count($t)-1;
-        //echo $n;
         $words = explode(" | ", $t[4] );
         $new_words = array();
 // https://cc-cedict.org/wiki/format:syntax
 // Traditional Simplified [pin1 yin1] /English equivalent 1/equivalent 2/
-//var_dump($words);
-//exit();
+
         foreach($words as $key=>$word) {
             $new_words[] = trim($word);
         }
-//var_dump($new_words);
-//exit();
+
         return $new_words;
     }
 
@@ -227,41 +223,7 @@ function uniord($c)
 function convert_emoji($emoji) {
 $u =  $this->uniord($emoji);
 return strtoupper("U+".dechex($u));
-//exit();
-//echo "received". $emoji . "<br>";
-//echo "encoding" . mb_check_encoding($emoji, 'UTF-8'). "<br>";
-    // ✊🏾 --> 0000270a0001f3fe
-    //$emoji = mb_convert_encoding($emoji, 'UTF-32');
-    $utf32_emoji = mb_convert_encoding($emoji, 'UTF-32', 'UTF-8');
-
-//$emoji = iconv("UTF-8", "UTF-32", $emoji);
-
-    $hex = bin2hex($utf32_emoji);
-    
-//echo "<br>";
-//echo "mb_convert ". $utf32_emoji;
-//echo "<br>";
-//echo "hex ".$hex;
-//echo "<br>";
-
-
-    // Split the UTF-32 hex representation into chunks
-    $hex_len = strlen($hex) / 8;
-    $chunks = array();
-
-    for ($i = 0; $i < $hex_len; ++$i) {
-        $tmp = substr($hex, $i * 8, 8);
-        // Format each chunk
-        $chunks[$i] = $this->format($tmp);
-    }
-
-
-
-
-    // Convert chunks array back to a string
-    return implode($chunks, ' ');
 }
-
     function format($str)
     {
         $copy = false;
@@ -330,7 +292,6 @@ return strtoupper("U+".dechex($u));
 
         }
 
-//echo "search for ". $searchfor;
 //        header('Content-Type: text/plain');
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
@@ -340,24 +301,12 @@ return strtoupper("U+".dechex($u));
         // search, and store all matching occurences in $matches
         $m = false;
         if(preg_match_all($pattern, $contents, $matches)){
-//echo "\n";
-//var_dump($matches);
-            //echo "Found matches:\n";
+
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
         }
         return $m;
     }
-
-
-//    public function toWords() {
-
-
-
-//    }
-
-
-
 
 
 	public function Respond() {
@@ -523,7 +472,6 @@ $this->emojis = null;
 
                         default:
 
-                            //echo 'default';
 
                     }
 

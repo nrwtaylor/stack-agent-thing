@@ -82,6 +82,25 @@ class Time extends Agent {
         $this->thing_report['choices'] = $choices;
     }
 
+//https://stackoverflow.com/questions/11343403/php-exception-handling-on-datetime-object
+function isDateValid($str) {
+
+  if (!is_string($str)) {
+     return false;
+  }
+
+  $stamp = strtotime($str); 
+
+  if (!is_numeric($stamp)) {
+     return false; 
+  }
+
+  if ( checkdate(date('m', $stamp), date('d', $stamp), date('Y', $stamp)) ) { 
+     return true; 
+  } 
+  return false; 
+} 
+
 
     /**
      *
@@ -97,17 +116,25 @@ class Time extends Agent {
 
         if ($timevalue == null) {$timevalue = $this->current_time;}
 
-var_dump($timevalue);
         $m =  "Unfortunately, the time server was not available. ";
-        if (true) {
 
+//try {
+//        if (true) {
+if ($this->isDateValid( $timevalue )) {
             $datum = new \DateTime($timevalue, new \DateTimeZone("UTC"));
+
             $datum->setTimezone(new \DateTimeZone($this->time_zone));
 
             $m = "Time check from stack server ". $this->web_prefix. ". ";
             $m .= "In the timezone " . $this->time_zone . ", it is " . $datum->format('l') . " " . $datum->format('d/m/Y, H:i:s') .". ";
 
-        }
+        } else {
+
+//} catch (Throwable $t) {
+$m = "Could not get a time.";
+}
+
+
 
         $this->response = $m;
         $this->time_message = $this->response;

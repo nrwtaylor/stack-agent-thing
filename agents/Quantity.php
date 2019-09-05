@@ -247,12 +247,6 @@ if (is_array($this->last_quantity)) {echo "lastquant"; exit();}
        return true;
     }
 
-    //function makeCoordinate($v)
-    //{
-
-    //    var_dump($v);
-
-    //}
 
     function getQuantities()
     {
@@ -273,8 +267,6 @@ if (is_array($this->last_quantity)) {echo "lastquant"; exit();}
 
         if ( ($findagent_thing->thing_report['things'] == true)) {}
 
-        //var_dump(count($findagent_thing->thing_report['things'])); 
-        //var_dump($findagent_thing->thing_report['things'] == true);
 
         if (!$this->is_positive_integer($count))
         {
@@ -362,7 +354,6 @@ array_multisort($refreshed_at, SORT_DESC, $this->quantities);
 // Get latest per place
 $this->places = array();
 foreach($filtered_places as $key=>$filtered_place) {
-//var_dump($filtered_place);
 
         $this->places[] = $filtered_place;
 }
@@ -372,7 +363,6 @@ $this->quantities = array();
 foreach ($this->old_quantities as $key =>$row)
 {
 
-//var_dump( strtotime($row['refreshed_at']) );
     if ( strtotime($row['refreshed_at']) != false) { 
       $this->quantities[] = $row;
     }
@@ -432,7 +422,6 @@ foreach ($this->old_quantities as $key =>$row)
     {
         if ($quantity == null) {return true;}
 if (!is_numeric($quantity)) {return true;}
-//var_dump($coordinate);
 
 
 /*
@@ -493,8 +482,6 @@ if (!is_numeric($quantity)) {return true;}
     {
 
         $number = new Number($this->thing, "number");
-//var_dump ($number->numbers);
-//exit();
 
         $numbers = $number->numbers;
 
@@ -546,11 +533,8 @@ if (is_array($input)) {$this->quantity = true; return;}
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
-//echo "assert coordinate<br>";
-//var_dump($filtered_input);
 
         $quantity = $this->extractQuantity($filtered_input);
-//var_dump($coordinate);
         if ($quantity) {
             //true so make a place
             $this->makeQuantity($this->quantity);
@@ -649,12 +633,6 @@ if (is_array($input)) {$this->quantity = true; return;}
 
         $quantity_array = true;
 
-//prod
-//var_dump($coordinates);
-//        if (is_array($coordinates)) {
-
-//        if (count($coordinates) == 1) {$coordinate_array = $coordinates[0];}
-//        }
 
         if ( (is_array($quantities)) and (count($quantities) == 1)) {
             $quantity_array = $quantities[0];
@@ -791,17 +769,6 @@ $last_quantity = $this->quantities[0];
 
 $this->last_quantity = $last_quantity['quantity'];
 $this->last_refreshed_at = $last_coordinate['refreshed_at'];
-var_dump($last_quantity['quantity']);
-//        foreach(array_reverse($this->coordinates) as $key=>$coordinate) {
-
-//            if ($coordinate['coordinate'] == $this->last_coordinate) {
-//                $this->last_refreshed_at = $coordinate['refreshed_at'];
-//                break;
-//            }
-
-
-//        }
-//exit();
 
 
     }

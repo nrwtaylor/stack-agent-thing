@@ -97,6 +97,7 @@ if (!isset($this->response)) {$this->makeResponse();}
 */
 
 
+
     /**
      *
      */
@@ -124,12 +125,17 @@ if (!isset($this->response)) {$this->makeResponse();}
         //            $response .= " until " . $this->runat->day . " " . str_pad("0", 2, $this->runat->hour, STR_PAD_LEFT) . ":" . str_pad("0", 2, $this->runat->minute, STR_PAD_LEFT);
 
         $date_string = $this->rundate->year . "/" . $this->rundate->month . "/" . $this->rundate->day;
-        var_dump($date_string);
+        //var_dump($date_string);
 
         $time = new Time($this->thing, "time");
         $time->doTime($date_string);
+
+if ($time->datum != null) {
+
         $response .= " " . $time->datum->format('l') . " " . $time->datum->format('d/m/Y, H:i:s') ."";
         $response .= " in " . $time->time_zone;
+
+}
         $response .= ".";
 
 

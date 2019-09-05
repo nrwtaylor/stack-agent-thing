@@ -221,18 +221,6 @@ class Brownpapertickets
             }
         }
 
-/*
-$runat = array();
-foreach ($this->events as $key => $row)
-{
-    $runat[$key] = strtotime($row['runat']);
-var_dump($row[$key]);
-}
-array_multisort($runat, SORT_ASC, $this->events);
-$this->thing->log("end sort");
-*/
-
-
         $this->events_count = count($this->events);
     }
 

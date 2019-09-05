@@ -112,7 +112,7 @@ catch (\OverflowException $t)
 $this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
 $this->thing_report['sms'] = "STACK | " . $this->response;
 
-//echo "caught throwable";
+    $this->thing->log("caught throwable");
    // Executed only in PHP 7, will not match in PHP 5
 }
 
@@ -121,12 +121,13 @@ catch (\Throwable $t)
 //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
 //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
 
-//echo "caught throwable";
+$this->thing->log("caught throwable");
    // Executed only in PHP 7, will not match in PHP 5
 }
 catch (\Exception $e)
 {
-//echo "caught exception";
+
+   $this->thing->log("caught exception");
    // Executed only in PHP 5, will not be reached in PHP 7
 }
 
@@ -216,8 +217,6 @@ $this->makeTXT();
      *
      */
     public function getName() {
-//        $this->agent_name =   explode( "\\", strtolower(get_class()) )[2] ;
-//var_dump(get_class($this));
         $this->agent_name =   explode( "\\", strtolower(get_class($this)) )[2] ;
 
     }
@@ -404,11 +403,9 @@ if ($this->agent_name == "agent") {return;}
 
             $this->thing_report['message'] = $this->thing_report['sms'];
 
-//var_dump($this->agent_input);
             if (($this->agent_input == null) or ($this->agent_input == "")) { 
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-//var_dump($message_thing->thing_report['info']);
             }
         }
 
@@ -660,7 +657,6 @@ public function makeEmail() {
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-            // echo $ex;
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
@@ -711,14 +707,13 @@ public function makeEmail() {
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
 //            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
-            // echo $ex;
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
             $line = $ex->getLine();
 
 //            $input = $message . '  ' . $file . ' line:' . $line;
-//            $this->thing->log($input , "WARNING" );
+            $this->thing->log($input , "WARNING" );
 
             // This is an error in the Place, so Bork and move onto the next context.
             // $bork_agent = new Bork($this->thing, $input);
@@ -810,7 +805,6 @@ public function makeEmail() {
         // So look hear to generalize that.
         //$agents = new Agents($this->thing, "agents");
         //foreach ($agents->agents as $agent_class_name=>$agent_name) {
-        //echo $agent_id . " " ;
         $text = urldecode($this->agent_input);
         $text = strtolower($text);
         //if ( $text == $this->agent_input) {
@@ -1037,7 +1031,6 @@ public function makeEmail() {
         if ( strtolower( substr($input, 0, 2)) != "s/") {
 
             // Okay here check for input
-            //echo "input is ".  $input;
 
             if ( strtolower($this->subject) == "break" ) {
 
@@ -1049,14 +1042,10 @@ public function makeEmail() {
 
             // Where is input routed to?
             $input_thing = new Input($this->thing, "input");
-//var_dump($input_thing->input_agent);
             if (($input_thing->input_agent != null) and ($input_thing->input_agent != $input)) {
-//$input = $input_thing->input_agent . " " . $input;
             }
 
         }
-//var_dump($input); 
-       //echo "input is routed to " . $input . ".\n";
 
 
         $this->thing->log('processed haystack "' .  $input . '".', "DEBUG");
@@ -1145,7 +1134,6 @@ public function makeEmail() {
         $headcode->extractHeadcodes($input);
 
         if ($headcode->response === true) {
-            // pass echo "not a headcode...";
         } else {
             //if ( is_string($headcode->head_code)) {
 
@@ -1250,7 +1238,6 @@ public function makeEmail() {
 
             if ($this->getAgent($agent_class_name)) {
                 //            if ($this->getAgent($agent_class_name, $input)) {
-                //echo $this->thing_report['help'];
                 return $this->thing_report;
             }
         }
@@ -1298,7 +1285,6 @@ public function makeEmail() {
         if (!$place_thing->isPlace($input)) {
             //        if (!$place_thing->isPlace($this->subject)) {
             //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
-            //            echo "place not found";
         } else {
             // place found
             $place_thing = new Place($this->thing);
@@ -1344,23 +1330,6 @@ public function makeEmail() {
         }
 
 
-        /*
-        // This would allow web based agent to update state
-        // devstack think
-        // Now check for any place agent input
-        $this->thing->log( $this->agent_prefix .'now looking at Place Context.' );
-        $place_thing = new Place($this->thing, $this->agent_input);
-        $this->thing_report = $place_thing->thing_report;
-
-        if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
-echo "place not found";
-        } else {
-echo "place found";
-            $place_thing = new Place($this->thing, $this->agent_input);
-            $this->thing_report = $place_thing->thing_report;
-            return $this->thing_report;
-        }
-*/
 
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
@@ -1387,7 +1356,6 @@ echo "place found";
 
                 $last_heard[strtolower($entity_name)] = strtotime( $variables[strtolower($entity_name)]['refreshed_at']);
 
-                //echo $entity_name . " " . $last_heard[strtolower($entity_name)] . "\n";
 
                 if (!isset($last_heard['entity'])) {
                     $last_heard['entity'] = $last_heard[strtolower($entity_name)];
@@ -1400,7 +1368,6 @@ echo "place found";
                 }
             }
 
-            //        echo $agent_name. " "  . $last_heard['entity'];
 
             if (!isset($agent_name)) {$agent_name = "Ant";}
 
@@ -1626,13 +1593,11 @@ echo "place found";
 
         }
 
-return $this->thing_report;
+        return $this->thing_report;
 
         if ((isset($chinese_thing->chineses)) or (isset($emoji_thing->emojis))) {
             $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
             return $this->thing_report;
-            //exit();
-
         }
 
 
@@ -1728,45 +1693,25 @@ $this->thing_report['png'] = null;
      */
     function warning_handler($errno, $errstr) {
         //throw new \Exception('Class not found.');
-
         //trigger_error("Fatal error", E_USER_ERROR);
+        $this->thing->log( $errno );
+        $this->thing->log( $errstr );
 
-        //echo $errno;
-        //echo $errstr;
         // do something
+
     }
 
 function my_exception_handler($e) {
 $this->thing_report['sms'] = "Test";
-//$this->respond();
-//            if (($this->agent_input == null) or ($this->agent_input == "")) { 
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-//var_dump($message_thing->thing_report['info']);
-//            }
 restore_exception_handler();
-echo "fatal exception";
+$this->thing->log( "fatal exception" );
 //$this->thing_report['sms'] = "Merp.";
-//echo $e;
+$this->thing->log($e);
     // do some erorr handling here, such as logging, emailing errors
     // to the webmaster, showing the user an error page etc
 }
 
 
 }
-
-
-
-/*
-
-function warning_handler($errno, $errstr) {
-    throw new Exception('Class not found.');
-
-    //trigger_error("Fatal error", E_USER_ERROR);
-
-    echo ;
-    //echo $errstr;
-    // do something
-}
-
-*/

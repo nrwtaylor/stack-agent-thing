@@ -335,18 +335,33 @@ class Runat extends Agent {
      */
     public function makeSMS() {
 
+$day = "X";
+if (isset($this->day)) {$hour = $this->day;}
+if ($day == null) {$day = "X";}
+
+$hour = "X";
+if (isset($this->hour)) {$hour = $this->hour;}
+if ($hour == null) {$hour = "X";}
+
+$minute = "X";
+if (isset($this->minute)) {$hour = $this->minute;}
+if ($minute == null) {$minute = "X";}
+
+//var_dump($this->hour);
+//var_dump($this->minute);
+
         $sms_message = "RUNAT";
 
-        $hour_text = str_pad($this->hour, 2, "0", STR_PAD_LEFT);
-        $minute_text = str_pad($this->minute, 2, "0", STR_PAD_LEFT);
+        $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
+        $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
 
-        $day_text = $this->day;
+        $day_text = $day;
         $sms_message .= " | day " . $day_text . " hour " . $hour_text . " minute " . $minute_text . " ";
 
 
-        if ( (!$this->isInput($this->day)) or
-            (!$this->isInput($this->hour)) or
-            (!$this->isInput($this->minute)) ) {
+        if ( (!$this->isInput($day)) or
+            (!$this->isInput($hour)) or
+            (!$this->isInput($minute)) ) {
 
             //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 
@@ -465,13 +480,14 @@ class Runat extends Agent {
             return;
         }
         //        $this->extractRunat($this->input);
-
         if ($this->agent_input == "runat") {
-
+            $this->extractRunat($this->input);
             return;
         }
 
         if (strpos($this->agent_input, "runat") !== false) {
+
+
             $this->extractRunat($this->agent_input);
 
             return;

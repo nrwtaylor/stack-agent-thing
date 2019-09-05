@@ -55,11 +55,22 @@ class Place extends Agent
 
         $this->keywords = array('place','next', 'accept', 'clear', 'drop','add','new','here','there');
 
-        $this->default_place_name = $this->thing->container['api']['place']['default_place_name'];
-        $this->default_place_code = $this->thing->container['api']['place']['default_place_code'];
+        $this->default_place_name = "Here";
+        $this->default_place_code = "BMYK";
+
+        if (isset($this->thing->container['api']['place'])) {
+
+            if (isset($this->thing->container['api']['place']['default_place_name'])) {
+                $this->default_place_name = $this->thing->container['api']['place']['default_place_name'];
+            }
+
+            if (isset($this->thing->container['api']['place']['default_place_code'])) {
+                $this->default_place_code = $this->thing->container['api']['place']['default_place_code'];
+            }
+
+        }
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
 
         $this->default_alias = "Thing";
         $this->current_time = $this->thing->time();

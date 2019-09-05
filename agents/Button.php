@@ -231,53 +231,11 @@ return true;
         return $this->state;
     }
 
-/*
-	public function respond() {
-echo "respond";
-		// Thing actions
-
-		$this->thing->flagGreen();
-
-		// Generate email response.
-
-		$to = $this->thing->from;
-		$from = "button";
-
-
-        $this->makeChoices();
-        $this->makeSMS();
-
-		$test_message = 'Here are some buttons made from "' . $this->subject . '".  Your next choices are [ ' . $this->link . '].';
-		//$test_message .= '<br>Shift state: ' . $this->state . '<br>';
-
-		$test_message .= '<br>' . $this->thing_report['sms'];
-
-		//$test_message .= '<br>Current node: ' . $this->thing->choice->current_node;
-		//$test_message .= '<br>Requested state: ' . $this->requested_state;
-
-		$this->thing_report['email'] = $test_message;
-		$this->thing_report['message'] = $test_message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
-
-        //$this->makeChoices();
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
-//        $this->makeWeb();
-
-        $this->thing_report['help'] = 'This is a set of buttons.  Buttons tells a stack what you have decided.';
-
-		return;
-	}
-*/
-
     public function readSubject() 
     {
 
 
-//echo "readSubject " . $this->input ."<br>";
         if ($this->agent_input != null) {
-//echo $this->agent_input;
 //            $this->response = "Saw an agent instruction and didn't read further.";
             return;
         }

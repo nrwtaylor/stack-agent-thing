@@ -106,7 +106,6 @@ switch (true) {
         // null
         break;
     default:
-//       echo "i is not equal to 0, 1 or 2";
 }
 
 
@@ -118,8 +117,6 @@ switch (true) {
 
 
 
-//exit();    
-
 
 
 
@@ -127,23 +124,6 @@ switch (true) {
 
 
 	}
-/*
-    function extractRoll($input) {
-
-//echo $input;
-//exit();
-
-preg_match('/^(\\d)?d(\\d)(\\+\\d)?$/',$input,$matches);
-
-print_r($matches);
-
-$t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
-                '$a="$1"? : 1;for(; $i++<$a; $s+=rand(1,$2) );echo$s$3;',
-                $input)?:'echo"Invalid input";';
-
-
-    }
-*/
 
 
 
@@ -159,7 +139,3 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
 
 }
 
-
-
-return;
-?>

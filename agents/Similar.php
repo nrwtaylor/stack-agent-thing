@@ -614,7 +614,6 @@ class Similar
                                 if ($word == $discriminator) {
                                         $count[$discriminator] = $count[$discriminator] + 1;
                                         $total_count = $total_count + 1;
-                                                //echo "sum";
                                 }
 
                                 foreach ($aliases[$discriminator] as $alias) {
@@ -622,7 +621,6 @@ class Similar
                                         if ($word == $alias) {
                                                 $count[$discriminator] = $count[$discriminator] + 1;
                                                 $total_count = $total_count + 1;
-                                                //echo "sum";
                                         }
                                 }
                         }
@@ -645,18 +643,15 @@ class Similar
                 // Now see what the delta is between position 0 and 1
 
                 foreach ($normalized as $key=>$value) {
-                        //echo $key, $value;
 
           if ( isset($max) ) {$delta = $max-$value; break;}
                         if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
                 }
 
 
-                        //echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
 
 
                 if ($delta >= $minimum_discrimination) {
-                        //echo "discriminator" . $discriminator;
                         return $selected_discriminator;
                 } else {
                         return false; // No discriminator found.

@@ -43,58 +43,6 @@ class Syllables extends Agent
         echo "\n";
     }
 
-
-    /**
-     *
-     * @return unknown
-
-    function getTask() {
-
-        $block_things = array();
-        // See if a stack record exists.
-        $findagent_thing = new Findagent($this->thing, 'thing');
-
-        $this->max_index =0;
-        $match = 0;
-        $link_uuids = array();
-
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-
-            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
-            if ($block_thing['nom_to'] != "usermanager") {
-                $match += 1;
-                $this->link_task = $block_thing['task'];
-                $link_tasks[] = $block_thing['task'];
-                // if ($match == 2) {break;}
-                // Get upto 10 matches
-                if ($match == 10) {break;}
-            }
-        }
-        $this->prior_agent = "web";
-        foreach ($link_tasks as $key=>$link_task) {
-            //            $previous_thing = new Thing($link_uuid);
-            var_dump($link_task);
-            //            if (isset($previous_thing->json->array_data['message']['agent'])) {
-            if (isset($link_task)) {
-
-                if (in_array(strtolower($link_task), array('web', 'pdf', 'txt', 'log', 'php', 'syllables', 'brilltagger'))) {
-                    continue;
-                }
-
-                $this->link_task = $link_task;
-                break;
-            }
-        }
-
-        $this->web_exists = true;
-        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
-
-        return $this->link_task;
-    }
-
-*/
-
-
     /**
      *
      * @param unknown $tags

@@ -27,7 +27,6 @@ class State extends Agent
         $this->primary_place = "roost";
         $this->signals = array("on", "off");
 
-var_dump($this->signals);
 
         $this->node_list = array("inside nest"=>array("nest maintenance"=>array("patrolling"=>"foraging", "foraging")), "midden work"=>"foraging");
 
@@ -74,20 +73,10 @@ var_dump($this->signals);
 
         $this->state = $this->thing->choice->load('roost');
 
-        //echo "this state is " .$this->state;
-        //echo "meep";
-//        if ($this->state == false) {
-//$this->state = "inside nest";
-//$this->setState();
-//$this->state = "spawn";
-//            $this->state = $this->subject;
-//            return;
-//        }
 
         // Will need to develop this to only only valid state changes.
         switch ($this->state) {
         case "on":
-            //echo "spawn";
             //$this->spawn();
             $this->response .= "Spawn state. ";
             $this->onState();

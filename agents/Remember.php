@@ -13,12 +13,8 @@ error_reporting(-1);
 class Remember {
 
 	function __construct(Thing $thing) {
-		//echo "Receipt called";
 
                 if ($thing->thing != true) {
-                        //print "falsey";
-
-	                echo '<pre> Agent "Remember" ran on a null Thing ';echo $thing->uuid;echo'</pre>';
 
         	        $this->thing_report = array('thing' => false, 
 						'info' => 'Tried to run remember on a null Thing.',
@@ -151,10 +147,6 @@ class Remember {
 
 
 
-//echo "<pre>";
-//print_r($this->thing);
-//echo "</pre>";
-//exit();
 
 		$this->thing->flagGreen();
 
@@ -175,7 +167,6 @@ if ( isset($this->thing->account) ) {
 
 		$this->thing_report = array('thing' => $this->thing->thing, 'choices' => $choices, 'info' => 'This is a reminder.','help' => 'This is probably stuff you want to remember.  Or forget.');
 
-                //echo '<pre> Agent "Remember" credited 100 to the thing account</pre>';
 
 
 		return $this->thing_report;

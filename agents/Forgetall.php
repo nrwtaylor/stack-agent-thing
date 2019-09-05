@@ -73,8 +73,6 @@ $this->sms_message = "";
                 // And sums of differences of squares.
 
                 // Get all users records
-//echo "x" . $this->from . "x";
-//exit();  
 
               $this->thing->db->setUser($this->from);
                 $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
@@ -94,41 +92,19 @@ $count = 0;
 
 $start_time = time();
 
-//echo count ($this->total_things);
 
                 while (count($things) > 1) {
 
-			//echo "<br>";
-			//echo count($things);
                         $thing = array_pop($things);
 
-//			if ( time() - $start_time > 2 ) {
-
-//				$this->sms_message .= "Timed out. | ";
-//				echo "meep";
-//				break;
-//				exit();
-
-//			}
-
-			//echo $thing['uuid'];echo "<br>";
-			//echo $this->uuid;
-			//echo "<br>";
-//exit();
 			if ($thing['uuid'] != $this->uuid) {
 
-//				echo "no match";
-//				echo "-forget thing not implemented";
                         	$temp_thing = new Thing($thing['uuid']);
 				$temp_thing->Forget();
 $count += 1;
 			} else {
-				//echo "match";
-//exit();
 			}
 		}
-//echo "<br>" . "complete" . $count;
-//exit();
 
 		$this->sms_message .= "Completed request for this Identity. Forgot ". $count . " Things.";
 //		$this->thing->Forget();

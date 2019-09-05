@@ -101,7 +101,6 @@ class Variables
 
     function setVariables()
     {
-        //echo "variables.php Variable set name " . ($this->variable_set_name) . "\n";
 
 
         $this->thing->db->setFrom($this->identity);
@@ -132,7 +131,6 @@ class Variables
 
 //if ($this->agent_command == "variables place console") {exit();}
 
-    //echo "variables.pgp setVariable complete\n";
 
         if ($refreshed_at == false) {
         // Toss in a refreshed.
@@ -208,7 +206,6 @@ class Variables
                                             // Consider seeing if this is really needed.
 //if ($this->agent_command == "variables place console") {exit();}
 
-//                    $this->echoVariableSet();
                     return;
                 }
             }
@@ -300,7 +297,6 @@ class Variables
 
         if (!isset($this->variables_thing->account['stack'])) {
             // No stack balance available.
-            //echo "not set";
             return null;
         }
 
@@ -720,27 +716,6 @@ with the start agent. And doesn't seem to be necessary
                             }
                             //return;
                             //break;
-/*
-                        case 'is':
-
-                            if  (isset($this->variable) ) {
-
-                                $this->thing->log( $this->agent_prefix . 'setting ' . $this->variable . ' to ' . $this->number . '.', "INFORMATION" );
-                                //$right_of_is = ltrim(strrchr($this->nom_input," is "));
-
-                                $needle = "is";
-                                $this->thing->log( $this->agent_prefix . 'processing new variables.' );
-                                $right_of_needle = ltrim(substr($this->nom_input,strpos($this->nom_input, $needle)+strlen($needle)));
-//echo $this->nom_input;
-//echo "<br>";
-//echo $this->variable;
-//var_dump($right_of_needle);
-//exit();
-
-                                $this->setVariable($this->variable, $right_of_needle);
-                                return;
-                            }
-*/
 
                         case 'add':
                         case "&":
@@ -759,7 +734,6 @@ with the start agent. And doesn't seem to be necessary
 //$t = $this->thing->db->length();
 //var_dump($t);
 
-//                            echo "variable store size " . strlen(json_encode($this->variables_thing->variables)) . "\n";
                             return;
 
 
@@ -783,23 +757,5 @@ with the start agent. And doesn't seem to be necessary
         }
         $this->setVariable($name, $value);
     }
-/*
-    function warning_handler($errno, $errstr) {
-        //throw new \Exception('Class not found.');
-
-        //trigger_error("Fatal error", E_USER_ERROR);
-//echo "sdfsdfsdfsdfs";
-//        echo $errno;
-//        echo $errstr;
-        // do something
-    }
-
-function my_exception_handler($e) {
-//$this->thing_report['sms'] = "Merp.";
-//echo $e;
-    // do some erorr handling here, such as logging, emailing errors
-    // to the webmaster, showing the user an error page etc
-}
-*/
 
 }

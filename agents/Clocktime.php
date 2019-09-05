@@ -103,7 +103,6 @@ class Clocktime
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
         $this->hour = date("H",$t);
         $this->minute =  date("i",$t);
 
@@ -354,11 +353,6 @@ class Clocktime
             // If agent input has been provided then
             // ignore the subject.
             // Might need to review this.
-
-//$assume_time = date('Y-m-d H:i:s', $this->agent_input);
-//$assume_string = date('Y-m-d H:i:s', str_to_time($this->agent_input));
-
-//echo $this->agent_input ." > " . $assume_time . " " . $assume_string . "\n";
 
             $input = strtolower($this->agent_input);
         } else {

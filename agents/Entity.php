@@ -510,7 +510,7 @@ class Entity extends Agent
             //                return true;
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-            echo "The agent is broken.";
+            //echo "The agent is broken.";
 
             $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
             // echo $ex;
@@ -535,7 +535,7 @@ class Entity extends Agent
 
         $ad_hoc = true;
         if ( ($ad_hoc != false) ) {
-            echo "The agent is broken.";
+            //echo "The agent is broken.";
             // Ad-hoc headcodes allows creation of headcodes on the fly.
             // 'Z' indicates the associated 'Place' is offering whatever it has.
             // Block is a Place.  Train is a Place (just a moving one).
