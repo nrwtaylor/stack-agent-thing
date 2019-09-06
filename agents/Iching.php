@@ -250,7 +250,7 @@ class IChing extends Agent {
      *
      */
     function makeEmail() {
-
+        if (!isset($this->message)) {$this->makeMessage();}
         $makeemail_agent = new Makeemail($this->thing, $this->message);
 
         $this->email_message = $makeemail_agent->email_message;

@@ -18,7 +18,8 @@ class Ebay extends Agent
     {
         $this->test= "Development code"; // Always
 
-        $this->agent_prefix = 'Agent "Ebay" ';
+//        $this->agent_name = "ebay";
+//        $this->agent_prefix = 'Agent "Ebay" ';
 
         $this->node_list = array("ebay"=>array("ebay"));
 
@@ -31,10 +32,12 @@ class Ebay extends Agent
 
         $this->run_time_max = 360; // 5 hours
 
+        $this->thing_report['help'] = 'This reads the Ebay catalog.';
 	}
 
     function run()
     {
+         $this->makeSnippet();
          // Do something.
     }
 
@@ -42,13 +45,21 @@ class Ebay extends Agent
     {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
+
+//        $this->thingreportEbay();
+
     }
 
+    function getLink() {
+        $this->link = "merp";
+
+    }
 
     function get()
     {
         $this->variables_agent = new Variables($this->thing, "variables " . "ebay" . " " . $this->from);
 
+        // Count calls to Ebay API. Note call limits.
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
@@ -59,15 +70,18 @@ class Ebay extends Agent
 
     function doApi($type = "dictionary")
     {
+        $this->thing->log("Called Ebay Finding API.");
         if ($type == null) {$type = "dictionary";}
 
 
         $keywords = "";
         if (isset($this->search_words)) {$keywords = $this->search_words;}
 
+        // Create + seperated keyword string
         $keywords = str_replace(" ", "+", $keywords);
         $keywords = urlencode($keywords);
 
+        // Not needed.
         $options = array(
             'http'=>array(
                 'method'=>"GET",
@@ -103,12 +117,20 @@ class Ebay extends Agent
 
         // Extract information.
         $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
-        $time_stamp = $json_data['findItemsAdvancedResponse'][0]['timestamp']['0'];
 
+        if ($ack != "Success") {
+            $this->response = "Could not ask Ebay.";
+            $this->definitions_count = 0;
+            return true;
+            // Invalid query of some sort.
+        }
+
+
+        $time_stamp = $json_data['findItemsAdvancedResponse'][0]['timestamp']['0'];
         $count = $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['@count'];
 
+        // Array of ebay items.
         $items = $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['item'];
-
         $this->definitions = $items;
 
         $this->definitions_count = $count;
@@ -116,73 +138,80 @@ class Ebay extends Agent
         return false;
     }
 
-	public function respondResponse()
+    public function makeSnippet()
     {
-		// Thing actions
+$this->thing->log("Called Ebay makeSnippet.");
+        if (isset($this->thing_report['snippet'])) {return;}
 
-		$this->thing->flagGreen();
+        $web = "";
 
-        $choices = false;
-		$this->thing_report['choices'] = $choices;
+//        if (!isset($this->definitions)) {$web .= "<br>No definitions found on Ebay.";}
 
-        $this->flag = "green";
+//        if (isset($this->definitions)) {
 
-        //$this->makeSMS();
-        //$this->makeMessage();
-
-        //$this->makeWeb();
-
-        $this->thing_report['email'] = $this->sms_message;
-        //$this->thing_report['message'] = $this->sms_message;
-
-        $this->thingreportEbay();
-
-        if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-        }
-
-        $this->thing_report['help'] = 'This reads the Ebay catalog.';
-
-		return;
-	}
-
-    public function makeWeb()
-    {
-
-        if (isset($this->thing_report['web'])) {return;}
-        $web = "<b>EBAY</b>";
-        $web .= "<p><b>Ebay definitions</b>";
-
-        if (!isset($this->definitions)) {$web .= "<br>No definitions found on Ebay.";}
-
-        if (isset($this->definitions)) {
+            $web_definitions = "";
             foreach ($this->definitions as $id=>$definition) {
+                $parsed_item = $this->parseItem($definition);
+                $web_definitions .= "<br>" .  $parsed_item['html_link'] . " " . $parsed_item['price'];
+            }
+ //       }
+$snippet_prefix = '<span class = "' . $this->agent_name . '">';
+$snippet_postfix = '</span>';
+       $web .= $web_definitions;
+$web = $snippet_prefix . $web . $snippet_postfix;
+        $this->thing_report['snippet'] = $web;
+    }
 
-                $title = $definition['title'][0];
+    public function makeTXT()
+    {
+$this->thing->log("Called Ebay makeTxt.");
+        if (isset($this->thing_report['web'])) {return;}
 
-                $currency = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+        $txt = "EBAY\n";
+        $txt .= "Ebay items\n";
+
+//        if (!isset($this->definitions)) {$web .= "<br>No definitions found on Ebay.";}
+
+//        if (isset($this->definitions)) {
+            $txt_items = "";
+            foreach ($this->definitions as $id=>$definition) {
+                $parsed_item = $this->parseItem($definition);
+                $txt_items .= "\n" .  $parsed_item['title'] . " " . $parsed_item['price'];
+            }
+ //       }
+
+       $txt .= $txt_items;
+        $this->thing_report['txt'] = $txt;
+        $this->txt = $txt;
+
+    }
+
+    public function parseItem($item = null) {
+
+        if ($item == null) {return;}
+
+                $title = $item['title'][0];
+
+                $currency = $item['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
                 $currency_prefix = "";
                 $currency_postfix = "USD";
                 if ($currency == "USD") {$currency_prefix = "$";$currency_postfix = "";}
 
-                $price = $definition['sellingStatus'][0]['currentPrice'][0]['__value__'];
+                $price = $item['sellingStatus'][0]['currentPrice'][0]['__value__'];
 
                 $price_text =  $currency_prefix . $price . $currency_postfix;
 
-                $link = $definition["viewItemURL"][0];
-                $link_thumbnail =  $definition["galleryURL"][0];
-                $location = $definition["location"][0];
-                $country = $definition["country"][0];
+                $link = $item["viewItemURL"][0];
+                $link_thumbnail =  $item["galleryURL"][0];
+                $location = $item["location"][0];
+                $country = $item["country"][0];
 
                 $html_link = '<a href="' . $link . '">';
                 $html_link .= $title;
                 $html_link .= "</a>";
-                $web .= "<br>" .  $html_link . " " . $price_text;
-            }
-        }
-        $this->thing_report['web'] = $web;
-        $this->web_message = $web;
+
+        $parsed_item = array("title"=>$title,"price"=>$price_text, "link"=>$link, "thumbnail" => $link_thumbnail, "location"=>$location, "country"=>$country, "html_link"=>$html_link); 
+return $parsed_item;
     }
 
     public function makeSMS()
@@ -205,23 +234,14 @@ class Ebay extends Agent
             default:
 
                 foreach($this->definitions as $definition) {
-
-                    $currency = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
-                    $currency_prefix = "";
-                    $currency_postfix = "USD";
-                    if ($currency == "USD") {$currency_prefix = "$";$currency_postfix = "";}
-
-                    $price = $definition['sellingStatus'][0]['currentPrice'][0]['__value__'];
-
-                    $sms .= " / " . $definition['title'][0] . " " . $currency_prefix . $price . $currency_postfix;
-
+                    $parsed_item = $this->parseItem($definition);
+                    $sms .= " / " . $parsed_item['title'] . " " . $parsed_item['price'];
                 }
         }
 
         $sms .= " | " . $this->response;
-
         $this->sms_message = $sms;
-
+        $this->thing_report['sms'] = $sms;
     }
 
     public function makeMessage()
@@ -240,31 +260,34 @@ class Ebay extends Agent
                 break;
             default:
                 foreach($this->definitions as $definition) {
-                    $currency = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
-                    $currency_prefix = "";
-                    $currency_postfix = "USD";
-                    if ($currency == "USD") {$currency_prefix = "$";$currency_postfix = "";}
+//                    $currency = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+//                    $currency_prefix = "";
+ //                   $currency_postfix = "USD";
+ //                   if ($currency == "USD") {$currency_prefix = "$";$currency_postfix = "";}
 
-                    $price = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+   //                 $price = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
 
-                    $message .= " / " . $definition['title'][0] . " " . $currency_prefix . $price . $currency_postfix;
+                  //  $parsed_item = $this->parseItem($definition);
+
+                  //  $message .= " / " . $parsed_item['title'] . " " . $parsed_item['price'];
                 }
 
         }
 
         $this->message = $message;
-
+        $this->thing_report['message'] = $message;
     }
 
     private function thingreportEbay()
     {
-        $this->thing_report['sms'] = $this->sms_message;
-        //$this->thing_report['web'] = $this->html_message;
-        $this->thing_report['message'] = $this->message;
+//        $this->thing_report['sms'] = $this->sms_message;
+//       $this->thing_report['web'] = $this->html_message;
+//        $this->thing_report['message'] = $this->message;
     }
 
     public function readSubject()
     {
+$this->thing->log("Ebay readSubject");
         $this->response = null;
 
         $keywords = $this->keywords;
@@ -293,7 +316,6 @@ class Ebay extends Agent
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
-
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
             $this->doApi("dictionary");

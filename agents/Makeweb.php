@@ -29,7 +29,7 @@ class MakeWeb
             //$this->thing_report['web'] = $this->agent_thing->thing_report['web'];
         }
 
-            $web = $this->agent_thing->thing_report['web'];
+        $web = $this->agent_thing->thing_report['web'];
 
 
 

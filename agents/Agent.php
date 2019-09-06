@@ -93,6 +93,11 @@ class Agent {
 */
         $this->init();
 
+
+//        $this->getName();
+//        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
+
+
         $this->get();
 
         $this->read();
@@ -112,7 +117,7 @@ catch (\OverflowException $t)
 $this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
 $this->thing_report['sms'] = "STACK | " . $this->response;
 
-    $this->thing->log("caught throwable");
+    $this->thing->log("caught overflow exception.");
    // Executed only in PHP 7, will not match in PHP 5
 }
 
@@ -121,7 +126,7 @@ catch (\Throwable $t)
 //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
 //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
 
-$this->thing->log("caught throwable");
+$this->thing->log("caught throwable.");
    // Executed only in PHP 7, will not match in PHP 5
 }
 catch (\Exception $e)
@@ -172,13 +177,15 @@ catch (\Exception $e)
      */
     public function make() {
         $this->makeResponse();
+        $this->makeMessage();
         $this->makeImage();
         $this->makePNG();
         $this->makeSMS();
         $this->makeWeb();
+        $this->makeSnippet();
 
 $this->makeEmail();
-$this->makeMessage();
+//$this->makeMessage();
 $this->makeTXT();
 
         $this->makePDF();
@@ -429,28 +436,29 @@ if ($this->agent_name == "agent") {return;}
      *
      */
     public function makeWeb() {
-
     }
 
-public function makePDF() {
+    public function makePDF() {
+    }
 
-}
+    public function makeImage() {
+    }
 
-public function makeImage() {
+    public function makeSnippet() {
+       $this->thing_report['snippet'] = "<b>Empty.</b>";
+    }
 
-}
 
-public function makeTXT() {
+    public function makeTXT() {
 //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
 //        $this->thing_report['txt'] = $this->thing_report['sms'];
-}
+    }
 
-public function makeMessage() {
+    public function makeMessage() {
 //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
 
 //        $this->thing_report['message'] = $this->thing_report['sms'];
-
-}
+    }
 
 public function makeEmail() {
 
@@ -653,10 +661,10 @@ public function makeEmail() {
 
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
-            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+            $this->thing->log( 'caught throwable.' , "WARNING" );
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+            $this->thing->log( 'caught error. Could not load "' . $agent_class_name . '".' , "WARNING" );
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();
@@ -704,9 +712,10 @@ public function makeEmail() {
             return true;
 
 } catch (\Throwable $t) {
+            $this->thing->log( 'caught throwable.' , "WARNING" );
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-//            $this->thing->log( 'could not load "' . $agent_class_name . '".' , "WARNING" );
+            $this->thing->log( 'caught error. Could not load "' . $agent_class_name . '".' , "WARNING" );
             $message = $ex->getMessage();
             // $code = $ex->getCode();
             $file = $ex->getFile();

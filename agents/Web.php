@@ -96,7 +96,7 @@ $this->makeSMS();
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
@@ -109,7 +109,7 @@ $this->makeSMS();
      * @return unknown
      */
     function getLink() {
-
+        $this->thing->log("called get web link.");
         $block_things = array();
         // See if a stack record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
@@ -160,7 +160,7 @@ $this->makeSMS();
         //        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
         $previous_thing->silenceOn();
         $quiet_thing = new Quiet($previous_thing, "on");
-        $agent_thing = new Agent($previous_thing);
+        $agent_thing = new Agent($previous_thing,$this->prior_agent);
         if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
 
 
