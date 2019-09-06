@@ -286,9 +286,9 @@ if ($year == null) {$year = "X";}
 
         $sms_message = "RUNDATE";
 
-        $day_text = str_pad($this->day, 2, "0", STR_PAD_LEFT);
-        $month_text = str_pad($this->month, 2, "0", STR_PAD_LEFT);
-        $year_text = str_pad($this->year, 2, "0", STR_PAD_LEFT);
+        $day_text = str_pad($day, 2, "0", STR_PAD_LEFT);
+        $month_text = str_pad($month, 2, "0", STR_PAD_LEFT);
+        $year_text = str_pad($year, 2, "0", STR_PAD_LEFT);
 
         $day_text = $this->day;
         $month_text = $this->month;
@@ -297,9 +297,9 @@ if ($year == null) {$year = "X";}
         if (isset($this->response)) {
             $sms_message .= "| " . trim($this->response) . " ";
         }
-        if ( (!$this->isInput($this->day)) or
-            (!$this->isInput($this->month)) or
-            (!$this->isInput($this->year)) ) {
+        if ( (!$this->isInput($day)) or
+            (!$this->isInput($month)) or
+            (!$this->isInput($year)) ) {
 
             //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 

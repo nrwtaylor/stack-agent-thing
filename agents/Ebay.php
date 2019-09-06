@@ -25,19 +25,20 @@ class Ebay extends Agent
 
         $this->keywords = array('ebay','catalog','catalogue');
 
-//        $this->current_time = $this->thing->json->time();
-
+        // devstack improve this call as $this->thing->api->ebay->appID.
         $this->application_id = $this->thing->container['api']['ebay']['app ID'];
         $this->application_key = $this->thing->container['api']['ebay']['cert ID']; 
 
         $this->run_time_max = 360; // 5 hours
 
         $this->thing_report['help'] = 'This reads the Ebay catalog.';
-	}
+    }
 
     function run()
     {
+         // Make sure the Snippet code is being run.
          $this->makeSnippet();
+
          // Do something.
     }
 
@@ -45,18 +46,16 @@ class Ebay extends Agent
     {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-//        $this->thingreportEbay();
-
     }
 
     function getLink() {
-        $this->link = "merp";
-
+        $this->link = "www.ebay.com";
     }
 
     function get()
     {
+        // $this->from is set by the calling agent.
+        // See thing-wordpress.php / thing-keybase / etc
         $this->variables_agent = new Variables($this->thing, "variables " . "ebay" . " " . $this->from);
 
         // Count calls to Ebay API. Note call limits.
@@ -70,9 +69,14 @@ class Ebay extends Agent
 
     function doApi($type = "dictionary")
     {
+        // Lots of things we can do we the Api.
+        // First thing let us see what the Finding API does.
+
+        // There is also a Catalog API. And many others.
+        // https://developer.ebay.com/docs
+
         $this->thing->log("Called Ebay Finding API.");
         if ($type == null) {$type = "dictionary";}
-
 
         $keywords = "";
         if (isset($this->search_words)) {$keywords = $this->search_words;}
@@ -96,7 +100,6 @@ class Ebay extends Agent
         $context = stream_context_create($options);
 
         // https://partnernetwork.ebay.com/epn-blog/2010/05/simple-api-searching-example
-
         // $data_source = "https://svcs.ebay.com/services/search/FindingService/v1/". $keywords;
 
         $app_id = $this->application_id;
@@ -109,7 +112,7 @@ class Ebay extends Agent
 
         if ($data == false) {
             $this->response = "Could not ask Ebay.";
-            $this->definitions_count = 0;
+            $this->items_count = 0;
             return true;
             // Invalid query of some sort.
         }
@@ -118,22 +121,31 @@ class Ebay extends Agent
         // Extract information.
         $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
 
+        // Ebay asks developers to check the status response.
         if ($ack != "Success") {
             $this->response = "Could not ask Ebay.";
-            $this->definitions_count = 0;
+            $this->items_count = 0;
             return true;
             // Invalid query of some sort.
         }
 
-
+        // Meta
+        // See what other variables are helpful and/or useful.
         $time_stamp = $json_data['findItemsAdvancedResponse'][0]['timestamp']['0'];
         $count = $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['@count'];
 
         // Array of ebay items.
-        $items = $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['item'];
-        $this->definitions = $items;
+        // Use the ebay language here for items.
+        // Translation to Thing comes later in code.
 
-        $this->definitions_count = $count;
+$items = null;
+if (isset( $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['item'])) {
+
+        $items = $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['item'];
+}
+        $this->items = $items;
+
+        $this->items_count = $count;
 
         return false;
     }
@@ -145,19 +157,20 @@ $this->thing->log("Called Ebay makeSnippet.");
 
         $web = "";
 
-//        if (!isset($this->definitions)) {$web .= "<br>No definitions found on Ebay.";}
+//        if (!isset($this->items)) {$web .= "<br>No items found on Ebay.";}
 
-//        if (isset($this->definitions)) {
+//        if (isset($this->items)) {
 
-            $web_definitions = "";
-            foreach ($this->definitions as $id=>$definition) {
-                $parsed_item = $this->parseItem($definition);
-                $web_definitions .= "<br>" .  $parsed_item['html_link'] . " " . $parsed_item['price'];
+            $web_items = "";
+if ((!isset($this->items)) or (count($this->items) == 0)) {return;}
+            foreach ($this->items as $id=>$item) {
+                $parsed_item = $this->parseItem($item);
+                $web_items .= "<br>" .  $parsed_item['html_link'] . " " . $parsed_item['price'];
             }
  //       }
 $snippet_prefix = '<span class = "' . $this->agent_name . '">';
 $snippet_postfix = '</span>';
-       $web .= $web_definitions;
+       $web .= $web_items;
 $web = $snippet_prefix . $web . $snippet_postfix;
         $this->thing_report['snippet'] = $web;
     }
@@ -170,12 +183,15 @@ $this->thing->log("Called Ebay makeTxt.");
         $txt = "EBAY\n";
         $txt .= "Ebay items\n";
 
-//        if (!isset($this->definitions)) {$web .= "<br>No definitions found on Ebay.";}
+//        if (!isset($this->items)) {$web .= "<br>No items found on Ebay.";}
 
-//        if (isset($this->definitions)) {
+        if ((!isset($this->items)) or (count($this->items) == 0)) { return;}
+
+
+//        if (isset($this->items)) {
             $txt_items = "";
-            foreach ($this->definitions as $id=>$definition) {
-                $parsed_item = $this->parseItem($definition);
+            foreach ($this->items as $id=>$item) {
+                $parsed_item = $this->parseItem($item);
                 $txt_items .= "\n" .  $parsed_item['title'] . " " . $parsed_item['price'];
             }
  //       }
@@ -221,20 +237,20 @@ return $parsed_item;
             $sms .= " " . strtoupper($this->search_words);
         }
 
-        $definitions_count = 0;
-        if(isset($this->definitions_count)) {$definitions_count = $this->definitions_count;}
+        $items_count = 0;
+        if(isset($this->items_count)) {$items_count = $this->items_count;}
 
-        switch ($definitions_count) {
+        switch ($items_count) {
             case 0:
-                $sms .= " | No definitions found.";
+                $sms .= " | No items found.";
                 break;
             case 1:
-                $sms .= " | " .$this->definitions[0];
+                $sms .= " | " .$this->items[0];
                 break;
             default:
 
-                foreach($this->definitions as $definition) {
-                    $parsed_item = $this->parseItem($definition);
+                foreach($this->items as $item) {
+                    $parsed_item = $this->parseItem($item);
                     $sms .= " / " . $parsed_item['title'] . " " . $parsed_item['price'];
                 }
         }
@@ -248,18 +264,18 @@ return $parsed_item;
     {
         $message = "Ebay";
 
-        $definitions_count = 0;
-        if(isset($this->definitions_count)) {$definitions_count = $this->definitions_count;}
+        $items_count = 0;
+        if(isset($this->items_count)) {$items_count = $this->items_count;}
 
-        switch ($definitions_count) {
+        switch ($items_count) {
             case 0:
-                $message .= " did not find any definitions.";
+                $message .= " did not find any items.";
                 break;
             case 1:
-                $message .= ' found, "' .$this->definitions[0] . '"';
+                $message .= ' found, "' .$this->items[0] . '"';
                 break;
             default:
-                foreach($this->definitions as $definition) {
+                foreach($this->items as $item) {
 //                    $currency = $definition['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
 //                    $currency_prefix = "";
  //                   $currency_postfix = "USD";
@@ -291,6 +307,7 @@ $this->thing->log("Ebay readSubject");
         $this->response = null;
 
         $keywords = $this->keywords;
+
 
         $input = $this->input;
 
