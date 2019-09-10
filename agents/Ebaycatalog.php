@@ -32,17 +32,25 @@ $this->devID = $this->thing->container['api']['ebay']['dev ID'];
 
 $this->clientID = $this->appID;
 
-       $this->authToken ="";
-        $this->refreshToken ="";
-        $this->ruName= "";
+//       $this->authToken ="";
+//        $this->refreshToken ="";
+//        $this->ruName= "";
 
        $this->serverUrl = 'https://api.ebay.com/ws/api.dll';      // server URL different for prod and sandbox
 
 $this->code_oauth = $this->thing->container['api']['ebay']['auth code'];
+$this->authToken = $this->code_oauth;
+
+$this->ruName = $this->thing->container['api']['ebay']['ruName'];
+
 $this->paypalEmailAddress = $this->thing->container['api']['ebay']['email address'];
 
-$this->firstAuthAppToken();
-//exit();
+//$this->firstAuthAppToken();
+
+
+//$this->authorizationToken();
+// Having gotten it it is valid for 18 months.
+
         $this->run_time_max = 360; // 5 hours
 
         $this->thing_report['help'] = 'This reads the Ebay catalog.';
@@ -174,12 +182,20 @@ var_dump($json_data);
     }
 */
 
- function doApi($text = null) {
+ function doEbaycatalog($text = null) {
 
         //$link = "https://api.ebay.com/identity/v1/oauth2/token";
 $link = "https://api.ebay.com/commerce/catalog/v1_beta/product_summary/search?q=drone&limit=3";
 var_dump($this->clientID.':'.$this->certID);
         $codeAuth = base64_encode($this->clientID.':'.$this->certID);
+
+$this->doApi($text);
+
+
+
+
+
+return;
         $ch = curl_init($link);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/x-www-form-urlencoded',
@@ -203,33 +219,101 @@ var_dump($json);
         }
     }
 
+    public function doApi($post_data) {
+
+
+         // Your ID and token
+         $authToken = $this->authToken;
+var_dump($authToken);
+         // The data to send to the API
+         $post_data = json_encode(array("legacyOrderId"=>"110181400870-27973775001"));
+         $url = 'https://api.sandbox.ebay.com/post-order/v2/cancellation/check_eligibility'; 
+
+$post_data = null;
+$url = "https://api.ebay.com/commerce/catalog/v1_beta/product_summary/search?q=drone&limit=3";
+
+         //Setup cURL
+//         $header = array(
+//                        'Accept: application/json',
+//                        'Authorization: TOKEN '.$authToken,
+//                        'Content-Type: application/json',
+//                        'X-EBAY-C-MARKETPLACE-ID: EBAY-UK'
+//                         );
+
+         $header = array(
+                        'Accept: application/json',
+                        'Authorization: Bearer '.urlencode($authToken),
+                        'Content-Type: application/json',
+                        'X-EBAY-C-MARKETPLACE-ID: EBAY-US'
+                         );
+var_dump($header);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+        if(curl_errno($ch)){
+            echo "ERROR:".curl_error($ch);
+        }
+        curl_close($ch); 
+var_dump($response);
+//        echo json_decode($response,true);
+
+    }
+
+    function doEligibility() {
+
+         $post_data = json_encode(array("legacyOrderId"=>"110181400870-27973775001"));
+         $url = 'https://api.sandbox.ebay.com/post-order/v2/cancellation/check_eligibility'; 
+        $this->doApi($post_data, $url);
+    }
 
 //}
     public function firstAuthAppToken() {
         $url = "https://auth.ebay.com/oauth2/authorize?client_id=".$this->clientID."&amp;response_type=code&amp;redirect_uri=".$this->ruName."&amp;scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly";       
+
+        // Run this manually.
+        // Devstack do the API call and retrience the code.
+
     }
  
     public function authorizationToken()
-    {
+    {echo "Requested authorization token." ."\n";
         $link = "https://api.ebay.com/identity/v1/oauth2/token";
         $codeAuth = base64_encode($this->clientID.':'.$this->certID);
+var_dump($codeAuth);
         $ch = curl_init($link);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/x-www-form-urlencoded',
             'Authorization: Basic '.$codeAuth
         ));
+
+$t = 'grant_type=authorization_code&
+      code='.$codeAuth .  '&redirect_uri=' . $this->ruName;
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "grant_type=authorization_code&amp;code=".$this->authCode."&amp;redirect_uri=".$this->ruName);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $t);
         $response = curl_exec($ch);
         $json = json_decode($response, true);
         $info = curl_getinfo($ch);
         curl_close($ch);
         if($json != null)
         {
+var_dump($json);
+
+if (!isset($json['access_token'])) {echo "Did not retrieve access token.";} else {
             $this->authToken = $json["access_token"];
+}
+var_dump($this->authToken);
+
             $this->refreshToken = $json["refresh_token"]; 
+var_dump($this->refreshToken);
         } 
     }
  
@@ -444,7 +528,7 @@ $this->thing->log("Ebay Catalog readSubject");
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            $this->doApi("dictionary");
+            $this->doEbaycatalog();
             $this->response = "Asked Ebay Catalog about the word " . $this->search_words . ".";
             return false;
         }
