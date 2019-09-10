@@ -360,6 +360,9 @@ $this->email_message = $message;
 
 
 		$multipart = $this->generateMultipart($from, $raw_message, $choices);
+if (strpos(strtolower($from), '@winlink.org') !== false) {
+    $multipart['headers'] = null;
+}
 
 		return $this->mailer($to,$subject,$multipart['message'], $multipart['headers']);
 	}

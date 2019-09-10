@@ -7,6 +7,16 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+//use \DTS\eBaySDK\Catalog\Services;
+//use \DTS\eBaySDK\Catalog\Types;
+//use \DTS\eBaySDK\Catalog\Enums;
+
+//use \DTS\eBaySDK\Shopping\Services;
+//use \DTS\eBaySDK\Shopping\Types;
+
+//use \DTS\eBaySDK\OAuth\Services;
+//use \DTS\eBaySDK\OAuth\Types;
+
 class Ebay extends Agent
 {
 
@@ -28,6 +38,8 @@ class Ebay extends Agent
         // devstack improve this call as $this->thing->api->ebay->appID.
         $this->application_id = $this->thing->container['api']['ebay']['app ID'];
         $this->application_key = $this->thing->container['api']['ebay']['cert ID']; 
+$this->devID = $this->thing->container['api']['ebay']['dev ID'];
+
 
         $this->run_time_max = 360; // 5 hours
 
@@ -47,6 +59,26 @@ class Ebay extends Agent
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
     }
+
+function getTime() {
+
+//use \DTS\eBaySDK\Shopping\Services;
+//use \DTS\eBaySDK\Shopping\Types;
+
+
+// Create the service object.
+$service = new Services\ShoppingService();
+
+// Create the request object.
+$request = new Types\GeteBayTimeRequestType();
+
+// Send the request to the service operation.
+$response = $service->geteBayTime($request);
+
+// Output the result of calling the service operation.
+printf("The official eBay time is: %s\n", $response->Timestamp->format('H:i (\G\M\T) \o\n l jS Y'));
+
+}
 
     function getLink() {
         $this->link = "www.ebay.com";
@@ -149,6 +181,137 @@ if (isset( $json_data['findItemsAdvancedResponse'][0]['searchResult']['0']['item
 
         return false;
     }
+
+function getUsertoken() {
+
+//use \DTS\eBaySDK\OAuth\Services;
+//use \DTS\eBaySDK\OAuth\Types;
+
+
+/**
+ * Create the service object.
+ */
+$service = new Services\OAuthService([
+    'credentials' => $config['sandbox']['credentials'],
+    'ruName'      => $config['sandbox']['ruName'],
+    'sandbox'     => true
+]);
+/**
+ * Create the request object.
+ */
+$request = new Types\GetUserTokenRestRequest();
+$request->code = '<AUTHORIZATION CODE>';
+/**
+ * Send the request.
+ */
+$response = $service->getUserToken($request);
+/**
+ * Output the result of calling the service operation.
+ */
+printf("\nStatus Code: %s\n\n", $response->getStatusCode());
+if ($response->getStatusCode() !== 200) {
+    printf(
+        "%s: %s\n\n",
+        $response->error,
+        $response->error_description
+    );
+} else {
+    printf(
+        "%s\n%s\n%s\n%s\n\n",
+        $response->access_token,
+        $response->token_type,
+        $response->expires_in,
+        $response->refresh_token
+    );
+}
+
+}
+
+function getToken() {
+
+//use \DTS\eBaySDK\OAuth\Services;
+//use \DTS\eBaySDK\OAuth\Types;
+
+
+/**
+ * Create the service object.
+ */
+$service = new Services\OAuthService([
+    'credentials' => $config['sandbox']['credentials'],
+    'ruName'      => $config['sandbox']['ruName'],
+    'sandbox'     => true
+]);
+/**
+ * Send the request.
+ */
+$response = $service->getAppToken();
+/**
+ * Output the result of calling the service operation.
+ */
+printf("\nStatus Code: %s\n\n", $response->getStatusCode());
+if ($response->getStatusCode() !== 200) {
+    printf(
+        "%s: %s\n\n",
+        $response->error,
+        $response->error_description
+    );
+} else {
+    printf(
+        "%s\n%s\n%s\n%s\n\n",
+        $response->access_token,
+        $response->token_type,
+        $response->expires_in,
+        $response->refresh_token
+    );
+}
+
+
+}
+
+function doCatalog() {
+
+$service = new Services\CatalogService([
+    'authorization' => $config['production']['oauthUserToken']
+    //,'httpOptions' => ['debug' => true]
+]);
+
+
+/**
+ * Create the request object.
+ */
+$request = new Types\SearchRestRequest();
+$request->q = 'iphone';
+$request->limit = '3';
+/**
+ * Send the request.
+ */
+$response = $service->search($request);
+/**
+ * Output the result of calling the service operation.
+ */
+printf("\nStatus Code: %s\n\n", $response->getStatusCode());
+if (isset($response->errors)) {
+    foreach ($response->errors as $error) {
+        printf(
+            "%s: %s\n%s\n\n",
+            $error->errorId,
+            $error->message,
+            $error->longMessage
+        );
+    }
+}
+if ($response->getStatusCode() === 200) {
+    foreach ($response->productSummaries as $productSummary) {
+        printf(
+            "%s\n%s\n",
+            $productSummary->title,
+            $productSummary->brand
+        );
+    }
+}
+
+
+}
 
     public function makeSnippet()
     {

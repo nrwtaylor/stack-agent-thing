@@ -374,6 +374,9 @@ if ($this->checkAddress($to) != false) {
 //var_dump($to);
 //var_dump($headers);
 		
+//if (strpos(strtolower($to), '@winlink.org') !== false) {
+//    $headers = null;
+//}
 		
 mail($to,$subject,$message, $headers);
 
@@ -616,13 +619,15 @@ $this->generateHTML($raw_message, $choices);
 		//Plain text body
 		$message .= $this->generateText($raw_message) . "\r\n";
 
+if (strpos($this->from, '@winlink.org') !== false) {
+} else {
 		$message .= "--PHP-alt-" . $boundary . "\r\n";
 		$message .= "Content-type: text/html;charset=utf-8\r\n";
 		$message .= "Content-Transfer-Encoding: quoted-printable\r\n";
 
 		//Html body
 		$message .= quoted_printable_encode($this->generateHTML($raw_message, $choices)) . "\r\n";
-
+}
 
 
 //		echo $choices['email_html'];

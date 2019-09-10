@@ -225,7 +225,14 @@ $this->thing_report['info'] = "Assemble a message.";
 					}
 */
             case 'email':
+                //     if (isset($this->thing_report['email']) ) {
+                //      $this->message = $this->thing_report['message'];
                 $this->email = $this->thing_report['email'];
+
+
+                //     }
+                //echo "email";
+                //break;
                 continue;
             case 'web':
 
@@ -268,9 +275,7 @@ $this->thing_report['info'] = "Assemble a message.";
     function checkFacebook($searchfor) {
         // Check address against the beta list
         $file = $this->resource_path . 'facebook/fbid.txt';
-        $contents = @file_get_contents($file);
-
-if ($contents == false) {return false;}
+        $contents = file_get_contents($file);
 
         $pattern = "|\b($searchfor)\b|";
 
@@ -298,6 +303,7 @@ if ($contents == false) {return false;}
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
         //$channel = new Channel($this->thing, "channel");
+        //var_dump($channel);
         if ($this->channel_name == "microsoft") {return true;}
         return false; // in dev
     }
@@ -313,6 +319,7 @@ if ($contents == false) {return false;}
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
         //$channel = new Channel($this->thing, "channel");
+        //var_dump($channel);
         if ($this->channel_name == "slack") {return true;}
         return false; // in dev
         //exit();
@@ -333,6 +340,21 @@ if ($contents == false) {return false;}
             return false;
         }
     }
+
+    function checkWinlink()
+    {
+       $searchfor = "@winlink.org";
+        // Check address against the beta list
+
+//        $file = '/var/www/stackr.test/resources/slack/id.txt';
+//        $contents = file_get_contents($file);
+
+if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
+    return true;
+}
+        return false;
+    }
+
 
 
     /**
@@ -469,7 +491,9 @@ if ($contents == false) {return false;}
         }
 
 
+        //echo "message";
         if ( $this->checkSlack($to) ) { // The Slack app of Mordok the Magnificent
+            //echo "slack";
             $this->thing->log('<pre> Agent "Message" responding via Slack.</pre>');
 
 
@@ -529,6 +553,7 @@ if ($contents == false) {return false;}
 
             switch (true) {
             case ($token_thing->thing_report['token'] != 'sms' ):
+                echo "no sms token " . $this->uuid . "\n";
                 $this->thing_report['info'] = 'Agent "Message" did not get SMS token.';
                 break;
 
@@ -553,6 +578,7 @@ if ($contents == false) {return false;}
             default:
             }
 
+            //echo $this->thing_report['info'];
 
             $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
 
@@ -568,6 +594,8 @@ if ($contents == false) {return false;}
         // IF there is a formatted email message.
 
         if ( filter_var($from, FILTER_VALIDATE_EMAIL) and isset($this->message) ) {
+
+
 
             // Cost is handled by sms.php
             // So here we should pull in the token limiter and proof
@@ -594,6 +622,9 @@ if ($contents == false) {return false;}
                 $this->thing_report['info'] = 'Agent "Message" has exceeded the daily message quota.';
                 break;
                 //            case (isset($dev_overide)):
+case ( strpos(strtolower($this->nom_from), '@winlink.org') !== false):
+    $this->thing_report['email'] = $makeemail_agent->sms_message;
+
             case (true):
 
                 //                if($quota->counter >= $quota->period_limit) {
