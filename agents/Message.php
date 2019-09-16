@@ -275,7 +275,9 @@ $this->thing_report['info'] = "Assemble a message.";
     function checkFacebook($searchfor) {
         // Check address against the beta list
         $file = $this->resource_path . 'facebook/fbid.txt';
-        $contents = file_get_contents($file);
+        $contents = @file_get_contents($file);
+
+if ($contents == false) {return;}
 
         $pattern = "|\b($searchfor)\b|";
 

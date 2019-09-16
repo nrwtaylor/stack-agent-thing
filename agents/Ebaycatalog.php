@@ -26,9 +26,17 @@ class Ebaycatalog extends Agent
 
 //        $this->current_time = $this->thing->json->time();
 
-        $this->appID = $this->thing->container['api']['ebay']['app ID'];
-        $this->certID = $this->thing->container['api']['ebay']['cert ID']; 
-$this->devID = $this->thing->container['api']['ebay']['dev ID'];
+$word = strtolower($this->word) . "_production"; 
+        // devstack improve this call as $this->thing->api->ebay->appID.
+
+//        $this->application_id = $this->thing->container['api']['ebay'][$word]['app ID'];
+//        $this->application_key = $this->thing->container['api']['ebay'][$word]['cert ID']; 
+//        $this->devID = $this->thing->container['api']['ebay'][$word]['dev ID'];
+
+
+        $this->appID = $this->thing->container['api']['ebay'][$word]['app ID'];
+        $this->certID = $this->thing->container['api']['ebay'][$word]['cert ID']; 
+$this->devID = $this->thing->container['api']['ebay'][$word]['dev ID'];
 
 $this->clientID = $this->appID;
 
@@ -38,12 +46,12 @@ $this->clientID = $this->appID;
 
        $this->serverUrl = 'https://api.ebay.com/ws/api.dll';      // server URL different for prod and sandbox
 
-$this->code_oauth = $this->thing->container['api']['ebay']['auth code'];
+$this->code_oauth = $this->thing->container['api']['ebay'][$word]['production']['auth code'];
 $this->authToken = $this->code_oauth;
 
-$this->ruName = $this->thing->container['api']['ebay']['ruName'];
+$this->ruName = $this->thing->container['api']['ebay'][$word]['production']['ruName'];
 
-$this->paypalEmailAddress = $this->thing->container['api']['ebay']['email address'];
+//$this->paypalEmailAddress = $this->thing->container['api']['ebay']['email address'];
 
 //$this->firstAuthAppToken();
 
@@ -220,7 +228,7 @@ var_dump($json);
     }
 
     public function doApi($post_data) {
-
+echo "Do API" . "\n";
 
          // Your ID and token
          $authToken = $this->authToken;
@@ -232,6 +240,8 @@ var_dump($authToken);
 $post_data = null;
 $url = "https://api.ebay.com/commerce/catalog/v1_beta/product_summary/search?q=drone&limit=3";
 
+$url = "https://sandbox.ebay.com/commerce/catalog/v1_beta/product_summary/search?q=drone&limit=3";
+
          //Setup cURL
 //         $header = array(
 //                        'Accept: application/json',
@@ -240,9 +250,11 @@ $url = "https://api.ebay.com/commerce/catalog/v1_beta/product_summary/search?q=d
 //                        'X-EBAY-C-MARKETPLACE-ID: EBAY-UK'
 //                         );
 
+//$post_data = json_encode(array("legacyOrderId"=>"110181400870-27973775001"));
+
          $header = array(
                         'Accept: application/json',
-                        'Authorization: Bearer '.urlencode($authToken),
+                        'Authorization: Bearer '.$authToken,
                         'Content-Type: application/json',
                         'X-EBAY-C-MARKETPLACE-ID: EBAY-US'
                          );
@@ -252,18 +264,23 @@ var_dump($header);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+//        curl_setopt($ch, CURLOPT_POST, 1);
+//        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
         $response = curl_exec($ch);
         if(curl_errno($ch)){
             echo "ERROR:".curl_error($ch);
         }
-        curl_close($ch); 
+        curl_close($ch);
+echo "JSON Response." . "\n";
 var_dump($response);
 //        echo json_decode($response,true);
 
     }
+
+
+
 
     function doEligibility() {
 
@@ -305,6 +322,7 @@ $t = 'grant_type=authorization_code&
         curl_close($ch);
         if($json != null)
         {
+echo "JSON dump" ."\n";
 var_dump($json);
 
 if (!isset($json['access_token'])) {echo "Did not retrieve access token.";} else {
