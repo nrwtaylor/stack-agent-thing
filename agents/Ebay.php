@@ -20,9 +20,15 @@ class Ebay extends Agent
         $this->node_list = array("ebay" => array("ebay"));
         $this->keywords = array('ebay', 'catalog', 'catalogue');
 
-        $this->environment = "sandbox"; // production
+        $this->environment = "production"; // production
 
         $word = strtolower($this->word) . "_" . $this->environment;
+
+        $this->thing->log(
+            $this->agent_prefix . 'using ebay keys for  ' . $word . ".",
+            "DEBUG"
+        );
+
 
         $this->application_id =
             $this->thing->container['api']['ebay'][$word]['app ID'];
@@ -230,6 +236,15 @@ class Ebay extends Agent
 
         $context = stream_context_create($options);
 
+// https://thisinterestsme.com/file_get_contents-timeout/
+$context = stream_context_create(
+    array('http'=>
+        array(
+            'timeout' => 5,  //120 seconds
+        )
+    )
+);
+
         // https://partnernetwork.ebay.com/epn-blog/2010/05/simple-api-searching-example
         // $data_source = "https://svcs.ebay.com/services/search/FindingService/v1/". $keywords;
 
@@ -265,14 +280,16 @@ class Ebay extends Agent
         // devstack timeout call
 
         // Set a 5 second timeout.
-        $default_socket_timeout = ini_get('default_socket_timeout');
-        ini_set('default_socket_timeout', 5);
+//        $default_socket_timeout = ini_get('default_socket_timeout');
+//        ini_set('default_socket_timeout', 5);
 
         $this->call = $data_source;
 
+
+
         $data = @file_get_contents($data_source, false, $context);
 
-        ini_set('default_socket_timeout', $default_socket_timeout);
+//        ini_set('default_socket_timeout', $default_socket_timeout);
 
         if ($data == false) {
             $this->thing->log("Finding API call failed.");
