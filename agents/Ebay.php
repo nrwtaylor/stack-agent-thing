@@ -129,9 +129,10 @@ class Ebay extends Agent
         $compatabilityLevel = 967;
         $appID = $this->application_id;
 
+//https://developer.ebay.com/devzone/shopping/docs/callref/getsingleitem.html#detailControls
         //you can also play with these selectors
         $includeSelector =
-            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility";
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
 
         // Construct the GetSingleItem REST call
         $apicall =
@@ -596,9 +597,14 @@ $context = stream_context_create(
         $html_link .= "</a>";
 
         $item_id = $item["itemId"][0];
+//var_dump($item["primaryCategory"][0]['categoryName'][0]);
+//exit();
+$category_name = "X";
+if (isset($item["primaryCategory"][0]["categoryName"][0])) {$category_name = $item["primaryCategory"][0]["categoryName"][0];}
 
         $parsed_item = array(
             "id" => $item_id,
+            "category_name"=> $category_name,
             "title" => $title,
             "price" => $price_text,
             "link" => $link,

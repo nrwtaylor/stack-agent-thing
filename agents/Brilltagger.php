@@ -122,7 +122,7 @@ class Brilltagger extends Agent
 
         // Then run it through the classifier.
         $tags = $this->tag($filtered_input);
-
+$this->tags = $tags;
 //        $this->printTag($tags);
         $this->textTag($tags);
 
