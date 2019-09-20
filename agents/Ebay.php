@@ -29,7 +29,6 @@ class Ebay extends Agent
             "DEBUG"
         );
 
-
         $this->application_id =
             $this->thing->container['api']['ebay'][$word]['app ID'];
         $this->application_key =
@@ -129,7 +128,7 @@ class Ebay extends Agent
         $compatabilityLevel = 967;
         $appID = $this->application_id;
 
-//https://developer.ebay.com/devzone/shopping/docs/callref/getsingleitem.html#detailControls
+        //https://developer.ebay.com/devzone/shopping/docs/callref/getsingleitem.html#detailControls
         //you can also play with these selectors
         $includeSelector =
             "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
@@ -140,6 +139,79 @@ class Ebay extends Agent
             "&appid=$appID&ItemID=$ItemID" .
             "&responseencoding=XML" .
             "&IncludeSelector=$includeSelector";
+        $xml = simplexml_load_file($apicall);
+        if ($xml) {
+            $json = json_encode($xml);
+            $array = json_decode($json, true);
+            return $array;
+        }
+        return false;
+    }
+
+    // devstack
+    function eBayGetCategory($category_id)
+    {
+        $this->thing->log(
+            "get multiple items by cateogory " . $category_id . "."
+        );
+
+        $this->response .= "Requested multiple items. ";
+        $URL = 'http://open.api.ebay.com/shopping';
+        //change these two lines
+        $compatabilityLevel = 967;
+        $appID = $this->application_id;
+        //you can also play with these selectors
+        $includeSelector =
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
+
+        // Construct the GetSingleItem REST call
+        $apicall =
+            "https://svcs.ebay.com/services/search/FindingService/v1?" .
+            "OPERATION-NAME=findItemsAdvanced&" .
+            "SERVICE-VERSION=1.0.0&" .
+            "SECURITY-APPNAME=$appID&" .
+            "RESPONSE-DATA-FORMAT=XML&" .
+            "REST-PAYLOAD&" .
+            "outputSelector=AspectHistogram&" .
+            "paginationInput.entriesPerPage=10&" .
+            "categoryId=" .
+            $category_id;
+
+        $xml = simplexml_load_file($apicall);
+        if ($xml) {
+            $json = json_encode($xml);
+            $array = json_decode($json, true);
+            return $array;
+        }
+        return false;
+    }
+
+    // devstack
+    function eBayGetKeywords($keywords)
+    {
+        $this->thing->log("get multiple items by keyword " . $keywords . ".");
+
+        $this->response .= "Requested multiple items. ";
+        $URL = 'http://open.api.ebay.com/shopping';
+        //change these two lines
+        $compatabilityLevel = 967;
+        $appID = $this->application_id;
+        //you can also play with these selectors
+        $includeSelector =
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
+
+        // Construct the GetSingleItem REST call
+
+        $apicall =
+            "https://svcs.ebay.com/services/search/FindingService/v1?" .
+            "OPERATION-NAME=findItemsByKeywords&" .
+            "SERVICE-VERSION=1.0.0&" .
+            "SECURITY-APPNAME=$appID&" .
+            "RESPONSE-DATA-FORMAT=XML&" .
+            "REST-PAYLOAD&" .
+            "keywords=harry%20potter%20phoenix&" .
+            "paginationInput.entriesPerPage=10";
+
         $xml = simplexml_load_file($apicall);
         if ($xml) {
             $json = json_encode($xml);
@@ -190,7 +262,6 @@ class Ebay extends Agent
 
     function findingApi($text = null)
     {
-
         // , + - all have specific meanings to eBay.
         $this->response = "Searched eBay query " . $text . ". ";
         // Lots of things we can do we the Api.
@@ -214,7 +285,9 @@ class Ebay extends Agent
             $keywords = $text;
         }
 
-        $this->thing->log('Call Ebay Finding API ask about, "' . $keywords . '".');
+        $this->thing->log(
+            'Call Ebay Finding API ask about, "' . $keywords . '".'
+        );
 
         $keywords = urlencode($keywords);
         // Not needed.
@@ -237,14 +310,12 @@ class Ebay extends Agent
 
         $context = stream_context_create($options);
 
-// https://thisinterestsme.com/file_get_contents-timeout/
-$context = stream_context_create(
-    array('http'=>
-        array(
-            'timeout' => 5,  //120 seconds
-        )
-    )
-);
+        // https://thisinterestsme.com/file_get_contents-timeout/
+        $context = stream_context_create(array(
+            'http' => array(
+                'timeout' => 5 //120 seconds
+            )
+        ));
 
         // https://partnernetwork.ebay.com/epn-blog/2010/05/simple-api-searching-example
         // $data_source = "https://svcs.ebay.com/services/search/FindingService/v1/". $keywords;
@@ -281,16 +352,14 @@ $context = stream_context_create(
         // devstack timeout call
 
         // Set a 5 second timeout.
-//        $default_socket_timeout = ini_get('default_socket_timeout');
-//        ini_set('default_socket_timeout', 5);
+        //        $default_socket_timeout = ini_get('default_socket_timeout');
+        //        ini_set('default_socket_timeout', 5);
 
         $this->call = $data_source;
 
-
-
         $data = @file_get_contents($data_source, false, $context);
 
-//        ini_set('default_socket_timeout', $default_socket_timeout);
+        //        ini_set('default_socket_timeout', $default_socket_timeout);
 
         if ($data == false) {
             $this->thing->log("Finding API call failed.");
@@ -357,9 +426,7 @@ $context = stream_context_create(
 
         $this->items_count = $count;
 
-        $this->thing->log(
-            "got " . $this->items_count . " items."
-        );
+        $this->thing->log("got " . $this->items_count . " items.");
 
         return false;
     }
@@ -563,48 +630,76 @@ $context = stream_context_create(
         if ($item == null) {
             return;
         }
-
-        $title = $item['title'][0];
-
-        $currency = $item['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
-        $currency_prefix = "";
-        $currency_postfix = "USD";
-        if ($currency == "USD") {
-            setlocale(LC_MONETARY, 'en_US.UTF-8');
-            $currency_prefix = "$";
-            $currency_postfix = "";
+        $title = "X";
+        if (isset($item['title'][0])) {
+            $title = $item['title'][0];
         }
 
-        $price = $item['sellingStatus'][0]['currentPrice'][0]['__value__'];
+        $currency = "X";
+        $currency_prefix = "?";
+        $currency_postfix = "?";
+        if (
+            isset($item['sellingStatus'][0]['currentPrice'][0]['@currencyId'])
+        ) {
+            $currency =
+                $item['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+            $currency_prefix = "";
+            $currency_postfix = "USD";
+            if ($currency == "USD") {
+                setlocale(LC_MONETARY, 'en_US.UTF-8');
+                $currency_prefix = "$";
+                $currency_postfix = "";
+            }
+        }
 
-        $price_text = $currency_prefix . $price . $currency_postfix;
+        $price = "X";
+        $price_text = "X";
+        if (isset($item['sellingStatus'][0]['currentPrice'][0]['__value__'])) {
+            $price = $item['sellingStatus'][0]['currentPrice'][0]['__value__'];
 
-        // https://www.php.net/manual/en/function.money-format.php
-        $price_text = money_format('%.2n', $price);
+            $price_text = $currency_prefix . $price . $currency_postfix;
 
-        $link = $item["viewItemURL"][0];
+            // https://www.php.net/manual/en/function.money-format.php
+            $price_text = money_format('%.2n', $price);
+        }
 
+        $link = "X";
+        if (isset($item["viewItemURL"][0])) {
+            $link = $item["viewItemURL"][0];
+        }
         $link_thumbnail = null;
         if (isset($item['galleryURL'][0])) {
             $link_thumbnail = $item["galleryURL"][0];
         }
 
-        $location = $item["location"][0];
-        $country = $item["country"][0];
+        $location = "X";
+        if (isset($item["location"][0])) {
+            $location = $item["location"][0];
+        }
 
+        $country = "X";
+        if (isset($item["country"][0])) {
+            $country = $item["country"][0];
+        }
         $html_link = '<a href="' . $link . '">';
         $html_link .= $title;
         $html_link .= "</a>";
 
-        $item_id = $item["itemId"][0];
-//var_dump($item["primaryCategory"][0]['categoryName'][0]);
-//exit();
-$category_name = "X";
-if (isset($item["primaryCategory"][0]["categoryName"][0])) {$category_name = $item["primaryCategory"][0]["categoryName"][0];}
+        $item_id = "X";
+        if (isset($item["itemId"][0])) {
+            $item_id = $item["itemId"][0];
+        }
+
+        //var_dump($item["primaryCategory"][0]['categoryName'][0]);
+        //exit();
+        $category_name = "X";
+        if (isset($item["primaryCategory"][0]["categoryName"][0])) {
+            $category_name = $item["primaryCategory"][0]["categoryName"][0];
+        }
 
         $parsed_item = array(
             "id" => $item_id,
-            "category_name"=> $category_name,
+            "category_name" => $category_name,
             "title" => $title,
             "price" => $price_text,
             "link" => $link,
