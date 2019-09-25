@@ -245,6 +245,22 @@ class Ngram {
 
         $keywords = array('ngram', 'n-gram');
         $pieces = explode(" ", strtolower($input));
+/*
+        if (count($pieces) == 1) {
+
+            if ($input == 'ngram') {
+$this->ngrams = array();
+$this->response = "No response.";
+             //   $this->getMessage();
+
+             //   if ((!isset($this->index)) or 
+             //       ($this->index == null)) {
+             //       $this->index = 1;
+             //   }
+                return;
+            }
+        }
+*/
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {

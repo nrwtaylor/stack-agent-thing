@@ -272,6 +272,24 @@ class Word extends Agent {
         $this->word = $word;
     }
 
+    function isWord($input) {
+if (!isset($this->contents)) {
+        $file = $this->resource_path_words . 'words.txt';
+        $contents = file_get_contents($file);
+$this->contents = $contents;
+}
+        $words = explode("\n", $this->contents);
+
+        foreach ($words as $key=>$word) {
+
+            if (strtolower($input) == strtolower($word)) {
+                return true;
+            }
+
+        }
+return false;
+
+    }
 
     /**
      *

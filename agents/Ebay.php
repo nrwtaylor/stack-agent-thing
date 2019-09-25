@@ -187,6 +187,53 @@ class Ebay extends Agent
     }
 
     // devstack
+    function eBayFastKeywords($keywords, $n = 10)
+    {
+        $this->thing->log("fastest ebay search for " . $keywords . ".");
+
+        $this->response .= "Requested multiple items. ";
+        $URL = 'http://open.api.ebay.com/shopping';
+        //change these two lines
+        $compatabilityLevel = 967;
+        $appID = $this->application_id;
+        //you can also play with these selectors
+//        $includeSelector =
+//            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName,PictureURL";
+
+        $includeSelector =
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName,PictureURL";
+
+
+//        $includeSelector =
+//            "Description, TextDescription";
+
+
+        // Construct the GetSingleItem REST call
+
+        $apicall =
+            "https://svcs.ebay.com/services/search/FindingService/v1?" .
+            "OPERATION-NAME=findItemsByKeywords&" .
+            "SERVICE-VERSION=1.0.0&" .
+            "SECURITY-APPNAME=$appID&" .
+            "RESPONSE-DATA-FORMAT=XML&" .
+            "REST-PAYLOAD&" .
+            "keywords=" . urlencode($keywords) ."&" .
+            "paginationInput.entriesPerPage=" . $n;
+
+
+        $xml = @simplexml_load_file($apicall);
+  
+      if ($xml) {
+            $json = json_encode($xml);
+            $array = json_decode($json, true);
+            return $array;
+        }
+$this->state = "off";
+        return false;
+    }
+
+
+    // devstack
     function eBayGetKeywords($keywords)
     {
         $this->thing->log("get multiple items by keyword " . $keywords . ".");
@@ -209,7 +256,7 @@ class Ebay extends Agent
             "SECURITY-APPNAME=$appID&" .
             "RESPONSE-DATA-FORMAT=XML&" .
             "REST-PAYLOAD&" .
-            "keywords=harry%20potter%20phoenix&" .
+            "keywords=" . urlencode($keywords) ."&" .
             "paginationInput.entriesPerPage=10";
 
         $xml = simplexml_load_file($apicall);
@@ -365,6 +412,7 @@ class Ebay extends Agent
             $this->thing->log("Finding API call failed.");
 
             $this->response .= "Could not ask Ebay. ";
+            $this->state = "off";
             $this->items_count = 0;
             return true;
             // Invalid query of some sort.
@@ -625,24 +673,37 @@ class Ebay extends Agent
         $this->thing->log("made text.");
     }
 
-    public function parseItem($item = null)
+    public function parseItem($ebay_item = null)
     {
-        if ($item == null) {
-            return;
+//if (isset($ebay_item['Description'])) {var_dump($ebay_item);exit();}
+        if ($ebay_item == null) {
+            return true;
         }
-        $title = "X";
-        if (isset($item['title'][0])) {
-            $title = $item['title'][0];
+
+if (is_string($ebay_item)) {return true;}
+
+if (isset($ebay_item['Item'])) {$ebay_item = $ebay_item['Item'];}
+
+$title = "X";
+
+if (isset($ebay_item['title'])) {
+        $title = $ebay_item['title'];
+        if (is_array($ebay_item['title'])) {
+            $title = $ebay_item['title'][0];
         }
+}
+
+//if ($title == "X") {$title = $ebay_item['ebay']['Title'];}
 
         $currency = "X";
         $currency_prefix = "?";
         $currency_postfix = "?";
+
         if (
-            isset($item['sellingStatus'][0]['currentPrice'][0]['@currencyId'])
+            isset($ebay_item['sellingStatus'][0]['currentPrice'][0]['@currencyId'])
         ) {
             $currency =
-                $item['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+                $ebay_item['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
             $currency_prefix = "";
             $currency_postfix = "USD";
             if ($currency == "USD") {
@@ -652,10 +713,25 @@ class Ebay extends Agent
             }
         }
 
+
+        if (
+            isset($ebay_item['sellingStatus']['currentPrice'])
+        ) {
+            $currency = "USD";
+            $currency_prefix = "";
+            $currency_postfix = "USD";
+            if ($currency == "USD") {
+                setlocale(LC_MONETARY, 'en_US.UTF-8');
+                $currency_prefix = "$";
+                $currency_postfix = "";
+            }
+        }
+
+
         $price = "X";
         $price_text = "X";
-        if (isset($item['sellingStatus'][0]['currentPrice'][0]['__value__'])) {
-            $price = $item['sellingStatus'][0]['currentPrice'][0]['__value__'];
+        if (isset($ebay_item['sellingStatus'][0]['currentPrice'][0]['__value__'])) {
+            $price = $ebay_item['sellingStatus'][0]['currentPrice'][0]['__value__'];
 
             $price_text = $currency_prefix . $price . $currency_postfix;
 
@@ -663,52 +739,170 @@ class Ebay extends Agent
             $price_text = money_format('%.2n', $price);
         }
 
-        $link = "X";
-        if (isset($item["viewItemURL"][0])) {
-            $link = $item["viewItemURL"][0];
-        }
-        $link_thumbnail = null;
-        if (isset($item['galleryURL'][0])) {
-            $link_thumbnail = $item["galleryURL"][0];
+
+        if (isset($ebay_item['sellingStatus']['currentPrice'])) {
+            $price = $ebay_item['sellingStatus']['currentPrice'];
+
+            $price_text = $currency_prefix . $price . $currency_postfix;
+
+            // https://www.php.net/manual/en/function.money-format.php
+            $price_text = money_format('%.2n', $price);
         }
 
-        $location = "X";
-        if (isset($item["location"][0])) {
-            $location = $item["location"][0];
-        }
+//if ($price == "X") {var_dump($ebay_item);exit();}
 
-        $country = "X";
-        if (isset($item["country"][0])) {
-            $country = $item["country"][0];
+$picture_urls = "X";
+if (isset($ebay_item["Item"]["PictureURL"])) {
+    $picture_urls = $ebay_item["Item"]["PictureURL"];
+}
+
+if (isset($ebay_item["PictureURL"])) {
+    $picture_urls = $ebay_item["PictureURL"];
+}
+
+$description = "X";
+if (isset($ebay_item["Description"])) {
+    $description = $ebay_item["Description"];
+}
+
+
+$condition_description = "X";
+if (isset($ebay_item["ConditionDescription"])) {
+    $condition_description = $ebay_item["ConditionDescription"];
+}
+
+
+$link = null;
+if (isset($ebay_item["viewItemURL"])) {
+        $link = $ebay_item["viewItemURL"];
+        if (is_array($ebay_item["viewItemURL"])) {
+            $link = $ebay_item["viewItemURL"][0];
         }
+}
+
+
+
+if (isset($ebay_item["ViewItemURLForNaturalSearch"])) {
+            $link = $ebay_item["ViewItemURLForNaturalSearch"];
+//echo $link;
+}
+
+//$link = "X";
+if (isset($ebay_item['link'])) {$link = $ebay_item['link'];}
+
+//if (!isset($link)) {var_dump($ebay_item); exit();}
+
+
+//var_dump($ebay_item);
+//if ($picture_urls == "X") {var_dump($ebay_item);exit();}
+$link_thumbnail = "X";
+if (isset($ebay_item["galleryURL"])) {
+
+        $link_thumbnail = $ebay_item["galleryURL"];
+        if (is_array($ebay_item['galleryURL'])) {
+            $link_thumbnail = $ebay_item["galleryURL"][0];
+        }
+}
+
+if (isset($ebay_item["GalleryURL"])) {
+
+        $link_thumbnail = $ebay_item["GalleryURL"];
+        if (is_array($ebay_item['GalleryURL'])) {
+            $link_thumbnail = $ebay_item["GalleryURL"][0];
+        }
+}
+
+//$link_thumbnail = "X";
+if (isset($ebay_item['thumbnail'])) {$link_thumbnail = $ebay_item['thumbnail'];}
+
+
+if (!isset($link_thumbnail)) {
+throw "No thumbnai";
+var_dump($ebay_item); exit();
+}
+
+
+$location = "X";
+if (isset($ebay_item["location"])) {
+        $location =$ebay_item["location"];
+        if (is_array($ebay_item["location"])) {
+            $location = $ebay_item["location"][0];
+        }
+}
+
+$country = "X";
+if (isset($ebay_item["country"])) {
+        $country = $ebay_item["country"][0];
+        if (is_array($ebay_item["country"])) {
+            $country = $ebay_item["country"][0];
+        }
+}
+
+
+//if(!isset($link)) {var_dump($ebay_item);echo "<br><br>";}
+
+
+if (!isset($link)) {
+if (isset($bay_item["viewItemURL"])) {$link = $ebay_item["viewItemURL"];}
+if (isset($bay_item["link"])) {$link = $ebay_item["link"];}
+
+}
+
+$html_link = "";
+if (isset($link)) {
         $html_link = '<a href="' . $link . '">';
         $html_link .= $title;
         $html_link .= "</a>";
+}
 
-        $item_id = "X";
-        if (isset($item["itemId"][0])) {
-            $item_id = $item["itemId"][0];
+$item_id = "X";
+if (isset($ebay_item['itemId'])) {
+
+        $item_id = $ebay_item["itemId"];
+        if (is_array($ebay_item["itemId"])) {
+            $item_id = $ebay_item["itemId"][0];
         }
+}
+if (isset($ebay_item['ItemID'])) {
+
+        $item_id = $ebay_item["ItemID"];
+        if (is_array($ebay_item["ItemID"])) {
+            $item_id = $ebay_item["ItemID"][0];
+        }
+}
+
+//if(!isset($item_id)) {var_dump($ebay_item["itemId"][0]);exit();}
+
+
+if (isset($ebay_item["id"])) {$item_id = $ebay_item["id"];}
+//if (!isset($link)) {var_dump($ebay_item); exit();}
+
 
         //var_dump($item["primaryCategory"][0]['categoryName'][0]);
-        //exit();
         $category_name = "X";
-        if (isset($item["primaryCategory"][0]["categoryName"][0])) {
-            $category_name = $item["primaryCategory"][0]["categoryName"][0];
-        }
+if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
+            $category_name = $ebay_item["primaryCategory"][0]["categoryName"];
 
-        $parsed_item = array(
+        if (is_array($category_name)) {
+            $category_name = $ebay_item["primaryCategory"][0]["categoryName"][0];
+        }
+}
+        $item = array(
             "id" => $item_id,
             "category_name" => $category_name,
+            "description" => $description,
+            "condition_description" => $condition_description,
             "title" => $title,
             "price" => $price_text,
             "link" => $link,
             "thumbnail" => $link_thumbnail,
             "location" => $location,
             "country" => $country,
-            "html_link" => $html_link
+            "html_link" => $html_link,
+            "picture_urls"=> $picture_urls,
+            "ebay"=>$ebay_item
         );
-        return $parsed_item;
+        return $item;
     }
 
     public function makeSMS()
@@ -822,17 +1016,27 @@ class Ebay extends Agent
         $keywords = $this->keywords;
 
         $input = $this->input;
-
+//var_dump($input);
+//var_dump($this->agent_input);
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
         // Keyword
+
+if ($this->agent_input == "ebay") {
+$this->response .= "Set up a connector to the Ebay API(s)";
+return;
+}
+
         if (count($pieces) == 1) {
             if ($input == 'ebay') {
                 $this->response .= "Did not ask Ebay about nothing. ";
                 return;
             }
         }
+
+// Don't pull anything. Just set up the connector.
+//return;
 
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), "ebay is")) !== false) {

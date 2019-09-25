@@ -288,6 +288,7 @@ class Alpha extends Agent
      *
      * @return unknown
      */
+/*
     public function makePNG() {
         $text = "thing:".$this->alphas[0];
 
@@ -303,6 +304,6 @@ class Alpha extends Agent
         $this->thing_report['png'] = $image;
         return $this->thing_report['png'];
     }
-
+*/
 
 }
