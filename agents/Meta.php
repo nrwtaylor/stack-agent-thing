@@ -105,7 +105,6 @@ class Meta
                                 "message"=>null);
 
         $this->meta = $data_gram;
-//echo "Blank provided\n";
 return;}
 
 
@@ -260,7 +259,6 @@ return;}
 
                         default:
 
-                            //echo 'default';
 
                     }
 
@@ -287,5 +285,3 @@ return;}
         return $this->word_context;
     }
 }
-
-?>

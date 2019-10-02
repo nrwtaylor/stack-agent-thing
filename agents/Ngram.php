@@ -327,6 +327,3 @@ $this->response = "No response.";
 
 
 }
-
-
-?>

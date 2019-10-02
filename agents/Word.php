@@ -78,10 +78,6 @@ class Word extends Agent {
         //      $t = explode("  ", $test);
         $t = preg_split($pattern, $test);
 
-        //$n = count($t)-1;
-        //echo $n;
-        //$words = explode(" | ", $t[4] );
-        //$new_words = array();
 
         foreach ($t as $key=>$word) {
             $new_words[] = trim($word);

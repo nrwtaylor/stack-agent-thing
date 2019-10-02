@@ -661,5 +661,3 @@ class Similar
         }
 
 }
-
-?>

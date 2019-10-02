@@ -411,6 +411,3 @@ class Clocktime
 
 	}
 }
-
-?>
-

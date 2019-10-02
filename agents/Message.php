@@ -231,7 +231,6 @@ $this->thing_report['info'] = "Assemble a message.";
 
 
                 //     }
-                //echo "email";
                 //break;
                 continue;
             case 'web':
@@ -493,9 +492,7 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
         }
 
 
-        //echo "message";
         if ( $this->checkSlack($to) ) { // The Slack app of Mordok the Magnificent
-            //echo "slack";
             $this->thing->log('<pre> Agent "Message" responding via Slack.</pre>');
 
 
@@ -555,7 +552,7 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
 
             switch (true) {
             case ($token_thing->thing_report['token'] != 'sms' ):
-                echo "no sms token " . $this->uuid . "\n";
+                $this->thing->log( "no sms token " . $this->uuid );
                 $this->thing_report['info'] = 'Agent "Message" did not get SMS token.';
                 break;
 
@@ -579,8 +576,6 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
 
             default:
             }
-
-            //echo $this->thing_report['info'];
 
             $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
 

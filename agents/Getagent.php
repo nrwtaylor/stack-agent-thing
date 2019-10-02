@@ -295,13 +295,3 @@ $this->agent_names = implode(" ", $this->agent_variables);
 
 
 }
-
-
-
-
-
-
-
-
-
-?>

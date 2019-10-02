@@ -230,18 +230,6 @@ class FindAgent
 
         if (isset($pieces[0])) {$this->requested_agent_name = $pieces[0];}
         if (isset($pieces[1])) {$this->horizon = $pieces[1];}
-
-
-//echo $this->requested_thing_name;
-//echo $this->horizon;
-//exit();
-        //$this->identity = $pieces[2];
-
-
-//        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agen$
-
-        return;
-
     }
 
 	public function readSubject() {

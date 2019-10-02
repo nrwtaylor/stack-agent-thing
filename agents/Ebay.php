@@ -23,7 +23,6 @@ class Ebay extends Agent
         $this->environment = "production"; // production
 
         $word = strtolower($this->word) . "_" . $this->environment;
-
         $this->thing->log(
             $this->agent_prefix . 'using ebay keys for  ' . $word . ".",
             "DEBUG"

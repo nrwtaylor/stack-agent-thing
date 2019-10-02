@@ -57,7 +57,6 @@ class Frequency extends Agent
      *
      */
     function makeTable() {
-
         if (!isset($this->channel['vector'])) {$this->getFrequencies();}
 
 if (!isset($this->channel['vector'])) {return;}
@@ -132,7 +131,6 @@ if (!isset($this->channel['vector'])) {return;}
             }
 
         }
-
         $this->band = $band;
     }
 
@@ -185,6 +183,10 @@ if (!isset($this->channel['vector'])) {return;}
 $matches = array();
 
         if (!isset($this->band)) {$this->makeTable();}
+
+// Still not set?
+if (!isset($this->band)) {return;}
+
         $search_frequency = (float) $text;
 
         foreach ($this->band as $i=>$band) {
@@ -418,12 +420,15 @@ if (!isset($this->link)) {$this->link = null;}
             //var_dump($this->band_matches);
             //exit();
 
+$t = "No band matches. ";
+if (isset($this->band_matches)) {
             $t = "";
             foreach ($this->band_matches as $i=>$band) {
 
                 $t .= $this->frequencyString($band) ." / ";
 
             }
+}
 
             if (strpos(strtolower($t), "amateur")) {
                 $ars_thing = new Amateurradioservice($this->thing);

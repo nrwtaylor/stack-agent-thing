@@ -379,5 +379,3 @@ if (strpos(strtolower($from), '@winlink.org') !== false) {
 	}
 
 }
-
-?>

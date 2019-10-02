@@ -696,6 +696,3 @@ if (strpos($this->from, '@winlink.org') !== false) {
 
 }
 
-
-
-?>

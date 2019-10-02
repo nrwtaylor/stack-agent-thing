@@ -512,8 +512,6 @@ class Json {
             // Nah. Do the hard work through exceptions.
 
 
-            //echo "Insufficient space available in DB field " . $this->field . " to fully save Thing state.  String length = " . strlen($this->json_data) . " characters.\n";
-            //echo $this->uuid . "\n";
             $thing = new Thing(null);
             $thing->Create(null, "human", 'Insufficient space in DB record ' . $this->uuid . ".");
             $thing_agent = new Hey($thing);

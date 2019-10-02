@@ -44,31 +44,6 @@ $this->identifier = $this->agent_input;
 
         $this->current_time = $this->thing->json->time();
 
-//        $this->variables_thing = new Variables($this->thing, "variables identity " . $this->from);
-
-//        $this->get(); // Updates $this->elapsed_time;
-
-//		$this->thing->log('Agent "Identity" running on Thing ' . $this->thing->nuuid . ".");
-//		$this->thing->log('Agent "Identity" received this Thing, "' . $this->subject .  '".') ;
-
-//		$this->readSubject();
-//		$this->respond();
-
-		//$this->thing->log( '<pre> Agent "Mordok" completed and is showing a ' . $this->state . ' flag.</pre>');
-
-
-//        $this->end_time = microtime(true);
-//        $this->actual_run_time = $this->end_time - $this->start_time;
-//        $milliseconds = round($this->actual_run_time * 1000);
-
-//        $this->thing->log( $this->agent_prefix .'ran for ' . $milliseconds . 'ms.' );
-
-
-//        $this->thing_report['log'] = $this->thing->log;
-//        echo $this->thing_report['log'];
-
-
-//		return;
 $this->thing_report['sms'] = "MESSAGE IDENTITY | " . $this->identifier;
 
 		}
@@ -76,7 +51,6 @@ $this->thing_report['sms'] = "MESSAGE IDENTITY | " . $this->identifier;
 
     function set($requested_state = null)
     {
-echo "set";
 //        if ($time_string == false) {
             $this->thing->json->setField("variables");
 //            $time_string = $this->thing->json->time();

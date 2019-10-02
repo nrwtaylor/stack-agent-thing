@@ -15,7 +15,6 @@ error_reporting(-1);
 // API group
 $app->group('/api', function () use ($app) {
 
-
     // This is the whitefox API.  Accessible at api/whitefox/
         $app->group('/whitefox', function () use ($app) {
         });

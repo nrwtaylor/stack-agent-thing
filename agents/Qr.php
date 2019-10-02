@@ -235,14 +235,15 @@ class Qr
 
         $qrCode = new QrCode($codeText);
 
-        ob_start();
-        echo $qrCode->writeString();
-        $image = ob_get_contents();
-
-        ob_clean();
-        ob_end_clean();
+        //ob_start();
+        //echo $qrCode->writeString();
+        //$image = ob_get_contents();
+$image = $qrCode->writeString();
+        //ob_clean();
+        //ob_end_clean();
 
         $this->PNG_embed = "data:image/png;base64,".base64_encode($image);
+
         $this->PNG = $image;
 
         $this->width = 100;
@@ -251,7 +252,6 @@ class Qr
         $html = '<img src="data:image/png;base64,'. base64_encode($image) . '"
                 width="' . $this->width .'"  
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/qr.txt">';
-
 
         $this->html_image = $html;
 
@@ -264,31 +264,7 @@ class Qr
 
         $this->thing_report['png'] = $image;
 
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
         return $this->thing_report['png'];
     }
-/*
-    public function makePNG()
-    {
-        //if (!isset($this->image)) {$this->makeImage();}
-
-        $agent = new Png($this->thing, "png");
-        $this->makeImage();
-
-        $agent->makePNG($this->image);
-
-        $this->html_image = $agent->html_image;
-        $this->image = $agent->image;
-        $this->PNG = $agent->PNG;
-
-        //$this->thing_report['png'] = $agent->PNG;
-        $this->thing_report['png'] = $agent->image_string;
-
-    }
-*/
-
 }
-
-
-?>

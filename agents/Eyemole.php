@@ -237,5 +237,3 @@ foreach($nuggets as $nugget) {
 	}
 
 }
-
-?>

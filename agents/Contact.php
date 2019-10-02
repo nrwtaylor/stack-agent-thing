@@ -119,8 +119,3 @@ class Contact {
     }
 
 }
-
-
-
-return;
-?>

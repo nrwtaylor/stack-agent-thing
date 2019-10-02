@@ -79,6 +79,3 @@ class Pride {
 		return $this->response;
 	}
 }
-
-?>
-

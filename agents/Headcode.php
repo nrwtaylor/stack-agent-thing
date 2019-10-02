@@ -49,8 +49,6 @@ class Headcode
 
     function __construct(Thing $thing, $agent_input = null) 
     {
-
-
         $this->start_time = microtime(true);
 
         //if ($agent_input == null) {$agent_input = "";}
@@ -179,8 +177,6 @@ class Headcode
         if (!isset($this->response)) {$this->response = "No response found.";}
 
         $this->thing_report['response'] = $this->response;
-
-		return;
     }
 
     function set()
@@ -218,8 +214,6 @@ class Headcode
         $this->headcode->setVariable("run_at", $this->run_at);
         $this->headcode->setVariable("quantity", $this->quantity);
         $this->headcode->setVariable("available", $this->available);
-
-        return;
     }
 
     function nextHeadcode()
@@ -842,7 +836,10 @@ $image_width = 125;
                 $txt .= " " . str_pad($headcode['available'], 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['quantity'])) {
-                $txt .= " " . str_pad($headcode['quantity'], 9, " ", STR_PAD_LEFT);
+$quantity = "X";
+if (isset($headcode['quantity']['quantity'])) {$quantity = $headcode['quantity']['quantity'];}
+//var_dump($headcode['quantity']);
+                $txt .= " " . str_pad($quantity, 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['consist'])) {
                 $txt .= " " . str_pad($headcode['consist'], 9, " ", STR_PAD_LEFT);
@@ -1115,8 +1112,6 @@ if (!isset($this->index)) {
 
 
 		return false;
-
-	
 	}
 
 
@@ -1128,8 +1123,6 @@ if (!isset($this->index)) {
 		// No messing about.
 		return $this->thing->Forget();
 	}
-
-}
 
 /* More on headcodes
 
@@ -1153,4 +1146,5 @@ S          "     "     "         Scottish Region
 V         "     "     "         Western Region
 
 */
-?>
+}
+

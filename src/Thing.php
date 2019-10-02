@@ -263,9 +263,7 @@ class Thing
 		// I found and deleted an @ sign.
 
 		if (strpos($to, "@") !== false) {
-			//echo "@ sign found";
 			$to = "";
-			//echo "email address removed completely<br>";
 			$message0['50 words'] .= $this->uuid . " found and removed an @ sign";
 		}
 
@@ -421,7 +419,7 @@ class Thing
         foreach ($accounts as $uuid=>$account) {
             foreach($account as $account_name=>$balance) {
                 if (($uuid == 'stack') or ($uuid == 'thing' )) {
-                //    echo "corrupted account list";
+                //    corrupted account list
                     return true;
                 }
                 $this->newAccount($uuid, $account_name,	$balance);
@@ -433,7 +431,7 @@ class Thing
     {
 		// Query stack for matching uuid and nom_from
 
-		echo "WORK ON STACK BALANCE";
+		// "WORK ON STACK BALANCE";
 
 		$thingreport = $this->db-->UUids(); // Designed to accept null as $this->uuid.
 
@@ -495,7 +493,7 @@ class Thing
 		if ($action == null) {$action = "did something with";}
 		// Keep it simple for now.
 
-		echo '<pre> Agent "'.$agent.'" ' . $action . ' this Thing at ';print_r($variable);echo'</pre>';
+//		echo '<pre> Agent "'.$agent.'" ' . $action . ' this Thing at ';print_r($variable);echo'</pre>';
     }
 
     public function getVariable($variable_set, $variable)
@@ -940,5 +938,3 @@ class Thing
         }
     }
 }
-
-?>

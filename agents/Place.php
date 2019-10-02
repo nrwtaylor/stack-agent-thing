@@ -183,7 +183,6 @@ class Place extends Agent
 
         foreach ($this->places as $place) {
             $existing_place_code = strtolower($place['code']);
-//echo $place_code ." " . $place_code_candidate. "\n";
             if (($existing_place_code == $place_code_candidate) or ($place_code_candidate == null)) {
                 //$place_code_candidate = str_pad(rand(100,9999) , 8, "9", STR_PAD_LEFT);
 
@@ -1098,8 +1097,6 @@ $choices = false;
 
         }
 
-        //echo "last place refreshed at " .$this->last_refreshed_at;
-        //echo "<br>";
 
 
     }

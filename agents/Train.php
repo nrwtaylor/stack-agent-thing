@@ -106,7 +106,6 @@ $this->Respond();
 
         $this->thing_report['log'] = $this->thing->log;
         $this->thing_report['response'] = $this->response;
-echo $this->response;
         //var_dump($this->available);
 
 		return;
@@ -767,9 +766,6 @@ $train = null;
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
-      //  $this->day = date("w",$t);
-      //  $this->minute =  date("i",$t);
 
 
 
@@ -1017,8 +1013,6 @@ $train_day = $this->day;
                 // Negative is how late the train is.
                 $this->available = strtotime($this->end_at) - strtotime($this->current_time);
 
-//echo($this->available);
-//exit();
                 break;
             default:
                 $this->available = "X";
@@ -1347,8 +1341,6 @@ $train_day = $this->day;
 
         $this->get();
 
-        //echo "start";
-        //echo $this->previous_state;
 
 		if ($this->previous_state == 'stop') {
             $this->thing->choice->Choose('start');
@@ -1359,8 +1351,6 @@ $train_day = $this->day;
 
 		if ($this->previous_state == 'start') {
 
-            //echo $this->current_time;
-            //ech
             $t = strtotime($this->current_time) - strtotime($this->refreshed_at);
 
 			$this->elapsed_time = $t + strtotime($this->elapsed_time);
@@ -1454,7 +1444,6 @@ $train_day = $this->day;
 		$to = $this->thing->from;
 		$from = "train";
 
-		//echo "<br>";
 
         if (isset($this->requested_state)) {
             $this->state = $this->requested_state;
@@ -1920,7 +1909,6 @@ $this->getConsist();
 // probably okay if the variable is renamed to variable.  Or if $headcode_thing
 // resolves to the variable.
 
-//echo count($head_codes);
 
         $this->thing->log( $this->agent_prefix .'. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
@@ -2034,7 +2022,7 @@ $this->getConsist();
 
 
     default:
-        //$this->read();                                                    //echo 'default';
+        //$this->read();
 
                                         }
 
@@ -2156,7 +2144,6 @@ if ( (isset($this->run_at)) and (isset($this->runtime->minutes)) ) {
                                 if ($word == $discriminator) {
                                         $count[$discriminator] = $count[$discriminator] + 1;
                                         $total_count = $total_count + 1;
-                                                //echo "sum";
                                 }
 
                                 foreach ($aliases[$discriminator] as $alias) {
@@ -2164,14 +2151,12 @@ if ( (isset($this->run_at)) and (isset($this->runtime->minutes)) ) {
                                         if ($word == $alias) {
                                                 $count[$discriminator] = $count[$discriminator] + 1;
                                                 $total_count = $total_count + 1;
-                                                //echo "sum";
                                         }
                                 }
                         }
 
                 }
 
-                //echo "total count"; $total_count;
                 // Set total sum of all values to 1.
 
                 $normalized = array();
@@ -2187,14 +2172,12 @@ if ( (isset($this->run_at)) and (isset($this->runtime->minutes)) ) {
                 // Now see what the delta is between position 0 and 1
 
                 foreach ($normalized as $key=>$value) {
-                    //echo $key, $value;
 
                     if ( isset($max) ) {$delta = $max-$value; break;}
                         if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
                 }
 
 
-//                        echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
 
 
                 if ($delta >= $minimum_discrimination) {
@@ -2208,6 +2191,3 @@ if ( (isset($this->run_at)) and (isset($this->runtime->minutes)) ) {
         }
 
 }
-
-?>
-

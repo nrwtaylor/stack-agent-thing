@@ -139,7 +139,6 @@ class Weather extends Agent {
 
             foreach ($days as $day) {
                 if (stripos($line, $day) !== false) {
-                    //echo $line;
                     $a = explode(":", $line);
                     if (stripos($line, $day) !== false) {
                         foreach ($days as $day) {
@@ -512,6 +511,5 @@ if(!isset($this->daily_forecast['sunday'][0]['night'])) {$index = 1;}
         return "Message not understood";
         return false;
     }
-
 
 }

@@ -1235,7 +1235,7 @@ function myErrorHandler($errno, $errstr, $errfile, $errline) {
         //ob_clean();
         echo "BORK | e5ffb5de-a502-466e-8ecc-f0ec9f861e0d";
         if (preg_match('(Maximum|execution|time|exceeded)', $errstr) === 1) {
-            echo " | We only a limited amount of steam on this server.";
+            echo " | We only have a limited amount of steam on this server.";
         }
 
         // echo $errno . "\n";
@@ -1302,6 +1302,3 @@ function fatalErrorShutdownHandler() {
 
 
 }
-
-
-?>

@@ -1027,5 +1027,3 @@ if ($this->isPlace($input)) {
         }
 
 }
-
-?>

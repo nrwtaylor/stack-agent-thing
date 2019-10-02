@@ -108,8 +108,6 @@ class Flag
 
         $this->flag->setVariable("refreshed_at", $this->current_time);
 
-        //$this->makeChoices();
-        //$this->makePNG();
 
         $this->thing->log($this->agent_prefix . 'set Flag to ' . $this->state, "INFORMATION");
 
@@ -208,8 +206,6 @@ class Flag
 
     function makeChoices () {
 
-//        $this->thing->choice->Choose($this->state);
-//        $this->thing->choice->save($this->keyword, $this->state);
 
         $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
 
@@ -261,7 +257,6 @@ class Flag
 		$this->thing_report['email'] = $this->message;
 
         $this->makePNG();
-//        $this->makeChoices(); // Turn off because it is too slow.
 
         $this->makeTXT();
 
@@ -273,8 +268,6 @@ class Flag
 
         //$this->thing_report['help'] = 'This Flag is either RED or GREEN. RED means busy.';
         $this->makeHelp();
-
-		return;
 	}
 
     function makeHelp()
@@ -624,13 +617,11 @@ class Flag
                 if ($word == $discriminator) {
                     $count[$discriminator] = $count[$discriminator] + 1;
                     $total_count = $total_count + 1;
-                    //echo "sum";
                 }
                 foreach ($aliases[$discriminator] as $alias) {
                     if ($word == $alias) {
                         $count[$discriminator] = $count[$discriminator] + 1;
                         $total_count = $total_count + 1;
-                        //echo "sum";
                     }
                 }
             }
@@ -650,18 +641,15 @@ class Flag
         // Now see what the delta is between position 0 and 1
 
         foreach ($normalized as $key=>$value) {
-            //echo $key, $value;
 
             if ( isset($max) ) {$delta = $max-$value; break;}
             if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
         }
 
 
-        //echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
 
 
         if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
             return $selected_discriminator;
         } else {
             return false; // No discriminator found.

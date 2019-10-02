@@ -405,5 +405,3 @@ function microtime_diff($start, $end)
 
 
 }
-
-?>

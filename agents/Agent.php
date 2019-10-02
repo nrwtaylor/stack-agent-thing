@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 // Agent resolves message disposition
@@ -36,7 +35,6 @@ class Agent {
 
         $this->getName();
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
-
         // Given a "thing".  Instantiate a class to identify
         // and create the most appropriate agent to respond to it.
 
@@ -93,15 +91,12 @@ class Agent {
 */
         $this->init();
 
-
 //        $this->getName();
 //        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
 
 
         $this->get();
-
         $this->read();
-
         $this->run();
         $this->make();
 
@@ -630,7 +625,6 @@ public function makeEmail() {
             $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
         }
         $this->input = trim($whatIWant);
-
         $this->readSubject();
     }
 
@@ -749,64 +743,6 @@ public function makeEmail() {
         } else {
             $input = strtolower($this->agent_input);
         }
-
-        /*
-        if (strpos($this->agent_input, 'receipt') !== false) {
-            $this->thing->log( 'Agent created a Receipt agent' );
-            $receipt_thing = new Receipt($this->thing);
-            $this->thing_report = $receipt_thing->thing_report;
-
-            return $this->thing_report;
-        }
-
-        if (strpos($this->agent_input, 'flag') !== false) {
-            $this->thing->log( '<pre> Agent created a Flag agent</pre>' );
-            $flag_thing = new Flag($this->thing);
-            $this->thing_report = $flag_thing->thing_report;
-
-            return $this->thing_report;
-        }
-
-        if (strpos($this->agent_input, 'satoshi') !== false) {
-
-            $this->thing->log( '<pre> Agent created a Satoshi agent</pre>' );
-            $satoshi_thing = new Satoshi($this->thing);
-            $this->thing_report = $satoshi_thing->thing_report;
-
-            return $this->thing_report;
-
-        }
-
-        if (strpos($this->agent_input, 'iching') !== false) {
-
-            $this->thing->log( '<pre> Agent created a iChing agent</pre>' );
-            $iching_thing = new Iching($this->thing);
-            $this->thing_report = $iching_thing->thing_report;
-            return $this->thing_report;
-        }
-
-        if (strpos($this->agent_input, 'whatis') !== false) {
-
-            $this->thing->log( '<pre> Agent created a Whatis agent</pre>' );
-            $whatis_thing = new Whatis($this->thing);
-            $this->thing_report = $whatis_thing->thing_report;
-            return $this->thing_report;
-        }
-
-        if (strpos($this->agent_input, 'train') !== false) {
-            $this->thing->log( '<pre> Agent created a Train agent</pre>' );
-            $train_thing = new Train($this->thing);
-            $this->thing_report = $train_thing->thing_report;
-            return $this->thing_report;
-        }
-
-        if (strpos($this->agent_input, 'snowflake') !== false) {
-            $this->thing->log( '<pre> Agent created a Snowflake agent</pre>' );
-            $snowflake_thing = new Snowflake($this->thing);
-            $this->thing_report = $snowflake_thing->thing_report;
-            return $this->thing_report;
-        }
-*/
 
         // Basically if the agent input directly matches an agent name
         // Then run it.
@@ -993,7 +929,6 @@ public function makeEmail() {
 
         }
 
-
         // Based on burstiness and similiary decide if this message is okay.
         //  if ($burstiness
 
@@ -1074,7 +1009,6 @@ public function makeEmail() {
             return $this->thing_report;
         }
 
-
         $this->thing->log('<pre> Agent "Agent" looking for optin/optout.</pre>');
         //    $usermanager_thing = new Usermanager($this->thing,'usermanager');
 
@@ -1121,26 +1055,23 @@ public function makeEmail() {
             return $this->thing_report;
         }
 
-        $this->thing->log('Agent "Agent" looking for UUID in input.');
 
+        $this->thing->log('Agent "Agent" looking for UUID in input.');
         // Is Identity Context?
         $uuid = new Uuid($this->thing, "extract");
         $uuid->extractUuids($input);
-
         if ((isset($uuid->uuids)) and (count($uuid->uuids) > 0)) {
             $this->thing->log('Agent "Agent" found a  UUID in input.', "INFORMATION");
             // $this->thing_report = $uuid->thing_report;
             // And then ignored it.
         }
-
         // Remove references to named chatbot agents
         //        $chatbot = new Chatbot($this->thing,"chatbot");
         //        $input =  $chatbot->filtered_input;
 
-
-
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
+
 
         if ($headcode->response === true) {
         } else {

@@ -18,7 +18,6 @@ error_reporting(-1);
 class Uuid extends Agent
 {
 
-
     /**
      *
      */
@@ -34,7 +33,6 @@ class Uuid extends Agent
             array("uuid", "snowflake"));
 
         $this->aliases = array("learning"=>array("good job"));
-
         $this->makePNG();
 
         $this->thing_report['help'] = "Makes a universally unique identifier. Try NUUID.";
@@ -222,6 +220,7 @@ class Uuid extends Agent
      *
      * @return unknown
      */
+/*
     public function makePNG() {
         if (isset($this->PNG)) {return;}
 
@@ -238,6 +237,6 @@ class Uuid extends Agent
         return $this->thing_report['png'];
 
     }
-
+*/
 
 }
