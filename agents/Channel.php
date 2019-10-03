@@ -136,9 +136,9 @@ class Channel
 
 		}
 */
-		$this->thing->choice->Create('channel', $this->node_list, "start");
+		//$this->thing->choice->Create('channel', $this->node_list, "start");
 
-		$choices = $this->thing->choice->makeLinks('start');
+		//$choices = $this->thing->choice->makeLinks('start');
 //		$html_button_set = $links['button'];
 
 		$from = $this->from;

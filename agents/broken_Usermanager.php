@@ -5,19 +5,19 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Usermanager
+class Usermanager extends Agent
 {
-	function __construct(Thing $thing, $agent_input = null)
-    {
-$this->state = "X";
-return;
-		$this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $thing;
+function init() {
+//	function __construct(Thing $thing, $agent_input = null)
+//    {
 
-		$this->agent_name = 'usermanager';
-        $this->agent_prefix = 'Agent "Usermanager"';
-        $this->agent_input = $agent_input;
+//		$this->thing = $thing;
+  //      $this->start_time = $this->thing->elapsed_runtime();
+    //    $this->thing_report['thing'] = $thing;
+
+//		$this->agent_name = 'usermanager';
+   //     $this->agent_prefix = 'Agent "Usermanager"';
+   //     $this->agent_input = $agent_input;
 
 		// So I could call
 		$this->test = false;
@@ -41,10 +41,13 @@ return;
 
         $this->verbosity_log = 7;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+                $this->thing_report['help'] = 'Agent "Usermanager" figuring the user of this Thing out';
+
+
+  //      $this->uuid = $thing->uuid;
+  //      $this->to = $thing->to;
+  //      $this->from = $thing->from;
+  //      $this->subject = $thing->subject;
 		//$this->sqlresponse = null;
 
 		$this->node_list = array("start"=>array("new user"=>array("opt-in"=>
@@ -52,28 +55,28 @@ return;
 
         $this->current_time = $this->thing->time();
 
-		$this->thing->log( 'Agent "Usermanager" running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
+//		$this->thing->log( 'Agent "Usermanager" running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
 
-        // 279ms 303ms 306ms
-        $split_time = $this->thing->elapsed_runtime();
+//        // 279ms 303ms 306ms
+//        $split_time = $this->thing->elapsed_runtime();
+//
+//        $this->variables_agent = new Variables($this->thing, "variables usermanager " . $this->from);
 
-        $this->variables_agent = new Variables($this->thing, "variables usermanager " . $this->from);
-
-        $this->thing->log( $this->agent_prefix .' created variables agent in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.', "OPTIMIZE" );
+//        $this->thing->log( $this->agent_prefix .' created variables agent in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.', "OPTIMIZE" );
         //4ms 4ms 3ms
-        $this->get();
+//        $this->get();
 
-        if ($this->agent_input != null) {
-            $this->readInstruction();
-	    } else {
-            $this->getSubject();
-        }
+//        if ($this->agent_input != null) {
+//            $this->readInstruction();
+//	    } else {
+//            $this->getSubject();
+//        }
 
-        $this->set();
+//        $this->set();
 
-        if ($this->agent_input == null) {
-		    $this->setSignals(); /// Don't send any messages
-        }
+//        if ($this->agent_input == null) {
+//		    $this->setSignals(); /// Don't send any messages
+//        }
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
@@ -81,6 +84,17 @@ return;
 
 		return;
 	}
+
+function run() {
+
+        if ($this->agent_input != null) {
+            $this->readInstruction();
+            } else {
+            $this->getSubject();
+        }
+
+}
+
 
     function readInstruction()
     {
@@ -144,6 +158,15 @@ return;
 
     function get()
     {
+
+        // 279ms 303ms 306ms
+        $split_time = $this->thing->elapsed_runtime();
+
+        $this->variables_agent = new Variables($this->thing, "variables usermanager " . $this->from);
+
+        $this->thing->log( $this->agent_prefix .' created variables agent in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.', "OPTIMIZE" );
+
+
         // get gets the state of the Flag the last time
         // it was saved into the stack (serialized).
         $this->state = $this->variables_agent->getVariable("state");
@@ -200,7 +223,7 @@ return;
         return;
     }
 
-	public function setSignals()
+	public function respond()
     {
 		// Develop the various messages for each channel.
 

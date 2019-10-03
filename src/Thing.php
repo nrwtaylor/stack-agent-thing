@@ -726,6 +726,12 @@ class Thing
 		return $thing;
 		}
 
+    function isPositive($str)
+    {
+        return (is_numeric($str) && $str > 0 && $str == round($str));
+    }
+
+
 	public function readSubject()
     {
 		return false;
