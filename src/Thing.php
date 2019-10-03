@@ -498,6 +498,8 @@ class Thing
 
     public function getVariable($variable_set, $variable)
     {
+if (!isset($this->account['stack'])) {return true;}
+
         $variables = $this->account['stack']->json->array_data;
 
         if (isset($variables[$variable_set])) {

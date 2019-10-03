@@ -29,7 +29,11 @@ class Agent {
         $this->start_time = $thing->elapsed_runtime();
         //microtime(true);
 
-        $this->agent_input = strtolower($input);
+$this->agent_input = $input;
+if (is_array($input)) {$this->agent_input = $input;}
+if (is_string($input)) {$this->agent_input = strtolower($input);}
+
+//        $this->agent_input = strtolower($input);
 
 //        $this->agent_name = 'agent';
 
@@ -73,6 +77,15 @@ class Agent {
 
         $this->context = null;
         $this->response = "";
+
+
+if (isset($thing->container['api']['agent'])) {
+
+if ($thing->container['api']['agent'] == "off") {return;}
+
+
+}
+
 
         // First things first... see if Mordok is on.
         /* Think about how this should work and the user UX/UI

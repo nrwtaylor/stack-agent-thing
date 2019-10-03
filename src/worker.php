@@ -55,28 +55,33 @@ function call_agent_function($job)
     echo "worker received job workload "  . $job->workload() . "\n";
     $arr = json_decode($job->workload(),true);
 
+$agent_input = null;
+if (isset($arr['agent_input'])) {$agent_input = $arr['agent_input'];}
+
     if (isset($arr['uuid'])) {
         echo "worker found uuid\n";
-        $thing = new Thing($arr['uuid']);
+        $thing = new Thing($arr['uuid'], $agent_input);
         $start_time = $thing->elapsed_runtime();
     } else {
         echo "worker found message\n";
-        $thing = new \Nrwtaylor\StackAgentThing\Thing(null);
+        $thing = new \Nrwtaylor\StackAgentThing\Thing(null, $agent_input);
         $start_time = $thing->elapsed_runtime();
         $thing->Create($arr['to'], $arr['from'], $arr['subject'] );
     }
-
+//$thing->agent_input = $agent_input;
+if ($thing->thing == false) {
+echo "Thing is false";
+return true;
+}
     echo "worker nuuid " . $thing->nuuid."\n";
     echo "worker uuid " . $thing->uuid."\n";
     echo "worker timestamp " . $thing->microtime(). "\n";
     echo "job timestamp " . $thing->thing->created_at. "\n";
-
+//echo "agent input" . $thing->agent_input . "\n";
 $do_not_respond = false;
     if (isset($arr['body']['messageId'])) {
     $message_id = $arr['body']['messageId'];
-    
 
-//$message_id = "170000024b36ffdb";
 $m = $thing->db->variableSearch(null, $message_id);
 
 //if ( (isset($m['things'])) and (count($m['things']) > 0) ) {
