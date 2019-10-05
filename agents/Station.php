@@ -180,7 +180,7 @@ $this->max_hops = 2;
                 }
             }
 
-            if ($completed == true) {echo "meep";exit();}
+            if ($completed == true) {return; echo "meep";exit();}
             //echo "\n";
 
             // Now visiting stations up from $station_id
@@ -576,6 +576,8 @@ echo "meep";
 
         $handle = fopen($file, "r");
         $line_number = 0;
+
+if ($handle == false) {return true;}
 
         while(!feof($handle)) {
             $line = trim(fgets($handle));

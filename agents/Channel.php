@@ -75,12 +75,15 @@ class Channel
 
     public function set()
     {
+$channel_name = "X";
+if (isset($this->channel_name)) {$channel_name = $this->channel_name;}
+
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("channel",
             "refreshed_at"),  $this->thing->json->time()
             );
         $this->thing->json->writeVariable(array("channel",
-            "name"),  $this->channel_name
+            "name"),  $channel_name
             );
 
     }

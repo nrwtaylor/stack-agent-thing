@@ -170,7 +170,9 @@ class Word extends Agent {
         $contents = "";
         foreach (range("A", "Z") as $v) {
             $file = $this->resource_path_ewol . $v . ' Words.txt';
-            $contents .= file_get_contents($file);
+            $c = @file_get_contents($file);
+if ($c == false) {return true;}
+            $contents .= $c;
         }
 
         $arr = explode("\n", $contents);
@@ -253,6 +255,9 @@ class Word extends Agent {
      * @param unknown $number (optional)
      */
     function randomWord($number = null) {
+
+if (!isset($this->ewol_dictionary)) {return true;}
+
         $min_number = 3;
         $max_number = $number;
         if ($number == false) {$max_number = 7;}

@@ -177,6 +177,8 @@ class Callsign extends Agent {
             $value = $this->stripPunctuation($value);
             $text = $this->findCallsign('list', $value);
 
+if ($text == true) {return true;}
+
             foreach ($text as $x) {
                 $line = $x['line'];
                 $line = utf8_encode($line);
@@ -247,7 +249,9 @@ class Callsign extends Agent {
         case 'list':
             if (isset($this->callsigns_list)) {$contents = $this->callsigns_list;break;}
             $file = $this->resource_path . 'amateur_delim.txt';
-            $pre_contents = file_get_contents($file);
+            $pre_contents = @file_get_contents($file);
+
+if ($pre_contents == false) {return true;}
 
             // Remove address info from search space.
             $arr = explode("\n", $pre_contents);

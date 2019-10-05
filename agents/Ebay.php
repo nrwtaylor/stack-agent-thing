@@ -217,6 +217,9 @@ class Ebay extends Agent
             "RESPONSE-DATA-FORMAT=XML&" .
             "REST-PAYLOAD&" .
             "keywords=" . urlencode($keywords) ."&" .
+"outputSelector(0)=location&" .
+"outputSelector(1)=condition&" .
+
             "paginationInput.entriesPerPage=" . $n;
 
 
