@@ -26,6 +26,8 @@ class Brilltagger extends Agent
      */
     function init() {
 
+//if (defined('DICT')) {$this->dict = DICT; echo "got dict from globals";return;}
+
         $lexicon = $this->resource_path . "brilltagger/lexicon.txt";
         $fh = fopen($lexicon, 'r');
         while ($line = fgets($fh)) {
@@ -33,7 +35,8 @@ class Brilltagger extends Agent
             $this->dict[strtolower(array_shift($tags))] = $tags;
         }
         fclose($fh);
-
+//echo "built dict";
+//define('DICT', $this->dict);
 
     }
 

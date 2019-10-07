@@ -198,6 +198,7 @@ class Duplicable
     {
         $sms = "DUPLICABLE | ";
         $sms .= $this->web_prefix . "thing/".$this->uuid."/duplicable.pdf";
+        $sms .= ' | ' . 'Made a non-duplicable index.';
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }

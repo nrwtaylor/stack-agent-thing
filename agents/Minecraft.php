@@ -39,7 +39,19 @@ class Minecraft extends Agent {
         $this->thing_report["info"] = "This is a minecraft keeping an eye on how late this Thing is.";
         $this->thing_report["help"] = "This is about being inscrutable.";
 
-        //        public function __construct($host, $port=25565, $timeout=3, $auto_connect = false) {
+
+
+        if (isset($this->thing->container['api']['minecraft'])) {
+
+            if (isset($this->thing->container['api']['minecraft']['default_name'])) {
+                $this->default_name = $this->thing->container['api']['minecraft']['default_name'];
+            }
+
+            if (isset($this->thing->container['api']['minecraft']['default_address'])) {
+                $this->default_address = $this->thing->container['api']['minecraft']['default_address'];
+            }
+
+        }
 
 
 
@@ -141,10 +153,8 @@ class Minecraft extends Agent {
      */
     function doMinecraft($text = null) {
         // Yawn.
-        //require_once('query.php');
-
-        //$server = new \Query('173.209.44.184');
-        $this->doQuery('173.209.44.184');
+        if (!isset($this->default_address)) {return true;}
+        $this->doQuery($this->default_address);
 
         if ($this->connect()) {
             $info = $this->get_info();

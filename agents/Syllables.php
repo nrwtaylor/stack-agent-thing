@@ -8,7 +8,9 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-require_once '/var/www/html/stackr.ca/vendor/autoload.php';
+//require_once '/var/www/html/stackr.ca/vendor/autoload.php';
+//require_once '/var/www/stackr.test/vendor/autoload.php';
+
 
 // Splits sentences into syllables.
 
@@ -29,6 +31,11 @@ class Syllables extends Agent
      *
      */
     function init() {
+
+        $this->cache_path = '/var/www/stackr.test/vendor/vanderlee/syllable/src/Cache';
+$this->resource_path_cache = $GLOBALS['stack_path'] . 'vendor/vanderlee/syllable/src/Cache';
+
+
     }
 
 
@@ -119,11 +126,10 @@ class Syllables extends Agent
     function doSyllables($filtered_input) {
 
         $syllable = new Syllable('en-ca');
-
         $cache = $syllable->getCache();
-        $cache->setPath('/var/www/html/stackr.ca/vendor/vanderlee/syllable/src/Cache');
+//        $cache->setPath('/var/www/html/stackr.ca/vendor/vanderlee/syllable/src/Cache');
 
-        $syllable->getSource()->setPath('/var/www/html/stackr.ca/vendor/vanderlee/syllable/languages');
+        $syllable->getSource()->setPath($this->resource_path_cache);
 
 
         $syllable->setMinWordLength(0);

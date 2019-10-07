@@ -244,10 +244,13 @@ class Splosh
 //        $distance_energy = ($acceleration * $tick_time * $tick_time) /2
  //                            + ($velocity * $tick_time)
  //                               + $distance; 
-        echo "time " . $tick_time . "\n";
-        echo "a" . $this->distance_acceleration . "\n";
-        echo "v" . $this->distance_velocity . "\n";
-        echo "s" . $distance;
+
+
+
+//        echo "time " . $tick_time . "\n";
+//        echo "a" . $this->distance_acceleration . "\n";
+//        echo "v" . $this->distance_velocity . "\n";
+//        echo "s" . $distance;
 
         $distance_energy = $this->distance_acceleration + $this->distance_velocity + $distance;
 
