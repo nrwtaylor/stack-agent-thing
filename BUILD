@@ -1,6 +1,6 @@
 (c) 2018-2019. NRW Taylor
 
-These are the current build instructions as of January 2019.
+These are the current build instructions as of October 2019.
 
 1. Install Ubuntu latest.
 
