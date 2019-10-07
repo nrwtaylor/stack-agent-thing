@@ -32,6 +32,7 @@ return [
         ],
 
 	    'stack' => [
+                    'word' => '<not set>',
 		    'short_name' => '<not set>',
             'entity_name' => '<not set',
             'server_location' => '<NOT SET>',

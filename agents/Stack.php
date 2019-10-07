@@ -5,46 +5,19 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Stack
+class Stack extends Agent
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->start_time = $thing->elapsed_runtime();
-        $this->agent_input = $agent_input;
 
-        $this->thing = $thing;
-        $this->agent_name = 'stack';
-
-        $this->agent_prefix = 'Agent "'. ucwords($this->agent_name) . '" ';
-
- 		$this->thing_report['thing']  = $thing;
-
-        // So I could call
-        $this->test = false;
-        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-        // I think.
-        // Instead.
-
- 		$this->uuid = $thing->uuid;
-     	$this->to = $thing->to;
-       	$this->from = $thing->from;
-       	$this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
-        $this->created_at = $thing->thing->created_at;
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+        $this->created_at = $this->thing->thing->created_at;
 
         $this->current_time = $this->thing->json->time();
 
         $this->default_state = "off";
-
+$this->state = $this->default_state;
         $this->countStack();
 
         $this->node_list = array("stack"=>array("agent","thing"), "null"=>array("stack"));
@@ -54,19 +27,8 @@ class Stack
         // Probably an unnecessary call, but it updates $this->thing.
         // And we need the previous usermanager state.
         $this->stack = new Variables($this->thing, "variables stack " . $this->from);
-
+/*
         $this->get();
-
-//        $this->current_state = $this->thing->getState('usermanager');
-
-		// create container and configure
-//		$this->api_key = $this->thing->container['api']['watson'];
-
-//        $this->get();
-
-        //$this->getStart();
-
-        //$this->getThing();
 
 		$this->readSubject();
 
@@ -74,12 +36,9 @@ class Stack
         if ($this->agent_input == null) {
 		    $this->thing_report = $this->respond();
         }
-
-  //      $this->set();
-		$this->thing->log('Agent "Stack" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
+*/
 
         $this->thing_report['log'] = $this->thing->log;
-		return;
     }
 
     function resetStack()
@@ -144,12 +103,7 @@ class Stack
             $this->response = "Got new identity.";
         }
 
-        if ($f == true) {echo "Failed to retrieve thing"; return;}
-// else {
-//            $this->getStart();
-//        }
-        //var_dump($identity);
-
+        if ($f == true) {$this->thing->log( "Failed to retrieve thing"); return;}
 
 
         $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
@@ -198,7 +152,10 @@ class Stack
 
         // This returns an uuid
 
-        $thing_json = file_get_contents($this->web_prefix . "api/redpanda/start");
+        $thing_json = @file_get_contents($this->web_prefix . "api/redpanda/start");
+
+        if ($thing_json == false) {return true;}
+
         $thing_array = json_decode($thing_json, true);
 
         if ($thing_array == null) {
@@ -215,7 +172,10 @@ class Stack
         $this->thing->log("Loading " . $this->identity . " from " . str_replace("@","",$this->mail_postfix) . ".");
         $url = $this->web_prefix . "api/redpanda/thing/" . $this->identity;
 
-        $thing_json = file_get_contents($url);
+        $thing_json = @file_get_contents($url);
+
+        if ($thing_json == false) {return true;}
+
         $thing_report = $this->thing->json->jsontoArray($thing_json);
 
 
@@ -255,12 +215,10 @@ class Stack
         $depth = $depth + 1;
         if ($h = null) {$h = "Start";}
         $h .= "<ul>";
-        //echo "<ul>";
 
         foreach($array as $k => $v) {
             if (is_array($v)) {
                 $h .= "<li>" . $k . "</li>";
-                //echo "<li>" . $k . "</li>";
                 //$depth = $depth + 1;
                 $h .= $this->printArrayList($v, $h, $depth);
                 //$depth = $depth - 1;
@@ -268,12 +226,10 @@ class Stack
             }
             if (($v == null) or ($v == false)) {$v= "X";}
             $h .= "<li>" . $k . " is " .  $v . "</li>";
-            //echo "<li>" . $v . "</li>";
         }
         $h .= "</ul>";
         $depth = $depth - 1;
         return $h;
-        //echo "</ul>";
     }
 
     public function makeWeb()
@@ -290,9 +246,17 @@ class Stack
         $w .= "message is " . $this->sms_message . "<br>";
       //  $w .= print_r($this->variables) . "<br>";
         $w .= "Variables<br>";
-        $w .= $this->printArrayList($this->variables) . "<br>";
+$variables = array();
+if (isset($this->variables)) {$variables = $this->variables;}
+
+        $w .= $this->printArrayList($variables) . "<br>";
         $w .= "Settings<br>";       
-         $w .= $this->printArrayList($this->settings) . "<br>";             
+
+
+$settings =array();
+if (isset($this->settings)) {$variables = $this->settings;}
+
+         $w .= $this->printArrayList($settings) . "<br>";             
         
 
 
@@ -342,7 +306,7 @@ class Stack
     }
 // -----------------------
 
-	private function respond() {
+	public function respond() {
 
 
 		$this->thing->flagGreen();
@@ -351,10 +315,7 @@ class Stack
 
 		$to = $this->thing->from;
 
-		//echo "to:". $to;
-
 		$from = "stack";
-		
 		$subject = 's/pingback ';	
 
 		$message = 'Stack checker.';
@@ -380,11 +341,6 @@ class Stack
         $this->messageStack($this->response);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		
-
-	//	$this->thing_report = array('thing'=>$this->thing, 'keyword'=>'pingback', 'info'=>'Ping agent pinged back', 'help'=>'Useful for checking the stack.');
-
-//                $this->thing_report['thing'] = $this->thing; 
 $this->thing_report['keyword'] = 'pingback';
 //$this->thing_report['info'] = 'Ping agent pinged back';
 $this->thing_report['help'] = 'Useful for checking the stack.';
@@ -399,7 +355,8 @@ $this->thing_report['help'] = 'Useful for checking the stack.';
     function messageStack($text = null)
     {
         //file_get_contents($this->web_prefix . "api/redpanda/" . $text);
-        file_get_contents($this->web_prefix . "api/redpanda/" . "stack");
+        $text = @file_get_contents($this->web_prefix . "api/redpanda/" . "stack");
+        if ($text == false) {return true;}
 
     }
 
@@ -416,10 +373,6 @@ $this->thing_report['help'] = 'Useful for checking the stack.';
 
 	public function readSubject()
     {
-		return;
-
 	}
 
 }
-
-?>

@@ -6,15 +6,16 @@ These are the current build instructions as of January 2019.
 
 Which finds you here.
 sudo apt-get update
-sudo apt-get install php7.1-xml
 sudo apt-get install php-mbstring
+sudo apt-get install php7.2-xml
 
 2. Install LAMP stack.
 
 Curated instructions here. Stop at configuration.
 https://www.linode.com/docs/web-servers/lamp/install-lamp-stack-on-ubuntu-18-04/
 
-3. Set-up InnoDB.
+3. MySQL
+3 (cont). Set-up InnoDB.
 
 mysql -u root -p
 
@@ -59,8 +60,7 @@ pager less -SFX;
 SELECT * FROM stack ORDER BY created_at DESC limit 99;
 
 3. Setup PHP
-
-10. Install PHP extensions
+3 cont. Install PHP extensions
 
 sudo apt install php7.2-bcmath
 sudo apt install php7.0-gd
@@ -86,6 +86,9 @@ wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/compos
 sudo apt install composer
 composer install
 
+Load in resources under /resources
+
+# Can stop here if there is no need to serve stack web requests.
 
 cd /etc/apache2/sites-available
 sudo nano 000-default.conf
@@ -167,10 +170,23 @@ ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite
 
 sudo service apache2 reload
 
+4 (cont.) Establish web server file area.
+
+https://stackoverflow.com/questions/22390001/runtimeexception-vendor-does-not-exist-and-could-not-be-created/43513522#43513522
+sudo usermod -a -G www-data `whoami`
+
+sudo chown root:root /var/www
+sudo chmod 755 /var/www/
+
+sudo chown -R www-data:www-data /var/www/stackr.test
+sudo chmod -R 774 /var/www/stackr.test
+
+
 6. Build resources
 
 The resources folder contains custom resources for this stack.
-
+mkdir resources
+Add in agent resources as available.
 
 7. Verify localhost serving to local-wide TCP/IP
 
@@ -179,32 +195,8 @@ php -S localhost:8080 -t public public/index.php
 8. Verify Ping, Latency
 9. Verify Roll PNG
 
-11. Set-up cron
-
-sudo crontab -e
-* * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1
-sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
-Correct require line for the current environment.
-sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
-Remove forward slash from /Gearman in line 62.
-
-12. Verify Snowflake (web, PNG, PDF)
 
 
-
-Some stuff to get the stack whirring.
-
-For the mb string functions
-sudo apt-get install php-mbstring
-
-http://www.hostingadvice.com/how-to/install-gearman-ubuntu-14-04/
-
-sudo apt-get install software-properties-common
-sudo add-apt-repository ppa:gearman-developers/ppa
-sudo apt-get update
-
-sudo apt-get install gearman-job-server libgearman-dev
-sudo apt-get upgrade
 
 10. Install Gearman.
 
@@ -214,27 +206,47 @@ Update require path.
 
 
 ---
+
 Install Gearman
+http://gearman.org/
+
+gearmand-1.1.18.tar.gz
+https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gz
+
+---
+
+10 (cont.) Install Gearman
 https://gist.github.com/himelnagrana/9758209
 
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install gcc autoconf bison flex libtool make libboost-all-dev libcurl4-openssl-dev curl libevent-dev uuid-dev
 cd ~
-wget https://launchpad.net/gearmand/1.2/1.1.12/+download/gearmand-1.1.12.tar.gz
-tar -xvf gearmand-1.1.12.tar.gz
-cd gearmand-1.1.12
+wget https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gz
+tar -xvf gearmand-1.1.18.tar.gz
+cd gearmand-1.1.18
 
 sudo apt-get install gperf
 
 ./configure
 sudo make
+# this takes a while and throws a lot of output
 sudo make install
 sudo apt-get install gearman-job-server
+
+sudo apt-get install php-pear
 sudo pecl install gearman
 sudo nano /etc/php5/conf.d/gearman.ini [and then write extension=gearman.so as content of the file, save it and close it]
 sudo service apache2 restart
 
+# perhaps just
+
+sudo apt-get install php-gearman
+
+# Test with gearman scripts
+
+-
+# Lots of gearman stuff folows because gearman is tricky to get up and running.
 -
 
 sudo apt install gearman-tools
@@ -346,6 +358,14 @@ echo "extension=gearman.so" | sudo tee /etc/php/7.1/mods-available/gearman.ini
 sudo phpenmod -v ALL -s ALL gearman
 
 ---
+
+# Another way the gearman install can go awry.
+PHP Startup: Unable to load dynamic library 'gearman.so'
+https://stackoverflow.com/questions/36423929/gearman-is-missing-from-your-system
+
+
+10 (cont.) Installing Supervisor for Gearman
+
 Install Supervisor
 http://masnun.com/2011/11/02/gearman-php-and-supervisor-processing-background-jobs-with-sanity.html
 
@@ -391,6 +411,30 @@ sudo apt-get install php7.1-fpm
 
 -
 
+
+http://www.hostingadvice.com/how-to/install-gearman-ubuntu-14-04/
+
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:gearman-developers/ppa
+sudo apt-get update
+
+sudo apt-get install gearman-job-server libgearman-dev
+sudo apt-get upgrade
+
+
+11. Set-up cron
+
+sudo crontab -e
+* * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1
+sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
+Correct require line for the current environment.
+sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
+Remove forward slash from /Gearman in line 62.
+
+12. Verify Snowflake (web, PNG, PDF)
+
+
+-
 https://stackoverflow.com/questions/23635746/htaccess-redirect-from-site-root-to-public-folder-hiding-public-in-url
 
 Make .htaccess in stackr.test
@@ -619,9 +663,44 @@ sudo apt install php7.3-bcmath
 
 # useful commands
 
+Some stuff to get the stack whirring.
+
+For the mb string functions
+sudo apt-get install php-mbstring
+
+
+
+
+13. install composer
+13 (cont). Get composer dependencies
+
+composer.json
+{
+    "name": "test project",
+    "description": "A PHP project to test my package",
+    "require": {
+        "slim/slim": "^3.0",
+        "slim/php-view": "*",
+        "ramsey/uuid": "^3.7",
+        "monolog/monolog": "^1.23",
+        "hyperthese/php-serial": "*",
+        "linkorb/tty": "dev-master",
+        "nrwtaylor/stack-agent-thing": "*",
+        "setasign/fpdi-fpdf": "^2.0",
+        "monolog/monolog": ">=1.10",
+        "endroid/qr-code": "^3.2",
+        "ekinhbayar/brill-tagger": "^0.3.1",
+        "vanderlee/syllable": "^1.5",
+        "vanderlee/php-sentence": "^1.0",
+        "webignition/robots-txt-file": "^2.1",
+        "symfony/console": "^4.3"
+    }
+}
+
+
 15. Syllables
 
-Use the vanderlee composer package. 
+Use the vanderlee composer package.
 You will need to get the .tex file which has Thomas Kroll's name on it.
 Otherwise was you will get these errors.
 
