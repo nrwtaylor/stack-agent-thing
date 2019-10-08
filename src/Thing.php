@@ -16,7 +16,8 @@ class Thing
 
 	function __construct($uuid, $test_message = null)
     {
-        // Now at 0.0.8
+        // Now at 0.0.9
+
         // Imagine both a need not to touch anything.
         // And a need to make this much tidier.
         // So expect lots of comments.  And a few deletions.
@@ -28,7 +29,7 @@ class Thing
 		// At this point, we are presented a UUID.
 		// Whether or not the record exists is another question.
 
-		// But we don't need to "find", because the UUID is randomly created.	
+		// But we don't need to "find", because the UUID is randomly created.
 		// Chance of collision super-super-small.
 
 		// https://www.quora.com/Has-there-ever-been-a-UUID-collision
@@ -94,11 +95,16 @@ class Thing
         try {
             $this->getThing($uuid);
         } catch (\Exception $e) {
+           // Fail quietly. There was no Thing to get.
            //echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
 
+        // Deal with it.
+
+// devstack
 //		echo "Stack Balance<br>";
 //		$this->stackBalance($this->uuid);
+
         $this->log("Thing instantiation completed.");
     }
 
