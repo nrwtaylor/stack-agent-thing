@@ -19,23 +19,6 @@ class Destination {
     function __construct(Thing $thing, $agent_input = null)
     {
         $this->agent_input = $agent_input;
-	//function __construct($arguments) {
-
-		//echo $arguments;
-		//var_dump($arguments);
-//  $defaults = array(
-//    'uuid' => Uuid::uuid4(),
-//    'from' => NULL,
-//	'to' => NULL,
-//	'subject' => NULL,
-//	'sqlresponse' => NULL
-//  );
-
-//  $arguments = array_merge($defaults, $arguments);
-
-//  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
-
 
 
 		$this->thing = $thing;
@@ -151,9 +134,11 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 
 
         $this->destination_list = array();
+
+
+if (!isset($this->gtfs->places)) {return true;}
         $places = $this->gtfs->places;
-//var_dump($places);
-//exit();
+
 
         foreach ($places as $stop_desc=>$stops) {
             foreach($stops as $stop) {
@@ -167,8 +152,6 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 
         }
 
-       // var_dump($this->destination_list);
-//exit();
     }
 
     public function getDestination() {
@@ -244,14 +227,18 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
  //           $message = "DESTINATION | " . $this->destination_count . " matches | " . $this->web_prefix . "thing/" . $this->uuid . "/destination";
  //       } else {
 
-//var_dump($this->destination["stop_name"]);
  //           $stop_name = $this->destination["stop_name"];
  //           $stop_number = $this->destination["stop_number"];
 
             $message = "DESTINATION";
  //           $message .= " | " . $stop_number;
  //           $message .= " | " . $stop_name;
-            $message .= " > " . $this->route_list_text;
+
+$route_list_text = "NOT SET";
+if (isset($this->route_list_text)) {$route_list_text = $this->route_list_text;}
+            $message .= " > " . $route_list_text;
+
+
 //        }
 
         $this->sms_message = $message;
@@ -263,7 +250,6 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
     {
         if (!isset($this->destination_list)) {$this->getDestinations();}
 
-//var_dump($this->destination["stop_name"]);
 //$stop_name = $this->destination["stop_name"];
 //$stop_number = $this->destination["stop_number"];
 
@@ -319,10 +305,8 @@ $this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->
 
         $this->gtfs = new Gtfs($this->thing, $input);
 
-//var_dump($this->gtfs->response);
-var_dump($this->gtfs->thing_report['sms']);
 
-
+if (isset($this->gtfs->stations)) {
 foreach ($this->gtfs->stations as $station) {
 
     $station_id =  $station['station_id'];
@@ -342,6 +326,8 @@ foreach($route_list as $route_number=>$value) {
 }
 
 $this->route_list_text = $route_text;
+}
+
 $this->response = "Got routes serving " . $input;
 return;
 

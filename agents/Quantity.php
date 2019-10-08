@@ -518,17 +518,17 @@ $test_message .= strtoupper($quantity['head_code']) . " " . $quantity['quantity'
         $this->num_hits = 0;
 
         $input = $this->input;
-
+//var_dump($input);
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'quantity') {
-
                 $this->response = "Last quantity retrieved.";
                 return;
             }
+           return;
         }
 
         $this->extractQuantity($input);
