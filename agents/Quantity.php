@@ -68,18 +68,32 @@ class Quantity extends Agent
         $this->thing->log( $this->agent_prefix .' set ' . $this->quantity . ".", "INFORMATION" );
     }
 
-public function respond() {
-        if (!$this->thing->isData($this->agent_input)) {
-            $message_thing = new Message($this->thing, $this->thing_report);
 
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-        } else {
-            $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
-        }
+    public function respond() {
 
-        $this->thing_report['help'] = 'This is a Quantity.';
+//        $this->getResponse();
 
-}
+        $this->thing->flagGreen();
+
+//        $to = $this->thing->from;
+//        $from = "kaiju";
+
+
+//        $this->makeSMS();
+
+//        $this->makeMessage();
+        // $this->makeTXT();
+//        $this->makeChoices();
+
+//        $this->thing_report["info"] = "This creates an exercise message.";
+//        $this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+//        $this->makeWeb();
+
+//        $this->makeTXT();
+    }
 
     /**
      *
