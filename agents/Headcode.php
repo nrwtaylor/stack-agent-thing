@@ -21,7 +21,7 @@ class Headcode
     // of NANN.  Where N is a digit from 0-9, and A is an uppercase character from A-Z.
 
     // This implementation recognizes lowercase and uppercase characters as the same.
-    // 0t80. OT80. HEADODE 0t90.
+    // 0t80. OT80. HEADCODE 0t90.
 
     // The headcode is used by the Train agent to create the proto-train.
     // A Train must have a Headcode to run.  Rule #1.
@@ -119,18 +119,6 @@ class Headcode
         $this->default_alias = "Thing";
         $this->current_time = $this->thing->time();
 
-        // Loads in headcode variables.
-        // This will attempt to find the latest head_code
-//        $this->get(); // Updates $this->elapsed_time as well as pulling in the current headcode
-
-        // Now at this point a  "$this->headcode_thing" will be loaded.
-        // Which will be re-factored eventaully as $this->variables_thing.
-
-        // This looks like a reminder below that the json time generator might be creating a token.
-
-		// So created a token_generated_time field.
-        //        $this->thing->json->setField("variables");
-        //        $this->thing->json->writeVariable( array("stopwatch", "request_at"), $this->thing->json->time() );
 
 		$this->test= "Development code"; // Always iterative.
 
@@ -297,6 +285,9 @@ class Headcode
     {
         // $this->quantity = $this->thing->json->readVariable( array("headcode", "quantity"))  ;
         $this->quantity = "X";
+
+//$this->quantity_agent = new Quantity($this->thing,"quantity");
+//echo $this->quantity_agent->quantity;
     }
 
 
@@ -387,8 +378,6 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
         $this->getRunat();
         $this->getQuantity();
         $this->getAvailable();
-
-        return;
     }
 
     function dropHeadcode()
@@ -619,8 +608,6 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
         $consists = $this->extractConsists($input);
 
         if ((is_array($consists)) and (count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
-
-//        if ((count($consists) == 1) and (strtolower($consists[0]) != 'train')) {
             $this->consist = $consists[0];
             $this->thing->log('Agent "Headcode" found a consist (' . $this->consist . ') in the text.');
             return $this->consist;
@@ -631,11 +618,7 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
         if  ((is_array($consists)) and (count($consists) == 0)){return false;}
         if  ((is_array($consists)) and (count($consists) > 1)){return false;}
 
-        //if (count($consists == 0)) {return false;}
-        //if (count($consists > 1)) {return true;}
-
         return true;
-
     }
 
 
@@ -673,10 +656,7 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
         if  ((is_array($head_codes)) and (count($head_codes) == 0)){return false;}
         if  ((is_array($head_codes)) and (count($head_codes) > 1)) {return true;}
 
-
-
         return true;
-
     }
 
 
@@ -842,7 +822,9 @@ if (isset($headcode['quantity']['quantity'])) {$quantity = $headcode['quantity']
                 $txt .= " " . str_pad($quantity, 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['consist'])) {
-                $txt .= " " . str_pad($headcode['consist'], 9, " ", STR_PAD_LEFT);
+$consist = "Z";
+if (is_string($headcode['consist'])) {$consist = $headcode['consist'];}
+                $txt .= " " . str_pad($consist, 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['route'])) {
                 $txt .= " " . str_pad($headcode['route'], 9, " ", STR_PAD_LEFT);
@@ -870,21 +852,24 @@ if (isset($headcode['quantity']['quantity'])) {$quantity = $headcode['quantity']
         if (!isset($this->flag->state)) {$this->getFlag();}
         //$s = strtoupper($this->flag->state);
         
+        $flag_state = "X";
+        if (isset($this->flag->state)) {$flag_state = $this->flag->state;}
 
-        $sms_message = "HEADCODE " . strtoupper($this->head_code) ." | " . $this->flag->state;
+        $sms_message = "HEADCODE " . strtoupper($this->head_code) ." " . $flag_state ." | ";
+        $sms_message .= "" . $this->link;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
 
-        $sms_message .= $this->route . " [" . $this->consist . "] " . $this->quantity;
- 
+//        $sms_message .= $this->route . " [" . $this->consist . "] " . $this->quantity;
+ $sms_message .= "A headcode needs a ROUTE, a CONSIST, and a QUANTITY. ";
 //        $sms_message .= " | index " . $this->index;
 //        $sms_message .= " | available " . $this->available;
 
         //$sms_message .= " | from " . $this->headcodeTime($this->start_at) . " to " . $this->headcodeTime($this->end_at);
         //$sms_message .= " | now " . $this->headcodeTime();
-        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
-        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
-
+//        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
+//        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
+$sms_message .= "Text QUANTITY";
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
 
@@ -958,21 +943,14 @@ if (!isset($this->index)) {
 
         $this->thing_report['help'] = 'This is a headcode.';
 
-
-
-		return;
-
-
-	}
+    }
 
     function isData($variable) {
         if ( 
             ($variable !== false) and
             ($variable !== true) and
             ($variable != null) ) {
- 
             return true;
-
         } else {
             return false;
         }
@@ -1000,7 +978,7 @@ if (!isset($this->index)) {
         }
 
 
-		//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+	//$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
 

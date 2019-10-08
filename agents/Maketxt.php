@@ -27,7 +27,7 @@ class makeTxt
     	$this->input = $input;
         $this->thing_report = array('thing' => $thing);
 
-    	// routes passes image_name to make png as $input
+    	// routes passes file_name to make txt as $input
 	    $image_name = $input;
 	    $this->agent_thing = new Agent($thing, $input);
 
