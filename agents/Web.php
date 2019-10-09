@@ -148,6 +148,7 @@ $this->makeSMS();
                 }
 
                 $this->link_uuid = $link_uuid;
+
                 break;
             }
         }

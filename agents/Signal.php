@@ -219,7 +219,8 @@ class Signal extends Agent
                     $text = "X";
                     if (isset($variables['signal']['text'])) {$text = $variables['signal']['text'];}
 
-                    $state = $variables['signal']['state'];
+                    $state = "X";
+                    if (isset($variables['signal']['state'])) {$state = $variables['signal']['state'];}
 
                     $this->signals[] = array("id"=>$signal_id, "state"=>$state, "associations"=>$associations, "text"=>$text, "refreshed_at"=>$refreshed_at);
                     $this->signalid_list[] = $signal_id;
@@ -256,10 +257,25 @@ class Signal extends Agent
         $web .= "</a>";
         $web .= "<br>";
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
-        $web .= $this->sms_message;
+        //$web .= $this->sms_message;
+
+        $web .= "SIGNAL IS " . strtoupper($this->signal['state']) . "<br>";
+        $web .= "SIGNAL ID " . strtoupper($this->signal['id']) . "<br>";
+        //$web .= "Refreshed at " . strtoupper($this->signal['refreshed_at']) . "<br>";
+
+
 
         $this->thing_report['web'] = $web;
     }
+
+function makeLink() {
+
+        $this->link = $this->web_prefix . 'thing/' . $this->signal['id'] . '/signal';
+
+        $this->thing_report['link'] = $this->link;
+
+
+}
 
     function make() {
 
@@ -271,7 +287,7 @@ class Signal extends Agent
         $this->makeSignal();
 
         $this->makeHelp();
-
+$this->makeLink();
         $this->makeSMS();
         $this->makeMessage();
 
@@ -332,7 +348,13 @@ class Signal extends Agent
         }
 
         if ($this->verbosity > 0) {
-            $sms_message .= " | signal id " . strtoupper($this->signal['id']);
+        //    $sms_message .= " | signal id " . strtoupper($this->signal['id']);
+        }
+
+        if ($this->verbosity > 0) {
+            $sms_message .= " | " . $this->link . "";
+            $sms_message .= " Text HELP";
+
         }
 
         if ($this->verbosity > 2) {
