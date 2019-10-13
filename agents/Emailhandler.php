@@ -42,7 +42,7 @@ if ($development == true) {
 	
 	//$from = rand(100000,999999) .  $accepted_domains[0];
 	//$from = "322564@stackr.ca";
-	$from = "nick@enablething.org";
+	$from = "nick@stackr.ca";
 	echo "<br>Default values set for test email.  Call agenthandler.php to process.<br>";
 	echo "to: ".$to . "<br>";
 	echo "from: ".$from . "<br>";
@@ -202,9 +202,6 @@ $notused = "{\"processed\":
 $devreport = 'Subject: $subject\nTo: $to\nFrom: $from\nMessage: $message\nUUID: $uuid4\n\n$sqlresponse';
 
 //test email to make sure it works
-
-
-//mail("nick@wildnomad.com","Stackr receipt: $subject","Thankyou $from your message to stackr.co account $to has been accepted by Stackr.  Keep on stacking.\n\nSubject: $subject\nTo: $to\nFrom: $from\nMessage: $message", $headers);
 
 mail($from,"[Stackr] $subject","Thank you $from your message to stackr.ca account $to has not been accepted by Stackr.  Keep on stacking.\n\nhttps://stackr.co/api/thing:$uuid\n$sqlresponse
 ", $headers);

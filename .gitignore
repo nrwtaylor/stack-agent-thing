@@ -1,4 +1,6 @@
+.gitignore
 _*
+.*
 broken_
 dev_
 vendor

@@ -84,23 +84,23 @@ class Message {
         // Find out what channel this is
         $channel = new Channel($this->thing, "channel");
         $this->channel_name = $channel->channel_name;
-//$this->get();
-//        $quiet_thing = new Quiet($this->thing, "quiet");
+        //$this->get();
+        //        $quiet_thing = new Quiet($this->thing, "quiet");
 
         //if ($quiet_thing->state == "off") {
-$this->thing_report['info'] = "Assemble a message.";
+        //        $this->thing_report['info'] = "Assemble a message.";
 
-        if (!$this->thing->isSilent()){
+        if (!$this->thing->isSilent()) {
             $this->respond();
-        //}
-        //}
+            //}
+            //}
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("message",
-                "outcome"),  $this->thing_report['info']
-        );
+            $this->thing->json->setField("variables");
+            $this->thing->json->writeVariable(array("message",
+                    "outcome"),  $this->thing_report['info']
+            );
 
-}
+        }
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
@@ -131,6 +131,9 @@ $this->thing_report['info'] = "Assemble a message.";
     }
 
 
+    /**
+     *
+     */
     function get() {
 
         $this->thing->json->setField("variables");
@@ -140,6 +143,7 @@ $this->thing_report['info'] = "Assemble a message.";
             $this->do_not_send = true;
         }
     }
+
 
     /**
      *
@@ -276,7 +280,7 @@ $this->thing_report['info'] = "Assemble a message.";
         $file = $this->resource_path . 'facebook/fbid.txt';
         $contents = @file_get_contents($file);
 
-if ($contents == false) {return;}
+        if ($contents == false) {return;}
 
         $pattern = "|\b($searchfor)\b|";
 
@@ -342,27 +346,14 @@ if ($contents == false) {return;}
         }
     }
 
-    function checkWinlink()
-    {
-       $searchfor = "@winlink.org";
-        // Check address against the beta list
-
-//        $file = '/var/www/stackr.test/resources/slack/id.txt';
-//        $contents = file_get_contents($file);
-
-if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
-    return true;
-}
-        return false;
-    }
-
-
 
     /**
      *
      * @return unknown
      */
     public function respond() {
+        //        $this->thing_report['info'] = 'No info available.';
+
         if ($this->isOpen() == "off") {
             $this->thing->log( $this->agent_prefix . ' messaging is off.' , "WARNING");
             $this->thing_report['info'] = 'Agent "Message" says user messaging is OFF.';
@@ -379,8 +370,6 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
             //            return; Do not implement until usermanager is defaulting to start
         }
 
-
-        $this->thing_report['info'] = 'Agent "Message" processing response';
         // Thing actions
 
         $this->thing->json->setField("variables");
@@ -439,9 +428,9 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
                 $thing_report['info'] = $fb_thing->thing_report['info'];
 
                 $this->thing_report['channel'] = 'facebook'; // one of sms, email, keyword etc
-                $this->thing_report['info'] = 'Agent "Message" sent a Facebook message.';
+                $this->thing_report['info'] = $fb_thing->thing_report['info'];
 
-                $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "INFORMATION" );
+                $this->thing->log( $this->thing_report['info'], "INFORMATION" );
 
                 $this->tallyMessage();
 
@@ -512,13 +501,13 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
                 // $slack_thing = new Slack($this->thing, $this->sms_message);
 
 
-                $thing_report['info'] = 'Slack message sent.';
+                $thing_report['info'] = $slack_thing->thing_report['info'];
 
                 $this->thing_report['channel'] = 'slack'; // one of sms, email, keyword etc
                 $this->thing_report['info'] = 'Agent "Message" sent a Slack message';
 
 
-                $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>' , "INFORMATION");
+                $this->thing->log( $this->thing_report['info'] , "INFORMATION");
 
                 $this->tallyMessage();
 
@@ -529,7 +518,7 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
                 $this->thing_report['info'] = 'Agent "Message" did not get a Slack token.';
             }
 
-            $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
+            $this->thing->log( $this->thing_report['info'] , "WARNING" );
 
             return $this->thing_report;
         }
@@ -577,7 +566,7 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
             default:
             }
 
-            $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
+            $this->thing->log($this->thing_report['info'], "WARNING" );
 
 
             return $this->thing_report;
@@ -591,10 +580,8 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
         // IF there is a formatted email message.
 
         if ( filter_var($from, FILTER_VALIDATE_EMAIL) and isset($this->message) ) {
+            $this->thing_report['info'] = 'Agent "Message" did not send an email message.';
 
-
-
-            // Cost is handled by sms.php
             // So here we should pull in the token limiter and proof
             // it's capacity to token limit outgoing email
 
@@ -608,35 +595,29 @@ if ( strpos(strtolower($this->nom_from), '@winlink.org') !== false) {
 
             switch (true) {
             case (strpos($this->from, $this->mail_postfix) !== false):
-                $this->thing_report['info'] = 'Agent "Message" did not send an Email to an internal address.';
+                $this->thing_report['info'] = 'did not send an Email to an internal address.';
                 break;
 
             case ($token_thing->thing_report['token'] != 'email' ):
-                $this->thing_report['info'] = 'Agent "Message" did not get Email token.';
+                $this->thing_report['info'] = 'did not get Email token.';
                 break;
 
             case ($quota->flag == 'red'):
-                $this->thing_report['info'] = 'Agent "Message" has exceeded the daily message quota.';
+                $this->thing_report['info'] = 'has exceeded the daily message quota.';
                 break;
                 //            case (isset($dev_overide)):
-case ( strpos(strtolower($this->nom_from), '@winlink.org') !== false):
-    $this->thing_report['email'] = $makeemail_agent->sms_message;
-
             case (true):
-
                 //                if($quota->counter >= $quota->period_limit) {
                 //                    $this->sms_message = "!dailymessagequota";
                 //                }
 
-                $sms_thing = new Email($this->thing, $this->thing_report);
+                $email_agent = new Email($this->thing, $this->thing_report);
 
+                $info = "No agent info available.";
+                if (isset($email_agent->thing_report['info'])) {$info = $email_agent->thing_report['info'];}
 
-                //                   $sms_thing = new Sms($this->thing, $this->sms_message);
-
-                //$this->thing_report['email'] = $sms_thing->email_message;
-
-                $this->thing_report['info'] = 'Agent "Message" sent an Email.';
-                $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "INFORMATION" );
+                $this->thing_report['info'] = $info;
+                $this->thing->log($this->thing_report['info'], "INFORMATION" );
 
                 $this->tallyMessage();
                 $quota = new Quota($this->thing, 'quota use');
@@ -647,12 +628,18 @@ case ( strpos(strtolower($this->nom_from), '@winlink.org') !== false):
             }
 
 
-            $this->thing->log( '<pre> ' . $this->thing_report['info'] . '</pre>', "WARNING" );
+
+            $this->thing->log( $this->thing_report['info'] , "WARNING" );
 
             return $this->thing_report;
         }
 
-        $this->thing_report['info'] = 'Agent "Message" did not send a message.';
+        //        $this->thing_report['info'] = 'No info available.';
+
+        if (!isset($this->thing_report['info'])) {$this->thing_report['info'] = 'Agent "Message" did not accept the message.';}
+
+
+        //        $this->thing_report['info'] = 'Agent "Message" did not send a message.';
 
         return $this->thing_report;
     }
@@ -667,5 +654,6 @@ case ( strpos(strtolower($this->nom_from), '@winlink.org') !== false):
         $status = true;
         return $status;
     }
+
 
 }

@@ -94,6 +94,14 @@ class Makelog
         $file .= "\nAgent SMS response\n";
         $file .= $this->agent_thing->thing_report['sms'];
 
+        $file .= "\nAgent information\n";
+
+        $file .= "\n";
+
+        $info = "No agent info available.";
+        if (isset($this->agent_thing->thing_report['info'])) {$info = $this->agent_thing->thing_report['info'];}
+        $file .= $info;
+
         $file .= "\n";
 
         $file .= $footer;

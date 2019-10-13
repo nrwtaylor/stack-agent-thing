@@ -1,4 +1,11 @@
 <?php
+/**
+ * Email.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 // This is the only agent allowed to send emails.
@@ -8,12 +15,17 @@ class Email {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $input = null)
-    {
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $input (optional)
+     */
+    function __construct(Thing $thing, $input = null) {
         //$this->start_time = microtime(true);
         $this->start_time = $thing->elapsed_runtime();
 
-/*
+        /*
 
         if ($input == null) {
             $this->message = "No message provided";
@@ -22,26 +34,26 @@ class Email {
         }
 */
 
-$this->makeMessage($input);
-//        $this->input = $input;
+        $this->makeMessage($input);
+        //        $this->input = $input;
         $this->cost = 50;
 
 
 
-//function __construct($arguments) {
-//echo $arguments;
-//var_dump($arguments);
-//  $defaults = array(
-//    'uuid' => Uuid::uuid4(),
-//    'from' => NULL,
-//  'to' => NULL,
-//  'subject' => NULL,
-//  'sqlresponse' => NULL
-//  );
+        //function __construct($arguments) {
+        //echo $arguments;
+        //var_dump($arguments);
+        //  $defaults = array(
+        //    'uuid' => Uuid::uuid4(),
+        //    'from' => NULL,
+        //  'to' => NULL,
+        //  'subject' => NULL,
+        //  'sqlresponse' => NULL
+        //  );
 
-//  $arguments = array_merge($defaults, $arguments);
+        //  $arguments = array_merge($defaults, $arguments);
 
-//  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
+        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
 
         $this->test= "Development code";
 
@@ -54,7 +66,7 @@ $this->makeMessage($input);
         $this->agent_prefix = 'Agent "Email"';
 
         $this->thing_report['thing'] = $thing;
-//        $this->thing_report['thing'] = $this->thing->thing;
+        //        $this->thing_report['thing'] = $this->thing->thing;
 
         if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
@@ -78,7 +90,7 @@ $this->makeMessage($input);
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
-    
+
         // This probably isn't needed.
         // But keep it here for if we want to add override type choices.
         $this->node_list = array("email"=>array("email"));
@@ -103,22 +115,20 @@ $this->makeMessage($input);
 
         $this->email_per_message_responses = 1;
         $this->email_horizon = 2 *60; //s
-/*
-*/
 
-        $this->thing->log( 'Agent "Email" running on Thing ' .  $this->thing->nuuid . '.',"INFORMATION" );
-        $this->thing->log( 'Agent "Email" received this Thing "' .  $this->subject . '".' ,"INFORMATION");
+        $this->thing->log( 'Agent "Email" running on Thing ' .  $this->thing->nuuid . '.', "INFORMATION" );
+        $this->thing->log( 'Agent "Email" received this Thing "' .  $this->subject . '".' , "INFORMATION");
 
 
 
         if ( $this->readSubject() == true) {
             // aka 'something terrible happened when reading the to and subject line.
-            $this->thing_report = array('thing' => $this->thing->thing, 
+            $this->thing_report = array('thing' => $this->thing->thing,
                 'choices' => false,
                 'info' => "An email address wasn't provided.",
                 'help' => 'from needs to be a valid email address.');
 
-                $this->thing->log( 'Agent "Email" completed without sending an email.', "INFORMATION" );
+            $this->thing->log( 'Agent "Email" completed without sending an email.', "INFORMATION" );
             return;
         }
 
@@ -132,10 +142,12 @@ $this->makeMessage($input);
 
         return;
 
-        }
+    }
 
-// -----------------------
 
+    /**
+     *
+     */
     private function respond() {
 
         // Thing actions
@@ -146,9 +158,6 @@ $this->makeMessage($input);
         $to = $this->from;
         $from = $this->to;
 
-        //$choices = $this->thing->choice->makeLinks($this->state);
-        //echo "<br>";
-        //echo $html_links;
 
         if ($this->message != null) {
             $test_message = $this->message;
@@ -156,7 +165,7 @@ $this->makeMessage($input);
             $test_message = $this->subject;
         }
 
-/////
+        /////
 
         if ($this->message == false) {
             $this->thing_report['choices']= false;
@@ -167,41 +176,34 @@ $this->makeMessage($input);
             return;
         }
 
-//        $this->email_message = false;
+        //        $this->email_message = false;
         $this->makeEmail();
 
         $received_at = strtotime($this->thing->thing->created_at);
         $time_ago = time() - $received_at;
 
-/////
+        /////
 
 
+        $this->thing_report['info'] = 'Agent "Email" did not send an email.';
 
         if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
             //$this->sendSms($to, $test_message);
-//echo $to;
-//echo "/n";
-//echo $from;
-//echo "/n";
-            $this->sendGeneric($to,$from,$this->subject,$this->message, null);
+            //echo $to;
+            //echo "/n";
+            //echo $from;
+            //echo "/n";
+            $this->sendGeneric($to, $from, $this->subject, $this->message, null);
             $this->thing->account['stack']->Debit($this->cost);
 
-//                $this->sendUSshortcode($to, $test_message);
-
-            $this->thing_report['info'] = '<pre> Agent "Email" sent an Email to ' . $this->from . '.</pre>';
+            //                $this->sendUSshortcode($to, $test_message);
 
 
+            //            $this->thing_report['info'] = 'Agent "Email" sent an Email to ' . $this->from . '.';
 
 
-
-
-
-
-
-
-
-//      } else {
-//          echo '<pre> Agent "Sms" did not send a SMS to ' . $this->from . '.  Not enough stack balance.</pre>';
+            //      } else {
+            //          echo '<pre> Agent "Sms" did not send a SMS to ' . $this->from . '.  Not enough stack balance.</pre>';
 
 
         } else {
@@ -210,20 +212,17 @@ $this->makeMessage($input);
         }
 
 
-//$this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 'info' => 'This is a sms sender.','help' => 'Ants.  Lots of ants.');
+        //$this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 'info' => 'This is a sms sender.','help' => 'Ants.  Lots of ants.');
 
-//$this->thing_report['choices'] = false;
-$this->thing_report['help'] = "This agent is responsible for sending emails.";
-
-
-        //echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
-//echo $message;
-
-        return;
-
+        //$this->thing_report['choices'] = false;
+        $this->thing_report['help'] = "This agent is responsible for sending emails.";
 
     }
 
+
+    /**
+     *
+     */
     function makeEmail() {
         if (!isset($this->message)) {
             $this->makeMessage();
@@ -233,34 +232,40 @@ $this->thing_report['help'] = "This agent is responsible for sending emails.";
             $this->makeChoices();
         }
 
-//new
-//        require_once '/var/www/html/stackr.ca/agents/makeemail.php';
+        //new
+        //        require_once '/var/www/html/stackr.ca/agents/makeemail.php';
         $this->thing_report['choices'] = $this->choices;
         $makeemail_agent = new Makeemail($this->thing, $this->thing_report);
 
         $this->email_message = $makeemail_agent->email_message;
 
-//old
-//        $from = $this->from .$this->mail_postfix;
-//        $this->email_message = $this->generateMultipart($this->from, $this->message, $this->choice$
+        //old
+        //        $from = $this->from .$this->mail_postfix;
+        //        $this->email_message = $this->generateMultipart($this->from, $this->message, $this->choice$
 
 
 
         $this->thing_report['email'] = $this->email_message;
     }
 
-    function makeChoices()
-    {
+
+    /**
+     *
+     */
+    function makeChoices() {
         if (!isset($this->choices)) {$this->choices = false;}
         $this->thing_report['choices'] = $this->choices;
     }
 
 
-    function makeMessage($input = null)
-    {
+    /**
+     *
+     * @param unknown $input (optional)
+     */
+    function makeMessage($input = null) {
         if ($input == null) {
             $this->message = false;
-                    }
+        }
 
         if (!isset($input['message'])) {
             if (!is_array($input)) {
@@ -286,8 +291,11 @@ $this->thing_report['help'] = "This agent is responsible for sending emails.";
     }
 
 
-    public function readSubject()
-    {
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
 
         if ( filter_var($this->to, FILTER_VALIDATE_EMAIL) and isset($this->message) ) {
             return true;
@@ -296,114 +304,117 @@ $this->thing_report['help'] = "This agent is responsible for sending emails.";
         return false;
     }
 
-    function checkAddress($searchfor)
-    {
+
+    /**
+     *
+     * @param unknown $searchfor
+     * @return unknown
+     */
+    function checkAddress($searchfor) {
         // Check address against the beta list
+        $limitedbeta_agent = new Limitedbeta($this->thing, "limitedbeta");
 
-        //$file = '/var/www/stackr.test/resources/limitedbeta/limitedbeta.txt';
-        //$file = '/var/www/html/stackr.ca/resources/limitedbeta/limitedbeta.txt';
-        $file = $this->resource_path . 'limitedbeta/limitedbeta.txt';
+        return $limitedbeta_agent->isLimitedbeta($searchfor);
 
-        $contents = file_get_contents($file);
-
-//var_dump($contents);
-        $pattern = "|\b($searchfor)\b|";
-
-        // search, and store all matching occurences in $matches
-
-        if(preg_match_all($pattern, $contents, $matches)){
-
-            $m = $matches[0][0];
-            return $m;
-        } else {
-            return false;
-        }
-
-        return;
     }
 
 
 
-	public function mailer($to,$subject,$message,$headers)
-    {
-		$donotsend = null;
-//        $donotsend = true; //NRWTaylor 25 Sep 2017
+    /**
+     *
+     * @param unknown $to
+     * @param unknown $subject
+     * @param unknown $message
+     * @param unknown $headers
+     * @return unknown
+     */
+    public function mailer($to, $subject, $message, $headers) {
+        $donotsend = null;
+        //        $donotsend = true; //NRWTaylor 25 Sep 2017
 
-if ($this->checkAddress($to) != false) {
-        $this->thing->log( 'Agent "Email" found the email address in the limited beta list.', "INFORMATION");
-} else {
-        $this->thing->log( 'Agent "Email" did not find the email address in the limited beta list.', "INFORMATION");
-       $donotsend = true;
-}
+        if ($this->checkAddress($to) != false) {
+            $this->thing->log( 'found the email address in the limited beta list.', "INFORMATION");
+        } else {
+            $this->thing->log( 'did not find the email address in the limited beta list.', "INFORMATION");
+            $donotsend = true;
+        }
+        $subject = $this->mail_prefix . ' ' . $subject;
 
-		$subject = $this->mail_prefix . ' ' . $subject;
+        if (strpos(strtolower($subject), strtolower("Stack record: ")) !== false) {
+            $donotsend = true;
+        }
 
-		if (strpos(strtolower($subject),strtolower("Stack record: ")) !== false) {
-			$donotsend = true;
-		}
+        if (strpos(strtolower($subject), strtolower("Stack record: Opt-in verification request ")) !== false) {
+            $donotsend = true;
+        }
+        // Do not send an email to stack domain.
+        if (strpos(strtolower($this->from), strtolower($this->mail_postfix)) != false) {
+            $donotsend = true;
+        }
+        $email_thing = new Thing(null);
+        $email_thing->Create($to, 'ant' , 's/ record email authorization');
+        $email_thing->flagGreen();
 
-		if (strpos(strtolower($subject),strtolower("Stack record: Opt-in verification request ")) !== false) {
-			$donotsend = true;
-		}
-		// Do not send an email to stack domain.
-		if (strpos(strtolower($this->from), strtolower($this->mail_postfix)) != false) {
-			$donotsend = true;
-		}
-		$email_thing = new Thing(null);
-		$email_thing->Create($to, 'ant' , 's/ record email authorization');
-		$email_thing->flagGreen();
+        $user_state = $email_thing->getState('usermanager');
 
-		$user_state = $email_thing->getState('usermanager');
+        //  $db = new Database($this->uuid, $this->from);
+        //  $db->setUser($this->from);
 
-//		$db = new Database($this->uuid, $this->from);	
-//		$db->setUser($this->from);
+        if ($donotsend) {return true;}
 
-		if ($donotsend) {return true;}
+        if (($user_state == "opt-out") or ($user_state == "deleted")) {
 
-		if (($user_state == "opt-out") or ($user_state == "deleted")) {
+            $email_thing = new Thing(null);
+            $email_thing->Create($to, 'ant' , 's/ opt-out or deleted');
+            $email_thing->flagGreen();
 
-               		$email_thing = new Thing(null);
-                	$email_thing->Create($to, 'ant' , 's/ opt-out or deleted');
-                	$email_thing->flagGreen();
-
-			return true;
-		}
-
-
-
-//var_dump($to);
-//var_dump($headers);
-		
-//if (strpos(strtolower($to), '@winlink.org') !== false) {
-//    $headers = null;
-//}
-		
-mail($to,$subject,$message, $headers);
-
-        $this->thing->log( '<pre> Agent "Email" sent an email to ' . $to . ".");
-        $this->thing->log( 'Agent "Email" said "' . $subject . '".');
-
-		//echo '<pre> email.php sent an email to ';echo $to; echo '</pre>';
-//echo '<pre>   subject: ';echo $subject; echo '</pre>';
-
-
-                $email_thing = new Thing(null);
-                $email_thing->Create($to, 'email' , 's/ email sent');
-                $email_thing->flagGreen();
-
-		return "s/success";
-	}
-
-
-	public function generateHTML($raw_message, $choices = null)
-    {
-
-$html_button_set = $choices['button'];
-if ($choices == null) {$html_button_set = "";}
+            return true;
+        }
 
 
 
-$message = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        //var_dump($to);
+        //var_dump($headers);
+
+        if (strpos(strtolower($to), '@winlink.org') !== false) {
+            $headers = null;
+        }
+
+        $response = @mail($to, $subject, $message, $headers);
+
+        if ($response) {
+            $this->thing_report['info'] = 'Message was accepted for delivery.';
+            $this->thing->log( 'was accepted for delivery.');
+        } else {
+            $this->thing_report['info'] = 'Message was not accepted for delivery.';
+
+            $this->thing->log( 'was not accepted for delivery.');
+        }
+        $this->thing->log( 'said "' . $subject . '".');
+
+
+        $email_thing = new Thing(null);
+        $email_thing->Create($to, 'email' , 's/ email sent');
+        $email_thing->flagGreen();
+
+        return "s/success";
+    }
+
+
+    /**
+     *
+     * @param unknown $raw_message
+     * @param unknown $choices     (optional)
+     * @return unknown
+     */
+    public function generateHTML($raw_message, $choices = null) {
+
+        $html_button_set = $choices['button'];
+        if ($choices == null) {$html_button_set = "";}
+
+
+
+        $message = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><META http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
@@ -567,132 +578,156 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
 </html>';
 
 
-	return $message;
-	}
+        return $message;
+    }
 
 
 
-	function generateText($raw_message) {
+    /**
+     *
+     * @param unknown $raw_message
+     * @return unknown
+     */
+    function generateText($raw_message) {
 
         $this->unsubscribe = "unsubscribe";
 
-		$message = strip_tags($raw_message);
-		$message .= strip_tags($this->mail_regulatory);
-		$message .= strip_tags($this->unsubscribe);
+        $message = strip_tags($raw_message);
+        $message .= strip_tags($this->mail_regulatory);
+        $message .= strip_tags($this->unsubscribe);
 
-		return $message;
-		}
-
-	function generateMultipart($from, $raw_message, $choices = null) {
-
-// useful in dev - to create the same message received by email.
-$this->generateHTML($raw_message, $choices);
-
-		//create a boundary for the email. This 
-		$boundary = uniqid('np');
-				
-		//headers - specify your from email address and name here
-		//and specify the boundary for the email
-		$headers = "MIME-Version: 1.0\r\n";
-		$headers .= "From: ".$from . "\r\n";
-//		$headers .=	"Reply-To: ".$from . "\r\n";
+        return $message;
+    }
 
 
+    /**
+     *
+     * @param unknown $from
+     * @param unknown $raw_message
+     * @param unknown $choices     (optional)
+     * @return unknown
+     */
+    function generateMultipart($from, $raw_message, $choices = null) {
 
-    	//$headers .= "X-Sender: ".$this->short_name." < admin" . $this->mail_postfix . " >\n";
-	    $headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
-//		$headers .= "To: ".$this->from."\r\n";
-		$headers .= "Content-Type: multipart/mixed;boundary=\"PHP-mixed-" . $boundary . "\"" ."\r\n";
+        // useful in dev - to create the same message received by email.
+        $this->generateHTML($raw_message, $choices);
+
+        //create a boundary for the email. This
+        $boundary = uniqid('np');
+
+        //headers - specify your from email address and name here
+        //and specify the boundary for the email
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "From: ".$from . "\r\n";
+        //  $headers .= "Reply-To: ".$from . "\r\n";
+
+
+
+        //$headers .= "X-Sender: ".$this->short_name." < admin" . $this->mail_postfix . " >\n";
+        $headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
+        //  $headers .= "To: ".$this->from."\r\n";
+        $headers .= "Content-Type: multipart/mixed;boundary=\"PHP-mixed-" . $boundary . "\"" ."\r\n";
 
 
 
 
-		$message = "--PHP-mixed-" . $boundary . "\r\n";
-		$message .= "Content-Type: multipart/alternative;boundary=\"PHP-alt-" . $boundary . "\"" . "\r\n\r\n";
+        $message = "--PHP-mixed-" . $boundary . "\r\n";
+        $message .= "Content-Type: multipart/alternative;boundary=\"PHP-alt-" . $boundary . "\"" . "\r\n\r\n";
 
-		//here is the content body
-		//$message .= "This is a MIME encoded message.";
-		$message .= "--PHP-alt-" . $boundary . "\r\n";
-		$message .= "Content-type: text/plain;charset=utf-8\r\n";
-		$message .= "Content-Transfer-Encoding: quoted-printable\r\n";
+        //here is the content body
+        //$message .= "This is a MIME encoded message.";
+        $message .= "--PHP-alt-" . $boundary . "\r\n";
+        $message .= "Content-type: text/plain;charset=utf-8\r\n";
+        $message .= "Content-Transfer-Encoding: quoted-printable\r\n";
 
-		//Plain text body
-		$message .= $this->generateText($raw_message) . "\r\n";
+        //Plain text body
+        $message .= $this->generateText($raw_message) . "\r\n";
 
-if (strpos($this->from, '@winlink.org') !== false) {
-} else {
-		$message .= "--PHP-alt-" . $boundary . "\r\n";
-		$message .= "Content-type: text/html;charset=utf-8\r\n";
-		$message .= "Content-Transfer-Encoding: quoted-printable\r\n";
+        if (strpos($this->from, '@winlink.org') !== false) {
+        } else {
+            $message .= "--PHP-alt-" . $boundary . "\r\n";
+            $message .= "Content-type: text/html;charset=utf-8\r\n";
+            $message .= "Content-Transfer-Encoding: quoted-printable\r\n";
 
-		//Html body
-		$message .= quoted_printable_encode($this->generateHTML($raw_message, $choices)) . "\r\n";
+            //Html body
+            $message .= quoted_printable_encode($this->generateHTML($raw_message, $choices)) . "\r\n";
+        }
+
+
+        //$message .= "--PHP-alt-" . $boundary . "\r\n";
+        //$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip')));
+        //$attachment = "Meep";
+        //$message .= "--PHP-mixed-" . $boundary;
+        //$message .= 'Content-Type: application/zip; name="attachment.zip"';
+        //$message .= "Content-Transfer-Encoding: base64";
+        //$message .= 'Content-Disposition: attachment ';
+        //$message .= $attachment;
+
+
+        $message .= "--PHP-mixed-" .$boundary . "--";
+
+
+        $m = array("message"=>$message, "headers"=>$headers);
+
+        return $m;
+    }
+
+
+    /**
+     *
+     * @param unknown $to
+     * @param unknown $from
+     * @param unknown $subject
+     * @param unknown $raw_message
+     * @param unknown $choices     (optional)
+     * @return unknown
+     */
+    public function sendGeneric($to, $from, $subject, $raw_message, $choices = null) {
+
+        $from = $from .$this->mail_postfix;
+
+
+        //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
+
+        $headers = 'From: '.$from . "\r\n" .
+            'Reply-To: '.$from . "\r\n" .
+            'X-Thing: '.$this->uuid . "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+        //$headers .= "CC: susan@example.com\r\n";
+        //$headers .= "MIME-Version: 1.0\r\n";
+        //$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+
+
+        // Code block for attempting to stop auto-underling on iPhone (iOS?)
+        //  $message = "<!DOCTYPE html><html><head><style>" . ".appleLinksWhite a {color: #ffffff !important; text-decoration: underline;}
+        //.appleLinksBlack a {color: #000000 !important; text-decoration: none;}" . "</style></head><body>";
+        //  $message .= '<pre>';
+
+        // Process the incoming raw message and generate a multi-part message
+        // by default.
+
+
+        $multipart = $this->generateMultipart($from, $raw_message, $choices);
+
+        return $this->mailer($to, $subject, $multipart['message'], $multipart['headers']);
+    }
+
+
+
+    /**
+     *
+     * @param unknown $str
+     * @param array   $arr
+     * @return unknown
+     */
+    function contains($str, array $arr) {
+        foreach ($arr as $a) {
+            if (stripos($str, $a) !== false) return true;
+        }
+        return false;
+    }
+
+
+
+
 }
-
-
-//		echo $choices['email_html'];
-
-		//$message .= "--PHP-alt-" . $boundary . "\r\n";
-		//$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip'))); 
-		//$attachment = "Meep";
-		//$message .= "--PHP-mixed-" . $boundary; 
-		//$message .= 'Content-Type: application/zip; name="attachment.zip"';
-		//$message .= "Content-Transfer-Encoding: base64";
-		//$message .= 'Content-Disposition: attachment ';
-		//$message .= $attachment;
-
-
-		$message .= "--PHP-mixed-" .$boundary . "--";
-
-
-		$m = array("message"=>$message,"headers"=>$headers);
-
-		return $m;
-		}
-
-
-	public function sendGeneric($to,$from,$subject,$raw_message, $choices = null) {
-
-		$from = $from .$this->mail_postfix;
-
-
-//https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
-
-		$headers = 'From: '.$from . "\r\n" .
-			'Reply-To: '.$from . "\r\n" .
-			'X-Thing: '.$this->uuid . "\r\n" .
-			 'X-Mailer: PHP/' . phpversion();
-		//$headers .= "CC: susan@example.com\r\n";
-		//$headers .= "MIME-Version: 1.0\r\n";
-		//$headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-
-
-		// Code block for attempting to stop auto-underling on iPhone (iOS?)
-		//		$message = "<!DOCTYPE html><html><head><style>" . ".appleLinksWhite a {color: #ffffff !important; text-decoration: underline;} 
-		//.appleLinksBlack a {color: #000000 !important; text-decoration: none;}" . "</style></head><body>";
-		//		$message .= '<pre>';
-
-		// Process the incoming raw message and generate a multi-part message
-		// by default.
-
-
-		$multipart = $this->generateMultipart($from, $raw_message, $choices);
-
-		return $this->mailer($to,$subject,$multipart['message'], $multipart['headers']);
-	}
-
-
-
-	function contains($str, array $arr)
-	{
-		foreach($arr as $a) {
-		    if (stripos($str,$a) !== false) return true;
-		}
-		return false;
-	}
-
-
-
-
-}
-
