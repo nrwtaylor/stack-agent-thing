@@ -87,8 +87,52 @@ $this->makePNG();
     }
 
 
+    function calcdVdt() {
+
+if (!isset($this->points)) {return true;}
+
+        $this->chart_width = $this->width - 20;
+        $this->chart_height = $this->height - 20;
+
+        $num_points = count($this->points);
+        $column_width = $this->width / $num_points;
+
+//        $series_1 = $this->points[0]['series_1'];
+//        $series_2 = $this->points[0]['series_2'];
+
+        // Get min and max
+//        if (!isset($y_min)) { $y_min = $series_1 + $series_2; }
+//        if (!isset($y_max)) {$y_max = $series_1 + $series_2;}
+
+//        if (!isset($x_min)) { $x_min = $refreshed_at; }
+//        if (!isset($x_max)) { $x_max = $refreshed_at; }
+
+        $i = 0;
+        foreach ($this->points as &$point) {
 
 
+if (!isset($refreshed_at_last)) {$refreshed_at_last = $point['refreshed_at'];}
+//$refreshed_at_last = $refreshed_at;
+
+$refreshed_at = $point['refreshed_at'];
+$dt = $refreshed_at - $refreshed_at_last;
+
+
+if (!isset($series_1_last)) {$series_1_last = $point['series_1'];}
+$series_1 = $point['series_1'];
+$dv = $series_1 - $series_1_last;
+
+$dv_dt = (float) $dv/$dt;
+$point['dv'] = $dv;
+$point['dt'] = $dt;
+
+$point['dv_dt'] = $dv_dt;
+$refreshed_at_last = $refreshed_at;
+$series_1_last = $series_1;
+            $i += 1;
+        }
+
+}
 
     function drawGraph() {
 
@@ -973,7 +1017,7 @@ if (isset($this->points)) {
      *
      */
     function makeTXT() {
-        $txt = "Kaiju traffic.\n";
+        $txt = "Kaiju traffics.\n";
         $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
         $txt .= "\n";
 
@@ -994,6 +1038,21 @@ if (isset($this->points)) {
 //                $txt .= $parsed_thing['created_at'] . "\n";
                 $txt .=  $flat_thing . "\n";
 //            }
+
+        }
+
+        }
+
+        $txt .= "\n\n";
+
+        $txt .= "dv/dt test.\n";
+
+$this->calcDvdt();
+        if (isset($this->points)) {
+
+        foreach ($this->points as $key=>$point) {
+
+                $txt .=  $point['refreshed_at'] ." dv " . number_format($point['dv'],2) . "V dt " . $point['dt']. "s dv/dt " .number_format($point['dv_dt'],6) . "\n";
 
         }
 
