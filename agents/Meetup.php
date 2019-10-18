@@ -7,10 +7,13 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Meetup 
+class Meetup
 {
 
     // This gets events from the Meetup API.
+
+    // devstack Meetup v2 API was deprecated.
+    // Rewrite this agent https://www.meetup.com/meetup_api/auth/#oauth2
 
     public $var = 'hello';
 
@@ -104,7 +107,9 @@ class Meetup
         $keywords = urlencode($keywords);
 
         // Let's use meetup popularity...
-        $data_source = "https://api.meetup.com/2/open_events.xml?format=json&and_text=true&text=" . $keywords . "&time=,1w&key=". $this->api_key;
+//        $data_source = "https://api.meetup.com/2/open_events.xml?format=json&and_text=true&text=" . $keywords . "&time=,1w&key=". $this->api_key;
+        $data_source = "https://api.meetup.com/find/upcoming_events?format=json&and_text=true&text=" . $keywords . "&time=,1w&key=". $this->api_key;
+$data_source = "https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&page=20";
 
         $time = "&time=,1w";
         $time = ""; // turn time paramaters off
@@ -116,6 +121,49 @@ class Meetup
         $data_source = "https://api.meetup.com/2/open_events.xml?" . $format . "&country=ca&city=vancouver&and_text=true&text=" . $keywords . $time . "&key=". $this->api_key;
 
         //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
+
+
+
+
+
+        $options = array(
+            'http'=>array(
+                'method'=>"GET",
+                'header'=>"Accept-language: application/json\r\n" .
+                    "app_id: " . $this->application_id . "\r\n" .  // check function.stream-context-create on php.net
+                    "app_key: " . $this->application_key . "\r\n" . 
+                    "" // i.e. An iPad 
+            )
+        );
+
+        $context = stream_context_create($options);
+
+//        $data_source = "https://od-api.oxforddictionaries.com:443/api/v1/entries/en/". $keywords;
+
+//get /entries/{source_lang}/{word_id}/synonyms
+//get /entries/{source_lang}/{word_id}/synonyms
+
+        $data = @file_get_contents($data_source, false, $context);
+
+        if ($data == false) {
+            $this->response = "Could not ask Oxford Dictionaries.";
+            $this->definitions_count = 0;
+            //$this->events_count = 0;
+            return true;
+            // Invalid query of some sort.
+        }
+        $json_data = json_decode($data, TRUE);
+
+
+
+
+
+
+
+
+
+$data_source = "https://api.meetup.com/find/upcoming_events?&sign=true&photo-host=public&page=20";
+
 
         $data = file_get_contents($data_source);
 
