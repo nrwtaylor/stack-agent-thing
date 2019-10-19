@@ -35,7 +35,7 @@ class Paragraph extends Word {
 
         if ((isset($this->paragraphs)) and (count($this->paragraphs) != 0)) {
 
-            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->paragraph . '.');
+//            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->paragraph . '.');
 
 
         } else {
@@ -77,14 +77,14 @@ explode($test, "/n");
 
 $delimiters = array("/n","/r","<br>","<p>");
 $delimiters_string = implode("|", $delimiters);
-echo $delimiters;
-echo $merp;
-exit();
+//echo $delimiters;
+//echo $merp;
+//exit();
 
 $paragraphs = preg_split( '/ ('. '\n' . '|' . '<br>'. ') /', $test );
 
-echo $paragraphs;
-exit();
+//echo $paragraphs;
+//exit();
 
         //$new_words = array();
 
@@ -158,42 +158,20 @@ function makeParagraphs($text, $length = 200, $maxLength = 250){
      * @param unknown $string
      * @return unknown
      */
-    function extractParagraphs($text) {
+    function extractParagraphs($text, $allow_empty_paragraphs = true) {
 
 $delimiters = array("/n","/r","<br>","<p>");
 $delimiters_string = trim(implode("|", $delimiters));
 
+if ($allow_empty_paragraphs == false) {
+$paragraphs = preg_split('~\R~',$text, -1, PREG_SPLIT_NO_EMPTY);
+} else {
+// Allow empty paragraphs.
 $paragraphs = preg_split('~\R~',$text);
-
-$search_title = "backlog";
-
-$paragraph_backlog = false;
-$count_carriage_returns = 0;
-foreach ($paragraphs as $index=>$paragraph) {
-    if (strpos(strtolower($paragraph), $search_title) !== false) {$paragraph_backlog = true;}
-
-    if ($paragraph_backlog == true) {$text .= "\n";}
-
-
-    if ($paragraph == "") {$count_carriage_returns +=1;}
-    if ($count_carriage_returns >= 4) {$paragraph_backlog = false;$count_carriage_returns = 0; 
-$this->paragraphs[] = $text;
-$text = "";}
 }
 
-
-        if ((isset($this->paragraphs)) and (count($this->paragraphs) != 0)) {
-            $this->paragraph = $this->paragraphs[0];
-        } else {
-            //            $text = $this->nearestWord($value);
-            //echo $text;
-            //exit();
-$this->paragraphs = array($text);
-            $this->paragraph = $this->paragraphs[0];
-        }
-
-
-        return $this->paragraphs;
+$this->paragraphs = $paragraphs;
+return $this->paragraphs;
     }
 
 
@@ -254,7 +232,7 @@ if ($this->agent_input == null) {
 $this->reading = null;
 if (isset($this->words)) {$this->reading = count($this->words);}
         $this->thing->json->writeVariable(array("paragraph", "reading"), $this->reading);
-
+//var_dump($this->paragraphs);
         return $this->thing_report;
     }
 
@@ -323,6 +301,8 @@ if (isset($this->words)) {$this->reading = count($this->words);}
             $input = strtolower($this->subject);
         } else {
             $input = strtolower($this->agent_input);
+
+if ($input == "paragraph") {return;}
 
            //             $prefix = 'word';
 //                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);

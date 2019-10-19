@@ -859,10 +859,12 @@ if (!isset($this->account['stack'])) {return true;}
         //get the calling class
         $trace = debug_backtrace();
         // Get the class that is asking for who awoke it
+$class_name = "X";
+if (isset($trace[1]['class'])) {
         $class_namespace = $trace[1]['class'];
         $class_name_array = explode("\\", $class_namespace);
         $class_name = end($class_name_array);
-
+}
         //$t = strip_tags($text);
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
