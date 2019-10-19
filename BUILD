@@ -8,6 +8,7 @@ Which finds you here.
 sudo apt-get update
 sudo apt-get install php-mbstring
 sudo apt-get install php7.2-xml
+sudo apt-get install php-intl
 
 2. Install LAMP stack.
 
@@ -705,3 +706,4 @@ You will need to get the .tex file which has Thomas Kroll's name on it.
 Otherwise was you will get these errors.
 
 APACHE > PHP Warning:  file(/var/www/html/stackr.ca/vendor/vanderlee/syllable/languages/hyph-en-ca.tex): failed to open stream: No such file or directory in /var/www/stackr.test/vendor/vanderlee/syllable/src/Source/File.php on line 59
+
