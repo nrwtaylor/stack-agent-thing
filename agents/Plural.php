@@ -93,6 +93,8 @@ $this->text = $this->pluralize($filtered_input);
 
 
       static $plural = array(
+          '/(fez)$/i'               => "$1zes",
+          '/(gas)$/i'               => "$1ses",
           '/(quiz)$/i'               => "$1zes",
           '/^(ox)$/i'                => "$1en",
           '/([m|l])ouse$/i'          => "$1ice",
@@ -110,6 +112,11 @@ $this->text = $this->pluralize($filtered_input);
           '/(octop)us$/i'            => "$1i",
           '/(ax|test)is$/i'          => "$1es",
           '/(us)$/i'                 => "$1es",
+          '/ss$/i'                    => "$1es",
+          '/sh$/i'                    => "$1es",
+          '/ch$/i'                    => "$1es",
+          '/x$/i'                    => "$1es",
+          '/z$/i'                    => "$1es",
           '/s$/i'                    => "s",
           '/$/'                      => "s"
       );
