@@ -117,7 +117,7 @@ class Word extends Agent {
 
         //echo implode("_",$w) . "\n";
 
-
+        $this->notwords = array();
         $this->words = array();
         foreach ($w as $key=>$value) {
 
@@ -130,6 +130,7 @@ class Word extends Agent {
                 //   echo "word is " . $text . "\n";
                 $this->words[] = $text;
             } else {
+                $this->notwords[] = $value;
                 //   echo "word is not " . $value . "\n";
             }
         }
@@ -282,8 +283,7 @@ $this->contents = $contents;
         $words = explode("\n", $this->contents);
 
         foreach ($words as $key=>$word) {
-
-            if (strtolower($input) == strtolower($word)) {
+            if (trim(strtolower($input)) == trim(strtolower($word))) {
                 return true;
             }
 

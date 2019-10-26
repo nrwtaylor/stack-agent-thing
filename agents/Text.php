@@ -206,10 +206,14 @@ public function textNouns($input) {
 
 global $wp;
 if (!isset($wp->brilltagger_agent)) {
-$wp->brilltagger_agent = new Brilltagger($this->thing, $input);
+$wp->brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
 }
+
+$tags = $wp->brilltagger_agent->tag($input);
+
+
 //$word_agent = new Word($this->thing, "word");
-$tags = $wp->brilltagger_agent->tags;
+//$tags = $wp->brilltagger_agent->tags;
 $text = "";
 foreach ($tags as $index=>$tag) {
 

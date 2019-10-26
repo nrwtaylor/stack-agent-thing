@@ -661,6 +661,80 @@ class Database
         return $thingreport;
     }
 
+    function agentForget($agent, $max = 0) {
+
+// DELETE FROM stack WHERE nom_to="tile" AND created_at < (NOW() - INTERVAL 6 HOUR);
+
+        if ($max == null) {
+            $max = 3;
+        }
+        $max = (int) $max;
+
+        $user_search = $this->from;
+        //$user_search= "%$user_search%"; // Value to search for in Variables
+
+        $query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+//$query = 'DELETE FROM stack WHERE nom_to=:agent and task <= (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT 1 OFFSET 1) foo)';
+
+        $sth = $this->container->db->prepare($query);
+//        $sth->bindParam(":user_search", $user_search);
+//        $sth->bindParam(":agent", $agent);
+//        $sth->bindParam(":max", $max, PDO::PARAM_INT);
+        $sth->execute();
+
+        $things = $sth->fetchAll();
+
+        $thingreport = array(
+            'things' => $things,
+            'info' =>
+                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' =>
+                'A list of Things which match at the provided phrase.'
+        );
+        return $thingreport;
+
+
+
+    }
+/*
+    function agentForgetexceptnewest($agent, $max = null)
+    {
+
+        if ($max == null) {
+            $max = 3;
+        }
+        $max = (int) $max;
+
+        $user_search = $this->from;
+        //$user_search= "%$user_search%"; // Value to search for in Variables
+
+        //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+       // $query = "DELETE FROM stack WHERE nom_to=:agent AND nom_from = :user_search AND task NOT IN (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT :max) foo)";
+
+$query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2.task AND t1.nom_to = :agent AND nom_from = :user_search';
+
+        $sth = $this->container->db->prepare($query);
+        $sth->bindParam(":user_search", $user_search);
+        $sth->bindParam(":agent", $agent);
+        $sth->bindParam(":max", $max, PDO::PARAM_INT);
+        $sth->execute();
+
+        $things = $sth->fetchAll();
+
+        $thingreport = array(
+            'things' => $things,
+            'info' =>
+                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' =>
+                'A command to delete all but some of a specific agent records.'
+        );
+        return $thingreport;
+
+
+}
+*/
     /**
      *
      * @param unknown $agent

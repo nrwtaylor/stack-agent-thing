@@ -57,6 +57,7 @@ mysql> DESC stack;
 
 Useful commands.
 
+USE stack_db;
 pager less -SFX;
 SELECT * FROM stack ORDER BY created_at DESC limit 99;
 
