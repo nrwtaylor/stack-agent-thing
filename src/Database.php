@@ -697,10 +697,10 @@ class Database
 
 
     }
-/*
+
     function agentForgetexceptnewest($agent, $max = null)
     {
-
+return;
         if ($max == null) {
             $max = 3;
         }
@@ -712,7 +712,9 @@ class Database
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
        // $query = "DELETE FROM stack WHERE nom_to=:agent AND nom_from = :user_search AND task NOT IN (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT :max) foo)";
 
-$query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2.task AND t1.nom_to = :agent AND nom_from = :user_search';
+//$query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2.task AND t1.nom_to = :agent AND nom_from = :user_search';
+$query = 'delete from stack where nom_to=:agent and nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
+
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -720,12 +722,13 @@ $query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2
         $sth->bindParam(":max", $max, PDO::PARAM_INT);
         $sth->execute();
 
-        $things = $sth->fetchAll();
-
+//        $things = $sth->fetchAll();
+//var_dump($things);
+//exit();
         $thingreport = array(
-            'things' => $things,
+            'things' => null,
             'info' =>
-                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
+                'Asked to delete records by agent.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
                 'A command to delete all but some of a specific agent records.'
@@ -734,7 +737,7 @@ $query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2
 
 
 }
-*/
+
     /**
      *
      * @param unknown $agent

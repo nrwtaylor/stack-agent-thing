@@ -280,10 +280,39 @@ if (!isset($this->contents)) {
         $contents = file_get_contents($file);
 $this->contents = $contents;
 }
+//var_dump($input);
+
+        $pattern = "|\b($input)\b|";
+
+        // search, and store all matching occurences in $matches
+        if (preg_match_all($pattern, $this->contents, $matches)) {
+            $m = $matches[0][0];
+//var_dump($m);
+//exit();
+return true;
+            return $m;
+        } else {
+            return false;
+        }
+
+return;
+
+
+
         $words = explode("\n", $this->contents);
+//$input = trim($input);
+
+$input = str_replace(array("\r", "\n"), "", $input);
+
+//if ($input == "trumpet") {echo "merp";exit();}
 
         foreach ($words as $key=>$word) {
-            if (trim(strtolower($input)) == trim(strtolower($word))) {
+//$word = trim($word);
+
+$word = str_replace(array("\r", "\n"), "", $word);
+
+if(strcasecmp($input, $word) == 0) {
+    //        if ( strtolower($input) == strtolower($word) ) {
                 return true;
             }
 
