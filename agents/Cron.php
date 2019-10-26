@@ -1,12 +1,11 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-//require '/var/www/stackr.test/vendor/autoload.php';
-require '/var/www/html/stackr.ca/vendor/autoload.php';
+require '/var/www/stackr.test/vendor/autoload.php';
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 //var_dump($_SERVER['DOCUMENT_ROOT']);
 
-//$GLOBALS['stack'] = '/var/www/stackr.test/';
-$GLOBALS['stack'] = '/var/www/html/stackr.ca/';
+$GLOBALS['stack'] = '/var/www/stackr.test/';
 
 //use GearmanClient;
 //https://stackoverflow.com/questions/36787079/php-class-not-found-when-using-namespace
@@ -20,7 +19,7 @@ ini_set("allow_url_fopen", 1);
 
 // Set-up for command-line/cron job run
 
-$from = "null@stackr.ca";
+$from = "null@example.com";
 $stack_agent = "cron";
 $subject = "s/ cron 60s tick";
 
