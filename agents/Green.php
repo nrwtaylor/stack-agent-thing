@@ -7,7 +7,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Green
+class Green extends Agent
 {
 
     // This is a color.
@@ -79,9 +79,6 @@ class Green
 
         $this->thing_report['log'] = $this->thing->log;
 
-
-
-		return;
 
     }
 

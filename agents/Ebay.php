@@ -185,6 +185,70 @@ class Ebay extends Agent
         return false;
     }
 
+/*
+http://open.api.ebay.com/shopping?
+   callname=GetMultipleItems&
+   responseencoding=XML&
+   appid=YourAppIDHere&
+   siteid=0&
+   version=967&
+   ItemID=190000456297,280000052600,9600579283
+*/
+
+    // devstack
+    function eBayGetMultiple($items = array())
+    {
+if ($items == array()) {return;}
+$items_string = implode(",",$items);
+var_dump($items_string);
+//exit();
+
+        $includeSelector =
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
+
+        // Construct the GetSingleItem REST call
+//        $apicall =
+//            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
+//            "&appid=$appID&ItemID=$ItemID" .
+//            "&responseencoding=XML" .
+//            "&IncludeSelector=$includeSelector";
+
+
+        $this->thing->log(
+            "get multiple items by item id."
+        );
+
+        $this->response .= "Requested multiple items. ";
+        $URL = 'http://open.api.ebay.com/shopping';
+        //change these two lines
+        $compatabilityLevel = 967;
+        $appID = $this->application_id;
+        //you can also play with these selectors
+        $includeSelector =
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
+
+        // Construct the Multiple Item REST call
+        $apicall = 'http://open.api.ebay.com/shopping?' .
+   'callname=GetMultipleItems&' .
+   'responseencoding=XML&'.
+   'appid='. $appID .'&' .
+   'siteid=0&' .
+   'version=967&' .
+   'ItemID=' . $items_string . '';
+
+
+        $xml = simplexml_load_file($apicall);
+var_dump($xml);  
+      if ($xml) {
+            $json = json_encode($xml);
+            $array = json_decode($json, true);
+            return $array;
+        }
+        return false;
+    }
+
+
+
     // devstack
     function eBayFastKeywords($keywords, $n = 10)
     {

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Limitedbeta.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -7,76 +14,32 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class LimitedBeta {
+class LimitedBeta extends Agent {
 
 
-	public $var = 'hello';
+    public $var = 'hello';
 
 
-    function __construct(Thing $thing)
-    {
-        $this->agent_prefix = 'Agent "Limited Beta" ';
-
-        $this->thing = $thing;
-        $this->thing->elapsed_runtime();
-
-        $thing_report['thing'] = $this->thing->thing;
-
-		$this->agent_name = 'question';
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
-		$this->api_key = $this->thing->container['api']['translink'];
-
-        $this->word = $this->thing->container['stack']['word'];
-        $this->email = $this->thing->container['stack']['email'];
-
+    /**
+     *
+     */
+    function init() {
 
         $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . '.');
 
-        $this->current_time = $this->thing->json->time();
-        $this->verbosity = 9;
+        $this->node_list = array("limitedbeta"=>array("start", "opt-in"));
+
+    }
 
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-
-        //$this->thing_report['message'] = "Echo " . $this->subject . ".";
-
-		$this->sqlresponse = null;
-
-		// Allow for a new state tree to be introduced here.
-		$this->node_list = array("start"=>array("transit", "opt-in"));
-
-
-		$this->readSubject();
-        $this->respond();
-
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
-
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-
-        $this->thing_report['log'] = $this->thing->log;
-
-
-		return;
-
-		}
-
-	public function limitedbeta()
-    {
-
+    /**
+     *
+     * @return unknown
+     */
+    public function limitedbeta() {
 
         $this->sms_message = 'LIMITED BETA | Your address has been forwarded to the development team.';
         $this->message = $this->word . ' is in limited beta. Your address has been forwarded to the development team.';
-
-
-
 
         $message = 'The stack received a limited beta request from ' . $this->from .'.';
 
@@ -95,64 +58,65 @@ class LimitedBeta {
         $message_thing = new Message($thing, $thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-		return $this->message;
-	}
+        return $this->message;
+    }
 
 
+    /**
+     *
+     * @param unknown $input (optional)
+     * @return unknown
+     */
+    public function isLimitedbeta($input = null) {
 
-	private function respond()
-    {
+        $input_address = trim($input);
+        $input_address_array = explode("@", $input_address);
+        $input_prefix = $input_address_array[0];
+        $input_postfix = $input_address_array[1];
 
-		// Thing actions
-		$this->thing->flagGreen();
+        // Check address against the beta list
+        $file = $this->resource_path . 'limitedbeta/limitedbeta.txt';
 
-		// Generate email response.
-		$to = $this->thing->from;
-		$from = "usermanager";
+        //        $contents = file_get_contents($file);
 
+        $handle = fopen($file, "r");
 
-		//$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-		//$choices = $this->thing->choice->makeLinks('start');
-
-
-		$this->thing_report['thing'] = $this->thing->thing;
-		$this->thing_report['choices'] = false;
-
-        $this->thing_report['message'] = $this->sms_message;
-
-
-//		$this->thing_report['sms'] = "QUESTION | " . $this->message . " | FORGET";
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['email'] = $this->thing_report['message'];
-
-//var_dump($this->thing->from);
-//exit();
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
-		$this->thing_report['help'] = 'Beta program manager';
-
-		return $this->thing_report;
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
 
 
-	}
+                $limitedbeta_address = trim($line);
+                //echo $limitedbeta_address . " "  . $input_address . "\n";
 
-	private function nextWord($phrase) {
+                $limitedbeta_address_array = explode("@", $limitedbeta_address);
+
+                $limitedbeta_prefix = $limitedbeta_address_array[0];
+                $limitedbeta_postfix = $limitedbeta_address_array[1];
+
+                if ($limitedbeta_prefix == "*") {
+                    if (strtolower($limitedbeta_postfix) == strtolower($input_postfix)) {return true;}
+                }
+
+                if (strtolower($input_address) == strtolower($limitedbeta_address)) {return true;}
 
 
-	}
+            }
+            fclose($handle);
+        } else {
+            // error opening the file.
+        }
 
-	public function readSubject()
-    {
+        return false;
+    }
 
+
+    /**
+     *
+     */
+    public function readSubject() {
         $this->limitedbeta();
-	}
+    }
 
 
 
 }
-
-
-
-
-?>

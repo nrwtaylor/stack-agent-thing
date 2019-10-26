@@ -1,16 +1,27 @@
 <?php
+/**
+ * Makeweb.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
 
-class MakeWeb
-{
+class MakeWeb {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $input = null) 
-    {
+
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $input (optional)
+     */
+    function __construct(Thing $thing, $input = null) {
 
 
         $this->input = $input;
@@ -21,9 +32,9 @@ class MakeWeb
 
         $this->agent_thing = new Agent($thing, $input);
 
-       if (!isset($this->agent_thing->thing_report['web'])) {
-        //    $this->thing_report['web'] = $this->agent_thing->thing_report['web'];
-        //} else {
+        if (!isset($this->agent_thing->thing_report['web'])) {
+            //    $this->thing_report['web'] = $this->agent_thing->thing_report['web'];
+            //} else {
 
             $this->agent_thing = new Web($thing, $input);
             //$this->thing_report['web'] = $this->agent_thing->thing_report['web'];
@@ -33,26 +44,26 @@ class MakeWeb
 
 
 
-$head= '
+        $head= '
 <table class="makeweb">
 <tr>
 <td class="makeweb">
 <div class="makeweb">';
 
 
-//$head= '
-//<td>
-//<table border="0" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-bottom:0; border-radius:10px">
+        //$head= '
+        //<td>
+        //<table border="0" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-bottom:0; border-radius:10px">
 
-//<tr>
-//<td align="center" valign="top">
-//<div padding: 5px; text-align: center>';
+        //<tr>
+        //<td align="center" valign="top">
+        //<div padding: 5px; text-align: center>';
 
 
 
-$foot = "</td></div></td></tr></tbody></table></td></tr>";
+        $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
-        
+
         //$web .= "<center>";
         $web .= $head;
         $web .= $this->agent_thing->thing_report['choices']['button'];
@@ -61,7 +72,7 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
 
 
-/*
+        /*
         if (isset($this->agent_thing->thing_report['web'])) {
             $this->thing_report['web'] = $this->agent_thing->thing_report['web'];
         } else {
@@ -72,30 +83,33 @@ $foot = "</td></div></td></tr></tbody></table></td></tr>";
 
 */
 
-$this->thing_report['web'] = $web;
+        $this->thing_report['web'] = $web;
 
 
 
-//echo $this->agent_thing->thing_report['log'];
+        //echo $this->agent_thing->thing_report['log'];
         $this->thing_report['etime'] = number_format($thing->elapsed_runtime());
 
 
 
         return;
 
-	    $this->input = $input;
+        $this->input = $input;
         $web_agent = new Web($thing, $input);
 
-	    if ($input == null) {
-		    echo "Agent 'make web' says 'Nothing received'";//
-	    } else {
-		    echo "Agent 'make web' says '" . $input . "' received.";
-	    }
+        if ($input == null) {
+            echo "Agent 'make web' says 'Nothing received'";//
+        } else {
+            echo "Agent 'make web' says '" . $input . "' received.";
+        }
 
-        $this->thing_report = array('thing' => $thing, 
+        $this->thing_report = array('thing' => $thing,
             'web' => $web_agent->thing_report['web']);
 
-	}
+    }
+
+
 }
+
 
 ?>

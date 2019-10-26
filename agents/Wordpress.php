@@ -9,7 +9,6 @@
 namespace Nrwtaylor\StackAgentThing;
 
  // require wp-load.php to use built-in WordPress functions
- require_once("/var/www/gimmu.com/public_html/wp-load.php");
 
 class Wordpress extends Agent
 {
@@ -25,11 +24,24 @@ class Wordpress extends Agent
         // I think.
         // Instead.
 
-$this->user_id = 7;
+            if (isset($this->thing->container['api']['wordpress']['path_to'])) {
+                $this->path_to = $this->thing->container['api']['wordpress']['path_to'];
+            }
+
+            if (isset($this->thing->container['api']['wordpress']['user_id'])) {
+                $this->user_id = $this->thing->container['api']['wordpress']['user_id'];
+            }
+
+        // require wp-load.php to use built-in WordPress functions
+        // Set the Wordpress location in settings
+        require_once($this->path_to . "wp-load.php");
 
         $this->thing_report['help'] = 'Communicates with the Wordpress API.';
 
         $this->node_list = array("wordpress"=>array("wordpress"));
+
+
+
     }
 
 

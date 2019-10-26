@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -18,10 +17,9 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use \PDO;
 
-class Database {
-
+class Database
+{
     public $var = 'hello';
-
 
     /**
      *
@@ -29,7 +27,8 @@ class Database {
      * @param unknown $nom_from
      * @return unknown
      */
-    function __construct($uuid, $nom_from) {
+    function __construct($uuid, $nom_from)
+    {
         $start_time = microtime(true);
         $this->start_time = $start_time;
         $this->split_time = $start_time;
@@ -55,18 +54,22 @@ class Database {
         // The problem is when they are both null.
         // Code here should allow either.
 
-        if (($nom_from == null) and ($uuid == null)) {throw new Exception('No
-			$nom_from and $uuid provided to Class Db.');}
+        if ($nom_from == null and $uuid == null) {
+            throw new Exception('No
+			$nom_from and $uuid provided to Class Db.');
+        }
 
-
-        if ($nom_from == null) {throw new Exception('No $nom_from provided to
-			Class Db.');}
-        if ($uuid == null) {throw new Exception('No $uuid provided to
-			Class Db.');}
+        if ($nom_from == null) {
+            throw new Exception('No $nom_from provided to
+			Class Db.');
+        }
+        if ($uuid == null) {
+            throw new Exception('No $uuid provided to
+			Class Db.');
+        }
 
         $this->from = $nom_from;
         $this->uuid = $uuid;
-
 
         // create container and configure it
 
@@ -84,16 +87,20 @@ class Database {
         // Haven't seen this triggered.
         $c['errorHandler'] = function ($c) {
             return function ($request, $response, $exception) use ($c) {
-                return $c['response']->withStatus(500)
-                ->withHeader('Content-Type', 'text/html')
-                ->write('AGENT | Maintenance.');
+                return $c['response']
+                    ->withStatus(500)
+                    ->withHeader('Content-Type', 'text/html')
+                    ->write('AGENT | Maintenance.');
             };
         };
 
         $c['db'] = function ($c) {
             $db = $c['settings']['db'];
-            $pdo = new PDO("mysql:host=" . $db['host'] . ";dbname=" . $db['dbname'],
-                $db['user'], $db['pass']);
+            $pdo = new PDO(
+                "mysql:host=" . $db['host'] . ";dbname=" . $db['dbname'],
+                $db['user'],
+                $db['pass']
+            );
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             return $pdo;
@@ -108,7 +115,7 @@ class Database {
         //        $this->caller = $r;
         // $t[count($t)-2];
 
-        $this->test( "<b>".$this->get_calling_function()."</b>" );
+        $this->test("<b>" . $this->get_calling_function() . "</b>");
 
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
@@ -116,7 +123,6 @@ class Database {
         $this->char_max = $c['stack']['char_max'];
 
         $this->uuid = $uuid;
-
 
         $this->test("Database set-up ");
 
@@ -135,58 +141,64 @@ class Database {
         return $r;
     }
 
-
     /**
      *
      */
-    function __destruct() {
+    function __destruct()
+    {
         // Log database transactions in test
         $this->test("Database destruct ");
     }
-
 
     /**
      *
      * @param unknown $comment     (optional)
      * @param unknown $instruction (optional)
      */
-    function test($comment = null, $instruction=null) {
-
-        if ($this->state != "test") {return;}
-
-        if (($comment ==null) and ($instruction == null)) {
-            $comment ="";
+    function test($comment = null, $instruction = null)
+    {
+        if ($this->state != "test") {
+            return;
         }
 
-        // echo in test
+        if ($comment == null and $instruction == null) {
+            $comment = "";
+        }
+
         // devstack save to variable
         echo "<pre>";
         echo substr($this->uuid, 0, 4) . "-" . $this->caller . " ";
-        echo str_pad(number_format((microtime(true) - $this->start_time)*1000) ."ms", 0, " ", STR_PAD_RIGHT);
+        echo str_pad(
+            number_format((microtime(true) - $this->start_time) * 1000) . "ms",
+            0,
+            " ",
+            STR_PAD_RIGHT
+        );
 
         echo "[" . number_format($this->operations_time * 1e3) . "ms]";
-        echo " ". $comment. " ";
-        echo "split time " . number_format( (microtime(true) - $this->split_time)*1000)."ms " ;
+        echo " " . $comment . " ";
+        echo "split time " .
+            number_format((microtime(true) - $this->split_time) * 1000) .
+            "ms ";
         echo "operations " . $this->operations . " ";
         echo "<br>";
 
-        foreach ($this->log as $key=>$value) {
-            echo str_pad("", 4, " ") .   $value . "<br>";
+        foreach ($this->log as $key => $value) {
+            echo str_pad("", 4, " ") . $value . "<br>";
         }
         $this->log = array();
         echo "</pre>";
     }
 
-
     /**
      *
      * @return unknown
      */
-    function get_calling_function() {
+    function get_calling_function()
+    {
         // see stackoverflow.com/questions/190421
         $caller = debug_backtrace();
 
-        // echo "function ". debug_backtrace()[1]['function'];
 
         $caller = $caller[2];
         $r = $caller['function'] . '()';
@@ -195,13 +207,13 @@ class Database {
             $r .= ' called by ';
             // $r .= $caller['class'];
             $t = explode("\\", $caller['class']);
-            $r .= "" . $t[count($t) -1];
+            $r .= "" . $t[count($t) - 1];
         }
 
-        $this->caller = $t[count($t)-1];
+        $this->caller = $t[count($t) - 1];
 
         $r .= "\\";
-        $r .=  debug_backtrace()[1]['function'];
+        $r .= debug_backtrace()[1]['function'];
 
         if (isset($caller['object'])) {
             //$r .= ' (' . get_class($caller['object']) . ')';
@@ -209,13 +221,13 @@ class Database {
         return $r;
     }
 
-
     /**
      *
      * @param unknown $created_at (optional)
      * @return unknown
      */
-    function priorGet($created_at = null) {
+    function priorGet($created_at = null)
+    {
         // Given a $uuid.  Find the previous record the $from user
         // created.
 
@@ -237,32 +249,45 @@ class Database {
         // created_at is a stack created field
 
         if ($created_at == null) {
-            $query_string = "SELECT * FROM (SELECT * FROM stack WHERE
-				nom_from='". $this->from .
+            $query_string =
+                "SELECT * FROM (SELECT * FROM stack WHERE
+				nom_from='" .
+                $this->from .
                 "' ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
-
         } else {
-            $query_string = "SELECT * FROM stack where nom_from = '" . $this->from . "' and created_at < '" . $created_at . "' order by created_at DESC LIMIT 3";
-        };
+            $query_string =
+                "SELECT * FROM stack where nom_from = '" .
+                $this->from .
+                "' and created_at < '" .
+                $created_at .
+                "' order by created_at DESC LIMIT 3";
+        }
 
         $sth = $this->container->db->prepare($query_string);
         $sth->execute();
         $thing = $sth->fetchObject();
 
-        $thingreport = array('thing' => $thing, 'info' => 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' . $this->web_prefix . 'api/thing/<32 characters>.', 'help' => 'Check your junk/spam folder.');
+        $thingreport = array(
+            'thing' => $thing,
+            'info' =>
+                'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
+                $this->web_prefix .
+                'api/thing/<32 characters>.',
+            'help' => 'Check your junk/spam folder.'
+        );
 
         // Runs in 0 to 8ms
 
         return $thingreport;
     }
 
-
     /**
      *
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    function writeField($field_text, $string_text) {
+    function writeField($field_text, $string_text)
+    {
         $this->split_time = microtime(true);
         $this->log = array($field_text, $string_text);
         //$this->test( $this->get_calling_function() );
@@ -271,8 +296,6 @@ class Database {
         // user provided string_text
         // stack provided field_text
 
-        //if ($field_text == "associations") {
-        //    echo "db write uuid " . $this->uuid . " field " . $field_text . " string "  . $string_text . ".\n";}
 
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
@@ -301,40 +324,39 @@ class Database {
             $this->last_update = true;
         }
 
-
-        $this->operations_time += (microtime(true) - $this->split_time);
+        $this->operations_time += microtime(true) - $this->split_time;
         $this->operations += 1;
         //$this->test("writeField");
-
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    function count() {
+    function count()
+    {
         $sth = $this->container->db->prepare("SELECT count(*) FROM stack");
         $sth->execute();
 
         $thing_count = $sth->fetchColumn();
 
-        $thingreport = array('things' => false,
+        $thingreport = array(
+            'things' => false,
             'info' => 'Counted ' . $thing_count . '  records on stack.',
-            'help' => 'This is how big the stack is.');
+            'help' => 'This is how big the stack is.'
+        );
         $thingreport['number'] = $thing_count;
 
         return $thingreport;
     }
-
 
     /**
      *
      * @param unknown $field
      * @return unknown
      */
-    function readField($field) {
+    function readField($field)
+    {
         $thingreport = $this->Get();
         $this->thing = $thingreport['thing'];
 
@@ -347,14 +369,14 @@ class Database {
         }
     }
 
-
     /**
      *
      * @param unknown $subject
      * @param unknown $to
      * @return unknown
      */
-    function Create($subject, $to) {
+    function Create($subject, $to)
+    {
         // Create a new record in the db for the Thing.
         $this->split_time = microtime(true);
 
@@ -379,12 +401,12 @@ class Database {
         return $query;
     }
 
-
     /**
      *
      * @return unknown
      */
-    function Get() {
+    function Get()
+    {
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
 
@@ -392,32 +414,42 @@ class Database {
 
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
-            $sth = $this->container->db->prepare("SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid");
+            $sth = $this->container->db->prepare(
+                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
+            );
 
             //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
             $sth->bindParam("uuid", $this->uuid);
             $sth->execute();
             $thing = $sth->fetchObject();
         } catch (\Exception $e) {
-            echo 'Caught error: ',  $e->getMessage(), "\n";
+            echo 'Caught error: ', $e->getMessage(), "\n";
             $thing = false;
         }
 
-
-        $thingreport = array('thing' => $thing, 'info' => 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' . $this->web_prefix . 'api/thing/<32 characters>.', 'help' => 'Check your junk/spam folder.');
+        $thingreport = array(
+            'thing' => $thing,
+            'info' =>
+                'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
+                $this->web_prefix .
+                'api/thing/<32 characters>.',
+            'help' => 'Check your junk/spam folder.'
+        );
 
         $this->test();
 
         return $thingreport;
     }
 
-
     /**
      *
      * @return unknown
      */
-    function Forget() {
-        $sth = $this->container->db->prepare("DELETE FROM stack WHERE uuid=:uuid");
+    function Forget()
+    {
+        $sth = $this->container->db->prepare(
+            "DELETE FROM stack WHERE uuid=:uuid"
+        );
         $sth->bindParam("uuid", $this->uuid);
         $sth->execute();
 
@@ -425,18 +457,18 @@ class Database {
         return $thingreport;
     }
 
-
     /**
      *
      * @param unknown $id (optional)
      */
-    function setUser($id = null) {
-
-        if ($id == null) {$id = "null@" . $settings['settings']['stack']['mail_postfix'];}
+    function setUser($id = null)
+    {
+        if ($id == null) {
+            $id = "null@" . $settings['settings']['stack']['mail_postfix'];
+        }
         $this->from = $id;
         return;
     }
-
 
     /*
     // Add bindparam
@@ -459,16 +491,15 @@ class Database {
 	}
 */
 
-
     /**
      *
      * @param unknown $nom_from
      */
-    function setFrom($nom_from) {
+    function setFrom($nom_from)
+    {
         $this->from = $nom_from;
         return;
     }
-
 
     /**
      *
@@ -476,9 +507,11 @@ class Database {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function associationSearch($value, $max = null) {
-
-        if ($max == null) {$max = 3;}
+    function associationSearch($value, $max = null)
+    {
+        if ($max == null) {
+            $max = 3;
+        }
         $max = (int) $max;
 
         $user_search = $this->from;
@@ -491,9 +524,10 @@ class Database {
 
         $thingreport['things'] = array();
 
-        try{
+        try {
             $value = "%$value%"; // Value to search for in Variables
-            $query = "SELECT * FROM stack WHERE nom_from=:user_search AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
+            $query =
+                "SELECT * FROM stack WHERE nom_from=:user_search AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
             // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
             // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
             // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_searc$
@@ -510,21 +544,17 @@ class Database {
 
             $things = $sth->fetchAll();
 
-            $thingreport['info'] = 'So here are Things with the association you provided. That\'s what you want';
+            $thingreport['info'] =
+                'So here are Things with the association you provided. That\'s what you want';
             $thingreport['things'] = $things;
-
-        } catch(\PDOException $e) {
+        } catch (\PDOException $e) {
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
         }
 
-
         return $thingreport;
     }
-
-
-
 
     /**
      *
@@ -533,9 +563,11 @@ class Database {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function variableSearch($path, $value, $max = null) {
-
-        if ($max == null) {$max = 3;}
+    function variableSearch($path, $value, $max = null)
+    {
+        if ($max == null) {
+            $max = 3;
+        }
         $max = (int) $max;
 
         $user_search = $this->from;
@@ -548,9 +580,10 @@ class Database {
 
         $thingreport['things'] = array();
 
-        try{
-//            $value = "%$value%"; // Value to search for in Variables
-            $query = "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+        try {
+            //            $value = "%$value%"; // Value to search for in Variables
+            $query =
+                "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
             // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
             // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
             // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
@@ -567,19 +600,17 @@ class Database {
 
             $things = $sth->fetchAll();
 
-            $thingreport['info'] = 'So here are Things with the variable you provided in \$variables. That\'s what you want';
+            $thingreport['info'] =
+                'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport['things'] = $things;
-
-        } catch(\PDOException $e) {
+        } catch (\PDOException $e) {
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
         }
 
-
         return $thingreport;
     }
-
 
     /**
      *
@@ -587,16 +618,68 @@ class Database {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function agentSearch($agent, $max = null) {
+    function subjectSearch($keyword_input, $agent, $max)
+    {
+        $user_search = $this->from;
+        //        $keyword = "%$keyword%"; // Value to search for in Variables
+        //        $keyword = '"' . $keyword .'"'; // Value to search for in Variables
+        //$keyword = "$keyword";
 
-        if ($max == null) {$max = 3;}
+        $keyword = $this->container->db->quote($keyword_input);
+
+        if ($max == null) {
+            $max = 3;
+        }
+        $max = (int) $max;
+
+        $query =
+            'SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+
+        $sth = $this->container->db->prepare($query);
+        $sth->bindParam(":user_search", $user_search);
+        $sth->bindParam(":keyword", $keyword);
+        $sth->bindParam(":agent", $agent);
+        $sth->bindParam(":max", $max, PDO::PARAM_INT);
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+        }
+        $things = $sth->fetchAll();
+
+        //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
+        $thingreport = array(
+            'things' => $things,
+            'info' =>
+                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' =>
+                'A list of Things which match at the provided phrase.'
+        );
+
+        return $thingreport;
+    }
+
+    /**
+     *
+     * @param unknown $agent
+     * @param unknown $max   (optional)
+     * @return unknown
+     */
+    function agentSearch($agent, $max = null)
+    {
+        if ($max == null) {
+            $max = 3;
+        }
         $max = (int) $max;
 
         $user_search = $this->from;
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-        $query = "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+        $query =
+            "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -606,10 +689,16 @@ class Database {
 
         $things = $sth->fetchAll();
 
-        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help' => 'It is up to you what you do with these.', 'whatisthis' => 'A list of Things which match at the provided phrase.');
+        $thingreport = array(
+            'things' => $things,
+            'info' =>
+                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' =>
+                'A list of Things which match at the provided phrase.'
+        );
         return $thingreport;
     }
-
 
     /**
      * add bindparam
@@ -617,13 +706,15 @@ class Database {
      * @param unknown $keyword
      * @return unknown
      */
-    function userSearch($keyword) {
+    function userSearch($keyword)
+    {
         $user_search = $this->from;
         $keyword = "%$keyword%"; // Value to search for in Variables
 
         //  $query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' AND task LIKE '%$keyword%' ORDER BY created_at DESC";
         //      $query = "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE '%$keyword%' ORDER BY created_at DESC";
-        $query = "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE :keyword ORDER BY created_at DESC";
+        $query =
+            "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE :keyword ORDER BY created_at DESC";
 
         try {
             $sth = $this->container->db->prepare($query);
@@ -633,18 +724,19 @@ class Database {
 
             $sth->execute();
             $things = $sth->fetchAll();
-
         } catch (\Exception $e) {
-            echo 'Caught error: ',  $e->getMessage(), "\n";
+            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
         }
 
-
-        $thingreport = array('thing' => $things, 'info' => 'Searches by nom_from and task.', 'help' => 'Keyword subject line search.');
+        $thingreport = array(
+            'thing' => $things,
+            'info' => 'Searches by nom_from and task.',
+            'help' => 'Keyword subject line search.'
+        );
 
         return $thingreport;
     }
-
 
     /*
     // add bindparam
@@ -676,15 +768,19 @@ class Database {
     }
 */
 
-
     /**
      *
      * @return unknown
      */
-    function userNextThing() {
-        if (!isset($this->user_things)) {$this->userThings();}
+    function userNextThing()
+    {
+        if (!isset($this->user_things)) {
+            $this->userThings();
+        }
 
-        if ($this->from != $this->user) {return;}
+        if ($this->from != $this->user) {
+            return;
+        }
 
         $thing = $this->user_things->fetch();
         //$things = $sth->fetchAll();
@@ -695,7 +791,6 @@ class Database {
 
         return $thing_report;
     }
-
 
     /*
     // deprecated
@@ -743,7 +838,8 @@ class Database {
      *
      * @return unknown
      */
-    private function updateThing() {
+    private function updateThing()
+    {
         $this->uuid = $thing->uuid;
         $this->to = $thing->nom_to;
         $this->from = $thing->nom_from;
@@ -751,16 +847,21 @@ class Database {
         return "Thing read " . $this->uuid;
     }
 
-
     /**
      *
      */
-    function validateThing() {
-
-        if ((!isset($this->from)) and (!isset($this->uuid))) {throw new Exception('$this->from and $this->uuid not set.  Required.');}
+    function validateThing()
+    {
+        if (!isset($this->from) and !isset($this->uuid)) {
+            throw new Exception(
+                '$this->from and $this->uuid not set.  Required.'
+            );
+        }
 
         // Fail if a null nom_from is provided
-        if ( $this->from == null ) {throw new Exception('$this->nom_from set as null.  Required.');}
+        if ($this->from == null) {
+            throw new Exception('$this->nom_from set as null.  Required.');
+        }
 
         // Every Thing should be able to do this.
         // but which Things reply should be private to the Things.
@@ -774,13 +875,13 @@ class Database {
         return;
     }
 
-
     /**
      *
      * @param unknown $uuid (optional)
      * @return unknown
      */
-    function UUids($uuid = null) {
+    function UUids($uuid = null)
+    {
         // Either $uuid or $nom_from might not be set.
         // UUids requires both to be set to do a search
         // for all records contain the $uuid.
@@ -789,23 +890,21 @@ class Database {
         // is asking for too much.
 
         // Do a self look-up if no uuid provided.
-        if ( $uuid == null ); {
+        if ($uuid == null);
+        if ($this->uuid == null) {
+            $thingreport = array('things' => false);
+            $thingreport['info'] =
+                'So here are the uuids of all records matching your request.  That\'s what you wanted.';
+            $thingreport['help'] = 'No matching records returned.';
 
-            if ( $this->uuid == null ) {
-
-                $thingreport = array('things' => false);
-                $thingreport['info'] = 'So here are the uuids of all records matching your request.  That\'s what you wanted.';
-                $thingreport['help'] = 'No matching records returned.';
-
-                return $thingreport;
-
-            } else {
-                $uuid = $this->uuid;
-            }
+            return $thingreport;
+        } else {
+            $uuid = $this->uuid;
         }
 
         // Should be able to request multiple Things uuids at the same time.
-        if ( is_string($uuid) ); {$task_inclusions = array($uuid);}
+        if (is_string($uuid));
+        $task_inclusions = array($uuid);
 
         // Should not be able to request by nom_from.
         // So commented out here.
@@ -816,7 +915,14 @@ class Database {
 
         $task_exclusions = null;
 
-        $querable_fields = array('nom_from', 'nom_to', 'associations', 'task', 'message0', 'settings');
+        $querable_fields = array(
+            'nom_from',
+            'nom_to',
+            'associations',
+            'task',
+            'message0',
+            'settings'
+        );
 
         // Double capitals to make you thing before you ask a Thing
         // about what other Things it knows.
@@ -831,7 +937,6 @@ class Database {
         $sub_query = "";
 
         foreach ($task_inclusions as $task_inclusion) {
-
             // Example:
             // SELECT * FROM stack WHERE nom_from='<blank>' and ((task not like '%?%') or ($field not like '%transit%') or ($field not like '%test%')) ORDER BY RAND() LIMIT 3;
 
@@ -841,8 +946,14 @@ class Database {
                 $or = "";
                 $task_sql = "";
                 foreach ($querable_fields as $querable_field) {
-                    $task_sql .= $or . "($querable_field like '%" . $task_inclusion . "%')";
-                    if (count($task_inclusions) > 0) {$or = " or ";}
+                    $task_sql .=
+                        $or .
+                        "($querable_field like '%" .
+                        $task_inclusion .
+                        "%')";
+                    if (count($task_inclusions) > 0) {
+                        $or = " or ";
+                    }
                 }
             }
 
@@ -864,22 +975,28 @@ class Database {
             // It's the or here that makes the exclusion script fail.
             //  $sub_query .= "' and (" . $inclusion_sql . " or " . $exclusion_sql . ")";
             $sub_query .= "' and (" . $inclusion_sql . ")";
-
         }
 
-        $query = "SELECT * FROM stack WHERE nom_from='". $this->from . $sub_query . " ORDER BY RAND()"; // LIMIT 3";
+        $query =
+            "SELECT * FROM stack WHERE nom_from='" .
+            $this->from .
+            $sub_query .
+            " ORDER BY RAND()"; // LIMIT 3";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam("nom_from", $this->from);
         $sth->execute();
         $things = $sth->fetchAll();
 
-
-        $thingreport = array('things' => $things, 'info' => 'So here are the uuids of all records matching your request.  That\'s what you wanted.', 'help' => 'It is up to you what you do with these.');
+        $thingreport = array(
+            'things' => $things,
+            'info' =>
+                'So here are the uuids of all records matching your request.  That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.'
+        );
 
         return $thingreport;
     }
-
 
     /*
     // add bindparam
@@ -934,12 +1051,12 @@ class Database {
 	}
 */
 
-
     /**
      *
      * @return unknown
      */
-    function getRed() {
+    function getRed()
+    {
         // Get all red items on the stack.
         // Not an identity function.
         //http://www.sqltrainingonline.com/sql-not-like-with-multiple-values/
@@ -959,20 +1076,26 @@ class Database {
         //$this->from = $thing->nom_from;
         //$this->subject = $thing->task;
 
-        $thingreport = array('thing' => $things, 'info' => 'So here are Things which are flagged red.', 'help' => 'It is up to you what you do with these.', 'whatisthis' => 'A list of Things which have status red.');
+        $thingreport = array(
+            'thing' => $things,
+            'info' => 'So here are Things which are flagged red.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' => 'A list of Things which have status red.'
+        );
 
         return $thingreport;
     }
-
 
     /**
      *
      * @param unknown $max (optional)
      * @return unknown
      */
-    function getStack($max = null) {
-
-        if ($max == null) {$max = 99;}
+    function getStack($max = null)
+    {
+        if ($max == null) {
+            $max = 99;
+        }
         $max = (int) $max;
 
         $agent = "stack";
@@ -980,7 +1103,8 @@ class Database {
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-        $query = "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+        $query =
+            "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -990,57 +1114,71 @@ class Database {
 
         $things = $sth->fetchAll();
 
-        $thingreport = array('things' => $things, 'info' => 'So here are Things which are flagged as stack reports.', 'help' => 'This reports on stack health');
+        $thingreport = array(
+            'things' => $things,
+            'info' => 'So here are Things which are flagged as stack reports.',
+            'help' => 'This reports on stack health'
+        );
 
         return $thingreport;
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    public static function getNew() {
+    public static function getNew()
+    {
         $query = "SELECT * FROM stack WHERE variables is NULL";
 
         $sth = $this->container->db->prepare($query);
         $sth->execute();
         $things = $sth->fetchAll();
 
-        $thingreport = array('thing' => $things, 'info' => 'So here are Things which are flagged red.', 'help' => 'It is up to you what you do with these.', 'whatisthis' => 'A list of Things which have status red.');
+        $thingreport = array(
+            'thing' => $things,
+            'info' => 'So here are Things which are flagged red.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' => 'A list of Things which have status red.'
+        );
 
         return $thingreport;
     }
-
 
     /**
      *
      * @return unknown
      */
-    function length() {
-        $query = "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
+    function length()
+    {
+        $query =
+            "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
         $sth = $this->container->db->prepare($query);
         $sth->execute();
         $response = $sth->fetchAll();
 
         $keys = array_keys($response);
 
-        $thingreport = array('thing' => false, 'db' => $response, 'info' => 'So here is the length of the variables field.', 'help' => 'There is a limit to the variables the stack can keep track of.', 'whatisthis' => 'The maximum length of the variables field.');
+        $thingreport = array(
+            'thing' => false,
+            'db' => $response,
+            'info' => 'So here is the length of the variables field.',
+            'help' =>
+                'There is a limit to the variables the stack can keep track of.',
+            'whatisthis' => 'The maximum length of the variables field.'
+        );
 
         //$thingreport = false;
 
         return $thingreport;
-
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    function connections() {
+    function connections()
+    {
         // NOT TESTED
 
         $query = "SHOW STATUS WHERE `variable_name` = 'Threads_connected'";
@@ -1051,13 +1189,19 @@ class Database {
 
         $keys = array_keys($response);
 
-        $thingreport = array('thing' => false, 'db' => $response, 'info' => 'So here are Things matching at least one of the words provided. That\'s what you wanted.', 'help' => 'It is up to you what you do with these.', 'whatisthis' => 'A list of Things which match at least one keyword.');
+        $thingreport = array(
+            'thing' => false,
+            'db' => $response,
+            'info' =>
+                'So here are Things matching at least one of the words provided. That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' => 'A list of Things which match at least one keyword.'
+        );
 
         //$thingreport = false;
 
         return $thingreport;
     }
-
 
     /**
      *
@@ -1065,8 +1209,8 @@ class Database {
      * @param unknown $n        (optional)
      * @return unknown
      */
-    function random($nom_from = null, $n = 1) {
-
+    function random($nom_from = null, $n = 1)
+    {
         if ($nom_from == null) {
             // https://explainextended.com/2009/03/01/selecting-random-rows/
             // https://stackoverflow.com/questions/1244555/how-can-i-optimize-mysqls-order-by-rand-function
@@ -1091,7 +1235,11 @@ class Database {
             //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
             //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
 
-            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((" . $n . "/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT " . $n;
+            $q =
+                "SELECT * FROM stack WHERE RAND()<(SELECT ((" .
+                $n .
+                "/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT " .
+                $n;
 
             //            $q = "SELECT * FROM stack ORDER BY RAND() LIMIT " . $n;
             //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((20/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 20";
@@ -1106,11 +1254,15 @@ class Database {
             //      $this->from = $thing->nom_from;
             //      $this->subject = $thing->task;
 
-            $thingreport = array('things' => $things, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.', 'help' => 'It is up to you what you do with these.');
-
+            $thingreport = array(
+                'things' => $things,
+                'info' =>
+                    'So here are three things you put on the stack.  That\'s what you wanted.',
+                'help' => 'It is up to you what you do with these.'
+            );
         } else {
-
-            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
+            $q =
+                "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
             $sth = $this->container->db->prepare($q);
 
             $sth->execute();
@@ -1120,13 +1272,16 @@ class Database {
             $this->from = $thing->nom_from;
             $this->subject = $thing->task;
 
-            $thingreport = array('things' => $thing, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.', 'help' => 'It is up to you what you do with these.');
-
+            $thingreport = array(
+                'things' => $thing,
+                'info' =>
+                    'So here are three things you put on the stack.  That\'s what you wanted.',
+                'help' => 'It is up to you what you do with these.'
+            );
         }
 
         return $thingreport;
     }
-
 
     /**
      *
@@ -1134,19 +1289,25 @@ class Database {
      * @param unknown $n        (optional)
      * @return unknown
      */
-    function randomN($nom_from, $n=3) {
-
+    function randomN($nom_from, $n = 3)
+    {
         // Pick N of identity's things.
-        $sth = $this->container->db->prepare("SELECT * FROM stack WHERE nom_from=:nom_from ORDER BY RAND() LIMIT 3");
+        $sth = $this->container->db->prepare(
+            "SELECT * FROM stack WHERE nom_from=:nom_from ORDER BY RAND() LIMIT 3"
+        );
         $sth->bindParam("nom_from", $nom_from);
         $sth->execute();
         $things = $sth->fetchAll();
 
-        $thingreport = array('thing' => $things, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.', 'help' => 'It is up to you what you do with these.');
+        $thingreport = array(
+            'thing' => $things,
+            'info' =>
+                'So here are three things you put on the stack.  That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.'
+        );
 
         return $thingreport;
     }
-
 
     /**
      * code review
@@ -1156,7 +1317,11 @@ class Database {
      * @param unknown $nom_to_exclusions (optional)
      * @return unknown
      */
-    function reminder($nom_from, $task_exclusions = null, $nom_to_exclusions = null) {
+    function reminder(
+        $nom_from,
+        $task_exclusions = null,
+        $nom_to_exclusions = null
+    ) {
         // Example:
         // SELECT * FROM stack WHERE nom_from='test@test.test' and ((task not like '%?%') or (nom_from not like '%transit%') or (nom_from not like '%test%')) ORDER BY RAND() LIMIT 3;
 
@@ -1183,33 +1348,43 @@ class Database {
             $and = "";
             //$nom_to_sql = "";
             foreach ($nom_to_exclusions as $nom_to_exclusion) {
-                $nom_to_sql .= $and . "nom_to not like '%" . $nom_to_exclusion . "%'";
+                $nom_to_sql .=
+                    $and . "nom_to not like '%" . $nom_to_exclusion . "%'";
                 $and = " and ";
             }
             $nom_to_sql .= ")";
         }
 
-        $query = "SELECT * FROM stack WHERE nom_from='". $nom_from . "' and (" . $task_sql . " and " . $nom_to_sql . ") ORDER BY RAND() LIMIT 3";
+        $query =
+            "SELECT * FROM stack WHERE nom_from='" .
+            $nom_from .
+            "' and (" .
+            $task_sql .
+            " and " .
+            $nom_to_sql .
+            ") ORDER BY RAND() LIMIT 3";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam("nom_from", $nom_from);
         $sth->execute();
         $things = $sth->fetchAll();
 
-
-        $thingreport = array('thing' => $things, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.', 'help' => 'It is up to you what you do with these.');
+        $thingreport = array(
+            'thing' => $things,
+            'info' =>
+                'So here are three things you put on the stack.  That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.'
+        );
 
         return $thingreport;
     }
-
-
 }
-
 
 // https://insomanic.me.uk/php-trick-catching-fatal-errors-e-error-with-a-custom-error-handler-cea2262697a2
 //set_error_handler('myErrorHandler');
-register_shutdown_function('Nrwtaylor\StackAgentThing\fatalErrorShutdownHandler');
-
+register_shutdown_function(
+    'Nrwtaylor\StackAgentThing\fatalErrorShutdownHandler'
+);
 
 /**
  *
@@ -1219,19 +1394,24 @@ register_shutdown_function('Nrwtaylor\StackAgentThing\fatalErrorShutdownHandler'
  * @param unknown $errline
  * @return unknown
  */
-function myErrorHandler($errno, $errstr, $errfile, $errline) {
-    if ( E_RECOVERABLE_ERROR===$errno ) {
+function myErrorHandler($errno, $errstr, $errfile, $errline)
+{
+    if (E_RECOVERABLE_ERROR === $errno) {
         //ob_clean();
         //echo "BORK | Bounty ";
         //ob_clean();
-        if (ob_get_contents()) ob_clean();
+        if (ob_get_contents()) {
+            ob_clean();
+        }
         echo "BORK | 3797e2c1-6585-4ae8-a256-b3e5466c980f ";
         //echo "'caught' fatal error E_RECOVERABLE_ERROR\n";
         return true;
-    } elseif ( E_ERROR===$errno ) {
+    } elseif (E_ERROR === $errno) {
         // If there is stuff in the screen buffer clear it.
 
-        if (ob_get_contents()) ob_clean();
+        if (ob_get_contents()) {
+            ob_clean();
+        }
         //ob_clean();
         echo "BORK | e5ffb5de-a502-466e-8ecc-f0ec9f861e0d";
         if (preg_match('(Maximum|execution|time|exceeded)', $errstr) === 1) {
@@ -1252,7 +1432,9 @@ function myErrorHandler($errno, $errstr, $errfile, $errline) {
 
         return true;
     }
-    if (ob_get_contents()) ob_clean();
+    if (ob_get_contents()) {
+        ob_clean();
+    }
 
     //ob_clean();
     echo "BORK | 00539cf2-0f56-495a-87df-64746cebfd41";
@@ -1260,11 +1442,11 @@ function myErrorHandler($errno, $errstr, $errfile, $errline) {
     return false;
 }
 
-
 /**
  *
  */
-function fatalErrorShutdownHandler() {
+function fatalErrorShutdownHandler()
+{
     // Options
 
     // This displays on each uuid end-point
@@ -1288,9 +1470,13 @@ function fatalErrorShutdownHandler() {
     $last_error = error_get_last();
     if ($last_error['type'] === E_ERROR) {
         // fatal error
-        myErrorHandler(E_ERROR, $last_error['message'], $last_error['file'], $last_error['line']);
+        myErrorHandler(
+            E_ERROR,
+            $last_error['message'],
+            $last_error['file'],
+            $last_error['line']
+        );
     }
-
 
     // This is the end-point to the full Stackr response.
     //
@@ -1299,6 +1485,4 @@ function fatalErrorShutdownHandler() {
     //echo "BORK | No response."; // Will appear in the web page
     // An exit here will cut off the footer display.
     //exit();
-
-
 }

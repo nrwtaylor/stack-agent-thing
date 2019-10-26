@@ -34,7 +34,6 @@ if (is_array($input)) {$this->agent_input = $input;}
 if (is_string($input)) {$this->agent_input = strtolower($input);}
 
 //        $this->agent_input = strtolower($input);
-
 //        $this->agent_name = 'agent';
 
         $this->getName();
@@ -124,7 +123,6 @@ catch (\OverflowException $t)
 {
 $this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
 $this->thing_report['sms'] = "STACK | " . $this->response;
-
     $this->thing->log("caught overflow exception.");
    // Executed only in PHP 7, will not match in PHP 5
 }
@@ -133,17 +131,14 @@ catch (\Throwable $t)
 {
 //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
 //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
-
 $this->thing->log("caught throwable.");
    // Executed only in PHP 7, will not match in PHP 5
 }
 catch (\Exception $e)
 {
-
    $this->thing->log("caught exception");
    // Executed only in PHP 5, will not be reached in PHP 7
 }
-
 //restore_error_handler();
         if (($this->agent_input == null) or ($this->agent_input == "")) {
             $this->respond();
@@ -620,7 +615,13 @@ public function makeEmail() {
         case (isset($this->input)) :
             break;
 
+case (is_array($this->agent_input)):
+            $this->input = $this->agent_input;
+break;
+
         case ($this->agent_input == null):
+
+
         case (strtolower($this->agent_input) == "extract"):
         case (strtolower($this->agent_input) == strtolower($this->agent_name)) :
             $this->input = strtolower($text);
@@ -630,7 +631,7 @@ public function makeEmail() {
         }
 
 
-
+if (!is_array($this->input)) {
         $whatIWant = $this->input;
         if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
             $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
@@ -638,6 +639,8 @@ public function makeEmail() {
             $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
         }
         $this->input = trim($whatIWant);
+}
+
         $this->readSubject();
     }
 
@@ -750,11 +753,14 @@ public function makeEmail() {
         // Because we need to be able to respond to calls
         // to specific Identities.
 
-        $input = strtolower($this->agent_input . " " . $this->to . " " .$this->subject);
+$agent_input_text = $this->agent_input;
+if (is_array($this->agent_input)) {$agent_input_text = "";}
+
+        $input = strtolower($agent_input_text . " " . $this->to . " " .$this->subject);
         if ($this->agent_input == null) {
             $input = strtolower($this->to . " " . $this->subject);
         } else {
-            $input = strtolower($this->agent_input);
+            $input = strtolower($agent_input_text);
         }
 
         // Basically if the agent input directly matches an agent name
@@ -763,7 +769,7 @@ public function makeEmail() {
         // So look hear to generalize that.
         //$agents = new Agents($this->thing, "agents");
         //foreach ($agents->agents as $agent_class_name=>$agent_name) {
-        $text = urldecode($this->agent_input);
+        $text = urldecode($agent_input_text);
         $text = strtolower($text);
         //if ( $text == $this->agent_input) {
         //}
@@ -1122,7 +1128,7 @@ public function makeEmail() {
         if ($this->agent_input == null) {
             $arr[] = $this->to;
         } else {
-            $arr = explode(' ' , $this->agent_input);
+            $arr = explode(' ' , $agent_input_text);
         }
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
         //set_error_handler("warning_handler", E_WARNING);
