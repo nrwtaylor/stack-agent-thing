@@ -16,6 +16,8 @@ class Capitalise extends Agent
      */
     function init()
     {
+$this->capitalisations = array();
+$this->capitalisation = null;
     }
 
     /**
@@ -35,8 +37,10 @@ class Capitalise extends Agent
         $capitalisations = $word_agent->extractWords($text);
         //$result = $word_agent->isWord($text);
 $this->capitalisations = $capitalisations;
+$this->capitalisation = null;
+if (isset($this->capitalisations[0])) {
         $this->capitalisation = $this->capitalisations[0];
-
+}
     $thing_report = $this->thing->db->subjectSearch($text, $agent, 999);
 
 
@@ -81,6 +85,8 @@ $this->capitalisations = $capitalisations;
     public function readSubject()
     {
         $input = $this->input;
+if ($input == "capitalise") {return;}
+
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), "capitalise")) !== false) {
             $whatIWant = substr(

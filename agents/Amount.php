@@ -40,6 +40,14 @@ class Amount extends Agent
         $this->thing_report['help'] = "Recognizes text with an amount in it. ";
     }
 
+public function extractAmount($input = null){
+
+if (!isset($this->amounts)) {$this->extractAmounts($input);}
+$this->amount = "X";
+if (isset($this->amounts[0])) {$this->amount = $this->amounts[0];}
+return $this->amount;
+}
+
     function extractAmounts($input = null)
     {
         if (is_array($input)) {

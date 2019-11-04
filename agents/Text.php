@@ -17,7 +17,8 @@ class Text extends Agent
 {
     public $var = 'hello';
 
-    private function getNgrams($input, $n = 3) {
+    public function getNgrams($input, $n = 3) {
+if (!isset($this->ngrams)) {$this->ngrams = array();}
         $words = explode(' ', $input);
         $ngrams = array();
 
@@ -28,11 +29,63 @@ class Text extends Agent
                 for ($i = 0; $i < $n; $i++) {
                     $ngram .= " " . $words[$key + $i];
                 }
-                $ngrams[] = trim($ngram);
+                $ngrams[] = trim($this->trimAlpha($ngram));
             }
         }
+
+
         return $ngrams;
     }
+
+
+
+    public function trimAlpha($text) {
+$letters = array();
+$new_text = "";
+$flag = false;
+foreach(range(0, mb_strlen($text)) as $i) {
+
+$letter = substr($text,$i,1);
+//if (ctype_alpha($letter)) {$flag = true;}
+if (ctype_alnum($letter)) {$flag = true;}
+
+
+//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
+if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
+
+$letters[] = $letter;
+
+}
+
+//$text = $new_text;
+
+$new_text = "";
+$flag = false;
+foreach(array_reverse($letters) as $i=>$letter) {
+
+//$letter = substr($text,$i,1);
+//if (ctype_alpha($letter)) {$flag = true;}
+if (ctype_alnum($letter)) {$flag = true;}
+
+
+//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
+if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
+
+$n = count($letters) - $i -1;
+
+$letters[$n] = $letter;
+
+}
+$new_text = implode("",$letters);
+
+return $new_text;
+
+
+
+
+    }
+
+
 
 
     public function init()
@@ -121,7 +174,8 @@ class Text extends Agent
 //            ) {
 
             if (
-                preg_match('/[0-9]/', $token)
+//                preg_match('/[0-9]/', $token)
+is_numeric($token)
             ) {
 
 
@@ -162,14 +216,22 @@ class Text extends Agent
 //                preg_match('/[0-9]/', $token)
 //            ) {
 
+//            if (
+//                preg_match('/[A-Za-z]/', $token) &&
+//                preg_match('/[0-9]/', $token)
+//            ) {
+//                $hyphens[] = $token;
+//            }
+
             if (
-                preg_match('/[A-Za-z]/', $token) &&
-                preg_match('/[0-9]/', $token)
+preg_match('/^[^\W-]+-[^\W-]+$/', $token)
             ) {
 
 
                 $hyphens[] = $token;
             }
+
+
         }
         $this->hyphenates = $hyphens;
         return $this->hyphenates;

@@ -199,7 +199,6 @@ class Database
         // see stackoverflow.com/questions/190421
         $caller = debug_backtrace();
 
-
         $caller = $caller[2];
         $r = $caller['function'] . '()';
 
@@ -295,7 +294,6 @@ class Database
         // sqlinjection commentary
         // user provided string_text
         // stack provided field_text
-
 
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
@@ -618,22 +616,89 @@ class Database
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function subjectSearch($keyword_input, $agent, $max)
+    function testSearch($keyword_input)
+    {
+        $query =
+            'SELECT * FROM stack WHERE task="something something something"';
+
+        $sth = $this->container->db->prepare($query);
+
+        try {
+            $sth->execute();
+        } catch (\PDOException $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+        }
+        $things = $sth->fetchAll();
+        //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
+        $thingreport = array(
+            'things' => $things,
+            'info' =>
+                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' =>
+                'A list of Things which match at the provided phrase.'
+        );
+
+        return $thingreport;
+    }
+
+    /**
+     *
+     * @param unknown $agent
+     * @param unknown $max   (optional)
+     * @return unknown
+     */
+    function subjectSearch($keyword_input, $agent, $max, $mode = null)
     {
         $user_search = $this->from;
         //        $keyword = "%$keyword%"; // Value to search for in Variables
         //        $keyword = '"' . $keyword .'"'; // Value to search for in Variables
         //$keyword = "$keyword";
 
-        $keyword = $this->container->db->quote($keyword_input);
+        //$keyword = $this->container->db->quote($keyword_input);
 
         if ($max == null) {
             $max = 3;
         }
         $max = (int) $max;
 
-        $query =
-            'SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+        if ($mode == null or strtolower($mode) == "boolean") {
+            $keyword = $this->container->db->quote($keyword_input);
+            $query =
+                'SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+        }
+
+        if (strtolower($mode) == "like") {
+            $keyword = "$keyword_input"; // Value to search for in Variables
+            $query =
+                'SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
+        }
+        if (strtolower($mode) == "where") {
+            $keyword = $this->container->db->quote($keyword_input);
+            $query =
+                'SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
+        }
+
+        if (strtolower($mode) == "natural language") {
+            $keyword = $this->container->db->quote($keyword_input);
+            $query =
+                'SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max';
+        }
+
+        if (strtolower($mode) == "equal") {
+            $keyword =
+                "adidas adiPower S bounce men\'s spikeless Golf Shoe NEW";
+            //      $keyword = $keyword_input; // Value to search for in Variables
+            $keyword = $this->container->db->quote(
+                "adidas adiPower S bounce men\'s spikeless Golf Shoe NEW"
+            );
+            //$keyword = '$keyword_input';
+            //        $keyword = $this->container->db->quote($keyword_input);
+            //$text = "adidas adiPower S bounce men's spikeless Golf Shoe NEW";
+            //  $query ='SELECT * FROM stack WHERE task=:keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
+
+            $query = 'SELECT * FROM stack WHERE task=":keyword"';
+        }
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
@@ -647,7 +712,6 @@ class Database
             echo 'Caught exception: ', $e->getMessage(), "\n";
         }
         $things = $sth->fetchAll();
-
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
         $thingreport = array(
             'things' => $things,
@@ -661,9 +725,9 @@ class Database
         return $thingreport;
     }
 
-    function agentForget($agent, $max = 0) {
-
-// DELETE FROM stack WHERE nom_to="tile" AND created_at < (NOW() - INTERVAL 6 HOUR);
+    function agentForget($agent, $max = 0)
+    {
+        // DELETE FROM stack WHERE nom_to="tile" AND created_at < (NOW() - INTERVAL 6 HOUR);
 
         if ($max == null) {
             $max = 3;
@@ -673,13 +737,14 @@ class Database
         $user_search = $this->from;
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
-        $query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-//$query = 'DELETE FROM stack WHERE nom_to=:agent and task <= (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT 1 OFFSET 1) foo)';
+        $query =
+            "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+        //$query = 'DELETE FROM stack WHERE nom_to=:agent and task <= (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT 1 OFFSET 1) foo)';
 
         $sth = $this->container->db->prepare($query);
-//        $sth->bindParam(":user_search", $user_search);
-//        $sth->bindParam(":agent", $agent);
-//        $sth->bindParam(":max", $max, PDO::PARAM_INT);
+        //        $sth->bindParam(":user_search", $user_search);
+        //        $sth->bindParam(":agent", $agent);
+        //        $sth->bindParam(":max", $max, PDO::PARAM_INT);
         $sth->execute();
 
         $things = $sth->fetchAll();
@@ -693,50 +758,40 @@ class Database
                 'A list of Things which match at the provided phrase.'
         );
         return $thingreport;
-
-
-
     }
 
-    function agentForgetexceptnewest($agent, $max = null)
+    // Keep only the newest agent task.
+    function agentDeduplicate($agent)
     {
-return;
-        if ($max == null) {
-            $max = 3;
-        }
-        $max = (int) $max;
-
         $user_search = $this->from;
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-       // $query = "DELETE FROM stack WHERE nom_to=:agent AND nom_from = :user_search AND task NOT IN (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT :max) foo)";
+        // $query = "DELETE FROM stack WHERE nom_to=:agent AND nom_from = :user_search AND task NOT IN (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT :max) foo)";
 
-//$query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2.task AND t1.nom_to = :agent AND nom_from = :user_search';
-$query = 'delete from stack where nom_to=:agent and nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
-
+        //$query = 'DELETE t1 FROM stack t1, stack t2 WHERE t1.id < t2.id AND t1.task = t2.task AND t1.nom_to = :agent AND nom_from = :user_search';
+        //$query = 'delete from stack where nom_to=:agent and nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
+        //$query = 'delete /*+ MAX_EXECUTION_TIME(100) */ from stack where nom_to="tile" and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
+        $query =
+            'delete from stack where nom_to=:agent AND nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
         $sth->bindParam(":agent", $agent);
-        $sth->bindParam(":max", $max, PDO::PARAM_INT);
         $sth->execute();
 
-//        $things = $sth->fetchAll();
-//var_dump($things);
-//exit();
+        //        $things = $sth->fetchAll();
+        //var_dump($things);
+        //exit();
         $thingreport = array(
             'things' => null,
-            'info' =>
-                'Asked to delete records by agent.',
+            'info' => 'Asked to delete records by agent.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
                 'A command to delete all but some of a specific agent records.'
         );
         return $thingreport;
-
-
-}
+    }
 
     /**
      *
