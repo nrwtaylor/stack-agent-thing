@@ -143,7 +143,12 @@ class Ngram {
     }
 
 
+    public function isEqual($text_a, $text_b) {
 
+    
+
+
+    }
 
 
     /**

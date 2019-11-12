@@ -40,6 +40,14 @@ class Amount extends Agent
         $this->thing_report['help'] = "Recognizes text with an amount in it. ";
     }
 
+public function extractAmount($input = null){
+
+if (!isset($this->amounts)) {$this->extractAmounts($input);}
+$this->amount = "X";
+if (isset($this->amounts[0])) {$this->amount = $this->amounts[0];}
+return $this->amount;
+}
+
     function extractAmounts($input = null)
     {
         if (is_array($input)) {
@@ -67,6 +75,25 @@ class Amount extends Agent
                $amounts[] = $amount;
             }
         }
+
+        foreach ($tokens as $key => $token) {
+$currency_arr = array("dollars");
+//            if (strtolower($token) == "dollars") {
+if (in_array(strtolower($token), $currency_arr)) {
+            //$n =  $a->parseCurrency($token, $currency);
+
+            if ( is_numeric($tokens[$key - 1]) ) {
+$n = $tokens[$key - 1];
+               $amount = array("currency"=>"dollars", "amount"=>$n);
+               $amounts[] = $amount;
+            }
+            }
+
+        }
+
+
+
+
         $this->amounts = $amounts;
         return $this->amounts;
     }

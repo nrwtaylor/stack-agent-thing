@@ -117,7 +117,7 @@ class Word extends Agent {
 
         //echo implode("_",$w) . "\n";
 
-
+        $this->notwords = array();
         $this->words = array();
         foreach ($w as $key=>$value) {
 
@@ -130,6 +130,7 @@ class Word extends Agent {
                 //   echo "word is " . $text . "\n";
                 $this->words[] = $text;
             } else {
+                $this->notwords[] = $value;
                 //   echo "word is not " . $value . "\n";
             }
         }
@@ -279,11 +280,39 @@ if (!isset($this->contents)) {
         $contents = file_get_contents($file);
 $this->contents = $contents;
 }
+//var_dump($input);
+
+        $pattern = "|\b($input)\b|";
+
+        // search, and store all matching occurences in $matches
+        if (preg_match_all($pattern, $this->contents, $matches)) {
+            $m = $matches[0][0];
+//var_dump($m);
+//exit();
+return true;
+            return $m;
+        } else {
+            return false;
+        }
+
+return;
+
+
+
         $words = explode("\n", $this->contents);
+//$input = trim($input);
+
+$input = str_replace(array("\r", "\n"), "", $input);
+
+//if ($input == "trumpet") {echo "merp";exit();}
 
         foreach ($words as $key=>$word) {
+//$word = trim($word);
 
-            if (strtolower($input) == strtolower($word)) {
+$word = str_replace(array("\r", "\n"), "", $word);
+
+if(strcasecmp($input, $word) == 0) {
+    //        if ( strtolower($input) == strtolower($word) ) {
                 return true;
             }
 

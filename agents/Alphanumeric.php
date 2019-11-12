@@ -1,6 +1,6 @@
 <?php
 /**
- * Alpha.php
+ * Alphanumeric.php
  *
  * @package default
  */
@@ -14,7 +14,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Alpha extends Agent
+class Alphanumeric extends Agent
 {
 
 
@@ -22,11 +22,14 @@ class Alpha extends Agent
      *
      */
     function init() {
-        $this->node_list = array("alpha"=>
-            array("number"));
+        $this->node_list = array("alphanumeric"=>
+            array("alpha","number"));
 
         $this->aliases = array("learning"=>array("good job"));
         $this->recognize_french = true; // Flag error
+
+$this->filterAlphanumeric("123414sdfas asdfsad 234234 *&*dfg") ;
+
     }
 
 
@@ -34,10 +37,10 @@ class Alpha extends Agent
      *
      */
     function get() {
-        $this->alpha_agent = new Variables($this->thing, "variables alpha " . $this->from);
+//        $this->alphanumeric_agent = new Variables($this->thing, "variables alphanumeric " . $this->from);
 
-        $this->alpha = $this->alpha_agent->getVariable("alpha");
-        $this->refreshed_at = $this->alpha_agent->getVariable("refreshed_at");
+//        $this->alphanumeric = $this->alpha_agent->getVariable("alphanumeric");
+//        $this->refreshed_at = $this->alpha_agent->getVariable("refreshed_at");
     }
 
 
@@ -45,13 +48,19 @@ class Alpha extends Agent
      *
      */
     function set() {
-        $this->alpha_agent->setVariable("alpha", $this->alpha);
 
-        $this->alpha_agent->setVariable("refreshed_at", $this->current_time);
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(array("alphanumeric",
+                "refreshed_at"),  $this->thing->json->time()
+        );
+
+//        $this->alpha_agent->setVariable("alphanumeric", $this->alpha);
+
+//        $this->alpha_agent->setVariable("refreshed_at", $this->current_time);
 
     }
 
-    public function trimAlpha($text) {
+    public function trimAlphanumeric($text) {
 $letters = array();
 $new_text = "";
 $flag = false;
@@ -98,12 +107,47 @@ return $new_text;
     }
 
 
+    public function filterAlphanumeric($text) {
+$letters = array();
+//$new_text = "";
+//$flag = false;
+foreach(range(0, mb_strlen($text)) as $i) {
+
+$letter = substr($text,$i,1);
+//if (ctype_alpha($letter)) {$flag = true;}
+if (ctype_alnum($letter)) {
+$letters[] = $letter;
+} else {
+$letters[] = " ";
+}
+//$flag = true;}
+
+
+//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
+//if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
+
+//$letters[] = $letter;
+
+}
+
+//var_dump($letters);
+$new_text = implode("" ,$letters);
+$this->filter_alphanumeric = $new_text;
+return $new_text;
+
+
+
+
+    }
+
+
+
     /**
      *
      * @param unknown $input (optional)
      * @return unknown
      */
-    function extractAlphas($input = null) {
+    function extractAlphanumerics($input = null) {
         if ($input == null) {
             $input = $this->subject;
         }
@@ -111,15 +155,15 @@ return $new_text;
         // Life goals regex that does this
 
         if (!isset($this->alphas)) {
-            $this->alphas = array();
+            $this->alphanumerics = array();
         }
 
         $pieces = explode(" ", $input);
         $this->alphas = [];
         foreach ($pieces as $key=>$piece) {
 
-            if (ctype_alpha($piece)) {
-                $this->alphas[] = $piece;
+            if (ctype_alnum($piece)) {
+                $this->alphanumerics[] = $piece;
                 continue;
             }
 
@@ -140,8 +184,8 @@ return $new_text;
             //                continue;
             //            }
 
-            if (ctype_alpha(str_replace(",", "", $piece))) {
-                $this->alphas[] = str_replace(",", "", $piece);
+            if (ctype_alnum(str_replace(",", "", $piece))) {
+                $this->alphanumerics[] = str_replace(",", "", $piece);
                 continue;
             }
 
@@ -149,24 +193,24 @@ return $new_text;
             preg_match_all('/^\p{Alphabetic}+$/',  $piece, $matches);
 
             foreach ($matches[0] as $key=>$match) {
-                $this->alphas[] = $match;
+                $this->alphanumerics[] = $match;
             }
 
         }
 
-        return $this->alphas;
+        return $this->alphanumerics;
     }
 
 
     /**
      *
      */
-    function extractAlpha() {
+    function extractAlphanumeric() {
         $this->alpha = false; // No numbers.
-        if (!isset($this->alphas)) {$this->extractAlphas();}
+        if (!isset($this->alphanumerics)) {$this->extractAlphanumerics();}
 
-        if (isset($this->alphas[0])) {
-            $this->alpha = $this->alphas[0];
+        if (isset($this->alphanumerics[0])) {
+            $this->alphanumeric = $this->alphanumerics[0];
         }
 
     }
@@ -178,10 +222,10 @@ return $new_text;
     public function respond() {
         // Thing actions
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(array("alpha",
-                "received_at"),  $this->thing->json->time()
-        );
+//        $this->thing->json->setField("settings");
+//        $this->thing->json->writeVariable(array("alphanumeric",
+//                "received_at"),  $this->thing->json->time()
+//        );
 
         $this->thing->flagGreen();
 
@@ -218,7 +262,7 @@ return $new_text;
 
         $this->thing_report['thing'] = $this->thing->thing;
 
-        $this->thing_report['help'] = "This extracts alphas from the datagram.";
+        $this->thing_report['help'] = "This extracts alphanumerics from the datagram.";
 
     }
 
@@ -234,17 +278,17 @@ return $new_text;
             $input = $this->subject;
         }
 
-        if ($this->agent_input == "alpha") {
+        if ($this->agent_input == "alphanumeric") {
             $input = $this->subject;
         } else {
             $input = $this->agent_input;
         }
 
-        $this->extractAlphas($input);
-        $this->extractAlpha();
+        $this->extractAlphanumerics($input);
+        $this->extractAlphanumeric();
 
 
-        if ($this->alpha == false) {
+        if ($this->alphanumeric == false) {
             $this->get();
         }
 
@@ -252,9 +296,9 @@ return $new_text;
 
         if (count($pieces) == 1) {
 
-            if ($input == 'alpha') {
-                $this->getAlpha();
-                $this->response = "Last alpha retrieved.";
+            if ($input == 'alphanumeric') {
+                $this->getAlphanumeric();
+                $this->response = "Last alphanumeric retrieved.";
                 return;
             }
         }
@@ -285,11 +329,11 @@ return $new_text;
         if (!isset($this->numbers[0])) {
             $web .= "No numbers found<br>";
         } else {
-            $web .= "First number is ". $this->alphas[0] . "<br>";
+            $web .= "First number is ". $this->alphanumerics[0] . "<br>";
             $web .= "Extracted numbers are:<br>";
         }
-        foreach ($this->alphas as $key=>$alpha) {
-            $web .= $alpha . "<br>";
+        foreach ($this->alphanumerics as $key=>$alphanumeric) {
+            $web .= $alphanumeric . "<br>";
         }
 
         if ($this->recognize_french == true) {
@@ -306,11 +350,11 @@ return $new_text;
      *
      */
     function makeSMS() {
-        $sms = "ALPHA | ";
+        $sms = "ALPHANUMERIC | ";
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
         //}
-        $sms .= $this->alpha;
+        $sms .= $this->alphanumeric;
         //$this->sms_message .= 'devstack';
 
         $this->sms_message = $sms;
@@ -322,9 +366,8 @@ return $new_text;
      *
      */
     function makeChoices() {
-        $this->thing->choice->Create("number", $this->node_list, "number");
 
-        $choices = $this->thing->choice->makeLinks("number");
+        $choices = false;
         $this->thing_report['choices'] = $choices;
         $this->choices = $choices;
     }
