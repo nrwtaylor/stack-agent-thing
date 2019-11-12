@@ -75,6 +75,25 @@ return $this->amount;
                $amounts[] = $amount;
             }
         }
+
+        foreach ($tokens as $key => $token) {
+$currency_arr = array("dollars");
+//            if (strtolower($token) == "dollars") {
+if (in_array(strtolower($token), $currency_arr)) {
+            //$n =  $a->parseCurrency($token, $currency);
+
+            if ( is_numeric($tokens[$key - 1]) ) {
+$n = $tokens[$key - 1];
+               $amount = array("currency"=>"dollars", "amount"=>$n);
+               $amounts[] = $amount;
+            }
+            }
+
+        }
+
+
+
+
         $this->amounts = $amounts;
         return $this->amounts;
     }

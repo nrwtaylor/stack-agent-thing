@@ -15,6 +15,7 @@ class Ebay extends Agent
 
     function init()
     {
+        $this->ebay_daily_call_count = 0;
         $this->test = "Development code"; // Always
 
         $this->node_list = array("ebay" => array("ebay"));
@@ -54,6 +55,7 @@ class Ebay extends Agent
     function set()
     {
         $this->variables_agent->setVariable("counter", $this->counter);
+        $this->variables_agent->setVariable("daily_call_count", $this->ebay_daily_call_count);
         $this->variables_agent->setVariable(
             "refreshed_at",
             $this->current_time
@@ -103,6 +105,9 @@ class Ebay extends Agent
 
         // Count calls to Ebay API. Note call limits.
         $this->counter = $this->variables_agent->getVariable("counter");
+
+        $this->ebay_daily_call_count = $this->variables_agent->getVariable("daily_call_count");
+
         $this->refreshed_at = $this->variables_agent->getVariable(
             "refreshed_at"
         );
@@ -122,8 +127,31 @@ class Ebay extends Agent
 
 function logEbay($text) {
 
+if ($text == null) {$text = "MErp";}
+
+//var_dump($text);
+//var_dump($text['errorMessage']['error']['message']);
+
+
+$log_text = "Error message not found.";
+if (isset($text['errorMessage']['error']['message'])) {
+
+$log_text = $text['errorMessage']['error']['message'];
+
+}
+
+$request = "No request. ";
+if (isset($this->request)) {
+$request = $this->request;
+}
+
 $thing = new Thing(null);
-$thing->Create("merp","merp", $text);
+$thing->Create("meep","ebay", "g/ ebay error " . $request ." - ". $log_text);
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message1");
+        $this->thing->json->writeVariable( array("ebay") , $text );
 
 
 
@@ -131,6 +159,7 @@ $thing->Create("merp","merp", $text);
 
     function eBayGetSingle($ItemID)
     {
+$this->request = $ItemID;
         $this->thing->log("get single item id " . $ItemID . ".");
 
         $this->response .= "Requested an eBay item. ";
@@ -152,6 +181,9 @@ $thing->Create("merp","merp", $text);
             "&responseencoding=XML" .
             "&IncludeSelector=$includeSelector";
         $xml = simplexml_load_file($apicall);
+
+$this->ebay_daily_call_count += 1;
+
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
@@ -166,6 +198,7 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
     // devstack
     function eBayGetCategory($category_id)
     {
+$this->request = $category_id;
         $this->thing->log(
             "get multiple items by cateogory " . $category_id . "."
         );
@@ -193,12 +226,16 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
             $category_id;
 
         $xml = @simplexml_load_file($apicall);
+
+$this->ebay_daily_call_count += 1;
+
+
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
 
-if ($array["Ack"] == "Failure") {$this->logEbay($array);}
-
+if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
+if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
             return $array;
         }
         return false;
@@ -217,9 +254,12 @@ http://open.api.ebay.com/shopping?
     // devstack
     function eBayGetMultiple($items = array())
     {
+
+
 if ($items == array()) {return;}
 $items_string = implode(",",$items);
-var_dump($items_string);
+//var_dump($items_string);
+$this->request = $items_string;
 //exit();
 
         $includeSelector =
@@ -257,6 +297,10 @@ var_dump($items_string);
 
 
         $xml = @simplexml_load_file($apicall);
+
+$this->ebay_daily_call_count += 1;
+
+
 //var_dump($xml);  
       if ($xml) {
             $json = json_encode($xml);
@@ -275,6 +319,7 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
     // devstack
     function eBayFastKeywords($keywords, $n = 10)
     {
+$this->request = $keywords;
         $this->thing->log("fastest ebay search for " . $keywords . ".");
 
         $this->response .= "Requested multiple items. ";
@@ -312,11 +357,14 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
 
 
         $xml = @simplexml_load_file($apicall);
+
+$this->ebay_daily_call_count += 1;
+
   
       if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-//var_dump($array);
+
 if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
 if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
 
@@ -331,6 +379,7 @@ $this->state = "off";
     // devstack
     function eBayGetKeywords($keywords)
     {
+$this->request = $keywords;
         $this->thing->log("get multiple items by keyword " . $keywords . ".");
 
         $this->response .= "Requested multiple items. ";
@@ -357,11 +406,17 @@ $this->state = "off";
             "paginationInput.entriesPerPage=10";
 
         $xml = @simplexml_load_file($apicall);
+
+$this->ebay_daily_call_count += 1;
+
+
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
 
-if ($array["Ack"] == "Failure") {$this->logEbay($array);}
+//if ($array["Ack"] == "Failure") {$this->logEbay($array);}
+if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
+if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
 
 
             return $array;
@@ -509,6 +564,9 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
 
         $data = @file_get_contents($data_source, false, $context);
 
+$this->ebay_daily_call_count += 1;
+
+
         //        ini_set('default_socket_timeout', $default_socket_timeout);
 
         // Extract information
@@ -517,8 +575,8 @@ if (isset($json_data['findItemsAdvancedResponse'][0]['ack']['0'])) {
         $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
 }
 
-
-if ($ack == "Failure") {$this->logEbay($array);}
+if ($ack == "Failure") {$this->logEbay($data);}
+if ($data == false) {$this->logEbay($data);}
 
 
         if ($data == false) {
@@ -813,8 +871,6 @@ if (isset($ebay_item['title'])) {
         }
 }
 
-//if ($title == "X") {$title = $ebay_item['ebay']['Title'];}
-
         $currency = "X";
         $currency_prefix = "?";
         $currency_postfix = "?";
@@ -846,7 +902,6 @@ if (isset($ebay_item['title'])) {
                 $currency_postfix = "";
             }
         }
-
 
         $price = "X";
         $price_text = "X";
@@ -1064,6 +1119,7 @@ if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
         }
 
         $sms .= " | " . $this->response;
+$sms .= " daily call count " . $this->ebay_daily_call_count;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
