@@ -53,6 +53,7 @@ class Message {
         //$this->thing = $thing;
 
         $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report['info'] = "No info available.";
 
 
 
