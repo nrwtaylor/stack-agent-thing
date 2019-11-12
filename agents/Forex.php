@@ -145,31 +145,12 @@ function run() {
     {
 
 $forex = new Exchangeratesapi($this->thing, $this->currency_pair);
-//var_dump($forex->price);
-//exit();
 
         $this->getLink($this->currency_pair);
-//        $data_source = "https://forex.1forge.com/1.0.3/quotes?pairs=" . $this->currency_pair . "&api_key=" .$this->api_key;
-
-        //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
-
-//        $data = file_get_contents($data_source);
-
-//        if ($data == false) {
-//            return true;
-            // Invalid query of some sort.
-//        }
-
-//        $json_data = json_decode($data, TRUE);
 
         $this->bid = $forex->bid;
         $this->price = $forex->price;
         $this->ask = $forex->ask;
-
-
-//        $this->bid = $json_data[0]['bid'];
-//        $this->price = $json_data[0]['price'];
-//        $this->ask = $json_data[0]['ask'];
 
         return $this->price;
     }

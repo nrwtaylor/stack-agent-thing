@@ -97,15 +97,6 @@ if (!isset($this->points)) {return true;}
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
 
-//        $series_1 = $this->points[0]['series_1'];
-//        $series_2 = $this->points[0]['series_2'];
-
-        // Get min and max
-//        if (!isset($y_min)) { $y_min = $series_1 + $series_2; }
-//        if (!isset($y_max)) {$y_max = $series_1 + $series_2;}
-
-//        if (!isset($x_min)) { $x_min = $refreshed_at; }
-//        if (!isset($x_max)) { $x_max = $refreshed_at; }
 
         $i = 0;
         foreach ($this->points as &$point) {
@@ -115,20 +106,32 @@ if (!isset($refreshed_at_last)) {$refreshed_at_last = $point['refreshed_at'];}
 //$refreshed_at_last = $refreshed_at;
 
 $refreshed_at = $point['refreshed_at'];
-$dt = $refreshed_at - $refreshed_at_last;
+$dt = $refreshed_at_last - $refreshed_at; // Going backwards.
 
 
 if (!isset($series_1_last)) {$series_1_last = $point['series_1'];}
 $series_1 = $point['series_1'];
+$point['voltage'] = $point['series_1'];
+
 $dv = $series_1 - $series_1_last;
 
+
+
+$refreshed_at_last = $refreshed_at;
+$series_1_last = $series_1;
+
+
+
+
+if ($dt == 0) {
+$dv_dt = null;} else {
 $dv_dt = (float) $dv/$dt;
+}
+
 $point['dv'] = $dv;
 $point['dt'] = $dt;
 
 $point['dv_dt'] = $dv_dt;
-$refreshed_at_last = $refreshed_at;
-$series_1_last = $series_1;
             $i += 1;
         }
 
@@ -245,39 +248,120 @@ if (!isset($this->points)) {return true;}
     }
 
 
+    function drawGraph2() {
+
+if (!isset($this->points)) {return true;}
+
+        $this->chart_width = $this->width - 20;
+        $this->chart_height = $this->height - 20;
+
+        $num_points = count($this->points);
+        $column_width = $this->width / $num_points;
+
+        $series_1 = $this->points[0]['series_1'];
+        $series_2 = $this->points[0]['series_2'];
 
 
-/*
-   function getData()
-    {
-        $split_time = $this->thing->elapsed_runtime();
+        $refreshed_at = $this->points[0]['refreshed_at'];
 
-        $this->identity = "null" . $this->mail_postfix;
-        // We will probably want a getThings at some point.
-        $this->thing->db->setFrom($this->identity);
-        $thing_report = $this->thing->db->agentSearch("kaiju", 99);
+        // Get min and max
+        if (!isset($y_min)) { $y_min = $series_1 + $series_2; }
+        if (!isset($y_max)) {$y_max = $series_1 + $series_2;}
 
-        $things = $thing_report['things'];
-var_dump($things);
+        if (!isset($x_min)) { $x_min = $refreshed_at; }
+        if (!isset($x_max)) { $x_max = $refreshed_at; }
 
-        if ( $things == false  ) {return;}
+        $i = 0;
+        foreach ($this->points as $point) {
 
-        $this->points = array();
-        foreach ($things as $thing) {
+            $series_1 = $point['series_1'];
+            $dv_dt = $point['dv_dt'];
 
-            $thing_subject= $thing['task'];
+            $queue_time = $point['series_2'];
+            $elapsed_time = $series_1 + $series_2;
 
-$kaiju_array = explode(" " , $thing_subject);
-var_dump($kaiju_array);
-$this->points[] = null;
-   //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
+            $refreshed_at = $point['refreshed_at'];
+
+            if (($elapsed_time == null) or ($elapsed_time == 0 )) {
+                continue;
+            }
+
+            if ($elapsed_time < $y_min) {$y_min = $elapsed_time;}
+            if ($elapsed_time > $y_max) {$y_max = $elapsed_time;}
+
+            if ($refreshed_at < $x_min) {$x_min = $refreshed_at;}
+            if ($refreshed_at > $x_max) {$x_max = $refreshed_at;}
+
+
+            $i += 1;
         }
 
-        $this->thing->log('Agent "Latencygraph" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
+        $x_max = strtotime($this->current_time);
 
+        $i = 0;
+
+        foreach ($this->points as $point) {
+
+            $series_1 = $point['series_1'];
+            $series_2 = $point['series_2'];
+
+            $dv_dt = $point['dv_dt'];
+
+            $elapsed_time = $series_1 + $series_2;
+            $refreshed_at = $point['refreshed_at'];
+
+            $y_spread = $y_max - $y_min;
+            if ($y_spread == 0) {$y_spread = 100;$this->y_spread = $y_spread;}
+
+            $y = 10 + $this->chart_height - ($elapsed_time - $y_min) / ($y_spread) * $this->chart_height;
+            $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
+
+            if (!isset($x_old)) {$x_old = $x;}
+            if (!isset($y_old)) {$y_old = $y;}
+
+            // +1 to overlap bars
+            $width = $x - $x_old;
+
+            $offset = 1.5;
+
+            imagefilledrectangle($this->image2,
+                    $x_old - $offset , $y_old - $offset,
+                    $x_old + $width / 2 + $offset, $y_old + $offset,
+                    $this->red);
+
+            imagefilledrectangle($this->image2,
+                    $x_old + $width / 2 - $offset, $y_old - $offset,
+                    $x - $width / 2 + $offset, $y + $offset ,
+                    $this->red);
+
+            imagefilledrectangle($this->image2,
+                    $x - $width / 2 - $offset , $y - $offset,
+                    $x + $offset, $y + $offset ,
+                    $this->red);
+
+
+            $y_old = $y;
+            $x_old = $x;
+
+            $i += 1;
+        }
+
+        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
+        $inc = ($y_max - $y_min)/ 5;
+
+        $closest_distance = $y_max;
+
+        foreach ($allowed_steps as $key=>$step) {
+
+            $distance = abs($inc - $step);
+            if ($distance < $closest_distance) {
+                $closest_distance = $distance;
+                $preferred_step = $step;
+            }
+        }
+
+        $this->drawGrid($y_min, $y_max, $preferred_step);
     }
-
-*/
 
     /**
      *
@@ -1052,7 +1136,16 @@ $this->calcDvdt();
 
         foreach ($this->points as $key=>$point) {
 
-                $txt .=  $point['refreshed_at'] ." dv " . number_format($point['dv'],2) . "V dt " . $point['dt']. "s dv/dt " .number_format($point['dv_dt'],6) . "\n";
+//$time_text = echo date('m/d/Y H:i', $point['refreshed_at']); 
+$time_text = date('H:i', $point['refreshed_at']);
+$date_text = date('m/d/Y', $point['refreshed_at']); 
+
+if (!isset($date_text_last)) {$date_text_last = $date_text;}
+if ($date_text != $date_text_last) {$txt .= $date_text . "\n";}
+
+                $txt .=  $time_text ." V " . number_format($point['voltage'],2)  . "V dV " . number_format($point['dv'],2) . "V dt " . $point['dt']. "s dv/dt " .number_format($point['dv_dt'],6) . "\n";
+
+$date_text_last = $date_text;
 
         }
 
