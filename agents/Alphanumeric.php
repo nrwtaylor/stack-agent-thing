@@ -190,7 +190,7 @@ return $new_text;
             }
 
             // preg_match_all('!\d+!', $piece, $matches);
-            preg_match_all('/^\p{Alphabetic}+$/',  $piece, $matches);
+            preg_match_all('/[\W]/',  $piece, $matches);
 
             foreach ($matches[0] as $key=>$match) {
                 $this->alphanumerics[] = $match;
