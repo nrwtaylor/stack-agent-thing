@@ -37,10 +37,13 @@ class Ebay extends Agent
             $this->thing->container['api']['ebay'][$word]['cert ID'];
         $this->devID = $this->thing->container['api']['ebay'][$word]['dev ID'];
 
+$this->auth_token = base64_encode($this->application_id .":" . $this->application_key);
+
         $this->run_time_max = 360; // 5 hours
 
         $this->thing_report['help'] = 'This reads the Ebay catalog.';
 
+//$this->eBayGetItemSnapshotFeed(4);
 
     }
 
@@ -153,8 +156,6 @@ $thing->Create("meep","ebay", "g/ ebay error " . $request ." - ". $log_text);
         $this->thing->json->setField("message1");
         $this->thing->json->writeVariable( array("ebay") , $text );
 
-
-
 }
 
     function eBayGetSingle($ItemID)
@@ -194,6 +195,87 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
         }
         return false;
     }
+
+
+    function eBayGetItemSnapshotFeed($ItemID)
+    {
+
+
+
+        $options = array(
+            'http' => array(
+                'method' => "GET",
+                // check function.stream-context-create on php.net
+                'header' =>
+                    "Accept-language: application/json\r\n" .
+                    "app_id: " .
+                    $this->application_id .
+                    "\r\n" .
+                    "app_key: " .
+                    $this->application_key .
+                    "\r\n" .
+                    "" // i.e. An iPad
+            )
+        );
+        $options = null;
+
+        $context = stream_context_create($options);
+
+
+
+
+
+$this->request = $ItemID;
+        $this->thing->log("get single item id " . $ItemID . ".");
+
+        $this->response .= "Requested an eBay item. ";
+        $URL = 'http://open.api.ebay.com/shopping';
+
+        //change these two lines
+        $compatabilityLevel = 967;
+        $appID = $this->application_id;
+
+        //https://developer.ebay.com/devzone/shopping/docs/callref/getsingleitem.html#detailControls
+        //you can also play with these selectors
+        $includeSelector =
+            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
+
+        // Construct the GetSingleItem REST call
+        $apicall =
+            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
+            "&appid=$appID&ItemID=$ItemID" .
+            "&responseencoding=XML" .
+            "&IncludeSelector=$includeSelector";
+
+
+        // Construct the GetSingleItem REST call
+//        $apicall =
+//            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
+//            "&appid=$appID&ItemID=$ItemID" .
+//            "&responseencoding=XML" .
+//            "&IncludeSelector=$includeSelector";
+
+
+// GET https://api.ebay.com/buy/browse/v1/item/v1|201533667898|0
+$apicall = 'https://api.ebay.com/buy/feed/v1_beta/item?feed_scope=NEWLY_LISTED&category_id=15032&date=20170924';
+
+
+        $xml = simplexml_load_file($apicall);
+
+$this->ebay_daily_call_count += 1;
+
+        if ($xml) {
+            $json = json_encode($xml);
+            $array = json_decode($json, true);
+
+if ($array["Ack"] == "Failure") {$this->logEbay($array);}
+
+            return $array;
+        }
+        return false;
+    }
+
+
 
     // devstack
     function eBayGetCategory($category_id)
@@ -862,6 +944,8 @@ if (is_string($ebay_item)) {return true;}
 
 if (isset($ebay_item['Item'])) {$ebay_item = $ebay_item['Item'];}
 
+$source = "ebay";
+
 $title = "X";
 
 if (isset($ebay_item['title'])) {
@@ -998,7 +1082,7 @@ if (isset($ebay_item['thumbnail'])) {$link_thumbnail = $ebay_item['thumbnail'];}
 if (!isset($link_thumbnail)) {
 throw "No thumbnail";
 return;
-var_dump($ebay_item); exit();
+//var_dump($ebay_item); exit();
 }
 
 
@@ -1068,6 +1152,7 @@ if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
         }
 }
         $item = array(
+            "source"=>$source,
             "id" => $item_id,
             "category_name" => $category_name,
             "description" => $description,

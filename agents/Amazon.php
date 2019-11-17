@@ -73,6 +73,37 @@ class Amazon extends Agent
         $this->counter = $this->counter + 1;
     }
 
+function logAmazon($text) {
+
+if ($text == null) {$text = "MErp";}
+
+//var_dump($text);
+//var_dump($text['errorMessage']['error']['message']);
+
+
+$log_text = "Error message not found.";
+if (isset($text['errorMessage']['error']['message'])) {
+
+$log_text = $text['errorMessage']['error']['message'];
+
+}
+
+$request = "No request. ";
+if (isset($this->request)) {
+$request = $this->request;
+}
+
+$thing = new Thing(null);
+$thing->Create("meep","amazon", "g/ amazon error " . $request ." - ". $log_text);
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message1");
+        $this->thing->json->writeVariable( array("ebay") , $text );
+
+}
+
+
     public function parseItem($amazon_item = null)
     {
         if ($amazon_item == null) {
@@ -83,8 +114,9 @@ class Amazon extends Agent
             return true;
         }
 
-        //$url = $amazon_item['DetailPageURL'];
+        $source = "amazon";
 
+        //$url = $amazon_item['DetailPageURL'];
         $url = "";
         if (isset($amazon_item['DetailPageURL'])) {
             $url = $amazon_item['DetailPageURL'];
@@ -122,13 +154,69 @@ class Amazon extends Agent
             $title = $amazon_item['ItemAttributes']['Title'];
         }
 
-        //$item = $this->parsedItem($amazon_item);
+$link_thumbnail = null;
+if (isset($amazon_item['MediumImage']['URL'])) {
 
+$link_thumbnail = $amazon_item['MediumImage']['URL'];
+
+}
+
+/*
+if (($link_thumbnail == null) and (isset($amazon_item['SmallImage']['URL']))) {
+
+$link_thumbnail = $amazon_item['SmallImage']['URL'];
+
+}
+*/
+if ($link_thumbnail == null) {
+
+$link_thumbnail = $this->web_prefix . "noimage.png";
+
+
+}
+
+//var_dump($amazon_item['Price']);
+
+/*
+exit();
+$link_thumbnail = "https://gimmu.com/noimage.png";
+if (isset($amazon_item['MediumImage']['URL'])) {
+
+$link_thumbnail = $amazon_item['MediumImage']['URL'];
+
+}
+*/
+
+
+        //$item = $this->parsedItem($amazon_item);
+//echo "---<br>";
+//var_dump($amazon_item['ItemAttributes']);
+//exit();
         $item = array(
+            "id" => $asin,
             "title" => $title,
-            "url" => $url,
-            "source" => "amazon:" . $asin
+            "thumbnail" => $link_thumbnail,
+            "link" => $url,
+            "source" => "amazon:" . $asin,
+            "amazon" => $amazon_item
         );
+
+/* ebay reference
+            "source"=>$source,
+            "id" => $item_id,
+            "category_name" => $category_name,
+            "description" => $description,
+            "condition_description" => $condition_description,
+            "title" => $title,
+            "price" => $price_text,
+            "link" => $link,
+            "thumbnail" => $link_thumbnail,
+            "location" => $location,
+            "country" => $country,
+            "html_link" => $html_link,
+            "picture_urls"=> $picture_urls,
+            "ebay"=>$ebay_item
+*/
 
         return $item;
     }
@@ -137,7 +225,7 @@ class Amazon extends Agent
     {
         $index = "All";
 
-        var_dump($slug);
+//        var_dump($slug);
         //exit();
         $region = "com";
         $method = "GET";
@@ -233,19 +321,11 @@ class Amazon extends Agent
 
     function getItemSearch($text = null)
     {
-        $keywords = "";
-        if (isset($this->search_words)) {
-            $keywords = $this->search_words;
-        }
+if (($text == null) and ($this->search_words == null)) {return true;}
 
-        if ($text == null) {
-            $keywords = "";
-            if (isset($this->search_words)) {
-                $keywords = $this->search_words;
-            }
-        } else {
-            $keywords = $text;
-        }
+if ($text == null) {$text = $this->search_words;}
+
+$keywords= $text;
         $keywords = urlencode($keywords);
 
         $this->response .=
@@ -263,9 +343,18 @@ class Amazon extends Agent
 
         $request = $this->getRequest($request_array);
 
-        var_dump($request);
+//        var_dump($request);
 
         $amazon_array = $this->getAmazon($request);
+//var_dump($amazon_array);
+
+if (!isset($amazon_array['Items'])) {
+if (isset($amazon_array['Error'])) {
+
+$this->logAmazon($amazon_array['Error']['Message']);
+return true;
+}
+}
 
         $is_valid = $amazon_array['Items']['Request']['IsValid'];
         $total_results = $amazon_array['Items']['TotalResults'];
@@ -274,12 +363,46 @@ class Amazon extends Agent
 
         $items = $amazon_array['Items']['Item'];
 
+
         foreach ($items as $i => $item) {
-            $item = $this->parseItem($item);
-            $this->items[] = $item;
+            $parsed_item = $this->parseItem($item);
+//var_dump($parsed_item);
+//exit();
+            $this->items[] = $parsed_item;
         }
+
+
+
+        // $this->items = $items;
+        if (!isset($this->items)) {
+            $this->getItems();
+        }
+        if ($items != null) {
+            $this->items = array_merge($this->items, $items);
+        }
+
+        // This is where we choose the best return from eBay.
+        $this->item = null;
+        if (isset($this->items[0])) {
+            $this->item = $this->items[0];
+        }
+
+//var_dump($this->items);
+
+        $this->items_count = count($this->items);
+
+        $this->thing->log("got " . $this->items_count . " items.");
+
         return false;
     }
+
+    function getItems($text = null)
+    {
+        $this->items = array();
+    }
+
+
+
 
     function getItemLookup($item_id = null, $item_id_type = "ASIN")
     {
@@ -299,10 +422,16 @@ class Amazon extends Agent
 
         $this->response .= 'Asked Amazon about the item "' . $item_id . '". ';
         $this->response .= 'Asked Amazon about the item "' . $item_id . '". ';
-
+/*
         $request_array = array(
             "Operation" => "ItemLookup",
             "ResponseGroup" => "Images,Small",
+            "ItemId" => $item_id
+        );
+*/
+        $request_array = array(
+            "Operation" => "ItemLookup",
+            "ResponseGroup" => "OfferFull",
             "ItemId" => $item_id
         );
 
@@ -322,8 +451,6 @@ class Amazon extends Agent
         }
 
         $request = $this->getRequest($request_array);
-
-        var_dump($request);
 
         $amazon_array = $this->getAmazon($request);
 
@@ -346,13 +473,11 @@ class Amazon extends Agent
 
         $items = $amazon_array['Items']['Item'];
 
-        var_dump($items);
-
-        //exit();
 
         foreach ($items as $i => $item) {
-            $item = $this->parseItem($item);
-            $this->items[] = $item;
+//var_dump($item['MediumImage']);
+            $parsed_item = $this->parseItem($item);
+            $this->items[] = $parsed_item;
         }
         return false;
     }
@@ -390,9 +515,15 @@ class Amazon extends Agent
     {
         //      $sms = "AMAZON | " . $this->response;
         $s = "";
+
+if (isset($this->items)) {
         foreach ($this->items as $i => $item) {
+if (isset($item['title'])) {
             $s .= $item['title'] . " / ";
+}
         }
+}
+
         $sms = "AMAZON | " . $s . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $this->sms_message;
@@ -426,7 +557,7 @@ class Amazon extends Agent
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'amazon') {
-                //$this->search_words = null;
+                $this->search_words = null;
                 $this->response .= "Asked Amazon about nothing. ";
                 return;
             }
