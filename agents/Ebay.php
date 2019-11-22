@@ -15,6 +15,8 @@ class Ebay extends Agent
 
     function init()
     {
+$this->response = "Started ebay agent. ";
+$this->flag = "green";
         $this->ebay_daily_call_count = 0;
         $this->test = "Development code"; // Always
 
@@ -156,6 +158,9 @@ $thing->Create("meep","ebay", "g/ ebay error " . $request ." - ". $log_text);
         $this->thing->json->setField("message1");
         $this->thing->json->writeVariable( array("ebay") , $text );
 
+$this->flag = "red";
+$this->response .= "Logging " . $request .  " " . $log_text .". ";
+
 }
 
     function eBayGetSingle($ItemID)
@@ -163,7 +168,7 @@ $thing->Create("meep","ebay", "g/ ebay error " . $request ." - ". $log_text);
 $this->request = $ItemID;
         $this->thing->log("get single item id " . $ItemID . ".");
 
-        $this->response .= "Requested an eBay item. ";
+        $this->response .= "Requested a single eBay item " . $ItemID .". ";
         $URL = 'http://open.api.ebay.com/shopping';
 
         //change these two lines
@@ -182,17 +187,17 @@ $this->request = $ItemID;
             "&responseencoding=XML" .
             "&IncludeSelector=$includeSelector";
         $xml = simplexml_load_file($apicall);
-
 $this->ebay_daily_call_count += 1;
 
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-
+$this->flag = "green";
 if ($array["Ack"] == "Failure") {$this->logEbay($array);}
 
             return $array;
         }
+$this->flag = "green";
         return false;
     }
 
@@ -267,11 +272,11 @@ $this->ebay_daily_call_count += 1;
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-
 if ($array["Ack"] == "Failure") {$this->logEbay($array);}
 
             return $array;
         }
+$this->flag = "green";
         return false;
     }
 
@@ -315,11 +320,11 @@ $this->ebay_daily_call_count += 1;
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-
 if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
 if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
             return $array;
         }
+$this->flag = "green";
         return false;
     }
 
@@ -393,6 +398,7 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
 
             return $array;
         }
+$this->flag = "green";
         return false;
     }
 
@@ -404,7 +410,9 @@ if ($array["Ack"] == "Failure") {$this->logEbay($array);}
 $this->request = $keywords;
         $this->thing->log("fastest ebay search for " . $keywords . ".");
 
-        $this->response .= "Requested multiple items. ";
+
+
+        $this->response .= "Requested multiple items for " . $keywords.". ";
         $URL = 'http://open.api.ebay.com/shopping';
         //change these two lines
         $compatabilityLevel = 967;
@@ -454,6 +462,7 @@ if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($ar
             return $array;
         }
 $this->state = "off";
+$this->flag = "green";
         return false;
     }
 
@@ -503,6 +512,7 @@ if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($ar
 
             return $array;
         }
+$this->flag = "green";
         return false;
     }
 
@@ -548,7 +558,7 @@ if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($ar
     function findingApi($text = null)
     {
         // , + - all have specific meanings to eBay.
-        $this->response = "Searched eBay query " . $text . ". ";
+        $this->response .= "Searched eBay query " . $text . ". ";
         // Lots of things we can do we the Api.
         // First thing let us see what the Finding API does.
 
@@ -656,7 +666,6 @@ $ack = "";
 if (isset($json_data['findItemsAdvancedResponse'][0]['ack']['0'])) {
         $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
 }
-
 if ($ack == "Failure") {$this->logEbay($data);}
 if ($data == false) {$this->logEbay($data);}
 
@@ -667,6 +676,7 @@ if ($data == false) {$this->logEbay($data);}
             $this->response .= "Could not ask Ebay. ";
             $this->state = "off";
             $this->items_count = 0;
+$this->flag = "red";
             return true;
             // Invalid query of some sort.
         }
@@ -680,6 +690,7 @@ if ($data == false) {$this->logEbay($data);}
 
         // Ebay asks developers to check the status response.
         if ($ack != "Success") {
+$this->flag = "red";
             $this->thing->log("Finding API not successful.");
 
             $this->response .= "Query not successful. ";
@@ -687,7 +698,7 @@ if ($data == false) {$this->logEbay($data);}
             return true;
             // Invalid query of some sort.
         }
-
+$this->flag = "green";
 //if ($ack == "Failure") {$this->logEbay($array);}
 
 
@@ -1277,7 +1288,7 @@ $sms .= " daily call count " . $this->ebay_daily_call_count;
     public function readSubject()
     {
         $this->thing->log('Ebay read input, "' . $this->input . '".');
-        $this->response = null;
+        //$this->response .= null;
 
         $keywords = $this->keywords;
 

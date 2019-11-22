@@ -179,7 +179,6 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
 /*
 exit();
-$link_thumbnail = "https://gimmu.com/noimage.png";
 if (isset($amazon_item['MediumImage']['URL'])) {
 
 $link_thumbnail = $amazon_item['MediumImage']['URL'];
