@@ -231,6 +231,29 @@ $this->makeTXT();
 
     }
 
+    function assert($input, $agent = null)
+    {
+if ($agent == null) {
+$agent = $this->agent_name;
+}
+        $whatIWant = $input;
+        if (($pos = strpos(strtolower($input), $agent . " is")) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen($agent . " is")); 
+        } elseif (($pos = strpos(strtolower($input), $agent)) !== FALSE) { 
+            $whatIWant = substr(strtolower($input), $pos+strlen($agent)); 
+        }
+
+        $filtered_input = ltrim(strtolower($whatIWant), " ");
+//        $place = $this->getPlace($filtered_input);
+//        if ($place) {
+            //true so make a place
+//            $this->makePlace(null, $filtered_input);
+//        }
+return $filtered_input;
+
+    }
+
+
 
     /**
      *

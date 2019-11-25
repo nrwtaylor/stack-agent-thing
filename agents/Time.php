@@ -35,34 +35,6 @@ class Time extends Agent {
         $this->time_zone = 'America/Vancouver';
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-/*
-    public function respond() {
-        $this->thing->flagGreen();
-
-        $to = $this->thing->from;
-        $from = "time";
-
-        $this->makeSMS();
-        $this->makeChoices();
-
-        //$this->thing_report["info"] = "This is a ntp in a park.";
-        //$this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text RANGER.";
-
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
-
-        return $this->thing_report;
-    }
-*/
-
     /**
      *
      */
@@ -82,24 +54,24 @@ class Time extends Agent {
         $this->thing_report['choices'] = $choices;
     }
 
-//https://stackoverflow.com/questions/11343403/php-exception-handling-on-datetime-object
-function isDateValid($str) {
+    //https://stackoverflow.com/questions/11343403/php-exception-handling-on-datetime-object
+    function isDateValid($str) {
 
-  if (!is_string($str)) {
-     return false;
-  }
+        if (!is_string($str)) {
+            return false;
+        }
 
-  $stamp = strtotime($str); 
+        $stamp = strtotime($str); 
 
-  if (!is_numeric($stamp)) {
-     return false; 
-  }
+        if (!is_numeric($stamp)) {
+            return false; 
+        }
 
-  if ( checkdate(date('m', $stamp), date('d', $stamp), date('Y', $stamp)) ) { 
-     return true; 
-  } 
-  return false; 
-} 
+        if ( checkdate(date('m', $stamp), date('d', $stamp), date('Y', $stamp)) ) { 
+            return true; 
+        } 
+        return false; 
+    } 
 
 
     /**
@@ -118,8 +90,8 @@ function isDateValid($str) {
 
         $m =  "Unfortunately, the time server was not available. ";
 
-//try {
-//        if (true) {
+        //try {
+        //        if (true) {
 if ($this->isDateValid( $timevalue )) {
             $datum = new \DateTime($timevalue, new \DateTimeZone("UTC"));
 
@@ -136,7 +108,7 @@ $m = "Could not get a time.";
 
 
 
-        $this->response = $m;
+        $this->response .= $m;
         $this->time_message = $this->response;
 
         $this->datum = $datum;
@@ -144,12 +116,43 @@ $m = "Could not get a time.";
 
     }
 
+    public function extractTimezone($text = null) {
+
+        if (($text == null) or ($text == "")) {return true;}
+        $OptionsArray = timezone_identifiers_list();
+
+        $matches = array();
+
+        // Devstack. Librex.
+        foreach ($OptionsArray as $i=>$timezone_id) {
+
+            if (stripos($timezone_id, $text) !== false) {
+                $matches[] = $timezone_id;
+            }
+        }
+
+        $match = false;
+        if ((isset($matches)) and (count($matches) == 1)) {$match = $matches[0];}
+        $this->response .= "Could not resolve the timezone. ";
+
+        return $match;
+
+    }
 
     /**
      *
      * @return unknown
      */
     public function readSubject() {
+
+        $this->filtered_input = $this->assert($this->input, "time");
+
+        if ($this->filtered_input != "") {
+            $timezone = $this->extractTimezone($this->filtered_input);
+        }
+
+        if ((isset($timezone)) and (is_string($timezone))) {$this->time_zone = $timezone;}
+
         $this->doTime();
         return false;
     }

@@ -226,7 +226,7 @@ class Librex extends Word
      * @param unknown $librex_name
      * @return unknown
      */
-    function getLibrex($librex_name) {
+    function getLibrex($librex_name, $contents = null) {
         if ( strtolower($librex_name) == strtolower($this->librex_name)) {
 
             if (isset($this->librex)) {return;}
@@ -272,7 +272,11 @@ class Librex extends Word
 
         $this->librex_name = $librex_name;
 
+if ($contents == null) {
         $this->librex = file_get_contents($file);
+} else {
+     $this->librex = $contents;
+}
 
 
     }
@@ -288,14 +292,11 @@ class Librex extends Word
 if (!isset($this->librex)) {$this->getLibrex($this->librex_name);}
 
         $contents = $this->librex;
-
         $this->matches = array();
         $separator = "\r\n";
         $line = strtok($contents, $separator);
 
         while ($line !== false) {
-
-
 
 //            $word = $this->parseMatch($line);
 $parse_function = "parse".ucfirst($parser_name);
@@ -341,7 +342,6 @@ $this->matches = array();
         }
         if (!isset($this->matches)) {$this->matches = array();}
 //var_dump($this->matches);
-
         return $m;
     }
 
