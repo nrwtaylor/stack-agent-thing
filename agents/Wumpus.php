@@ -666,6 +666,7 @@ break;
     /**
      *
      */
+
     public function makeChoices() {
 
 
@@ -698,8 +699,14 @@ break;
         $this->choices = $choices;
         $this->thing_report['choices'] = $choices ;
     }
-
-
+/*
+public function makeChoices() {
+$this->state = "END";
+        $choices = $this->thing->choice->makeLinks($this->state);
+        $this->choices = $choices;
+        $this->thing_report['choices'] = $choices ;
+}
+*/
     /**
      *
      */

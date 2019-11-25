@@ -47,8 +47,13 @@ class Thing
 
         }
 
+
+//set_error_handler(array($this, "exception_error_handler"));
+
         $url = $GLOBALS['stack_path'] . 'private/settings.php';
         $settings = require $url;
+
+//        $settings = require $url;
 
 		$this->container = new \Slim\Container($settings);
 
@@ -91,6 +96,9 @@ class Thing
 
         $this->web_prefix = $this->container['stack']['web_prefix'];
         $this->engine_state = $this->container['stack']['engine_state'];
+
+
+//set_error_handler(array($this, "exception_error_handler"));
 
         try {
             $this->getThing($uuid);
@@ -953,4 +961,12 @@ if (isset($trace[1]['class'])) {
             }
         }
     }
+//}
+
+function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+    throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+
+}
+
+
 }

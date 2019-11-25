@@ -55,6 +55,8 @@ class Bottomlesspits extends Agent
 
 $this->bottomless_pits = array("1","2");
 
+//$this->bottomless_pit_name = "Little Mountain";
+
 $this->node_list = $this->bottomless_pits;
 //var_dump($this->bottomless_pits);
 
@@ -314,19 +316,19 @@ $this->node_list = $this->bottomless_pits;
 
         $this->thing_report['web'] = $test_message;
     }
-
+/*
     public function makeChoices()
     {
-
+        $this->choices_text = "Wumpus";
         $this->bottomless_pit_name = $this->thing->choice->load($this->primary_place);
 
-        if ($this->bottomless_pit__name == false) {
+        if ($this->bottomless_pit_name == false) {
             // Hopefully the first run
             $this->bottomless_pit_name = strval(random_int(1,20));
         }
-
-        $this->choices = $this->bottomless_pits[$this->bottomless_pit__name];
-
+//var_dump($this->bottomless_pit_name);
+//        $this->choices = $this->bottomless_pits[$this->bottomless_pit_name];
+//var_dump($this->choices);
     //$choices_text = implode(" ",$choices['words']);
 //        $sms .= "AVAILABLE CHOICES ARE [ NORTH EAST SOUTH WEST ] ";
 
@@ -336,6 +338,7 @@ $this->node_list = $this->bottomless_pits;
         //$this->choices_text = $this->thing->choice->current_node; 
         $this->choices_text = "";
         if ($this->choices != null) {
+//var_dump($this->choices);
             $this->choices_text = strtoupper(implode("  " ,$this->choices));
         }
 
@@ -344,6 +347,17 @@ $this->node_list = $this->bottomless_pits;
         //$this->choices = $choices;
         $this->thing_report['choices'] = $this->choices ;
     }
+
+*/
+public function makeChoices() {
+$this->state = "END";
+        $choices = $this->thing->choice->makeLinks($this->state);
+$this->choices_text = "End";
+        $this->choices = $choices;
+        $this->thing_report['choices'] = $choices ;
+}
+
+
 
     public function makeMessage()
     {
@@ -355,7 +369,7 @@ $this->node_list = $this->bottomless_pits;
     public function makeSMS()
     {
 
-        //$this->makeChoices();
+        $this->makeChoices();
 
         //$this->choices_text = $this->thing->choice->current_node; 
    //     if ($this->choices['words'] != null) {
@@ -378,7 +392,7 @@ $this->narrative = array('bottomless pit'=>'It was dark. You fell into a pit.'
 );
 
 
-$this->prompt_litany = array('bottomless pit'=>'TEXT WEB / ' . $this->choices_text,
+$this->prompt_litany = array('bottomless pit'=>'TEXT WUMPUS',
 );
 
 
@@ -391,7 +405,7 @@ $this->prompt_litany = array('bottomless pit'=>'TEXT WEB / ' . $this->choices_te
 
         $sms .= " | " . $this->response;
         $sms .= "| ";
-//        $sms .= "AVAILABLE CHOICES ARE [" . $this->choices_text."] ";
+        $sms .= "AVAILABLE CHOICES ARE [" . $this->choices_text."] ";
 
 //        $this->choices_text = $this->thing->choice->current_node; 
 //        if ($this->choices['words'] != null) {

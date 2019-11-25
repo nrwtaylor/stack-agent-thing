@@ -315,7 +315,12 @@ class Database
 
             $t = new Thing(null);
             $t->Create("meep", "meep", $e->getMessage());
-            $t = new Bork($t);
+
+
+            // Commented out 24 November 2019.
+            // Prevents a SQLSTATE[22001] error from looping.
+            //$t = new Bork($t);
+
             echo "BORK | Thing is full.";
             //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
