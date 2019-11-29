@@ -1,4 +1,3 @@
-<?php
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
