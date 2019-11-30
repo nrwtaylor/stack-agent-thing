@@ -139,6 +139,8 @@ First name: <input type="text" onkeyup="showHint(this.value)">
 
 	public function readSubject()
     {
+$q = $_REQUEST["q"];
+var_dump($q);
 		return;
 	}
 
