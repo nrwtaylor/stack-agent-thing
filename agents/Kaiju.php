@@ -723,6 +723,8 @@ if (isset($this->test_string)) {$test = $this->test_string;}
         }
 
 if (!isset($dict[4])) {return;}
+if (!isset($dict[5])) {return;}
+
 //var_dump($dict);
 //var_dump(count($dict));
 

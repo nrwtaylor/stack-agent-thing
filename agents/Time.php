@@ -35,6 +35,7 @@ class Time extends Agent {
         $this->time_zone = 'America/Vancouver';
     }
 
+
     /**
      *
      */
@@ -54,24 +55,30 @@ class Time extends Agent {
         $this->thing_report['choices'] = $choices;
     }
 
-    //https://stackoverflow.com/questions/11343403/php-exception-handling-on-datetime-object
+
+    /**
+     * https://stackoverflow.com/questions/11343403/php-exception-handling-on-datetime-object
+     *
+     * @param unknown $str
+     * @return unknown
+     */
     function isDateValid($str) {
 
         if (!is_string($str)) {
             return false;
         }
 
-        $stamp = strtotime($str); 
+        $stamp = strtotime($str);
 
         if (!is_numeric($stamp)) {
-            return false; 
+            return false;
         }
 
-        if ( checkdate(date('m', $stamp), date('d', $stamp), date('Y', $stamp)) ) { 
-            return true; 
-        } 
-        return false; 
-    } 
+        if ( checkdate(date('m', $stamp), date('d', $stamp), date('Y', $stamp)) ) {
+            return true;
+        }
+        return false;
+    }
 
 
     /**
@@ -92,7 +99,7 @@ class Time extends Agent {
 
         //try {
         //        if (true) {
-if ($this->isDateValid( $timevalue )) {
+        if ($this->isDateValid( $timevalue )) {
             $datum = new \DateTime($timevalue, new \DateTimeZone("UTC"));
 
             $datum->setTimezone(new \DateTimeZone($this->time_zone));
@@ -102,9 +109,9 @@ if ($this->isDateValid( $timevalue )) {
 
         } else {
 
-//} catch (Throwable $t) {
-$m = "Could not get a time.";
-}
+            //} catch (Throwable $t) {
+            $m = "Could not get a time.";
+        }
 
 
 
@@ -116,6 +123,12 @@ $m = "Could not get a time.";
 
     }
 
+
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
     public function extractTimezone($text = null) {
 
         if (($text == null) or ($text == "")) {return true;}
@@ -126,18 +139,19 @@ $m = "Could not get a time.";
         // Devstack. Librex.
         foreach ($OptionsArray as $i=>$timezone_id) {
 
-            if (stripos($timezone_id, $text) !== false) {
+            if ( (stripos($timezone_id, $text) !== false) or (stripos($timezone_id, str_replace(" ","_",$text)) !== false) ) {
                 $matches[] = $timezone_id;
             }
         }
 
         $match = false;
-        if ((isset($matches)) and (count($matches) == 1)) {$match = $matches[0];}
-        $this->response .= "Could not resolve the timezone. ";
+        if ((isset($matches)) and (count($matches) == 1)) {$match = $matches[0];} else {
+            $this->response .= "Could not resolve the timezone. ";}
 
         return $match;
 
     }
+
 
     /**
      *
@@ -156,5 +170,6 @@ $m = "Could not get a time.";
         $this->doTime();
         return false;
     }
+
 
 }

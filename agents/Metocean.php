@@ -101,6 +101,45 @@ $this->getMetocean();
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 
         $this->refreshed_at = $this->current_time;
+
+
+
+
+
+
+        $this->current_time = $this->thing->json->time();
+
+        // Borrow this from iching
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable( array("metocean", "refreshed_at") );
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable( array("metocean", "refreshed_at"), $time_string );
+        }
+
+        $this->refreshed_at = strtotime($time_string);
+
+        $this->thing->json->setField("variables");
+//        $queue_time = $this->thing->json->readVariable( array("metocean", "current_conditions") );
+//        $run_time = $this->thing->json->readVariable( array("metocean", "forecast_conditions") );
+
+
+//        if (($queue_time == false) and ($run_time==false) ) {
+//            $this->getLatency();
+
+//            $this->readSubject();
+
+            $this->thing->json->writeVariable( array("metocean", "current_conditions"), $this->current_conditions );
+            $this->thing->json->writeVariable( array("metocean", "forecast_conditions"), $this->forecast_conditions );
+
+//        }
+
+
+
+
+
     }
 
 

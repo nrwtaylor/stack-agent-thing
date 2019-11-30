@@ -38,6 +38,9 @@ class Roll
 
         $command_line = null;
 
+$this->width = 125;
+$this->height = $this->width;
+
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
@@ -181,6 +184,7 @@ class Roll
         $this->makeSMS();
         $this->makeMessage();
         $this->makePNG();
+        $this->makePNGs();
 
         $this->makeChoices();
         $this->makeWeb();
@@ -239,12 +243,28 @@ class Roll
         //                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.tx$
 
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
-
+/*
         if (!isset($this->html_image)) {
             $this->makePNG();
         }
 
         $web .= $this->html_image;
+*/
+$web .= '<div class="imageset">';
+foreach($this->thing_report['pngs'] as $name=>$image_string) {
+
+        $alt_text = $this->images[$name]['alt_text'];
+
+
+        $html = '<img src="data:image/png;base64,'. $image_string . '"
+                width="' . $this->width .'"  
+                alt="' . $alt_text . '" longdesc="' . $this->web_prefix . 'thing/' .$this->uuid . '/png.txt">';
+
+ $web .=   '<div class="image">' .$html . '</div>';
+}
+
+$web = '</div>';
+
 
         $web .= "</a>";
         $web .= "<br>";
@@ -263,6 +283,7 @@ class Roll
      */
     function makeWeb()
     {
+$web = "";
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $this->node_list = array("roll" => array("roll", "card"));
@@ -275,10 +296,40 @@ class Roll
         $choices = $this->thing->choice->makeLinks('web');
 
         if (!isset($this->html_image)) {
-            $this->makePNG();
+            $this->makePNG($this->image);
         }
 
-        $web = '<a href="' . $link . '">' . $this->html_image . "</a>";
+//        $web = '<a href="' . $link . '">' . $this->html_image . "</a>";
+//        $web .= "<br>";
+
+//var_dump($this->thing_report['pngs']);
+//exit();
+
+if (isset($this->thing_report['pngs'])) {
+
+foreach($this->thing_report['pngs'] as $name=>$image_string) {
+        $alt_text = $this->images[$name]['alt_text'];
+
+$web .= $alt_text .  '<br>';
+}
+
+}
+
+foreach($this->thing_report['pngs'] as $name=>$image_string) {
+
+        $alt_text = $this->images[$name]['alt_text'];
+
+
+        $html = '<img src="data:image/png;base64,'. $image_string . '"
+                width="' . $this->width .'"  
+                alt="' . $alt_text . '" longdesc="' . $this->web_prefix . 'thing/' .$this->uuid . '/'. $name .'.txt" >';
+
+//        $html = '<br><img src="data:image/png;base64,'. $image_string . '" alt="test" /><br>';
+
+//$html ="";
+ $web .= $html;
+//break;
+}
         $web .= "<br>";
 
         //$received_at = strtotime($this->thing->thing->created_at);
@@ -368,13 +419,50 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
     /**
      *
      */
-    public function makeImage()
+    public function makeImage($number = null, $die = null)
     {
+//var_dump($number);
+//var_dump($die);
         //if (isset($this->image)) {return;}
         // here DB request or some processing
-        $number = $this->result[count($this->result) - 1]['roll'];
 
-        $image = imagecreatetruecolor(125, 125);
+        if (($die == null) and ($number == null)) {
+if (isset($this->result[2])) {return true;} // Can't figure this out.
+
+//var_dump($this->result);
+//            $die = "d6";
+//if (isset($this->roll)) {$die = $this->roll;}
+//            $number = $this->result[0]['d6'];
+$die_array = $this->result[0];
+
+reset($die_array);
+//echo key($die_array) . ' = ' . current($die_array);
+$die = key($die_array);
+$number = current($die_array);
+
+
+        }
+if ($die == "roll") {return true;}
+//echo "number " . $number . " die " . $die. "<br>";
+/*
+if ($number == null) {
+    $number = $this->result[count($this->result) - 1]['roll'];
+
+//        if ($die == "d6") {
+//            $number = $this->result[0]['d6'];
+//        }
+}
+
+
+if ($die == null) {
+    $die = $this->roll;
+}
+*/
+//var_dump($die);
+//var_dump($number);
+//echo $die ." " . $number ."<br>";
+
+        $image = imagecreatetruecolor($this->width, $this->height);
 
         $white = imagecolorallocate($image, 255, 255, 255);
         $black = imagecolorallocate($image, 0, 0, 0);
@@ -382,16 +470,16 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         $green = imagecolorallocate($image, 0, 255, 0);
         $grey = imagecolorallocate($image, 128, 128, 128);
 
-        imagefilledrectangle($image, 0, 0, 125, 125, $white);
+        imagefilledrectangle($image, 0, 0, $this->width, $this->height, $white);
 
         $textcolor = imagecolorallocate($image, 0, 0, 0);
 
         if (count($this->result) != 2) {
             $this->image = $image;
-            return;
+            return $image;
         }
 
-        if ($this->roll == "d6") {
+        if ($die == "d6") {
             $this->ImageRectangleWithRoundedCorners(
                 $image,
                 0,
@@ -462,7 +550,7 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         } else {
             if ($number > 99) {
                 $this->image = $image;
-                return;
+                return $image;
             }
 
             if (false) {
@@ -514,23 +602,31 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
             );
 
             //var_dump ($width);
-            imagestring($image, 2, 100, 0, $this->roll, $textcolor);
+            imagestring($image, 2, 100, 0, $die, $textcolor);
         }
 
         $this->image = $image;
+return $image;
     }
 
     /**
      *
      */
-    public function makePNG()
+    public function makePNG($image = null)
     {
+if ($image = null) {
+$image = $this->image;
+}
+if ($image == true) {return true;}
+
         //if (!isset($this->image)) {$this->makeImage();}
 
         $agent = new Png($this->thing, "png");
-        $this->makeImage();
+        $image = $this->makeImage();
 
-        $agent->makePNG($this->image);
+if ($image === true) {return true;}
+
+        $agent->makePNG($image);
 
         $this->html_image = $agent->html_image;
         $this->image = $agent->image;
@@ -539,6 +635,72 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
         //$this->thing_report['png'] = $agent->PNG;
         $this->thing_report['png'] = $agent->image_string;
     }
+
+    public function makePNGs()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+        $this->thing_report['pngs'] = array();
+        $agent = new Png($this->thing, "png");
+
+foreach($this->result as $index=>$die_array) {
+reset($die_array);
+//echo key($die_array) . ' = ' . current($die_array);
+$die = key($die_array);
+$number = current($die_array);
+
+  $image =      $this->makeImage($number, $die);
+if ($image === true) {continue;}
+
+        $agent->makePNG($image);
+
+//        $this->html_image = $agent->html_image;
+//        $this->image = $agent->image;
+//        $this->PNG = $agent->PNG;
+
+$alt_text = "Image of a " .$die . " die with a roll of " . $number . ".";
+
+        $this->images[$this->agent_name .'-'.$index] = array("image"=>$agent->image,
+           "html_image"=> $agent->html_image,
+           "image_string"=> $agent->image_string,
+           "alt_text" => $alt_text);
+
+
+        $this->thing_report['pngs'][$this->agent_name . '-'.$index] = $agent->image_string;
+
+
+}
+/*
+        $this->image_string = base64_encode($imagedata);
+
+        $this->PNG_embed = "data:image/png;base64,".$this->image_string;
+        $this->PNG = $imagedata;
+
+        $this->thing_report['png'] = $imagedata;
+
+        if (isset($this->result[1]['roll'])) {
+            $alt_text = "Rolled " . $this->roll . " and got " . $this->result[1]['roll'] . ".";
+        } else {
+            $alt_text = "Roll result not available";
+        }
+        // Removing height fixes problem with image squashing on mobile devices
+        // Prodstack css
+        $html = '<img src="data:image/png;base64,'. $this->image_string . '"
+                width="' . $this->width .'"  
+                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/png.txt">';
+*/
+
+//        $this->makeImage();
+
+//        $agent->makePNG($this->image);
+
+//        $this->html_image = $agent->html_image;
+//        $this->image = $agent->image;
+//        $this->PNG = $agent->PNG;
+
+        //$this->thing_report['png'] = $agent->PNG;
+//        $this->thing_report['pngs'] = array('dice-1'=>$agent->image_string);
+    }
+
 
     /**
      *
