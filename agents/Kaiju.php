@@ -63,6 +63,8 @@ $this->horizon = 5*24*60/15;
     function run() {
         $this->getAddress($this->thing->from);
         $this->getKaiju();
+$this->blankImage();
+        $this->drawGraph();
 $this->makePNG();
     }
 
@@ -245,6 +247,7 @@ if (!isset($this->points)) {return true;}
         }
 
         $this->drawGrid($y_min, $y_max, $preferred_step);
+return $this->image;
     }
 
 
@@ -258,15 +261,16 @@ if (!isset($this->points)) {return true;}
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
 
-        $series_1 = $this->points[0]['series_1'];
-        $series_2 = $this->points[0]['series_2'];
+        $temperature_1 = $this->points[0]['temperature_1'];
+        $temperature_2 = $this->points[0]['temperature_2'];
+        $temperature_3 = $this->points[0]['temperature_3'];
 
 
         $refreshed_at = $this->points[0]['refreshed_at'];
 
         // Get min and max
-        if (!isset($y_min)) { $y_min = $series_1 + $series_2; }
-        if (!isset($y_max)) {$y_max = $series_1 + $series_2;}
+        if (!isset($y_min)) { $y_min = min($temperature_1,$temperature_2, $temperature_3); }
+        if (!isset($y_max)) {$y_max = max($temperature_1,$temperature_2, $temperature_3);}
 
         if (!isset($x_min)) { $x_min = $refreshed_at; }
         if (!isset($x_max)) { $x_max = $refreshed_at; }
@@ -274,20 +278,33 @@ if (!isset($this->points)) {return true;}
         $i = 0;
         foreach ($this->points as $point) {
 
-            $series_1 = $point['series_1'];
-            $dv_dt = $point['dv_dt'];
+            $temperature_1 = $point['temperature_1'];
+            $temperature_2 = $point['temperature_2'];
+            $temperature_3 = $point['temperature_3'];
 
-            $queue_time = $point['series_2'];
-            $elapsed_time = $series_1 + $series_2;
+
+//            $dv_dt = $point['dv_dt'];
+
+//            $queue_time = $point['series_2'];
+//            $elapsed_time = $series_1 + $series_2;
 
             $refreshed_at = $point['refreshed_at'];
 
-            if (($elapsed_time == null) or ($elapsed_time == 0 )) {
+            if ($temperature_1 == null) {
                 continue;
             }
 
-            if ($elapsed_time < $y_min) {$y_min = $elapsed_time;}
-            if ($elapsed_time > $y_max) {$y_max = $elapsed_time;}
+            if ($temperature_2 == null) {
+                continue;
+            }
+
+            if ($temperature_3 == null) {
+                continue;
+            }
+
+
+            if (min($temperature_1,$temperature_2, $temperature_3) < $y_min) {$y_min = min($temperature_1,$temperature_2, $temperature_3);}
+            if (max($temperature_1,$temperature_2, $temperature_3) > $y_max) {$y_max = max($temperature_1,$temperature_2, $temperature_3);}
 
             if ($refreshed_at < $x_min) {$x_min = $refreshed_at;}
             if ($refreshed_at > $x_max) {$x_max = $refreshed_at;}
@@ -302,18 +319,23 @@ if (!isset($this->points)) {return true;}
 
         foreach ($this->points as $point) {
 
-            $series_1 = $point['series_1'];
-            $series_2 = $point['series_2'];
+            $temperature_1 = $point['temperature_1'];
+            $temperature_2 = $point['temperature_2'];
+            $temperature_3 = $point['temperature_3'];
 
-            $dv_dt = $point['dv_dt'];
 
-            $elapsed_time = $series_1 + $series_2;
+//            $series_1 = $point['series_1'];
+//            $series_2 = $point['series_2'];
+
+//            $dv_dt = $point['dv_dt'];
+
+//            $elapsed_time = $series_1 + $series_2;
             $refreshed_at = $point['refreshed_at'];
 
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {$y_spread = 100;$this->y_spread = $y_spread;}
 
-            $y = 10 + $this->chart_height - ($elapsed_time - $y_min) / ($y_spread) * $this->chart_height;
+            $y = 10 + $this->chart_height - ($temperature_1 - $y_min) / ($y_spread) * $this->chart_height;
             $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
 
             if (!isset($x_old)) {$x_old = $x;}
@@ -324,17 +346,17 @@ if (!isset($this->points)) {return true;}
 
             $offset = 1.5;
 
-            imagefilledrectangle($this->image2,
+            imagefilledrectangle($this->image,
                     $x_old - $offset , $y_old - $offset,
                     $x_old + $width / 2 + $offset, $y_old + $offset,
                     $this->red);
 
-            imagefilledrectangle($this->image2,
+            imagefilledrectangle($this->image,
                     $x_old + $width / 2 - $offset, $y_old - $offset,
                     $x - $width / 2 + $offset, $y + $offset ,
                     $this->red);
 
-            imagefilledrectangle($this->image2,
+            imagefilledrectangle($this->image,
                     $x - $width / 2 - $offset , $y - $offset,
                     $x + $offset, $y + $offset ,
                     $this->red);
@@ -577,6 +599,12 @@ $data_array = explode(" " ,$kaiju_array[1]);
 //$voltage = (float)str_replace("V","",$data_array[2]);
 
 $voltage = $this->parseData($data_array[2]);
+
+$temperature_1 = str_replace("C","",$data_array[10]);
+$temperature_2 = str_replace("C","",$data_array[11]);
+$temperature_3 = str_replace("C","",$data_array[12]);
+
+
 //$array = array();
 //$array["refreshed_at"] = $parsed_thing['created_at'];
 //$array["series_1"] = $voltage;
@@ -585,7 +613,13 @@ $voltage = $this->parseData($data_array[2]);
 
 
 //var_dump($data_array[2]);
-$this->points[] = array("refreshed_at"=>strtotime($parsed_thing['created_at']), "series_1"=>$voltage["voltage"], "series_2"=>0);
+$this->points[] = array("refreshed_at"=>strtotime($parsed_thing['created_at']), 
+"series_1"=>$voltage["voltage"], 
+"series_2"=>0,
+"temperature_1"=>$temperature_1,
+"temperature_2"=>$temperature_2,
+"temperature_3"=>$temperature_3
+);
 //$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], $voltage, "series_2"=>0);
 
    //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
@@ -1003,21 +1037,70 @@ $this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6
     function setInject() {
     }
 
+
+    /**
+     *
+     */
+    public function makePNGs() {
+        //if (!isset($this->image)) {$this->makeImage();}
+        $this->thing_report['pngs'] = array();
+        //return;
+        $agent = new Png($this->thing, "png");
+/*
+        foreach ($this->result as $index=>$die_array) {
+            reset($die_array);
+            //echo key($die_array) . ' = ' . current($die_array);
+            $die = key($die_array);
+            $number = current($die_array);
+
+            $image =      $this->makeImage($number, $die);
+            if ($image === true) {continue;}
+
+            $agent->makePNG($image);
+
+            //        $this->html_image = $agent->html_image;
+            //        $this->image = $agent->image;
+            //        $this->PNG = $agent->PNG;
+
+            $alt_text = "Image of a " .$die . " die with a roll of " . $number . ".";
+
+
+            $this->images[$this->agent_name .'-'.$index] = array("image"=>$agent->image,
+                "html_image"=> $agent->html_image,
+                "image_string"=> $agent->image_string,
+                "alt_text" => $alt_text);
+
+
+            $this->thing_report['pngs'][$this->agent_name . '-'.$index] = $agent->image_string;
+}
+*/
+}
+
     /**
      *
      */
     function makeWeb() {
 
-        $this->drawGraph();
+        $this->node_list = array("asleep"=>array("awake", "moving"));
+
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/kaiju';
 
-        $this->node_list = array("asleep"=>array("awake", "moving"));
-        // Make buttons
-        //$this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
-        //$choices = $this->thing->choice->makeLinks('rocky');
-
+$this->blankImage();
+        $this->drawGraph();
         if (!isset($this->html_image)) {$this->makePNG();}
+$graph1_image_embedded = $this->image_embedded;
+
+$this->image = null;
+$this->makePNG();
+
+$this->blankImage();
+        $this->drawGraph2();
+        if (!isset($this->html_image)) {$this->makePNG();}
+$graph2_image_embedded = $this->image_embedded;
+
+$this->makePNG();
+
 
         $web = "<b>Kaiju Agent</b>";
         $web .= "<p>";
@@ -1066,13 +1149,27 @@ if (isset($this->points)) {
 if (isset($this->points)) {
 
         $web .= '<a href="' . $link . '">';
-        $web .= $this->image_embedded;
+//        $web .= $this->image_embedded;
+$web .= $graph1_image_embedded;
         $web .= "</a>";
         $web .= "<br>";
 
         $web .= "kaiju graph";
 
         $web .= "<br><br>";
+
+
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph2_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= "kaiju graph";
+
+        $web .= "<br><br>";
+
+
 }
 
         $web .= "Requested about ". $ago . " ago.";
