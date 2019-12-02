@@ -329,6 +329,8 @@ public function blankImage() {
 
         imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
 */
+
+/*
 //$this->blankImage();
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
@@ -357,7 +359,7 @@ public function blankImage() {
         $width = imagesx($this->image); 
         $height = imagesy($this->image);
         $pad = 0;
-
+*/
         ob_start();
         imagepng($this->image);
         $imagedata = ob_get_contents();
