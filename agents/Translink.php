@@ -1017,7 +1017,11 @@ $response ="";
 
             $this->sms_message .= "Source: Translink | ";
 
+$alert_agent = new Alert($this->thing, "alert");
+if ($alert_agent->flag == "red") {$this->sms_message .= "TEXT ALERT";} else {
+
 			$this->sms_message .= "TEXT ?";
+}
 
         $this->thing->log('Agent "Translink". Translink API call took ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.');
 

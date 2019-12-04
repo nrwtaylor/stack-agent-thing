@@ -41,7 +41,7 @@ class Chart extends Agent
         $this->width = 300;
 
 
-        $this->read();
+//        $this->read();
 
 //        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
 
@@ -64,7 +64,7 @@ class Chart extends Agent
 
 //		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>','INFORMATION' );
 
-        $this->getData();
+//        $this->getData();
 
 //        if ($agent_command == null) {
 //		    $this->respond();
@@ -74,6 +74,15 @@ class Chart extends Agent
 
    //     $this->thing_report['log'] = $this->thing->log;
 	}
+
+function run()
+{
+
+        $this->getData();
+
+
+
+}
 
     function set()
     {
@@ -291,10 +300,7 @@ $this->makePNG();
 
     }
 
-    public function makePNG()
-    {
-        //    $this->height = 200;
-        //    $this->width = 300;
+public function blankImage() {
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
@@ -306,9 +312,29 @@ $this->makePNG();
 
         imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
 
+}
+
+    public function makePNG()
+    {
+        //    $this->height = 200;
+        //    $this->width = 300;
+/*
+        $this->image = imagecreatetruecolor($this->width, $this->height);
+
+        $this->white = imagecolorallocate($this->image, 255, 255, 255);
+        $this->black = imagecolorallocate($this->image, 0, 0, 0);
+        $this->red = imagecolorallocate($this->image, 255, 0, 0);
+        $this->green = imagecolorallocate($this->image, 0, 255, 0);
+        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+        imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
+*/
+
+/*
+//$this->blankImage();
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
-        $this->drawGraph();
+//        $this->drawGraph();
 
         // Write the string at the top left
         $border = 30;
@@ -333,7 +359,7 @@ $this->makePNG();
         $width = imagesx($this->image); 
         $height = imagesy($this->image);
         $pad = 0;
-
+*/
         ob_start();
         imagepng($this->image);
         $imagedata = ob_get_contents();

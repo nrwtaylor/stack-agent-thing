@@ -243,7 +243,7 @@ $text = $this->text;
 
     public function makePNG($image = null)
     {
-        if ((isset($this->PNG)) and ($image == null)) {return;}
+        if ((isset($this->PNG)) and ($image == null)) {return true;}
 
         if ($image == null) {
             $this->makeImage();

@@ -32,6 +32,12 @@ $this->flag = "green";
             "DEBUG"
         );
 
+if (!isset($this->thing->container['api']['ebay'])) {
+
+$this->response .= "Settings not available. ";
+return true;
+
+}
 
         $this->application_id =
             $this->thing->container['api']['ebay'][$word]['app ID'];
@@ -557,6 +563,9 @@ $this->flag = "green";
 
     function findingApi($text = null)
     {
+        if (!isset($this->application_key)) {return true;}
+        if (!isset($this->devID)) {return true;}
+
         // , + - all have specific meanings to eBay.
         $this->response .= "Searched eBay query " . $text . ". ";
         // Lots of things we can do we the Api.

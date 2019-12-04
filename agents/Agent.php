@@ -183,6 +183,7 @@ catch (\Exception $e)
         $this->makeMessage();
         $this->makeImage();
         $this->makePNG();
+$this->makePNGs();
         $this->makeSMS();
         $this->makeWeb();
         $this->makeSnippet();
@@ -1667,6 +1668,7 @@ $this->thing_report['png'] = null;
 */
     }
 
+public function makePNGs() {}
 
     /**
      *
