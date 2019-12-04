@@ -1301,7 +1301,7 @@ $sms .= " daily call count " . $this->ebay_daily_call_count;
         // Keyword
 
 if ($this->agent_input == "ebay") {
-$this->response .= "Set up a connector to the Ebay API(s)";
+$this->response .= "Set up a connector to the Ebay API(s). ";
 return;
 }
 

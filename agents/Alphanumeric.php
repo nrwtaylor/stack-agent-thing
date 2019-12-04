@@ -288,7 +288,7 @@ return $new_text;
         $this->extractAlphanumeric();
 
 
-        if ($this->alphanumeric == false) {
+        if ((!isset($this->alphanumeric)) or ($this->alphanumeric == false)) {
             $this->get();
         }
 
@@ -354,7 +354,9 @@ return $new_text;
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
         //}
+if (isset($this->alphanumeric)) {
         $sms .= $this->alphanumeric;
+}
         //$this->sms_message .= 'devstack';
 
         $this->sms_message = $sms;
