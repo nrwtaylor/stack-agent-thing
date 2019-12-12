@@ -3,6 +3,12 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
+/*
+set_error_handler(function(int $number, string $message) {
+   echo "Handler captured error $number: '$message'" . PHP_EOL  ;
+});
+*/
+
 class Variables
 {
     // So Variables manages a set of variables.
@@ -20,7 +26,6 @@ class Variables
 	function __construct(Thing $thing, $agent_command = null)
     {
 
-//if ($agent_command == "variables place console") {exit();}
         // Setup Thing
         $this->thing = $thing;
 
@@ -78,8 +83,6 @@ class Variables
         // Not sure this is limiting.
         $this->getVariables();
 
-//if ($agent_command == "variables place console") {exit();}
-
         $this->nuuid = substr($this->variables_thing->uuid,0,4);
 
 		$this->readText();
@@ -114,10 +117,6 @@ class Variables
 //            $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
 
 
-
-//if ($this->agent_command == "variables place console") {exit();}
-
-
             // Intentionally write to the variable thing.  And the current thing.
             if (isset($variable_name)) {
                 $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
@@ -129,11 +128,8 @@ class Variables
 
         }
 
-//if ($this->agent_command == "variables place console") {exit();}
-
-
         if ($refreshed_at == false) {
-        // Toss in a refreshed.
+            // Toss in a refreshed.
             $time_string = $this->thing->time();
             $this->setVariable("refreshed_at", $time_string);
         }
@@ -165,7 +161,6 @@ class Variables
         // Returns variable sets managed by Variables.
         // Creates just one record per variable set.
         $thing_report = $this->thing->db->agentSearch("variables", $this->max_variable_sets); 
-//if ($this->agent_command == "variables place console") {exit();}
 
         $things = $thing_report['things'];
 
@@ -190,7 +185,6 @@ class Variables
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
-//if ($this->agent_command == "variables place console") {exit();}
 
                 if($this->getVariableSet() == false) {
 
@@ -388,12 +382,34 @@ class Variables
 
         $this->variables_thing->$variable = $value;
 
-//      set_error_handler(array($this, 'warning_handler'), E_WARNING);
-//set_exception_handler(array($this,'my_exception_handler'));
-//try {
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
+
+        try {
+            $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
+        }
+        catch (Throwable $t)
+        {
+            //echo 'Caught throwable: ',  $t->getMessage(), "\n";
+            // Executed only in PHP 7, will not match in PHP 5
+        }
+        catch (\OverflowException $e)
+        {
+            //echo 'Caught exception: ',  $e->getMessage(), "\n";
+
+            $text = strtolower($this->subject);
+            if (($text == "forget all") or ($text == "forgetall")){
+            } else {
+                $this->thing_report['thing'] = $this->thing->thing;
+                $this->thing_report['sms'] = $this->sms_message;
+                $this->thing_report['sms'] = "VARIABLES | 10,000 character stack variable space exhausted. Please text FORGET ALL to resolve.";
+
+                $agent_message = new Message($this->thing,$this->thing_report);
+                return;
+            }
+                // Executed only in PHP 5, will not be reached in PHP 7
+            }
+
         // What are the options for dealing with variable overflow.
         // User will see this as the system not "remembering" things.
 
@@ -404,45 +420,21 @@ class Variables
         // Here we are addressing a fundamental size limitation of any one thing to store all of an identitities variables
         // Especially when those variables have lots of unique identifiers.
 
-if ($this->variables_thing->json->write_fail_count > 0) {
-$this->thing->log("overflow " . $this->variables_thing->json->size_overflow . " write_fail_count " . $this->variables_thing->json->write_fail_count . ".");
-$this->thing->log("set " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
-}
-
-//} catch (Exception $e) {
-//    echo 'Caught exception: ',  $e->getMessage(), "\n";
-//} catch (Error $e) {
-//   echo 'Now you can catch me!';
-//}
-
-//        restore_error_handler();
-//restore_exception_handler();
-
+        if ($this->variables_thing->json->write_fail_count > 0) {
+            $this->thing->log("overflow " . $this->variables_thing->json->size_overflow . " write_fail_count " . $this->variables_thing->json->write_fail_count . ".");
+            $this->thing->log("set " . $this->variables_thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+        }
 
         // And save variable_set onto local Thing.
-//try {
         $this->thing->db->setFrom($this->identity);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array($this->variable_set_name, $variable), $value );
-if ($this->variables_thing->json->write_fail_count > 0) {
 
-$this->thing->log("overflow " . $this->thing->json->size_overflow . " write_fail_count " . $this->thing->json->write_fail_count . ".");
-$this->thing->log("set " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
-}
-//} catch (Exception $e) {
-//    echo 'Caught exception: ',  $e->getMessage(), "\n";
-//}
-//} catch (Error $e) {
-//   echo 'Now you can catch me!';
-//}
+        if ($this->variables_thing->json->write_fail_count > 0) {
 
-
-
-        // bughunt 23 June 2018 if ($value == "usermanager") {exit();}
-
-//        restore_error_handler();
-//restore_exception_handler();
-
+            $this->thing->log("overflow " . $this->thing->json->size_overflow . " write_fail_count " . $this->thing->json->write_fail_count . ".");
+            $this->thing->log("set " . $this->thing->uuid . " " .  $this->variable_set_name ." " . $variable . " " . $value);
+        }
 
         return $this->variables_thing->$variable;
     }
