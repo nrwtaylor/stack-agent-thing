@@ -44,7 +44,6 @@ class Thing
             // Try this, otherwise fail.
             $GLOBALS['stack_path'] = "/var/www/stackr.test/";
             //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
-
         }
 
 

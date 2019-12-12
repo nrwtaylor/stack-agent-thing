@@ -827,7 +827,9 @@ if (is_string($headcode['consist'])) {$consist = $headcode['consist'];}
                 $txt .= " " . str_pad($consist, 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode['route'])) {
-                $txt .= " " . str_pad($headcode['route'], 9, " ", STR_PAD_LEFT);
+$route = $headcode['route'];
+if (is_array($headcode['route'])) {$route = implode(">", $headcode['route']);}
+                $txt .= " " . str_pad($route, 9, " ", STR_PAD_LEFT);
             }
             $txt .= "\n";
 
