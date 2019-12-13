@@ -64,7 +64,7 @@ class Message {
         $this->mail_postfix = $thing->container['stack']['mail_postfix'];
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
-
+$this->stack_email = $this->email;
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         // Create some short-cuts.
@@ -215,13 +215,13 @@ class Message {
             switch ($key) {
             case 'keyword':
                 $this->keyword = $this->thing_report['keyword'];
-                continue;
+                continue 2;
             case 'sms':
                 $this->sms_message = $this->thing_report['sms'];
-                continue;
+                continue 2;
             case 'choices':
                 $this->choices = $this->thing_report['choices'];
-                continue;
+                continue 2;
 
 
                 /*
@@ -240,17 +240,17 @@ class Message {
 
                 //     }
                 //break;
-                continue;
+                continue 2;
             case 'web':
 
                 //$this->thing->log('<pre> Agent "Message" started running on Thing ' . date("Y-m-d H:i:s") . '</pre>');
 
                 //$this->thing->log( "web channel sent to message - no action" );
                 //break;
-                continue;
+                continue 2;
             default:
                 //
-                continue;
+                continue 2;
             }
         }
     }
@@ -398,7 +398,7 @@ class Message {
 
         }
 
-        if ( substr( $this->subject, 0, 3 ) === "s/ " ) {
+        if (( substr( $this->subject, 0, 3 ) === "s/ " ) and (strtolower($this->stack_email) != strtolower($this->email))) {
             $this->thing_report['info'] = 'Agent "Message" did not send a stack message.';
             return $this->thing_report;
         } else {
@@ -606,8 +606,8 @@ class Message {
                 $this->thing_report['info'] = 'did not get Email token.';
                 break;
 
-            case ($quota->flag == 'red'):
-                $this->thing_report['info'] = 'has exceeded the daily message quota.';
+            case (($quota->flag == 'red') and (strtolower($this->email) != strtolower($this->stack_email))) :
+                $this->thing_report['info'] = 'Has exceeded the daily message quota.';
                 break;
                 //            case (isset($dev_overide)):
             case (true):

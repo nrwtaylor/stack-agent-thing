@@ -13,10 +13,18 @@ class Ebay extends Agent
 
     public $var = 'hello';
 
+    function is_positive_integer($str)
+    {
+        return is_numeric($str) && $str > 0 && $str == round($str);
+    }
+
     function init()
     {
-$this->response = "Started ebay agent. ";
-$this->flag = "green";
+        $this->email = $this->thing->container['stack']['email'];
+        $this->stack_email = $this->email;
+
+        $this->response = "Init eBay. ";
+        $this->flag = "green";
         $this->ebay_daily_call_count = 0;
         $this->test = "Development code"; // Always
 
@@ -32,12 +40,10 @@ $this->flag = "green";
             "DEBUG"
         );
 
-if (!isset($this->thing->container['api']['ebay'])) {
-
-$this->response .= "Settings not available. ";
-return true;
-
-}
+        if (!isset($this->thing->container['api']['ebay'])) {
+            $this->response .= "Settings not available. ";
+            return true;
+        }
 
         $this->application_id =
             $this->thing->container['api']['ebay'][$word]['app ID'];
@@ -45,14 +51,43 @@ return true;
             $this->thing->container['api']['ebay'][$word]['cert ID'];
         $this->devID = $this->thing->container['api']['ebay'][$word]['dev ID'];
 
-$this->auth_token = base64_encode($this->application_id .":" . $this->application_key);
+        $this->desired_state = $this->thing->container['api']['ebay']['state'];
+
+        $this->auth_token = base64_encode(
+            $this->application_id . ":" . $this->application_key
+        );
 
         $this->run_time_max = 360; // 5 hours
 
         $this->thing_report['help'] = 'This reads the Ebay catalog.';
 
-//$this->eBayGetItemSnapshotFeed(4);
+        //$this->eBayGetItemSnapshotFeed(4);
+    }
 
+    public function errorEbay()
+    {
+        $this->sms_message = 'EBAY | There is a problem with the eBay API.';
+        $this->message = $this->word . ' turned off the eBay API.';
+
+        $message = 'The stack saw errors back from the eBay API. The eBay API is currently '. strtoupper($this->state) .".";
+
+        $thing = new Thing(null);
+
+        $to = $this->stack_email;
+        $thing->Create($to, "human", 's/ ebay error message to ' . $this->from);
+        $thing->flagGreen();
+
+        $thing_report['thing'] = $thing;
+        $thing_report['message'] = $message;
+        $thing_report['sms'] = $message;
+        $thing_report['email'] = $message;
+
+        $message_thing = new Message($thing, $thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
+
+        $this->response .= $this->thing_report['info'] . " ";
+
+        return $this->message;
     }
 
     function run()
@@ -65,16 +100,40 @@ $this->auth_token = base64_encode($this->application_id .":" . $this->applicatio
 
     function set()
     {
+        if (!isset($this->state) or $this->state == false) {
+            $this->state = "off";
+        }
+
+        $this->variables_agent->setVariable("state", $this->state);
+
         $this->variables_agent->setVariable("counter", $this->counter);
-        $this->variables_agent->setVariable("daily_call_count", $this->ebay_daily_call_count);
+        $this->variables_agent->setVariable(
+            "daily_call_count",
+            $this->ebay_daily_call_count
+        );
         $this->variables_agent->setVariable(
             "refreshed_at",
             $this->current_time
         );
+
+        //     if ($this->last_state == false) {
+        //            $this->readSubject();
+
+        $this->thing->json->writeVariable(array("ebay", "state"), $this->state);
+        $this->thing->json->writeVariable(
+            array("ebay", "refreshed_at"),
+            $this->current_time
+        );
+
+        $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE");
+        //    }
     }
 
     function getTime()
     {
+        if ($this->state == "off") {
+            return true;
+        }
         // devstack
         // Ebay test
 
@@ -107,17 +166,25 @@ $this->auth_token = base64_encode($this->application_id .":" . $this->applicatio
 
     function get()
     {
+        //$from = $this->from;
+        // Because this is a per key allowance.
+        $from = "stack";
+
         // $this->from is set by the calling agent.
         // See thing-wordpress.php / thing-keybase / etc
         $this->variables_agent = new Variables(
             $this->thing,
-            "variables " . "ebay" . " " . $this->from
+            "variables " . "ebay" . " " . $from
         );
+
+        $this->last_state = $this->variables_agent->getVariable("state");
 
         // Count calls to Ebay API. Note call limits.
         $this->counter = $this->variables_agent->getVariable("counter");
 
-        $this->ebay_daily_call_count = $this->variables_agent->getVariable("daily_call_count");
+        $this->ebay_daily_call_count = $this->variables_agent->getVariable(
+            "daily_call_count"
+        );
 
         $this->refreshed_at = $this->variables_agent->getVariable(
             "refreshed_at"
@@ -136,45 +203,105 @@ $this->auth_token = base64_encode($this->application_id .":" . $this->applicatio
         $this->item = $this->eBayGetSingle($text);
     }
 
-function logEbay($text) {
+    function logEbay($text)
+    {
+        if ($text == null) {
+            $text = "MErp";
+        }
 
-if ($text == null) {$text = "MErp";}
+        //var_dump($text);
+        //var_dump($text['errorMessage']['error']['message']);
 
-//var_dump($text);
-//var_dump($text['errorMessage']['error']['message']);
+        $log_text = "Error message not found.";
+        if (isset($text['errorMessage']['error']['message'])) {
+            $log_text = $text['errorMessage']['error']['message'];
+        }
 
+        $request = "No request. ";
+        if (isset($this->request)) {
+            $request = $this->request;
+        }
 
-$log_text = "Error message not found.";
-if (isset($text['errorMessage']['error']['message'])) {
+        $thing = new Thing(null);
+        $thing->Create(
+            "meep",
+            "ebay",
+            "g/ ebay error " . $request . " - " . $log_text
+        );
 
-$log_text = $text['errorMessage']['error']['message'];
-
-}
-
-$request = "No request. ";
-if (isset($this->request)) {
-$request = $this->request;
-}
-
-$thing = new Thing(null);
-$thing->Create("meep","ebay", "g/ ebay error " . $request ." - ". $log_text);
+        //$this->state = $this->last_state;
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable( array("ebay") , $text );
+        $this->thing->json->writeVariable(array("ebay"), $text);
 
-$this->flag = "red";
-$this->response .= "Logging " . $request .  " " . $log_text .". ";
+        $this->flag = "red";
+        $this->response .= "Logging " . $request . " " . $log_text . ". ";
 
-}
+        // Okay at this point we have one error...
+        // Have we had other errors recently?
+
+        $findagent_thing = new FindAgent($this->thing, 'ebay');
+
+        $count = count($findagent_thing->thing_report['things']);
+        $this->thing->log(
+            'found ' .
+                count($findagent_thing->thing_report['things']) .
+                " place Things."
+        );
+
+        if ($findagent_thing->thing_report['things'] == true) {
+        }
+
+        if (!$this->is_positive_integer($count)) {
+            // Do nothing
+        } else {
+            $now = strtotime($this->thing->time());
+
+            $count = 0;
+            foreach (
+                $findagent_thing->thing_report['things']
+                as $thing_object
+            ) {
+                $time_string = $thing_object['created_at'];
+                $created_at = strtotime($time_string);
+
+                $age = $now - $created_at;
+
+                if ($age < 60 * 5) {
+                    $this->response .= "Saw error  " . $age . "s ago. ";
+                    $count += 1;
+                }
+
+            }
+        }
+
+        if ($count > 2) {
+            $this->response .= "Turned eBay off. ";
+            $this->state = "off";
+
+            // Send a message. Handle the error.
+            $this->errorEbay();
+        }
+
+        // Log to the created error Thing.
+        $thing->json->writeVariable(array("ebay", "state"), $this->state);
+        $thing->json->writeVariable(
+            array("ebay", "refreshed_at"),
+            $this->current_time
+        );
+    }
 
     function eBayGetSingle($ItemID)
     {
-$this->request = $ItemID;
+        if ($this->state == "off") {
+            return true;
+        }
+        $this->request = $ItemID;
         $this->thing->log("get single item id " . $ItemID . ".");
 
-        $this->response .= "Requested a single eBay item " . $ItemID .". ";
+        $this->response .= "Requested a single eBay item " . $ItemID . ". ";
         $URL = 'http://open.api.ebay.com/shopping';
 
         //change these two lines
@@ -193,25 +320,27 @@ $this->request = $ItemID;
             "&responseencoding=XML" .
             "&IncludeSelector=$includeSelector";
         $xml = simplexml_load_file($apicall);
-$this->ebay_daily_call_count += 1;
+        $this->ebay_daily_call_count += 1;
 
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-$this->flag = "green";
-if ($array["Ack"] == "Failure") {$this->logEbay($array);}
+            $this->flag = "green";
+            if ($array["Ack"] == "Failure") {
+                $this->logEbay($array);
+            }
 
             return $array;
         }
-$this->flag = "green";
+        $this->flag = "green";
         return false;
     }
 
-
     function eBayGetItemSnapshotFeed($ItemID)
     {
-
-
+        if ($this->state == "off") {
+            return true;
+        }
 
         $options = array(
             'http' => array(
@@ -232,11 +361,7 @@ $this->flag = "green";
 
         $context = stream_context_create($options);
 
-
-
-
-
-$this->request = $ItemID;
+        $this->request = $ItemID;
         $this->thing->log("get single item id " . $ItemID . ".");
 
         $this->response .= "Requested an eBay item. ";
@@ -258,40 +383,41 @@ $this->request = $ItemID;
             "&responseencoding=XML" .
             "&IncludeSelector=$includeSelector";
 
-
         // Construct the GetSingleItem REST call
-//        $apicall =
-//            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
-//            "&appid=$appID&ItemID=$ItemID" .
-//            "&responseencoding=XML" .
-//            "&IncludeSelector=$includeSelector";
+        //        $apicall =
+        //            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
+        //            "&appid=$appID&ItemID=$ItemID" .
+        //            "&responseencoding=XML" .
+        //            "&IncludeSelector=$includeSelector";
 
-
-// GET https://api.ebay.com/buy/browse/v1/item/v1|201533667898|0
-$apicall = 'https://api.ebay.com/buy/feed/v1_beta/item?feed_scope=NEWLY_LISTED&category_id=15032&date=20170924';
-
+        // GET https://api.ebay.com/buy/browse/v1/item/v1|201533667898|0
+        $apicall =
+            'https://api.ebay.com/buy/feed/v1_beta/item?feed_scope=NEWLY_LISTED&category_id=15032&date=20170924';
 
         $xml = simplexml_load_file($apicall);
 
-$this->ebay_daily_call_count += 1;
+        $this->ebay_daily_call_count += 1;
 
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-if ($array["Ack"] == "Failure") {$this->logEbay($array);}
+            if ($array["Ack"] == "Failure") {
+                $this->logEbay($array);
+            }
 
             return $array;
         }
-$this->flag = "green";
+        $this->flag = "green";
         return false;
     }
-
-
 
     // devstack
     function eBayGetCategory($category_id)
     {
-$this->request = $category_id;
+        if ($this->state == "off") {
+            return true;
+        }
+        $this->request = $category_id;
         $this->thing->log(
             "get multiple items by cateogory " . $category_id . "."
         );
@@ -320,21 +446,24 @@ $this->request = $category_id;
 
         $xml = @simplexml_load_file($apicall);
 
-$this->ebay_daily_call_count += 1;
-
+        $this->ebay_daily_call_count += 1;
 
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
-if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
-if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
+            if (isset($array["Ack"]) and $array["Ack"] == "Failure") {
+                $this->logEbay($array);
+            }
+            if (isset($array["ack"]) and $array["ack"] == "Failure") {
+                $this->logEbay($array);
+            }
             return $array;
         }
-$this->flag = "green";
+        $this->flag = "green";
         return false;
     }
 
-/*
+    /*
 http://open.api.ebay.com/shopping?
    callname=GetMultipleItems&
    responseencoding=XML&
@@ -347,28 +476,29 @@ http://open.api.ebay.com/shopping?
     // devstack
     function eBayGetMultiple($items = array())
     {
+        if ($this->state == "off") {
+            return true;
+        }
 
-
-if ($items == array()) {return;}
-$items_string = implode(",",$items);
-//var_dump($items_string);
-$this->request = $items_string;
-//exit();
+        if ($items == array()) {
+            return;
+        }
+        $items_string = implode(",", $items);
+        //var_dump($items_string);
+        $this->request = $items_string;
+        //exit();
 
         $includeSelector =
             "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
 
         // Construct the GetSingleItem REST call
-//        $apicall =
-//            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
-//            "&appid=$appID&ItemID=$ItemID" .
-//            "&responseencoding=XML" .
-//            "&IncludeSelector=$includeSelector";
+        //        $apicall =
+        //            "$URL?callname=GetSingleItem&version=$compatabilityLevel" .
+        //            "&appid=$appID&ItemID=$ItemID" .
+        //            "&responseencoding=XML" .
+        //            "&IncludeSelector=$includeSelector";
 
-
-        $this->thing->log(
-            "get multiple items by item id."
-        );
+        $this->thing->log("get multiple items by item id.");
 
         $this->response .= "Requested multiple items. ";
         $URL = 'http://open.api.ebay.com/shopping';
@@ -380,60 +510,61 @@ $this->request = $items_string;
             "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName";
 
         // Construct the Multiple Item REST call
-        $apicall = 'http://open.api.ebay.com/shopping?' .
-   'callname=GetMultipleItems&' .
-   'responseencoding=XML&'.
-   'appid='. $appID .'&' .
-   'siteid=0&' .
-   'version=967&' .
-   'ItemID=' . $items_string . '';
-
+        $apicall =
+            'http://open.api.ebay.com/shopping?' .
+            'callname=GetMultipleItems&' .
+            'responseencoding=XML&' .
+            'appid=' .
+            $appID .
+            '&' .
+            'siteid=0&' .
+            'version=967&' .
+            'ItemID=' .
+            $items_string .
+            '';
 
         $xml = @simplexml_load_file($apicall);
 
-$this->ebay_daily_call_count += 1;
+        $this->ebay_daily_call_count += 1;
 
-
-//var_dump($xml);  
-      if ($xml) {
+        //var_dump($xml);
+        if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
 
-if ($array["Ack"] == "Failure") {$this->logEbay($array);}
-
+            if ($array["Ack"] == "Failure") {
+                $this->logEbay($array);
+            }
 
             return $array;
         }
-$this->flag = "green";
+        $this->flag = "green";
         return false;
     }
-
-
 
     // devstack
     function eBayFastKeywords($keywords, $n = 10)
     {
-$this->request = $keywords;
+        if ($this->state == "off") {
+            return true;
+        }
+        $this->request = $keywords;
         $this->thing->log("fastest ebay search for " . $keywords . ".");
 
-
-
-        $this->response .= "Requested multiple items for " . $keywords.". ";
+        $this->response .= "Requested multiple items for " . $keywords . ". ";
         $URL = 'http://open.api.ebay.com/shopping';
         //change these two lines
         $compatabilityLevel = 967;
         $appID = $this->application_id;
         //you can also play with these selectors
-//        $includeSelector =
-//            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName,PictureURL";
+        //        $includeSelector =
+        //            "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName,PictureURL";
 
         $includeSelector =
             "Details,Description,TextDescription,ShippingCosts,ItemSpecifics,Variations,Compatibility,PrimaryCategoryName,PictureURL";
 
-
-//        $includeSelector =
-//            "Description, TextDescription";
-
+        //        $includeSelector =
+        //            "Description, TextDescription";
 
         // Construct the GetSingleItem REST call
 
@@ -444,39 +575,45 @@ $this->request = $keywords;
             "SECURITY-APPNAME=$appID&" .
             "RESPONSE-DATA-FORMAT=XML&" .
             "REST-PAYLOAD&" .
-            "keywords=" . urlencode($keywords) ."&" .
-"outputSelector(0)=location&" .
-"outputSelector(1)=condition&" .
-"itemFilter(0).name=HideDuplicateItems&" .
-"itemFilter(0).value=true&" .
-            "paginationInput.entriesPerPage=" . $n;
-
+            "keywords=" .
+            urlencode($keywords) .
+            "&" .
+            "outputSelector(0)=location&" .
+            "outputSelector(1)=condition&" .
+            "itemFilter(0).name=HideDuplicateItems&" .
+            "itemFilter(0).value=true&" .
+            "paginationInput.entriesPerPage=" .
+            $n;
 
         $xml = @simplexml_load_file($apicall);
 
-$this->ebay_daily_call_count += 1;
+        $this->ebay_daily_call_count += 1;
 
-  
-      if ($xml) {
+        if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
 
-if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
-if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
-
+            if (isset($array["ack"]) and $array["ack"] == "Failure") {
+                $this->logEbay($array);
+            }
+            if (isset($array["Ack"]) and $array["Ack"] == "Failure") {
+                $this->logEbay($array);
+            }
 
             return $array;
         }
-$this->state = "off";
-$this->flag = "green";
+        //$this->state = "off";
+        $this->flag = "green";
         return false;
     }
-
 
     // devstack
     function eBayGetKeywords($keywords)
     {
-$this->request = $keywords;
+        if ($this->state == "off") {
+            return true;
+        }
+        $this->request = $keywords;
         $this->thing->log("get multiple items by keyword " . $keywords . ".");
 
         $this->response .= "Requested multiple items. ";
@@ -497,28 +634,32 @@ $this->request = $keywords;
             "SECURITY-APPNAME=$appID&" .
             "RESPONSE-DATA-FORMAT=XML&" .
             "REST-PAYLOAD&" .
-            "keywords=" . urlencode($keywords) ."&" .
-"itemFilter(0).name=HideDuplicateItems&" .
-"itemFilter(0).value=true&" .
+            "keywords=" .
+            urlencode($keywords) .
+            "&" .
+            "itemFilter(0).name=HideDuplicateItems&" .
+            "itemFilter(0).value=true&" .
             "paginationInput.entriesPerPage=10";
 
         $xml = @simplexml_load_file($apicall);
 
-$this->ebay_daily_call_count += 1;
-
+        $this->ebay_daily_call_count += 1;
 
         if ($xml) {
             $json = json_encode($xml);
             $array = json_decode($json, true);
 
-//if ($array["Ack"] == "Failure") {$this->logEbay($array);}
-if ((isset($array["ack"])) and ($array["ack"] == "Failure")) {$this->logEbay($array);}
-if ((isset($array["Ack"])) and ($array["Ack"] == "Failure")) {$this->logEbay($array);}
-
+            //if ($array["Ack"] == "Failure") {$this->logEbay($array);}
+            if (isset($array["ack"]) and $array["ack"] == "Failure") {
+                $this->logEbay($array);
+            }
+            if (isset($array["Ack"]) and $array["Ack"] == "Failure") {
+                $this->logEbay($array);
+            }
 
             return $array;
         }
-$this->flag = "green";
+        $this->flag = "green";
         return false;
     }
 
@@ -541,6 +682,9 @@ $this->flag = "green";
 
     function wideApi($text = null)
     {
+        if ($this->state == "off") {
+            return true;
+        }
         $keywords = "(" . str_replace(" ", ",", $text) . ")";
         $this->findingApi($keywords);
         $this->thing->log("wide search for " . $keywords . ".");
@@ -548,6 +692,9 @@ $this->flag = "green";
 
     function ebayApi($text = null)
     {
+        if ($this->state == "off") {
+            return true;
+        }
         $keywords = $text;
         $this->findingApi($keywords);
         $this->thing->log("did a Finding API search for " . $keywords . ".");
@@ -555,6 +702,9 @@ $this->flag = "green";
 
     function ngramApi($text = null)
     {
+        if ($this->state == "off") {
+            return true;
+        }
         $keywords = '@1 ' . $text;
         $this->findingApi($keywords);
 
@@ -563,8 +713,15 @@ $this->flag = "green";
 
     function findingApi($text = null)
     {
-        if (!isset($this->application_key)) {return true;}
-        if (!isset($this->devID)) {return true;}
+        if ($this->state == "off") {
+            return true;
+        }
+        if (!isset($this->application_key)) {
+            return true;
+        }
+        if (!isset($this->devID)) {
+            return true;
+        }
 
         // , + - all have specific meanings to eBay.
         $this->response .= "Searched eBay query " . $text . ". ";
@@ -647,8 +804,8 @@ $this->flag = "green";
             $global_id .
             "&paginationInput.entriesPerPage=" .
             $entries .
-"itemFilter(0).name=HideDuplicateItems&" .
-"itemFilter(0).value=true&" .
+            "itemFilter(0).name=HideDuplicateItems&" .
+            "itemFilter(0).value=true&" .
             "&paginationInput.pageNumber=1&keywords=" .
             $keywords;
 
@@ -665,27 +822,29 @@ $this->flag = "green";
 
         $data = @file_get_contents($data_source, false, $context);
 
-$this->ebay_daily_call_count += 1;
-
+        $this->ebay_daily_call_count += 1;
 
         //        ini_set('default_socket_timeout', $default_socket_timeout);
 
         // Extract information
-$ack = "";
-if (isset($json_data['findItemsAdvancedResponse'][0]['ack']['0'])) {
-        $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
-}
-if ($ack == "Failure") {$this->logEbay($data);}
-if ($data == false) {$this->logEbay($data);}
-
+        $ack = "";
+        if (isset($json_data['findItemsAdvancedResponse'][0]['ack']['0'])) {
+            $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
+        }
+        if ($ack == "Failure") {
+            $this->logEbay($data);
+        }
+        if ($data == false) {
+            $this->logEbay($data);
+        }
 
         if ($data == false) {
             $this->thing->log("Finding API call failed.");
 
             $this->response .= "Could not ask Ebay. ";
-            $this->state = "off";
+            //   $this->state = "off";
             $this->items_count = 0;
-$this->flag = "red";
+            $this->flag = "red";
             return true;
             // Invalid query of some sort.
         }
@@ -694,12 +853,12 @@ $this->flag = "red";
         // Extract information.
         $ack = $json_data['findItemsAdvancedResponse'][0]['ack']['0'];
 
-//var_dump($ack);
-//if ($ack == "Failure") {$this->logEbay($array);}
+        //var_dump($ack);
+        //if ($ack == "Failure") {$this->logEbay($array);}
 
         // Ebay asks developers to check the status response.
         if ($ack != "Success") {
-$this->flag = "red";
+            $this->flag = "red";
             $this->thing->log("Finding API not successful.");
 
             $this->response .= "Query not successful. ";
@@ -707,10 +866,8 @@ $this->flag = "red";
             return true;
             // Invalid query of some sort.
         }
-$this->flag = "green";
-//if ($ack == "Failure") {$this->logEbay($array);}
-
-
+        $this->flag = "green";
+        //if ($ack == "Failure") {$this->logEbay($array);}
 
         // Meta
         // See what other variables are helpful and/or useful.
@@ -857,6 +1014,9 @@ $this->flag = "green";
 
     function doCatalog()
     {
+        if ($this->state == "off") {
+            return true;
+        }
         $service = new Services\CatalogService([
             'authorization' => $config['production']['oauthUserToken']
             //,'httpOptions' => ['debug' => true]
@@ -955,35 +1115,43 @@ $this->flag = "green";
 
     public function parseItem($ebay_item = null)
     {
-//if (isset($ebay_item['Description'])) {var_dump($ebay_item);exit();}
+        //if (isset($ebay_item['Description'])) {var_dump($ebay_item);exit();}
         if ($ebay_item == null) {
             return true;
         }
 
-if (is_string($ebay_item)) {return true;}
-
-if (isset($ebay_item['Item'])) {$ebay_item = $ebay_item['Item'];}
-
-$source = "ebay";
-
-$title = "X";
-
-if (isset($ebay_item['title'])) {
-        $title = $ebay_item['title'];
-        if (is_array($ebay_item['title'])) {
-            $title = $ebay_item['title'][0];
+        if (is_string($ebay_item)) {
+            return true;
         }
-}
+
+        if (isset($ebay_item['Item'])) {
+            $ebay_item = $ebay_item['Item'];
+        }
+
+        $source = "ebay";
+
+        $title = "X";
+
+        if (isset($ebay_item['title'])) {
+            $title = $ebay_item['title'];
+            if (is_array($ebay_item['title'])) {
+                $title = $ebay_item['title'][0];
+            }
+        }
 
         $currency = "X";
         $currency_prefix = "?";
         $currency_postfix = "?";
 
         if (
-            isset($ebay_item['sellingStatus'][0]['currentPrice'][0]['@currencyId'])
+            isset(
+                $ebay_item['sellingStatus'][0]['currentPrice'][0]['@currencyId']
+            )
         ) {
             $currency =
-                $ebay_item['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+                $ebay_item['sellingStatus'][0]['currentPrice'][0][
+                    '@currencyId'
+                ];
             $currency_prefix = "";
             $currency_postfix = "USD";
             if ($currency == "USD") {
@@ -993,10 +1161,7 @@ if (isset($ebay_item['title'])) {
             }
         }
 
-
-        if (
-            isset($ebay_item['sellingStatus']['currentPrice'])
-        ) {
+        if (isset($ebay_item['sellingStatus']['currentPrice'])) {
             $currency = "USD";
             $currency_prefix = "";
             $currency_postfix = "USD";
@@ -1009,15 +1174,19 @@ if (isset($ebay_item['title'])) {
 
         $price = "X";
         $price_text = "X";
-        if (isset($ebay_item['sellingStatus'][0]['currentPrice'][0]['__value__'])) {
-            $price = $ebay_item['sellingStatus'][0]['currentPrice'][0]['__value__'];
+        if (
+            isset(
+                $ebay_item['sellingStatus'][0]['currentPrice'][0]['__value__']
+            )
+        ) {
+            $price =
+                $ebay_item['sellingStatus'][0]['currentPrice'][0]['__value__'];
 
             $price_text = $currency_prefix . $price . $currency_postfix;
 
             // https://www.php.net/manual/en/function.money-format.php
             $price_text = money_format('%.2n', $price);
         }
-
 
         if (isset($ebay_item['sellingStatus']['currentPrice'])) {
             $price = $ebay_item['sellingStatus']['currentPrice'];
@@ -1028,151 +1197,146 @@ if (isset($ebay_item['title'])) {
             $price_text = money_format('%.2n', $price);
         }
 
-//if ($price == "X") {var_dump($ebay_item);exit();}
+        //if ($price == "X") {var_dump($ebay_item);exit();}
 
-$picture_urls = "X";
-if (isset($ebay_item["Item"]["PictureURL"])) {
-    $picture_urls = $ebay_item["Item"]["PictureURL"];
-}
-
-if (isset($ebay_item["PictureURL"])) {
-    $picture_urls = $ebay_item["PictureURL"];
-}
-
-$description = "X";
-if (isset($ebay_item["Description"])) {
-    $description = $ebay_item["Description"];
-}
-
-
-$condition_description = "X";
-if (isset($ebay_item["ConditionDescription"])) {
-    $condition_description = $ebay_item["ConditionDescription"];
-}
-
-
-$link = null;
-if (isset($ebay_item["viewItemURL"])) {
-        $link = $ebay_item["viewItemURL"];
-        if (is_array($ebay_item["viewItemURL"])) {
-            $link = $ebay_item["viewItemURL"][0];
+        $picture_urls = "X";
+        if (isset($ebay_item["Item"]["PictureURL"])) {
+            $picture_urls = $ebay_item["Item"]["PictureURL"];
         }
-}
 
+        if (isset($ebay_item["PictureURL"])) {
+            $picture_urls = $ebay_item["PictureURL"];
+        }
 
+        $description = "X";
+        if (isset($ebay_item["Description"])) {
+            $description = $ebay_item["Description"];
+        }
 
-if (isset($ebay_item["ViewItemURLForNaturalSearch"])) {
+        $condition_description = "X";
+        if (isset($ebay_item["ConditionDescription"])) {
+            $condition_description = $ebay_item["ConditionDescription"];
+        }
+
+        $link = null;
+        if (isset($ebay_item["viewItemURL"])) {
+            $link = $ebay_item["viewItemURL"];
+            if (is_array($ebay_item["viewItemURL"])) {
+                $link = $ebay_item["viewItemURL"][0];
+            }
+        }
+
+        if (isset($ebay_item["ViewItemURLForNaturalSearch"])) {
             $link = $ebay_item["ViewItemURLForNaturalSearch"];
-//echo $link;
-}
-
-//$link = "X";
-if (isset($ebay_item['link'])) {$link = $ebay_item['link'];}
-
-//if (!isset($link)) {var_dump($ebay_item); exit();}
-
-
-//var_dump($ebay_item);
-//if ($picture_urls == "X") {var_dump($ebay_item);exit();}
-$link_thumbnail = "X";
-   //         if (isset($ebay_item["galleryURL"])) {$link_thumbnail = $ebay_item["galleryURL"];}
-
-if (isset($ebay_item["galleryURL"])) {
-
-        $link_thumbnail = $ebay_item["galleryURL"];
-        if (is_array($ebay_item['galleryURL'])) {
-            $link_thumbnail = $ebay_item["galleryURL"][0];
+            //echo $link;
         }
-}
 
-if (isset($ebay_item["GalleryURL"])) {
-
-        $link_thumbnail = $ebay_item["GalleryURL"];
-        if (is_array($ebay_item['GalleryURL'])) {
-            $link_thumbnail = $ebay_item["GalleryURL"][0];
+        //$link = "X";
+        if (isset($ebay_item['link'])) {
+            $link = $ebay_item['link'];
         }
-}
-//if ($link_thumbnail == "X") {
-//var_dump($ebay_item);
-//}
-//$link_thumbnail = "X";
-if (isset($ebay_item['thumbnail'])) {$link_thumbnail = $ebay_item['thumbnail'];}
 
+        //if (!isset($link)) {var_dump($ebay_item); exit();}
 
-if (!isset($link_thumbnail)) {
-throw "No thumbnail";
-return;
-//var_dump($ebay_item); exit();
-}
+        //var_dump($ebay_item);
+        //if ($picture_urls == "X") {var_dump($ebay_item);exit();}
+        $link_thumbnail = "X";
+        //         if (isset($ebay_item["galleryURL"])) {$link_thumbnail = $ebay_item["galleryURL"];}
 
-
-$location = "X";
-if (isset($ebay_item["location"])) {
-        $location =$ebay_item["location"];
-        if (is_array($ebay_item["location"])) {
-            $location = $ebay_item["location"][0];
+        if (isset($ebay_item["galleryURL"])) {
+            $link_thumbnail = $ebay_item["galleryURL"];
+            if (is_array($ebay_item['galleryURL'])) {
+                $link_thumbnail = $ebay_item["galleryURL"][0];
+            }
         }
-}
 
-$country = "X";
-if (isset($ebay_item["country"])) {
-        $country = $ebay_item["country"][0];
-        if (is_array($ebay_item["country"])) {
+        if (isset($ebay_item["GalleryURL"])) {
+            $link_thumbnail = $ebay_item["GalleryURL"];
+            if (is_array($ebay_item['GalleryURL'])) {
+                $link_thumbnail = $ebay_item["GalleryURL"][0];
+            }
+        }
+        //if ($link_thumbnail == "X") {
+        //var_dump($ebay_item);
+        //}
+        //$link_thumbnail = "X";
+        if (isset($ebay_item['thumbnail'])) {
+            $link_thumbnail = $ebay_item['thumbnail'];
+        }
+
+        if (!isset($link_thumbnail)) {
+            throw "No thumbnail";
+            return;
+            //var_dump($ebay_item); exit();
+        }
+
+        $location = "X";
+        if (isset($ebay_item["location"])) {
+            $location = $ebay_item["location"];
+            if (is_array($ebay_item["location"])) {
+                $location = $ebay_item["location"][0];
+            }
+        }
+
+        $country = "X";
+        if (isset($ebay_item["country"])) {
             $country = $ebay_item["country"][0];
+            if (is_array($ebay_item["country"])) {
+                $country = $ebay_item["country"][0];
+            }
         }
-}
 
+        //if(!isset($link)) {var_dump($ebay_item);echo "<br><br>";}
 
-//if(!isset($link)) {var_dump($ebay_item);echo "<br><br>";}
-
-
-if (!isset($link)) {
-if (isset($bay_item["viewItemURL"])) {$link = $ebay_item["viewItemURL"];}
-if (isset($bay_item["link"])) {$link = $ebay_item["link"];}
-
-}
-
-$html_link = "";
-if (isset($link)) {
-        $html_link = '<a href="' . $link . '">';
-        $html_link .= $title;
-        $html_link .= "</a>";
-}
-
-$item_id = "X";
-if (isset($ebay_item['itemId'])) {
-
-        $item_id = $ebay_item["itemId"];
-        if (is_array($ebay_item["itemId"])) {
-            $item_id = $ebay_item["itemId"][0];
+        if (!isset($link)) {
+            if (isset($bay_item["viewItemURL"])) {
+                $link = $ebay_item["viewItemURL"];
+            }
+            if (isset($bay_item["link"])) {
+                $link = $ebay_item["link"];
+            }
         }
-}
-if (isset($ebay_item['ItemID'])) {
 
-        $item_id = $ebay_item["ItemID"];
-        if (is_array($ebay_item["ItemID"])) {
-            $item_id = $ebay_item["ItemID"][0];
+        $html_link = "";
+        if (isset($link)) {
+            $html_link = '<a href="' . $link . '">';
+            $html_link .= $title;
+            $html_link .= "</a>";
         }
-}
 
-//if(!isset($item_id)) {var_dump($ebay_item["itemId"][0]);exit();}
+        $item_id = "X";
+        if (isset($ebay_item['itemId'])) {
+            $item_id = $ebay_item["itemId"];
+            if (is_array($ebay_item["itemId"])) {
+                $item_id = $ebay_item["itemId"][0];
+            }
+        }
+        if (isset($ebay_item['ItemID'])) {
+            $item_id = $ebay_item["ItemID"];
+            if (is_array($ebay_item["ItemID"])) {
+                $item_id = $ebay_item["ItemID"][0];
+            }
+        }
 
+        //if(!isset($item_id)) {var_dump($ebay_item["itemId"][0]);exit();}
 
-if (isset($ebay_item["id"])) {$item_id = $ebay_item["id"];}
-//if (!isset($link)) {var_dump($ebay_item); exit();}
-
+        if (isset($ebay_item["id"])) {
+            $item_id = $ebay_item["id"];
+        }
+        //if (!isset($link)) {var_dump($ebay_item); exit();}
 
         //var_dump($item["primaryCategory"][0]['categoryName'][0]);
         $category_name = "X";
-if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
+        if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
             $category_name = $ebay_item["primaryCategory"][0]["categoryName"];
 
-        if (is_array($category_name)) {
-            $category_name = $ebay_item["primaryCategory"][0]["categoryName"][0];
+            if (is_array($category_name)) {
+                $category_name =
+                    $ebay_item["primaryCategory"][0]["categoryName"][0];
+            }
         }
-}
         $item = array(
-            "source"=>$source,
+            "source" => $source,
             "id" => $item_id,
             "category_name" => $category_name,
             "description" => $description,
@@ -1184,8 +1348,8 @@ if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
             "location" => $location,
             "country" => $country,
             "html_link" => $html_link,
-            "picture_urls"=> $picture_urls,
-            "ebay"=>$ebay_item
+            "picture_urls" => $picture_urls,
+            "ebay" => $ebay_item
         );
         return $item;
     }
@@ -1193,6 +1357,7 @@ if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
     public function makeSMS()
     {
         $sms = "EBAY";
+        $sms .= " | " . $this->state . "";
         if (isset($this->search_words) and $this->search_words != "") {
             $sms .= " " . strtoupper($this->search_words);
         }
@@ -1224,7 +1389,7 @@ if (isset($ebay_item["primaryCategory"][0]["categoryName"][0])) {
         }
 
         $sms .= " | " . $this->response;
-$sms .= " daily call count " . $this->ebay_daily_call_count;
+        $sms .= " daily call count " . $this->ebay_daily_call_count;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -1299,20 +1464,42 @@ $sms .= " daily call count " . $this->ebay_daily_call_count;
         $this->thing->log('Ebay read input, "' . $this->input . '".');
         //$this->response .= null;
 
+        if (strtolower($this->input) == "ebay on") {
+            $this->state = "on";
+            return;
+        }
+        if (strtolower($this->input) == "ebay off") {
+            $this->state = "off";
+            return;
+        }
+
+        $this->state = $this->last_state;
+
+        if ($this->last_state == "off") {
+            $this->response .= "eBay is in an OFF condition. ";
+            return;
+        }
+
+        //$this->state = $this->last_state;
+
+        if (strtolower($this->input) == "ebay") {
+            $this->response .= "Checked eBay state. ";
+            return;
+        }
+
         $keywords = $this->keywords;
 
         $input = $this->input;
-//var_dump($input);
-//var_dump($this->agent_input);
+
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
         // Keyword
 
-if ($this->agent_input == "ebay") {
-$this->response .= "Set up a connector to the Ebay API(s). ";
-return;
-}
+        if ($this->agent_input == "ebay") {
+            $this->response .= "Set up a connector to the Ebay API(s). ";
+            return;
+        }
 
         if (count($pieces) == 1) {
             if ($input == 'ebay') {
@@ -1321,8 +1508,8 @@ return;
             }
         }
 
-// Don't pull anything. Just set up the connector.
-//return;
+        // Don't pull anything. Just set up the connector.
+        //return;
 
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), "ebay is")) !== false) {

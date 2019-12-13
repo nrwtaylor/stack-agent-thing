@@ -17,6 +17,16 @@ error_reporting(-1);
 class Alpha extends Agent
 {
 
+public function isAlpha($token) {
+
+                    if (ctype_alpha($token)) {
+                        return true;
+                    }
+return false;
+
+
+}
+
 
     /**
      *

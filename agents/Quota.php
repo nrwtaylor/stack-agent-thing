@@ -38,6 +38,7 @@ class Quota {
         $quota_period = 60;
 
         $this->period_limit = $this->thing->container['api']['quota'][$this->quota_name . '_limit'];
+//$this->period_limit = 5;
         //$this->quota_daily = $this->thing->container['api']['quota'][$this->quota_name . '_limit'];
         //$this->quota_hourly = $this->thing->container['api']['quota']['this->message_hourly_limit'];
 

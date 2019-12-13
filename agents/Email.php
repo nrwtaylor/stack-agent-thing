@@ -62,6 +62,7 @@ class Email {
 
         //$this->start_time = microtime(true);
 
+
         $this->agent_name = 'email';
         $this->agent_prefix = 'Agent "Email"';
 
@@ -79,8 +80,14 @@ class Email {
 
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
-
+$this->stack_email = $this->email;
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+
+if (isset($this->thing->container['api']['wordpress']['path_to'])) {
+        $this->wordpress_path_to = $this->thing->container['api']['wordpress']['path_to'];
+        require_once($this->wordpress_path_to ."wp-load.php");
+}
+
 
 
         // Sent uo agent.
@@ -193,7 +200,36 @@ class Email {
             //echo "/n";
             //echo $from;
             //echo "/n";
+
+
+
+// dev test
+// Use wordpress email if it is available.
+if (isset($this->wordpress_path_to)) {
+
+        // get the blog administrator's email address
+//        $to = get_option('admin_email');
+
+        $name = "User X";
+
+//        $to = get_option('admin_email');
+//        $subject = "Some text in subject...";
+//        $subject = $input_text;
+$subject = $this->subject;
+        $message =
+            '"' . $email . '" wants to be updated when this search is updated.';
+
+        $headers = "From: $name <$email>" . "\r\n";
+        $post_title = "Merp";
+
+        wp_mail($to, $this->subject, $this->message, $headers);
+
+} else {
+
             $this->sendGeneric($to, $from, $this->subject, $this->message, null);
+}
+
+
             $this->thing->account['stack']->Debit($this->cost);
 
             //                $this->sendUSshortcode($to, $test_message);

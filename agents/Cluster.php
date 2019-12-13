@@ -1,0 +1,131 @@
+<?php
+/**
+ * Cluster.php
+ *
+ * @package default
+ */
+
+namespace Nrwtaylor\StackAgentThing;
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+ini_set("allow_url_fopen", 1);
+
+class Cluster extends Agent
+{
+    public $var = 'hello';
+
+    /**
+     *
+     */
+    public function init() {
+        $this->test= "Development code";
+
+      //  $this->primary_place = "roost";
+      //  $this->signals = array("on", "off");
+
+
+        $this->node_list = array("cluster"=>array("cluster"));
+
+        $this->thing_report['help'] = 'This is the cluster agent.' ;
+
+$this->size = null;
+$this->characteristic = null;
+$this->threshold = null;
+
+
+//        $entity = new Entity($this->thing, "state");
+  //      $this->state_thing = $entity->thing;
+
+  }
+
+    function run() {
+        $this->doCluster();
+    }
+
+    private function getCluster()
+    {
+     //   $this->state = $this->state_thing->choice->load($this->primary_place);
+     //   $this->state_thing->choice->Create($this->primary_place, $this->node_list, $this->state);
+     //   $this->state_thing->choice->Choose($this->state);
+
+     //   $choices = $this->state_thing->choice->makeLinks($this->state);
+    }
+
+public function makeSMS() {
+
+$this->thing_report['sms'] = "CLUSTER";
+
+}
+
+public function setSize($size) {
+
+$this->size = $size;
+
+}
+
+
+public function setCharacteristic($characteristic) {
+
+$this->characteristic = $characteristic;
+
+}
+
+public function setThreshold($threshold) {
+
+$this->threshold = $threshold;
+
+}
+
+
+    private function setCluster()
+    {
+ //       $this->state_thing->choice->Choose($this->state);
+ //       $choices = $this->state_thing->choice->makeLinks($this->state);
+    }
+
+    /**
+     *
+     */
+    public function set()
+    {
+//if (!isset($this->size)) {return true;}
+        $this->thing->json->writeVariable( array("cluster", "size"), $this->size );
+        $this->thing->json->writeVariable( array("cluster", "characteristic"), $this->characteristic );
+        $this->thing->json->writeVariable( array("cluster", "threshold"), $this->threshold );
+
+    }
+
+    function doCluster() {
+       if ((!isset($this->size)) or ($this->size == null)) {
+            //$this->response = "detected state n run subject discriminator";
+            $this->thing->log($this->agent_prefix . 'size is null.');
+        }
+
+
+   //     $this->state = $this->thing->choice->load('roost');
+
+/*
+        // Will need to develop this to only only valid state changes.
+        switch ($this->state) {
+        default:
+            $this->thing->log('invalid state provided "' . $this->state. ".");
+            $this->response = "Cluster handling is broken. ";
+        }
+ */
+//$this->signal = "X";
+$this->state = "X";
+
+    }
+
+    function respond() {
+        $this->thing_report['sms'] = "STATE " . "| " . $this->response;
+    }
+
+
+
+    function readSubject() {}
+
+}

@@ -697,8 +697,9 @@ class Database
             $keyword = $this->container->db->quote(
                 "adidas adiPower S bounce men\'s spikeless Golf Shoe NEW"
             );
-            //$keyword = '$keyword_input';
-            //        $keyword = $this->container->db->quote($keyword_input);
+
+            $keyword = '$keyword_input';
+         //           $keyword = $this->container->db->quote($keyword_input);
             //$text = "adidas adiPower S bounce men's spikeless Golf Shoe NEW";
             //  $query ='SELECT * FROM stack WHERE task=:keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
 
