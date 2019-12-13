@@ -34,7 +34,6 @@ class Ebay extends Agent
         $this->environment = "production"; // production
 
         $word = strtolower($this->word) . "_" . $this->environment;
-
         $this->thing->log(
             $this->agent_prefix . 'using ebay keys for  ' . $word . ".",
             "DEBUG"
@@ -44,6 +43,11 @@ class Ebay extends Agent
             $this->response .= "Settings not available. ";
             return true;
         }
+
+        $this->credential_set =
+            $this->thing->container['api']['ebay']['credential_set'];
+
+$word = $this->credential_set;
 
         $this->application_id =
             $this->thing->container['api']['ebay'][$word]['app ID'];
@@ -203,7 +207,7 @@ class Ebay extends Agent
         $this->item = $this->eBayGetSingle($text);
     }
 
-    function logEbay($text)
+    function logEbay($text, $type = "ERROR")
     {
         if ($text == null) {
             $text = "MErp";
@@ -222,11 +226,13 @@ class Ebay extends Agent
             $request = $this->request;
         }
 
+$calling_function = debug_backtrace()[1]['function'];
+
         $thing = new Thing(null);
         $thing->Create(
             "meep",
             "ebay",
-            "g/ ebay error " . $request . " - " . $log_text
+            "g/ ebay " . $type . " " . $calling_function . " - " . $request . " - " . $log_text
         );
 
         //$this->state = $this->last_state;
@@ -238,6 +244,9 @@ class Ebay extends Agent
 
         $this->flag = "red";
         $this->response .= "Logging " . $request . " " . $log_text . ". ";
+
+
+if ($type == "WARNING") {return true;}
 
         // Okay at this point we have one error...
         // Have we had other errors recently?
@@ -835,7 +844,7 @@ http://open.api.ebay.com/shopping?
             $this->logEbay($data);
         }
         if ($data == false) {
-            $this->logEbay($data);
+            $this->logEbay("Data is false.", "WARNING");
         }
 
         if ($data == false) {
