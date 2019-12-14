@@ -11,7 +11,6 @@ class Bar extends Agent
 {
     public function init()
     {
-echo "init\n";
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
         $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
@@ -27,36 +26,63 @@ echo "init\n";
     public function set()
     {
         $this->variables->setVariable("count", $this->bar_count);
+        $this->variables->setVariable("stack_count", $this->bar_count_stack);
+
         $this->variables->setVariable("refreshed_at", $this->current_time);
+    }
+
+    public function run()
+    {
+        $this->updateBar();
+    }
+
+    public function updateBar()
+    {
+
+        $from = "null" . $this->mail_postfix;
+        $variables = new Variables($this->thing, "variables bar " . $from);
+        $this->bar_count_stack = $variables->getVariable("count");
+
+        $diff = $this->bar_count_stack - $this->last_bar_count_stack;
+
+if ($diff != 0) {$this->response .= "Advanced bar to current count. ";}
+
+        $this->bar_count += $diff;
     }
 
     public function get()
     {
         $this->bar_count = $this->variables->getVariable("count");
-        $this->refreshed_at = $this->variables->getVariable("refreshed_at");
+        $this->last_bar_count_stack = $this->variables->getVariable("stack_count");
 
+        $this->refreshed_at = $this->variables->getVariable("refreshed_at");
         $this->thing->log($this->agent_prefix .  'loaded ' . $this->bar_count . ".");
     }
 
     public function countBar()
     {
         $this->bar_count += 1;
-echo $this->bar_count . "\n";
     }
 
     function respond()
     {
         // looks like this could be factored out by default agent respond()
-        $this->makeSMS();
-        $this->makePNG();
-        $this->makeWeb();
+//        $this->makeSMS();
+
+//        $this->makePNG();
+//        $this->makeWeb();
     }
 
     function makeSMS()
     {
-        $this->sms_message = "BAR";
-        $this->sms_message .= " | " . $this->bar_count . " of " . $this->max_bar_count . ". " . $this->response;
-        $this->thing_report['sms'] = $this->sms_message;
+        $message = "BAR";
+if ((!isset($this->bar_count)) or ($this->bar_count == false)) {
+        $message .= " | Bar count not set. Text BAR ADVANCE.";
+} else {
+        $message .= " | " . $this->bar_count . " of " . $this->max_bar_count . ". " . $this->response;
+}
+$this->sms_message = $message;
+        $this->thing_report['sms'] = $message;
     }
 
     function makeWeb()
@@ -92,6 +118,7 @@ echo $this->bar_count . "\n";
     public function Perform($piece)
     {
         switch($piece) {
+case 'bar':
            case 'stack':
             $from = "null@stackr.ca";
             $this->variables = new Variables($this->thing, "variables bar " . $this->from);
@@ -102,7 +129,13 @@ echo $this->bar_count . "\n";
                $this->doBar();
                return;
            case 'on':
-           default:
+//return;
+default:
+  
+
+
+//         default:
+return;
         }
     }
 
