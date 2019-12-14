@@ -7,41 +7,44 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Burst 
+class Burst extends Agent
 {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
-
+//    function __construct(Thing $thing, $agent_input = null) {
+function init() {
         // $this->start_time = microtime(true);
-        $this->start_time = $thing->elapsed_runtime();
+//        $this->start_time = $thing->elapsed_runtime();
 
-        $this->agent_instruction = $agent_input;
+//        $this->agent_instruction = $agent_input;
 
 
         //if ($agent_input == null) {$agent_input = "";}
 
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
         $this->keyword = "burst";
-        $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
+//        $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
 
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing = $thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
         $this->verbosity = 1;
-        if ($this->verbosity >= 2) {
-            $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . ".");
-        }
+if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['verbosity'];}
+
+
+//        if ($this->verbosity >= 2) {
+//            $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->nuuid . ".");
+//        }
 
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->test= "Development code"; // Always
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
+//        $this->sqlresponse = null;
         if ($this->verbosity >= 2) {
         $this->thing->log($this->agent_prefix . 'received this Thing, "' . $this->subject .  '".') ;
         }
@@ -78,11 +81,12 @@ class Burst
         // has the current flag variables loaded.
 
 
-        $this->readInstruction();
+//        $this->readInstruction();
 
-		$this->readSubject();
+//		$this->readSubject();
 
-        $this->getBurst(); 
+//        $this->getBurst(); 
+/*
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
         }
@@ -93,13 +97,31 @@ class Burst
         }
 
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-
+*/
         $this->thing_report['log'] = $this->thing->log;
 
 
-		return;
+//		return;
 
 		}
+
+
+function read() {
+
+        $this->readInstruction();
+
+                $this->readSubject();
+
+
+}
+
+function run() {
+
+        $this->getBurst(); 
+
+
+}
+
 
 
     function set($requested_flag = null)
@@ -197,7 +219,27 @@ class Burst
 //exit();
 //        foreach ($findagent_thing->thing_report['things'] as $thing) {
 
-        if ($t['things'] != true) {
+//        foreach ($findagent_thing->thing_report['things'] as $thing) {
+
+//echo $thing['task'] . " " . $thing['nom_to'] ." " . $thing['nom_from'] . "<br>";
+
+//}
+//echo "merp";
+//var_dump($findagent_thing->thing_report['things']);
+        $this->max_index = 0;
+        $this->previous_trains = array();
+        $this->similarness = 0;
+        $this->similarity = 0;
+        $this->flag = "green";
+
+        $this->matches = array();
+
+        if ((isset($findagent_thing->thing_report['things'])) and (count($findagent_thing->thing_report['things']) > 1)) {
+
+
+
+
+//        if ($t['things'] != true) {
         foreach ($t['things'] as $thing) {
 
             $previous_created_at = $created_at;
@@ -261,7 +303,14 @@ class Burst
         return;
 
 
+    function read()
+    {
+        //$this->thing->log("read");
+
+        $this->get();
+        return $this->flag;
     }
+
 
 
     function read()
@@ -272,6 +321,9 @@ class Burst
         return $this->flag;
     }
 
+
+
+    }
 
 
     function selectChoice($choice = null)
@@ -313,7 +365,7 @@ class Burst
 
     }
 
-	private function Respond() {
+	public function respond() {
 
         // At this point state is set
         $this->set($this->flag);
@@ -366,7 +418,7 @@ class Burst
 
     function makeTXT()
     {
-        $txt = 'This is BURST ' . $this->flag->nuuid . '. ';
+        $txt = 'This is BURST ' . $this->uuid . '. ';
         $txt .= 'There is a '. strtoupper($this->flag) . " FLAG. ";
         if ($this->verbosity >= 5) {
             $txt .= 'It was last refreshed at ' . $this->current_time . ' (UTC).';
@@ -379,7 +431,7 @@ class Burst
     function makeSMS()
     {
 
-        $sms_message = "TEST TEST TEST BURST ";
+        $sms_message = "BURST ";
 
 
         if ($this->verbosity >= 7) {
@@ -474,6 +526,13 @@ class Burst
 
     public function readSubject() 
     {
+
+if ($this->agent_input == "burst") {return null;}
+
+if ($this->agent_input != null) {
+        $this->requested_thing_name = $this->agent_input;
+}
+
         $this->response = null;
 
         $keywords = array('flag', 'red', 'green');
@@ -541,7 +600,7 @@ class Burst
                 return;
         }
 
-        $this->read();
+        $this->get();
 
 
 
@@ -662,5 +721,6 @@ class Burst
 
                 return true;
         }
+
 
 }

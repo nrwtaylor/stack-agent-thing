@@ -70,6 +70,13 @@ if (is_string($input)) {$this->agent_input = strtolower($input);}
         $this->agents_path = $GLOBALS['stack_path'] . 'agents/';
         $this->agents_path = $GLOBALS['stack_path'] . 'vendor/nrwtaylor/stack-agent-thing/agents/';
 
+        if (isset($this->thing->container['api'][strtolower($this->agent_name)])) {
+
+$this->settings = $this->thing->container['api'][strtolower($this->agent_name)];
+
+        }
+
+
         $this->current_time = $this->thing->time();
 
         $this->verbosity = 9;
@@ -912,24 +919,24 @@ if (is_array($this->agent_input)) {$agent_input_text = "";}
 
         if ($burst_check) {
             $this->thing->log( 'Agent "Agent" created a Burst agent looking for burstiness.', "DEBUG" );
-            $burst = new Burst($this->thing, 'read');
+            $this->burst = new Burst($this->thing, 'read');
 
             $this->thing->log( 'Agent "Agent" created a Similar agent looking for incoming message repeats.', "DEBUG" );
 
-            $similar = new Similar($this->thing, 'read');
+            $this->similar = new Similar($this->thing, 'read');
 
-            $similarness = $similar->similarness;
-            $bursts = $burst->burst;
+            $similarness = $this->similar->similarness;
+            $bursts = $this->burst->burst;
 
-            $burstiness = $burst->burstiness;
-            $similarities = $similar->similarity;
+            $burstiness = $this->burst->burstiness;
+            $similarities = $this->similar->similarity;
 
             $elapsed = $this->thing->elapsed_runtime();
 
             $burst_age_limit = 900; //s
             $similiarness_limit = 90;
 
-            $burst_age = strtotime($this->current_time) - strtotime($burst->burst_time);
+            $burst_age = strtotime($this->current_time) - strtotime($this->burst->burst_time);
             if ($burst_age < 0) {$burst_age = 0;}
 
 

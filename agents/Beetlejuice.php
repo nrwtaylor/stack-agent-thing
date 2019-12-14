@@ -3,6 +3,9 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
+// devstack
+// not operational
+
 class Beetlejuice{
 
     // Looks for a repeat.  Three times.
@@ -186,7 +189,7 @@ function makeRandomString($length = 200) {
     function distance($string1 = null, $string2 = null)
     {
         $sum = 0;
-        if (count($string1) < count($string2)) {$string_temp = $string2; $string2 = $string1; $string1= $string_temp;}
+        if (mb_strlen($string1) < mb_strlen($string2)) {$string_temp = $string2; $string2 = $string1; $string1= $string_temp;}
 
         $arr1 = str_split($string1);
         $arr2 = str_split($string2);

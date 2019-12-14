@@ -9,28 +9,29 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Similar 
+class Similar extends Agent 
 {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
-
-        $this->start_time = microtime(true);
-        $this->agent_instruction = $agent_input;
+  //  function __construct(Thing $thing, $agent_input = null) {
+function init() {
+//        $this->start_time = microtime(true);
+//        $this->agent_instruction = $agent_input;
 
 
         //if ($agent_input == null) {$agent_input = "";}
 
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
         $this->keyword = "similar";
-        $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
+  //      $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
 
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+    //    $this->thing = $thing;
+   //     $this->thing_report['thing'] = $this->thing->thing;
 
         $this->verbosity = 1;
-        
+
+if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['verbosity'];}
 
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . ".");
@@ -40,11 +41,11 @@ class Similar
 
         $this->test= "Development code"; // Always
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
+   //     $this->uuid = $thing->uuid;
+   //     $this->to = $thing->to;
+   //     $this->from = $thing->from;
+   //     $this->subject = $thing->subject;
+  //      $this->sqlresponse = null;
 
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . 'received this Thing, "' . $this->subject .  '".') ;
@@ -79,26 +80,40 @@ class Similar
         // has the current flag variables loaded.
 
 
-        $this->readInstruction();
+//        $this->readInstruction();
 
-		$this->readSubject();
+//		$this->readSubject();
 
-        $this->getSimilar(); 
+//        $this->getSimilar(); 
 
        //$this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
 
-        if ($this->agent_input == null) {$this->Respond();}
+//        if ($this->agent_input == null) {$this->Respond();}
         //$this->thing->log($this->agent_prefix . ' set response. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
 
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
 
-        $this->thing_report['log'] = $this->thing->log;
+//        $this->thing_report['log'] = $this->thing->log;
 
 
-		return;
+//		return;
 
 		}
+
+public function read() {
+
+        $this->readInstruction();
+                $this->readSubject();
+
+}
+
+public function run() {
+
+        $this->getSimilar(); 
+
+}
+
 
 
     function set($requested_flag = null)
@@ -169,6 +184,14 @@ class Similar
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . 'found ' . count($findagent_thing->thing_report['things']) ." " . ucwords($this->requested_thing_name) . " Agent Things." );
         }
+
+//        foreach ($findagent_thing->thing_report['things'] as $thing) {
+
+//echo $thing['task'] . " " . $thing['nom_to'] ." " . $thing['nom_from'] . "<br>";
+
+//}
+//echo "merp";
+//var_dump($findagent_thing->thing_report['things']);
         $this->max_index = 0;
         $this->previous_trains = array();
         $this->similarness = 0;
@@ -177,8 +200,11 @@ class Similar
 
         $this->matches = array();
 
-        if ($findagent_thing->thing_report['things'] != true) {
+        if ((isset($findagent_thing->thing_report['things'])) and (count($findagent_thing->thing_report['things']) > 1)) {
 
+
+      //  if ($findagent_thing->thing_report['things'] != true) {
+//echo "Calculating<br>";
         foreach ($findagent_thing->thing_report['things'] as $thing) {
         foreach ($findagent_thing->thing_report['things'] as $thing2) {
 
@@ -201,6 +227,9 @@ class Similar
                 $this->thing->log($this->agent_prefix . ' ' . $subject . ' ' . $l . '.');
             }
         }
+
+//echo $thing['task'] . " " . $this->similiarity .  " " . $this->similarness . "<br>";
+
         }
         }
 
@@ -212,6 +241,9 @@ class Similar
             $this->thing->log($this->agent_prefix . 'calculated similarness =  ' . $this->similarness . '.');
             $this->thing->log($this->agent_prefix . 'calculated similarity =  ' . $this->similarity . '.');
         }
+
+
+
 
     }
 
@@ -246,7 +278,7 @@ class Similar
 
     }
 
-
+/*
     function read()
     {
         //$this->thing->log("read");
@@ -254,7 +286,7 @@ class Similar
         $this->get();
         return $this->flag;
     }
-
+*/
 
 
     function selectChoice($choice = null)
@@ -298,7 +330,11 @@ class Similar
 
     }
 
-	private function Respond() {
+
+	public function respond() {
+
+        if ($this->agent_input != null) {return true;}
+
 
         // At this point state is set
         $this->set($this->flag);
@@ -473,6 +509,14 @@ class Similar
     {
         $this->response = null;
 
+if ($this->agent_input == "similar") {return null;}
+
+if ($this->agent_input != null) {
+        $this->requested_thing_name = $this->agent_input; 
+}
+
+
+
         $keywords = array('flag', 'red', 'green');
 
         $input = strtolower($this->subject);
@@ -538,7 +582,7 @@ class Similar
                 return;
         }
 
-        $this->read();
+        $this->get();
 
 
 
