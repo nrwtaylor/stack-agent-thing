@@ -188,6 +188,7 @@ catch (\Exception $e)
     public function make() {
         $this->makeResponse();
         $this->makeMessage();
+$this->makeChart();
         $this->makeImage();
         $this->makePNG();
 $this->makePNGs();
@@ -474,6 +475,10 @@ if ($this->agent_name == "agent") {return;}
 
     public function makePDF() {
     }
+
+public function makeChart() {
+}
+
 
     public function makeImage() {
     }

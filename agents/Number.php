@@ -82,6 +82,8 @@ class Number extends Agent
 
         // Way to output test information to web page as a thing call
         // $this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
+
+$this->horizon = 99;
     }
 
 
@@ -126,6 +128,72 @@ class Number extends Agent
 
 
     }
+
+
+
+public function makeChart() {
+
+//$chart_agent = new Chart($this->thing, "chart number ". $this->from);
+//exit();
+}
+
+    /**
+     *
+     * @return unknown
+     */
+    function getNumbers() {
+   //     if (!isset($this->kaiju_address)) {$this->getAddress($this->thing->from);}
+   //     if (!isset($this->kaiju_address)) {return;}
+
+        //var_dump($this->kaiju_address);
+        //exit();
+
+   //     $this->kaiju_thing = new Thing(null);
+   //     $this->kaiju_thing->Create($this->kaiju_address, "null", "s/ kaiju thing");
+
+        $block_things = array();
+        // See if a stack record exists.
+        $findagent_thing = new Findagent($this->thing, 'number '. $this->horizon);
+        $this->max_index =0;
+
+        $match = 0;
+
+        $link_uuids = array();
+        $kaiju_messages = array();
+$this->points = array();
+        foreach ($findagent_thing->thing_report['things'] as $thing_object) {
+
+//var_dump($this->parseNumber($block_thing['task']));
+//var_dump($block_thing['variables']);
+
+                $variables_json= $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                if (isset($variables['number'])) {
+
+                    $number = "X";
+                    $refreshed_at = "X";
+
+                    if(isset($variables['number']['number'])) {$number = $variables['number']['number'];}
+                    if(isset($variables['number']['refreshed_at'])) {$refreshed_at = $variables['number']['refreshed_at'];}
+
+                }
+//var_dump($number);
+//var_dump($refreshed_at);
+
+                $this->points[] = array("refreshed_at"=>strtotime($refreshed_at),
+                    "number"=>$number);
+        }
+    }
+
+public function parseNumber($text = null) {
+
+if ($text == null) {return true;}
+
+return $this->extractNumber($text);
+
+
+}
 
 
     /**
@@ -233,19 +301,19 @@ $pieces = explode(" ", $i);
 
         $this->thing->flagGreen();
 
-        $from = $this->from;
-        $to = $this->to;
+//        $from = $this->from;
+//        $to = $this->to;
 
-        $subject = $this->subject;
+//        $subject = $this->subject;
 
         // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+//        $uuid = $this->uuid;
+//        $sqlresponse = "yes";
 
         //$message = "Thank you here is a Number.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
         //$message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
 
-        $this->makeSMS();
+//        $this->makeSMS();
 
         //$this->thing_report['email'] = array('to'=>$from,
         //   'from'=>'uuid',
@@ -255,20 +323,20 @@ $pieces = explode(" ", $i);
 
         //$this->makePNG();
 
-        $this->makeChoices();
+//        $this->makeChoices();
 
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->thing_report['help'] = "This extracts numbers from the datagram.";
 
-        return;
+  //      return;
     }
 
 
@@ -332,6 +400,13 @@ $pieces = explode(" ", $i);
 
             }
         }
+
+if ($this->input == "number chart") {
+
+$this->getNumbers();
+return;
+
+}
 
         $status = true;
 

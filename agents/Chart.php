@@ -257,6 +257,85 @@ $this->makePNG();
         $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
     }
 
+    /**
+     *
+     * @param unknown $series_name (optional)
+     * @param unknown $colour      (optional)
+     * @param unknown $line_width  (optional)
+     * @return unknown
+     */
+    public function drawSeries($series_name = null, $colour = 'red', $line_width = 1.5) {
+        if ($series_name == null) {return true;}
+
+
+        $y_max = $this->y_max;
+        $x_max = $this->x_max;
+
+        $y_min = $this->y_min;
+        $x_min = $this->x_min;
+
+
+        //$series_name = 'temperature_1';
+        $x_max = strtotime($this->current_time);
+
+        $i = 0;
+        foreach ($this->points as $point) {
+            //$y = array();
+
+            $series = $point[$series_name];
+
+            //            $temperature_2 = $point['temperature_2'];
+            ///            $temperature_3 = $point['temperature_3'];
+
+
+            //            $series_1 = $point['series_1'];
+            //            $series_2 = $point['series_2'];
+
+            //            $dv_dt = $point['dv_dt'];
+
+            //            $elapsed_time = $series_1 + $series_2;
+            $refreshed_at = $point['refreshed_at'];
+
+            $y_spread = $y_max - $y_min;
+            if ($y_spread == 0) {$y_spread = 100;$this->y_spread = $y_spread;}
+
+            $y = 10 + $this->chart_height - ($series - $y_min) / ($y_spread) * $this->chart_height;
+            $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
+
+            if (!isset($x_old)) {$x_old = $x;}
+            if (!isset($y_old)) {$y_old = $y;}
+
+            // +1 to overlap bars
+            $width = $x - $x_old;
+
+            $offset = $line_width;
+
+            imagefilledrectangle($this->image,
+                $x_old - $offset , $y_old - $offset,
+                $x_old + $width / 2 + $offset, $y_old + $offset,
+                $this->{$colour});
+
+            imagefilledrectangle($this->image,
+                $x_old + $width / 2 - $offset, $y_old - $offset,
+                $x - $width / 2 + $offset, $y + $offset ,
+                $this->{$colour});
+
+            imagefilledrectangle($this->image,
+                $x - $width / 2 - $offset , $y - $offset,
+                $x + $offset, $y + $offset ,
+                $this->{$colour});
+
+
+            $y_old = $y;
+            $x_old = $x;
+
+            $i += 1;
+        }
+
+
+    }
+
+
     public function drawGrid($y_min, $y_max, $inc)
     {
 
@@ -484,6 +563,7 @@ public function blankImage() {
             $this->defaultCommand();
         }
 
+
         $pieces = explode(" ", strtolower($this->nom_input));
 
         $this->agent = $pieces[0];
@@ -502,4 +582,12 @@ public function blankImage() {
         $this->readInstruction();
         $this->readText();
     }
+
+
+public function readSubject() {
+
+
+
+}
+
 }
