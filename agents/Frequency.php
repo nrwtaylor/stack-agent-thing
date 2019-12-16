@@ -48,7 +48,6 @@ class Frequency extends Agent
 
         $data_source = $this->resource_path . "ised/frequencies.url";
 
-
         $this->thing_report['help'] = "Recognizes frequencies.";
     }
 

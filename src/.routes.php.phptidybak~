@@ -2,6 +2,8 @@
 namespace Nrwtaylor\StackAgentThing;
 // (c) 2018 Stackr Interactive Ltd
 
+// whitefox 27 June 2019
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -12,7 +14,11 @@ error_reporting(-1);
 
 // API group
 $app->group('/api', function () use ($app) {
-    // This is the red panda API.  Accessible at api/redpanda/
+
+    // This is the whitefox API.  Accessible at api/whitefox/
+        $app->group('/whitefox', function () use ($app) {
+        });
+
 	// Introducing redpanda
 	$app->group('/redpanda', function () use ($app) {
 
@@ -35,11 +41,22 @@ $app->group('/api', function () use ($app) {
             return $this->renderer->render($response, 'thing.phtml', $google_agent->thing_report);
         });
 
-        $app->post('/webhook_hangoutschat_a11nzr4tug', function ($request, $response, $args)  {
+        $app->post($app->getContainer()->get('settings')['api']['google']['google hangouts']['webhook'], function ($request, $response, $args)  {
 
             $body = $request->getParsedBody();
+            $getParam = $request->getQueryParams();
+//$threadKey = $getParam('threadKey');
+$params_json = $getParam;
+$args_json = $args;
 
-
+//$uri = $request->getUri();
+//$method = $uri->getQuery();
+//$threadKey = $app->request()->params('threadKey');
+//$threadKey = $request->params('');
+//$data = json_decode($request->getBody()) ?: $request->params();
+//$data = json_decode( $app->request->getBody() ) ?: $app->request->params();
+$data = array("params"=>$params_json,"args"=>$arg_json, "body"=>$body);
+//$data = $body;
             ignore_user_abort(true);
             set_time_limit(0);
 
@@ -71,15 +88,17 @@ $app->group('/api', function () use ($app) {
             $input = json_encode($body);
             $thing = new Thing(null);
 
-$nom_to = "null";
-$sender_id = "null";
-$test_text = "s/ google hangouts";
-                    $thing->Create($sender_id, $nom_to, $test_text );
-                   $channel = new Channel($thing,"hangoutschat");
+            $nom_to = "null";
+            $sender_id = "null";
+            $test_text = "s/ google hangouts";
 
-                   $agent = new Googlehangouts($thing, $body);
+            $thing->Create($sender_id, $nom_to, $test_text );
 
-                $agent = new Agent($thing);
+            $channel = new Channel($thing,"hangoutschat");
+            $agent = new Googlehangouts($thing, $data);
+
+//                $agent = new Googlehangouts($thing, array($body, $threadKey));
+//                $agent = new Agent($thing);
 
 
                     $thing->flagRed();
@@ -122,10 +141,7 @@ $test_text = "s/ google hangouts";
 
                 $client= new \GearmanClient();
                 $client->addServer();
-//$client->addServers("10.0.0.24,10.0.0.25");
 
-//$client->addServer("10.0.0.24");
-//$client->addServer('10.0.0.25');
                 //$client->doNormal("call_agent", $arr);
                 $client->doHighBackground("call_agent", $arr);
                 //echo "Gearman worker called";
@@ -135,8 +151,8 @@ $test_text = "s/ google hangouts";
 //                ->withStatus(200);
         });
 
-        // Operational end-point for NEXMO
-        $app->post('/webhook_microsoft_qvhs6s4y', function ($request, $response, $args)  {
+        // Operational end-point for Microsoft
+        $app->post($app->getContainer()->get('settings')['api']['microsoft']['webhook'], function ($request, $response, $args)  {
 //        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
             $body = $request->getParsedBody();
 
@@ -193,8 +209,7 @@ $test_text = "s/ google hangouts";
 
                 $client= new \GearmanClient();
                 $client->addServer();
-//$client->addServer("10.0.0.24");
-//$client->addServer("10.0.0.25");
+
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
 
@@ -204,10 +219,6 @@ $test_text = "s/ google hangouts";
                 $microsoft_thing->Create( $body['conversation']['id'], $body['from']['id'], $body['text'] );
 
                 $m = new Microsoft($microsoft_thing, $body);
-
-//        $microsoft_thing->json->setField("message0");
-//        $microsoft_thing->json->writeVariable( array("edna") , $body  );
-
 
                 $agent = new Agent($microsoft_thing);
             }
@@ -257,34 +268,53 @@ $test_text = "s/ google hangouts";
 
 
             //$input = json_encode($body);
-            $thing = new Thing(null);
+///            $thing = new Thing(null);
 // ---
-$nom_to = "null";
-$sender_id = "null";
-$test_text = "s/ nexmo sms";
-                    $thing->Create($sender_id, $nom_to, $test_text );
+/// $nom_to = "null";
+///$sender_id = "null";
+///$test_text = "s/ nexmo sms";
+///                    $thing->Create($sender_id, $nom_to, $test_text );
 
-                $channel = new Channel($thing,"sms");
+///                $channel = new Channel($thing,"sms");
 
-                    $agent = new Sms($thing, $body);
+///                    $agent = new Sms($thing, $body);
 
 //                $agent = new Agent($thing);
 
 
-                    $thing->flagRed();
-                    $response_text = "foo";
-                    return $this->response->write($response_text)
-                                ->withStatus(200);
+///                    $thing->flagRed();
+///                    $response_text = "foo";
+///                    return $this->response->write($response_text)
+///                                ->withStatus(200);
 
 // ---
 
 
+$message_id =  $body['messageId'];
+
+//$id_array = $this->get('messageids');
+//$id_array[] = $message_id;
+//if (!isset($app->nexmo_ids)) {$app->nexmo_ids = "";}
+
+//    if($this->has('ids')) {
+//$inject_text = "merp";
+//    }
+//$c = $app->getContainer();
+//$inject_text = $app->getContainer()['message_ids'];
+////$inject_text = $c['message_ids'];
+
+//$app->nexmo_ids .= $message_id;
+//$inject_text = " " . $app->nexmo_ids;
+//$inject_text = $app->get('ids');
+//$inject_text = implode(" " ,$id_array->id_list);
+$inject_text = "";
+//$inject_text = " " .implode(" " , $id_array);
             $queue = true;
 
             // Flag Red so that the agent handler picks it up.
             if ($queue) {
 
-                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
+                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text'] . $inject_text, "body"=>$body));
 
                 $client= new \GearmanClient();
                 $client->addServer();
@@ -396,7 +426,6 @@ $test_text = "s/ nexmo sms";
 					$test_text = $body['event']['text'];
 
 					$test_text = ltrim( str_replace("<@U6N5VCYDT>","",$test_text) );
-//$nom_to = "mordok";
 					$slack_thing->Create($sender_id, $nom_to, $test_text );
 
                 $channel = new Channel($slack_thing,"slack");
@@ -486,7 +515,7 @@ $test_text = "s/ nexmo sms";
             $slack_thing->Create($sender_id, $page_id, $test_text );
         });
 
-        $app->post('/webhook_fb_ygu2c0u2', function ($request, $response, $args)  {
+        $app->post($app->getContainer()->get('settings')['api']['facebook']['webhook'], function ($request, $response, $args)  {
 
             $body = $request->getParsedBody();
 
@@ -589,6 +618,8 @@ $test_text = "s/ nexmo sms";
 				$uuid = $args['uuid'];
 				$thing = new Thing($uuid);
                 //$j = json_decode ($thing->thing);
+
+if ($thing->thing != false) {
                 $t = $thing->thing;
 
 
@@ -611,7 +642,9 @@ $test_text = "s/ nexmo sms";
 
                 $t->settings = false;
                 $t->variables = $thing->json->array_data;
-
+} else {
+$t = false;
+}
                 // Just display the thing.
 
 $web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/";
@@ -674,6 +707,7 @@ $web_prefix = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_
 
 // Route handler for everything after the /
 $app->get('[/{params:.*}]', function ($request, $response, $args)  {
+
 //    ini_set("max_input_time", 2); //s
 //set_time_limit(2);
 
@@ -762,8 +796,15 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
             // File request of some sort
 
-            $t = explode(".", $last);
+// Unless it is a number and a number
 
+            $t = explode(".", $last);
+$is_number = false;
+// Unless it is a number and a number
+if ( (is_numeric($t[0])) and (is_numeric($t[1])) ) {
+$is_number = true;
+}
+if (!$is_number) {
             $agent_name = $t[0];
             $ext_name = $t[1];
             $agent_class_name = 'Make' . strtolower($ext_name);
@@ -836,26 +877,48 @@ $app->get('[/{params:.*}]', function ($request, $response, $args)  {
 
             $response->write($content);
             return $response->withHeader('Content-Type', $content_types[$ext_name]);
-
+}
         case true:
             // Everything else
-
             $thing = new Thing($uuid);
+
 
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
 
 
+
             if ( $thing->thing == false ) {
+                // Run the slug through the agent.
+                // With the identity 'web'.
+                $thing->Create("web@stackr.ca", "agent", $command);
+
+$slug = new Slug($thing,$command);
+
+if ((isset($slug->state)) and ($slug->state=="off")){
 
                 $datagram = [];
                 $datagram['thing'] = false;
                 $datagram['thing_report'] = false;
 
                 return $this->renderer->render($response, 'thing.phtml', $datagram);
-            }
 
+
+}
+$filtered_command = str_replace("-", " " ,$slug->slug);
+            $agent = new Agent($thing, $filtered_command);
+
+//var_dump($agent->thing_report['sms']);
+
+                $datagram = [];
+                $datagram['thing'] = false;
+//                $datagram['thing_report'] = false;
+                $datagram['thing_report'] = $agent->thing_report;
+
+
+                return $this->renderer->render($response, 'thing.phtml', $datagram);
+            }
             // Unaddressed web request to a Thing existing on the stack.
             // Enter into stack as coming from web and addressed to stack agent.
             if ($uuid == null) {

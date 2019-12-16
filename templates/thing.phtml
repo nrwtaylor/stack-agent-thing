@@ -1,6 +1,3 @@
-<?php
-// v0.0.2 redpanda --- test engine
-?>
 <meta name="viewport" content="width=device-width" />
 <!DOCTYPE html>
 
@@ -11,8 +8,33 @@
         <title>Stackr</title>
         <link rel="stylesheet" href="/style.css?128" type='text/css'>
 
+<script>
+function callAgent(str) {
+    if (str.length == 0) {
+        document.getElementById("txtHint").innerHTML = "";
+        return;
+    } else {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("txtHint").innerHTML = this.responseText;
+            }
+        };
+        xmlhttp.open("GET", "" + str, true);
+        xmlhttp.send();
+    }
+}
+</script>
+
+
     </head>
     <body>
+
+<p><b>Start typing a name in the input field below:</b></p>
+<form>
+First name: <input type="text" onkeyup="callAgent(this.value)">
+</form>
+<p>Suggestions: <span id="txtHint"></span></p>
 
 <!--<div id="container">-->
 
@@ -36,14 +58,19 @@
 
 
 
+
 <?php
 
 $GLOBALS['thingy'] = $thing_report;
 
 function displayThingreport($channel, $value) {
     global $web_prefix;
-    $uuid = $GLOBALS['thingy']['thing']->uuid;
 
+$uuid = "X";
+if (isset($GLOBALS['thingy']['thing'])) {
+
+    $uuid = $GLOBALS['thingy']['thing']->uuid;
+}
 
     echo $channel;
 	echo "<br>";
@@ -245,8 +272,9 @@ switch ($requested_channel) {
     case "email":
         
         if (isset($thing_report['email']) and (is_string($thing_report['email']))) {
+            echo '<div class="card email">';
             echo quoted_printable_decode($thing_report['email']);
-
+            echo '</div>';
             break;
         }
 
@@ -254,7 +282,11 @@ switch ($requested_channel) {
         if (isset($thing_report['message'])) {
             //$button_align = "left";
             //$bubble = '<div class="triangle-border">' . $thing_report['sms'] . '</div>';
+echo '<div class="card message">';
+
             echo quoted_printable_decode($thing_report['message']);
+echo '</div>';
+
             break;
         }
 
@@ -274,7 +306,10 @@ $string = preg_replace($url, '<a href="$0" title="$0">$0</a>', $string);
             $bubble = '<div class="triangle-border">' . $thing_report['sms'] . '</div>';
             $bubble = '<div class="triangle-border">' . $string . '</div>';
 
+            echo '<div class="card smsmessage">';
             echo quoted_printable_decode($bubble);
+            echo '</div>';
+
             break;
         }
         // Drop through to default
@@ -299,15 +334,6 @@ $string = preg_replace($url, '<a href="$0" title="$0">$0</a>', $string);
         }
 }
 
-$response="on";
-
-if  ($response == "on") {
-
-    if (isset($thing_report['response'])) {
-        echo $thing_report['response'];
-    }
-
-}
 
 $buttons="on";
 
@@ -416,6 +442,8 @@ if (isset($GLOBALS['thingy']['thing']->uuid)) {
 
     }
 
+            echo '<div class="card buttons">';
+
     if (!isset($button_align)) {$button_align = "center";}
 //$button_align = "center";
     if ($button_align != "left") {
@@ -431,6 +459,9 @@ if (isset($GLOBALS['thingy']['thing']->uuid)) {
         echo quoted_printable_decode($content);
         echo quoted_printable_decode($foot);
     }
+
+            echo '</div>';
+
 
 }
 
@@ -455,8 +486,20 @@ if (isset($state)) : ?>
 <tr class="blob">
 <td class="blob">
 
-<?php echo "usermanager: " . quoted_printable_decode($state['thing']); ?><br>
-<?php echo "stack: " . quoted_printable_decode($state['stack']); ?><br>
+<?php 
+echo '<div class="card state">';
+echo "usermanager: " . quoted_printable_decode($state['thing']); 
+echo '</div>';
+
+?>
+<br>
+<?php
+echo '</div class="card stack">';
+ echo "stack: " . quoted_printable_decode($state['stack']); 
+echo '</div>';
+
+?>
+<br>
 
 </td>
 </tr>
@@ -469,9 +512,11 @@ if (isset($state)) : ?>
 
 			
 <div>
+<div class="text stack">
+
 
 <?php $web_prefix = $settings['settings']['stack']['web_prefix']; ?>
-<img src="<?php echo $web_prefix; ?>pixel_sml.png">
+<center><img src="<?php echo $web_prefix; ?>pixel_sml.png"></center>
 
 <?php /* img src="<?php $web_prefix = "http://$_SERVER[HTTP_HOST]/"; echo $web_prefix; ?>pixel_sml.png"*/ ?>
 </div>
@@ -494,12 +539,14 @@ if (isset($state)) : ?>
 
 
 
-// Confirm if there is a validated identity behind the agent request
+// Confirm if there is a validated identit behind the agent request
 if (isset($thing_report['thing']->nom_from)) {
     $nom_from = $thing_report['thing']->nom_from;
 } else {
     $nom_from = null;
 }
+
+//echo '<div class="text identity">';
 
 switch ($nom_from) {
     case null:
@@ -516,10 +563,11 @@ switch ($nom_from) {
 
 
 ?>
+
 <br>
 
         <a href="<?php echo  $web_prefix ?>"><?php echo  $web_prefix ?></a>
-
+</div>
 
 </footer>
 

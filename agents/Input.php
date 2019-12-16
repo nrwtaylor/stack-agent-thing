@@ -155,6 +155,21 @@ $this->respond();
     $this->variables_agent->setVariable("refreshed_at", $this->current_time);
 }
 
+
+public function makeWeb() {
+
+$web = '<p><b>Agent Input</b></p>
+<form>
+Input: <input type="text" onkeyup="callAgent(this.value)">
+</form>
+<p>&gt <span id="agent-smsmessage"></span></p>';
+
+        $this->web = $web;
+$this->thing_report['web'] = $web;
+
+
+}
+
 /**
  *
  */

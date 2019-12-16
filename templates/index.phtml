@@ -1,54 +1,59 @@
-<?php namespace Nrwtaylor\StackAgentThing; ?>
-<?php $settings = $GLOBALS['settings'];?>
-<?php //$thing= new Thing(null);?>
 
 <meta name="viewport" content="width=device-width" />
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8"/>
-        <title><?php echo $settings['settings']['stack']['short_name']; ?></title>
+        <title>Stackr</title>
         <link rel="stylesheet" href="/style.css?70" type='text/css'>
     </head>
     <body>
 
 
 <header>
+<h1 class="front">Stackr</h1>
 
-<h1 class="front"><?php echo $settings['settings']['stack']['short_name']; ?></h1>
+        <div class="card why">technology to get things done</div>
 
-        <div><?php echo $settings['settings']['thing']['is']; ?></div>
-
-
+<div class="card how">
         <?php if (isset($messages)) : ?>
             <h2></h2>
         <?php else: ?>
 
         <?php endif; ?>
+</div>
 
-
-
+<div class="card response">
         <?php if (isset($name)) : ?>
         <h2><?= htmlspecialchars($name); ?>!</h2>  
        <!--     <h2>Hello.</h2> -->
 
         <?php else: ?>
-
+</div>
 </header>
 <main class="grid">
 <article>
+<div class="card smsmessage">
 <br>
 <br>
 
+            <!--<p><a href="mailto:just_send_this_email_to@stackr.ca">just_send_this_email_to@stackr.ca</a>-->
         <?php endif; ?>
 
 <?php
-//            $messages[0] = "Down for maintenance.";
+//           $messages[0] = "Down for maintenance.";
+//            $messages[0] = "Service announcement. US and Canada SMS is delayed. Reported at 13 March 2018 12:54.";
+//            $messages[0] = "Service announcement. Translink realtime information is currently not available. Reported at 2 May 2019 16:53. All other services operating normally.";
+//            $messages[0] = "Service announcement. SMS responder service is currently not available. Reported at 11 December 2019 22:41. All other services operating normally.";
+//            $messages[0] = "Service announcement. SMS responder service is currently not available. Reported at 14 December 2019 22:44. All other services operating normally.";
 
-            $messages[0] = "Text START to " .  $settings['settings']['stack']['location'] . " SMS Portal <br>at ".$settings['settings']['stack']['sms_address']." operated by " . $settings['settings']['stack']['entity_name'].".";
-            $messages[1] = "Use " . $settings['settings']['stack']['short_name'] . " by email.  Request access to " . $settings['settings']['stack']['email']. ".";
+            $messages[0] = "Text START to Vancouver, BC SMS Portal <br>at (778) 401-2132";
+
+//            $messages[1] = "Use Stackr by email.  Request access to limitedbeta@stackr.ca.";
+
 
 //            $messages[2] = "Hello.";
+
 
             $message = $messages[rand(0,count($messages) - 1)];
 
@@ -56,59 +61,37 @@
             echo quoted_printable_decode($bubble);
 ?>
 
+</div>
 
-
-
+<div class="card-buttons">
 <?php
         // Display default button here
 
-        $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+        $head= '
+        <table class="makeweb">
+        <tr>
+        <td class="makeweb">
+        <div class="buttonset">';
 
         $word = "Privacy";
-        $url_link = $actual_link . "/privacy";
+        $url_link = "https://stackr.ca/privacy";
 
         $privacy_button = '<span class="button">
             <a style="text-decoration: none; color: white;" href="'.
                 $url_link . '"> '.  ''. $word . ''.' </a></span>
             ';
-        //$privacy_button = '<a href = "' . $url_link . '">'. $word.'</a>' ;
-/*
-            $privacy_button = '<td style="background-color: #0066dd; font-family: \"Helvetica Neue\",Arial,sans-serif;
-            font-size: 14px; 
-            line-height: 18px; padding-left: 7px; padding-right: 7px;
-            padding-top: 4px;
-            padding-bottom: 4px; 
-            margin-left: 18px;
-            margin-right: 18px;
-            font-weight: bold;
-            box-shadow: 0px 0px 2px 0 rgb(0.18, 0.18, 0.18);
-            border-radius: 0px; 
-            background: #719e40;">
 
-            <a style="text-decoration: none; color: white;" href="' . $url_link . '"> '. $word . '  </a>
-            </td>';
-*/
-
-            $privacy_button = '<td style="background-color: #0066dd; font-family: \'Helvetica Neue\',Arial,sans-serif;
-            font-size: 14px; 
-            line-height: 18px; padding-left: 7px; padding-right: 7px;
-            padding-top: 4px;
-            padding-bottom: 4px; 
-            margin-left: 18px;
-            margin-right: 18px;
-            font-weight: bold;
-            box-shadow: 0px 0px 2px 0 rgb(0.18, 0.18, 0.18);
-            border-radius: 0px; 
-            background: #719e40;">
-            <a style="text-decoration: none; color: white;" href="' . $url_link . '"> '. $word . '  </a>
-            </td>';
+//        $privacy_button = "";
 
 
-    $forget_button = "";
+        $foot = "
+        </div>
+        </td>
+        </tr>
+        </tbody>
+        </table>";
 
-    $html_button_set = 
-
-'<div class="buttonset"><table border="0" width="100%" cellpadding="0" cellspacing="0">
+$content =  '<table border="0" cellpadding="0" cellspacing="0" width="100%">
     <tbody>
         <tr>
             <td colspan="3" valign="top" width="15" height="10">
@@ -118,8 +101,10 @@
             <td>
                 <table style="border-spacing: 14px 0px">
                     <tr>
-                        ' . $privacy_button . '
-                    </tr>
+<td class="button">
+            <a class="button" style="text-decoration: none; color: white;" href="https://stackr.ca/privacy"> Privacy </a>
+</td>
+</tr>
                 </table>
             </td>
         </tr>
@@ -131,45 +116,87 @@
     </tbody>
 </table>';
 
-        echo quoted_printable_decode($html_button_set);
+
+//$content =  '
+//            <a style="text-decoration: none; color: white;" href="https://stackr.ca/privacy"><span class="button"> Privacy </span></a>
+//';
+$content = $privacy_button;
+
+
+//$content = "meep";
+
+$head = '        <div>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+        <tr>
+        <td colspan="3" valign="top" width="15" height="10">
+        </td>
+        </tr>
+        <tr class="buttonset">
+        <td>
+        <table class="buttonset">
+        <tr>';
+
+$foot = '       </tr>
+        </table>
+        </td>
+        </tr>
+        <tr>
+        <td colspan="3" valign="top" width="15" height="10">
+        </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>';
+
+        echo quoted_printable_decode($head);
+        //echo '<div>';
+        echo quoted_printable_decode($content);
+
+
+        //echo "</div>";
+        echo quoted_printable_decode($foot);
+
 
 
 ?>
-
+</div>
 </div>
 </article>
-<div>
+<div class="card whatis">
 
-A limited-AI message processor.
+A short message responder.
 
+<br>短信机
 
 <footer>
 
 
 <br>
 <br>
-Unsubscribe: <a href="mailto:unsubscribe<?php echo  $settings['settings']['stack']['mail_postfix'] ?>">unsubscribe<?php  echo $settings['settings']['stack']['mail_postfix'] ?></a>
+Unsubscribe: <a href="mailto:unsubscribe@stackr.ca">unsubscribe@stackr.ca</a>
 <br>
 Text STOP
 <br>
 <br>
-Hosted in <?php echo $settings['settings']['stack']['server_location'] ?>
+</div>
+<div class="card host">
+Hosted in Canada
 <br>
-<?php echo $settings['settings']['stack']['mail_regulatory'] ?>
+Stackr Interactive Ltd
+<br>201-3701 Hastings Street, Burnaby, BC V5C 2H6
 <br>
 <br>
-<div>
-<?php $web_prefix = $settings['settings']['stack']['web_prefix']; ?>
-<img src="<?php echo $web_prefix; ?>pixel_sml.png">
-
-<?php /*<img src="<?php $this->web_prefix = "http://$_SERVER[HTTP_HOST]/"; echo $web_prefix; ?>pixel_sml.png"> */ ?>
-
+<div class="logo">
+<center>
+<img src="https://stackr.ca/pixel_sml.png">
+</center>
 </div>
 
 
-
+<div class="card devstack">
 <?php
-    echo $settings['settings']['stack']['hashmessage']; 
+    echo "#devstack";
     // Show the elapsed time
     if (isset($thing_report['start_time'])) {
         echo " ";
@@ -187,7 +214,7 @@ Hosted in <?php echo $settings['settings']['stack']['server_location'] ?>
     } 
     
 ?>
-
+</div>
 
 </footer>
 </main>

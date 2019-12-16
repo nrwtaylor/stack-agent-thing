@@ -45,19 +45,38 @@ class Bar extends Agent
 
         $diff = $this->bar_count_stack - $this->last_bar_count_stack;
 
-var_dump($this->bar_count);
-var_dump($diff);
 
 if ($diff != 0) {$this->response .= "Advanced bar to current count. ";}
 
 //        $this->bar_count = ($this->bar_count + $diff) % $this->max_bar_count;
 
-        $b = $this->bar_count + $diff;
-$this->bar_count = $b % $this->max_bar_count;
+//        $b = $this->bar_count + $diff;
+//$this->bar_count = $b % $this->max_bar_count;
 //) % $this->max_bar_count;
+$this->incrementBar($diff);
+
+    }
+
+    public function incrementBar($diff = null)
+    {
+
+if ($this->bar_count == "X") {return null;}
+
+if ($this->bar_count + $diff > $this->max_bar_count) {
+
+$this->bar_count = "X";
+
+} else {
+
+$this->bar_count += $diff;
+
+}
+
 
 
     }
+
+
 
     public function get()
     {
