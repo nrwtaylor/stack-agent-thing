@@ -832,7 +832,8 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     "png"=>'image/png',
                     "txt"=>'text/plain',
                     "php"=>'text/plain',
-                    "log"=>'text/plain');
+                    "log"=>'text/plain',
+                    "json"=>'application/json');
 
 
                 // See if the extension name is one of these.

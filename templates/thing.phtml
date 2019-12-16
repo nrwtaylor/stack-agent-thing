@@ -11,16 +11,38 @@
 <script>
 function callAgent(str) {
     if (str.length == 0) {
-        document.getElementById("txtHint").innerHTML = "";
+        document.getElementById("agent-smsmessage").innerHTML = "";
         return;
     } else {
         var xmlhttp = new XMLHttpRequest();
+
+
+//xmlhttp.onload  = function() {
+
         xmlhttp.onreadystatechange = function() {
+
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("txtHint").innerHTML = this.responseText;
+var thing_report = JSON.parse(this.responseText);
+  //  console.log('response', thing_report); // JSON response 
+                document.getElementById("agent-smsmessage").innerHTML = thing_report.thing_report.message;
+	
+//                document.getElementById("agent-smsmessage").innerHTML = this.responseText;
+
             }
         };
-        xmlhttp.open("GET", "" + str, true);
+
+
+
+//        xmlhttp.open("GET", "" + str, true);
+        xmlhttp.open("GET", "" + str + ".json", true);
+
+
+//xmlhttp.onload  = function() {
+//   var jsonResponse = JSON.parse(xmlhttp.responseText);
+//   document.getElementById("agent-smsmessage").innerHTML = jsonResponse->thing_report->message;
+   // do something with jsonResponse
+//};
+
         xmlhttp.send();
     }
 }
@@ -29,12 +51,6 @@ function callAgent(str) {
 
     </head>
     <body>
-
-<p><b>Start typing a name in the input field below:</b></p>
-<form>
-First name: <input type="text" onkeyup="callAgent(this.value)">
-</form>
-<p>Suggestions: <span id="txtHint"></span></p>
 
 <!--<div id="container">-->
 
