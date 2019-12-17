@@ -1,4 +1,11 @@
 <?php
+/**
+ * Agent.php
+ *
+ * @package default
+ */
+
+
 /*
  * Agent.php
  *
@@ -29,12 +36,12 @@ class Agent {
         $this->start_time = $thing->elapsed_runtime();
         //microtime(true);
 
-$this->agent_input = $input;
-if (is_array($input)) {$this->agent_input = $input;}
-if (is_string($input)) {$this->agent_input = strtolower($input);}
+        $this->agent_input = $input;
+        if (is_array($input)) {$this->agent_input = $input;}
+        if (is_string($input)) {$this->agent_input = strtolower($input);}
 
-//        $this->agent_input = strtolower($input);
-//        $this->agent_name = 'agent';
+        //        $this->agent_input = strtolower($input);
+        //        $this->agent_name = 'agent';
 
         $this->getName();
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
@@ -72,7 +79,7 @@ if (is_string($input)) {$this->agent_input = strtolower($input);}
 
         if (isset($this->thing->container['api'][strtolower($this->agent_name)])) {
 
-$this->settings = $this->thing->container['api'][strtolower($this->agent_name)];
+            $this->settings = $this->thing->container['api'][strtolower($this->agent_name)];
 
         }
 
@@ -85,12 +92,12 @@ $this->settings = $this->thing->container['api'][strtolower($this->agent_name)];
         $this->response = "";
 
 
-if (isset($thing->container['api']['agent'])) {
+        if (isset($thing->container['api']['agent'])) {
 
-if ($thing->container['api']['agent'] == "off") {return;}
+            if ($thing->container['api']['agent'] == "off") {return;}
 
 
-}
+        }
 
 
         // First things first... see if Mordok is on.
@@ -110,8 +117,8 @@ if ($thing->container['api']['agent'] == "off") {return;}
 */
         $this->init();
 
-//        $this->getName();
-//        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
+        //        $this->getName();
+        //        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
 
 
         $this->get();
@@ -120,33 +127,30 @@ if ($thing->container['api']['agent'] == "off") {return;}
         $this->make();
 
 
-//set_error_handler(array($this,'my_exception_handler'));
-try {
-//            throw new \OverflowException('Insufficient space in DB record ' . $this->uuid . ".");
+        //set_error_handler(array($this,'my_exception_handler'));
+        try {
+            //            throw new \OverflowException('Insufficient space in DB record ' . $this->uuid . ".");
 
-        $this->set();
-}
-catch (\OverflowException $t)
-{
-$this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
-$this->thing_report['sms'] = "STACK | " . $this->response;
-    $this->thing->log("caught overflow exception.");
-   // Executed only in PHP 7, will not match in PHP 5
-}
+            $this->set();
+        }
+        catch (\OverflowException $t) {
+            $this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
+            $this->thing_report['sms'] = "STACK | " . $this->response;
+            $this->thing->log("caught overflow exception.");
+            // Executed only in PHP 7, will not match in PHP 5
+        }
 
-catch (\Throwable $t)
-{
-//$this->response = "STACK | Variable store is full. Text FORGET ALL.";
-//$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
-$this->thing->log("caught throwable.");
-   // Executed only in PHP 7, will not match in PHP 5
-}
-catch (\Exception $e)
-{
-   $this->thing->log("caught exception");
-   // Executed only in PHP 5, will not be reached in PHP 7
-}
-//restore_error_handler();
+        catch (\Throwable $t) {
+            //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
+            //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
+            $this->thing->log("caught throwable.");
+            // Executed only in PHP 7, will not match in PHP 5
+        }
+        catch (\Exception $e) {
+            $this->thing->log("caught exception");
+            // Executed only in PHP 5, will not be reached in PHP 7
+        }
+        //restore_error_handler();
         if (($this->agent_input == null) or ($this->agent_input == "")) {
             $this->respond();
         }
@@ -188,17 +192,17 @@ catch (\Exception $e)
     public function make() {
         $this->makeResponse();
         $this->makeMessage();
-$this->makeChart();
+        $this->makeChart();
         $this->makeImage();
         $this->makePNG();
-$this->makePNGs();
+        $this->makePNGs();
         $this->makeSMS();
         $this->makeWeb();
         $this->makeSnippet();
 
-$this->makeEmail();
-//$this->makeMessage();
-$this->makeTXT();
+        $this->makeEmail();
+        //$this->makeMessage();
+        $this->makeTXT();
 
         $this->makePDF();
     }
@@ -234,31 +238,67 @@ $this->makeTXT();
 
     /**
      *
+     * @return unknown
+     */
+    public function getCallingagent() {
+
+        //get the trace
+        $trace = debug_backtrace();
+
+        // Get the class that is asking for who awoke it
+        if (!isset($trace[1]['class'])) {
+            $this->calling_agent = true;
+            return true;
+        }
+
+        $class_name = $trace[1]['class'];
+        // +1 to i cos we have to account for calling this function
+        for ( $i=1; $i<count( $trace ); $i++ ) {
+            if ( isset( $trace[$i] ) ) // is it set?
+                if ((isset($trace[$i]['class'])) and ( $class_name != $trace[$i]['class'] )) {// is it a different class
+                    $this->calling_agent = $trace[$i]['class'];
+                    return $trace[$i]['class'];
+                }
+        }
+
+        $this->calling_agent = null;
+
+    }
+
+
+    /**
+     *
      */
     public function getName() {
         $this->agent_name =   explode( "\\", strtolower(get_class($this)) )[2] ;
 
     }
 
-    function assert($input, $agent = null)
-    {
-if ($agent == null) {
-$agent = $this->agent_name;
-}
+
+    /**
+     *
+     * @param unknown $input
+     * @param unknown $agent (optional)
+     * @return unknown
+     */
+    function assert($input, $agent = null) {
+        if ($agent == null) {
+            $agent = $this->agent_name;
+        }
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), $agent . " is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen($agent . " is")); 
-        } elseif (($pos = strpos(strtolower($input), $agent)) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen($agent)); 
+        if (($pos = strpos(strtolower($input), $agent . " is")) !== FALSE) {
+            $whatIWant = substr(strtolower($input), $pos+strlen($agent . " is"));
+        } elseif (($pos = strpos(strtolower($input), $agent)) !== FALSE) {
+            $whatIWant = substr(strtolower($input), $pos+strlen($agent));
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
-//        $place = $this->getPlace($filtered_input);
-//        if ($place) {
-            //true so make a place
-//            $this->makePlace(null, $filtered_input);
-//        }
-return $filtered_input;
+        //        $place = $this->getPlace($filtered_input);
+        //        if ($place) {
+        //true so make a place
+        //            $this->makePlace(null, $filtered_input);
+        //        }
+        return $filtered_input;
 
     }
 
@@ -421,7 +461,7 @@ return $filtered_input;
     public function respond() {
         $this->respondResponse();
         $this->thing->flagGreen();
-//        return $this->thing_report;
+        //        return $this->thing_report;
     }
 
 
@@ -430,7 +470,7 @@ return $filtered_input;
      */
     public function respondResponse() {
         $agent_flag = true;
-if ($this->agent_name == "agent") {return;}
+        if ($this->agent_name == "agent") {return;}
 
 
         if ($agent_flag == true) {
@@ -445,9 +485,9 @@ if ($this->agent_name == "agent") {return;}
 
             $this->thing_report['message'] = $this->thing_report['sms'];
 
-            if (($this->agent_input == null) or ($this->agent_input == "")) { 
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            if (($this->agent_input == null) or ($this->agent_input == "")) {
+                $message_thing = new Message($this->thing, $this->thing_report);
+                $this->thing_report['info'] = $message_thing->thing_report['info'] ;
             }
         }
 
@@ -473,37 +513,63 @@ if ($this->agent_name == "agent") {return;}
     public function makeWeb() {
     }
 
+
+    /**
+     *
+     */
     public function makePDF() {
     }
 
-public function makeChart() {
-}
+
+    /**
+     *
+     */
+    public function makeChart() {
+    }
 
 
+    /**
+     *
+     */
     public function makeImage() {
     }
 
+
+    /**
+     *
+     */
     public function makeSnippet() {
-       $this->thing_report['snippet'] = "<b>Empty.</b>";
+        $this->thing_report['snippet'] = "<b>Empty.</b>";
     }
 
 
+    /**
+     *
+     */
     public function makeTXT() {
-//if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
-//        $this->thing_report['txt'] = $this->thing_report['sms'];
+        //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
+        //        $this->thing_report['txt'] = $this->thing_report['sms'];
     }
 
+
+    /**
+     *
+     */
     public function makeMessage() {
-//if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
+        //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
 
-//        $this->thing_report['message'] = $this->thing_report['sms'];
+        //        $this->thing_report['message'] = $this->thing_report['sms'];
     }
 
-public function makeEmail() {
+
+    /**
+     *
+     */
+    public function makeEmail() {
 
 
 
-}
+    }
 
 
 
@@ -651,9 +717,9 @@ public function makeEmail() {
         case (isset($this->input)) :
             break;
 
-case (is_array($this->agent_input)):
+        case (is_array($this->agent_input)):
             $this->input = $this->agent_input;
-break;
+            break;
 
         case ($this->agent_input == null):
 
@@ -667,15 +733,15 @@ break;
         }
 
 
-if (!is_array($this->input)) {
-        $whatIWant = $this->input;
-        if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
-            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
-        } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
-            $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
+        if (!is_array($this->input)) {
+            $whatIWant = $this->input;
+            if (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
+                $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
+            } elseif (($pos = strpos(strtolower($this->input), "@ednabot")) !== FALSE) {
+                $whatIWant = substr(strtolower($this->input), $pos+strlen("@ednabot"));
+            }
+            $this->input = trim($whatIWant);
         }
-        $this->input = trim($whatIWant);
-}
 
         $this->readSubject();
     }
@@ -757,7 +823,7 @@ if (!is_array($this->input)) {
             $this->agent = $agent;
             return true;
 
-} catch (\Throwable $t) {
+        } catch (\Throwable $t) {
             $this->thing->log( 'caught throwable.' , "WARNING" );
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
@@ -767,7 +833,7 @@ if (!is_array($this->input)) {
             $file = $ex->getFile();
             $line = $ex->getLine();
 
-//            $input = $message . '  ' . $file . ' line:' . $line;
+            //            $input = $message . '  ' . $file . ' line:' . $line;
             $this->thing->log($input , "WARNING" );
 
             // This is an error in the Place, so Bork and move onto the next context.
@@ -789,8 +855,8 @@ if (!is_array($this->input)) {
         // Because we need to be able to respond to calls
         // to specific Identities.
 
-$agent_input_text = $this->agent_input;
-if (is_array($this->agent_input)) {$agent_input_text = "";}
+        $agent_input_text = $this->agent_input;
+        if (is_array($this->agent_input)) {$agent_input_text = "";}
 
         $input = strtolower($agent_input_text . " " . $this->to . " " .$this->subject);
         if ($this->agent_input == null) {
@@ -1610,39 +1676,45 @@ if (is_array($this->agent_input)) {$agent_input_text = "";}
         return $this->thing_report;
     }
 
+
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
     function filterAgent($text = null) {
 
-//$input = strtolower($this->subject);
-$input = $this->input;
-if ($text != null) {$input = $text;}
+        //$input = strtolower($this->subject);
+        $input = $this->input;
+        if ($text != null) {$input = $text;}
 
-            $strip_words = array(
-                $this->agent_name, 
-                strtolower($this->agent_name),
-                ucwords($this->agent_name),
-                strtoupper($this->agent_name)
-            );
-            foreach ($strip_words as $i=>$strip_word) {
+        $strip_words = array(
+            $this->agent_name,
+            strtolower($this->agent_name),
+            ucwords($this->agent_name),
+            strtoupper($this->agent_name)
+        );
+        foreach ($strip_words as $i=>$strip_word) {
             $strip_words[] = str_replace(" ", "", $strip_word);
+        }
+
+        foreach ($strip_words as $i=>$strip_word) {
+
+            //                    $strip_word = $strip_word['words'];
+
+            $whatIWant = $input;
+            if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
+                $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
+            } elseif (($pos = strpos(strtolower($input), $strip_word)) !== FALSE) {
+                $whatIWant = substr(strtolower($input), $pos+strlen($strip_word));
             }
 
-                foreach($strip_words as $i=>$strip_word){
+            $input = $whatIWant;
+        }
+        $input = trim($input);
 
-//                    $strip_word = $strip_word['words'];
-
-                    $whatIWant = $input;
-                    if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
-                        $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
-                    } elseif (($pos = strpos(strtolower($input), $strip_word)) !== FALSE) {
-                        $whatIWant = substr(strtolower($input), $pos+strlen($strip_word));
-                    }
-
-                    $input = $whatIWant;
-                }
-            $input = trim($input);
-
-$this->input = $input;
-return $input;
+        $this->input = $input;
+        return $input;
     }
 
 
@@ -1650,7 +1722,7 @@ return $input;
      *
      */
     public function makePNG() {
-/*
+        /*
         $this->html_image = null;
         $this->image = null;
         $this->PNG = null;
@@ -1661,7 +1733,7 @@ return $input;
         if (!isset($this->image)) {return;}
 try {
         $agent = new Png($this->thing, "png");
-//try{ 
+//try{
 //        $this->makeImage();
 
         $agent->makePNG($this->image);
@@ -1674,13 +1746,18 @@ try {
         $this->thing_report['png'] = $agent->image_string;
 } catch (\Throwable $t) {
 
-$this->thing_report['png'] = null; 
+$this->thing_report['png'] = null;
 
 }
 */
     }
 
-public function makePNGs() {}
+
+    /**
+     *
+     */
+    public function makePNGs() {}
+
 
     /**
      *
@@ -1697,17 +1774,22 @@ public function makePNGs() {}
 
     }
 
-function my_exception_handler($e) {
-$this->thing_report['sms'] = "Test";
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-restore_exception_handler();
-$this->thing->log( "fatal exception" );
-//$this->thing_report['sms'] = "Merp.";
-$this->thing->log($e);
-    // do some erorr handling here, such as logging, emailing errors
-    // to the webmaster, showing the user an error page etc
-}
+
+    /**
+     *
+     * @param unknown $e
+     */
+    function my_exception_handler($e) {
+        $this->thing_report['sms'] = "Test";
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        restore_exception_handler();
+        $this->thing->log( "fatal exception" );
+        //$this->thing_report['sms'] = "Merp.";
+        $this->thing->log($e);
+        // do some erorr handling here, such as logging, emailing errors
+        // to the webmaster, showing the user an error page etc
+    }
 
 
 }

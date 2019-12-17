@@ -83,7 +83,7 @@ class Number extends Agent
         // Way to output test information to web page as a thing call
         // $this->thing->test(date("Y-m-d H:i:s"),'receipt','completed');
 
-$this->horizon = 99;
+        $this->horizon = 99;
     }
 
 
@@ -97,6 +97,11 @@ $this->horizon = 99;
 
         $this->number = $this->number_agent->getVariable("number");
         $this->refreshed_at = $this->number_agent->getVariable("refreshed_at");
+
+        $this->getCallingagent();
+        // Extract calling agent name from class name.
+        $agent_class_name = $this->calling_agent;
+        $this->calling_agent_name = strtolower((array_reverse(explode('\\', $agent_class_name)))[0]);
     }
 
 
@@ -113,6 +118,7 @@ $this->horizon = 99;
         //$this->variables = new Variables($this->thing, "variables number " . $this->from);
 
         $this->number_agent->setVariable("number", $this->number);
+        $this->number_agent->setVariable("calling_agent_name", $this->calling_agent_name);
 
 
 
@@ -131,25 +137,73 @@ $this->horizon = 99;
 
 
 
-public function makeChart() {
+    /**
+     *
+     */
+    public function makeChart() {
 
-//$chart_agent = new Chart($this->thing, "chart number ". $this->from);
-//exit();
-}
+        if (!isset($this->numbers_history)) {$this->historyNumber();}
+        $t = "NUMBER CHART\n";
+        $points = array();
+        $x_min = 1e99;
+        $x_max = -1e99;
+
+        $y_min = 1e99;
+        $y_max = -1e99;
+
+
+        foreach ($this->numbers_history as $i=>$number_object) {
+
+            $created_at = $number_object['created_at'];
+            $number = $number_object['created_at'];
+
+            $points[$created_at] = $number;
+            //$t .= $i . " " . $number['created_at'] . " " . $number['calling_agent'] . " " . $number['number'] . "\n";
+
+            if ($created_at < $x_min) {$x_min = $created_at;}
+            if ($created_at > $x_max) {$x_max = $created_at;}
+
+            if ($number < $y_min) {$y_min = $number;}
+            if ($number > $y_max) {$y_max = $number;}
+
+
+        }
+
+
+        $chart_agent = new Chart($this->thing, "chart");
+        $chart_agent->points = $points;
+
+        //var_dump($chart_agent->points);
+        //exit();
+        $chart_agent->x_min = $x_min;
+        $chart_agent->x_max = $x_max;
+
+        $chart_agent->y_min = $y_min;
+        $chart_agent->y_max = $y_max;
+        $chart_agent->width = 200;
+        $chart_agent->height = 100;
+        $chart_agent->blankImage();
+
+
+        // devstack - start here next time
+        //$chart_agent->drawGraph();
+        //exit();
+    }
+
 
     /**
      *
      * @return unknown
      */
-    function getNumbers() {
-   //     if (!isset($this->kaiju_address)) {$this->getAddress($this->thing->from);}
-   //     if (!isset($this->kaiju_address)) {return;}
+    function historyNumber() {
+        //     if (!isset($this->kaiju_address)) {$this->getAddress($this->thing->from);}
+        //     if (!isset($this->kaiju_address)) {return;}
 
         //var_dump($this->kaiju_address);
         //exit();
 
-   //     $this->kaiju_thing = new Thing(null);
-   //     $this->kaiju_thing->Create($this->kaiju_address, "null", "s/ kaiju thing");
+        //     $this->kaiju_thing = new Thing(null);
+        //     $this->kaiju_thing->Create($this->kaiju_address, "null", "s/ kaiju thing");
 
         $block_things = array();
         // See if a stack record exists.
@@ -160,40 +214,63 @@ public function makeChart() {
 
         $link_uuids = array();
         $kaiju_messages = array();
-$this->points = array();
+        $this->numbers_history = array();
         foreach ($findagent_thing->thing_report['things'] as $thing_object) {
 
-//var_dump($this->parseNumber($block_thing['task']));
-//var_dump($block_thing['variables']);
 
-                $variables_json= $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
 
-                if (isset($variables['number'])) {
+            if (isset($variables['number'])) {
 
-                    $number = "X";
-                    $refreshed_at = "X";
+                $number = "X";
+                $calling_agent = "X";
+                $refreshed_at = "X";
 
-                    if(isset($variables['number']['number'])) {$number = $variables['number']['number'];}
-                    if(isset($variables['number']['refreshed_at'])) {$refreshed_at = $variables['number']['refreshed_at'];}
+                if (isset($variables['number']['number'])) {$number = $variables['number']['number'];}
+                if (isset($variables['number']['calling_agent'])) {$number = $variables['number']['calling_agent'];}
+                if (isset($variables['number']['refreshed_at'])) {$refreshed_at = $variables['number']['refreshed_at'];}
 
-                }
-//var_dump($number);
-//var_dump($refreshed_at);
+            }
 
-                $this->points[] = array("refreshed_at"=>strtotime($refreshed_at),
-                    "number"=>$number);
+            $this->numbers_history[] = array("created_at"=>strtotime($refreshed_at), "calling_agent"=>$calling_agent,
+                "number"=>$number);
         }
     }
 
-public function parseNumber($text = null) {
 
-if ($text == null) {return true;}
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
+    public function parseNumber($text = null) {
 
-return $this->extractNumber($text);
+        if ($text == null) {return true;}
+
+        return $this->extractNumber($text);
 
 
-}
+    }
+
+
+    /**
+     *
+     */
+    function makeTXT() {
+
+        if (!isset($this->numbers_history)) {$this->historyNumber();}
+        $t = "NUMBER REPORT\n";
+        foreach ($this->numbers_history as $i=>$number) {
+
+            $t .= $i . " " . $number['created_at'] . " " . $number['calling_agent'] . " " . $number['number'] . "\n";
+
+        }
+        //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
+        $this->thing_report['txt'] = $t;
+
+
+    }
 
 
     /**
@@ -214,8 +291,8 @@ return $this->extractNumber($text);
 
         $pieces = explode(" ", $input);
 
-$i = str_replace(array(',',':','-','/'), ' ', $input);
-$pieces = explode(" ", $i);
+        $i = str_replace(array(',', ':', '-', '/'), ' ', $input);
+        $pieces = explode(" ", $i);
 
         $this->numbers = [];
         foreach ($pieces as $key=>$piece) {
@@ -291,6 +368,7 @@ $pieces = explode(" ", $i);
     /**
      *
      */
+    /*
     public function respond() {
         // Thing actions
 
@@ -338,7 +416,7 @@ $pieces = explode(" ", $i);
 
   //      return;
     }
-
+*/
 
     /**
      *
@@ -401,12 +479,12 @@ $pieces = explode(" ", $i);
             }
         }
 
-if ($this->input == "number chart") {
+        if ($this->input == "number chart") {
 
-$this->getNumbers();
-return;
+            $this->getNumbers();
+            return;
 
-}
+        }
 
         $status = true;
 
@@ -498,7 +576,7 @@ return;
      *
      * @return unknown
      */
-/*
+    /*
     public function makePNG() {
         $text = "thing:".$this->numbers[0];
 
@@ -523,7 +601,7 @@ return;
         return $this->thing_report['png'];
     }
 */
-/*
+    /*
     public function makeImage() {
         $text = "thing:".$this->numbers[0];
 

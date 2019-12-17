@@ -77,11 +77,7 @@ class Chart extends Agent
 
 function run()
 {
-
         $this->getData();
-
-
-
 }
 
     function set()
@@ -135,10 +131,10 @@ function run()
             $this->points[] = array($tock_series=>${$tock_series}, $dimension[0]=>${$dimension[0]}, $dimension[1]=>${$dimension[1]});
         }
 
-        $this->thing->log('Agent "charth" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
+        $this->thing->log('Agent "Chart" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
 
     }
-
+/*
 	public function respond() {
 
 		// Develop the various messages for each channel.
@@ -147,14 +143,6 @@ function run()
 		// Because we are making a decision and moving on.  This Thing
 		// can be left alone until called on next.
 		$this->thing->flagGreen(); 
-/*
-		$this->sms_message = "LATENCY GRAPH  | " . $this->web_prefix . "latencygraph/" . $this->uuid;
-
-        if (isset($this->function_message)) {
-            $this->sms_message .= " | " . $this->function_message;
-        }
-		$this->sms_message .= ' | TEXT ?';
-*/
         $this->makeSMS();
 $this->makePNG();
         $this->makeWeb();
@@ -173,7 +161,7 @@ $this->makePNG();
 
 		return $this->thing_report;
 	}
-
+*/
     function makeSMS()
     {
         $this->sms_message = "LATENCY GRAPH  | " . $this->web_prefix . "chart/" . $this->uuid;
@@ -198,9 +186,13 @@ $this->makePNG();
 
         $i = 0;
 
-        $this->tubAge();
+//        $this->points();
 
-        foreach ($this->tubs as $x=>$y) {
+        foreach ($this->points as $x=>$y) {
+
+//var_dump($y);
+//$x = $y['created_at'];
+//$y = $y['number'];
 
             $common_variable = $y;
 
@@ -395,6 +387,7 @@ public function blankImage() {
 
     public function makePNG()
     {
+if (!isset($this->image)) {return true;}
         //    $this->height = 200;
         //    $this->width = 300;
 /*
@@ -457,6 +450,14 @@ public function blankImage() {
 
     function makeWeb()
     {
+
+if (!isset($this->image)) {
+
+        $this->thing_report['web'] = "No chart available.";
+
+return;
+}
+
         $link = $this->web_prefix . 'chart/' . $this->uuid . '/agent';
 
         $head= '
@@ -484,6 +485,11 @@ public function blankImage() {
 
     function makeTXT()
     {
+if (!isset($this->points)) {
+        $this->thing_report['txt'] = "No data available.";
+return;
+}
+
         $txt = 'This is a CHART. ';
         $txt .= "\n";
 
@@ -576,15 +582,21 @@ public function blankImage() {
         // No need to read text.  Any identity input to Tally
         // increments the tally.
 	}
-
+/*
     public function read()
     {
+$this->readSubject();
+//var_dump($this->input);
+//exit();
         $this->readInstruction();
         $this->readText();
     }
-
+*/
 
 public function readSubject() {
+if ($this->agent_input == "chart") {return null;}
+        $this->readInstruction();
+        $this->readText();
 
 
 
