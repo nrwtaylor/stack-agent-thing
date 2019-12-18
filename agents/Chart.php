@@ -9,27 +9,8 @@ class Chart extends Agent
 
     // refactor
     function init()
-	//function __construct(Thing $thing, $agent_command = null)
     {
-  //      $this->start_time = $thing->elapsed_runtime();
 
-        // Setup Thing
-  //      $this->thing = $thing;
-  //     $this->uuid = $thing->uuid;
-  //      $this->to = $thing->to;
-  //      $this->from = $thing->from;
-  //      $this->subject = $thing->subject;
-
-        // Setup Agent
-  //      $this->agent = strtolower(get_class());
-  //      $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
-
-        // Setup logging
- //       $this->thing_report['thing'] = $this->thing->thing;
-
-  //      if ($agent_command == null) {
-  //          $this->thing->log( 'Agent "Chart" did not find an agent command.' );
-  //      }
         $agent_command = $this->agent_input; //
         $this->agent_command = $agent_command;
 
@@ -40,50 +21,42 @@ class Chart extends Agent
         $this->height = 200;
         $this->width = 300;
 
-
-//        $this->read();
-
-//        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
+$this->initChart();
 
 
-		// So I could call
-//		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
-
-
-        // Get some stuff from the stack which will be helpful.
-  //      $this->web_prefix = $thing->container['stack']['web_prefix'];
-  //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-  //      $this->word = $thing->container['stack']['word'];
-  //      $this->email = $thing->container['stack']['email'];
-
-  //      $this->current_time = $this->thing->json->time();
 
 		$this->node_list = array("chart");
-
-//		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>','INFORMATION' );
-
-//        $this->getData();
-
-//        if ($agent_command == null) {
-//		    $this->respond();
-//        }
-
-  //      $this->thing->log('Agent "chart" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
-
-   //     $this->thing_report['log'] = $this->thing->log;
 	}
 
 function run()
 {
-        $this->getData();
+//        $this->getData();
 }
 
     function set()
     {
         $this->thing->json->setField("variables");
     }
+
+
+public function get() {
+
+//$this->getColours();
+$this->getData();
+
+}
+
+function getColours() {
+
+        $this->white = imagecolorallocate($this->image, 255, 255, 255);
+        $this->black = imagecolorallocate($this->image, 0, 0, 0);
+        $this->red = imagecolorallocate($this->image, 255, 0, 0);
+        $this->green = imagecolorallocate($this->image, 0, 255, 0);
+        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+
+
+}
 
     function getData()
     {
@@ -164,7 +137,7 @@ $this->makePNG();
 */
     function makeSMS()
     {
-        $this->sms_message = "LATENCY GRAPH  | " . $this->web_prefix . "chart/" . $this->uuid;
+        $this->sms_message = "CHART  | " . $this->web_prefix . "chart/" . $this->uuid;
 
         if (isset($this->function_message)) {
             $this->sms_message .= " | " . $this->function_message;
@@ -181,8 +154,11 @@ $this->makePNG();
         $this->chart_height = $this->height - 20;
 
         $num_points = count($this->points);
+if ($num_points == 0) {return true;}
+
         $column_width = $this->width / $num_points;
 
+//exit();
 
         $i = 0;
 
@@ -232,10 +208,11 @@ $this->makePNG();
             $i += 1;
         }
 
+        $preferred_step = 10;
         $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
         $inc = ($this->y_max - $this->y_min)/ 5;
 
-        $closest_distance = $y_max;
+        $closest_distance = $this->y_max;
 
         foreach ($allowed_steps as $key=>$step) {
 
@@ -245,7 +222,6 @@ $this->makePNG();
                 $preferred_step = $step;
             }
         }
-
         $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
     }
 
@@ -370,7 +346,7 @@ $this->makePNG();
     {
 
     }
-
+/*
 public function blankImage() {
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -384,6 +360,26 @@ public function blankImage() {
         imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
 
 }
+*/
+public function initChart() {
+
+if ((!isset($this->width)) or (!isset($this->height))) {
+return true;
+
+}
+
+        $this->image = imagecreatetruecolor($this->width, $this->height);
+
+        $this->white = imagecolorallocate($this->image, 255, 255, 255);
+        $this->black = imagecolorallocate($this->image, 0, 0, 0);
+        $this->red = imagecolorallocate($this->image, 255, 0, 0);
+        $this->green = imagecolorallocate($this->image, 0, 255, 0);
+        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+        imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
+
+}
+
 
     public function makePNG()
     {
@@ -594,7 +590,7 @@ $this->readSubject();
 */
 
 public function readSubject() {
-if ($this->agent_input == "chart") {return null;}
+//if ($this->agent_input == "chart") {return null;}
         $this->readInstruction();
         $this->readText();
 

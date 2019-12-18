@@ -635,7 +635,6 @@ $this->variables_agent = "tallycounter";
         $this->agent = "latencygraph";
         $this->name = "thing";
         $this->identity = $this->from;
-        return;
     }
 
     public function readInstruction()
@@ -651,23 +650,17 @@ $this->variables_agent = "tallycounter";
         $this->name = $pieces[1];
         $this->identity = $pieces[2];
 
-        return;
-
     }
 
 	public function readText()
     {
         // No need to read text.  Any identity input to Tally
         // increments the tally.
-        return;
 	}
 
     public function readInput()
     {
         $this->readInstruction();
         $this->readText();
-        return;
     }
 }
-
-?>

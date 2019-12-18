@@ -16,7 +16,7 @@ class Thing
 
 	function __construct($uuid, $test_message = null)
     {
-        // Now at 0.0.9
+        // Now at 0.0.10
 
         // Imagine both a need not to touch anything.
         // And a need to make this much tidier.

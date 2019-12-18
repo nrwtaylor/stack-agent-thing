@@ -1,4 +1,11 @@
 <?php
+/**
+ * Burst.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -12,41 +19,44 @@ class Burst extends Agent
 
     public $var = 'hello';
 
-//    function __construct(Thing $thing, $agent_input = null) {
-function init() {
-        // $this->start_time = microtime(true);
-//        $this->start_time = $thing->elapsed_runtime();
 
-//        $this->agent_instruction = $agent_input;
+    /**
+     * function __construct(Thing $thing, $agent_input = null) {
+     */
+    function init() {
+        // $this->start_time = microtime(true);
+        //        $this->start_time = $thing->elapsed_runtime();
+
+        //        $this->agent_instruction = $agent_input;
 
 
         //if ($agent_input == null) {$agent_input = "";}
 
-//        $this->agent_input = $agent_input;
+        //        $this->agent_input = $agent_input;
         $this->keyword = "burst";
-//        $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
+        //        $this->agent_prefix = 'Agent "' . ucwords($this->keyword) . '" ';
 
-//        $this->thing = $thing;
-//        $this->thing_report['thing'] = $this->thing->thing;
+        //        $this->thing = $thing;
+        //        $this->thing_report['thing'] = $this->thing->thing;
         $this->verbosity = 1;
-if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['verbosity'];}
+        if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['verbosity'];}
 
 
-//        if ($this->verbosity >= 2) {
-//            $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->nuuid . ".");
-//        }
+        //        if ($this->verbosity >= 2) {
+        //            $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->nuuid . ".");
+        //        }
 
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->test= "Development code"; // Always
 
-//        $this->uuid = $thing->uuid;
-//        $this->to = $thing->to;
-//        $this->from = $thing->from;
-//        $this->subject = $thing->subject;
-//        $this->sqlresponse = null;
+        //        $this->uuid = $thing->uuid;
+        //        $this->to = $thing->to;
+        //        $this->from = $thing->from;
+        //        $this->subject = $thing->subject;
+        //        $this->sqlresponse = null;
         if ($this->verbosity >= 2) {
-        $this->thing->log($this->agent_prefix . 'received this Thing, "' . $this->subject .  '".') ;
+            $this->thing->log($this->agent_prefix . 'received this Thing, "' . $this->subject .  '".') ;
         }
 
         // Set up default flag settings
@@ -70,9 +80,9 @@ if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['ver
         $this->current_time = $this->thing->json->time();
 
         // Get the current Identities flag
-//        $this->flag = new Variables($this->thing, "variables flag " . $this->from);
+        //        $this->flag = new Variables($this->thing, "variables flag " . $this->from);
 
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . ' got flag variables. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
         }
@@ -81,12 +91,12 @@ if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['ver
         // has the current flag variables loaded.
 
 
-//        $this->readInstruction();
+        //        $this->readInstruction();
 
-//		$this->readSubject();
+        //  $this->readSubject();
 
-//        $this->getBurst(); 
-/*
+        //        $this->getBurst();
+        /*
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
         }
@@ -101,31 +111,42 @@ if (isset($this->settings['verbosity'])) {$this->verbosity= $this->settings['ver
         $this->thing_report['log'] = $this->thing->log;
 
 
-//		return;
+        //  return;
 
-		}
+    }
 
 
-function read() {
+    /**
+     *
+     * @return unknown
+     */
+    function read() {
 
         $this->readInstruction();
 
-                $this->readSubject();
+        $this->readSubject();
 
 
-}
-
-function run() {
-
-        $this->getBurst(); 
+    }
 
 
-}
+    /**
+     *
+     */
+    function run() {
+
+        $this->getBurst();
+
+
+    }
 
 
 
-    function set($requested_flag = null)
-    {
+    /**
+     *
+     * @param unknown $requested_flag (optional)
+     */
+    function set($requested_flag = null) {
         if ($requested_flag == null) {
             if (!isset($this->requested_flag)) {
                 // Set default behaviour.
@@ -139,26 +160,31 @@ function run() {
         $this->flag = $requested_flag;
         $this->refreshed_at = $this->current_time;
 
-//        $this->thing->setVariable("state", $this->state);
-//        $this->thing->setVariable("refreshed_at", $this->current_time);
+        //        $this->thing->setVariable("state", $this->state);
+        //        $this->thing->setVariable("refreshed_at", $this->current_time);
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("burst",
-                        "flag"),  $this->flag );
+                "flag"),  $this->flag );
         $this->thing->json->writeVariable(array("burst",
-                        "refreshed_at"),  $this->current_time );
+                "refreshed_at"),  $this->current_time );
         $this->thing->json->writeVariable(array("burst",
-                        "burst"),  $this->burst );
+                "burst"),  $this->burst );
         $this->thing->json->writeVariable(array("burst",
-                        "burstiness"),  $this->burstiness );
+                "burstiness"),  $this->burstiness );
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . 'set Flag to ' . $this->flag);
         }
         return;
     }
 
-    function isFlag($flag = null)
-    {
+
+    /**
+     *
+     * @param unknown $flag (optional)
+     * @return unknown
+     */
+    function isFlag($flag = null) {
         // Validates whether the Flag is green or red.
         // Nothing else is allowed.
 
@@ -174,6 +200,9 @@ function run() {
 
 
 
+    /**
+     *
+     */
     function getBurst() {
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . ' start getBurst. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
@@ -184,7 +213,7 @@ function run() {
         // Think about that.
 
         $findagent= 'prod';
-        // prod 5,626 5,897 5,147 
+        // prod 5,626 5,897 5,147
         // dev 3,575 5,082 7,746 7,038 6,690
         if ($findagent == 'prod') {
             $findagent_thing = new FindAgent($this->thing, $this->requested_thing_name . ' ' . $this->horizon);
@@ -194,13 +223,7 @@ function run() {
             $t = $this->thing->db->variableSearch(null, null, $this->horizon);
         }
 
-
-//var_dump($this->from);
-
-//$t =        $this->thing->db->userRecords($this->from, $this->horizon);
-//var_dump($t['things']);
-//var_dump($t);
-//exit();
+if (!isset($t)) {return null;}
 
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . 'found ' . count($t['things']) ." " . ucwords($this->requested_thing_name) . " Agent Things." );
@@ -211,21 +234,8 @@ function run() {
         $this->burstiness = 0;
         $this->flag = "green";
 
-        //$created_at = $this->current_time;
-
         $created_at = $t['things'][0]['created_at'];
 
-//var_dump($created_at);
-//exit();
-//        foreach ($findagent_thing->thing_report['things'] as $thing) {
-
-//        foreach ($findagent_thing->thing_report['things'] as $thing) {
-
-//echo $thing['task'] . " " . $thing['nom_to'] ." " . $thing['nom_from'] . "<br>";
-
-//}
-//echo "merp";
-//var_dump($findagent_thing->thing_report['things']);
         $this->max_index = 0;
         $this->previous_trains = array();
         $this->similarness = 0;
@@ -236,38 +246,35 @@ function run() {
 
         if ((isset($findagent_thing->thing_report['things'])) and (count($findagent_thing->thing_report['things']) > 1)) {
 
+            foreach ($t['things'] as $thing) {
 
+                $previous_created_at = $created_at;
+                $created_at = ($thing['created_at']);
 
+                $age = strtotime($this->current_time) - strtotime($created_at);
 
-//        if ($t['things'] != true) {
-        foreach ($t['things'] as $thing) {
+                //if ((strtotime($this->current_time) - strtotime($created_at)) > 10*60) {break;}
 
-            $previous_created_at = $created_at;
-            $created_at = ($thing['created_at']);
+                $inter_arrival_time = strtotime($previous_created_at) - strtotime($created_at);
 
-            $age = strtotime($this->current_time) - strtotime($created_at);
+                if ($inter_arrival_time < $this->burst_horizon) {
+                    $this->burst += 1;
+                    // Set the age to the head of the series
+                    $this->burst_time = $t['things'][0]['created_at'];
+                }
 
-            //if ((strtotime($this->current_time) - strtotime($created_at)) > 10*60) {break;}
-
-            $inter_arrival_time = strtotime($previous_created_at) - strtotime($created_at);
-
-            if ($inter_arrival_time < $this->burst_horizon) {
-                $this->burst += 1;
-                // Set the age to the head of the series
-                $this->burst_time = $t['things'][0]['created_at'];
+                $this->burstiness += $inter_arrival_time;
+                if ($this->verbosity >= 2) {
+                    $this->thing->log($this->agent_prefix . ' td ' . $inter_arrival_time . '.');
+                }
             }
-
-            $this->burstiness += $inter_arrival_time;
-            if ($this->verbosity >= 2) {
-                $this->thing->log($this->agent_prefix . ' td ' . $inter_arrival_time . '.');
-            }
-        }
         }
 
         if ($this->burst >= 1) {
             $this->flag = "red";
         }
         if ($this->verbosity >= 2) {
+if (!isset($age)) {$age = "X";}
             $this->thing->log($this->agent_prefix . 'calculated age =  ' . $age . '.');
             $this->thing->log($this->agent_prefix . 'calculated burst =  ' . $this->burst . '.');
             $this->thing->log($this->agent_prefix . 'calculated burstiness =  ' . $this->burstiness . '.');
@@ -275,12 +282,15 @@ function run() {
 
     }
 
-    function get()
-    {
+
+    /**
+     *
+     */
+    function get() {
         // get gets the state of the Flag the last time
         // it was saved into the stack (serialized).
-        $this->previous_flag = $this->thing->getVariable("burst","flag");
-        $this->refreshed_at = $this->thing->getVariable("burst","refreshed_at");
+        $this->previous_flag = $this->thing->getVariable("burst", "flag");
+        $this->refreshed_at = $this->thing->getVariable("burst", "refreshed_at");
 
         if ($this->verbosity >= 2) {
             $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_flag);
@@ -294,8 +304,8 @@ function run() {
             $this->flag = $this->default_flag;
         }
 
-//        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
-//        $check = $this->thing->choice->current_node;
+        //        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
+        //        $check = $this->thing->choice->current_node;
 
         $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->flag) . ' FLAG.');
 
@@ -303,31 +313,41 @@ function run() {
         return;
 
 
-    function read()
-    {
-        //$this->thing->log("read");
+        /**
+         *
+         * @return unknown
+         */
+        function read() {
+            //$this->thing->log("read");
 
-        $this->get();
-        return $this->flag;
+            $this->get();
+            return $this->flag;
+        }
+
+
+
+        /**
+         *
+         * @return unknown
+         */
+        function read() {
+            //$this->thing->log("read");
+
+            $this->get();
+            return $this->flag;
+        }
+
+
+
     }
 
 
-
-    function read()
-    {
-        //$this->thing->log("read");
-
-        $this->get();
-        return $this->flag;
-    }
-
-
-
-    }
-
-
-    function selectChoice($choice = null)
-    {
+    /**
+     *
+     * @param unknown $choice (optional)
+     * @return unknown
+     */
+    function selectChoice($choice = null) {
 
         if ($choice == null) {
             if (!isset($this->flag)) {
@@ -353,10 +373,14 @@ function run() {
         return $this->flag;
     }
 
-    function makeChoices () {
 
-//        $this->thing->choice->Choose($this->state);
-//        $this->thing->choice->save($this->keyword, $this->state);
+    /**
+     *
+     */
+    function makeChoices() {
+
+        //        $this->thing->choice->Choose($this->state);
+        //        $this->thing->choice->save($this->keyword, $this->state);
 
         $this->thing->choice->Create($this->keyword, $this->node_list, $this->flag);
 
@@ -365,48 +389,55 @@ function run() {
 
     }
 
-	public function respond() {
+
+    /**
+     *
+     */
+    public function respond() {
 
         // At this point state is set
         $this->set($this->flag);
 
-		// Thing actions
+        // Thing actions
 
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// Generate email response.
+        // Generate email response.
 
-		$to = $this->thing->from;
-		$from = $this->keyword;
+        $to = $this->thing->from;
+        $from = $this->keyword;
 
         $this->makeSMS();
         $this->makeMessage();
 
 
-		$this->thing_report['email'] = $this->message;
+        $this->thing_report['email'] = $this->message;
 
-//        $this->makePNG();
-//        $this->makeChoices(); // Turn off because it is too slow.
+        //        $this->makePNG();
+        //        $this->makeChoices(); // Turn off because it is too slow.
 
-//        $this->makeTXT();
+        //        $this->makeTXT();
 
 
 
         //$respond = "all";
         //if (($this->flag == "red") or ($respond == "all")) {
-        if ($this->agent_input == null) { 
-           $message_thing = new Message($this->thing, $this->thing_report);
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
         //$this->thing_report['help'] = 'This Flag is either RED or GREEN. RED means busy.';
         $this->makeHelp();
 
-		return;
-	}
+        return;
+    }
 
-    function makeHelp()
-    {
+
+    /**
+     *
+     */
+    function makeHelp() {
         if ($this->flag == "green") {
             $this->thing_report['help'] = 'FLAG GREEN. No recent burst has been seen.';
         }
@@ -416,8 +447,11 @@ function run() {
         }
     }
 
-    function makeTXT()
-    {
+
+    /**
+     *
+     */
+    function makeTXT() {
         $txt = 'This is BURST ' . $this->uuid . '. ';
         $txt .= 'There is a '. strtoupper($this->flag) . " FLAG. ";
         if ($this->verbosity >= 5) {
@@ -428,8 +462,11 @@ function run() {
         $this->txt = $txt;
     }
 
-    function makeSMS()
-    {
+
+    /**
+     *
+     */
+    function makeSMS() {
 
         $sms_message = "BURST ";
 
@@ -465,7 +502,7 @@ function run() {
 
 
             if ($this->flag == "green") {
-//                $sms_message .= ' | MESSAGE &ltinput&gt';
+                //                $sms_message .= ' | MESSAGE &ltinput&gt';
                 $sms_message .= ' | MESSAGE Input';
             }
         }
@@ -480,8 +517,10 @@ function run() {
     }
 
 
-    function makeMessage()
-    {
+    /**
+     *
+     */
+    function makeMessage() {
 
         $message = 'This is a BURSTINESS detector. ';
 
@@ -502,9 +541,12 @@ function run() {
 
     }
 
-    public function readInstruction() 
-    {
-        if($this->agent_instruction == null) {
+
+    /**
+     *
+     */
+    public function readInstruction() {
+        if ($this->agent_instruction == null) {
             //$this->defaultCommand();
             return;
         }
@@ -516,7 +558,7 @@ function run() {
         //$this->identity = $pieces[2];
 
 
-//        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agen$
+        //        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agen$
 
         return;
 
@@ -524,14 +566,17 @@ function run() {
 
 
 
-    public function readSubject() 
-    {
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
 
-if ($this->agent_input == "burst") {return null;}
+        if ($this->agent_input == "burst") {return null;}
 
-if ($this->agent_input != null) {
-        $this->requested_thing_name = $this->agent_input;
-}
+        if ($this->agent_input != null) {
+            $this->requested_thing_name = $this->agent_input;
+        }
 
         $this->response = null;
 
@@ -539,45 +584,44 @@ if ($this->agent_input != null) {
 
         $input = strtolower($this->subject);
 
-		$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        $haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
-//		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+        //  $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
 
-		// So this is really the 'sms' section
-		// Keyword
+        // So this is really the 'sms' section
+        // Keyword
         if (count($pieces) == 1) {
 
             if ($input == $this->keyword) {
                 $this->get();
                 return;
             }
-                        //return "Request not understood";
-                        // Drop through to piece scanner
+            //return "Request not understood";
+            // Drop through to piece scanner
         }
 
 
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
-                    switch($piece) 
-                    {
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
 
-                        case 'red':
-                            $this->thing->log($this->agent_prefix . 'received request for RED FLAG.');
-                            $this->selectChoice('red');
-                            return;
-                        case 'green':
-                            $this->selectChoice('green');
-                            return;
-                        case 'next':
+                    case 'red':
+                        $this->thing->log($this->agent_prefix . 'received request for RED FLAG.');
+                        $this->selectChoice('red');
+                        return;
+                    case 'green':
+                        $this->selectChoice('green');
+                        return;
+                    case 'next':
 
 
-                        default:
+                    default:
 
                     }
 
@@ -590,14 +634,13 @@ if ($this->agent_input != null) {
         // If all else fails try the discriminator.
 
         $this->requested_flag = $this->discriminateInput($haystack); // Run the discriminator.
-        switch($this->requested_flag)
-        {
-            case 'green':
-                $this->selectChoice('green');
-                return;
-            case 'red':
-                $this->selectChoice('red');
-                return;
+        switch ($this->requested_flag) {
+        case 'green':
+            $this->selectChoice('green');
+            return;
+        case 'red':
+            $this->selectChoice('red');
+            return;
         }
 
         $this->get();
@@ -607,120 +650,129 @@ if ($this->agent_input != null) {
 
         return "Message not understood";
 
-		return false;
-
-	
-	}
+        return false;
 
 
+    }
 
 
 
 
-	function kill()
-    {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-
-    function discriminateInput($input, $discriminators = null)
-    {
 
 
-                //$input = "optout opt-out opt-out";
-
-                if ($discriminators == null) {
-                        $discriminators = array('red', 'green');
-                }       
-
-
-
-                $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
-
-                if (count($discriminators) > 4) {
-                        $minimum_discrimination = $default_discriminator_thresholds[4];
-                } else {
-                        $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
-                }
+    /**
+     *
+     * @return unknown
+     */
+    function kill() {
+        // No messing about.
+        return $this->thing->Forget();
+    }
 
 
-
-                $aliases = array();
-
-                $aliases['red'] = array('r', 'red','on');
-                $aliases['green'] = array('g','grn','gren','green', 'gem', 'off');
-                //$aliases['reset'] = array('rst','reset','rest');
-                //$aliases['lap'] = array('lap','laps','lp');
-
-
-
-                $words = explode(" ", $input);
-
-                $count = array();
-
-                $total_count = 0;
-                // Set counts to 1.  Bayes thing...     
-                foreach ($discriminators as $discriminator) {
-                        $count[$discriminator] = 1;
-
-                       $total_count = $total_count + 1;
-                }
-                // ...and the total count.
+    /**
+     *
+     * @param unknown $input
+     * @param unknown $discriminators (optional)
+     * @return unknown
+     */
+    function discriminateInput($input, $discriminators = null) {
 
 
+        //$input = "optout opt-out opt-out";
 
-                foreach ($words as $word) {
-
-                        foreach ($discriminators as $discriminator) {
-
-                                if ($word == $discriminator) {
-                                        $count[$discriminator] = $count[$discriminator] + 1;
-                                        $total_count = $total_count + 1;
-                                }
-
-                                foreach ($aliases[$discriminator] as $alias) {
-
-                                        if ($word == $alias) {
-                                                $count[$discriminator] = $count[$discriminator] + 1;
-                                                $total_count = $total_count + 1;
-                                        }
-                                }
-                        }
-
-                }
-
-                $this->thing->log('Agent "Flag" has a total count of ' . $total_count . '.');
-                // Set total sum of all values to 1.
-
-                $normalized = array();
-                foreach ($discriminators as $discriminator) {
-                        $normalized[$discriminator] = $count[$discriminator] / $total_count;            
-                }
-
-
-                // Is there good discrimination
-                arsort($normalized);
-
-
-                // Now see what the delta is between position 0 and 1
-
-                foreach ($normalized as $key=>$value) {
-
-          if ( isset($max) ) {$delta = $max-$value; break;}
-                        if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
-                }
-
-
-
-
-                if ($delta >= $minimum_discrimination) {
-                        return $selected_discriminator;
-                } else {
-                        return false; // No discriminator found.
-                } 
-
-                return true;
+        if ($discriminators == null) {
+            $discriminators = array('red', 'green');
         }
+
+
+
+        $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
+
+        if (count($discriminators) > 4) {
+            $minimum_discrimination = $default_discriminator_thresholds[4];
+        } else {
+            $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
+        }
+
+
+
+        $aliases = array();
+
+        $aliases['red'] = array('r', 'red', 'on');
+        $aliases['green'] = array('g', 'grn', 'gren', 'green', 'gem', 'off');
+        //$aliases['reset'] = array('rst','reset','rest');
+        //$aliases['lap'] = array('lap','laps','lp');
+
+
+
+        $words = explode(" ", $input);
+
+        $count = array();
+
+        $total_count = 0;
+        // Set counts to 1.  Bayes thing...
+        foreach ($discriminators as $discriminator) {
+            $count[$discriminator] = 1;
+
+            $total_count = $total_count + 1;
+        }
+        // ...and the total count.
+
+
+
+        foreach ($words as $word) {
+
+            foreach ($discriminators as $discriminator) {
+
+                if ($word == $discriminator) {
+                    $count[$discriminator] = $count[$discriminator] + 1;
+                    $total_count = $total_count + 1;
+                }
+
+                foreach ($aliases[$discriminator] as $alias) {
+
+                    if ($word == $alias) {
+                        $count[$discriminator] = $count[$discriminator] + 1;
+                        $total_count = $total_count + 1;
+                    }
+                }
+            }
+
+        }
+
+        $this->thing->log('Agent "Flag" has a total count of ' . $total_count . '.');
+        // Set total sum of all values to 1.
+
+        $normalized = array();
+        foreach ($discriminators as $discriminator) {
+            $normalized[$discriminator] = $count[$discriminator] / $total_count;
+        }
+
+
+        // Is there good discrimination
+        arsort($normalized);
+
+
+        // Now see what the delta is between position 0 and 1
+
+        foreach ($normalized as $key=>$value) {
+
+            if ( isset($max) ) {$delta = $max-$value; break;}
+            if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
+        }
+
+
+
+
+        if ($delta >= $minimum_discrimination) {
+            return $selected_discriminator;
+        } else {
+            return false; // No discriminator found.
+        }
+
+        return true;
+    }
 
 
 }
