@@ -18,14 +18,17 @@ error_reporting(-1);
 class Uuid extends Agent
 {
 
+
     /**
      *
      */
     function init() {
         $this->stack_state = $this->thing->container['stack']['state'];
         $this->short_name = $this->thing->container['stack']['short_name'];
-
-        $this->created_at =  strtotime($this->thing->thing->created_at);
+        //var_dump("uuid");
+        //var_dump($this->thing->thing->created_at);
+        //var_dump($this->thing->thing->created_at);
+        //        $this->created_at =  strtotime($this->thing->thing->created_at);
 
         $this->thing->log('started running on Thing ' . date("Y-m-d H:i:s") . '');
 
@@ -38,6 +41,12 @@ class Uuid extends Agent
         $this->thing_report['help'] = "Makes a universally unique identifier. Try NUUID.";
 
         $this->thing->log('Agent "Uuid" found ' . $this->uuid);
+
+$this->link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
+
+        $this->created_at =  strtotime($this->thing->thing->created_at);
+
+
     }
 
 
@@ -45,8 +54,10 @@ class Uuid extends Agent
      *
      */
     function getQuickresponse() {
-        $agent = new Qr($this->thing, "qr");
-        $this->quick_response_png = $agent->PNG_embed;
+        $this->uuid_agent = new Qr($this->thing, $this->link);
+        $this->quick_response_png = $this->uuid_agent->PNG_embed;
+        $this->html_image = $this->uuid_agent->html_image;
+
     }
 
 
@@ -68,6 +79,29 @@ class Uuid extends Agent
         //array_pop($arr);
         $this->uuids = $arr;
         return $arr;
+    }
+
+
+    /**
+     *
+     * @param unknown $input (optional)
+     * @return unknown
+     */
+    function stripUuids($input = null) {
+
+        if ($input == null) {$input = $this->input;}
+        if (!isset($this->uuids)) {$this->extractUuids($input);}
+        $stripped_input = $input;
+        foreach ($this->uuids as $i=>$uuid) {
+
+            $stripped_input = str_replace(strtolower($uuid) , " " , strtolower($stripped_input));
+        }
+
+        if ($input == $this->input) {$this->stripped_input = $stripped_input;}
+
+        return $stripped_input;
+
+
     }
 
 
@@ -107,7 +141,7 @@ class Uuid extends Agent
         $choices = $this->thing->choice->makeLinks('uuid');
 
         $alt_text = "a QR code with a uuid";
-
+/*
         $web = '<a href="' . $link . '">';
         //$web_prefix = "http://localhost:8080/";
         $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/uuid.png" jpg"
@@ -115,6 +149,19 @@ class Uuid extends Agent
                 alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/uuid.txt">';
 
         $web .= "</a>";
+*/
+        $web = '<a href="' . $link . '">';
+        //$web_prefix = "http://localhost:8080/";
+if (!isset($this->html_image)) {
+$this->getQuickresponse();
+}
+        $web .= $this->html_image;
+
+
+        $web .= "</a>";
+
+
+
         $web .= "<br>";
 
         //$received_at = strtotime($this->thing->thing->created_at);
@@ -122,8 +169,17 @@ class Uuid extends Agent
         //$web .= "Created about ". $ago . " ago.";
         //$web.= "<b>UUID Agent</b><br>";
         //$web.= "uuid is " . $this->uuid. "<br>";
+/*
+        $created_at = "X";
+        if (isset($this->thing->created_at)) {$time_number = strtotime($this->thing->created_at);
+            $created_at = strtoupper(date('Y M d D H:m', $time_number));
+        }
 
-        $web.= "CREATED AT " . strtoupper(date('Y M d D H:m', $this->created_at)). "<br>";
+        $web.= "CREATED AT " . $created_at . "<br>";
+*/
+//var_dump($this->created_at);
+        $web.= "CREATED AT " . strtoupper(date('Y M d D H:m',$this->created_at)). "<br>";
+
 
         $web .= "<br>";
 
@@ -220,7 +276,7 @@ class Uuid extends Agent
      *
      * @return unknown
      */
-/*
+    /*
     public function makePNG() {
         if (isset($this->PNG)) {return;}
 

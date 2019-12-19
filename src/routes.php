@@ -897,6 +897,25 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
 
             if ( $thing->thing == false ) {
+
+
+// At this point it might have a uuid.
+// But not one recognized by the stack.
+$uuid_agent = new Uuid($thing, "uuid");
+$txt = $uuid_agent->stripUuids($command);
+
+if ($command != $txt) {
+
+                    $datagram = [];
+                    $datagram['thing'] = false;
+                    $datagram['thing_report'] = false;
+
+                    return $this->renderer->render($response, 'thing.phtml', $datagram);
+
+}
+
+
+
                 // Run the slug through the agent.
                 // With the identity 'web'.
                 $thing->Create("web@stackr.ca", "agent", $command);
@@ -914,10 +933,11 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
                 }
 
-$filtered_command = $command;
-if (!is_numeric($command)) {
-                $filtered_command = str_replace("-", " " , $slug->slug);
-}
+                $filtered_command = $command;
+                if (!is_numeric($command)) {
+                    $filtered_command = str_replace("-", " " , $slug->slug);
+                }
+
                 $agent = new Agent($thing, $filtered_command);
 
                 //var_dump($agent->thing_report['sms']);

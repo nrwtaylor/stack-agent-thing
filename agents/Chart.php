@@ -1,4 +1,11 @@
 <?php
+/**
+ * Chart.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
@@ -7,9 +14,11 @@ class Chart extends Agent
 {
     // Latencygraph shows the stack latency history.
 
-    // refactor
-    function init()
-    {
+
+    /**
+     * refactor
+     */
+    function init() {
 
         $agent_command = $this->agent_input; //
         $this->agent_command = $agent_command;
@@ -21,32 +30,43 @@ class Chart extends Agent
         $this->height = 200;
         $this->width = 300;
 
-$this->initChart();
+        $this->initChart();
+
+        $this->node_list = array("chart");
+    }
 
 
+    /**
+     *
+     */
+    function run() {
+        //        $this->getData();
+    }
 
-		$this->node_list = array("chart");
-	}
 
-function run()
-{
-//        $this->getData();
-}
-
-    function set()
-    {
+    /**
+     *
+     */
+    function set() {
         $this->thing->json->setField("variables");
     }
 
 
-public function get() {
+    /**
+     *
+     */
+    public function get() {
 
-//$this->getColours();
-$this->getData();
+        //$this->getColours();
+        $this->getData();
 
-}
+    }
 
-function getColours() {
+
+    /**
+     *
+     */
+    function getColours() {
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -54,12 +74,13 @@ function getColours() {
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
+    }
 
 
-}
-
-    function getData()
-    {
+    /**
+     *
+     */
+    function getData() {
         $split_time = $this->thing->elapsed_runtime();
 
         $agent_name = "age";
@@ -107,7 +128,9 @@ function getColours() {
         $this->thing->log('Agent "Chart" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
 
     }
-/*
+
+
+    /*
 	public function respond() {
 
 		// Develop the various messages for each channel.
@@ -115,7 +138,7 @@ function getColours() {
 		// Thing actions
 		// Because we are making a decision and moving on.  This Thing
 		// can be left alone until called on next.
-		$this->thing->flagGreen(); 
+		$this->thing->flagGreen();
         $this->makeSMS();
 $this->makePNG();
         $this->makeWeb();
@@ -135,8 +158,12 @@ $this->makePNG();
 		return $this->thing_report;
 	}
 */
-    function makeSMS()
-    {
+
+
+    /**
+     *
+     */
+    function makeSMS() {
         $this->sms_message = "CHART  | " . $this->web_prefix . "chart/" . $this->uuid;
 
         if (isset($this->function_message)) {
@@ -148,32 +175,27 @@ $this->makePNG();
     }
 
 
-    function drawGraph()
-    {
+    /**
+     *
+     * @return unknown
+     */
+    function drawGraph() {
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
 
         $num_points = count($this->points);
-if ($num_points == 0) {return true;}
+        if ($num_points == 0) {return true;}
 
         $column_width = $this->width / $num_points;
 
-//exit();
-
         $i = 0;
-
-//        $this->points();
 
         foreach ($this->points as $x=>$y) {
 
-//var_dump($y);
-//$x = $y['created_at'];
-//$y = $y['number'];
-
             $common_variable = $y;
 
-      //      $this->y_spread = $y_max - $y_min;
-      //      if ($this->y_spread == 0) {$this->y_spread = 100;}
+            //      $this->y_spread = $y_max - $y_min;
+            //      if ($this->y_spread == 0) {$this->y_spread = 100;}
 
             $y = 10 + $this->chart_height - ($common_variable - $this->y_min) / ($this->y_spread) * $this->chart_height;
             $x = 10 + ($x - $this->x_min) / ($this->x_max - $this->x_min) * $this->chart_width;
@@ -185,21 +207,36 @@ if ($num_points == 0) {return true;}
             $width = $x - $x_old;
 
             $offset = 1.5;
+            // dev for very large numbers
+            /*
+if ( ($y_old - $offset) > $this->chart_height) {continue;}
+if ( (-1 * ($y_old - $offset)) > $this->chart_height)  {continue;}
+
+if ( ($y_old + $offset) > $this->chart_height) {continue;}
+if ( (-1 * ($y_old + $offset)) > $this->chart_height)  {continue;}
+
+if ( ($x_old - $offset) > $this->chart_width) {continue;}
+if ( (-1 * ($x_old - $offset)) > $this->chart_width)  {continue;}
+
+if ( ($x_old + $offset) > $this->chart_width) {continue;}
+if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
+*/
+
 
             imagefilledrectangle($this->image,
-                    $x_old - $offset , $y_old - $offset,
-                    $x_old + $width / 2 + $offset, $y_old + $offset,
-                    $this->red);
+                $x_old - $offset , $y_old - $offset,
+                $x_old + $width / 2 + $offset, $y_old + $offset,
+                $this->red);
 
             imagefilledrectangle($this->image,
-                    $x_old + $width / 2 - $offset, $y_old - $offset,
-                    $x - $width / 2 + $offset, $y + $offset ,
-                    $this->red);
+                $x_old + $width / 2 - $offset, $y_old - $offset,
+                $x - $width / 2 + $offset, $y + $offset ,
+                $this->red);
 
             imagefilledrectangle($this->image,
-                    $x - $width / 2 - $offset , $y - $offset,
-                    $x + $offset, $y + $offset ,
-                    $this->red);
+                $x - $width / 2 - $offset , $y - $offset,
+                $x + $offset, $y + $offset ,
+                $this->red);
 
 
             $y_old = $y;
@@ -209,8 +246,17 @@ if ($num_points == 0) {return true;}
         }
 
         $preferred_step = 10;
-        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
+        $allowed_step_multiples = array(1, 2, 5);
+
+        $range = $this->y_max - $this->y_min;
+
         $inc = ($this->y_max - $this->y_min)/ 5;
+
+
+        $digits = ($range !== 0 ? floor(log10($range) + 1) : 1);
+
+        $digits = $digits - 2;
+        $allowed_steps = array(1 * pow(10, $digits), 2 * pow(10, $digits), 5 * pow(10, $digits), 10 * pow(10, $digits) );
 
         $closest_distance = $this->y_max;
 
@@ -222,8 +268,10 @@ if ($num_points == 0) {return true;}
                 $preferred_step = $step;
             }
         }
+
         $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
     }
+
 
     /**
      *
@@ -304,8 +352,13 @@ if ($num_points == 0) {return true;}
     }
 
 
-    public function drawGrid($y_min, $y_max, $inc)
-    {
+    /**
+     *
+     * @param unknown $y_min
+     * @param unknown $y_max
+     * @param unknown $inc
+     */
+    public function drawGrid($y_min, $y_max, $inc) {
 
         $y = $this->roundUpToAny($y_min, $inc);
 
@@ -337,16 +390,27 @@ if ($num_points == 0) {return true;}
         }
     }
 
-    function roundUpToAny($n,$x=5)
-    {
+
+    /**
+     *
+     * @param unknown $n
+     * @param unknown $x (optional)
+     * @return unknown
+     */
+    function roundUpToAny($n, $x=5) {
         return round(($n+$x/2)/$x)*$x;
     }
 
-    private function drawBar()
-    {
+
+    /**
+     *
+     */
+    private function drawBar() {
 
     }
-/*
+
+
+    /*
 public function blankImage() {
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -361,12 +425,17 @@ public function blankImage() {
 
 }
 */
-public function initChart() {
 
-if ((!isset($this->width)) or (!isset($this->height))) {
-return true;
+    /**
+     *
+     * @return unknown
+     */
+    public function initChart() {
 
-}
+        if ((!isset($this->width)) or (!isset($this->height))) {
+            return true;
+
+        }
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
@@ -378,15 +447,18 @@ return true;
 
         imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
 
-}
+    }
 
 
-    public function makePNG()
-    {
-if (!isset($this->image)) {return true;}
+    /**
+     *
+     * @return unknown
+     */
+    public function makePNG() {
+        if (!isset($this->image)) {return true;}
         //    $this->height = 200;
         //    $this->width = 300;
-/*
+        /*
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
@@ -398,7 +470,7 @@ if (!isset($this->image)) {return true;}
         imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
 */
 
-/*
+        /*
 //$this->blankImage();
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
@@ -416,15 +488,15 @@ if (!isset($this->image)) {return true;}
 
         $size = 72;
         $angle = 0;
-        $bbox = imagettfbbox ($size, $angle, $font, $text); 
-        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-            extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
+        $bbox = imagettfbbox ($size, $angle, $font, $text);
+        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]);
+        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]);
+        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]);
+        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]);
+            extract ($bbox, EXTR_PREFIX_ALL, 'bb');
 
-        //check width of the image 
-        $width = imagesx($this->image); 
+        //check width of the image
+        $width = imagesx($this->image);
         $height = imagesy($this->image);
         $pad = 0;
 */
@@ -439,20 +511,23 @@ if (!isset($this->image)) {return true;}
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="chart"/>';
         $this->image_embedded = $response;
 
-//        imagedestroy($this->image);
+        //        imagedestroy($this->image);
 
         return $response;
     }
 
-    function makeWeb()
-    {
 
-if (!isset($this->image)) {
+    /**
+     *
+     */
+    function makeWeb() {
 
-        $this->thing_report['web'] = "No chart available.";
+        if (!isset($this->image)) {
 
-return;
-}
+            $this->thing_report['web'] = "No chart available.";
+
+            return;
+        }
 
         $link = $this->web_prefix . 'chart/' . $this->uuid . '/agent';
 
@@ -479,19 +554,21 @@ return;
     }
 
 
-    function makeTXT()
-    {
-if (!isset($this->points)) {
-        $this->thing_report['txt'] = "No data available.";
-return;
-}
+    /**
+     *
+     */
+    function makeTXT() {
+        if (!isset($this->points)) {
+            $this->thing_report['txt'] = "No data available.";
+            return;
+        }
 
         $txt = 'This is a CHART. ';
         $txt .= "\n";
 
         $count = null;
         if (is_array($this->points)) {
-          $count =  count($this->points);
+            $count =  count($this->points);
         }
 
         $txt .= $count . '' . ' Points retrieved.\n';
@@ -500,7 +577,7 @@ return;
         $dimension[0] = "age";
         $dimension[1] = "bin_sum";
 
-        foreach($this->points as $key=>$point) {
+        foreach ($this->points as $key=>$point) {
             if (!isset($x_min)) {$x_min = $point['age'];}
             if (!isset($x_max)) {$x_max = $point['age'];}
 
@@ -528,16 +605,16 @@ return;
 
         $num_tubs = 3;
 
-        foreach($this->points as $key=>$point) {
+        foreach ($this->points as $key=>$point) {
 
             //$spread = the distance between youngest and oldest age
             $tub_index = intval(($num_tubs - 1) * ($x_max - $point['age']) / $this->x_spread) + 1;
 
-            if(!isset($tubs[$tub_index])) {$tubs[$tub_index] = 1; continue;}
+            if (!isset($tubs[$tub_index])) {$tubs[$tub_index] = 1; continue;}
             $tubs[$tub_index] += 1;
         }
 
-        foreach($tubs as $x=>$y) {
+        foreach ($tubs as $x=>$y) {
             $txt .= str_pad($x, 7, ' ', STR_PAD_LEFT);
             $txt .= " ";
             $txt .= str_pad($y, 7, ' ', STR_PAD_LEFT);
@@ -552,16 +629,21 @@ return;
 
 
 
-    public function defaultCommand()
-    {
+    /**
+     *
+     */
+    public function defaultCommand() {
         $this->agent = "chart";
         $this->name = "thing";
         $this->identity = $this->from;
     }
 
-    public function readInstruction()
-    {
-        if($this->agent_command == null) {
+
+    /**
+     *
+     */
+    public function readInstruction() {
+        if ($this->agent_command == null) {
             $this->defaultCommand();
         }
 
@@ -573,29 +655,28 @@ return;
         $this->identity = $pieces[2];
     }
 
-	public function readText()
-    {
+
+    /**
+     *
+     */
+    public function readText() {
         // No need to read text.  Any identity input to Tally
         // increments the tally.
-	}
-/*
-    public function read()
-    {
-$this->readSubject();
-//var_dump($this->input);
-//exit();
-        $this->readInstruction();
-        $this->readText();
     }
-*/
 
-public function readSubject() {
-//if ($this->agent_input == "chart") {return null;}
+
+
+    /**
+     *
+     */
+    public function readSubject() {
+        //if ($this->agent_input == "chart") {return null;}
         $this->readInstruction();
         $this->readText();
 
 
 
-}
+    }
+
 
 }

@@ -80,11 +80,11 @@ class Number extends Agent
         if (!isset($this->numbers_history)) {$this->historyNumber();}
         $t = "NUMBER CHART\n";
         $points = array();
-        $x_min = 1e99;
-        $x_max = -1e99;
+//        $x_min = 1e99;
+//        $x_max = -1e99;
 
-        $y_min = 1e99;
-        $y_max = -1e99;
+//        $y_min = 1e99;
+//        $y_max = -1e99;
 
         foreach ($this->numbers_history as $i=>$number_object) {
 
@@ -93,8 +93,15 @@ class Number extends Agent
 
             $points[$created_at] = $number;
 
+if (!isset($x_min)) {$x_min = $created_at;}
+if (!isset($x_max)) {$x_max = $created_at;}
+
+
             if ($created_at < $x_min) {$x_min = $created_at;}
             if ($created_at > $x_max) {$x_max = $created_at;}
+
+if (!isset($y_min)) {$y_min = $number;}
+if (!isset($y_max)) {$y_max = $number;}
 
             if ($number < $y_min) {$y_min = $number;}
             if ($number > $y_max) {$y_max = $number;}
@@ -111,14 +118,27 @@ class Number extends Agent
         $this->chart_agent->y_min = $y_min;
         $this->chart_agent->y_max = $y_max;
 
+//var_dump($y_min);
+//var_dump($y_max);
+
+
+
         $y_spread = 100;
-        if (($y_min == false) or ($y_max === false)) {
+        if (($y_min == false) and ($y_max === false)) {
             //
+        } elseif (($y_min == false) and (is_numeric($y_max))) {
+$y_spread = $y_max;
+        } elseif (($y_max == false) and (is_numeric($y_min))) {
+// test stack
+$y_spread = abs($y_mix);
+
         } else {
             $y_spread = $y_max - $y_min;
-            if ($y_spread == 0) {$y_spread = 100;}
+//            if ($y_spread == 0) {$y_spread = 100;}
         }
+            if ($y_spread == 0) {$y_spread = 100;}
 
+//var_dump($y_spread);
         $this->chart_agent->y_spread = $y_spread;
         $this->chart_agent->drawGraph();
 
@@ -213,7 +233,7 @@ $this->numbers_history = $traditional;
 
         foreach ($this->numbers_history as $i=>$number) {
 
-            $created_at = $number['created_at'];
+            $created_at = $number['timestamp'];
             $calling_agent = $number['calling_agent'];
             $number = $number['number'];
 
@@ -475,13 +495,20 @@ if (!$embedded) {
         if (!isset($this->numbers_history[0])) {
             $web .= "No numbers found<br>";
         } else {
-            $web .= "Biggest number is ". $this->chart_agent->y_max . "<br>";
+$y_max = "X";
+if ((isset($this->chart_agent->y_max)) and ($this->chart_agent->y_max != false)) {$y_max = $this->chart_agent->y_max;}
+            $web .= "Biggest seen number is ". $y_max . "<br>";
 $y_min = "X";
-//var_dump($this->chart_agent->y_min);
-if ((isset($this->chart_agent->y_min)) and ($this->chart_agent->y_min != false)) {$y_min = $this->chart_agent->y_min;}
-            $web .= "Smallest number is ". $y_min . "<br>";
 
-            $web .= "Latest number is ". $this->numbers_history[0]['number'] . "<br>";
+if ((isset($this->chart_agent->y_min)) and ($this->chart_agent->y_min != false)) {$y_min = $this->chart_agent->y_min;}
+            $web .= "Smallest seen number is ". $y_min . "<br>";
+
+$number = "X";
+
+if ((isset($this->numbers_history[0]['number'])) and ($this->numbers_history[0]['number'] != false)) {$number = $this->numbers_history[0]['number'];}
+
+
+            $web .= "Latest number is ". $number . "<br>";
 
             $web .= "Latest " . $this->web_return_max . " extracted numbers are:<br>";
         }
@@ -489,7 +516,7 @@ $i= 0;
         foreach ($this->numbers_history as $key=>$number) {
 $i += 1;
 if ($i >= $this->web_return_max) {break;}
-            $web .= implode(" " , $number) . "<br>";
+            $web .= $number['timestamp'] . " " .$number['calling_agent'] . " " .$number['number'] . "<br>";
         }
 
         if ($this->recognize_french == true) {

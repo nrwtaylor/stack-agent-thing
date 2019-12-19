@@ -24,7 +24,7 @@ function callAgent(str) {
             if (this.readyState == 4 && this.status == 200) {
 var thing_report = JSON.parse(this.responseText);
   //  console.log('response', thing_report); // JSON response 
-                document.getElementById("agent-smsmessage").innerHTML = thing_report.thing_report.message;
+                document.getElementById("agent-smsmessage").innerHTML = thing_report.thing_report.sms;
 	
 //                document.getElementById("agent-smsmessage").innerHTML = this.responseText;
 

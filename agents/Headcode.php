@@ -423,7 +423,7 @@ if(!isset($variables['route'])) {$variables['route'] = "X";}
 
         if (!isset($this->html_image)) {$this->makePNG();}
 
-        $web = '<a href="' . $link . '">'. $this->html_image . "</a>";
+        $web = '<a href="' . $link . '" alt="Tile with '. strtoupper($this->head_code) . ' and ' . $this->thing->nuuid . '">'. $this->html_image . "</a>";
         $web .= "<br>";
 
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';

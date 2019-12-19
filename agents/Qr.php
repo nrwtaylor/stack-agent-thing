@@ -15,7 +15,7 @@ error_reporting(-1);
 class Qr
 {
 
-	function __construct(Thing $thing, $agent_input = null)
+    function __construct(Thing $thing, $agent_input = null)
     {
         $this->thing_report['thing'] = $thing;
 
@@ -85,12 +85,6 @@ class Qr
             $this->quick_responses = array();
         }
 
-        //$pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-
-        //preg_match_all($pattern, $input, $m);
-
-        //$arr = $m[0];
-        //array_pop($arr);
         $this->quick_responses[] = $input;
         return $this->quick_responses;
 
@@ -106,9 +100,9 @@ class Qr
         $this->thing->choice->Create($this->agent_name, $this->node_list, "qr");
         $choices = $this->thing->choice->makeLinks('qr');
 
-        $alt_text = "a QR code with a uuid";
+        $alt_text = "QR code with the uuid " . $this->uuid;
 
-        $web = '<a href="' . $link . '">';
+        $web = '<a href="' . $link . '" ' . 'alt="' . $alt_text .'" >';
         //$web_prefix = "http://localhost:8080/";
 //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/qr.png" jpg" 
 //                width="100" height="100" 

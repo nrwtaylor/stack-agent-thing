@@ -320,6 +320,9 @@ class Agent {
 
         // Treat as nomina
         if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
+        // Treat as nomina
+        if (!isset($thing->created_at)) {$this->created_at = null;} else {$this->created_at = $thing->created_at;}
+
     }
 
 

@@ -124,7 +124,7 @@ class Geolocation extends Agent
 
         $this->thing->log('got ' . $total_items . " Geolocated things.");
 
-        $this->available_cars_count = $total_items;
+        //$this->available_cars_count = $total_items;
 
         $geolocation_places = $json_data;
 
@@ -372,7 +372,7 @@ return;
      */
     public function makeMessage() {
         $message = "Geolocation";
-
+/*
         switch ($this->cars_count) {
         case 0:
             $message .= " did not find any events.";
@@ -383,12 +383,12 @@ return;
             $message .= " found "  . $car_html . ".";
             break;
         default:
-            $message .= " found "  . $this->available_cars_count . ' events.';
+//            $message .= " found "  . $this->available_cars_count . ' events.';
             $car = reset($this->cars);
             $car_html = $this->carString($car);
             $message .= " This was one of them. " . $car_html .".";
         }
-
+*/
         $this->message = $message;
     }
 
