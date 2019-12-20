@@ -21,8 +21,7 @@ class Number extends Agent
     /**
      *
      */
-    function init()
-        {
+    function init() {
         $this->node_list = array("number"=>
             array("number"));
 
@@ -80,11 +79,11 @@ class Number extends Agent
         if (!isset($this->numbers_history)) {$this->historyNumber();}
         $t = "NUMBER CHART\n";
         $points = array();
-//        $x_min = 1e99;
-//        $x_max = -1e99;
+        //        $x_min = 1e99;
+        //        $x_max = -1e99;
 
-//        $y_min = 1e99;
-//        $y_max = -1e99;
+        //        $y_min = 1e99;
+        //        $y_max = -1e99;
 
         foreach ($this->numbers_history as $i=>$number_object) {
 
@@ -93,15 +92,15 @@ class Number extends Agent
 
             $points[$created_at] = $number;
 
-if (!isset($x_min)) {$x_min = $created_at;}
-if (!isset($x_max)) {$x_max = $created_at;}
+            if (!isset($x_min)) {$x_min = $created_at;}
+            if (!isset($x_max)) {$x_max = $created_at;}
 
 
             if ($created_at < $x_min) {$x_min = $created_at;}
             if ($created_at > $x_max) {$x_max = $created_at;}
 
-if (!isset($y_min)) {$y_min = $number;}
-if (!isset($y_max)) {$y_max = $number;}
+            if (!isset($y_min)) {$y_min = $number;}
+            if (!isset($y_max)) {$y_max = $number;}
 
             if ($number < $y_min) {$y_min = $number;}
             if ($number > $y_max) {$y_max = $number;}
@@ -118,8 +117,8 @@ if (!isset($y_max)) {$y_max = $number;}
         $this->chart_agent->y_min = $y_min;
         $this->chart_agent->y_max = $y_max;
 
-//var_dump($y_min);
-//var_dump($y_max);
+        //var_dump($y_min);
+        //var_dump($y_max);
 
 
 
@@ -127,26 +126,76 @@ if (!isset($y_max)) {$y_max = $number;}
         if (($y_min == false) and ($y_max === false)) {
             //
         } elseif (($y_min == false) and (is_numeric($y_max))) {
-$y_spread = $y_max;
+            $y_spread = $y_max;
         } elseif (($y_max == false) and (is_numeric($y_min))) {
-// test stack
-$y_spread = abs($y_mix);
+            // test stack
+            $y_spread = abs($y_mix);
 
         } else {
             $y_spread = $y_max - $y_min;
-//            if ($y_spread == 0) {$y_spread = 100;}
+            //            if ($y_spread == 0) {$y_spread = 100;}
         }
-            if ($y_spread == 0) {$y_spread = 100;}
+        if ($y_spread == 0) {$y_spread = 100;}
 
-//var_dump($y_spread);
+        //var_dump($y_spread);
         $this->chart_agent->y_spread = $y_spread;
         $this->chart_agent->drawGraph();
 
     }
 
+
+    /**
+     *
+     */
     public function makeImage() {
         $this->image = $this->chart_agent->image;
     }
+
+
+public function isSingleprecision($text) {
+
+return $this->isPrecision($text, 1);
+}
+
+public function isPrecision($text, $test_precision = 1) {
+
+$precision = $this->getPrecision($text);
+
+if ($precision == $test_precision) {return true;}
+
+
+
+return false;
+
+}
+
+public function getPrecision($text = null) {
+
+if ($text == null) {$text = $this->input;}
+
+return strlen(substr(strrchr($text, "."), 1));
+
+}
+
+public function getDigits($text = null) {
+
+
+if ($text == null) {$text = $this->input;}
+
+$this->extractNumber($text);
+
+$number = $this->number;
+
+
+$num_digits = $number !== 0 ? floor(log10($number) + 1) : 1;
+
+//$left_of_period = strlen(substr(strrchr($text, "."), 0));
+//$num_digits = str_replace(",","",$left_of_period);
+
+return $num_digits;
+
+}
+
 
     /**
      *
@@ -186,7 +235,7 @@ $y_spread = abs($y_mix);
         array_multisort($refreshed_at, SORT_DESC, $this->numbers_history);
 
 
-/*
+        /*
             // Sort by length of phrase. Shortest first.
             $traditional = array();
             foreach ($this->numbers_history as $key => $row) {
@@ -245,6 +294,21 @@ $this->numbers_history = $traditional;
         }
 
         $this->thing_report['txt'] = $txt;
+
+    }
+
+
+    /**
+     *
+     * @param unknown $text
+     * @return unknown
+     */
+    function hasNumber($text) {
+
+
+        $this->extractNumbers($text);
+        if ((isset($this->numbers)) and (count($this->numbers) > 0)) {return true;}
+        return false;
 
     }
 
@@ -343,56 +407,22 @@ $this->numbers_history = $traditional;
 
     /**
      *
+     * @return unknown
      */
-    /*
-    public function respond() {
-        // Thing actions
-
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(array("number",
-                "received_at"),  $this->thing->json->time()
-        );
-
+    public function respondResponse() {
         $this->thing->flagGreen();
 
-//        $from = $this->from;
-//        $to = $this->to;
+        // This should be the code to handle non-matching responses.
 
-//        $subject = $this->subject;
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
 
-        // Now passed by Thing object
-//        $uuid = $this->uuid;
-//        $sqlresponse = "yes";
+        //        $this->thing_report['sms'] = $this->sms_message;
 
-        //$message = "Thank you here is a Number.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
-        //$message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
-
-//        $this->makeSMS();
-
-        //$this->thing_report['email'] = array('to'=>$from,
-        //   'from'=>'uuid',
-        //   'subject'=>$subject,
-        //   'message'=>$message,
-        //   'choices'=>$choices);
-
-        //$this->makePNG();
-
-//        $this->makeChoices();
-
-
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-//        $this->makeWeb();
-
-//        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->thing_report['help'] = "This extracts numbers from the datagram.";
-
-  //      return;
     }
-*/
+
 
     /**
      *
@@ -419,11 +449,11 @@ $this->numbers_history = $traditional;
         if ($this->number == false) {
             $this->get();
         }
-//var_dump($this->number);
-if ($this->number === false) {
-                $this->response .= "No number found. Text NUMBER 5.3. Or NUMBER 6.005.";
-return null;
-}
+
+        if ($this->number === false) {
+            $this->response .= "No number found. Text NUMBER 5.3. Or NUMBER 6.005.";
+            return null;
+        }
         // Keyword
         $pieces = explode(" ", strtolower($input));
 
@@ -439,18 +469,15 @@ return null;
             }
         }
 
-        if ($this->input == "number chart") {
-$this->response .= "Made a link to a chart " . $this->link;
-//            $this->getNumbers();
+
+        switch ($this->input) {
+        case "number chart":
+        case "chart number":
+        case "number graph":
+        case "graph number":
+            $this->response .= "Made a link to a chart " . $this->link;
             return;
-
-        }
-
-        if ($this->input == "chart number") {
-$this->response .= "Made a link to a chart " . $this->link;
-//            $this->getNumbers();
-            return;
-
+        default:
         }
 
 
@@ -469,17 +496,17 @@ $this->response .= "Made a link to a chart " . $this->link;
 
         $this->node_list = array("number"=>array("number"));
 
-$embedded = true;
-if (!$embedded) {
-        $web = '<a href="' . $link . '">';
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/number.png">';
-        $web .= "</a>";
-} else {
+        $embedded = true;
+        if (!$embedded) {
+            $web = '<a href="' . $link . '">';
+            $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/number.png">';
+            $web .= "</a>";
+        } else {
 
-        $web = '<a href="' . $link . '">';
-        $web .= $this->image_embedded;
-        $web .= "</a>";
-}
+            $web = '<a href="' . $link . '">';
+            $web .= $this->image_embedded;
+            $web .= "</a>";
+        }
         $web .= "<br>";
 
         $web .= "number graph";
@@ -495,27 +522,27 @@ if (!$embedded) {
         if (!isset($this->numbers_history[0])) {
             $web .= "No numbers found<br>";
         } else {
-$y_max = "X";
-if ((isset($this->chart_agent->y_max)) and ($this->chart_agent->y_max != false)) {$y_max = $this->chart_agent->y_max;}
+            $y_max = "X";
+            if ((isset($this->chart_agent->y_max)) and ($this->chart_agent->y_max != false)) {$y_max = $this->chart_agent->y_max;}
             $web .= "Biggest seen number is ". $y_max . "<br>";
-$y_min = "X";
+            $y_min = "X";
 
-if ((isset($this->chart_agent->y_min)) and ($this->chart_agent->y_min != false)) {$y_min = $this->chart_agent->y_min;}
+            if ((isset($this->chart_agent->y_min)) and ($this->chart_agent->y_min != false)) {$y_min = $this->chart_agent->y_min;}
             $web .= "Smallest seen number is ". $y_min . "<br>";
 
-$number = "X";
+            $number = "X";
 
-if ((isset($this->numbers_history[0]['number'])) and ($this->numbers_history[0]['number'] != false)) {$number = $this->numbers_history[0]['number'];}
+            if ((isset($this->numbers_history[0]['number'])) and ($this->numbers_history[0]['number'] != false)) {$number = $this->numbers_history[0]['number'];}
 
 
             $web .= "Latest number is ". $number . "<br>";
 
             $web .= "Latest " . $this->web_return_max . " extracted numbers are:<br>";
         }
-$i= 0;
+        $i= 0;
         foreach ($this->numbers_history as $key=>$number) {
-$i += 1;
-if ($i >= $this->web_return_max) {break;}
+            $i += 1;
+            if ($i >= $this->web_return_max) {break;}
             $web .= $number['timestamp'] . " " .$number['calling_agent'] . " " .$number['number'] . "<br>";
         }
 
@@ -551,14 +578,15 @@ if ($i >= $this->web_return_max) {break;}
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
         //}
-//var_dump($this->number);
-if ((isset($this->number)) and ($this->number != false)) {       $sms .= $this->number ." | ";}
-$sms .= $this->response;
+        //var_dump($this->number);
+        if ((isset($this->number)) and ($this->number != false)) {       $sms .= $this->number ." | ";}
+        $sms .= $this->response;
         $sms .= ' #devstack';
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
+
 
     /**
      *
@@ -571,14 +599,19 @@ $sms .= $this->response;
         $this->choices = $choices;
     }
 
-public function makePNG() {
 
-if (!isset($this->image)) {return true;}
-$this->chart_agent->makePNG();
-$this->image_embedded = $this->chart_agent->image_embedded;
-$this->thing_report['png'] = $this->chart_agent->thing_report['png'];
+    /**
+     *
+     * @return unknown
+     */
+    public function makePNG() {
 
-}
+        if (!isset($this->image)) {return true;}
+        $this->chart_agent->makePNG();
+        $this->image_embedded = $this->chart_agent->image_embedded;
+        $this->thing_report['png'] = $this->chart_agent->thing_report['png'];
+
+    }
 
 
 }

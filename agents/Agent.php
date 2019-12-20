@@ -1360,26 +1360,52 @@ class Agent {
 
         // Here are some other places
 
-        $frequency_thing = new Frequency($this->thing, "extract");
-        $this->thing_report = $frequency_thing->thing_report;
+        $number_thing = new Number($this->thing, "number");
 
-        if ($frequency_thing->hasFrequency($input)) {
+        $frequency_exception_flag = (($number_thing->getDigits($input) == 1) and ($number_thing->getPrecision($input) == 1));
+
+        if ( $number_thing->getPrecision($input) == 0 ) {$frequency_exception_flag = true;}
+
+        if (stripos($input, 'frequency') !== false) {$frequency_exception_flag = false;}
+
+        if (stripos($input, 'freq') !== false) {
+            $frequency_exception_flag = false;
+        }
+
+        if (stripos($input, 'hz') !== false) {
+            $frequency_exception_flag = false;
+        }
+
+
+
+
+        $frequency_thing = new Frequency($this->thing, "extract");
+        //        $this->thing_report = $frequency_thing->thing_report;
+
+        if ( ($frequency_thing->hasFrequency($input)) and !($frequency_exception_flag) ) {
             //            $ars_thing = new Amateurradioservice($this->thing, $input);
             //        $frequency_thing = new Frequency($this->thing, "extract");
-            $frequency_thing = new Frequency($this->thing);
 
-            //            $ars_thing = new Amateurradioservice($this->thing);
-            $this->thing_report = $frequency_thing->thing_report;
-            return $this->thing_report;
+
+            $frequency_thing = new Frequency($this->thing);
+            //var_dump($frequency_thing->response);
+            if ($frequency_thing->response != "") {
+
+                //            $ars_thing = new Amateurradioservice($this->thing);
+                $this->thing_report = $frequency_thing->thing_report;
+                return $this->thing_report;
+            }
 
         }
 
         $repeater_thing = new Repeater($this->thing, "extract");
         $this->thing_report = $repeater_thing->thing_report;
 
-        if ($repeater_thing->hasRepeater($input)) {
+        if ( ($repeater_thing->hasRepeater($input)) and !($frequency_exception_flag) ) {
 
             $ars_thing = new Amateurradioservice($this->thing, $input);
+
+
             if ($ars_thing->response == false) {
 
                 $ars_thing = new Callsign($this->thing);
@@ -1393,6 +1419,16 @@ class Agent {
             }
         }
 
+        //echo "foo";
+        //exit();
+        //if ($frequency_exception_flag) {
+        if (is_numeric($input)) {
+            $this->thing_report = $number_thing->thing_report;
+            return $this->thing_report;
+        }
+
+
+        //}
 
 
         $this->thing->log( 'now looking at Nest Context.  Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
