@@ -52,7 +52,7 @@ class Slug extends Agent
 public function getSlug($text = null) {
 
 if ($text == null) {return true;}
-if ($this->state == "off") {$this->slug = ""; return null;}
+//if ($this->state == "off") {$this->slug = ""; return null;}
 
 $alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
 $slug = $alphanumeric_agent->filterAlphanumeric($text);
