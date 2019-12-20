@@ -359,7 +359,6 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
      * @param unknown $inc
      */
     public function drawGrid($y_min, $y_max, $inc) {
-
         $y = $this->roundUpToAny($y_min, $inc);
 
         //echo $y . " ". $y_max;
@@ -558,6 +557,8 @@ public function blankImage() {
      *
      */
     function makeTXT() {
+return true;
+
         if (!isset($this->points)) {
             $this->thing_report['txt'] = "No data available.";
             return;

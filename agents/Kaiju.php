@@ -5,6 +5,7 @@
  * @package default
  */
 
+// An example of a custom agent.
 
 namespace Nrwtaylor\StackAgentThing;
 
@@ -16,7 +17,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Kaiju extends Chart
+class Kaiju extends Agent
 {
     public $var = 'hello';
 
@@ -54,6 +55,7 @@ class Kaiju extends Chart
         $this->persist_to = $agent->persist_to;
 
         $this->variable = new Variables($this->thing, "variables kaiju " . $this->from);
+
     }
 
 
@@ -63,12 +65,6 @@ class Kaiju extends Chart
     function run() {
         $this->getAddress($this->thing->from);
         $this->getKaiju();
-        /*
-$this->blankImage();
-        $this->drawGraph();
-$this->makePNG();
-*/
-        //exit();
     }
 
 
@@ -92,16 +88,16 @@ $this->makePNG();
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
     function calcdVdt() {
 
         if (!isset($this->points)) {return true;}
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
+
+$this->chart_agent->chart_width = $this->chart_width;
+$this->chart_agent->chart_height = $this->chart_height;
+
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -111,52 +107,64 @@ $this->makePNG();
         foreach ($this->points as &$point) {
 
 
-            if (!isset($refreshed_at_last)) {$refreshed_at_last = $point['refreshed_at'];}
-            //$refreshed_at_last = $refreshed_at;
+if (!isset($refreshed_at_last)) {$refreshed_at_last = $point['refreshed_at'];}
+//$refreshed_at_last = $refreshed_at;
 
-            $refreshed_at = $point['refreshed_at'];
-            $dt = $refreshed_at_last - $refreshed_at; // Going backwards.
-
-
-            if (!isset($series_1_last)) {$series_1_last = $point['series_1'];}
-            $series_1 = $point['series_1'];
-            $point['voltage'] = $point['series_1'];
-
-            $dv = $series_1 - $series_1_last;
+$refreshed_at = $point['refreshed_at'];
+$dt = $refreshed_at_last - $refreshed_at; // Going backwards.
 
 
+if (!isset($series_1_last)) {$series_1_last = $point['series_1'];}
+$series_1 = $point['series_1'];
+$point['voltage'] = $point['series_1'];
 
-            $refreshed_at_last = $refreshed_at;
-            $series_1_last = $series_1;
+$dv = $series_1 - $series_1_last;
 
 
 
+$refreshed_at_last = $refreshed_at;
+$series_1_last = $series_1;
 
-            if ($dt == 0) {
-                $dv_dt = null;} else {
-                $dv_dt = (float) $dv/$dt;
-            }
 
-            $point['dv'] = $dv;
-            $point['dt'] = $dt;
 
-            $point['dv_dt'] = $dv_dt;
+
+if ($dt == 0) {
+$dv_dt = null;} else {
+$dv_dt = (float) $dv/$dt;
+}
+
+$point['dv'] = $dv;
+$point['dt'] = $dt;
+
+$point['dv_dt'] = $dv_dt;
             $i += 1;
         }
 
-    }
+}
 
-
-    /**
-     *
-     * @return unknown
-     */
     function drawGraph1() {
 
-        if (!isset($this->points)) {return true;}
+if (!isset($this->points)) {return true;}
+
+
+
+        $this->chart_agent = new Chart($this->thing, "chart age " . $this->from);
+
+//$this->chart_agent->blankImage();
+
+
+        $this->image = $this->chart_agent->image;
+        $this->black = $this->chart_agent->black;
+        $this->red = $this->chart_agent->red;
+        $this->grey = $this->chart_agent->grey;
+
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
+
+$this->chart_agent->chart_width = $this->chart_width;
+$this->chart_agent->chart_height = $this->chart_height;
+
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -199,6 +207,13 @@ $this->makePNG();
 
         $x_max = strtotime($this->current_time);
 
+
+$this->chart_agent->y_min = $y_min;
+$this->chart_agent->y_max = $y_max;
+$this->chart_agent->x_min = $x_min;
+$this->chart_agent->x_max = $x_max;
+
+
         $i = 0;
 
         foreach ($this->points as $point) {
@@ -222,29 +237,30 @@ $this->makePNG();
 
             $offset = 1.5;
 
-            imagefilledrectangle($this->image,
-                $x_old - $offset , $y_old - $offset,
-                $x_old + $width / 2 + $offset, $y_old + $offset,
-                $this->red);
+            imagefilledrectangle($this->chart_agent->image,
+                    $x_old - $offset , $y_old - $offset,
+                    $x_old + $width / 2 + $offset, $y_old + $offset,
+                    $this->red);
 
-            imagefilledrectangle($this->image,
-                $x_old + $width / 2 - $offset, $y_old - $offset,
-                $x - $width / 2 + $offset, $y + $offset ,
-                $this->red);
+            imagefilledrectangle($this->chart_agent->image,
+                    $x_old + $width / 2 - $offset, $y_old - $offset,
+                    $x - $width / 2 + $offset, $y + $offset ,
+                    $this->red);
 
-            imagefilledrectangle($this->image,
-                $x - $width / 2 - $offset , $y - $offset,
-                $x + $offset, $y + $offset ,
-                $this->red);
+            imagefilledrectangle($this->chart_agent->image,
+                    $x - $width / 2 - $offset , $y - $offset,
+                    $x + $offset, $y + $offset ,
+                    $this->red);
 
 
             $y_old = $y;
             $x_old = $x;
 
             $i += 1;
+
         }
 
-        $allowed_steps = array(0.02, 0.05, 0.2, 0.5, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 10000, 20000, 25000, 100000, 200000, 250000);
+        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
         $inc = ($y_max - $y_min)/ 5;
 
         $closest_distance = $y_max;
@@ -258,21 +274,40 @@ $this->makePNG();
             }
         }
 
-        $this->drawGrid($y_min, $y_max, $preferred_step);
-        return $this->image;
+        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
+
+//echo "merp";
+//exit();
+
+//        $this->chart_agent->image = $this->image;
+        $this->chart_agent->makePNG();
+        $this->image_embedded = $this->chart_agent->image_embedded;
+        $this->image = $this->chart_agent->image;
+//        $this->html_image = $this->chart_agent->html_image;
+
+
+return $this->image;
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
     function drawGraph2() {
 
-        if (!isset($this->points)) {return true;}
+if (!isset($this->points)) {return true;}
+
+        $this->chart_agent = new Chart($this->thing, "chart age " . $this->from);
+//$this->chart_agent->blankImage();
+
+        $this->image = $this->chart_agent->image;
+        $this->black = $this->chart_agent->black;
+        $this->red = $this->chart_agent->red;
+        $this->grey = $this->chart_agent->grey;
+
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
+
+$this->chart_agent->chart_width = $this->chart_width;
+$this->chart_agent->chart_height = $this->chart_height;
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -285,8 +320,8 @@ $this->makePNG();
         $refreshed_at = $this->points[0]['refreshed_at'];
 
         // Get min and max
-        if (!isset($y_min)) { $y_min = min($temperature_1, $temperature_2, $temperature_3); }
-        if (!isset($y_max)) {$y_max = max($temperature_1, $temperature_2, $temperature_3);}
+        if (!isset($y_min)) { $y_min = min($temperature_1,$temperature_2, $temperature_3); }
+        if (!isset($y_max)) {$y_max = max($temperature_1,$temperature_2, $temperature_3);}
 
         if (!isset($x_min)) { $x_min = $refreshed_at; }
         if (!isset($x_max)) { $x_max = $refreshed_at; }
@@ -301,10 +336,10 @@ $this->makePNG();
             $temperature_3 = $point['temperature_3'];
 
 
-            //            $dv_dt = $point['dv_dt'];
+//            $dv_dt = $point['dv_dt'];
 
-            //            $queue_time = $point['series_2'];
-            //            $elapsed_time = $series_1 + $series_2;
+//            $queue_time = $point['series_2'];
+//            $elapsed_time = $series_1 + $series_2;
 
             $refreshed_at = $point['refreshed_at'];
 
@@ -321,12 +356,11 @@ $this->makePNG();
             }
 
 
-            if (min($temperature_1, $temperature_2, $temperature_3) < $y_min) {$y_min = min($temperature_1, $temperature_2, $temperature_3);}
-            if (max($temperature_1, $temperature_2, $temperature_3) > $y_max) {$y_max = max($temperature_1, $temperature_2, $temperature_3);}
+            if (min($temperature_1,$temperature_2, $temperature_3) < $y_min) {$y_min = min($temperature_1,$temperature_2, $temperature_3);}
+            if (max($temperature_1,$temperature_2, $temperature_3) > $y_max) {$y_max = max($temperature_1,$temperature_2, $temperature_3);}
 
             if ($refreshed_at < $x_min) {$x_min = $refreshed_at;}
             if ($refreshed_at > $x_max) {$x_max = $refreshed_at;}
-
 
 
             $i += 1;
@@ -334,19 +368,27 @@ $this->makePNG();
 
         $x_max = strtotime($this->current_time);
 
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
+$this->y_max = $y_max;
+$this->y_min = $y_min;
 
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
-
-
-        $this->drawSeries('temperature_1', 'red');
-        $this->drawSeries('temperature_2', 'black', 1);
-        $this->drawSeries('temperature_3', 'grey', 1);
+$this->x_max = $x_max;
+$this->x_min = $x_min;
 
 
-        $allowed_steps = array(0.02, 0.05, 0.2, 0.5, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 10000, 20000, 25000, 100000, 200000, 250000);
+$this->chart_agent->y_min = $y_min;
+$this->chart_agent->y_max = $y_max;
+$this->chart_agent->x_min = $x_min;
+$this->chart_agent->x_max = $x_max;
+
+
+
+$this->drawSeries('temperature_1','red');
+$this->drawSeries('temperature_2','black', 1);
+$this->drawSeries('temperature_3','grey', 1);
+
+
+
+        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
         $inc = ($y_max - $y_min)/ 5;
 
         $closest_distance = $y_max;
@@ -360,20 +402,36 @@ $this->makePNG();
             }
         }
 
-        $this->drawGrid($y_min, $y_max, $preferred_step);
+        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
+
+
+        $this->chart_agent->image = $this->image;
+        $this->chart_agent->makePNG();
+        $this->image_embedded = $this->chart_agent->image_embedded;
+        $this->image = $this->chart_agent->image;
+//        $this->html_image = $this->chart_agent->html_image;
+
+
     }
 
+   function drawGraph3() {
 
-    /**
-     *
-     * @return unknown
-     */
-    function drawGraph3() {
+if (!isset($this->points)) {return true;}
 
-        if (!isset($this->points)) {return true;}
+        $this->chart_agent = new Chart($this->thing, "chart age " . $this->from);
+//$this->chart_agent->blankImage();
+        $this->image = $this->chart_agent->image;
+        $this->black = $this->chart_agent->black;
+        $this->red = $this->chart_agent->red;
+        $this->grey = $this->chart_agent->grey;
+
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
+
+$this->chart_agent->chart_width = $this->chart_width;
+$this->chart_agent->chart_height = $this->chart_height;
+
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -414,16 +472,22 @@ $this->makePNG();
 
         $x_max = strtotime($this->current_time);
 
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
+$this->y_max = $y_max;
+$this->y_min = $y_min;
 
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
+$this->x_max = $x_max;
+$this->x_min = $x_min;
 
-        //return true;
-        $this->drawSeries('magnetic_field');
+$this->chart_agent->y_min = $y_min;
+$this->chart_agent->y_max = $y_max;
+$this->chart_agent->x_min = $x_min;
+$this->chart_agent->x_max = $x_max;
 
-        $allowed_steps = array(0.02, 0.05, 0.2, 0.5, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 10000, 20000, 25000, 100000, 200000, 250000);
+
+//return true;
+$this->drawSeries('magnetic_field');
+
+        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
         $inc = ($y_max - $y_min)/ 5;
 
         $closest_distance = $y_max;
@@ -436,23 +500,38 @@ $this->makePNG();
                 $preferred_step = $step;
             }
         }
-        $this->drawGrid($y_min, $y_max, $preferred_step);
+        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
+
+        $this->chart_agent->image = $this->image;
+        $this->chart_agent->makePNG();
+        $this->image_embedded = $this->chart_agent->image_embedded;
+        $this->image = $this->chart_agent->image;
+//        $this->html_image = $this->chart_agent->html_image;
+
 
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
-    function drawGraph4() {
+   function drawGraph4() {
 
-        $series_name = 'pressure';
+$series_name = 'pressure';
 
-        if (!isset($this->points)) {return true;}
+if (!isset($this->points)) {return true;}
+
+        $this->chart_agent = new Chart($this->thing, "chart age " . $this->from);
+//$this->chart_agent->blankImage();
+        $this->image = $this->chart_agent->image;
+        $this->black = $this->chart_agent->black;
+        $this->red = $this->chart_agent->red;
+        $this->grey = $this->chart_agent->grey;
+
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
+
+$this->chart_agent->chart_width = $this->chart_width;
+$this->chart_agent->chart_height = $this->chart_height;
+
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -493,16 +572,22 @@ $this->makePNG();
 
         $x_max = strtotime($this->current_time);
 
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
+$this->y_max = $y_max;
+$this->y_min = $y_min;
 
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
+$this->x_max = $x_max;
+$this->x_min = $x_min;
 
-        //return true;
-        $this->drawSeries($series_name);
+$this->chart_agent->y_min = $y_min;
+$this->chart_agent->y_max = $y_max;
+$this->chart_agent->x_min = $x_min;
+$this->chart_agent->x_max = $x_max;
 
-        $allowed_steps = array(0.02, 0.05, 0.2, 0.5, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 10000, 20000, 25000, 100000, 200000, 250000);
+
+//return true;
+$this->drawSeries($series_name);
+
+        $allowed_steps = array(0.02,0.05,0.2,0.5,2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
         $inc = ($y_max - $y_min)/ 5;
 
         $closest_distance = $y_max;
@@ -515,25 +600,38 @@ $this->makePNG();
                 $preferred_step = $step;
             }
         }
-        $this->drawGrid($y_min, $y_max, $preferred_step);
+        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
+
+        $this->chart_agent->image = $this->image;
+        $this->chart_agent->makePNG();
+        $this->image_embedded = $this->chart_agent->image_embedded;
+        $this->image = $this->chart_agent->image;
+//        $this->html_image = $this->chart_agent->html_image;
+
 
     }
 
 
 
-    /**
-     *
-     * @param unknown $series_name (optional)
-     * @return unknown
-     */
-    function drawGraph($series_name = null) {
+   function drawGraph($series_name = null) {
 
-        //$series_name = 'dv_dt';
+//$series_name = 'dv_dt';
 
-        if (!isset($this->points)) {return true;}
+if (!isset($this->points)) {return true;}
+
+        $this->chart_agent = new Chart($this->thing, "chart age " . $this->from);
+//$this->chart_agent->blankImage();
+        $this->image = $this->chart_agent->image;
+        $this->black = $this->chart_agent->black;
+        $this->red = $this->chart_agent->red;
+        $this->grey = $this->chart_agent->grey;
+
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
+
+$this->chart_agent->chart_width = $this->chart_width;
+$this->chart_agent->chart_height = $this->chart_height;
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -554,6 +652,7 @@ $this->makePNG();
         $i = 0;
         foreach ($this->points as $point) {
             $magnetic_field = $point[$series_name];
+//if ($series_name == "bilge_level") {var_dump($point); exit();echo $magnetic_field;}
             $refreshed_at = $point['refreshed_at'];
 
             if ($magnetic_field == null) {
@@ -574,16 +673,22 @@ $this->makePNG();
 
         $x_max = strtotime($this->current_time);
 
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
+$this->y_max = $y_max;
+$this->y_min = $y_min;
 
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
+$this->x_max = $x_max;
+$this->x_min = $x_min;
 
-        //return true;
-        $this->drawSeries($series_name);
+$this->chart_agent->y_min = $y_min;
+$this->chart_agent->y_max = $y_max;
+$this->chart_agent->x_min = $x_min;
+$this->chart_agent->x_max = $x_max;
 
-        $allowed_steps = array(0.02, 0.05, 0.2, 0.5, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 10000, 20000, 25000, 100000, 200000, 250000);
+
+//return true;
+$this->drawSeries($series_name);
+
+        $allowed_steps = array(0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02,0.05,0.1, 0.2,0.5,1, 2,5,10,20,25,50,100,200,250,500,1000,2000,2500, 10000, 20000, 25000, 100000,200000,250000);
         $inc = ($y_max - $y_min)/ 5;
 
         $closest_distance = $y_max;
@@ -596,48 +701,49 @@ $this->makePNG();
                 $preferred_step = $step;
             }
         }
-        $this->drawGrid($y_min, $y_max, $preferred_step);
+        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
+
+        $this->chart_agent->image = $this->image;
+        $this->chart_agent->makePNG();
+        $this->image_embedded = $this->chart_agent->image_embedded;
+        $this->image = $this->chart_agent->image;
+//        $this->html_image = $this->chart_agent->html_image;
 
     }
 
 
-    /**
-     *
-     * @param unknown $series_name (optional)
-     * @param unknown $colour      (optional)
-     * @param unknown $line_width  (optional)
-     * @return unknown
-     */
-    public function drawSeries($series_name = null, $colour = 'red', $line_width = 1.5) {
-        if ($series_name == null) {return true;}
 
 
-        $y_max = $this->y_max;
-        $x_max = $this->x_max;
-
-        $y_min = $this->y_min;
-        $x_min = $this->x_min;
+public function drawSeries($series_name = null, $colour = 'red', $line_width = 1.5) {
+if ($series_name == null) {return true;}
 
 
-        //$series_name = 'temperature_1';
+$y_max = $this->y_max;
+$x_max = $this->x_max;
+
+$y_min = $this->y_min;
+$x_min = $this->x_min;
+
+
+//$series_name = 'temperature_1';
         $x_max = strtotime($this->current_time);
 
         $i = 0;
         foreach ($this->points as $point) {
-            //$y = array();
+//$y = array();
 
             $series = $point[$series_name];
 
-            //            $temperature_2 = $point['temperature_2'];
-            ///            $temperature_3 = $point['temperature_3'];
+//            $temperature_2 = $point['temperature_2'];
+///            $temperature_3 = $point['temperature_3'];
 
 
-            //            $series_1 = $point['series_1'];
-            //            $series_2 = $point['series_2'];
+//            $series_1 = $point['series_1'];
+//            $series_2 = $point['series_2'];
 
-            //            $dv_dt = $point['dv_dt'];
+//            $dv_dt = $point['dv_dt'];
 
-            //            $elapsed_time = $series_1 + $series_2;
+//            $elapsed_time = $series_1 + $series_2;
             $refreshed_at = $point['refreshed_at'];
 
             $y_spread = $y_max - $y_min;
@@ -654,20 +760,20 @@ $this->makePNG();
 
             $offset = $line_width;
 
-            imagefilledrectangle($this->image,
-                $x_old - $offset , $y_old - $offset,
-                $x_old + $width / 2 + $offset, $y_old + $offset,
-                $this->{$colour});
+            imagefilledrectangle($this->chart_agent->image,
+                    $x_old - $offset , $y_old - $offset,
+                    $x_old + $width / 2 + $offset, $y_old + $offset,
+                    $this->{$colour});
 
-            imagefilledrectangle($this->image,
-                $x_old + $width / 2 - $offset, $y_old - $offset,
-                $x - $width / 2 + $offset, $y + $offset ,
-                $this->{$colour});
+            imagefilledrectangle($this->chart_agent->image,
+                    $x_old + $width / 2 - $offset, $y_old - $offset,
+                    $x - $width / 2 + $offset, $y + $offset ,
+                    $this->{$colour});
 
-            imagefilledrectangle($this->image,
-                $x - $width / 2 - $offset , $y - $offset,
-                $x + $offset, $y + $offset ,
-                $this->{$colour});
+            imagefilledrectangle($this->chart_agent->image,
+                    $x - $width / 2 - $offset , $y - $offset,
+                    $x + $offset, $y + $offset ,
+                    $this->{$colour});
 
 
             $y_old = $y;
@@ -677,8 +783,7 @@ $this->makePNG();
         }
 
 
-    }
-
+}
 
     /**
      *
@@ -857,7 +962,7 @@ $this->makePNG();
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
-            //            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
+//            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
             //echo $block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from'] . "\n";
             if ($block_thing['nom_from'] != $this->kaiju_address) {continue;}
 
@@ -883,52 +988,56 @@ $this->makePNG();
 
                 $parsed_thing['created_at'] = $thing['created_at'];
 
-                //                $parsed_thing['created_at'] = strtotime($thing['created_at']);
+//                $parsed_thing['created_at'] = strtotime($thing['created_at']);
                 $this->kaiju_things[] = $parsed_thing;
 
 
-                $thing_subject= $thing['task'];
+            $thing_subject= $thing['task'];
 
-                $kaiju_array = explode("|" , $thing_subject);
-                $data_array = explode(" " , $kaiju_array[1]);
-                //$voltage = (float)str_replace("V","",$data_array[2]);
+$kaiju_array = explode("|" , $thing_subject);
+$data_array = explode(" " ,$kaiju_array[1]);
+//$voltage = (float)str_replace("V","",$data_array[2]);
 
-                $voltage = $this->parseData($data_array[2]);
+$voltage = $this->parseData($data_array[2]);
 
-                $temperature_1 = str_replace("C", "", $data_array[10]);
-                $temperature_2 = str_replace("C", "", $data_array[11]);
-                $temperature_3 = str_replace("C", "", $data_array[12]);
-
-
-                //var_dump($parsed_thing);
-                $magnetic_field_text = $parsed_thing['magnetic_field'];
-                $magnetic_field = $this->parseData($magnetic_field_text)['magnetic_field'];
-
-                $pressure_text = $parsed_thing['pressure'];
-                $pressure = $this->parseData($pressure_text)['pressure'];
+$temperature_1 = str_replace("C","",$data_array[10]);
+$temperature_2 = str_replace("C","",$data_array[11]);
+$temperature_3 = str_replace("C","",$data_array[12]);
 
 
-                //$array = array();
-                //$array["refreshed_at"] = $parsed_thing['created_at'];
-                //$array["series_1"] = $voltage;
-                //$array["series_2"] = 0;
-                //var_dump($array);
+//var_dump($parsed_thing);
+$magnetic_field_text = $parsed_thing['magnetic_field'];
+$magnetic_field = $this->parseData($magnetic_field_text)['magnetic_field'];
+
+$pressure_text = $parsed_thing['pressure'];
+$pressure = $this->parseData($pressure_text)['pressure'];
+
+$bilge_level_text = $parsed_thing['bilge_level'];
+$bilge_level = $this->parseData($bilge_level_text)['bilge'];
 
 
-                //var_dump($data_array[2]);
-                $this->points[] = array("refreshed_at"=>strtotime($parsed_thing['created_at']),
-                    "series_1"=>$voltage["voltage"],
-                    "series_2"=>0,
-                    "temperature_1"=>$temperature_1,
-                    "temperature_2"=>$temperature_2,
-                    "temperature_3"=>$temperature_3,
-                    "magnetic_field"=>$magnetic_field,
-                    "pressure"=>$pressure,
+//$array = array();
+//$array["refreshed_at"] = $parsed_thing['created_at'];
+//$array["series_1"] = $voltage;
+//$array["series_2"] = 0;
+//var_dump($array);
 
-                );
-                //$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], $voltage, "series_2"=>0);
 
-                //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
+//var_dump($data_array[2]);
+$this->points[] = array("refreshed_at"=>strtotime($parsed_thing['created_at']), 
+"series_1"=>$voltage["voltage"], 
+"series_2"=>0,
+"temperature_1"=>$temperature_1,
+"temperature_2"=>$temperature_2,
+"temperature_3"=>$temperature_3,
+"magnetic_field"=>$magnetic_field,
+"pressure"=>$pressure,
+"bilge_level"=>$bilge_level
+
+);
+//$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], $voltage, "series_2"=>0);
+
+   //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
 
 
 
@@ -940,33 +1049,26 @@ $this->makePNG();
         return $this->kaiju_thing;
     }
 
+function parseData($text) {
 
-    /**
-     *
-     * @param unknown $text
-     * @return unknown
-     */
-    function parseData($text) {
+$map = array("V" => "voltage", "Pa"=>"pressure", "uT"=>"magnetic_field", "g"=>"acceleration",
+"mm"=>"bilge");
 
-        $map = array("V" => "voltage", "Pa"=>"pressure", "uT"=>"magnetic_field", "g"=>"acceleration",
-            "mm"=>"bilge");
+foreach($map as $symbol=>$name) {
 
-        foreach ($map as $symbol=>$name) {
+if (strpos($text, $symbol) !== false) {
+$voltage = (float)str_replace($symbol,"",$text);
+//echo $symbol . " " . $name ." " . $voltage.  "\n";
 
-            if (strpos($text, $symbol) !== false) {
-                $voltage = (float)str_replace($symbol, "", $text);
-                //echo $symbol . " " . $name ." " . $voltage.  "\n";
+$a[$name] = $voltage;
+return $a;
 
-                $a[$name] = $voltage;
-                return $a;
+}
+}
 
-            }
-        }
+return null;
 
-        return null;
-
-    }
-
+}
 
     /**
      *
@@ -1026,12 +1128,12 @@ $this->makePNG();
 
     /**
      *
-     * @param unknown $test
+     * @param unknown $Wtest
      * @return unknown
      */
     private function parseKaiju($test) {
 
-        if (isset($this->test_string)) {$test = $this->test_string;}
+if (isset($this->test_string)) {$test = $this->test_string;}
 
         if (mb_substr($test, 0, 1) == "#") {$word = false; return $word;}
 
@@ -1069,69 +1171,69 @@ $this->makePNG();
             return null;
         }
 
-        if (!isset($dict[4])) {return;}
-        if (!isset($dict[5])) {return;}
+if (!isset($dict[4])) {return;}
+if (!isset($dict[5])) {return;}
 
-        //var_dump($dict);
-        //var_dump(count($dict));
+//var_dump($dict);
+//var_dump(count($dict));
 
         //foreach($dict as $index=>$phrase) {
         //    if ($index == 0) {continue;}
         //    if ($phrase == "") {continue;}
         //    $english_phrases[] = $phrase;
         //}
-        if (count($dict) == 12) {
-            $nuuid =  $dict[2];
-            $kaiju_voltage =  $dict[3];
-            $kaiju_temperature =  $dict[4];
-            $pressure = $dict[5];
-            $magnetic_field =  $dict[6];
-            $vertical_acceleration =  $dict[7];
-            $temperature_1 =  $dict[8];
-            $temperature_2 =  $dict[9];
-            $temperature_3 =  $dict[10];
-            $bilge_level =  $dict[11];
-            $pitch = null;
-            $roll = null;
-            $heading = null;
-            $clock_time = null;
-        }
+if (count($dict) == 12) {
+        $nuuid =  $dict[2];
+        $kaiju_voltage =  $dict[3];
+        $kaiju_temperature =  $dict[4];
+        $pressure = $dict[5];
+        $magnetic_field =  $dict[6];
+        $vertical_acceleration =  $dict[7];
+        $temperature_1 =  $dict[8];
+        $temperature_2 =  $dict[9];
+        $temperature_3 =  $dict[10];
+        $bilge_level =  $dict[11];
+$pitch = null;
+$roll = null;
+$heading = null;
+$clock_time = null;
+}
 
-        if (count($dict) == 13) {
-            $nuuid =  $dict[2];
-            $kaiju_voltage =  $dict[3];
-            $kaiju_temperature =  $dict[4];
-            $pressure = $dict[5];
-            $magnetic_field =  $dict[6];
-            $vertical_acceleration =  $dict[7];
-            $temperature_1 =  $dict[8];
-            $temperature_2 =  $dict[9];
-            $temperature_3 =  $dict[10];
-            $bilge_level =  $dict[11];
-            $pitch = null;
-            $roll = null;
-            $heading = null;
-            $clock_time = $dict[12];
-        }
+if (count($dict) == 13) {
+        $nuuid =  $dict[2];
+        $kaiju_voltage =  $dict[3];
+        $kaiju_temperature =  $dict[4];
+        $pressure = $dict[5];
+        $magnetic_field =  $dict[6];
+        $vertical_acceleration =  $dict[7];
+        $temperature_1 =  $dict[8];
+        $temperature_2 =  $dict[9];
+        $temperature_3 =  $dict[10];
+        $bilge_level =  $dict[11];
+$pitch = null;
+$roll = null;
+$heading = null;
+$clock_time = $dict[12];
+}
 
-        if (count($dict) == 14) {
-            $nuuid =  $dict[2];
-            $kaiju_voltage =  $dict[3];
-            $kaiju_temperature =  $dict[4];
-            $pressure = $dict[5];
-            $magnetic_field =  $dict[6];
-            $vertical_acceleration =  $dict[7];
-            $temperature_1 =  $dict[8];
-            $temperature_2 =  $dict[9];
-            $temperature_3 =  $dict[10];
-            $bilge_level =  $dict[11];
-            $pitch = null;
-            $roll = null;
-            $heading = null;
-            $clock_time = $dict[12] . " " . $dict[13];
-        }
+if (count($dict) == 14) {
+        $nuuid =  $dict[2];
+        $kaiju_voltage =  $dict[3];
+        $kaiju_temperature =  $dict[4];
+        $pressure = $dict[5];
+        $magnetic_field =  $dict[6];
+        $vertical_acceleration =  $dict[7];
+        $temperature_1 =  $dict[8];
+        $temperature_2 =  $dict[9];
+        $temperature_3 =  $dict[10];
+        $bilge_level =  $dict[11];
+$pitch = null;
+$roll = null;
+$heading = null;
+$clock_time = $dict[12] . " " . $dict[13];
+}
 
-        if (count($dict) == 15) {
+if (count($dict) == 15) {
 
             $nuuid =  $dict[2];
             $kaiju_voltage =  $dict[3];
@@ -1139,19 +1241,19 @@ $this->makePNG();
             $pressure =  $dict[5];
             $magnetic_field =  $dict[6];
             $vertical_acceleration =  $dict[7];
-            $pitch =  $dict[8];
-            $roll =  $dict[9];
-            $heading =  $dict[10];
+        $pitch =  $dict[8];
+        $roll =  $dict[9];
+        $heading =  $dict[10];
 
             $temperature_1 =  $dict[11];
             $temperature_2 =  $dict[12];
             $temperature_3 =  $dict[13];
-            $bilge_level =  $dict[14];
+           $bilge_level =  $dict[14];
             $clock_time =  null;
-        }
+}
 
 
-        if (count($dict) == 16) {
+if (count($dict) == 16) {
 
             $nuuid =  $dict[2];
             $kaiju_voltage =  $dict[3];
@@ -1159,18 +1261,18 @@ $this->makePNG();
             $pressure =  $dict[5];
             $magnetic_field =  $dict[6];
             $vertical_acceleration =  $dict[7];
-            $pitch =  $dict[8];
-            $roll =  $dict[9];
-            $heading =  $dict[10];
+        $pitch =  $dict[8];
+        $roll =  $dict[9];
+        $heading =  $dict[10];
 
             $temperature_1 =  $dict[11];
             $temperature_2 =  $dict[12];
             $temperature_3 =  $dict[13];
-            $bilge_level =  $dict[14];
+           $bilge_level =  $dict[14];
             $clock_time =  $dict[15];
-        }
+}
 
-        if (count($dict) == 17) {
+if (count($dict) == 17) {
 
             $nuuid =  $dict[2];
             $kaiju_voltage =  $dict[3];
@@ -1178,22 +1280,22 @@ $this->makePNG();
             $pressure =  $dict[5];
             $magnetic_field =  $dict[6];
             $vertical_acceleration =  $dict[7];
-            $pitch =  $dict[8];
-            $roll =  $dict[9];
-            $heading =  $dict[10];
+        $pitch =  $dict[8];
+        $roll =  $dict[9];
+        $heading =  $dict[10];
 
             $temperature_1 =  $dict[11];
             $temperature_2 =  $dict[12];
             $temperature_3 =  $dict[13];
-            $bilge_level =  $dict[14];
+           $bilge_level =  $dict[14];
             $clock_time =  $dict[15]. " " . $dict[16];
-        }
+}
 
         //        $dict = explode(",",$text);
         //        $kaiju_owner = $dict[0];
         //        $kaiju_address = trim($dict[1]);
 
-        if (!isset($nuuid)) {var_dump($dict);}
+if (!isset($nuuid)) {var_dump($dict);}
 
         $parsed_line = array(
             "nuuid" =>  $nuuid,
@@ -1202,29 +1304,25 @@ $this->makePNG();
             "pressure" =>  $pressure,
             "magnetic_field" =>  $magnetic_field,
             "vertical_acceleration" =>  $vertical_acceleration,
-            "pitch" =>  $pitch,
-            "roll" =>  $roll,
-            "heading" =>  $heading,
+        "pitch" =>  $pitch,
+        "roll" =>  $roll,
+        "heading" =>  $heading,
 
             "temperature_1" =>  $temperature_1,
             "temperature_2" =>  $temperature_2,
             "temperature_3" =>  $temperature_3,
             "bilge_level" =>  $bilge_level,
             "clocktime" =>  $clock_time
-        );
+);
 
         return $parsed_line;
     }
 
+function test() {
 
-    /**
-     *
-     */
-    function test() {
+$this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6C 25.8C 516mm 1564091111";
 
-        $this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6C 25.8C 516mm 1564091111";
-
-    }
+}
 
 
     /**
@@ -1243,11 +1341,10 @@ $this->makePNG();
         return $this->bank;
     }
 
+//    public function makeImage() {
+//       $this->image = null;
 
-    //    public function makeImage() {
-    //       $this->image = null;
-
-    //    }
+//    }
 
     /**
      *
@@ -1300,8 +1397,8 @@ $this->makePNG();
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/kaiju.pdf';
 
         //        $sms = "KAIJU " . $this->inject . " | " . $link . " | " . $this->response;
-        $text = "Was not found.";
-        if (isset($this->kaiju_thing)) {$text = implode(" " , $this->kaiju_thing);}
+	$text = "Was not found.";
+	if (isset($this->kaiju_thing)) {$text = implode(" " ,$this->kaiju_thing);}
         $sms = "KAIJU THING | " . $text;
 
 
@@ -1333,10 +1430,10 @@ $this->makePNG();
     function makeMessage() {
 
 
-        if (!isset($this->sms_message)) {$this->makeSMS();}
+	if (!isset($this->sms_message)) {$this->makeSMS();}
         $message = $this->sms_message . "<br>";
-        //        $uuid = $this->uuid;
-        //        $message .= "<p>" . $this->web_prefix . "thing/$uuid/kaiju\n \n\n<br> ";
+//        $uuid = $this->uuid;
+//        $message .= "<p>" . $this->web_prefix . "thing/$uuid/kaiju\n \n\n<br> ";
         $this->thing_report['message'] = $message;
     }
 
@@ -1364,7 +1461,7 @@ $this->makePNG();
         $this->thing_report['pngs'] = array();
         //return;
         $agent = new Png($this->thing, "png");
-        /*
+/*
         foreach ($this->result as $index=>$die_array) {
             reset($die_array);
             //echo key($die_array) . ' = ' . current($die_array);
@@ -1392,64 +1489,77 @@ $this->makePNG();
             $this->thing_report['pngs'][$this->agent_name . '-'.$index] = $agent->image_string;
 }
 */
-    }
-
+}
 
     /**
      *
      */
     function makeWeb() {
-
         $this->node_list = array("asleep"=>array("awake", "moving"));
 
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/kaiju';
+//$this->blankImage();
 
-        $this->blankImage();
         $this->drawGraph1();
-        if (!isset($this->html_image)) {$this->makePNG();}
-        $graph1_image_embedded = $this->image_embedded;
 
-        $this->image = null;
-        $this->makePNG();
 
-        $this->blankImage();
+//        if (!isset($this->html_image)) {$this->makePNG();}
+$graph1_image_embedded = $this->chart_agent->image_embedded;
+
+//$this->image = null;
+//$this->makePNG();
+
+//$this->blankImage();
+
+//echo "merp";
+//exit();
+
         $this->drawGraph2();
-        if (!isset($this->html_image)) {$this->makePNG();}
-        $graph2_image_embedded = $this->image_embedded;
-
-        $this->makePNG();
+//        if (!isset($this->html_image)) {$this->makePNG();}
+$graph2_image_embedded = $this->chart_agent->image_embedded;
 
 
-        $this->blankImage();
+
+$this->makePNG();
+
+
+//$this->blankImage();
         $this->drawGraph3();
-        //        $this->drawGraph('magnetic');
+//        $this->drawGraph('magnetic');
 
-        $this->makePNG();
-        //        if (!isset($this->html_image)) {$this->makePNG();}
-        $graph3_image_embedded = $this->image_embedded;
+$this->makePNG();
+//        if (!isset($this->html_image)) {$this->makePNG();}
+$graph3_image_embedded = $this->chart_agent->image_embedded;
 
-        //$graph3_image_embedded = $graph2_image_embedded;
+//$graph3_image_embedded = $graph2_image_embedded;
 
-        //$this->makePNG();
+//$this->makePNG();
 
 
-        $this->blankImage();
-        //        $this->drawGraph4();
+//$this->blankImage();
+//        $this->drawGraph4();
         $this->drawGraph('pressure');
 
-        $this->makePNG();
-        //        if (!isset($this->html_image)) {$this->makePNG();}
-        $graph4_image_embedded = $this->image_embedded;
+$this->makePNG();
+//        if (!isset($this->html_image)) {$this->makePNG();}
+$graph4_image_embedded = $this->chart_agent->image_embedded;
 
 
-        $this->calcDvdt();
+        $this->drawGraph('bilge_level');
 
-        $this->blankImage();
+$this->makePNG();
+//        if (!isset($this->html_image)) {$this->makePNG();}
+$graph6_image_embedded = $this->chart_agent->image_embedded;
+
+
+$this->calcDvdt();
+
+//$this->blankImage();
         $this->drawGraph('dv_dt');
-        $this->makePNG();
-        //        if (!isset($this->html_image)) {$this->makePNG();}
-        $graph5_image_embedded = $this->image_embedded;
+$this->makePNG();
+//        if (!isset($this->html_image)) {$this->makePNG();}
+$graph5_image_embedded = $this->chart_agent->image_embedded;
 
 
         $web = "<b>Kaiju Agent</b>";
@@ -1461,103 +1571,112 @@ $this->makePNG();
         //$web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         //$web .= "<br>";
 
-        //$this->kaiju_thing
+//$this->kaiju_thing
 
         $web .= $this->sms_message;
         $web .= "\n";
 
         $web .= "<p>";
 
-        if (isset($this->kaiju_thing)) {
+if (isset($this->kaiju_thing)) {
 
-            $web .= "NUUID " . $this->kaiju_thing['nuuid'] . "<br>";
+        $web .= "NUUID " . $this->kaiju_thing['nuuid'] . "<br>";
 
-            $web .= "kaiju voltage " . $this->kaiju_thing['kaiju_voltage'];
-            if ($this->kaiju_thing['kaiju_voltage'] < 11.50) {$web .= " WARN";}
-            $web.= "<br>";
+        $web .= "kaiju voltage " . $this->kaiju_thing['kaiju_voltage'];
+if ($this->kaiju_thing['kaiju_voltage'] < 11.50) {$web .= " WARN";}
+$web.= "<br>";
 
-            $web .= "bilge level " . $this->kaiju_thing['bilge_level'];
-            if ($this->kaiju_thing['bilge_level'] >200) {$web .= " WARN";}
-            $web.= "<br>";
+        $web .= "bilge level " . $this->kaiju_thing['bilge_level']; 
+if ($this->kaiju_thing['bilge_level'] >200) {$web .= " WARN";} 
+$web.= "<br>";
 
-        }
+}
         $web .= "<p>";
 
 
         $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
 
-        if (isset($this->points)) {
+if (isset($this->points)) {
 
-            $txt = '<a href="' . $link . ".txt" . '">';
-            $txt .= 'TEXT';
-            $txt .= "</a>";
+        $txt = '<a href="' . $link . ".txt" . '">';
+        $txt .= 'TEXT';
+        $txt .= "</a>";
 
-            $web .= "Kaiju report here " . $txt .".";
-            $web .= "<p>";
-        }
+        $web .= "Kaiju report here " . $txt .".";
+        $web .= "<p>";
+}
 
-        if (isset($this->points)) {
+if (isset($this->points)) {
 
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph1_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph1_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
 
-            $web .= "voltage graph";
+        $web .= "voltage graph (V)";
 
-            $web .= "<br><br>";
-
-
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph2_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
-
-            $web .= "temperature graph";
-
-            $web .= "<br><br>";
+        $web .= "<br><br>";
 
 
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph2_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
 
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph3_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
+        $web .= "temperature graph (C)";
 
-            $web .= "magnetic flux graph";
+        $web .= "<br><br>";
 
-            $web .= "<br><br>";
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph6_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
 
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph4_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
+        $web .= "bilge level graph (mm)";
 
-            $web .= "pressure graph";
-
-            $web .= "<br><br>";
-
-
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph5_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
-
-            $web .= "dV/dt graph";
-
-            $web .= "<br><br>";
+        $web .= "<br><br>";
 
 
-        }
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph3_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= "magnetic flux graph (uT)";
+
+        $web .= "<br><br>";
+
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph4_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= "pressure graph (mBar)";
+
+        $web .= "<br><br>";
+
+
+        $web .= '<a href="' . $link . '">';
+//        $web .= $this->image_embedded;
+$web .= $graph5_image_embedded;
+        $web .= "</a>";
+        $web .= "<br>";
+
+        $web .= "dV/dt graph (V/s)";
+
+        $web .= "<br><br>";
+
+
+}
 
         $web .= "Requested about ". $ago . " ago.";
-        //        $web .= "<p>";
-        //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
+//        $web .= "<p>";
+//        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
 
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= "This link will expire in " . $togo. ".<br>";
@@ -1570,7 +1689,7 @@ $this->makePNG();
 
         $web .= "This Kaiju thing is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $privacy .".";
 
-        //        $web .= "This Kaiju thing is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
+//        $web .= "This Kaiju thing is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -1597,15 +1716,15 @@ $this->makePNG();
 
         if (isset($this->kaiju_things)) {
 
-            foreach ($this->kaiju_things as $key=>$thing) {
+        foreach ($this->kaiju_things as $key=>$thing) {
 
-                $flat_thing = implode($thing, " ");
-                //            if ($parsed_thing != null) {
-                //                $txt .= $parsed_thing['created_at'] . "\n";
+            $flat_thing = implode($thing, " ");
+//            if ($parsed_thing != null) {
+//                $txt .= $parsed_thing['created_at'] . "\n";
                 $txt .=  $flat_thing . "\n";
-                //            }
+//            }
 
-            }
+        }
 
         }
 
@@ -1613,23 +1732,23 @@ $this->makePNG();
 
         $txt .= "dv/dt test.\n";
 
-        $this->calcDvdt();
+$this->calcDvdt();
         if (isset($this->points)) {
 
-            foreach ($this->points as $key=>$point) {
+        foreach ($this->points as $key=>$point) {
 
-                //$time_text = echo date('m/d/Y H:i', $point['refreshed_at']);
-                $time_text = date('H:i', $point['refreshed_at']);
-                $date_text = date('m/d/Y', $point['refreshed_at']);
+//$time_text = echo date('m/d/Y H:i', $point['refreshed_at']); 
+$time_text = date('H:i', $point['refreshed_at']);
+$date_text = date('m/d/Y', $point['refreshed_at']); 
 
-                if (!isset($date_text_last)) {$date_text_last = $date_text;}
-                if ($date_text != $date_text_last) {$txt .= $date_text . "\n";}
+if (!isset($date_text_last)) {$date_text_last = $date_text;}
+if ($date_text != $date_text_last) {$txt .= $date_text . "\n";}
 
-                $txt .=  $time_text ." V " . number_format($point['voltage'], 2)  . "V dV " . number_format($point['dv'], 2) . "V dt " . $point['dt']. "s dv/dt " .number_format($point['dv_dt'], 6) . "\n";
+                $txt .=  $time_text ." V " . number_format($point['voltage'],2)  . "V dV " . number_format($point['dv'],2) . "V dt " . $point['dt']. "s dv/dt " .number_format($point['dv_dt'],6) . "\n";
 
-                $date_text_last = $date_text;
+$date_text_last = $date_text;
 
-            }
+        }
 
         }
 
@@ -1671,10 +1790,10 @@ $this->makePNG();
 
 
 
-        //        if (!$this->getMember()) {$this->response = "Generated an inject.";}
+//        if (!$this->getMember()) {$this->response = "Generated an inject.";}
 
         $input = strtolower($this->subject);
-        if ((isset($this->test_flag)) and ($this->test_flag === true)) {$input = $this->test_string;}
+if ((isset($this->test_flag)) and ($this->test_flag === true)) {$input = $this->test_string;}
 
         $pieces = explode(" ", strtolower($input));
 
@@ -1682,17 +1801,17 @@ $this->makePNG();
 
             if ($input == 'kaiju') {
 
-                //              $this->getMessage();
+  //              $this->getMessage();
 
-                //                if ((!isset($this->index)) or
-                //                    ($this->index == null)) {
-                //                    $this->index = 1;
-                //                }
+//                if ((!isset($this->index)) or
+//                    ($this->index == null)) {
+//                    $this->index = 1;
+//                }
                 return;
             }
         }
 
-        $keywords = array("test", "kaiju", "hard", "easy", "hey", "on", "off");
+        $keywords = array("test","kaiju", "hard", "easy", "hey", "on", "off");
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -1703,7 +1822,7 @@ $this->makePNG();
                         $this->setState($piece);
                         $this->setBank($piece);
 
-                        //                        $this->getMessage();
+//                        $this->getMessage();
                         $this->response .= " Set messages to " . strtoupper($this->state) .".";
 
                         return;
@@ -1713,10 +1832,10 @@ $this->makePNG();
                         return;
 
                     case 'test':
-                        $this->test_flag = true;
-                        $this->test();
-                        $l = $this->parseThing($this->test_string);
-                        var_dump($l);
+$this->test_flag = true;
+$this->test();
+$l = $this->parseThing($this->test_string);
+var_dump($l);
                         return;
 
                     case 'on':
@@ -1726,7 +1845,7 @@ $this->makePNG();
             }
         }
 
-        //        $this->getMessage();
+//        $this->getMessage();
 
         if ((!isset($this->index)) or
             ($this->index == null)) {
