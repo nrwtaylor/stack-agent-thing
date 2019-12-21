@@ -359,7 +359,7 @@ $this->extractParagraphs($input);
 
                     case 'paragraph':
 
-                        if ($this->paragraph != null) {return;}
+                        if ((isset($this->paragraph)) and ($this->paragraph != null)) {return;}
                         //return;
 
                     default:
