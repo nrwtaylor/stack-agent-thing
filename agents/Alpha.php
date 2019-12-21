@@ -156,11 +156,20 @@ return $new_text;
             }
 
             // preg_match_all('!\d+!', $piece, $matches);
-            preg_match_all('/^\p{Alphabetic}+$/',  $piece, $matches);
+//var_dump($piece);
 
-            foreach ($matches[0] as $key=>$match) {
-                $this->alphas[] = $match;
-            }
+if (ctype_alpha($piece)) {
+
+$this->alphas[] = $piece;
+
+
+}
+
+//            preg_match_all('/^\p{Alphabetic}+$/',  $piece, $matches);
+
+//            foreach ($matches[0] as $key=>$match) {
+//                $this->alphas[] = $match;
+//            }
 
         }
 
