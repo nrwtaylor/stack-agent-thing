@@ -39,6 +39,11 @@ class Number extends Agent
 
         $this->web_return_max = 10;
         $this->horizon = 99; // 99 items
+
+        $this->event_horizon = 60*60*24;
+        $this->y_max_limit = null;
+        $this->y_min_limit = null;
+
     }
 
 
@@ -56,6 +61,18 @@ class Number extends Agent
         $this->getCallingagent();
         $agent_class_name = $this->calling_agent;
         $this->calling_agent_name = strtolower((array_reverse(explode('\\', $agent_class_name)))[0]);
+
+        $event_horizon = $this->number_agent->getVariable("event_horizon");
+
+        if ($event_horizon != false) {$this->event_horizon = $event_horizon;}
+
+        $y_max_limit = $this->number_agent->getVariable("y_max_limit");
+        if ($y_max_limit != false) {$this->y_max_limit = $y_max_limit;}
+
+        $y_min_limit = $this->number_agent->getVariable("y_min_limit");
+        if ($y_min_limit != false) {$this->y_min_limit = $y_min_limit;}
+
+
     }
 
 
@@ -66,6 +83,10 @@ class Number extends Agent
 
         $this->number_agent->setVariable("number", $this->number);
         $this->number_agent->setVariable("calling_agent_name", $this->calling_agent_name);
+        $this->number_agent->setVariable("event_horizon", $this->event_horizon);
+        $this->number_agent->setVariable("y_max_limit", $this->y_max_limit);
+        $this->number_agent->setVariable("y_min_limit", $this->y_min_limit);
+
         $this->number_agent->setVariable("refreshed_at", $this->current_time);
 
     }
@@ -89,6 +110,7 @@ class Number extends Agent
 
             $created_at = $number_object['created_at'];
             $number = $number_object['number'];
+
 
             $points[$created_at] = $number;
 
@@ -114,11 +136,18 @@ class Number extends Agent
         $this->chart_agent->x_max = $x_max;
         $this->chart_agent->x_max = strtotime($this->thing->time);
 
-        $this->chart_agent->y_min = $y_min;
-        $this->chart_agent->y_max = $y_max;
 
-        //var_dump($y_min);
-        //var_dump($y_max);
+        if (($this->y_min_limit != false) or ($this->y_min_limit != null)) {
+            $y_min = $this->y_min_limit;
+        }
+
+        $this->chart_agent->y_min = $y_min;
+
+
+        if (($this->y_max_limit != false) or ($this->y_max_limit != null)) {
+            $y_max = $this->y_max_limit;
+        }
+        $this->chart_agent->y_max = $y_max;
 
 
 
@@ -137,7 +166,6 @@ class Number extends Agent
         }
         if ($y_spread == 0) {$y_spread = 100;}
 
-        //var_dump($y_spread);
         $this->chart_agent->y_spread = $y_spread;
         $this->chart_agent->drawGraph();
 
@@ -152,49 +180,73 @@ class Number extends Agent
     }
 
 
-public function isSingleprecision($text) {
+    /**
+     *
+     * @param unknown $text
+     * @return unknown
+     */
+    public function isSingleprecision($text) {
 
-return $this->isPrecision($text, 1);
-}
-
-public function isPrecision($text, $test_precision = 1) {
-
-$precision = $this->getPrecision($text);
-
-if ($precision == $test_precision) {return true;}
-
+        return $this->isPrecision($text, 1);
+    }
 
 
-return false;
+    /**
+     *
+     * @param unknown $text
+     * @param unknown $test_precision (optional)
+     * @return unknown
+     */
+    public function isPrecision($text, $test_precision = 1) {
 
-}
+        $precision = $this->getPrecision($text);
 
-public function getPrecision($text = null) {
-
-if ($text == null) {$text = $this->input;}
-
-return strlen(substr(strrchr($text, "."), 1));
-
-}
-
-public function getDigits($text = null) {
+        if ($precision == $test_precision) {return true;}
 
 
-if ($text == null) {$text = $this->input;}
 
-$this->extractNumber($text);
+        return false;
 
-$number = $this->number;
+    }
 
 
-$num_digits = $number !== 0 ? floor(log10($number) + 1) : 1;
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
+    public function getPrecision($text = null) {
 
-//$left_of_period = strlen(substr(strrchr($text, "."), 0));
-//$num_digits = str_replace(",","",$left_of_period);
+        if ($text == null) {$text = $this->input;}
 
-return $num_digits;
+        return strlen(substr(strrchr($text, "."), 1));
 
-}
+    }
+
+
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
+    public function getDigits($text = null) {
+
+
+        if ($text == null) {$text = $this->input;}
+
+        $this->extractNumber($text);
+
+        $number = $this->number;
+
+
+        $num_digits = $number !== 0 ? floor(log10($number) + 1) : 1;
+
+        //$left_of_period = strlen(substr(strrchr($text, "."), 0));
+        //$num_digits = str_replace(",","",$left_of_period);
+
+        return $num_digits;
+
+    }
 
 
     /**
@@ -218,14 +270,22 @@ return $num_digits;
                 $calling_agent = "X";
                 $refreshed_at = "X";
 
+
                 if (isset($variables['number']['number'])) {$number = $variables['number']['number'];}
                 if (isset($variables['number']['calling_agent'])) {$number = $variables['number']['calling_agent'];}
+                if (isset($variables['number']['refreshed_at'])) {$refreshed_at = $variables['number']['refreshed_at'];}
                 if (isset($variables['number']['refreshed_at'])) {$refreshed_at = $variables['number']['refreshed_at'];}
 
             }
 
+            $age = strtotime($this->current_time) - strtotime($refreshed_at);
+            if ($age > $this->event_horizon) {continue;}
+
+            if (!is_numeric($number) ) {continue;}
+
             $this->numbers_history[] = array("timestamp"=>$refreshed_at, "created_at"=>strtotime($refreshed_at), "calling_agent"=>$calling_agent,
-                "number"=>$number);
+                "number"=>$number, "uuid"=>$thing_object['uuid']);
+
         }
 
         $refreshed_at = array();
@@ -429,7 +489,6 @@ $this->numbers_history = $traditional;
      * @return unknown
      */
     public function readSubject() {
-        //var_dump($this->input);
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
 
@@ -446,6 +505,8 @@ $this->numbers_history = $traditional;
         $this->extractNumbers($input);
         $this->extractNumber();
 
+        $this->extracted_number = $this->number;
+
         if ($this->number == false) {
             $this->get();
         }
@@ -460,10 +521,7 @@ $this->numbers_history = $traditional;
         if (count($pieces) == 1) {
 
             if ($this->input == 'number') {
-                //$this->getNumber();
                 $this->response .= "Last number retrieved.";
-
-                //echo "meep";
                 return;
 
             }
@@ -477,8 +535,118 @@ $this->numbers_history = $traditional;
         case "graph number":
             $this->response .= "Made a link to a chart " . $this->link;
             return;
+
         default:
         }
+
+        switch (true) {
+        case (stripos($this->input, 'low') !== false) :
+        case (stripos($this->input, 'min') !== false) :
+        case (stripos($this->input, 'minimum') !== false) :
+        case (stripos($this->input, 'lowest') !== false) :
+        case (stripos($this->input, 'smallest') !== false) :
+
+            if ($this->extracted_number === false) {
+
+            } else {
+
+                if ( count($this->numbers) == 1) {
+
+                    $this->y_min_limit = $this->number;
+                    $this->number = null;
+                    $this->response .= "Set minimum range to " . $this->y_min_limit . ". ";
+
+                    return;
+
+                }
+
+
+            }
+
+        case (stripos($this->input, 'high') !== false) :
+        case (stripos($this->input, 'max') !== false) :
+        case (stripos($this->input, 'maximum') !== false) :
+        case (stripos($this->input, 'dog') !== false) : // Because max translates to dog :|
+
+            if ($this->extracted_number === false) {
+
+            } else {
+
+                if ( count($this->numbers) == 1) {
+
+                    $this->y_max_limit = $this->number;
+                    $this->number = null;
+                    $this->response .= "Set maximum number to " . $this->y_max_limit . ". ";
+
+                    return;
+
+                }
+
+
+            }
+
+        case (stripos($this->input, 'limit') !== false) :
+        case (stripos($this->input, 'range') !== false) :
+        case (stripos($this->input, 'to') !== false) :
+
+
+
+            if (stripos($this->input, 'auto') !== false) {
+
+                $this->y_min_limit = null;
+                $this->y_max_limit = null;
+                $this->number = null;
+                $this->response .= "Range set to automatic. ";
+                return;
+
+            }
+
+
+            if ($this->extracted_number === false) {
+
+            } else {
+
+                if ( count($this->numbers) == 2) {
+
+                    $this->y_min_limit = min($this->numbers);
+                    $this->y_max_limit = max($this->numbers);
+                    $this->number = null;
+                    $this->response .= "Range set to  " . $this->y_min_limit . " to " .$this->y_max_limit . ". ";
+                    return;
+
+                }
+
+                if ( count($this->numbers) == 1) {
+
+                    $this->y_max_limit = $this->number;
+                    $this->number = null;
+                    $this->response .= "Set maximum number to " . $this->y_max_limit . ". ";
+
+                    return;
+
+                }
+
+
+            }
+
+        case (stripos($this->input, 'age') !== false) :
+        case (stripos($this->input, 'oldest') !== false) :
+        case (stripos($this->input, 'event horizon') !== false) :
+            if ($this->extracted_number == false) {
+
+            } else {
+                $this->number = null;
+                $this->event_horizon = $this->extracted_number;
+                $this->response .= "Set event horizon to " . $this->event_horizon . ". ";
+
+                return;
+            }
+
+
+        default:
+        }
+
+
 
 
         $status = true;
@@ -517,14 +685,18 @@ $this->numbers_history = $traditional;
 
         $web .= "<br>";
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
-        $web .= $this->subject . "<br>";
+
+        $web .= 'Request is "' . $this->subject . '".<br>';
 
         if (!isset($this->numbers_history[0])) {
             $web .= "No numbers found<br>";
         } else {
             $y_max = "X";
             if ((isset($this->chart_agent->y_max)) and ($this->chart_agent->y_max != false)) {$y_max = $this->chart_agent->y_max;}
-            $web .= "Biggest seen number is ". $y_max . "<br>";
+            $web .= "Biggest seen number is ". $y_max;
+
+            $web .= "<br>";
+
             $y_min = "X";
 
             if ((isset($this->chart_agent->y_min)) and ($this->chart_agent->y_min != false)) {$y_min = $this->chart_agent->y_min;}
@@ -536,14 +708,21 @@ $this->numbers_history = $traditional;
 
 
             $web .= "Latest number is ". $number . "<br>";
-
+            $web .= "<br>";
             $web .= "Latest " . $this->web_return_max . " extracted numbers are:<br>";
         }
         $i= 0;
         foreach ($this->numbers_history as $key=>$number) {
             $i += 1;
             if ($i >= $this->web_return_max) {break;}
-            $web .= $number['timestamp'] . " " .$number['calling_agent'] . " " .$number['number'] . "<br>";
+            $web .= $number['timestamp'] . " " .$number['calling_agent'] . " " .$number['number'];
+            $link = $this->web_prefix . "thing/". $number['uuid'] . "/forget";
+
+            $web .= " ";
+            $web .= '<a href="' . $link . '">Forget</a>';
+
+
+            $web .= "<br>";
         }
 
         if ($this->recognize_french == true) {
@@ -575,10 +754,7 @@ $this->numbers_history = $traditional;
     function makeSMS() {
 
         $sms = "NUMBER | ";
-        //foreach ($this->numbers as $key=>$number) {
-        //    $this->sms_message .= $number . " | ";
-        //}
-        //var_dump($this->number);
+
         if ((isset($this->number)) and ($this->number != false)) {       $sms .= $this->number ." | ";}
         $sms .= $this->response;
         $sms .= ' #devstack';
