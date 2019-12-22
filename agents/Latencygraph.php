@@ -396,6 +396,8 @@ $this->variables_agent = "tallycounter";
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
 
+if (!isset($this->points)) {return true;}
+
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
 
