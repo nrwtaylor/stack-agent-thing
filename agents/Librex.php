@@ -345,6 +345,41 @@ $this->matches = array();
         return $m;
     }
 
+    /**
+     *
+     * @param unknown $librex_name
+     * @param unknown $searchfor   (optional)
+     * @return unknown
+     */
+    function getHits($searchfor = null) {
+
+//Get the lines in the Librex which contain the search term.
+
+        if ($searchfor == null) {return null;}
+
+if (!isset($this->librex)) {$this->getLibrex($this->librex_name);}
+
+        $contents = $this->librex;
+        $this->hits = array();
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+
+if ((stripos($line, $searchfor) !== false) or (stripos($searchfor, $line) !== false)) {
+            $this->hits[] = $line;
+}
+
+            $line = strtok( $separator );
+//                if ($word == false) {continue;}
+
+//            $this->hits[] = $line;
+            // do something with $line
+//            $line = strtok( $separator );
+        }
+        return $this->hits;
+    }
+
 
     /**
      *

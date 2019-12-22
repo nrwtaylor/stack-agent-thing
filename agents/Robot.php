@@ -1,93 +1,143 @@
 <?php
+/**
+ * Robot.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
-// devstack only reads the current web_prefix currently
+// Looks like the only way to decide if the user is a bot is to look at the header.
+// Look at the header.
+// See if it gets a hit against known headers/header strings.
+// If it does flag as a bot.
+
+// Do not save the header.
+
+// devstack - robots.txt reader
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Robot {
-
-	function __construct(Thing $thing)
-    {
-		$this->thing = $thing;
-		$this->agent_name = 'robot';
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-
-        $this->thing_report['thing'] = $this->thing->thing;
+class Robot extends Agent {
 
 
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
+    /**
+     *
+     * @param Thing   $thing
+     */
+    function init() {
 
-        $user_agent = $this->thing->container['api']['robot']['user_agent'];
-        ini_set('user_agent', $user_agent);
+        // So I could call
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+        // I think.
+        // Instead.
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
 
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+        if (isset($this->thing->container['api']['robot']['user_agent'])) {
 
-		$this->node_list = array("start"=>array("acknowledge"));
+            $user_agent = $this->thing->container['api']['robot']['user_agent'];
+            ini_set('user_agent', $user_agent);
+        }
 
-        $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.</pre>');
 
-        $this->variables_agent = new Variables($this->thing, "variables robot " . $this->from);
+        $this->node_list = array("start"=>array("acknowledge"));
+
         $this->current_time = $this->thing->json->time();
 
         $this->useragent = ini_get("user_agent");
         $url = rtrim($this->web_prefix. "/");
 
-        $this->get();
-		$this->readSubject();
+        $this->thing_report['help'] = 'Checks if you are a robot.';
 
-        $this->set();
- 		$this->respond();
 
-		$this->thing->flagGreen();
+    }
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
 
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        $this->thing_report['log'] = $this->thing->log;
+    /**
+     *
+     * @param unknown $text (optional)
+     * @return unknown
+     */
+    function getHeader($text = null) {
+        $this->hits = array();
+        $this->hits_count = 0;
 
-    	return;
-	}
+        try {
+            $headers = apache_request_headers();
+        }
 
-    function set()
-    {
+
+        catch (\Throwable $t) {
+            $this->thing->log("caught throwable.");
+            // Executed only in PHP 7, will not match in PHP 5
+            return true;
+        }
+
+
+        catch (\Exception $e) {
+            $this->thing->log("caught exception");
+            // Executed only in PHP 5, will not be reached in PHP 7
+            return true;
+        }
+
+
+
+
+        if (isset($headers['User-Agent'])) {$request_user_agent = $headers['User-Agent'];
+            $text = $request_user_agent;}
+        //var_dump($text);
+
+        $librex_agent = new Librex($this->thing, "librex");
+        $librex_agent->getLibrex('robot/robot');
+        $this->hits = $librex_agent->getHits($text);
+
+        $this->hits_count = count($this->hits);
+
+    }
+
+
+    /**
+     *
+     */
+    function set() {
         $this->variables_agent->setVariable("counter", $this->counter);
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
     }
 
 
-    function get()
-    {
+    /**
+     *
+     */
+    function get() {
+        $this->variables_agent = new Variables($this->thing, "variables robot " . $this->from);
+
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
 
         $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".");
 
         $this->counter = $this->counter + 1;
+
+        $this->getHeader();
+
     }
 
 
-    function makeTXT()
-    {
+    /**
+     *
+     */
+    function makeTXT() {
         // https://developers.google.com/search/reference/robots_txt
 
-        $txt = "# welcome robot\n";
+        if ($this->hits_count == 0) {
+            $txt = "# welcome human(?)\n"; } else {
+            $txt = "# welcome robot\n";
+        }
 
-        $jarvis = new Jarvis($this->thing,"jarvis");
+        $jarvis = new Jarvis($this->thing, "jarvis");
         $txt .= "# " . $jarvis->sms_message . "\n";
 
         $txt .= 'User-agent: *';
@@ -100,47 +150,78 @@ class Robot {
         $this->txt = $txt;
     }
 
-    public function makeSMS()
-    {
+
+    /**
+     *
+     */
+    public function makeSMS() {
         switch ($this->counter) {
-            case 1:
-                $sms = "ROBOT | You may read all end-points.  Please be respectful of resources. Read our Privacy Policy " . $this->web_prefix . "policy";
-                break;
+        case 1:
+            $sms = "ROBOT | You may read all end-points.  Please be respectful of resources. Read our Privacy Policy " . $this->web_prefix . "policy";
+            break;
 
-            case null;
+        case null;
 
-            default:
-                $sms = "ROBOT | You may read all end-points.  Please be respectful of resources. " . $this->web_prefix . "privacy";
+        default:
+            $sms = "ROBOT | You may read all end-points.  Please be respectful of resources. " . $this->web_prefix . "privacy";
 
         }
 
-            $sms .= " | TEXT PRIVACY";
+        if (isset($this->response)) {$sms = "ROBOT | " . $this->response;}
 
-            //$sms .= " | counter " . $this->counter;
+        $sms .= " | TEXT PRIVACY";
 
-            $this->sms_message = $sms;
-            $this->thing_report['sms'] = $sms;
+        //$sms .= " | counter " . $this->counter;
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
 
     }
 
-    public function makeEmail()
-    {
+
+    /**
+     *
+     */
+    public function makeWeb() {
+
+        $web = "<b>Robot Agent</b>";
+        $web .= "<br><br>";
+
+        if (($this->hits_count) == 0) {$web .= "You seem to be human.";} else {
+
+            $web .= "Your header matches against the following known bot strings:<br>";
+
+            foreach ($this->hits as $i=>$hit_text) {
+                $web .= $hit_text . "<br>";
+            }
+
+        }
+
+        $this->thing_report['web'] = $web;
+
+    }
+
+
+    /**
+     *
+     */
+    public function makeEmail() {
         switch ($this->counter) {
-            case 1:
-                $subject = "Hello Robot";
-                $message = "Email access is in limited beta. Please be respectful of resources.
+        case 1:
+            $subject = "Hello Robot";
+            $message = "Email access is in limited beta. Please be respectful of resources.
                     <br>
                     Keep on stacking.
 
                     ";
-                break;
-            case 2:
-                $subject = "Robot";
-                $message = "No robots please.\n\n";
-                break;
-            case null;
-            default:
-                $message = "ROBOT | Acknowledged. " . $this->web_prefix ."privacy";
+            break;
+        case 2:
+            $subject = "Robot";
+            $message = "No robots please.\n\n";
+            break;
+        case null;
+        default:
+            $message = "ROBOT | Acknowledged. " . $this->web_prefix ."privacy";
         }
 
         $this->message = $message;
@@ -148,110 +229,237 @@ class Robot {
 
     }
 
-    private function makeChoices()
-    {
-            $choices = $this->thing->choice->makeLinks('start');
 
-            $this->choices = $choices;
-            $this->thing_report['choices'] = $choices;
+    /**
+     *
+     */
+    private function makeChoices() {
+        $choices = $this->thing->choice->makeLinks('start');
+
+        $this->choices = $choices;
+        $this->thing_report['choices'] = $choices;
 
     }
 
 
 
-	public function respond()
-    {
-		// Thing actions
-		$this->thing->flagGreen();
-
-        $this->makeSMS();
-        $this->makeEmail();
-        $this->makeChoices();
-
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['sms'] = $this->sms_message;
+    /**
+     *
+     * @return unknown
+     */
+    public function respond() {
+        // Thing actions
+        $this->thing->flagGreen();
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->makeTxt();
-        $this->thing_report['help'] = $this->agent_prefix  .'responding to a message from a robot.';
 
-		return;
-	}
+        return $this->thing_report;
+    }
 
-	public function readSubject()
-    {
+
+    /**
+     *
+     */
+    public function readSubject() {
+        $link_agent = new link($this->thing, $this->input);
+        $t = $link_agent->extractLink($this->input);
+        //var_dump($t);
+        if ($t != null) {
+            $this->test_link = $t;
+
+            //$is_allowed_test1 = $this->robots_allowed($t);
+
+            $is_allowed_test2 = $this->robots_allowed_curl($t);
+
+            $this->test_allowed = $is_allowed_test2;
+
+            if ($this->test_allowed) {
+                $this->response .= $this->test_link . " is allowed. ";}
+            else {
+
+                $this->response .= $this->test_link . " is not allowed. ";
+
+
+            }
+
+            return;
+
+        }
         $this->start();
-		return;
-	}
+        return;
+    }
 
-	function start()
-    {
+
+    /**
+     *
+     */
+    function start() {
         // Call the Usermanager agent and update the state
         $agent = new Usermanager($this->thing, "robot start");
         $this->thing->log( $this->agent_prefix .'called the Usermanager to update user state to start.' );
 
-		return;
-	}
+        return;
+    }
 
-    function robots_allowed($url, $useragent=false)
-    {
+
+    /**
+     *
+     * @param unknown $url
+     * @param unknown $useragent (optional)
+     * @return unknown
+     */
+    function robots_allowed($url, $useragent=false) {
         // https://www.the-art-of-web.com/php/parse-robots/
         // parse url to retrieve host and path
         $parsed = parse_url($url);
 
         $agents = array(preg_quote('*'));
-        if($useragent) $agents[] = preg_quote($useragent);
+        if ($useragent) $agents[] = preg_quote($useragent);
         $agents = implode('|', $agents);
 
         // location of robots.txt file
         $robotstxt = file("http://{$parsed['host']}/robots.txt");
 
         // if there isn't a robots, then we're allowed in
-        if(empty($robotstxt)) return true;
+        if (empty($robotstxt)) return true;
 
         $rules = array();
         $ruleApplies = false;
-        foreach($robotstxt as $line) {
+        foreach ($robotstxt as $line) {
             // skip blank lines
-            if(!$line = trim($line)) continue;
+            if (!$line = trim($line)) continue;
 
             // following rules only apply if User-agent matches $useragent or '*'
-            if(preg_match('#^\s*User-agent: (.*)#i', $line, $match)) {
+            if (preg_match('#^\s*User-agent: (.*)#i', $line, $match)) {
                 $ruleApplies = preg_match("#($agents)#i", $match[1]);
             }
-            if($ruleApplies && preg_match('#^\s*Disallow:(.*)#i', $line, $regs)) {
+            if ($ruleApplies && preg_match('#^\s*Disallow:(.*)#i', $line, $regs)) {
                 // an empty rule implies full access - no further tests required
-                if(!$regs[1]) return true;
+                if (!$regs[1]) return true;
                 // add rules that apply to array for testing
                 $rules[] = preg_quote(trim($regs[1]), '/');
             }
         }
 
-        foreach($rules as $rule) {
+        if (!isset($parsed['path'])) {return null;}
+
+        foreach ($rules as $rule) {
             // check if page is disallowed to us
-            if(preg_match("#^$rule#", $parsed['path'])) return false;
+            if (preg_match("#^$rule#", $parsed['path'])) return false;
         }
 
         // page is not disallowed
         return true;
     }
 
-    function getRobots($url)
-    {
+
+    // https://www.the-art-of-web.com/php/parse-robots/
+
+    // Original PHP code by Chirp Internet: www.chirp.com.au
+    // Adapted to include 404 and Allow directive checking by Eric at LinkUp.com
+    // Please acknowledge use of this code by including this header.
+
+
+    /**
+     *
+     * @param unknown $url
+     * @param unknown $useragent (optional)
+     * @return unknown
+     */
+    function robots_allowed_curl($url, $useragent=false) {
+        // parse url to retrieve host and path
+        $parsed = parse_url($url);
+
+        $agents = array(preg_quote('*'));
+        if ($useragent) $agents[] = preg_quote($useragent, '/');
+        $agents = implode('|', $agents);
+
+        // location of robots.txt file, only pay attention to it if the server says it exists
+        if (function_exists('curl_init')) {
+            $handle = curl_init("http://{$parsed['host']}/robots.txt");
+            curl_setopt($handle,  CURLOPT_RETURNTRANSFER, TRUE);
+            $response = curl_exec($handle);
+            $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+            if ($httpCode == 200) {
+                $robotstxt = explode("\n", $response);
+            } else {
+                $robotstxt = false;
+            }
+            curl_close($handle);
+        } else {
+            $robotstxt = @file("http://{$parsed['host']}/robots.txt");
+        }
+
+        // if there isn't a robots, then we're allowed in
+        if (empty($robotstxt)) return true;
+
+        $rules = array();
+        $ruleApplies = false;
+        foreach ($robotstxt as $line) {
+            // skip blank lines
+            if (!$line = trim($line)) continue;
+
+            // following rules only apply if User-agent matches $useragent or '*'
+            if (preg_match('/^\s*User-agent: (.*)/i', $line, $match)) {
+                $ruleApplies = preg_match("/($agents)/i", $match[1]);
+                continue;
+            }
+            if ($ruleApplies) {
+                list($type, $rule) = explode(':', $line, 2);
+                $type = trim(strtolower($type));
+                // add rules that apply to array for testing
+                $rules[] = array(
+                    'type' => $type,
+                    'match' => preg_quote(trim($rule), '/'),
+                );
+            }
+        }
+
+        $isAllowed = true;
+        $currentStrength = 0;
+        foreach ($rules as $rule) {
+            // check if page hits on a rule
+            if (preg_match("/^{$rule['match']}/", $parsed['path'])) {
+                // prefer longer (more specific) rules and Allow trumps Disallow if rules same length
+                $strength = strlen($rule['match']);
+                if ($currentStrength < $strength) {
+                    $currentStrength = $strength;
+                    $isAllowed = ($rule['type'] == 'allow') ? true : false;
+                } elseif ($currentStrength == $strength && $rule['type'] == 'allow') {
+                    $currentStrength = $strength;
+                    $isAllowed = true;
+                }
+            }
+        }
+
+        return $isAllowed;
+    }
+
+
+
+    /**
+     *
+     * @param unknown $url
+     * @return unknown
+     */
+    function getRobots($url) {
+        // devstack
+
         $robotsUrl = $url . "/robots.txt";
         $robot = null;
+        //                $robot = new stdClass();
+
         //create an object
         $allRobots = [];
-        $fh = fopen($robotsUrl,'r');
+        $fh = fopen($robotsUrl, 'r');
         while (($line = fgets($fh)) != false) {
-            echo $line . "<br>";
-            if (preg_match("/user-agent.*/i", $line) ){
-                if($robot != null){
+            //            echo $line . "<br>";
+            if (preg_match("/user-agent.*/i", $line) ) {
+                if ($robot != null) {
                     array_push($allRobots, $robot);
                 }
 
@@ -261,23 +469,24 @@ class Robot {
                 $robot->disAllow = [];
                 $robot->allow = [];
             }
-            if (preg_match("/disallow.*/i", $line)){
-              array_push($robot->disAllow, explode(':', $line, 2)[1]);
+            if (preg_match("/disallow.*/i", $line)) {
+                array_push($robot->disAllow, explode(':', $line, 2)[1]);
             }
-            else if (preg_match("/^allow.*/i", $line)){
-              array_push($robot->allow, explode(':', $line, 2)[1]);
+            else if (preg_match("/^allow.*/i", $line)) {
+                array_push($robot->allow, explode(':', $line, 2)[1]);
             }
         }
 
-        if($robot != null){
+        if ($robot != null) {
             array_push($allRobots, $robot);
         }
 
         //Lazy way of outputting. Loop through for prettier output.
-        echo "<pre>";
-        var_dump($allRobots);
-        echo "</pre>";
+        //        echo "<pre>";
+        //        var_dump($allRobots);
+        //        echo "</pre>";
+        return $allRobots;
     }
-}
 
-?>
+
+}
