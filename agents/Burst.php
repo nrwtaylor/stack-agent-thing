@@ -205,7 +205,7 @@ class Burst extends Agent
      */
     function getBurst() {
         if ($this->verbosity >= 2) {
-            $this->thing->log($this->agent_prefix . ' start getBurst. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.') ;
+            $this->thing->log($this->agent_prefix . ' start getBurst. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.',"OPTIMIZE") ;
         }
         // Get recent train tags.
         // This will include simple 'train'
@@ -226,7 +226,7 @@ class Burst extends Agent
 if (!isset($t)) {return null;}
 
         if ($this->verbosity >= 2) {
-            $this->thing->log($this->agent_prefix . 'found ' . count($t['things']) ." " . ucwords($this->requested_thing_name) . " Agent Things." );
+            $this->thing->log($this->agent_prefix . 'found ' . count($t['things']) ." " . ucwords($this->requested_thing_name) . " Agent Things.", "DEBUG" );
         }
 
         $this->max_index = 0;
@@ -265,7 +265,7 @@ if (!isset($t)) {return null;}
 
                 $this->burstiness += $inter_arrival_time;
                 if ($this->verbosity >= 2) {
-                    $this->thing->log($this->agent_prefix . ' td ' . $inter_arrival_time . '.');
+                    $this->thing->log($this->agent_prefix . ' td ' . $inter_arrival_time . '.', "DEBUG");
                 }
             }
         }
@@ -275,9 +275,9 @@ if (!isset($t)) {return null;}
         }
         if ($this->verbosity >= 2) {
 if (!isset($age)) {$age = "X";}
-            $this->thing->log($this->agent_prefix . 'calculated age =  ' . $age . '.');
-            $this->thing->log($this->agent_prefix . 'calculated burst =  ' . $this->burst . '.');
-            $this->thing->log($this->agent_prefix . 'calculated burstiness =  ' . $this->burstiness . '.');
+            $this->thing->log($this->agent_prefix . 'calculated age =  ' . $age . '.', "DEBUG");
+            $this->thing->log($this->agent_prefix . 'calculated burst =  ' . $this->burst . '.', "DEBUG");
+            $this->thing->log($this->agent_prefix . 'calculated burstiness =  ' . $this->burstiness . '.', "DEBUG");
         }
 
     }
@@ -293,7 +293,7 @@ if (!isset($age)) {$age = "X";}
         $this->refreshed_at = $this->thing->getVariable("burst", "refreshed_at");
 
         if ($this->verbosity >= 2) {
-            $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_flag);
+            $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_flag, "DEBUG");
         }
 
         // If it is a valid previous_state, then

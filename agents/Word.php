@@ -474,6 +474,11 @@ if (isset($this->words)) {$this->reading = count($this->words);}
      */
     public function readSubject() {
 
+//if ($this->input == "word") {
+
+//return;
+//}
+
         //        $this->translated_input = $this->wordsEmoji($this->subject);
 
         if ($this->agent_input == null) {

@@ -224,7 +224,7 @@ public function run() {
             $this->similarness += $l;
 
             if ($this->verbosity == 9) {
-                $this->thing->log($this->agent_prefix . ' ' . $subject . ' ' . $l . '.');
+                $this->thing->log($this->agent_prefix . ' ' . $subject . ' ' . $l . '.', "DEBUG");
             }
         }
 
@@ -238,8 +238,8 @@ public function run() {
         }
 
         if ($this->verbosity >= 2) {
-            $this->thing->log($this->agent_prefix . 'calculated similarness =  ' . $this->similarness . '.');
-            $this->thing->log($this->agent_prefix . 'calculated similarity =  ' . $this->similarity . '.');
+            $this->thing->log($this->agent_prefix . 'calculated similarness =  ' . $this->similarness . '.', "DEBUG");
+            $this->thing->log($this->agent_prefix . 'calculated similarity =  ' . $this->similarity . '.', "DEBUG");
         }
 
 

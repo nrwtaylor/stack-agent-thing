@@ -992,13 +992,14 @@ class Agent {
         $bursts_limit = 1;
 
         if ($burst_check) {
+
+
             $this->thing->log( 'Agent "Agent" created a Burst agent looking for burstiness.', "DEBUG" );
             $this->burst = new Burst($this->thing, 'read');
 
             $this->thing->log( 'Agent "Agent" created a Similar agent looking for incoming message repeats.', "DEBUG" );
 
             $this->similar = new Similar($this->thing, 'read');
-
             $similarness = $this->similar->similarness;
             $bursts = $this->burst->burst;
 

@@ -576,6 +576,8 @@ class Variables
         return true; // Not found
     }
 
+public function readSubject() {}
+
     public function extractVariable($input)
     {
         $matches = 0;

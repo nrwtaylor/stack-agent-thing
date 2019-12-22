@@ -334,6 +334,15 @@ return $text;
 
 }
 
+public function compressText($text1, $text2) {
+$raw = $text1 . " " . $text2;
+$raw = strtolower($raw);
+$filtered = implode(' ', array_unique(explode(' ', $raw)));
+return $filtered;
+
+}
+
+
 function textNgram($input, $t = "@1") {
 
 $text = "(" . trim($input). ")";

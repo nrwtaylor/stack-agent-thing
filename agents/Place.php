@@ -217,6 +217,42 @@ $place_code = $place_code_candidate;
         // So this should create a headcode in the next quantity unit.
         return $this->available;
     }
+
+
+    public function parsePlace($place_text)
+    {
+        $arr = explode("|", $place_text);
+
+        $feature_id = $arr[0];
+        $feature_name = strtolower($arr[1]);
+        $feature_class = $arr[2];
+        $state_alpha = strtolower($arr[3]);
+        $state_numeric = $arr[4];
+        $county_name = strtolower($arr[5]);
+        $count_numeric = $arr[6];
+        // etc
+        //array(20) { [0]=> string(13) "﻿FEATURE_ID" [1]=> string(12) "FEATURE_NAME"
+        // [2]=> string(13) "FEATURE_CLASS" [3]=> string(11) "STATE_ALPHA" 
+        // [4]=> string(13) "STATE_NUMERIC" [5]=> string(11) "COUNTY_NAME" 
+        // [6]=> string(14) "COUNTY_NUMERIC" [7]=> string(15) 
+        // "PRIMARY_LAT_DMS" [8]=> string(13) "PRIM_LONG_DMS"
+        // [9]=> string(12) "PRIM_LAT_DEC" [10]=> string(13) "PRIM_LONG_DEC" 
+        // [11]=> string(14) "SOURCE_LAT_DMS" [12]=> string(15) "SOURCE_LONG_DMS"
+        // [13]=> string(14) "SOURCE_LAT_DEC" [14]=> string(15) "SOURCE_LONG_DEC"
+        // [15]=> string(9) "ELEV_IN_M" [16]=> string(10) "ELEV_IN_FT"
+        // [17]=> string(8) "MAP_NAME" [18]=> string(12) "DATE_CREATED" [19]=> string(13) "DATE_EDITED " }';
+
+        $place = array(
+            "feature_id" => $feature_id,
+            "feature_name" => $feature_name,
+            "state_alpha" => $state_alpha,
+            "county_name" => $county_name
+        );
+
+        return $place;
+    }
+
+
 /*
     function getVariable($variable_name = null, $variable = null)
     {
