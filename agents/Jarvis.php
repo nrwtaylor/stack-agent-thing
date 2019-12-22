@@ -33,7 +33,7 @@ class Jarvis extends Agent {
         } else {
             $this->requested_agent = $this->agent_input;
 
-            echo $this->requested_agent;
+            //echo $this->requested_agent;
 
 
         }
