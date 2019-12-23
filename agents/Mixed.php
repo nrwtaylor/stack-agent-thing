@@ -19,7 +19,7 @@ class Mixed extends Agent
 
 public function isMixed($token) {
 
-                    if (ctype_alnum($token) and !ctype_alpha($token)) {
+                    if (ctype_alnum($token) and !ctype_alpha($token) and !is_numeric($token)) {
                         return true;
                     }
 return false;
