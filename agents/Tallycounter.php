@@ -113,10 +113,6 @@ class Tallycounter
 
     function set()
     {
-//echo "set";
-//exit();
-//var_dump($this->counter);
-
 
         $this->thing->json->setField("variables");
 
@@ -132,14 +128,6 @@ class Tallycounter
             "refreshed_at"),  $this->thing->json->time()
             );
 
-  //      $this->variables->setVariable("count", $this->count);
-
-    //    $this->variables->setVariable("display", $this->display);
-
-      //  $this->variables->setVariable("refreshed_at", $this->current_time);
-
-
-        return;
     }
 
 
@@ -338,13 +326,6 @@ class Tallycounter
 
         $this->setVariable("variable", 0);
         $this->setVariable("name", $this->name);
-//exit();
-
-//        $thing = new Thing(null);
-//        $this->setVariable("next_uuid", $thing->uuid);
-
-
-		return;
 	}
 
 
@@ -364,10 +345,6 @@ class Tallycounter
         // only two role descriptions.)
 
         if ($variable == null) {$variable = 'variable';}
-
-//echo $this->identity;
-//echo "meep";
-//exit();
 
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");
@@ -393,10 +370,6 @@ class Tallycounter
 //        if (!isset($this->variables_thing)) { $this->variables_thing = $this->thing;}
 
         $this->variables_thing->$variable = $value;
-
-//echo $value;
-//echo $this->identity;
-//exit();
 
         $this->variables_thing->db->setFrom($this->identity);
         $this->variables_thing->json->setField("variables");

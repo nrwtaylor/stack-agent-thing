@@ -16,7 +16,27 @@ ini_set("allow_url_fopen", 1);
 
 // Set-up for command-line/cron job run
 
-$from = "null@example.com";
+        $url = $GLOBALS['stack'] . 'private/settings.php';
+        $settings = require $url;
+
+        $container = new \Slim\Container($settings);
+
+        $container['stack'] = function ($c) {
+            $db = $c['settings']['stack'];
+            return $db;
+        };
+
+        // Allow switched between an all grid.
+        // Card and grid view.
+        // Or 'prefer grid'
+        //        $this->mode = "card and grid";
+        //        $this->mode = "allow grouping";
+
+        $mail_postfix = $container['stack']['mail_postfix'];
+
+
+
+$from = "null" . $mail_postfix;
 $stack_agent = "cron";
 $subject = "s/ cron 60s tick";
 
@@ -60,7 +80,6 @@ class Cron
 
 //                $client->doHighBackground("call_agent", $arr);
 
-//        $tick_agent = new \Nrwtaylor\StackAgentThing\Tick($this->thing);
 
         $tick_agent = new Tick($this->thing);
 
@@ -71,7 +90,6 @@ class Cron
         //$client->doNormal("call_agent", $arr);
         $client->doLowBackground("call_agent", $arr);
 */
-        //exit();
 
         $this->thing_report['sms'] = "CRON | Tick";
         $this->thing_report['help'] = "This Agent connects the computer's clock tick to the stack.";

@@ -314,6 +314,84 @@ if (strpos($line, $searchfor) !== false) {
         return true;
     }
 
+    public function makeChart() {
+
+        if (!isset($this->numbers_history)) {$this->historyNumber();}
+        $t = "NUMBER CHART\n";
+        $points = array();
+        //        $x_min = 1e99;
+        //        $x_max = -1e99;
+
+        //        $y_min = 1e99;
+        //        $y_max = -1e99;
+
+        foreach ($this->numbers_history as $i=>$number_object) {
+
+            $created_at = $number_object['created_at'];
+            $number = $number_object['number'];
+
+            $points[$created_at] = $number;
+
+            if (!isset($x_min)) {$x_min = $created_at;}
+            if (!isset($x_max)) {$x_max = $created_at;}
+
+
+            if ($created_at < $x_min) {$x_min = $created_at;}
+            if ($created_at > $x_max) {$x_max = $created_at;}
+
+            if (!isset($y_min)) {$y_min = $number;}
+            if (!isset($y_max)) {$y_max = $number;}
+
+            if ($number < $y_min) {$y_min = $number;}
+            if ($number > $y_max) {$y_max = $number;}
+
+        }
+
+        $this->chart_agent = new Chart($this->thing, "chart number " . $this->from);
+        $this->chart_agent->points = $points;
+
+        $this->chart_agent->x_min = $x_min;
+        $this->chart_agent->x_max = $x_max;
+        $this->chart_agent->x_max = strtotime($this->thing->time);
+
+        $this->chart_agent->y_min = $y_min;
+        $this->chart_agent->y_max = $y_max;
+
+        //var_dump($y_min);
+        //var_dump($y_max);
+
+
+
+        $y_spread = 100;
+        if (($y_min == false) and ($y_max === false)) {
+            //
+        } elseif (($y_min == false) and (is_numeric($y_max))) {
+            $y_spread = $y_max;
+        } elseif (($y_max == false) and (is_numeric($y_min))) {
+            // test stack
+            $y_spread = abs($y_mix);
+
+        } else {
+            $y_spread = $y_max - $y_min;
+            //            if ($y_spread == 0) {$y_spread = 100;}
+        }
+        if ($y_spread == 0) {$y_spread = 100;}
+
+        //var_dump($y_spread);
+        $this->chart_agent->y_spread = $y_spread;
+        $this->chart_agent->drawGraph();
+
+    }
+
+
+    /**
+     *
+     */
+    public function makeImage() {
+        $this->image = $this->chart_agent->image;
+    }
+
+
 
     /**
      *

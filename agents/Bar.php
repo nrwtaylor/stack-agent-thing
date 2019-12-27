@@ -11,105 +11,105 @@ class Bar extends Agent
 {
     public function init()
     {
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
-        $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
+
+//        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
+//        $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
 
         $this->state = "red"; // running
 
-        $this->variables = new Variables($this->thing, "variables bar " . $this->from);
+//        $this->variables = new Variables($this->thing, "variables bar " . $this->from);
         $this->current_time = $this->thing->time();
 
+
+        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+
+
         $this->max_bar_count = 80;
-        $this->response = "";
+        $max_bar_count = $this->thing->container['api']['bar']['default_max_bar_count'];
+
+        if ((isset($max_bar_count)) and ($max_bar_count != false)) {
+            $this->max_bar_count = $max_bar_count;
+        }
+
+        $this->thing_report['help'] = "Counts time to " . $this->max_bar_count . " bars. Text BPM.";
+
+//        $this->response = "";
     }
 
     public function set()
     {
+       // $this->bar_count_from = $this->bar_count;
+
         $this->variables->setVariable("count", $this->bar_count);
-        $this->variables->setVariable("stack_count", $this->bar_count_stack);
+ //       $this->variables->setVariable("count_null", $this->bar_count_null);
 
         $this->variables->setVariable("refreshed_at", $this->current_time);
     }
 
     public function run()
     {
-        $this->updateBar();
+
+        // devstack develop per user bar counts
+        $this->getBars();
+        $this->getTicks();
+
+        $count = 0;
+        foreach($this->ticks_history as $i=>$tick_history) {
+
+            if (strtotime($this->last_refreshed_at) > strtotime($tick_history['refreshed_at'])) {break;}
+            $count += 1;
+
+        }
+
+        $this->tick_count = $count;
+        $this->doBar();
     }
 
-    public function updateBar()
-    {
+    public function makeChoice() {}
 
-        $from = "null" . $this->mail_postfix;
-        $variables = new Variables($this->thing, "variables bar " . $from);
-        $this->bar_count_stack = $variables->getVariable("count");
+    /**
+     *
+     * @return unknown
+     */
+    public function respondResponse() {
+        $this->thing->flagGreen();
 
-        $diff = $this->bar_count_stack - $this->last_bar_count_stack;
+        // This should be the code to handle non-matching responses.
 
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
 
-if ($diff != 0) {$this->response .= "Advanced bar to current count. ";}
-
-//        $this->bar_count = ($this->bar_count + $diff) % $this->max_bar_count;
-
-//        $b = $this->bar_count + $diff;
-//$this->bar_count = $b % $this->max_bar_count;
-//) % $this->max_bar_count;
-$this->incrementBar($diff);
-
-    }
-
-    public function incrementBar($diff = null)
-    {
-
-if ($this->bar_count == "X") {return null;}
-
-if ($this->bar_count + $diff > $this->max_bar_count) {
-
-$this->bar_count = "X";
-
-} else {
-
-$this->bar_count += $diff;
-
-}
-
-
+        //        $this->thing_report['sms'] = $this->sms_message;
 
     }
-
 
 
     public function get()
     {
-        $this->bar_count = $this->variables->getVariable("count");
-        $this->last_bar_count_stack = $this->variables->getVariable("stack_count");
+        $this->variables = new Variables($this->thing, "variables bar " . $this->from);
 
-        $this->refreshed_at = $this->variables->getVariable("refreshed_at");
-        $this->thing->log($this->agent_prefix .  'loaded ' . $this->bar_count . ".");
-    }
+        $this->last_bar_count = $this->variables->getVariable("count");
 
-    public function countBar()
-    {
-        $this->bar_count += 1;
-    }
+        if ($this->last_bar_count === false) {$this->last_bar_count = 0;}
 
-    function respond()
-    {
-        // looks like this could be factored out by default agent respond()
-//        $this->makeSMS();
+        $this->last_refreshed_at = $this->variables->getVariable("refreshed_at");
+        $this->thing->log($this->agent_prefix .  'loaded ' . $this->last_bar_count . ".");
 
-//        $this->makePNG();
-//        $this->makeWeb();
     }
 
     function makeSMS()
     {
         $message = "BAR";
-if ((!isset($this->bar_count)) or ($this->bar_count == false)) {
-        $message .= " | Bar count not set. Text BAR ADVANCE.";
-} else {
-        $message .= " | " . $this->bar_count . " of " . $this->max_bar_count . ". " . $this->response;
-}
-$this->sms_message = $message;
+
+        if ((!isset($this->bar_count)) or ($this->bar_count === false)) {
+            $message .= " | Bar count not set. Text BAR ADVANCE.";
+        } else {
+            $message .= " | " . $this->bar_count . " of " . $this->max_bar_count . ". Counted " . $this->tick_count . " ticks since the last bar update. " . $this->response;
+        }
+
+        $this->sms_message = $message;
         $this->thing_report['sms'] = $message;
     }
 
@@ -132,8 +132,19 @@ $this->sms_message = $message;
     public function readSubject()
     {
         $input = strtolower($this->subject);
+
+        $number_agent = new Number($this->thing, "number bar");
+        $number_agent->extractNumber($this->input);
+
+        if ($number_agent->number != false) {
+            $this->bar_count = 5;
+            $this->bar_count = $number_agent->number;
+            $this->response .= "Number found. Set bar count to " . $this->bar_count . ". ";
+            return null;
+        }
+
         $pieces = explode(" ", strtolower($input));
-        $keywords = array("bar", "advance");
+        $keywords = array("advance", "bar"); // Order important?
         foreach ($pieces as $key=>$piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece),$command) !== false) {
@@ -141,40 +152,118 @@ $this->sms_message = $message;
                 }
             }
         }
+
+        if (!isset($this->bar_count)) {$this->bar_count = $this->last_bar_count;}
+
     }
 
     public function Perform($piece)
     {
         switch($piece) {
-case 'bar':
-           case 'stack':
-            $from = "null@stackr.ca";
-            $this->variables = new Variables($this->thing, "variables bar " . $this->from);
-            $this->get();
-            return;
-
            case 'advance':
-               $this->doBar();
+               $this->advanceBar();
                return;
+
+//          case 'bar':
+//$this->bar_count = $this->last_bar_count;
+//           case 'stack':
+//            $from = "null@stackr.ca"; 
+//            $this->variables = new Variables($this->thing, "variables bar " . $this->from);
+//            $this->get();
+//            return;
            case 'on':
 //return;
-default:
-  
-
-
+           default:
+ 
+//$this->bar_count = $this->last_bar_count;
 //         default:
-return;
+               return;
         }
     }
 
-    function doBar($depth = null)
-    {
-        $this->countBar();
+    function nullBar() {
+    }
 
-        if ($this->bar_count >= $this->max_bar_count) {
-            $this->bar_count = 0;
-            $this->response .= "Reset bar count. ";
+    function advanceBar($depth = null)
+    {
+
+if ((!isset($this->last_bar_count)) or ($this->last_bar_count === false)) {$this->bar_count = 1;
+$this->response .= "Started bar count. ";
+return;}
+
+       $this->bar_count = $this->last_bar_count + 1;
+       // $this->countBar();
+
+        if ($this->bar_count > $this->max_bar_count) {
+            $this->bar_count = $this->bar_count % $this->max_bar_count;
+            $this->response .= "Wrapped bar count. ";
         }
+
+//$tally_agent = new Tally($this->thing, "tick");
+
+}
+
+
+    function getBars() {
+        $this->thing->db->setFrom("null@stackr.ca");
+
+        $t = $this->thing->db->agentSearch("bar", 99);
+
+        $this->ticks_history = array();
+        foreach ($t['things'] as $thing_object) {
+
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
+            if (isset($variables['bar'])) {
+                $bar_count = "X";
+                $refreshed_at = "X";
+
+
+                if (isset($variables['bar']['count'])) {$bar_count = $variables['bar']['count'];}
+                if (isset($variables['bar']['refreshed_at'])) {$refreshed_at = $variables['bar']['refreshed_at'];}
+
+                $this->bars_history[] = array("count"=>$bar_count, "refreshed_at"=>$refreshed_at);
+
+            }
+        }
+
+        $this->thing->db->setFrom($this->from);
+
+    }
+
+
+    function getTicks() {
+        $this->thing->db->setFrom("null@stackr.ca");
+
+        $t = $this->thing->db->agentSearch("cron", 99);
+
+        $this->ticks_history = array();
+        foreach ($t['things'] as $thing_object) {
+
+            $variables_json= $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
+
+            if (isset($variables['tick'])) {
+                $tick_count = "X";
+                $refreshed_at = "X";
+
+
+                if (isset($variables['tick']['count'])) {$tick_count = $variables['tick']['count'];}
+                if (isset($variables['tick']['refreshed_at'])) {$refreshed_at = $variables['tick']['refreshed_at'];}
+
+                $this->ticks_history[] = array("count"=>$tick_count, "refreshed_at"=>$refreshed_at);
+
+            }
+        }
+
+        $this->thing->db->setFrom($this->from);
+
+    }
+
+
+    function doBar($depth = null) {
+
+        if ($this->from != "null" . $this->mail_postfix) {return false;}
 
         $this->thing->log($this->agent_prefix . "called Tallycounter.");
 
@@ -184,11 +273,8 @@ return;
 
         $this->response .= "Did a tally count. ";
 
-//        $tallycounter = new Tallycounter($this->thing, 'tallycounter message tally@stackr.ca');
-
         if ($this->bar_count == 0) {
 
-//            $stack_thing = new Stack($this->thing);
 
             $thing = new Thing(null);
             $thing->Create(null,"stack", 's/ stack count');
@@ -218,9 +304,6 @@ return;
 
             $this->response .= "Damage. ";
         }
-
-
-
 
     }
 
@@ -285,6 +368,7 @@ return;
         $size = 10;
         $angle = 0;
 
+        if ((!isset($this->bar_count)) or ($this->bar_count == "X")) {$this->bar_count = 0;}
         $count_notation = $this->bar_count + 1;
 
         if (($count_notation <> 1) or ($count_notation == $this->max_bar_count)) {
@@ -301,9 +385,6 @@ return;
 
 
 //        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-
-
-        return;
 
     }
 

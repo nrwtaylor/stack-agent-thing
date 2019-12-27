@@ -45,6 +45,11 @@ class Tick extends Agent {
 
         $this->thing->json->setField("variables");
 
+        $max_tick_count = $this->thing->container['api']['tick']['default_max_tick_count'];
+if ((isset($max_tick_count)) and ($max_tick_count != false)) {
+    $this->max_tick_count = $max_tick_count;
+}
+
     }
 
 
@@ -55,7 +60,7 @@ class Tick extends Agent {
 
         $this->tick_count = $this->tick_count + 1;
 
-        if ($this->tick_count > 4) {
+        if ($this->tick_count > $this->max_tick_count) {
             $this->tick_count = 1;
             $this->doBar();
         }

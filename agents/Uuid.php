@@ -32,8 +32,9 @@ class Uuid extends Agent
 
         $this->thing->log('started running on Thing ' . date("Y-m-d H:i:s") . '');
 
-        $this->node_list = array("uuid"=>
-            array("uuid", "snowflake"));
+ //       $this->node_list = array("uuid"=>
+ //           array("uuid", "snowflake"));
+$this->node_list = array();
 
         $this->aliases = array("learning"=>array("good job"));
         $this->makePNG();
