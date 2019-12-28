@@ -39,6 +39,8 @@ class Tick extends Agent {
         $this->cron_period = $this->thing->container['stack']['cron_period'];
         $this->start_time = $this->thing->elapsed_runtime();
 
+        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+
 
         $this->variables = new Variables($this->thing, "variables tick " . $this->from);
         $this->current_time = $this->thing->json->time();
@@ -73,14 +75,9 @@ if ((isset($max_tick_count)) and ($max_tick_count != false)) {
      */
     function doBar() {
 
-//$thing = new Thing(null);
-//$thing->Create("null@stackr.ca", "bar", "s/ advance bar");
-//$bar_agent = new Bar($thing, "bar");
-//return;
-
         $client= new \GearmanClient();
         $client->addServer();
-        $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"bar", "subject"=>"s/ advance bar"));
+        $arr = json_encode(array("to"=>"null" . $this->mail_postfix, "from"=>"bar", "subject"=>"s/ advance bar"));
 
         $client->doLowBackground("call_agent", $arr);
     }

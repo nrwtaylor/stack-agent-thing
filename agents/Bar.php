@@ -164,13 +164,6 @@ class Bar extends Agent
                $this->advanceBar();
                return;
 
-//          case 'bar':
-//$this->bar_count = $this->last_bar_count;
-//           case 'stack':
-//            $from = "null@stackr.ca"; 
-//            $this->variables = new Variables($this->thing, "variables bar " . $this->from);
-//            $this->get();
-//            return;
            case 'on':
 //return;
            default:
@@ -205,7 +198,7 @@ return;}
 
 
     function getBars() {
-        $this->thing->db->setFrom("null@stackr.ca");
+        $this->thing->db->setFrom("null" . $this->mail_postfix);
 
         $t = $this->thing->db->agentSearch("bar", 99);
 
@@ -233,7 +226,7 @@ return;}
 
 
     function getTicks() {
-        $this->thing->db->setFrom("null@stackr.ca");
+        $this->thing->db->setFrom("null" . $this->mail_postfix);
 
         $t = $this->thing->db->agentSearch("cron", 99);
 
@@ -269,12 +262,21 @@ return;}
 
         $thing = new Thing(null);
         $thing->Create(null,"tallycounter", 's/ tallycounter message');
-        $tallycounter = new Tallycounter($thing, 'tallycounter message tally@stackr.ca');
+        $tallycounter = new Tallycounter($thing, 'tallycounter message tally' . $this->mail_postfix);
 
         $this->response .= "Did a tally count. ";
 
-        if ($this->bar_count == 0) {
 
+        $thing = new Thing(null);
+        $thing->Create(null,"watchdog", 's/ watchdog');
+        $watchdog = new Watchdog($thing, 'watchdog');
+
+        $this->response .= "Called the watchdog. ";
+
+
+
+
+        if ($this->bar_count == 0) {
 
             $thing = new Thing(null);
             $thing->Create(null,"stack", 's/ stack count');
@@ -295,8 +297,8 @@ return;}
 
         if (($this->bar_count % 7) == 0) {
 
-            // $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage 10000"));
-            $arr = json_encode(array("to"=>"null@stackr.ca", "from"=>"damage", "subject"=>"s/ damage Z"));
+            $arr = json_encode(array("to"=>"null" . $this->mail_postfix, "from"=>"damage", "subject"=>"s/ damage Z"));
+
 
             $client= new \GearmanClient();
             $client->addServer();
