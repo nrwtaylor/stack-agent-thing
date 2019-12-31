@@ -299,13 +299,21 @@ if ($this->db->last_update != true) {echo "foo";return;}
      * @param unknown $pos   (optional)
      */
     function pushStream($value, $pos = -1) {
+
+var_dump($this->field);
         $this->setField($this->field);
 
         $stream_id = $this->idStream();
+var_dump($stream_id);
+
         if ($pos == -1) {
             $pos = count($this->array_data[$stream_id]);
         }
+var_dump($pos);
         array_splice($this->array_data[$stream_id], $pos, 0, $value);
+var_dump($this->array_data);
+var_dump($value);
+
         $this->setArray($this->array_data);
         //var_dump($this->db->last_update);
     }

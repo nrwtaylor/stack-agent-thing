@@ -98,6 +98,11 @@ class Robot extends Agent {
 
     }
 
+    public function isRobot() {
+        if ($this->hits > 1) {return true;}
+        return false;
+    }
+
 
     /**
      *
@@ -265,7 +270,7 @@ class Robot extends Agent {
      *
      */
     public function readSubject() {
-        $link_agent = new link($this->thing, $this->input);
+        $link_agent = new Link($this->thing, $this->input);
         $t = $link_agent->extractLink($this->input);
         //var_dump($t);
         if ($t != null) {

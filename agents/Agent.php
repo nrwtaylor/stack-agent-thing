@@ -71,7 +71,7 @@ class Agent {
         $this->sqlresponse = null;
 
         $this->thing->log('running on Thing ' . $this->thing->nuuid . '.');
-        $this->thing->log('read "' . $this->subject . '".');
+        // $this->thing->log('read "' . $this->subject . '".');
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
         $this->agents_path = $GLOBALS['stack_path'] . 'agents/';
@@ -746,6 +746,8 @@ class Agent {
             $this->input = trim($whatIWant);
         }
 
+        $this->thing->log('read "' . $this->subject . '".');
+
         $this->readSubject();
     }
 
@@ -853,6 +855,10 @@ class Agent {
      * @return unknown
      */
     public function readSubject() {
+
+        $this->thing->log('read subject "' . $this->subject . '".');
+
+
         $status = false;
         $this->response = false;
         // Because we need to be able to respond to calls
