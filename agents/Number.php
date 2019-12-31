@@ -152,16 +152,16 @@ class Number extends Agent
 
 
         $y_spread = 100;
-        if (($y_min == false) and ($y_max === false)) {
+        if (($this->chart_agent->y_min == false) and ($this->chart_agent->y_max === false)) {
             //
-        } elseif (($y_min == false) and (is_numeric($y_max))) {
+        } elseif (($this->chart_agent->y_min == false) and (is_numeric($this->chart_agent->y_max))) {
             $y_spread = $y_max;
-        } elseif (($y_max == false) and (is_numeric($y_min))) {
+        } elseif (($this->chart_agent->y_max == false) and (is_numeric($this->chart_agent->y_min))) {
             // test stack
-            $y_spread = abs($y_mix);
+            $y_spread = abs($this->chart_agent->y_min);
 
         } else {
-            $y_spread = $y_max - $y_min;
+            $y_spread = $this->chart_agent->y_max - $this->chart_agent->y_min;
             //            if ($y_spread == 0) {$y_spread = 100;}
         }
         if ($y_spread == 0) {$y_spread = 100;}
