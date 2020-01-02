@@ -107,6 +107,30 @@ return $new_text;
 
     }
 
+    function countAlpha($text)
+    {
+        $characters = str_split($text);
+        $count = 0;
+        $max_count = 0;
+        foreach ($characters as $i => $character) {
+            if (!ctype_alpha($character)) {
+                if ($count > $max_count) {
+                    $max_count = $count;
+                }
+                $count = 0;
+            }
+            if (ctype_alpha($character)) {
+                $count += 1;
+
+                if ($count > $max_count) {
+                    $max_count = $count;
+                }
+            }
+        }
+
+        return $max_count;
+    }
+
 
     /**
      *

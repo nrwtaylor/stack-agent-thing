@@ -90,10 +90,10 @@ class Robot extends Agent {
             $text = $request_user_agent;}
         //var_dump($text);
 
-        $librex_agent = new Librex($this->thing, "librex");
-        $librex_agent->getLibrex('robot/robot');
-        $this->hits = $librex_agent->getHits($text);
-
+        $this->librex_agent = new Librex($this->thing, "librex");
+        $this->librex_agent->getLibrex('robot/robot');
+        $this->hits = $this->librex_agent->getHits($text);
+        $this->header_text = $text;
         $this->hits_count = count($this->hits);
 
     }
@@ -444,6 +444,21 @@ class Robot extends Agent {
         return $isAllowed;
     }
 
+
+    function getRobot() {
+        $this->getHeader();
+        $matches = array();
+
+        foreach ($this->hits as $i=>$hit_string) {
+            $matches[] = explode(" ", $hit_string)[0];
+        }
+
+        $matches = array_unique($matches);
+        $this->robot = null;
+        if (count($matches) == 1) {$this->robot = $matches[0];}
+
+        return $this->robot;
+    }
 
 
     /**

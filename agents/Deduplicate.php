@@ -88,6 +88,31 @@ class Deduplicate extends Agent
         return $this->thing_report;
     }
 
+
+    public function arrayDeduplicate($thing_array = null, $deduplicate_field = "text")
+    {
+        // Deduplicate
+
+        foreach ($thing_array as $i => $thing_a) {
+            foreach ($thing_array as $j => $thing_b) {
+                if ($i == $j) {
+                    continue;
+                }
+
+                if (
+                    strtolower($thing_a[$deduplicate_field]) ==
+                    strtolower($thing_b[$deduplicate_field])
+                ) {
+                    unset($thing_array[$i]);
+                }
+            }
+        }
+
+        return $thing_array;
+    }
+
+
+
     /**
      *
      */
@@ -129,7 +154,7 @@ class Deduplicate extends Agent
 
         return;
     }
-
+/*
     function assert($search, $input)
     {
         $search = strtolower($search);
@@ -146,7 +171,7 @@ class Deduplicate extends Agent
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         return $filtered_input;
     }
-
+*/
     /**
      *
      */
