@@ -52,8 +52,8 @@ class Agent {
         $this->thing_report['thing'] = $this->thing;
 
         // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
+        if ($this->thing->container['stack']['state'] == 'dev') {$this->dev = true; $this->test = true;}
+        if ($this->thing->container['stack']['engine_state'] == 'dev') {$this->dev = true;}
         $this->getMeta();
 
         // Tell the thing to be quiet
@@ -99,6 +99,8 @@ class Agent {
 
         }
 
+        if ((isset($this->dev)) and ($this->dev == true)) {$this->debug();}
+
 
         // First things first... see if Mordok is on.
         /* Think about how this should work and the user UX/UI
@@ -116,21 +118,19 @@ class Agent {
 }
 */
         $this->init();
-
-        //        $this->getName();
-        //        $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
-
-
         $this->get();
         $this->read();
         $this->run();
         $this->make();
 
-
+        // This is where we deal with insufficient space to serialize the variabes to the stack.
         //set_error_handler(array($this,'my_exception_handler'));
-        try {
-            //            throw new \OverflowException('Insufficient space in DB record ' . $this->uuid . ".");
 
+        // Test with.
+        //            throw new \OverflowException('Insufficient space in DB record ' . $this->uuid . ".");
+
+
+        try {
             $this->set();
         }
         catch (\OverflowException $t) {
@@ -150,7 +150,7 @@ class Agent {
             $this->thing->log("caught exception");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
-        //restore_error_handler();
+
         if (($this->agent_input == null) or ($this->agent_input == "")) {
             $this->respond();
         }
@@ -274,6 +274,25 @@ class Agent {
 
     }
 
+    function debug() {
+
+        $this->thing->log('agent_name is  ' . $this->agent_name .'.');
+
+        $this->getCallingagent();
+        $this->thing->log('Calling agent is  ' . $this->calling_agent .'.');
+
+        $agent_input_text = $this->agent_input;
+        if (is_array($this->agent_input)) {
+            $agent_input_text = "array"; 
+            if (isset($this->agent_input['thing'])) {$agent_input_text = "thing";}
+
+        }
+
+        $this->thing->log('agent_input is  ' . $agent_input_text .'.');
+        $this->thing->log('subject is  ' . $this->subject .'.');
+
+
+    }
 
     /**
      *

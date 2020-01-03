@@ -44,10 +44,10 @@ return false;
      *
      */
     function get() {
-        $this->alpha_agent = new Variables($this->thing, "variables alpha " . $this->from);
+//        $this->alpha_agent = new Variables($this->thing, "variables alpha " . $this->from);
 
-        $this->alpha = $this->alpha_agent->getVariable("alpha");
-        $this->refreshed_at = $this->alpha_agent->getVariable("refreshed_at");
+//        $this->alpha = $this->alpha_agent->getVariable("alpha");
+//        $this->refreshed_at = $this->alpha_agent->getVariable("refreshed_at");
     }
 
 
@@ -55,9 +55,16 @@ return false;
      *
      */
     function set() {
-        $this->alpha_agent->setVariable("alpha", $this->alpha);
 
-        $this->alpha_agent->setVariable("refreshed_at", $this->current_time);
+        $time_string = $this->thing->json->time();
+        $this->thing->json->writeVariable(
+            array("mixed", "refreshed_at"),
+            $time_string
+        );
+
+//        $this->alpha_agent->setVariable("alpha", $this->alpha);
+
+//        $this->alpha_agent->setVariable("refreshed_at", $this->current_time);
 
     }
 

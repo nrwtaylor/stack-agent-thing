@@ -79,6 +79,8 @@ class Log {
 
         $this->readSubject();
 
+$this->makeSnippet();
+
         //        if ($this->agent_input == null) {
         $this->respond(); // Return $this->thing_report;
         //        }
@@ -139,6 +141,73 @@ class Log {
 
         return $this->thing_report;
     }
+
+    function makeSnippet() {
+
+$gap_time_max = 0;
+$lines = explode('<br>', $this->thing->log);
+$log = array();
+foreach($lines as $i=>$line) {
+$line = trim($line);
+$tokens = explode(" ", $line);
+$millisecond_text = $tokens[0];
+$milliseconds = intval(trim(str_replace(array("ms",","),"",$millisecond_text)));
+
+$gap_time = 0;
+if (isset($last_milliseconds)) {$gap_time = $milliseconds - $last_milliseconds;}
+
+
+
+if ($gap_time > $gap_time_max) {
+$gap_time_max = $gap_time;
+$log_index_max = $i;
+
+}
+$t = array("number"=>$i, "line" =>$line, "elapsed_time"=>$milliseconds, "gap_time"=>$gap_time);
+
+
+$log[] = $t;
+$last_milliseconds = $milliseconds;
+}
+
+
+// Find top-10 time gaps
+$gap_time_sorted_log = $log;
+        $gap_time = array();
+        foreach ($gap_time_sorted_log as $key => $row) {
+            $gap_time[$key] = $row['gap_time'];
+        }
+        array_multisort($gap_time, SORT_DESC, $gap_time_sorted_log);
+
+$max_entries = 10;
+$count = 0;
+$highlight = array();
+foreach($gap_time_sorted_log as $i=>$log_entry) {
+$count += 1;
+//var_dump($log_entry['gap_time']);
+$highlight[] = $log_entry['number'];
+if ($count >= $max_entries) {break;}
+
+}
+
+
+$snippet = "";
+foreach($log as $i=>$log_entry) {
+$line = $log_entry['line'];
+//if ($i == $log_index_max) { $line = '<b>' . $log_entry['line'] . '</b>';}
+
+foreach($highlight as $k=>$highlight_index) {
+
+if ($highlight_index == $i) {$line = '<b>' . $log_entry['line'] . '</b>';}
+}
+
+$snippet .= $line . '<br>';
+
+
+}
+$this->thing_report['snippet'] = $snippet;
+
+}
 
 
     /**

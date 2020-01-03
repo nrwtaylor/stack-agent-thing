@@ -58,6 +58,7 @@ class Makelog
 
         $text = str_replace("<br>", "\n", ($this->agent_thing->thing->log));
         $text = str_replace("\n ", "\n", $text);
+
         $this->text = $text;
 
         $this->getRuntimes();
@@ -109,8 +110,16 @@ class Makelog
         $this->thing_report = array('thing' => $thing, 
             'log' => $file);
 
-	}
+//$this->makeSnippet();
 
+	}
+/*
+    function makeSnippet() {
+
+$this->thing_report['snippet'] = "Merp.";
+
+}
+*/
     function getRuntimes()
     {
         $c = 0;

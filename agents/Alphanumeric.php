@@ -108,6 +108,10 @@ return $new_text;
 
 
     public function filterAlphanumeric($text) {
+
+$this->filter_alphanumeric = preg_replace("/[^a-zA-Z0-9]+/", " ", $text);
+return $this->filter_alphanumeric;
+
 $letters = array();
 //$new_text = "";
 //$flag = false;
@@ -134,9 +138,6 @@ $letters[] = " ";
 $new_text = implode("" ,$letters);
 $this->filter_alphanumeric = $new_text;
 return $new_text;
-
-
-
 
     }
 

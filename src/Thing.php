@@ -691,7 +691,7 @@ if (!isset($this->account['stack'])) {return true;}
 		$thingreport = $this->db->Get($this->uuid);
 		$thing = $thingreport['thing'];
 
-        $this->log("Thing loaded thing from db.");
+        $this->log("loaded thing " . $this->nuuid . " from db.");
 
 		if ($thing == false) {
 			//$this->uuid = $this->thing->uuid;

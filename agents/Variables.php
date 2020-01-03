@@ -121,7 +121,6 @@ class Variables
             if (isset($variable_name)) {
                 $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
                 $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->variables_thing->$variable_name );
-
             }
 
             if ($variable_name == "refreshed_at") {$refreshed_at = true;}
@@ -194,7 +193,6 @@ class Variables
 
                     // Should echo the matching variable sets
                     $match_count += 1;
-//if ($this->agent_command == "variables place console") {exit();}
  
                    $this->setVariables(); // Make sure thing and stack match.
                                             // Consider seeing if this is really needed.

@@ -114,11 +114,16 @@ class FindAgent
 	function findAgent($name = null, $id = null)
     {
         $ref_time = $this->thing->elapsed_runtime();
+
+// Search for a reference within the variables field to the agent.
+
 		$thingreport = $this->thing->db->setUser($this->from);
 		$thingreport = $this->thing->db->variableSearch(null, $name, $this->horizon);
 
+
+
         $run_time = $this->thing->elapsed_runtime() - $ref_time;
-        $this->thing->log( 'database call ran for ' . $run_time . 'ms.', "OPTIMIZE" );
+        $this->thing->log( 'db call ran for ' . $run_time . 'ms.', "OPTIMIZE" );
 
 		$groups = array();
         $agent_things = array();
@@ -142,8 +147,14 @@ class FindAgent
                 if ($thing_object['nom_to'] != "usermanager") {
                     $match += 1;
 
-                    $thing= new Thing($uuid);
-                    $variables = $thing->account['stack']->json->array_data;
+//                    $thing= new Thing($uuid);
+//                    $variables = $thing->account['stack']->json->array_data;
+
+
+                $variables_json= $thing_obj['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+
                     if (isset($variables[$name])) {
                         $agent_thing_id = $variables[$name][$name."_id"];
 

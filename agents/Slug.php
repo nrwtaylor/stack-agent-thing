@@ -34,6 +34,8 @@ class Slug extends Agent
      *
      */
     function get() {
+$this->alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
+
     }
 
 
@@ -54,8 +56,8 @@ public function getSlug($text = null) {
 if ($text == null) {return true;}
 //if ($this->state == "off") {$this->slug = ""; return null;}
 
-$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
-$slug = $alphanumeric_agent->filterAlphanumeric($text);
+//$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
+$slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 //var_dump($slug);
 
 $despaced_slug = preg_replace('/\s+/', ' ',$slug);
@@ -63,16 +65,14 @@ $slug = str_replace(" ","-",$despaced_slug);
 $slug = strtolower($slug);
 $slug = trim($slug,"-");
 $this->slug = $slug;
+return $slug;
 }
 
 public function extractSlug($text = null) {
 
 if ($text == null) {return true;}
-//if ($this->state == "off") {$this->slug = ""; return null;}
 
-$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
-$slug = $alphanumeric_agent->filterAlphanumeric($text);
-//var_dump($slug);
+$slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
 $despaced_slug = preg_replace('/\s+/', ' ',$slug);
 $slug = str_replace(" ","-",$despaced_slug);

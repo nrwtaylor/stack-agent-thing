@@ -107,6 +107,9 @@ class Word extends Agent {
      * @return unknown
      */
     function extractWords($string) {
+        if ($string == "") {$this->words = array(); return $this->words;}
+        $this->thing->log('called extractWords on "'. $string . '".' , "DEBUG");
+
         //echo "\n";
         //                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
         //echo $string . "\n";
