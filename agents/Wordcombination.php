@@ -228,6 +228,8 @@ class Wordcombination extends Agent
      */
     public function readSubject()
     {
+if ($this->input == "wordcombination") {return;}
+
         $input = strtolower($this->subject);
         if ($this->agent_input != null) {
             $input = $this->agent_input;
