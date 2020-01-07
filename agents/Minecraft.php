@@ -38,7 +38,7 @@ class Minecraft extends Agent {
         $this->test= "Development code";
 
         $this->thing_report["info"] = "This is an agent which keeps an eye on a Minecraft server.";
-        $this->thing_report["help"] = "This is a Minecraft server manager.";
+        $this->thing_report["help"] = "Text MINECRAFT <text>.";
 
         $this->default_state = "on";
 
@@ -52,6 +52,9 @@ class Minecraft extends Agent {
                 $this->default_address = $this->thing->container['api']['minecraft']['default_address'];
             }
 
+            if (isset($this->thing->container['api']['minecraft']['default_port'])) {
+                $this->default_port = $this->thing->container['api']['minecraft']['default_port'];
+            }
 
             if (isset($this->thing->container['api']['minecraft']['server_path'])) {
                 $this->server_path = $this->thing->container['api']['minecraft']['server_path'];
@@ -60,10 +63,14 @@ class Minecraft extends Agent {
 
         }
 
-
-
     }
 
+
+    /**
+     *
+     * @param unknown $data
+     * @return unknown
+     */
     function replace_a_line($data) {
 
         if (stristr($data, 'motd')) {
@@ -74,14 +81,20 @@ class Minecraft extends Agent {
     }
 
 
+    /**
+     *
+     */
     public function set() {
 
         $data = $this->server_properties;
+        if ($data != true) {
+            $data = array_map(array($this, 'replace_a_line'), $data);
+            $server_properties = implode('', $data);
+            // Write server.properties file.
+            // Explore changing motd.
+            //file_put_contents($this->server_path . "server.properties", $server_properties);
 
-        $data = array_map(array($this,'replace_a_line'),$data);
-
-        $server_properties = implode('', $data);
-
+        }
         $player_count = "X";
         if (isset($this->player_count)) {$player_count = $this->player_count;}
 
@@ -100,12 +113,13 @@ class Minecraft extends Agent {
 
         $this->thing->log($this->agent_prefix . 'set Minecraft to ' . $this->state, "INFORMATION");
 
-// Write server.properties file.
-// Explore changing motd.
-//file_put_contents($this->server_path . "server.properties", $server_properties);
 
     }
 
+
+    /**
+     *
+     */
     public function run() {
         $this->day = $this->previous_day;
 
@@ -116,13 +130,20 @@ class Minecraft extends Agent {
         }
     }
 
+
+    /**
+     *
+     */
     public function doDay() {
 
         $this->response .="It is now " . $this->clocktime. ". It is day " . $this->day . ". ";
 
-
     }
 
+
+    /**
+     *
+     */
     public function get() {
 
         $this->server_properties = $this->getMinecraft();
@@ -140,11 +161,11 @@ class Minecraft extends Agent {
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
-//        if (!$this->isKaiju($this->previous_state)) {
-//            $this->state = $this->previous_state;
-//        } else {
-//            $this->state = $this->default_state;
-//        }
+        //        if (!$this->isKaiju($this->previous_state)) {
+        //            $this->state = $this->previous_state;
+        //        } else {
+        //            $this->state = $this->default_state;
+        //        }
 
         if ((!isset($this->state)) or ($this->state == false)) {
             $this->state = $this->default_state;
@@ -163,14 +184,18 @@ class Minecraft extends Agent {
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable( array("minecraft", "player_count") );
+        $this->previous_player_count = $this->thing->json->readVariable( array("minecraft", "player_count") );
+
+    }
 
 
-
-
-}
-
+    /**
+     *
+     * @return unknown
+     */
     public function getMinecraft() {
+
+        if (!isset($this->server_path)) {return true;}
 
         $data_source = $this->server_path . "server.properties";
 
@@ -200,9 +225,9 @@ class Minecraft extends Agent {
             try {
 
                 if ($file_flag === false) {
- //                   @file_put_contents($data_target, $data, LOCK_EX);
+                    //                   @file_put_contents($data_target, $data, LOCK_EX);
                     //                    @file_put_contents($data_target, $data, FILE_APPEND | LOCK_EX);
-//                    $this->thing->log("Data source " . $data_source . " created.");
+                    //                    $this->thing->log("Data source " . $data_source . " created.");
 
                 }
             } catch (Exception $e) {
@@ -214,15 +239,21 @@ class Minecraft extends Agent {
 
     }
 
+
+    /**
+     *
+     */
     function loadMinecraft() {
 
     }
 
+
     /**
      *
      * @param unknown $text
+     * @param unknown $port (optional)
      */
-     function doQuery($text, $port = 25565) {
+    function doQuery($text, $port = 25565) {
         $host = $text;
 
         $timeout = 3;
@@ -267,7 +298,7 @@ class Minecraft extends Agent {
 
         // Logging for debug
         $thing = new Thing(null);
-        $thing->create("merp","merp", 's/ ' . $this->thing_report['sms']);
+        $thing->create("merp", "merp", 's/ ' . $this->thing_report['sms']);
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'] ;
@@ -306,10 +337,12 @@ class Minecraft extends Agent {
     /**
      *
      * @param unknown $text (optional)
+     * @return unknown
      */
     function doMinecraft($text = null) {
         // Yawn.
         if (!isset($this->default_address)) {return true;}
+        if (!isset($this->default_port)) {return true;}
         $this->doQuery($this->default_address, $this->default_port);
 
         if ($this->connect()) {
@@ -374,41 +407,41 @@ class Minecraft extends Agent {
             $numbers = $number_agent->extractNumbers($this->subject);
             $this->player_count = $numbers[0];
             return;
-       }
+        }
 
-       if (stripos($this->subject, 'The time is') !== false) {
-           $number_agent = new Number($this->thing, $this->subject);
-           $number = $number_agent->extracted_number;
-           $this->clocktime = $number;
-           $this->response .= $number;
-           return;
-       }
+        if (stripos($this->subject, 'The time is') !== false) {
+            $number_agent = new Number($this->thing, $this->subject);
+            $number = $number_agent->extracted_number;
+            $this->clocktime = $number;
+            $this->response .= $number;
+            return;
+        }
 
-       if (stripos($this->subject, 'tick') !== false) {
-           $number_agent = new Number($this->thing, $this->subject);
-           $this->tick = $number_agent->extracted_number;
-           $this->response = "No response.";
-           return;
-       }
+        if (stripos($this->subject, 'tick') !== false) {
+            $number_agent = new Number($this->thing, $this->subject);
+            $this->tick = $number_agent->extracted_number;
+            $this->response = "No response.";
+            return;
+        }
 
-       if (stripos($this->subject, 'bar') !== false) {
-           $number_agent = new Number($this->thing, $this->subject);
-           $this->bar = $number_agent->extracted_number;
-           $this->response = "No response.";
+        if (stripos($this->subject, 'bar') !== false) {
+            $number_agent = new Number($this->thing, $this->subject);
+            $this->bar = $number_agent->extracted_number;
+            $this->response = "No response.";
 
-           if ($this->bar == 1) {
-               $this->response .= "Text EDNA PRIVACY for this server's privacy policy. ";
-               $this->flag_do_not_respond = false;
-           }
+            if ($this->bar == 1) {
+                $this->response .= "Text EDNA PRIVACY for this server's privacy policy. ";
+                $this->flag_do_not_respond = false;
+            }
 
-           return;
-       }
+            return;
+        }
 
-       if (stripos($this->subject, 'thing') !== false) {
-           //$this->flag_do_not_respond = true;
-           $this->response = "No response.";
-           return;
-       }
+        if (stripos($this->subject, 'thing') !== false) {
+            //$this->flag_do_not_respond = true;
+            $this->response = "No response.";
+            return;
+        }
 
 
         $this->doMinecraft($this->input);

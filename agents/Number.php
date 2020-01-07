@@ -100,11 +100,13 @@ class Number extends Agent
         if (!isset($this->numbers_history)) {$this->historyNumber();}
         $t = "NUMBER CHART\n";
         $points = array();
-        //        $x_min = 1e99;
-        //        $x_max = -1e99;
 
-        //        $y_min = 1e99;
-        //        $y_max = -1e99;
+        // Defaults needed.
+                $x_min = 1e99;
+                $x_max = -1e99;
+
+                $y_min = 1e99;
+                $y_max = -1e99;
 
         foreach ($this->numbers_history as $i=>$number_object) {
 
