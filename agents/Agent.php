@@ -265,6 +265,39 @@ class Agent {
 
     }
 
+    /**
+     *
+     */
+    function makeAgent($name = null) {
+        $text = strtolower($this->agent_name);
+        $file = $this->resource_path .'/' . $text . '/' . $text . '.txt';
+        $contents = file_get_contents($file);
+
+        $handle = fopen($file, "r");
+
+        $channels = array("sms", "email", "snippet", "han", "word", "slug");
+        $channel = "null";
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                $text = trim(str_replace(array('#', '[', ']'), '', $line));
+                if (in_array($text, $channels)) {
+                    $channel = $text;
+                    continue;
+                }
+
+                if (!isset($this->thing_report[$channel])) {$this->thing_report[$channel] = "";}
+                $this->thing_report[$channel] .= $line;
+
+            }
+
+            fclose($handle);
+        } else {
+            // error opening the file.
+        }
+    }
+
+
+
 
     /**
      *
