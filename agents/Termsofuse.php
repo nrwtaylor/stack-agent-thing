@@ -27,13 +27,9 @@ class Termsofuse extends Agent {
      */
     function init() {
 
-        $this->thing_report['help'] = 'This is the Terms of Use manager. Email ' . $this->email .'.';
-
         $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
         $this->node_list = array("start"=>array("start","opt-in"));
         $this->termsofuse();
-
-//        $this->thing_report['thing']  = $this->thing;
     }
 
 
@@ -41,7 +37,7 @@ class Termsofuse extends Agent {
      *
      */
     public function termsofuse() {
-        $this->makeAgent("where");
+        $this->makeAgent("termsofuse");
     }
 
 
@@ -60,9 +56,12 @@ class Termsofuse extends Agent {
      * @return unknown
      */
     public function makeSMS() {
-        $sms = "TERMS OF USE | " . $this->thing_report['sms'];
-        $sms .= " Please read them carefully at " . $this->web_prefix ."terms-of-use" ;
-        $sms .= " | " . "TEXT PRIVACY" ;
+
+        $text = ($this->thing_report['sms']);
+        $shortcode_agent = new Shortcode($this->thing, "shortcode");
+        $text = $shortcode_agent->filterShortcode($text);
+
+        $sms = "TERMS OF USE | " . $text;
 
         $this->thing_report['sms'] = $sms;
         $this->sms_message = $sms;
@@ -74,40 +73,14 @@ class Termsofuse extends Agent {
      *
      */
     public function makeEmail() {
-$text = ($this->thing_report['email']);
 
-//$string = "The people are very nice , [gal~route~100~100] , the people are very nice , [ga2l~route2~150~150]";
-$regex = "/\[(.*?)\]/";
-preg_match_all($regex, $text, $matches);
+        $text = ($this->thing_report['email']);
+        $shortcode_agent = new Shortcode($this->thing, "shortcode");
+        $text = $shortcode_agent->filterShortcode($text);
 
-for($i = 0; $i < count($matches[1]); $i++)
-{
-    $match = $matches[1][$i];
-
-//    $array = explode('~', $match);
-//    $newValue = $array[0] . " - " . $array[1] . " - " . $array[2] . " - " . $array[3];
-$newValue = $this->{strtolower($match)};
-    $text = str_replace($matches[0][$i], $newValue, $text);
-}
 
         $this->thing_report['email'] = $text;
     }
-
-
-    /**
-     *
-     */
-/*
-    public function makeChoices() {
-var_dump($this->thing_report['choices']);
-exit();
-        // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-        $choices = $this->thing->choice->makeLinks('start');
-        // $choices = false;
-        $this->thing_report['choices'] = $choices;
-    }
-*/
 
     /**
      *

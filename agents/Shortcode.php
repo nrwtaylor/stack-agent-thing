@@ -1,6 +1,6 @@
 <?php
 /**
- * Privacy.php
+ * Shortcode.php
  *
  * @package default
  */
@@ -15,7 +15,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Privacy extends Agent {
+class Shortcode extends Agent {
 
 
     public $var = 'hello';
@@ -27,71 +27,57 @@ class Privacy extends Agent {
      */
     function init() {
 
+        $this->thing_report['help'] = 'This is the Short Code manager.';
+
         $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
         $this->web_prefix = $this->thing->container['stack']['web_prefix'];
 
         $this->node_list = array("start"=>array("start","opt-in"));
-        $this->privacy();
-
-
-        $this->thing_report['thing']  = $this->thing;
+        $this->shortcode();
     }
 
 
     /**
      *
      */
-    public function privacy() {
-        $this->makeAgent("privacy");
+    public function shortcode() {
+//        $this->makeAgent("shortcode");
     }
-
-
-    /**
-     *
-     */
-    public function makeWeb() {
-        $file = $GLOBALS['stack_path'] . 'resources/privacy/privacy.html';
-        $contents = file_get_contents($file);
-        $this->thing_report['web'] = $contents;
-    }
-
 
     /**
      *
      * @return unknown
      */
     public function makeSMS() {
-        $sms = "PRIVACY | " . $this->thing_report['sms'];
+        $sms = "SHORTCODE | No response.";
 
         $this->thing_report['sms'] = $sms;
         $this->sms_message = $sms;
         return $this->sms_message;
-
     }
 
 
     /**
      *
      */
+    public function filterShortcode($text = null) {
 
-    public function makeEmail() {
-        $text = ($this->thing_report['email']);
-        $shortcode_agent = new Shortcode($this->thing, "shortcode");
-        $text = $shortcode_agent->filterShortcode($text);
+        if ($text == null) return true;
 
-        $this->thing_report['email'] = $text;
-    }
+        $regex = "/\[(.*?)\]/";
+        preg_match_all($regex, $text, $matches);
 
+        for($i = 0; $i < count($matches[1]); $i++)
+        {
+            $match = $matches[1][$i];
 
-    /**
-     *
-     */
-    public function makeChoices() {
-        // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-        $choices = $this->thing->choice->makeLinks('start');
-        // $choices = false;
-        $this->thing_report['choices'] = $choices;
+//    $array = explode('~', $match);
+//    $newValue = $array[0] . " - " . $array[1] . " - " . $array[2] . " - " . $array[3];
+            $newValue = $this->{strtolower($match)};
+            $text = str_replace($matches[0][$i], $newValue, $text);
+        }
+
+        return $text;
     }
 
 
@@ -100,13 +86,8 @@ class Privacy extends Agent {
      * @return unknown
      */
     public function respondResponse() {
-
-//        $this->makeChoices();
-
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
 
         return $this->thing_report;
     }
@@ -117,8 +98,6 @@ class Privacy extends Agent {
      * @return unknown
      */
     public function readSubject() {
-
-        $this->thing_report['request'] = "What is Privacy?";
         return "Message not understood";
     }
 
