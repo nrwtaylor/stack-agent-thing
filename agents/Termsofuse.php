@@ -27,12 +27,13 @@ class Termsofuse extends Agent {
      */
     function init() {
 
+        $this->thing_report['help'] = 'This is the Terms of Use manager. Email ' . $this->email .'.';
 
         $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
         $this->node_list = array("start"=>array("start","opt-in"));
         $this->termsofuse();
 
-        $this->thing_report['thing']  = $this->thing;
+//        $this->thing_report['thing']  = $this->thing;
     }
 
 
@@ -40,6 +41,7 @@ class Termsofuse extends Agent {
      *
      */
     public function termsofuse() {
+        $this->makeAgent("where");
     }
 
 
@@ -58,13 +60,13 @@ class Termsofuse extends Agent {
      * @return unknown
      */
     public function makeSMS() {
-        $this->sms_message = "TERMS OF USE | Records of the subject/chat, originating address and destination agent are retained until they are forgotten.  Records may be forgotten at anytime either by the system or by the Identity. Forgetall will forget all of an Identity's Things. Things may contain nominal key accessible information.";
-        $this->sms_message .= " | " . $this->web_prefix ."terms-of-use" ;
-        $this->sms_message .= " | " . "TEXT ?" ;
+        $sms = "TERMS OF USE | " . $this->thing_report['sms'];
+        $sms .= " Please read them carefully at " . $this->web_prefix ."terms-of-use" ;
+        $sms .= " | " . "TEXT PRIVACY" ;
 
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->message = $this->sms_message;
-        return $this->message;
+        $this->thing_report['sms'] = $sms;
+        $this->sms_message = $sms;
+        return $this->sms_message;
     }
 
 
@@ -72,55 +74,49 @@ class Termsofuse extends Agent {
      *
      */
     public function makeEmail() {
-        $message = "Thank you. Privacy is really important to " . ucwords($this->word) . ". Records deposited with " . ucwords($this->word) . " may be forgotten at any time.\r\n";
-        $message .= "The address fields (to:, cc:, and bcc:) are stripped of non-Stackr emails, and the subject line is processed by " . ucwords($this->word) . ".\r\n";
-        $message .= "An instruction to Stackr to remove all message records associated with this email address can be sent to forgetall" . $this->mail_postfix . ".\r\n";
+$text = ($this->thing_report['email']);
 
-        $message .= "<br><br>";
+//$string = "The people are very nice , [gal~route~100~100] , the people are very nice , [ga2l~route2~150~150]";
+$regex = "/\[(.*?)\]/";
+preg_match_all($regex, $text, $matches);
 
-        $message .= 'If you need to discuss our privacy policy please contact ' . $this->email . ".\r\n";
-        $message .= 'Our mailing address is ' . trim($this->mail_regulatory) . ".\r\n";
+for($i = 0; $i < count($matches[1]); $i++)
+{
+    $match = $matches[1][$i];
 
-        $message .= 'For a full statement of our privacy policy, please goto to <a href="' . $this->web_prefix . ' privacy">' . $this->web_prefix . 'privacy</a>';
+//    $array = explode('~', $match);
+//    $newValue = $array[0] . " - " . $array[1] . " - " . $array[2] . " - " . $array[3];
+$newValue = $this->{strtolower($match)};
+    $text = str_replace($matches[0][$i], $newValue, $text);
+}
 
-        $this->thing_report['email'] = $message;
+        $this->thing_report['email'] = $text;
     }
 
 
     /**
      *
      */
+/*
     public function makeChoices() {
+var_dump($this->thing_report['choices']);
+exit();
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
         $choices = $this->thing->choice->makeLinks('start');
         // $choices = false;
         $this->thing_report['choices'] = $choices;
     }
-
+*/
 
     /**
      *
      * @return unknown
      */
-    public function respond() {
-        // Thing actions
-        $this->thing->flagGreen();
-
-        $this->makeSMS();
-        $this->makeWeb();
-        $this->makeEmail();
-
-        $to = $this->thing->from;
-        $from = "privacy";
-
-        $this->makeChoices();
-
+    public function respondResponse() {
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        //$this->thing_report['help'] = 'This is the Privacy manager. Email privacy' . $this->mail_postfix .'.';
-        $this->thing_report['help'] = 'This is the Terms of Use manager. Email ' . $this->email .'.';
 
 
         return $this->thing_report;
@@ -133,8 +129,7 @@ class Termsofuse extends Agent {
      */
     public function readSubject() {
 
-        $this->thing_report['request'] = "What is Terms of Use?";
-        $this->thing_report['message'] = "Request for web terms of use.";
+        $this->thing_report['request'] = "What are the Terms of Use?";
 
         return "Message not understood";
     }

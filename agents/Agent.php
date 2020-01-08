@@ -275,7 +275,7 @@ class Agent {
 
         $handle = fopen($file, "r");
 
-        $channels = array("sms", "email", "snippet", "han", "word", "slug");
+        $channels = array("sms", "email", "txt", "snippet", "han", "word", "slug", "choices");
         $channel = "null";
         if ($handle) {
             while (($line = fgets($handle)) !== false) {

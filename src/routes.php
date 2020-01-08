@@ -798,6 +798,29 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             return $this->renderer->render($response, 'thing.phtml', $bleep);
             break;
 
+        case ($command == "termsofuse"):
+        case ($command == "terms-of-use"):
+
+            $thing = new Thing($uuid);
+            $thing->Create("web", "routes", "s/ web termsofuse");
+
+            $agent = new Termsofuse($thing);
+
+            $thing_report = $agent->thing_report;
+            $thing_report['requested_channel'] = 'thing';
+
+            $thing_report['etime'] = number_format($thing->elapsed_runtime());
+            $thing_report['request'] = $thing->subject;
+
+            $thing->flagGreen();
+
+            $bleep = array();
+            $bleep['thing_report'] = $thing_report;
+
+            return $this->renderer->render($response, 'thing.phtml', $bleep);
+            break;
+
+
         case( (strpos($last, ".") !== false) ):
 
             // File request of some sort
