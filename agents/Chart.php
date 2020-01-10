@@ -180,6 +180,17 @@ $this->makePNG();
      * @return unknown
      */
     function drawGraph() {
+
+        if (!isset($this->x_min)) {return true;}
+        if (!isset($this->x_max)) {return true;}
+        if (!isset($this->y_min)) {return true;}
+        if (!isset($this->y_max)) {return true;}
+
+        if (!isset($this->y_spread)) {$this->y_spread = $this->y_max - $this->y_min;}
+        if (!isset($this->x_spread)) {$this->x_spread = $this->x_max - $this->x_min;}
+
+        if ($this->x_spread == 0) {return true;}
+
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
 
@@ -198,7 +209,7 @@ $this->makePNG();
             //      if ($this->y_spread == 0) {$this->y_spread = 100;}
 
             $y = 10 + $this->chart_height - ($common_variable - $this->y_min) / ($this->y_spread) * $this->chart_height;
-            $x = 10 + ($x - $this->x_min) / ($this->x_max - $this->x_min) * $this->chart_width;
+            $x = 10 + ($x - $this->x_min) / ($this->x_spread) * $this->chart_width;
 
             if (!isset($x_old)) {$x_old = $x;}
             if (!isset($y_old)) {$y_old = $y;}

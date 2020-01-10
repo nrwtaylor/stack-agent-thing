@@ -74,7 +74,13 @@ class Termsofuse extends Agent {
      */
     public function makeEmail() {
 
-        $text = ($this->thing_report['email']);
+        if (!isset($this->thing_report['email'])) {
+            $thing = new Thing(null);
+            $thing->Create("terms-of-use", "human", "s/ terms of use email not found");
+            return true;
+        }
+
+        $text = $this->thing_report['email'];
         $shortcode_agent = new Shortcode($this->thing, "shortcode");
         $text = $shortcode_agent->filterShortcode($text);
 

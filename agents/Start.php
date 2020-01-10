@@ -156,7 +156,7 @@ class Start {
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/start';
 
-        $this->node_list = array("start"=>array("glossary", "new user"));
+        $this->node_list = array("start"=>array("glossary", "new user", "privacy", "terms of use"));
 
         $this->makeChoices();
 

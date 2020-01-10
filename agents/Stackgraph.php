@@ -128,6 +128,9 @@ class Stackgraph {
             if (!isset($variables['stack'])) {continue;}
 
             $stack = $variables['stack'];
+
+            if (!isset($stack['count'])) {continue;}
+
             $count = $stack['count'];
             $refreshed_at = strtotime($stack['refreshed_at']);
 
@@ -142,7 +145,6 @@ class Stackgraph {
 
             $this->points[] = array("refreshed_at"=>$refreshed_at, "series_0"=>$count, "series_1"=>null);
         }
-//var_dump($this->points);
     }
 
 
@@ -181,9 +183,6 @@ return;
             $this->startVariables();
             return;
         }
-
-
-            
 
         $this->thing->log( 'Agent "Stackgraph" got ' . count($things) . ' recent Tally Things.', 'INFORMATION' );
 
