@@ -30,7 +30,7 @@ class Privacy extends Agent {
         $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
         $this->web_prefix = $this->thing->container['stack']['web_prefix'];
 
-        $this->node_list = array("start"=>array("start","opt-in"));
+        $this->node_list = array("start"=>array("start","opt-in", "terms of use"));
         $this->privacy();
 
 
@@ -43,6 +43,7 @@ class Privacy extends Agent {
      */
     public function privacy() {
         $this->makeAgent("privacy");
+        $this->makeChoices();
     }
 
 
@@ -87,9 +88,12 @@ class Privacy extends Agent {
      *
      */
     public function makeChoices() {
+if (isset($this->thing_report['choices'])) {}
+
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
         $choices = $this->thing->choice->makeLinks('start');
+//var_dump($choices);
         // $choices = false;
         $this->thing_report['choices'] = $choices;
     }
@@ -105,8 +109,6 @@ class Privacy extends Agent {
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-
 
         return $this->thing_report;
     }

@@ -38,7 +38,6 @@ class Metocean extends Agent {
      * @param unknown $agent_input (optional)
      */
     function init() {
-
         $this->keyword = "environment";
         $this->test= "Development code"; // Always
         $this->keywords = array('weather');
@@ -53,7 +52,7 @@ class Metocean extends Agent {
         $this->link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
         $this->xml_link = "https://weather.gc.ca/rss/city/bc-74_e.xml";
 
-$this->html_link = "https://weather.gc.ca/marine/weatherConditions-currentConditions_e.html?mapID=02&siteID=14305&stationID=wvf";
+        $this->html_link = "https://weather.gc.ca/marine/weatherConditions-currentConditions_e.html?mapID=02&siteID=14305&stationID=wvf";
 
         // https://www.weather.gc.ca/city/pages/bc-74_metric_e.html
         $link = str_replace("/rss/city/", "/city/pages/", $this->xml_link);
@@ -69,17 +68,21 @@ $this->html_link = "https://weather.gc.ca/marine/weatherConditions-currentCondit
     function run() {
 
         $this->doMetocean();
+    }
+
+
+    /**
+     *
+     */
+    function doMetocean() {
+
+        $this->current_conditions = "";
+        $this->forecast_conditions = "";
+
+        $this->getMetocean();
 
     }
 
-function doMetocean() {
-
-$this->current_conditions = "";
-$this->forecast_conditions = "";
-
-$this->getMetocean();
-
-}
 
     /**
      *
@@ -122,19 +125,19 @@ $this->getMetocean();
         $this->refreshed_at = strtotime($time_string);
 
         $this->thing->json->setField("variables");
-//        $queue_time = $this->thing->json->readVariable( array("metocean", "current_conditions") );
-//        $run_time = $this->thing->json->readVariable( array("metocean", "forecast_conditions") );
+        //        $queue_time = $this->thing->json->readVariable( array("metocean", "current_conditions") );
+        //        $run_time = $this->thing->json->readVariable( array("metocean", "forecast_conditions") );
 
 
-//        if (($queue_time == false) and ($run_time==false) ) {
-//            $this->getLatency();
+        //        if (($queue_time == false) and ($run_time==false) ) {
+        //            $this->getLatency();
 
-//            $this->readSubject();
+        //            $this->readSubject();
 
-            $this->thing->json->writeVariable( array("metocean", "current_conditions"), $this->current_conditions );
-            $this->thing->json->writeVariable( array("metocean", "forecast_conditions"), $this->forecast_conditions );
+        $this->thing->json->writeVariable( array("metocean", "current_conditions"), $this->current_conditions );
+        $this->thing->json->writeVariable( array("metocean", "forecast_conditions"), $this->forecast_conditions );
 
-//        }
+        //        }
 
 
 
@@ -166,7 +169,6 @@ $this->getMetocean();
     function getMetocean() {
 
         $data_source = $this->html_link;
-
         $data = file_get_contents($data_source);
         if ($data == false) {
             return true;
@@ -180,53 +182,52 @@ $this->getMetocean();
         $contents = $data;
         $this->weather_contents = $data;
 
-$searchfor = "Wind&nbsp; ( knots ) ";
+        $searchfor = "Wind&nbsp; ( knots ) ";
 
-//$t = $this->getLineAfter($contents, $searchfor);
-$text = $this->getLine($contents, $searchfor, 0);
+        //$t = $this->getLineAfter($contents, $searchfor);
+        $text = $this->getLine($contents, $searchfor, 0);
 
-//var_dump($text);
-//exit();
-//$x = "Wind";
-$conditions_text = explode($searchfor, $text);
+        //var_dump($text);
+        //exit();
+        //$x = "Wind";
+        $conditions_text = explode($searchfor, $text);
 
-$conditions = explode("Air",$conditions_text[1]);
-$this->current_conditions = trim($conditions[0]);
+        $conditions = explode("Air", $conditions_text[1]);
+        $this->current_conditions = trim($conditions[0]);
 
 
-$searchfor = "Sand Heads Lightstation ";
+        $searchfor = "Sand Heads Lightstation ";
 
-//$t = $this->getLineAfter($contents, $searchfor);
-$text = $this->getLine($contents, $searchfor, 0);
+        //$t = $this->getLineAfter($contents, $searchfor);
+        $text = $this->getLine($contents, $searchfor, 0);
 
-//$x = "Wind";
-$timestamp_text = explode("  ", $text);
-$timestamp = $timestamp_text[1];
+        //$x = "Wind";
+        $timestamp_text = explode("  ", $text);
+        $timestamp = $timestamp_text[1];
+        $conditions_timestamp = str_replace("&nbsp;", " " , $timestamp);
 
-$conditions_timestamp = str_replace("&nbsp;", " " ,$timestamp);
+        //var_dump($timestamp);
 
-//var_dump($timestamp);
-
-//        $forecast_timestamp = trim(explode($searchfor, $this->conditions[0])[1]);
+        //        $forecast_timestamp = trim(explode($searchfor, $this->conditions[0])[1]);
 
         $this->forecast_timestamp_date = preg_split( "/ (PDT|PST) /", $conditions_timestamp )[1];
         $this->forecast_timestamp_time = preg_split( "/ (PDT|PST) /", $conditions_timestamp )[0];
 
-//        $this->forecast_conditions = trim($forecast_conditions);
+        //        $this->forecast_conditions = trim($forecast_conditions);
 
         $this->refreshed_at = $this->current_time;
 
 
-//exit();
+        //exit();
 
-$conditions = explode("Air",$conditions_text[1]);
-$this->current_conditions = trim($conditions[0]);
-
-
+        $conditions = explode("Air", $conditions_text[1]);
+        $this->current_conditions = trim($conditions[0]);
 
 
 
-return;
+
+
+        return;
 
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
@@ -278,22 +279,31 @@ return;
 
     }
 
-function getLine($contents, $searchfor, $relative_index = 0) {
 
-$lines = explode("\r\n", $contents);
-//    $lines = file($file_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    /**
+     *
+     * @param unknown $contents
+     * @param unknown $searchfor
+     * @param unknown $relative_index (optional)
+     * @return unknown
+     */
+    function getLine($contents, $searchfor, $relative_index = 0) {
 
-foreach($lines as $i=>$line) {
+        $lines = explode("\r\n", $contents);
+        //    $lines = file($file_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-if (strpos($line, $searchfor) !== false) {
-    return $lines[$i+ $relative_index];
-}
-}
- //   if (($key = array_search($line, $lines)) !== false && isset($lines[$key + 1])) {
-//        return $lines[$key + 1];
-//    }
-    return null;
-}
+        foreach ($lines as $i=>$line) {
+
+            if (strpos($line, $searchfor) !== false) {
+                return $lines[$i+ $relative_index];
+            }
+        }
+        //   if (($key = array_search($line, $lines)) !== false && isset($lines[$key + 1])) {
+        //        return $lines[$key + 1];
+        //    }
+        return null;
+    }
+
 
     /**
      *
@@ -314,8 +324,12 @@ if (strpos($line, $searchfor) !== false) {
         return true;
     }
 
-    public function makeChart() {
 
+    /**
+     *
+     */
+    public function makeChart() {
+        return;
         if (!isset($this->numbers_history)) {$this->historyNumber();}
         $t = "NUMBER CHART\n";
         $points = array();
@@ -388,7 +402,7 @@ if (strpos($line, $searchfor) !== false) {
      *
      */
     public function makeImage() {
-        $this->image = $this->chart_agent->image;
+        //        $this->image = $this->chart_agent->image;
     }
 
 
@@ -396,22 +410,23 @@ if (strpos($line, $searchfor) !== false) {
     /**
      *
      */
+
     /**
      *
      */
     public function makeWeb() {
         $web = "<b>Metocean Agent</b>";
-//        $web .= "<p>";
+        //        $web .= "<p>";
         //$web .= '<iframe title="Environment Canada Weather" width="287px" height="191px" src="//weather.gc.ca/wxlink/wxlink.html?cityCode=bc-74&amp;lang=e" allowtransparency="true" frameborder="0"></iframe>';
 
-//        $web .= '<iframe title="Environment Canada Weather" width="300px" height="191px" src="//weather.gc.ca/wxlink/wxlink.html?cityCode=bc-74&amp;lang=e" allowtransparency="true" frameborder="0"></iframe>';
+        //        $web .= '<iframe title="Environment Canada Weather" width="300px" height="191px" src="//weather.gc.ca/wxlink/wxlink.html?cityCode=bc-74&amp;lang=e" allowtransparency="true" frameborder="0"></iframe>';
 
         $web .= "<p>";
         $web .= "current conditions are " . $this->current_conditions . "<br>";
         $web .= "forecast conditions becoming " . $this->forecast_conditions . "<br>";
 
         $web .= "data from " . $this->html_link . "<br>";
-$web .= "This report is from a summary of hourly weather conditions for the weather station or buoy. Please note that these observations might not always be representative of weather conditions over their associated marine area.<br>";
+        $web .= "This report is from a summary of hourly weather conditions for the weather station or buoy. Please note that these observations might not always be representative of weather conditions over their associated marine area.<br>";
         $web .= "Source is Environment Canada." . "<br>";
 
 
@@ -422,7 +437,7 @@ $web .= "This report is from a summary of hourly weather conditions for the weat
 
         $web .= "Environment Canada feed last queried " . $ago .  " ago.<br>";
 
-//        $this->sms_message = $sms_message;
+        //        $this->sms_message = $sms_message;
         $this->thing_report['web'] = $web;
     }
 
@@ -430,10 +445,10 @@ $web .= "This report is from a summary of hourly weather conditions for the weat
     /**
      *
      */
-    public function makeSms() {
+    public function makeSMS() {
 
         if ((!isset($this->response)) or ($this->response == null)) {
-//            $this->response = $this->current_conditions . " > " . $this->forecast_conditions;
+            //            $this->response = $this->current_conditions . " > " . $this->forecast_conditions;
             $this->response = $this->current_conditions . " ";
         }
 
@@ -441,13 +456,14 @@ $web .= "This report is from a summary of hourly weather conditions for the weat
         $sms_message .= trim($this->response);
         $sms_message .= " | link " . $this->html_link;
         $sms_message .= " | source Environment Canada ";
-$sms_message .= "Note that these observations might not always be representative of weather conditions over their associated marine area.";
+        $sms_message .= "Note that these observations might not always be representative of weather conditions over their associated marine area.";
         $agent = new Clocktime($this->thing, $this->forecast_timestamp_time);
 
         $sms_message .= " " . str_pad($agent->hour, 2 , "0", STR_PAD_LEFT) . ":" . str_pad($agent->minute, 2, "0", STR_PAD_LEFT);
-$sms_message .= " " . $this->forecast_timestamp_date;
+        $sms_message .= " " . $this->forecast_timestamp_date;
         // devstack - a conditioning algorithm.  In Sms.php?
-//        $sms_message = str_replace("°C", "C", $sms_message);
+        //        $sms_message = str_replace("°C", "C", $sms_message);
+
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -522,7 +538,7 @@ $sms_message .= " " . $this->forecast_timestamp_date;
         if (count($pieces) == 1) {
 
             if ($this->input == 'metocean') {
-//                $this->response = $this->current_conditions . " > " . $this->forecast_conditions;
+                //                $this->response = $this->current_conditions . " > " . $this->forecast_conditions;
                 $this->response = $this->current_conditions;
                 return;
 

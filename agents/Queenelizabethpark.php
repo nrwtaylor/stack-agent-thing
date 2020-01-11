@@ -659,7 +659,7 @@ $park_response = $r;
 //return;
 
 
-$park_response .= "Join us Saturday 17 August 1pm to 4.30pm at Queen Elizabeth Park. Contact VE7RVF control.";
+$park_response .= "Join us sometime in June 2020 at 1pm to 4.30pm at Queen Elizabeth Park. Contact VE7RVF control. Watch for the date.";
 
 }
 

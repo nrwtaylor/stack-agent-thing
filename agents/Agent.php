@@ -31,10 +31,19 @@ class Agent {
      * @param Thing   $thing
      * @param unknown $input (optional)
      */
-    function __construct(Thing $thing, $input = null) {
+    function __construct(Thing $thing = null, $input = null) {
+
+
         // Start the timer
-        $this->start_time = $thing->elapsed_runtime();
+        // $this->start_time = $thing->elapsed_runtime();
+
         //microtime(true);
+        if ($thing == null) {
+            $thing = new Thing(null);
+        }
+
+        // Start the thing timer.
+        $this->start_time = $thing->elapsed_runtime();
 
         $this->agent_input = $input;
         if (is_array($input)) {$this->agent_input = $input;}
@@ -304,7 +313,6 @@ class Agent {
      */
     public function getName() {
         $this->agent_name =   explode( "\\", strtolower(get_class($this)) )[2] ;
-
     }
 
     function debug() {
@@ -323,7 +331,6 @@ class Agent {
 
         $this->thing->log('agent_input is  ' . $agent_input_text .'.');
         $this->thing->log('subject is  ' . $this->subject .'.');
-
 
     }
 
@@ -1303,6 +1310,7 @@ class Agent {
             if (strtolower($keyword) == 'agent') {continue;}
 
             $agent_class_name = ucfirst(strtolower($keyword));
+            $agent_class_name = str_replace("-","",$agent_class_name);
 
             // Can probably do this quickly by loading path list into a variable
             // and looping, or a direct namespace check.
@@ -1820,34 +1828,6 @@ class Agent {
      *
      */
     public function makePNG() {
-        /*
-        $this->html_image = null;
-        $this->image = null;
-        $this->PNG = null;
-        $this->thing_report['png'] = null;
-
-
-
-        if (!isset($this->image)) {return;}
-try {
-        $agent = new Png($this->thing, "png");
-//try{
-//        $this->makeImage();
-
-        $agent->makePNG($this->image);
-
-        $this->html_image = $agent->html_image;
-        $this->image = $agent->image;
-        $this->PNG = $agent->PNG;
-
-        //$this->thing_report['png'] = $agent->PNG;
-        $this->thing_report['png'] = $agent->image_string;
-} catch (\Throwable $t) {
-
-$this->thing_report['png'] = null;
-
-}
-*/
     }
 
 
