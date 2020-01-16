@@ -82,6 +82,26 @@ class Ngram {
 
     }
 
+    public function getNgrams($input, $n = 3)
+    {
+        if (is_array($input)) {
+            return true;
+        }
+        $words = explode(' ', $input);
+        $ngrams = array();
+
+        foreach ($words as $key => $value) {
+            if ($key < count($words) - ($n - 1)) {
+                $ngram = "";
+                for ($i = 0; $i < $n; $i++) {
+                    $ngram .= " " . $words[$key + $i];
+                }
+                $ngrams[] = trim($ngram);
+            }
+        }
+        return $ngrams;
+    }
+
 
     /**
      *
@@ -226,6 +246,84 @@ class Ngram {
         $this->sms_message = "WORD | no match found";
         return;
     }
+
+    public function makeNgrams($lines = array(), $field = null)
+    {
+        $this->thing->log("start make ngrams");
+        //      $ngram_agent = new Ngram($this->thing, null);
+        $ngrams = array();
+
+        foreach ($lines as $index => $line) {
+
+if ($field != null) {
+$line = $line[$field];
+}
+
+            $line_filter = preg_replace("/[^a-zA-Z0-9 ]+/", "", $line);
+            foreach (array(2, 3, 4) as $i => $n) {
+                $t = $this->extractNgrams($line_filter, $n);
+                foreach ($t as $i => $ngram) {
+                    // Not sure why.
+                    // Some one word ngrams coming through.
+
+                    if (count(explode(" ", $ngram)) == 1) {
+                        continue;
+                    }
+
+                    if (strlen($ngram) <= 2) {
+                        continue;
+                    }
+
+                    // Do not do strtolower because we want Ngrams.
+                    // 5c is different to 5C.
+                    // And we need to be able to spot that.
+
+                    if (!isset($ngrams[$ngram])) {
+                        $ngrams[$ngram] = 0;
+                    }
+                    $ngrams[$ngram] += 1;
+                }
+            }
+        }
+
+        asort($ngrams);
+        $this->ngrams = $ngrams;
+        $this->ngrams_unique = array();
+        $this->ngrams_duplicate = array();
+        $html_ngrams_unique = "";
+        $html_ngrams_duplicate = "";
+        foreach ($ngrams as $ngram => $score) {
+            // Ignore only words
+            if ($score == 1) {
+                $this->ngrams_unique[$ngram] = 1;
+                $html_ngrams_unique .= $ngram . " " . $score . "<br>";
+
+                continue;
+            }
+            $this->ngrams_duplicate[$ngram] = $score;
+
+            //            $html_ngrams_duplicate .= $ngram . " " . $score . "<br>";
+        }
+
+        $count = 0;
+        foreach (array_reverse($this->ngrams_duplicate) as $ngram => $score) {
+            $count += 1;
+            $html_ngrams_duplicate .= $ngram . " " . $score . "<br>";
+            if ($count >= 10) {
+                break;
+            }
+        }
+
+        $this->thing->log("made ngrams");
+
+        $html =
+            "<br><br>DUPLICATE NGRAMS<br>" . $html_ngrams_duplicate . "<br>";
+
+        $this->ngram_html = $html;
+        $this->thing_report['ngram'] = $html;
+    }
+
+
 
 
     /**

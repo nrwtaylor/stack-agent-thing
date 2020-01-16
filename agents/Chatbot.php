@@ -47,7 +47,7 @@ class Chatbot extends Agent
 
         $this->thing->json->setField("variables");
         $this->name = strtolower($this->thing->json->readVariable( array("chatbot", "name") ));
-
+/*
         if ( ($this->name == false) ) {
 
             $this->readSubject();
@@ -57,10 +57,17 @@ class Chatbot extends Agent
 
             $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
         }
-
+*/
     }
 
+    public function set() {
 
+        if ( ($this->name == false) ) {
+            $this->thing->json->writeVariable( array("chatbot", "name"), $this->name );
+            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
+        }
+
+    }
 
     /**
      *
@@ -104,7 +111,7 @@ class Chatbot extends Agent
             return;
         }
 
-        if (!isset($this->cast)) {$this->getChatbots();}
+        if (!isset($this->chatbots)) {$this->getChatbots();}
 
         $this->chatbot_aliases = $this->chatbot_names;
 
@@ -116,7 +123,6 @@ class Chatbot extends Agent
         usort($this->chatbot_aliases, function($a, $b) {
                 return strlen($b) <=> strlen($a);
             });
-
 
         $this->filtered_input = trim(str_replace($this->chatbot_aliases, '' , $input));
 
@@ -161,8 +167,10 @@ class Chatbot extends Agent
      */
     function init() {
 
-        $this->default_chatbot_name = $this->thing->container['api']['chatbot']['name'];
-
+        $this->default_chatbot_name = "X";
+        if (isset($this->thing->container['api']['chatbot']['name'])) {
+            $this->default_chatbot_name = $this->thing->container['api']['chatbot']['name'];
+        }
         $this->thing_report["info"] = "This recognizes stack chatbot names.";
         $this->thing_report["help"] = 'Try EDNA.';
 
@@ -214,7 +222,9 @@ class Chatbot extends Agent
         $this->chatbots = array();
         // Load in the cast. And roles.
         $file = $this->resource_path .'/chatbot/chatbot.txt';
-        $contents = file_get_contents($file);
+        $contents = @file_get_contents($file);
+
+        if ($contents === false) {$this->response .= "No chatbot list found. "; return true;}
 
         $handle = fopen($file, "r");
 
@@ -249,7 +259,7 @@ class Chatbot extends Agent
     function isChatbot($text = null) {
 
         $selector = $text;
-        foreach ($this->cast as $index=>$chatbot) {
+        foreach ($this->chatbots as $index=>$chatbot) {
             // Match the first matching place
 
             if ($chatbot['name'] == $selector) {
@@ -285,7 +295,7 @@ class Chatbot extends Agent
             $web .= implode(" " , $chatbot) . '<br>';
         }
 */
-$web .= "OK.";
+        $web .= "OK.";
         $this->thing_report['web'] = $web;
 
     }
@@ -306,12 +316,13 @@ $web .= "OK.";
 
         $pieces = explode(" ", strtolower($input));
 
+        $this->getChatbot();
 
         if (count($pieces) == 1) {
 
             if ($input == 'chatbot') {
-                $this->getChatbot();
-                $this->response = "OK.";
+                //$this->getChatbot();
+                $this->response .= "OK. ";
                 //                if ((!isset($this->index)) or
                 //                    ($this->index == null)) {
                 //                    $this->index = 1;
@@ -327,8 +338,8 @@ $web .= "OK.";
                     switch ($piece) {
 
                     case 'chatbot':
-                        $this->response = "OK.";
-                        $this->getChatbot();
+                        $this->response .= "Saw the word chatbot. ";
+                        //$this->getChatbot();
 
                         return;
 
@@ -343,8 +354,8 @@ $web .= "OK.";
             }
         }
 
-        $this->getChatbot();
-        $this->response = "OK.";
+        //$this->getChatbot();
+        $this->response .= "OK. ";
     }
 
 

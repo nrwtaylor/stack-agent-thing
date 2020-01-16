@@ -34,6 +34,14 @@ class Token extends Agent
      *
      */
     function get() {
+        if (!isset($this->alphanumeric_agent)) {
+            $this->alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
+        }
+
+        if (!isset($this->mixed_agent)) {
+            $this->mixed_agent = new Mixed($this->thing,"mixed");
+        }
+
     }
 
 
@@ -54,8 +62,8 @@ public function getToken($text = null) {
 if ($text == null) {return true;}
 //if ($this->state == "off") {$this->slug = ""; return null;}
 
-$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
-$slug = $alphanumeric_agent->filterAlphanumeric($text);
+//$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
+$slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
 $despaced_slug = preg_replace('/\s+/', ' ',$slug);
 $slug = str_replace(" ","-",$despaced_slug);
@@ -173,8 +181,8 @@ $this->addTokens($t5);
 }
 
 
-$mixed_agent = new Mixed($this->thing,"mixed");
-$mixeds = $mixed_agent->extractMixeds($this->input);
+//$mixed_agent = new Mixed($this->thing,"mixed");
+$mixeds = $this->mixed_agent->extractMixeds($this->input);
 
 $this->addTokens($mixeds);
 

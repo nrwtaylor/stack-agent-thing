@@ -248,6 +248,20 @@ class Thing
         }
     }
 
+function spawn($datagram = null) {
+
+
+        $client = new \GearmanClient();
+        $client->addServer();
+        $arr = json_encode($datagram);
+
+        $client->doLowBackground("call_gimmu", $arr);
+
+
+
+}
+
+
 	function getUUid()
     {
 	    return (string) Uuid::uuid4();
@@ -836,7 +850,7 @@ if (!isset($this->account['stack'])) {return true;}
 		}
 	}
 
-	function associate ($uuids = null) {
+	function associate ($uuids = null, $mode = "default") {
 		if ($uuids == null) {return false;}
 
 		if ( is_string($uuids) ) {$uuids = array($uuids);}
@@ -845,7 +859,11 @@ if (!isset($this->account['stack'])) {return true;}
 			foreach($uuids as $uuid) {
 			    $this->json->setField("associations");
                 //$this->json->pushStream($uuid);
-                $this->json->fallingWater($uuid);
+                if ($mode == "default") {
+                    $this->json->pushStream($uuid);
+                } else {
+                    $this->json->fallingWater($uuid);
+                }
             }
 			return false;
 		}

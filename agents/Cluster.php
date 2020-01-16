@@ -124,8 +124,28 @@ $this->state = "X";
         $this->thing_report['sms'] = "STATE " . "| " . $this->response;
     }
 
+    public function associateCluster($uuid = null, $nom_from = null) {
+        if ($uuid == null) {return true;}
+        if ($nom_from == null) {$nom_from = $this->from;}
+
+        $this->thing->json->setFrom($nom_from);
+        $this->thing->associate($uuid, "falling water");
+        $this->thing->json->setField("variables");
 
 
-    function readSubject() {}
+
+    }
+
+    public function readSubject() {
+
+//$uuid_agent = new Uuid($this->thing);
+//$uuid = $uuid_agent->extractUuid($this->agent_input);
+
+//$this->thing->associate($this->agent_input, "falling water");
+
+//$this->thing->json->setField("variables");
+
+
+}
 
 }

@@ -27,11 +27,31 @@ class Brilltagger extends Agent
     function init() {
         $this->thing->log("init.");
 
+        $this->wordpress_path_to = false;
+
+        if (isset($this->thing->container['api']['wordpress']['path_to'])) {
+           $this->wordpress_path_to = $this->thing->container['api']['wordpress']['path_to'];
+        }
+
+
     }
 
     public function get() {
 
         if (isset($this->dict)) {return;}
+
+        // See if there is a faster way to pull the lexicon.
+        // Rather than pulling it from the text file.
+
+        // If the stack is running alongside WordPress use get and set transient.
+
+        if ($this->wordpress_path_to !== false) {
+            require_once $this->wordpress_path_to. 'wp-load.php';
+            if (($this->dict = get_transient('agent-brilltagger-lexicon'))) {
+                $this->thing->log("loaded brilltagger lexicon from  wp transient store.");
+                return $this->dict;
+            }
+        }
 
         $lexicon = $this->resource_path . "brilltagger/lexicon.txt";
         $fh = fopen($lexicon, 'r');
@@ -45,6 +65,10 @@ class Brilltagger extends Agent
         }
         fclose($fh);
         $this->thing->log("got the brilltagger lexicon.");
+
+        if ($this->wordpress_path_to !== false) {
+            set_transient('agent-brilltagger-lexicon', $this->dict);
+        }
     }
 
     /**
