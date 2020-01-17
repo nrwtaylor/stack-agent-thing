@@ -817,16 +817,18 @@ class Agent {
      * @param unknown $agent_input      (optional)
      * @return unknown
      */
-    public function getAgent($agent_class_name = null, $agent_input = null) {
+    public function getAgent($agent_class_name = null, $agent_input = null, $thing = null) {
+
+        if ($thing == null) {$thing = $this->thing;}
 
         try {
             $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
-
+var_dump($agent_namespace_name);
             $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
 
-            if (isset($this->input)) {$this->thing->subject = $this->input;}
+            if (isset($this->input)) {$thing->subject = $this->input;}
 
-            $agent = new $agent_namespace_name($this->thing);
+            $agent = new $agent_namespace_name($thing);
 
             // If the agent returns true it states it's response is not to be used.
             if ((isset($agent->response)) and ($agent->response === true)) {
@@ -838,7 +840,6 @@ class Agent {
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
             $this->thing->log( 'caught throwable.' , "WARNING" );
-
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'caught error. Could not load "' . $agent_class_name . '".' , "WARNING" );
             $message = $ex->getMessage();
@@ -854,7 +855,7 @@ class Agent {
             //continue;
             return false;
         }
-        return true;
+        return $agent;
 
     }
 
