@@ -37,7 +37,7 @@ class Brilltagger extends Agent
     }
 
     public function get() {
-
+$this->thing->log("get.");
         if (isset($this->dict)) {return;}
 
         // See if there is a faster way to pull the lexicon.
@@ -102,11 +102,11 @@ class Brilltagger extends Agent
     /**
      *
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
-        $this->makeSms();
-        $from = $this->from;
-        $to = $this->to;
+        //$this->makeSMS();
+        //$from = $this->from;
+        //$to = $this->to;
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -118,7 +118,7 @@ class Brilltagger extends Agent
     /**
      *
      */
-    function makeSms() {
+    function makeSMS() {
 
         $this->thing_report['sms'] = "BRILL TAGGER | " . $this->text;
 
@@ -134,6 +134,15 @@ class Brilltagger extends Agent
         $input = $this->input;
 
         if (strtolower($input) == "brilltagger") {
+
+return;
+}
+
+$this->thing->log("read " . $input .".");
+/*
+        if (strtolower($input) == "brilltagger") {
+//return;
+//}
             $this->getTask();
 //            $this->doSyllables($this->link_task);
         // Then run it through the classifier.
@@ -143,7 +152,7 @@ class Brilltagger extends Agent
 
             return;
         }
-
+*/
 
         $whatIWant = $this->input;
         if (($pos = strpos(strtolower($input), "brill tagger")) !== FALSE) { 
@@ -160,6 +169,7 @@ $this->tags = $tags;
 //        $this->printTag($tags);
         $this->textTag($tags);
 
+
     }
 
     /**
@@ -168,6 +178,7 @@ $this->tags = $tags;
      * @return unknown
      */
     public function tag($text) {
+$this->thing->log("brilltagger tag run.");
         preg_match_all("/[\w\d\.]+/", $text, $matches);
         $nouns = array('NN', 'NNS');
 

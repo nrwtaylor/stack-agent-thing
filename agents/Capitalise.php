@@ -41,7 +41,7 @@ $this->capitalisation = null;
 if (isset($this->capitalisations[0])) {
         $this->capitalisation = $this->capitalisations[0];
 }
-    $thing_report = $this->thing->db->subjectSearch($text, $agent, 999);
+//    $thing_report = $this->thing->db->subjectSearch($text, $agent, 999);
 
 
         return $this->capitalisation;

@@ -24,6 +24,13 @@ class Word extends Agent {
         $this->resource_path_ewol = $GLOBALS['stack_path'] . 'resources/ewol/';
         $this->keywords = array();
 
+        $this->wordpress_path_to = false;
+
+        if (isset($this->thing->container['api']['wordpress']['path_to'])) {
+           $this->wordpress_path_to = $this->thing->container['api']['wordpress']['path_to'];
+        }
+
+
         $this->thing_report['help'] = "Screens against a list of over four hundred thousand words.";
 
 
@@ -171,6 +178,23 @@ class Word extends Agent {
      */
     function ewolWords() {
         if (isset($this->ewol_dictionary)) {$contents = $this->ewol_dictionary;return;}
+
+        $this->thing->log("ewolWords.");
+
+
+        if ($this->wordpress_path_to !== false) {
+            require_once $this->wordpress_path_to. 'wp-load.php';
+            if (($this->ewol_dictionary = get_transient('agent-ewol-dictionary'))) {
+                $this->thing->log("loaded ewol dictionary from  wp transient store.");
+                return;
+            }
+        }
+
+
+
+
+
+
         $contents = "";
         foreach (range("A", "Z") as $v) {
             $file = $this->resource_path_ewol . $v . ' Words.txt';
@@ -185,6 +209,12 @@ if ($c == false) {return true;}
             $this->ewol_dictionary[$line] = true;
         }
 
+
+        if ($this->wordpress_path_to !== false) {
+            set_transient('agent-ewol-dictionary', $this->ewol_dictionary);
+        }
+
+
     }
 
 
@@ -196,14 +226,37 @@ if ($c == false) {return true;}
      */
     function findWord($librex, $searchfor) {
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
-
         switch ($librex) {
         case null:
             // Drop through
         case 'list':
             if (isset($this->words_list)) {$contents = $this->words_list;break;}
             $file = $this->resource_path_words . 'words.txt';
+
+
+        if ($this->wordpress_path_to !== false) {
+            require_once $this->wordpress_path_to. 'wp-load.php';
+            if (($contents = get_transient('agent-words-list'))) {
+$this->words_list = $contents;
+                $this->thing->log("loaded words from  wp transient store.");
+                break;
+            }
+        }
+
+
+
+
+
+
             $contents = file_get_contents($file);
+
+
+        if ($this->wordpress_path_to !== false) {
+            set_transient('agent-words-list', $contents);
+        }
+
+                $this->thing->log("loaded words from text file.");
+
             $this->words_list = $contents;
             break;
         case 'ewol':
@@ -277,17 +330,41 @@ if (!isset($this->ewol_dictionary)) {return true;}
         $this->word = $word;
     }
 
+    public function getContents() {
+
+        if (isset($this->contents)) {return $this->contents;}
+
+        if ($this->wordpress_path_to !== false) {
+
+        if (($this->contents = get_transient('agent-word-contents'))) {
+            return $this->contents;
+        }
+        }
+
+        $file = $this->resource_path_words . 'words.txt';
+        $this->contents = file_get_contents($file);
+
+        if ($this->wordpress_path_to !== false) {
+            set_transient('agent-word-contents', $this->contents);
+        }
+
+    }
+
     function isWord($input) {
+
 if (!isset($this->contents)) {
+
+//$this->getContents();
         $file = $this->resource_path_words . 'words.txt';
         $contents = file_get_contents($file);
 $this->contents = $contents;
 }
-//var_dump($input);
 
-        $pattern = "|\b($input)\b|";
+        $pattern = '|\b(' . $input . ')\b|';
 
         // search, and store all matching occurences in $matches
+
+        // Suppress warning of preg_match fail.
         if (preg_match_all($pattern, $this->contents, $matches)) {
             $m = $matches[0][0];
 //var_dump($m);
@@ -297,6 +374,8 @@ return true;
         } else {
             return false;
         }
+
+
 
 return;
 
