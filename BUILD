@@ -708,3 +708,11 @@ Otherwise was you will get these errors.
 
 APACHE > PHP Warning:  file(/var/www/html/stackr.ca/vendor/vanderlee/syllable/languages/hyph-en-ca.tex): failed to open stream: No such file or directory in /var/www/stackr.test/vendor/vanderlee/syllable/src/Source/File.php on line 59
 
+16. Memcached (optional)
+
+sudo apt-get update
+sudo apt-get install memcached
+
+Memcached will speed up agents which call on it to store large text lookup files locally.
+
+sudo apt-get install -y php-memcached

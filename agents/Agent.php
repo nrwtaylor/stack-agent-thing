@@ -200,6 +200,7 @@ class Agent {
      */
     public function make() {
         $this->makeResponse();
+//        $this->makeChoices();
         $this->makeMessage();
         $this->makeChart();
         $this->makeImage();
@@ -305,6 +306,21 @@ class Agent {
         }
     }
 
+
+
+    public function getMemcached() {
+
+if (isset($this->mem_cached)) {return;}
+
+
+$this->mem_cached = new \Memcached; //point 2.
+$this->mem_cached->addServer("127.0.0.1", 11211); 
+//$mem_var->set('gtfs-translink',  0.5); //point 3
+//later:
+//$num = $mem_var->get('gtfs-translink'); //point 4.
+
+
+    }
 
 
 
@@ -596,6 +612,8 @@ class Agent {
     public function makeImage() {
     }
 
+    public function makeChoices() {
+    }
 
     /**
      *
@@ -1401,7 +1419,7 @@ class Agent {
         $transit_thing = new Transit($this->thing, "extract");
         $this->thing_report = $transit_thing->thing_report;
 
-        if ((isset($transit_thing->stop)) and ($transit_thing->stop != false) ) {
+        if ( (isset($transit_thing->stop)) and ( ($transit_thing->stop != false) and ($transit_thing->stop != "X")) ) {
 
             $translink_thing = new Translink($this->thing);
             $this->thing_report = $translink_thing->thing_report;

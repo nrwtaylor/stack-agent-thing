@@ -1,4 +1,11 @@
 <?php
+/**
+ * Transit.php
+ *
+ * @package default
+ */
+
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -7,43 +14,21 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Transit
-{
-    // This is a resource block.  It is a train which be run by the block scheduler.
-    // It will respond to trains with a signal.
-    // Red - Not available
-    // Green - Slot allocated
-    // Yellow - Next signal Red.
-    // Double Yellow - Next signal Yellow
+class Transit extends Agent  {
 
-    // The block keeps track of the uuids of associated resources.
-    // And checks to see what the block signal should be.  And pass and collect tokens.
-
-    // This is the block manager.  They are an ex-British Rail signalperson.
+    // This is the transit manager.
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
-    {
-        if ($agent_input == null) {
-            $agent_input = "";
-        }
 
-        $this->agent_input = $agent_input;
-
-        $this->keyword = "mordok";
-
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
+    /**
+     *
+     * @param Thing   $thing
+     * @param unknown $agent_input (optional)
+     */
+    function init() {
 
         $this->test = "Development code"; // Always
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
 
         $this->num_hits = 0;
 
@@ -77,40 +62,45 @@ class Transit
         //$this->negative_time = $this->thing->container['api']['train']['negative_time'];
         $this->default_run_time = $this->current_time;
         $this->negative_time = true;
-        //$this->app_secret = $this->thing->container['api']['facebook']['app secret'];
 
-        //$this->page_access_token = $this->thing->container['api']['facebook']['page_access_token'];
+        $this->default_agency = "translink";
+        if (isset($this->thing->container['api']['transit']['agency'])) {
+           $this->default_agency = $this->thing->container['api']['transit']['agency'];
+
+        }
+
+        $this->stop = "X";
 
         $default_train_name = "transit";
 
         //        $this->variables_agent = new Variables($this->thing, "variables " . $default_train_name . " " . $this->from);
 
+
+
         $this->current_time = $this->thing->json->time();
 
-        // Loads in Train variables.
-        $this->get();
+        $this->thing_report['help'] = 'This is a bus with people on it.';
+
+        $this->state = 'X';
+        $this->requested_state = 'X';
+
 
         $this->thing->log(
             'running on Thing ' .
-                $this->thing->nuuid .
-                '.'
+            $this->thing->nuuid .
+            '.'
         );
         $this->thing->log(
             'received this Thing "' .
-                $this->subject .
-                '".'
+            $this->subject .
+            '".'
         );
 
-        $this->readSubject();
-
-        if ($this->agent_input == null) {
-            $this->respond();
-        }
         $this->thing->log(
             $this->agent_prefix .
-                'ran for ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.'
+            'ran for ' .
+            number_format($this->thing->elapsed_runtime()) .
+            'ms.'
         );
 
         $this->thing->log($this->agent_prefix . 'completed.');
@@ -118,8 +108,11 @@ class Transit
         $this->thing_report['log'] = $this->thing->log;
     }
 
-    function set()
-    {
+
+    /**
+     *
+     */
+    function set() {
         // A block has some remaining amount of resource and
         // an indication where to start.
 
@@ -128,9 +121,9 @@ class Transit
             $this->train_thing = $this->thing;
         }
 
-        if ($requested_state == null) {
-            $requested_state = $this->requested_state;
-        }
+//        if ((!isset($requested_state)) or ($requested_state == null)) {
+//            $requested_state = $this->requested_state;
+//        }
 
         // Update calculated variables.
 
@@ -157,6 +150,7 @@ class Transit
             $this->agency
         );
 
+        $this->refreshed_at = $this->current_time;
         $this->thing->json->writeVariable(
             array("transit", "refreshed_at"),
             $this->refreshed_at
@@ -165,18 +159,29 @@ class Transit
         //        $this->thing->choice->save('train', $this->state);
         //        $this->state = $requested_state;
 
-        $this->refreshed_at = $this->current_time;
+//        $this->refreshed_at = $this->current_time;
 
-        return;
     }
 
-    function get($train_time = null)
-    {
-        return;
+
+    /**
+     *
+     * @param unknown $train_time (optional)
+     */
+    public function get($train_time = null) {
+
+       $this->getFlag();
+
     }
 
-    function getVariable($variable_name = null, $variable = null)
-    {
+    /**
+     *
+     * @param unknown $variable_name (optional)
+     * @param unknown $variable      (optional)
+     * @return unknown
+     */
+/*
+    function getVariable($variable_name = null, $variable = null) {
         // This function does a minor kind of magic
         // to resolve between $variable, $this->variable,
         // and $this->default_variable.
@@ -205,123 +210,145 @@ class Transit
         // setting is found.
         return false;
     }
+*/
 
-    function getFlag()
-    {
+    /**
+     *
+     * @return unknown
+     */
+    function getFlag() {
         $this->flag_thing = new Flag($this->thing, 'flag');
         $this->flag = $this->flag_thing->state;
 
         return $this->flag;
     }
 
-    function setFlag($colour)
-    {
+
+    /**
+     *
+     * @param unknown $colour
+     * @return unknown
+     */
+    function setFlag($colour) {
         $this->flag_thing = new Flag($this->thing, 'flag ' . $colour);
         $this->flag = $this->flag_thing->state;
 
         return $this->flag;
     }
 
-    private function respond()
-    {
+
+    /**
+     *
+     */
+    public function respond() {
         // Thing actions
-        $this->thing->flagGreen();
+//        $this->thing->flagGreen();
         // Generate email response.
 
-        $this->state = 'green';
+//        $this->state = 'green';
+//        $this->requested_state = 'green';
 
-        $this->requested_state = 'green';
+        $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->set();
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $to = $this->thing->from;
-        $from = "transit";
+    }
 
-        $choices = $this->thing->choice->makeLinks($this->state);
-        //		$this->thing_report['choices'] = $choices;
-        $choice = false;
+    public function makeEmail() {
+        if (!isset($this->sms_message)) {$this->makeSMS();}
+        $this->thing_report['email'] = $this->sms_message;
+    }
 
-        //$s = $this->block_thing->state;
-        if (!isset($this->flag)) {
-            $this->flag = strtoupper($this->getFlag());
-        }
+    public function makeMessage() {
+        if (!isset($this->sms_message)) {$this->makeSMS();}
+        $this->thing_report['message'] = $this->sms_message;
+
+    }
+
+    public function makeSnippet() {
+
+        if (!isset($this->choices)) {$this->makeChoices();}
+
+        $test_message =
+            'Last thing heard: "' .
+            $this->subject .
+            '".  Your next choices are [ ' .
+            $this->choices['link'] .
+            '].';
+
+        $state_text = "X";
+        if (isset($this->state)) {$state_text = $this->state;}
+        $test_message .= '<br>Train state: ' . $state_text . '<br>';
+
+        $test_message .= '<br>' . $this->sms_message;
+
+        $test_message .=
+            '<br>Current node: ' . $this->thing->choice->current_node;
+        $this->thing_report['snippet'] = $test_message;
+
+    }
+
+    public function makeChoices() {
+
+        $this->node_list = array("transit"=>null);
+
+
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "transit");
+        $this->choices = $this->thing->choice->makeLinks('transit');
+
+        $this->thing_report['choices'] = $this->choices;
+
+    }
+
+    public function makeSMS() {
 
         $sms_message = "TRANSIT ";
         $sms_message .= " | flag " . $this->flag;
 
-        //        $sms_message .= " | alias " . strtoupper($this->alias);
-        //        $route_description = $this->route . " [" . $this->consist . "] " . $this->quantity;
         $sms_message .= " | " . $this->stop;
 
         $sms_message .= " | nuuid " . substr($this->thing->uuid, 0, 4);
         $sms_message .=
             " | rtime " . number_format($this->thing->elapsed_runtime()) . 'ms';
 
-        $test_message =
-            'Last thing heard: "' .
-            $this->subject .
-            '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
-        $test_message .= '<br>Train state: ' . $this->state . '<br>';
-
-        $test_message .= '<br>' . $sms_message;
-
-        $test_message .=
-            '<br>Current node: ' . $this->thing->choice->current_node;
-
-        //		$test_message .= '<br>Requested state: ' . $this->requested_state;
-
+        $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
-        $this->thing_report['email'] = $sms_message;
-        $this->thing_report['message'] = $sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
-        $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-
-        //$this->thing->email->sendGeneric($to,$from,$this->subject, $test_message, $choices);
-
-        //        $this->thing->json->writeVariable( array("transit", "agency"), $this->agency );
-
-        $this->thing_report['help'] = 'This is a bus with people on it.';
-
-        //echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
-        //echo $message;
     }
 
-    function extractStops($input)
-    {
+    /**
+     *
+     * @param unknown $input
+     * @return unknown
+     */
+    function extractStops($input) {
         if (!isset($this->stops)) {
             $this->stops = array();
         }
 
         $pattern = "|\d{5}$|";
-        //$pattern = "|\(d{5})$|";
-        //$pattern = '/(\d{5})/';
-        //$pattern = "|^[0-9]{5}\z|";
-        //$pattern = "|^[0-9]{5}$|";
         $pattern = '/\b(\d{5})\b/';
         preg_match_all($pattern, $input, $m);
         $this->stops = $m[0];
-        //var_dump($this->stops);
-        //exit();
-        //echo $input;
-        //var_dump($this->stops);
-        //exit();
         return $this->stops;
     }
 
-    function getStop($input)
-    {
+
+    /**
+     *
+     * @param unknown $input
+     * @return unknown
+     */
+    function extractStop($input) {
         $stops = $this->extractStops($input);
 
         if (count($stops) == 1) {
             $this->stop = $stops[0];
             $this->thing->log(
                 'Agent "Transit" found a stop (' .
-                    $this->stop .
-                    ') in the text.'
+                $this->stop .
+                ') in the text.'
             );
             return $this->stop;
         }
@@ -336,9 +363,14 @@ class Transit
         return true;
     }
 
-    function getAgency($input)
-    {
-        $this->agency = "translink";
+
+    /**
+     *
+     * @param unknown $input
+     * @return unknown
+     */
+    function extractAgency($input) {
+        $this->agency = $this->default_agency;
 
         if (
             substr($input, 0, 4) == "1778" or
@@ -351,8 +383,12 @@ class Transit
         return $this->agency;
     }
 
-    public function readSubject()
-    {
+
+    /**
+     *
+     * @return unknown
+     */
+    public function readSubject() {
         $this->response = null;
 
         $keywords = $this->keywords;
@@ -366,28 +402,23 @@ class Transit
             $input = strtolower($this->subject);
         }
 
-        //var_dump($input);
-        //exit();
 
         $this->input = $input;
 
         $haystack =
             $this->agent_input . " " . $this->from . " " . $this->subject;
 
-        //$this->stop = "X";
-        $this->getStop($haystack); // Can X be improved on?
+        $this->extractStop($haystack); // Can X be improved on?
 
-        $this->getAgency($input);
-        //var_dump($this->stop);
-        //exit();
+        $this->extractAgency($input);
 
         if (isset($this->stop)) {
             $this->thing->log(
                 'Agent "Transit" found a stop (' .
-                    $this->stop .
-                    ') for agency ' .
-                    $this->agency .
-                    '.'
+                $this->stop .
+                ') for agency ' .
+                $this->agency .
+                '.'
             );
             $this->transit_id = $this->stop;
         }
@@ -411,19 +442,19 @@ class Transit
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'red':
-                            $this->setFlag('red');
-                            break;
+                    case 'red':
+                        $this->setFlag('red');
+                        break;
 
-                        case 'green':
-                            $this->setFlag('green');
-                            break;
+                    case 'green':
+                        $this->setFlag('green');
+                        break;
 
-                        case 'on':
+                    case 'on':
                         //$this->setFlag('green');
                         //break;
 
-                        default:
+                    default:
                     }
                 }
             }
@@ -433,11 +464,15 @@ class Transit
     }
 
 
-    function kill()
-    {
+    /**
+     *
+     * @return unknown
+     */
+/*
+    function kill() {
         // No messing about.
         return $this->thing->Forget();
     }
-
+*/
 
 }

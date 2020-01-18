@@ -16,7 +16,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Gtfs {
+class Gtfs extends Agent {
 
     public $var = 'hello';
 
@@ -26,9 +26,8 @@ class Gtfs {
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-    function __construct(Thing $thing, $agent_input = null) {
-
-        $this->channel = new Channel($thing, "channel");
+    function init() {
+        $this->channel = new Channel($this->thing, "channel");
         $this->channel_name = $this->channel->channel_name;
 
         // Handle stations specifically.
@@ -60,15 +59,7 @@ class Gtfs {
         //   this gives a list of all the stops after the stop on routes served
         //   from the stop
 
-        $this->agent_input = $agent_input;
-
-        $this->thing = $thing;
-        $this->agent_name = 'gtfs';
-
-        $this->thing_report['thing'] = $thing;
-
         $this->start_time = $this->thing->elapsed_runtime();
-
 
         // So I could call
         if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
@@ -77,21 +68,7 @@ class Gtfs {
 
         $this->retain_for = 2; // Retain for at least 2 hours.
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-
-
         $this->sqlresponse = null;
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
 
         // Allow for a new state tree to be introduced here.
         $this->node_list = array("start"=>array("useful", "useful?"));
@@ -106,34 +83,13 @@ class Gtfs {
 
         //        $this->getDestinations(); // Get the stops available from this stop.  Availability includes runat.
 
-        $this->readSubject();
-
-        $this->respond();
         $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
-$this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADISON HASTINGS.';
+        $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADISON HASTINGS.';
 
         $this->thing_report['response'] = $this->response;
 
-        return;
-
     }
-
-
-    /*
-    function depr_getTrains()
-    {
-        if (!isset($this->routes)) {$this->getRoutes();}
-        foreach($this->routes as $route_id=>$route) {
-            // All the trains passing through this station
-            $train = $this->get("trips", array("route_id"=>$route_id));
-            $trains[$route_id] = $train;
-        }
-        $this->trains = $trains;
-
-    }
-*/
-
 
     /**
      *
@@ -145,8 +101,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         // Running in 15s.  4 Aug 2018.
         $split_time = $this->thing->elapsed_runtime();
         $this->thing->log ( "Making railway - transit context");
-        //echo $this->thing->log();
-        //exit();
+
         // stop_times is a large file
         // this looks through and identifies all the blocks.
         // From one stop to the next.
@@ -209,7 +164,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
     function findStop($text = null) {
         if ($text == null) {return null;}
 
-        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
+        if (!isset($this->stops_db)) {$this->stops_db = $this->getMatches("stops");}
         $match_array = $this->searchForText(strtolower($text), $this->stops_db);
 
         return $match_array;
@@ -226,7 +181,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
 
         if (isset($this->stops[$station_id])) {return $this->stops[$station_id];}
         // Use Translink file language.  This is a station in train context.
-        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
+        if (!isset($this->stops_db)) {$this->stops_db = $this->getMatches("stops");}
         $stop_count = $this->searchForsId($station_id, $this->stops_db);
 
         $stop = null;
@@ -245,13 +200,11 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
      */
     function getStations($station_id = null) {
 
-
         if (isset($this->stations[$station_id])) {return $this->stations;}
 
         $this->thing->log("get stations " . $station_id . ".");
 
         // This needs to get a list of all the stations connected to this station (stop) by a train (trip)
-
 
         // Get the stations are connected (backwards and forwards) a stop
 
@@ -302,7 +255,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
 
             foreach ($stations as $station_id=>$station) {
                 $visible_stations[$station_id] = array("visited"=>false, "station_id"=>$station_id, "station"=>$this->getStops($station_id));
-                echo $station_id . " ";
+                //echo $station_id . " ";
                 $completed = false;
             }
 
@@ -315,7 +268,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         }
 
 
-        echo "\n";
+        //echo "\n";
 
         $this->stations = $visible_stations;
         //var_dump($this->stations);
@@ -362,7 +315,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         if ($text == null) {return null;}
         $stop_code = $text;
 
-        $stops = $this->get("stops", array("stop_code"=>$stop_code));
+        $stops = $this->getMatches("stops", array("stop_code"=>$stop_code));
 
         if (isset($stops[0])) {$stop_id = $stops[0]["stop_id"];}
         $this->thing->log("Matched stop_code " . $stop_code . " to stop_id " .$stop_id . ".");
@@ -378,7 +331,27 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
      * @param unknown $selector_array (optional)
      * @return unknown
      */
-    function get($file_name, $selector_array = null) {
+    function getMatches($file_name, $selector_array = null) {
+
+/*
+        if (!isset($this->mem_cached)) {$this->getMemcached();
+
+           $matches = $this->mem_cached->get('gtfs-translink');
+//var_dump($matches);
+//cdexit();
+
+
+        }
+*/
+/*
+        if (!isset($mem_var)) {
+           $mem_var = new \Memcached; //point 2.
+           $mem_var->addServer("127.0.0.1", 11211); 
+        }
+
+        $temp = $mem_var->get('gtfs-translink'); //point 3
+        if (is_array($temp)) {$matches = $temp; return $matches;}
+*/
         //$this->thing->log("Getting " . $file_name . ".txt.");
 
         $matches = array();
@@ -387,6 +360,10 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         foreach ($iterator as $iteration) {
             $matches[] = $iteration;
         }
+
+        if (!isset($this->mem_cached)) {$this->getMemcached();}
+        $this->mem_cached->set('gtfs-translink',  $matches); //point 3
+
 
         return $matches;
     }
@@ -628,7 +605,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         if (!isset($this->routes[$station_id])) {$this->routes[$station_id] = array();}
 
         //        if (!isset($this->trips_db)) {$this->trips_db = $this->get("trips");}
-        if (!isset($this->routes_db)) {$this->routes_db = $this->get("routes");}
+        if (!isset($this->routes_db)) {$this->routes_db = $this->getMatches("routes");}
 
 
 
@@ -711,7 +688,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
     /**
      *
      */
-    function makeSms() {
+    function makeSMS() {
         if (isset($this->message)) {
 
             $this->sms_message = "GTFS | " . $this->message;
@@ -727,11 +704,13 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         $s ="";
         $stops = $this->getStations($this->station_id);
         foreach ($stops as $stop_id=>$stop) {
-
+//var_dump($stop);
             $station =  ($stop['station']);
             $stop_text = $station['stop_desc'];
+            $stop_code= $station['stop_code'];
+            $stop_name= $station['stop_name'];
 
-            $s .= $stop_text ." ";
+            $s .= $stop_name ." ";
             $s .= " [";
             $r = "";
             if (!isset($stop['routes'])) {
@@ -776,7 +755,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
     /**
      *
      */
-    function makeTxt() {
+    function makeTXT() {
         if (true) {return;}
 
         if (!isset($this->stations)) {$this->getStations();}
@@ -895,6 +874,15 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
      * @param unknown $selector_array (optional)
      */
     function nextGtfs($file_name, $selector_array = null) {
+
+
+        if (!isset($this->mem_cached)) {$this->getMemcached();
+           $matches = $this->mem_cached->get('gtfs-translink');
+           $this->thing->log("found memcached gtfs-translink store.");
+        }
+
+
+
         $this->thing->log("nextGtfs " . $file_name . " ");
         $split_time = $this->thing->elapsed_runtime();
 
@@ -1108,8 +1096,6 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         $this->sms_message .= " | ";
         $this->sms_message .= 'Text the five-digit stop number for live Translink stop inforation. | For example, "51380". | ';
         $this->sms_message .= "TEXT <5-digit stop number>";
-        return;
-
 
     }
 
@@ -1125,14 +1111,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
         $this->sms_message .= 'Syntax: "51380". | ';
         $this->sms_message .= "TEXT HELP";
 
-        return;
     }
-
-
-
-
-
-
 
     // -----------------------
 
@@ -1140,15 +1119,11 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
      *
      * @return unknown
      */
-    private function respond() {
+    public function respond() {
         //$this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
         // Thing actions
         $this->thing->flagGreen();
 
-
-        //$this->thing_report['sms'] = $this->sms_message;
-
-        $this->makeSms();
 
         $this->thing_report['choices'] = false;
         $this->thing_report['info'] = 'SMS sent';
@@ -1165,17 +1140,6 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
-
-        //        if (strtolower($thing->state) == "on") {
-        //            $thing = new Transit($this->thing, "transit " . $this->stop);
-        //        }
-
-//        $this->thing_report['help'] = 'This agent is developmental (and slow ~160,000ms).  See what you think.  Let me know at ' . $this->email . ".";
-
-        $this->makeWeb();
-
-
-        $this->makeTxt(); // Do last because this needs some processing.
 
         return $this->thing_report;
     }
@@ -1196,7 +1160,21 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
      * @return unknown
      */
     public function readSubject() {
+/*
+$mem_var = new \Memcached; //point 2.
+$mem_var->addServer("127.0.0.1", 11211); 
+$mem_var->set('gtfs-translink',  0.5); //point 3
+//later:
+$num = $mem_var->get('gtfs-translink'); //point 4.
 
+var_dump($num);
+
+exit();
+
+
+echo "merp";
+exit();
+*/
         $this->thing->log("reading subject.");
 
         $this->response = null;
@@ -1245,7 +1223,7 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
             $this->message = $m;
             return;
         }
-//var_dump($arr);
+        //var_dump($arr);
         if (($arr != null) and (count($arr) == 1)) {
             $this->station_id = $arr[0]['stop_id'];
             $m = $arr[0]['stop_code'] . " " . $arr[0]['stop_desc'];
@@ -1398,8 +1376,3 @@ $this->thing_report['help'] = 'Asks Translink about where you are. Try GTFS MADI
 
 }
 
-
-
-
-
-?>

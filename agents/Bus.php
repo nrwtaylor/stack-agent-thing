@@ -22,7 +22,6 @@ class Bus extends Agent {
      * @return unknown
      */
     function init() {
-
         if ($this->thing != true) {
 
             $this->thing->log ( 'ran on a null Thing ' .  $thing->uuid .  '.');
@@ -41,37 +40,82 @@ class Bus extends Agent {
 
         $this->node_list = array('bus'=>array('what', 'where'), 'transit');
 
+        $this->ignore_list = array('bus', 'transit', 'translink', 'gtfs');
+
         $this->namespace = "\\Nrwtaylor\\StackAgentThing\\";
     }
 
-//    public function drawGraph() {}
-
-    function run() {
-        $this->getLink();
-        $this->getBus();
-    }
 
     /**
      *
      */
+    function run() {
+        $this->getLink();
+
+        $this->getBus();
+
+        $this->getHistory();
+    }
+
+
+    /**
+     *
+     */
+    public function getHistory() {
+
+        // $ignore_list = array('bus', 'transit', 'translink');
+
+        $t = "";
+        foreach ($this->history as $i=>$event) {
+            $text = $event['text'];
+
+            if (in_array(strtolower($event['text']), $this->ignore_list)) {continue;}
+
+            $timestamp = $event['timestamp'];
+            $ago = (strtotime($this->current_time) - strtotime($timestamp))/60;
+            if ($ago > (2*60)) {break;}
+
+            if (mb_strlen($this->response . $t . $event['text'] . ' / ') > 140) {$t .= "[...]"; break;}
+
+            $t .= $event['text'] . " / ";
+
+        }
+
+        if ($t != "") {$this->response .= "Heard ". $t;}
+
+    }
+
+
+    /**
+     *
+     * @return unknown
+     */
     public function getBus() {
 
         if (!isset($this->prior_agent)) {
-            $this->response .= "Did not get prior agent. ";
-            $this->thing_report['help'] = $this->bus;
+            $this->response .= "Did not get any transit context. ";
+            $this->thing_report['help'] = "Did not get any transit context. ";
             return true;
         }
+
+        $time_agent = new Time($this->thing, "vancouver");
+        $current_time_text = $time_agent->text;
+
+        $this->current_time_text = $time_agent->text;
+
+        $current_time = strtotime($current_time_text);
+
 
         if ($this->prior_agent != "Translink") {$this->response .= "Text <stop number>. "; return true;}
 
         try {
             $this->thing->log( $this->agent_prefix .'trying Agent "' . $this->prior_agent . '".', "INFORMATION" );
             $agent_class_name = $this->namespace . ucwords(strtolower($this->prior_agent));
+
             $agent = new $agent_class_name($this->prior_thing);
             $thing_report = $agent->thing_report;
 
             $this->text = $thing_report['sms'];
-
 
             $t ="";
             $buses = array();
@@ -82,7 +126,7 @@ class Bus extends Agent {
 
                 if (count($b) != 2) {continue;}
                 $arrival_text = trim(trim($b[0]));
-                $arrival_array = explode(" ",$arrival_text);
+                $arrival_array = explode(" ", $arrival_text);
                 $route = $arrival_array[0];
                 $time_string = $arrival_array[1];
 
@@ -93,36 +137,29 @@ class Bus extends Agent {
 
                 $bus_time = strtotime($bus_time_text);
 
-                $time_agent = new Time($this->thing,"vancouver");
-                $time_text = $time_agent->text;
-
-                $current_time = strtotime($time_text);
-
                 $minutes = ($bus_time - $current_time ) / 60;
 
                 $destination_text = trim($b[1]);
                 $buses[] = array("wait_time"=>$minutes, "route"=>$route, "destination"=>$destination_text);
-           }
+            }
 
 
 
             $wait_time = array();
-            foreach ($buses as $key => $row)
-            {
+            foreach ($buses as $key => $row) {
                 $wait_time[$key] = $row['wait_time'];
             }
             array_multisort($wait_time, SORT_DESC, $buses);
 
-            $this->response .= "It is now " . $time_text. ". ";;
-
             $t = "";
             foreach (array_reverse($buses) as $i=>$bus) {
 
-                if ($bus['wait_time'] < 0) {$t .= $bus['route'] . " arrived " . -$bus['wait_time'] . " minutes ago. "; continue;}
-                if ($bus['wait_time'] == 0) {$t .= $bus['route'] . " just arrived. "; continue;}
+                if ($bus['wait_time'] == -1) {$t .= $bus['route'] . " just arrived or left. "; continue;}
+                if ($bus['wait_time'] < 0) {$t .= $bus['route'] . " -" . -$bus['wait_time'] . " minutes. "; continue;}
+                if ($bus['wait_time'] == 0) {$t .= $bus['route'] . " just arriving or left. "; continue;}
                 if ($bus['wait_time'] == 1) {$t .= $bus['route'] . " is expected now. "; continue;}
 
-                $t .= $bus['route'] . " is expected in " . $bus['wait_time'] . " minutes. ";
+                $t .= $bus['route'] . " +" . $bus['wait_time'] . " minutes. ";
 
             }
             $this->response .= $t;
@@ -143,12 +180,18 @@ class Bus extends Agent {
         }
     }
 
+
     /**
      *
      */
     public function makeSMS() {
 
-        $this->sms_message = "BUS | " . ucwords($this->prior_agent) . " | " . $this->response;
+        $prior_agent_text = "";
+        if (isset($this->prior_agent)) {
+            $prior_agent_text = ucwords($this->prior_agent) ." " . $this->stop_text . " " .$this->current_time_text .  " | ";
+        }
+
+        $this->sms_message = "BUS | " . $prior_agent_text . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
 
     }
@@ -159,7 +202,6 @@ class Bus extends Agent {
      * @return unknown
      */
     public function respondResponse() {
-//        $this->thing->flagGreen();
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
@@ -173,49 +215,43 @@ class Bus extends Agent {
      * @return unknown
      */
     function getLink() {
-
         $things = new FindAgent($this->thing, 'thing');
-
-        // This pulls up a list of other Block Things.
-        // We need the newest block as that is most likely to be relevant to
-        // what we are doing.
-
-        //$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
-
-//        $this->max_index =0;
-
-//        $match = 0;
-
-
+        $this->history = array();
         foreach ($things->thing_report['things'] as $thing) {
 
             $this->thing->log($thing['task'] . " " . $thing['nom_to'] . " " . $thing['nom_from']);
 
-            if ($thing['nom_to'] != "usermanager") {
-  //              $match += 1;
-                $this->link_uuid = $thing['uuid'];
+            if ($thing['nom_to'] == "usermanager") {
+                continue;
             }
 
+            if (in_array(strtolower($thing['task']), $this->ignore_list)) {continue;}
 
             $variables_json= $thing['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
 
-            if (!isset($variables['message']['agent'])) {
-            } else {
-                $block_thing_agent = $variables['message']['agent'];
+            if (!isset($variables['message']['agent'])) {continue;}
+            //            } else {
+            $block_thing_agent = $variables['message']['agent'];
 
-                if ($block_thing_agent == "Translink") {
+            if ($block_thing_agent == "Translink") {
 
-                    $this->prior_agent = $variables['message']['agent'];
-                    $previous_thing = new Thing($thing['uuid']);
+                $this->prior_agent = $variables['message']['agent'];
+                $previous_thing = new Thing($thing['uuid']);
+
+                // Get first thing.
+                if (!isset($this->prior_thing)) {
                     $this->prior_thing = $previous_thing;
-                    return $this->link_uuid;
+                    $this->stop_text = $thing['task'];
                 }
-           }
-      }
-      return false;
 
-        //return $this->link_uuid;
+
+                $this->history[] = array("agency"=>$this->prior_agent, "text"=>$thing['task'], "timestamp"=>$thing['created_at']);
+
+            }
+            //           }
+        }
+        return false;
 
     }
 
@@ -227,9 +263,8 @@ class Bus extends Agent {
      * @return unknown
      */
     public function readSubject() {
-//        $status = true;
-//        return $status;
     }
+
 
     /**
      *
@@ -242,13 +277,18 @@ class Bus extends Agent {
 
         $web = "";
 
-//        $web = '<a href="' . $link . '">';
-//        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
-//        $web .= "</a>";
+        //        $web = '<a href="' . $link . '">';
+        //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
+        //        $web .= "</a>";
 
-//        $web .= "<br>";
+        //        $web .= "<br>";
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
-        $web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
+
+
+        $prior_agent_text = "";
+        if (isset($this->prior_agent)) {$prior_agent_text = ucwords($this->prior_agent);}
+
+        $web .= 'The last agent to run was the ' . $prior_agent_text . ' Agent.<br>';
 
         $web .= "<br>";
 
@@ -258,5 +298,6 @@ class Bus extends Agent {
 
 
     }
+
 
 }
