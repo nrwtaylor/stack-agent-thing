@@ -139,9 +139,6 @@ $this->resource_path_cache = $GLOBALS['stack_path'] . 'vendor/vanderlee/syllable
         $this->syllable_count = $syllable->countSyllablesText($filtered_input);
         $this->syllables = $syllable->splitText($filtered_input);
 
-
-
     }
-
 
 }
