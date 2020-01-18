@@ -57,7 +57,7 @@ class Chart extends Agent
      */
     public function get() {
 
-        //$this->getColours();
+        $this->getColours();
         $this->getData();
 
     }
@@ -210,6 +210,7 @@ $this->makePNG();
 
             $y = 10 + $this->chart_height - ($common_variable - $this->y_min) / ($this->y_spread) * $this->chart_height;
             $x = 10 + ($x - $this->x_min) / ($this->x_spread) * $this->chart_width;
+if(is_nan($y)) {return true;}
 
             if (!isset($x_old)) {$x_old = $x;}
             if (!isset($y_old)) {$y_old = $y;}
@@ -232,8 +233,6 @@ if ( (-1 * ($x_old - $offset)) > $this->chart_width)  {continue;}
 if ( ($x_old + $offset) > $this->chart_width) {continue;}
 if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
 */
-
-
             imagefilledrectangle($this->image,
                 $x_old - $offset , $y_old - $offset,
                 $x_old + $width / 2 + $offset, $y_old + $offset,

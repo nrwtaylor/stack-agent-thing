@@ -818,12 +818,11 @@ class Agent {
      * @return unknown
      */
     public function getAgent($agent_class_name = null, $agent_input = null, $thing = null) {
-
+        //$agent = null;
         if ($thing == null) {$thing = $this->thing;}
 
         try {
             $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
-var_dump($agent_namespace_name);
             $this->thing->log( 'trying Agent "' . $agent_class_name . '".', "INFORMATION" );
 
             if (isset($this->input)) {$thing->subject = $this->input;}
@@ -840,6 +839,7 @@ var_dump($agent_namespace_name);
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
             $this->thing->log( 'caught throwable.' , "WARNING" );
+            return false;
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( 'caught error. Could not load "' . $agent_class_name . '".' , "WARNING" );
             $message = $ex->getMessage();

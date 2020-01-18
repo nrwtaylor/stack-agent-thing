@@ -172,7 +172,10 @@ class Robot extends Agent {
 
         }
 
-        if (isset($this->response)) {$sms = "ROBOT | " . $this->response;}
+        $response_text = "Hello. ";
+        if ((isset($this->response)) and ($this->response != "")) {$response_text = $this->response;}
+
+        if (isset($this->response)) {$sms = "ROBOT | " . $response_text;}
 
         $sms .= " | TEXT PRIVACY";
 

@@ -107,6 +107,8 @@ class Time extends Agent {
             $m = "Time check from stack server ". $this->web_prefix. ". ";
             $m .= "In the timezone " . $this->time_zone . ", it is " . $datum->format('l') . " " . $datum->format('d/m/Y, H:i:s') .". ";
 
+            $this->text =  $datum->format('H:i');
+
         } else {
 
             //} catch (Throwable $t) {

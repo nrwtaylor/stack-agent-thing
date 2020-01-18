@@ -9,12 +9,12 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Translink
+class Translink extends Agent
 {
 
 	public $var = 'hello';
-
-    function __construct(Thing $thing, $agent_input = null)
+function init()
+ //   function __construct(Thing $thing, $agent_input = null)
     {
         // Some notes
         // agency.txt - agency_id, agency_name - descriptions of the three agencies
@@ -36,14 +36,14 @@ class Translink
         //   from the stop
 
 
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
 
-		$this->thing = $thing;
+//		$this->thing = $thing;
 		$this->agent_name = 'translink';
 
-        $this->thing_report['thing'] = $thing;
+//        $this->thing_report['thing'] = $thing;
 
-        $this->start_time = $this->thing->elapsed_runtime();
+//        $this->start_time = $this->thing->elapsed_runtime();
 
 
 		// So I could call
@@ -53,10 +53,10 @@ class Translink
 
 		$this->retain_for = 2; // Retain for at least 2 hours.
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 
 
 
@@ -76,16 +76,21 @@ class Translink
 // devstack NRWTaylor 28 July 2018
         //$this->getEvents();
 
-        $this->getNetworktime();
+//        $this->getNetworktime();
 //echo $this->network_time_string;
 //exit();
-        $this->readSubject();
-  		$this->respond();
+//        $this->readSubject();
+//  		$this->respond();
 
 		$this->thing->log('Agent "Translink" ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 		return;
 
     }
+
+    public function run() {
+        $this->getNetworktime();
+    }
+
 
     public function nullAction()
     {
@@ -104,7 +109,7 @@ class Translink
 
     }
 
-    function get($file_name, $selector_array = null)
+    public function getTranslink($file_name, $selector_array = null)
     {
         echo "Getting " . $file_name . "\n";
 
@@ -115,39 +120,6 @@ class Translink
             $matches[] = $iteration;
         }
 
-/*
-        foreach ($iterator as $iteration) {
-            //echo $iteration;
-
-            //var_dump($iteration);
-
-
-            foreach ($iteration as $field_name=>$field_value) {
-
-                if ($selector_array == null) {$matches[] = $iteration; continue;}
-
-                foreach ($selector_array as $selector_name=>$selector_value) {
-                    //echo $selector_name ." " . $selector_value . "\n";
-                    //echo $field_name ." " . $field_value . "\n";
-  
-                    if (($selector_name == $field_name) and ($selector_value == $field_value)) {
-                        $matches[] = $iteration;
-                    }
-              }
-
-            $matches[] = $iteration;
-//                    echo $field_name ." " . $field_value . "\n";
-
-            }
-//            $arr = explode(",",$iteration);
-//            foreach ($arr as $key=>$value) {
-//                echo $key ." ".$value . "\n";
-//            }
-            
-        }
-*/
-//        var_dump($matches);
-//exit();
 
         return $matches;
     }
@@ -184,7 +156,7 @@ function getTimeFromString($time){
         $this->network_time = $this->network_time_string;
         //"15:43:33";
 
-        $stops = $this->get("stops", array("stop_code"=>$stop_code));
+        $stops = $this->getTranslink("stops", array("stop_code"=>$stop_code));
 
         if (isset($stops[0])) {$stop_id = $stops[0]["stop_id"];}
         echo "Matched stop_code " . $stop_code . " to stop_id " .$stop_id . ".\n";
@@ -218,107 +190,10 @@ function getTimeFromString($time){
             $event_stop_id = $event['stop_id'];
             $event_trip_id = $event['trip_id'];
 
- //           $event['event_time_delta'] = $event_time_delta;
 
-
-//var_dump($event);
-//exit();
             $stop_events[$event_stop_id][$event_trip_id] = $event;
-//echo "[".$event_stop_id."]" . "[" . $event_trip_id ."]" . " --- ".implode(" " , $event) . "\n";
-//var_dump($stop_events);
-//exit();
 
-/*
-            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
-            $trip_event = $trip_events->current();
-
-
-            $trip_event_stop_id = $trip_event['stop_id'];
-
-            if ($trip_event_stop_id == $stop_id) {$visible = "on";}
-//echo "foo";
-//exit();
-
-            if ($visible = "off") {continue;}
-echo "foo";
-exit();
-                $arrival_time = $trip_event['arrival_time']; // Limit of one event per second, per trip, per stop.  Make more stops.
-
-                // Calculate event variables
-                if (!isset($shape_dist_traveled)) {$shape_dist_traveled = 0;}
-                $shape_dist_traveled += floatval( $trip_event['shape_dist_traveled'] );
-
-                if ((!isset($last_departure_time)) 
-                    or ($last_departure_time == null)
-                    or ($last_event_trip_id != $event_trip_id)) {
-                    $trip_time_elapsed = 0;
-                } else {
-                    $trip_time_elapsed += strtotime($event['departure_time']) - strtotime($last_departure_time);
-                }
-
-                $trip_event['trip_time_elapsed'] = $trip_time_elapsed;
-                $trip_event['shape_dist_traveled'] = $shape_dist_traveled;
-
-                $last_event_trip_id = $event_trip_id;
-                $last_departure_time = $trip_event['departure_time'];
-                // Discrete
-                $this->stops[strval($trip_event_stop_id)][strval($event_trip_id)][strval($arrival_time)] = $trip_event;
-echo $event_stop_id . " " . $event_trip_id ." " . $arrival_time ." --- ".implode(" " , $trip_event) . "\n";
-               // Now get the stops with can be reached from this stop.
-                // Stops on trips which are after now.
-
-
-
-
-echo "foo";
-exit();
-
-/*
-            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
-
-            $visible = "off";
-            for ($trip_events = $this->nextGtfs("stop_times",array("trip_id"=>$event_trip_id)); $trip_events->valid(); $trip_events->next()) {
-
-
-
-
-                $trip_event = $trip_events->current();
-//                $trip_event_stop_id = $trip_event['stop_id'];
-                $trip_event_stop_id = $trip_event['stop_id'];
-
-                if ($trip_event_stop_id == $stop_id) {$visible = "on";}
-                if ($visible = "off") {continue;}
-
-                $arrival_time = $trip_event['arrival_time']; // Limit of one event per second, per trip, per stop.  Make more stops.
-
-                // Calculate event variables
-                if (!isset($shape_dist_traveled)) {$shape_dist_traveled = 0;}
-                $shape_dist_traveled += floatval( $trip_event['shape_dist_traveled'] );
-
-                if ((!isset($last_departure_time)) 
-                    or ($last_departure_time == null)
-                    or ($last_event_trip_id != $event_trip_id)) {
-                    $trip_time_elapsed = 0;
-                } else {
-                    $trip_time_elapsed += strtotime($event['departure_time']) - strtotime($last_departure_time);
-                }
-
-                $trip_event['trip_time_elapsed'] = $trip_time_elapsed;
-                $trip_event['shape_dist_traveled'] = $shape_dist_traveled;
-
-                $last_event_trip_id = $event_trip_id;
-                $last_departure_time = $trip_event['departure_time'];
-                // Discrete
-                $this->stops[strval($trip_event_stop_id)][strval($event_trip_id)][strval($arrival_time)] = $trip_event;
-echo $event_stop_id . " " . $event_trip_id ." " . $arrival_time ." --- ".implode(" " , $trip_event) . "\n";
-               // Now get the stops with can be reached from this stop.
-                // Stops on trips which are after now.
-
-            }
-*/
         }
-//var_dump($stop_events);
-//exit();
         // Now determine which stops are visible.
         // Based on network time and whether the trip has passed the stop.
         echo "Determining tripe events for first trip on the list :/" . "\n";
@@ -400,8 +275,6 @@ exit();
     //    }
 
         $this->stop_events = $stop_events;
-//var_dump($this->stop_events);
-//exit();
         return;
     }
 
@@ -466,7 +339,7 @@ exit();
 
     }
 
-    function makeTxt()
+    public function makeTXT()
     {
 return;
         //if (!isset($this->events)) {$this->getEvents();}
@@ -928,8 +801,6 @@ ksort($lines);
 
 			$file = 'http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
 //			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
-//var_dump($web_input);
-//exit();
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $file);
@@ -938,7 +809,6 @@ ksort($lines);
 			curl_close($ch);
 
 			$web_input = $xmldata;
-//var_dump($web_input);
 if ($web_input == "") {
             $web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
 }
@@ -1072,7 +942,7 @@ if ($alert_agent->flag == "red") {$this->sms_message .= "TEXT ALERT";} else {
 
 // -----------------------
 
-	private function respond()
+	public function respondResponse()
     {
         //$this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
 
@@ -1097,17 +967,8 @@ if ($alert_agent->flag == "red") {$this->sms_message .= "TEXT ALERT";} else {
 
 		// Generate email response.
 
-		$to = $this->thing->from;
-		$from = "transit";
-
-		//$message = $this->readSubject();
-
-		//$message = "Thank you for your request.<p><ul>" . ucwords(strtolower($response)) . '</ul>' . $this->error . " <br>";
-
-// This is running at 20s...
-//		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
-//		$choices = $this->thing->choice->makeLinks('start');
-//		$this->thing_report['choices'] = $choices;
+//		$to = $this->thing->from;
+//		$from = "transit";
 
 
 		// Need to refactor email to create a preview of the sent email in the $thing_report['email']
@@ -1118,21 +979,10 @@ if ($alert_agent->flag == "red") {$this->sms_message .= "TEXT ALERT";} else {
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
-// And then at this point if Mordok is on?
-// Run an hour train.
-//$thing = new Mordok($this->thing);
-//If Mordok is on.  Then allow starting of a train automatically.
-//        if (strtolower($thing->state) == "on") {
-
-//            $thing = new Transit($this->thing, "transit " . $this->stop);
-//        }
-
-//	$this->thing_report['info'] = 'This is the translink agent responding to a request.';
 	    $this->thing_report['help'] = 'Connector to Translink API.';
 
-        //$this->thing->log('Agent "Translink". End Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-        $this->makeTxt();
-        $this->makeweb();
+//        $this->makeTxt();
+//        $this->makeweb();
 
 		return $this->thing_report;
 	}
@@ -1145,7 +995,6 @@ if ($alert_agent->flag == "red") {$this->sms_message .= "TEXT ALERT";} else {
 
 	public function readSubject()
     {
-
 		$this->response = null;
 
 		$keywords = array('stop', 'bus', 'route');
@@ -1264,29 +1113,3 @@ if ($alert_agent->flag == "red") {$this->sms_message .= "TEXT ALERT";} else {
 
 
 }
-
-
-
-
-
-/*
-        $this->matched_lines = array();
-        foreach ($lines as $line) {
-            // if(preg_match('(MAIN|HASTINGS)', $line) === 1) { // echo $line; // 
-            //$matches[] = $line; // $count += 1; // }
-
-            //$needles = array('MAIN','HASTINGS');
-            $needles = explode(" ",$searchfor);
-
-            $regex='/(?=.*?'.implode(')(?=.*?', $needles).')/s';
-            if (preg_match($regex,$line)===1) {
-                //  echo 'true';
-                $this->matched_lines[] = $line;
-                //echo $line;
-                //echo "<br>";
-            }
-        }
-*/
-
-?>
-
