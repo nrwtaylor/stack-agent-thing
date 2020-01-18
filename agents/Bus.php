@@ -233,7 +233,6 @@ class Bus extends Agent {
             if (!isset($variables['message']['agent'])) {continue;}
             //            } else {
             $block_thing_agent = $variables['message']['agent'];
-
             if ($block_thing_agent == "Translink") {
 
                 $this->prior_agent = $variables['message']['agent'];
