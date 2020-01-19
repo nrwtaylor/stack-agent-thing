@@ -393,10 +393,16 @@ if (!isset($this->link)) {$this->link = null;}
      */
     function set() {
 
-        $this->thing->json->setField("settings");
+//        $this->thing->json->setField("settings");
+//        $this->thing->json->writeVariable(array("frequency",
+//                "received_at"),  $this->thing->json->time()
+//        );
+
+        $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("frequency",
-                "received_at"),  $this->thing->json->time()
+                "refreshed_at"),  $this->thing->json->time()
         );
+
 
     }
 

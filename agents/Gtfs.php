@@ -109,10 +109,11 @@ class Gtfs extends Agent {
         for ($channels = $this->nextGtfs("stop_times"); $channels->valid(); $channels->next()) {
 
             $channel = $channels->current();
-            //var_dump($channel);
+
             $station_id = $channel['stop_id'];
             $train_id = $channel['trip_id'];
-
+//var_dump($station_id);
+//var_dump($train_id);
             //$this->thing->log ( "got " . $station_id . " " . $train_id . ".");
 
             $stop_sequence = $channel['stop_sequence'];
@@ -217,6 +218,7 @@ class Gtfs extends Agent {
         //        $stop_id = $this->idStation($text);
 
         // Make the networks
+
         $this->getRailway();
         //        $station_id = $stop_id; // Work in train context
 
@@ -225,9 +227,7 @@ class Gtfs extends Agent {
         //        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
         //        $stop_count = $this->searchForsId($station_id, $this->stops_db);
         //        $stop = $this->stops_db[$stop_count];
-
         $stop = $this->getStops($station_id);
-
 
         $visible_stations[$station_id] = array("visited"=>false, "station_id"=>$station_id);
 
@@ -246,8 +246,10 @@ class Gtfs extends Agent {
                 }
             }
 
-            if ($completed == true) {var_dump($visible_stations);echo "meep";exit();}
-            //echo "\n";
+            if ($completed == true) {
+return true;
+var_dump($visible_stations);echo "meep";exit();
+}
 
             // Now visiting stations up from $station_id
             $stations =  $this->railway[$station_id_pointer];
@@ -255,7 +257,6 @@ class Gtfs extends Agent {
 
             foreach ($stations as $station_id=>$station) {
                 $visible_stations[$station_id] = array("visited"=>false, "station_id"=>$station_id, "station"=>$this->getStops($station_id));
-                //echo $station_id . " ";
                 $completed = false;
             }
 
@@ -267,12 +268,7 @@ class Gtfs extends Agent {
             if ($hops > $this->max_hops) {break;}
         }
 
-
-        //echo "\n";
-
         $this->stations = $visible_stations;
-        //var_dump($this->stations);
-        //exit();
 
         return $this->stations;
     }
@@ -333,27 +329,6 @@ class Gtfs extends Agent {
      */
     function getMatches($file_name, $selector_array = null) {
 
-/*
-        if (!isset($this->mem_cached)) {$this->getMemcached();
-
-           $matches = $this->mem_cached->get('gtfs-translink');
-//var_dump($matches);
-//cdexit();
-
-
-        }
-*/
-/*
-        if (!isset($mem_var)) {
-           $mem_var = new \Memcached; //point 2.
-           $mem_var->addServer("127.0.0.1", 11211); 
-        }
-
-        $temp = $mem_var->get('gtfs-translink'); //point 3
-        if (is_array($temp)) {$matches = $temp; return $matches;}
-*/
-        //$this->thing->log("Getting " . $file_name . ".txt.");
-
         $matches = array();
         $iterator = $this->nextGtfs($file_name, $selector_array);
 
@@ -361,9 +336,10 @@ class Gtfs extends Agent {
             $matches[] = $iteration;
         }
 
+/*
         if (!isset($this->mem_cached)) {$this->getMemcached();}
         $this->mem_cached->set('gtfs-translink',  $matches); //point 3
-
+*/
 
         return $matches;
     }
@@ -434,42 +410,6 @@ class Gtfs extends Agent {
     }
 
 
-    /*
-        if (isset($this->routes[$station_id])) {return $this->routes[$station_id];}
-        if ($station_id == null) {$station_id = $this->station_id;}
-
-        // This is tricky, because there is no existing file that maps
-        // station_id to route.
-
-        // Question is can it be done quick enough not
-        // to worry about building another table.
-
-        // Currently taking 15s.  4 August 2018.
-
-
-//        $selector_array = array("stop_id"=>$station_id); // Because this is a Station
-
-        if (!isset($this->stations_db)) {$this->stations_db = $this->get("stops");}
-
-        $station_count = $this->searchForsId($station_id, $this->stations_db);
-        $station = $this->stations_db[$station_count];
-
-        // stop_times.txt maps stop_id <> trip_id
-
-
-        if(!isset($this->routes[$station_id])) {$this->getRoutes($station_id);}
-
-        // trip_times.txt maps trip_id <> route_id
-        // routes gets route info
-
-        $station['routes'] = $this->routes[$station_id];
-
-        return $station;
-
-    }
-*/
-
-
     /**
      *
      * @param unknown $station_id
@@ -521,16 +461,20 @@ class Gtfs extends Agent {
         $match_array = array();
         $num_words = count($pieces);
         foreach ($array as $key => $val) {
+//            $stop_desc = strtolower($val['stop_desc']);
+            $stop_name = strtolower($val['stop_name']);
 
-            $stop_desc = strtolower($val['stop_desc']);
             $stop_id = strtolower($val['stop_id']);
             $stop_code = strtolower($val['stop_code']);
 
             $count = 0;
+
             foreach ($pieces as $piece) {
 
+//                if (stripos($stop_desc, $piece) !== false) {
+                //if (preg_match("/\b$piece\b/i", $stop_desc)) {
+                if (preg_match("/\b$piece\b/i", $stop_name)) {
 
-                if (preg_match("/\b$piece\b/i", $stop_desc)) {
                     $count += 1;
                     $match = true;
                 } else {
@@ -542,11 +486,15 @@ class Gtfs extends Agent {
                 if ($count == $num_words) {break;}
 
             }
-            if ($count == $num_words) {$match_array[] = array("stop_desc"=>$stop_desc,
+//            if ($count == $num_words) {$match_array[] = array("stop_desc"=>$stop_desc,"stop_name"=>$stop_name,
+//                    "stop_id"=>$stop_id,
+//                    "stop_code"=>$stop_code);}
+
+            if ($count == $num_words) {$match_array[] = array("stop_name"=>$stop_name,
                     "stop_id"=>$stop_id,
                     "stop_code"=>$stop_code);}
-        }
 
+        }
         return $match_array;
     }
 
@@ -615,7 +563,6 @@ class Gtfs extends Agent {
             //  $route_id =  $this->trip_routes[$trip_id];
             // Have we processed it?
 
-            //var_dump($trip);
             $trip_id = $trip['trip_id'];
             $route_id = $this->trip_routes[$trip_id];
 
@@ -704,7 +651,7 @@ class Gtfs extends Agent {
         $s ="";
         $stops = $this->getStations($this->station_id);
         foreach ($stops as $stop_id=>$stop) {
-//var_dump($stop);
+
             $station =  ($stop['station']);
             $stop_text = $station['stop_desc'];
             $stop_code= $station['stop_code'];
@@ -787,7 +734,6 @@ class Gtfs extends Agent {
 
             //if (!isset($station['station'])) {$txt .= "No station information.\n";}
 
-            //var_dump($station);
             $stop = $this->getStops($station_id);
             $stop_code = $stop['stop_code'];
             $stop_id = $stop['stop_id'];
@@ -808,8 +754,7 @@ class Gtfs extends Agent {
                 $route_text = "";
                 foreach ($station['routes'] as $routes) {
                     foreach ($routes as $route) {
-                        //var_dump($route);
-                        //exit();
+
                         $route_short_name = $route['route_short_name'];
                         $route_long_name = $route['route_long_name'];
                         $route_text .= $route_short_name ." " .$route_long_name . " ";
@@ -867,6 +812,20 @@ class Gtfs extends Agent {
 
     }
 
+function parseLine($line, $field_names = null) {
+if ($field_names == null) {$field_names = $this->field_names;}
+
+            $field_values = explode(",", $line);
+            $i = 0;
+            $arr = array();
+
+            foreach ($field_names as $field_name) {
+                if (!isset($field_values[$i])) {$field_values[$i] = null;}
+                $arr[$field_name] = $field_values[$i];
+                $i += 1;
+            }
+return $arr;
+}
 
     /**
      *
@@ -875,12 +834,12 @@ class Gtfs extends Agent {
      */
     function nextGtfs($file_name, $selector_array = null) {
 
-
+/*
         if (!isset($this->mem_cached)) {$this->getMemcached();
            $matches = $this->mem_cached->get('gtfs-translink');
            $this->thing->log("found memcached gtfs-translink store.");
         }
-
+*/
 
 
         $this->thing->log("nextGtfs " . $file_name . " ");
@@ -909,7 +868,8 @@ class Gtfs extends Agent {
 
 
             //$line = trim(fgets($handle));
-            $arr = array();
+//            $arr = array();
+/*
             $field_values = explode(",", $line);
             $i = 0;
             foreach ($field_names as $field_name) {
@@ -917,6 +877,8 @@ class Gtfs extends Agent {
                 $arr[$field_name] = $field_values[$i];
                 $i += 1;
             }
+*/
+$arr = $this->parseLine($line, $field_names);
 
             // If there is no selector array, just return it.
             if ($selector_array == null) {yield $arr;continue;}
@@ -937,7 +899,6 @@ class Gtfs extends Agent {
                 if ($selector_array == null) {continue;}
 
                 foreach ($selector_array as $selector) {
-                    //var_dump($selector_array);
 
                     foreach ($selector as $selector_name=>$selector_value) {
 
@@ -1054,9 +1015,6 @@ class Gtfs extends Agent {
                 if (!isset($output_array[$field_index_value])) {$output_array[$field_index_value] = array();}
                 $output_array[$field_index_value][] = $arr;
 
-                //if ($file_name == "stop_times") {var_dump($field_index_value);var_dump($arr);echo "foo";exit();}
-
-                //$line_number += 1;
                 // process the line read.
             }
 
@@ -1065,8 +1023,6 @@ class Gtfs extends Agent {
         } else {
             // error opening the file.
         }
-
-        //if ($file_name == "stop_times") {var_dump($field_index_value);var_dump($arr);echo "foo";exit();}
 
         return $output_array;
     }
@@ -1160,21 +1116,6 @@ class Gtfs extends Agent {
      * @return unknown
      */
     public function readSubject() {
-/*
-$mem_var = new \Memcached; //point 2.
-$mem_var->addServer("127.0.0.1", 11211); 
-$mem_var->set('gtfs-translink',  0.5); //point 3
-//later:
-$num = $mem_var->get('gtfs-translink'); //point 4.
-
-var_dump($num);
-
-exit();
-
-
-echo "merp";
-exit();
-*/
         $this->thing->log("reading subject.");
 
         $this->response = null;
@@ -1187,10 +1128,9 @@ exit();
         } else {
             $input = strtolower($this->agent_input);
         }
-        //var_dump($input);
-        //exit();
 
-        $input = str_replace("gtfs " , "", $input);
+//        $input = str_replace("gtfs " , "", $input);
+        $input = $this->assert($input);
         $arr =  $this->findStop($input);
 
         $count = 0;
@@ -1203,10 +1143,10 @@ exit();
 
                 $station_id = $stop['stop_id'];
                 $this->stations[$station_id] = array("visited"=>false, "station_id"=>$station_id);
-                //var_dump($stop);
-                $this->places[$stop['stop_desc']][$stop['stop_id']] = $stop;
 
-                $temp_array[$stop['stop_desc']][] = $stop['stop_code'];
+                $this->places[$stop['stop_name']][$stop['stop_id']] = $stop;
+
+                $temp_array[$stop['stop_name']][] = $stop['stop_code'];
             }
 
             foreach ($temp_array as $stop_desc=>$stops) {
@@ -1223,10 +1163,10 @@ exit();
             $this->message = $m;
             return;
         }
-        //var_dump($arr);
+
         if (($arr != null) and (count($arr) == 1)) {
             $this->station_id = $arr[0]['stop_id'];
-            $m = $arr[0]['stop_code'] . " " . $arr[0]['stop_desc'];
+            $m = $arr[0]['stop_code'] . " " . $arr[0]['stop_name'];
             $this->message = $m . " | " . "http://www.transitdb.ca/stop/" . $arr[0]['stop_code'] ."/ | TEXT WEB";
             return;
         }
@@ -1244,7 +1184,6 @@ exit();
                 $this->response = "No match found.";
                 return;
             }
-
             $this->getStation($station_id);
             $this->station_id = $station_id;
 
@@ -1324,8 +1263,6 @@ exit();
                             $this->stop = false;
                             return "Request not understood";
                         } else {
-                            //echo "next word is:";
-                            //var_dump($pieces[$index+1]);
                             $this->stop = $pieces[$key+1];
                             $this->response = $this->stopTranslink($this->stop);
                             return $this->response;
