@@ -18,7 +18,105 @@ class Capitalise extends Agent
     {
 $this->capitalisations = array();
 $this->capitalisation = null;
+
+global $wp;
+if (!isset($wp->slug_agent)) {
+    $wp->slug_agent = new Slug($this->thing,"slug");
+}
+
+
+$lines = array("The quick brown fox was not Capitalized.", "The Return of the Jedi was.", "The Jedi attack.","The Attack of the Clones.");
+$this->loadCapitalisations($lines);
+$this->getCapitalisation("Return the jeDi to me.");
     }
+
+    function addCapitalisation($capitalisation) {
+global $wp;
+$slug = $wp->slug_agent->getSlug($capitalisation);
+
+if (!isset($this->capitalisations)) {$this->capitalisations = array();}
+
+$count = 0;
+if (isset($this->capitalisations[$slug][$capitalisation]['count'])) {
+$count = $this->capitalisations[$slug][$capitalisation]['count'];
+}
+
+$arr = array("count"=>$count += 1);
+
+
+$this->capitalisations[$slug][$capitalisation] = $arr;
+
+
+   }
+
+function preferredCapitalisation($text) {
+
+global $wp;
+$slug = $wp->slug_agent->getSlug($text);
+
+
+if (!isset($this->capitalisations[$slug])) {
+
+$this->addCapitalisation($text);
+
+
+}
+
+$capitalisations = $this->capitalisations[$slug];
+$max_count = 0;
+foreach($capitalisations as $i=>$capitalisation) {
+if ($capitalisation['count'] > $max_count) {
+
+$preferred_capitalisation = $i;
+
+}
+
+}
+
+return $preferred_capitalisation;
+
+}
+
+function addCapitalisations($capitalisations) {
+
+foreach($capitalisations as $i=>$capitalisation) {
+
+$this->addCapitalisation($capitalisation);
+
+}
+
+
+}
+
+    function loadCapitalisations($lines = null) {
+
+    // Read all the 1-gram to 3-gram combinations.
+    // And see how they are capitalised in the set.
+
+    if ( (!is_array($lines)) and (is_string($lines)) ) {$lines = array($lines);}
+
+//    $token_agent= new Token($this->thing, "token");
+    $ngram_agent= new Ngram($this->thing,"ngram");
+   // $slug_agent= new Slug($this->thing,"slug");
+
+    foreach($lines as $i=>$line) {
+
+//    $token_agent->extractTokens($line);
+    $n = $ngram_agent->getNgrams($line, 3);
+$this->addCapitalisations($n);
+
+    $n = $ngram_agent->getNgrams($line, 2);
+$this->addCapitalisations($n);
+
+    $n = $ngram_agent->getNgrams($line, 1);
+$this->addCapitalisations($n);
+
+
+    }
+
+    }
+
+
 
     /**
      *
@@ -26,23 +124,27 @@ $this->capitalisation = null;
      */
     function getCapitalisation($text = null)
     {
-        $agent = "agent";
-        if (isset($this->search_agent)) {
-            $agent = $this->search_agent;
-        }
-        $word_agent = new Word($this->thing, "word");
+global $wp;
+//        $agent = "agent";
+//        if (isset($this->search_agent)) {
+//            $agent = $this->search_agent;
+//        }
+//        $word_agent = new Word($this->thing, "word");
 
-        $words = array();
+//        $words = array();
 
-        $capitalisations = $word_agent->extractWords($text);
-        //$result = $word_agent->isWord($text);
-$this->capitalisations = $capitalisations;
-$this->capitalisation = null;
-if (isset($this->capitalisations[0])) {
-        $this->capitalisation = $this->capitalisations[0];
+$tokens = explode(" " , $text);
+$t = "";
+foreach($tokens as $i=>$token) {
+
+//$slug = $wp->slug_agent->getSlug($token);
+
+$preferred_capitalisation = $this->preferredCapitalisation($token);
+
+$t .= $preferred_capitalisation ." ";
 }
-//    $thing_report = $this->thing->db->subjectSearch($text, $agent, 999);
 
+$this->capitalisation = trim($t);
 
         return $this->capitalisation;
     }
@@ -73,7 +175,7 @@ if (isset($this->capitalisations[0])) {
         //trim($t);
 
         $this->sms_message =
-            "CAPITALIZATION " . strtoupper($this->filtered_input) . " | " . $this->capitalisation;
+            "CAPITALISATION " . $this->input . " | " . $this->capitalisation;
 
         $this->thing_report['sms'] = $this->sms_message;
     }

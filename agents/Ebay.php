@@ -71,7 +71,7 @@ $word = $this->credential_set;
     public function errorEbay()
     {
         $this->sms_message = 'EBAY | There is a problem with the eBay API.';
-        $this->message = $this->word . ' turned off the eBay API.';
+        $this->message = $this->word . ' turned off the eBay API. ' . $this->response;
 
         $message = 'The stack saw errors back from the eBay API. The eBay API is currently '. strtoupper($this->state) .".";
 
@@ -85,6 +85,8 @@ $word = $this->credential_set;
         $thing_report['message'] = $message;
         $thing_report['sms'] = $message;
         $thing_report['email'] = $message;
+
+
 
         $message_thing = new Message($thing, $thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
