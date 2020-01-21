@@ -241,7 +241,7 @@ class Robot extends Agent {
     /**
      *
      */
-    private function makeChoices() {
+    public function makeChoices() {
         $choices = $this->thing->choice->makeLinks('start');
 
         $this->choices = $choices;

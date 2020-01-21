@@ -321,7 +321,7 @@ class Database
             // Prevents a SQLSTATE[22001] error from looping.
             //$t = new Bork($t);
 
-            echo "BORK | Thing is full.";
+            //echo "BORK | Thing is full.";
             //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
             $this->last_update = true;

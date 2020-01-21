@@ -557,6 +557,14 @@ http://open.api.ebay.com/shopping?
         if ($this->state == "off") {
             return true;
         }
+
+        if ($keywords == null) {return true;}
+        if ($keywords == "") {return true;}
+        if ($keywords == " ") {return true;}
+        if ($keywords === false) {return true;}
+        if ($keywords === true) {return true;}
+
+
         $this->request = $keywords;
         $this->thing->log("fastest ebay search for " . $keywords . ".");
 
