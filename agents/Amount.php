@@ -77,20 +77,20 @@ return $this->amount;
         }
 
         foreach ($tokens as $key => $token) {
-$currency_arr = array("dollars");
+$currency_arr = array("dollars", "dollar");
 //            if (strtolower($token) == "dollars") {
 if (in_array(strtolower($token), $currency_arr)) {
             //$n =  $a->parseCurrency($token, $currency);
+            if ( is_numeric($tokens[$key - 1]) ) 
+{
 
-            if ( is_numeric($tokens[$key - 1]) ) {
-$n = $tokens[$key - 1];
-               $amount = array("currency"=>"dollars", "amount"=>$n);
+$n = floatval($tokens[$key - 1]);
+               $amount = array("currency"=>"USD", "amount"=>$n);
                $amounts[] = $amount;
             }
             }
 
         }
-
 
 
 

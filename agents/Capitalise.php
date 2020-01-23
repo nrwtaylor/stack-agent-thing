@@ -25,9 +25,10 @@ if (!isset($wp->slug_agent)) {
 }
 
 
-$lines = array("The quick brown fox was not Capitalized.", "The Return of the Jedi was.", "The Jedi attack.","The Attack of the Clones.");
-$this->loadCapitalisations($lines);
-$this->getCapitalisation("Return the jeDi to me.");
+//$lines = array("The quick brown fox was not Capitalized.", "The Return of the Jedi was.", "The Jedi attack.","The Attack of the Clones.");
+//$this->loadCapitalisations($lines);
+//$this->getCapitalisation("Return the jeDi to me.");
+$this->initCapitalise();
     }
 
     function addCapitalisation($capitalisation) {
@@ -48,6 +49,43 @@ $this->capitalisations[$slug][$capitalisation] = $arr;
 
 
    }
+
+public function initCapitalise() {
+
+$contents = file_get_contents('/var/www/stackr.test/resources/capitalise/capitalise.txt');
+
+
+
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+$lines[] = $line;
+/*
+            $word = $this->getConcept($line);
+
+            if (mb_strlen($word['english']) == 1) {
+
+                //v/ar_dump($word);
+                //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " >
+                //echo $dictionary_entry;
+                $dictionary[$word['english']] = $line . "\n";
+
+            }
+*/
+            // do something with $line
+            $line = strtok( $separator );
+        }
+
+
+
+
+
+
+$this->loadCapitalisations($lines);
+
+
+}
 
 function preferredCapitalisation($text) {
 
@@ -133,7 +171,7 @@ global $wp;
 
 //        $words = array();
 
-$tokens = explode(" " , $text);
+$tokens = explode(" " , strtolower($text));
 $t = "";
 foreach($tokens as $i=>$token) {
 

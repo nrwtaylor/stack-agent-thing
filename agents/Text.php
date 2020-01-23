@@ -101,6 +101,32 @@ return $new_text;
 
     }
 
+    public function postfixText($text = null, $post_fix = null, $allowed_length = 64, $part_tokens = false) {
+if ($text == null) {return true;}
+$text = trim($text);
+if ($post_fix == null) {$post_fix = "";}
+
+
+$tokens = explode(" " , $text);
+
+
+
+$new_text = trim(substr($text, 0, $allowed_length - mb_strlen($post_fix)));
+
+$tokens_new = explode(" ", $new_text);
+$last_index = count($tokens_new) - 1 ;
+if ($tokens_new[$last_index] != $tokens[$last_index]) {
+
+$tokens_new[$last_index] = "";
+
+}
+$new_text = trim(implode(" ", $tokens_new)) . $post_fix;
+
+//$wp->text_agent->postfixText($capt, $post_fix, $allowed_length);
+return $new_text;
+
+    }
+
     function extractCodes($input = null)
     {
         if (is_array($input)) {
