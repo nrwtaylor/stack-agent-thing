@@ -49,8 +49,6 @@ class Wordpress extends Agent
      *
      */
     public function run() {
-//        $this->getPing();
-//$this->makePost();
     }
 
     function test() {
@@ -65,6 +63,81 @@ if ($text == null) {$text = $this->filtered_input;}
   return false;
 
 }
+
+public function deletePosts($input = null) {
+if (is_numeric($input)) {$count = $input;}
+
+$counter = 0;
+
+while ($counter < $count) {
+    $post_id = $this->randomPost();
+    $this->deletePost($post_id);
+    $counter += 1;
+}
+
+$this->response .= "Deleted " . $count . " posts.";
+
+
+
+}
+
+    public function deletePost($post_id = null) {
+
+if ($post_id == null) {$post_id = $this->randomPost();}
+
+//$n = get_posts( array( 'orderby' => 'rand', 'posts_per_page' => 1) );
+//$post_id = $n[0]->ID;
+
+wp_delete_post($post_id, true);
+$this->response .= $post_id .' / ';
+
+
+
+    }
+
+public function randomPost() {
+
+$n = get_posts( array( 'orderby' => 'rand', 'posts_per_page' => 1) );
+$post_id = $n[0]->ID;
+
+return $post_id;
+
+}
+
+
+function countPosts() {
+$count = wp_count_posts();
+
+/*
+  ["publish"]=>
+  string(6) "100802"
+  ["future"]=>
+  string(1) "2"
+  ["draft"]=>
+  int(0)
+  ["pending"]=>
+  int(0)
+  ["private"]=>
+  int(0)
+  ["trash"]=>
+  string(4) "2447"
+  ["auto-draft"]=>
+  string(1) "1"
+  ["inherit"]=>
+  int(0)
+  ["request-pending"]=>
+  int(0)
+  ["request-confirmed"]=>
+  int(0)
+  ["request-failed"]=>
+  int(0)
+  ["request-completed"]=>
+  int(0)
+*/
+$this->response .= "Saw " . $count->publish . " posts.";
+
+}
+
 
 // https://www.kickstartcommerce.com/programmatically-create-wordpress-posts-pages-using-php.html
 function makePost($text = null) {
@@ -127,7 +200,7 @@ if ($text == null) {$text = $this->filtered_input;}
     /**
      *
      */
-    public function makeSms() {
+    public function makeSMS() {
         $this->sms_message = "WORDPRESS | Content. Autommatic. ";
         $this->sms_message .= $this->response;
 
@@ -163,7 +236,7 @@ if ($text == null) {$text = $this->filtered_input;}
 
         if (count($pieces) == 1) {
             if ($input == 'wordpress') {
-                $this->response = "Saw the word Wordpress.";
+                $this->response .= "Saw the word Wordpress.";
                 return;
             }
         }
@@ -176,12 +249,44 @@ if ($text == null) {$text = $this->filtered_input;}
             $whatIWant = substr(strtolower($this->input), $pos+strlen("wordpress")); 
         }
 
+
+$input = $this->assert($this->input);
+$this->filtered_input = ltrim(strtolower($input), " ");
+
+$quantity_agent = new Quantity($this->thing, "quantity");
+$quantity = $quantity_agent->quantity;
+
+$this->filtered_input = trim(str_replace($quantity, "", $this->filtered_input));
+$this->filtered_input = trim(str_replace("  ", " ", $this->filtered_input));
+
+switch ($this->filtered_input) {
+    case "posts":
+    case "count post":
+    case "count posts":
+    case "how many posts":
+    case "count":
+        $this->countPosts();
+        return;
+
+    case "delete posts":
+    case "delete":
+        $this->deletePosts($quantity);
+        return;
+
+    default:
+
+}
+
+
+//
         $this->filtered_input = ltrim(strtolower($whatIWant), " ");
 
         $this->makePost($this->filtered_input);
 
         $this->response = "Responded to a request about Wordpress.";
     }
+
+
 
 
 }
