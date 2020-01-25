@@ -278,7 +278,7 @@ $this->Respond();
         // requests too.
         // Think about that.
         //require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        $findagent_thing = new FindAgent($this->thing, 'train');
+        $findagent_thing = new Findagent($this->thing, 'train');
 
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to

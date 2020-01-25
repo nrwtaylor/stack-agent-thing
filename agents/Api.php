@@ -129,39 +129,6 @@ class Api {
 
 		return $this->thing_report;
 	}
-/*
-    function getLink() {
-
-        $block_things = array();
-        // See if a block record exists.
-        $findagent_thing = new FindAgent($this->thing, 'thing');
-
-        // This pulls up a list of other Block Things.
-        // We need the newest block as that is most likely to be relevant to
-        // what we are doing.
-
-//$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
-
-        $this->max_index =0;
-
-        $match = 0;
-
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-
-$this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
-
-
-
-            if ($block_thing['nom_to'] != "usermanager") {
-                $match += 1;
-                $this->link_uuid = $block_thing['uuid'];
-                if ($match == 2) {break;}
-            }
-        }
-        return $this->link_uuid;
-    
-    }
-*/
     function getLink() {
 
         $block_things = array();

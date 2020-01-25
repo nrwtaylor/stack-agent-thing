@@ -299,7 +299,7 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
 
 
         // Get up to 10000 crows.
-        $crow = new FindAgent($this->thing, "crow");
+        $crow = new Findagent($this->thing, "crow");
         $crow->horizon = 10000;
         $crow->findAgent("crow");
         $crow_things = $crow->thing_report['things'];

@@ -409,7 +409,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
 
         $block_things = array();
         // See if a block record exists.
-        $findagent_thing = new FindAgent($this->thing, 'thing');
+        $findagent_thing = new Findagent($this->thing, 'thing');
 
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to
@@ -619,7 +619,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
      *
      */
     public function makeSnippet() {
-        $this->thing_report['snippet'] = "<b>Empty.</b>";
+//        $this->thing_report['snippet'] = "<b>Empty.</b>";
     }
 
 
@@ -1525,7 +1525,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
             //$agent_name = "entity";
             foreach ($entity_list as $key=>$entity_name) {
 
-                $findagent_agent = new FindAgent($this->thing, $entity_name);
+                $findagent_agent = new Findagent($this->thing, $entity_name);
                 $things = $findagent_agent->thing_report['things'];
                 $uuid = ($things[0]['uuid']);
 

@@ -378,7 +378,7 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
         $this->resources = array();
         // See if a headcode record exists.
 //        require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        $findagent_thing = new FindAgent($this->thing, 'resource');
+        $findagent_thing = new Findagent($this->thing, 'resource');
 
         $this->thing->log('Agent "Place" found ' . count($findagent_thing->thing_report['things']) ." resource Things." );
 

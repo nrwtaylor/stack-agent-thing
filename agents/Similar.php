@@ -176,7 +176,7 @@ public function run() {
         // requests too.
         // Think about that.
       
-        $findagent_thing = new FindAgent($this->thing, $this->requested_thing_name . ' ' . $this->horizon);
+        $findagent_thing = new Findagent($this->thing, $this->requested_thing_name . ' ' . $this->horizon);
 
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to

@@ -193,7 +193,7 @@ class Pace extends Agent {
     public function lastPace() {
         $this->getTime();
 
-        $findagent_thing = new FindAgent($this->thing, 'pace');
+        $findagent_thing = new Findagent($this->thing, 'pace');
 
         $this->thing->log('Agent "Pace" found ' . count($findagent_thing->thing_report['things']) ." Pace Agent Things." );
 

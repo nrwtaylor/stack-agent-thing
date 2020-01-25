@@ -261,7 +261,7 @@ class Entity extends Agent
 
         $this->entitycode_list = array();
 
-        $entities = new FindAgent($this->thing, "entity");
+        $entities = new Findagent($this->thing, "entity");
         // Get up to 10000 entities. Make this a stack variable.
         $entities->horizon = 10000;
         $entities->findAgent("entity");

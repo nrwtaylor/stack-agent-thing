@@ -183,7 +183,7 @@ class Route
 
         $this->routes = array();
         // See if a headcode record exists.
-        $findagent_thing = new FindAgent($this->thing, 'route');
+        $findagent_thing = new Findagent($this->thing, 'route');
 
 
         foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_object) {

@@ -269,7 +269,9 @@ switch ($this->filtered_input) {
         return;
 
     case "delete posts":
+    case "delete post":
     case "delete":
+        if (!isset($quantity)) {$quantity = 1;}
         $this->deletePosts($quantity);
         return;
 

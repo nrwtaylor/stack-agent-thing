@@ -207,7 +207,7 @@ class Nod {
     public function lastNod() {
         $this->getTime();
 
-        $findagent_thing = new FindAgent($this->thing, 'nod');
+        $findagent_thing = new Findagent($this->thing, 'nod');
 
         $this->thing->log('Agent "Nod" found ' . count($findagent_thing->thing_report['things']) ." Nod Agent Things." );
 

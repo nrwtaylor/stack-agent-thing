@@ -9,7 +9,7 @@ ini_set("allow_url_fopen", 1);
 
 // Capitalization?
 
-class FindAgent
+class Findagent
 {
 	public $var = 'hello';
 

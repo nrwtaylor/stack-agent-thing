@@ -247,7 +247,7 @@ function init() {
 
         $consist_things = array();
         // See if a Consist record exists.
-        $findagent_thing = new \Nrwtaylor\StackAgentThing\FindAgent($this->thing, 'consist');
+        $findagent_thing = new \Nrwtaylor\StackAgentThing\Findagent($this->thing, 'consist');
 
         // This pulls up a list of other Consist Things.
         // We need the newest Consist as that is most likely to be relevant to
@@ -257,7 +257,7 @@ function init() {
 
         $this->current_variable = null;
 
-        $findagent_thing = new \Nrwtaylor\StackAgentThing\FindAgent($this->thing, 'consist');
+        $findagent_thing = new \Nrwtaylor\StackAgentThing\Findagent($this->thing, 'consist');
 
         foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_obj) {
 

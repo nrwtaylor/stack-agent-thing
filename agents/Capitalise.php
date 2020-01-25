@@ -31,6 +31,74 @@ if (!isset($wp->slug_agent)) {
 $this->initCapitalise();
     }
 
+public function capitaliseTitle($text = null) {
+
+//return strtoupper($text);
+
+global $wp;
+$h_test = $this->getCapitalisation($text);
+$tks = explode(" " , $text);
+$s = mb_strlen($h_test);
+//echo "<pre>";
+//echo "Capitalisation test: " . $h_test. " " ." [".$s."]". "<br>";
+
+
+
+$brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
+$m = $brilltagger_agent->tag($text);
+
+
+//var_dump($m);
+$capitalised_title = "";
+
+//$wp->capitalise_agent = new Capitalise($this->thing,"capitalise");
+
+foreach($m as $i=>$tag_array) {
+
+$tag = trim($tag_array['tag']);
+$token = strtolower($tag_array['token']);
+
+if (substr($tag,0,2) == "NN") {$token = ucfirst($token);}
+if (substr($tag,0,2) == "VB") {$token = ucfirst($token);}
+if (substr($tag,0,2) == "JJ") {$token = ucfirst($token);}
+
+if (!ctype_lower($token)) {
+
+$token_test = $this->getCapitalisation($token);
+if (!ctype_lower($token_test)) {$token = $token_test;}
+}
+
+if (is_numeric($token)) {
+
+if (isset($tks[$i])) {
+$token = $tks[$i];
+}
+
+}
+
+$mixed_agent = new Mixed($this->thing, "mixed");
+
+
+if ( $mixed_agent->isMixed($token) ) {$token = strtoupper($tag_array['token']);}
+
+if ($tag == "CC") {}
+    $capitalised_title .= " " . $token;
+}
+
+//$s = mb_strlen($capt);
+
+
+
+$this->capitalised_title = $capitalised_title;
+
+return $capitalised_title;
+
+
+
+
+}
+
+
     function addCapitalisation($capitalisation) {
 global $wp;
 $slug = $wp->slug_agent->getSlug($capitalisation);
@@ -86,6 +154,10 @@ $this->loadCapitalisations($lines);
 
 
 }
+
+
+
+
 
 function preferredCapitalisation($text) {
 

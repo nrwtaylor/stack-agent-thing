@@ -253,7 +253,7 @@ if ($type == "WARNING") {return true;}
         // Okay at this point we have one error...
         // Have we had other errors recently?
 
-        $findagent_thing = new FindAgent($this->thing, 'ebay');
+        $findagent_thing = new Findagent($this->thing, 'ebay');
 
         $count = count($findagent_thing->thing_report['things']);
         $this->thing->log(

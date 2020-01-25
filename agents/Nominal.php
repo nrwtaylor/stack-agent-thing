@@ -217,7 +217,7 @@ $this->thing->choice->load('Nominal');
 
         $Nominal_things = array();
         // See if a Nominal record exists.
-        $findagent_thing = new FindAgent($this->thing, 'nominal');
+        $findagent_thing = new Findagent($this->thing, 'nominal');
 
         // This pulls up a list of other Nominal Things.
         // We need the newest Nominal as that is most likely to be relevant to

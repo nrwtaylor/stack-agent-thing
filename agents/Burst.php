@@ -216,7 +216,7 @@ class Burst extends Agent
         // prod 5,626 5,897 5,147
         // dev 3,575 5,082 7,746 7,038 6,690
         if ($findagent == 'prod') {
-            $findagent_thing = new FindAgent($this->thing, $this->requested_thing_name . ' ' . $this->horizon);
+            $findagent_thing = new Findagent($this->thing, $this->requested_thing_name . ' ' . $this->horizon);
             $t = $findagent_thing->thing_report;
         } else {
             $this->thing->db->setUser($this->from);

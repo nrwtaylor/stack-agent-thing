@@ -51,10 +51,21 @@ class Thankyou extends Agent {
     }
 */
 
+    public function makeSnippet() {
+    $this->thing_html['snippet'] = $this->thankyou_message ;
+
+    }
+
+    public function makeWeb() {
+    $this->thing_html['web'] = $this->thankyou_message ;
+
+    }
+
+
     /**
      *
      */
-    function makeSMS() {
+    public function makeSMS() {
         $this->node_list = array("thankyou"=>array("thankyou"));
         $m = strtoupper($this->agent_name) . " | " . $this->response;
         $this->sms_message = $m;
@@ -73,6 +84,8 @@ class Thankyou extends Agent {
 
     function doThankyou($text = null) {
 
+$litany_agent = new Litany($this->thing, "litany thankyou");
+
 // https://www.google.com/search?responses+to+the+word+thank+you
             $array = array("Why shucks. ",
 'Glad to help. ',
@@ -85,6 +98,14 @@ class Thankyou extends Agent {
 
 
 $this->thankyou_response = $v;
+
+if (isset($litany_agent->message)) {
+
+$this->thankyou_response = $litany_agent->message;
+
+
+}
+
 
         // If we didn't receive the command NTP ...
 if (strtolower($this->input) != "thankyou") {

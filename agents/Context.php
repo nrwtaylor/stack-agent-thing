@@ -179,7 +179,7 @@ class Context
 
         // See if a context record exists.
 //        require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        $findagent_thing = new FindAgent($this->thing, 'thing');
+        $findagent_thing = new Findagent($this->thing, 'thing');
 
         $this->max_index =0;
         $match = 0;

@@ -158,7 +158,7 @@ class Info {
 
         $block_things = array();
         // See if a block record exists.
-        $findagent_thing = new FindAgent($this->thing, 'thing');
+        $findagent_thing = new Findagent($this->thing, 'thing');
 
         $this->max_index =0;
 

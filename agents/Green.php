@@ -169,7 +169,7 @@ class Green extends Agent
         $train_things = array();
         // See if a block record exists.
 
-        $findagent_thing = new FindAgent($this->thing, 'train');
+        $findagent_thing = new Findagent($this->thing, 'train');
 
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to

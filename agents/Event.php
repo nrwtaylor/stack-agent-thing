@@ -381,7 +381,7 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->event_code . ' and ' . 
 
         // See if a headcode record exists.
         //$findagent_thing = new Findagent($this->thing, 'event');
-        $findagent_thing = new FindAgent($this->thing, 'event'); //prod
+        $findagent_thing = new Findagent($this->thing, 'event'); //prod
 
         $count = count($findagent_thing->thing_report['things']);
         $this->thing->log('Agent "Event" found ' . count($findagent_thing->thing_report['things']) ." event Things." );

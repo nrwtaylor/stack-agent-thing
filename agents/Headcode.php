@@ -295,7 +295,7 @@ class Headcode
     {
         $this->headcode_list = array();
         // See if a headcode record exists.
-        $findagent_thing = new FindAgent($this->thing, 'headcode');
+        $findagent_thing = new Findagent($this->thing, 'headcode');
 
         $this->thing->log('Agent "Headcode" found ' . count($findagent_thing->thing_report['things']) ." headcode Things." );
 

@@ -203,7 +203,7 @@ class Alias
 
         $this->aliases_list = array();
 
-        $findagent_thing = new FindAgent($this->thing, 'alias');
+        $findagent_thing = new Findagent($this->thing, 'alias');
 
         $this->thing->log('Agent "Alias" found ' . count($findagent_thing->thing_report['things']) ." Alias Agent Things." );
         $this->thing->log('Agent "Alias". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
