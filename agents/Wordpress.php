@@ -64,6 +64,18 @@ if ($text == null) {$text = $this->filtered_input;}
 
 }
 
+public function csvPost($text = null) {
+
+if ($text == null) {return true;}
+if (!is_string($text)) {return true;}
+$text .= '\n';
+$file = '/tmp/' . 'wordpress_posts.csv';
+
+file_put_contents($file, $text, FILE_APPEND | LOCK_EX);
+
+}
+
+
 public function deletePosts($input = null) {
 if (is_numeric($input)) {$count = $input;}
 
@@ -98,6 +110,7 @@ $this->response .= $post_id .' / ';
 public function randomPost() {
 
 $n = get_posts( array( 'orderby' => 'rand', 'posts_per_page' => 1) );
+//var_dump($n);
 $post_id = $n[0]->ID;
 
 return $post_id;
