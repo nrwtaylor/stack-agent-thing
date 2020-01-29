@@ -154,6 +154,7 @@ class Word extends Agent {
             $this->word = null;
         }
 
+$this->thing->log("extracted words.");
 
         return $this->words;
     }
@@ -238,7 +239,8 @@ if ($c == false) {return true;}
             require_once $this->wordpress_path_to. 'wp-load.php';
             if (($contents = get_transient('agent-words-list'))) {
 $this->words_list = $contents;
-                $this->thing->log("loaded words from  wp transient store.");
+                $this->thing->log("loaded words from wp transient store.");
+
                 break;
             }
         }
@@ -484,7 +486,6 @@ return false;
         $this->makeEmail();
 
         $this->thing_report['email'] = $this->sms_message;
-
 if ($this->agent_input == null) {
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -578,6 +579,8 @@ if (isset($this->words)) {$this->reading = count($this->words);}
 
         }
 
+
+//if ($input == "word") {return;}
 
         //        if (count($this->words) == 0) {
         //            return;

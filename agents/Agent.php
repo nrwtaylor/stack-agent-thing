@@ -550,7 +550,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         $agent_flag = true;
         if ($this->agent_name == "agent") {return;}
 
-
         if ($agent_flag == true) {
             //        if ($this->agent_input == null) {
             //          $this->respond();
@@ -562,7 +561,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
             }
 
             $this->thing_report['message'] = $this->thing_report['sms'];
-
             if (($this->agent_input == null) or ($this->agent_input == "")) {
                 $message_thing = new Message($this->thing, $this->thing_report);
                 $this->thing_report['info'] = $message_thing->thing_report['info'] ;

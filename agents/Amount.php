@@ -81,6 +81,9 @@ $currency_arr = array("dollars", "dollar");
 //            if (strtolower($token) == "dollars") {
 if (in_array(strtolower($token), $currency_arr)) {
             //$n =  $a->parseCurrency($token, $currency);
+
+if (!isset($tokens[$key - 1])) {continue;}
+
             if ( is_numeric($tokens[$key - 1]) ) 
 {
 
