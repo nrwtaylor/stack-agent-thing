@@ -65,6 +65,8 @@ class Robot extends Agent {
         $this->hits = array();
         $this->hits_count = 0;
 
+if ($text == null) {
+
         try {
             $headers = apache_request_headers();
         }
@@ -88,11 +90,12 @@ class Robot extends Agent {
 
         if (isset($headers['User-Agent'])) {$request_user_agent = $headers['User-Agent'];
             $text = $request_user_agent;}
-        //var_dump($text);
+}
 
         $this->librex_agent = new Librex($this->thing, "librex");
         $this->librex_agent->getLibrex('robot/robot');
         $this->hits = $this->librex_agent->getHits($text);
+
         $this->header_text = $text;
         $this->hits_count = count($this->hits);
 
@@ -172,6 +175,8 @@ class Robot extends Agent {
 
         }
 
+        if ( (count($this->hits) > 0) ) {$this->response .= count($this->hits);}
+
         $response_text = "Hello. ";
         if ((isset($this->response)) and ($this->response != "")) {$response_text = $this->response;}
 
@@ -214,6 +219,7 @@ class Robot extends Agent {
      *
      */
     public function makeEmail() {
+
         switch ($this->counter) {
         case 1:
             $subject = "Hello Robot";
@@ -273,6 +279,18 @@ class Robot extends Agent {
      *
      */
     public function readSubject() {
+
+        if ($this->agent_input == "robot") {return;}
+
+        $asserted_input = trim($this->assert($this->input));
+if ($asserted_input != "") {
+$text = $this->getRobot($asserted_input);
+$this->response .= $text;
+return;
+}
+
+
+
         $link_agent = new Link($this->thing, $this->input);
         $t = $link_agent->extractLink($this->input);
         //var_dump($t);
@@ -448,10 +466,10 @@ class Robot extends Agent {
     }
 
 
-    function getRobot() {
+    function getRobot($text = null) {
+
         $this->getHeader();
         $matches = array();
-
         foreach ($this->hits as $i=>$hit_string) {
             $matches[] = explode(" ", $hit_string)[0];
         }
