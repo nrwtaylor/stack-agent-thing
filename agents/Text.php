@@ -380,6 +380,112 @@ return $text;
 
 }
 
+public function posText($text = null, $pattern = "mixed-adjective") {
+
+// dev stack
+
+if ($text == null) {return true;}
+
+
+$processed_text = $this->tagText($text);
+$pattern_tokens = explode("-", $pattern);
+$process_text_tokens = explode("-", $pattern);
+
+foreach($pattern_tokens as $i=>$pattern_token) {
+}
+
+
+}
+
+public function tagText($text = null) {
+
+global $wp;
+if ($text == null) {return false;}
+if (!isset($wp->brilltagger_agent)) {
+$wp->brilltagger_agent = new Brilltagger(null, "brilltagger");
+}
+
+if (!isset($wp->mixed_agent)) {
+$wp->mixed_agent = new Mixed(null, "brilltagger");
+}
+
+if (!isset($wp->alpha_agent)) {
+$wp->alpha_agent = new Alpha(null, "alpha");
+}
+
+
+$tags = $wp->brilltagger_agent->tag($text);
+
+/*
+foreach($tags as $i=>$token_tag) {
+
+$tag= $token_tag['tag'];
+$token = $token_tag['token'];
+echo $token . "  " . $tag  . "<br>";
+
+}
+*/
+
+// --- now it gets tricky.
+// https://cs.uwaterloo.ca/~jimmylin/downloads/brill-javadoc/edu/mit/csail/brill/BrillTagger.html
+
+$arr = array("adjective"=>array('JJ', 'JJR', 'JJS'),
+"noun"=>array('NN','NNS','NNP','NNPS'),
+"pronoun"=>array('PRP','PRPS','WP'),
+"verb"=>array('VB','VBD','VBG','VBN','VBP','VBZ'),
+"adverb"=>array('RB','RBR','RBS','WRB'),
+
+
+);
+
+//$pattern_tokens = explode("-", $pattern);
+
+$processed_text = "";
+foreach($tags as $i=>$token_tag){
+
+$tag = $tags[$i]['tag'];
+$token = $tags[$i]['token'];
+/*
+if (!isset($tags[$i]['pos'])) {$tags[$i]['pos'] = "X";}
+if ($wp->alpha_agent->isAlpha($token)) {$tags[$i]['pos']= 'alpha';}
+if (in_array($tag,$arr)) {$tags[$i]['pos']= 'adjective';}
+
+if ($wp->mixed_agent->isMixed($token)) {$tags[$i]['pos']= 'mixed';}
+*/
+
+switch (true) {
+    case ($wp->mixed_agent->isMixed($token)):
+        $tags[$i]['pos']= 'mixed';
+       break;
+    case (is_numeric($token)):
+        $tags[$i]['pos']= 'numeric'; 
+        break;
+    case ($wp->alpha_agent->isAlpha($token)):
+        if (in_array($tag,$arr['adjective'])) {$tags[$i]['pos']= 'adjective';} else
+        {$tags[$i]['pos']= 'alpha';}
+
+        break;
+    case (!isset($tags[$i]['pos'])):
+    default:
+        $tags[$i]['pos'] = "X";
+        break;
+}
+
+
+
+$processed_text .= "-" . $tags[$i]['pos'];
+}
+$processed_text = trim($processed_text,"-");
+
+
+
+return $processed_text;
+
+}
+
+
+
+
 
 
 public function make() {}
