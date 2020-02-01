@@ -261,10 +261,19 @@ class Database
                 $created_at .
                 "' order by created_at DESC LIMIT 3";
         }
-
+        try {
         $sth = $this->container->db->prepare($query_string);
         $sth->execute();
         $thing = $sth->fetchObject();
+        } catch (\Exception $e) {
+            // Devstack - decide how to handle thing full
+
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+            $thing = false;
+        }
+
+
 
         $thingreport = array(
             'thing' => $thing,
@@ -426,7 +435,10 @@ class Database
             $sth->execute();
             $thing = $sth->fetchObject();
         } catch (\Exception $e) {
-            echo 'Caught error: ', $e->getMessage(), "\n";
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+
+//            echo 'Caught error: ', $e->getMessage(), "\n";
             $thing = false;
         }
 
@@ -551,6 +563,9 @@ class Database
                 'So here are Things with the association you provided. That\'s what you want';
             $thingreport['things'] = $things;
         } catch (\PDOException $e) {
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
@@ -631,7 +646,8 @@ class Database
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
         }
         $things = $sth->fetchAll();
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
@@ -715,7 +731,10 @@ class Database
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+
+//            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
         $things = $sth->fetchAll();
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
@@ -858,6 +877,8 @@ class Database
         $query =
             "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
+        try {
+
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
         $sth->bindParam(":agent", $agent);
@@ -865,6 +886,14 @@ class Database
         $sth->execute();
 
         $things = $sth->fetchAll();
+        } catch (\Exception $e) {
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+
+//            echo 'Caught error: ', $e->getMessage(), "\n";
+            $things = false;
+        }
+
 
         $thingreport = array(
             'things' => $things,
@@ -875,6 +904,8 @@ class Database
                 'A list of Things which match at the provided phrase.'
         );
         return $thingreport;
+
+
     }
 
     /**
@@ -902,7 +933,10 @@ class Database
             $sth->execute();
             $things = $sth->fetchAll();
         } catch (\Exception $e) {
-            echo 'Caught error: ', $e->getMessage(), "\n";
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+
+//            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
         }
 
