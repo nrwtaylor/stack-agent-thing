@@ -167,6 +167,9 @@ $n = floatval($tokens[$key - 1]);
 
     }
 
+public function filterAmount($text = null) {
+
+}
 
     /**
      *
