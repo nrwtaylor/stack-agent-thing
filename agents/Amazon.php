@@ -77,8 +77,6 @@ function logAmazon($text) {
 
 if ($text == null) {$text = "MErp";}
 
-//var_dump($text);
-//var_dump($text['errorMessage']['error']['message']);
 
 
 $log_text = "Error message not found.";
@@ -175,22 +173,10 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
 }
 
-//var_dump($amazon_item['Price']);
-
-/*
-exit();
-if (isset($amazon_item['MediumImage']['URL'])) {
-
-$link_thumbnail = $amazon_item['MediumImage']['URL'];
-
-}
-*/
 
 
         //$item = $this->parsedItem($amazon_item);
 //echo "---<br>";
-//var_dump($amazon_item['ItemAttributes']);
-//exit();
         $item = array(
             "id" => $asin,
             "title" => $title,
@@ -224,8 +210,6 @@ $link_thumbnail = $amazon_item['MediumImage']['URL'];
     {
         $index = "All";
 
-//        var_dump($slug);
-        //exit();
         $region = "com";
         $method = "GET";
         $host = "webservices.amazon." . $region;
@@ -342,10 +326,8 @@ $keywords= $text;
 
         $request = $this->getRequest($request_array);
 
-//        var_dump($request);
 
         $amazon_array = $this->getAmazon($request);
-//var_dump($amazon_array);
 
 if (!isset($amazon_array['Items'])) {
 if (isset($amazon_array['Error'])) {
@@ -360,13 +342,18 @@ return true;
         $total_pages = $amazon_array['Items']['TotalPages'];
         $more_results_url = $amazon_array['Items']['MoreSearchResultsUrl'];
 
-        $items = $amazon_array['Items']['Item'];
 
+$items = array();
+if ($total_results > 0) {
+        $items = $amazon_array['Items']['Item'];
+}
+
+$this->more_results_url = $more_results_url;
+if ($items == array()) {$this->items = array(); return;}
 
         foreach ($items as $i => $item) {
             $parsed_item = $this->parseItem($item);
-//var_dump($parsed_item);
-//exit();
+
             $this->items[] = $parsed_item;
         }
 
@@ -386,7 +373,6 @@ return true;
             $this->item = $this->items[0];
         }
 
-//var_dump($this->items);
 
         $this->items_count = count($this->items);
 
@@ -474,7 +460,7 @@ return true;
 
 
         foreach ($items as $i => $item) {
-//var_dump($item['MediumImage']);
+
             $parsed_item = $this->parseItem($item);
             $this->items[] = $parsed_item;
         }
@@ -547,7 +533,7 @@ if (isset($item['title'])) {
         }
 
         $this->input = $input;
-        //var_dump($input);
+
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
