@@ -236,13 +236,28 @@ if ($c == false) {return true;}
 
 
         if ($this->wordpress_path_to !== false) {
+try {
             require_once $this->wordpress_path_to. 'wp-load.php';
             if (($contents = get_transient('agent-words-list'))) {
 $this->words_list = $contents;
                 $this->thing->log("loaded words from wp transient store.");
 
                 break;
-            }
+}
+
+}        catch (\Throwable $t) {
+$this->wordpress = "off";
+            //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
+            //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
+            $this->thing->log("caught throwable.");
+            // Executed only in PHP 7, will not match in PHP 5
+        }
+        catch (\Exception $e) {
+$this->wordpress = "off";
+            $this->thing->log("caught exception");
+            // Executed only in PHP 5, will not be reached in PHP 7
+        }
+
         }
 
 
@@ -253,7 +268,7 @@ $this->words_list = $contents;
             $contents = file_get_contents($file);
 
 
-        if ($this->wordpress_path_to !== false) {
+        if (($this->wordpress_path_to !== false) and ($this->wordpress != "off")){
             set_transient('agent-words-list', $contents);
         }
 
