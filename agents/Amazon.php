@@ -439,7 +439,10 @@ if ($items == array()) {$this->items = array(); return;}
 
         $amazon_array = $this->getAmazon($request);
 
-        $is_valid = $amazon_array['Items']['Request']['IsValid'];
+        $is_valid = "";
+        if (isset($amazon_array['Items']['Request']['IsValid'])) {
+            $is_valid = $amazon_array['Items']['Request']['IsValid'];
+        }
 
         $total_results = "";
         if (isset($amazon_array['Items']['TotalResults'])) {
@@ -456,8 +459,10 @@ if ($items == array()) {$this->items = array(); return;}
             $more_results_url = $amazon_array['Items']['MoreSearchResultsUrl'];
         }
 
-        $items = $amazon_array['Items']['Item'];
-
+        $items = array();
+        if (isset($amazon_array['Items']['Item'])) {
+            $items = $amazon_array['Items']['Item'];
+        }
 
         foreach ($items as $i => $item) {
 
