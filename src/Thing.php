@@ -870,6 +870,16 @@ if (!isset($this->account['stack'])) {return true;}
 		return true;
 	}
 
+    function has($text = null) {
+
+        if (stripos($this->subject, $text) !== false) {
+            return true;
+        }
+
+        return false;
+
+    }
+
     function log($text = null, $logging_level = null)
     {
 
