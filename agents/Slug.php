@@ -57,16 +57,14 @@ $this->alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
 public function getSlug($text = null) {
 
 if ($text == null) {return true;}
-//if ($this->state == "off") {$this->slug = ""; return null;}
 
-//$alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
 $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
-//var_dump($slug);
 
 $despaced_slug = preg_replace('/\s+/', ' ',$slug);
 $slug = str_replace(" ","-",$despaced_slug);
 $slug = strtolower($slug);
 $slug = trim($slug,"-");
+
 $this->slug = $slug;
 return $slug;
 }
@@ -93,13 +91,13 @@ return $slug;
 
         $this->thing->flagGreen();
 
-        $this->makeSMS();
-        $this->makeChoices();
+        //$this->makeSMS();
+        //$this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->makeWeb();
+        //$this->makeWeb();
 
         $this->thing_report['thing'] = $this->thing->thing;
 
@@ -115,20 +113,17 @@ return $slug;
     public function readSubject() {
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
-        if ($this->agent_input == null) {
-            $input = $this->subject;
-        }
+        $input = $this->subject;
+//        if ($this->agent_input == null) {
+//            $input = $this->subject;
+//        }
 
         if ($this->agent_input == "slug") {
             $input = $this->subject;
-        } else {
+        } elseif ($this->agent_input != null) {
             $input = $this->agent_input;
         }
-
-// dev not needed for now
-//        $this->extractSlugs($input);
-//        $this->extractSlug();
-
+$filtered_input = $this->assert($input);
 
         if ((!isset($this->slug)) or ($this->slug == false)) {
             $this->getSlug($input);
@@ -194,15 +189,20 @@ return $slug;
      *
      */
     function makeSMS() {
-        $sms = "SLUG";
+
+        $slug_text = "test";
+        if (isset($this->slug)) {$slug_text = "Made slug " . $this->slug . ". ";}
+
+        $sms = "SLUG" . $slug_text;
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
         //}
-
+/*
 if (isset($this->slug)) {
         $sms .= " | " . $this->slug;
         //$this->sms_message .= 'devstack';
 }
+*/
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -218,27 +218,5 @@ if (isset($this->slug)) {
         $this->choices = $choices;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-/*
-    public function makePNG() {
-        $text = "thing:".$this->alphas[0];
-
-        ob_clean();
-
-        ob_start();
-
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
-
-        $image = ob_get_contents();
-        ob_clean();
-
-        $this->thing_report['png'] = $image;
-        return $this->thing_report['png'];
-    }
-*/
 
 }
