@@ -125,6 +125,14 @@ $word = $this->credential_set;
         //     if ($this->last_state == false) {
         //            $this->readSubject();
 
+$this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
+
+        $this->thing->json->writeVariable(
+            array("ebay", "runtime"),
+            $this->runtime
+        );
+
+
         $this->thing->json->writeVariable(array("ebay", "state"), $this->state);
         $this->thing->json->writeVariable(
             array("ebay", "refreshed_at"),

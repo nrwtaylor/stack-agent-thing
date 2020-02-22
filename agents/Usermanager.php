@@ -34,6 +34,14 @@ class Usermanager
         $this->sms_seperator =
             $this->thing->container['stack']['sms_separator']; // |
 
+        if (isset($this->thing->container['api']['usermanager'])) {
+
+            if (isset($this->thing->container['api']['usermanager']['state'])) {
+                $state = $this->thing->container['api']['usermanager']['state'];
+            }
+            if ($state == "off") {return;}
+        }
+
         // Load in time quantums
         $this->cron_period = $this->thing->container['stack']['cron_period']; // 60s
         $this->thing_resolution =
@@ -64,7 +72,7 @@ class Usermanager
             'Agent "Usermanager" running on Thing ' . $this->thing->nuuid . '.',
             "INFORMATION"
         );
-
+//return;
         // 279ms 303ms 306ms
         $split_time = $this->thing->elapsed_runtime();
 
