@@ -389,6 +389,8 @@ class Database
      */
     function Create($subject, $to)
     {
+
+        try {
         // Create a new record in the db for the Thing.
         $this->split_time = microtime(true);
 
@@ -409,8 +411,29 @@ class Database
         $nom_to = $to;
 
         $query->execute();
-
         return $query;
+
+        } catch (\Exception $e) {
+            // Devstack - decide how to handle thing full
+            // Do this for now.
+
+            $t = new Thing(null);
+            $t->Create("meep", "meep", $e->getMessage());
+
+
+            // Commented out 24 November 2019.
+            // Prevents a SQLSTATE[22001] error from looping.
+            //$t = new Bork($t);
+
+            //echo "BORK | Thing is full.";
+            //echo 'Caught error: ',  $e->getMessage(), "\n";
+            $thing = false;
+            $this->last_update = true;
+            return false;
+
+        }
+
+
     }
 
     /**

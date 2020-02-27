@@ -335,6 +335,8 @@ function spawn($datagram = null) {
             // User must expect that logging might not have happened.
             $this->sqlresponse =  "New record created successfully.";
             $message0['500 words'] .= $this->sqlresponse;
+        } elseif ($query == false) {
+            return false;
 
         } else {
 
