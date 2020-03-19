@@ -75,6 +75,13 @@ class Callsign extends Agent {
 
         //  $this->thing_report['sms'] = strtoupper($this->agent_name) . " | " . $this->response;
 
+//        $this->reading = "X";
+//        if (isset($this->callsigns)) {
+//            $this->reading = count($this->callsigns);
+//        }
+//        $this->thing->json->writeVariable(array("callsign", "reading"), $this->reading);
+
+
         $this->thing->json->writeVariable( array("callsign", "reading"), $this->reading );
 
         $callsign = new Variables($this->thing, "variables callsign " . $this->from);
@@ -165,6 +172,7 @@ class Callsign extends Agent {
     function extractCallsigns($string) {
         $pattern = '/\b\w*?\p{N}\w*\b/u';
         preg_match_all($pattern, $string, $callsigns);
+
         $w = $callsigns[0];
 
         $w = array($string);
@@ -177,7 +185,7 @@ class Callsign extends Agent {
             $value = $this->stripPunctuation($value);
             $text = $this->findCallsign('list', $value);
 
-if ($text == true) {return true;}
+            if ($text === true) {return true;}
 
             foreach ($text as $x) {
                 $line = $x['line'];
@@ -191,6 +199,7 @@ if ($text == true) {return true;}
                 } else {
                     $callsign = array("callsign"=>$a[0], "first_name"=>$a[1], "second_name"=>$a[2]);
                 }
+
 
 
                 if ($text != false) {
@@ -241,6 +250,7 @@ if ($text == true) {return true;}
      * @return unknown
      */
     function findCallsign($librex, $searchfor) {
+
         if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
 
         switch ($librex) {
@@ -249,9 +259,9 @@ if ($text == true) {return true;}
         case 'list':
             if (isset($this->callsigns_list)) {$contents = $this->callsigns_list;break;}
             $file = $this->resource_path . 'amateur_delim.txt';
-            $pre_contents = @file_get_contents($file);
+            $pre_contents = file_get_contents($file);
 
-if ($pre_contents == false) {return true;}
+            if ($pre_contents == false) {return true;}
 
             // Remove address info from search space.
             $arr = explode("\n", $pre_contents);
@@ -263,11 +273,14 @@ if ($pre_contents == false) {return true;}
                 $contents .= $fields[0] .";". $fields[1] . ";" . $fields[2] . "\n";
             }
 
+
             $file = $this->resource_path . 'special_callsign.txt';
             $contents .= file_get_contents($file);
 
 
             $this->callsigns_list = $contents;
+
+
             break;
         default:
             $file = $this->resource_path .  'amateur_delim.txt';
@@ -287,7 +300,6 @@ if ($pre_contents == false) {return true;}
             preg_match_all($pattern, $contents, $matches);
             $line_matches = array_merge($line_matches, $matches[0]);
         }
-
         $best_score = 0;
 
         $sorted_matches = array();
@@ -378,29 +390,29 @@ if ($pre_contents == false) {return true;}
         // Compose email
 
         // Make SMS
-        $this->makeSMS();
-        $this->thing_report['sms'] = $this->sms_message;
+//        $this->makeSMS();
+//        $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
-        $this->thing_report['message'] = $this->sms_message;
+//        $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail();
+//        $this->makeEmail();
 
-        $this->thing_report['email'] = $this->sms_message;
+//        $this->thing_report['email'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 
-        $this->makeWeb();
-
+//        $this->makeWeb();
+/*
         $this->reading = "X";
         if (isset($this->callsigns)) {
             $this->reading = count($this->callsigns);
         }
         $this->thing->json->writeVariable(array("callsign", "reading"), $this->reading);
-
+*/
 
 
         return $this->thing_report;
@@ -472,20 +484,16 @@ if ($pre_contents == false) {return true;}
      * @return unknown
      */
     public function readSubject() {
-        //        if ($this->agent_input == null) {
-        //            $this->input = strtolower($this->subject);
-        //        } else {
-        //            $this->input = strtolower($this->agent_input);
-        //        }
-        //var_dump($this->input);
 
+//var_dump($this->input);
+//var_dump(get_parent_class());
 
         $prefix = 'callsign';
         $callsigns = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $this->input);
         $callsigns = ltrim($callsigns);
+
         $this->search_callsigns = $callsigns;
         $this->extractCallsigns($callsigns);
-
 
 
         $keywords = array('is', 'callsign');
@@ -530,7 +538,6 @@ if ($pre_contents == false) {return true;}
                 }
             }
         }
-
         $first_name = $this->callsign["first_name"];
 
         // If more than one first name is returned.

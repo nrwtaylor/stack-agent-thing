@@ -61,7 +61,8 @@ if ($text == null) {return true;}
 $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
 $despaced_slug = preg_replace('/\s+/', ' ',$slug);
-$slug = str_replace(" ","-",$despaced_slug);
+$slug = str_replace("'","",$despaced_slug);
+$slug = str_replace(" ","-",$slug);
 $slug = strtolower($slug);
 $slug = trim($slug,"-");
 

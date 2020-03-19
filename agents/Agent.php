@@ -931,9 +931,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
      * @return unknown
      */
     public function readSubject() {
-
         $this->thing->log('read subject "' . $this->subject . '".');
-
 
         $status = false;
         $this->response = false;
@@ -949,7 +947,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         } else {
             $input = strtolower($agent_input_text);
         }
-
         // Basically if the agent input directly matches an agent name
         // Then run it.
 
@@ -979,7 +976,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
                 return strlen($b) <=> strlen($a);
             });
         $matches = array();
-
         foreach ($arr as $i=>$ngram) {
             $ngram = ucfirst($ngram);
             if ($ngram == "Thing") {
@@ -1005,6 +1001,8 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
                 //                return $this->thing_report;
             }
         }
+
+
         if (count($matches) == 1) {
             $this->getAgent($matches[0]);
 
@@ -1165,7 +1163,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         if ((isset($chinese_thing->chineses)) and isset($chinese_thing->translated_input)) {
             $input = $chinese_thing->translated_input;
         }
-
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
@@ -1203,7 +1200,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
 
         // Now pick up obvious cases where the keywords are embedded
         // in the $input string.
-
         if (strtolower($input) == 'agent') {
             $this->thing->log( 'created a Usermanager agent.' );
             //            $usermanager_thing = new Usermanager($this->thing);
@@ -1246,7 +1242,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
-
         // Then look for messages sent to UUIDS
         $this->thing->log('looking for UUID in address.', 'INFORMATION');
 
@@ -1261,7 +1256,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
             $this->thing_report = $uuid_thing->thing_report;
             return $this->thing_report;
         }
-
 
         $this->thing->log('Agent "Agent" looking for UUID in input.');
         // Is Identity Context?
@@ -1291,7 +1285,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
                 return $this->thing_report;
             }
         }
-
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
             $this->thing->log( '<pre> Agent created a Robot agent</pre>', "INFORMATION" );
@@ -1304,7 +1297,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
 
         // See if there is an agent with the first workd
         $arr = explode(' ', trim($input));
-
         $agents = array();
 
         $bigrams = $this->getNgrams($input, $n = 2);
@@ -1321,7 +1313,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
         //set_error_handler("warning_handler", E_WARNING);
         $this->thing->log('looking for keyword matches with available agents.', "INFORMATION");
-
         foreach ($arr as $keyword) {
             // Don't allow agent to be recognized
             if (strtolower($keyword) == 'agent') {continue;}
@@ -1361,7 +1352,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
 
         // What effect would this have?
         //$agents = array_reverse($agents);
-
         $this->input = $input;
         // Prefer longer agent names
         usort($agents, function($a, $b) {
@@ -1484,7 +1474,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
 
         $repeater_thing = new Repeater($this->thing, "extract");
         $this->thing_report = $repeater_thing->thing_report;
-
         if ( ($repeater_thing->hasRepeater($input)) and !($frequency_exception_flag) ) {
 
             $ars_thing = new Amateurradioservice($this->thing, $input);

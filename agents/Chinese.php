@@ -60,7 +60,9 @@ class Chinese extends Agent {
 
             if ($words != false) {
                 $this->keywords = array_merge($this->getConcept($text));
+if (isset($this->keywords[0])) {
                 $this->keyword = $this->keywords[0];
+}
             }
         }
 
@@ -307,6 +309,8 @@ class Chinese extends Agent {
 
         $dict = explode("/", $test);
 
+        if (!isset($dict[0])) {return true;}
+
         if ( (!isset($dict[1])) or (!isset($dict[2])) ) {
         }
 
@@ -316,16 +320,27 @@ class Chinese extends Agent {
             $english_phrases[] = $phrase;
         }
 
+if (!isset($english_phrases)) {
+$english_phrases = array("X");
+}
+
         $text =  $dict[0];
-
         preg_match_all("/\[([^\]]*)\]/", $text, $matches);
+$pin_yin = "X";
+if (isset($matches[0][0])) {
         $pin_yin = $matches[0][0];
-
+}
         $dict = explode(" ", $text);
 
+$traditional = "X";
+if (isset($dict[0])) {
         $traditional = $dict[0];
-        $simplified = $dict[1];
+}
 
+$simplified = "X";
+if (isset($dict[1])) {
+        $simplified = $dict[1];
+}
         $word = array("traditional"=>$traditional, "simplified"=>$simplified,
             "pin_yin"=>$pin_yin, "english"=>$english_phrases);
 
@@ -593,8 +608,8 @@ if ($value == 6) {$pointer += 1;}
             $file = $this->resource_path .'chinese/chinese-keywords.txt';
             $contents = file_get_contents($file);
             break;
-        case 'mordok':
-            $file = $this->resource_path . 'chinese/chinese-mordok.txt';
+        case 'agent':
+            $file = $this->resource_path . 'chinese/chinese-agent.txt';
             $contents = file_get_contents($file);
 
             break;
@@ -621,6 +636,11 @@ if ($value == 6) {$pointer += 1;}
             break;
         default:
             $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+        }
+
+        if ((!isset($contents)) or ($contents == false)) {
+           $this->matches = array();
+           return true;
         }
 
         // devstack add \b to Word

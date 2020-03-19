@@ -242,7 +242,7 @@ sudo make
 sudo make install
 sudo apt-get install gearman-job-server
 
-sudo apt-get install php-pear
+sudo apt-getwget https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gzfetlifewget https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gzfetlifewget https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gzwget https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gz install php-pear
 sudo pecl install gearman
 sudo nano /etc/php5/conf.d/gearman.ini [and then write extension=gearman.so as content of the file, save it and close it]
 sudo service apache2 restart
@@ -722,8 +722,3 @@ sudo apt-get install memcached
 Memcached will speed up agents which call on it to store large text lookup files locally.
 
 sudo apt-get install -y php-memcached
-
--
-
-sudo apt-get update
-sudo apt-get install php-fpm
