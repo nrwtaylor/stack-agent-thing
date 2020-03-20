@@ -76,6 +76,7 @@ public function extractSlug($text = null) {
 if ($text == null) {return true;}
 
 $slug = str_replace('\'',"",$text);
+$slug = str_replace('/'," ",$text);
 
 $slug = $this->alphanumeric_agent->filterAlphanumeric($slug);
 $slug = preg_replace('/\s+/', ' ',$slug);
