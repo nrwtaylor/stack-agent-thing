@@ -1035,7 +1035,7 @@ $match = true;
  //       return null;
     }
 
-	private function respond() {
+	public function respond() {
 
 		// Thing actions
         // At some point this is where the 

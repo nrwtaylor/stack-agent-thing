@@ -577,7 +577,7 @@ $this->makeLink();
         }
 
         // If all else fails try the discriminator.
-        $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+        $this->requested_state = $this->discriminateInput($this->input); // Run the discriminator.
         switch($this->requested_state)
         {
             case 'green':
