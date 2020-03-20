@@ -514,6 +514,81 @@ public function make() {}
         $this->thing->log("Set text refreshed_at.");
     }
 
+    public function readTitle($post_title)
+    {
+        global $wp;
+
+        $codes = $this->extractCodes($post_title);
+        $numbers = $this->extractNumbers($post_title);
+        $hyphenates = $wp->text_agent->extractHyphenates($post_title);
+
+$alpha_agent = new Alpha($this->thing,"alpha");
+$mixed_agent = new Mixed($this->thing,"mixed");
+$word_agent = new Word($this->thing, "word");
+$brilltagger_agent = new Brilltagger($this->thing,"brilltagger");
+$slug_agent = new Slug($this->thing, "slug");
+$singular_agent = new Singular($this->thing, "singular");
+
+$alphas = $alpha_agent->extractAlphas($post_title);
+$mixeds = $mixed_agent->extractMixeds($post_title);
+
+
+        $words = $word_agent->extractWords($post_title);
+        $notwords = $word_agent->notwords;
+
+        $t = "";
+
+        $tags = $brilltagger_agent->tag($post_title);
+
+        $tokens = $slug_agent->getSlug($post_title);
+        $p = "";
+        foreach ($tags as $i => $tag) {
+            $token = $tag['token'];
+
+            if (strpos($tag['tag'], 'NNS') !== false) {
+                $token = $singular_agent->singularize($token);
+            }
+
+            $p .= $token . " ";
+
+     }
+
+        $p = trim($p);
+        $post_title = $p;
+
+
+        $adjectives = "";
+        $nouns = "";
+
+        foreach ($tags as $i => $tag) {
+            if ($tag['tag'] == "JJ") {
+                $adjectives .= $tag['token'] . " ";
+            }
+
+            if (strpos($tag['tag'], 'NN') !== false) {
+                $nouns .= $tag['token'] . " ";
+            }
+        }
+
+        $adjectives = trim($adjectives);
+        $nouns = trim($nouns);
+
+$processed_text = array("adjectives"=>$adjectives,
+"nouns"=>$nouns,
+"codes"=>$codes,
+"alphas"=>$alphas,
+"mixed"=>$mixeds,
+"words"=>$words,
+"notwords"=>$notwords);
+    }
+
+
+
+
+
+
+
+
 public function readSubject() {
 
 if ($this->input == "text") {return;}

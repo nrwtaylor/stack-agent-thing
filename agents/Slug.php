@@ -57,6 +57,7 @@ $this->alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
 public function getSlug($text = null) {
 
 if ($text == null) {return true;}
+return $this->extractSlug($text);
 
 $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
@@ -74,10 +75,13 @@ public function extractSlug($text = null) {
 
 if ($text == null) {return true;}
 
-$slug = $this->alphanumeric_agent->filterAlphanumeric($text);
+$slug = str_replace('\'',"",$text);
 
-$despaced_slug = preg_replace('/\s+/', ' ',$slug);
-$slug = str_replace(" ","-",$despaced_slug);
+$slug = $this->alphanumeric_agent->filterAlphanumeric($slug);
+$slug = preg_replace('/\s+/', ' ',$slug);
+//$slug = str_replace("'","",$despaced_slug);
+//$slug = str_replace("/"," ",$slug);
+$slug = str_replace(" ","-",$slug);
 $slug = strtolower($slug);
 $slug = trim($slug,"-");
 return $slug;
