@@ -60,9 +60,9 @@ echo "postrobot" . "\n";
 //            $this->wave_thing = $this->thing;
 //        }
 
-        if ($requested_state == null) {
-            $requested_state = $this->requested_state;
-        }
+//        if ($requested_state == null) {
+//            $requested_state = $this->requested_state;
+//        }
 
         $this->variables_agent->setVariable("state", $this->state);
 
