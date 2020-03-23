@@ -269,7 +269,7 @@ class Database
             // Devstack - decide how to handle thing full
 
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
             $thing = false;
         }
 
@@ -323,7 +323,7 @@ class Database
             // Do this for now.
 
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
 
 
             // Commented out 24 November 2019.
@@ -418,7 +418,7 @@ class Database
             // Do this for now.
 
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'Create' . $e->getMessage());
 
 
             // Commented out 24 November 2019.
@@ -459,7 +459,7 @@ class Database
             $thing = $sth->fetchObject();
         } catch (\Exception $e) {
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'Get ' . $e->getMessage());
 
 //            echo 'Caught error: ', $e->getMessage(), "\n";
             $thing = false;
@@ -587,7 +587,7 @@ class Database
             $thingreport['things'] = $things;
         } catch (\PDOException $e) {
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'associationSearch ' .$e->getMessage());
 
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
@@ -670,7 +670,7 @@ class Database
             $sth->execute();
         } catch (\PDOException $e) {
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
         }
         $things = $sth->fetchAll();
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
@@ -755,7 +755,7 @@ class Database
             $sth->execute();
         } catch (\PDOException $e) {
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
 //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
@@ -911,7 +911,7 @@ class Database
         $things = $sth->fetchAll();
         } catch (\Exception $e) {
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'agentSearch ' . $e->getMessage());
 
 //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
@@ -957,7 +957,7 @@ class Database
             $things = $sth->fetchAll();
         } catch (\Exception $e) {
             $t = new Thing(null);
-            $t->Create("meep", "meep", $e->getMessage());
+            $t->Create("stack", "error", 'userSearch' . $e->getMessage());
 
 //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;

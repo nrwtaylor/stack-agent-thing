@@ -1314,16 +1314,14 @@ http://open.api.ebay.com/shopping?
         }
 
         //if(!isset($link)) {var_dump($ebay_item);echo "<br><br>";}
-
         if (!isset($link)) {
-            if (isset($bay_item["viewItemURL"])) {
+            if (isset($ebay_item["viewItemURL"])) {
                 $link = $ebay_item["viewItemURL"];
             }
-            if (isset($bay_item["link"])) {
+            if (isset($ebay_item["link"])) {
                 $link = $ebay_item["link"];
             }
         }
-
         $html_link = "";
         if (isset($link)) {
             $html_link = '<a href="' . $link . '">';

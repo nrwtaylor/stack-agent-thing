@@ -1,5 +1,4 @@
-<?php
-/**
+<?php /*
  * Agent.php
  *
  * @package default
@@ -171,6 +170,9 @@ class Agent {
 
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
         $this->thing_report['log'] = $this->thing->log;
+
+        if ((isset($this->test)) and ($this->test)) {$this->test();}
+
     }
 
 
@@ -240,9 +242,9 @@ class Agent {
      */
     public function test() {
         // See if it can run an agent request
-        $agent_thing = new Agent($this->thing, "agent");
+        //$agent_thing = new Agent($this->thing, "agent");
         // No result for now
-        $this->test = null;
+        //$this->test = null;
     }
 
 

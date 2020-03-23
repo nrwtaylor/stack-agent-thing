@@ -25,7 +25,9 @@ class Bar extends Agent
 
 
         $this->max_bar_count = 80;
+if (isset($this->thing->container['api']['bar']['default_max_bar_count'])) {
         $max_bar_count = $this->thing->container['api']['bar']['default_max_bar_count'];
+}
 
         if ((isset($max_bar_count)) and ($max_bar_count != false)) {
             $this->max_bar_count = $max_bar_count;
@@ -131,8 +133,8 @@ class Bar extends Agent
 
     public function readSubject()
     {
-        $input = strtolower($this->subject);
-
+     //   $input = strtolower($this->subject);
+$input = $this->input;
         $number_agent = new Number($this->thing, "number bar");
         $number_agent->extractNumber($this->input);
 

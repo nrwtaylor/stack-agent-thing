@@ -96,6 +96,9 @@ $this->threshold = $threshold;
         $this->thing->json->writeVariable( array("cluster", "characteristic"), $this->characteristic );
         $this->thing->json->writeVariable( array("cluster", "threshold"), $this->threshold );
 
+        $time_string = $this->thing->time();
+        $this->thing->json->writeVariable( array("cluster", "refreshed_at"), $time_string );
+
     }
 
     function doCluster() {
