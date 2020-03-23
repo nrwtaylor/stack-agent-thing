@@ -381,6 +381,7 @@ $this->numbers_history = $traditional;
      * @return unknown
      */
     function extractNumbers($input = null) {
+
         if ($input == null) {
             $input = $this->subject;
         }
@@ -456,9 +457,9 @@ $this->numbers_history = $traditional;
     /**
      *
      */
-    function extractNumber() {
+    function extractNumber($text = null) {
         $this->number = false; // No numbers.
-        if (!isset($this->numbers)) {$this->extractNumbers();}
+        if ((!isset($this->numbers)) or ($text != null)) {$this->extractNumbers($text);}
 
         if (isset($this->numbers[0])) {
             $this->number = $this->numbers[0];
