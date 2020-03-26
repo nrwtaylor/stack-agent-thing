@@ -108,6 +108,7 @@ $word = $this->credential_set;
     {
         if (!isset($this->state) or $this->state == false) {
             $this->state = "off";
+            $this->state = "on";
         }
 
         $this->variables_agent->setVariable("state", $this->state);
@@ -297,6 +298,7 @@ if ($type == "WARNING") {return true;}
         }
 
         if ($count > 2) {
+        $this->thing->log("Turned eBay off.");
             $this->response .= "Turned eBay off. ";
             $this->state = "off";
 

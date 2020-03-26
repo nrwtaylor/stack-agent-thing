@@ -434,7 +434,7 @@ $arr = array("adjective"=>array('JJ', 'JJR', 'JJS'),
 "pronoun"=>array('PRP','PRPS','WP'),
 "verb"=>array('VB','VBD','VBG','VBN','VBP','VBZ'),
 "adverb"=>array('RB','RBR','RBS','WRB'),
-
+"preposition"=>array('IN')
 
 );
 
