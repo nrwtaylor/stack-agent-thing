@@ -59,11 +59,12 @@ class Agent {
         $this->thing = $thing;
         $this->thing_report['thing'] = $this->thing;
 
+        $this->thing->log("Got thing.");
         // So I could call
         if ($this->thing->container['stack']['state'] == 'dev') {$this->dev = true; $this->test = true;}
         if ($this->thing->container['stack']['engine_state'] == 'dev') {$this->dev = true;}
         $this->getMeta();
-
+        $this->thing->log("Got meta.");
         // Tell the thing to be quiet
         if ($this->agent_input != null) {
             //            $this->thing->silenceOn();
@@ -143,18 +144,40 @@ class Agent {
         }
         catch (\OverflowException $t) {
             $this->response = "Stack variable store is full. Variables not saved. Text FORGET ALL.";
+
+        $web_thing = new Thing(null);
+        $web_thing->Create(
+            $this->from,
+            "error",
+            "try set failed."
+        );
+
+
             $this->thing_report['sms'] = "STACK | " . $this->response;
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         }
 
         catch (\Throwable $t) {
+
+        $web_thing = new Thing(null);
+        $web_thing->Create(
+            $this->from,
+            "error",
+            "try set failed."
+        );
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
             //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
             $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
         }
         catch (\Exception $e) {
+        $web_thing = new Thing(null);
+        $web_thing->Create(
+            $this->from,
+            "error",
+            "try set failed."
+        );
             $this->thing->log("caught exception");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
@@ -1019,8 +1042,6 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
             //$thing_report['thing'] = $this->thing;
             $this->thing_report['thing'] = $this->thing->thing;
             $this->thing_report['info'] = 'Mordok ignored a "cronhandler run" request.';
-            //$usermanager_thing = new Optout($this->thing);
-            //$thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
 

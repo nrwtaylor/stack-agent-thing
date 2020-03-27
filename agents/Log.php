@@ -35,6 +35,12 @@ class Log extends Agent
             $this->test = true;
         }
 
+        $this->state = "X";
+        if (isset($this->settings['log']['state'])) {
+            $this->state = $this->settings['log']['state'];
+        }
+
+
         $this->node_list = array(
             'log' => array('privacy'),
             'code' => array('web', 'log'),
@@ -44,6 +50,7 @@ class Log extends Agent
 
     public function run()
     {
+if ($this->state == "on") {
         $this->getLink();
         $web_thing = new Thing(null);
         $web_thing->Create(
@@ -51,19 +58,20 @@ class Log extends Agent
             $this->agent_name,
             's/ record web view'
         );
-
+}
         //$this->makeSnippet();
     }
 
     public function set()
     {
-        $this->thing->json->setField("variables");
+if ($this->state == "on") { 
+       $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(
             array("log", "received_at"),
             gmdate("Y-m-d\TH:i:s\Z", time())
         );
     }
-
+}
     /**
      *
      * @return unknown
@@ -164,19 +172,23 @@ class Log extends Agent
      */
     function makeSMS()
     {
-        $this->sms_message = "LOG | No log found.";
-        if (strtolower($this->prior_agent) == "php") {
-            $this->sms_message = "LOG | No log available.";
-        } else {
-            $this->sms_message =
-                "LOG | " .
-                $this->web_prefix .
+
+if ((!isset($this->link_uuid)) or (!isset($this->prior_agent))) {$link_text = "No log available.";} else {
+$link_text =                 $this->web_prefix .
                 "" .
                 $this->link_uuid .
                 "/" .
                 strtolower($this->prior_agent) .
                 ".log";
+
+        if (strtolower($this->prior_agent) == "php") {
+        $link_text = "No log available.";
         }
+
+}
+            $this->sms_message =
+                "LOG | " .
+                $link_text;
 
         $this->sms_message .= " | TEXT INFO";
         $this->thing_report['sms'] = $this->sms_message;
@@ -188,6 +200,7 @@ class Log extends Agent
      */
     function getLink()
     {
+
         $block_things = array();
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
@@ -278,7 +291,9 @@ class Log extends Agent
         //$web .= '<img src= "https://stackr.ca/thing/' . $this->link_uuid . '/flag.png">';
 
         $web = "";
-        $web .= '<b>' . ucwords($this->prior_agent) . ' Agent</b>';
+$agent_text = "No";
+if (isset($this->prior_agent)) {$agent_text = ucwords($this->prior_agent);}
+        $web .= '<b>' . $agent_text . ' Agent</b>';
 
         //$web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
 
