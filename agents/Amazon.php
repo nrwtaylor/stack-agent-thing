@@ -37,7 +37,7 @@ class Amazon extends Agent
 
     function run()
     {
-        $this->getItemSearch();
+  //      $this->getItemSearch();
 
         // Test
         //$this->getItemLookup("B0774T8DC6");
@@ -98,6 +98,8 @@ $thing->Create("meep","amazon", "g/ amazon error " . $request ." - ". $log_text)
 
         $this->thing->json->setField("message1");
         $this->thing->json->writeVariable( array("ebay") , $text );
+
+$this->response .= $request . " - " . $log_text ." " ;
 
 }
 
@@ -298,7 +300,6 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
         $json = json_encode($parsed_xml);
         $amazon_array = json_decode($json, true);
-
         return $amazon_array;
     }
 
@@ -325,10 +326,10 @@ $keywords= $text;
         );
 
         $request = $this->getRequest($request_array);
-
+var_dump($request);
 
         $amazon_array = $this->getAmazon($request);
-
+var_dump($amazon_array);
 if (!isset($amazon_array['Items'])) {
 if (isset($amazon_array['Error'])) {
 
@@ -576,7 +577,8 @@ if (isset($item['title'])) {
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            //        $this->response .= 'Asked Amazon about the word "' . $this->search_words . '". ';
+            $this->response .= 'Asked Amazon about the word "' . $this->search_words . '". ';
+$this->getItemSearch();
             return false;
         }
 
