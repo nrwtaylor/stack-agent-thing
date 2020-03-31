@@ -7,10 +7,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-// Etsy: "We believe in code as craft."
-
-// devstack. Develop Item lookup.
-
+// https://www.etsy.com/developers/documentation/getting_started/requests
 
 class Etsy extends Agent
 {
@@ -19,28 +16,43 @@ class Etsy extends Agent
     function init()
     {
         $this->test = "Development code"; // Always
-        $this->keywords = array('etsy', 'items');
+        $this->keywords = array('amazon', 'items');
 
-        $this->keystring =
+$this->items_limit = 100;
+
+$this->access_key = null;
+if (isset($this->thing->container['api']['etsy']['keystring'])) {
+        $this->access_key =
             $this->thing->container['api']['etsy']['keystring'];
-        $this->shared_secret =
-            $this->thing->container['api']['etsy']['shared secret'];
+}
 
+$this->secret_key = null;
+if (isset($this->thing->container['api']['amazon']['shared secret'])) {
+        $this->secret_key =
+            $this->thing->container['api']['amazon']['shared secret'];
+}
+$this->associate_tag = null;
+if (isset($this->thing->container['api']['amazon']['associate tag'])) {
         $this->associate_tag =
-            $this->thing->container['api']['etsy']['associate tag'];
+            $this->thing->container['api']['amazon']['associate tag'];
+}
 
+$this->etsy_stack_state = 'off';
+if (isset($this->thing->container['api']['etsy']['state'])) {
+        $this->etsy_stack_state = $this->thing->container['api']['etsy']['state'];
+}
         $this->run_time_max = 360; // 5 hours
-        $this->link = "https://www.etsy.com";
+        $this->link = "https://www.amazon.com";
 
-        $this->response = "Dev. ";
+        $this->response .= "Dev. ";
 
         $this->thing_report['help'] =
-            'This requests products using the Etsy API.';
+            'This requests products using the Amazon API.';
     }
 
     function run()
     {
-        $this->getItemSearch();
+  //      $this->getItemSearch();
 
         // Test
         //$this->getItemLookup("B0774T8DC6");
@@ -60,7 +72,7 @@ class Etsy extends Agent
     {
         $this->variables_agent = new Variables(
             $this->thing,
-            "variables " . "etsy" . " " . $this->from
+            "variables " . "amazon" . " " . $this->from
         );
 
         $this->counter = $this->variables_agent->getVariable("counter");
@@ -76,12 +88,10 @@ class Etsy extends Agent
         $this->counter = $this->counter + 1;
     }
 
-function logEtsy($text) {
+function logAmazon($text) {
 
 if ($text == null) {$text = "MErp";}
 
-//var_dump($text);
-//var_dump($text['errorMessage']['error']['message']);
 
 
 $log_text = "Error message not found.";
@@ -97,91 +107,96 @@ $request = $this->request;
 }
 
 $thing = new Thing(null);
-$thing->Create("meep","etsy", "g/ etsy error " . $request ." - ". $log_text);
+$thing->Create("meep","amazon", "g/ amazon error " . $request ." - ". $log_text);
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable( array("etsy") , $text );
+        $this->thing->json->writeVariable( array("ebay") , $text );
+
+$this->response .= $request . " - " . $log_text ." " ;
 
 }
 
 
-    public function parseItem($etsy_item = null)
+    public function parseItem($amazon_item = null)
     {
-        if ($etsy_item == null) {
+
+        if ($amazon_item == null) {
             return true;
         }
 
-        if (is_string($etsy_item)) {
+        if (is_string($amazon_item)) {
             return true;
         }
-
-        $state = "";
-        if (isset($etsy_item['state'])) {
-            $url = $etsy_item['state'];
-        }
-
-        if ($state != "active") {return false;}
-
         $source = "etsy";
 
+        //$url = $amazon_item['DetailPageURL'];
+        $etsy_id = "";
+        if (isset($amazon_item['listing_id'])) {
+            $etsy_id = $amazon_item['listing_id'];
+        }
+        //$url = $amazon_item['DetailPageURL'];
         $url = "";
-        if (isset($etsy_item['url'])) {
-            $url = $etsy_item['url'];
+        if (isset($amazon_item['url'])) {
+            $url = $amazon_item['url'];
         }
 
-        $sku = "";
-        if (isset($etsy_item['sku'])) {
-            $sku = $etsy_item['sku'];
+        //$asin = $amazon_item['ASIN'];
+/*
+        $asin = "";
+        if (isset($amazon_item['ASIN'])) {
+            $asin = $amazon_item['ASIN'];
         }
-
-        $listing_id = "";
-        if (isset($etsy_item['listing_id'])) {
-            $listing_id = $etsy_item['listing_id'];
-        }
-
-
+*/
 /*
         $author = "";
-        if (isset($etsy_item['ItemAttributes']['Author'])) {
-            $author = $etsy_item['ItemAttributes']['Author'];
+        if (isset($amazon_item['ItemAttributes']['Author'])) {
+            $author = $amazon_item['ItemAttributes']['Author'];
         }
 
         $creator = "";
-        if (isset($etsy_item['ItemAttributes']['Creator'])) {
-            $creator = $etsy_item['ItemAttributes']['Creator'];
+        if (isset($amazon_item['ItemAttributes']['Creator'])) {
+            $creator = $amazon_item['ItemAttributes']['Creator'];
         }
 
         $manufacturer = "";
-        if (isset($etsy_item['ItemAttributes']['Manufacturer'])) {
-            $manufacturer = $etsy_item['ItemAttributes']['Manufacturer'];
+        if (isset($amazon_item['ItemAttributes']['Manufacturer'])) {
+            $manufacturer = $amazon_item['ItemAttributes']['Manufacturer'];
         }
 
         $product_group = "";
-        if (isset($etsy_item['ItemAttributes']['ProductGroup'])) {
-            $product_group = $etsy_item['ItemAttributes']['ProductGroup'];
-        }
-
-        $title = "";
-        if (isset($etsy_item['title'])) {
-            $title = $etsy_item['title'];
+        if (isset($amazon_item['ItemAttributes']['ProductGroup'])) {
+            $product_group = $amazon_item['ItemAttributes']['ProductGroup'];
         }
 */
+        $title = "";
+        if (isset($amazon_item['title'])) {
+            $title = $amazon_item['title'];
+        }
+
+        $description = "";
+        if (isset($amazon_item['description'])) {
+            $description = $amazon_item['description'];
+        }
+
+        $price = "";
+        if (isset($amazon_item['price'])) {
+            $price = $amazon_item['price'];
+        }
+
 
 $link_thumbnail = null;
-if (isset($etsy_item['Images'][0]["url_170x135"])) {
+if (isset($amazon_item['Images'][0]['url_75x75'])) {
 
-$link_thumbnail = $etsy_item['Images'][0]["url_170x135"];
+$link_thumbnail = $amazon_item['Images'][0]['url_75x75'];
 
 }
 
-var_dump($link_thumbnail);
-
 /*
-if (($link_thumbnail == null) and (isset($etsy_item['SmallImage']['URL']))) {
+if (($link_thumbnail == null) and (isset($amazon_item['SmallImage']['URL']))) {
 
-$link_thumbnail = $etsy_item['SmallImage']['URL'];
+$link_thumbnail = $amazon_item['SmallImage']['URL'];
 
 }
 */
@@ -192,47 +207,32 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
 }
 
-//var_dump($etsy_item['Price']);
+$picture_urls = array();
+if (isset($amazon_item->Images)) {
+foreach($amazon_item->Images as $i=>$image_array) {
 
-/*
-exit();
-if (isset($etsy_item['MediumImage']['URL'])) {
+if (isset($image_array->url_570xN)) {
 
-$link_thumbnail = $etsy_item['MediumImage']['URL'];
+$picture_urls[] = $image_array->url_570xN;
 
 }
-*/
+
+}
+}
 
 
-        //$item = $this->parsedItem($etsy_item);
+        //$item = $this->parsedItem($amazon_item);
 //echo "---<br>";
-//var_dump($etsy_item['ItemAttributes']);
-//exit();
         $item = array(
-            "id" => $listing_id,
+            "id" => $etsy_id,
             "title" => $title,
+            "description" => $description,
             "thumbnail" => $link_thumbnail,
             "link" => $url,
-            "source" => "etsy:" . $listing_id,
-            "etsy" => $etsy_item
+            "source" => "etsy:" . $etsy_id,
+            "vendor" => $amazon_item,
+            "picture_urls" => $picture_urls
         );
-
-/* ebay reference
-            "source"=>$source,
-            "id" => $item_id,
-            "category_name" => $category_name,
-            "description" => $description,
-            "condition_description" => $condition_description,
-            "title" => $title,
-            "price" => $price_text,
-            "link" => $link,
-            "thumbnail" => $link_thumbnail,
-            "location" => $location,
-            "country" => $country,
-            "html_link" => $html_link,
-            "picture_urls"=> $picture_urls,
-            "ebay"=>$ebay_item
-*/
 
         return $item;
     }
@@ -240,132 +240,51 @@ $link_thumbnail = $etsy_item['MediumImage']['URL'];
     function getRequest($request_array = null)
     {
 
-//$keywords_text = "keywords=buch";
-//$image_text = "includes=Images";
+if (($request_array == null) or (!isset($request_array['keywords']))) {
 
-$request_text = "";
-foreach($request_array as $key=>$value) {
-
-$request_text .= "&" . $key . "=" . $value;
+return true;
 
 }
-//var_dump($request_text);
-//exit();
 
-            //terms = $('#etsy-terms').val();
-//            $request = "https://openapi.etsy.com/v2/listings/active.js?keywords=". $terms.
-//"&limit=12&includes=Images:1&api_key=". $this->keystring;
-
-//            $request = "https://openapi.etsy.com/v2/listings/active?api_key=". $this->keystring. "&keywords=" ."buch". "&" . $image_text;
-//            $request = "https://openapi.etsy.com/v2/listings/active?api_key=". $this->keystring. "&" . $keywords_text . "&" . $image_text;
-            $request = "https://openapi.etsy.com/v2/listings/active?api_key=". $this->keystring. $request_text;
+//$request_array['keywords'] = "bananagrams";
 
 
+$keywords = $request_array['keywords'];
+//$keywords = "bananagrams";
+$request = "https://openapi.etsy.com/v2/listings/active?keywords=".$keywords."&limit=".$this->items_limit. "&includes=Images:1&api_key=".$this->access_key;
+//$request = 'https://openapi.etsy.com/v2/listings/active?api_key='.$this->access_key;
 return $request;
 
-
-// -------------- merp ----------------------
-
-        $index = "All";
-
-//        var_dump($slug);
-        //exit();
-        $region = "com";
-        $method = "GET";
-        $host = "webservices.amazon." . $region;
-        $uri = "/onca/xml";
-
-        $arr = array(
-            "Service" => "AWSECommerceService",
-            "AWSAccessKeyId" => $this->keystring,
-            "AssociateTag" => $this->associate_tag,
-            "Timestamp" => gmdate("Y-m-d\TH:i:s\Z")
-        );
-
-        if ($request_array == null) {
-            $request_array = array(
-                "Operation" => "ItemSearch",
-                "Keywords" => $slug,
-                "SearchIndex" => $index
-            );
-        }
-
-        $arr = array_merge($arr, $request_array);
-
-        ksort($arr);
-
-        foreach ($arr as $parameter => $value) {
-            $parameter = str_replace("%7E", "~", rawurlencode($parameter));
-            $value = str_replace("%7E", "~", rawurlencode($value));
-            $canonicalized_query[] = $parameter . "=" . $value;
-        }
-
-        $canonicalized_query = implode("&", $canonicalized_query);
-        $string_to_sign =
-            $method . "\n" . $host . "\n" . $uri . "\n" . $canonicalized_query;
-
-        // Calculate an RFC 2104-compliant HMAC with the SHA256 hash algorithm
-
-        $signature = base64_encode(
-            hash_hmac('sha256', $string_to_sign, $this->secret_key, true)
-        );
-        /* encode the signature for the request */
-        //   $signature = str_replace("%7E", "~", rawurlencode($signature));
-
-        $signature = urlencode($signature);
-
-        /* create request */
-        $request =
-            "http://" .
-            $host .
-            $uri .
-            "?" .
-            $canonicalized_query .
-            "&Signature=" .
-            $signature;
-
-        return $request;
     }
 
     function getEtsy($text)
     {
+if ($this->etsy_stack_state == 'off') {
+$this->response .= "Agent is off. ";
+return true;
+}
         $request = $text;
-//var_dump($request);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $request);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
-        $json_string_response = curl_exec($ch);
+        $ch = curl_init($request);
+        //curl_setopt($ch, CURLOPT_URL, $request);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        //curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        //curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
-/*
-        $xml_response = curl_exec($ch);
-        $xml = simplexml_load_string($xml_response);
+        $response_body = curl_exec($ch);
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$response = json_decode($response_body,true);
+return $response;
 
-        if ($xml_response === false) {
-            return false;
-        } else {
-         //    parse XML and return a SimpleXML object, if you would
-         //  rather like raw xml then just return the $xml_response.
-         
-            $parsed_xml = @simplexml_load_string($xml_response);
-            //        return ($parsed_xml === False) ? False : $parsed_xml;
-        }
-*/
-        if ($json_string_response === false) {
-            $this->logEtsy($text);
-            return true;
-        }
-
-        $json_array = json_decode($json_string_response,true);
-//        $etsy_array = json_decode($json, true);
-
-        return $json_array;
     }
 
     function getItemSearch($text = null)
     {
+if ($this->etsy_stack_state == 'off') {
+$this->response .= "Agent is off. ";
+return true;
+}
+
 if (($text == null) and ($this->search_words == null)) {return true;}
 
 if ($text == null) {$text = $this->search_words;}
@@ -381,37 +300,33 @@ $keywords= $text;
         $index = "All";
 
         $request_array = array(
-            "keywords" => $slug,
-            "includes" => "Images"
+            "Operation" => "ItemSearch",
+            "Keywords" => $slug,
+            "SearchIndex" => $index
         );
+
+//$slug_agent = new Slug($this->thing, "slug");
+//$keywords = $slug_agent->getSlug($this->search_words);
+//var_dump($keywords);
+//exit();
+$request_array = array("keywords"=>$keywords);
 
         $request = $this->getRequest($request_array);
 
-//        var_dump($request);
+        $amazon_array = $this->getEtsy($request);
+        $total_results = $amazon_array['count'];
 
-        $etsy_array = $this->getEtsy($request);
-
-
-if (!isset($etsy_array['Items'])) {
-if (isset($etsy_array['Error'])) {
-
-$this->logEtsy($etsy_array['Error']['Message']);
-return true;
-}
+$items = array();
+if ($total_results > 0) {
+        $items = $amazon_array['results'];
 }
 
-//        $is_valid = $etsy_array['Items']['Request']['IsValid'];
-        $total_results = $etsy_array['count'];
-//        $total_pages = $etsy_array['Items']['TotalPages'];
-//        $more_results_url = $etsy_array['Items']['MoreSearchResultsUrl'];
-//var_dump($total_results);
-        $items = $etsy_array['results'];
-
+//$this->more_results_url = $more_results_url;
+if ($items == array()) {$this->items = array(); return;}
 
         foreach ($items as $i => $item) {
             $parsed_item = $this->parseItem($item);
-//var_dump($parsed_item);
-//exit();
+
             $this->items[] = $parsed_item;
         }
 
@@ -431,7 +346,6 @@ return true;
             $this->item = $this->items[0];
         }
 
-//var_dump($this->items);
 
         $this->items_count = count($this->items);
 
@@ -450,9 +364,13 @@ return true;
 
     function getItemLookup($item_id = null, $item_id_type = "ASIN")
     {
-        //https://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
-        // IdType
-        //Valid Values: SKU | UPC | EAN | ISBN (US only, when search index is Books). UPC is not valid in the CA locale.
+
+if ($this->etsy_stack_state == 'off') {
+$this->response .= "Agent is off. ";
+return true;
+}
+
+
 
         if ($item_id == null) {
             if (isset($this->item_id)) {
@@ -496,30 +414,35 @@ return true;
 
         $request = $this->getRequest($request_array);
 
-        $etsy_array = $this->getEtsy($request);
+        $amazon_array = $this->getEtsy($request);
 
-        $is_valid = $etsy_array['Items']['Request']['IsValid'];
+        $is_valid = "";
+        if (isset($amazon_array['Items']['Request']['IsValid'])) {
+            $is_valid = $amazon_array['Items']['Request']['IsValid'];
+        }
 
         $total_results = "";
-        if (isset($etsy_array['Items']['TotalResults'])) {
-            $total_results = $etsy_array['Items']['TotalResults'];
+        if (isset($amazon_array['Items']['TotalResults'])) {
+            $total_results = $amazon_array['Items']['TotalResults'];
         }
 
         $total_pages = "";
-        if (isset($etsy_array['Items']['TotalPages'])) {
-            $total_pages = $etsy_array['Items']['TotalPages'];
+        if (isset($amazon_array['Items']['TotalPages'])) {
+            $total_pages = $amazon_array['Items']['TotalPages'];
         }
 
         $more_results_url = "";
-        if (isset($etsy_array['Items']['MoreSearchResultsUrl'])) {
-            $more_results_url = $etsy_array['Items']['MoreSearchResultsUrl'];
+        if (isset($amazon_array['Items']['MoreSearchResultsUrl'])) {
+            $more_results_url = $amazon_array['Items']['MoreSearchResultsUrl'];
         }
 
-        $items = $etsy_array['Items']['Item'];
-
+        $items = array();
+        if (isset($amazon_array['Items']['Item'])) {
+            $items = $amazon_array['Items']['Item'];
+        }
 
         foreach ($items as $i => $item) {
-//var_dump($item['MediumImage']);
+
             $parsed_item = $this->parseItem($item);
             $this->items[] = $parsed_item;
         }
@@ -548,8 +471,8 @@ return true;
 
     public function makeWeb()
     {
-        $html = "<b>ETSY</b>";
-        $html .= "<p><b>Etsy definitions</b>";
+        $html = "<b>AMAZON</b>";
+        $html .= "<p><b>Amazon definitions</b>";
 
         $this->html_message = $html;
         $this->thing_report['web'] = $this->html_message;
@@ -557,7 +480,7 @@ return true;
 
     public function makeSMS()
     {
-        //      $sms = "ETSY | " . $this->response;
+        //      $sms = "AMAZON | " . $this->response;
         $s = "";
 
 if (isset($this->items)) {
@@ -592,7 +515,7 @@ if (isset($item['title'])) {
         }
 
         $this->input = $input;
-        //var_dump($input);
+
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
@@ -611,7 +534,7 @@ if (isset($item['title'])) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'etsy':
+                        case 'amazon':
                             break;
 
                         default:
@@ -630,7 +553,8 @@ if (isset($item['title'])) {
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            //        $this->response .= 'Asked Etsy about the word "' . $this->search_words . '". ';
+            $this->response .= 'Asked Etsy about the word "' . $this->search_words . '". ';
+$this->getItemSearch();
             return false;
         }
 
