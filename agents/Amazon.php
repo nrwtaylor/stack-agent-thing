@@ -18,18 +18,31 @@ class Amazon extends Agent
         $this->test = "Development code"; // Always
         $this->keywords = array('amazon', 'items');
 
+$this->access_key = null;
+if (isset($this->thing->container['api']['amazon']['access key'])) {
         $this->access_key =
             $this->thing->container['api']['amazon']['access key'];
+}
+
+$this->secret_key = null;
+if (isset($this->thing->container['api']['amazon']['secret key'])) {
         $this->secret_key =
             $this->thing->container['api']['amazon']['secret key'];
-
+}
+$this->associate_tag = null;
+if (isset($this->thing->container['api']['amazon']['associate tag'])) {
         $this->associate_tag =
             $this->thing->container['api']['amazon']['associate tag'];
+}
 
+$this->amazon_stack_state = 'off';
+if (isset($this->thing->container['api']['amazon']['state'])) {
+        $this->amazon_stack_state = $this->thing->container['api']['amazon']['state'];
+}
         $this->run_time_max = 360; // 5 hours
         $this->link = "https://www.amazon.com";
 
-        $this->response = "Dev. ";
+        $this->response .= "Dev. ";
 
         $this->thing_report['help'] =
             'This requests products using the Amazon API.';
@@ -210,6 +223,7 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
     function getRequest($request_array = null)
     {
+
         $index = "All";
 
         $region = "com";
@@ -271,6 +285,10 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
     function getAmazon($text)
     {
+if ($this->amazon_stack_state == 'off') {
+$this->response .= "Agent is off. ";
+return true;
+}
         $request = $text;
 
         $ch = curl_init();
@@ -305,6 +323,11 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
     function getItemSearch($text = null)
     {
+if ($this->amazon_stack_state == 'off') {
+$this->response .= "Agent is off. ";
+return true;
+}
+
 if (($text == null) and ($this->search_words == null)) {return true;}
 
 if ($text == null) {$text = $this->search_words;}
@@ -392,6 +415,13 @@ if ($items == array()) {$this->items = array(); return;}
 
     function getItemLookup($item_id = null, $item_id_type = "ASIN")
     {
+
+if ($this->amazon_stack_state == 'off') {
+$this->response .= "Agent is off. ";
+return true;
+}
+
+
         //https://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
         // IdType
         //Valid Values: SKU | UPC | EAN | ISBN (US only, when search index is Books). UPC is not valid in the CA locale.
