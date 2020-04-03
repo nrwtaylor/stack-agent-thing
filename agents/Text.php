@@ -499,6 +499,7 @@ public function make() {}
     {
         // Log which agent was requested ie Ebay.
         // And note the time.
+        $this->thing->json->setField("variables");
 
         $time_string = $this->thing->json->time();
         $this->thing->json->writeVariable(

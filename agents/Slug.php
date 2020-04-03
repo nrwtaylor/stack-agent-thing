@@ -57,7 +57,9 @@ $this->alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
 public function getSlug($text = null) {
 
 if ($text == null) {return true;}
-return $this->extractSlug($text);
+$slug =  $this->extractSlug($text);
+$this->slug = $slug;
+return $slug;
 
 $slug = $this->alphanumeric_agent->filterAlphanumeric($text);
 
@@ -106,7 +108,6 @@ return $slug;
         //$this->makeWeb();
 
         $this->thing_report['thing'] = $this->thing->thing;
-
         $this->thing_report['help'] = "This makes a slug from the datagram.";
 
     }
@@ -132,7 +133,8 @@ return $slug;
 $filtered_input = $this->assert($input);
 
         if ((!isset($this->slug)) or ($this->slug == false)) {
-            $this->getSlug($input);
+            $this->getSlug($filtered_input);
+            return;
         }
 
         $pieces = explode(" ", strtolower($input));

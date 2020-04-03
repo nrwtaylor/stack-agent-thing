@@ -58,7 +58,7 @@ return false;
 
         $time_string = $this->thing->json->time();
         $this->thing->json->writeVariable(
-            array("mixed", "refreshed_at"),
+            array("alpha", "refreshed_at"),
             $time_string
         );
 

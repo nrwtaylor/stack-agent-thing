@@ -128,6 +128,8 @@ $word = $this->credential_set;
 
 $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
 
+        $this->thing->json->setField("variables");
+
         $this->thing->json->writeVariable(
             array("ebay", "runtime"),
             $this->runtime
