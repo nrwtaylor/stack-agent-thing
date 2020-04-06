@@ -622,16 +622,30 @@ http://open.api.ebay.com/shopping?
 
         if ($xml) {
             $json = json_encode($xml);
-            $array = json_decode($json, true);
+            $response= json_decode($json, true);
 
-            if (isset($array["ack"]) and $array["ack"] == "Failure") {
-                $this->logEbay($array);
+            if (isset($response["ack"]) and $response["ack"] == "Failure") {
+                $this->logEbay($response);
+return true;
             }
-            if (isset($array["Ack"]) and $array["Ack"] == "Failure") {
-                $this->logEbay($array);
+            if (isset($response["Ack"]) and $response["Ack"] == "Failure") {
+                $this->logEbay($response);
+return true;
             }
 
-            return $array;
+        if (isset($response['searchResult']['item'])) {
+            $ebay_items = array(0 => $response['searchResult']['item']);
+        } else {
+        }
+
+        if (isset($response['searchResult']['item'][0])) {
+            $ebay_items = $response['searchResult']['item'];
+        } else {
+        }
+
+            
+
+return $ebay_items;
         }
         //$this->state = "off";
         $this->flag = "green";

@@ -345,6 +345,10 @@ function spawn($datagram = null) {
             $message0['50 words'] .= $this->sqlresponse;
         }
 
+if ($to == "error") {
+return true;
+}
+
 		if($query == true) {
 
 			$this->sqlresponse =  "New record created successfully.";
@@ -354,7 +358,6 @@ function spawn($datagram = null) {
 			$message0['500 words'] .= $this->sqlresponse;
 
 		} else {
-
 			//$error = $query->errorInfo();
 			//$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
 			$this->sqlresponse = "Error: " .implode(":",$query->errorInfo());
