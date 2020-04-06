@@ -51,7 +51,6 @@ class Compression extends Agent
 
 
 $text = $this->filtered_input;
-
         foreach ($matches as $agent_name=>$compression) {
 
             $text = str_ireplace($compression[0]['words'],

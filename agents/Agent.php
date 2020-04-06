@@ -1186,6 +1186,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         if ((isset($chinese_thing->chineses)) and isset($chinese_thing->translated_input)) {
             $input = $chinese_thing->translated_input;
         }
+
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.

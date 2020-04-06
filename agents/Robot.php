@@ -35,13 +35,11 @@ class Robot extends Agent {
         // I think.
         // Instead.
 
-
         if (isset($this->thing->container['api']['robot']['user_agent'])) {
 
             $user_agent = $this->thing->container['api']['robot']['user_agent'];
             ini_set('user_agent', $user_agent);
         }
-
 
         $this->node_list = array("start"=>array("acknowledge"));
 
@@ -293,7 +291,7 @@ return;
 
         $link_agent = new Link($this->thing, $this->input);
         $t = $link_agent->extractLink($this->input);
-        //var_dump($t);
+
         if ($t != null) {
             $this->test_link = $t;
 
@@ -341,43 +339,64 @@ return;
     function robots_allowed($url, $useragent=false) {
         // https://www.the-art-of-web.com/php/parse-robots/
         // parse url to retrieve host and path
+
         $parsed = parse_url($url);
+
+$scheme = $parsed['scheme'];
+$schemes = array("http","https");
+if (isset($scheme)) {$schemes = array($scheme);}
 
         $agents = array(preg_quote('*'));
         if ($useragent) $agents[] = preg_quote($useragent);
         $agents = implode('|', $agents);
 
         // location of robots.txt file
-        $robotstxt = file("http://{$parsed['host']}/robots.txt");
 
+foreach ($schemes as $i=>$scheme) {
+        $robotstxt = file($scheme. "://{$parsed['host']}/robots.txt");
+if (empty($robotstxt)) {continue;}
+
+}
+//exit();
         // if there isn't a robots, then we're allowed in
+        //https://serverfault.com/questions/154820/what-happens-if-a-website-does-not-have-a-robots-txt-file
         if (empty($robotstxt)) return true;
 
         $rules = array();
         $ruleApplies = false;
         foreach ($robotstxt as $line) {
+
             // skip blank lines
             if (!$line = trim($line)) continue;
 
             // following rules only apply if User-agent matches $useragent or '*'
             if (preg_match('#^\s*User-agent: (.*)#i', $line, $match)) {
+
                 $ruleApplies = preg_match("#($agents)#i", $match[1]);
+
             }
             if ($ruleApplies && preg_match('#^\s*Disallow:(.*)#i', $line, $regs)) {
                 // an empty rule implies full access - no further tests required
-                if (!$regs[1]) return true;
+                if (!$regs[1]) {
+return true;
+}
                 // add rules that apply to array for testing
                 $rules[] = preg_quote(trim($regs[1]), '/');
             }
         }
 
-        if (!isset($parsed['path'])) {return null;}
+        if (!isset($parsed['path'])) {
+$this->thing->log("No path found.");
+return null;}
 
         foreach ($rules as $rule) {
             // check if page is disallowed to us
-            if (preg_match("#^$rule#", $parsed['path'])) return false;
+            if (preg_match("#^$rule#", $parsed['path'])) {
+$this->thing->log("Saw that we are disallowed.");
+return false;
+}
         }
-
+$this->thing->log("Saw that we are allowed.");
         // page is not disallowed
         return true;
     }
@@ -523,9 +542,6 @@ return;
         }
 
         //Lazy way of outputting. Loop through for prettier output.
-        //        echo "<pre>";
-        //        var_dump($allRobots);
-        //        echo "</pre>";
         return $allRobots;
     }
 

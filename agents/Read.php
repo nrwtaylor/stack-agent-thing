@@ -20,11 +20,6 @@ class Read extends Agent
         $this->test = "Development code"; // Always
         $this->keywords = array('read', 'link', 'date', 'wordlist');
 
-        $this->user_agent = null;
-        if (isset($this->thing->container['api']['read']['user_agent'])) {
-            $this->user_agent =
-                $this->thing->container['api']['read']['user_agent'];
-        }
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -41,14 +36,46 @@ class Read extends Agent
     {
         // Now have this->link potentially from reading subject
 
-        echo "prerobot " . $this->link . "\n";
         $this->robot_agent = new Robot($this->thing, $this->link);
-        echo "postrobot" . "\n";
 
-if ($this->robot_agent->robots_allowed($this->link, $this->user_agent === false)) {
+var_dump($this->robot_agent->useragent);
+
+if ($this->robot_agent->robots_allowed($this->link, $this->robot_agent->useragent)) {
+$this->response .= "Robot allowed. ";
+
+        $this->getUrl($this->link);
+
+// Get all the URLs in the page.
+$url_agent = new Url($this->thing, "url");
+$this->urls = $url_agent->extractUrls($this->contents);
+
+$text = strip_tags($this->contents);
+// Remove multiple spaces
+$text = preg_replace('/\s+/', ' ', $text);
+// Remove start and end spaces
+$text = trim($text);
+
+//https://stackoverflow.com/questions/16377437/split-a-text-into-sentences
+$pattern = '/(?<=[.?!])\s+(?=[a-z])/i';
+
+//$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
+$this->sentences = preg_split($pattern, $text);
+
+$this->matched_sentences = array();
+
+foreach($this->sentences as $i=>$sentence) {
+
+if (stripos($sentence, $this->search_phrase) !== false) {
+    $this->matched_sentences[] =  $sentence;
+}
+
+
+
+}
+
+} else {
 $this->response .= "Robot not allowed. ";
 }
-        $this->getUrl($this->link);
 
 
     }
@@ -65,8 +92,6 @@ $this->response .= "Robot not allowed. ";
         );
 
         $this->refreshed_at = $this->current_time;
-
-        return;
     }
 
     function get()
@@ -89,15 +114,28 @@ $this->response .= "Robot not allowed. ";
         $options = array(
             'http' => array(
                 'method' => "GET",
-                'header' => "User-Agent: " . $this->user_agent . "\r\n"
+                'header' => "User-Agent: " . $this->robot_agent->useragent . "\r\n"
             )
         );
 
         $context = stream_context_create($options);
 
         $data = file_get_contents($data_source, false, $context);
+if (isset($http_response_header[0])) {
+$response_string = $http_response_header[0];
+} else {
+   $this->thing->log('No response code header found.');
+   return true;
+}
 
-        if ($data == false) {
+$parts = explode(' ', $response_string);
+$response_code = null;
+if (isset($parts[1])) {
+$response_code = $parts[1];
+}
+        if (($data == false) or ($response_code != 200)) {
+
+            $this->thing->log('No response or response code not 200.');
             return true;
             // Invalid return from site..
         }
@@ -120,65 +158,35 @@ $this->response .= "Robot not allowed. ";
         return true;
     }
 
-    /*
-    function getVariable($variable_name = null, $variable = null) {
-
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-
-*/
-
-    public function respond()
-    {
-        // Thing actions
-
-        $this->thing->flagGreen();
-        // Generate email response.
-
-        $to = $this->thing->from;
-        $from = "read";
+public function makeChoices() {
 
         $choices = false;
         $this->thing_report['choices'] = $choices;
 
-        $this->thing_report['txt'] = implode("/n", $this->yard_sales);
+}
 
-        if (strtolower($this->flag) == "red") {
-            $sms_message = "READ DEV = ESTATE FOUND";
-        } else {
-            $sms_message = "READ DEV";
-        }
+public function makeTxt() {
+
+//        $this->thing_report['txt'] = implode("/n", $this->yard_sales);
+        $this->thing_report['txt'] = "No text retrieved.";
+
+}
+
+function makeSMS() {
+
+
+//        if (strtolower($this->flag) == "red") {
+//            $sms_message = "READ DEV = ESTATE FOUND";
+//        } else {
+//            $sms_message = "READ DEV";
+//        }
+
+$sms_message = "READ | ";
+$sms_message .= $this->response;
 
         if ($this->verbosity >= 2) {
         }
-
+/*
         $a = implode(" | ", $this->addresses);
 
         $addresses = $a;
@@ -188,7 +196,7 @@ $this->response .= "Robot not allowed. ";
         if ($this->verbosity >= 5) {
             $sms_message .= " | wordlist " . $this->wordlist;
         }
-
+*/
         $sms_message .= " | link " . $this->link;
 
         if ($this->verbosity >= 9) {
@@ -202,23 +210,30 @@ $this->response .= "Robot not allowed. ";
 
         $sms_message .= " | TEXT ?";
 
-        $test_message = 'Last thing heard: "' . $this->subject . '"';
+$this->thing_report['sms'] = $sms_message;
+$this->sms_message = $sms_message;
 
-        $test_message .= '<br>Train state: ' . $this->state . '<br>';
+}
 
-        $test_message .= '<br>' . $sms_message;
+    public function respondResponse()
+    {
+        // Thing actions
 
-        $this->thing_report['sms'] = $sms_message;
-        $this->thing_report['email'] = $sms_message;
-        $this->thing_report['message'] = $sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing->flagGreen();
+
+//        $test_message = 'Last thing heard: "' . $this->subject . '"';
+//        $test_message .= '<br>Train state: ' . $this->state . '<br>';
+//        $test_message .= '<br>' . $sms_message;
+
+//        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-
         $this->thing_report['help'] = 'This reads a web resource.';
 
-        return;
     }
 
     public function extractNumber($input = null)
@@ -259,8 +274,14 @@ $this->response .= "Robot not allowed. ";
 
         $input = $this->assert($this->input);
 
-        $this->url = $input;
-        $this->link = $input;
+        $url_agent = new Url($this->thing,"url");
+
+        $this->url = $url_agent->extractUrl($input);
+
+        $this->link = $this->url;
+
+$input = str_replace($this->url, "", $input);
+$this->search_phrase = trim(strtolower($input));
 
         $pieces = explode(" ", strtolower($input));
 
