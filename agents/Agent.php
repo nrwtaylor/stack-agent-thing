@@ -1334,6 +1334,8 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         } else {
             $arr = explode(' ' , $agent_input_text);
         }
+
+
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
         //set_error_handler("warning_handler", E_WARNING);
         $this->thing->log('looking for keyword matches with available agents.', "INFORMATION");
@@ -1378,9 +1380,15 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         //$agents = array_reverse($agents);
         $this->input = $input;
         // Prefer longer agent names
+
+// April 7, 2020
+// Prefer order in string
+/*
         usort($agents, function($a, $b) {
                 return strlen($b) <=> strlen($a);
             });
+*/
+
         foreach ($agents as $agent_class_name) {
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
             // Allow for doing something smarter here with

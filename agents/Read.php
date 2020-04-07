@@ -18,8 +18,7 @@ class Read extends Agent
     function init()
     {
         $this->test = "Development code"; // Always
-        $this->keywords = array('read', 'link', 'date', 'wordlist');
-
+        $this->keywords = ['read', 'link', 'date', 'wordlist'];
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -36,48 +35,56 @@ class Read extends Agent
     {
         // Now have this->link potentially from reading subject
 
+        $this->matched_sentences = [];
+
         $this->robot_agent = new Robot($this->thing, $this->link);
 
-var_dump($this->robot_agent->useragent);
+        if (
+            $this->robot_agent->robots_allowed(
+                $this->link,
+                $this->robot_agent->user_agent_short
+            )
+        ) {
+            $this->response .= "Robot allowed. ";
 
-if ($this->robot_agent->robots_allowed($this->link, $this->robot_agent->useragent)) {
-$this->response .= "Robot allowed. ";
+            if (
+                substr($this->link, 0, 4) === "http" or
+                substr($this->link, 0, 5) === "https"
+            ) {
+                // Okay.
+            } elseif (isset($this->robot_agent->scheme)) {
+                $this->link = $this->robot_agent->scheme . '://' . $this->link;
+            } else {
+                return true;
+            }
 
-        $this->getUrl($this->link);
+            $this->getUrl($this->link);
 
-// Get all the URLs in the page.
-$url_agent = new Url($this->thing, "url");
-$this->urls = $url_agent->extractUrls($this->contents);
+            // Get all the URLs in the page.
+            $url_agent = new Url($this->thing, "url");
+            $this->urls = $url_agent->extractUrls($this->contents);
 
-$text = strip_tags($this->contents);
-// Remove multiple spaces
-$text = preg_replace('/\s+/', ' ', $text);
-// Remove start and end spaces
-$text = trim($text);
+            $text = strip_tags($this->contents);
+            // Remove multiple spaces
+            $text = preg_replace('/\s+/', ' ', $text);
+            // Remove start and end spaces
+            $text = trim($text);
 
-//https://stackoverflow.com/questions/16377437/split-a-text-into-sentences
-$pattern = '/(?<=[.?!])\s+(?=[a-z])/i';
+            //https://stackoverflow.com/questions/16377437/split-a-text-into-sentences
+            $pattern = '/(?<=[.?!])\s+(?=[a-z])/i';
 
-//$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
-$this->sentences = preg_split($pattern, $text);
+            //$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
+            $this->sentences = preg_split($pattern, $text);
 
-$this->matched_sentences = array();
-
-foreach($this->sentences as $i=>$sentence) {
-
-if (stripos($sentence, $this->search_phrase) !== false) {
-    $this->matched_sentences[] =  $sentence;
-}
-
-
-
-}
-
-} else {
-$this->response .= "Robot not allowed. ";
-}
-
-
+            foreach ($this->sentences as $i => $sentence) {
+                if (stripos($sentence, $this->search_phrase) !== false) {
+                    $this->matched_sentences[] = $sentence;
+                }
+            }
+        } else {
+            $this->response .=
+                "Robot not allowed. " . $this->robot_agent->response;
+        }
     }
 
     function set()
@@ -105,36 +112,38 @@ $this->response .= "Robot not allowed. ";
 
     function getUrl($url = null)
     {
+        $this->contents = false;
         if ($url == null) {
             $this->link = $this->web_prefix;
             $url = $this->link;
         }
+
         $data_source = $this->link;
 
-        $options = array(
-            'http' => array(
+        $options = [
+            'http' => [
                 'method' => "GET",
-                'header' => "User-Agent: " . $this->robot_agent->useragent . "\r\n"
-            )
-        );
+                'header' =>
+                    "User-Agent: " . $this->robot_agent->useragent . "\r\n",
+            ],
+        ];
 
         $context = stream_context_create($options);
 
         $data = file_get_contents($data_source, false, $context);
-if (isset($http_response_header[0])) {
-$response_string = $http_response_header[0];
-} else {
-   $this->thing->log('No response code header found.');
-   return true;
-}
+        if (isset($http_response_header[0])) {
+            $response_string = $http_response_header[0];
+        } else {
+            $this->thing->log('No response code header found.');
+            return true;
+        }
 
-$parts = explode(' ', $response_string);
-$response_code = null;
-if (isset($parts[1])) {
-$response_code = $parts[1];
-}
-        if (($data == false) or ($response_code != 200)) {
-
+        $parts = explode(' ', $response_string);
+        $response_code = null;
+        if (isset($parts[1])) {
+            $response_code = $parts[1];
+        }
+        if ($data == false or $response_code != 200) {
             $this->thing->log('No response or response code not 200.');
             return true;
             // Invalid return from site..
@@ -158,35 +167,32 @@ $response_code = $parts[1];
         return true;
     }
 
-public function makeChoices() {
-
+    public function makeChoices()
+    {
         $choices = false;
         $this->thing_report['choices'] = $choices;
+    }
 
-}
-
-public function makeTxt() {
-
-//        $this->thing_report['txt'] = implode("/n", $this->yard_sales);
+    public function makeTxt()
+    {
+        //        $this->thing_report['txt'] = implode("/n", $this->yard_sales);
         $this->thing_report['txt'] = "No text retrieved.";
+    }
 
-}
+    function makeSMS()
+    {
+        //        if (strtolower($this->flag) == "red") {
+        //            $sms_message = "READ DEV = ESTATE FOUND";
+        //        } else {
+        //            $sms_message = "READ DEV";
+        //        }
 
-function makeSMS() {
-
-
-//        if (strtolower($this->flag) == "red") {
-//            $sms_message = "READ DEV = ESTATE FOUND";
-//        } else {
-//            $sms_message = "READ DEV";
-//        }
-
-$sms_message = "READ | ";
-$sms_message .= $this->response;
+        $sms_message = "READ | ";
+        $sms_message .= $this->response;
 
         if ($this->verbosity >= 2) {
         }
-/*
+        /*
         $a = implode(" | ", $this->addresses);
 
         $addresses = $a;
@@ -210,10 +216,9 @@ $sms_message .= $this->response;
 
         $sms_message .= " | TEXT ?";
 
-$this->thing_report['sms'] = $sms_message;
-$this->sms_message = $sms_message;
-
-}
+        $this->thing_report['sms'] = $sms_message;
+        $this->sms_message = $sms_message;
+    }
 
     public function respondResponse()
     {
@@ -221,11 +226,11 @@ $this->sms_message = $sms_message;
 
         $this->thing->flagGreen();
 
-//        $test_message = 'Last thing heard: "' . $this->subject . '"';
-//        $test_message .= '<br>Train state: ' . $this->state . '<br>';
-//        $test_message .= '<br>' . $sms_message;
+        //        $test_message = 'Last thing heard: "' . $this->subject . '"';
+        //        $test_message .= '<br>Train state: ' . $this->state . '<br>';
+        //        $test_message .= '<br>' . $sms_message;
 
-//        $this->thing_report['sms'] = $sms_message;
+        //        $this->thing_report['sms'] = $sms_message;
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
@@ -233,7 +238,6 @@ $this->sms_message = $sms_message;
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
         $this->thing_report['help'] = 'This reads a web resource.';
-
     }
 
     public function extractNumber($input = null)
@@ -274,14 +278,14 @@ $this->sms_message = $sms_message;
 
         $input = $this->assert($this->input);
 
-        $url_agent = new Url($this->thing,"url");
+        $url_agent = new Url($this->thing, "url");
 
         $this->url = $url_agent->extractUrl($input);
 
         $this->link = $this->url;
 
-$input = str_replace($this->url, "", $input);
-$this->search_phrase = trim(strtolower($input));
+        $input = str_replace($this->url, "", $input);
+        $this->search_phrase = trim(strtolower($input));
 
         $pieces = explode(" ", strtolower($input));
 
