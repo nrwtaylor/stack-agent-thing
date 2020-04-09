@@ -5,80 +5,58 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class EightBall {
+class EightBall extends Agent
+{
+    public $var = 'hello';
 
-	public $var = 'hello';
-
-
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->agent_input = $agent_input;
-        $this->start_time = $thing->elapsed_runtime(); 
-
-		$this->agent_name = "eightball";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
-
-		$this->thing = $thing;
-        $this->thing_report['thing']  = $thing;
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.');
-        $this->thing->log($this->agent_prefix . "received this Thing ".  $this->subject . '".');
-
-        $this->get();
-		$this->readSubject();
-
-        $this->respond();
-        $this->set();
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-
-        $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
-		return;
-	}
+    }
 
     function set()
     {
-            $this->thing->json->writeVariable( array("eightball", "face"), $this->face );
+        $this->thing->json->writeVariable(["eightball", "face"], $this->face);
     }
 
     function get()
     {
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("eightball", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "eightball",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("eightball", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["eightball", "refreshed_at"],
+                $time_string
+            );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
         $this->thing->json->setField("variables");
-        $this->face = strtolower($this->thing->json->readVariable( array("eightball", "face") ));
+        $this->face = strtolower(
+            $this->thing->json->readVariable(["eightball", "face"])
+        );
     }
 
-
-// -----------------------
-
-	private function respond()
+    public function respondResponse()
     {
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// This should be the code to handle non-matching responses.
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
+        }
 
-		$to = $this->thing->from;
-		$from = "eightball";
+        return $this->thing_report;
+    }
 
-        $this->makeMessage();
-
+    function makeSMS()
+    {
         $this->sms_message = "8 BALL";
 
         $this->sms_message .= " | " . $this->message;
@@ -86,20 +64,20 @@ class EightBall {
 
         $choices = false;
 
-		$this->thing_report[ "choices" ] = $choices;
- 		$this->thing_report["info"] = "This makes a prognistication.";
- 		$this->thing_report["help"] = "Try EIGHTBALL.";
+        $this->thing_report["choices"] = $choices;
+        $this->thing_report["info"] = "This makes a prognistication.";
+        $this->thing_report["help"] = "Try EIGHTBALL.";
 
-		$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report['sms'] = $this->sms_message;
+    }
 
-        if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+    function makeTXT()
+    {
+        if (!isset($this->sms_message)) {
+            $this->makeSMS();
         }
-
-		return $this->thing_report;
-	}
+        $this->thing_report['txt'] = $this->sms_message;
+    }
 
     function makeMessage()
     {
@@ -167,26 +145,19 @@ class EightBall {
                 break;
         }
 
-
         $m = $answer;
 
         $this->message = $m;
         $this->thing_report['message'] = $m;
     }
 
-
-
-	public function readSubject()
+    public function readSubject()
     {
-
-        if ((!isset($this->face)) or ($this->face == "")) {$this->face = rand(1,20);}
+        if (!isset($this->face) or $this->face == "") {
+            $this->face = rand(1, 20);
+        }
         $this->response = "Received an answer to the question.";
 
-        //$input = strtolower($this->subject);
-
-		return false;
+        return false;
     }
-
 }
-
-?>
