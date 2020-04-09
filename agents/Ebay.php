@@ -217,7 +217,7 @@ $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
 
     function doItem($text)
     {
-        $this->item = $this->eBayGetSingle($text);
+        //$this->item = $this->eBayGetSingle($text);
     }
 
     function logEbay($text, $type = "ERROR")
@@ -632,7 +632,8 @@ return true;
                 $this->logEbay($response);
 return true;
             }
-
+$ebay_items = array();
+$this->items = array();
         if (isset($response['searchResult']['item'])) {
             $ebay_items = array(0 => $response['searchResult']['item']);
         } else {
@@ -642,10 +643,17 @@ return true;
             $ebay_items = $response['searchResult']['item'];
         } else {
         }
+//if (!isset($ebay_items)) {
+//var_dump($response);
+//}
+            foreach ($ebay_items as $i => $item) {
+            $parsed_item = $this->parseItem($item);
 
-            
+            $this->items[] = $parsed_item;
+        }
 
-return $ebay_items;
+return $this->items;
+//return $ebay_items;
         }
         //$this->state = "off";
         $this->flag = "green";
@@ -1165,6 +1173,8 @@ return $ebay_items;
             return true;
         }
 
+//$ebay_item['source'] = "eBay";
+$source = "eBay";
         if (is_string($ebay_item)) {
             return true;
         }
@@ -1173,7 +1183,6 @@ return $ebay_items;
             $ebay_item = $ebay_item['Item'];
         }
 
-        $source = "ebay";
 
         $title = "X";
 

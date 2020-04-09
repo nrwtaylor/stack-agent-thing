@@ -235,7 +235,8 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
         //$request_array['keywords'] = "bananagrams";
 
         $keywords = $request_array['keywords'];
-        //$keywords = "bananagrams";
+
+/*
         $request =
             "https://openapi.etsy.com/v2/listings/active?keywords=" .
             $keywords .
@@ -243,9 +244,23 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
             $this->items_limit .
             "&includes=Images:1&api_key=" .
             $this->access_key;
+*/
+
+        $request =
+            "https://openapi.etsy.com/v2/listings/active?keywords=" .
+            $keywords .
+            "&limit=" .
+            $this->items_limit .
+            "&includes=Images&api_key=" .
+            $this->access_key;
+
+
         //$request = 'https://openapi.etsy.com/v2/listings/active?api_key='.$this->access_key;
         return $request;
     }
+
+//https://www.etsy.com/developers/documentation/reference/listing
+
 
     function getEtsy($text)
     {
@@ -266,6 +281,7 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
         $response = json_decode($response_body, true);
         return $response;
     }
+
 
     function getItemSearch($text = null)
     {
@@ -352,6 +368,17 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
         $this->items = array();
     }
 
+function getItemImages($item_id = null) {
+        $request =
+            "https://openapi.etsy.com/v2/listings/" .
+            $item_id .
+            "/images". 
+            "?api_key=" .
+            $this->access_key;
+        $response = $this->getEtsy($request);
+return $response;
+}
+
     function getItemLookup($item_id = null, $item_id_type = "ASIN")
     {
         if ($this->etsy_stack_state == 'off') {
@@ -400,7 +427,6 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
         }
 
         $request = $this->getRequest($request_array);
-
         $amazon_array = $this->getEtsy($request);
 
         $is_valid = "";
