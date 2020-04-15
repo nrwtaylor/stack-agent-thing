@@ -78,6 +78,17 @@ foreach($arr as $search_engine=>$search_settings) {
 
 //var_dump($key_order);
 $this->search_engine_order = $key_order;
+
+
+ $this->search_engines = array();
+        foreach($this->search_engine_order as $i=>$search_engine) {
+
+                $this->search_engines[$search_engine] = $this->search_settings[$search_engine];
+        }
+
+
+
+
 }
 
     public function run()
@@ -103,16 +114,19 @@ $this->urlSearch($search_engine);
         $this->thing_report['help'] = 'This is an agent which understands what search is. And will help do one.';
 	}
 
-    public function urlSearch($search_engine = null)
+    public function urlSearch($search_engine = null, $raw_search_words = null)
     {
+
         if ($search_engine == null) {return;}
+
+if ($raw_search_words == null) {$raw_search_words = $this->search_words;}
 
             $links = "";
             $search_settings = $this->search_settings[$search_engine];
-
-$search_words = $this->search_words;
+//$search_words = $this->search_words;
+$search_words = $raw_search_words;
 if ( (isset($search_settings['search_encoding'])) and ($search_settings['search_encoding'] == "url") ) {
-$search_words = urlencode($this->search_words);
+$search_words = urlencode($search_words);
 }
 
 $search_postfix = "";
@@ -138,9 +152,9 @@ $search_postfix = $search_settings['search_postfix'];
 
         $this->response .= $link . " " ;
 
-
+return $link;
     }
-
+/*
     function assert($search, $input)
     {
         $search = strtolower($search);
@@ -154,7 +168,7 @@ $search_postfix = $search_settings['search_postfix'];
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         return $filtered_input;
     }
-
+*/
     public function makeSMS()
     {
        $sms = "SEARCH | ";
@@ -170,6 +184,8 @@ $search_postfix = $search_settings['search_postfix'];
     {
 
         $input = $this->input;
+
+if ($this->input == "search") {return;}
 
         $filtered_input = $this->assert("search", $input);
 

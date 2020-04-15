@@ -39,6 +39,7 @@ class Robot extends Agent
             $user_agent_long =
                 $this->thing->container['api']['robot']['user_agent_long'];
             ini_set('user_agent', $user_agent_long);
+            $this->user_agent_long;
         }
 
         if (
