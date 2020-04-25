@@ -21,7 +21,6 @@ class Log extends Agent
      */
     function init()
     {
-
         if ($this->thing != true) {
             $this->thing->log('ran on a null Thing ' . $thing->uuid . '.');
             $this->thing_report['info'] = 'Tried to run Log on a null Thing.';
@@ -40,38 +39,37 @@ class Log extends Agent
             $this->state = $this->settings['log']['state'];
         }
 
-
-        $this->node_list = array(
-            'log' => array('privacy'),
-            'code' => array('web', 'log'),
-            'uuid' => array('snowflake', 'optin')
-        );
+        $this->node_list = [
+            'log' => ['privacy'],
+            'code' => ['web', 'log'],
+            'uuid' => ['snowflake', 'optin'],
+        ];
     }
 
     public function run()
     {
-if ($this->state == "on") {
-        $this->getLink();
-        $web_thing = new Thing(null);
-        $web_thing->Create(
-            $this->from,
-            $this->agent_name,
-            's/ record web view'
-        );
-}
+        if ($this->state == "on") {
+            $this->getLink();
+            $web_thing = new Thing(null);
+            $web_thing->Create(
+                $this->from,
+                $this->agent_name,
+                's/ record web view'
+            );
+        }
         //$this->makeSnippet();
     }
 
     public function set()
     {
-if ($this->state == "on") { 
-       $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            array("log", "received_at"),
-            gmdate("Y-m-d\TH:i:s\Z", time())
-        );
+        if ($this->state == "on") {
+            $this->thing->json->setField("variables");
+            $this->thing->json->writeVariable(
+                ["log", "received_at"],
+                gmdate("Y-m-d\TH:i:s\Z", time())
+            );
+        }
     }
-}
     /**
      *
      * @return unknown
@@ -102,13 +100,13 @@ if ($this->state == "on") {
     {
         $gap_time_max = 0;
         $lines = explode('<br>', $this->thing->log);
-        $log = array();
+        $log = [];
         foreach ($lines as $i => $line) {
             $line = trim($line);
             $tokens = explode(" ", $line);
             $millisecond_text = $tokens[0];
             $milliseconds = intval(
-                trim(str_replace(array("ms", ","), "", $millisecond_text))
+                trim(str_replace(["ms", ","], "", $millisecond_text))
             );
 
             $gap_time = 0;
@@ -120,12 +118,12 @@ if ($this->state == "on") {
                 $gap_time_max = $gap_time;
                 $log_index_max = $i;
             }
-            $t = array(
+            $t = [
                 "number" => $i,
                 "line" => $line,
                 "elapsed_time" => $milliseconds,
-                "gap_time" => $gap_time
-            );
+                "gap_time" => $gap_time,
+            ];
 
             $log[] = $t;
             $last_milliseconds = $milliseconds;
@@ -133,7 +131,7 @@ if ($this->state == "on") {
 
         // Find top-10 time gaps
         $gap_time_sorted_log = $log;
-        $gap_time = array();
+        $gap_time = [];
         foreach ($gap_time_sorted_log as $key => $row) {
             $gap_time[$key] = $row['gap_time'];
         }
@@ -141,7 +139,7 @@ if ($this->state == "on") {
 
         $max_entries = 10;
         $count = 0;
-        $highlight = array();
+        $highlight = [];
         foreach ($gap_time_sorted_log as $i => $log_entry) {
             $count += 1;
             //var_dump($log_entry['gap_time']);
@@ -172,23 +170,22 @@ if ($this->state == "on") {
      */
     function makeSMS()
     {
-
-if ((!isset($this->link_uuid)) or (!isset($this->prior_agent))) {$link_text = "No log available.";} else {
-$link_text =                 $this->web_prefix .
+        if (!isset($this->link_uuid) or !isset($this->prior_agent)) {
+            $link_text = "No log available.";
+        } else {
+            $link_text =
+                $this->web_prefix .
                 "" .
                 $this->link_uuid .
                 "/" .
                 strtolower($this->prior_agent) .
                 ".log";
 
-        if (strtolower($this->prior_agent) == "php") {
-        $link_text = "No log available.";
+            if (strtolower($this->prior_agent) == "php") {
+                $link_text = "No log available.";
+            }
         }
-
-}
-            $this->sms_message =
-                "LOG | " .
-                $link_text;
+        $this->sms_message = "LOG | " . $link_text;
 
         $this->sms_message .= " | TEXT INFO";
         $this->thing_report['sms'] = $this->sms_message;
@@ -200,8 +197,7 @@ $link_text =                 $this->web_prefix .
      */
     function getLink()
     {
-
-        $block_things = array();
+        $block_things = [];
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
 
@@ -245,6 +241,11 @@ $link_text =                 $this->web_prefix .
      */
     public function readSubject()
     {
+
+        $input = $this->input;
+        $filtered_input = $this->assert("search", $input);
+
+
         $this->defaultButtons();
 
         $status = true;
@@ -282,7 +283,7 @@ $link_text =                 $this->web_prefix .
     {
         $link = $this->web_prefix . 'web/' . $this->uuid . '/thing';
 
-        $this->node_list = array("web" => array("iching", "roll"));
+        $this->node_list = ["web" => ["iching", "roll"]];
 
         //$web = '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
@@ -291,8 +292,10 @@ $link_text =                 $this->web_prefix .
         //$web .= '<img src= "https://stackr.ca/thing/' . $this->link_uuid . '/flag.png">';
 
         $web = "";
-$agent_text = "No";
-if (isset($this->prior_agent)) {$agent_text = ucwords($this->prior_agent);}
+        $agent_text = "No";
+        if (isset($this->prior_agent)) {
+            $agent_text = ucwords($this->prior_agent);
+        }
         $web .= '<b>' . $agent_text . ' Agent</b>';
 
         //$web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
