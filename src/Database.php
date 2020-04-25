@@ -459,10 +459,20 @@ class Database
             $sth->execute();
             $thing = $sth->fetchObject();
         } catch (\Exception $e) {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'Get ' . $e->getMessage());
 
-//            echo 'Caught error: ', $e->getMessage(), "\n";
+// devstack look get the error code.
+// SQLSTATE[HY000] [2002] Connection refused
+if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
+
+// devstack write to text file?
+// Don't try making more entries when the database is refusing entries...
+
+
+} else {
+            $t = new Thing(null);
+            $t->Create("stack", "error", 'Get ' . $e->getCode());
+}
+
             $thing = false;
         }
 
