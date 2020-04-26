@@ -1,0 +1,652 @@
+<?php
+// Call regularly from cron 
+// On call determine best thing to be addressed.
+
+// Start by picking a random thing and seeing what needs to be done.
+
+
+//ini_set('display_startup_errors', 1);
+//ini_set('display_errors', 1);
+//error_reporting(-1);
+
+//require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
+//require '../vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
+
+//require '../src/watson.php';
+//require '../src/translink.php';
+
+
+
+class iChing {
+
+	// Responds to a query from $from to useragent@stackr.co
+
+	function __construct(Thing $thing) {
+
+
+		//echo "Agent__construct";
+		// Given a "thing".  Instantiate a class to identify and create the
+		// most appropriate agent to respond to it.
+
+		//$thingy = $thing->thing;
+		$this->thing = $thing;
+
+		//echo "subject",$thing->subject;
+		//echo "to",$thing->to;
+		//echo "from",$thing->from;
+
+
+		//var_dump($thingy);
+
+
+	        $this->uuid = $thing->uuid;
+        	$this->to = $thing->to;
+        	$this->from = $thing->from;
+	        $this->subject = $thing->subject;
+		$this->sqlresponse = null;
+
+		echo '<pre> Agent "Iching" running on Thing ';echo $this->uuid;echo'</pre>';
+
+		echo '<pre> Agent "Iching" received this Thing "';echo $this->subject;echo'"</pre>';
+
+		//$this->thing->json->setField("variables");
+		//$this->thing->json->writeVariable(array("iching",
+		//	"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
+		//	);
+
+
+
+                $this->thing->json->setField("variables");
+                $time_string = $this->thing->json->readVariable( array("iching", "refreshed_at") );
+
+                if ($time_string == false) {
+                        $this->thing->json->setField("variables");
+                        $time_string = $this->thing->json->time();
+                        $this->thing->json->writeVariable( array("iching", "refreshed_at"), $time_string );
+                }
+
+                $this->thing->json->setField("variables");
+                $this->hexagram = $this->thing->json->readVariable( array("iching", "hexagram") );
+
+                if ( ($this->hexagram == false) ) {
+                        $this->thing->log( '<pre> Agent "iching" setReminders() </pre>' );
+                        $this->setHexagram();
+                }
+
+                $this->thing->json->setField("variables");
+                $this->changing_lines = $this->thing->json->readVariable( array("iching", "changing") );
+
+                if ( ($this->changing_lines == false) ) {
+                        $this->thing->log( '<pre> Agent "iching" setChangingLinks() </pre>' );
+                        $this->setChangingLines();
+                } 
+
+
+
+
+
+
+		$this->response_format = "text no images";
+
+		//echo "construct email responser";
+
+		// If readSubject is true then it has been responded to.
+		// Forget thing.
+		$this->readSubject();
+		$this->response();
+
+
+		// We are going to be looking
+
+
+
+//		if ($json_data == null) {
+//			// No text in field.
+//			} else {
+//			// Text in the field
+//			// So extract existing setting
+//			}
+
+
+
+//		if ($this->readSubject()) {
+//			$this->thing->Forget();
+//			}
+
+
+		$this->thing_report['thing'] = $this->thing->thing;
+
+
+		echo '<pre> Agent "Iching" completed</pre>';
+
+
+	}
+
+	function setHexagram() {}
+
+	function setChangingLines() {}
+
+
+function setEmail() {
+
+}
+
+	public function response() {
+
+		$this->cost = 100;
+
+		// Thing stuff
+
+		$this->thing->json->setField("variables");
+
+		$this->thing->json->writeVariable(array("iching", "response_at"), gmdate("Y-m-d\TH:i:s\Z", time()));
+
+
+
+		$this->thing->flagGreen();
+
+		// Compose email
+
+		$status = false;
+		$this->response = false;
+		$keywords = array('setting');
+
+		$iching_query = $this->subject;
+
+		$response = $this->hexagramGenerator();
+		$upper = $response['upper']['trigram'];
+		$lower = $response['lower']['trigram'];
+		$hexagram = $response['hexagram'];
+		$hexagram_text = $response['hexagram text'];
+
+
+
+
+
+
+		$this->thing->json->writeVariable(array("iching", "hexagram"), $hexagram);
+
+
+
+		$lines = array();
+		array_push($lines,$response['lower']['lines'][0]);
+		array_push($lines,$response['lower']['lines'][1]);
+		array_push($lines,$response['lower']['lines'][2]);
+		array_push($lines,$response['upper']['lines'][0]);
+		array_push($lines,$response['upper']['lines'][1]);
+		array_push($lines,$response['upper']['lines'][2]);
+
+		$response = '';
+		$response .= "Hexagram ". $hexagram . ' ' .$hexagram_text[0] . ' ' . $hexagram_text[1] 
+			. ' ' . $hexagram_text[2] . '<br>';
+
+		$response .= "Changing lines:";
+		$response .= $this->changinglines($lines);
+		$response .= '<br><br>';
+
+		$this->sms_message = $response;
+
+		$response .= '<a href = "' . $this->cafeausoul($hexagram)[0] . '">Cafe au Soul reading: ' .
+		$this->cafeausoul($hexagram)[1] . '</a><br>';
+
+		$response .= '<a href = "http://www.jamesdekorne.com/GBCh/hex' . $hexagram . '.htm">James deKorne: Hexagram ' .$hexagram.'</a>';
+		$response .= "<br>";
+
+		$response .= "<br>";
+
+		$response .= "upper trigram: ".$upper[2] . ' / ' .$upper[3] . '<br>';
+		$response .= "lower trigram: ".$lower[2] . ' / ' .$lower[3] . '<br><br>';
+
+$this->drawHexagram($lines);
+
+$response .= '<br>';
+$response .= '<img src = "https://stackr.ca/thing/' . $this->uuid . '/iching.png" alt = "Hexagram ' . $hexagram . ' ' . $hexagram_text[0] . ' '.  $hexagram_text[1] . '">';
+$response .= '<br>';
+//echo  $this->thing_report['png'];
+//exit();
+
+		if ($this->response_format == "text no images") {
+			$response .= $this->textHexagram($lines);
+			} else {	
+			$response .= $this->drawHexagram($lines);
+			}
+
+
+		$subject = 	"Hexagram ". $hexagram . ' ' .$hexagram_text[0] . ' ' . $hexagram_text[1] 
+			. ' ' . $hexagram_text[2];
+		echo $this->from;
+
+
+		$this->thing_report['email'] = array('to'=>$this->from,
+				'from'=>'iching',
+				'subject' => $this->subject,
+				'message' => $response,
+				'choices' => false);
+
+//echo $this->thing->account['stack']->balance['amount'];
+
+// Prepare sms response
+
+
+                $this->sms_message = 'ICHING | ';
+                $this->sms_message .= "Hexagram ". $hexagram . ' ' .$hexagram_text[0] . ' ' . $hexagram_text[1]  . ' ' . $hexagram_text[2];
+
+		if ($this->changinglines($lines) == null ) {
+                $this->sms_message .= " unchanging ";
+		} else {
+		$this->sms_message .= " with changing lines ";
+                $this->sms_message .= $this->changinglines($lines);
+		}
+                $this->sms_message .= " | TEXT ICHING <question>";
+
+                //$this->sms_message = "Bleep";
+
+		$this->thing_report['sms'] = $this->sms_message;
+
+                if ( is_numeric($this->from) ) {
+                        require_once '/var/www/html/stackr.ca/agents/sms.php';
+
+                 //       $this->readSubject();
+
+
+                        $sms_thing = new Sms($this->thing, $this->sms_message);
+                        $this->thing_report['choices'] = false;
+                        $this->thing_report['info'] = 'SMS sent';
+
+			//$this->thing->log("sms sent");
+
+//                return $thing_report;
+                 }
+
+
+                if ($this->thing->account['stack']->balance['amount'] >= $this->cost) {
+                        $this->thing->email->sendGeneric($this->from,"iching",$this->subject, $response);
+                        $this->thing->account['stack']->Debit($this->cost);
+                }
+
+
+//echo $this->thing_report['sms'];
+
+// Prepare PNG
+
+		$this->drawHexagram($lines);
+
+		return;
+	}
+
+
+	public function readSubject() {
+
+		$status = true;
+
+	return $status;		
+	}
+
+
+
+	public function changinglines($lines) {
+		$i = 0;
+		$x = "";
+		foreach ($lines as $line) {
+			if ($line[2] == 'changing') {
+				$x .= " ". ($i+1) ;
+				}
+			$i++;
+			}
+		return $x;
+		}
+
+
+	public function textHexagram($lines) {
+		$i = 0;
+		$response ="";
+		foreach (array_reverse($lines) as $line) {
+			if ($line[2] == 'changing') {
+				$response .= ''.$line[1].' changing<br>';	
+				} else {
+				$response .= '' .$line[1].' <br>';	
+				}
+			$i++;
+			}
+		return $response;
+		}
+
+	public function drawHexagram($lines) {
+
+		$width = 70;
+		$bar_height = 8;
+		$border = 4;
+
+		// Create a 70x100 image
+		$im = imagecreatetruecolor($width, 100);
+		$white = imagecolorallocate($im, 255, 255, 255);
+		$black = imagecolorallocate($im, 0, 0, 0);
+		$red = imagecolorallocate($im, 255, 0, 255);
+
+		// Make the background transparent
+		imagecolortransparent($im, $white);
+		imagefilledrectangle($im, 0, 0, 70, 100, $white);
+
+		$x_centre = $width / 2;
+
+		$i = 0;
+		foreach ($lines as $line) {
+			$y_low_left_corner = 4+16*(5-$i);
+			if ($line[2] == 'changing') {$color = $red;} else {$color = $black;}
+			if ($line[1] == '---') {
+				imagefilledrectangle($im, $border, $y_low_left_corner, $width-$border, 	$y_low_left_corner + $bar_height, $color);			
+			} else {
+				imagefilledrectangle($im, $border, $y_low_left_corner, 22, $y_low_left_corner + $bar_height, $color);
+				imagefilledrectangle($im, 22+$border, $y_low_left_corner, 26+18, $y_low_left_corner + $bar_height, $color);
+				imagefilledrectangle($im, 26+18+$border, $y_low_left_corner, $width-$border, $y_low_left_corner + $bar_height, $color);
+			}
+			$i++;
+		}
+
+		// Save the image
+		//header('Content-Type: image/png');
+		//imagepng($im);
+
+		ob_start();
+		imagepng($im);
+		$imagedata = ob_get_contents();
+		ob_end_clean();
+
+		$this->thing_report['png'] = $imagedata;
+
+		//echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
+		$response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="hexagram"/>';
+
+
+		imagedestroy($im);
+
+		return $response;
+
+	}
+
+
+
+
+function bitFlip($n_bits) {
+
+		$bit_string = "";
+
+
+		for ($i = 0; $i <= $n_bits-1; $i++) {
+
+
+				$bit_string .= rand(0,1);
+
+		}
+				
+
+
+		return $bit_string;
+	}	
+
+
+function trigramGenerator() {
+		$trigram_lookup = array('111' => array(0,"Chien", "Chien Qián 乾", "Heaven, Sky, Air"),
+				'110' => array(1, "Tui", "Tui Duì 兌", "Lake Valley"),
+				'101' => array(2, "Li", "Li 離", "Fire"),
+				'100' => array(3, "Chen", "Chen Zhèn 震", "Thunder"),			
+				'011' => array(4, "Sun", "Sun Xùn 巽", "Wind"),
+				'010' => array(5, "Kan", "K'an 坎", "Water"),
+				'001' => array(6, "Ken", "Ken Gèn 艮", "Mountain"),
+				'000' => array(7, "Kun", "K'un Kūn 坤", "Earth"),		
+				);
+		// Heads counts as 2, tails counts as 3
+
+		$random_bits = $this->bitFlip(9);
+		//echo $random_bits;
+
+		//echo "<br>";
+		$lines = str_split($random_bits,3);
+		$trigram = null;
+		$line_readings = array();
+
+		$i = 0;
+		foreach ($lines as $line) {
+			//echo '<br>';
+			//echo $line;
+			$line_sum = null;
+
+			$line = str_split($line,1);
+
+			foreach ($line as $cointoss) {
+				if ($cointoss == 1) {
+					$line_sum = $line_sum + 2;
+				} else {
+
+					$line_sum = $line_sum + 3;
+				}
+
+			}
+			//echo $line_sum;
+			// array_push adds to end of array.
+			// So building trigram from bottom up.
+			//echo ' ' .$i . ":" . $line_sum;
+			switch ($line_sum) {
+				case 6:
+					array_push($line_readings, array("yin","- -","changing"));
+					$trigram .= '0';
+					//echo "- -";
+					break;
+				case 7:
+					array_push($line_readings, array("yang","---",""));
+					$trigram .= '1';
+//echo "---";
+					break;
+				case 8:
+					array_push($line_readings, array("yin","- -",""));
+					$trigram .= '0';
+//echo "- -";
+					break;
+				case 9:
+					array_push($line_readings, array("yang","---","changing"));
+					$trigram .= '1';
+//echo "---";
+					break;
+			}
+
+
+
+		$i++;	
+		}
+		//echo "<br><br>";
+		//echo "trigram:" . $trigram . "<br>";
+		foreach($line_readings as $line_reading) {
+			//echo $line_reading[0] . ' ' . $line_reading[1] . ' ' . $line_reading[2] . '<br>';
+		}
+
+		//echo "<br>".$trigram .' ' .$trigram_lookup[$trigram][2];
+					//echo "<br>";
+			//echo "trigram: ".$trigram;
+			//echo "trigram text: ".$trigram_lookup[$trigram][0] . ' ' .$trigram_lookup[$trigram][1];
+		
+		return array("trigram"=>$trigram_lookup[$trigram],"lines"=>$line_readings);
+	}
+
+	function cafeausoul($n) {
+
+		$cafeausoul_lookup = array(
+	1 => array("http://cafeausoul.com/iching/qian-creative","Qián The Creative"),
+	2 => array("http://cafeausoul.com/iching/kun-receptive","K'un The Receptive"),
+	3 => array("http://cafeausoul.com/iching/chun-difficult-beginnings","Chun Difficult Beginnings"),
+	4 => array("http://cafeausoul.com/iching/meng-youthful-folly","Meng Youthful Folly"),
+	5 => array("http://cafeausoul.com/iching/hsu-nourished-while-waiting","Hsu Nourished While Waiting"),
+	6 => array("http://cafeausoul.com/iching/sung-conflict","Sung Conflict"),
+	7 => array("http://cafeausoul.com/iching/shih-army","Shih Army"),
+	8 => array("http://cafeausoul.com/iching/pi-uniting","Pi Uniting"),
+	9 => array("http://cafeausoul.com/iching/hsiao-chu-small-restraint","Hsiao Ch'u Small Restraint"),
+	10 => array("http://cafeausoul.com/iching/lu-treading","Lu Treading"),
+	11 => array("http://cafeausoul.com/iching/tai-peace","T'ai Peace"),
+	12 => array("http://cafeausoul.com/iching/pi-standstill","P'i Standstill"),
+	13 => array("http://cafeausoul.com/iching/tung-jen-fellowship","T'ung Jen Fellowship"),
+	14 => array("http://cafeausoul.com/iching/ta-yu-great-possessing","Ta Yu Great Possessing"),
+	15 => array("http://cafeausoul.com/iching/qian-authenticity","Qian Authenticity"),
+	16 => array("http://cafeausoul.com/iching/yu-enthusiasm","Yu Enthusiasm"),
+	17 => array("http://cafeausoul.com/iching/sui-following","Sui Following"),
+	18 => array("http://cafeausoul.com/iching/ku-decay","Ku Decay"),
+	19 => array("http://cafeausoul.com/iching/lin-approach","Lin Approach"),
+	20 => array("http://cafeausoul.com/iching/kuan-contemplation","Kuan Contemplation"),
+	21 => array("http://cafeausoul.com/iching/shi-ho-biting-through","Shi Ho Biting Through"),
+	22 => array("http://cafeausoul.com/iching/bi-grace","Bi Grace"),
+	23 => array("http://cafeausoul.com/iching/po-split-apart","Po Split Apart"),
+	24 => array("http://cafeausoul.com/iching/fu-return","Fu Return"),
+	25 => array("http://cafeausoul.com/iching/wu-wang-innocence","Wu Wang Innocence"),
+	26 => array("http://cafeausoul.com/iching/ta-chu-controlled-power","Ta Ch’u Controlled Power"),
+	27 => array("http://cafeausoul.com/iching/yi-nourishing-vision","Yi Nourishing Vision"),
+	28 => array("http://cafeausoul.com/iching/ta-kuo-critical-mass","Ta Kuo Critical Mass"),
+	29 => array("http://cafeausoul.com/iching/kn-abyss","Kǎn Abyss"),
+	30 => array("http://cafeausoul.com/iching/li-clarity","Li Clarity"),
+	31 => array("http://cafeausoul.com/iching/hsien-influencewooing","Hsien Influence/Wooing"),
+	32 => array("http://cafeausoul.com/iching/heng-duration","Heng Duration"),
+	33 => array("http://cafeausoul.com/iching/tun-retreat","Tun Retreat"),
+	34 => array("http://cafeausoul.com/iching/da-zhuang-great-power","Da Zhuang Great Power"),
+	35 => array("http://cafeausoul.com/iching/chin-progress","Chin Progress"),
+	36 => array("http://cafeausoul.com/iching/ming-yi-brightness-hiding","Ming Yi Brightness Hiding"),
+	37 => array("http://cafeausoul.com/iching/chia-jen-family","Chia Jen Family"),
+	38 => array("http://cafeausoul.com/iching/kuei-opposition","K’uei Opposition"),
+	39 => array("http://cafeausoul.com/iching/jian-obstruction","Jian Obstruction"),
+	40 => array("http://cafeausoul.com/iching/jie-liberation","Jie Liberation"),
+	41 => array("http://cafeausoul.com/iching/sun-decrease","Sun Decrease"),
+	42 => array("http://cafeausoul.com/iching/yi-increase","Yi Increase"),
+	43 => array("http://cafeausoul.com/iching/guai-determination","Guai Determination"),
+	44 => array("http://cafeausoul.com/iching/gou-coming-meet","Gou Coming to Meet"),
+	45 => array("http://cafeausoul.com/iching/cui-gathering-together","Cui Gathering Together"),
+	46 => array("http://cafeausoul.com/iching/sheng-pushing-upward","Sheng Pushing Upward"),
+	47 => array("http://cafeausoul.com/iching/kun-oppressionexhaustion","Kùn Oppression/Exhaustion"),
+	48 => array("http://cafeausoul.com/iching/jing-well","Jing The Well"),
+	49 => array("http://cafeausoul.com/iching/ko-moltingrevolution","Ko Molting/Revolution"),
+	50 => array("http://cafeausoul.com/iching/ting-cauldron","Ting Cauldron"),
+	51 => array("http://cafeausoul.com/iching/zhen-shocking","Zhen Shocking"),
+	52 => array("http://cafeausoul.com/iching/ken-keeping-still","Ken Keeping Still"),
+	53 => array("http://cafeausoul.com/iching/jian-development","Ji’an Development"),
+	54 => array("http://cafeausoul.com/iching/kui-mei-propriety","Kui Mei Propriety"),
+	55 => array("http://cafeausoul.com/iching/feng-abundance","Feng Abundance"),
+	56 => array("http://cafeausoul.com/iching/lu-wanderer","Lu The Wanderer"),
+	57 => array("http://cafeausoul.com/iching/xun-penetration","Xun Penetration"),
+	58 => array("http://cafeausoul.com/iching/tui-joy","Tui Joy"),
+	59 => array("http://cafeausoul.com/iching/huan-dispersion","Huan Dispersion"),
+	60 => array("http://cafeausoul.com/iching/jie-limitation","Jie Limitation"),
+	61 => array("http://cafeausoul.com/iching/zhong-fu-inner-truth","Zhong Fu Inner Truth"),
+	62 => array("http://cafeausoul.com/iching/xiao-guo-small-exceeding","Xiao Guo Small Exceeding"),
+	63 => array("http://cafeausoul.com/iching/chi-chi-after-completion","Chi Chi After Completion"),
+	64 => array("http://cafeausoul.com/iching/wei-chi-completion","Wei Chi Before Completion"));
+
+
+		return $cafeausoul_lookup[$n];
+}
+
+	function hexagramLookup($n) {
+
+
+
+		$hexagram_lookup = array(
+			1 => array("乾" , "qián", "Force", "the creative", "strong action", "the key", "god"),
+			2 => array("坤" , "kūn", "Field", "the receptive", "acquiescence", "the flow"),
+			3 => array("屯", "zhūn", "Sprouting", "difficulty at the beginning", "gathering support", "hoarding"),
+			4 => array("蒙", "méng", "Enveloping", "youthful folly", "the young shoot", "discovering"),
+			5 => array("需", "xū", "Attending", "waiting", "moistened", "arriving"),
+			6 => array("訟", "sòng", "Arguing", "conflict", "lawsuit"),
+			7 => array("師", "shī", "Leading", "the army"),
+			8 => array("比", "bǐ", "Grouping", "holding together"),
+			9 => array("小畜", "xiǎo chù", "Small Accumulating", "the taming power of the small"),
+			10 => array("履", "lǚ", "Treading", "treading(conduct)"),
+			11 => array("泰", "tài", "Pervading", "peace"),
+			12 => array("否", "pǐ", "Obstruction", "standstill (stagnation)"),
+			13 => array("同人", "tóng rén", "Concording People", "fellowship"),
+			14 => array("大有", "dà yǒu", "Great Possessing", "possession in great measure"),
+			15 => array("謙", "qiān", "Humbling", "modesty"),
+			16 => array("豫", "yù", "Providing-For","enthusiasm"),
+			17 => array("隨", "suí", "Following" , "following"),
+			18 => array("蠱", "gǔ", "Correction", "work on what has been spoiled"),
+			19 => array("臨", "lín", "Nearing", "approach", "the forest"),
+			20 => array("觀", "guān", "Viewing", "contemplation (view)", "looking up"),
+			21 => array("噬嗑", "shì kè", "Gnawing Bite", "biting through", "biting and chewing"),
+			22 => array("賁", "bì", "Adorning", "grace", "luxuriance"),
+			23 => array("剝", "bō", "Stripping", "splitting apart", "flaying"),
+			24 => array("復", "fù", "Returning", "return (the turning point)"),
+			25 => array("無妄", "wú wàng", "Without Embroiling"),
+			26 => array("大畜", "dà chù", "Great Accumulating"),
+			27 => array("頤", "yí", "Swallowing"),
+			28 => array("大過", "dà guò", "Great Exceeding"),
+			29 => array("坎", "kǎn", "Gorge"),
+			30 => array("離", "lí", "Radiance"),
+			31 => array("咸", "xián", "Conjoining"),
+			32 => array("恆", "héng", "Persevering"),
+			33 => array("遯", "dùn", "Retiring"),
+			34 => array("大壯", "dà zhuàng", "Great Invigorating"),
+			35 => array("晉", "jìn", "Prospering"),
+			36 => array("明夷", "míng yí", "Darkening of the Light"),
+			37 => array("家人", "jiā rén", "Dwelling People", "the family (the clan)
+", "family members"),
+			38 => array("睽", "kuí", "Polarising", "opposition", "perversion"),
+			39 => array("蹇", "jiǎn", "Limping", "obstruction", "afoot"),
+			40 => array("解", "xiè", "Taking-Apart"),
+			41 => array("損", "sǔn", "Diminishing"),
+			42 => array("益", "yì", "Augmenting"),
+			43 => array("夬", "guài", "Displacement"),
+			44 => array("姤", "gòu", "Coupling"),
+			45 => array("萃", "cuì", "Clustering"),
+			46 => array("升", "shēng", "Ascending"),
+			47 => array("困", "kùn", "Confining"),
+			48 => array("井", "jǐng", "Welling"),
+			49 => array("革", "gé", "Skinning", "revolution (molting)", "the bridle"),
+			50 => array("鼎", "dǐng", "Holding"),
+			51 => array("震", "zhèn", "Shake"),
+			52 => array("艮", "gèn", "Bound"),
+			53 => array("漸", "jiàn", "Infiltrating"),
+			54 => array("歸妹", "guī mèi", "Converting the Maiden"),
+			55 => array("豐", "fēng", "Abounding"),
+			56 => array("旅", "lǚ", "Sojourning"),
+			57 => array("巽", "xùn", "Ground", "the gentle (penetrating wind)", "calculations"),
+			58 => array("兌", "duì", "Open"),
+			59 => array("渙", "huàn", "Dispersing"),
+			60 => array("節", "jié", "Articulating"),
+			61 => array("中孚", "zhōng fú", "Center Returning", "inner truth", "central return"),
+			62 => array("小過", "xiǎo guò", "Small Exceeding", "preponderance of the small", "small surpassing"),
+			63 => array("既濟", "jì jì", "Already Fording", "after completion", "already completed"),
+			64 => array("未濟", "wèi jì", "Not Yet Fording", "before completion", "not yet completed")
+			);
+
+
+		return $hexagram_lookup[$n];
+}
+
+
+	function hexagramGenerator() {
+		// upper then lower
+		$hexagram_number_lookup = array('Chien' => array('Chien' => 1, 'Tui'=>10, 'Li'=> 13, 'Chen'=>25, 'Sun' => 44, 'Kan' =>6, 'Ken'=>33, 'Kun' =>12), 
+		'Tui' => array('Chien' => 43, 'Tui'=>58, 'Li'=> 49, 'Chen'=>17, 'Sun' => 28, 'Kan' => 47, 'Ken'=>31, 'Kun' => 45),
+		'Li' => array('Chien' => 14, 'Tui'=>38, 'Li'=> 30, 'Chen'=>21, 'Sun' => 50, 'Kan' => 64, 'Ken'=>56, 'Kun' => 35),
+		'Chen' => array('Chien' => 34, 'Tui'=> 54, 'Li'=> 55, 'Chen'=> 51, 'Sun' => 32, 'Kan' => 40, 'Ken'=> 62, 'Kun' => 16),
+		'Sun' => array('Chien' => 9, 'Tui'=> 61, 'Li'=> 37, 'Chen'=> 42, 'Sun' => 57, 'Kan' => 59, 'Ken'=> 53, 'Kun' => 20),
+		'Kan' => array('Chien' => 5, 'Tui'=> 60, 'Li'=> 63, 'Chen'=> 3, 'Sun' => 48, 'Kan' => 29, 'Ken'=> 39, 'Kun' => 8),
+		'Ken' => array('Chien' => 26, 'Tui'=> 41, 'Li'=> 22, 'Chen'=> 27, 'Sun' => 18, 'Kan' => 4, 'Ken'=> 52, 'Kun' => 23),
+		'Kun' => array('Chien' => 11, 'Tui'=> 19, 'Li'=> 36, 'Chen'=> 24, 'Sun' => 46, 'Kan' => 7, 'Ken'=> 15, 'Kun' => 2));
+
+// https://en.wikipedia.org/wiki/List_of_hexagrams_of_the_I_Ching
+
+
+
+		$upper_trigram = $this->trigramGenerator();
+		$lower_trigram = $this->trigramGenerator();
+
+		//$upper = $upper_trigram["trigram"];
+		//$lower = $lower_trigram["trigram"];
+
+		$hexagram_number = $hexagram_number_lookup[$upper_trigram["trigram"][1]][$lower_trigram["trigram"][1]];
+
+		$hexagram = $this->hexagramLookup($hexagram_number);
+
+		return array("hexagram"=>$hexagram_number, "upper"=>$upper_trigram, "lower"=>$lower_trigram, "hexagram text"=>$hexagram);
+	}
+
+}
+
+
+
+?>

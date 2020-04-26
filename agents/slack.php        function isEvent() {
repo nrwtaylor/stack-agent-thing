@@ -1,0 +1,936 @@
+<?php
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+//require '../vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
+
+
+require_once '/var/www/html/stackr.ca/agents/message.php';
+
+
+ini_set("allow_url_fopen", 1);
+
+class Slack {
+
+
+//    \Ratchet\Client\connect('ws://echo.socketo.me:9000')->then(function($conn) {
+//        $conn->on('message', function($msg) use ($conn) {
+//            echo "Received: {$msg}\n";
+//            $conn->close();
+//        });
+
+//        $conn->send('Hello World!');
+//    }, function ($e) {
+//        echo "Could not connect: {$e->getMessage()}\n";
+//    });
+
+
+
+
+
+	public $var = 'hello';
+
+
+    function __construct(Thing $thing, $input = null) {
+
+
+
+		$this->cost = 50;
+	//function __construct($arguments) {
+
+		//echo $arguments;
+		//var_dump($arguments);
+//  $defaults = array(
+//    'uuid' => Uuid::uuid4(),
+//    'from' => NULL,
+//	'to' => NULL,
+//	'subject' => NULL,
+//	'sqlresponse' => NULL
+//  );
+
+//  $arguments = array_merge($defaults, $arguments);
+
+//  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
+
+
+
+
+		// create container and configure it
+		//$settings = require '/var/www/html/stackr.ca/src/settings.php';
+		//$this->container = new \Slim\Container($settings);
+
+		// create app instance
+		
+
+		//$app = new \Slim\App($this->container);
+		//$this->container = $app->getContainer();
+
+
+		
+
+
+		$this->test= "Development code";
+
+
+
+//		$thingy = $thing->thing;
+		$this->thing = $thing;
+
+
+		$this->thing_report = array('thing' => $this->thing->thing);
+		$this->thing_report['info'] = 'This is the "Slack" agent.';
+
+
+                // Example
+                //$this->api_key = $this->thing->container['api']['translink'];
+                $this->client_secret = $this->thing->container['api']['slack']['client secret'];
+                $this->client_id = $this->thing->container['api']['slack']['client ID'];
+                $this->verification_token = $this->thing->container['api']['slack']['verification token'];
+		$this->bot_user_oauth_access_token = $this->thing->container['api']['slack']['bot user oauth access token'];
+
+
+	        $this->uuid = $thing->uuid;
+        	$this->to = $thing->to;
+        	$this->from = $thing->from;
+        	$this->subject = $thing->subject;
+		$this->sqlresponse = null;
+
+
+$this->node_list = array("sms send"=>array("sms send"));
+
+		$this->thing->log( '<pre> Agent "Slack" running on Thing ' .  $this->uuid . ' </pre>' );
+		$this->thing->log( '<pre> Agent "Slack" received this Thing "' .  $this->subject . '"</pre>' );
+
+
+
+
+
+                // Read the input array.
+// for testing
+/*
+$input = 
+'{
+        "token": "XXYYZZ",
+        "team_id": "TXXXXXXXX",
+        "api_app_id": "AXXXXXXXXX",
+        "event": {
+                "type": "name_of_event",
+                "event_ts": "1234567890.123456",
+                "user": "UXXXXXXX1"
+        },
+        "type": "event_callback",
+        "authed_users": [
+                "UXXXXXXX1",
+                "UXXXXXXX2"
+        ],
+        "event_id": "Ev08MFMKH6",
+        "event_time": 1234567890
+}';
+*/
+//echo "foobar";
+//echo $input;
+
+	$this->eventGet();
+
+//$this->chat_postMessage("C6NQ4A3KQ", "devstack test" );
+
+
+        if ( is_array($input) ) {
+//echo "meep";
+                //$this->thing = $thing;
+	
+                $this->body = $input;
+                //$this->bodytoJson();
+//		$this->body = "bob";
+		$this->eventSet();
+
+		$this->variablesGet();
+
+
+// Filter out messages from the bot
+//if ( ( isset($this->body['event']['bot_id']) ) and ($this->body['event']['bot_id'] == "B6N5VCYCV") ) {
+//	$this->thing->flagGreen();
+//} else {
+
+		$this->thing->flagRed();
+//}
+		return false; // Return having set the Thing's slack variables.  
+		// Next time it is called from the agent handler it won't have an array payload
+
+
+
+
+        }
+                $this->input = $input;
+
+//var_dump($this->body);
+
+
+
+/* Moved to respond
+$this->channel = "C6NQ4A3KQ";
+//$this->channel = "@nrwtaylor";
+$this->sms_message = "Testing";
+$this->chat_postMessage();
+exit();
+
+*/
+
+/* Websocket experimentation.  Might not be needed.
+
+	// Now run a websocket connect to Slack
+		$this->Connect();
+
+echo "<br>----<br>";
+
+if (!isset($this->error_message)) {
+	$this->getEvents();
+
+	//$this->sendEvent();
+
+} else {
+	return true;
+}
+
+
+
+// Test message send
+//$this->makeMessage(); 
+//$this->sendMessage();
+echo "done";
+exit();
+
+*/
+
+
+
+		if ( $this->readSubject() == true) {
+			$this->thing_report = array('thing' => $this->thing->thing, 
+				'choices' => false,
+				'info' => "A cell number wasn't provided.",
+				'help' => 'from needs to be a number.');
+
+		        $this->thing->log( '<pre> Agent "Slack" completed without sending a message</pre>' );
+			return;
+		}
+		$this->respond();
+
+
+
+
+		$this->thing->log ( '<pre> Agent "Slack" completed</pre>' );
+
+		return;
+
+		}
+
+
+
+
+
+
+        function eventSet() {
+
+
+                $this->thing->log( '<pre> Agent "Slack" called eventSet()</pre>' );
+
+
+                $this->thing->db->setFrom($this->from);
+                //$this->thing->json->setField("variables");
+                //$this->thing->json->writeVariable( array("slack") , $this->body  );
+
+                $this->thing->json->setField("message0");
+
+                $this->thing->json->writeVariable( array("slack") , $this->body  );
+
+
+                //$this->thing->flagGreen();
+		return;
+                }
+
+        function eventGet() {
+
+
+                $this->thing->log( '<pre> Agent "Slack" called eventGet()</pre>' );
+
+
+                $this->thing->db->setFrom($this->from);
+               // $this->thing->json->setField("variables");
+               // $this->body = $this->thing->json->readVariable( array("slack") );
+
+                $this->thing->json->setField("message0");
+                $this->body = $this->thing->json->readVariable( array("slack") );
+
+
+$this->variablesGet();
+
+
+                //$this->thing->flagGreen();
+		return $this->body;
+                }
+
+	function variablesGet() {
+
+$this->channel_id = $this->getChannel();
+//$this->channel_id =  $this->body['channel_id'];
+
+//if (!isset( $this->channel_id )) {
+//$this->channel_id = $this->body['event']['channel'];
+//}
+
+$this->user = $this->getUser();
+
+$this->text = $this->getText();
+$this->response_url = $this->body['response_url'];
+
+return;
+
+	}
+
+
+
+	private function respond() {
+
+//$this->chat_postMessage("C6NQ4A3KQ","Meep2");
+
+		// Thing actions
+
+
+		$this->thing->flagGreen();
+
+
+		// Generate email response.
+
+		if ( $this->isCommand() ) {
+			$to = $this->getChannel();['type']) and ( $this->body['type'] == 'event_callback) ) {
+                        return true;
+                } else {
+                        return false;
+                }
+        }
+
+		}
+
+		$to = $this->from;
+//		$from = $this->to;
+
+		//echo "<br>";
+
+
+
+//		$choices = $this->thing->choice->makeLinks($this->state);
+		//echo "<br>";
+		//echo $html_links;
+
+		if ($this->input != null) {
+			$test_message = $this->input;
+		} else {
+			$test_message = $this->subject;
+		}
+
+
+//$this->chat_postMessage("C6NQ4A3KQ","Meep2");
+//$this->chat_postMessage("C6NQ4A3KQ","-".$test_message."-");
+
+
+//	$this->channel = $this->from;
+
+                $this->thing->json->setField("message0");
+//                $this->channel = $this->thing->json->readVariable( array("slack", "channel_id") );
+
+                $this->response_url = $this->thing->json->readVariable( array("slack", "response_url") );
+echo $this->response_url;
+
+if ($this->response_url != false) {
+	$this->chat_webhookResponse(null,$test_message);
+	
+                        $this->thing->log("Slack message sent");
+
+                        $this->thing_report['info'] = '<pre> Agent "Slack" sent a Slack webhook response.</pre>';
+
+
+			$this->thing_report['choices'] = false;
+			$this->thing_report['help'] = 'In development.';
+			$this->thing_report['log'] = $this->thing->log;
+			$this->thing->flagGreen();
+			return $this->thing_report;
+}
+
+
+//echo $this->channel_id;
+
+//$this->chat_postMessage($this->channel_id, $this->channel_id);
+
+
+
+
+//if ($this->channel_id != false) {
+
+echo "Responding in channel";
+//$test_message = "meepfoo";
+
+//$this->chat_postMessage("C6NQ4A3KQ", "devstack test" );
+//$this->chat_postMessage("C6NQ4A3KQ","Meep");
+//$this->chat_postMessage($this->channel_id, "Test" . $test_message);
+
+
+
+if (!isset($test_message)) { $test_message = "null message"; } else {}
+
+$this->chat_postMessage($this->channel_id, $test_message);
+
+
+//$this->chat_postMessage($this->channel_id, "foo".$test_message."bar" );
+
+//$this->chat_postMessage("C6NQ4A3KQ", "devstack test" );
+
+       // $this->chat_postMessage($this->channel_id,$test_message);
+
+                        $this->thing->log("Slack message sent to " . $this->channel_id);
+
+                        $this->thing_report['info'] = '<pre> Agent "Slack" sent a Slack message to channel ' . $this->channel_id . '</pre>';
+
+
+                        $this->thing_report['choices'] = false;
+                        $this->thing_report['help'] = 'In development.';
+                        $this->thing_report['log'] = $this->thing->log;
+			$this->thing->flagGreen();
+                        return $this->thing_report;
+//}
+
+
+//$this->channel = "@nrwtaylor";
+//$this->sms_message = "Received";
+
+//$this->chat_postMessage($this->channel_id, "Response: " . $this->text);
+//echo "sednign";
+//$this->chat_webhookResponse($this->channel_id,$test_message);
+//echo "sent";
+//exit();
+
+		
+
+//		if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
+//			$this->sendMessage($to, $test_message);
+
+
+
+
+//			$this->thing->account['stack']->Debit($this->cost);
+
+//                        $message_thing = new Message($this->thing, $this->thing_report);
+//                        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+
+
+
+
+			$this->thing->log("Slack message sent");
+
+			$this->thing_report['info'] = '<pre> Agent "Slack" sent a Slack message to ' . $this->from . '.</pre>';
+//
+//		} else {
+//
+//			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
+//		}
+
+
+$this->thing_report['choices'] = false;
+//$this->thing_report['info'] = 'This is a facebook message agent.';
+$this->thing_report['help'] = 'In development.';
+$this->thing_report['log'] = $this->thing->log;
+
+		//echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
+//echo $message;
+
+		return;
+
+
+	}
+
+
+	public function readSubject() {
+
+		
+//		if ( !is_numeric($this->from) ) {
+			// This isn't a textable number.
+//			return true;
+//		}
+
+
+		return false;
+
+
+	}
+
+
+	function Connect() {
+
+/* Expected response style
+{
+    "ok": true,
+    "url": "wss:\/\/ms9.slack-msgs.com\/websocket\/2I5yBpcvk",
+    "team": {
+        "id": "T654321",
+        "name": "Librarian Society of Soledad",
+        "domain": "libsocos",
+        "enterprise_id": "E234567",
+        "enterprise_name": "Intercontinental Librarian Society"
+    },
+    "self": {
+        "id": "W123456",
+        "name": "brautigan"
+    }
+}
+
+*/
+
+		$token = $this->bot_user_oauth_access_token; 
+
+//		$sender = $to;
+//		$message_to_reply = $text;
+
+		//API url
+		$url = "https://slack.com/api/rtm.connect?token=" . $token;
+
+		//Initiate cURL.
+		$ch = curl_init($url);
+ 
+		//The JSON data.
+		//$jsonData = '{"token":"' . $token . '"}';
+		$jsonData = "";
+
+		//Encode the array into JSON.
+		$jsonDataEncoded = $jsonData;
+ 
+		//Tell cURL that we want to send a POST request.
+		curl_setopt($ch, CURLOPT_POST, 1);
+
+
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+ 
+		//Set the content type to application/json
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+ 
+		//Execute the request
+echo "<br>";
+ $result = curl_exec($ch);
+echo $result;
+$response = json_decode($result);
+
+if ($response->ok) {
+	$this->resource_id = $ch;
+	$this->websocket_url = $response->url;
+	$this->team = $response->team;
+	$this->self = $response->self;	
+
+
+echo "<br>Connected and found,";
+echo $this->self->name. "'s ID is " . $this->self->id . ".";
+	// Valid response
+} else {
+echo "Unable to connect";
+	$this->error_message = $response->error;
+	echo $this->error_message;
+	// Invalid respsone
+}
+
+		return;
+
+	}
+
+
+
+
+        function chat_webhookResponse($to,$message) {
+
+                //https://api.slack.com/methods/chat.postMessage
+                $token = $this->bot_user_oauth_access_token; 
+
+                echo "<br>channel:".$this->channel_id;
+
+                echo "<br>user:".$this->getUser();
+            //    $this->sms_message = "test";
+
+                //API url
+                $url = $this->response_url;
+
+//echo $url;
+                //Initiate cURL.
+                $slack_call = curl_init($url);
+                //The JSON data.
+                //$jsonData = '{"token":"' . $token . '"}';
+//                $data = array(
+//			"channel" => $to,
+//			"text" => $message
+//			);
+
+                $data = array(
+                        "text" => $message
+                        );
+
+
+//var_dump($data);
+
+                //Encode the array into JSON.
+                $json_string = json_encode($data);
+                //Tell cURL that we want to send a POST request.
+  //              curl_setopt($ch, CURLOPT_POST, 1);
+  //              curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                //Set the content type to application/json
+  //              curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+curl_setopt($slack_call, CURLOPT_CUSTOMREQUEST, "POST");
+curl_setopt($slack_call, CURLOPT_POSTFIELDS, $json_string);
+curl_setopt($slack_call, CURLOPT_CRLF, true);
+curl_setopt($slack_call, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($slack_call, CURLOPT_HTTPHEADER, array(
+    "Content-Type: application/json",
+    "Content-Length: " . strlen($json_string))
+);
+
+
+
+                //Execute the request
+                $result = curl_exec($slack_call);
+                echo "result:".$result;
+                $response = json_decode($result);
+
+                if ($result == "ok") {
+                        //$this->resource_id = $slack_call;
+                        //$this->websocket_url = $response->url;
+                        //$this->team = $response->team;
+                        //$this->self = $response->self;  
+			$this->thing_report['info'] = $result;
+                        return false;
+//echo "<br>Connected and found,";
+//echo $this->self->name. "'s ID is " . $this->self->id . ".";
+                        // Valid response
+                } else {
+                        return true;
+//echo "Unable to connect";
+//        $this->error_message = $response->error;
+//        echo $this->error_message;
+        // Invalid respsone
+                }
+                return;
+        }
+
+
+
+
+        function chat_postMessage($to, $message) {
+echo "chat_postMessage";
+		//https://api.slack.com/methods/chat.postMessage
+                $token = $this->bot_user_oauth_access_token; 
+
+//		echo $this->channel;
+//		$this->sms_message = "test";
+echo $to;
+echo $message;
+                //API url
+                $url = 'https://slack.com/api/chat.postMessage?token=' . $token . "&channel=" . $to . '&text=' . $message;
+                //Initiate cURL.
+                $ch = curl_init($url);
+                //The JSON data.
+                //$jsonData = '{"token":"' . $token . '"}';
+                $jsonData = "";
+                //Encode the array into JSON.
+                $jsonDataEncoded = $jsonData;
+                //Tell cURL that we want to send a POST request.
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                //Set the content type to application/json
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+                //Execute the request
+		$result = curl_exec($ch);
+		echo "postMessage result".$result;
+		$response = json_decode($result);
+echo "response:". $response;
+		if ($response->ok) {
+        		$this->resource_id = $ch;
+        		$this->websocket_url = $response->url;
+        		$this->team = $response->team;
+        		$this->self = $response->self;  
+
+			return false;
+//echo "<br>Connected and found,";
+//echo $this->self->name. "'s ID is " . $this->self->id . ".";
+        		// Valid response
+		} else {
+			return true;
+//echo "Unable to connect";
+//        $this->error_message = $response->error;
+//        echo $this->error_message;
+        // Invalid respsone
+		}
+                return;
+        }
+
+
+        function isEvent() {
+
+                if ( isset( $this->body['command'] ) )  {
+			return true;
+		} else {
+			return false;
+		}
+
+        }
+
+        function isCommand() {
+
+                if ( (isset( $this->body['type']) ) and ( $this->body['type'] == 'event_callback') ) {
+                        return true;
+                } else {
+                        return false;
+                }
+        }
+
+
+
+	function getChannel() {
+
+		$this->channel_id =  $this->body['channel_id'];
+
+		if (!isset( $this->channel_id )) {
+			$this->channel_id = $this->body['event']['channel'];
+		}
+
+
+		return $this->channel_id;
+	}
+
+
+        function getUser() {
+
+                $this->user =  $this->body['user_id'];
+
+                if (!isset( $this->user )) {
+                        $this->user = $this->body['event']['user'];
+                }
+
+
+                return $this->user;
+        }
+
+
+        function getText() {
+
+                $this->text =  $this->body['text'];
+
+                if (!isset( $this->user )) {
+                        $this->text = $this->body['event']['text'];
+                }
+
+
+                return $this->text;
+        }
+
+
+        function getTeam() {
+
+                $this->team =  $this->body['team_id'];
+
+                //if (!isset( $this->user )) {
+                //        $this->user = $this->body['event']['user'];
+                //}
+
+
+                return $this->team;
+        }
+
+        function getToken() {
+
+                $this->token =  $this->body['token'];
+
+                //if (!isset( $this->user )) {
+                //        $this->user = $this->body['event']['user'];
+                //}
+
+
+                return $this->token;
+        }
+
+
+
+	function getEvents() {
+echo "<br>Get events<br>";
+/* Message format
+{
+    "type": "message",
+    "ts": "1358878749.000002",
+    "user": "U023BECGF",
+    "text": "Hello"
+}
+*/
+            $wsUrl = $this->websocket_url;
+
+            $loop = React\EventLoop\Factory::create();
+            $connector = new Ratchet\Client\Connector($loop);
+
+            $connector($wsUrl)
+            ->then(function(Ratchet\Client\WebSocket $conn) {
+	        $conn->on('message', function(\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn) {
+        	echo "<br>";echo "Received: {$msg}\n";echo "<br>";
+            	// $conn->close();
+            	});
+
+            	$conn->on('close', function($code = null, $reason = null) {
+            	echo "<br>";echo "Connection closed ({$code} - {$reason})\n";
+            });
+
+$t= '';
+
+if (isset($this->message)) {
+            $conn->send($t);
+}
+            }, function(\Exception $e) use ($loop) {
+            echo "<br>";echo "Could not connect: {$e->getMessage()}\n";
+            $loop->stop();
+            });
+
+            $loop->run();
+	return;
+	}
+
+
+
+        function sendMessage() {
+
+//return;
+
+/* Incomming Message format
+{
+    "type": "message",
+    "ts": "1358878749.000002",
+    "user": "U023BECGF",
+    "text": "Hello"
+}
+*/
+	//$this->Connect();
+
+            $wsUrl = $this->websocket_url;
+
+            $loop = React\EventLoop\Factory::create();
+            $connector = new Ratchet\Client\Connector($loop);
+
+            $connector($wsUrl)
+            ->then(function(Ratchet\Client\WebSocket $conn) {
+                $conn->on('message', function(\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn) {
+                echo "Received: {$msg}\n";echo "<br>";
+                // $conn->close();
+                });
+
+                $conn->on('close', function($code = null, $reason = null) {
+                echo "Connection closed ({$code} - {$reason})\n";
+            });
+
+            $conn->send($this->message);
+            }, function(\Exception $e) use ($loop) {
+            echo "Could not connect: {$e->getMessage()}\n";
+            $loop->stop();
+            });
+
+            $loop->run();
+        return;
+        }
+
+
+	function makeMessage() {
+/*
+$array = 
+'{
+        "token": "XXYYZZ",
+        "team_id": "TXXXXXXXX",
+        "api_app_id": "AXXXXXXXXX",
+        "event": {
+                "type": "name_of_event",
+                "event_ts": "1234567890.123456",
+                "user": "UXXXXXXX1",
+                ...
+        },
+        "type": "event_callback",
+        "authed_users": [
+                "UXXXXXXX1",
+                "UXXXXXXX2"
+        ],
+        "event_id": "Ev08MFMKH6",
+        "event_time": 1234567890
+}';
+*/
+
+        //Options
+        $token    = $this->bot_user_oauth_access_token; 
+        $domain   = 'mordok';
+        $channel  = $this->getChannel();
+        $bot_name = 'mordok';
+        $icon     = ':alien:';
+        $message  = 'Test message';
+        $attachments = array([
+            'fallback' => 'Lorem ipsum',
+            'pretext'  => 'Lorem ipsum',
+            'color'    => '#ff6600',
+            'fields'   => array(
+                [
+                    'title' => 'Title',
+                    'value' => 'Lorem ipsum',
+                    'short' => true
+                ],
+                [
+                    'title' => 'Notes',
+                    'value' => 'Lorem ipsum',
+                    'short' => true
+                ]
+            )
+        ]);
+        $data = array(
+            'channel'     => $channel,
+            'username'    => $bot_name,
+            'text'        => $message,
+            'icon_emoji'  => $icon,
+            'attachments' => $attachments
+        );
+        $data_string = json_encode($data);
+
+/*
+        $ch = curl_init('https://'.$domain.'.slack.com/services/hooks/incoming-webhook?token='.$token);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data_string))
+            );
+        //Execute CURL
+        $result = curl_exec($ch);
+
+*/
+	$this->message = $data_string;
+//echo $result;
+        return $data_string;
+
+
+//echo "bodytoJson";
+//$this->team_id = "bob";
+//echo "<pre>";print_r($this->thing->thing);echo "</pre>";
+$this->eventSet();
+
+return;
+}
+
+
+
+
+
+
+
+
+
+}
+
+?>
+

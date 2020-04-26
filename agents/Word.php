@@ -330,7 +330,9 @@ $this->wordpress = "off";
      */
     function randomWord($number = null) {
 
-if (!isset($this->ewol_dictionary)) {return true;}
+if (!isset($this->ewol_dictionary)) {$this->ewolWords();
+//return true;
+}
 
         $min_number = 3;
         $max_number = $number;
@@ -345,6 +347,7 @@ if (!isset($this->ewol_dictionary)) {return true;}
             }
         }
         $this->word = $word;
+        return $word;
     }
 
     public function getContents() {
