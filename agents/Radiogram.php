@@ -49,7 +49,7 @@ class Radiogram extends Agent
         //var_dump($this->thing);
         //exit();
 
-        $this->getMemcached();
+//        $this->getMemcached();
     }
 
     function isRadiogram($state = null)

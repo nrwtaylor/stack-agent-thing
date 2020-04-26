@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Stackr</title>
+        <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+        <style>
+            body {
+                margin: 50px 0 0 0;
+                padding: 0;
+                width: 100%;
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                text-align: center;
+                color: #aaa;
+                font-size: 18px;
+            }
+
+            h1 {
+                color: #719e40;
+                letter-spacing: -3px;
+                font-family: 'Lato', sans-serif;
+                font-size: 100px;
+                font-weight: 200;
+                margin-bottom: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Stackr</h1>
+        <div>providing technology to get things done</div>
+
+<p>
+
+<br>
+<br>
+
+<?= htmlspecialchars($info); ?><p>
+<?= htmlspecialchars($help); ?>
+
+<br>
+<br>
+
+
+
+        <?php 
+	foreach ($things as $thing) { ?>
+		
+		"<?=htmlspecialchars($thing['task']); ?>"
+		[<a href="/thing/<?= htmlspecialchars($thing['uuid']); ?>/forget " target="_blank">Forget</a>]<p>
+
+
+
+<!--
+		<?=htmlspecialchars($thing['created_at']); ?><br>
+		<?=htmlspecialchars($thing['uuid']); ?><p>
+-->
+
+
+        <?php } ?>
+
+
+<!--
+        <?php 
+	foreach ($things as $thing) {
+		foreach ($thing as $key => $value) {
+
+			?><h2><?= htmlspecialchars($key); ?> : <?= htmlspecialchars($value); ?></h2>
+
+	        <?php } ?>
+
+        <?php } ?>
+-->
+
+
+
+
+    </body>
+</html>
+
+
+

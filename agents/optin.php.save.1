@@ -1,0 +1,236 @@
+<?php
+// Call regularly from cron 
+// On call determine best thing to be addressed.
+
+// Start by picking a random thing and seeing what needs to be done.
+
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+//require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
+//require '../vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
+
+
+//require '../src/watson.php';
+//require_once '../src/stackdb.php';
+require '/var/www/html/stackr.ca/agents/newuser.php';
+require '/var/www/html/stackr.ca/agents/optout.php';
+
+
+class Optin {
+
+	function __construct(Thing $thing) {
+		//echo "Receipt called";
+
+echo "<pre>";print_r($thing->thing);echo "</pre>";		
+
+		$this->thing = $thing;
+		$this->agent_name = 'usermanager';
+
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+		// I think.
+		// Instead.
+
+        $this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
+		//$this->sqlresponse = null;
+
+		$this->node_list = array("new user"=>array("repeat opt-in"=>array("opt-out","redpanda"), "opt-in"=>
+							array("opt-out"=>array("opt-in","delete"))));
+
+
+		echo '<pre> Agent "Optin" running on Thing ';echo $this->uuid;echo'</pre>';
+
+		echo '<pre> Agent "Optin" received this Thing "';echo $this->subject;echo'"</pre>';
+
+		//echo "construct email responser";
+
+		// If readSubject is true then it has been responded to.
+		// Forget thing.
+
+		$this->previous_state = $this->thing->getState('usermanager');
+
+		echo '<pre> Agent "Optin" previous usermanager state: ';echo $this->previous_state;echo'</pre>';
+
+
+		$this->readSubject();
+		$thing_report = $this->respond();
+
+		$this->thing_report = $thing_report;
+
+		$this->thing->flagGreen();
+//echo "this->uuid" . $this->uuid . "<br>";
+//echo "this->thing->uuid" . $this->thing->uuid . "<br>";
+		echo '<pre> Agent "Optin" completed</pre>';
+		
+		return;
+	}
+
+	public function respond() {
+
+		// Thing actions
+
+		// New user is triggered when there is no nom_from in the db.
+		// If this is the case, then Stackr should send out a response
+		// which explains what stackr is and asks either
+		// for a reply to the email, or to send an email to opt-in@stackr.co.
+
+		$this->thing->json->setField("settings");
+		$this->thing->json->writeVariable(array($this->agent_name,"opt-in",
+			"received_at"),  date("Y-m-d H:i:s")
+			);
+
+		$this->thing->flagGreen();
+
+		// Get the current user-state.
+
+		switch ($this->previous_state) {
+			case 'opt-out':
+
+				$thing_temp = new Optout($this->thing);
+				$thing_report = $thing_temp->thing_report;
+
+				break;
+			case 'opt-in':
+
+
+				// Last state was opt-int, now is opt-in.  Again.  This isn't
+				// what we were expecting.
+
+                                $node_list = array('start'=>array('opt-out','credit'));
+				$start_state = $this->thing->getState('start');
+
+				// This is where we inform the start engine of one user start.
+				// Opting in...
+
+
+
+		     		$this->thing->choice->Create('start', $node_list, "start");
+
+				// And then use the same tool to make the opt-out and credit 'temporary choices'
+				// as buttons.  Allows for other keywords to be injected.
+				$choices = $this->thing->choice->makeLinks('start');
+
+
+//				$test_message = $choices['url'];
+
+				$subject = "Well hello?";
+
+				$message = "So an action you took (or someone else took) opted you into 
+					Stackr.
+					<br>
+					There is always that little element of uncertainity.  So we clearly think
+					this is a good thing and are excited to start
+					making associations from your emails that (which?) we know will be
+					helpful or useful to you.
+					<br>
+					So thanks for that and be sure to keep an eye on your stack balance. Which
+					will be maintained at least until you opt-out.  
+					<br>
+					Keep on stacking.
+
+					";
+
+				//echo $choices['button'];
+
+				$this->thing->email->sendGeneric($this->from,$this->agent_name,$subject, $message, $choices);
+				echo '<pre> Agent "Optin" terms sent to '; echo $this->from; echo ' </pre>';
+
+				$thing_report = array('thing' => $this->thing->thing, 'choices' => $choices, 'info' => 'This is the opt-in agent responding to a valid opt-in request.','help' => 'Opt-in mechanism.');
+
+				break;
+
+
+			case 'new user':
+
+				// Last state was newuser, now is opt-in.  This is
+				// what we are expecting.
+
+				$choices = $this->thing->choice->makeLinks('opt-in');
+
+//				$test_message = $choices['url'];
+
+
+				$subject = "Opt-in request accepted";
+
+				$message = "Thank you for your opt-in request.  'optin' has 
+					added ".$this->from." to the accepted list of Stackr emails.
+					You can now use Stackr.  Keep on stacking.\n\n";
+
+				//echo $choices['button'];
+
+				$this->thing->email->sendGeneric($this->from,$this->agent_name,$subject, $message, $choices);
+				echo '<pre> Agent "Optin" terms sent to '; echo $this->from; echo ' </pre>';
+
+				$thing_report = array('thing' => $this->thing->thing, 'choices' => $choices, 'info' => 'This is the opt-in agent responding to a valid opt-in request.','help' => 'Opt-in mechanism.');
+
+				break;
+			case null;
+				// An opt-in request from user with null user state.
+				// Treat as new user request.
+				$thing_temp = new Newuser($this->thing);
+				$thing_report = $thing_temp->thing_report;
+
+				break;
+			default:
+				$thing_report = array('thing'=>false);	
+	
+			} 
+
+		$this->thing->flagGreen();
+
+
+		return $thing_report;
+	}
+
+
+
+	public function readSubject() {
+
+//		$this->thing->choice->Choose("new user");
+		return;		
+
+	}
+
+
+	function optin() {
+
+		$this->thing = new Thing(null);
+		$this->thing->Create($this->from, $this->agent_name, "Stack record: The last choice was opt-in");
+
+		$this->thing->choice->Create($this->agent_name, $this->node_list, "opt-in");
+
+		$this->thing->flagGreen();
+
+		return;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+?>

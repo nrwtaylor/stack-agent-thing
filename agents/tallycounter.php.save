@@ -1,0 +1,425 @@
+<?php
+
+error_reporting(E_ALL);ini_set('display_errors', 1);
+
+
+
+require_once('/var/www/html/stackr.ca/lib/fpdf.php');
+require_once('/var/www/html/stackr.ca/lib/fpdi.php');
+
+require_once '/var/www/html/stackr.ca/agents/message.php';
+require_once '/var/www/html/stackr.ca/agents/tally.php';
+
+//include_once('/var/www/html/stackr.ca/src/pdf.php'); 
+
+
+class Tallycounter{
+
+    // So Tallycounter tallies up.  It follows
+    // the uuid chain and calculates the count.
+
+    // If an Agent gives it a command, it will set up the 
+    // parameters of the Tally, which by default are:
+    //   tallycounter / mordok  /  tally@stackr.ca
+    
+    //   tallycounter  <agent> <identity> ie
+    // a tallycounter for mordok for tally@stackr.ca
+
+    // Without an agent instruction, tallycounter
+    // return the calling identities self-count.
+
+    //   tallycounter / thing  /   $this->from
+
+	function __construct(Thing $thing, $agent_command = null) {
+
+        $this->start_time = microtime(true);
+
+        // Setup Thing
+        $this->thing = $thing;
+        $this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
+
+        // Setup Agent
+        $this->agent = strtolower(get_class());
+        $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
+
+        // Setup logging
+        $this->thing_report['thing'] = $this->thing->thing;
+
+//Testing
+//$agent_command = "tallycounter message tally@stackr.ca";
+
+        if ($agent_command == null) {
+            $this->thing->log( 'Agent "Tally" did not find an agent command.' );
+        }
+
+        $this->agent_command = $agent_command;
+        $this->nom_input = $agent_command . " " . $this->from . " " . $this->subject;
+
+
+        $this->readInput();
+        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
+
+
+
+        $this->readInput();
+
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+		// I think.
+		// Instead.
+
+
+		$this->node_list = array("start");
+
+		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>' );
+
+        // Not sure this is limiting.
+
+    
+
+
+
+        $this->getAgent();
+
+        // Set Tallycount
+        $this->current_time = $this->thing->json->time();
+
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable( array("tallycounter", "count"), $this->count );
+        $this->thing->json->writeVariable( array("tallycounter", "name"), $this->name );
+
+        $this->thing->json->writeVariable( array("tallycounter", "display"), $this->display );
+        $this->thing->json->writeVariable( array("tallycounter", "refreshed_at"), $this->current_time );
+
+
+
+
+		$this->Respond();
+
+
+        $this->end_time = microtime(true);
+        $this->actual_run_time = $this->end_time - $this->start_time;
+        $milliseconds = round($this->actual_run_time * 1000);
+
+        $this->thing->log( 'Agent "Tallycounter" ran for ' . $milliseconds . 'ms.' );
+
+        $this->thing_report['log'] = $this->thing->log;
+		return;
+	}
+
+
+
+    function getTallycounter() {
+        $this->getVariables("tally");
+        // which will match the name
+
+//echo "<br><pre>";
+
+$next_uuid = $this->variables_thing->uuid;
+
+$index = 0;
+$count = 0;
+$display = "";
+  //      $arr = array("a","b","c");
+        
+//        foreach ($arr as $dump) {
+while ($next_uuid != false) {
+//if ($next_uuid == false) {break;}        
+
+        $thing = new Thing($next_uuid);
+        $thing->db->setFrom($this->identity);
+        $thing->json->setField("variables");
+
+
+        $variable = $thing->json->readVariable( array("tally", "variable") );
+        $limit = $thing->json->readVariable( array("tally", "limit") );
+        $next_uuid = $thing->json->readVariable( array("tally", "next_uuid") );
+
+//echo $thing->uuid . " | ";
+//echo "variable:".$variable;
+//echo "limit:".$limit;
+//echo "nuuid:".$next_uuid; echo "<br>";
+//var_dump($next_uuid);
+
+$count = $count  + pow($limit,$index) * ($variable);
+$display = $variable . '/' . $display ;
+
+$index += 1;
+if ($next_uuid == false) {break;}
+
+        }
+
+//echo $count;
+//echo "<br>";
+//echo $display;
+
+$this->count = $count;
+$this->display = $display;
+
+//exit();
+    }
+
+    function getAgent() 
+    {
+        // Tallycounter
+        $this->getTallycounter();
+
+        return;
+    }
+
+	function getVariables($agent = null) {
+
+        if ($agent == null) {
+            $agent = $this->agent;
+        }
+
+        $this->variables_horizon = 5;
+        $this->variables_agent = $agent; // Allows getVariables to pull in a different agents variables.
+        // Here we only need to save the count.
+        // But need to inspect Tally
+
+
+//        $this->variables_agent = $agent;
+
+        // So this returns the last 3 tally Things.
+        // which should be enough.  One should be enough.
+        // But this just provides some resiliency.
+
+        $this->thing->log( 'Agent "Tallycounter" requested the variables.' );
+
+
+        // We will probably want a getThings at some point.
+        $this->thing->db->setFrom($this->identity);
+        $thing_report = $this->thing->db->agentSearch($this->variables_agent, $this->variables_horizon);
+        $things = $thing_report['things'];
+//echo "<br>----";
+//echo $this->identity;
+//echo $this->variables_agent;
+//echo $this->variables_horizon;
+//echo $this->name;
+//echo "----<br>";
+        // When we have that list of Things, we check it for the tally we are looking for.
+        // Review using $this->limit as search length limiter.  Might even just
+        // limit search to N microseconds of search. 
+        if ( $things == false  ) {
+//            $this->thing->log( 'Agent "Tally" getVariables did not find any Tally Things.' );
+
+//echo "no things found";
+
+            // No tally found.
+            $this->startVariables();
+//echo $this->identity;
+//echo "<br>";
+//echo count($things);
+//exit();
+
+            
+        } else {
+
+            $this->thing->log( 'Agent "Tallycounter" got ' . count($things) . ' recent Tally Things.' );
+
+
+            foreach ($things as $thing) {
+                // Check each of the three Things.
+                $this->variables_thing = new Thing($thing['uuid']);
+
+                $this->getVariable('variable');
+                $this->getVariable('name');
+                $this->getVariable('next_uuid');
+
+
+                if ($this->name == $this->variables_thing->name)  {
+
+                    $this->thing->log( 'Agent "Tallycounter" loaded the tallycounter variable: ' . $this->variables_thing->variable . '.' );
+                    $this->thing->log( 'Agent "Tallycounter" loaded the tallycounter name: ' . $this->variables_thing->name . '.' );
+                    $this->thing->log( 'Agent "Tallycounter" next counter pointer is: ' . substr($this->variables_thing->next_uuid,0,4) . "." );
+                    return;
+                }
+
+//                 $this->thing->log( 'Agent "Tally" did not find a match for ' . $this->name ."." );
+                // So couldn't find a matching variable.  Reset.
+                //$this->resetVariable();
+            }
+
+//echo "no variables loaded";
+            $this->startVariables();
+            // So we get dropped out here with $this->variables_thing set
+        }
+        return;
+	}
+
+
+
+
+	function startVariables() 
+    {
+        $this->thing->log( 'Agent "Tallycounter" started a count.' );
+
+        if (!isset($this->variables_thing)) { $this->variables_thing = $this->thing;}
+
+        $this->setVariable("variable", 0);
+        $this->setVariable("name", $this->name);
+//exit();
+
+//        $thing = new Thing(null);
+//        $this->setVariable("next_uuid", $thing->uuid);
+
+
+		return;
+	}
+
+
+    function getVariable($variable = null) {
+
+        // Pulls variable from the database
+        // and sets variables thing on the current record.
+        // so shouldn't need to adjust the $this-> set
+        // of variables and can refactor that out.
+
+        // All variables should be callable by
+        // $this->variables_thing.
+
+        // The only Thing variable of use is $this->from
+        // which is used to set the identity for 
+        // self-tallies.  (Thing and Agent are the 
+        // only two role descriptions.)
+
+        if ($variable == null) {$variable = 'variable';}
+
+//echo $this->identity;
+//echo "meep";
+//exit();
+
+        $this->variables_thing->db->setFrom($this->identity);
+        $this->variables_thing->json->setField("variables");
+        $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variables_agent, $variable) );
+
+        // And then load it into the thing
+//        $this->$variable = $this->variables_thing->$variable;
+//        $this->variables_thing->flagGreen();
+
+        return $this->variables_thing->$variable;
+    }
+
+    function setVariable($variable = null, $value) 
+    {
+
+        // Take a variable in the variables_thing and save
+        // into the database.  Probably end
+        // up coding setVariables, to 
+        // speed things up, but it isn't needed from
+        // a logic perspective.
+
+        if ($variable == null) {$variable = 'variable';}
+//        if (!isset($this->variables_thing)) { $this->variables_thing = $this->thing;}
+
+        $this->variables_thing->$variable = $value;
+
+//echo $value;
+//echo $this->identity;
+//exit();
+
+        $this->variables_thing->db->setFrom($this->identity);
+        $this->variables_thing->json->setField("variables");
+        $this->variables_thing->json->writeVariable( array($this->variables_agent, $variable), $value );
+
+//        $this->$variable = $value;
+//        $this->variables_thing->flagGreen();
+
+        return $this->variables_thing->$variable;
+    }
+
+
+
+
+
+	public function Respond() {
+
+		// Develop the various messages for each channel.
+
+		// Thing actions
+		// Because we are making a decision and moving on.  This Thing
+		// can be left alone until called on next.
+		$this->thing->flagGreen(); 
+
+
+        $this->thing->log( 'Agent "Tallycounter" variable is ' . $this->variables_thing->variable . '.' );
+
+		$this->sms_message = "TALLY COUNTER  = " . number_format($this->count);
+
+        $this->sms_message .= " | " . $this->display;
+        $this->sms_message .= " | " . $this->name;
+
+        if (isset($this->function_message)) {
+            $this->sms_message .= " | " . $this->function_message;
+        }
+		$this->sms_message .= ' | TEXT ?';
+
+		$this->thing_report['thing'] = $this->thing->thing;
+		$this->thing_report['sms'] = $this->sms_message;
+
+
+		// While we work on this
+		$this->thing_report['email'] = $this->sms_message;
+        $message_thing = new Message($this->thing, $this->thing_report);
+
+
+
+		return $this->thing_report;
+	}
+
+
+    public function defaultCommand() 
+    {
+        $this->agent = "tallycounter";
+        //$this->limit = 5;
+        $this->name = "thing";
+        $this->identity = $this->from;
+        return;
+    }
+
+
+    public function readInstruction() 
+    {
+        if($this->agent_command == null) {
+            $this->defaultCommand();
+            return;
+        }
+
+        $pieces = explode(" ", strtolower($this->nom_input));
+
+        $this->agent = $pieces[0];
+        $this->name = $pieces[1];
+        $this->identity = $pieces[2];
+
+
+//        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agent . ' ' . $this->limit . ' ' . $this->name . ' ' . $this->identity . "." );
+
+        return;
+
+    }
+
+
+
+
+	public function readText() {
+
+        // No need to read text.  Any identity input to Tally
+        // increments the tally.
+     
+        return;
+	}
+
+    public function readInput() {
+        $this->readInstruction();
+        $this->readText();
+        return;
+    }
+
+
+}
+
+?>

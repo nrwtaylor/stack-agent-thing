@@ -1,0 +1,502 @@
+<?php
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+//require '../vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
+require_once '/var/www/html/stackr.ca/agents/message.php';
+ini_set("allow_url_fopen", 1);
+
+class Character {
+
+	public $var = 'hello';
+
+
+    function __construct(Thing $thing) {
+	//function __construct($arguments) {
+
+		//echo $arguments;
+		//var_dump($arguments);
+//  $defaults = array(
+//    'uuid' => Uuid::uuid4(),
+//    'from' => NULL,
+//	'to' => NULL,
+//	'subject' => NULL,
+//	'sqlresponse' => NULL
+//  );
+
+//  $arguments = array_merge($defaults, $arguments);
+
+//  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
+
+
+
+
+		$this->thing = $thing;
+		$this->agent_name = 'character';
+
+                $this->thing_report = array('thing' => $this->thing->thing);
+
+
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+
+		$this->api_key = $this->thing->container['api']['translink'];
+
+		$this->retain_for = 24; // Retain for at least 24 hours.
+
+        $this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+        $this->subject = $thing->subject;
+
+
+	// For testing
+//	$this->subject = 'stop 51380';
+//		$this->from = 'redpanda.stack@gmail.com';
+
+
+
+		$this->sqlresponse = null;
+
+		// Allow for a new state tree to be introduced here.
+		$this->node_list = array("start"=>array("useful", "useful?"));
+
+		$this->thing->log( '<pre> Agent "Character" running on Thing ' . $this->uuid . '</pre>');
+		$this->thing->log( '<pre> Agent "Character" received this Thing "' . $this->subject .  '"</pre>');
+
+		$this->readSubject();
+		$this->thing_report = $this->respond();
+
+		$this->thing->log( '<pre> Agent "Character" completed</pre>' );
+
+                $this->thing_report['log'] = $this->thing->log;
+
+
+		return;
+
+		}
+
+
+	function variablesSet() {
+
+
+                $this->thing->json->setField("variables");
+                $time_string = $this->thing->json->readVariable( array("character", "refreshed_at") );
+
+                if ($time_string == false) {
+                        // Then this Thing has no group information
+                        //$this->thing->json->setField("variables");
+                        //$time_string = $this->thing->json->time();
+                        //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+                }
+
+                $this->thing->db->setFrom($this->from);
+                $thing_report = $this->thing->db->agentSearch('age', 3);
+                $things = $thing_report['things'];
+
+
+                $this->sms_message = "";
+                $reset = false;
+
+
+              if ( $things == false  ) {
+
+                        // No character information store found.
+                        $this->resetCharacter();
+
+
+                } else {
+
+                        foreach ($things as $thing) {
+
+
+                                $thing = new Thing($thing['uuid']);
+                //              var_dump($thing);
+
+                                $thing->json->setField("variables");
+                                $this->name = $thing->json->readVariable( array("character", "name") );
+
+                                $this->strength = $thing->json->readVariable( array("character", "strength") );
+                                $this->constitution = $thing->json->readVariable( array("character", "constitution") );
+                                $this->intelligence = floatval( $thing->json->readVariable( array("character", "intelligence") ) );
+                                $this->wisdom = floatval( $thing->json->readVariable( array("character", "wisdom") )  );
+                                $this->charisma = floatval( $thing->json->readVariable( array("character", "charisma") )  );
+
+                                $this->earliest_seen = strtotime ( $thing->json->readVariable( array("character", "earliest_seen") )  );
+
+
+//var_dump ($this->age == false);
+//var_dump ($this->count == false);
+//var_dump ($this->sum == false);
+//var_dump ($this->sum_squared == false);
+//var_dump ($this->sum_squared_difference == false);
+
+                                if ( ($this->age == false) or
+                                        ($this->count == false) or
+                                        ($this->sum == false) or
+                                        ($this->sum_squared == false) or
+                                        ($this->sum_squared_difference == false) ) {
+
+                                        //$this->resetCounts();
+                                } else {
+
+                                        // Successfully loaded an age Thing
+
+                                        $this->age_thing = $thing;
+                                        break;
+
+                                }
+
+                        $this->resetCharacter();
+
+                        }
+
+                }
+
+	return;
+
+
+
+
+	}
+
+
+	public function stopTranslink($stop) {
+
+		$this->stop = $stop;
+		try {
+
+			$file = 'http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
+
+			$web_input = file_get_contents('http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60');
+
+
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $file);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$xmldata = curl_exec($ch);
+			curl_close($ch);
+
+			$web_input = $xmldata;
+
+			$this->error = "";
+
+		} catch (Exception $e) {
+			echo 'Caught exception: ',  $e->getMessage(), "\n";
+			$this->error = $e;
+			$web_input = false;
+$this->sms_message = "Request not understood: " . $this->error;
+
+			return "Request not understood";
+		}
+
+		//echo $web_input;
+
+
+                $xml = simplexml_load_string($web_input);  
+                $t = $xml->NextBus;
+
+                //var_dump($xml);
+                $json_data = json_encode($t,true);
+                //echo $json_data;
+
+                $response = null;
+
+                foreach($t as $item) {
+  $response .= '<li>' . $item->Schedules->Schedule->ExpectedLeaveTime . ' ' . $item->RouteNo . ' ' . $item->RouteName . ' ' . '> ' . $item->Schedules->Schedule->Destination . '</li>';
+                }
+
+                $message = "Thank you for your request for stop " . $stop .".  The next buses are: <p><ul>" . ucwords(strtolower($response)) . '</ul>';
+		$message .= "";
+		$message .= "Source: Translink real-time data feed.";
+
+
+// Hacky here to be refactored.
+// Generate a special short SMS message
+
+$this->sms_message = "";
+$response ="";
+                foreach($t as $item) {
+ // $response .=  $item->Schedules->Schedule->ExpectedLeaveTime . ' ' . $item->RouteNo . '> ' . $item->Schedules->Schedule->Destination . ' | ';
+
+  $response .=  $item->RouteNo . ' ' . $item->Schedules->Schedule->ExpectedLeaveTime . ' > ' . $item->Schedules->Schedule->Destination . ' | ';
+
+                }
+
+
+
+                	$this->sms_message = "CHARACTER";
+//			if (count($t) > 1) {$this->sms_message .= "ES";}
+
+			$this->sms_message .= " | ";
+
+/
+			// Sometimes Translink return 
+			// a date in the time string.  Remove it.
+
+			$input = $response;
+			//$input = "Current from 2014-10-10 to 2015/05/23 and 2001.02.10";
+			$output = preg_replace('/(\d{4}[\.\/\-][01]\d[\.\/\-][0-3]\d)/', '', $input);
+
+			echo $output;
+
+			if (count($t) == 0) {
+				$this->sms_message .= "No information returned for stop " . $this->stop . ' | ';
+			} else {
+				$this->sms_message .= ucwords(strtolower($output))  ;
+			}
+
+			$this->sms_message .= "TEXT ?";
+
+
+		return $message;
+	}
+
+
+
+        public function busTranslink($bus_id) {
+
+                try {
+
+                        $file = 'http://api.translink.ca/rttiapi/v1/buses/' . $bus_id . '?apikey=' . $this->api_key;
+
+//http://api.translink.ca/rttiapi/v1/stops/'.$stop .'/estimates?apikey='. $this->api_key . '&count=3&timeframe=60';
+
+                        $web_input = file_get_contents($file);
+
+
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, $file);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        $xmldata = curl_exec($ch);
+                        curl_close($ch);
+
+                        $web_input = $xmldata;
+
+                        $this->error = "";
+
+                } catch (Exception $e) {
+                        echo 'Caught exception: ',  $e->getMessage(), "\n";
+                        $this->error = $e;
+                        $web_input = false;
+			return "Bus information not yet supported";
+                }
+
+		$message = "Here is some xml information" . $web_input;
+
+                //echo $web_input;
+                return $message;
+        }
+
+
+
+
+
+// -----------------------
+
+	private function respond() {
+
+		//$this->thing_report = array('thing' => $this->thing->thing);
+
+		// Thing actions
+		$this->thing->flagGreen();
+
+		$this->readSubject();
+
+                        $this->thing_report['sms'] = $this->sms_message;
+                        $this->thing_report['choices'] = false;
+                        $this->thing_report['info'] = 'SMS sent';
+
+
+		// Generate email response.
+
+		$to = $this->thing->from;
+
+// Testing 
+//	$to = 'redpanda.stack@gmail.com';
+
+
+		$from = "character";
+
+
+
+		$message = $this->readSubject();
+
+		//$message = "Thank you for your request.<p><ul>" . ucwords(strtolower($response)) . '</ul>' . $this->error . " <br>";
+
+		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+		$choices = $this->thing->choice->makeLinks('start');
+		$this->thing_report['choices'] = $choices;
+
+
+
+
+		$this->thing->email->sendGeneric($to,$from,$this->subject, $message, $choices);
+		echo '<pre> Agent "Character" email sent to '; echo $to; echo ' </pre>';
+
+
+  //              $this->thing_report['email'] = array('to'=>$this->from,
+  //                              'from'=>'transit',
+  //                              'subject' => $this->subject,
+  //                              'message' => $message, 
+  //                              'choices' => false);
+
+
+		// Need to refactor email to create a preview of the sent email in the $thing_report['email']
+		// For now this attempts to send both an email and text.
+
+                $message_thing = new Message($this->thing, $this->thing_report);
+
+
+                $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+
+
+//	$this->thing_report['info'] = 'This is the translink agent responding to a request.';
+	$this->thing_report['help'] = 'Stackr connector to Translink API.';
+
+		return $this->thing_report;
+
+
+	}
+
+	function resetCharacter () {}
+
+
+
+
+	private function nextWord($phrase) {}
+
+	public function readSubject() {
+
+		$this->response = null;
+
+		$keywords = array('character', 'race', 'gender', 'ability', 'modifier', 'class', 'skill', 
+			'strength', 'dexterity', 'constituion', 'intelligence', 'wisdom', 'charisma');
+
+//
+//    Strength, measuring physical power
+//    Dexterity, measuring agility
+//    Constitution, measuring endurance
+//    Intelligence, measuring reasoning and memory
+//    Wisdom, measuring perception and insight
+//    Charisma, measuring force of personality
+//
+// https://roll20.net/compendium/dnd5e/Ability%20Scores#content
+
+
+// Strength
+//    Athletics
+
+//Dexterity
+//    Acrobatics
+//    Sleight of Hand
+//    Stealth
+
+//Intelligence
+//    Arcana
+//    History
+//    Investigation
+//    Nature
+//    Religion
+
+//Wisdom
+//    Animal Handling
+//    Insight
+//    Medicine
+//    Perception
+//    Survival
+
+//Charisma
+//    Deception
+//    Intimidation
+//    Performance
+//    Persuasion
+
+// https://roll20.net/compendium/dnd5e/Ability%20Scores#content
+
+		$input = strtolower($this->subject);
+
+		$prior_uuid = null;
+
+		$pieces = explode(" ", strtolower($input));
+
+
+                if (count($pieces) == 1) {
+
+                        $input = $this->subject;
+
+                        if (ctype_alpha($this->subject[0]) == true) { // If the first character of the keyword is a letter
+                                // Strip out first letter and process remaning 4 or 5 digit number
+                                $input = substr($input, 1);
+			}
+
+
+                        if (is_numeric($this->subject) and strlen($input) == 5 ) { // If this is a five-digit number
+				echo "meep";
+                                return $this->stopTranslink($input);
+                                //return $this->response;
+                        }
+
+                        if (is_numeric($this->subject) and strlen($input) == 4 ) { // If this is a four-digit number
+                                return $this->busTranslink($input);
+                                //return $this->response;
+                        }
+
+                        return "Request not understood";
+
+        	}
+
+
+
+		foreach ($pieces as $key=>$piece) {
+			foreach ($keywords as $command) {
+				if (strpos(strtolower($piece),$command) !== false) {
+
+					switch($piece) {
+						case 'name':	
+
+							if ($key + 1 > count($pieces)) {
+								//echo "last word is stop";
+								$this->stop = false;
+								return "Request not understood";
+							} else {
+								//echo "next word is:";
+								//var_dump($pieces[$index+1]);
+								$this->name = $pieces[$key+1];
+								$this->response = $this->stopTranslink($this->stop);
+								return $this->response;
+							}
+							break;
+
+						case 'report':
+
+							//echo 'bus';
+							break;
+
+						default:
+
+							//echo 'default';
+
+					}
+
+				}
+			}
+
+		}
+		return "Message not understood";
+	}
+
+
+
+}
+
+
+
+
+?>
+
+
+

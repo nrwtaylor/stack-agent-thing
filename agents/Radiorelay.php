@@ -49,8 +49,7 @@ class Radiorelay extends Agent
 
         //var_dump($this->thing);
         //exit();
-
-        $this->getMemcached();
+//        $this->getMemcached();
     }
 
     function isRadiorelay($state = null)
@@ -162,7 +161,6 @@ class Radiorelay extends Agent
         ]);
 
 if ($callsign != false) {$this->callsign = $callsign;}
-
 
     }
 
@@ -414,7 +412,7 @@ exit();
         }
     }
 
-    function getMessages()
+    public function getMessages()
     {
         if (isset($this->messages)) {
             return;
@@ -422,10 +420,8 @@ exit();
 
         //$test = $this->mem_cached->get('radiorelay-queries');
         //if ($test != false) {$this->messages = $test; return;}
-
         // Load in the name of the message bank.
         $this->getBank();
-
         // Latest transcribed sets.
         $filename = "/vector/messages-" . $this->bank . ".txt";
 
@@ -437,7 +433,6 @@ exit();
         //        $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
-
         $count = 0;
 
         $bank_info = null;
@@ -446,7 +441,6 @@ $bank_meta = array();
             while (($line = fgets($handle)) !== false) {
                 $line = trim($line);
   //              $count += 1;
-
                 if ($line == "---") {continue;}
 
 if (substr($line, 0, 1) == "#") {continue;}
@@ -564,10 +558,12 @@ $count += 1;
         } else {
             // error opening the file.
         }
-        $this->mem_cached->set("radiorelay-queries", $this->messages);
+//        $this->mem_cached->set("radiorelay-queries", $this->messages);
+
     }
 
-    function getInject()
+
+    public function getInject()
     {
         $this->getMessages();
 
@@ -591,7 +587,6 @@ $count += 1;
     public function getMessage()
     {
 //        $this->getInject();
-
         $this->getMessages();
 /*
         $callsign_agent = new Callsign($this->thing, "callsign");
@@ -602,7 +597,6 @@ $count += 1;
         $this->callsigns_heard = $callsign_agent;
 */
         $this->getCallsign();
-
 //$status = true;
 //if ($this->inject == null) {$status = false;}
 //if ($this->inject == false) {$status = false;}
@@ -621,7 +615,6 @@ $this->getInject();
 
 $radiogram_agent = new Radiogram($this->thing,"radiogram");
 $text = $radiogram_agent->translateRadiogram($message['text']);
-
 
 $word_count = count(explode(" ", $text));
 
@@ -686,7 +679,7 @@ $this->message['organization_from'] = "";
         $name_from = ucwords($this->name_from);
         $position_from = ucwords($this->position_from);
         $organization_from = strtoupper($this->organization_from);
-
+/*
         $this->short_message =
             "TO " .
             $name_to .
@@ -710,6 +703,21 @@ $this->message['organization_from'] = "";
             " " .
             $this->unit .
             "";
+*/
+        $this->short_message =
+            "TO " .
+            $name_to .
+            "\nFROM " .
+            $name_from .
+            "\n" .
+            "" .
+            $this->text .
+            "\n" .
+            $this->number .
+            " " .
+            $this->unit .
+            "";
+
 
         if (
             $this->position_to == "X" and
@@ -1287,6 +1295,7 @@ if ($this->qr_code_state == "on") {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
+
             if ($input == 'radiorelay') {
                 $this->getMessage();
 
@@ -1294,9 +1303,9 @@ if ($this->qr_code_state == "on") {
                     $this->index = 1;
                 }
                 return;
+
             }
         }
-
         $keywords = [
             "hey",
             "radio",

@@ -1,0 +1,653 @@
+<?php
+// Call regularly from cron 
+// On call determine best thing to be addressed.
+
+// Start by picking a random thing and seeing what needs to be done.
+
+
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+//require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
+//require __DIR__ . '/vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
+//#require '../vendor/autoload.php';
+
+
+
+//require_once '../agents/watson.php';
+//require_once '../agents/translink.php';
+
+//require_once '../agents/optin.php';
+require_once '/var/www/html/stackr.ca/agents/usermanager.php';
+
+require_once '/var/www/html/stackr.ca/agents/watson.php';
+require_once '/var/www/html/stackr.ca/agents/translink.php';
+require_once '/var/www/html/stackr.ca/agents/satoshi.php';
+require_once '/var/www/html/stackr.ca/agents/receipt.php';
+require_once '/var/www/html/stackr.ca/agents/iching.php';
+require_once '/var/www/html/stackr.ca/agents/roll.php';
+require_once '/var/www/html/stackr.ca/agents/group.php';
+require_once '/var/www/html/stackr.ca/agents/character.php';
+require_once '/var/www/html/stackr.ca/agents/train.php';
+require_once '/var/www/html/stackr.ca/agents/headcode.php';
+
+
+class Agent {
+
+	function __construct(Thing $thing, $input = null) {
+
+
+		$this->agent_input = strtolower($input);
+
+// For testing.
+// Remove references to slack id <@U6N5VCYDT>
+
+		//echo "Agent__construct";
+		// Given a "thing".  Instantiate a class to identify and create the
+		// most appropriate agent to respond to it.
+
+		//$thingy = $thing->thing;
+		//$this->thing = $thing;
+
+		$this->thing = $thing;
+		$this->agent_name = 'agent';
+
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+
+	        $this->uuid = $thing->uuid;
+       		$this->to = $thing->to;
+       		$this->from = $thing->from;
+       		$this->subject = $thing->subject;
+
+
+//$this->subject = ltrim( str_replace("<@U6N5VCYDT>","",$this->subject) );
+
+//echo "input:".$this->subject;
+
+
+
+		$this->sqlresponse = null;
+
+		$this->thing->log('<pre> Agent "Agent" running on Thing ' . $this->thing->nuuid . '.</pre>');
+
+		$thing_report = $this->readSubject();
+
+		$this->respond();
+
+		$this->thing->log('<pre> Agent "Agent" completed.</pre>');
+		$this->thing_report = $thing_report;
+
+        $this->thing_report['log'] = $this->thing->log;
+
+
+		return;
+	}
+
+	public function respond() {
+
+		$this->thing->flagGreen();
+
+		// This should be the code to handle non-matching responses.
+
+		return;
+	}
+
+
+
+	public function readSubject() {
+
+		$status = false;
+		$this->response = false;
+
+		$input = strtolower($this->agent_input . " " . $this->to . " " .$this->subject);
+
+		$this->thing->log('<pre> Agent "Agent" processed haystack "' .  $input . '".</pre>');
+
+		if ($this->thing->getState('usermanager') == false) {
+
+			// No usermanager record.
+			// Not tested.
+
+			$user_thing = new Thing(null);
+			$user_thing->Create($this->from, 'usermanager', 's/ start (agent)');
+			$user_thing->flagGreen();
+
+			// Run the Usermanager on the Thing now
+			$user_agent = new Usermanager($user_thing);
+
+
+			$this->thing->log('<pre> Agent "Agent" found usermanager stage unset.  Created a Usermanager agent ' . $user_agent->thing->nuuid . '.</pre>');
+
+//			$usermanager_thing = new Usermanager($this->thing);
+//			$thing_report = $usermanager_thing->thing_report;
+//			return $thing_report;
+
+		}
+
+		// See if the previous subject line is relevant
+		$this->thing->db->setUser($this->from);
+		$prior_thing_report = $this->thing->db->priorGet();
+
+		$task = $prior_thing_report['thing']->task ;
+		$nom_to = $prior_thing_report['thing']->nom_to ;
+
+		$temp_haystack = $nom_to . ' ' . $task;
+
+
+		// See if watson is referenced anywhere
+		$this->watson = false;
+                if (strpos($temp_haystack, 'watson') !== false) {
+ //               echo '<pre> Agent created a Watson agent</pre>';
+                        //$usermanager_thing = new Usermanager($this->thing);
+                        //$thing_report = $usermanager_thing->thing_report;
+                        //return $thing_report;
+			$this->watson = true;
+                }
+
+
+		// Now pick up obvious cases where the keywords are embedded
+		// in the $input string.
+
+		$this->thing->log('<pre> Agent "Agent" looking for optin/optout.</pre>');
+
+		if (strpos($input, 'optin') !== false) {
+		$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+			$usermanager_thing = new Usermanager($this->thing);
+			$thing_report = $usermanager_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'optout') !== false) {
+		$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+			$usermanager_thing = new Optout($this->thing);
+			$thing_report = $usermanager_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'opt-in') !== false) {
+			$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+			$usermanager_thing = new Optin($this->thing);
+			$thing_report = $usermanager_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'opt-out') !== false) {
+		$this->thing->log( '<pre> Agent created a Usermanager agent</pre>' );
+			$usermanager_thing = new Optout($this->thing);
+			$thing_report = $usermanager_thing->thing_report;
+			return $thing_report;
+		}
+
+
+		// See if there is an agent with the first workd
+		$arr = explode(' ',trim($input));
+		$agents = array();
+
+		set_error_handler("warning_handler", E_WARNING);
+
+		$this->thing->log('<pre> Agent "Agent" looking for keyword matches with available agents.</pre>');
+
+		foreach ($arr as $keyword) {
+
+			$this->thing->log('<pre> Agent "Agent" looking for "' . $keyword . '".</pre>');
+
+        		$agent_class_name = ucfirst($keyword);
+
+        		try {
+                		include_once '/var/www/html/stackr.ca/agents/' . strtolower($agent_class_name) . '.php';
+				$this->thing->log('<pre> Agent "Agent" adding for ' . $agent_class_name . ' to options.</pre>');
+
+				$success = true;
+			} catch (Exception $e) {
+        			$success = false;
+			}
+
+			if ($success == true) {
+				$agents[] = $agent_class_name;
+			}
+
+		}
+
+		//set_error_handler("warning_handler", E_WARNING); //dns_get_record(...) 
+		restore_error_handler();
+
+
+
+//[A-Z]{2}\d{6}
+//                $input = strtolower($this->to . " " .$this->subject);
+/* I don't think this is helpful here.
+                $pieces = explode(" ", strtolower($input));
+
+                require_once ('/var/www/html/stackr.ca/agents/headcode.php');                
+                $headcode_thing = new Headcode($this->thing, $input);
+                if ($headcode_thing->isData($headcode_thing->head_code)) {
+
+                    $this->head_code = $headcode_thing->head_code;
+
+                    $this->thing->log('Agent "Agent" spotted ' . $this->head_code . ' which is headcode.');
+                }
+And really slows things down.
+*/
+
+
+		foreach ($agents as $agent_class_name) {
+			// Allow for doing something smarter here with 
+			// word position and Bayes.
+			// But for now call the first agent found
+
+
+
+			try {
+				$agent = new $agent_class_name($this->thing);
+				$thing_report = $agent->thing_report;
+			} catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
+				require_once '/var/www/html/stackr.ca/agents/bork.php';
+
+
+			$message = $ex->getMessage();
+			//$code = $ex->getCode();
+			$file = $ex->getFile();
+			$line = $ex->getLine();
+
+			$input = $message . '  ' . $file . ' line:' . $line;
+
+        		$bork_agent = new Bork($this->thing, $input);
+			continue;
+
+
+			}
+
+			return $thing_report;
+
+		}
+
+/*
+
+        // And I think this is where we get to with a train name.
+
+        $path = null;
+        $this->thing->db->setUser($this->from);
+        $thing_report = $this->thing->db->variableSearch($path, 'train', 99);
+
+        $priorDate = null;
+        $head_code = null;
+        foreach ($thing_report['things'] as $thing) {
+
+            $newDate = date("d/m", strtotime($thing['created_at']));
+
+            if ($newDate == $priorDate) {
+                // Same date
+                // Just display time
+                $date_text = date("H:s", strtotime($thing['created_at']));
+            } else {
+                $date_text = date("d M H:s", strtotime($thing['created_at']));
+            }
+
+            //$date_text = $newDate;
+            //$newDate = date("d/m", strtotime($thing['created_at']));
+
+            $temp_thing = new Thing($thing['uuid']);
+
+            $temp_thing->json->setField("variables");
+            $head_code = $temp_thing->json->readVariable( array("train", "head_code") );
+
+            if ($head_code != null) {
+
+                //$temp_thing->thing->log( '<pre> Agent created a Group agent</pre>' );
+                $train_thing = new Train($this->thing); // Will find the id itself.
+                $thing_report = $train_thing->thing_report;
+
+                if ($train_thing->response != false) {
+                    break; //Not recognised by group
+                } else {
+                    return $thing_report;
+                }
+            } 
+        }
+
+        $this->thing->log(" existing train check");
+//echo "<br>Train response " .  $train_thing->response . "<br>";
+
+//exit();
+
+
+*/
+
+
+
+
+
+		// And I think this is where we get to with a group name.
+
+        $path = null;
+        $this->thing->db->setUser($this->from);
+        $thing_report = $this->thing->db->variableSearch($path, 'group', 99);
+
+        $priorDate = null;
+		$group_id = null;
+        foreach ($thing_report['things'] as $thing) {
+
+            $newDate = date("d/m", strtotime($thing['created_at']));
+
+            if ($newDate == $priorDate) {
+                // Same date
+                // Just display time
+                $date_text = date("H:s", strtotime($thing['created_at']));
+            } else {
+                $date_text = date("d M H:s", strtotime($thing['created_at']));
+            }
+            //$date_text = $newDate;
+            //$newDate = date("d/m", strtotime($thing['created_at']));
+
+            $temp_thing = new Thing($thing['uuid']);
+
+            $temp_thing->json->setField("variables");
+            $group_id = $temp_thing->json->readVariable( array("group", "group_id") );
+
+			if ($group_id != null) {
+
+	            //$temp_thing->thing->log( '<pre> Agent created a Group agent</pre>' );
+	            $group_thing = new Group($this->thing); // Will find the id itself.
+        	    $thing_report = $group_thing->thing_report;
+
+				if ($group_thing->response != false) {
+        $this->thing->log('Agent "Agent" did not identify any groups.');
+				    break; //Not recognised by group
+				} else {
+        $this->thing->log('Agent "Agent" spotted ' . $group_id . " which might be a group.");
+                    return $thing_report;
+    		    }
+	    	}
+        }
+
+        $this->thing->log('Agent "Agent" ran a check for groups.');
+
+
+                // And I think this is where we get to with a character name.
+
+                $path = null;
+
+                $this->thing->db->setUser($this->from);
+
+                $thing_report = $this->thing->db->variableSearch($path, 'character', 99);
+
+                $priorDate = null;
+                $character_name = null;
+                foreach ($thing_report['things'] as $thing) {
+
+                        $newDate = date("d/m", strtotime($thing['created_at']));
+
+                        if ($newDate == $priorDate) {
+                                // Same date
+                                // Just display time
+                                $date_text = date("H:s", strtotime($thing['created_at']));
+                        } else {
+                                $date_text = date("d M H:s", strtotime($thing['created_at']));
+                        }
+                        //$date_text = $newDate;
+
+                        //$newDate = date("d/m", strtotime($thing['created_at']));
+
+                        $temp_thing = new Thing($thing['uuid']);
+
+                        $temp_thing->json->setField("variables");
+                        $character_name = $temp_thing->json->readVariable( array("character", "name") );
+
+                        if ($character_name != null) {
+
+                                //$temp_thing->thing->log( '<pre> Agent created a Group agent</pre>' );
+                                $character_thing = new Character($this->thing); // Will find the id itself.
+                                $thing_report = $character_thing->thing_report;
+
+                                if ($character_thing->response != false) {
+                                        break; //Not recognised by group
+                                } else {
+
+                                        return $thing_report;
+                                }
+                        }
+
+
+
+                }
+
+
+		$this->thing->log('Agent "Agent" ran a check for characters.');
+
+
+
+
+                if (strpos($this->agent_input, 'satoshi') !== false) {
+
+			$this->thing->log( '<pre> Agent created a Satoshi agent</pre>' );
+                        $satoshi_thing = new Satoshi($this->thing);
+                        $thing_report = $satoshi_thing->thing_report;
+                        return $thing_report;
+
+                }
+
+                if (strpos($this->agent_input, 'iching') !== false) {
+
+		        $this->thing->log( '<pre> Agent created a iChing agent</pre>' );
+                        $iching_thing = new iChing($this->thing);
+                        $thing_report = $iching_thing->thing_report;
+                        return $thing_report;
+                }
+
+
+                if (strpos($this->agent_input, 'receipt') !== false) {
+
+		        $this->thing->log( '<pre> Agent created a Receipt agent</pre>' );
+                        $receipt_thing = new Receipt($this->thing);
+
+                        $thing_report = $receipt_thing->thing_report;
+
+
+                        return $thing_report;
+                }
+
+
+		// Refactor.  Much better ways of doing this.
+//                if (strpos($input, 'roll') !== false) {
+//                        $this->thing->log( '<pre> Agent created a Roll agent</pre>' );
+//                        //echo '<pre> Agent created a Translink agent</pre>';
+//                        $roll_thing = new Roll($this->thing);
+//                        $thing_report = $roll_thing->thing_report;
+//                        return $thing_report;
+//                }
+
+
+
+
+
+
+		if (strpos($input, 'transit') !== false) {
+			$this->thing->log( '<pre> Agent created a Translink agent</pre>' );
+			//echo '<pre> Agent created a Translink agent</pre>';
+			$transit_thing = new Translink($this->thing);
+			$thing_report = $transit_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'bus') !== false) {
+			$this->thing->log('<pre> Agent created a Translink agent</pre>');
+			$transit_thing = new Translink($this->thing);
+			$thing_report = $transit_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'stop') !== false) {
+		$this->thing->log( '<pre> Agent created a Translink agent</pre>' );
+			$transit_thing = new Translink($this->thing);
+			$thing_report = $transit_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'translink') !== false) {
+		$this->thing->log( '<pre> Agent created a Translink agent</pre>' );
+			$transit_thing = new Translink($this->thing);
+			$thing_report = $transit_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'watson') !== false) {
+		$this->thing->log( '<pre> Agent created a Watson agent</pre>' );
+			$watson_thing = new Watson($this->thing);
+			$thing_report = $watson_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'watsonagent') !== false) {
+		$this->thing->log( '<pre> Agent created a Watson agent</pre>' );
+			$watson_thing = new Watson($this->thing);
+			$thing_report = $watson_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'nest maintenance') !== false) {
+
+			require_once '../agents/ant.php';
+			$ant_thing = new Ant($this->thing);
+			$thing_report = $ant_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'patrolling') !== false) {
+			require_once '../agents/ant.php';
+			$ant_thing = new Ant($this->thing);
+			$thing_report = $ant_thing->thing_report;
+			return $thing_report;
+		}
+
+		if (strpos($input, 'foraging') !== false) {
+			require_once '/var/www/html/stackr.ca/agents/ant.php';
+			$ant_thing = new Ant($this->thing);
+			$thing_report = $ant_thing->thing_report;
+			return $thing_report;
+		}
+
+		if ( is_numeric($this->from) and ( strlen($this->subject) == 5 ) ) {
+			// Probably a text for a Translink stop
+			$this->thing->log('<pre> Agent created a Translink agent</pre>');
+                        $transit_thing = new Translink($this->thing);
+                        $thing_report = $transit_thing->thing_report;
+                        return $thing_report;
+                }
+
+
+                if ( preg_match('/\?/',$this->subject,$matches) ) { // returns true with ? mark
+$this->thing->log( '<pre> Agent found a question mark and created a Question agent</pre>' );
+
+                        require_once '/var/www/html/stackr.ca/agents/question.php';
+                        $question_thing = new Question($this->thing);
+                        $thing_report = $question_thing->thing_report;
+                        return $thing_report;
+
+                }
+
+                if ( $this->watson == true ) { 
+			$this->thing->log( '<pre> Agent found the previous message was Watson related');
+
+                        require_once '/var/www/html/stackr.ca/agents/question.php';
+                        $question_thing = new Question($this->thing);
+                        $thing_report = $question_thing->thing_report;
+                        return $thing_report;
+
+                }
+
+
+
+//		if ( preg_match('/\?/','A string?',$matches) ) { // returns true with ? mark
+
+//                        require_once '/var/www/html/stackr.ca/agents/question.php';
+//                        $question_thing = new Question($this->thing);
+//                        $thing_report = $question_thing->thing_report;
+ //                       return $thing_report;
+//                }
+
+
+
+       // Now if it is a head_code, it might also be a train...
+       //$train_thing = new Train($this->thing, $this->head_code);
+       $train_thing = new Train($this->thing, 'train');
+       $thing_report = $train_thing->thing_report;
+
+       if ($train_thing->response != false) {
+          //Not recognised by train. Drop through.
+       } else {
+           return $thing_report;
+       }
+
+       // Now if it isn't a train, it is a headcode needing 
+       // some headwork.
+       $headcode_thing = new Headcode($this->thing, 'headcode');
+       $thing_report = $headcode_thing->thing_report;
+       
+       if ($headcode_thing->response != false) {
+          //Not recognised by train. Drop through.
+       } else {
+           return $thing_report;
+       }
+
+
+
+        // Is this a request for a specific named agent?
+
+        $this->thing->log( $input . " " . $this->from );
+
+
+        if (strpos($input, 'mordok') !== false) {
+            require_once '/var/www/html/stackr.ca/agents/mordok.php';
+            $mordok_thing = new Mordok($this->thing);
+            $thing_report = $mordok_thing->thing_report;
+            return $thing_report;
+        }
+
+        if ($this->from == "1327328917385978") { // Facebook Messenger Mordok
+            require_once '/var/www/html/stackr.ca/agents/mordok.php';
+            $mordok_thing = new Mordok($this->thing);
+            $thing_report = $mordok_thing->thing_report;
+            return $thing_report;
+        }
+
+
+
+//499657543701317
+
+
+		$this->thing->log( '<pre> Agent "Agent" created a Redpanda agent.</pre>' );
+		$redpanda_thing = new Redpanda($this->thing);
+
+		$thing_report = $redpanda_thing->thing_report;
+
+
+
+	return $thing_report;		
+	}
+
+
+
+
+}
+
+
+
+
+
+function warning_handler($errno, $errstr) { 
+throw new Exception('Class not found.');
+
+//trigger_error("Fatal error", E_USER_ERROR);
+
+//echo $errno;
+//echo $errstr;
+// do something
+}
+
+
+
+
+?>

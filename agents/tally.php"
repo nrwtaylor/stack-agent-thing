@@ -1,0 +1,665 @@
+<?php
+
+error_reporting(E_ALL);ini_set('display_errors', 1);
+
+
+
+require_once('/var/www/html/stackr.ca/lib/fpdf.php');
+require_once('/var/www/html/stackr.ca/lib/fpdi.php');
+
+require_once '/var/www/html/stackr.ca/agents/message.php';
+
+//include_once('/var/www/html/stackr.ca/src/pdf.php'); 
+
+
+class Tally{
+
+	function __construct(Thing $thing, $agent_command = null) {
+
+        $this->start_time = microtime(true);
+
+        // Setup Thing
+        $this->thing = $thing;
+
+        // Setup Agent
+        $this->agent = strtolower(get_class());
+
+// For testing
+
+if ($agent_command == null) {
+    echo "agent command is null";
+    $this->identity = "tally@stackr.ca"; // Or $this->from;
+    $this->limit = 3;
+    $this->name = "mordok";
+    $agent_command = $this->agent . " " . $this->limit . " mordok " . $this->agent ."@stackr.ca";
+}
+
+        
+        $this->agent_command = $agent_command;
+
+        $this->readInstruction();
+
+
+        $this->log_prefix = 'Agent "Tally"';
+
+
+
+
+		// So I could call
+		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+		// I think.
+		// Instead.
+
+     	$this->uuid = $thing->uuid;
+        $this->to = $thing->to;
+        $this->from = $thing->from;
+    	$this->subject = $thing->subject;
+		//$this->sqlresponse = null;
+
+		$this->node_list = array("start");
+
+		$this->thing->log( '<pre> ' .$this->log_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>' );
+
+
+
+        $this->sms_message = "";
+
+
+        $this->getVariables();
+
+        $this->addTally();
+
+        // That is a Panopticon cell of identity. Which needs to be maintained.
+        // An agent can set a tally on any Thing.
+        // The agent get to name the tally.
+
+
+		$this->readText();
+
+		$this->Respond();
+
+
+        $this->end_time = microtime(true);
+        $this->actual_run_time = $this->end_time - $this->start_time;
+        $milliseconds = round($this->actual_run_time * 1000);
+        $this->thing->log( 'Agent "Tally" ran for ' . $milliseconds . 'ms.' );
+
+
+		return;
+	}
+
+    function getAgent() 
+    {
+
+
+        return;
+    }
+
+	function getVariables() {
+
+        // So this returns the last 3 tally Things.
+        // which should be enough.  One should be enough.
+        // But this just provides some resiliency.
+
+        $this->thing->log( 'Agent "Tally" requested the variables.' );
+
+        $this->thing->db->setFrom($this->identity);
+        $thing_report = $this->thing->db->agentSearch($this->agent, $this->limit);
+        $things = $thing_report['things'];
+
+        if ( $things == false  ) {
+
+            // No tally found.
+            $this->resetVariable();
+
+        } else {
+
+            foreach ($things as $thing) {
+                // Check each of the three Things.
+                $this->variables_thing = new Thing($thing['uuid']);
+
+                $this->variables_thing->json->setField("variables");
+                //$this->variable = $thing->json->readVariable( array($this->agent, "variable") );
+                //$thing->name = $thing->json->readVariable( array($this->agent, "name") );
+
+                $this->getVariable('variable');
+                $this->getVariable('name');
+
+                $this->thing->log( 'Agent "Tally" got ' . $this->variables_thing->variable . " and " . $this->variables_thing->name ."." );
+
+                if (($this->variables_thing->variable >= 0) and ($this->variables_thing->name = $this->name))  {
+
+                    echo "match";
+
+                    $this->thing->log( 'Agent "Tally" found and loaded a tally.' );
+                    //$this->tally_thing = $thing;
+                    $this->name = $this->variables_thing->name;
+                    break;
+
+                }
+
+                $this->resetVariable();
+            }
+
+            // So we get dropped out here with $this->variables_thing set
+
+        }
+        return;
+	}
+
+
+	function resetVariable() {
+
+        $this->thing->log( 'Agent "Tally" reset the tally variable.' );
+
+        $this->variable = 0;
+
+        $this->variables_thing = new Thing(null);
+        $this->variables_thing->Create($this->identity , $this->agent, 's/ ' . $this->agent . ' ' . $this->limit);
+
+		$this->variables_thing->flagGreen();
+
+		return;
+	}
+
+    function nextTally() {
+        
+        // Gets the UUID of the next variable (next counter wheel).
+        $next_uuid = $this->getVariable("next_uuid");
+
+        echo $next_uuid;
+        //exit();
+
+        if ($next_uuid == false) {
+
+            // Then no counter found
+            // Make a new thing for the Tally.
+            $next_tally_thing = new Thing(null);
+            $next_uuid = $next_tally_thing->uuid;
+
+            // So write in a uuid to the current tally wheel.
+
+            $this->setVariable("next_uuid", $next_uuid);
+
+        }
+
+        // Now pull in the thing for the next counter.
+        $next_tally_thing = new Thing($next_uuid);
+echo "<pre>";
+echo $next_uuid;
+print_r($next_tally_thing->thing);
+echo "</pre>";
+//exit();
+        // And then call it.
+
+        $command = $this->agent . " " . $this->limit . " " . $next_uuid . " " . $this->agent ."@stackr.ca";
+
+        $next_thing = new Tally($next_tally_thing, "foobar");
+
+//        $next_thing = new Tally($next_tally_thing, $command);
+
+        $this->thing->log( 'Agent "Tally" called the next counter ' . $next_tally_thing->nuuid . "." );
+
+        return;
+    }
+
+    function addVariable($variable = null, $amount) {
+
+        if ($variable == null) {$variable = 'variable';}
+
+        if (isset($this->$variable)) {
+           $this->$variable += $amount;
+        } else {
+            $this->$variable = $amount;
+        }
+
+
+        // Then at this point we would call tally again for the next counter.
+        if ($this->$variable > $this->limit) {
+            // Call next tallier
+            $this->nextTally();
+
+            // THIS IS WEHERE THE OWRK IS nrewtaylor 1635 18 Oct 2017
+
+            // And increment the tally to 1.
+            $this->$variable = 1;
+        }
+
+        // Store counts
+        $this->variables_thing->db->setFrom($this->identity);
+        $this->variables_thing->json->setField("variables");
+        $this->variables_thing->json->writeVariable( array($this->agent, $variable) , $this->$variable  );
+
+
+//        $this->variables_thing->json->writeVariable( array($this->agent, "name") , $this->name );
+
+        $this->variables_thing->flagGreen();
+
+        return $this->$variable;
+    }
+
+    function getVariable($variable = null) {
+
+        if ($variable == null) {$variable = 'variable';}
+
+        $this->variables_thing->db->setFrom($this->identity);
+        $this->variables_thing->json->setField("variables");
+        $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->agent, $variable) );
+
+        $this->$variable = $this->variables_thing->$variable;
+
+        $this->variables_thing->flagGreen();
+
+        return $this->$variable;
+    }
+
+    function setVariable($variable = null, $value) {
+
+        if ($variable == null) {$variable = 'variable';}
+
+        $this->variables_thing->$variable = $value;
+
+        $this->variables_thing->db->setFrom($this->identity);
+        $this->variables_thing->json->setField("variables");
+        $this->variables_thing->json->writeVariable( array($this->agent, $variable), $value );
+
+        $this->$variable = $value;
+        
+
+        $this->variables_thing->flagGreen();
+
+        return $this->$variable;
+    }
+
+
+
+    function incrementVariable($variable = null) {
+
+        $this->addVariable('variable', 1);
+        return;
+
+	}
+
+    function addTally() 
+    {
+        $this->incrementVariable('variable');
+        return;
+    }
+
+    function getTally() {
+
+        $start_time = time();
+
+        $count = 0;
+
+        // So this is a request for the full tally.  For the tally for agent and identity.
+
+        $count = $this->variable;
+
+        $next_uuid = $this->variables_thing->json->readVariable( array($this->agent, "next_uuid") );
+        $index = 0;
+
+        while ($next_uuid != false) {
+
+
+            break;
+            // Add the value.
+            // The wheels keep on turning.
+
+            if ( (time() - $start_time) > 2) {
+                $this->thing->log( "Looped for more than 2s");
+                $count = "?";
+                // timed out
+                break;
+            }
+
+           $next_thing = new Thing($next_uuid);
+           $next_uuid = false;
+
+           $amount = $next_thing->json->readVariable( array($this->agent, "variable") );
+           //$next_uuid = $next_thing->json->readVariable( array($this->agent, "next_uuid") );
+
+           $count = $count + ($this->limit * $index) * $amount;
+
+        }
+
+        //$next_uuid = $this->tally_thing->json->readVariable( array($this->agent, "next_uuid") );
+        //$tally_thing = new Thing($next_uuid);
+
+
+        $this->count = $count;
+
+        echo $next_uuid;
+
+        return $count;
+
+    }
+
+	public function Respond() {
+
+		// Develop the various messages for each channel.
+
+		// Thing actions
+		// Because we are making a decision and moving on.  This Thing
+		// can be left alone until called on next.
+		$this->thing->flagGreen(); 
+
+
+//		$this->addTally();
+//exit();
+
+//        $this->getTally();
+
+
+        $this->thing->log( 'Agent "Tally" variable is ' . $this->variable . '.' );
+        $this->thing->log( 'Agent "Tally" count is ' . $this->count . '.' );
+
+//exit();
+
+ 		$this->thing->json->setField("variables");
+
+//		$this->PNG();
+//		$this->PDF();
+
+		$this->sms_message = "TALLY = " . number_format($this->variable) . ".";
+
+        $this->sms_message .= " | COUNT = " . number_format($this->count) . ".";
+
+        $this->sms_message .= " | NEXT = " . $this->tally_thing->nuuid;
+
+
+		$this->sms_message .= ' | TEXT ?';
+
+		$this->thing_report['thing'] = $this->thing->thing;
+		$this->thing_report['sms'] = $this->sms_message;
+
+
+		// While we work on this
+		$this->thing_report['email'] = $this->sms_message;
+        $message_thing = new Message($this->thing, $this->thing_report);
+
+
+
+		return $this->thing_report;
+	}
+
+
+    public function readInstruction() {
+
+        $pieces = explode(" ", strtolower($this->agent_command));
+
+        $this->agent = $pieces[0];
+        $this->limit = $pieces[1];
+        $this->name = $pieces[2];
+        $this->identity = $pieces[3];
+
+        $this->thing->log( 'Agent "Tally" read the instruction and got ' . $this->agent . ' ' . $this->limit . ' ' . $this->name . ' ' . $this->identity . "." );
+
+        return;
+
+    }
+
+
+
+
+	public function readText() {
+
+        // This is ony going to have one response which is to return the tally.
+
+        // At this point the tally thing is loaded, and so we call
+
+        if ($this->agent_command == null) {
+            $this->getTally();
+        }
+
+        // But for testing...
+//        $this->getTally();
+
+        return;
+	}
+
+
+	public function PDF() {
+
+               // This code should return the pdf when called.
+//		ob_clean();
+//		header('text/html');
+
+                $public_image = 'filename.png';
+                //secret_image = 'filename.png';
+
+                // initiate FPDI
+                $pdf = new FPDI('P','mm','Letter');
+
+                $pdf->setSourceFile('/var/www/html/stackr.ca/templates/satoshi.pdf');
+
+                $tplidx1 = $pdf->importPage(1, '/MediaBox');  
+                $pdf->addPage();  
+                $pdf->useTemplate($tplidx1,0,0,215);  
+
+
+                // Generate secret key first
+//                QRcode::png($this->secret_key,"/var/www/html/stackr.ca/temp/file.png", QR_ECLEVEL_L, 4,1);               
+//		$pdf->Image("/var/www/html/stackr.ca/temp/file.png",168,125,40);
+
+                // Overwrite secret key
+                // Create public code and publish as available Thing png image
+//                QRcode::png($this->public_key,"/var/www/html/stackr.ca/temp/file2.png", QR_ECLEVEL_L, 4,1);
+//                $pdf->Image("/var/www/html/stackr.ca/temp/file2.png",115,125,40);
+		//$pdf->MemImage($image, 115,125,40);
+
+
+		
+
+                $pdf->SetFont('Helvetica','',10);
+                $pdf->SetTextColor(0,0,0);
+
+                $pdf->SetXY(5, 24);
+                $t =  "Agent 'Satoshi' processed Thing "; 
+                $pdf->Write(0, $t);
+
+
+                $pdf->SetXY(5, 28);
+                $t = $this->uuid . ' on ';
+                $pdf->Write(0, $t);
+
+
+                $pdf->SetXY(5, 32);
+                $t = date("Y-m-d H:i:s") . ' and';
+                $pdf->Write(0, $t);
+
+
+                $pdf->SetXY(5, 36);
+                $t = 'created PUBLIC ' . $this->public_key;
+                $pdf->Write(0, $t);
+
+                $pdf->SetXY(5, 40);
+                $t = 'created PRIVATE ' . $this->secret_key;
+                $pdf->Write(0, $t);
+
+
+
+                $pdf->SetFont('Helvetica','',10);
+                $pdf->SetTextColor(255, 0, 0);
+
+
+
+
+
+//              //$pdf->RotatedImage('circle.png',85,60,40,16,45);
+//              //$pdf->RotatedText(100,60,'Hello!',45);
+
+//              $pdf->SetXY(10, 44);
+//              $pdf->Write(0, "PUBLIC: " . $public_key);
+
+//                $pdf->SetXY(10, 48);
+//                $pdf->Write(0, "PRIVATE: " . $private_key);
+
+
+
+
+                //$key_thing = new Thing(null);
+                //$key_thing->Create($this->from, 'satoshi', 's/ ' . $this->private_key);
+                //$key_thing->flagGreen();
+
+
+                // Generate some content for page 1  
+
+                $tplidx2 = $pdf->importPage(2);  
+                $pdf->addPage();  
+                $pdf->useTemplate($tplidx2,0,0);  
+                // Generate some content for page 2  
+
+//ob_clean();
+//$pdf->Output('newpdf.pdf', 'I');
+
+//exit();
+
+//header('Content-Type: application/pdf');
+
+                ob_start();
+                $image = $pdf->Output('', 'I');
+                $image = ob_get_contents();
+                ob_clean();
+
+
+//http://www.fpdf.org/en/script/script45.php
+
+		$this->thing_report['pdf'] = $image;
+
+//ob_clean();
+//echo $this->thing_report['pdf'];
+//exit();
+		return $this->thing_report['pdf'];
+}
+
+
+
+        public function PNG() {
+// Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-$
+
+                // here DB request or some processing
+                $codeText = $this->public_key;
+
+                ob_clean();
+
+                ob_start();
+
+//echo header('Content-Type: image/png');
+//echo header('Content-Type: text/html');
+
+                QRcode::png($codeText,false,QR_ECLEVEL_Q,4); 
+
+//echo header('Content-Type: text/html');
+
+
+                $image = ob_get_contents();
+                ob_clean();
+
+// Can't get this text editor working yet 10 June 2017
+
+//$textcolor = imagecolorallocate($image, 0, 0, 255);
+// Write the string at the top left
+//imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
+
+$this->thing_report['png'] = $image;
+//echo $this->thing_report['png']; // for testing.  Want function to be silent.
+
+
+                return $this->thing_report['png'];
+                }
+
+
+
+
+
+
+}
+
+
+
+
+// Stream handler to read from global variables
+class meepVariableStream
+{
+    private $varname;
+    private $position;
+
+    function stream_open($path, $mode, $options, &$opened_path)
+    {
+        $url = parse_url($path);
+        $this->varname = $url['host'];
+        if(!isset($GLOBALS[$this->varname]))
+        {
+            trigger_error('Global variable '.$this->varname.' does not exist', E_USER_WARNING);
+            return false;
+        }
+        $this->position = 0;
+        return true;
+    }
+
+    function stream_read($variable)
+    {
+        $ret = substr($GLOBALS[$this->varname], $this->position, $variable);
+        $this->position += strlen($ret);
+        return $ret;
+    }
+
+    function stream_eof()
+    {
+        return $this->position >= strlen($GLOBALS[$this->varname]);
+    }
+
+    function stream_tell()
+    {
+        return $this->position;
+    }
+
+    function stream_seek($offset, $whence)
+    {
+        if($whence==SEEK_SET)
+        {
+            $this->position = $offset;
+            return true;
+        }
+        return false;
+    }
+    
+    function stream_stat()
+    {
+        return array();
+    }
+}
+
+class meepPDF_MemImage extends FPDF {
+    function __construct($orientation='P', $unit='mm', $format='A4')
+    {
+        parent::__construct($orientation, $unit, $format);
+        // Register var stream protocol
+        stream_wrapper_register('var', 'VariableStream');
+    }
+
+    function MemImage($data, $x=null, $y=null, $w=0, $h=0, $link='')
+    {
+        // Display the image contained in $data
+        $v = 'img'.md5($data);
+        $GLOBALS[$v] = $data;
+        $a = getimagesize('var://'.$v);
+        if(!$a)
+            $this->Error('Invalid image data');
+        $type = substr(strstr($a['mime'],'/'),1);
+        $this->Image('var://'.$v, $x, $y, $w, $h, $type, $link);
+        unset($GLOBALS[$v]);
+    }
+
+    function GDImage($im, $x=null, $y=null, $w=0, $h=0, $link='')
+    {
+        // Display the GD image associated with $im
+        ob_start();
+        imagepng($im);
+        $data = ob_get_clean();
+        $this->MemImage($data, $x, $y, $w, $h, $link);
+    }
+}
+
+?>
