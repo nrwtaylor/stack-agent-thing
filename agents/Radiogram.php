@@ -9,16 +9,17 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Radiorelay extends Agent
+class Radiogram extends Agent
 {
     public $var = 'hello';
 
     public function init()
     {
+
         // Need to add in mode changing - origin / relay
 
         //        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
-        $this->node_list = ["radiorelay" => ["radiorelay", "nonsense"]];
+        $this->node_list = ["radiogram" => ["radiogram", "nonsense"]];
 
         $this->number = null;
         $this->unit = "";
@@ -35,16 +36,14 @@ class Radiorelay extends Agent
             "character is Rocket J. Squirrel"
         );
 
-        $this->qr_code_state = "off";
-
         // Get the remaining persistence of the message.
         $agent = new Persistence($this->thing, "persistence 60 minutes");
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->radiorelay = new Variables(
+        $this->radiogram = new Variables(
             $this->thing,
-            "variables radiorelay " . $this->from
+            "variables radiogram " . $this->from
         );
 
         //var_dump($this->thing);
@@ -53,7 +52,7 @@ class Radiorelay extends Agent
         $this->getMemcached();
     }
 
-    function isRadiorelay($state = null)
+    function isRadiogram($state = null)
     {
         if ($state == null) {
             if (!isset($this->state)) {
@@ -73,33 +72,29 @@ class Radiorelay extends Agent
     function set($requested_state = null)
     {
         $this->thing->json->writeVariable(
-            ["radiorelay", "inject"],
+            ["radiogram", "inject"],
             $this->inject
         );
 
-        $this->thing->json->writeVariable(['radiorelay','callsign'], $this->callsign);
-
-
         $this->refreshed_at = $this->current_time;
 
-        $this->radiorelay->setVariable("state", $this->state);
-        $this->radiorelay->setVariable("mode", $this->mode);
+        $this->radiogram->setVariable("state", $this->state);
+        $this->radiogram->setVariable("mode", $this->mode);
 
-
-
-        $this->radiorelay->setVariable("refreshed_at", $this->current_time);
+        $this->radiogram->setVariable("refreshed_at", $this->current_time);
 
         $this->thing->log(
-            $this->agent_prefix . 'set Radio Relay to ' . $this->state,
+            $this->agent_prefix . 'set Radio Gram to ' . $this->state,
             "INFORMATION"
         );
     }
 
     function get()
     {
-        $this->previous_state = $this->radiorelay->getVariable("state");
-        $this->previous_mode = $this->radiorelay->getVariable("mode");
-        $this->refreshed_at = $this->radiorelay->getVariable("refreshed_at");
+        //$this->rocky = new Variables($this->thing, "variables rocky " . $this->from);
+        $this->previous_state = $this->radiogram->getVariable("state");
+        $this->previous_mode = $this->radiogram->getVariable("mode");
+        $this->refreshed_at = $this->radiogram->getVariable("refreshed_at");
 
         $this->thing->log(
             $this->agent_prefix . 'got from db ' . $this->previous_state,
@@ -108,7 +103,7 @@ class Radiorelay extends Agent
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
-        if (!$this->isRadiorelay($this->previous_state)) {
+        if (!$this->isRadiogram($this->previous_state)) {
             $this->state = $this->previous_state;
         } else {
             $this->state = $this->default_state;
@@ -134,7 +129,7 @@ class Radiorelay extends Agent
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "radiorelay",
+            "radiogram",
             "refreshed_at",
         ]);
 
@@ -142,7 +137,7 @@ class Radiorelay extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["radiorelay", "refreshed_at"],
+                ["radiogram", "refreshed_at"],
                 $time_string
             );
         }
@@ -150,20 +145,9 @@ class Radiorelay extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->inject = $this->thing->json->readVariable([
-            "radiorelay",
+            "radiogram",
             "inject",
         ]);
-
-
-
-        $callsign = $this->thing->json->readVariable([
-            "radiorelay",
-            "callsign",
-        ]);
-
-if ($callsign != false) {$this->callsign = $callsign;}
-
-
     }
 
     function getNuuid()
@@ -267,7 +251,7 @@ if ($callsign != false) {$this->callsign = $callsign;}
         $this->thing->flagGreen();
 
         $to = $this->thing->from;
-        $from = "radiorelay";
+        $from = "radiogram";
         $this->makeACP125G();
 
         $this->makePNG();
@@ -278,8 +262,8 @@ if ($callsign != false) {$this->callsign = $callsign;}
         // $this->makeTXT();
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This creates a question in a radiogram format.";
-        $this->thing_report["help"] = 'Try RADIORELAY then WEB. Or PDF. Or Text.';
+        $this->thing_report["info"] = "This creates an exercise message.";
+        $this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -294,16 +278,16 @@ if ($callsign != false) {$this->callsign = $callsign;}
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
-            "radiorelay"
+            "radiogram"
         );
-        $this->choices = $this->thing->choice->makeLinks('radiorelay');
+        $this->choices = $this->thing->choice->makeLinks('radiogram');
 
         $this->thing_report['choices'] = $this->choices;
     }
 
     function makeSMS()
     {
-        $sms = "RADIO RELAY " . $this->inject . " " . $this->mode . "\n";
+        $sms = "RADIOGRAM " . $this->inject . " " . $this->mode . "\n";
         //        $sms .= $this->response;
 
         $sms .= trim($this->short_message) . "\n";
@@ -414,230 +398,48 @@ exit();
         }
     }
 
-    function getMessages()
-    {
-        if (isset($this->messages)) {
-            return;
-        }
+public function translateRadiogram($text) {
 
-        //$test = $this->mem_cached->get('radiorelay-queries');
-        //if ($test != false) {$this->messages = $test; return;}
+//$text = $message['text'];
+$text = str_replace(",", " COMMA ", $text);
+$text = str_replace('"', ' QUOTE ', $text);
 
-        // Load in the name of the message bank.
-        $this->getBank();
+$text = str_replace('“', ' QUOTE ', $text);
+$text = str_replace('”', ' QUOTE ', $text);
 
-        // Latest transcribed sets.
-        $filename = "/vector/messages-" . $this->bank . ".txt";
+$text = str_replace('?', ' QUERY ', $text);
+$text = str_replace('!', ' EXCLAMATION ', $text);
+$text = str_replace('$', ' DOLLAR ', $text);
+$text = str_replace('#', ' HASH ', $text);
+$text = str_replace('*', ' ASTERISK ', $text);
 
-        $this->filename = $this->bank . ".txt";
+$text = str_replace("'", ' APOSTROPHE ', $text);
+$text = str_replace("’", ' APOSTROPHE ', $text);
+$text = str_replace("`", ' APOSTROPHE ', $text);
 
-        //$filename = "/radiorelay/" . $this->filename;
-        $filename = "/radiorelay/trivia-a01.txt";
-        $file = $this->resource_path . $filename;
-        //        $contents = file_get_contents($file);
+$text = str_replace("(", ' BRACKET ', $text);
+$text = str_replace(")", ' BRACKET ', $text);
 
-        $handle = fopen($file, "r");
+$text = str_replace("&", ' AMPERSAND ', $text);
+$text = str_replace("%", ' PERCENT ', $text);
 
-        $count = 0;
-
-        $bank_info = null;
-$bank_meta = array();
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-                $line = trim($line);
-  //              $count += 1;
-
-                if ($line == "---") {continue;}
-
-if (substr($line, 0, 1) == "#") {continue;}
-
-// returns "d"
-                //                $line_count = count($message) - 1;
-
-                //  if ($line_count == 10) {
-                // recognize as J-format
-
-if ($bank_info == null) {
-$bank_meta[] = $line;
+$text = str_replace(":", ' COLON ', $text);
+$text = str_replace(";", ' SEMICOLAN ', $text);
+$text = str_replace("-", ' HYPHEN ', $text);
+$text = str_replace("=", ' EQUALS ', $text);
 
 
 
-                if (count($bank_meta) == 4) {
+$text = str_replace('   ', ' ', $text);
+$text = str_replace('  ', ' ', $text);
+$text = trim($text);
 
-                    $title = trim(explode(":",$bank_meta[0])[1]);
-                    $this->title = $title;
-                    $author = trim(explode(":",$bank_meta[1])[1]);
-                    $this->author = $author;
+return $text;
 
-                    $date = trim(explode(":",$bank_meta[2])[1]);
-                    $this->date = $date;
-
-                    $version = trim(explode(":",$bank_meta[3])[1]);
-                    $this->version = $version;
-
-                //    $count = 0;
-                    $message = null;
-
-                    $bank_info = array("title"=>$this->title, "author"=>$this->author, "date"=>$this->date, "version"=>$this->version);
-             continue;
-
-                }
-continue;
 }
 
-
-
-//if ($bank_fino == null) {continue;}
-
-$count += 1;
-
-                //              if ($line_count == 10) {
-                // recognize as J-format
-
-                $meta = "X";
-
-                $name_to = "X";
-                $position_to = "X";
-                $organization_to = "X";
-                $number_to = "X";
-
-                $text = $line;
-
-                $name_from = "X";
-                $position_from = "X";
-                $organization_from = "X";
-                $number_from = "X";
-
-                $message_array = [
-                    "meta" => $meta,
-                    "name_to" => $name_to,
-                    "position_to" => $position_to,
-                    "organization_to" => $organization_to,
-                    "number_to" => $number_to,
-                    "text" => $text,
-                    "name_from" => $name_from,
-                    "position_from" => $position_from,
-                    "organization_from" => $organization_from,
-                    "number_from" => $number_from,
-                ];
-
-                $this->messages[] = $message_array;
-                //              }
-
-                /*
-        if ($line_count == 16) {
-
-                $line = array();
-                $message_array = array("line_1"=>$message[1],
-                    "line_2"=>$message[2],
-                    "line_3"=>$message[3],
-                    "line_4"=>$message[4],
-                    "line_5"=>$message[5],
-                    "line_6"=>$message[6],
-                    "line_7"=>$message[7],
-                    "line_8"=>$message[8],
-                    "line_9"=>$message[9],
-                    "line_10"=>$message[10],
-                    "line_11"=>$message[11],
-                    "line_12"=>$message[12],
-                    "line_13"=>$message[13],
-                    "line_14"=>$message[14],
-                    "line_15"=>$message[15],
-                    "line_16"=>$message[16]
-                );
-
-                $this->messages[] = $message_array;
-
-
-        }
-  
-              $count = 0;
-                $message = null;
-            }
-
-
-            $message[] = $line;
-*/
-            }
-
-            fclose($handle);
-        } else {
-            // error opening the file.
-        }
-        $this->mem_cached->set("radiorelay-queries", $this->messages);
-    }
-
-    function getInject()
+    public function readMessage($message = null)
     {
-        $this->getMessages();
-
-        if ($this->inject == false) {
-            $this->num = array_rand($this->messages);
-            $this->inject = $this->bank . "-" . $this->num;
-        }
-
-        if ($this->inject == null) {
-            // Pick a random message
-            $this->num = array_rand($this->messages);
-
-            $this->inject = $this->bank . "-" . $this->num;
-        } else {
-            $arr = explode("-", $this->inject);
-            $this->bank = $arr[0] . "-" . $arr[1];
-            $this->num = $arr[2];
-        }
-    }
-
-    public function getMessage()
-    {
-//        $this->getInject();
-
-        $this->getMessages();
-/*
-        $callsign_agent = new Callsign($this->thing, "callsign");
-        $callsign_agent->getCallsigns();
-        $callsign_agent->netCallsign();
-
-        var_dump($callsign_agent->callsigns_heard);
-        $this->callsigns_heard = $callsign_agent;
-*/
-        $this->getCallsign();
-
-//$status = true;
-//if ($this->inject == null) {$status = false;}
-//if ($this->inject == false) {$status = false;}
-
-$is_empty_inject = true;
-
-
-if ($this->inject === false) {$is_empty_inject = false;}
-
-
-while (true) {
-
-$this->getInject();
-
-        $message = $this->messages[$this->num];
-
-$radiogram_agent = new Radiogram($this->thing,"radiogram");
-$text = $radiogram_agent->translateRadiogram($message['text']);
-
-
-$word_count = count(explode(" ", $text));
-
-
-if ($is_empty_inject === true) {break;}
-
-if ($word_count >= 25) {$this->inject = null;continue;}
-
-if (stripos($text, 'which of the following') !== false) {$this->inject = null;continue;}
-if (stripos($text, 'which of these') !== false) {$this->inject = null;continue;}
-
-
-break;
-}
-
-$this->message = $message;
 
 
         $this->meta = trim($this->message['meta'], "//");
@@ -765,10 +567,11 @@ $this->message['organization_from'] = "";
 
     function makeMessage()
     {
+
         $message = $this->short_message . "<br>";
         $uuid = $this->uuid;
         $message .=
-            "<p>" . $this->web_prefix . "thing/$uuid/radiorelay\n \n\n<br> ";
+            "<p>" . $this->web_prefix . "thing/$uuid/radiogram\n \n\n<br> ";
         $this->thing_report['message'] = $message;
     }
 
@@ -777,17 +580,17 @@ $this->message['organization_from'] = "";
         $this->bar = new Bar($this->thing, "display");
     }
 
-    function setRadiorelay()
+    function setRadiogram()
     {
     }
 
-    function getRadiorelay()
+    function getRadiogram()
     {
     }
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiogram';
 
         //$this->node_list = array("rocky"=>array("rocky%20%hard%20%relay", "rocky hard origin", "rocky easy origin", "rocky easy relay" ,"bullwinkle","charley"));
         // Make buttons
@@ -798,23 +601,12 @@ $this->message['organization_from'] = "";
             $this->makePNG();
         }
 
-        $web = "<b>Radio Relay Agent</b>";
+        $web = "<b>Radiogram Agent</b>";
         $web .= "<p>";
 
         $web .= "<p>";
 
         $web .= "<p>";
-
-if(!isset($this->callsigns_heard)) {$this->getCallsigns();}
-
-
-$last_refreshed_at = $this->callsigns_heard[$this->callsign]['refreshed_at'];
-$current_time = $this->thing->time();
-
-        $ago = $this->thing->human_time ( strtotime($current_time) - strtotime( $last_refreshed_at ) );
-
-        $last_seen_text = "[last seen about ". $ago . " ago]";
-
 
         if (
             isset($this->name_to) and
@@ -822,7 +614,7 @@ $current_time = $this->thing->time();
             isset($this->name_from) and
             isset($this->position_from)
         ) {
-            $web .= "<b>TO (STATION CALLSIGN)</b> " . $this->name_to . " " . $last_seen_text .  "<br>";
+            $web .= "<b>TO (STATION CALLSIGN)</b> " . $this->name_to . "<br>";
 //            $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
             $web .= "<b>FROM (STATION CALLSIGN)</b> " . $this->name_from . "<br>";
 //            $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
@@ -858,7 +650,7 @@ $current_time = $this->thing->time();
         $this->makeACP125G($this->message);
         //        $web .= nl2br($this->acp125g->thing_report['acp125g']);
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay.txt';
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiogram.txt';
         $web .= '<a href="' . $link . '">' . $link . "</a>";
         $web .= "<br>";
 
@@ -869,7 +661,7 @@ $current_time = $this->thing->time();
             $web .= "No PERCS pdf available. Message > 25 words.<br><p>";
         } else {
             $link =
-                $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay.pdf';
+                $this->web_prefix . 'thing/' . $this->uuid . '/radiogram.pdf';
             $web .= '<a href="' . $link . '">' . $link . "</a>";
             $web .= "<br>";
             $web .= "<p>";
@@ -925,46 +717,9 @@ $current_time = $this->thing->time();
         $this->thing_report['web'] = $web;
     }
 
-    public function getCallsigns()
-    {
-       $callsign_agent = new Callsign($this->thing, "callsign");
-        $callsign_agent->getCallsigns();
-        $callsign_agent->netCallsign();
-
-        $this->callsigns_heard = $callsign_agent->callsigns_heard;
-
-
-    }
-
-    public function getCallsign()
-    {
-if (isset($this->callsign)) {return;}
-
-        $this->getCallsigns();
-
-        $this->current_time = $this->thing->json->time();
-$call_horizon = 30; // minutes
-
-$callsigns_available = array();
-foreach ($this->callsigns_heard as $i=>$callsign_heard) {
-//var_dump($callsign_heard);
-if (($callsign_heard['refreshed_at'] == null) or ($callsign_heard['refreshed_at'] == "X")) {continue;}
-if ($callsign_heard['action'] == 'checkout') {continue;}
-
-
-$age = strtotime($this->current_time) - strtotime($callsign_heard['refreshed_at']);
-if ($age > ($call_horizon * 60)) {continue;}
-$callsigns_available[$i] = $callsign_heard;
-}
-$this->callsigns_available = $callsigns_available;
-if (count($this->callsigns_available) == 0 ) {$this->callsign = ""; return;}
-$k = array_rand($this->callsigns_available);
-$this->callsign = $k;
-    }
-
     function makeTXT()
     {
-        $txt = "Traffic for RADIO RELAY.\n";
+        $txt = "Traffic for RADIOGRAM.\n";
 
         if ($this->mode == "relay") {
             $txt .= "Relay this message.\n";
@@ -1010,8 +765,8 @@ $this->callsign = $k;
         // devstack add path
         //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-        $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST RADIO RELAY";
-        $text = "RADIO RELAY";
+        $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST RADIOGRAM";
+        $text = "RADIOGRAM";
         $text = $this->message['text'];
 
         if (!isset($this->bar)) {
@@ -1139,18 +894,14 @@ $this->callsign = $k;
 
         $pdf->SetTextColor(0, 0, 0);
 
-if ($this->qr_code_state == "on") {
-
         $text = "Inject generated at " . $this->thing->thing->created_at . ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
 
         $this->getQuickresponse(
-            $this->web_prefix . 'thing\\' . $this->uuid . '\\radiorelay'
+            $this->web_prefix . 'thing\\' . $this->uuid . '\\radiogram'
         );
         $pdf->Image($this->quick_response_png, 199, 2, 10, 10, 'PNG');
-
-}
 
         //$pdf->SetXY(15, 20);
         //$pdf->Write(0, $this->message['text']);
@@ -1287,7 +1038,7 @@ if ($this->qr_code_state == "on") {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'radiorelay') {
+            if ($input == 'radiogram') {
                 $this->getMessage();
 
                 if (!isset($this->index) or $this->index == null) {
@@ -1298,6 +1049,7 @@ if ($this->qr_code_state == "on") {
         }
 
         $keywords = [
+            "radiogram",
             "hey",
             "radio",
             "relay",
@@ -1369,6 +1121,12 @@ if ($this->qr_code_state == "on") {
             $this->index = 1;
         }
     }
+
+function getMessage() {
+
+return false;
+
+}
 
     function setMode($mode = null)
     {

@@ -31,7 +31,22 @@ class Callsign extends Agent
         //        $this->thing_report['help'] = "Looks up callsigns.";
         $this->thing_report['info'] = "Possibly helpful to station operators.";
 
-        $this->keywords = ['is', 'heard', 'callsign', "active", "net"];
+        $this->keywords = [
+            'is',
+            'heard',
+            'check in',
+            'check-in',
+            'checkin',
+            'add',
+            'drop',
+            'check out',
+            'checkout',
+            'check-out',
+            '73',
+            'callsign',
+            "active",
+            "net",
+        ];
 
         $this->thing_report['help'] = ucwords(
             trim(implode(" ", $this->keywords))
@@ -88,9 +103,6 @@ class Callsign extends Agent
         // Build a list of the latest heard.
         $callsigns_heard = [];
 
-        //var_dump($this->callsigns);
-        //exit();
-
         foreach ($this->callsigns as $i => $callsign) {
             $call = $callsign['callsign'];
 
@@ -100,15 +112,21 @@ class Callsign extends Agent
         }
 
         foreach ($callsigns_heard as $i => $callsign) {
+            $action = "";
+            if (isset($callsign['action'])) {
+                $action = $callsign['action'];
+            }
+
             $text .=
                 $callsign['callsign'] .
+                " " .
+                $action .
                 " " .
                 $this->t($callsign['refreshed_at']) .
                 " / ";
             //$text .= $callsign['callsign'] ." ". $callsign['refreshed_at'] . " / ";
         }
-        //var_dump($text);
-        //exit();
+
         $this->callsigns_heard = $callsigns_heard;
         $this->response = $text;
     }
@@ -142,6 +160,7 @@ class Callsign extends Agent
             "variables callsign " . $this->from
         );
 
+        $this->callsign_action = $callsign->getVariable("action");
         $this->callsign_text = $callsign->getVariable("callsign");
         $this->refreshed_at = $callsign->getVariable("refreshed_at");
     }
@@ -182,6 +201,7 @@ class Callsign extends Agent
             $callsign->setVariable("callsign", $this->callsign["callsign"]);
             $time_string = $this->thing->json->time();
             $callsign->setVariable("refreshed_at", $time_string);
+            $callsign->setVariable("action", $this->callsign["action"]);
         }
     }
 
@@ -205,6 +225,18 @@ class Callsign extends Agent
 
         $this->callsign = reset($callsigns);
         $this->assert_callsign = true;
+    }
+
+    public function checkinCallsign()
+    {
+        $this->callsign['action'] = "checkin";
+        $this->response .= "Checked in. ";
+    }
+
+    public function checkoutCallsign()
+    {
+        $this->callsign['action'] = "checkout";
+        $this->response .= "Checked out. ";
     }
 
     /**
@@ -259,6 +291,12 @@ class Callsign extends Agent
                 if (isset($variables['callsign'])) {
                     $callsign = "X";
                     $refreshed_at = "X";
+                    $action = "X";
+
+                    if (isset($variables['callsign']['action'])) {
+                        $action = $variables['callsign']['action'];
+                    }
+
                     if (isset($variables['callsign']['callsign'])) {
                         $callsign = $variables['callsign']['callsign'];
                     }
@@ -268,6 +306,7 @@ class Callsign extends Agent
 
                     $this->callsigns[] = [
                         "callsign" => $callsign,
+                        "action" => $action,
                         "refreshed_at" => $refreshed_at,
                     ];
                     $this->callsign_list[] = $callsign;
@@ -651,9 +690,6 @@ class Callsign extends Agent
      */
     public function readSubject()
     {
-        //var_dump($this->input);
-        //var_dump(get_parent_class());
-
         $prefix = 'callsign';
         $callsigns = preg_replace(
             '/^' . preg_quote($prefix, '/') . '/',
@@ -666,7 +702,20 @@ class Callsign extends Agent
         $this->extractCallsigns($callsigns);
 
         //       $keywords = array('is', 'heard', 'callsign', "active", "net");
-        $pieces = explode(" ", strtolower($this->input));
+        //  $pieces = explode(" ", strtolower($this->input));
+
+        $ngram_agent = new Ngram($this->thing, "ngram");
+        $pieces = [];
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 3);
+        $pieces = array_merge($pieces, $arr);
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 2);
+        $pieces = array_merge($pieces, $arr);
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 1);
+        $pieces = array_merge($pieces, $arr);
+
+        $pieces = array_reverse($pieces);
+
+        //private function getNgrams($input, $n = 3) {
 
         if (count($pieces) == 1) {
             if ($this->input == 'callsign') {
@@ -698,6 +747,10 @@ class Callsign extends Agent
 
                             return;
 
+                        case 'check in':
+                        case 'check-in':
+                        case 'checkin':
+                        case 'add':
                         case 'heard':
                         case 'is':
                             $this->assertCallsign(strtolower($this->input));
@@ -709,6 +762,26 @@ class Callsign extends Agent
                                     'Callsign asserted to be ' .
                                     strtoupper($this->callsign["callsign"]) .
                                     ".";
+                                $this->checkinCallsign();
+                            }
+
+                            return;
+
+                        case 'check out':
+                        case 'check-out':
+                        case 'checkout':
+                        case 'drop':
+                        case '73':
+                            $this->assertCallsign(strtolower($this->input));
+
+                            if (empty($this->callsign)) {
+                                $this->response = "Did not find a callsign.";
+                            } else {
+                                $this->response =
+                                    'Callsign asserted to be ' .
+                                    strtoupper($this->callsign["callsign"]) .
+                                    ".";
+                                $this->checkoutCallsign();
                             }
 
                             return;
