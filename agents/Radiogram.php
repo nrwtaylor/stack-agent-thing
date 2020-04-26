@@ -15,7 +15,6 @@ class Radiogram extends Agent
 
     public function init()
     {
-
         // Need to add in mode changing - origin / relay
 
         //        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
@@ -49,7 +48,7 @@ class Radiogram extends Agent
         //var_dump($this->thing);
         //exit();
 
-//        $this->getMemcached();
+        //        $this->getMemcached();
     }
 
     function isRadiogram($state = null)
@@ -195,9 +194,9 @@ class Radiogram extends Agent
     {
         if ($bank == "trivia" or $bank == null) {
             $this->bank = "trivia-a01";
-//$this->bank = "easy-a05";
+            //$this->bank = "easy-a05";
         }
-/*
+        /*
         if ($bank == "hard") {
             $this->bank = "hard-a06";
         }
@@ -398,63 +397,56 @@ exit();
         }
     }
 
-public function translateRadiogram($text) {
+    public function translateRadiogram($text)
+    {
+        //$text = $message['text'];
+        $text = str_replace(",", " COMMA ", $text);
+        $text = str_replace('"', ' QUOTE ', $text);
 
-//$text = $message['text'];
-$text = str_replace(",", " COMMA ", $text);
-$text = str_replace('"', ' QUOTE ', $text);
+        $text = str_replace('“', ' QUOTE ', $text);
+        $text = str_replace('”', ' QUOTE ', $text);
 
-$text = str_replace('“', ' QUOTE ', $text);
-$text = str_replace('”', ' QUOTE ', $text);
+        $text = str_replace('?', ' QUERY ', $text);
+        $text = str_replace('!', ' EXCLAMATION ', $text);
+        $text = str_replace('$', ' DOLLAR ', $text);
+        $text = str_replace('#', ' HASH ', $text);
+        $text = str_replace('*', ' ASTERISK ', $text);
 
-$text = str_replace('?', ' QUERY ', $text);
-$text = str_replace('!', ' EXCLAMATION ', $text);
-$text = str_replace('$', ' DOLLAR ', $text);
-$text = str_replace('#', ' HASH ', $text);
-$text = str_replace('*', ' ASTERISK ', $text);
+        $text = str_replace("'", ' APOSTROPHE ', $text);
+        $text = str_replace("’", ' APOSTROPHE ', $text);
+        $text = str_replace("`", ' APOSTROPHE ', $text);
 
-$text = str_replace("'", ' APOSTROPHE ', $text);
-$text = str_replace("’", ' APOSTROPHE ', $text);
-$text = str_replace("`", ' APOSTROPHE ', $text);
+        $text = str_replace("(", ' BRACKET ', $text);
+        $text = str_replace(")", ' BRACKET ', $text);
 
-$text = str_replace("(", ' BRACKET ', $text);
-$text = str_replace(")", ' BRACKET ', $text);
+        $text = str_replace("&", ' AMPERSAND ', $text);
+        $text = str_replace("%", ' PERCENT ', $text);
 
-$text = str_replace("&", ' AMPERSAND ', $text);
-$text = str_replace("%", ' PERCENT ', $text);
+        $text = str_replace(":", ' COLON ', $text);
+        $text = str_replace(";", ' SEMICOLAN ', $text);
+        $text = str_replace("-", ' HYPHEN ', $text);
+        $text = str_replace("=", ' EQUALS ', $text);
 
-$text = str_replace(":", ' COLON ', $text);
-$text = str_replace(";", ' SEMICOLAN ', $text);
-$text = str_replace("-", ' HYPHEN ', $text);
-$text = str_replace("=", ' EQUALS ', $text);
+        $text = str_replace('   ', ' ', $text);
+        $text = str_replace('  ', ' ', $text);
+        $text = trim($text);
 
-
-
-$text = str_replace('   ', ' ', $text);
-$text = str_replace('  ', ' ', $text);
-$text = trim($text);
-
-return $text;
-
-}
+        return $text;
+    }
 
     public function readMessage($message = null)
     {
-
-
         $this->meta = trim($this->message['meta'], "//");
 
-$this->message['name_to'] = $this->callsign;
-$this->message['position_to'] = "";
-$this->message['organization_to'] = "";
+        $this->message['name_to'] = $this->callsign;
+        $this->message['position_to'] = "";
+        $this->message['organization_to'] = "";
 
-$this->message['text'] = $text;
+        $this->message['text'] = $text;
 
-$this->message['name_from'] = "";
-$this->message['position_from'] = "";
-$this->message['organization_from'] = "";
-
-
+        $this->message['name_from'] = "";
+        $this->message['position_from'] = "";
+        $this->message['organization_from'] = "";
 
         $this->name_to = $this->message['name_to'];
         $this->position_to = $this->message['position_to'];
@@ -567,7 +559,6 @@ $this->message['organization_from'] = "";
 
     function makeMessage()
     {
-
         $message = $this->short_message . "<br>";
         $uuid = $this->uuid;
         $message .=
@@ -615,9 +606,10 @@ $this->message['organization_from'] = "";
             isset($this->position_from)
         ) {
             $web .= "<b>TO (STATION CALLSIGN)</b> " . $this->name_to . "<br>";
-//            $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
-            $web .= "<b>FROM (STATION CALLSIGN)</b> " . $this->name_from . "<br>";
-//            $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
+            //            $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
+            $web .=
+                "<b>FROM (STATION CALLSIGN)</b> " . $this->name_from . "<br>";
+            //            $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
         }
 
         $web .= "<p>";
@@ -1066,7 +1058,7 @@ $this->message['organization_from'] = "";
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-/*
+                        /*
                         case 'hard':
                         case 'easy':
                         case '16ln':
@@ -1081,17 +1073,17 @@ $this->message['organization_from'] = "";
 
                             return;
 */
-                //        case 'origin':
-                //        case 'source':
-                //            $this->response .= " Set mode to origin.";
-                //            $this->setMode('origin');
-                //            $this->getMessage();
-                //            return;
-                 //       case 'relay':
-                 //           $this->response .= " Set mode to relay.";
-                 //           $this->setMode('relay');
-                 //           $this->getMessage();
-                 //           return;
+                        //        case 'origin':
+                        //        case 'source':
+                        //            $this->response .= " Set mode to origin.";
+                        //            $this->setMode('origin');
+                        //            $this->getMessage();
+                        //            return;
+                        //       case 'relay':
+                        //           $this->response .= " Set mode to relay.";
+                        //           $this->setMode('relay');
+                        //           $this->getMessage();
+                        //           return;
 
                         case 'hey':
                             $this->getMember();
@@ -1101,7 +1093,7 @@ $this->message['organization_from'] = "";
                                 ".";
 
                             return;
-/*
+                        /*
                         case 'info':
                             $this->response = $this->thing_report['info'];
 
@@ -1122,11 +1114,10 @@ $this->message['organization_from'] = "";
         }
     }
 
-function getMessage() {
-
-return false;
-
-}
+    function getMessage()
+    {
+        return false;
+    }
 
     function setMode($mode = null)
     {
@@ -1136,7 +1127,7 @@ return false;
         $this->mode = $mode;
     }
 
-  function getMode()
+    function getMode()
     {
         if (!isset($this->mode)) {
             $this->mode = $this->default_mode;
