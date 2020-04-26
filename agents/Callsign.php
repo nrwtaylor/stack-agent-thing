@@ -761,7 +761,7 @@ class Callsign extends Agent
                                 $this->response =
                                     'Callsign asserted to be ' .
                                     strtoupper($this->callsign["callsign"]) .
-                                    ".";
+                                    ". ";
                                 $this->checkinCallsign();
                             }
 
@@ -775,12 +775,12 @@ class Callsign extends Agent
                             $this->assertCallsign(strtolower($this->input));
 
                             if (empty($this->callsign)) {
-                                $this->response = "Did not find a callsign.";
+                                $this->response = "Did not find a callsign. ";
                             } else {
                                 $this->response =
                                     'Callsign asserted to be ' .
                                     strtoupper($this->callsign["callsign"]) .
-                                    ".";
+                                    ". ";
                                 $this->checkoutCallsign();
                             }
 
@@ -803,7 +803,7 @@ class Callsign extends Agent
         }
 
         if (!isset($this->callsigns)) {
-            $this->response = "No match found.";
+            $this->response = "No match found. ";
             return;
         }
 
@@ -825,10 +825,10 @@ class Callsign extends Agent
                 $this->callsign["callsign"] .
                 " " .
                 $first_name .
-                ".";
+                ". ";
             return;
         }
 
-        $this->response = "No match found.";
+        $this->response = "No match found. ";
     }
 }

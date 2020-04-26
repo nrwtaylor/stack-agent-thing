@@ -489,18 +489,6 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
     }
 
 
-    function echoDuplicables() {
-//
-//        $rows = 20;
-//        $columns = 5;
-
-//        foreach(range(0,$rows) as $row_index) {
-//            foreach(range(0,columns) as $column_index) {
-//            echo $row_index . " " . $column_index . " ".$value. " ";
-//        }
-
-    }
-
     function makeNonsense($n = 25) 
     {
         $v = array();
@@ -508,10 +496,11 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
         //$v[1] = 2;
 
         foreach(range(0,$n - 1) as $i) {
-	    $word_agent = new Word($this->thing, "random");
+	    $word_agent = new Word($this->thing, "word");
+$word = $word_agent->randomWord();
+$v[$i] = $word;
 
-
-            $v[$i] = $word_agent->word;
+         //   $v[$i] = $word_agent->word;
         }
 
 	$this->nonsense = implode($v, " ");

@@ -399,7 +399,7 @@ class Variables
             if (($text == "forget all") or ($text == "forgetall")){
             } else {
                 $this->thing_report['thing'] = $this->thing->thing;
-                $this->thing_report['sms'] = $this->sms_message;
+//                $this->thing_report['sms'] = $this->sms_message;
                 $this->thing_report['sms'] = "VARIABLES | 10,000 character stack variable space exhausted. Please text FORGET ALL to resolve.";
 
                 $agent_message = new Message($this->thing,$this->thing_report);
