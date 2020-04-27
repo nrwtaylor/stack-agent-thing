@@ -19,8 +19,9 @@ class Callsign extends Agent
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-    function init()
+    public function init()
     {
+        $this->version_date = "2020-04-27";
         $this->start_time = microtime(true);
 
         $this->assert_callsign = false;
@@ -30,6 +31,8 @@ class Callsign extends Agent
         //
         //        $this->thing_report['help'] = "Looks up callsigns.";
         $this->thing_report['info'] = "Possibly helpful to station operators.";
+
+        $this->net_horizon = 30*60; // 30 minutes. Then assume station has gone.
 
         $this->keywords = [
             'is',
@@ -46,10 +49,12 @@ class Callsign extends Agent
             'callsign',
             "active",
             "net",
+            "callsign",
+            "call sign"
         ];
 
-        $this->thing_report['help'] = ucwords(
-            trim(implode(" ", $this->keywords))
+        $this->thing_report['help'] = 'Recognises the following modifiers. ' . ucwords(
+            trim(implode(" ", $this->keywords)). "."
         );
     }
 
@@ -106,6 +111,10 @@ class Callsign extends Agent
         foreach ($this->callsigns as $i => $callsign) {
             $call = $callsign['callsign'];
 
+$last_refreshed_at = $callsign['refreshed_at'];
+$ago = strtotime($this->current_time) - strtotime($last_refreshed_at);
+if ($ago > $this->net_horizon) {continue;}
+
             if (!isset($callsigns_heard[$call])) {
                 $callsigns_heard[$call] = $callsign;
             }
@@ -155,14 +164,14 @@ class Callsign extends Agent
             "reading",
         ]);
 
-        $callsign = new Variables(
+        $this->variables = new Variables(
             $this->thing,
             "variables callsign " . $this->from
         );
 
-        $this->callsign_action = $callsign->getVariable("action");
-        $this->callsign_text = $callsign->getVariable("callsign");
-        $this->refreshed_at = $callsign->getVariable("refreshed_at");
+        $this->callsign_action = $this->variables->getVariable("action");
+        $this->callsign_text = $this->variables->getVariable("callsign");
+        $this->refreshed_at = $this->variables->getVariable("refreshed_at");
     }
 
     /**
@@ -177,7 +186,7 @@ class Callsign extends Agent
      */
     function set()
     {
-        $this->makeSMS();
+//        $this->makeSMS();
 
         //  $this->thing_report['sms'] = strtoupper($this->agent_name) . " | " . $this->response;
 
@@ -192,16 +201,16 @@ class Callsign extends Agent
             $this->reading
         );
 
-        $callsign = new Variables(
-            $this->thing,
-            "variables callsign " . $this->from
-        );
+        //$this->variables = new Variables(
+        //    $this->thing,
+        //    "variables callsign " . $this->from
+        //);
 
         if ($this->assert_callsign) {
-            $callsign->setVariable("callsign", $this->callsign["callsign"]);
+            $this->variables->setVariable("callsign", $this->callsign["callsign"]);
             $time_string = $this->thing->json->time();
-            $callsign->setVariable("refreshed_at", $time_string);
-            $callsign->setVariable("action", $this->callsign["action"]);
+            $this->variables->setVariable("refreshed_at", $time_string);
+            $this->variables->setVariable("action", $this->callsign["action"]);
         }
     }
 
@@ -239,31 +248,6 @@ class Callsign extends Agent
         $this->response .= "Checked out. ";
     }
 
-    /**
-     *
-     * @param unknown $test
-     * @return unknown
-     */
-    /*
-    function getCallsigns($test) {
-        if ($test == false) {
-            return false;
-        }
-
-        $new_callsigns = array();
-
-        if ($test == "") {return $new_callsigns;}
-
-        $pattern = '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){1,}/';
-        $t = preg_split($pattern, $test);
-
-        foreach ($t as $key=>$callsign) {
-            $new_callsigns[] = trim($callsign);
-        }
-        return $new_callsigns;
-    }
-*/
-
     function getCallsigns()
     {
         $this->callsign_list = [];
@@ -278,7 +262,6 @@ class Callsign extends Agent
                 " Callsign Things."
         );
 
-        //        if ( ($findagent_thing->thing_report['things'] == true)) {}
         if ($count > 0) {
             foreach (
                 array_reverse($findagent_thing->thing_report['things'])
@@ -300,9 +283,17 @@ class Callsign extends Agent
                     if (isset($variables['callsign']['callsign'])) {
                         $callsign = $variables['callsign']['callsign'];
                     }
+
+
                     if (isset($variables['callsign']['refreshed_at'])) {
                         $refreshed_at = $variables['callsign']['refreshed_at'];
                     }
+
+// Check for junk entries. And discard.
+if ($callsign == "X") {continue;}
+if ($action == "X") {continue;}
+if ($refreshed_at == "X") {continue;}
+
 
                     $this->callsigns[] = [
                         "callsign" => $callsign,
@@ -596,31 +587,8 @@ class Callsign extends Agent
         // Thing stuff
         $this->thing->flagGreen();
 
-        // Compose email
-
-        // Make SMS
-        //        $this->makeSMS();
-        //        $this->thing_report['sms'] = $this->sms_message;
-
-        // Make message
-        //        $this->thing_report['message'] = $this->sms_message;
-
-        // Make email
-        //        $this->makeEmail();
-
-        //        $this->thing_report['email'] = $this->sms_message;
-
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-
-        //        $this->makeWeb();
-        /*
-        $this->reading = "X";
-        if (isset($this->callsigns)) {
-            $this->reading = count($this->callsigns);
-        }
-        $this->thing->json->writeVariable(array("callsign", "reading"), $this->reading);
-*/
 
         return $this->thing_report;
     }
@@ -658,8 +626,25 @@ class Callsign extends Agent
         $web .= "<br>";
         $web .= '<b>Callsign Agent</b><br>';
         $web .= "<p>";
-        $web .= $this->sms_message;
+        $web .= "No web response available.";
+/*
+        $web .= 'sms message ' . $this->sms_message;
         $web .= "<p>";
+        $web .= 'input ' . $this->input;
+        $web .= "<p>";
+        $web .= 'uuid ' . $this->uuid;
+        $web .= "<p>";
+        $web .= 'subject ' . $this->subject;
+        $web .= "<p>";
+
+        $web .= 'subject '. $this->thing->subject;
+        $web .= "<p>";
+
+        $web .= 'agent_input ' . $this->agent_input;
+        $web .= "<p>";
+
+
+
         if (isset($this->callsigns)) {
             foreach ($this->callsigns as $id => $callsign) {
                 $first_name = "X";
@@ -671,7 +656,7 @@ class Callsign extends Agent
                 $web .= "<br>" . $callsign_text;
             }
         }
-
+*/
         $this->web_message = $web;
         $this->thing_report['web'] = $web;
     }
@@ -727,7 +712,7 @@ class Callsign extends Agent
                         " " .
                         $this->callsign["first_name"] .
                         ". " .
-                        "Asserted callsign retrieved.";
+                        "Last asserted callsign retrieved.";
                     return;
                 }
 
@@ -744,7 +729,9 @@ class Callsign extends Agent
                         case 'active':
                             $this->getCallsigns();
                             $this->netCallsign();
-
+                            $count = 0;
+                            if (is_array($this->callsigns_heard)) {$count = count($this->callsigns_heard);}
+                            $this->response .= "Retrieved " . $count . " active callsigns. ";
                             return;
 
                         case 'check in':
@@ -785,6 +772,8 @@ class Callsign extends Agent
                             }
 
                             return;
+
+
 
                         default:
                         //echo 'default';

@@ -1,24 +1,14 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
-error_reporting(-1);
-
 use setasign\Fpdi;
-
-ini_set("allow_url_fopen", 1);
 
 class Radiorelay extends Agent
 {
-    public $var = 'hello';
 
-    public function init()
+    function init()
     {
-        // Need to add in mode changing - origin / relay
-
-        //        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
-        $this->node_list = ["radiorelay" => ["radiorelay", "nonsense"]];
+        $this->node_list = ["radiorelay" => ["radio relay", "nonsense"]];
 
         $this->number = null;
         $this->unit = "";
@@ -27,13 +17,6 @@ class Radiorelay extends Agent
         $this->default_mode = "relay";
 
         $this->setMode($this->default_mode);
-
-        //        $this->getNuuid();
-
-        $this->character = new Character(
-            $this->thing,
-            "character is Rocket J. Squirrel"
-        );
 
         $this->qr_code_state = "off";
 
@@ -46,10 +29,6 @@ class Radiorelay extends Agent
             $this->thing,
             "variables radiorelay " . $this->from
         );
-
-        //var_dump($this->thing);
-        //exit();
-        //        $this->getMemcached();
     }
 
     function isRadiorelay($state = null)
@@ -161,18 +140,7 @@ class Radiorelay extends Agent
         if ($callsign != false) {
             $this->callsign = $callsign;
         }
-    }
 
-    function getNuuid()
-    {
-        $agent = new Nuuid($this->thing, "nuuid");
-        $this->nuuid_png = $agent->PNG_embed;
-    }
-
-    function getUuid()
-    {
-        $agent = new Uuid($this->thing, "uuid");
-        $this->uuid_png = $agent->PNG_embed;
     }
 
     function getQuickresponse($text = null)
@@ -257,21 +225,19 @@ class Radiorelay extends Agent
         return $this->bank;
     }
 
-    public function respond()
+    public function respondResponse()
     {
-        $this->getResponse();
+        //$this->thing->flagGreen();
 
-        $this->thing->flagGreen();
-
-        $to = $this->thing->from;
-        $from = "radiorelay";
+        //$to = $this->thing->from;
+        //$from = "radiorelay";
         $this->makeACP125G();
 
-        $this->makePNG();
+//        $this->makePNG();
 
-        $this->makeSMS();
+//        $this->makeSMS();
 
-        $this->makeMessage();
+//        $this->makeMessage();
         // $this->makeTXT();
         $this->makeChoices();
 
@@ -282,10 +248,10 @@ class Radiorelay extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-        $this->makeWeb();
+//        $this->makeWeb();
 
-        $this->makeTXT();
-        $this->makePDF();
+//        $this->makeTXT();
+//        $this->makePDF();
     }
 
     function makeChoices()
@@ -320,105 +286,14 @@ class Radiorelay extends Agent
         $this->acp125g->makeACP125G($this->message);
     }
 
-    public function getCast()
-    {
-        //$callsign_agent = new Callsign($this->thing, "callsign");
 
-        //$this->getCallsigns();
-        /*
-//var_dump($this->callsigns_heard);
-foreach ($this->callsigns_heard as $i=>$callsign_heard) {
-    var_dump($callsign_heard);
-}
-*/
-        // Unique name <> Role mappings. Check?
-        /*
-                $this->name_list[$role] = $name;
-                $this->role_list[$name] = $role;
 
-                $this->cast[] = array("name"=>$name, "role"=>$role); 
-
-exit();
-
-/*
-                // Unique name <> Role mappings. Check?
-                $this->name_list[$role] = $name;
-                $this->role_list[$name] = $role;
-
-                $this->cast[] = array("name"=>$name, "role"=>$role); 
-*/
-    }
-
-    function getName($role = null)
-    {
-        if (!isset($this->name_list)) {
-            $this->getCast();
-        }
-
-        if ($role == "X") {
-            $this->name = "Rocky";
-            return;
-        }
-
-        $this->name = array_rand(["Rocky", "Rocket J. Squirrel"]);
-
-        $input = ["Rocky"];
-
-        // Pick a random Charles.
-        $this->name = $input[array_rand($input)];
-        if (isset($this->name_list[$role])) {
-            $this->name = $this->name_list[$role];
-        }
-
-        return $this->name;
-    }
-
-    function getResponse()
-    {
-        if (isset($this->response)) {
-            return;
-        }
-    }
-
-    function getMember()
-    {
-        if (isset($this->member)) {
-            return;
-        }
-
-        // Load in the cast. And roles.
-        $file = $this->resource_path . '/vector/members.txt';
-        $contents = file_get_contents($file);
-        $handle = fopen($file, "r");
-
-        $count = 0;
-
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-                $arr = explode(",", $line);
-                $member_call_sign = trim($arr[0]);
-                $member_sms = trim($arr[1]);
-
-                if ($this->from == $member_sms) {
-                    $this->member['call_sign'] = $member_call_sign;
-                    $this->member['sms'] = $member_sms;
-                    return;
-                }
-            }
-        }
-
-        if (!isset($this->member['call_sign'])) {
-            $this->member['call_sign'] = "ROCKY";
-            $this->member['sms'] = "(XXX) XXX-XXXX";
-        }
-    }
 
     public function getMessages()
     {
         if (isset($this->messages)) {
             return;
         }
-
         //$test = $this->mem_cached->get('radiorelay-queries');
         //if ($test != false) {$this->messages = $test; return;}
         // Load in the name of the message bank.
@@ -427,15 +302,12 @@ exit();
         $filename = "/vector/messages-" . $this->bank . ".txt";
 
         $this->filename = $this->bank . ".txt";
-
         //$filename = "/radiorelay/" . $this->filename;
         $filename = "/radiorelay/trivia-a01.txt";
         $file = $this->resource_path . $filename;
         //        $contents = file_get_contents($file);
-
         $handle = fopen($file, "r");
         $count = 0;
-
         $bank_info = null;
         $bank_meta = [];
         if ($handle) {
@@ -484,7 +356,6 @@ exit();
                     }
                     continue;
                 }
-
                 //if ($bank_fino == null) {continue;}
 
                 $count += 1;
@@ -520,44 +391,8 @@ exit();
                 ];
 
                 $this->messages[] = $message_array;
-                //              }
 
-                /*
-        if ($line_count == 16) {
-
-                $line = array();
-                $message_array = array("line_1"=>$message[1],
-                    "line_2"=>$message[2],
-                    "line_3"=>$message[3],
-                    "line_4"=>$message[4],
-                    "line_5"=>$message[5],
-                    "line_6"=>$message[6],
-                    "line_7"=>$message[7],
-                    "line_8"=>$message[8],
-                    "line_9"=>$message[9],
-                    "line_10"=>$message[10],
-                    "line_11"=>$message[11],
-                    "line_12"=>$message[12],
-                    "line_13"=>$message[13],
-                    "line_14"=>$message[14],
-                    "line_15"=>$message[15],
-                    "line_16"=>$message[16]
-                );
-
-                $this->messages[] = $message_array;
-
-
-        }
-  
-              $count = 0;
-                $message = null;
             }
-
-
-            $message[] = $line;
-*/
-            }
-
             fclose($handle);
         } else {
             // error opening the file.
@@ -588,21 +423,8 @@ exit();
 
     public function getMessage()
     {
-        //        $this->getInject();
         $this->getMessages();
-        /*
-        $callsign_agent = new Callsign($this->thing, "callsign");
-        $callsign_agent->getCallsigns();
-        $callsign_agent->netCallsign();
-
-        var_dump($callsign_agent->callsigns_heard);
-        $this->callsigns_heard = $callsign_agent;
-*/
         $this->getCallsign();
-        //$status = true;
-        //if ($this->inject == null) {$status = false;}
-        //if ($this->inject == false) {$status = false;}
-
         $is_empty_inject = true;
 
         if ($this->inject === false) {
@@ -613,7 +435,6 @@ exit();
             $this->getInject();
 
             $message = $this->messages[$this->num];
-
             $radiogram_agent = new Radiogram($this->thing, "radiogram");
             $text = $radiogram_agent->translateRadiogram($message['text']);
 
@@ -669,15 +490,6 @@ exit();
         $this->organization_from = $this->message['organization_from'];
         $this->number_from = $this->message['number_from'];
 
-        /*
-        $this->short_message = $this->meta . "\n" .
-             $this->name_to . ", " . $this->position_to . ", " .
-             $this->organization_to.", " . $this->number_to. ". " . "\n" .
-             $this->text ." " . "\n" .
-             $this->name_from . ", " .
-             $this->position_from . ", " . $this->organization_from . ", " .
-             $this->number_from. ".";
-*/
 
         $name_to = ucwords($this->name_to);
         $position_to = ucwords($this->position_to);
@@ -686,31 +498,7 @@ exit();
         $name_from = ucwords($this->name_from);
         $position_from = ucwords($this->position_from);
         $organization_from = strtoupper($this->organization_from);
-        /*
-        $this->short_message =
-            "TO " .
-            $name_to .
-            ", " .
-            $position_to .
-            " [" .
-            $organization_to .
-            "]" .
-            "\nFROM " .
-            $name_from .
-            ", " .
-            $position_from .
-            " [" .
-            $organization_from .
-            "]" .
-            "\n" .
-            "" .
-            $this->text .
-            "\n" .
-            $this->number .
-            " " .
-            $this->unit .
-            "";
-*/
+
         $this->short_message =
             "TO " .
             $name_to .
@@ -791,13 +579,6 @@ exit();
         $this->bar = new Bar($this->thing, "display");
     }
 
-    function setRadiorelay()
-    {
-    }
-
-    function getRadiorelay()
-    {
-    }
 
     function makeWeb()
     {
@@ -1023,134 +804,6 @@ exit();
         $this->txt = $txt;
     }
 
-    public function makePNG()
-    {
-        $this->image = imagecreatetruecolor(164, 164);
-
-        $this->white = imagecolorallocate($this->image, 255, 255, 255);
-        $this->black = imagecolorallocate($this->image, 0, 0, 0);
-        $this->red = imagecolorallocate($this->image, 255, 0, 0);
-        $this->green = imagecolorallocate($this->image, 0, 255, 0);
-        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
-
-        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
-
-        imagefilledrectangle($this->image, 0, 0, 164, 164, $this->white);
-        $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-
-        // $this->drawRocky(164/2,164/2);
-
-        // Write the string at the top left
-        $border = 30;
-        $radius = (1.165 * (164 - 2 * $border)) / 3;
-
-        // devstack add path
-        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-        $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST RADIO RELAY";
-        $text = "RADIO RELAY";
-        $text = $this->message['text'];
-
-        if (!isset($this->bar)) {
-            $this->getBar();
-        }
-
-        $bar_count = $this->bar->bar_count;
-
-        // Add some shadow to the text
-
-        imagettftext(
-            $this->image,
-            40,
-            0,
-            0 - $this->bar->bar_count * 5,
-            75,
-            $this->grey,
-            $font,
-            $text
-        );
-
-        $size = 72;
-        $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-        //check width of the image
-        $width = imagesx($this->image);
-        $height = imagesy($this->image);
-        $pad = 0;
-
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
-            $textcolor,
-            $font,
-            $this->message['station_origin']
-        );
-
-        $size = 10;
-
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + ($bb_height * 4) / 5,
-            $textcolor,
-            $font,
-            $this->message['station_origin']
-        );
-
-        // Small nuuid text for back-checking.
-        imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
-
-        // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
-        if (ob_get_contents()) {
-            ob_clean();
-        }
-
-        ob_start();
-        imagepng($this->image);
-        $imagedata = ob_get_contents();
-
-        ob_end_clean();
-
-        $this->thing_report['png'] = $imagedata;
-
-        $response =
-            '<img src="data:image/png;base64,' .
-            base64_encode($imagedata) .
-            '"alt="snowflake"/>';
-
-        $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
-
-        $this->PNG = $imagedata;
-
-        $this->html_image = $response;
-
-        return $response;
-    }
-
-    function extractNuuid($input)
-    {
-        if (!isset($this->duplicables)) {
-            $this->duplicables = [];
-        }
-
-        return $this->duplicables;
-    }
-
     public function makePDF()
     {
         if ($this->num_words > 25) {
@@ -1315,24 +968,35 @@ exit();
 
     public function readSubject()
     {
-        if (!$this->getMember()) {
-            $this->response = "Generated an inject.";
-        }
 
         $input = strtolower($this->subject);
 
-        $pieces = explode(" ", strtolower($input));
+//        $pieces = explode(" ", strtolower($input));
+
+        $ngram_agent = new Ngram($this->thing, "ngram");
+        $pieces = [];
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 3);
+        $pieces = array_merge($pieces, $arr);
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 2);
+        $pieces = array_merge($pieces, $arr);
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 1);
+        $pieces = array_merge($pieces, $arr);
+
+        $pieces = array_reverse($pieces);
+
+
 
         if (count($pieces) == 1) {
             if ($input == 'radiorelay') {
                 $this->getMessage();
-
                 if (!isset($this->index) or $this->index == null) {
                     $this->index = 1;
                 }
                 return;
             }
         }
+
+
         $keywords = [
             "hey",
             "radio",
@@ -1345,60 +1009,26 @@ exit();
             "source",
             "origin",
             "relay",
+            "radio relay",
+            "radiorelay"
         ];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        /*
-                        case 'hard':
-                        case 'easy':
-                        case '16ln':
-                            $this->setState($piece);
-                            $this->setBank($piece);
+                        case "radiorelay":
+                        case "radio relay":
+                $this->getMessage();
+                if (!isset($this->index) or $this->index == null) {
+                    $this->index = 1;
+                }
+                return;
 
-                            $this->getMessage();
-                            $this->response .=
-                                " Set messages to " .
-                                strtoupper($this->state) .
-                                ".";
-
-                            return;
-*/
-                        //        case 'origin':
-                        //        case 'source':
-                        //            $this->response .= " Set mode to origin.";
-                        //            $this->setMode('origin');
-                        //            $this->getMessage();
-                        //            return;
-                        //       case 'relay':
-                        //           $this->response .= " Set mode to relay.";
-                        //           $this->setMode('relay');
-                        //           $this->getMessage();
-                        //           return;
-
-                        case 'hey':
-                            $this->getMember();
-                            $this->response =
-                                "Hey " .
-                                strtoupper($this->member['call_sign']) .
-                                ".";
-
-                            return;
-                        /*
-                        case 'info':
-                            $this->response = $this->thing_report['info'];
-
-                            return;
-*/
-
-                        case 'on':
                         default:
                     }
                 }
             }
         }
-
         $this->getMessage();
 
         if (!isset($this->index) or $this->index == null) {

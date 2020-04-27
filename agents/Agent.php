@@ -353,7 +353,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
      *
      */
     public function getName() {
-        $this->agent_name =   explode( "\\", strtolower(get_class($this)) )[2] ;
+        $this->agent_name =   explode( "\\", strtolower(get_class($this)) )[2];
     }
 
     function debug() {

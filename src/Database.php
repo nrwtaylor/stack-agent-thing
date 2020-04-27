@@ -1650,10 +1650,9 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         }
         echo "BORK | 3797e2c1-6585-4ae8-a256-b3e5466c980f ";
         //echo "'caught' fatal error E_RECOVERABLE_ERROR\n";
-        return true;
+       return true;
     } elseif (E_ERROR === $errno) {
         // If there is stuff in the screen buffer clear it.
-
         if (ob_get_contents()) {
             ob_clean();
         }
