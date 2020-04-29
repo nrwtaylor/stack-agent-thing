@@ -239,11 +239,40 @@ $this->short_message = "X";
         $this->thing_report['sms'] = $sms;
     }
 
+
+public function deperiodAcronym($text) {
+
+$tokens = explode(' ', $text);
+
+foreach($tokens as $i=>$token) {
+
+$dot_count = substr_count($token, ".");
+if ($dot_count > 1) {
+$tokens[$i] = str_replace('.', '', $token);
+
+}
+
+}
+
+$processed_text = trim(implode(' ',$tokens));
+return $processed_text;
+
+}
+
+
     public function translateRadiogram($text)
     {
         //$text = $message['text'];
 
+$text = $this->deperiodAcronym($text);
+
         $text = str_replace(".", " XRAY ", $text);
+
+        $text = str_replace(',"', ' QUOTE ', $text);
+        $text = str_replace(',“', ' QUOTE ', $text);
+        $text = str_replace(',”', ' QUOTE ', $text);
+
+//        $text = str_replace(".", " XRAY ", $text);
 
         $text = str_replace(",", " COMMA ", $text);
         $text = str_replace('"', ' QUOTE ', $text);

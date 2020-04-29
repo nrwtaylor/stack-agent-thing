@@ -379,6 +379,8 @@ if  ($buttons == "on") {
 
         </tbody>
         </table>';
+
+
 /*
         $head= '
         <table class="makeweb">
@@ -394,7 +396,7 @@ if  ($buttons == "on") {
         </table>";
 */
 
-        $head= '<div class="buttonset">';
+        $head= '<div class="choice-button-set">';
         $foot = '</div>';
 
 //if (!isset($GLOBAL['thingy']['thing'])) {
@@ -410,42 +412,18 @@ if (isset($GLOBALS['thingy']['thing']->uuid)) {
 
         $word = "Forget";
         $url_link = $web_prefix . "thing/".$uuid ."/forget";
-        $forget_button = '<span class="button">
-            <a style="text-decoration: none; color: white;" href="'.
-                $url_link . '"> '.  ''. $word . ''.' </a></span>
-            ';
+        $forget_button = '<a style="text-decoration: none; color: white;" href="'.
+                $url_link . '"><div class="choice-button"> '.  ''. $word . ''.' </div></a>';
 }
 
 
         $word = "Privacy";
         $url_link = $web_prefix . "privacy";
-        $privacy_button = '<span class="button">
-            <a style="text-decoration: none; color: white;" href="'.
-                $url_link . '"> '.  ''. $word . ''.' </a></span>
-            ';
+        $privacy_button = '<a style="text-decoration: none; color: white;" href="'.
+                $url_link . '"><div class="choice-button"> '.  ''. $word . ''.' </div></a>';
 
 
-    $content =  '<table border="0" cellpadding="0" cellspacing="0" width="100%">
-        <tbody>
-
-        <tr class="buttonset">
-        <td>
-
-        <table class="buttonset">
-        <tr>
-        <td>
-' . $forget_button . ' ' .$privacy_button . '
-
-        </td>
-        </tr>
-        </table>
-
-        </td>
-        </tr>
-
-
-        </tbody>
-        </table>';
+    $content =  '<div class="choice-button-set">' . $forget_button . ' ' .$privacy_button . '</div>';
 
 
 
@@ -458,7 +436,7 @@ if (isset($GLOBALS['thingy']['thing']->uuid)) {
 
     }
 
-            echo '<div class="card buttons">';
+            echo '<div class="choice-button-set">';
 
     if (!isset($button_align)) {$button_align = "center";}
 //$button_align = "center";

@@ -981,7 +981,6 @@ if ($command != $txt) {
             $agent = new Agent($thing, $command);
 
             $thing_report = $agent->thing_report;
-
             $thing_report['filename'] = $last;
             $thing_report['request'] = $thing->subject;
 

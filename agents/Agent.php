@@ -972,6 +972,7 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
         } else {
             $input = strtolower($agent_input_text);
         }
+
         // Basically if the agent input directly matches an agent name
         // Then run it.
 
@@ -1015,6 +1016,12 @@ $this->mem_cached->addServer("127.0.0.1", 11211);
             if ($ngram == "Agent") {
                 continue;
             }
+
+
+if ($ngram == "Sms") {
+continue;
+}
+
 
             if ($ngram == "") {
                 continue;
