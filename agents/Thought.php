@@ -11,14 +11,12 @@ class Thought extends Agent
 {
     function init()
     {
-        $this->node_list = array("snow" => array("stop", "snow"));
-
-        $this->current_time = $this->thing->json->time();
+        $this->node_list = ["snow" => ["stop", "snow"]];
 
         $this->variable = 10; //s
 
         $this->thing_report['help'] = $this->agent_prefix . 'had a thought.';
-        $this->thing_report['infop'] = 'Deep thoughts.';
+        $this->thing_report['info'] = 'Deep thoughts.';
     }
 
     public function run()
@@ -78,6 +76,8 @@ class Thought extends Agent
         // Thing actions
         $this->thing->flagGreen();
 
+        $this->makeChoices();
+
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['sms'] = $this->sms_message;
@@ -95,11 +95,11 @@ class Thought extends Agent
 
     function thought()
     {
-        // Reminder?
+        // Get a reminder stochastically.
         $thingreport = $this->thing->db->reminder(
             $this->from,
-            array('s/', 'stack record'),
-            array('ant', 'email', 'transit', 'translink')
+            ['s/', 'stack record'],
+            ['ant', 'email', 'transit', 'translink']
         );
         $things = $thingreport['thing'];
 
@@ -108,6 +108,7 @@ class Thought extends Agent
 
         $this->thought = $thing['task'];
 
+        // Think for a little while.
         sleep(rand(1, $this->variable));
 
         $this->thing->log($this->agent_prefix . ' says, "Thought."');
