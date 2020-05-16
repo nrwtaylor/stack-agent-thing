@@ -1166,6 +1166,23 @@ return $this->items;
         $this->thing->log("made text.");
     }
 
+    public function parseOffers($ebay_item = null)
+    {
+
+        if ($ebay_item == null) {
+            return true;
+        }
+$end_time = $ebay_item['listingInfo']['endTime'];
+
+$available = "no";
+if ($end_time < $this->current_time) {$available = "yes";}
+
+$offer = array("available"=>$available, "availability_ends"=>$end_time);
+$offers = array($offer);
+return $offers;
+
+    }
+
     public function parseItem($ebay_item = null)
     {
         //if (isset($ebay_item['Description'])) {var_dump($ebay_item);exit();}
@@ -1387,6 +1404,7 @@ $source = "eBay";
                     $ebay_item["primaryCategory"][0]["categoryName"][0];
             }
         }
+
         $item = array(
             "source" => $source,
             "id" => $item_id,
@@ -1401,8 +1419,19 @@ $source = "eBay";
             "country" => $country,
             "html_link" => $html_link,
             "picture_urls" => $picture_urls,
-            "ebay" => $ebay_item
+            "vendor" => $ebay_item
         );
+
+$offers = $this->parseOffers($ebay_item);
+if ((!isset($offers)) or ($offers == true) or ($offers == false)) {
+
+} else {
+
+$item['offers'] = $offers;
+
+}
+
+
         return $item;
     }
 
