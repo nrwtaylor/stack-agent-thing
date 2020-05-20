@@ -88,7 +88,7 @@ class Etsy extends Agent
         $this->counter = $this->counter + 1;
     }
 
-    function logAmazon($text)
+    function logEtsy($text)
     {
         if ($text == null) {
             $text = "MErp";
@@ -107,8 +107,8 @@ class Etsy extends Agent
         $thing = new Thing(null);
         $thing->Create(
             "meep",
-            "amazon",
-            "g/ amazon error " . $request . " - " . $log_text
+            "etsy",
+            "g/ etsy error " . $request . " - " . $log_text
         );
 
         $this->thing->db->setFrom($this->from);
@@ -195,6 +195,7 @@ return $offers;
             $product_group = $amazon_item['ItemAttributes']['ProductGroup'];
         }
 */
+
         $title = "";
         if (isset($amazon_item['title'])) {
             $title = $amazon_item['title'];
@@ -205,9 +206,20 @@ return $offers;
             $description = $amazon_item['description'];
         }
 
-        $price = "";
+        $currency_code = "X";
+        $currency_symbol = 'X';
+        if (isset($amazon_item['currency_code'])) {
+            $currency_code = $amazon_item['currency_code'];
+            if ($currency_code == "USD") {$currency_symbol = '$';}
+        }
+
+
+        $price = "X";
         if (isset($amazon_item['price'])) {
-            $price = $amazon_item['price'];
+if ($currency_symbol == '$') {
+            $price = $currency_symbol . $amazon_item['price'];
+}
+
         }
 
         $link_thumbnail = null;

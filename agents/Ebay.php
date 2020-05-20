@@ -146,6 +146,37 @@ $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
         //    }
     }
 
+
+    function setEbay($response = null)
+    {
+
+if ($response == null) {return true;}
+
+        $this->thing->log( 'called setEbay()' );
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $this->thing->json->writeVariable( array("ebay") , $response  );
+
+    }
+
+    function getEbay()
+    {
+        $this->thing->log( 'called getEbay()' );
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $response = $this->thing->json->readVariable( array("ebay") );
+
+//                $this->variablesGet();
+
+                return $response;
+    }
+
+
+
     function getTime()
     {
         if ($this->state == "off") {
@@ -353,9 +384,12 @@ if ($type == "WARNING") {return true;}
                 $this->logEbay($array);
             }
 
+$this->setEbay($array);
+
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -427,10 +461,11 @@ if ($type == "WARNING") {return true;}
             if ($array["Ack"] == "Failure") {
                 $this->logEbay($array);
             }
-
+$this->setEbay($array);
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -481,8 +516,10 @@ if ($type == "WARNING") {return true;}
                 $this->logEbay($array);
             }
             return $array;
+$this->setEbay($array);
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -558,10 +595,11 @@ http://open.api.ebay.com/shopping?
             if ($array["Ack"] == "Failure") {
                 $this->logEbay($array);
             }
-
+$this->setEbay($array);
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -709,10 +747,11 @@ return $this->items;
             if (isset($array["Ack"]) and $array["Ack"] == "Failure") {
                 $this->logEbay($array);
             }
-
+$this->setEbay($array);
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
