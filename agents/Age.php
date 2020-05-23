@@ -141,7 +141,8 @@ class Age extends Chart
         $i = 0;
 
         foreach ($this->tubs as $x=>$y) {
-
+//var_dump($x);
+//var_dump($y);
             if (($y == null) or ($y == 0 )) {
                 continue;
             }
@@ -162,6 +163,10 @@ class Age extends Chart
 
             $i += 1;
         }
+
+//$x = $this->tub_boundaries[$x];
+// devstack
+//var_dump($x);
 
         $this->y_max = $y_max;
         $this->y_min = $y_min;
@@ -301,6 +306,17 @@ class Age extends Chart
         $dimension[0] = "age";
         $dimension[1] = "bin_sum";
 
+$this->tub_boundaries = array("seconds"=>60,
+"minutes"=>60*60,
+"days"=>60*60*24,
+"weeks"=>60*60*24*7,
+"months"=>60*60*24*7*6,
+"years"=>60*60*60*24*365,
+"decades"=>60*60*60*24*365,
+"centuries"=>60*60*60*24*365*100);
+
+
+
         foreach ($this->points as $key=>$point) {
 
             if (!isset($x_min)) {$x_min = $point['age'];}
@@ -334,6 +350,19 @@ class Age extends Chart
         foreach ($this->points as $key=>$point) {
 
             //$spread = the distance between youngest and oldest age
+
+
+foreach ($this->tub_boundaries as $tub_name=>$tub_boundary) {
+
+
+if ($this->x_max > $tub_boundary) {
+$tub_boundary_name = $tub_name;
+}
+
+}
+//var_dump($tub_boundary_name);
+
+//$tub_index = $tub_boundary_name;
             $tub_index = intval(($this->num_tubs - 1) * ($this->x_max - $point['age']) / $this->x_spread) + 1;
 
             if (!isset($this->tubs[$tub_index])) {$this->tubs[$tub_index] = 1; continue;}
@@ -412,7 +441,6 @@ class Age extends Chart
             if ( $variable == 0 ) {
                 //echo "age = 0";
                 continue;
-                exit();
             }
 
 
@@ -515,6 +543,8 @@ class Age extends Chart
         $this->tubAge();
 
         foreach ($this->tubs as $x=>$y) {
+//var_dump($x);
+//var_dump($y);
             $txt .= str_pad($x, 7, ' ', STR_PAD_LEFT);
             $txt .= " ";
 
@@ -525,6 +555,9 @@ class Age extends Chart
 
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
+
+//exit();
+
     }
 
 

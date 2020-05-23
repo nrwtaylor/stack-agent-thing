@@ -39,7 +39,7 @@ class Robot extends Agent
             $user_agent_long =
                 $this->thing->container['api']['robot']['user_agent_long'];
             ini_set('user_agent', $user_agent_long);
-            $this->user_agent_long;
+            $this->user_agent_long = $user_agent_long;
         }
 
         if (
@@ -74,6 +74,23 @@ class Robot extends Agent
 
         return;
     }
+
+public function metaRobot($html) {
+
+// devstack
+
+$doc = new \DOMDocument();
+//$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
+@$doc->loadHTML($html);
+
+$xpath = new \DOMXpath($doc);
+$contents = $xpath->query('/html/head/meta[@name="robots"]/@content');
+
+var_dump($contents);
+
+}
+
+
 
     /**
      *

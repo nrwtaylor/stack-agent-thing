@@ -60,6 +60,10 @@ class Read extends Agent
 
             $this->getUrl($this->link);
 
+            $this->metaRead($this->contents);
+
+            $this->copyrightRead($this->contents);
+
             // Get all the URLs in the page.
             $url_agent = new Url($this->thing, "url");
             $this->urls = $url_agent->extractUrls($this->contents);
@@ -86,6 +90,53 @@ class Read extends Agent
                 "Robot not allowed. " . $this->robot_agent->response;
         }
     }
+
+
+function copyrightRead($html) {
+
+// devstack
+
+
+if (stripos($html, 'copywrite') !== false) {
+return true;
+}
+
+if (stripos($html, 'copyright') !== false) {
+return true;
+}
+
+if (stripos($html, '©') !== false) {
+return true;
+}
+
+if (stripos($html, '(c)') !== false) {
+return true;
+}
+
+if (stripos($html, 'copr') !== false) {
+return true;
+}
+
+return false;
+
+}
+
+
+
+function metaRead($html) {
+
+$doc = new \DOMDocument();
+//$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
+@$doc->loadHTML($html);
+
+$xpath = new \DOMXpath($doc);
+//$elements = $xpath->query("*/div[@class='yourTagIdHere']");
+$elements = $xpath->query("//*[contains(@class, 'class name goes here')]");
+
+
+
+}
+
 
     function set()
     {
@@ -151,6 +202,8 @@ class Read extends Agent
 
         // Raw file
         $this->contents = $data;
+
+
     }
 
     function match_all($needles, $haystack)
