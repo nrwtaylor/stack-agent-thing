@@ -146,6 +146,37 @@ $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
         //    }
     }
 
+
+    function setEbay($response = null)
+    {
+
+if ($response == null) {return true;}
+
+        $this->thing->log( 'called setEbay()' );
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $this->thing->json->writeVariable( array("ebay") , $response  );
+
+    }
+
+    function getEbay()
+    {
+        $this->thing->log( 'called getEbay()' );
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $response = $this->thing->json->readVariable( array("ebay") );
+
+//                $this->variablesGet();
+
+                return $response;
+    }
+
+
+
     function getTime()
     {
         if ($this->state == "off") {
@@ -353,9 +384,12 @@ if ($type == "WARNING") {return true;}
                 $this->logEbay($array);
             }
 
+$this->setEbay($array);
+
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -427,10 +461,11 @@ if ($type == "WARNING") {return true;}
             if ($array["Ack"] == "Failure") {
                 $this->logEbay($array);
             }
-
+$this->setEbay($array);
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -481,8 +516,10 @@ if ($type == "WARNING") {return true;}
                 $this->logEbay($array);
             }
             return $array;
+$this->setEbay($array);
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -558,10 +595,11 @@ http://open.api.ebay.com/shopping?
             if ($array["Ack"] == "Failure") {
                 $this->logEbay($array);
             }
-
+$this->setEbay($array);
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -709,10 +747,11 @@ return $this->items;
             if (isset($array["Ack"]) and $array["Ack"] == "Failure") {
                 $this->logEbay($array);
             }
-
+$this->setEbay($array);
             return $array;
         }
         $this->flag = "green";
+$this->setEbay(false);
         return false;
     }
 
@@ -1166,6 +1205,23 @@ return $this->items;
         $this->thing->log("made text.");
     }
 
+    public function parseOffers($ebay_item = null)
+    {
+
+        if ($ebay_item == null) {
+            return true;
+        }
+$end_time = $ebay_item['listingInfo']['endTime'];
+
+$available = "no";
+if ($end_time < $this->current_time) {$available = "yes";}
+
+$offer = array("available"=>$available, "availability_ends"=>$end_time);
+$offers = array($offer);
+return $offers;
+
+    }
+
     public function parseItem($ebay_item = null)
     {
         //if (isset($ebay_item['Description'])) {var_dump($ebay_item);exit();}
@@ -1387,6 +1443,7 @@ $source = "eBay";
                     $ebay_item["primaryCategory"][0]["categoryName"][0];
             }
         }
+
         $item = array(
             "source" => $source,
             "id" => $item_id,
@@ -1401,8 +1458,19 @@ $source = "eBay";
             "country" => $country,
             "html_link" => $html_link,
             "picture_urls" => $picture_urls,
-            "ebay" => $ebay_item
+            "vendor" => $ebay_item
         );
+
+$offers = $this->parseOffers($ebay_item);
+if ((!isset($offers)) or ($offers == true) or ($offers == false)) {
+
+} else {
+
+$item['offers'] = $offers;
+
+}
+
+
         return $item;
     }
 

@@ -536,7 +536,12 @@ class Variables
         if (!isset($pieces[3])) {
             $this->index = 0;
         } else {
+$index = false;
+if (isset($pieces[4])) {$index = $pieces[4];
+
             $this->index = $pieces[4];
+}
+
         }
 
         return;

@@ -88,7 +88,7 @@ class Etsy extends Agent
         $this->counter = $this->counter + 1;
     }
 
-    function logAmazon($text)
+    function logEtsy($text)
     {
         if ($text == null) {
             $text = "MErp";
@@ -107,8 +107,8 @@ class Etsy extends Agent
         $thing = new Thing(null);
         $thing->Create(
             "meep",
-            "amazon",
-            "g/ amazon error " . $request . " - " . $log_text
+            "etsy",
+            "g/ etsy error " . $request . " - " . $log_text
         );
 
         $this->thing->db->setFrom($this->from);
@@ -118,6 +118,32 @@ class Etsy extends Agent
 
         $this->response .= $request . " - " . $log_text . " ";
     }
+
+    public function parseOffers($etsy_item = null)
+    {
+
+        if ($etsy_item == null) {
+            return true;
+        }
+
+if (!isset($etsy_item['ending_tsz'])) {
+
+return true;
+
+
+}
+
+$end_time = date('c',$etsy_item['ending_tsz']);
+
+$available = "no";
+if ($end_time < $this->current_time) {$available = "yes";}
+
+$offer = array("available"=>$available, "availability_ends"=>$end_time);
+$offers = array($offer);
+return $offers;
+
+    }
+
 
     public function parseItem($amazon_item = null)
     {
@@ -169,6 +195,7 @@ class Etsy extends Agent
             $product_group = $amazon_item['ItemAttributes']['ProductGroup'];
         }
 */
+
         $title = "";
         if (isset($amazon_item['title'])) {
             $title = $amazon_item['title'];
@@ -179,9 +206,20 @@ class Etsy extends Agent
             $description = $amazon_item['description'];
         }
 
-        $price = "";
+        $currency_code = "X";
+        $currency_symbol = 'X';
+        if (isset($amazon_item['currency_code'])) {
+            $currency_code = $amazon_item['currency_code'];
+            if ($currency_code == "USD") {$currency_symbol = '$';}
+        }
+
+
+        $price = "X";
         if (isset($amazon_item['price'])) {
-            $price = $amazon_item['price'];
+if ($currency_symbol == '$') {
+            $price = $currency_symbol . $amazon_item['price'];
+}
+
         }
 
         $link_thumbnail = null;
@@ -222,6 +260,17 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
             "vendor" => $amazon_item,
             "picture_urls" => $picture_urls
         );
+
+$offers = $this->parseOffers($amazon_item);
+if ((!isset($offers)) or ($offers == true) or ($offers == false)) {
+
+} else {
+
+$item['offers'] = $offers;
+
+}
+
+
 
         return $item;
     }
