@@ -992,16 +992,20 @@ class Thing
         }
 
         $a = array(
+            10 * 365 * 24 * 60 * 60 => 'decade',
             365 * 24 * 60 * 60 => 'year',
             30 * 24 * 60 * 60 => 'month',
+            7 * 24 * 60 * 60 => 'week',
             24 * 60 * 60 => 'day',
             60 * 60 => 'hour',
             60 => 'minute',
             1 => 'second'
         );
         $a_plural = array(
+            'decade' => 'decade',
             'year' => 'years',
             'month' => 'months',
+            'week' => 'weeks',
             'day' => 'days',
             'hour' => 'hours',
             'minute' => 'minutes',
