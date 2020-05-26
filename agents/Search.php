@@ -16,16 +16,16 @@ class Search extends Agent
     public $search_settings = [
         "google" => [
             "state" => "off",
-            "search_prefix" => "https://google.com/search?q=",
+            "search_prefix" => 'https://google.com/search?q=',
             "search_space" => "+",
         ],
         "amazon" => [
-            "search_prefix" => "https://amazon.com/?s?k=",
+            "search_prefix" => 'https://amazon.com/?s?k=',
             "search_space" => "+",
         ],
         "craigslist vancouver" => [
             "search_prefix" =>
-                "https://vancouver.craigslist.org/search/sss?query=",
+                'https://vancouver.craigslist.org/search/sss?query=',
             "search_postfix" => "&sort=rel",
             "search_space" => "%20",
         ],
@@ -35,16 +35,16 @@ class Search extends Agent
             "search_encoding" => "url",
         ],
         "amazon ca" => [
-            "search_prefix" => "https://amazon.ca/?s?k=",
+            "search_prefix" => 'https://amazon.ca/?s?k=',
             "search_space" => "+",
         ],
         "ebay" => [
-            "search_prefix" => " http://www.ebay.com/sch/",
+            "search_prefix" => 'http://www.ebay.com/sch/',
             "search_space" => "%20",
             "search_encoding" => "url",
         ],
         "ebay ca" => [
-            "search_prefix" => "https://ebay.ca/?s=",
+            "search_prefix" => '%uFFFD php web link appearinghttps://ebay.ca/?s=',
             "search_space" => "+",
         ],
     ];
@@ -95,7 +95,6 @@ $this->search_links = array();
                 $this->response .= ' - ';
             }
             $link = $this->urlSearch($search_engine, $text);
-
 $this->search_links[$search_engine] = $link;
 
             $flag_first = false;
@@ -129,7 +128,6 @@ if (isset($filtered_parts[0])) {
 if (isset($filtered_parts[1])) {
         $input_search = $filtered_parts[1];
 }
-//var_dump($input_search);
 
 $search_text = $this->readSearch($input_search);
 //$this->linksSearch($search_text);
@@ -268,13 +266,13 @@ public function makeWeb()
 {
 
 $links = $this->linksSearch($this->search_text);
-//var_dump($links);
 $web = "<b>Search Agent</b><p>";
 $web .= $this->input . "<br>";
-$web .= $this->subject ."<br>";
-$web .= $this->thing->subject . "<br>";
+//$web .= $this->subject ."<br>";
+//$web .= $this->thing->subject . "<br>";
 foreach ($this->search_links as $search_engine=>$link) {
-$web .= $search_engine . ' <a href="' . $link.'">' . $this->search_text . '</a>' . "<br>";
+//echo $link;
+$web .= $search_engine . ' <a href="' . $link .'">' . $this->search_text . '</a>' . "<br>";
 
 }
 
@@ -289,8 +287,6 @@ $this->thing_report['web'] = $web;
     {
 
 $input = $this->input;
-//var_dump($this->subject);
-//var_dump($input);
         $this->search_text = $this->extractSearch($input);
 
 $pieces = explode(" ", $this->search_text);
