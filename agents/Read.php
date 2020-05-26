@@ -33,7 +33,6 @@ class Read extends Agent
 
     function run()
     {
-
         // Now have this->link potentially from reading subject
 
         $this->matched_sentences = [];
@@ -58,9 +57,9 @@ class Read extends Agent
             } else {
                 return true;
             }
-// Populate $this->contents
+            // Populate $this->contents
             $this->getUrl($this->link);
-//var_dump($this->contents);
+
             $this->metaRead($this->contents);
             $this->copyrightRead($this->contents);
 
@@ -90,52 +89,47 @@ class Read extends Agent
         }
     }
 
+    function copyrightRead($html)
+    {
+        // devstack
 
-function copyrightRead($html) {
+        if (stripos($html, 'copywrite') !== false) {
+            return true;
+        }
 
-// devstack
+        if (stripos($html, 'copyright') !== false) {
+            return true;
+        }
 
+        if (stripos($html, '©') !== false) {
+            return true;
+        }
 
-if (stripos($html, 'copywrite') !== false) {
-return true;
-}
+        if (stripos($html, '(c)') !== false) {
+            return true;
+        }
 
-if (stripos($html, 'copyright') !== false) {
-return true;
-}
+        if (stripos($html, 'copr') !== false) {
+            return true;
+        }
 
-if (stripos($html, '©') !== false) {
-return true;
-}
+        return false;
+    }
 
-if (stripos($html, '(c)') !== false) {
-return true;
-}
+    function metaRead($html)
+    {
+        $doc = new \DOMDocument();
+        //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
+        @$doc->loadHTML($html);
 
-if (stripos($html, 'copr') !== false) {
-return true;
-}
+        $xpath = new \DOMXpath($doc);
+        //$elements = $xpath->query("*/div[@class='yourTagIdHere']");
+        $elements = $xpath->query(
+            "//*[contains(@class, 'class name goes here')]"
+        );
+    }
 
-return false;
-
-}
-
-
-
-function metaRead($html) {
-
-$doc = new \DOMDocument();
-//$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
-@$doc->loadHTML($html);
-
-$xpath = new \DOMXpath($doc);
-//$elements = $xpath->query("*/div[@class='yourTagIdHere']");
-$elements = $xpath->query("//*[contains(@class, 'class name goes here')]");
-
-
-
-}
-
+    /* A comment to break the confusion that the above string causes. */
 
     function set()
     {
@@ -192,12 +186,13 @@ $elements = $xpath->query("//*[contains(@class, 'class name goes here')]");
         if (isset($parts[1])) {
             $response_code = $parts[1];
         }
-$this->response_code = $response_code;
-$allowed_response_codes=array(301,302,200);
+        $this->response_code = $response_code;
+        $allowed_response_codes = [301, 302, 200];
 
-        if ($data == false or !in_array($response_code, $allowed_response_codes)) {
-
-//        if ($data == false or $response_code != 200) {
+        if (
+            $data == false or
+            !in_array($response_code, $allowed_response_codes)
+        ) {
             $this->thing->log('No response or response code not 200.');
             return true;
             // Invalid return from site..
@@ -205,8 +200,6 @@ $allowed_response_codes=array(301,302,200);
 
         // Raw file
         $this->contents = $data;
-
-
     }
 
     function match_all($needles, $haystack)
@@ -237,14 +230,8 @@ $allowed_response_codes=array(301,302,200);
 
     function makeSMS()
     {
-        //        if (strtolower($this->flag) == "red") {
-        //            $sms_message = "READ DEV = ESTATE FOUND";
-        //        } else {
-        //            $sms_message = "READ DEV";
-        //        }
-
         $sms_message = "READ | ";
-        $sms_message .= $this->response;
+        $sms_message .= trim($this->response);
 
         if ($this->verbosity >= 2) {
         }
@@ -276,59 +263,54 @@ $allowed_response_codes=array(301,302,200);
         $this->sms_message = $sms_message;
     }
 
-public function makeWeb() {
-$web = "<b>READ AGENT</b><p>";
+    public function makeWeb()
+    {
+        $web = "<b>READ AGENT</b><p>";
 
-if ($this->urls == true) {
+        if ($this->urls == true) {
+        } else {
+            //var_dump($this->urls);
+        }
 
+        $web .= "<p><b>URLs read</b><br>";
+        $link_agent = new Link($this->thing, "link");
+        $link_agent->extractLinks($this->contents);
+        //var_dump($link_agent->links);
+        //exit();
+        $links = array_unique($link_agent->links);
+        foreach ($links as $i => $link) {
+            $unsafe_characters = ['{', '}'];
 
-} else {
-//var_dump($this->urls);
-}
+            if (
+                preg_match(
+                    '/[' . preg_quote(implode(',', $unsafe_characters)) . ']+/',
+                    $link
+                )
+            ) {
+                continue;
+            }
 
+            $web .= '<a href="' . $link . '">' . $link . '</a>' . '<br>';
+        }
 
-$web .= "<p><b>URLs read</b><br>";
-$link_agent = new Link($this->thing,"link");
-$link_agent->extractLinks($this->contents);
-//var_dump($link_agent->links);
-//exit();
-$links = array_unique($link_agent->links);
-foreach ($links as $i=>$link) {
+        $sentence = $this->sentences[0];
 
-$unsafe_characters = array('{','}');
+        $word_agent = new Word($this->thing, "word");
+        $words = $word_agent->extractWords($this->contents);
 
-if(preg_match('/[' . preg_quote(implode(',', $unsafe_characters)) . ']+/', $link)) {
-    continue;
-}
+        $unique_words = array_unique($words);
 
+        $web .= "<p><b>Words read</b>" . '<br>';
 
-$web .= '<a href="'. $link.'">' . $link . '</a>' . '<br>';
-//$web .= $link;
+        foreach ($unique_words as $i => $unique_word) {
+            $web .= $unique_word . " ";
+        }
 
-}
-
-
-$sentence = $this->sentences[0];
-
-$word_agent = new Word($this->thing,"word");
-$words = $word_agent->extractWords($this->contents);
-//var_dump($words);
-$unique_words = array_unique($words);
-
-$web .= "<p><b>Words read</b>".'<br>';
-
-foreach ($unique_words as $i=>$unique_word) {
-
-$web .= $unique_word ." ";
-
-}
-
-$web .= '<p>';
-$web .=  $this->sms_message;
-$web .= '<br>';
-$this->thing_report['web'] = $web;
-
-}
+        $web .= '<p>';
+        $web .= $this->sms_message;
+        $web .= '<br>';
+        $this->thing_report['web'] = $web;
+    }
 
     public function respondResponse()
     {
@@ -336,11 +318,6 @@ $this->thing_report['web'] = $web;
 
         $this->thing->flagGreen();
 
-        //        $test_message = 'Last thing heard: "' . $this->subject . '"';
-        //        $test_message .= '<br>Train state: ' . $this->state . '<br>';
-        //        $test_message .= '<br>' . $sms_message;
-
-        //        $this->thing_report['sms'] = $sms_message;
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
