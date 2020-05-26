@@ -86,7 +86,6 @@ $doc = new \DOMDocument();
 $xpath = new \DOMXpath($doc);
 $contents = $xpath->query('/html/head/meta[@name="robots"]/@content');
 
-var_dump($contents);
 
 }
 
@@ -400,6 +399,8 @@ var_dump($contents);
 
             $host = $url_parts[0];
         }
+// Error condition no link provided.
+if ($host == "") {return true;}
 
         if (!isset($parsed['scheme'])) {
             $schemes = ["http", "https"];

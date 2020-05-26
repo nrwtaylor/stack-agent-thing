@@ -33,6 +33,7 @@ class Read extends Agent
 
     function run()
     {
+
         // Now have this->link potentially from reading subject
 
         $this->matched_sentences = [];
@@ -57,17 +58,15 @@ class Read extends Agent
             } else {
                 return true;
             }
-
+// Populate $this->contents
             $this->getUrl($this->link);
-
+//var_dump($this->contents);
             $this->metaRead($this->contents);
-
             $this->copyrightRead($this->contents);
 
             // Get all the URLs in the page.
             $url_agent = new Url($this->thing, "url");
             $this->urls = $url_agent->extractUrls($this->contents);
-
             $text = strip_tags($this->contents);
             // Remove multiple spaces
             $text = preg_replace('/\s+/', ' ', $text);
@@ -180,21 +179,25 @@ $elements = $xpath->query("//*[contains(@class, 'class name goes here')]");
         ];
 
         $context = stream_context_create($options);
-
         $data = file_get_contents($data_source, false, $context);
+
         if (isset($http_response_header[0])) {
             $response_string = $http_response_header[0];
         } else {
             $this->thing->log('No response code header found.');
             return true;
         }
-
         $parts = explode(' ', $response_string);
         $response_code = null;
         if (isset($parts[1])) {
             $response_code = $parts[1];
         }
-        if ($data == false or $response_code != 200) {
+$this->response_code = $response_code;
+$allowed_response_codes=array(301,302,200);
+
+        if ($data == false or !in_array($response_code, $allowed_response_codes)) {
+
+//        if ($data == false or $response_code != 200) {
             $this->thing->log('No response or response code not 200.');
             return true;
             // Invalid return from site..
@@ -272,6 +275,60 @@ $elements = $xpath->query("//*[contains(@class, 'class name goes here')]");
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
     }
+
+public function makeWeb() {
+$web = "<b>READ AGENT</b><p>";
+
+if ($this->urls == true) {
+
+
+} else {
+//var_dump($this->urls);
+}
+
+
+$web .= "<p><b>URLs read</b><br>";
+$link_agent = new Link($this->thing,"link");
+$link_agent->extractLinks($this->contents);
+//var_dump($link_agent->links);
+//exit();
+$links = array_unique($link_agent->links);
+foreach ($links as $i=>$link) {
+
+$unsafe_characters = array('{','}');
+
+if(preg_match('/[' . preg_quote(implode(',', $unsafe_characters)) . ']+/', $link)) {
+    continue;
+}
+
+
+$web .= '<a href="'. $link.'">' . $link . '</a>' . '<br>';
+//$web .= $link;
+
+}
+
+
+$sentence = $this->sentences[0];
+
+$word_agent = new Word($this->thing,"word");
+$words = $word_agent->extractWords($this->contents);
+//var_dump($words);
+$unique_words = array_unique($words);
+
+$web .= "<p><b>Words read</b>".'<br>';
+
+foreach ($unique_words as $i=>$unique_word) {
+
+$web .= $unique_word ." ";
+
+}
+
+$web .= '<p>';
+$web .=  $this->sms_message;
+$web .= '<br>';
+$this->thing_report['web'] = $web;
+
+}
 
     public function respondResponse()
     {

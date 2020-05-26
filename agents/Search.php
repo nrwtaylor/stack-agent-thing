@@ -51,6 +51,7 @@ class Search extends Agent
 
     public function init()
     {
+
         // https://codereview.stackexchange.com/questions/165263/move-one-element-before-another-in-an-associated-array
         $arr = $this->search_settings;
         while (count($arr) != 0) {
@@ -73,7 +74,6 @@ class Search extends Agent
             unset($arr[$longest_token]);
         }
 
-        //var_dump($key_order);
         $this->search_engine_order = $key_order;
 
         $this->search_engines = [];
@@ -85,30 +85,57 @@ class Search extends Agent
 
     public function run()
     {
-//        $flag_first = true;
-/*
-        foreach ($this->search_engines as $search_engine => $x) {
-            if (!$flag_first) {
-                $this->response .= ' - ';
-            }
-            $this->urlSearch($search_engine, $this->search_input);
-
-            $flag_first = false;
-        }
-*/
-//$this->linksSearch();
     }
 
-public function linksSearch() {
+public function linksSearch($text) {
 $flag_first = true;
+$this->search_links = array();
         foreach ($this->search_engines as $search_engine => $x) {
             if (!$flag_first) {
                 $this->response .= ' - ';
             }
-            $this->urlSearch($search_engine, $this->search_input);
+            $link = $this->urlSearch($search_engine, $text);
+
+$this->search_links[$search_engine] = $link;
 
             $flag_first = false;
         }
+
+return $this->search_links;
+
+}
+
+public function extractSearch($text = null) {
+
+if ($text == null) {return true;}
+
+        $parts = explode("search", strtolower($text));
+
+$filtered_parts = array();
+foreach($parts as $i=>$part) {
+
+$part = trim($part);
+if ($part == "") {continue;}
+$filtered_parts[] = $part;
+
+}
+
+$input_search = "search";
+
+if (isset($filtered_parts[0])) {
+        $input_search = $filtered_parts[0];
+}
+
+if (isset($filtered_parts[1])) {
+        $input_search = $filtered_parts[1];
+}
+//var_dump($input_search);
+
+$search_text = $this->readSearch($input_search);
+//$this->linksSearch($search_text);
+
+return $search_text;
+//        $this->url = $url_agent->extractUrl($input);
 
 
 }
@@ -133,7 +160,7 @@ $flag_first = true;
         }
 
         if ($raw_search_words == null) {
-            $raw_search_words = $this->search_words;
+            $raw_search_words = $this->search_text;
         }
 
         $links = "";
@@ -220,35 +247,63 @@ $flag_first = true;
 
     public function makeSMS()
     {
+
+$links = $this->linksSearch($this->search_text);
+
+
         $sms = "SEARCH | ";
-        $sms .= $this->response;
+//        $sms .= $this->response;
+
+foreach ($links as $search_engine=>$link) {
+$sms .= $search_engine . ' ' . $link . ' ';
+
+}
+
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
+public function makeWeb()
+{
+
+$links = $this->linksSearch($this->search_text);
+//var_dump($links);
+$web = "<b>Search Agent</b><p>";
+$web .= $this->input . "<br>";
+$web .= $this->subject ."<br>";
+$web .= $this->thing->subject . "<br>";
+foreach ($this->search_links as $search_engine=>$link) {
+$web .= $search_engine . ' <a href="' . $link.'">' . $this->search_text . '</a>' . "<br>";
+
+}
+
+$this->thing_report['web'] = $web;
+
+
+}
+
+
+
     public function readSubject()
     {
-        $input = $this->input;
 
-//$this->search_input = $this->input;
+$input = $this->input;
+//var_dump($this->subject);
+//var_dump($input);
+        $this->search_text = $this->extractSearch($input);
 
-        $this->search_input = $this->readSearch($this->subject);
-//        $this->search_input = $search_input;
-//var_dump($this->search_input);
-$this->linksSearch();
+$pieces = explode(" ", $this->search_text);
 
-        $input_search = explode("search", $this->input);
-        $input_search = $input_search[1];
-
-//        $search_input = $this->readSearch($input_search);
-//        $this->search_input = $search_input;
-
-        if ($this->input == "search") {
-            return;
+        if (count($pieces) == 1) {
+            if (strtolower($input) == 'search') {
+                return;
+            }
         }
 
-        $filtered_input = $this->assert("search", $input);
+    }
+
+public function build() {
 
         $matches = 0;
 
@@ -263,19 +318,12 @@ $this->linksSearch();
             }
         }
 
-//var_dump($this->input);
-//var_dump($this->input);
-
-//        $search_input = $this->readSearch($this->input);
-//        $this->search_input = $search_input;
-
-
-    //    $this->search_words = $filtered_input;
-$this->search_words = $this->search_input;
-//var_dump($this->search_words);
         if ($matches == 1) {
             $this->search_engine = $this->search_engines[0];
         }
-        // Blank
-    }
+
+
+}
+
+
 }

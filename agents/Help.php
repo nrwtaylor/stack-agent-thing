@@ -21,10 +21,7 @@ class Help extends Agent {
      * @param Thing   $thing
      * @return unknown
      */
-//    function __construct(Thing $thing) {
     function init() {
-
-//        $this->thing_report['thing'] = false;
 
         if ($this->thing != true) {
 
@@ -205,9 +202,6 @@ class Help extends Agent {
      */
     public function readSubject() {
 
-        //  $this->defaultButtons();
-//        $this->getHelp();
-        //$this->getHelp2();
         $status = true;
         return $status;
     }
@@ -218,7 +212,6 @@ class Help extends Agent {
      */
     function makeChoices() {
 
-        //$this->node_list = array("web"=>array("iching", "roll"));
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "help");
         $choices = $this->thing->choice->makeLinks('help');
@@ -255,5 +248,4 @@ class Help extends Agent {
 
 
     }
-
 }

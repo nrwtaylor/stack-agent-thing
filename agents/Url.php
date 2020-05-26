@@ -80,7 +80,6 @@ class Url extends Agent
             return true;
         }
         // https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
-        //var_dump($text);
 
         //$string = "The text you want to filter goes here. http://google.com, https://www.youtube.com/watch?v=K_m7NEDMrV0,https://instagram.com/hellow/";
         // Require http...
@@ -96,7 +95,6 @@ class Url extends Agent
         $urls = array_merge($urls, $match[0]);
         $urls = array_unique($urls);
         //$this->slugs = $match[0];
-        //var_dump($this->slugs);
 
         // Deal with spaces
 
@@ -111,6 +109,9 @@ class Url extends Agent
     public function extractUrl($text = null)
     {
         $urls = $this->extractUrls($text);
+
+// No URLS founds.
+if ($urls === true) {return false;}
 
         if (count($urls) == 1) {
             return $urls[0];
@@ -127,7 +128,7 @@ class Url extends Agent
         //        $keywords = $this->keywords;
 
         $input = $this->assert($this->input);
-        var_dump($input);
+
         $this->url = $input;
         $this->link = $input;
 
