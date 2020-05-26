@@ -5,10 +5,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
-// factored to
-// call agent 'Agent'
-
 ini_set("allow_url_fopen", 1);
 
 class Read extends Agent
@@ -61,7 +57,20 @@ class Read extends Agent
             $this->getUrl($this->link);
 
             $this->metaRead($this->contents);
-            $this->copyrightRead($this->contents);
+            if ($this->noindexRead($this->contents)) {
+$this->response .= 'Do not index. ';
+            }
+
+            if ($this->copyrightRead($this->contents)) {
+$this->response .= 'Saw a copyright notice. ';
+}
+
+$description = $this->descriptionRead($this->contents);
+$this->response .= 'Read '. $description . ' ';
+
+//}
+
+
 
             // Get all the URLs in the page.
             $url_agent = new Url($this->thing, "url");
@@ -130,6 +139,79 @@ class Read extends Agent
     }
 
     /* A comment to break the confusion that the above string causes. */
+
+function noindexRead($html) {
+        $doc = new \DOMDocument();
+        //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
+        @$doc->loadHTML($html);
+
+        $xpath = new \DOMXpath($doc);
+        //$elements = $xpath->query("*/div[@class='yourTagIdHere']");
+
+//$nodes = $xpath->query('meta[name="robots"');
+//$contents = $xpath->query('//meta[@name="description"]/@content');
+
+$contents = $xpath->query('//meta[@name="robots"]/@content');
+
+$meta = array();
+
+foreach($contents as $node){
+$meta[] = $node->nodeValue;
+}
+
+$contents = $xpath->query('//meta[@name="ROBOTS"]/@content');
+
+
+
+foreach($contents as $node){
+$meta[] = $node->nodeValue;
+}
+
+foreach($meta as $i=>$tag) {
+
+if ($tag == "NOINDEX") {return true;}
+if ($tag == "noindex") {return true;}
+
+}
+return false;
+
+
+}
+    /* A comment to break the confusion that the above string causes. */
+
+
+function descriptionRead($html) {
+        $doc = new \DOMDocument();
+        //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
+        @$doc->loadHTML($html);
+
+        $xpath = new \DOMXpath($doc);
+
+$contents = $xpath->query('//meta[@name="description"]/@content');
+$meta = array();
+
+foreach($contents as $node){
+$meta[] = $node->nodeValue;
+}
+
+$contents = $xpath->query('//meta[@name="DESCRIPTION"]/@content');
+
+foreach($contents as $node){
+$meta[] = $node->nodeValue;
+}
+
+foreach($meta as $i=>$tag) {
+//echo $i . " " . $tag . "<br>";
+}
+
+$response = "an empty description.";
+if (isset($meta[0])) {$response = $meta[0];}
+
+return $response;
+
+
+}
+
 
     function set()
     {

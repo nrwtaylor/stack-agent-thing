@@ -797,6 +797,30 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             return $this->renderer->render($response, 'thing.phtml', $bleep);
             break;
+        case ($command == "bot"):
+        case ($command == "robot"):
+        case ($command == "robots"):
+
+            $thing = new Thing($uuid);
+            $thing->Create("web", "routes", "s/ web robot");
+
+            $privacy_agent = new Robot($thing);
+
+            $thing_report = $privacy_agent->thing_report;
+            $thing_report['requested_channel'] = 'thing';
+
+            $thing_report['etime'] = number_format($thing->elapsed_runtime());
+            $thing_report['request'] = $thing->subject;
+
+            $thing->flagGreen();
+
+            $bleep = array();
+            $bleep['thing_report'] = $thing_report;
+
+            return $this->renderer->render($response, 'thing.phtml', $bleep);
+            break;
+
+
 
         case ($command == "termsofuse"):
         case ($command == "terms-of-use"):
