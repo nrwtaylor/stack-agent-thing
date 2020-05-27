@@ -25,6 +25,10 @@ class Read extends Agent
         if ($this->link == false) {
             $this->link = "";
         }
+
+$this->do_not_read = false;
+$this->do_not_catalogue = false;
+
     }
 
     function run()
@@ -41,7 +45,7 @@ class Read extends Agent
                 $this->robot_agent->user_agent_short
             )
         ) {
-            $this->response .= "Robot allowed. ";
+            $this->response .= "Robot " . $this->robot_agent->user_agent_short. " allowed. ";
 
             if (
                 substr($this->link, 0, 4) === "http" or
@@ -58,15 +62,25 @@ class Read extends Agent
 
             $this->metaRead($this->contents);
             if ($this->noindexRead($this->contents)) {
+
+// Read as noindex do not set url
 $this->response .= 'Do not index. ';
             }
 
             if ($this->copyrightRead($this->contents)) {
 $this->response .= 'Saw a copyright notice. ';
+$this->do_not_read = true;
 }
 
+
+            if ($this->trademarkRead($this->contents)) {
+$this->response .= 'Saw a trademark notice. ';
+$this->do_not_read = true;
+}
+
+// Okay to read meta. Get description.
 $description = $this->descriptionRead($this->contents);
-$this->response .= 'Read '. $description . ' ';
+$this->response .= 'Read meta '. $description . ' ';
 
 //}
 
@@ -95,6 +109,7 @@ $this->response .= 'Read '. $description . ' ';
         } else {
             $this->response .=
                 "Robot not allowed. " . $this->robot_agent->response;
+$this->do_not_read = true;
         }
     }
 
@@ -122,8 +137,54 @@ $this->response .= 'Read '. $description . ' ';
             return true;
         }
 
+        if (stripos($html, '&copy') !== false) {
+            return true;
+        }
+
+
         return false;
     }
+
+    function trademarkRead($html)
+    {
+        // devstack
+
+        if (stripos($html, 'trademark') !== false) {
+            return true;
+        }
+
+        if (stripos($html, ' TM ') !== false) {
+            return true;
+        }
+
+        if (stripos($html, '(TM)') !== false) {
+            return true;
+        }
+
+        if (stripos($html, 'TM.') !== false) {
+            return true;
+        }
+
+
+        if (stripos($html, '™') !== false) {
+$this->response .= "trademark b";
+
+            return true;
+        }
+
+        if (stripos($html, '®') !== false) {
+$this->response .= "trademark c";
+
+            return true;
+        }
+/*
+        if (stripos($html, 'tradem') !== false) {
+            return true;
+        }
+*/
+        return false;
+    }
+
 
     function metaRead($html)
     {
@@ -330,6 +391,9 @@ return $response;
 */
         $sms_message .= " | link " . $this->link;
 
+$sms_message .= " | Do not read flag ";
+if ($this->do_not_read) {$sms_message .= 'RED. ';} else {$sms_message .= 'GREEN. ';}
+/*
         if ($this->verbosity >= 9) {
             $sms_message .=
                 " | nuuid " . substr($this->variables_agent->thing->uuid, 0, 4);
@@ -338,8 +402,8 @@ return $response;
                 number_format($this->thing->elapsed_runtime()) .
                 'ms';
         }
-
-        $sms_message .= " | TEXT ?";
+*/
+//        $sms_message .= " | TEXT ?";
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;

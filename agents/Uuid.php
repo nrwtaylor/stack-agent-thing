@@ -80,6 +80,19 @@ class Uuid extends Agent
         return $arr;
     }
 
+public function set() {
+
+
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(
+            ["uuid", "refreshed_at"],
+            $this->thing->json->time()
+        );
+
+
+
+}
+
     /**
      *
      * @param unknown $input (optional)
@@ -146,7 +159,8 @@ class Uuid extends Agent
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
 
-        $this->node_list = ["uuid" => ["uuid", "snowflake"]];
+/*
+        $this->node_list = ["uuid" => ["uuid", "snowflake","roll"]];
         // Make buttons
         $this->thing->choice->Create(
             $this->agent_name,
@@ -154,6 +168,7 @@ class Uuid extends Agent
             "uuid"
         );
         $choices = $this->thing->choice->makeLinks('uuid');
+*/
 
         $alt_text = "a QR code with a uuid";
         /*
@@ -203,27 +218,28 @@ class Uuid extends Agent
     /**
      *
      */
-    public function respond()
+    public function respondResponse()
     {
         // Thing actions
 
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
-            ["uuid", "received_at"],
-            $this->thing->json->time()
-        );
+//        $this->thing->json->setField("settings");
+//        $this->thing->json->writeVariable(
+//            ["uuid", "received_at"],
+//            $this->thing->json->time()
+//        );
 
-        $this->thing->flagGreen();
+//        $this->thing->flagGreen();
 
-        $from = $this->from;
-        $to = $this->to;
+//        $from = $this->from;
+//        $to = $this->to;
 
-        $subject = $this->subject;
+//        $subject = $this->subject;
 
         // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+//        $uuid = $this->uuid;
+//        $sqlresponse = "yes";
 
+/*
         $message =
             "Thank you $from here is a UUID.<p>" .
             $this->web_prefix .
@@ -236,21 +252,21 @@ class Uuid extends Agent
             '/receipt.png" alt="thing:' .
             $uuid .
             '" height="92" width="92">';
-
-        $this->makeSMS();
+*/
+//        $this->makeSMS();
 
         $this->thing_report['email'] = $this->thing_report['sms'];
 
-        $this->makePNG();
+//        $this->makePNG();
 
-        $this->makeChoices();
+//        $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         //$this->thing_report['thing'] = $this->thing->thing;
 
-        $this->makeWeb();
+//        $this->makeWeb();
     }
 
     /**
