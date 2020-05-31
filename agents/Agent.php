@@ -682,9 +682,22 @@ class Agent
     /**
      *
      */
-    public function makeSnippet()
-    {
-        //        $this->thing_report['snippet'] = "<b>Empty.</b>";
+
+    public function makeSnippet() {
+
+if (isset($this->thing_report['snippet'])) {
+
+$this->thing_report['snippet'] = str_replace('[word]', $this->word, $this->thing_report['snippet']);
+
+}
+
+if (!isset($this->thing_report['snippet'])) {
+
+$this->thing_report['snippet'] = "";
+
+}
+
+
     }
 
     /**
@@ -1771,6 +1784,11 @@ class Agent
                 if (!isset($variables[strtolower($entity_name)])) {
                     continue;
                 }
+
+                if (!isset($variables[strtolower($entity_name)]['refreshed_at'])) {
+                    continue;
+                }
+
 
                 $last_heard[strtolower($entity_name)] = strtotime(
                     $variables[strtolower($entity_name)]['refreshed_at']

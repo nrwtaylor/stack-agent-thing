@@ -97,6 +97,10 @@ if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return tr
     }
 
 
+    public function makeMessage() {
+    if (!isset($this->message)) {$this->message = "No message found.";}
+
+    }
     // -----------------------
 
     /**

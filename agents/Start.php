@@ -166,7 +166,7 @@ class Start {
         $web .= "<p>";
         $web .= "<p>";
 
-        $web .= "Text the word START to our BC SMS portal at (778) 401-2130.";
+        $web .= "Text the word START to our BC SMS portal at (778) 401-2132.";
 
 //        $web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         $web .= "<br>";
