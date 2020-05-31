@@ -138,7 +138,11 @@ if ((isset($max_tick_count)) and ($max_tick_count != false)) {
      */
     function makeSMS() {
         $this->sms_message = "TICK | value destroyed " . number_format($this->value_destroyed) . " things destroyed " . $this->things_destroyed . ".";
-        $this->sms_message .= " | " . $this->tick_count;
+        $this->sms_message .= " | tick count " . $this->tick_count;
+
+$ago = strtotime($this->thing->time()) - strtotime($this->refreshed_at);
+//$ago = $this->thing->time();
+$this->sms_message .= " | last tick was " . $this->thing->human_time($ago) . " ago.";
         $this->thing_report['sms'] = $this->sms_message;
     }
 
