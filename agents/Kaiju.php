@@ -1058,7 +1058,6 @@ foreach($map as $symbol=>$name) {
 
 if (strpos($text, $symbol) !== false) {
 $voltage = (float)str_replace($symbol,"",$text);
-//echo $symbol . " " . $name ." " . $voltage.  "\n";
 
 $a[$name] = $voltage;
 return $a;
@@ -1674,7 +1673,7 @@ $web .= $graph5_image_embedded;
 
 }
 
-        $web .= "Requested about ". $ago . " ago.";
+        $web .= "Requested about ". $ago . " ago. ";
 //        $web .= "<p>";
 //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
 

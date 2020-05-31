@@ -30,8 +30,10 @@ class Chart extends Agent
         $this->height = 200;
         $this->width = 300;
 
-        $this->initChart();
 
+
+        $this->initChart();
+$this->getColours();
         $this->node_list = array("chart");
     }
 
@@ -48,7 +50,7 @@ class Chart extends Agent
      *
      */
     function set() {
-        $this->thing->json->setField("variables");
+//        $this->thing->json->setField("variables");
     }
 
 
@@ -57,7 +59,7 @@ class Chart extends Agent
      */
     public function get() {
 
-        $this->getColours();
+ //       $this->getColours();
         $this->getData();
 
     }
@@ -128,36 +130,6 @@ class Chart extends Agent
         $this->thing->log('Agent "Chart" getData ran for ' . number_format($this->thing->elapsed_runtime()-$split_time)."ms.", "OPTIMIZE");
 
     }
-
-
-    /*
-	public function respond() {
-
-		// Develop the various messages for each channel.
-
-		// Thing actions
-		// Because we are making a decision and moving on.  This Thing
-		// can be left alone until called on next.
-		$this->thing->flagGreen();
-        $this->makeSMS();
-$this->makePNG();
-        $this->makeWeb();
-		$this->thing_report['thing'] = $this->thing->thing;
-//		$this->thing_report['sms'] = $this->sms_message;
-
-       // $this->makePNG();
-        $this->makeTXT();
-
-		// While we work on this
-		$this->thing_report['email'] = $this->sms_message;
-        $message_thing = new Message($this->thing, $this->thing_report);
-
-
-        //$this->makeWeb();
-
-		return $this->thing_report;
-	}
-*/
 
 
     /**
@@ -419,21 +391,6 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
     }
 
 
-    /*
-public function blankImage() {
-
-        $this->image = imagecreatetruecolor($this->width, $this->height);
-
-        $this->white = imagecolorallocate($this->image, 255, 255, 255);
-        $this->black = imagecolorallocate($this->image, 0, 0, 0);
-        $this->red = imagecolorallocate($this->image, 255, 0, 0);
-        $this->green = imagecolorallocate($this->image, 0, 255, 0);
-        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-
-        imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $this->white);
-
-}
-*/
 
     /**
      *

@@ -140,6 +140,7 @@ $this->margin_bottom = 10;
     {
         $chart_agent = new Chart($this->thing, "chart age " . $this->from);
         $this->image = $chart_agent->image;
+        $this->white = $chart_agent->white;
         $this->black = $chart_agent->black;
         $this->red = $chart_agent->red;
         $this->grey = $chart_agent->grey;
@@ -152,18 +153,10 @@ $this->margin_bottom = 10;
         $num_points = count($this->tubs);
         $column_width = $this->width / $num_points;
 
-        //        $run_time = $this->points[0]['bin_sum'];
-        //$queue_time = $this->points[0]['bin_sum'];
-
-        //$variable = $run_time;
-
-        //        $refreshed_at = $this->points[0]['age'];
-
         $i = 0;
 
         foreach ($this->tubs as $x => $y) {
-            //var_dump($x);
-            //var_dump($y);
+
             if ($y == null or $y == 0) {
                 continue;
             }
@@ -198,10 +191,6 @@ $this->margin_bottom = 10;
             $i += 1;
         }
 
-        //$x = $this->tub_boundaries[$x];
-        // devstack
-        //var_dump($x);
-
         $this->y_max = $y_max;
         $this->y_min = $y_min;
         $this->y_min = 0; // Force 0
@@ -216,7 +205,6 @@ $this->margin_bottom = 10;
 
         $this->y_spread = $this->y_max - $this->y_min;
 
-        //$x_max = strtotime($this->current_time);
 
         $i = 0;
         //$i_max = count($this->tubs);
@@ -225,36 +213,27 @@ $this->margin_bottom = 10;
         //    $this->tubAge();
 
         foreach ($this->tubs as $tub_name => $tub_quantity) {
-            //echo $x_min. " " . $x_max . " " . $y_min . " " . $y_max . " " . $index . " " . $tub_quantity . " ";
-            //$run_time = $point['bin_sum'];
-            //$queue_time = $point['queue_time'];
+
+            if ($i > $this->tubs_max) {break;}
+
             $elapsed_time = $tub_quantity;
             $refreshed_at = $this->tub_boundaries[$tub_name];
-            //echo $tub_name. " " . $tub_quantity. " " . $refreshed_at . " ";
 
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {
                 $y_spread = 100;
             }
 
-            //$y_origin = $this->y_origin;
 
             $y =
                 $this->y_origin +
                 $this->chart_height -
                 (($elapsed_time - $y_min) / $y_spread) * $this->chart_height;
 
-            //$x = 50 + ($refreshed_at - $x_min) / ($x_max - $x_min) * ($this->chart_width - 50);
-            $x = 50 + ($i / $this->tubs_max) * ($this->chart_width - 50);
 
-            //echo $x . "<br>";
+            $j = $this->tubs_max - $i;
+            $x = 50 + ($j / $this->tubs_max) * ($this->chart_width - 50);
 
-            //var_dump($x);
-            //$x_input = $this->tub_boundaries[$tub_name];
-
-            //$x = $x_input/ $this->x_spread * $this->chart_width;
-            //var_dump($x);
-            //echo $x_input . " " . $x . " " . $this->x_spread.  " " .$this->chart_width." <br>";
             $x = $this->chart_width - $x + 50;
 
             if (!isset($x_old)) {
@@ -323,6 +302,8 @@ $this->margin_bottom = 10;
             }
         }
 
+        $this->preferred_step = $preferred_step;
+
         $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
         $this->drawLabels();
 
@@ -343,20 +324,22 @@ $this->margin_bottom = 10;
         //exit();
         //        while ($i <= $i_max) {
         foreach ($this->tubs as $m => $n) {
+if ($i > $this->tubs_max) {break;}
+
       //      $plot_x =
       //          0 +
       //          $this->chart_width -
       //          ($i / $this->tubs_max) * ($this->chart_width - 50);
 
-            $plot_x = 50 + ($i / $this->tubs_max) * ($this->chart_width - 50);
-            $plot_x = $this->chart_width - $plot_x + 50;
-$plot_x = $plot_x +4;
-            //var_dump($plot_y);
+$j = $this->tubs_max - $i;
 
-            //imageline($this->image,
-            //    $plot_x , 50,
-            //    $plot_x-10, $plot_y,
-            //    $this->black);
+            $plot_x = 50 + ($j / $this->tubs_max) * ($this->chart_width - 50);
+            $plot_x = $this->chart_width - $plot_x + 50;
+
+            $x_label_offset = 5;
+            $plot_x = $plot_x +$x_label_offset;
+            $y_label_offset = 16;
+            $plot_y = $this->height - $y_label_offset;
 
             $font =
                 $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
@@ -367,13 +350,16 @@ $plot_x = $plot_x +4;
             $angle = 90;
             $pad = 0;
 
+            $colour = $this->grey;
+            if ($n > 2 * $this->preferred_step) {$colour = $this->white;}
+
             imagettftext(
                 $this->image,
                 $size,
                 $angle,
-                $plot_x - 1,
-                180,
-                $this->grey,
+                $plot_x,
+                $plot_y,
+                $colour,
                 $font,
                 $m
             );
@@ -381,7 +367,6 @@ $plot_x = $plot_x +4;
             $i = $i + 1;
         }
 
-        //exit();
     }
 
     /**
@@ -511,25 +496,8 @@ $plot_x = $plot_x +4;
             //$spread = the distance between youngest and oldest age
 
             $x = time() - $point['age'];
-            /*
-$tub_boundary_name = "X";
-            foreach ($this->tub_boundaries as $tub_name=>$tub_boundary) {
-//if (!isset($tub_boundary_name)) {$tub_boundary_name = "X";}
-                if ($x > $tub_boundary) {
-                    //echo $x ." " . $tub_boundary . "<br>";
-                    break;
-//$tub_boundary_name = $tub_name;
-                }
 
-                $tub_boundary_name = $tub_name;
-            }
-*/
             $tub_boundary_name = explode(" ", $this->thing->human_time($x))[1];
-
-            //echo $tub_boundary_name . " " . $x . $this->thing->human_time($x).  '<br>';
-
-            //$tub_index = $tub_boundary_name;
-            //            $tub_index = intval(($this->num_tubs - 1) * ($this->x_max - $point['age']) / $this->x_spread) + 1;
 
             if (!isset($this->tubs[$tub_boundary_name])) {
                 $this->tubs[$tub_boundary_name] = 1;
@@ -537,7 +505,7 @@ $tub_boundary_name = "X";
             }
             $this->tubs[$tub_boundary_name] += 1;
         }
-        //exit();
+
         foreach ($this->tubs as $tub_name => $quantity) {
         }
     }
@@ -715,16 +683,13 @@ $tub_boundary_name = "X";
         $this->tubAge();
 
         foreach ($this->tubs as $x => $y) {
-            //var_dump($x);
 
-            //var_dump($this->tub_boundaries);
-            //exit();
-            //var_dump($y);
             $txt .= str_pad($x, 7, ' ', STR_PAD_LEFT);
             $txt .= " ";
 
             $txt .= str_pad($y, 7, ' ', STR_PAD_LEFT);
             $txt .= "\n";
+
         }
 
         $this->thing_report['txt'] = $txt;
@@ -760,8 +725,6 @@ $tub_boundary_name = "X";
                 " | ";
         }
 
-        //$this->sms_message .= "SD " . number_format ($this->standard_deviation) . " | ";
-        //$this->sms_message .= number_format( $this->sample_count ) . " Things sampled from " . number_format( $this->total_things ) . " in " . $this->calc_time . "s | ";
         $this->sms_message .=
             "COUNT " . number_format($this->total_things) . " | ";
 
@@ -820,19 +783,19 @@ $tub_boundary_name = "X";
         $web .= "<b>Agent Age</b>";
 
         $web .= "<p>";
-$web .= '<table>';
-            $web .= '<th>'.'age' . "</th><th>" . 'Things' . "</th>";
+        $web .= '<table>';
+        $web .= '<th>'.'age' . "</th><th>" . 'Things' . "</th>";
         foreach ($this->tubs as $tub_name => $tub_quantity) {
-$web .= '<tr>';
-
+            $web .= '<tr>';
             $web .= '<th>'.$tub_name . "</th><th>" . $tub_quantity . "</th>";
             $web .= "</tr>";
         }
 
             $web .= '<th>'.'Total' . "</th><th>" . $this->total_things . "</th>";
 
-$web .= '</table>';
-$web .= "<p>";
+        $web .= '</table>';
+        $web .= "<p>";
+
         $web .= "This shows the age spread of the ";
         $web .= number_format($this->total_things) . " Things ";
         $web .= "you have deposited using the current text channel. ";
