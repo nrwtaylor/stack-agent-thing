@@ -6,7 +6,7 @@ namespace Nrwtaylor\StackAgentThing;
 // To report on unique contacts in the from channel.
 // In a defined period.
 
-class Contacttracking extends Agent
+class Contactcounter extends Agent
 {
     public $var = 'hello';
 
@@ -17,10 +17,10 @@ class Contacttracking extends Agent
         $this->thing_report["info"] =
             "This is seeing how many contacts this channel has had.";
         $this->thing_report["help"] =
-            'Text CONTACT <text>. Then text CONTACT TRACKING.';
+            'Text CONTACT <text>. Then text CONTACT COUNTER.';
 
         // Start with 14 days.
-        $this->contacttracking_horizon = 14 * 24 * 60 * 60;
+        $this->contactcounter_horizon = 14 * 24 * 60 * 60;
     }
 
     public function get()
@@ -37,7 +37,7 @@ class Contacttracking extends Agent
         $count = count($findagent_thing->thing_report['things']);
 
         $this->thing->log(
-            'Agent "Contacttracking" found ' .
+            'Agent "Contactcounter" found ' .
                 count($findagent_thing->thing_report['things']) .
                 " Contact Things."
         );
@@ -65,7 +65,7 @@ class Contacttracking extends Agent
                     strtotime($this->thing->time()) -
                     strtotime($thing_object['created_at']);
 
-                if ($age > $this->contacttracking_horizon) {
+                if ($age > $this->contactcounter_horizon) {
                     continue;
                 }
 
@@ -88,7 +88,7 @@ class Contacttracking extends Agent
         $count = count($findagent_thing->thing_report['things']);
 
         $this->thing->log(
-            'Agent "Contacttracking" found ' .
+            'Agent "Contactcounter" found ' .
                 count($findagent_thing->thing_report['things']) .
                 " Contact Things."
         );
@@ -106,7 +106,7 @@ class Contacttracking extends Agent
                     strtotime($this->thing->time()) -
                     strtotime($thing_object['created_at']);
 
-                if ($age > $this->contacttracking_horizon) {
+                if ($age > $this->contactcounter_horizon) {
                     continue;
                 }
 
@@ -144,13 +144,13 @@ class Contacttracking extends Agent
         $this->node_list = [
             "contact" => ["privacy", "terms of use", "warranty"],
         ];
-        $sms = "CONTACT TRACKING | ";
+        $sms = "CONTACT COUNTER | ";
         $sms .= $this->response;
         $sms .=
             "Counted " .
             $this->unique_count .
             " unique contacts in " .
-            $this->thing->human_time($this->contacttracking_horizon) .
+            $this->thing->human_time($this->contactcounter_horizon) .
             ". ";
         $sms .= "Saw " . $this->translink_count . " Translink tags. ";
         $this->sms_message = $sms;
@@ -159,8 +159,8 @@ class Contacttracking extends Agent
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "contacttracking");
-        $choices = $this->thing->choice->makeLinks('contacttracking');
+        $this->thing->choice->Create('channel', $this->node_list, "contactcounter");
+        $choices = $this->thing->choice->makeLinks('contactcounter');
         $this->thing_report['choices'] = $choices;
     }
 

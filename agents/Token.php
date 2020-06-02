@@ -26,7 +26,11 @@ class Token extends Agent
             array("token"));
 
         //$this->getSlug("123414sdfas asdfsad 234234 *&*dfg") ;
-        $this->state = $this->settings['state'];
+        $this->state = "X";
+        if (isset($this->settings['state'])) {
+            $this->state = $this->settings['state'];
+        }
+
     }
 
 
