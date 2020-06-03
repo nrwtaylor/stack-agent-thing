@@ -268,8 +268,8 @@ class Database
         } catch (\Exception $e) {
             // Devstack - decide how to handle thing full
 
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
             $thing = false;
         }
 
@@ -322,8 +322,8 @@ class Database
             // Devstack - decide how to handle thing full
             // Do this for now.
 
-            $t = new Thing(null);
-            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
 
 
             // Commented out 24 November 2019.
@@ -418,8 +418,8 @@ class Database
             // Devstack - decide how to handle thing full
             // Do this for now.
 
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'Create' . $e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'Create' . $e->getMessage());
 
 
             // Commented out 24 November 2019.
@@ -469,8 +469,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
 
 } else {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'Get ' . $e->getCode());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'Get ' . $e->getCode());
 }
 
             $thing = false;
@@ -597,8 +597,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
                 'So here are Things with the association you provided. That\'s what you want';
             $thingreport['things'] = $things;
         } catch (\PDOException $e) {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'associationSearch ' .$e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'associationSearch ' .$e->getMessage());
 
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
@@ -680,8 +680,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
         }
         $things = $sth->fetchAll();
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
@@ -765,8 +765,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
 //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
@@ -921,8 +921,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $things = $sth->fetchAll();
         } catch (\Exception $e) {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'agentSearch ' . $e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'agentSearch ' . $e->getMessage());
 
 //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
@@ -967,8 +967,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
             $sth->execute();
             $things = $sth->fetchAll();
         } catch (\Exception $e) {
-            $t = new Thing(null);
-            $t->Create("stack", "error", 'userSearch' . $e->getMessage());
+//            $t = new Thing(null);
+//            $t->Create("stack", "error", 'userSearch' . $e->getMessage());
 
 //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
