@@ -5,13 +5,18 @@ use setasign\Fpdi;
 
 class Radiorelay extends Agent
 {
-
     function init()
     {
-        $this->node_list = ["radiorelay" => ["radio relay", "nonsense"]];
+        $this->node_list = ["radiorelay" => ["trivia", "privacy"]];
 
         $this->number = null;
         $this->unit = "";
+
+        $this->filename = "not set";
+        $this->title = "not provided";
+        $this->author = "not provided";
+        $this->date = "not avalable";
+        $this->version = "none";
 
         $this->default_state = "easy";
         $this->default_mode = "relay";
@@ -29,6 +34,58 @@ class Radiorelay extends Agent
             $this->thing,
             "variables radiorelay " . $this->from
         );
+
+        //        $url = $GLOBALS['stack_path'] . 'resources/radiorelay/radiorelay.php';
+        $url = $this->resource_path . 'radiorelay/radiorelay.php';
+        $settings = require $url;
+
+        $this->container = new \Slim\Container($settings);
+
+        if (isset($this->container['radiorelay'])) {
+            if (isset($this->container['radiorelay']['checkin'])) {
+                $this->checkin_frequencies =
+                    $this->container['radiorelay']['checkin'];
+            }
+
+            if (isset($this->container['radiorelay']['calling'])) {
+                $this->calling_frequencies =
+                    $this->container['radiorelay']['calling'];
+            }
+
+            if (isset($this->container['radiorelay']['transfer'])) {
+                $this->transfer_frequencies =
+                    $this->container['radiorelay']['transfer'];
+            }
+
+            if (isset($this->container['radiorelay']['agents'])) {
+                $this->agent_responses =
+                    $this->container['radiorelay']['agents'];
+
+                $this->thing_report["info"] =
+                    $this->container['radiorelay']['agents']['info'];
+                $this->thing_report["help"] =
+                    $this->container['radiorelay']['agents']['help'];
+            }
+        }
+        $this->checkin_name = array_rand($this->checkin_frequencies);
+        $this->checkin_frequency =
+            $this->checkin_frequencies[$this->checkin_name];
+
+        $this->callsign =
+            '<' .
+            'ASK ' .
+            strtoupper($this->checkin_name) .
+            " " .
+            $this->checkin_frequency .
+            '>';
+
+        $this->calling_name = array_rand($this->calling_frequencies);
+        $this->calling_frequency =
+            $this->calling_frequencies[$this->calling_name];
+
+        $this->transfer_name = array_rand($this->transfer_frequencies);
+        $this->transfer_frequency =
+            $this->transfer_frequencies[$this->transfer_name];
     }
 
     function isRadiorelay($state = null)
@@ -140,7 +197,6 @@ class Radiorelay extends Agent
         if ($callsign != false) {
             $this->callsign = $callsign;
         }
-
     }
 
     function getQuickresponse($text = null)
@@ -227,31 +283,17 @@ class Radiorelay extends Agent
 
     public function respondResponse()
     {
-        //$this->thing->flagGreen();
-
-        //$to = $this->thing->from;
-        //$from = "radiorelay";
         $this->makeACP125G();
 
-//        $this->makePNG();
-
-//        $this->makeSMS();
-
-//        $this->makeMessage();
-        // $this->makeTXT();
         $this->makeChoices();
 
-        $this->thing_report["info"] =
-            "This creates a question in a radiogram format.";
-        $this->thing_report["help"] =
-            'Try RADIORELAY then WEB. Or PDF. Or Text.';
+        //        $this->thing_report["info"] =
+        //            "This creates a question in a radiogram format.";
+        //        $this->thing_report["help"] =
+        //            'Try RADIORELAY then WEB. Or PDF. Or Text.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-//        $this->makeWeb();
-
-//        $this->makeTXT();
-//        $this->makePDF();
     }
 
     function makeChoices()
@@ -268,13 +310,31 @@ class Radiorelay extends Agent
 
     function makeSMS()
     {
-        $sms = "RADIO RELAY " . $this->inject . " " . $this->mode . "\n";
-        //        $sms .= $this->response;
+        //        $sms = "RADIO RELAY " . $this->inject . " " . $this->mode . "\n";
+        $sms = "RADIO RELAY\n";
 
-        $sms .= trim($this->short_message) . "\n";
+        if (isset($this->short_message)) {
+            $sms .= trim($this->short_message) . "\n";
+        }
 
-        $sms .= "TEXT WEB";
-        // $this->response;
+        $sms .= $this->response;
+
+        if (isset($this->short_message)) {
+            $sms .=
+                "COORDINATION " .
+                $this->checkin_name .
+                " " .
+                $this->checkin_frequency .
+                " CALLING " .
+                $this->calling_name .
+                " " .
+                $this->calling_frequency .
+                " TRANSFER " .
+                $this->transfer_name .
+                " " .
+                $this->transfer_frequency .
+                " TEXT WEB";
+        }
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -282,12 +342,13 @@ class Radiorelay extends Agent
 
     function makeACP125G()
     {
+        if (!isset($this->message)) {
+            return null;
+        }
+
         $this->acp125g = new ACP125G($this->thing, "acp125g");
         $this->acp125g->makeACP125G($this->message);
     }
-
-
-
 
     public function getMessages()
     {
@@ -365,15 +426,15 @@ class Radiorelay extends Agent
 
                 $meta = "X";
 
-                $name_to = "X";
+                $name_to = "<ASK COORDINATION CHANNEL>";
                 $position_to = "X";
                 $organization_to = "X";
                 $number_to = "X";
 
                 $text = $line;
 
-                $name_from = "X";
-                $position_from = "X";
+                $name_from = '<YOUR CALLSIGN>';
+                $position_from = 'X';
                 $organization_from = "X";
                 $number_from = "X";
 
@@ -391,7 +452,6 @@ class Radiorelay extends Agent
                 ];
 
                 $this->messages[] = $message_array;
-
             }
             fclose($handle);
         } else {
@@ -465,13 +525,17 @@ class Radiorelay extends Agent
 
         $this->meta = trim($this->message['meta'], "//");
 
-        $this->message['name_to'] = $this->callsign;
+        if ($this->callsign == "") {
+            $this->message['name_to'] = '<ASK COORDINATION CHANNEL>';
+        } else {
+            $this->message['name_to'] = $this->callsign;
+        }
         $this->message['position_to'] = "";
         $this->message['organization_to'] = "";
 
         $this->message['text'] = $text;
 
-        $this->message['name_from'] = "";
+        $this->message['name_from'] = '<YOUR CALLSIGN>';
         $this->message['position_from'] = "";
         $this->message['organization_from'] = "";
 
@@ -490,12 +554,13 @@ class Radiorelay extends Agent
         $this->organization_from = $this->message['organization_from'];
         $this->number_from = $this->message['number_from'];
 
-
         $name_to = ucwords($this->name_to);
+
         $position_to = ucwords($this->position_to);
         $organization_to = strtoupper($this->organization_to);
 
         $name_from = ucwords($this->name_from);
+
         $position_from = ucwords($this->position_from);
         $organization_from = strtoupper($this->organization_from);
 
@@ -556,18 +621,56 @@ class Radiorelay extends Agent
 
         $this->message['number'] = "";
 
-        $this->message['precedence'] = $arr[1];
+        $precedence = "";
+        if (isset($arr[1])) {
+            $precedence = $arr[1];
+        }
+        $this->message['precedence'] = $precedence;
+
         $this->message['hx'] = null; // Not used?
-        $this->message['station_origin'] = $arr[2];
-        $this->message['check'] = $arr[3];
-        $this->message['place_filed'] = $arr[4];
-        $this->message['time_filed'] = $arr[5];
-        $this->message['date_filed'] = $arr[6];
+
+        $station_origin = "";
+        if (isset($arr[2])) {
+            $station_origin = $arr[2];
+        }
+
+        $this->message['station_origin'] = $station_origin;
+
+        $check = "";
+        if (isset($arr[3])) {
+            $check = $arr[3];
+        }
+
+        $this->message['check'] = $check;
+
+        $place_filed = "";
+        if (isset($arr[4])) {
+            $place_filed = $arr[4];
+        }
+
+        $this->message['place_filed'] = $place_filed;
+
+        $time_filed = "";
+        if (isset($arr[5])) {
+            $time_filed = $arr[5];
+        }
+
+        $this->message['time_filed'] = $time_filed;
+
+        $date_filed = "";
+        if (isset($arr[6])) {
+            $date_filed = $arr[6];
+        }
+
+        $this->message['date_filed'] = $date_filed;
     }
 
     function makeMessage()
     {
-        $message = $this->short_message . "<br>";
+        $message = "";
+        if (isset($this->short_message)) {
+            $message .= $this->short_message . "<br>";
+        }
         $uuid = $this->uuid;
         $message .=
             "<p>" . $this->web_prefix . "thing/$uuid/radiorelay\n \n\n<br> ";
@@ -579,15 +682,9 @@ class Radiorelay extends Agent
         $this->bar = new Bar($this->thing, "display");
     }
 
-
     function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay';
-
-        //$this->node_list = array("rocky"=>array("rocky%20%hard%20%relay", "rocky hard origin", "rocky easy origin", "rocky easy relay" ,"bullwinkle","charley"));
-        // Make buttons
-        //$this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
-        //$choices = $this->thing->choice->makeLinks('rocky');
 
         if (!isset($this->html_image)) {
             $this->makePNG();
@@ -598,22 +695,36 @@ class Radiorelay extends Agent
 
         $web .= "<p>";
 
-        $web .= "<p>";
+        $web .= $this->response;
 
         if (!isset($this->callsigns_heard)) {
             $this->getCallsigns();
         }
 
-        $last_refreshed_at =
-            $this->callsigns_heard[$this->callsign]['refreshed_at'];
-        $current_time = $this->thing->time();
+        if (!isset($this->callsign)) {
+            $this->thing_report['web'] = $web;
+            return;
+        }
 
-        $seconds_ago = strtotime($current_time) - strtotime($last_refreshed_at);
-        $ago = $this->thing->human_time($seconds_ago);
-        if ($seconds_ago > 60 * 60 * 24) {
-            $last_seen_text = "";
-        } else {
-            $last_seen_text = "[last seen about " . $ago . " ago]";
+        if (!isset($this->message)) {
+            $this->thing_report['web'] = $web;
+            return;
+        }
+
+        $last_seen_text = "";
+        if (isset($this->callsigns_heard[$this->callsign]['refreshed_at'])) {
+            $last_refreshed_at =
+                $this->callsigns_heard[$this->callsign]['refreshed_at'];
+            $current_time = $this->thing->time();
+
+            $seconds_ago =
+                strtotime($current_time) - strtotime($last_refreshed_at);
+            $ago = $this->thing->human_time($seconds_ago);
+            if ($seconds_ago > 60 * 60 * 24) {
+                $last_seen_text = "";
+            } else {
+                $last_seen_text = "[last seen about " . $ago . " ago]";
+            }
         }
 
         if (
@@ -624,13 +735,15 @@ class Radiorelay extends Agent
         ) {
             $web .=
                 "<b>TO (STATION CALLSIGN)</b> " .
-                $this->name_to .
+                htmlspecialchars($this->message['name_to']) .
                 " " .
                 $last_seen_text .
                 "<br>";
             //            $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
             $web .=
-                "<b>FROM (STATION CALLSIGN)</b> " . $this->name_from . "<br>";
+                "<b>FROM (STATION CALLSIGN)</b> " .
+                htmlspecialchars($this->message['name_from']) .
+                "<br>";
             //            $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
         }
 
@@ -658,27 +771,31 @@ class Radiorelay extends Agent
         //        $link = $this->web_prefix . "privacy";
         //        $privacy_link = '<a href="' . $link . '">'. $link . "</a>";
 
-        $web .= "ACP 125(G) format message - ";
-        //        $web .= "<p>";
+        if (isset($this->message)) {
+            $web .= "ACP 125(G) format message - ";
+            $this->makeACP125G($this->message);
 
-        $this->makeACP125G($this->message);
-        //        $web .= nl2br($this->acp125g->thing_report['acp125g']);
-
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay.txt';
-        $web .= '<a href="' . $link . '">' . $link . "</a>";
-        $web .= "<br>";
-
+            $link =
+                $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay.txt';
+            $web .= '<a href="' . $link . '">' . $link . "</a>";
+            $web .= "<br>";
+        }
         $web .= "<p>";
         $web .= "PERCS format radiogram - ";
 
-        if ($this->num_words > 25) {
-            $web .= "No PERCS pdf available. Message > 25 words.<br><p>";
-        } else {
-            $link =
-                $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay.pdf';
-            $web .= '<a href="' . $link . '">' . $link . "</a>";
-            $web .= "<br>";
-            $web .= "<p>";
+        if (isset($this->num_words)) {
+            if ($this->num_words > 25) {
+                $web .= "No PERCS pdf available. Message > 25 words.<br><p>";
+            } else {
+                $link =
+                    $this->web_prefix .
+                    'thing/' .
+                    $this->uuid .
+                    '/radiorelay.pdf';
+                $web .= '<a href="' . $link . '">' . $link . "</a>";
+                $web .= "<br>";
+                $web .= "<p>";
+            }
         }
 
         $web .= "Message Bank - ";
@@ -689,42 +806,27 @@ class Radiorelay extends Agent
         $web .= $this->date . " - ";
         $web .= $this->version . "";
 
+        if (isset($this->message_meta)) {
+            $web .= "<p>";
+            $web .= "Message Metadata - ";
+
+            $web .=
+                $this->inject .
+                " - " .
+                $this->thing->nuuid .
+                " - " .
+                $this->thing->thing->created_at;
+
+            $togo = $this->thing->human_time($this->time_remaining);
+            $web .= " - " . $togo . " remaining.<br>";
+        }
+
         $web .= "<p>";
-        $web .= "Message Metadata - ";
-        //        $web .= "<p>";
-
-        $web .=
-            $this->inject .
-            " - " .
-            $this->thing->nuuid .
-            " - " .
-            $this->thing->thing->created_at;
-
-        //        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
-
-        //        $web .= "Inject was created about ". $ago . " ago.";
-        //        $web .= "<p>";
-        //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
-
-        $togo = $this->thing->human_time($this->time_remaining);
-        $web .= " - " . $togo . " remaining.<br>";
-
-        $web .= "<br>";
-
-        $link = $this->web_prefix . "privacy";
-        $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );
-        $web .= "Inject was created about " . $ago . " ago. ";
-
-        $web .=
-            "This proof-of-concept inject is hosted by the " .
-            ucwords($this->word) .
-            " service.  Read the privacy policy at " .
-            $privacy_link .
-            ".";
+        $web .= "This radiogram was created about " . $ago . " ago. ";
 
         $web .= "<br>";
 
@@ -796,17 +898,18 @@ class Radiorelay extends Agent
 
         $txt .= "\n";
 
-        $txt .= $this->acp125g->thing_report['acp125g'];
+        if (isset($this->acp125g->thing_report['acp125g'])) {
+            $txt .= $this->acp125g->thing_report['acp125g'];
 
-        $txt .= "\n";
-
+            $txt .= "\n";
+        }
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
     }
 
     public function makePDF()
     {
-        if ($this->num_words > 25) {
+        if (!isset($this->num_words) or $this->num_words > 25) {
             return;
         }
         $txt = $this->thing_report['txt'];
@@ -867,7 +970,6 @@ class Radiorelay extends Agent
             $pdf->SetXY(181, 50);
             $pdf->Write(0, $this->message['date_filed']);
         }
-
         switch (strtolower($this->message['precedence'])) {
             case 'r':
             case 'routine':
@@ -894,7 +996,6 @@ class Radiorelay extends Agent
 
         $pdf->SetXY(30, 76);
         $pdf->Write(0, strtoupper($this->message['name_to']));
-
         $pdf->SetXY(30, 76 + 10);
         $pdf->Write(0, strtoupper($this->message['position_to']));
 
@@ -968,10 +1069,9 @@ class Radiorelay extends Agent
 
     public function readSubject()
     {
-
         $input = strtolower($this->subject);
 
-//        $pieces = explode(" ", strtolower($input));
+        //        $pieces = explode(" ", strtolower($input));
 
         $ngram_agent = new Ngram($this->thing, "ngram");
         $pieces = [];
@@ -984,8 +1084,6 @@ class Radiorelay extends Agent
 
         $pieces = array_reverse($pieces);
 
-
-
         if (count($pieces) == 1) {
             if ($input == 'radiorelay') {
                 $this->getMessage();
@@ -996,9 +1094,17 @@ class Radiorelay extends Agent
             }
         }
 
-
         $keywords = [
             "hey",
+            "when",
+            "about",
+            "how",
+            "what",
+            "where",
+            "when",
+            "why",
+            "help",
+            "info",
             "radio",
             "relay",
             "rocky",
@@ -1010,19 +1116,36 @@ class Radiorelay extends Agent
             "origin",
             "relay",
             "radio relay",
-            "radiorelay"
+            "radiorelay",
         ];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
+                        case "how":
+                        case "why":
+                        case "what":
+                        case "who":
+                        case "where":
+                        case "about":
+                        case "when":
+                        case "info":
+                        case "help":
+                            $agent_name = $piece;
+                            if ($piece == "about") {
+                                $agent_name = 'whatis';
+                            }
+
+                            $this->response .=
+                                $this->agent_responses[$agent_name];
+                            return;
                         case "radiorelay":
                         case "radio relay":
-                $this->getMessage();
-                if (!isset($this->index) or $this->index == null) {
-                    $this->index = 1;
-                }
-                return;
+                            $this->getMessage();
+                            if (!isset($this->index) or $this->index == null) {
+                                $this->index = 1;
+                            }
+                            return;
 
                         default:
                     }

@@ -683,21 +683,19 @@ class Agent
      *
      */
 
-    public function makeSnippet() {
+    public function makeSnippet()
+    {
+        if (isset($this->thing_report['snippet'])) {
+            $this->thing_report['snippet'] = str_replace(
+                '[word]',
+                $this->word,
+                $this->thing_report['snippet']
+            );
+        }
 
-if (isset($this->thing_report['snippet'])) {
-
-$this->thing_report['snippet'] = str_replace('[word]', $this->word, $this->thing_report['snippet']);
-
-}
-
-if (!isset($this->thing_report['snippet'])) {
-
-$this->thing_report['snippet'] = "";
-
-}
-
-
+        if (!isset($this->thing_report['snippet'])) {
+            $this->thing_report['snippet'] = "";
+        }
     }
 
     /**
@@ -1120,7 +1118,6 @@ $this->thing_report['snippet'] = "";
         $text = strtolower($text);
         //if ( $text == $this->agent_input) {
         //}
-
         $arr = explode(' ', trim($text));
 
         $arr = explode('\%20', trim($text));
@@ -1136,6 +1133,7 @@ $this->thing_report['snippet'] = "";
         usort($arr, function ($a, $b) {
             return strlen($b) <=> strlen($a);
         });
+
         $matches = [];
 
         foreach ($arr as $i => $ngram) {
@@ -1489,6 +1487,27 @@ $this->thing_report['snippet'] = "";
             // $this->thing_report = $uuid->thing_report;
             // And then ignored it.
         }
+
+        $this->thing->log('Agent "Agent" looking for URL in input.');
+        // Is Identity Context?
+        $url = new Url($this->thing, "url");
+        $urls = $url->extractUrls($input);
+
+        if (isset($urls) and count($urls) > 0) {
+            $this->thing->log(
+                'Agent "Agent" found a URL in input.',
+                "INFORMATION"
+            );
+            $this->url = $urls[0];
+
+            $tokens = explode(" ", $input);
+            if (count($tokens) == 1) {
+                $url = new Url($this->thing);
+                $this->thing_report = $url->thing_report;
+                return $this->thing_report;
+            }
+        }
+
         // Remove references to named chatbot agents
         //        $chatbot = new Chatbot($this->thing,"chatbot");
         //        $input =  $chatbot->filtered_input;
@@ -1785,10 +1804,11 @@ $this->thing_report['snippet'] = "";
                     continue;
                 }
 
-                if (!isset($variables[strtolower($entity_name)]['refreshed_at'])) {
+                if (
+                    !isset($variables[strtolower($entity_name)]['refreshed_at'])
+                ) {
                     continue;
                 }
-
 
                 $last_heard[strtolower($entity_name)] = strtotime(
                     $variables[strtolower($entity_name)]['refreshed_at']

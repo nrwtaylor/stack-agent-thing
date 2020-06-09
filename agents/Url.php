@@ -45,15 +45,19 @@ class Url extends Agent
 
     function makeSMS()
     {
-        $sms_message = "URL | ";
-        $sms_message .= $this->response;
+        $sms_message = "URL";
+
+        if (isset($this->response) and $this->response != "") {
+            $sms_message .= " | ";
+            $sms_message .= $this->response;
+        }
 
         if ($this->verbosity >= 2) {
         }
 
         $sms_message .= " | link " . $this->link;
 
-        $sms_message .= " | TEXT ?";
+        //        $sms_message .= " | TEXT ?";
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
@@ -110,8 +114,10 @@ class Url extends Agent
     {
         $urls = $this->extractUrls($text);
 
-// No URLS founds.
-if ($urls === true) {return false;}
+        // No URLS founds.
+        if ($urls === true) {
+            return false;
+        }
 
         if (count($urls) == 1) {
             return $urls[0];
