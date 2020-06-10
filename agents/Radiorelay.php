@@ -35,13 +35,19 @@ class Radiorelay extends Agent
             "variables radiorelay " . $this->from
         );
 
-        //        $url = $GLOBALS['stack_path'] . 'resources/radiorelay/radiorelay.php';
         $url = $this->resource_path . 'radiorelay/radiorelay.php';
         $settings = require $url;
 
         $this->container = new \Slim\Container($settings);
 
         if (isset($this->container['radiorelay'])) {
+
+            if (isset($this->container['radiorelay']['default_bank'])) {
+                $this->default_bank =
+                    $this->container['radiorelay']['default_bank'];
+            }
+
+
             if (isset($this->container['radiorelay']['checkin'])) {
                 $this->checkin_frequencies =
                     $this->container['radiorelay']['checkin'];
@@ -136,10 +142,10 @@ class Radiorelay extends Agent
         $this->previous_mode = $this->radiorelay->getVariable("mode");
         $this->refreshed_at = $this->radiorelay->getVariable("refreshed_at");
 
-        $this->thing->log(
-            $this->agent_prefix . 'got from db ' . $this->previous_state,
-            "INFORMATION"
-        );
+     //   $this->thing->log(
+     //       $this->agent_prefix . 'got from db ' . $this->previous_state,
+     //       "INFORMATION"
+     //   );
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
@@ -231,47 +237,14 @@ class Radiorelay extends Agent
     function setBank($bank = null)
     {
         if ($bank == "trivia" or $bank == null) {
-            $this->bank = "trivia-a01";
-            //$this->bank = "easy-a05";
+            $this->bank = $this->default_bank;
         }
-        /*
-        if ($bank == "hard") {
-            $this->bank = "hard-a06";
-        }
-
-        if ($bank == "16ln") {
-            $this->bank = "16ln-a02";
-        }
-
-        if ($bank == "ics213") {
-            $this->bank = "ics213-a01";
-        }
-*/
     }
 
     function getBank()
     {
-        //$this->bank = "queries";
-        //return $this->bank;
-
         if (!isset($this->state) or $this->state == "easy") {
-            $this->bank = "trivia-a01";
-        }
-
-        //        if (!isset($this->bank)) {
-        //            $this->bank = "easy-a03";
-        //        }
-
-        if ($this->state == "hard") {
-            $this->bank = "hard-a06";
-        }
-
-        if ($this->state == "16ln") {
-            $this->bank = "16ln-a02";
-        }
-
-        if ($this->state == "ics213") {
-            $this->bank = "ics213-a01";
+            $this->bank = $this->default_bank;
         }
 
         if (isset($this->inject) and $this->inject != false) {
@@ -284,13 +257,7 @@ class Radiorelay extends Agent
     public function respondResponse()
     {
         $this->makeACP125G();
-
         $this->makeChoices();
-
-        //        $this->thing_report["info"] =
-        //            "This creates a question in a radiogram format.";
-        //        $this->thing_report["help"] =
-        //            'Try RADIORELAY then WEB. Or PDF. Or Text.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -310,7 +277,6 @@ class Radiorelay extends Agent
 
     function makeSMS()
     {
-        //        $sms = "RADIO RELAY " . $this->inject . " " . $this->mode . "\n";
         $sms = "RADIO RELAY\n";
 
         if (isset($this->short_message)) {
@@ -360,13 +326,12 @@ class Radiorelay extends Agent
         // Load in the name of the message bank.
         $this->getBank();
         // Latest transcribed sets.
-        $filename = "/vector/messages-" . $this->bank . ".txt";
 
         $this->filename = $this->bank . ".txt";
-        //$filename = "/radiorelay/" . $this->filename;
+
         $filename = "/radiorelay/trivia-a01.txt";
         $file = $this->resource_path . $filename;
-        //        $contents = file_get_contents($file);
+
         $handle = fopen($file, "r");
         $count = 0;
         $bank_info = null;
@@ -382,12 +347,6 @@ class Radiorelay extends Agent
                 if (substr($line, 0, 1) == "#") {
                     continue;
                 }
-
-                // returns "d"
-                //                $line_count = count($message) - 1;
-
-                //  if ($line_count == 10) {
-                // recognize as J-format
 
                 if ($bank_info == null) {
                     $bank_meta[] = $line;
@@ -417,12 +376,9 @@ class Radiorelay extends Agent
                     }
                     continue;
                 }
-                //if ($bank_fino == null) {continue;}
 
                 $count += 1;
 
-                //              if ($line_count == 10) {
-                // recognize as J-format
 
                 $meta = "X";
 
@@ -583,7 +539,6 @@ class Radiorelay extends Agent
             $this->position_from == "X" and
             $this->text == "X"
         ) {
-            //$this->response = $this->number . " " . $this->unit . ".";
             $this->response = "No message to pass.";
         }
 
@@ -592,7 +547,6 @@ class Radiorelay extends Agent
             $this->position_from == "X" and
             $this->text != "X"
         ) {
-            //$this->response = $this->text . "\n" . $this->number. " " . $this->unit . ".";
             $this->response = "Unaddressed message.";
         }
 
@@ -764,13 +718,6 @@ class Radiorelay extends Agent
 
         $web .= "<p>";
 
-        //        //$received_at = strtotime($this->thing->thing->created_at);
-        //        $ago = $this->thing->human_time ( time() - $this->refreshed_at );
-        //        $web .= "This inject was created about ". $ago . " ago. ";
-
-        //        $link = $this->web_prefix . "privacy";
-        //        $privacy_link = '<a href="' . $link . '">'. $link . "</a>";
-
         if (isset($this->message)) {
             $web .= "ACP 125(G) format message - ";
             $this->makeACP125G($this->message);
@@ -799,7 +746,7 @@ class Radiorelay extends Agent
         }
 
         $web .= "Message Bank - ";
-        //        $web .= "<p>";
+
         $web .= $this->filename . " - ";
         $web .= $this->title . " - ";
         $web .= $this->author . " - ";
@@ -855,7 +802,6 @@ class Radiorelay extends Agent
 
         $callsigns_available = [];
         foreach ($this->callsigns_heard as $i => $callsign_heard) {
-            //var_dump($callsign_heard);
             if (
                 $callsign_heard['refreshed_at'] == null or
                 $callsign_heard['refreshed_at'] == "X"
@@ -1070,8 +1016,6 @@ class Radiorelay extends Agent
     public function readSubject()
     {
         $input = strtolower($this->subject);
-
-        //        $pieces = explode(" ", strtolower($input));
 
         $ngram_agent = new Ngram($this->thing, "ngram");
         $pieces = [];
