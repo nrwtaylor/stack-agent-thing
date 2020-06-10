@@ -21,18 +21,15 @@ class Callsign extends Agent
      */
     public function init()
     {
-        $this->version_date = "2020-04-27";
+        $this->version_date = "2020-06-09";
         $this->start_time = microtime(true);
 
         $this->assert_callsign = false;
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/callsign/';
 
-        //        $this->keywords = array();
-        //
-        //        $this->thing_report['help'] = "Looks up callsigns.";
         $this->thing_report['info'] = "Possibly helpful to station operators.";
 
-        $this->net_horizon = 30*60; // 30 minutes. Then assume station has gone.
+        $this->net_horizon = 30 * 60; // 30 minutes. Then assume station has gone.
 
         $this->keywords = [
             'is',
@@ -50,12 +47,12 @@ class Callsign extends Agent
             "active",
             "net",
             "callsign",
-            "call sign"
+            "call sign",
         ];
 
-        $this->thing_report['help'] = 'Recognises the following modifiers. ' . ucwords(
-            trim(implode(" ", $this->keywords)). "."
-        );
+        $this->thing_report['help'] =
+            'Recognises the following modifiers. ' .
+            ucwords(trim(implode(" ", $this->keywords)) . ".");
     }
 
     function getTimezone()
@@ -73,13 +70,12 @@ class Callsign extends Agent
 
         $dt->setTimezone(new \DateTimeZone($this->time_zone));
 
-        //                $d = date('H:i', strtotime($prediction["date"]));
         $d = $dt->format('H:i');
 
         return $d;
+        /*
         $date = $dt->format('Y/m/d');
 
-        //                $date = date('Y/m/d H:i', strtotime($prediction["date"]));
 
         if ($i == 0) {
             //   $d = date('Y/m/d H:i',strtotime($prediction["date"]));
@@ -99,6 +95,7 @@ class Callsign extends Agent
 
         //return $d;
         //                $i+=1;
+*/
     }
 
     function netCallsign()
@@ -111,9 +108,12 @@ class Callsign extends Agent
         foreach ($this->callsigns as $i => $callsign) {
             $call = $callsign['callsign'];
 
-$last_refreshed_at = $callsign['refreshed_at'];
-$ago = strtotime($this->current_time) - strtotime($last_refreshed_at);
-if ($ago > $this->net_horizon) {continue;}
+            $last_refreshed_at = $callsign['refreshed_at'];
+            $ago =
+                strtotime($this->current_time) - strtotime($last_refreshed_at);
+            if ($ago > $this->net_horizon) {
+                continue;
+            }
 
             if (!isset($callsigns_heard[$call])) {
                 $callsigns_heard[$call] = $callsign;
@@ -186,28 +186,16 @@ if ($ago > $this->net_horizon) {continue;}
      */
     function set()
     {
-//        $this->makeSMS();
-
-        //  $this->thing_report['sms'] = strtoupper($this->agent_name) . " | " . $this->response;
-
-        //        $this->reading = "X";
-        //        if (isset($this->callsigns)) {
-        //            $this->reading = count($this->callsigns);
-        //        }
-        //        $this->thing->json->writeVariable(array("callsign", "reading"), $this->reading);
-
         $this->thing->json->writeVariable(
             ["callsign", "reading"],
             $this->reading
         );
 
-        //$this->variables = new Variables(
-        //    $this->thing,
-        //    "variables callsign " . $this->from
-        //);
-
         if ($this->assert_callsign) {
-            $this->variables->setVariable("callsign", $this->callsign["callsign"]);
+            $this->variables->setVariable(
+                "callsign",
+                $this->callsign["callsign"]
+            );
             $time_string = $this->thing->json->time();
             $this->variables->setVariable("refreshed_at", $time_string);
             $this->variables->setVariable("action", $this->callsign["action"]);
@@ -284,16 +272,20 @@ if ($ago > $this->net_horizon) {continue;}
                         $callsign = $variables['callsign']['callsign'];
                     }
 
-
                     if (isset($variables['callsign']['refreshed_at'])) {
                         $refreshed_at = $variables['callsign']['refreshed_at'];
                     }
 
-// Check for junk entries. And discard.
-if ($callsign == "X") {continue;}
-if ($action == "X") {continue;}
-if ($refreshed_at == "X") {continue;}
-
+                    // Check for junk entries. And discard.
+                    if ($callsign == "X") {
+                        continue;
+                    }
+                    if ($action == "X") {
+                        continue;
+                    }
+                    if ($refreshed_at == "X") {
+                        continue;
+                    }
 
                     $this->callsigns[] = [
                         "callsign" => $callsign,
@@ -393,6 +385,8 @@ if ($refreshed_at == "X") {continue;}
                     ];
                 }
 
+if ($callsign['first_name'] == 'first_name') {continue;}
+
                 if ($text != false) {
                     //   echo "callsign is " . $text . "\n";
                     $this->callsigns[$a[0]] = $callsign;
@@ -403,11 +397,94 @@ if ($refreshed_at == "X") {continue;}
         }
 
         if (count($this->callsigns) != 0) {
-            $this->callsign = reset($this->callsigns);
+            $this->selectCallsign();
+            //$this->callsign = reset($this->callsigns);
         } else {
             $this->callsign = null;
         }
         return $this->callsigns;
+    }
+
+    function selectCallsign($callsign = null)
+    {
+        $input = $this->input;
+
+        $slug_agent = new Slug($this->thing, "slug");
+        $chatbot_agent = new Chatbot($this->thing, "chatbot");
+
+        $input = $chatbot_agent->filterChatbots($input);
+
+        str_replace("callsign", " ", $input);
+
+        $tokens = explode(" ", $this->input);
+        foreach ($tokens as $i => $token) {
+            $tokens[$i] = trim(strtolower($token));
+        }
+
+        //            $this->callsign = reset($this->callsigns);
+        foreach ($this->callsigns as $callsign => $call) {
+            $score = 0;
+            $hits = 0;
+            $hit_flag = false;
+
+            $multiplier = 1;
+            foreach ($tokens as $i => $token) {
+                $token = $slug_agent->getSlug($token);
+
+                // Match first three characters.
+                if (substr($token, 0, 2) == substr($callsign, 0, 2)) {
+                    $score += 5;
+                    $hit_flag = true;
+                }
+
+                // Match six characters.
+                if (substr($token, 0, 5) == substr($callsign, 0, 5)) {
+                    $score += 3;
+                    $hit_flag = true;
+                }
+
+                // Match first three characters of name.
+                $firstname = $slug_agent->getSlug($call['first_name']);
+                if (substr($token, 0, 2) == substr($firstname, 0, 2)) {
+                    $score += 2;
+                    $hit_flag = true;
+                }
+
+                foreach ($call as $j => $needle) {
+                    $needle = $slug_agent->getSlug($needle);
+
+                    // Add a point if the full needle is found.
+                    if (stripos($token, $needle) !== false) {
+                        $score += 1 * $multiplier;
+                        $multiplier += 1;
+                        $hit_flag = true;
+                    }
+                }
+
+                if ($hit_flag === true) {
+                    $hits += 1;
+                }
+            }
+
+            $this->callsigns[$callsign]['score'] = $score;
+            $this->callsigns[$callsign]['hits'] = $hits;
+        }
+
+        $min_hit_count = count($tokens);
+
+        $test_array = $this->callsigns;
+        $score = [];
+        foreach ($test_array as $key => $row) {
+            if ($row['hits'] == 0) {
+                $score[$key] = 0;
+                continue;
+            }
+            $score[$key] = $row['score'];
+        }
+        array_multisort($score, SORT_DESC, $test_array);
+        $this->callsign = reset($test_array);
+
+        return;
     }
 
     /**
@@ -580,8 +657,6 @@ if ($refreshed_at == "X") {continue;}
      */
     public function respondResponse()
     {
-        //  public function respond() {
-
         $this->cost = 100;
 
         // Thing stuff
@@ -601,12 +676,9 @@ if ($refreshed_at == "X") {continue;}
         //$callsign_text = (implode(" ",$this->callsign));
         $r = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $this->response);
 
-        //            $this->sms_message .= $callsign_text;
-
         $sms = "CALLSIGN | " . $r;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
-        return;
     }
 
     /**
@@ -616,47 +688,12 @@ if ($refreshed_at == "X") {continue;}
     {
         $web = "";
 
-        //        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
-
-        //        $web = '<a href="' . $link . '">';
-        //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
-        //        $web .= $this->html_image;
-
         $web .= "</a>";
         $web .= "<br>";
         $web .= '<b>Callsign Agent</b><br>';
         $web .= "<p>";
         $web .= "No web response available.";
-/*
-        $web .= 'sms message ' . $this->sms_message;
-        $web .= "<p>";
-        $web .= 'input ' . $this->input;
-        $web .= "<p>";
-        $web .= 'uuid ' . $this->uuid;
-        $web .= "<p>";
-        $web .= 'subject ' . $this->subject;
-        $web .= "<p>";
 
-        $web .= 'subject '. $this->thing->subject;
-        $web .= "<p>";
-
-        $web .= 'agent_input ' . $this->agent_input;
-        $web .= "<p>";
-
-
-
-        if (isset($this->callsigns)) {
-            foreach ($this->callsigns as $id => $callsign) {
-                $first_name = "X";
-                if (isset($callsign['first_name'])) {
-                    $first_name = $callsign['first_name'];
-                }
-
-                $callsign_text = $callsign["callsign"] . " " . $first_name;
-                $web .= "<br>" . $callsign_text;
-            }
-        }
-*/
         $this->web_message = $web;
         $this->thing_report['web'] = $web;
     }
@@ -700,11 +737,8 @@ if ($refreshed_at == "X") {continue;}
 
         $pieces = array_reverse($pieces);
 
-        //private function getNgrams($input, $n = 3) {
-
         if (count($pieces) == 1) {
             if ($this->input == 'callsign') {
-                //                $this->getCallsigns($this->callsign_text);
                 $this->extractCallsigns($this->callsign_text);
                 if (isset($this->callsign)) {
                     $this->response =
@@ -730,8 +764,11 @@ if ($refreshed_at == "X") {continue;}
                             $this->getCallsigns();
                             $this->netCallsign();
                             $count = 0;
-                            if (is_array($this->callsigns_heard)) {$count = count($this->callsigns_heard);}
-                            $this->response .= "Retrieved " . $count . " active callsigns. ";
+                            if (is_array($this->callsigns_heard)) {
+                                $count = count($this->callsigns_heard);
+                            }
+                            $this->response .=
+                                "Retrieved " . $count . " active callsigns. ";
                             return;
 
                         case 'check in':
@@ -772,8 +809,6 @@ if ($refreshed_at == "X") {continue;}
                             }
 
                             return;
-
-
 
                         default:
                         //echo 'default';
