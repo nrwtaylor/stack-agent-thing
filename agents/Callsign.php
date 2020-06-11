@@ -21,7 +21,7 @@ class Callsign extends Agent
      */
     public function init()
     {
-        $this->version_date = "2020-06-09";
+        $this->version_date = "2020-06-10";
         $this->start_time = microtime(true);
 
         $this->assert_callsign = false;
@@ -73,29 +73,6 @@ class Callsign extends Agent
         $d = $dt->format('H:i');
 
         return $d;
-        /*
-        $date = $dt->format('Y/m/d');
-
-
-        if ($i == 0) {
-            //   $d = date('Y/m/d H:i',strtotime($prediction["date"]));
-            $d = $dt->format('Y/m/d H:i');
-
-            $old_date = $date;
-        }
-
-        //echo $date . " " . $old_date ."\n";
-
-        if ($old_date != $date) {
-            //   $d = date('m/d H:i',strtotime($prediction["date"]));
-            $d = $dt->format('m/d H:i');
-        }
-
-        //                   $d = $dt->format('H:i');
-
-        //return $d;
-        //                $i+=1;
-*/
     }
 
     function netCallsign()
@@ -385,13 +362,13 @@ class Callsign extends Agent
                     ];
                 }
 
-if ($callsign['first_name'] == 'first_name') {continue;}
+                if ($callsign['first_name'] == 'first_name') {
+                    continue;
+                }
 
                 if ($text != false) {
-                    //   echo "callsign is " . $text . "\n";
                     $this->callsigns[$a[0]] = $callsign;
                 } else {
-                    //   echo "callsign is not " . $value . "\n";
                 }
             }
         }
@@ -411,59 +388,109 @@ if ($callsign['first_name'] == 'first_name') {continue;}
 
         $slug_agent = new Slug($this->thing, "slug");
         $chatbot_agent = new Chatbot($this->thing, "chatbot");
+        $mixed_agent = new Mixed($this->thing, "mixed");
 
         $input = $chatbot_agent->filterChatbots($input);
 
-        str_replace("callsign", " ", $input);
+        $input = trim(str_replace("callsign", "", $input));
 
-        $tokens = explode(" ", $this->input);
+        $tokens = explode(" ", $input);
+
         foreach ($tokens as $i => $token) {
             $tokens[$i] = trim(strtolower($token));
         }
 
         //            $this->callsign = reset($this->callsigns);
         foreach ($this->callsigns as $callsign => $call) {
-            $score = 0;
+            $name_hit = false;
+            $callsign_hit = false;
+            $score = 1;
             $hits = 0;
             $hit_flag = false;
 
             $multiplier = 1;
             foreach ($tokens as $i => $token) {
+                $matched_tokens = 0;
                 $token = $slug_agent->getSlug($token);
 
-                // Match first three characters.
-                if (substr($token, 0, 2) == substr($callsign, 0, 2)) {
-                    $score += 5;
-                    $hit_flag = true;
+                if ($mixed_agent->isMixed($token)) {
+                    $callsign_distance = $this->distanceCallsign(
+                        $token,
+                        $callsign
+                    );
+                    if ($callsign_distance >= 2) {
+                        $score = $score * pow(10, $callsign_distance);
+                        $callsign_hit = true;
+                    }
                 }
 
-                // Match six characters.
-                if (substr($token, 0, 5) == substr($callsign, 0, 5)) {
-                    $score += 3;
+                // Match first three characters.
+                //if (substr($token, 0, 2) == substr($callsign, 0, 2)) {
+                //    $score = $score * 10;
+                //    $hit_flag = true;
+                //}
+
+                // Match full callsign.
+                if (strtolower($token) == strtolower($callsign)) {
+                    $callsign_hit = true;
+                    $factor = strlen($callsign) - 3;
+
+                    $score = $score * pow(10, $factor);
+
                     $hit_flag = true;
                 }
 
                 // Match first three characters of name.
                 $firstname = $slug_agent->getSlug($call['first_name']);
                 if (substr($token, 0, 2) == substr($firstname, 0, 2)) {
-                    $score += 2;
+                    $score = $score * 10;
+                    $name_hit = true;
                     $hit_flag = true;
                 }
 
-                foreach ($call as $j => $needle) {
-                    $needle = $slug_agent->getSlug($needle);
+                if (strtolower($token) == strtolower($firstname)) {
+                    $score = $score * 10;
+                    $hit_flag = true;
+                    $name_hit = true;
+                }
 
+                // Match first three characters of name.
+                $secondname = $slug_agent->getSlug($call['second_name']);
+                if (substr($token, 0, 5) == substr($secondname, 0, 5)) {
+                    $score = $score * 10;
+                    $hit_flag = true;
+                    $name_hit = true;
+                }
+
+                if (strtolower($token) == strtolower($secondname)) {
+                    $score = $score * 10;
+                    $hit_flag = true;
+                    $name_hit = true;
+                }
+
+                // is in each token.
+                foreach ($call as $j => $needle) {
+                    if ($j == $callsign) {
+                        continue;
+                    }
+                    $needle = $slug_agent->getSlug($needle);
                     // Add a point if the full needle is found.
-                    if (stripos($token, $needle) !== false) {
-                        $score += 1 * $multiplier;
-                        $multiplier += 1;
-                        $hit_flag = true;
+                    if (stripos($needle, $token) !== false) {
+                        $matched_tokens += 1;
                     }
                 }
 
                 if ($hit_flag === true) {
                     $hits += 1;
                 }
+            }
+
+            if ($matched_tokens >= 1) {
+                $score = $score * pow(10, 2);
+            }
+
+            if ($name_hit and $callsign_hit) {
+                $score = $score * pow(10, 4);
             }
 
             $this->callsigns[$callsign]['score'] = $score;
@@ -485,6 +512,25 @@ if ($callsign['first_name'] == 'first_name') {continue;}
         $this->callsign = reset($test_array);
 
         return;
+    }
+
+    function distanceCallsign($callsign, $text)
+    {
+        $callsign_characters = str_split($callsign);
+        $text_characters = str_split($text);
+        $score = 0;
+        foreach ($callsign_characters as $i => $value) {
+
+            $callsign_character = strtolower($callsign_characters[$i]);
+            $text_character = strtolower($text_characters[$i]);
+
+            if ($callsign_character == $text_character) {
+                $score += 1;
+                continue;
+            }
+            break;
+        }
+        return $score;
     }
 
     /**
@@ -591,7 +637,6 @@ if ($callsign['first_name'] == 'first_name') {continue;}
 
         $i = 0;
         foreach ($test_array as $key => $value) {
-            //echo $value['score'] . " ". $value['line'] . "\n";
             $i += 1;
             if ($i > 10) {
                 break;
@@ -643,7 +688,6 @@ if ($callsign['first_name'] == 'first_name') {continue;}
                     mb_substr(strtolower($text_word), 0, 1) ==
                     mb_substr(strtolower($word), 0, 1)
                 ) {
-                    //echo $text ." " . $word . "\n";
                     $score += 1;
                 }
             }
@@ -811,7 +855,6 @@ if ($callsign['first_name'] == 'first_name') {continue;}
                             return;
 
                         default:
-                        //echo 'default';
                     }
                 }
             }
@@ -833,7 +876,7 @@ if ($callsign['first_name'] == 'first_name') {continue;}
 
         if (count($this->callsigns) > 1) {
             $this->response =
-                "Found " .
+                "Read " .
                 count($this->callsigns) .
                 " callsigns. Best " .
                 $this->callsign["callsign"] .

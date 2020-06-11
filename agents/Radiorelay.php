@@ -287,19 +287,19 @@ class Radiorelay extends Agent
 
         if (isset($this->short_message)) {
             $sms .=
-                "COORDINATION " .
+                "FREQUENCIES/CHANNELS - COORDINATION " .
                 $this->checkin_name .
                 " " .
                 $this->checkin_frequency .
-                " CALLING " .
+                " / CALLING " .
                 $this->calling_name .
                 " " .
                 $this->calling_frequency .
-                " TRANSFER " .
+                " / TRANSFER " .
                 $this->transfer_name .
                 " " .
                 $this->transfer_frequency .
-                " TEXT WEB";
+                " / TEXT WEB";
         }
 
         $this->sms_message = $sms;
