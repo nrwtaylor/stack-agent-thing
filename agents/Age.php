@@ -205,7 +205,6 @@ $this->margin_bottom = 10;
 
         $this->y_spread = $this->y_max - $this->y_min;
 
-
         $i = 0;
         //$i_max = count($this->tubs);
         //$i_max = count($this->tub_boundaries);
@@ -219,16 +218,10 @@ $this->margin_bottom = 10;
             $elapsed_time = $tub_quantity;
             $refreshed_at = $this->tub_boundaries[$tub_name];
 
-            $y_spread = $y_max - $y_min;
-            if ($y_spread == 0) {
-                $y_spread = 100;
-            }
-
-
             $y =
                 $this->y_origin +
                 $this->chart_height -
-                (($elapsed_time - $y_min) / $y_spread) * $this->chart_height;
+                (($elapsed_time - $this->y_min) / $this->y_spread) * $this->chart_height;
 
 
             $j = $this->tubs_max - $i;
@@ -290,9 +283,8 @@ $this->margin_bottom = 10;
             200000,
             250000,
         ];
-        $inc = ($y_max - $y_min) / 5;
-
-        $closest_distance = $y_max;
+        $inc = ($this->y_max - $this->y_min) / 5;
+        $closest_distance = $this->y_max;
 
         foreach ($allowed_steps as $key => $step) {
             $distance = abs($inc - $step);
@@ -301,7 +293,6 @@ $this->margin_bottom = 10;
                 $preferred_step = $step;
             }
         }
-
         $this->preferred_step = $preferred_step;
 
         $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
@@ -326,6 +317,8 @@ $this->margin_bottom = 10;
         foreach ($this->tubs as $m => $n) {
 if ($i > $this->tubs_max) {break;}
 
+
+
       //      $plot_x =
       //          0 +
       //          $this->chart_width -
@@ -346,12 +339,30 @@ $j = $this->tubs_max - $i;
 
             $text = "x";
 
-            $size = 8;
+            $size = 10;
             $angle = 90;
             $pad = 0;
 
-            $colour = $this->grey;
-            if ($n > 2 * $this->preferred_step) {$colour = $this->white;}
+            $colour = $this->black;
+            // $colour = $this->grey;
+            // if ($n > 2 * $this->preferred_step) {$colour = $this->white;}
+
+foreach(array(-1,0,1) as $i1=>$x0) {
+foreach(array(-1,0,1) as $j1=>$y0) {
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $plot_x+$x0,
+                $plot_y+$y0,
+                $this->white,
+                $font,
+                $m
+            );
+}
+}
+
+
 
             imagettftext(
                 $this->image,
@@ -368,6 +379,7 @@ $j = $this->tubs_max - $i;
         }
 
     }
+
 
     /**
      *
@@ -807,6 +819,9 @@ $j = $this->tubs_max - $i;
             $this->thing->human_time($this->age_oldest) .
             " old. ";
 
+        $web .= "<p>";
+        $web .= 'You can send the text command "FORGET TODAY". Or "FORGET MONTH". Or "FORGET MINUTES". This will forget Things of the specified age.';
+        $web .= "<p>";
         $web .= "The privacy engine continually removes Things by algorithm.";
 
         $web .= "<br><br>";

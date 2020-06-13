@@ -45,6 +45,9 @@ class Kaiju extends Agent
         $this->horizon = 10*24*60/15;
 
         $this->series = array('kaiju');
+        $this->default_y_spread = 100;
+
+        $this->default_preferred_step = 20;
 
 
         $this->character = new Character($this->thing, "character is Kaiju");
@@ -150,8 +153,6 @@ if (!isset($this->points)) {return true;}
 
         $this->chart_agent = new Chart($this->thing, "chart age " . $this->from);
 
-//$this->chart_agent->blankImage();
-
 
         $this->image = $this->chart_agent->image;
         $this->black = $this->chart_agent->black;
@@ -205,6 +206,7 @@ $this->chart_agent->chart_height = $this->chart_height;
             $i += 1;
         }
 
+
         $x_max = strtotime($this->current_time);
 
 
@@ -224,7 +226,7 @@ $this->chart_agent->x_max = $x_max;
             $refreshed_at = $point['refreshed_at'];
 
             $y_spread = $y_max - $y_min;
-            if ($y_spread == 0) {$y_spread = 100;$this->y_spread = $y_spread;}
+            if ($y_spread == 0) {$y_spread = $this->default_y_spread;$this->y_spread = $y_spread;}
 
             $y = 10 + $this->chart_height - ($elapsed_time - $y_min) / ($y_spread) * $this->chart_height;
             $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
@@ -673,6 +675,8 @@ $this->chart_agent->chart_height = $this->chart_height;
 
         $x_max = strtotime($this->current_time);
 
+
+
 $this->y_max = $y_max;
 $this->y_min = $y_min;
 
@@ -693,6 +697,7 @@ $this->drawSeries($series_name);
 
         $closest_distance = $y_max;
 
+        $preferred_step = $this->default_preferred_step;
         foreach ($allowed_steps as $key=>$step) {
 
             $distance = abs($inc - $step);
@@ -747,7 +752,7 @@ $x_min = $this->x_min;
             $refreshed_at = $point['refreshed_at'];
 
             $y_spread = $y_max - $y_min;
-            if ($y_spread == 0) {$y_spread = 100;$this->y_spread = $y_spread;}
+            if ($y_spread == 0) {$y_spread = $this->default_y_spread;$this->y_spread = $y_spread;}
 
             $y = 10 + $this->chart_height - ($series - $y_min) / ($y_spread) * $this->chart_height;
             $x = 10 + ($refreshed_at - $x_min) / ($x_max - $x_min) * $this->chart_width;
@@ -1460,34 +1465,7 @@ $this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6
         $this->thing_report['pngs'] = array();
         //return;
         $agent = new Png($this->thing, "png");
-/*
-        foreach ($this->result as $index=>$die_array) {
-            reset($die_array);
-            //echo key($die_array) . ' = ' . current($die_array);
-            $die = key($die_array);
-            $number = current($die_array);
 
-            $image =      $this->makeImage($number, $die);
-            if ($image === true) {continue;}
-
-            $agent->makePNG($image);
-
-            //        $this->html_image = $agent->html_image;
-            //        $this->image = $agent->image;
-            //        $this->PNG = $agent->PNG;
-
-            $alt_text = "Image of a " .$die . " die with a roll of " . $number . ".";
-
-
-            $this->images[$this->agent_name .'-'.$index] = array("image"=>$agent->image,
-                "html_image"=> $agent->html_image,
-                "image_string"=> $agent->image_string,
-                "alt_text" => $alt_text);
-
-
-            $this->thing_report['pngs'][$this->agent_name . '-'.$index] = $agent->image_string;
-}
-*/
 }
 
     /**
@@ -1498,24 +1476,14 @@ $this->test_string = "THING | b97f 0.00V 27.4C 100060Pa 46.22uT 0.00g 25.9C 26.6
 
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/kaiju';
-//$this->blankImage();
 
         $this->drawGraph1();
 
 
-//        if (!isset($this->html_image)) {$this->makePNG();}
 $graph1_image_embedded = $this->chart_agent->image_embedded;
 
-//$this->image = null;
-//$this->makePNG();
-
-//$this->blankImage();
-
-//echo "merp";
-//exit();
 
         $this->drawGraph2();
-//        if (!isset($this->html_image)) {$this->makePNG();}
 $graph2_image_embedded = $this->chart_agent->image_embedded;
 
 
@@ -1523,32 +1491,20 @@ $graph2_image_embedded = $this->chart_agent->image_embedded;
 $this->makePNG();
 
 
-//$this->blankImage();
         $this->drawGraph3();
-//        $this->drawGraph('magnetic');
 
 $this->makePNG();
-//        if (!isset($this->html_image)) {$this->makePNG();}
 $graph3_image_embedded = $this->chart_agent->image_embedded;
 
-//$graph3_image_embedded = $graph2_image_embedded;
-
-//$this->makePNG();
-
-
-//$this->blankImage();
-//        $this->drawGraph4();
         $this->drawGraph('pressure');
 
 $this->makePNG();
-//        if (!isset($this->html_image)) {$this->makePNG();}
 $graph4_image_embedded = $this->chart_agent->image_embedded;
 
 
         $this->drawGraph('bilge_level');
 
 $this->makePNG();
-//        if (!isset($this->html_image)) {$this->makePNG();}
 $graph6_image_embedded = $this->chart_agent->image_embedded;
 
 

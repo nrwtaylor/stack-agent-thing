@@ -1192,6 +1192,23 @@ class Agent
 
         // Third.  Forget.
         if (strpos($input, 'forget') !== false) {
+
+
+$forget_tokens = array("all","now","today","second","seconds","minute","minutes","hour","hours","day","days","week","weeks","month","months","year","years","everything");
+$tokens = explode(" ",$input);
+foreach ($tokens as $i=>$token) {
+
+if (in_array(strtolower($token),$forget_tokens)) {
+
+$forget_agent = new Forgetcollection($this->thing);
+                $this->thing_report['sms'] = $forget_agent->thing_report['sms'];
+
+//                $this->thing_report['sms'] =
+//                    "AGENT | Saw a FORGET instruction.";
+return $this->thing_report;
+
+}
+}
             //if (strtolower($input) == 'forget') {
 
             if (strpos($input, 'all') !== false) {
