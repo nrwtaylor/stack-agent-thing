@@ -456,7 +456,7 @@ class Agent
      *
      * @return unknown
      */
-    function getLink()
+    public function getLink($variable = null)
     {
         $block_things = [];
         // See if a block record exists.

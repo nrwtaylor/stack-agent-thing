@@ -108,7 +108,7 @@ $this->makeSMS();
      *
      * @return unknown
      */
-    function getLink() {
+    function getLink($text = null) {
         $this->thing->log("called get web link.");
         $block_things = array();
         // See if a stack record exists.
