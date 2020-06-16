@@ -76,7 +76,7 @@ if ($caption_id === true) {$this->response .= "No caption id found. "; return;}
 
 // test
 $this->response .= "Caption id is " . $caption_id . ". ";
-$caption = $this->captionYoutube($caption_id);
+//$caption = $this->captionYoutube($caption_id);
 
 
 
