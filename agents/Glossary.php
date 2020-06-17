@@ -286,6 +286,7 @@ class Glossary extends Agent
 
 function uc_first_word($string) {
     $s = explode(' ', $string);
+
     $s[0] = strtoupper(strtolower($s[0]));
     $s = implode(' ', $s);
     return $s;
@@ -293,7 +294,20 @@ function uc_first_word($string) {
 
 function bold_first_word($string) {
     $s = explode(' ', $string);
+
     $s[0] = "<b>" . $s[0] . "</b>";
+
+foreach($s as $i=>$token) {
+
+if (strtoupper($token) === $token) {
+
+    $s[$i] = "<b>" . $s[$i] . "</b>";
+
+
+}
+
+}
+//    $s[0] = "<b>" . $s[0] . "</b>";
     $s = implode(' ', $s);
     return $s;
 }
@@ -470,6 +484,29 @@ if ( (isset($this->glossary_agents)) and (count($this->glossary_agents) != 0) ) 
             $firstChar = mb_substr($agent_name, 0, 1, "UTF-8");
             if ($prior_firstChar != $firstChar) {$web .= "<p>" . "<b>" . $firstChar ."</b><br>";}
             $prior_firstChar = $firstChar;
+
+
+if (strpos($packet['words'], 'DEV') !== false) {
+    continue;
+}
+
+if (stripos($packet['words'], 'no sms response') !== false) {
+    continue;
+}
+
+if (stripos($packet['words'], 'agent response') !== false) {
+    continue;
+}
+
+if (stripos($packet['words'], 'no help available') !== false) {
+    continue;
+}
+
+if (stripos($packet['words'], 'not operational') !== false) {
+    continue;
+}
+
+
 
             $web .= $this->bold_first_word($this->uc_first_word($packet['words']) ."<br>");
 //            $web .= $agent_name . " " .$packet['words'] ."<br>";

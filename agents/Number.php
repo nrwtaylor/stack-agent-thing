@@ -411,6 +411,13 @@ $this->numbers_history = $traditional;
                 continue;
             }
 
+            //?
+            // X - Specify. Z - Available.
+            //if (($piece == "0") or ((strtolower($piece) == "zero"))) {
+            //    $this->numbers[] = 0;
+            //    continue;
+            //}
+
 
             // Treat () as accounting format number
             // Rare to see this in use.
@@ -464,7 +471,6 @@ $this->numbers_history = $traditional;
         if (isset($this->numbers[0])) {
             $this->number = $this->numbers[0];
         }
-
     }
 
 
@@ -481,8 +487,6 @@ $this->numbers_history = $traditional;
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
-
-        //        $this->thing_report['sms'] = $this->sms_message;
 
     }
 
@@ -510,12 +514,14 @@ $this->numbers_history = $traditional;
 
         $this->extracted_number = $this->number;
 
-        if ($this->number == false) {
+
+        if ($this->number === false) {
+            $this->response .= "No number seen. ";
             $this->get();
         }
 
         if ($this->number === false) {
-            $this->response .= "No number found. Text NUMBER 5.3. Or NUMBER 6.005.";
+            $this->response .= "No number found. Text NUMBER 5.3. Or NUMBER 6.005. ";
             return null;
         }
         // Keyword
@@ -524,10 +530,20 @@ $this->numbers_history = $traditional;
         if (count($pieces) == 1) {
 
             if ($this->input == 'number') {
-                $this->response .= "Last number retrieved.";
+                $this->response .= "Last number retrieved. ";
                 return;
 
             }
+
+
+            if ($this->input == '0') {
+                $this->response .= "Zero seen. ";
+                return;
+
+            }
+
+
+
         }
 
 
@@ -757,8 +773,16 @@ $this->numbers_history = $traditional;
     function makeSMS() {
 
         $sms = "NUMBER | ";
+if (isset($this->number)) {$number = $this->number;}
 
-        if ((isset($this->number)) and ($this->number != false)) {       $sms .= $this->number ." | ";}
+
+if ($number === false) {$number = "X";}
+if ($number === true) {$number = "ERR";}
+if ($number === null) {$number = "X";}
+
+
+        if ($number != "X") {       $sms .= $number ." | ";}
+
         $sms .= $this->response;
         $sms .= ' #devstack';
 

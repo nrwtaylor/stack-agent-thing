@@ -71,12 +71,17 @@ class Youtube extends Agent
             $this->video_id = $this->items[0]['id'];
         }
 
+if (!isset($this->video_id)) {return false;}
+
+$transcript = $this->transcriptYoutube($this->video_id);
+
         $caption_id = $this->captionidYoutube($this->video_id);
 if ($caption_id === true) {$this->response .= "No caption id found. "; return;}
 
 // test
 $this->response .= "Caption id is " . $caption_id . ". ";
 //$caption = $this->captionYoutube($caption_id);
+
 
 
 
@@ -97,6 +102,8 @@ $this->response .= "Caption id is " . $caption_id . ". ";
             $keywords = urlencode($this->search_words);
         }
 
+        if (!isset($this->items_count)) {$this->items_count = 0;}
+
         $data_source =
             "https://www.googleapis.com/youtube/v3/search?key=" .
             $this->api_key .
@@ -108,6 +115,8 @@ $this->response .= "Caption id is " . $caption_id . ". ";
         $json_data = $this->getApi($data_source);
 
         $items = $this->parseYoutube($json_data);
+
+if (!is_array($items)) {return true;}
 
         $this->items = $items;
         $this->items_count = count($this->items);
@@ -270,6 +279,17 @@ exit();
         return $items;
     }
 
+public function transcriptYoutube($video_id = null) {
+
+$data_source = "http://video.google.com/timedtext?lang=en&v=" . $video_id;
+
+//        $data = file_get_contents($data_source);
+//        $json_data = json_decode($data, true);
+
+return;
+
+}
+
     public function getLink($ref = null)
     {
         // Give it the message returned from the API service
@@ -335,6 +355,8 @@ exit();
     public function makeSMS()
     {
         $sms = "YOUTUBE";
+        $items_count = 0;
+        if (isset($this->items_count)) {$items_count = $this->items_count;}
 
         switch ($this->items_count) {
             case 0:
