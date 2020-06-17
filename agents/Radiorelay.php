@@ -41,12 +41,20 @@ class Radiorelay extends Agent
         $this->container = new \Slim\Container($settings);
 
         if (isset($this->container['radiorelay'])) {
-
             if (isset($this->container['radiorelay']['default_bank'])) {
                 $this->default_bank =
                     $this->container['radiorelay']['default_bank'];
             }
 
+            if (isset($this->container['radiorelay']['agents']['urls'])) {
+                $this->urls = $this->container['radiorelay']['agents']['urls'];
+            }
+            //var_dump($this->urls);
+            //echo "merp";
+            //exit();
+            if (isset($this->container['radiorelay']['agents']['when'])) {
+                $this->when = $this->container['radiorelay']['agents']['when'];
+            }
 
             if (isset($this->container['radiorelay']['checkin'])) {
                 $this->checkin_frequencies =
@@ -142,10 +150,10 @@ class Radiorelay extends Agent
         $this->previous_mode = $this->radiorelay->getVariable("mode");
         $this->refreshed_at = $this->radiorelay->getVariable("refreshed_at");
 
-     //   $this->thing->log(
-     //       $this->agent_prefix . 'got from db ' . $this->previous_state,
-     //       "INFORMATION"
-     //   );
+        //   $this->thing->log(
+        //       $this->agent_prefix . 'got from db ' . $this->previous_state,
+        //       "INFORMATION"
+        //   );
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
@@ -277,6 +285,16 @@ class Radiorelay extends Agent
 
     function makeSMS()
     {
+        // Signal this agent has not been accessed before.
+        $outro = "TEXT WEB";
+        var_dump($this->previous_state);
+        if ($this->previous_state === false) {
+            $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay';
+            $outro = $link;
+            if (isset($this->urls[0]['url'])) {
+                $outro = $this->urls[0]['url'];
+            }
+        }
         $sms = "RADIO RELAY\n";
 
         if (isset($this->short_message)) {
@@ -298,8 +316,13 @@ class Radiorelay extends Agent
                 " / TRANSFER " .
                 $this->transfer_name .
                 " " .
-                $this->transfer_frequency .
-                " / TEXT WEB";
+                $this->transfer_frequency;
+
+            //$text = "TEXT WEB";
+            //if (isset($this->urls[0]['url'])) {
+            //$text = $this->urls[0]['url'];
+            $sms .= " / " . $outro;
+            //}
         }
 
         $this->sms_message = $sms;
@@ -329,7 +352,7 @@ class Radiorelay extends Agent
 
         $this->filename = $this->bank . ".txt";
 
-        $filename = "/radiorelay/trivia-a01.txt";
+        $filename = "/radiorelay/trivia-a02.txt";
         $file = $this->resource_path . $filename;
 
         $handle = fopen($file, "r");
@@ -378,7 +401,6 @@ class Radiorelay extends Agent
                 }
 
                 $count += 1;
-
 
                 $meta = "X";
 
@@ -649,6 +671,9 @@ class Radiorelay extends Agent
 
         $web .= "<p>";
 
+        $web .= "<b>TRIVIA MESSAGE</b><br>";
+        $web .= "<p>";
+
         $web .= $this->response;
 
         if (!isset($this->callsigns_heard)) {
@@ -688,14 +713,14 @@ class Radiorelay extends Agent
             isset($this->position_from)
         ) {
             $web .=
-                "<b>TO (STATION CALLSIGN)</b> " .
+                "<b>TO</b> " .
                 htmlspecialchars($this->message['name_to']) .
                 " " .
                 $last_seen_text .
                 "<br>";
             //            $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
             $web .=
-                "<b>FROM (STATION CALLSIGN)</b> " .
+                "<b>FROM</b> " .
                 htmlspecialchars($this->message['name_from']) .
                 "<br>";
             //            $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
@@ -708,18 +733,59 @@ class Radiorelay extends Agent
 
         $web .= "<p>";
 
-        if ($this->mode == "origin") {
-            $web .= "<b>" . "ORIGINATE THIS RADIOGRAM</b><br>";
-        }
+        $web .= "<b>" . "RULES AND GUIDELINES</b><br>";
+        $web .= "<p>";
 
-        if ($this->mode == "relay") {
-            $web .= "<b>" . "RELAY THIS RADIOGRAM</b><br>";
+        //  $web .= "VECTOR Simplex Relay Day Participants Package (pdf) ";
+
+        //$this->makeACP125G($this->message);
+
+        //var_dump($this->urls);
+        //exit();
+        if (isset($this->urls[0])) {
+            $link = $this->urls[0]['url'];
+            $web .= $this->urls[0]['title'];
+            $web .= " ";
+            $web .= '<a href="' . $link . '">' . $link . "</a>";
+            $web .= "<br>";
+
+            if (count($this->urls) > 1) {
+                $web .= "<p>";
+
+                $useful_links = "";
+                foreach ($this->urls as $i => $url) {
+                    if ($i == 0) {
+                        continue;
+                    }
+
+                    $useful_links .= $url['title'] . " ";
+                    $link = $url['url'];
+                    $useful_links .=
+                        '<a href="' . $link . '">' . $link . "</a>";
+
+                    $useful_links .= "<br>";
+                }
+            }
         }
+        $web .= "<p>";
+
+        $web .= "<b>" . "WHEN</b><br>";
+        $web .= "<p>";
+        $web .= $this->when;
+        $web .= "<p>";
+
+        //        if ($this->mode == "origin") {
+        //            $web .= "<b>" . "ORIGINATE THIS RADIOGRAM</b><br>";
+        //        }
+
+        //        if ($this->mode == "relay") {
+        $web .= "<b>" . "RADIOGRAMS</b><br>";
+        //        }
 
         $web .= "<p>";
 
         if (isset($this->message)) {
-            $web .= "ACP 125(G) format message - ";
+            $web .= "ACP 125(G) format text - ";
             $this->makeACP125G($this->message);
 
             $link =
@@ -728,7 +794,7 @@ class Radiorelay extends Agent
             $web .= "<br>";
         }
         $web .= "<p>";
-        $web .= "PERCS format radiogram - ";
+        $web .= "PERCS machine-filled radiogram - ";
 
         if (isset($this->num_words)) {
             if ($this->num_words > 25) {
@@ -744,6 +810,14 @@ class Radiorelay extends Agent
                 $web .= "<p>";
             }
         }
+
+        $web .= "<b>" . "USEFUL LINKS</b><br>";
+        $web .= "<p>";
+
+        $web .= $useful_links;
+        $web .= "<p>";
+        $web .= "<b>" . "DOCUMENT META</b><br>";
+        $web .= "<p>";
 
         $web .= "Message Bank - ";
 
