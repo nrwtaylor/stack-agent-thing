@@ -295,16 +295,15 @@ function uc_first_word($string) {
 function bold_first_word($string) {
     $s = explode(' ', $string);
 
-    $s[0] = "<b>" . $s[0] . "</b>";
-
+//    $s[0] = "<b>" . $s[0] . "</b>";
 foreach($s as $i=>$token) {
 
-if (strtoupper($token) === $token) {
-
+if (ctype_upper($token)) {
     $s[$i] = "<b>" . $s[$i] . "</b>";
-
+    continue;
 
 }
+break;
 
 }
 //    $s[0] = "<b>" . $s[0] . "</b>";
