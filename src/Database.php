@@ -34,7 +34,10 @@ class Database
         $this->split_time = $start_time;
         $this->operations_time = 0;
         $this->operations = 0;
-        $this->log = array();
+        $this->log = [];
+
+        $this->hash_algorithm = 'sha256';
+        $this->hash_state = 'on';
 
         // Database controls access by $uuid.
 
@@ -186,7 +189,7 @@ class Database
         foreach ($this->log as $key => $value) {
             echo str_pad("", 4, " ") . $value . "<br>";
         }
-        $this->log = array();
+        $this->log = [];
         echo "</pre>";
     }
 
@@ -227,6 +230,8 @@ class Database
      */
     function priorGet($created_at = null)
     {
+        $nom_from = $this->from;
+        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
         // Given a $uuid.  Find the previous record the $from user
         // created.
 
@@ -250,39 +255,43 @@ class Database
         if ($created_at == null) {
             $query_string =
                 "SELECT * FROM (SELECT * FROM stack WHERE
-				nom_from='" .
+				(nom_from='" .
                 $this->from .
-                "' ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
+                "' OR nom_from='" .
+                $hash_nom_from .
+                "'" .
+                ") ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
         } else {
             $query_string =
-                "SELECT * FROM stack where nom_from = '" .
+                "SELECT * FROM stack where (nom_from = '" .
                 $this->from .
-                "' and created_at < '" .
+                "' OR nom_from='" .
+                $hash_nom_from .
+                "'" .
+                ") and created_at < '" .
                 $created_at .
                 "' order by created_at DESC LIMIT 3";
         }
         try {
-        $sth = $this->container->db->prepare($query_string);
-        $sth->execute();
-        $thing = $sth->fetchObject();
+            $sth = $this->container->db->prepare($query_string);
+            $sth->execute();
+            $thing = $sth->fetchObject();
         } catch (\Exception $e) {
             // Devstack - decide how to handle thing full
 
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
             $thing = false;
         }
 
-
-
-        $thingreport = array(
+        $thingreport = [
             'thing' => $thing,
             'info' =>
                 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
                 $this->web_prefix .
                 'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.'
-        );
+            'help' => 'Check your junk/spam folder.',
+        ];
 
         // Runs in 0 to 8ms
 
@@ -297,7 +306,7 @@ class Database
     function writeField($field_text, $string_text)
     {
         $this->split_time = microtime(true);
-        $this->log = array($field_text, $string_text);
+        $this->log = [$field_text, $string_text];
         //$this->test( $this->get_calling_function() );
 
         // sqlinjection commentary
@@ -322,9 +331,8 @@ class Database
             // Devstack - decide how to handle thing full
             // Do this for now.
 
-//            $t = new Thing(null);
-//            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
-
+            //            $t = new Thing(null);
+            //            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
 
             // Commented out 24 November 2019.
             // Prevents a SQLSTATE[22001] error from looping.
@@ -352,11 +360,11 @@ class Database
 
         $thing_count = $sth->fetchColumn();
 
-        $thingreport = array(
+        $thingreport = [
             'things' => false,
             'info' => 'Counted ' . $thing_count . '  records on stack.',
-            'help' => 'This is how big the stack is.'
-        );
+            'help' => 'This is how big the stack is.',
+        ];
         $thingreport['number'] = $thing_count;
 
         return $thingreport;
@@ -389,38 +397,41 @@ class Database
      */
     function Create($subject, $to)
     {
-
         try {
-        // Create a new record in the db for the Thing.
-        $this->split_time = microtime(true);
+            // Create a new record in the db for the Thing.
+            $this->split_time = microtime(true);
 
-        //$this->test("Create");
+            //$this->test("Create");
 
-        $query = $this->container->db->prepare("INSERT INTO stack
+            $query = $this->container->db->prepare("INSERT INTO stack
 			(uuid,task,nom_from,nom_to)
-			VALUES (:uuid, :task, :nom_from, :nom_to)");
+			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
 
-        $query->bindParam(':uuid', $uuid);
-        $query->bindParam(':task', $task);
-        $query->bindParam(':nom_from', $nom_from);
-        $query->bindParam(':nom_to', $nom_to);
+            $query->bindParam(':uuid', $uuid);
+            $query->bindParam(':task', $task);
+            $query->bindParam(':hash_nom_from', $hash_nom_from);
+            $query->bindParam(':nom_to', $nom_to);
 
-        $uuid = $this->uuid;
-        $task = $subject;
-        $nom_from = $this->from;
-        $nom_to = $to;
+            $uuid = $this->uuid;
+            $task = $subject;
+            $nom_from = $this->from;
 
-        $query->execute();
+            $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
-        return $query;
+if ($this->hash_state == 'off') {
+            $hash_nom_from = $nom_from;
+}
+            $nom_to = $to;
 
+            $query->execute();
+
+            return $query;
         } catch (\Exception $e) {
             // Devstack - decide how to handle thing full
             // Do this for now.
 
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'Create' . $e->getMessage());
-
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'Create' . $e->getMessage());
 
             // Commented out 24 November 2019.
             // Prevents a SQLSTATE[22001] error from looping.
@@ -431,10 +442,7 @@ class Database
             $thing = false;
             $this->last_update = true;
             return false;
-
         }
-
-
     }
 
     /**
@@ -459,31 +467,27 @@ class Database
             $sth->execute();
             $thing = $sth->fetchObject();
         } catch (\Exception $e) {
-
-// devstack look get the error code.
-// SQLSTATE[HY000] [2002] Connection refused
-if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
-
-// devstack write to text file?
-// Don't try making more entries when the database is refusing entries...
-
-
-} else {
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'Get ' . $e->getCode());
-}
+            // devstack look get the error code.
+            // SQLSTATE[HY000] [2002] Connection refused
+            if ($e->getCode() == '2002' or $e->getCode() == 'HY000') {
+                // devstack write to text file?
+                // Don't try making more entries when the database is refusing entries...
+            } else {
+                //            $t = new Thing(null);
+                //            $t->Create("stack", "error", 'Get ' . $e->getCode());
+            }
 
             $thing = false;
         }
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => $thing,
             'info' =>
                 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
                 $this->web_prefix .
                 'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.'
-        );
+            'help' => 'Check your junk/spam folder.',
+        ];
 
         $this->test();
 
@@ -502,7 +506,7 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $sth->bindParam("uuid", $this->uuid);
         $sth->execute();
 
-        $thingreport = array('info' => 'That thing was forgotten.');
+        $thingreport = ['info' => 'That thing was forgotten.'];
         return $thingreport;
     }
 
@@ -518,27 +522,6 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $this->from = $id;
         return;
     }
-
-    /*
-    // Add bindparam
-	function userRecords($user_search, $limit = null)
-    {
-
-		if ($limit == null) {$limit = 3;}
-
-		$user_search = $this->from;
-		$query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' ORDER BY created_at DESC LIMIT $limit";
-
-		$sth = $this->container->db->prepare($query);
-
-		$sth->execute();
-		$things = $sth->fetchAll();
-
-		$thingreport = array('thing' => $things, 'info' => 'So here are three things you put on the stack.  That\'s what you wanted.','help' => 'It is up to you what you do with these.');
-
-		return $thingreport;
-	}
-*/
 
     /**
      *
@@ -564,29 +547,22 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $max = (int) $max;
 
         $user_search = $this->from;
-
+        $hash_user_search($this->hash_algorithm, $user_search);
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
         $value = "%$value%"; // Value to search for in Variables
-        //      $value = "*$value*"; // Value to search for in Variables
 
-        //        $max = (int) $max;
-
-        $thingreport['things'] = array();
+        $thingreport['things'] = [];
 
         try {
             $value = "%$value%"; // Value to search for in Variables
             $query =
-                "SELECT * FROM stack WHERE nom_from=:user_search AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
-            // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_searc$
-
-            // $value = "*$value*"; // Value to search for in Variables
-            // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) $
+                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":hash_user_search", $hash_user_search);
+
             $sth->bindParam(":value", $value);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
@@ -597,8 +573,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
                 'So here are Things with the association you provided. That\'s what you want';
             $thingreport['things'] = $things;
         } catch (\PDOException $e) {
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'associationSearch ' .$e->getMessage());
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'associationSearch ' .$e->getMessage());
 
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport['info'] = $e->getMessage();
@@ -623,29 +599,22 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $max = (int) $max;
 
         $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
         $value = "%$value%"; // Value to search for in Variables
-        //      $value = "*$value*"; // Value to search for in Variables
 
-        //        $max = (int) $max;
-
-        $thingreport['things'] = array();
+        $thingreport['things'] = [];
 
         try {
-            //            $value = "%$value%"; // Value to search for in Variables
             $query =
-                "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
-            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
-            // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
-
-            // $value = "*$value*"; // Value to search for in Variables
-            // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY created_at DESC LIMIT :max";
+                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":hash_user_search", $hash_user_search);
+
             $sth->bindParam(":value", $value);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
@@ -680,19 +649,19 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
         }
         $things = $sth->fetchAll();
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
-        );
+                'A list of Things which match at the provided phrase.',
+        ];
 
         return $thingreport;
     }
@@ -706,6 +675,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
     function subjectSearch($keyword_input, $agent, $max, $mode = null)
     {
         $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $this->from);
+
         //        $keyword = "%$keyword%"; // Value to search for in Variables
         //        $keyword = '"' . $keyword .'"'; // Value to search for in Variables
         //$keyword = "$keyword";
@@ -720,24 +691,24 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         if ($mode == null or strtolower($mode) == "boolean") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                'SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+                'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
         }
 
         if (strtolower($mode) == "like") {
             $keyword = "$keyword_input"; // Value to search for in Variables
             $query =
-                'SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
+                'SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max';
         }
         if (strtolower($mode) == "where") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                'SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
+                'SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max';
         }
 
         if (strtolower($mode) == "natural language") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                'SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max';
+                'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max';
         }
 
         if (strtolower($mode) == "equal") {
@@ -749,7 +720,7 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
             );
 
             $keyword = '$keyword_input';
-         //           $keyword = $this->container->db->quote($keyword_input);
+            //           $keyword = $this->container->db->quote($keyword_input);
             //$text = "adidas adiPower S bounce men's spikeless Golf Shoe NEW";
             //  $query ='SELECT * FROM stack WHERE task=:keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max';
 
@@ -758,6 +729,8 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
+        $sth->bindParam(":hash_user_search", $hash_user_search);
+
         $sth->bindParam(":keyword", $keyword);
         $sth->bindParam(":agent", $agent);
         $sth->bindParam(":max", $max, PDO::PARAM_INT);
@@ -765,29 +738,28 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         try {
             $sth->execute();
         } catch (\PDOException $e) {
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
-//            echo 'Caught exception: ', $e->getMessage(), "\n";
+            //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
         $things = $sth->fetchAll();
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
-        );
+                'A list of Things which match at the provided phrase.',
+        ];
 
         return $thingreport;
     }
 
-    function agentCount($agent, $horizon = 48) 
+    function agentCount($agent, $horizon = 48)
     {
-
-//SELECT COUNT(*) FROM stack WHERE nom_to="agent" AND created_at > (NOW() - INTERVAL 6 HOUR);
+        //SELECT COUNT(*) FROM stack WHERE nom_to="agent" AND created_at > (NOW() - INTERVAL 6 HOUR);
 
         if ($horizon == null) {
             $horizon = 48;
@@ -795,34 +767,33 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $horizon = (int) $horizon;
 
         $user_search = $this->from;
-        //$user_search= "%$user_search%"; // Value to search for in Variables
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
 
-        //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-//        $query =
-//            "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
-
-        $query = 'SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND nom_from=:user_search AND created_at > (NOW() - INTERVAL :horizon HOUR)';
+        $query =
+            'SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) AND created_at > (NOW() - INTERVAL :horizon HOUR)';
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
+        $sth->bindParam(":hash_user_search", $hash_user_search);
+
         $sth->bindParam(":agent", $agent);
         $sth->bindParam(":horizon", $horizon, PDO::PARAM_INT);
         $sth->execute();
 
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
-        );
+                'A list of Things which match at the provided phrase.',
+        ];
         return $thingreport;
-
     }
 
+    // devstack
     function agentForget($agent, $max = 0)
     {
         // DELETE FROM stack WHERE nom_to="tile" AND created_at < (NOW() - INTERVAL 6 HOUR);
@@ -847,14 +818,14 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
-        );
+                'A list of Things which match at the provided phrase.',
+        ];
         return $thingreport;
     }
 
@@ -862,6 +833,7 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
     function agentDeduplicate($agent)
     {
         $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
@@ -871,23 +843,25 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         //$query = 'delete from stack where nom_to=:agent and nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
         //$query = 'delete /*+ MAX_EXECUTION_TIME(100) */ from stack where nom_to="tile" and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
         $query =
-            'delete from stack where nom_to=:agent AND nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
+            'delete from stack where nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
+        $sth->bindParam(":hash_user_search", $hash_user_search);
+
         $sth->bindParam(":agent", $agent);
         $sth->execute();
 
         //        $things = $sth->fetchAll();
         //var_dump($things);
         //exit();
-        $thingreport = array(
+        $thingreport = [
             'things' => null,
             'info' => 'Asked to delete records by agent.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A command to delete all but some of a specific agent records.'
-        );
+                'A command to delete all but some of a specific agent records.',
+        ];
         return $thingreport;
     }
 
@@ -905,41 +879,40 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $max = (int) $max;
 
         $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $this->from);
+
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
         $query =
-            "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+            "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         try {
+            $sth = $this->container->db->prepare($query);
+            $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":hash_user_search", $hash_user_search);
+            $sth->bindParam(":agent", $agent);
+            $sth->bindParam(":max", $max, PDO::PARAM_INT);
+            $sth->execute();
 
-        $sth = $this->container->db->prepare($query);
-        $sth->bindParam(":user_search", $user_search);
-        $sth->bindParam(":agent", $agent);
-        $sth->bindParam(":max", $max, PDO::PARAM_INT);
-        $sth->execute();
-
-        $things = $sth->fetchAll();
+            $things = $sth->fetchAll();
         } catch (\Exception $e) {
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'agentSearch ' . $e->getMessage());
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'agentSearch ' . $e->getMessage());
 
-//            echo 'Caught error: ', $e->getMessage(), "\n";
+            //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
         }
 
-
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' =>
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.'
-        );
+                'A list of Things which match at the provided phrase.',
+        ];
         return $thingreport;
-
-
     }
 
     /**
@@ -951,34 +924,38 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
     function userSearch($keyword)
     {
         $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $this->from);
+
         $keyword = "%$keyword%"; // Value to search for in Variables
 
         //  $query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' AND task LIKE '%$keyword%' ORDER BY created_at DESC";
         //      $query = "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE '%$keyword%' ORDER BY created_at DESC";
         $query =
-            "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE :keyword ORDER BY created_at DESC";
+            "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND task LIKE :keyword ORDER BY created_at DESC";
 
         try {
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":hash_user_search", $hash_user_search);
+
             $sth->bindParam(":keyword", $keyword);
 
             $sth->execute();
             $things = $sth->fetchAll();
         } catch (\Exception $e) {
-//            $t = new Thing(null);
-//            $t->Create("stack", "error", 'userSearch' . $e->getMessage());
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'userSearch' . $e->getMessage());
 
-//            echo 'Caught error: ', $e->getMessage(), "\n";
+            //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
         }
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => $things,
             'info' => 'Searches by nom_from and task.',
-            'help' => 'Keyword subject line search.'
-        );
+            'help' => 'Keyword subject line search.',
+        ];
 
         return $thingreport;
     }
@@ -1036,48 +1013,6 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         return $thing_report;
     }
-
-    /*
-    // deprecated
-	function userState()
-    {
-		$useremail = $this->from;
-
-		// First question is there an opt-in or opt-out
-		$thingreport = $this->userSearch("Use agreement: Opt-");
-		if (count($thingreport['thing']) == 0) {
-			// No opt-in records found
-
-			// Second question.  Have the terms and conditions been sent.
-
-			$thingreport = $this->userSearch("Terms and Conditions of Use");
-
-			if (count($thingreport['thing']) != 0) {
-				// No records found
-				return "terms sent";
-			}
-
-			$thingreport = $this->userSearch("");
-
-			$thingreport = $this->userRecords($useremail);
-
-			if (count($thingreport['thing']) == 0) {
-				// No records found
-				return "not found";
-			} else {
-				return "found";
-			}
-
-        } else {
-				$t = $thingreport['thing'][0];
-
-				if ($t['task'] == "Use agreement: Opt-in") {return "opt-in";}
-				if ($t['task'] == "Use agreement: Opt-out") {return "opt-out";}
-		}
-
-		return false;
-	}
-*/
 
     /**
      *
@@ -1137,7 +1072,7 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         // Do a self look-up if no uuid provided.
         if ($uuid == null);
         if ($this->uuid == null) {
-            $thingreport = array('things' => false);
+            $thingreport = ['things' => false];
             $thingreport['info'] =
                 'So here are the uuids of all records matching your request.  That\'s what you wanted.';
             $thingreport['help'] = 'No matching records returned.';
@@ -1149,7 +1084,7 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         // Should be able to request multiple Things uuids at the same time.
         if (is_string($uuid));
-        $task_inclusions = array($uuid);
+        $task_inclusions = [$uuid];
 
         // Should not be able to request by nom_from.
         // So commented out here.
@@ -1160,14 +1095,14 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $task_exclusions = null;
 
-        $querable_fields = array(
+        $querable_fields = [
             'nom_from',
             'nom_to',
             'associations',
             'task',
             'message0',
-            'settings'
-        );
+            'settings',
+        ];
 
         // Double capitals to make you thing before you ask a Thing
         // about what other Things it knows.
@@ -1233,12 +1168,12 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $sth->execute();
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' =>
                 'So here are the uuids of all records matching your request.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.'
-        );
+            'help' => 'It is up to you what you do with these.',
+        ];
 
         return $thingreport;
     }
@@ -1321,12 +1256,12 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         //$this->from = $thing->nom_from;
         //$this->subject = $thing->task;
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => $things,
             'info' => 'So here are Things which are flagged red.',
             'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which have status red.'
-        );
+            'whatisthis' => 'A list of Things which have status red.',
+        ];
 
         return $thingreport;
     }
@@ -1345,25 +1280,29 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $agent = "stack";
         $user_search = "null@stackr.ca";
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
+
         //$user_search= "%$user_search%"; // Value to search for in Variables
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
         $query =
-            "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+            "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
+        $sth->bindParam(":hash_user_search", $hash_user_search);
+
         $sth->bindParam(":agent", $agent);
         $sth->bindParam(":max", $max, PDO::PARAM_INT);
         $sth->execute();
 
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'things' => $things,
             'info' => 'So here are Things which are flagged as stack reports.',
-            'help' => 'This reports on stack health'
-        );
+            'help' => 'This reports on stack health',
+        ];
 
         return $thingreport;
     }
@@ -1380,12 +1319,12 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $sth->execute();
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => $things,
             'info' => 'So here are Things which are flagged red.',
             'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which have status red.'
-        );
+            'whatisthis' => 'A list of Things which have status red.',
+        ];
 
         return $thingreport;
     }
@@ -1404,14 +1343,14 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $keys = array_keys($response);
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => false,
             'db' => $response,
             'info' => 'So here is the length of the variables field.',
             'help' =>
                 'There is a limit to the variables the stack can keep track of.',
-            'whatisthis' => 'The maximum length of the variables field.'
-        );
+            'whatisthis' => 'The maximum length of the variables field.',
+        ];
 
         //$thingreport = false;
 
@@ -1434,14 +1373,15 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
 
         $keys = array_keys($response);
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => false,
             'db' => $response,
             'info' =>
                 'So here are Things matching at least one of the words provided. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which match at least one keyword.'
-        );
+            'whatisthis' =>
+                'A list of Things which match at least one keyword.',
+        ];
 
         //$thingreport = false;
 
@@ -1499,12 +1439,12 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
             //      $this->from = $thing->nom_from;
             //      $this->subject = $thing->task;
 
-            $thingreport = array(
+            $thingreport = [
                 'things' => $things,
                 'info' =>
                     'So here are three things you put on the stack.  That\'s what you wanted.',
-                'help' => 'It is up to you what you do with these.'
-            );
+                'help' => 'It is up to you what you do with these.',
+            ];
         } else {
             $q =
                 "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
@@ -1517,12 +1457,12 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
             $this->from = $thing->nom_from;
             $this->subject = $thing->task;
 
-            $thingreport = array(
+            $thingreport = [
                 'things' => $thing,
                 'info' =>
                     'So here are three things you put on the stack.  That\'s what you wanted.',
-                'help' => 'It is up to you what you do with these.'
-            );
+                'help' => 'It is up to you what you do with these.',
+            ];
         }
 
         return $thingreport;
@@ -1536,20 +1476,24 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
      */
     function randomN($nom_from, $n = 3)
     {
+        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
+
         // Pick N of identity's things.
         $sth = $this->container->db->prepare(
-            "SELECT * FROM stack WHERE nom_from=:nom_from ORDER BY RAND() LIMIT 3"
+            "SELECT * FROM stack WHERE (nom_from=:nom_from OR nom_from=:hash_nom_from) ORDER BY RAND() LIMIT 3"
         );
         $sth->bindParam("nom_from", $nom_from);
+        $sth->bindParam("hash_nom_from", $hash_nom_from);
+
         $sth->execute();
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => $things,
             'info' =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.'
-        );
+            'help' => 'It is up to you what you do with these.',
+        ];
 
         return $thingreport;
     }
@@ -1614,12 +1558,12 @@ if (($e->getCode() == '2002') or ($e->getCode() =='HY000')) {
         $sth->execute();
         $things = $sth->fetchAll();
 
-        $thingreport = array(
+        $thingreport = [
             'thing' => $things,
             'info' =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.'
-        );
+            'help' => 'It is up to you what you do with these.',
+        ];
 
         return $thingreport;
     }
@@ -1650,7 +1594,7 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
         }
         echo "BORK | 3797e2c1-6585-4ae8-a256-b3e5466c980f ";
         //echo "'caught' fatal error E_RECOVERABLE_ERROR\n";
-       return true;
+        return true;
     } elseif (E_ERROR === $errno) {
         // If there is stuff in the screen buffer clear it.
         if (ob_get_contents()) {

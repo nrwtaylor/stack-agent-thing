@@ -49,9 +49,12 @@ class Radiorelay extends Agent
             if (isset($this->container['radiorelay']['agents']['urls'])) {
                 $this->urls = $this->container['radiorelay']['agents']['urls'];
             }
-            //var_dump($this->urls);
-            //echo "merp";
-            //exit();
+
+            if (isset($this->container['radiorelay']['agents']['pdfs'])) {
+                $this->pdfs = $this->container['radiorelay']['agents']['pdfs'];
+            }
+
+
             if (isset($this->container['radiorelay']['agents']['when'])) {
                 $this->when = $this->container['radiorelay']['agents']['when'];
             }
@@ -287,7 +290,7 @@ class Radiorelay extends Agent
     {
         // Signal this agent has not been accessed before.
         $outro = "TEXT WEB";
-        var_dump($this->previous_state);
+
         if ($this->previous_state === false) {
             $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay';
             $outro = $link;
@@ -352,7 +355,7 @@ class Radiorelay extends Agent
 
         $this->filename = $this->bank . ".txt";
 
-        $filename = "/radiorelay/trivia-a02.txt";
+        $filename = "/radiorelay/". $this->default_bank .".txt";
         $file = $this->resource_path . $filename;
 
         $handle = fopen($file, "r");
@@ -733,37 +736,37 @@ class Radiorelay extends Agent
 
         $web .= "<p>";
 
+        $web .= "<b>" . "HOST</b><br>";
+        $web .= "<p>";
+
+        if (isset($this->urls[0])) {
+            $link = $this->urls[0]['url'];
+            $title = $this->urls[0]['title'];
+            $web .= " ";
+            $web .= '<a href="' . $link . '">' . $title . "</a>";
+            $web .= "<br>";
+        }
+
+        $web .= "<p>";
         $web .= "<b>" . "RULES AND GUIDELINES</b><br>";
         $web .= "<p>";
 
-        //  $web .= "VECTOR Simplex Relay Day Participants Package (pdf) ";
-
-        //$this->makeACP125G($this->message);
-
-        //var_dump($this->urls);
-        //exit();
-        if (isset($this->urls[0])) {
-            $link = $this->urls[0]['url'];
-            $web .= $this->urls[0]['title'];
+        if (isset($this->pdfs[0])) {
+            $link = $this->pdfs[0]['url'];
+            $title = $this->pdfs[0]['title'];
             $web .= " ";
-            $web .= '<a href="' . $link . '">' . $link . "</a>";
+            $web .= '<a href="' . $link . '">' . $title . " (pdf)</a>";
             $web .= "<br>";
 
-            if (count($this->urls) > 1) {
+            if (count($this->pdfs) > 1) {
                 $web .= "<p>";
 
-                $useful_links = "";
-                foreach ($this->urls as $i => $url) {
+                foreach ($this->pdfs as $i => $pdf) {
                     if ($i == 0) {
                         continue;
                     }
 
-                    $useful_links .= $url['title'] . " ";
-                    $link = $url['url'];
-                    $useful_links .=
-                        '<a href="' . $link . '">' . $link . "</a>";
-
-                    $useful_links .= "<br>";
+                    $link = $pdf['url'];
                 }
             }
         }
@@ -774,27 +777,23 @@ class Radiorelay extends Agent
         $web .= $this->when;
         $web .= "<p>";
 
-        //        if ($this->mode == "origin") {
-        //            $web .= "<b>" . "ORIGINATE THIS RADIOGRAM</b><br>";
-        //        }
-
-        //        if ($this->mode == "relay") {
         $web .= "<b>" . "RADIOGRAMS</b><br>";
-        //        }
 
+/*
         $web .= "<p>";
 
         if (isset($this->message)) {
-            $web .= "ACP 125(G) format text - ";
+            $title = "ACP 125(G) format text";
             $this->makeACP125G($this->message);
 
             $link =
                 $this->web_prefix . 'thing/' . $this->uuid . '/radiorelay.txt';
-            $web .= '<a href="' . $link . '">' . $link . "</a>";
+            $web .= '<a href="' . $link . '">' . $title . "</a>";
             $web .= "<br>";
         }
+*/
         $web .= "<p>";
-        $web .= "PERCS machine-filled radiogram - ";
+        $title = "PERCS machine-filled radiogram (pdf)";
 
         if (isset($this->num_words)) {
             if ($this->num_words > 25) {
@@ -805,7 +804,7 @@ class Radiorelay extends Agent
                     'thing/' .
                     $this->uuid .
                     '/radiorelay.pdf';
-                $web .= '<a href="' . $link . '">' . $link . "</a>";
+                $web .= '<a href="' . $link . '">' . $title . "</a>";
                 $web .= "<br>";
                 $web .= "<p>";
             }
@@ -813,6 +812,21 @@ class Radiorelay extends Agent
 
         $web .= "<b>" . "USEFUL LINKS</b><br>";
         $web .= "<p>";
+
+                $useful_links = "";
+                foreach ($this->urls as $i => $url) {
+                    if ($i == 0) {
+                        continue;
+                    }
+
+                    $title = $url['title'];
+                    $link = $url['url'];
+                    $useful_links .=
+                        '<a href="' . $link . '">' . $title . "</a>";
+
+                    $useful_links .= "<br>";
+                }
+
 
         $web .= $useful_links;
         $web .= "<p>";

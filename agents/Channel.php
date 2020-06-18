@@ -639,10 +639,3 @@ if ( $this->thing->account['thing']->balance['amount'] < 0 ) {
     }
 
 }
-
-
-
-
-
-
-?>
