@@ -24,10 +24,13 @@ class Etiquette extends Agent
         $this->unique_count = 0;
 
         $this->state = "off";
-        $this->response .= strtoupper($this->state) . ". ";
         if (isset($this->thing->container['api']['etiquette']['state'])) {
             $this->state = $this->thing->container['api']['etiquette']['state'];
         }
+
+if ($this->state == "off") {
+        $this->response .= strtoupper($this->state) . ". ";
+}
 
         // Start with 365 days.
         $this->etiquette_horizon = 365 * 24 * 60 * 60;
@@ -188,7 +191,10 @@ class Etiquette extends Agent
         $web .= "<p>";
         $web .= "<b>COLLECTED RULES</b><br><p>";
 
+
         $rules = "No channel rules found.";
+if ($this->state == "on") {
+
         if (count($this->rules_list) > 0) {
             $rules = "<ul>";
             foreach ($this->rules_list as $i => $rule) {
@@ -209,6 +215,7 @@ class Etiquette extends Agent
             }
             $rules .= "</ul>";
         }
+}
 
         $web .= $rules;
 
@@ -258,6 +265,15 @@ class Etiquette extends Agent
         ];
         $sms = "ETIQUETTE | ";
         $sms .= $this->response;
+
+if ($this->state == "off") {
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
+
+
+}
+
         $sms .= "Saw " . $this->unique_count . " rules. ";
 
         $link =

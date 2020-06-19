@@ -37,7 +37,7 @@ class Database
         $this->log = [];
 
         $this->hash_algorithm = 'sha256';
-        $this->hash_state = 'on';
+//        $this->hash_state = 'on';
 
         // Database controls access by $uuid.
 
@@ -80,6 +80,11 @@ class Database
 
         $this->web_prefix = $settings['settings']['stack']['web_prefix'];
         $this->state = $settings['settings']['stack']['state'];
+
+        $this->hash_state = 'off';
+        if (isset($settings['settings']['stack']['hash'])) {
+        $this->hash_state = $settings['settings']['stack']['hash'];
+        }
 
         $this->container = new \Slim\Container($settings);
 
