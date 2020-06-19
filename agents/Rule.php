@@ -21,7 +21,7 @@ class Rule extends Agent
         $this->node_list = ["rule" => ["forget"]];
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-$this->default_suit = "routine";
+        $this->default_suit = "routine";
 
         $this->thing->log(
             'Agent "Rule" running on Thing ' . $this->thing->nuuid . '.'
@@ -57,9 +57,11 @@ $this->default_suit = "routine";
             $this->thing->json->readVariable(["rule", "nom"])
         );
 
-$this->suit = $this->default_suit;
-$suit = $this->thing->json->readVariable(["rule", "suit"]);
-if ($suit !== false) {$this->suit = $suit;}
+        $this->suit = $this->default_suit;
+        $suit = $this->thing->json->readVariable(["rule", "suit"]);
+        if ($suit !== false) {
+            $this->suit = $suit;
+        }
 
         if ($this->nom == false or $this->suit == false) {
             $this->getRule();
@@ -99,6 +101,11 @@ if ($suit !== false) {$this->suit = $suit;}
             return false;
         }
         if (strtolower($text) == "etiquette") {
+            return false;
+        }
+
+        $tokens = explode(" ", strtolower($text));
+        if ($tokens[1] == "etiquette" and substr($text, 0, 1) == "@") {
             return false;
         }
 
@@ -143,8 +150,8 @@ if ($suit !== false) {$this->suit = $suit;}
         }
 */
 
-//$this->response .= 'Read rule. ';
-/*
+        //$this->response .= 'Read rule. ';
+        /*
         $this->response =
             "" .
             strtoupper($this->nom) .
@@ -158,13 +165,11 @@ if ($suit !== false) {$this->suit = $suit;}
 
     public function newRule()
     {
-if (strtolower($this->subject) == "rule") {
-
-$this->response .= "No rule found. ";
-return;
-
-}
-        $array = ['emergency','priority','routine','welfare'];
+        if (strtolower($this->subject) == "rule") {
+            $this->response .= "No rule found. ";
+            return;
+        }
+        $array = ['emergency', 'priority', 'routine', 'welfare'];
         $k = array_rand($array);
         $v = $array[$k];
 
@@ -190,9 +195,8 @@ return;
 
         $this->nom = strtolower($v);
 
-$this->response .= 'Rule is, "' . $this->readRule($this->subject) .'". ';
-
-
+        $this->response .=
+            'Rule is, "' . $this->readRule($this->subject) . '". ';
     }
 
     public function imagineRule()
@@ -221,10 +225,10 @@ $this->response .= 'Rule is, "' . $this->readRule($this->subject) .'". ';
             "welfare" => "D",
         ];
 
-$suit = "priority"; // Default
-if (isset($suits[$rule['suit']])) {
-        $suit = $suits[$rule['suit']];
-}
+        $suit = "priority"; // Default
+        if (isset($suits[$rule['suit']])) {
+            $suit = $suits[$rule['suit']];
+        }
         $filename = strtoupper($rule['nom']) . $suit . ".svg";
 
         return $filename;

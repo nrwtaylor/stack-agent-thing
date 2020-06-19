@@ -28,9 +28,9 @@ class Etiquette extends Agent
             $this->state = $this->thing->container['api']['etiquette']['state'];
         }
 
-if ($this->state == "off") {
-        $this->response .= strtoupper($this->state) . ". ";
-}
+        if ($this->state == "off") {
+            $this->response .= strtoupper($this->state) . ". ";
+        }
 
         // Start with 365 days.
         $this->etiquette_horizon = 365 * 24 * 60 * 60;
@@ -54,8 +54,10 @@ if ($this->state == "off") {
     {
         $channel_agent = new Channel($this->thing, "channel");
 
-$this->channel_sms = "No message.";
-if (isset($channel_agent->thing_report['sms'])) {$this->channel_sms = $channel_agent->thing_report['sms'];}
+        $this->channel_sms = "No message.";
+        if (isset($channel_agent->thing_report['sms'])) {
+            $this->channel_sms = $channel_agent->thing_report['sms'];
+        }
 
         if (isset($channel->channel_name)) {
             $this->channel_name = $channel->channel_name;
@@ -71,16 +73,13 @@ if (isset($channel_agent->thing_report['sms'])) {$this->channel_sms = $channel_a
     {
         $rules_list = [];
 
-        $this->rules_list = array();
+        $this->rules_list = [];
         $this->unique_count = 0;
 
-
         $findagent_thing = new Findagent($this->thing, 'rule');
-if (!is_array($findagent_thing->thing_report['things'])) {
-
-return;
-
-}
+        if (!is_array($findagent_thing->thing_report['things'])) {
+            return;
+        }
         $count = count($findagent_thing->thing_report['things']);
 
         $this->thing->log(
@@ -145,18 +144,11 @@ return;
         $this->rule_tag_count = 0;
         $this->rule_message_count = 0;
 
-
         $findagent_thing = new Findagent($this->thing, 'rule');
 
-
-if (!is_array($findagent_thing->thing_report['things'])) {
-
-return;
-
-}
-
-
-
+        if (!is_array($findagent_thing->thing_report['things'])) {
+            return;
+        }
 
         $count = count($findagent_thing->thing_report['things']);
 
@@ -219,49 +211,45 @@ return;
         $web .= "<p>";
         $web .= "<b>COLLECTED RULES</b><br><p>";
 
-
         $rules = "No channel rules found.";
-if ($this->state == "on") {
+        if ($this->state == "on") {
+            if (count($this->rules_list) > 0) {
+                $rules = "<ul>";
+                foreach ($this->rules_list as $i => $rule) {
+                    $link = $rule['url'];
 
-        if (count($this->rules_list) > 0) {
-            $rules = "<ul>";
-            foreach ($this->rules_list as $i => $rule) {
-                $link = $rule['url'];
+                    $web_link = '<a href="' . $link . '" target="_blank">';
+                    $web_link .= '[rule]';
+                    $web_link .= "</a>";
 
-                $web_link = '<a href="' . $link . '" target="_blank">';
-                $web_link .= '[rule]';
-                $web_link .= "</a>";
-
-                $rules .=
-                    "<li>" .
-                    htmlspecialchars($rule['title']) .
-                    " " .
-                    $web_link .
-                    " " .
-                    $this->thing->human_time($rule['age']) .
-                    " old<br>";
+                    $rules .=
+                        "<li>" .
+                        htmlspecialchars($rule['title']) .
+                        " " .
+                        $web_link .
+                        " " .
+                        $this->thing->human_time($rule['age']) .
+                        " old<br>";
+                }
+                $rules .= "</ul>";
             }
-            $rules .= "</ul>";
         }
-}
 
         $web .= $rules;
 
         $web .= "<p>";
 
-if ($this->channel_name != 'not read') 
-{
-        $web .= "<b>CHANNEL</b><br>";
+        if ($this->channel_name != 'not read') {
+            $web .= "<b>CHANNEL</b><br>";
 
-        $web .= "<p>";
-        $web .= $this->channel_sms . "<br>";
+            $web .= "<p>";
+            $web .= $this->channel_sms . "<br>";
 
-        $web .= "Channel name is " . $this->channel_name . "<br>";
-        $web .= "Channel identity is " . $this->channel_id . "<br>";
+            $web .= "Channel name is " . $this->channel_name . "<br>";
+            $web .= "Channel identity is " . $this->channel_id . "<br>";
 
-        $web .= "<p>";
-}
-
+            $web .= "<p>";
+        }
 
         $web .= "<b>HELP</b><br>";
 
@@ -299,13 +287,10 @@ if ($this->channel_name != 'not read')
         $sms = "ETIQUETTE | ";
         $sms .= $this->response;
 
-if ($this->state == "off") {
-
-        $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
-
-
-}
+        if ($this->state == "off") {
+            $this->sms_message = $sms;
+            $this->thing_report['sms'] = $sms;
+        }
 
         $sms .= "Saw " . $this->unique_count . " rules. ";
 
