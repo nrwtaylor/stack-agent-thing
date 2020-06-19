@@ -18,7 +18,9 @@ class Radiogram extends Agent
         // Need to add in mode changing - origin / relay
 
         //        $this->node_list = array("rocky"=>array("rocky", "charley", "nonsense"));
-        $this->node_list = ["radiogram" => ["nonsense"]];
+        $this->node_list = [
+            "radiogram" => ["forget", "trivia", "nonsense", "weather"],
+        ];
 
         $this->number = null;
         $this->unit = "";
@@ -28,6 +30,35 @@ class Radiogram extends Agent
 
         $this->setMode($this->default_mode);
 
+        $this->thing_report["info"] =
+            "Creates PDF radiograms from a user provided text string.";
+        $this->thing_report["help"] =
+            'Try RADIOGRAM TO BOB FROM MARK MESSAGE HELLO. Text PDF. Or WEB.';
+
+        $url = $this->resource_path . 'radiogram/radiogram.php';
+        $settings = require $url;
+
+        $this->container = new \Slim\Container($settings);
+
+        if (isset($this->container['radiogram'])) {
+            if (isset($this->container['radiogram']['agents']['urls'])) {
+                $this->urls = $this->container['radiogram']['agents']['urls'];
+            }
+
+            if (isset($this->container['radiogram']['agents']['pdfs'])) {
+                $this->pdfs = $this->container['radiogram']['agents']['pdfs'];
+            }
+
+            if (isset($this->container['radiorelay']['agents'])) {
+                $this->agent_responses =
+                    $this->container['radiorelay']['agents'];
+
+                $this->thing_report["info"] =
+                    $this->container['radiorelay']['agents']['info'];
+                $this->thing_report["help"] =
+                    $this->container['radiorelay']['agents']['help'];
+            }
+        }
 
         // Get the remaining persistence of the message.
         $agent = new Persistence($this->thing, "persistence 60 minutes");
@@ -39,12 +70,7 @@ class Radiogram extends Agent
             "variables radiogram " . $this->from
         );
 
-$this->short_message = "X";
-
-        //var_dump($this->thing);
-        //exit();
-
-        //        $this->getMemcached();
+        $this->short_message = "X";
     }
 
     function isRadiogram($state = null)
@@ -179,35 +205,13 @@ $this->short_message = "X";
             $this->bank = "trivia-a01";
             //$this->bank = "easy-a05";
         }
-        /*
-        if ($bank == "hard") {
-            $this->bank = "hard-a06";
-        }
-
-        if ($bank == "16ln") {
-            $this->bank = "16ln-a02";
-        }
-
-        if ($bank == "ics213") {
-            $this->bank = "ics213-a01";
-        }
-*/
     }
-
 
     public function respondResponse()
     {
-        //$this->getResponse();
-
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "radiogram";
-
         $this->makeChoices();
-
-        $this->thing_report["info"] = "This creates an exercise message.";
-        $this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -227,44 +231,62 @@ $this->short_message = "X";
 
     function makeSMS()
     {
-        $sms = "RADIOGRAM " . $this->inject . " " . $this->mode . "\n";
-        //        $sms .= $this->response;
+        $sms = "RADIOGRAM ";
+        $sms .= " | ";
+        $sms .=
+            "to " .
+            $this->message['name_to'] .
+            " from " .
+            $this->message['name_from'] .
+            " message " .
+            $this->message['text'];
 
-        $sms .= trim($this->short_message) . "\n";
+        $sms .= " | ";
 
         $sms .= "TEXT WEB";
-        // $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
+    function makeTXT()
+    {
+        $txt = "RADIOGRAM.\n";
 
-public function deperiodAcronym($text) {
+        $txt .= "\n";
 
-$tokens = explode(' ', $text);
+        $acp125g_agent = new ACP125G($this->thing, "acp125g");
+        $acp125g_agent->makeACP125G($this->message);
 
-foreach($tokens as $i=>$token) {
+        if (isset($acp125g_agent->thing_report['acp125g'])) {
+            $txt .= $acp125g_agent->thing_report['acp125g'];
 
-$dot_count = substr_count($token, ".");
-if ($dot_count > 1) {
-$tokens[$i] = str_replace('.', '', $token);
+            $txt .= "\n";
+        }
+        $this->thing_report['txt'] = $txt;
+        $this->txt = $txt;
+    }
 
-}
+    public function deperiodAcronym($text)
+    {
+        $tokens = explode(' ', $text);
 
-}
+        foreach ($tokens as $i => $token) {
+            $dot_count = substr_count($token, ".");
+            if ($dot_count > 1) {
+                $tokens[$i] = str_replace('.', '', $token);
+            }
+        }
 
-$processed_text = trim(implode(' ',$tokens));
-return $processed_text;
-
-}
-
+        $processed_text = trim(implode(' ', $tokens));
+        return $processed_text;
+    }
 
     public function translateRadiogram($text)
     {
         //$text = $message['text'];
 
-$text = $this->deperiodAcronym($text);
+        $text = $this->deperiodAcronym($text);
 
         $text = str_replace(".", " XRAY ", $text);
 
@@ -272,13 +294,13 @@ $text = $this->deperiodAcronym($text);
         $text = str_replace(',“', ' QUOTE ', $text);
         $text = str_replace(',”', ' QUOTE ', $text);
 
-//        $text = str_replace(".", " XRAY ", $text);
-
         $text = str_replace(",", " COMMA ", $text);
         $text = str_replace('"', ' QUOTE ', $text);
 
         $text = str_replace('“', ' QUOTE ', $text);
         $text = str_replace('”', ' QUOTE ', $text);
+
+        $text = str_replace('@', ' AT ', $text);
 
         $text = str_replace('?', ' QUERY ', $text);
         $text = str_replace('!', ' EXCLAMATION ', $text);
@@ -337,16 +359,11 @@ $text = $this->deperiodAcronym($text);
 
         $web .= "<p>";
 
-        if (
-            isset($this->name_to) and
-            isset($this->position_to) and
-            isset($this->name_from) and
-            isset($this->position_from)
-        ) {
-            $web .= "<b>TO (STATION CALLSIGN)</b> " . $this->name_to . "<br>";
+        if (isset($this->name_to) and isset($this->name_from)) {
+            $web .= "<b>TO</b> " . $this->name_to . "<br>";
             //            $web .= "<b>TO (ROLE)</b> " . $this->position_to . "<br>";
-            $web .=
-                "<b>FROM (STATION CALLSIGN)</b> " . $this->name_from . "<br>";
+
+            $web .= "<b>FROM</b> " . $this->name_from . "<br>";
             //            $web .= "<b>FROM (ROLE)</b> " . $this->position_from . "<br>";
         }
 
@@ -357,64 +374,104 @@ $text = $this->deperiodAcronym($text);
 
         $web .= "<p>";
 
-        if ($this->mode == "origin") {
-            $web .= "<b>" . "ORIGINATE THIS RADIOGRAM</b><br>";
-        }
-
-        if ($this->mode == "relay") {
-            $web .= "<b>" . "RELAY THIS RADIOGRAM</b><br>";
-        }
-
+        $web .= "<b>" . "HELP</b><br>";
         $web .= "<p>";
 
-        //        //$received_at = strtotime($this->thing->thing->created_at);
-        //        $ago = $this->thing->human_time ( time() - $this->refreshed_at );
-        //        $web .= "This inject was created about ". $ago . " ago. ";
+        $web .= $this->thing_report['help'] . "<br>";
+        $web .= "<p>";
+        $web .= "<b>" . "INFORMATION</b><br>";
+        $web .= "<p>";
 
-        //        $link = $this->web_prefix . "privacy";
-        //        $privacy_link = '<a href="' . $link . '">'. $link . "</a>";
+        $web .= $this->thing_report['info'] . "<br>";
+        $web .= "<p>";
 
- //       $web .= "ACP 125(G) format message - ";
-        //        $web .= "<p>";
-
- //       $this->makeACP125G($this->message);
-        //        $web .= nl2br($this->acp125g->thing_report['acp125g']);
+        $web .= "<b>" . "PDFS</b><br>";
+        $web .= "<p>";
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiogram.txt';
-        $web .= '<a href="' . $link . '">' . $link . "</a>";
+        $web .=
+            '<a href="' .
+            $link .
+            '">' .
+            "Machine-prepared TXT radiogram (txt)" .
+            "</a>";
         $web .= "<br>";
 
-        $web .= "<p>";
-        $web .= "PERCS format radiogram - ";
+        //$web .= "<p>";
+        //$web .= "PERCS format radiogram - ";
 
         if ($this->num_words > 25) {
             $web .= "No PERCS pdf available. Message > 25 words.<br><p>";
         } else {
             $link =
                 $this->web_prefix . 'thing/' . $this->uuid . '/radiogram.pdf';
-            $web .= '<a href="' . $link . '">' . $link . "</a>";
+            $web .=
+                '<a href="' .
+                $link .
+                '">' .
+                "Machine-filled PERCS radiogram (pdf)" .
+                "</a>";
             $web .= "<br>";
-            $web .= "<p>";
+            //  $web .= "<p>";
         }
 
-        $web .= "Message Bank - ";
+        //        $web .= "<b>" . "USEFUL LINKS</b><br>";
         //        $web .= "<p>";
-        $web .= $this->filename . " - ";
-        $web .= $this->title . " - ";
-        $web .= $this->author . " - ";
-        $web .= $this->date . " - ";
-        $web .= $this->version . "";
+
+        $useful_links = "None found.<br>";
+        foreach ($this->pdfs as $i => $url) {
+            if ($i == 0) {
+                continue;
+            }
+
+            $title = $url['title'];
+            $link = $url['url'];
+            $useful_links .= '<a href="' . $link . '">' . $title . " (pdf)</a>";
+
+            $useful_links .= "<br>";
+        }
+
+        $web .= $useful_links;
 
         $web .= "<p>";
-        $web .= "Message Metadata - ";
+        $web .= "<b>" . "URLS</b><br>";
+        $web .= "<p>";
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/radiogram.txt';
+
+        $useful_links = "None found.<br>";
+        foreach ($this->urls as $i => $url) {
+            if ($i == 0) {
+                continue;
+            }
+
+            $title = $url['title'];
+            $link = $url['url'];
+            $useful_links .= '<a href="' . $link . '">' . $title . " (pdf)</a>";
+
+            $useful_links .= "<br>";
+        }
+
+        $web .= $useful_links;
+
+        $web .= "<p>";
+
+        $web .= "<b>" . "META</b><br>";
+        $web .= "<p>";
+
+        //$web .= "Message Bank - ";
+        //        $web .= "<p>";
+        //$web .= $this->filename . " - ";
+        //$web .= $this->title . " - ";
+        //$web .= $this->author . " - ";
+        //$web .= $this->date . " - ";
+        //$web .= $this->version . "";
+
+        //$web .= "<p>";
+        //$web .= "Message Metadata - ";
         //        $web .= "<p>";
 
-        $web .=
-            $this->inject .
-            " - " .
-            $this->thing->nuuid .
-            " - " .
-            $this->thing->thing->created_at;
+        $web .= $this->thing->nuuid . " - " . $this->thing->thing->created_at;
 
         //        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
 
@@ -433,10 +490,10 @@ $text = $this->deperiodAcronym($text);
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );
-        $web .= "Inject was created about " . $ago . " ago. ";
+        $web .= "Radiogram was created about " . $ago . " ago. ";
 
         $web .=
-            "This proof-of-concept inject is hosted by the " .
+            "This proof-of-concept radiogram is hosted by the " .
             ucwords($this->word) .
             " service.  Read the privacy policy at " .
             $privacy_link .
@@ -452,6 +509,7 @@ $text = $this->deperiodAcronym($text);
         if ($this->num_words > 25) {
             return;
         }
+
         //$txt = $this->thing_report['txt'];
 
         // initiate FPDI
@@ -473,7 +531,8 @@ $text = $this->deperiodAcronym($text);
 
         $pdf->SetTextColor(0, 0, 0);
 
-        $text = "Inject generated at " . $this->thing->thing->created_at . ".";
+        $text =
+            "Radiogram generated at " . $this->thing->thing->created_at . ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
 
@@ -608,6 +667,11 @@ $text = $this->deperiodAcronym($text);
 
     public function readSubject()
     {
+        $meta_agent = new Meta($this->thing, "meta");
+        $meta_agent->extractMeta($this->subject);
+
+        $this->name_to = $meta_agent->to;
+        $this->name_from = $meta_agent->from;
 
         $input = strtolower($this->subject);
 
@@ -658,46 +722,58 @@ $text = $this->deperiodAcronym($text);
 
     function getMessage()
     {
+        $meta = "X / X / X / X / X / X";
+        $name_to = "X";
+        $position_to = "X";
+        $organization_to = "X";
+        $number_to = "X";
+        $text = "X";
+        $name_from = "X";
+        $position_from = "X";
+        $organization_from = "X";
+        $number_from = "X";
 
-$meta = "X / X / X / X / X / X";
-$name_to = "X";
-$position_to = "X";
-$organization_to = "X";
-$number_to = "X";
-$text = "X";
-$name_from = "X";
-$position_from = "X";
-$organization_from = "X";
-$number_from = "X";
+        // Do we have meta in the subject to fill the blanks?
 
+        $meta_agent = new Meta($this->thing, "meta");
+        $meta_agent->extractMeta($this->subject);
 
-                $this->message = [
-                    "meta" => $meta,
-                    "name_to" => $name_to,
-                    "position_to" => $position_to,
-                    "organization_to" => $organization_to,
-                    "number_to" => $number_to,
-                    "text" => $text,
-                    "name_from" => $name_from,
-                    "position_from" => $position_from,
-                    "organization_from" => $organization_from,
-                    "number_from" => $number_from,
-                ];
+        if ($meta_agent->subject != "") {
+            $text = $meta_agent->subject;
+        }
 
-$this->num_words = 0;
+        if ($meta_agent->to != "") {
+            $name_to = $meta_agent->to;
+        }
 
+        if ($meta_agent->from != "") {
+            $name_from = $meta_agent->from;
+        }
 
-            $this->message['number'] = "X";
-            $this->message['hx'] = "X";
-            $this->message['station_origin'] = "X";
-            $this->message['check'] = "X";
-            $this->message['place_filed'] = "X";
-            $this->message['time_filed'] = "X";
-            $this->message['date_filed'] = "X";
+        $this->message = [
+            "meta" => $meta,
+            "name_to" => $name_to,
+            "position_to" => $position_to,
+            "organization_to" => $organization_to,
+            "number_to" => $number_to,
+            "text" => $text,
+            "name_from" => $name_from,
+            "position_from" => $position_from,
+            "organization_from" => $organization_from,
+            "number_from" => $number_from,
+        ];
+
+        $this->num_words = 0;
+
+        $this->message['number'] = "X";
+        $this->message['hx'] = "X";
+        $this->message['station_origin'] = "X";
+        $this->message['check'] = "X";
+        $this->message['place_filed'] = "X";
+        $this->message['time_filed'] = "X";
+        $this->message['date_filed'] = "X";
 
         $this->message['precedence'] = "X";
-
-
 
         $this->filename = "X";
         $this->title = "X";
@@ -705,8 +781,7 @@ $this->num_words = 0;
         $this->date = "X";
         $this->version = "X";
 
-$this->text = $this->message['text'];
-
+        $this->text = $this->message['text'];
         return false;
     }
 

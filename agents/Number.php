@@ -773,6 +773,7 @@ $this->numbers_history = $traditional;
     function makeSMS() {
 
         $sms = "NUMBER | ";
+$number = false;
 if (isset($this->number)) {$number = $this->number;}
 
 

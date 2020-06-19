@@ -160,11 +160,11 @@ class Meta
             $this->meta = $data_gram;
             return;
         }
-
+/*
         if (!isset($this->words)) {
             $this->getWords($input);
         }
-
+*/
         $sections = array("from", "to", "message");
 
         $parse_section = null;
@@ -172,7 +172,9 @@ class Meta
         $to = "";
         $from = "";
 
-        foreach ($this->words as $temp => $word) {
+$this->tokens = explode(" ", $input);
+
+        foreach ($this->tokens as $temp => $word) {
             foreach ($sections as $temp => $section) {
                 if ($word == $section) {
                     $parse_section = $word;
@@ -187,7 +189,8 @@ class Meta
                         $message_count += 1;
                         $message .= " " . $word;
                     }
-                    continue;
+break;
+      //              continue;
                 case "to":
                     if (!isset($to_count)) {
                         $to_count = 1;
@@ -195,7 +198,8 @@ class Meta
                         $to_count += 1;
                         $to .= " " . $word;
                     }
-                    continue;
+break;
+      //              continue;
                 case "from":
                     if (!isset($from_count)) {
                         $from_count = 1;
@@ -203,7 +207,8 @@ class Meta
                         $from_count += 1;
                         $from .= " " . $word;
                     }
-                    continue;
+break;
+      //              continue;
             }
         }
 
