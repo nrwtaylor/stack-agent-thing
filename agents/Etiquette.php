@@ -53,6 +53,10 @@ if ($this->state == "off") {
     public function getChannel()
     {
         $channel_agent = new Channel($this->thing, "channel");
+
+$this->channel_sms = "No message.";
+if (isset($channel_agent->thing_report['sms'])) {$this->channel_sms = $channel_agent->thing_report['sms'];}
+
         if (isset($channel->channel_name)) {
             $this->channel_name = $channel->channel_name;
         }
@@ -67,7 +71,16 @@ if ($this->state == "off") {
     {
         $rules_list = [];
 
+        $this->rules_list = array();
+        $this->unique_count = 0;
+
+
         $findagent_thing = new Findagent($this->thing, 'rule');
+if (!is_array($findagent_thing->thing_report['things'])) {
+
+return;
+
+}
         $count = count($findagent_thing->thing_report['things']);
 
         $this->thing->log(
@@ -129,7 +142,22 @@ if ($this->state == "off") {
         $rule_tag_count = 0;
         $rule_message_count = 0;
 
+        $this->rule_tag_count = 0;
+        $this->rule_message_count = 0;
+
+
         $findagent_thing = new Findagent($this->thing, 'rule');
+
+
+if (!is_array($findagent_thing->thing_report['things'])) {
+
+return;
+
+}
+
+
+
+
         $count = count($findagent_thing->thing_report['things']);
 
         $this->thing->log(
@@ -221,14 +249,19 @@ if ($this->state == "on") {
 
         $web .= "<p>";
 
+if ($this->channel_name != 'not read') 
+{
         $web .= "<b>CHANNEL</b><br>";
 
         $web .= "<p>";
+        $web .= $this->channel_sms . "<br>";
 
         $web .= "Channel name is " . $this->channel_name . "<br>";
         $web .= "Channel identity is " . $this->channel_id . "<br>";
 
         $web .= "<p>";
+}
+
 
         $web .= "<b>HELP</b><br>";
 
