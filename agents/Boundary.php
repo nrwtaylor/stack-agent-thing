@@ -7,7 +7,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Rule extends Agent
+class Boundary extends Agent
 {
     public function init()
     {
@@ -18,13 +18,13 @@ class Rule extends Agent
         // I think.
         // Instead.
 
-        $this->node_list = ["rule" => ["forget"]];
+        $this->node_list = ["boundary" => ["forget"]];
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->default_suit = "routine";
 
         $this->thing->log(
-            'Agent "Rule" running on Thing ' . $this->thing->nuuid . '.'
+            'Agent "Boundary" running on Thing ' . $this->thing->nuuid . '.'
         );
     }
 
@@ -32,13 +32,13 @@ class Rule extends Agent
     {
         $this->variables_agent = new Variables(
             $this->thing,
-            "variables rule " . $this->from
+            "variables boundary " . $this->from
         );
         $this->current_time = $this->thing->time();
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "rule",
+            "boundary",
             "refreshed_at",
         ]);
 
@@ -46,7 +46,7 @@ class Rule extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["rule", "refreshed_at"],
+                ["boundary", "refreshed_at"],
                 $time_string
             );
         }
@@ -54,27 +54,27 @@ class Rule extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["rule", "nom"])
+            $this->thing->json->readVariable(["boundary", "nom"])
         );
 
         $this->suit = $this->default_suit;
-        $suit = $this->thing->json->readVariable(["rule", "suit"]);
+        $suit = $this->thing->json->readVariable(["boundary", "suit"]);
         if ($suit !== false) {
             $this->suit = $suit;
         }
 
         if ($this->nom == false or $this->suit == false) {
-            $this->getRule();
+            $this->getBoundary();
 
-            $this->thing->json->writeVariable(["rule", "nom"], $this->nom);
-            $this->thing->json->writeVariable(["rule", "suit"], $this->suit);
+            $this->thing->json->writeVariable(["boundary", "nom"], $this->nom);
+            $this->thing->json->writeVariable(["boundary", "suit"], $this->suit);
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',
                 "OPTIMIZE"
             );
         } else {
-            $this->colourRule();
+            $this->colourBoundary();
 
             $this->response =
                 "Retrieved " .
@@ -91,22 +91,23 @@ class Rule extends Agent
     {
     }
 
-    public function readRule($text = null)
+    public function readBoundary($text = null)
     {
         if ($text == null) {
             return true;
         }
 
+        if (strtolower($text) == "boundary") {
+            return false;
+        }
+
+        // And ignore these too.
         if (strtolower($text) == "rule") {
             return false;
         }
         if (strtolower($text) == "etiquette") {
             return false;
         }
-        if (strtolower($text) == "boundary") {
-            return false;
-        }
-
 
         $tokens = explode(" ", strtolower($text));
         if ($tokens[1] == "etiquette" and substr($text, 0, 1) == "@") {
@@ -119,12 +120,12 @@ class Rule extends Agent
             return false;
         }
 
-        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
+        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
 
         return $text;
     }
 
-    private function colourRule()
+    private function colourBoundary()
     {
         if ($this->suit == 'welfare' or $this->suit == 'routine') {
             $this->colour = "black";
@@ -133,7 +134,7 @@ class Rule extends Agent
         }
     }
 
-    public function getRule()
+    public function getBoundary()
     {
         // So if the word rule is provided.
         // It means we want to see the current rule.
@@ -141,11 +142,11 @@ class Rule extends Agent
         // But for now create a standard face rule randomly independent of prior deck selection.
 
         if ($this->nom == false or $this->suit == false) {
-            $this->newRule();
+            $this->newBoundary();
         }
 
         //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
-        $this->colourRule();
+        $this->colourBoundary();
         /*
         if (($this->suit == 'spades') or ($this->suit == 'clubs')) {
             $this->colour = "black";
@@ -167,10 +168,10 @@ class Rule extends Agent
 */
     }
 
-    public function newRule()
+    public function newBoundary()
     {
-        if (strtolower($this->subject) == "rule") {
-            $this->response .= "No rule found. ";
+        if (strtolower($this->subject) == "boundary") {
+            $this->response .= "No boundary found. ";
             return;
         }
         $array = ['emergency', 'priority', 'routine', 'welfare'];
@@ -200,17 +201,17 @@ class Rule extends Agent
         $this->nom = strtolower($v);
 
         $this->response .=
-            'Rule is, "' . $this->readRule($this->subject) . '". ';
+            'Boundary is, "' . $this->readBoundary($this->subject) . '". ';
     }
 
-    public function imagineRule()
+    public function imagineBoundary()
     {
         new Thought($this->thing, "thought");
     }
 
     public function makeSMS()
     {
-        $sms = "RULE | " . $this->response;
+        $sms = "BOUNDARY | " . $this->response;
 
         //        }
 
@@ -220,7 +221,7 @@ class Rule extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
-    private function svgRule($rule)
+    private function svgBoundary($rule)
     {
         $suits = [
             "emergency" => "H",
@@ -240,24 +241,24 @@ class Rule extends Agent
 
     public function makeWeb()
     {
-        $rule = ["nom" => $this->nom, "suit" => $this->suit];
+        $boundary = ["nom" => $this->nom, "suit" => $this->suit];
 
-        $filename = $this->svgRule($rule);
+        $filename = $this->svgBoundary($boundary);
 
-        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
-        $web = "<b>Rule Agents</b><br>";
+        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
+        $web = "<b>Boundary Agent</b><br>";
         $web .= "<p>";
         $web .= "<p>";
-        $web .= "<b>RULE</b><p>";
-        if ($this->readRule($this->subject) !== false) {
-            $web .= $this->readRule($this->subject);
+        $web .= "<b>BOUNDARY</b><p>";
+        if ($this->readBoundary($this->subject) !== false) {
+            $web .= $this->readBoundary($this->subject);
 
             $web .= "<center>" . $image . "</center>";
 
             $web .= "<p>";
-            $web .= "To forget this rule CLICK on the FORGET button.<p>";
+            $web .= "To forget this boundary CLICK on the FORGET button.<p>";
         } else {
-            $web .= "No rule found.";
+            $web .= "No boundary found.";
         }
 
         $this->thing_report['web'] = $web;
@@ -265,11 +266,11 @@ class Rule extends Agent
 
     public function makeSnippet()
     {
-        $rule = ["nom" => $this->nom, "suit" => $this->suit];
+        $boundary = ["nom" => $this->nom, "suit" => $this->suit];
 
-        $filename = $this->svgRule($rule);
+        $filename = $this->svgBoundary($boundary);
 
-        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
+        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
 
         $web = "<center" . $image . "</center";
 
@@ -289,9 +290,9 @@ class Rule extends Agent
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
-            "rule"
+            "boundary"
         );
-        $this->choices = $this->thing->choice->makeLinks('rule');
+        $this->choices = $this->thing->choice->makeLinks('boundary');
         $this->thing_report['choices'] = $this->choices;
     }
 
@@ -314,7 +315,7 @@ class Rule extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         $this->thing_report['help'] =
-            $this->agent_prefix . 'responding to the word rule';
+            $this->agent_prefix . 'responding to the word boundary';
         return $this->thing_report;
     }
 
@@ -325,17 +326,17 @@ class Rule extends Agent
         return;
     }
 
-    public function rule()
+    public function boundary()
     {
         // Call the Usermanager agent and update the state
         // Stochastically call rule.
         //if (rand(1, $this->variable) == 1) {
-        $this->getRule();
+        $this->getBoundary();
         //}
 
         $this->thing->log(
             $this->agent_prefix .
-                ' says, "Think that rule could be any rule.\n"'
+                ' says, "Think that boundary could be any boundary.\n"'
         );
 
         return;

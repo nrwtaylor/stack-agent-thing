@@ -86,6 +86,12 @@ class Database
         $this->hash_state = $settings['settings']['stack']['hash'];
         }
 
+        $this->hash_algorithm = 'sha256';
+        if (isset($settings['settings']['stack']['hash'])) {
+        $this->hash_algorithm = $settings['settings']['stack']['hash_algorithm'];
+        }
+
+
         $this->container = new \Slim\Container($settings);
 
         // create app instance
