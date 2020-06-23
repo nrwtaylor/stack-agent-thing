@@ -13,6 +13,8 @@ class Url extends Agent
 
     function init()
     {
+        $this->thing_report['help'] =
+            'Text URL < A web link> to add a link to this list.';
     }
 
     function run()
@@ -47,6 +49,56 @@ class Url extends Agent
         $this->thing_report['txt'] = "No text retrieved.";
     }
 
+    function makeWeb()
+    {
+        $this->getUrls();
+
+        $web = "<b>URL Agent</b><br><p>";
+        $web .= "<p>";
+        $web .= "<b>COLLECTED URLS</b><br><p>";
+        $web .= "<ul>";
+        //$urls = array_unique($this->urls);
+
+        $tempArr = array_unique(array_column($this->urls, 'url'));
+        $urls = array_intersect_key($this->urls, $tempArr);
+
+        foreach ($urls as $i => $url_array) {
+            $url = $url_array['url'];
+
+            $url_link =
+                $this->web_prefix . "thing/" . $url_array['uuid'] . "/forget";
+            $html_link = "[" . '<a href="' . $url_link . '">forget</a>]';
+            if (stripos($url, "://") !== false) {
+                $link = '<a href="' . $url . '">' . $url . '</a>';
+                $web .= "<li>" . $link . " " . $html_link . "<br>";
+
+                continue;
+            } else {
+                $link =
+                    'Try <a href="https://' .
+                    $url .
+                    '">' .
+                    "https://" .
+                    $url .
+                    '</a>';
+
+                $web .=
+                    "<li>" . $url . ' [' . $link . ']' . $html_link . "<br>";
+                continue;
+            }
+
+            $web .= "<li>" . $url . $html_link . "<br>";
+        }
+
+        $web .= "</ul>";
+
+        $web .= "<p>";
+        $web .= "<b>HELP</b><br><p>";
+        $web .= $this->thing_report['help'];
+
+        $this->thing_report['web'] = $web;
+    }
+
     function makeSMS()
     {
         $sms_message = "URL";
@@ -59,7 +111,12 @@ class Url extends Agent
         if ($this->verbosity >= 2) {
         }
 
-        $sms_message .= " | " . $this->url;
+        if ($this->url == "X") {
+            $urls_text = "No urls found. ";
+        } else {
+            $urls_text = $this->url;
+        }
+        $sms_message .= " | " . $urls_text;
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
@@ -71,7 +128,7 @@ class Url extends Agent
 
         $this->url = "X";
         if (isset($this->urls[0])) {
-            $this->url = $this->urls[0];
+            $this->url = $this->urls[0]['url'];
         }
     }
 
@@ -105,8 +162,14 @@ class Url extends Agent
                     if (count($task_urls) == 0) {
                         continue;
                     }
+                    $task_urls = $this->filterUrls($task_urls);
 
-                    $urls[] = implode(" ", $task_urls);
+                    $url = [
+                        "url" => implode(" ", $task_urls),
+                        "uuid" => $thing_object['uuid'],
+                    ];
+
+                    $urls[] = $url;
                 }
             }
         }
@@ -114,6 +177,24 @@ class Url extends Agent
         $urls = array_reverse($urls);
 
         $this->urls = $urls;
+    }
+
+    public function filterUrls($urls = null)
+    {
+        if (!is_array($urls)) {
+            return true;
+        }
+        foreach ($urls as $i => $url) {
+            $parts = explode(" ", $url);
+            if (count($parts) == 1) {
+                if (stripos($url, '.') !== false) {
+                    $urls[$i] = explode(' ', $url)[0];
+                } else {
+                    unset($urls[$i]);
+                }
+            }
+        }
+        return $urls;
     }
 
     public function respondResponse()
@@ -136,6 +217,10 @@ class Url extends Agent
         if ($text == null) {
             return true;
         }
+
+        $text = str_replace('url is', '', $text);
+        $text = str_replace('url', '', $text);
+        $text = trim($text);
         // https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
 
         // Require http...
@@ -144,7 +229,28 @@ class Url extends Agent
         //            '#^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$#';
         //$pattern == '/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/';
 
-        $pattern = '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
+        //$pattern = '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
+        $pattern =
+            '#\b(https://)?([^\s()<>]+)?(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
+
+        // https://stackoverflow.com/questions/6427530/regular-expression-pattern-to-match-url-with-or-without-http-www
+
+        $regex = '((https?|ftp)://)?';
+        $regex .= '([a-z0-9+!*(),;?&=$_.-]+(:[a-z0-9+!*(),;?&=$_.-]+)?@)?';
+        $regex .=
+            "([a-z0-9\-\.]*)\.(([a-z]{2,4})|([0-9]{1,3}\.([0-9]{1,3})\.([0-9]{1,3})))";
+        $regex .= '(:[0-9]{2,5})?';
+        $regex .= '(/([a-z0-9+$_%-]\.?)+)*/?';
+        $regex .= '(\?[a-z+&\$_.-][a-z0-9;:@&%=+/$_.-]*)?';
+        $regex .= '(#[a-z_.-][a-z0-9+$%_.-]*)?';
+
+        $pattern = "#" . $regex . "#";
+
+        $pattern =
+            '/^(http|https)?:\/\/|(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/';
+
+        $pattern =
+            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
         preg_match_all($pattern, $text, $match);
         if (!isset($urls)) {
@@ -155,12 +261,38 @@ class Url extends Agent
 
         // Deal with spaces
 
+        $urls = $this->filterUrls($urls);
+
+        /*
         foreach ($urls as $i => $url) {
-            if (strpos($url, ' ') !== false) {
-                $urls[$i] = explode(' ', $url)[0];
+            $parts = explode(" ", $url);
+            //var_dump($parts);
+            if (count($parts) == 1) {
+                if (stripos($url, '.') !== false) {
+                    $urls[$i] = explode(' ', $url)[0];
+                } else {
+                    unset($urls[$i]);
+                }
             }
         }
+*/
         return $urls;
+    }
+
+    public function hasUrl($text = null)
+    {
+        $urls = $this->extractUrls($text);
+
+        // No URLS found.
+        if ($urls === true) {
+            return false;
+        }
+
+        if (count($urls) >= 1) {
+            return true;
+        }
+
+        return false;
     }
 
     public function extractUrl($text = null)
@@ -194,6 +326,13 @@ class Url extends Agent
 
         $this->url = $input;
 
+        // Get urls from string
+        $this->urls = $this->extractUrls($input);
+        $this->url = "X";
+        if (isset($this->urls[0])) {
+            $this->url = $this->urls[0];
+        }
+
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
@@ -206,7 +345,6 @@ class Url extends Agent
                 return;
             }
         }
-
         return;
     }
 }

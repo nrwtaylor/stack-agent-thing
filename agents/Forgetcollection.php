@@ -23,6 +23,8 @@ class Forgetcollection extends Agent
             "refreshed_at",
         ]);
 
+        $this->forget_count = 0;
+
         if ($time_string == false) {
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
@@ -79,17 +81,25 @@ class Forgetcollection extends Agent
             }
         }
 
+        $this->forget_count += $count;
+        /*
         $this->sms_message .=
             "Completed request for this Identity. Forgot " .
             $count .
             " Things.";
+*/
     }
 
     public function makeSMS()
     {
         if ($this->sms_message == "") {
             $this->sms_message =
-                "FORGET COLLECTION | " . $this->sms_message . " | TEXT PRIVACY";
+                "FORGET COLLECTION | " .
+                $this->sms_message .
+                " " .
+                "Forgot " .
+                $this->forget_count .
+                " | TEXT PRIVACY";
         }
         //      $this->thing_report['thing'] = $this->thing->thing;
         $this->thing_report['sms'] = $this->sms_message;
@@ -157,6 +167,12 @@ class Forgetcollection extends Agent
         }
 
         if ($selected_token == "today") {
+            $this->doForgetcollection('second');
+            $this->doForgetcollection('seconds');
+            $this->doForgetcollection('minute');
+            $this->doForgetcollection('minutes');
+            $this->doForgetcollection('hour');
+            $this->doForgetcollection('hours');
             $this->doForgetcollection('day');
             return;
         }
