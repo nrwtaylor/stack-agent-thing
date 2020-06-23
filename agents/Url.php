@@ -68,12 +68,25 @@ class Url extends Agent
             $url_link =
                 $this->web_prefix . "thing/" . $url_array['uuid'] . "/forget";
             $html_link = "[" . '<a href="' . $url_link . '">forget</a>]';
+
             if (stripos($url, "://") !== false) {
                 $link = '<a href="' . $url . '">' . $url . '</a>';
                 $web .= "<li>" . $link . " " . $html_link . "<br>";
 
                 continue;
+            } elseif (stripos($url, ":/") !== false) {
+
+                $link = '<a href="' . $url . '">' . $url . '</a>';
+$try_link = '[Try ' . str_replace(":/","://",$link) . ']';
+                $web .= "<li>" . $link . " " . $try_link . "<br>";
+
+                continue;
+
+
             } else {
+
+
+
                 $link =
                     'Try <a href="https://' .
                     $url .
@@ -193,6 +206,18 @@ class Url extends Agent
                     unset($urls[$i]);
                 }
             }
+
+            if (stripos($url, "://") !== false) {
+                continue;
+            }
+
+            if (stripos($url, ":/") !== false) {
+                    unset($urls[$i]);
+
+            }
+
+
+
         }
         return $urls;
     }
