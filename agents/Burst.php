@@ -583,7 +583,8 @@ class Burst extends Agent
 
         // If all else fails try the discriminator.
 
-        $this->requested_flag = $this->discriminateInput($haystack); // Run the discriminator.
+        $this->requested_flag = $this->            $t = $findagent_thing->thing_report;
+discriminateInput($haystack); // Run the discriminator.
         switch ($this->requested_flag) {
             case 'green':
                 $this->selectChoice('green');
