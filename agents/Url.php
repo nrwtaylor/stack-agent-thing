@@ -55,57 +55,63 @@ class Url extends Agent
 
         $web = "<b>URL Agent</b><br><p>";
         $web .= "<p>";
-        $web .= "<b>COLLECTED URLS</b><br><p>";
-        $web .= "<ul>";
-        //$urls = array_unique($this->urls);
 
-        $tempArr = array_unique(array_column($this->urls, 'url'));
-        $urls = array_intersect_key($this->urls, $tempArr);
+        if (count($this->urls) > 0) {
+            $web .= "<b>COLLECTED URLS</b><br><p>";
+            $web .= "<ul>";
+            //$urls = array_unique($this->urls);
 
-        foreach ($urls as $i => $url_array) {
-            $url = $url_array['url'];
+            $tempArr = array_unique(array_column($this->urls, 'url'));
+            $urls = array_intersect_key($this->urls, $tempArr);
 
-            $url_link =
-                $this->web_prefix . "thing/" . $url_array['uuid'] . "/forget";
-            $html_link = "[" . '<a href="' . $url_link . '">forget</a>]';
+            foreach ($urls as $i => $url_array) {
+                $url = $url_array['url'];
 
-            if (stripos($url, "://") !== false) {
-                $link = '<a href="' . $url . '">' . $url . '</a>';
-                $web .= "<li>" . $link . " " . $html_link . "<br>";
+                $url_link =
+                    $this->web_prefix .
+                    "thing/" .
+                    $url_array['uuid'] .
+                    "/forget";
+                $html_link = "[" . '<a href="' . $url_link . '">forget</a>]';
 
-                continue;
-            } elseif (stripos($url, ":/") !== false) {
+                if (stripos($url, "://") !== false) {
+                    $link = '<a href="' . $url . '">' . $url . '</a>';
+                    $web .= "<li>" . $link . " " . $html_link . "<br>";
 
-                $link = '<a href="' . $url . '">' . $url . '</a>';
-$try_link = '[Try ' . str_replace(":/","://",$link) . ']';
-                $web .= "<li>" . $link . " " . $try_link . "<br>";
+                    continue;
+                } elseif (stripos($url, ":/") !== false) {
+                    $link = '<a href="' . $url . '">' . $url . '</a>';
+                    $try_link = '[Try ' . str_replace(":/", "://", $link) . ']';
+                    $web .= "<li>" . $link . " " . $try_link . "<br>";
 
-                continue;
+                    continue;
+                } else {
+                    $link =
+                        'Try <a href="https://' .
+                        $url .
+                        '">' .
+                        "https://" .
+                        $url .
+                        '</a>';
 
+                    $web .=
+                        "<li>" .
+                        $url .
+                        ' [' .
+                        $link .
+                        ']' .
+                        $html_link .
+                        "<br>";
+                    continue;
+                }
 
-            } else {
-
-
-
-                $link =
-                    'Try <a href="https://' .
-                    $url .
-                    '">' .
-                    "https://" .
-                    $url .
-                    '</a>';
-
-                $web .=
-                    "<li>" . $url . ' [' . $link . ']' . $html_link . "<br>";
-                continue;
+                $web .= "<li>" . $url . $html_link . "<br>";
             }
 
-            $web .= "<li>" . $url . $html_link . "<br>";
+            $web .= "</ul>";
+
+            $web .= "<p>";
         }
-
-        $web .= "</ul>";
-
-        $web .= "<p>";
         $web .= "<b>HELP</b><br><p>";
         $web .= $this->thing_report['help'];
 
@@ -212,12 +218,8 @@ $try_link = '[Try ' . str_replace(":/","://",$link) . ']';
             }
 
             if (stripos($url, ":/") !== false) {
-                    unset($urls[$i]);
-
+                unset($urls[$i]);
             }
-
-
-
         }
         return $urls;
     }
