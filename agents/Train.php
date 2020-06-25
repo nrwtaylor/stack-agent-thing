@@ -99,7 +99,7 @@ class Train
 
 //		$this->respond();
 //        if ($this->agent_input == null) {$this->Respond();}
-$this->Respond();
+$this->respondResponse();
         $this->thing->log( $this->agent_prefix .'. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.', 'OPTIMIZE' );
         $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', 'OPTIMIZE' );
 		$this->thing->log($this->agent_prefix . 'completed.', 'INFORMATION');
@@ -1427,7 +1427,7 @@ $train_day = $this->day;
     }
 
 
-	private function Respond()
+	public function respondResponse()
     {
 
         $this->makeTXT();
