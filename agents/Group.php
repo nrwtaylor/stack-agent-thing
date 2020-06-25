@@ -94,6 +94,21 @@ class Group extends Agent
         $this->choices = $this->thing->choice->makeLinks('start');
     }
 
+    public function isGroup($text)
+    {
+        $this->extractGroups($text);
+
+        if (!is_array($this->groups)) {
+            return false;
+        }
+
+        if (count($this->groups) == 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function joinGroup($group_id = null)
     {
         $this->thing->json->setField("variables");
@@ -253,7 +268,6 @@ class Group extends Agent
             "start"
         );
         $this->choices = $this->thing->choice->makeLinks("listen");
-
 
         return $this->thingreport['groups'];
     }
@@ -423,14 +437,13 @@ class Group extends Agent
             }
         }
 
-$web .= "<p>";
-$web .= "<b>HELP</b><br><p>";
-$web .= $this->thing_report['help'];
+        $web .= "<p>";
+        $web .= "<b>HELP</b><br><p>";
+        $web .= $this->thing_report['help'];
 
-$web .= "<p>";
-$web .= "<b>INFORMATION</b><br><p>";
-$web .= $this->thing_report['info'];
-
+        $web .= "<p>";
+        $web .= "<b>INFORMATION</b><br><p>";
+        $web .= $this->thing_report['info'];
 
         $this->thing_report['web'] = $web;
     }
@@ -441,12 +454,11 @@ $web .= $this->thing_report['info'];
 
         $choice_text = implode("", explode("FORGET", $sms_end, 2));
 
-        $sms =
-            strtoupper($this->agent_name) .
-            " | " .
-            $this->response .
-            "| TEXT " .
-            $choice_text;
+        $sms = strtoupper($this->agent_name);
+        if (isset($this->group_id)) {
+            $sms .= " " . strtoupper($this->group_id);
+        }
+        $sms .= " | " . $this->response . "| TEXT " . $choice_text;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;

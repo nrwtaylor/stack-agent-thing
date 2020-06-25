@@ -102,6 +102,8 @@ class Agent
 
         $this->current_time = $this->thing->time();
 
+        $this->num_hits = 0;
+
         $this->verbosity = 9;
 
         $this->context = null;
@@ -1515,6 +1517,7 @@ return $this->thing_report;
                 'Agent "Agent" found a URL in input.',
                 "INFORMATION"
             );
+
             $this->url = $urls[0];
 
             $tokens = explode(" ", $input);
@@ -1717,6 +1720,23 @@ return $this->thing_report;
             $this->thing_report = $place_thing->thing_report;
             return $this->thing_report;
         }
+
+
+        $this->thing->log('now looking at Group Context.');
+        //$place_thing = new Place($this->thing, "extract");
+        $group_thing = new Group($this->thing, "group");
+        //        $this->thing_report = $place_thing->thing_report;
+
+        if (!$group_thing->isGroup($input)) {
+            //        if (!$place_thing->isPlace($this->subject)) {
+            //if (($place_thing->place_code == null) and ($place_thing->place_n>
+        } else {
+            // place found
+            $group_thing = new Group($this->thing);
+            $this->thing_report = $group_thing->thing_report;
+            return $this->thing_report;
+        }
+
 
         // Here are some other places
 
@@ -1923,9 +1943,9 @@ return $this->thing_report;
         switch (strtolower($this->context)) {
             case 'group':
                 // Now if it is a head_code, it might also be a train...
-                $group_thing = new Group($this->thing, 'extract');
+                $group_thing = new Group($this->thing, 'group');
                 $this->groups = $group_thing->groups;
-
+//var_dump($group_thing->group_id);
                 if ($this->groups != null) {
                     // Group was recognized.
                     // Assign to Group manager.
