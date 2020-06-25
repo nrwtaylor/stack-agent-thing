@@ -96,8 +96,12 @@ class Group extends Agent
 
     public function isGroup($text)
     {
-        $this->extractGroups($text);
 
+// devstack
+return false;
+
+        $this->extractGroups($text);
+//var_dump($this->groups);
         if (!is_array($this->groups)) {
             return false;
         }
