@@ -163,7 +163,7 @@ class Group extends Agent
             'leave'
         );
 
-        $this->response = "Left group.";
+        $this->response .= "Left group. ";
     }
 
     public function startGroup($type = null)
@@ -185,8 +185,8 @@ class Group extends Agent
         );
         $this->group_id = $s;
 
-        $this->message = $this->group_id;
-        $this->sms_message .= " | " . "Type 'SAY' followed by your message.";
+        //$this->message = $this->group_id;
+        $this->response .= "Type 'SAY' followed by your message. ";
 
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable(
@@ -208,10 +208,6 @@ class Group extends Agent
         );
         $this->choices = $this->thing->choice->makeLinks('new group');
 
-        $this->sms_message =
-            " | " . strtoupper($this->group_id) . " | " . $this->sms_message;
-
-        return $this->message;
     }
 
     public function findGroup($name = null)
@@ -293,6 +289,7 @@ class Group extends Agent
         $t = $this->thing->db->agentSearch($agent, 10);
 
         $this->thing->db->agentSearch($this->from);
+        $this->thing->db->setFrom($this->from);
 
         $this->thing_report['things'] = $t['things'];
 
@@ -302,7 +299,7 @@ class Group extends Agent
         $ages = [];
 
         if (count($this->thing_report['things']) != 0) {
-            $this->sms_message .= " |";
+            $this->response .= "";
         }
 
         foreach ($this->thing_report['things'] as $thing) {
@@ -323,14 +320,14 @@ class Group extends Agent
             $this->response .= 'Nothing heard. ';
         } elseif (count($this->thing_report['things']) == 1) {
             $this->response .=
-                ' Earliest heard ' .
+                'Earliest heard ' .
                 $this->thing->human_time(max($ages)) .
-                ' ago';
+                ' ago. ';
         } else {
             $this->response .=
-                ' Earliest heard ' .
+                'Earliest heard ' .
                 $this->thing->human_time(max($ages)) .
-                ' ago';
+                ' ago. ';
         }
 
         $this->thing->choice->Create(
@@ -433,9 +430,15 @@ class Group extends Agent
             $web .= "<p>";
 
             foreach ($this->members as $i => $text) {
-                $web .= $text . "<br>";
+//var_dump($text);
+                $web .= $text['task'] . "<br>";
             }
         }
+
+        $web .= "<p>";
+        $web .= "<b>URL</b><br><p>";
+        $web .= $this->group_id . ' ' . '<a href="' . $link . '">' . $link . '</a>';
+
 
         $web .= "<p>";
         $web .= "<b>HELP</b><br><p>";
@@ -448,6 +451,7 @@ class Group extends Agent
         $this->thing_report['web'] = $web;
     }
 
+
     public function makeSMS()
     {
         $sms_end = strtoupper(strip_tags($this->choices['link']));
@@ -458,7 +462,8 @@ class Group extends Agent
         if (isset($this->group_id)) {
             $sms .= " " . strtoupper($this->group_id);
         }
-        $sms .= " | " . $this->response . "| TEXT " . $choice_text;
+        $sms .= " | " . $this->response;
+$sms .=  "| TEXT " . $choice_text;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -550,7 +555,7 @@ $this->response .= "Didn't see screen. So did not screen. ";
         }
         // added 18 Jul
         if (strpos(strtolower($this->agent_input), "join:") !== false) {
-            $this->response .= 'Agent input was ' . $this->agent_input;
+            $this->response .= 'Agent input was ' . $this->agent_input . '. ';
             $group = str_replace("join:", "", $this->agent_input);
             $this->joinGroup($group);
             return;
@@ -598,11 +603,9 @@ $this->response .= "Didn't see screen. So did not screen. ";
             }
 
             if (is_numeric($this->subject) and strlen($input) == 5) {
-                //return $this->response;
             }
 
             if (is_numeric($this->subject) and strlen($input) == 4) {
-                //return $this->response;
             }
 
             $this->nullAction();

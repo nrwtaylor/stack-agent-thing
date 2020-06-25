@@ -19,14 +19,10 @@ class Listen extends Agent
 
         $this->retain_for = 4; // Retain for at least 4 hours.
 
-        //        $this->sqlresponse = null;
-
         // Allow for a new state tree to be introduced here.
-        $this->node_list = ["start" => ["useful", "useful?"]];
+        $this->node_list = ["start" => ["forget"]];
 
-        $this->thing->log(
-            'Agent "Listen" running on Thing ' . $this->uuid . ''
-        );
+        $this->thing->log('running on Thing ' . $this->uuid . '');
         $this->thing->log('received this Thing "' . $this->subject . '"');
 
         $this->thing_report['info'] = "Listen request was handled by Group";
@@ -84,7 +80,7 @@ class Listen extends Agent
 
     public function joinGroup($group = null)
     {
-        $this->thing->log('<pre> Agent "Listen" called joinGroup() </pre>');
+        $this->thing->log('called joinGroup()');
 
         $join_agent = new Group($this->thing, "join " . $group);
 
@@ -95,23 +91,22 @@ class Listen extends Agent
 
     function listenGroup()
     {
-        $listen_agent = new Group($this->thing, "listen:" . $this->group_id);
+        $group_agent = new Group($this->thing, "listen:" . $this->group_id);
 
-        $things = $listen_agent->thing_report['things'];
+        $things = $group_agent->thing_report['things'];
 
         $this->response .=
-            "Counted " . count($listen_agent->thing_report['things']) . " ";
+            "Counted " . count($group_agent->thing_report['things']) . ". ";
 
         $tasks = "";
+
         foreach ($things as $thing) {
+            $age = time() - strtotime($thing['created_at']);
+            $age_text = $this->thing->human_time($age);
+
             $tasks .= $thing['task'];
-            //$this->message .= $thing['task'];
             $this->response .=
-                ' | "' .
-                $thing['task'] .
-                '" ' .
-                number_format(time() - strtotime($thing['created_at'])) .
-                "s ago.";
+                '/ "' . $thing['task'] . '" ' . $age_text . ' ' . 'ago. ';
 
             //copied to group
         }
@@ -128,6 +123,9 @@ class Listen extends Agent
 
         $this->makeChoices();
 
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
+
         $this->thing_report['log'] = $this->thing->log;
         return $this->thing_report;
     }
@@ -138,8 +136,8 @@ class Listen extends Agent
         if (isset($this->group_id)) {
             $sms .= strtoupper($this->group_id);
         }
-        $sms .= " ";
-        $sms .= $this->response;
+        $sms .= " | ";
+        $sms .= trim($this->response);
         $sms .= "" . " | TEXT GROUP";
         $this->thing_report['sms'] = $sms;
     }
@@ -161,11 +159,6 @@ class Listen extends Agent
 
     public function readSubject()
     {
-        //$this->thing->log(
-        //    '<pre> Agent "Listen" readSubject(), "' . $this->subject . '"</pre>'
-        //);
-        //$this->response = null;
-
         $keywords = ['listen', 'listne', 's/listen', 'ln', 'l'];
 
         // Make a haystack.  Using just the subject, because ...

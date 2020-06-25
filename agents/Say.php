@@ -24,7 +24,7 @@ class Say extends Agent
 
         $this->num_hits = 0;
 
-        $this->pain_score = null;
+        //$this->pain_score = null;
 
         $this->sqlresponse = null;
 
@@ -34,11 +34,11 @@ class Say extends Agent
             'This is the pain manager.  PAIN <1 to 10>.  PAIN <text>.';
 
         // Allow for a new state tree to be introduced here.
-        $this->node_list = ["start" => ["useful", "useful?"]];
+        $this->node_list = ["start" => ["forget"]];
 
-        $this->thing->log('running on Thing ' . $this->uuid . '');
-        $this->thing->log('received this Thing "' . $this->subject . '"');
-        $this->thing->log('completed');
+//        $this->thing->log('running on Thing ' . $this->uuid . '');
+//        $this->thing->log('received this Thing "' . $this->subject . '"');
+//        $this->thing->log('completed');
     }
 
     public function get()
@@ -72,28 +72,32 @@ class Say extends Agent
 
         $this->group_id = "open";
         $this->group_id = $group_thing->thingreport['groups'][0];
+
+        //$this->response .= "Found group " . $this->group_id . ". ";
     }
 
     public function notePain($text = null)
     {
-        if ($this->pain_score != null) {
-            // Then this Thing has no group information
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
-                ["say", "refreshed_at"],
-                $time_string
-            );
-            $this->thing->json->writeVariable(
-                ["say", "group_id"],
-                strtoupper($this->pain_score)
-            );
+        if ($text == null) {
+            return true;
         }
+        //    if ($this->pain_score != null) {
+        // Then this Thing has no group information
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->time();
+        $this->thing->json->writeVariable(
+            ["say", "refreshed_at"],
+            $time_string
+        );
+        $this->thing->json->writeVariable(
+            ["say", "group_id"],
+            strtoupper($this->group_id)
+        );
+        //    }
 
         // Generate a Thing
 
         $say_thing = new Thing(null);
-
         // remove "say" at start
 
         $group_message = substr(strstr($this->subject, " "), 1);
@@ -103,12 +107,10 @@ class Say extends Agent
             $group_message == null or
             $group_message == " "
         ) {
-            $this->sms_message =
-                $group_message .
-                "This agent broadcasts messages to your current group " .
-                strtoupper($this->group_id) .
-                ".";
+            $this->response .= "No message provided. ";
+            //sent to the current group " .
         } else {
+            //$this->response .= "Created a SAY thing. ";
             $say_thing->Create(
                 'null@stackr.ca',
                 $to = "say:" . strtoupper($this->group_id),
@@ -116,124 +118,8 @@ class Say extends Agent
             );
             $say_thing->flagGreen(); // to be sure
             $this->response .=
-                "Message sent to group " . strtoupper($this->group_id) . ". ";
+                'Said "' . $group_message . '" to group ' . strtoupper($this->group_id) . ". ";
         }
-
-        $this->response .=
-            "Agent '" .
-            ucfirst($this->agent_name) .
-            "' is broadcasting to " .
-            $this->group_id .
-            ".  Target message life " .
-            $this->retain_for .
-            " time units.";
-
-        $this->pain_score = null;
-        //              $this->message = $t;
-        //		$this->sms_message = "Message sent to group " . $this->group_id ;
-    }
-
-    public function noteScore($value = null)
-    {
-        //              $val = $pieces[$key + 1];
-
-        if (is_numeric($value)) {
-            $truth1 = $value >= 1 && $value <= 10; // true if 1 <= x <= 10
-
-            if ($truth1) {
-                $this->num_hits += 1;
-                //echo "next word is:";
-                //var_dump($pieces[$index+1]);
-
-                $t =
-                    "Agent '" .
-                    ucfirst($this->agent_name) .
-                    "' is watching for patterns.  This pain score observation will be kept for " .
-                    $this->retain_for;
-
-                $this->pain_score = $value;
-                //$this->message = ucfirst($this->agent_name) . " score " . $this->pain_score . " noted.  Pattern watching." . $t;
-                $this->response .=
-                    ucfirst($this->agent_name) .
-                    " score = " .
-                    $this->pain_score .
-                    ".  Pattern watching.";
-            } else {
-                // $this->message = "Pain score received but not understood.  It should be a number from 1 to 10";
-                $this->response .=
-                    "Not understood.  Pain score should be from 1 to 10";
-            }
-        }
-    }
-
-    public function painReport($text = null)
-    {
-        $this->response .= "s/devstack here will be a pain report";
-        //$this->r = "s/devstack here will be useful information on your pain";
-
-        //$this->painReport($input);
-        $path = null;
-
-        $this->thing->db->setUser($this->from);
-        $thing_report = $this->thing->db->variableSearch($path, 'pain', 10);
-
-        $priorDate = null;
-        $t = "<br>";
-        $t_sms = "";
-        foreach ($thing_report['things'] as $thing) {
-            $newDate = date("d/m", strtotime($thing['created_at']));
-
-            if ($newDate == $priorDate) {
-                // Same date
-                // Just display time
-                $date_text = date("H:s", strtotime($thing['created_at']));
-            } else {
-                $date_text = date("d M H:s", strtotime($thing['created_at']));
-            }
-            //$date_text = $newDate;
-
-            //$newDate = date("d/m", strtotime($thing['created_at']));
-
-            $pain_thing = new Thing($thing['uuid']);
-
-            $pain_thing->json->setField("variables");
-            $pain_score = $pain_thing->json->readVariable([
-                "pain",
-                "pain_score",
-            ]);
-
-            if (strtolower($pain_score) == "pain report") {
-                continue;
-            }
-
-            if ($pain_score == null) {
-                $pain_text = $thing['task'];
-            } else {
-                $pain_text = "p-" . $pain_score;
-            }
-
-            //if (isset($thing['number']) ) {
-            //	$pain_text = $thing['number'];
-            //} else {
-            //	$pain_text = $thing['number'];
-            //}
-
-            $t .=
-                date("d/m H:s", strtotime($thing['created_at'])) .
-                " " .
-                $pain_text .
-                "<br>";
-
-            $t_sms .= $date_text . ' ' . $pain_text . " > ";
-
-            $priorDate = $newDate;
-        }
-
-        //$t = "Agent '" . ucfirst($this->agent_name) . "' is watching for patterns.  This pain score observation will be kept for " . $this->retain_for;
-
-        $this->pain_score = $text;
-        //$this->message = ucfirst($this->agent_name) . " report: <br>" . $t;
-        $this->response .= ucfirst($this->agent_name) . " reports: " . $t_sms;
     }
 
     public function respondResponse()
@@ -252,17 +138,21 @@ class Say extends Agent
 
         $this->thing_report['message'] = $this->thing_report['sms'];
 
-        if ($this->pain_score != null) {
-            $this->thing_report['number'] = $this->pain_score;
-        }
-
         return $this->thing_report;
     }
 
     public function makeSMS()
     {
-        $sms = "SAY | " . $this->response . " | TEXT WHATIS";
+        $sms = "SAY | " . trim($this->response) . " | TEXT GROUP";
         $this->thing_report['sms'] = $sms;
+    }
+
+    public function makeWeb()
+    {
+        $web = '<b>Say Agent</b><br>';
+        $web .= "<p>";
+        $web .= $this->response;
+        $this->thing_report['web'] = $web;
     }
 
     public function makeChoices()
@@ -276,12 +166,14 @@ class Say extends Agent
 
         $this->thing_report['choices'] = $choices;
     }
+    /*
     private function nextWord($phrase)
     {
     }
-
+*/
     public function readSubject()
     {
+        //$this->response .= "Read subject. ";
         //$this->response = null;
 
         $keywords = ['say', 's/say', 'say', 'sey'];
@@ -317,6 +209,10 @@ class Say extends Agent
             // $this->notePain($input);
         }
 
+        $filtered_input = $this->assert($input);
+        $this->notePain($filtered_input);
+        return;
+
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -327,7 +223,7 @@ class Say extends Agent
                             if ($key + 1 > count($pieces)) {
                                 //echo "last word is pain";
                                 break;
-                                $this->pain_score = null;
+                                //$this->pain_score = null;
                                 // I feel your pain buddy?
                                 $this->notePain($input);
                                 return;
