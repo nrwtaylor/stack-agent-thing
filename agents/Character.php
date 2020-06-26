@@ -178,6 +178,8 @@ class Character {
         $this->sms_message = "";
         $reset = false;
 
+if (!isset($this->characters)) {$this->characters = array();}
+if (!isset($this->seen_characters)) {$this->seen_characters = array();}
 
         if ( $things == false  ) {
 

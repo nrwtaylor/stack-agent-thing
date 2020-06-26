@@ -247,8 +247,8 @@ return false;
         }
 
         if (count($groups) == 0) {
-            $this->sms_message .= "";
-            $this->sms_message .= " | No group found.";
+            $this->response .= "";
+            $this->response .= " | No group found.";
             $this->thingreport['groups'] = false;
             $this->group_id = null;
         } else {
