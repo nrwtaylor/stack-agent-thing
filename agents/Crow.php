@@ -156,6 +156,7 @@ class Crow extends Agent
         //        $this->crow_thing->choice->Choose($this->state);
         //        $this->state = $this->crow_thing->choice->load($this->primary_place);
         $this->setState();
+
     }
 
 

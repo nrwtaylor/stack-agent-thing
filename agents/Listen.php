@@ -71,7 +71,7 @@ class Listen extends Agent
         $this->thing->log('looking for contextually close groups');
 
         $group_thing = new Group($this->thing, "find");
-        $this->group_id = $group_thing->thingreport['groups'][0];
+        $this->group_id = $group_thing->thing_report['groups'][0];
 
         $this->thing->log(
             'found a group nearby called ' . $this->group_id . ''

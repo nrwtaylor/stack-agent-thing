@@ -71,7 +71,7 @@ class Say extends Agent
         $group_thing = new Group($this->thing, "find");
 
         $this->group_id = "open";
-        $this->group_id = $group_thing->thingreport['groups'][0];
+        $this->group_id = $group_thing->thing_report['groups'][0];
 
         //$this->response .= "Found group " . $this->group_id . ". ";
     }

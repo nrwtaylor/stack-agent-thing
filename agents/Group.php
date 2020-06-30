@@ -94,23 +94,22 @@ class Group extends Agent
         $this->choices = $this->thing->choice->makeLinks('start');
     }
 
-    public function isGroup($text)
+    public function isGroup($text = null)
     {
-
-// devstack
-return false;
-
-        $this->extractGroups($text);
-//var_dump($this->groups);
-        if (!is_array($this->groups)) {
-            return false;
+        if ($text == null) {
+            $text = $this->input;
         }
-
-        if (count($this->groups) == 0) {
-            return false;
+        $groups = $this->findGroup($text);
+if ($groups === false) {return false;}
+        $tokens = $this->extractGroups($text);
+        foreach ($tokens as $j => $token) {
+            foreach ($groups as $i => $group) {
+                if (strtolower($group) == strtolower($token)) {
+                    return true;
+                }
+            }
         }
-
-        return true;
+        return false;
     }
 
     public function joinGroup($group_id = null)
@@ -211,7 +210,6 @@ return false;
             "new group"
         );
         $this->choices = $this->thing->choice->makeLinks('new group');
-
     }
 
     public function findGroup($name = null)
@@ -434,15 +432,15 @@ return false;
             $web .= "<p>";
 
             foreach ($this->members as $i => $text) {
-//var_dump($text);
+                //var_dump($text);
                 $web .= $text['task'] . "<br>";
             }
         }
 
         $web .= "<p>";
         $web .= "<b>URL</b><br><p>";
-        $web .= $this->group_id . ' ' . '<a href="' . $link . '">' . $link . '</a>';
-
+        $web .=
+            $this->group_id . ' ' . '<a href="' . $link . '">' . $link . '</a>';
 
         $web .= "<p>";
         $web .= "<b>HELP</b><br><p>";
@@ -455,7 +453,6 @@ return false;
         $this->thing_report['web'] = $web;
     }
 
-
     public function makeSMS()
     {
         $sms_end = strtoupper(strip_tags($this->choices['link']));
@@ -467,7 +464,7 @@ return false;
             $sms .= " " . strtoupper($this->group_id);
         }
         $sms .= " | " . $this->response;
-$sms .=  "| TEXT " . $choice_text;
+        $sms .= "| TEXT " . $choice_text;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -531,11 +528,14 @@ $this->response .= "Didn't see screen. So did not screen. ";
 
         $this->findGroup(); // Might need to call this in the set-up.
 
-$groups = array();
-if ((isset($this->thing_report['groups'])) and ($this->thing_report['groups'] != false)) {
-$groups = $this->thing_report['groups'];
-}
-        foreach ($groups as $i=>$group) {
+        $groups = [];
+        if (
+            isset($this->thing_report['groups']) and
+            $this->thing_report['groups'] != false
+        ) {
+            $groups = $this->thing_report['groups'];
+        }
+        foreach ($groups as $i => $group) {
             if (
                 strpos(strtolower($this->subject), strtolower($group)) !== false
             ) {
@@ -581,7 +581,9 @@ $groups = $this->thing_report['groups'];
             if ($input == 'group') {
                 if ($this->group_id != null) {
                     $this->response .=
-                        "Retrieved the current group identity. Group is " . $this->group_id . ". ";
+                        "Retrieved the current group identity. Group is " .
+                        $this->group_id .
+                        ". ";
                 } else {
                     $this->findGroup();
                     $this->response .= "Found group " . $this->group_id . ". ";

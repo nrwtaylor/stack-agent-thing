@@ -48,6 +48,8 @@ $this->state = "on";
                 "refreshed_at"),  $this->thing->json->time()
         );
 
+//if (!isset($this->sentence)) {$this->thing_report = true;}
+
     }
 
 public function getSentence($text = null) {
@@ -69,7 +71,7 @@ $this->slug = $slug;
     /**
      *
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
 
         $this->thing->flagGreen();
@@ -191,10 +193,14 @@ $this->extractSentences();
         //    $this->sms_message .= $number . " | ";
         //}
 
+$sentence = "No sentence found.";
 if (isset($this->sentence)) {
-        $sms .= " | " . $this->sentence;
+        $sentence  = " | " . $this->sentence;
         //$this->sms_message .= 'devstack';
 }
+
+$sms .= $sentence;
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -210,27 +216,5 @@ if (isset($this->sentence)) {
         $this->choices = $choices;
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-/*
-    public function makePNG() {
-        $text = "thing:".$this->alphas[0];
-
-        ob_clean();
-
-        ob_start();
-
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
-
-        $image = ob_get_contents();
-        ob_clean();
-
-        $this->thing_report['png'] = $image;
-        return $this->thing_report['png'];
-    }
-*/
 
 }

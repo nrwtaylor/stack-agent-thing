@@ -604,7 +604,7 @@ class Agent
     public function respond()
     {
         $this->respondResponse();
-        $this->thing->flagGreen();
+ /////       //$this->thing->flagGreen();
         //        return $this->thing_report;
     }
 
@@ -967,8 +967,6 @@ class Agent
                 'trying Agent "' . $agent_class_name . '".',
                 "INFORMATION"
             );
-            //var_dump($thing->subject);
-            //   if (isset($this->input)) {
 
             // In test 25 May 2020
 
@@ -977,13 +975,15 @@ class Agent
                 //               }
             }
 
-            //var_dump($this->input);
             $agent = new $agent_namespace_name($thing, $agent_input);
 
             // If the agent returns true it states it's response is not to be used.
             if (isset($agent->response) and $agent->response === true) {
                 throw new Exception("Flagged true.");
             }
+
+            //if ($agent->thing_report == false) {return false;}
+
             $this->thing_report = $agent->thing_report;
             $this->agent = $agent;
 
@@ -1194,23 +1194,38 @@ class Agent
 
         // Third.  Forget.
         if (strpos($input, 'forget') !== false) {
+            $forget_tokens = [
+                "all",
+                "now",
+                "today",
+                "second",
+                "seconds",
+                "minute",
+                "minutes",
+                "hour",
+                "hours",
+                "day",
+                "days",
+                "week",
+                "weeks",
+                "month",
+                "months",
+                "year",
+                "years",
+                "everything",
+            ];
+            $tokens = explode(" ", $input);
+            foreach ($tokens as $i => $token) {
+                if (in_array(strtolower($token), $forget_tokens)) {
+                    $forget_agent = new Forgetcollection($this->thing);
+                    $this->thing_report['sms'] =
+                        $forget_agent->thing_report['sms'];
 
-
-$forget_tokens = array("all","now","today","second","seconds","minute","minutes","hour","hours","day","days","week","weeks","month","months","year","years","everything");
-$tokens = explode(" ",$input);
-foreach ($tokens as $i=>$token) {
-
-if (in_array(strtolower($token),$forget_tokens)) {
-
-$forget_agent = new Forgetcollection($this->thing);
-                $this->thing_report['sms'] = $forget_agent->thing_report['sms'];
-
-//                $this->thing_report['sms'] =
-//                    "AGENT | Saw a FORGET instruction.";
-return $this->thing_report;
-
-}
-}
+                    //                $this->thing_report['sms'] =
+                    //                    "AGENT | Saw a FORGET instruction.";
+                    return $this->thing_report;
+                }
+            }
             //if (strtolower($input) == 'forget') {
 
             if (strpos($input, 'all') !== false) {
@@ -1646,7 +1661,7 @@ return $this->thing_report;
                 return strlen($b) <=> strlen($a);
             });
 */
-
+        $responsive_agents = [];
         foreach ($agents as $agent_class_name) {
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
             // Allow for doing something smarter here with
@@ -1665,9 +1680,22 @@ return $this->thing_report;
             }
 
             if ($this->getAgent($agent_class_name)) {
+                $score = 1;
+                $responsive_agents[] = [
+                    "agent_name" => $agent_class_name,
+                    "thing_report" => $this->thing_report,
+                    "score" => $score,
+                ];
                 //            if ($this->getAgent($agent_class_name, $input)) {
-                return $this->thing_report;
+                //return $this->thing_report;
             }
+        }
+
+        // For now just take the first match.
+        // This allows for sophication in resolving multi agent responses.
+        if (count($responsive_agents) > 0) {
+            $this->thing_report = $responsive_agents[0]['thing_report'];
+            return $this->thing_report;
         }
 
         $this->thing->log('did not find an Ngram agent to run.', "INFORMATION");
@@ -1721,7 +1749,6 @@ return $this->thing_report;
             return $this->thing_report;
         }
 
-
         $this->thing->log('now looking at Group Context.');
         //$place_thing = new Place($this->thing, "extract");
         $group_thing = new Group($this->thing, "group");
@@ -1736,7 +1763,6 @@ return $this->thing_report;
             $this->thing_report = $group_thing->thing_report;
             return $this->thing_report;
         }
-
 
         // Here are some other places
 
@@ -1945,7 +1971,7 @@ return $this->thing_report;
                 // Now if it is a head_code, it might also be a train...
                 $group_thing = new Group($this->thing, 'group');
                 $this->groups = $group_thing->groups;
-//var_dump($group_thing->group_id);
+
                 if ($this->groups != null) {
                     // Group was recognized.
                     // Assign to Group manager.
