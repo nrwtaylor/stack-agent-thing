@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -14,36 +13,35 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Litany extends Agent {
-
+class Litany extends Agent
+{
     public $var = 'hello';
-
 
     /**
      *
      */
-    function init() {
-
+    function init()
+    {
         // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+        if ($this->thing->container['stack']['state'] == 'dev') {
+            $this->test = true;
+        }
 
         $this->num_hits = 0;
 
         // Allow for a new state tree to be introduced here.
-        $this->node_list = array("start"=>array("useful", "useful?"));
+        $this->node_list = ["start" => ["useful", "useful?"]];
     }
-
 
     /**
      *
      */
-    function run() {
+    function run()
+    {
         $this->text = "";
         $this->getLitany($this->librex_name);
         $this->doLitany();
-
     }
-
 
     /**
      *
@@ -51,35 +49,41 @@ class Litany extends Agent {
      * @param unknown $searchfor
      * @return unknown
      */
-    public function getLitany($librex_name) {
+    public function getLitany($librex_name)
+    {
         //echo "foo";
         // Look up the meaning in the dictionary.
-        if (($librex_name == "") or ($librex_name == " ") or ($librex_name == null)) {return false;}
+        if ($librex_name == "" or $librex_name == " " or $librex_name == null) {
+            return false;
+        }
 
         switch ($librex) {
-        default:
-            $file = $this->resource_path . $librex_name . '/' . $librex_name .'.txt';
+            default:
+                $file =
+                    $this->resource_path .
+                    $librex_name .
+                    '/' .
+                    $librex_name .
+                    '.txt';
         }
 
         $contents = @file_get_contents($file);
         // devstack add \b to Word
-var_dump($contents);
-//var_dump($contents);
-$this->litany = explode('\r\n', $contents);
-    //    $this->litany = $this->matches[0];
+        $this->litany = explode('\r\n', $contents);
         return $this->litany;
     }
-
-
 
     /**
      *
      * @param unknown $type (optional)
      * @return unknown
      */
-    public function doLitany($type = null) {
-
-if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return true;}
+    public function doLitany($type = null)
+    {
+        if (!isset($this->litany)) {
+            $this->response .= "No litany retrieved. ";
+            return true;
+        }
         //$this->findOrac("orac", "orac");
 
         $key = array_rand($this->litany);
@@ -88,18 +92,21 @@ if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return tr
         $this->message = $value;
         $this->sms_message = $value;
 
-
         $this->thing->json->setField("variables");
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("litany", "refreshed_at"), $time_string );
+        $this->thing->json->writeVariable(
+            ["litany", "refreshed_at"],
+            $time_string
+        );
 
         return $this->message;
     }
 
-
-    public function makeMessage() {
-    if (!isset($this->message)) {$this->message = "No message found.";}
-
+    public function makeMessage()
+    {
+        if (!isset($this->message)) {
+            $this->message = "No message found.";
+        }
     }
     // -----------------------
 
@@ -107,7 +114,8 @@ if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return tr
      *
      * @return unknown
      */
-    public function respond() {
+    public function respond()
+    {
         // Thing actions
         $this->thing->flagGreen();
 
@@ -115,10 +123,13 @@ if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return tr
         $to = $this->thing->from;
         $from = "orac";
 
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+        $this->thing->choice->Create(
+            $this->agent_name,
+            $this->node_list,
+            "start"
+        );
         $choices = $this->thing->choice->makeLinks('start');
         $this->thing_report['choices'] = $choices;
-
 
         $this->sms_message = "LITANY | " . $this->sms_message . " | REPLY HELP";
         $this->thing_report['sms'] = $this->sms_message;
@@ -128,7 +139,7 @@ if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return tr
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
         $this->thing_report['help'] = "This is Blake 7's robot.";
@@ -136,27 +147,24 @@ if (!isset($this->litany)) {$this->response .= "No litany retrieved. ";return tr
         return $this->thing_report;
     }
 
-
     /**
      *
      * @return unknown
      */
-    public function test() {
+    public function test()
+    {
         $this->test = false; // good
         return "green";
     }
 
-
     /**
      *
      */
-    public function readSubject() {
-
-$text = $this->assert($this->input);
-$this->librex_name = $text;
+    public function readSubject()
+    {
+        $text = $this->assert($this->input);
+        $this->librex_name = $text;
         $this->response = null;
         return;
     }
-
-
 }
