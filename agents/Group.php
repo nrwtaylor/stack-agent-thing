@@ -249,7 +249,7 @@ return false;
         if (count($groups) == 0) {
             $this->response .= "";
             $this->response .= " | No group found.";
-            $this->thingreport['groups'] = false;
+            $this->thing_report['groups'] = false;
             $this->group_id = null;
         } else {
             $this->group_id = $groups[0];
@@ -259,7 +259,7 @@ return false;
                 $this->group_id
             );
 
-            $this->thingreport['groups'] = $groups;
+            $this->thing_report['groups'] = $groups;
         }
 
         $this->thing->choice->Create(
@@ -269,7 +269,7 @@ return false;
         );
         $this->choices = $this->thing->choice->makeLinks("listen");
 
-        return $this->thingreport['groups'];
+        return $this->thing_report['groups'];
     }
 
     public function listenGroup($group = null)
@@ -530,7 +530,12 @@ $this->response .= "Didn't see screen. So did not screen. ";
         // Or we see if the group name matches one of the users.
 
         $this->findGroup(); // Might need to call this in the set-up.
-        foreach ($this->thingreport['groups'] as $group) {
+
+$groups = array();
+if ((isset($this->thing_report['groups'])) and ($this->thing_report['groups'] != false)) {
+$groups = $this->thing_report['groups'];
+}
+        foreach ($groups as $i=>$group) {
             if (
                 strpos(strtolower($this->subject), strtolower($group)) !== false
             ) {
@@ -576,7 +581,7 @@ $this->response .= "Didn't see screen. So did not screen. ";
             if ($input == 'group') {
                 if ($this->group_id != null) {
                     $this->response .=
-                        "Group " . $this->group_id . " is already set. ";
+                        "Retrieved the current group identity. Group is " . $this->group_id . ". ";
                 } else {
                     $this->findGroup();
                     $this->response .= "Found group " . $this->group_id . ". ";
@@ -594,7 +599,7 @@ $this->response .= "Didn't see screen. So did not screen. ";
                 } else {
                     $this->findGroup();
                     $this->response .= "Found group. ";
-                    $this->joinGroup($this->thingreport['groups'][0]);
+                    $this->joinGroup($this->thing_report['groups'][0]);
                 }
 
                 $this->num_hits += 1;

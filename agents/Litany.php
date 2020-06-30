@@ -61,9 +61,9 @@ class Litany extends Agent {
             $file = $this->resource_path . $librex_name . '/' . $librex_name .'.txt';
         }
 
-        $contents = file_get_contents($file);
+        $contents = @file_get_contents($file);
         // devstack add \b to Word
-
+var_dump($contents);
 //var_dump($contents);
 $this->litany = explode('\r\n', $contents);
     //    $this->litany = $this->matches[0];

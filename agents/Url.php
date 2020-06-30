@@ -178,6 +178,7 @@ class Url extends Agent
 
                 if (isset($variables['url'])) {
                     $task_urls = $this->extractUrls($thing_object['task']);
+if ($task_urls === true) {continue;}
                     if (count($task_urls) == 0) {
                         continue;
                     }

@@ -13,7 +13,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Runat extends Agent
+class At extends Agent
 {
     public $var = 'hello';
 
@@ -26,9 +26,9 @@ class Runat extends Agent
     {
         $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
         $this->test = "Development code"; // Always iterative.
-        $this->runat = new Variables(
+        $this->at = new Variables(
             $this->thing,
-            "variables runat " . $this->from
+            "variables at " . $this->from
         );
     }
 
@@ -37,7 +37,7 @@ class Runat extends Agent
      */
     function set()
     {
-        if ($this->runat == false) {
+        if ($this->at == false) {
             return;
         }
 
@@ -54,12 +54,12 @@ class Runat extends Agent
         $datetime = $this->day . " " . $this->hour . ":" . $this->minute;
         $this->datetime = date_parse($datetime);
 
-        $this->runat->setVariable("refreshed_at", $this->current_time);
-        $this->runat->setVariable("day", $this->day);
-        $this->runat->setVariable("hour", $this->hour);
-        $this->runat->setVariable("minute", $this->minute);
+        $this->at->setVariable("refreshed_at", $this->current_time);
+        $this->at->setVariable("day", $this->day);
+        $this->at->setVariable("hour", $this->hour);
+        $this->at->setVariable("minute", $this->minute);
 
-        $this->printRunat("set");
+        $this->printAt("set");
 
         $this->thing->log(
             $this->agent_prefix .
@@ -80,39 +80,30 @@ class Runat extends Agent
      */
     function get($run_at = null)
     {
-$headcode_agent = new Headcode($this->thing, "headcode");
-$this->head_code = $headcode_agent->head_code;
-
-$at_agent = new At($this->thing, "headcode");
-
-        if ($this->runat == false) {
+        if ($this->at == false) {
             return;
         }
 
-        $day = $this->runat->getVariable("day");
-        $hour = $this->runat->getVariable("hour");
-        $minute = $this->runat->getVariable("minute");
+        $day = $this->at->getVariable("day");
+        $hour = $this->at->getVariable("hour");
+        $minute = $this->at->getVariable("minute");
 
-        $this->refreshed_at = $this->runat->getVariable("refreshed_at");
+        $this->refreshed_at = $this->at->getVariable("refreshed_at");
 
-        $this->day = "X";
         if ($this->isInput($day)) {
             $this->day = $day;
         }
-        $this->hour = "X";
         if ($this->isInput($hour)) {
             $this->hour = $hour;
         }
-
-        $this->minute = "X";
         if ($this->isInput($minute)) {
             $this->minute = $minute;
         }
 
-        $this->printRunat("get");
+        $this->printAt("get");
     }
 
-    function getRunat()
+    function getAt()
     {
         //var_dump($this->hour);
         //var_dump($this->minute);
@@ -230,15 +221,13 @@ $at_agent = new At($this->thing, "headcode");
      * @param unknown $input (optional)
      * @return unknown
      */
-    function extractRunat($input = null)
+    function extractAt($input = null)
     {
         $this->parsed_date = date_parse($input);
 
         $minute = $this->parsed_date['minute'];
         $hour = $this->parsed_date['hour'];
         $day = $this->extractDay($input);
-
-        $this->response .= "Got " . $day . " " . $hour . " " . $minute . ". ";
 
         //var_dump($minute);
         //var_dump($hour);
@@ -251,19 +240,14 @@ $at_agent = new At($this->thing, "headcode");
 
         //var_dump($this->numbers);
         if (isset($this->numbers) and count($this->numbers) == 0) {
-            $this->response .= "Did not see any numbers. ";
         } elseif (count($this->numbers) == 1) {
-            $this->response .= "Saw one number. ";
 
             if (strlen($this->numbers[0]) == 4) {
-                $this->response .= "Saw one four digit number. ";
 
                 //var_dump($minute);
                 //var_dump($hour);
 
                 if ($minute == 0 and $hour == 0) {
-                    $this->response .=
-                        "Saw a four digit number. Using this for the time. ";
                     $minute = substr($this->numbers[0], 2, 2);
                     $hour = substr($this->numbers[0], 0, 2);
 
@@ -274,14 +258,11 @@ $at_agent = new At($this->thing, "headcode");
                 }
             }
         } elseif (count($this->numbers) == 2) {
-            $this->response .= "Saw two numbers. ";
 
             if ($minute == 0 and $hour == 0) {
-                $this->response .= "And saw minutes and hours are both zero. ";
 
                 // Deal with edge case(s)
                 if (isset($this->numbers[0]) and ($this->numbers[0] = "0000")) {
-                    $this->response .= "Saw midnight. ";
                     $this->hour = 0;
                     $this->minute = 0;
                 }
@@ -317,19 +298,6 @@ $at_agent = new At($this->thing, "headcode");
         //echo "extract minute " . $this->minute;
 
         //        return array($this->day, $this->hour, $this->minute);
-    }
-
-    public function timeRunat($text = null) {
-
-       $time_string = $text;
-       if ($text == null) {
-          $time_string = $this->day . " " . $this->hour .":". $this->minute;
-       }
-
-       $this->time = strtotime($time_string);
-
-       return $this->time;
-
     }
 
     /**
@@ -494,7 +462,7 @@ $at_agent = new At($this->thing, "headcode");
         //var_dump($this->hour);
         //var_dump($this->minute);
 
-        $sms_message = "RUNAT";
+        $sms_message = "AT";
 
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
         //if ($hour == 'X') {$hour_text = "X";}
@@ -503,7 +471,6 @@ $at_agent = new At($this->thing, "headcode");
         //if ($minute == 'X') {$minute_text = "X";}
 
         $day_text = $day;
-$sms_message .= " " .$this->head_code .  " ";
         $sms_message .=
             " | day " .
             $day_text .
@@ -521,10 +488,10 @@ $sms_message .= " " .$this->head_code .  " ";
         ) {
             //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
 
-            $sms_message .= " | Set RUNAT. ";
+            $sms_message .= " | Retrieved time. ";
         }
 
-        $sms_message .= "| nuuid " . strtoupper($this->runat->nuuid);
+        //$sms_message .= "| nuuid " . strtoupper($this->at->nuuid);
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
@@ -597,7 +564,7 @@ $sms_message .= " " .$this->head_code .  " ";
      *
      * @param unknown $text (optional)
      */
-    function printRunat($text = null)
+    function printAt($text = null)
     {
         return;
         echo $text . "\n";
@@ -627,13 +594,11 @@ $sms_message .= " " .$this->head_code .  " ";
      */
     public function readSubject()
     {
-        $this->response .= 'Hello. ';
         //$this->response = null;
         $this->num_hits = 0;
 
         $input = $this->input;
         $filtered_input = $this->assert($input);
-        $this->response .= "Reading " . $filtered_input . ". ";
 
         $keywords = $this->keywords;
         if (strpos($filtered_input, "reset") !== false) {
@@ -642,19 +607,11 @@ $sms_message .= " " .$this->head_code .  " ";
             $this->day = "X";
             return;
         }
-
-        if (strpos($filtered_input, "now") !== false) {
-            $this->extractRunat($this->current_time);
-return;
-        }
-
         //        $this->extractRunat($this->input);
-        if ($this->input == "runat") {
+        if ($this->input == "at") {
 //            $this->extractRunat($filtered_input);
             return;
         }
-
-
 
         //        if (strpos($this->agent_input, "runat") !== false) {
 
@@ -662,6 +619,6 @@ return;
 
         //            return;
         //        }
-        $this->extractRunat($filtered_input);
+        $this->extractAt($filtered_input);
     }
 }
