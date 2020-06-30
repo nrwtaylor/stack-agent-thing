@@ -193,7 +193,7 @@ $this->extractSentences();
         //    $this->sms_message .= $number . " | ";
         //}
 
-$sentence = "No sentence found.";
+$sentence = " | No sentence found.";
 if (isset($this->sentence)) {
         $sentence  = " | " . $this->sentence;
         //$this->sms_message .= 'devstack';
