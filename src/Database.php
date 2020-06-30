@@ -558,7 +558,9 @@ if ($this->hash_state == 'off') {
         $max = (int) $max;
 
         $user_search = $this->from;
-        $hash_user_search($this->hash_algorithm, $user_search);
+//        $hash_user_search($this->hash_algorithm, $user_search);
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
+
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
         $value = "%$value%"; // Value to search for in Variables
 
