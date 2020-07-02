@@ -12,7 +12,6 @@ class Similar extends Agent
 {
     public $var = 'hello';
 
-    //  function __construct(Thing $thing, $agent_input = null) {
     function init()
     {
         $this->keyword = "similar";
@@ -59,11 +58,6 @@ class Similar extends Agent
         $this->node_list = ["green" => ["red" => ["green"]]];
 
         $this->current_time = $this->thing->json->time();
-
-        // Get the current Identities flag
-        //        $this->flag = new Variables($this->thing, "variables flag " . $this->from);
-
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
 
         if ($this->verbosity >= 2) {
             $this->thing->log(
@@ -121,7 +115,6 @@ class Similar extends Agent
                 $this->agent_prefix . 'set Flag to ' . $this->flag
             );
         }
-        return;
     }
 
     function isFlag($flag = null)
@@ -179,13 +172,6 @@ class Similar extends Agent
             );
         }
 
-        //        foreach ($findagent_thing->thing_report['things'] as $thing) {
-
-        //echo $thing['task'] . " " . $thing['nom_to'] ." " . $thing['nom_from'] . "<br>";
-
-        //}
-        //echo "merp";
-        //var_dump($findagent_thing->thing_report['things']);
         $this->max_index = 0;
         $this->previous_trains = [];
         $this->similarness = 0;
@@ -194,14 +180,11 @@ class Similar extends Agent
 
         $this->matches = [];
 
-        //if ((isset($findagent_thing->thing_report['things'])) and (count($findagent_thing->thing_report['things']) > 1)) {
         if (
             isset($findagent_thing->thing_report['things']) and
             $findagent_thing->thing_report['things'] != true and
             count($findagent_thing->thing_report['things']) > 1
         ) {
-            //  if ($findagent_thing->thing_report['things'] != true) {
-            //echo "Calculating<br>";
             foreach ($findagent_thing->thing_report['things'] as $thing) {
                 foreach ($findagent_thing->thing_report['things'] as $thing2) {
                     if ($thing['uuid'] == $thing2['uuid']) {
@@ -347,12 +330,6 @@ class Similar extends Agent
 
         // Generate email response.
 
-//        $to = $this->thing->from;
-//        $from = $this->keyword;
-
-//        $this->makeSMS();
-//        $this->makeMessage();
-
         $this->thing_report['email'] = $this->message;
 
         if ($this->agent_input == null) {
@@ -362,8 +339,6 @@ class Similar extends Agent
 
         $this->makeHelp();
         $this->makeTxt();
-
-        return;
     }
 
     function makeHelp()
@@ -550,13 +525,7 @@ class Similar extends Agent
 
         return false;
     }
-/*
-    function kill()
-    {
-        // No messing about.
-        return $this->thing->Forget();
-    }
-*/
+
     function discriminateInput($input, $discriminators = null)
     {
         //$input = "optout opt-out opt-out";

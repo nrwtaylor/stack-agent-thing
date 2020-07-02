@@ -136,7 +136,26 @@ class Agent
 */
         $this->init();
         $this->get();
+
         $this->read();
+
+/*
+        $head_code = $this->thing->getVariable(
+            "headcode",
+            "head_code"
+        );
+var_dump($head_code);
+
+        $this->thing->json->setField("variables");
+        $head_code = $this->thing->json->readVariable(array(
+                "headcode",
+                "head_code"
+            ));
+var_dump($head_code);
+*/
+
+
+
         $this->run();
         $this->make();
 
