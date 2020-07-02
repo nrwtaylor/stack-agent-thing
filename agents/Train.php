@@ -268,11 +268,19 @@ class Train extends Agent
         if (!isset($this->train_thing)) {
             $this->train_thing = $this->thing;
         }
-
+        $this->getHeadcode();
+//var_dump($this->head_code);
+/*
         $this->variables_agent = new Variables(
             $this->train_thing,
             "variables " . $this->default_train_name . " " . $this->from
         );
+*/
+        $this->variables_agent = new Variables(
+            $this->train_thing,
+            "variables " . $this->default_train_name . "_" . $this->head_code ." ". $this->from
+        );
+
 
         //$this->train_thing->thing = $this->variables_agent->thing;
         $this->train_thing = $this->variables_agent->thing;

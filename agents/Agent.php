@@ -230,6 +230,59 @@ class Agent
         $this->makePNGs();
         $this->makeSMS();
         $this->makeWeb();
+
+
+
+
+// Explore adding in INFO and HELP to web response.
+if (isset($this->thing_report['web'])) {
+
+
+$needle = '<p>';
+$pos = strpos($this->thing_report['web'], $needle);
+$length = strlen($this->thing_report['web']);
+$needle_length = strlen($needle);
+
+// Note our use of ===.  Simply == would not work as expected
+// because the position of 'a' was the 0th (first) character.
+if ($pos === false) {
+//    echo "The string '$findme' was not found in the string '$mystring'";
+$this->thing_report['web'] .= "<p>";
+
+} else {
+//    echo "The string '$findme' was found in the string '$mystring'";
+//    echo " and exists at position $pos";
+
+if ($pos == ($length - $needle_length)) {
+
+
+
+} else {
+
+//$this->thing_report['web'] .= "<p>";
+
+
+}
+$this->thing_report['web'] .= "<p>";
+
+
+}
+
+
+$agents = array("response","help","info");
+
+foreach($agents as $i=>$agent_name) {
+
+if (!isset($this->thing_report[$agent_name])) {continue;}
+
+$this->thing_report['web'] .= "<b>" . strtoupper($agent_name) . "</b><p>";
+$this->thing_report['web'] .= $this->thing_report[$agent_name];
+$this->thing_report['web'] .= "<p>";
+}
+
+}
+
+
         $this->makeSnippet();
 
         $this->makeEmail();
