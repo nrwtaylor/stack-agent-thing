@@ -98,6 +98,8 @@ class Flag extends Agent
 
     public function get()
     {
+/*
+
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
             "headcode",
@@ -105,7 +107,8 @@ class Flag extends Agent
         ]);
 
         $flag_variable_name = "_" . $this->head_code;
-
+*/
+$flag_variable_name ="";
         // Get the current Identities flag
         $this->flag = new Variables(
             $this->thing,
@@ -278,8 +281,9 @@ class Flag extends Agent
             $flag_state = $this->state;
         }
 
-        $headcode_text = strtoupper($this->head_code);
-
+//        $headcode_text = strtoupper($this->head_code);
+$headcode_text = $this->flag->head_code;
+//$headcode_text = "XXXX";
         $sms_message =
             "FLAG " . $headcode_text . " IS " . strtoupper($flag_state);
         if ($this->verbosity > 6) {

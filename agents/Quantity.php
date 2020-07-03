@@ -64,6 +64,7 @@ class Quantity extends Agent
      *
      * @return unknown
      */
+/*
     public function set()
     {
         if ($this->input == "quantity") {
@@ -99,6 +100,43 @@ class Quantity extends Agent
             "INFORMATION"
         );
     }
+*/
+
+    function set($requested_quantity = null)
+    {
+        if ($requested_quantity == null) {
+            if (!isset($this->requested_quantity)) {
+                $this->requested_quantity = "X"; // If not sure, show X.
+
+                if (isset($this->quantity)) {
+                    $this->requested_quantity = $this->quantity;
+                }
+                // Set default behaviour.
+                // $this->requested_state = "green";
+                // $this->requested_state = "red";
+                //                $this->requested_state = "green"; // If not sure, show green.
+            }
+
+            $requested_quantity = $this->requested_quantity;
+        }
+
+        $this->quantity = $requested_quantity;
+        $this->refreshed_at = $this->current_time;
+
+        $this->quantity_agent->setVariable("quantity", $this->quantity);
+
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
+        //$this->variables_thing->setVariable("flag_id", $this->nuuid);
+
+        $this->quantity_agent->setVariable("refreshed_at", $this->current_time);
+
+        $this->thing->log(
+            $this->agent_prefix . 'set Quantity to ' . $this->quantity,
+            "INFORMATION"
+        );
+    }
+
+
 
     public function respondResponse()
     {
@@ -221,11 +259,57 @@ class Quantity extends Agent
      */
     public function get()
     {
-        $this->headcode_agent = new Headcode($this->thing, "headcode");
 
-        $this->getQuantity();
-        return $this->quantity;
+
+$flag_variable_name ="";
+        // Get the current Identities flag
+        $this->quantity_agent = new Variables(
+            $this->thing,
+            "variables quantity" . $flag_variable_name . " " . $this->from
+        );
+
+        // get gets the state of the Flag the last time
+        // it was saved into the stack (serialized).
+        $this->previous_quantity = $this->quantity_agent->getVariable("quantity");
+        $this->refreshed_at = $this->quantity_agent->getVariable("refreshed_at");
+
+
+        // If it is a valid previous_state, then
+        // load it into the current state variable.
+        if ($this->isQuantity($this->previous_quantity)) {
+            $this->quantity = $this->previous_quantity;
+        } else {
+            $this->quantity = $this->default_quantity;
+        }
+
+}
+
+
+
+
+
+    public function isQuantity($quantity = null)
+    {
+        // Validates whether the Flag is green or red.
+        // Nothing else is allowed.
+
+        if ($quantity == null) {
+            if (!isset($this->quantity)) {
+                $this->quantity = "X";
+            }
+
+            $quantity = $this->quantity;
+        }
+
+if (is_numeric($quantity)) {return true;}
+
+if (strtolower($quantity) == "x") {return true;}
+if (strtolower($quantity) == "z") {return true;}
+
+        return false;
     }
+
+
 
     /**
      *
@@ -267,6 +351,9 @@ class Quantity extends Agent
         );
 
         $this->current_quantity = $quantity;
+
+        $this->requested_quantity = $quantity;
+
         $this->quantity = $quantity;
         $this->refreshed_at = $this->current_time;
 
@@ -322,6 +409,7 @@ class Quantity extends Agent
     {
         $number = new Number($this->thing, "number");
         $numbers = $number->numbers;
+
         return $numbers;
     }
 
@@ -401,11 +489,13 @@ class Quantity extends Agent
      */
     public function makeWeb()
     {
+if (!isset($this->quantities)) {$this->getQuantities();}
+
         $test_message = "<b>Quantity Agent</b><p>";
 
         $test_message .=
             "Headcode " .
-            strtoupper($this->headcode_agent->head_code) .
+            strtoupper($this->quantity_agent->head_code) .
             " " .
             $this->quantity .
             ' units<p>';
@@ -539,9 +629,21 @@ class Quantity extends Agent
         $s = $this->inject;
         $string_quantity = $this->stringQuantity($this->quantity);
         $headcode = "X";
+/*
         if (isset($this->headcode_agent->head_code)) {
             $headcode = strtoupper($this->headcode_agent->head_code);
         }
+*/
+/*
+        if (isset($this->headcode_agent->head_code)) {
+            $headcode = strtoupper($this->headcode_agent->head_code);
+        }
+*/
+        if (isset($this->quantity_agent->head_code)) {
+            $headcode = strtoupper($this->quantity_agent->head_code);
+        }
+
+
         $sms = "QUANTITY " . $headcode . " " . $string_quantity;
 
         if (!empty($this->inject)) {

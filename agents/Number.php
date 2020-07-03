@@ -399,15 +399,14 @@ $this->numbers_history = $traditional;
 
         $this->numbers = [];
         foreach ($pieces as $key=>$piece) {
-
             if (is_numeric($piece)) {
                 $this->numbers[] = $piece;
                 continue;
             }
 
             // X - Specify. Z - Available.
-            if ((strtoupper($piece) == "X") or (strtoupper($piece == "Z"))) {
-                $this->numbers[] = $piece;
+            if ((strtoupper($piece) == "X") or (strtoupper($piece) == "Z")) {
+                $this->numbers[] = strtoupper($piece);
                 continue;
             }
 
