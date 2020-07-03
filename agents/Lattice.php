@@ -333,7 +333,9 @@ class Lattice extends Agent
 
     function rgbcolor($r, $g, $b)
     {
+
         $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
+
     }
 
     public function makePNG()
@@ -343,12 +345,17 @@ class Lattice extends Agent
             $this->canvas_size_y
         );
 
+imagesavealpha($this->image, true);
+$this->transparent_color = imagecolorallocatealpha($this->image, 0, 0, 0, 127);
+imagefill($this->image, 0, 0, $this->transparent_color);
+
+
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-
+/*
         imagefilledrectangle(
             $this->image,
             0,
@@ -357,7 +364,7 @@ class Lattice extends Agent
             $this->canvas_size_y,
             $this->white
         );
-
+*/
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
         //        $this->drawLattice($this->canvas_size_x/2, $this->canvas_size_y/2);
         $this->drawLattice();
@@ -475,8 +482,8 @@ class Lattice extends Agent
         if (isset($this->angle)) {
             $angle = $this->angle;
         }
-
-        $font_size = 6;
+$font_size = 10;
+if (isset($this->font_size)) {$font_size = $this->font_size;}
 
         $bbox = imagettfbbox($font_size, $angle, $font, $text);
         $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
@@ -644,13 +651,16 @@ class Lattice extends Agent
 
             $this->rgbcolor(255, 255, 255);
 
+$this->rgb = $this->transparent_color;
             //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
             imagefilledpolygon(
                 $this->image,
                 $point_array,
                 count($point_array) / 2,
+
                 $this->rgb
             );
+
 
             $this->rgbcolor(20, 20, 20);
             imagepolygon(
@@ -666,7 +676,7 @@ class Lattice extends Agent
 
             imagestring($this->image, 2, $x_pt+$center_x, $y_pt+$center_y, $label, $textcolor);
             $this->drawWord($label, $x_pt+ $center_x, $y_pt + $center_y);
-
+rgb
         }
 */
     }

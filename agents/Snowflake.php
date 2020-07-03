@@ -244,8 +244,10 @@ class Snowflake extends Agent
     public function latticeSnowflake()
     {
         $lattice_agent = new Lattice($this->thing, "lattice");
-        $lattice_agent->max = 13;
-        $lattice_agent->size = 150;
+        $lattice_agent->font_size = 16;
+
+        $lattice_agent->max = 12;
+        $lattice_agent->size = 120;
         $lattice_agent->lattice_size = 40;
         $lattice_agent->angle = -pi() / 2;
 
@@ -254,8 +256,8 @@ class Snowflake extends Agent
 
         //$lattice_agent->angle = 0;
 
-        $lattice_agent->canvas_size_x = 2200;
-        $lattice_agent->canvas_size_y = 2680;
+        $lattice_agent->canvas_size_x = 2550;
+        $lattice_agent->canvas_size_y = 2860;
 
         $lattice_agent->initLattice();
         $lattice_agent->makePNG();
@@ -1655,10 +1657,10 @@ class Snowflake extends Agent
 
             $pdf->addPage($s['orientation'], $s);
             $pdf->useTemplate($tplidx1);
-
+/*
             if (isset($this->hextile_PNG)) {
-                $top_x = 10;
-                $top_y = 10;
+                $top_x = -6;
+                $top_y = 11;
 
                 $pdf->Image(
                     $this->hextile_PNG,
@@ -1669,7 +1671,7 @@ class Snowflake extends Agent
                     'PNG'
                 );
             }
-
+*/
             $this->getNuuid();
             $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
             $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
@@ -1684,6 +1686,21 @@ class Snowflake extends Agent
             $text = $this->whatis;
             $line_height = 20;
             $pdf->MultiCell(150, $line_height, $text, 0);
+
+            if (isset($this->hextile_PNG)) {
+                $top_x = -6;
+                $top_y = 11;
+
+                $pdf->Image(
+                    $this->hextile_PNG,
+                    $top_x,
+                    $top_y,
+                    -300,
+                    -300,
+                    'PNG'
+                );
+            }
+
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
