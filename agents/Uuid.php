@@ -23,17 +23,11 @@ class Uuid extends Agent
     {
         $this->stack_state = $this->thing->container['stack']['state'];
         $this->short_name = $this->thing->container['stack']['short_name'];
-        //var_dump("uuid");
-        //var_dump($this->thing->thing->created_at);
-        //var_dump($this->thing->thing->created_at);
-        //        $this->created_at =  strtotime($this->thing->thing->created_at);
 
         $this->thing->log(
             'started running on Thing ' . date("Y-m-d H:i:s") . ''
         );
 
-        //       $this->node_list = array("uuid"=>
-        //           array("uuid", "snowflake"));
         $this->node_list = [];
 
         $this->aliases = ["learning" => ["good job"]];
@@ -135,6 +129,7 @@ class Uuid extends Agent
             $this->thing->log(
                 'found a uuid (' . $this->uuid . ') in the text.'
             );
+            $this->response .= "Extracted a UUID. ";
             return $this->uuid;
         }
 
@@ -213,11 +208,12 @@ class Uuid extends Agent
      */
     function makeSMS()
     {
-        $this->sms_message = "UUID | ";
-        $this->sms_message .= $this->uuid;
-        $this->sms_message .= ' | TEXT ?';
-
-        $this->thing_report['sms'] = $this->sms_message;
+        $sms = "UUID | ";
+        $sms .= $this->uuid;
+        $sms .= " " . $this->response;
+        //        $this->sms_message .= ' | TEXT ?';
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     /**

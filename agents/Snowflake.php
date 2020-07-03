@@ -290,9 +290,7 @@ class Snowflake extends Agent
         //        $this->binarySnowflake($this->decimal_snowflake);
 
         $this->thing->log(
-                'loaded decimal snowflake ' .
-                $this->decimal_snowflake .
-                '.',
+            'loaded decimal snowflake ' . $this->decimal_snowflake . '.',
             "INFORMATION"
         );
     }
@@ -402,7 +400,7 @@ class Snowflake extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.pdf';
         $this->node_list = ["snowflake" => ["snowflake"]];
         //$web = "<b>Snowflake Agent</b><br><p>";
-$web = "";
+        $web = "";
         $web .= '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
         $web .= $this->html_image;
@@ -1633,7 +1631,7 @@ $web = "";
 
             $pdf->addPage($s['orientation'], $s);
             $pdf->useTemplate($tplidx1);
-/*
+            /*
             if (isset($this->hextile_PNG)) {
                 $top_x = -6;
                 $top_y = 11;
@@ -1676,7 +1674,6 @@ $web = "";
                     'PNG'
                 );
             }
-
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
@@ -1729,8 +1726,8 @@ $web = "";
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
-//$pdfTitle = 'snowflake_'.$this->thing->nuuid.'.pdf';
-//$image = $pdf->Output('S', $pdfTitle);
+            //$pdfTitle = 'snowflake_'.$this->thing->nuuid.'.pdf';
+            //$image = $pdf->Output('S', $pdfTitle);
 
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
