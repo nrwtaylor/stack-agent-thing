@@ -83,10 +83,11 @@ class Roll extends Agent
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         $this->thing->flagGreen();
 
-//        $choices = false;
+        $this->makeChoices();
+
 
         $this->thing_report["info"] = "This rolls a dice.  See
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
@@ -107,6 +108,7 @@ class Roll extends Agent
     /**
      *
      */
+/*
     function make() {
 
         $this->makeSMS();
@@ -121,6 +123,7 @@ class Roll extends Agent
 
 
     }
+*/
 
 
     /**

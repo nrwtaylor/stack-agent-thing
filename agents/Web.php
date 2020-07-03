@@ -64,7 +64,7 @@ function makeSMS() {
      * @return unknown
      */
     public function respond() {
-$this->makeSMS();
+//$this->makeSMS();
         // Thing actions
 
         //        $web_thing = new Thing(null);
@@ -123,8 +123,33 @@ $this->makeSMS();
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
             $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
+//var_dump($block_thing['task']);
 
-            if ($block_thing['nom_to'] != "usermanager") {
+            if ($block_thing['nom_to'] == "usermanager") {continue;}
+
+
+            $variables_json = $block_thing['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
+
+            if (isset($variables['message']['agent'])) {
+
+                $this->prior_agent = $variables['message']['agent'];
+
+                if (in_array(strtolower($this->prior_agent), array('web', 'pdf', 'txt', 'log', 'php'))) {
+                    continue;
+                }
+
+                $this->link_uuid = $block_thing['uuid'];
+
+            $previous_thing = new Thing($this->link_uuid);
+//$balance = $previous_thing->account['stack']->balance['amount'];
+//var_dump($balance);
+                break;
+            }
+
+
+/*
+     //       if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];
                 $link_uuids[] = $block_thing['uuid'];
@@ -133,8 +158,10 @@ $this->makeSMS();
                 if ($match == 10) {break;}
 
 
-            }
-        }
+     //       }
+*/  
+      }
+/*
         $this->prior_agent = "web";
         foreach ($link_uuids as $key=>$link_uuid) {
             $previous_thing = new Thing($link_uuid);
@@ -152,7 +179,7 @@ $this->makeSMS();
                 break;
             }
         }
-
+*/
         $this->web_exists = true;
         // Testing with this removed
         //        $token_thing = new Tokenlimiter($previous_thing, "revoke tokens");

@@ -142,29 +142,6 @@ class Snowflake extends Agent
 
     /**
      *
-     */
-    /*
-    public function init()
-    {
-        if (!isset($this->max)) {
-            $this->max = 12;
-        }
-        if (!isset($this->size)) {
-            $this->size = 3.7;
-        }
-        if (!isset($this->lattice_size)) {
-            $this->lattice_size = 15;
-        }
-
-        $this->initLattice($this->max);
-        $this->initSegment();
-
-        $this->setProbability();
-        $this->setRules();
-    }
-*/
-    /**
-     *
      * @return unknown
      */
     public function respondResponse()
@@ -424,8 +401,9 @@ class Snowflake extends Agent
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.pdf';
         $this->node_list = ["snowflake" => ["snowflake"]];
-
-        $web = '<a href="' . $link . '">';
+        //$web = "<b>Snowflake Agent</b><br><p>";
+$web = "";
+        $web .= '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -438,11 +416,9 @@ class Snowflake extends Agent
 
         $this->timestampSnowflake($this->retain_to);
         $web .= ucwords($this->timestamp);
-        //$web .= "<br>";
 
-        $web .= "<p>";
+        //$web .= "<p>";
 
-        //$web .= "<br><br>";
         $this->thing_report['web'] = $web;
     }
 

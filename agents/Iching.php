@@ -74,7 +74,7 @@ class IChing extends Agent {
 
         $this->changinglines();
         if ( ($this->reading == false) ) {
-            $response = $this->hexagramGenerator();
+            $this->reading = $this->hexagramGenerator();
             $this->thing->json->writeVariable( array("iching", "reading"), $this->reading );
         }
         $this->getHexagram($this->reading);
@@ -162,6 +162,8 @@ class IChing extends Agent {
         $this->hexagram_number = $this->readingtoHexagram();
         $this->hexagram_text = $this->interpretHexagram($this->hexagram_number);
 
+$this->response .= "Got hexagram. ";
+
     }
 
 
@@ -169,7 +171,7 @@ class IChing extends Agent {
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
 
         $this->cost = 100;
 
@@ -177,18 +179,18 @@ class IChing extends Agent {
         $this->thing->flagGreen();
 
 
-        $this->response = false;
+//        $this->response = false;
 
         $this->thing->log( 'divined a reading of ' . $this->reading. "." );
 
-        $this->makePNG();
+//        $this->makePNG();
 
-        $this->makeMessage();
-        $this->makeEmail();
-        $this->makeSMS();
+//        $this->makeMessage();
+//        $this->makeEmail();
+//        $this->makeSMS();
 
         $this->makeChoices();
-        $this->makeWeb();
+//        $this->makeWeb();
 
         $this->thing_report['txt'] = $this->sms_message;
 
@@ -214,7 +216,6 @@ class IChing extends Agent {
     }
 
     public function makePNG() {
-        //if (!isset($this->image)) {$this->makeImage();}
 
         $agent = new Png($this->thing, "png");
         $this->makeImage();
@@ -225,7 +226,6 @@ class IChing extends Agent {
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
 
-        //$this->thing_report['png'] = $agent->PNG;
         $this->thing_report['png'] = $agent->image_string;
 
     }
@@ -263,23 +263,28 @@ class IChing extends Agent {
      *
      */
     function makeSMS() {
-        $this->sms_message = 'ICHING | ';
-        $this->sms_message .= "Hexagram ". $this->hexagram_text[0] ." ". $this->hexagram_number . ' ' . $this->hexagram_text[1]  . ' ' . $this->hexagram_text[2];
+        $sms = 'ICHING | ';
+        $sms .= "Hexagram ". $this->hexagram_text[0] ." ". $this->hexagram_number . ' ' . $this->hexagram_text[1]  . ' ' . $this->hexagram_text[2];
         $this->changinglines();
+
         if (count($this->changing_lines ) == 0) {
-            $this->sms_message .= " unchanging.";
+            $sms .= " unchanging.";
         } else {
             // Hexagram 小畜 9 xiǎo chù Small Accumulating with changing line 5
             //            if (mb_strlen($this->changinglines()) == 1) {
             if (count($this->changing_lines ) == 1) {
 
-                $this->sms_message .= " with changing line ";
+                $sms .= " with changing line ";
             } else {
-                $this->sms_message .= " with changing lines ";
+                $sms .= " with changing lines ";
             }
-            $this->sms_message .= $this->changinglines() . ".";
+            $sms .= $this->changinglines() . ".";
         }
-        $this->thing_report['sms'] = $this->sms_message;
+
+$sms .= " " . $this->response;
+
+$this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
 
@@ -860,9 +865,9 @@ class IChing extends Agent {
 
         $hexagram = $this->interpretHexagram($hexagram_number);
 
-        $this->reading = $lower_trigram['reading'] . $upper_trigram['reading'];
+        $reading = $lower_trigram['reading'] . $upper_trigram['reading'];
 
-        return $this->reading;
+        return $reading;
     }
 
 
