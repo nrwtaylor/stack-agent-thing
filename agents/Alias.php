@@ -7,7 +7,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Alias
+class Alias extends Agent
 {
 
     // This is the alias manager.  It assigns an alias coding to 
@@ -25,28 +25,28 @@ class Alias
     // Then find the latest alias record in that context.
 
     public $var = 'hello';
-
-    function __construct(Thing $thing, $agent_input = null)
+function init()
+//    function __construct(Thing $thing, $agent_input = null)
     {
 
 //        if ($agent_input == null) {$agent_input = "";}
-        $this->agent_input = $agent_input;
+  //      $this->agent_input = $agent_input;
         $this->keyword = "alias";
 
-        $this->thing = $thing;
+   //     $this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
         $this->thing_report['thing'] = $this->thing->thing;
 
         $this->test= "Development code"; // Always
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
+//        $this->sqlresponse = null;
 
-        $this->agent_name = "alias";
-        $this->agent_prefix = 'Agent "Alias" ';
+//        $this->agent_name = "alias";
+//        $this->agent_prefix = 'Agent "Alias" ';
 
 // $this->node_list = array("green"=>array("red"=>array("green","red"),"red"),"green3");
 //$this->thing->choice->load('alias');
@@ -61,10 +61,13 @@ class Alias
 
         $this->variables_agent = new Variables($this->thing, "variables alias " . $this->from);
 
+
+$this->alias_thing = $this->variables_agent->thing;
         $this->keywords = array('alias','is');
 
 
         $this->context = null;
+$this->context_id = null;
         $this->alias = null;
         $this->alias_id = null;
 
@@ -74,12 +77,12 @@ class Alias
 
 //        $this->variables_agent = new Variables($this->thing, "variables " . $default_alias_name . " " . $this->from);
 
-        $this->thing->log($this->agent_prefix . '. ' . $this->thing->elapsed_runtime() . 'ms.', "OPTIMIZE");
+    //    $this->thing->log($this->agent_prefix . '. ' . $this->thing->elapsed_runtime() . 'ms.', "OPTIMIZE");
 
         // Loads in Block variables.
         //$this->get(); // Updates $this->elapsed_time; // And calls the variables-agent
 
-        $this->thing->log($this->agent_prefix . '. ' . $this->thing->elapsed_runtime() . 'ms.', "OPTIMIZE");
+  //      $this->thing->log($this->agent_prefix . '. ' . $this->thing->elapsed_runtime() . 'ms.', "OPTIMIZE");
 
 //echo $this->thing->log;
 
@@ -94,27 +97,27 @@ class Alias
 //$this->thing->choice->Create('stopwatch', $this->node_list, 'stop');
 //$this->thing->choice->Choose("midden work");
 
-		$this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
-		$this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "INFORMATION");
+//		$this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
+//		$this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "INFORMATION");
 
 
-		$this->readSubject();
+//		$this->readSubject();
 
-        $this->set();
+  //      $this->set();
 
-        if ($this->agent_input == null) {
+  //      if ($this->agent_input == null) {
          
-		    $this->respond();
-        }
+	//	    $this->respond();
+    //    }
 
 
-        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.' );
+  //      $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time) . 'ms.' );
 
-        $this->thing_report['log'] = $this->thing->log;
+  //      $this->thing_report['log'] = $this->thing->log;
         //$this->thing_report['txt'] = "Meep";
 
 
-		return;
+//		return;
 
     }
 
@@ -183,7 +186,6 @@ class Alias
 //        $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
 
-        return;
     }
 
 
@@ -308,19 +310,17 @@ class Alias
 
         if (count($aliases) == 0) {
 
-            $this->alias = "Random";
+$this->response .= "Got zero aliases. ";
+            $this->alias = null;
 
         } else {
 
             $this->alias = $aliases[0]['alias'];
             $this->alias_id = $aliases[0]['alias_id'];
 
-//echo "<br>";echo "alias  " . $this->alias . " " . $this->alias_id;
-//exit();
-//echo "<br>";echo "alias id " . $this->alias_id;
-//echo "<br>";echo "context " . $this->context;
-//echo "<br>";
-//exit();
+        $this->alias = null;
+        $this->alias_id = null;
+
 
         }
 
@@ -329,7 +329,6 @@ class Alias
 //        $this->thing->log('Agent "Alias". Get() function too ' . number_format($this->thing->elapsed_runtime() - $this->get_start_time) . 'ms.' );
 
 
-        return;
     }
 
     function dropAlias() {
@@ -346,7 +345,6 @@ class Alias
 
         $this->get();
  
-       return;
     }
 
     function runAlias() {
@@ -396,12 +394,11 @@ class Alias
 
   //      $this->set();
 
-
         $this->thing->log($this->agent_prefix . 'found an alias and made a Alias entry.');
-
+$this->response .= 'Asked to make a Alias. But did not. ';
     }
 
-
+/*
     function getVariable($variable_name = null, $variable = null) {
 
         // This function does a minor kind of magic
@@ -409,7 +406,7 @@ class Alias
         // and $this->default_variable.
 
         // Doesn't yet do it's magic with...
-        // identity_variable
+        // identity_variablew
         // thing_variable
         // stack_variable
 
@@ -442,7 +439,7 @@ class Alias
         // setting is found.
         return false;
     }
-
+*/
 
 
 
@@ -488,6 +485,8 @@ class Alias
                 // Pass it to Alias which handles is/alias as the same word.
                 //$instruction = $left_grams . " alias " . $right_grams; 
 
+$this->response .= "Got alias ". $this->alias .". ";
+
             if ($this->alias == "place") {
                 // Okay straight to Place
                 $place_agent = new Place($this->thing);
@@ -505,44 +504,14 @@ class Alias
         return $alias;
     }
 
-/*
-    function extractAlias($input = null) 
-    {
-        if (!isset($this->aliases)) {$this->extractAliases($input);}
-
-        if (count($this->aliases) == 1) {
-            $this->alias = $this->aliases[0];
-            return $this->alias;
-        }
-
-        if (count($this->aliases) == 0) {
-            $this->alias = "meep";
-            return $this->alias;
-        }
-
-        $this->alias = $this->aliases[0];
-        return $this->alias;
-    }
-*/
-
-/*
-    function getHeadcode() 
+    function readAlias($text = null)
     {
 
-        if ( (isset($this->head_code)) and (isset($this->headcode_thing)) ) { return $this->head_code;}
-
-        $this->headcode_thing = new Headcode($this->variables_agent->thing, 'headcode '. $this->input);
-        $this->head_code = $this->headcode_thing->head_code; 
-
-        return $this->head_code;
-    }
-*/
+if ($text == null) {$text = $this->input;}
 
 
-    function read()
-    {
+
         $this->thing->log("read");
-        return $this->available;
     }
 
 
@@ -550,7 +519,6 @@ class Alias
     function addAlias() {
         $this->makeAlias();
         $this->get();
-        return;
     }
 
 
@@ -558,7 +526,7 @@ class Alias
    function makeTXT()
     {
 
-        if (!isset($this->aliases_list)) {$this->get();}
+        if (!isset($this->aliases_list)) {$this->getAliases();}
 
 
         $txt = 'These are ALIASES for RAILWAY ' . $this->variables_agent->nuuid . '. ';
@@ -631,26 +599,12 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
 
 
 
-	private function respond()
+	public function respondResponse()
     {
 		// Thing actions
 		$this->thing->flagGreen();
 
-		// Generate email response.
-		$to = $this->thing->from;
-		$from = "alias";
-
-        $this->makeTXT();
-
-//exit();
-//		$choices = $this->thing->choice->makeLinks($this->state);
-//		$this->thing_report['choices'] = $choices;
         $this->thing_report['choices'] = false;
-
-        //$interval = date_diff($datetime1, $datetime2);
-        //echo $interval->format('%R%a days');
-
-//        $available = $this->thing->human_time($this->available);
 
         if (!isset($this->index)) {
             $index = "0";
@@ -658,9 +612,8 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
             $index = $this->index;
         }
 
-
-        $this->makeSMS();
         $this->makeChoices();
+
         $this->thing_report['email'] = $this->sms_message;
 		$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
@@ -669,7 +622,7 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
 
         $this->thing_report['help'] = 'This is the Aliasing manager.';
 
-		return;
+//		return $this->thing_report;
 	}
 
     public function makeChoices()
@@ -693,22 +646,29 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
         $this->sms_messages[] = "ALIAS | Could not find an agent to respond to your message.";
         $this->node_list = array("alias"=>array("agent","message"));
 
-        $sms_message = "ALIAS " . strtoupper($this->alias_id);
-        $sms_message .= " | alias " . strtoupper($this->alias);
+        $sms = "ALIAS " . strtoupper($this->alias_id);
+        $sms .= " | alias " . strtoupper($this->alias);
 
-        $sms_message .= " | nuuid " . substr($this->variables_agent->uuid,0,4); 
-        $sms_message .= " | nuuid " . substr($this->alias_thing->uuid,0,4); 
+        $sms .= " | nuuid " . substr($this->variables_agent->uuid,0,4); 
+        $sms .= " | nuuid " . substr($this->alias_thing->uuid,0,4); 
 
-        $sms_message .= " | context " . $this->context;
-        $sms_message .= " | alias id " . $this->alias_id;
+        $sms .= " | context " . $this->context;
+        $sms .= " | alias id " . $this->alias_id;
 
-        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime()) . "ms";
+        $sms .= " | ~rtime " . number_format($this->thing->elapsed_runtime()) . "ms";
+$sms .= $this->response;
 
-        $this->sms_messages[] = $sms_message;
+//        $this->sms_messages[] = $sms_message;
 
-        $this->sms_message = $this->sms_messages[0];
-        $this->thing_report['sms'] = $this->sms_messages[0];
-        return;
+//        $this->sms_message = $this->sms_messages[0];
+
+//$sms = $sms_message;
+
+//        $this->thing_report['sms'] = $this->sms_messages[0];
+$this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
+
+
     }
 
     function isPlace($input)
@@ -749,9 +709,9 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
     public function readSubject() 
     {
 
-        $this->response = null;
+//        $this->response = null;
         $this->num_hits = 0;
-
+/*
         if ($this->agent_input != null) {
             // If agent input has been provided then
             // ignore the subject.
@@ -760,25 +720,27 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
         } else {
             $input = strtolower($this->subject);
         }
+*/
+$input = $this->input;
 
         $this->extractAlias($input);
-
-        $this->getAliases();
+//        $this->getAliases();
 
 
         // Bail at this point if
         // only extract wanted.
         if ($this->agent_input == 'extract') {
-
             // Added return here March 17 2018
             return;
             if ($this->alias != false) {return;}
         }
 
+        $this->getAliases();
+
+
         $this->extractContext();
 
         $this->input = $input;
-		$haystack = $this->agent_input . " "  . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
 
@@ -790,7 +752,7 @@ if (!isset($alias['context'])) {$alias['context'] = "X";}
         if (count($pieces) == 1) {
 
             if ($this->input == 'alias') {
-                $this->get();   
+                //$this->get();   
                 //$this->set();
                 $this->num_hits += 1;
                 return;
@@ -884,23 +846,8 @@ if ($this->isPlace($input)) {
 
 // If all else fails try the discriminator.
 
-    $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-    switch($this->requested_state) {
-        case 'start':
-            $this->start();
-            break;
-        case 'stop':
-            $this->stop();
-            break;
-        case 'reset':
-            $this->reset();
-            break;
-        case 'split':
-            $this->split();
-            break;
-    }
 
-    $this->read();
+    $this->readAlias();
 
 
 
@@ -912,118 +859,9 @@ if ($this->isPlace($input)) {
 
 		return false;
 
-	
 	}
 
 
 
-
-
-
-	function kill() {
-		// No messing about.
-		return $this->thing->Forget();
-	}
-
-       function discriminateInput($input, $discriminators = null) {
-
-
-                //$input = "optout opt-out opt-out";
-
-                if ($discriminators == null) {
-                        $discriminators = array('accept', 'clear');
-                }       
-
-
-
-                $default_discriminator_thresholds = array(2=>0.3, 3=>0.3, 4=>0.3);
-
-                if (count($discriminators) > 4) {
-                        $minimum_discrimination = $default_discriminator_thresholds[4];
-                } else {
-                        $minimum_discrimination = $default_discriminator_thresholds[count($discriminators)];
-                }
-
-
-
-                $aliases = array();
-
-                $aliases['accept'] = array('accept','add','+');
-                $aliases['clear'] = array('clear','drop', 'clr', '-');
-
-
-
-                $words = explode(" ", $input);
-
-                $count = array();
-
-                $total_count = 0;
-                // Set counts to 1.  Bayes thing...     
-                foreach ($discriminators as $discriminator) {
-                        $count[$discriminator] = 1;
-
-                       $total_count = $total_count + 1;
-                }
-                // ...and the total count.
-
-
-
-                foreach ($words as $word) {
-
-                        foreach ($discriminators as $discriminator) {
-
-                                if ($word == $discriminator) {
-                                        $count[$discriminator] = $count[$discriminator] + 1;
-                                        $total_count = $total_count + 1;
-                                                //echo "sum";
-                                }
-
-                                foreach ($aliases[$discriminator] as $alias) {
-
-                                        if ($word == $alias) {
-                                                $count[$discriminator] = $count[$discriminator] + 1;
-                                                $total_count = $total_count + 1;
-                                                //echo "sum";
-                                        }
-                                }
-                        }
-
-                }
-
-                //echo "total count"; $total_count;
-                // Set total sum of all values to 1.
-
-                $normalized = array();
-                foreach ($discriminators as $discriminator) {
-                        $normalized[$discriminator] = $count[$discriminator] / $total_count;            
-                }
-
-
-                // Is there good discrimination
-                arsort($normalized);
-
-
-                // Now see what the delta is between position 0 and 1
-
-                foreach ($normalized as $key=>$value) {
-                    //echo $key, $value;
-
-                    if ( isset($max) ) {$delta = $max-$value; break;}
-                        if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
-                }
-
-
-                      //  echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-
-                if ($delta >= $minimum_discrimination) {
-                        //echo "discriminator" . $discriminator;
-                        return $selected_discriminator;
-                } else {
-                        return false; // No discriminator found.
-                } 
-
-                return true;
-        }
 
 }

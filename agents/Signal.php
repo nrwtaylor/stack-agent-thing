@@ -165,7 +165,9 @@ class Signal extends Agent
                 $this->signal = $signal;
 
                 $this->signal_id = $signal['id'];
-                $this->signal_thing = new Thing($this->signal_id);
+         //       $this->signal_thing = new Thing($this->signal_id);
+
+$this->getSignalbyUuid($this->signal_id);
 
                 return $this->signal_thing;
             }

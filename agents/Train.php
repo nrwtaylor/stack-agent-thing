@@ -269,7 +269,6 @@ class Train extends Agent
             $this->train_thing = $this->thing;
         }
         $this->getHeadcode();
-//var_dump($this->head_code);
 /*
         $this->variables_agent = new Variables(
             $this->train_thing,
@@ -295,6 +294,8 @@ class Train extends Agent
         $this->getHeadcode();
 
         $this->response .= 'Got head code ' . $this->head_code . '. ';
+
+
         if (!isset($this->trains)) {
             $this->getTrains();
         }
@@ -602,7 +603,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
                 $this->head_code = $train['head_code'];
                 $this->run_at = $train['run_at'];
 
-                $this->runtime->minutes = $train['runtime'];
+                $this->runtime = $train['runtime'];
                 $this->quantity = $train['quantity'];
 
                 $this->route = $train['route'];
@@ -655,7 +656,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
                 $this->route = $thing->getVariable("train", "route");
                 $this->consist = $thing->getVariable("train", "consist");
-                $this->runtime->minutes = $thing->getVariable(
+                $this->runtime = $thing->getVariable(
                     "train",
                     "runtime"
                 );
@@ -672,7 +673,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
                         ' (' .
                         $this->trainTime($this->runat) .
                         " " .
-                        $this->runtime->minutes .
+                        $this->runtime .
                         ').'
                 );
 
@@ -685,7 +686,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
                 $this->train_thing->index = $this->max_index + 1;
                 $this->head_code = "2Z" . rand(20, 29);
                 $this->run_at = $this->current_time;
-                $this->runtime->minutes = 22;
+                $this->runtime = 22;
                 break;
 
             default:
@@ -783,14 +784,14 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             $this->run_at = $this->current_time;
         }
 
-        if (!isset($this->runtime->minutes)) {
+        if (!isset($this->runtime)) {
             // get and extract neither found anything
             //$this->getRuntime();
             $this->response .= "Set runtime to default. ";
-            $this->runtime->minutes = 22;
+            $this->runtime = 22;
         }
 
-        $this->response .= "Runtime " . $this->runtime->minutes . ". ";
+        $this->response .= "Runtime " . $this->runtime . ". ";
         $this->response .=
             "Runat " . $this->run_at->hour . " " . $this->run_at->minute . ". ";
         $this->response .= "Headcode is " . $this->head_code . ". ";
@@ -799,7 +800,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             $this->head_code,
             $this->alias,
             $this->current_time,
-            $this->runtime->minutes
+            $this->runtime
         );
 
         $this->state = "running";
@@ -1322,7 +1323,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             case strtoupper($this->end_at) != "X" and
                 strtoupper($this->end_at) != "Z":
                 $this->runat = strtotime(
-                    $this->end_at . "-" . $this->runtime->minutes . "minutes"
+                    $this->end_at . "-" . $this->runtime . "minutes"
                 );
 
                 break;
@@ -1411,11 +1412,11 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
     function setRuntime()
     {
-        $this->runtime_agent->runtime->minutes = $this->runtime;
+        $this->runtime_agent->runtime = $this->runtime;
         $this->runtime_agent->set();
 
         $t = new Runtime($this->train_thing, "runtim");
-        $t->runtime->minutes = $this->runtime->minutesy;
+        $t->runtime = $this->runtime;
 
         $t->set();
     }
@@ -1446,21 +1447,21 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         $runtime = $this->runtime;
 
         // Which can be <number>, "X" or "Z".
-        if (strtoupper($runtime->minutes) == "X") {
+        if (strtoupper($runtime) == "X") {
             // Train must specifiy runtime.
-            if (!isset($this->runtime->minutes)) {
-                $this->runtime->minutes = "X";
+            if (!isset($this->runtime)) {
+                $this->runtime = "X";
             }
         }
 
-        if (strtoupper($runtime->minutes) == "Z") {
+        if (strtoupper($runtime) == "Z") {
             // Train must specifiy runtime.
             $this->runtime->minutes = "Z";
         }
 
-        if (is_numeric($runtime->minutes)) {
+        if (is_numeric($runtime)) {
             // Train must specifiy runtime.
-            $this->runtime->minutes = $runtime->minutes;
+            $this->runtime = $runtime;
         }
         return $this->runtime;
     }
@@ -1932,7 +1933,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         $txt .= " " . str_pad($this->run_at, 6, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad($this->end_at, 6, " ", STR_PAD_LEFT);
 
-        $txt .= " " . str_pad($this->runtime->minutes, 8, " ", STR_PAD_LEFT);
+        $txt .= " " . str_pad($this->runtime, 8, " ", STR_PAD_LEFT);
 
         $txt .= " " . str_pad($this->available, 6, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad($this->quantity, 9, " ", STR_PAD_LEFT);
@@ -2402,7 +2403,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
                     //if (!$this->thing->isData($run_at)) {$run_at = "X";}
                     $sms_message .=
                         "" . "run at " . $this->trainTime($this->runat);
-                    $sms_message .= " " . "runtime " . $this->runtime->minutes;
+                    $sms_message .= " " . "runtime " . $this->runtime;
                 }
 
                 if ($this->verbosity > 5) {
@@ -2457,7 +2458,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             }
 
             $route_description =
-                $route . " [" . $this->consist . "] " . $this->runtime->minutes;
+                $route . " [" . $this->consist . "] " . $this->runtime;
             $sms_message .= " | " . $route_description;
             //     $sms_message .=
             //         " | nuuid " .
@@ -2562,7 +2563,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         $matches = 0;
         foreach ($pieces as $key => $piece) {
             if ($piece == 'x' or $piece == 'z') {
-                $this->runtime->minutes = $piece;
+                $this->runtime = $piece;
                 $matches += 1;
                 continue;
             }

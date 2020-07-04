@@ -139,7 +139,7 @@ class Agent
 
         $this->read();
 
-/*
+        /*
         $head_code = $this->thing->getVariable(
             "headcode",
             "head_code"
@@ -153,8 +153,6 @@ var_dump($head_code);
             ));
 var_dump($head_code);
 */
-
-
 
         $this->run();
         $this->make();
@@ -250,8 +248,6 @@ var_dump($head_code);
         $this->makeSMS();
         $this->makeWeb();
 
-
-
         // Explore adding in INFO and HELP to web response.
         $agents = ["response", "help", "info"];
 
@@ -315,7 +311,6 @@ var_dump($head_code);
 
             $this->thing_report['web'] .= "<p>" . $web;
         }
-
 
         $this->makeSnippet();
 
@@ -691,7 +686,7 @@ var_dump($head_code);
     public function respond()
     {
         $this->respondResponse();
- /////       //$this->thing->flagGreen();
+        /////       //$this->thing->flagGreen();
         //        return $this->thing_report;
     }
 
@@ -1697,43 +1692,58 @@ var_dump($head_code);
             'looking for keyword matches with available agents.',
             "INFORMATION"
         );
-        foreach ($arr as $keyword) {
-            // Don't allow agent to be recognized
-            if (strtolower($keyword) == 'agent') {
-                continue;
-            }
+        $agents_tested = [];
+        foreach (['', 's', 'es'] as $postfix_variant) {
+            foreach ($arr as $keyword) {
+                // Don't allow agent to be recognized
+                if (strtolower($keyword) == 'agent') {
+                    continue;
+                }
 
-            $agent_class_name = ucfirst(strtolower($keyword));
-            $agent_class_name = str_replace("-", "", $agent_class_name);
+                $agent_class_name = ucfirst(strtolower($keyword));
 
-            // Can probably do this quickly by loading path list into a variable
-            // and looping, or a direct namespace check.
-            $filename = $this->agents_path . $agent_class_name . ".php";
-            if (file_exists($filename)) {
-                $agents[] = $agent_class_name;
-            }
+                $agent_class_name = substr_replace(
+                    $agent_class_name,
+                    '',
+                    -1,
+                    strlen($postfix_variant)
+                );
+                if (in_array($agent_class_name, $agents_tested)) {
+                    continue;
+                }
 
-            // 2nd way
-            $agent_class_name = strtolower($keyword);
+                $agent_class_name = str_replace("-", "", $agent_class_name);
 
-            // Can probably do this quickly by loading path list into a variable
-            // and looping, or a direct namespace check.
-            $filename = $this->agents_path . $agent_class_name . ".php";
-            if (file_exists($filename)) {
-                $agents[] = $agent_class_name;
-            }
+                // Can probably do this quickly by loading path list into a variable
+                // and looping, or a direct namespace check.
+                $filename = $this->agents_path . $agent_class_name . ".php";
+                if (file_exists($filename)) {
+                    $agents[] = $agent_class_name;
+                }
 
-            // 3rd way
-            $agent_class_name = strtoupper($keyword);
+                // 2nd way
+                $agent_class_name = strtolower($keyword);
 
-            // Can probably do this quickly by loading path list into a variable
-            // and looping, or a direct namespace check.
-            $filename = $this->agents_path . $agent_class_name . ".php";
-            if (file_exists($filename)) {
-                $agents[] = $agent_class_name;
+                // Can probably do this quickly by loading path list into a variable
+                // and looping, or a direct namespace check.
+                $filename = $this->agents_path . $agent_class_name . ".php";
+                if (file_exists($filename)) {
+                    $agents[] = $agent_class_name;
+                }
+
+                $agents_tested[] = $agent_class_name;
+
+                // 3rd way
+                $agent_class_name = strtoupper($keyword);
+
+                // Can probably do this quickly by loading path list into a variable
+                // and looping, or a direct namespace check.
+                $filename = $this->agents_path . $agent_class_name . ".php";
+                if (file_exists($filename)) {
+                    $agents[] = $agent_class_name;
+                }
             }
         }
-
         restore_error_handler();
 
         // What effect would this have?
