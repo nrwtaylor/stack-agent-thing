@@ -134,7 +134,6 @@ function makeSMS() {
             if (isset($variables['message']['agent'])) {
 
                 $this->prior_agent = $variables['message']['agent'];
-
                 if (in_array(strtolower($this->prior_agent), array('web', 'pdf', 'txt', 'log', 'php'))) {
                     continue;
                 }

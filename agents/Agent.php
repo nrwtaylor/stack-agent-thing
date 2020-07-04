@@ -100,6 +100,8 @@ class Agent
                 $this->thing->container['api'][strtolower($this->agent_name)];
         }
 
+        $this->agent_version = 'redpanda';
+
         $this->current_time = $this->thing->time();
 
         $this->num_hits = 0;
@@ -144,14 +146,12 @@ class Agent
             "headcode",
             "head_code"
         );
-var_dump($head_code);
 
         $this->thing->json->setField("variables");
         $head_code = $this->thing->json->readVariable(array(
                 "headcode",
                 "head_code"
             ));
-var_dump($head_code);
 */
 
         $this->run();
@@ -1593,15 +1593,25 @@ var_dump($head_code);
 
         $this->thing->log('Agent "Agent" looking for UUID in input.');
         // Is Identity Context?
-        $uuid = new Uuid($this->thing, "extract");
+        $uuid = new Uuid($this->thing, "uuid");
+
         $uuid->extractUuids($input);
         if (isset($uuid->uuids) and count($uuid->uuids) > 0) {
             $this->thing->log(
                 'Agent "Agent" found a  UUID in input.',
                 "INFORMATION"
             );
-            // $this->thing_report = $uuid->thing_report;
-            // And then ignored it.
+
+            // Check if only a UUID is provided.
+            // If it is send it to the UUID agent.
+
+            if (strtolower($input) == strtolower($uuid->uuid)) {
+
+                $uuid = new Uuid($this->thing);
+                $this->thing_report = $uuid->thing_report;
+                return $this->thing_report;
+            }
+
         }
 
         $this->thing->log('Agent "Agent" looking for URL in input.');

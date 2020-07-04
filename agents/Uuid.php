@@ -143,6 +143,12 @@ class Uuid extends Agent
         return true;
     }
 
+    public function readUuid($text = null) {
+
+        $text = $this->input;
+        return $text;
+    }
+
     /**
      *
      */
@@ -161,13 +167,12 @@ class Uuid extends Agent
         $web .= "</a>";
 
         $web .= "<br>";
+        $web .= $this->readUuid() . "<br>";
 
         $web .=
             "CREATED AT " .
             strtoupper(date('Y M d D H:m', $this->created_at)) .
             "<br>";
-
-        $web .= "<br>";
 
         $this->thing_report['web'] = $web;
     }
@@ -184,17 +189,18 @@ class Uuid extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
     }
 
+
     /**
      *
      * @return unknown
      */
     public function readSubject()
     {
+        $input = $this->input;
+        $this->extractUuid($input);
+
         // Then look for messages sent to UUIDS
-        $this->thing->log('Agent "UUID" looking for UUID in address.');
-
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-
         if (preg_match($pattern, $this->to)) {
             $this->thing->log('Agent "UUID" found a  UUID in address.');
         }
