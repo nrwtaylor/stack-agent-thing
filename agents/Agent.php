@@ -581,8 +581,12 @@ class Agent
                 $previous_thing->json->array_data['message']['agent'];
         }
 
+	$this->link = $this->web_prefix . 'thing/' . $this->uuid . '/' . strtolower($this->prior_agent);
+
         return $this->link_uuid;
     }
+
+
 
     /**
      *

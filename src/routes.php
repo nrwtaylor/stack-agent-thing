@@ -610,7 +610,7 @@ $app->group('/api', function () use ($app) {
                         $thingreport = array('thing' => $thing->thing,
                             'info' => 'This is a GET connector to create new Things.  It does not extract any
 				other information from the datagram.  And only uses the text in the URI provided.',
-                            'help' => $app->web_prefix .'thing/<34 char>/to/<agent name>/subject/<998 characters>',
+                            'help' => 'Also try ' . 'thing/<34 char>/to/<agent name>/subject/<998 characters>',
                             'whatisthis' => 'This is the API creation endpoint for submitting to-subject pairs to this stack');
 
                         return $this->response->withJson($thingreport);
@@ -778,6 +778,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             break;
 
         case ($command == "privacy"):
+        case ($command == "privacy-policy"):
 
             $thing = new Thing($uuid);
             $thing->Create("web", "routes", "s/ web privacy");
@@ -797,36 +798,12 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             return $this->renderer->render($response, 'thing.phtml', $bleep);
             break;
-        case ($command == "bot"):
-        case ($command == "robot"):
-        case ($command == "robots"):
-
-            $thing = new Thing($uuid);
-            $thing->Create("web", "routes", "s/ web robot");
-
-            $privacy_agent = new Robot($thing);
-
-            $thing_report = $privacy_agent->thing_report;
-            $thing_report['requested_channel'] = 'thing';
-
-            $thing_report['etime'] = number_format($thing->elapsed_runtime());
-            $thing_report['request'] = $thing->subject;
-
-            $thing->flagGreen();
-
-            $bleep = array();
-            $bleep['thing_report'] = $thing_report;
-
-            return $this->renderer->render($response, 'thing.phtml', $bleep);
-            break;
-
-
 
         case ($command == "termsofuse"):
         case ($command == "terms-of-use"):
 
             $thing = new Thing($uuid);
-            $thing->Create("web", "routes", "s/ web termsofuse");
+            $thing->Create("web", "routes", "s/ web terms of use");
 
             $agent = new Termsofuse($thing);
 
@@ -937,10 +914,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             $thing = new Thing($uuid);
 
 
-//                            $channel = new Channel($thing, "web");
-//var_dump($channel->channel_name);
-
-
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
@@ -1009,6 +982,7 @@ if ($command != $txt) {
             $agent = new Agent($thing, $command);
 
             $thing_report = $agent->thing_report;
+
             $thing_report['filename'] = $last;
             $thing_report['request'] = $thing->subject;
 
@@ -1018,11 +992,6 @@ if ($command != $txt) {
             if ($channel == "thing") {
                 if (isset($thing_report['web'])) {
                     $channel = "web";
-
-                   new Channel($thing, "web");
-//var_dump($channel->channel_name);
-
-
                 } elseif (isset($thing_report['sms'])) {
                     $channel = "sms";
                 } else {
