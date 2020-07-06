@@ -1619,7 +1619,7 @@ class Agent
         $url = new Url($this->thing, "url");
         $urls = $url->extractUrls($input);
 
-        if (isset($urls) and count($urls) > 0) {
+        if (($urls !== true) and (isset($urls) and count($urls) > 0)) {
             $this->thing->log(
                 'Agent "Agent" found a URL in input.',
                 "INFORMATION"

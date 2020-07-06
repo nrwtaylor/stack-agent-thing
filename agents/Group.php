@@ -266,7 +266,7 @@ if ($groups === false) {return false;}
             "start"
         );
         $this->choices = $this->thing->choice->makeLinks("listen");
-
+$this->groups = $groups;
         return $this->thing_report['groups'];
     }
 
@@ -470,6 +470,26 @@ if ($groups === false) {return false;}
         $this->thing_report['sms'] = $sms;
     }
 
+public function textGroups($text = null) {
+$t = "";
+        $this->findGroup(); // Might need to call this in the set-up.
+
+        $groups = [];
+        if (
+            isset($this->thing_report['groups']) and
+            $this->thing_report['groups'] != false
+        ) {
+            $groups = $this->thing_report['groups'];
+        }
+$groups = array_unique($groups);
+        foreach ($groups as $i => $group) {
+
+$t .= $group . " ";
+
+        }
+return trim($t);
+}
+
     public function readSubject()
     {
         /*
@@ -578,6 +598,27 @@ $this->response .= "Didn't see screen. So did not screen. ";
                 return;
             }
 
+
+            if ($input == 'groups') {
+$this->response .= "Heard request for groups. ";
+$this->response .= $this->textGroups() ." ";
+/*
+                if ($this->group_id != null) {
+                    $this->response .=
+                        "Retrieved the current group identity. Group is " .
+                        $this->group_id .
+                        ". ";
+                } else {
+                    $this->findGroup();
+                    $this->response .= "Found group " . $this->group_id . ". ";
+                }
+*/
+                $this->num_hits += 1;
+                return;
+            }
+
+
+
             if ($input == 'group') {
                 if ($this->group_id != null) {
                     $this->response .=
@@ -607,8 +648,7 @@ $this->response .= "Didn't see screen. So did not screen. ";
                 $this->num_hits += 1;
                 return;
             }
-
-            if (ctype_alpha($this->subject[0]) == true) {
+            if ((isset($this->subject[0])) and (ctype_alpha($this->subject[0]) == true)) {
                 // Strip out first letter and process remaning 4 or 5 digit number
                 //$input = substr($input, 1);
             }
