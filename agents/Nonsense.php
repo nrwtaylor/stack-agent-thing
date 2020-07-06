@@ -384,13 +384,9 @@ public function set() {
 
     function computeTranspositions($array)
     {
-        //echo "foo";
-        //echo count($array);
-        //var_dump($array);
         if (count($array) == 1) {
             return false;
         }
-        //var_dump($array);
         $result = [];
         foreach (range(0, count($array) - 2) as $i) {
             $tmp_array = $array;
@@ -402,7 +398,6 @@ public function set() {
             //        var_dump($array);
         }
 
-        //exit();
         return $result;
     }
 

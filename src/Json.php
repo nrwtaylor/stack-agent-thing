@@ -282,7 +282,7 @@ class Json
         $this->pushStream($value, 0);
 
         if ($this->db->last_update != true) {
-            echo "foo";
+            echo "fallingWater";
             return;
         }
         // Check if JSON string too long.

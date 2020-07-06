@@ -14,7 +14,6 @@ class Callagent
 	public function __construct($thing, $agent_input = null)
     {
         return;
-        echo "foo";
         $this->agent_instruction = $agent_input;
 
         //$this->arg = $arg;
@@ -27,7 +26,6 @@ class Callagent
 
         if ($agent_input == "getagent") {$this->callAgent($this->thing->uuid);}
         $this->thing_report['log'] = $this->thing->log;
-        echo "bar";
 	}
 
 

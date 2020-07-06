@@ -1653,6 +1653,15 @@ class Agent
                 is_array($headcode->head_codes) and
                 count($headcode->head_codes) > 0
             ) {
+
+// OK have found a headcode.
+// But what if there is an active agent with the request?
+
+$tokens = explode(" ",$input);
+if (count($tokens) == 1) { 
+
+
+
                 $this->thing->log(
                     'Agent "Agent" found a headcode in address.',
                     "INFORMATION"
@@ -1660,6 +1669,9 @@ class Agent
                 $headcode_thing = new Headcode($this->thing);
                 $this->thing_report = $headcode_thing->thing_report;
                 return $this->thing_report;
+}
+// Otherwise check in as last resort...
+
             }
         }
         // Temporarily alias robots
@@ -2038,12 +2050,13 @@ class Agent
             $this->thing_report = $question_thing->thing_report;
             return $this->thing_report;
         }
+
+
         // Timecheck
         $this->thing_report = $this->timeout(15000);
         if ($this->thing_report != false) {
             return $this->thing_report;
         }
-
         // Now pull in the context
         // This allows us to be more focused
         // with the remaining time.
@@ -2072,6 +2085,26 @@ class Agent
         if ($this->thing_report != false) {
             return $this->thing_report;
         }
+
+
+
+            if (
+                is_array($headcode->head_codes) and
+                count($headcode->head_codes) > 0
+            ) {
+
+                $this->thing->log(
+                    'Agent "Agent" found a headcode in address.',
+                    "INFORMATION"
+                );
+                $headcode_thing = new Headcode($this->thing);
+                $this->thing_report = $headcode_thing->thing_report;
+                return $this->thing_report;
+
+            }
+
+
+
 
         switch (strtolower($this->context)) {
             case 'group':
@@ -2269,6 +2302,7 @@ class Agent
         //            $this->thing_report = $chatbot->thing_report;
         //            return $this->thing_report;
         //        }
+
 
         $this->thing->log(
             '<pre> Agent "Agent" created a Redpanda agent.</pre>',

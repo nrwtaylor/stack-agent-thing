@@ -57,6 +57,16 @@ class Signal extends Agent
 
     function set()
     {
+        if (isset($this->signal_thing->uuid)) {
+            $this->associations->setAssociation($this->signal_thing->uuid);
+        }
+
+        if ($this->channel_name == 'web') {
+            $this->response .= "Detected web channel. ";
+            // Do not effect a state change for web views.
+            return;
+        }
+
         $this->thing->json->writeVariable(
             ["signal", "state"],
             $this->signal['state']
@@ -68,12 +78,6 @@ class Signal extends Agent
         $this->thing->json->writeVariable(["signal", "text"], "X");
 
         $this->setSignal();
-
-        if (!isset($this->signal_id)) {
-            $this->signal_id = $this->uuid;
-        }
-
-        $this->associations->setAssociation($this->signal_id);
 
         $this->thing->log(
             $this->agent_prefix . 'set Signal to ' . $this->state,
@@ -111,8 +115,16 @@ class Signal extends Agent
         return true;
     }
 
-    function get()
+    public function get()
     {
+        //        if (!isset($this->signal_thing)) {
+        //            $this->signal_thing = $this->thing;
+        //        }
+
+        $this->channel = new Channel($this->thing, "channel");
+        $this->channel_name = $this->channel->channel_name;
+
+        $this->response .= "Saw channel is " . $this->channel_name . ". ";
         $this->getSignal();
 
         $this->thing->log(
@@ -158,10 +170,6 @@ class Signal extends Agent
 
     function setSignal($text = null)
     {
-        if (!isset($this->signal_thing)) {
-            $this->signal_thing = $this->thing;
-        }
-
         $this->signal_thing->json->writeVariable(
             ["signal", "state"],
             $this->signal['state']
@@ -198,6 +206,12 @@ class Signal extends Agent
 
     function getSignalbyUuid($uuid)
     {
+        if ($this->channel_name == 'web') {
+            $id = $this->idSignal($uuid);
+            $this->getSignalbyId($id);
+            return;
+        }
+
         $this->signal_thing = new Thing($uuid);
         $this->signal = $this->thing->json->jsontoArray(
             $this->signal_thing->thing->variables
@@ -208,8 +222,110 @@ class Signal extends Agent
         $this->signal['id'] = $this->signal_id;
     }
 
-    function getSignal()
+    function getSignalbyNuuid($nuuid)
     {
+        if (!isset($this->signals)) {
+            $this->getSignals();
+        }
+        $matched_uuids = [];
+        foreach ($this->signals as $i => $signal) {
+            if ($signal['text'] != "signal post") {
+                continue;
+            }
+
+            if (substr($signal['id'], 0, 4) == $nuuid) {
+                $matched_uuids[] = $signal['id'];
+            }
+        }
+
+        if (count($matched_uuids) != 1) {
+            return true;
+        }
+
+        $uuid = $matched_uuids[0];
+
+        $this->response .= "Found signal match " . $this->idSignal($uuid) . ". ";
+
+        $this->signal_thing = new Thing($uuid);
+        $this->signal = $this->thing->json->jsontoArray(
+            $this->signal_thing->thing->variables
+        )['signal'];
+
+        $this->state = $this->signal['state'];
+        $this->signal_id = $this->signal_thing->uuid;
+        $this->signal['id'] = $this->signal_id;
+    }
+
+    function getSignalbyId($id)
+    {
+        if (!isset($this->signals)) {
+            $this->getSignals();
+        }
+        $matched_uuids = [];
+        foreach ($this->signals as $i => $signal) {
+            if ($signal['text'] != "signal post") {
+                continue;
+            }
+
+            if (substr($this->idSignal($signal['id']), 0, 4) == $id) {
+                $matched_uuids[] = $signal['id'];
+            }
+        }
+
+        if (count($matched_uuids) != 1) {
+            return true;
+        }
+
+        $uuid = $matched_uuids[0];
+
+        $this->response .= "Found signal match " . $this->idSignal($uuid) . ". ";
+
+        $this->signal_thing = new Thing($uuid);
+        $this->signal = $this->thing->json->jsontoArray(
+            $this->signal_thing->thing->variables
+        )['signal'];
+
+        $this->state = $this->signal['state'];
+        $this->signal_id = $this->signal_thing->uuid;
+        $this->signal['id'] = $this->signal_id;
+    }
+
+    function idSignal($text = null)
+    {
+        $signal_id = $text;
+        if ($text == null) {
+            if (isset($this->signal_thing->uuid)) {
+                $signal_id = $this->signal_thing->uuid;
+            }
+        }
+
+        $t = hash('sha256', $signal_id);
+        $t = substr($t, 0, 4);
+        return $t;
+    }
+
+    public function getSignal()
+    {
+        if (
+            isset(
+                $this->thing->json->jsontoArray($this->thing->thing->variables)[
+                    'signal'
+                ]
+            )
+        ) {
+            // First is there a signal in this thing.
+            $this->signal = $this->thing->json->jsontoArray(
+                $this->thing->thing->variables
+            )['signal'];
+
+            $signal_id = "X";
+            if (isset($this->signal['id'])) {
+                $this->signal_id = $this->signal['id'];
+            }
+
+            //return;
+        }
+
         if (!isset($this->signals)) {
             $this->getSignals();
         }
@@ -325,20 +441,118 @@ class Signal extends Agent
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        if (!isset($this->signals)) {
+            $this->getSignals();
+        }
 
-        $web = '<a href="' . $link . '">';
+        if (isset($this->signal_thing->uuid)) {
+            $flag = false;
+            if (isset($this->signals) and is_array($this->signals)) {
+                $signal_text = "";
+                foreach ($this->signals as $i => $signal) {
+                    if ($signal['text'] != "signal post") {
+                        continue;
+                    }
+
+                    if ($this->signal_thing->uuid == $signal['id']) {
+                        $flag = true;
+                    }
+                }
+            }
+
+            if ($flag === false) {
+                //$web = "Merp.";
+                $web = null;
+                $this->thing_report['web'] = $web;
+                return;
+            }
+        }
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $web = "";
+        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
+        $web .= "<p>";
+        $web .= '<a href="' . $link . '">';
         //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/signal.png">';
         $web .= $this->html_image;
 
         $web .= "</a>";
         $web .= "<br>";
-        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
-        //$web .= $this->sms_message;
 
-        $web .= "SIGNAL IS " . strtoupper($this->signal['state']) . "<br>";
-        $web .= "SIGNAL ID " . strtoupper($this->signal['id']) . "<br>";
+        $state_text = "X";
+        if ($this->signal['state'] != null) {
+            $state_text = strtoupper($this->signal['state']);
+        }
+
+        $web .= "SIGNAL IS " . $state_text . "<br>";
+
+        $web .= "SIGNAL ID " . strtoupper($this->idSignal()) . "<br>";
+
+        $web .= "<p>";
         //$web .= "Refreshed at " . strtoupper($this->signal['refreshed_at']) . "<br>";
+
+        if (!isset($this->signals)) {
+            $this->getSignals();
+        }
+
+        if (isset($this->signals) and is_array($this->signals)) {
+            $signal_text = "";
+
+            foreach ($this->signals as $i => $signal) {
+                if ($signal['text'] == "signal post") {
+                    $signal['hash'] = $this->idSignal($signal['id']);
+                    $signals[] = $signal;
+
+                    //$signal_text .= strtoupper($this->idSignal($signal['id'])) . " " . strtoupper($signal['state']) . "<br>";
+                }
+            }
+
+            //$signals = $this->signals;
+
+            $refreshed_at = [];
+            foreach ($signals as $key => $row) {
+                $refreshed_at[$key] = $row['hash'];
+            }
+            array_multisort($refreshed_at, SORT_DESC, $signals);
+
+            foreach ($signals as $i => $signal) {
+                if ($signal['text'] == "signal post") {
+                    //$signal['hash'] = $this->idSignal($signal['id']);
+                    //$this->signals[$i] = $signal;
+
+                    $signal_text .=
+                        strtoupper($signal['hash']) .
+                        " " .
+                        strtoupper($signal['state']) .
+                        "<br>";
+                }
+            }
+
+            $web .= "<b>SIGNALS FOUND</b><br><p>" . $signal_text;
+        }
+
+        if (isset($this->associations->thing->thing->associations)) {
+            $web .= "<p>";
+            $association_text = "";
+
+            $associations_array = json_decode(
+                $this->associations->thing->thing->associations,
+                true
+            );
+            foreach ($associations_array as $agent_name => $associations) {
+                foreach ($associations as $i => $association_uuid) {
+                    $association_text .=
+                        strtoupper(
+                            $this->idSignal($this->idSignal($association_uuid))
+                        ) .
+                        " " .
+                        $agent_name .
+                        "<br>";
+                }
+            }
+
+            $web .= "<b>ASSOCIATIONS FOUND</b><br><p>" . $association_text;
+        }
 
         $this->thing_report['web'] = $web;
     }
@@ -350,27 +564,7 @@ class Signal extends Agent
 
         $this->thing_report['link'] = $this->link;
     }
-    /*
-    function make() {
-        $this->makeSignal();
 
-        $this->makeHelp();
-$this->makeLink();
-        $this->makeSMS();
-        $this->makeMessage();
-
-        $this->thing_report['email'] = $this->message;
-
-        $this->makePNG();
-
-        $this->makeTXT();
-
-        $this->makeChoices();
-        $this->makeWeb();
-
-        // $this->makeHelp();
-    }
-*/
     function makeHelp()
     {
         if ($this->signal['state'] == "X") {
@@ -400,7 +594,11 @@ $this->makeLink();
 
     function makeTXT()
     {
-        $txt = 'This is SIGNAL POLE ' . $this->signal['id'] . '. ';
+        $signal_id = 'X';
+        if (isset($this->signal['id'])) {
+            $signal_id = $this->signal['id'];
+        }
+        $txt = 'This is SIGNAL POLE ' . $signal_id . '. ';
         $txt .=
             'There is a ' . strtoupper($this->signal['state']) . " SIGNAL. ";
         if ($this->verbosity >= 5) {
@@ -414,7 +612,20 @@ $this->makeLink();
 
     function makeSMS()
     {
-        $sms_message = "SIGNAL IS " . strtoupper($this->signal['state']);
+        $signal_id = "X";
+        if (isset($this->signal_thing->uuid)) {
+            $signal_id = $this->signal_thing->uuid;
+            $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
+            $signal_id = $this->idSignal($signal_id);
+        }
+
+        $state_text = "X";
+        if ($this->signal['state'] != null) {
+            $state_text = strtoupper($this->signal['state']);
+        }
+
+        $sms_message =
+            "SIGNAL " . strtoupper($signal_id) . " IS " . $state_text;
 
         if ($this->verbosity > 6) {
             $sms_message .=
@@ -431,6 +642,18 @@ $this->makeLink();
             //    $sms_message .= " | signal id " . strtoupper($this->signal['id']);
         }
 
+if (strtolower($this->input) == "signals") {
+$sms_message .= " Active signals: ";
+foreach($this->signals as $i=>$signal) {
+if ($signal['text'] == "signal post") {
+$sms_message.= $this->idSignal($signal['id']) ." " ;
+}
+
+}
+
+}
+
+
         if ($this->verbosity > 0) {
             $sms_message .= " | " . $this->link . "";
             $sms_message .= " Text HELP";
@@ -445,6 +668,14 @@ $this->makeLink();
                 $sms_message .= ' | MESSAGE Red';
             }
         }
+        $sms_message .= " " . $this->response;
+
+        if ($this->verbosity > 0) {
+            $sms_message .= " | " . $this->link . "";
+            $sms_message .= " Text HELP";
+        }
+
+
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
     }
@@ -453,14 +684,14 @@ $this->makeLink();
     {
         $message =
             'This is a SIGNAL POLE.  The signal is a ' .
-            trim(strtoupper($this->state)) .
+            trim(strtoupper($this->signal['state'])) .
             " SIGNAL. ";
 
-        if ($this->state == 'red') {
+        if ($this->signal['state'] == 'red') {
             $message .= 'It is a BAD time at the moment. ';
         }
 
-        if ($this->state == 'green') {
+        if ($this->signal['state'] == 'green') {
             $message .= 'It is a GOOD time now. ';
         }
 
@@ -573,8 +804,6 @@ $this->makeLink();
                 $this->yellow
             );
         }
-
-        return;
     }
 
     public function makePNG()
@@ -630,10 +859,7 @@ $this->makeLink();
 
         if (count($pieces) == 3) {
             if ($input == "signal double yellow") {
-                //    $this->selectChoice('double yellow');
                 $this->makeState('double yellow');
-
-                $this->response .= "Selected a double yellow signal. ";
                 return;
             }
         }
@@ -643,6 +869,28 @@ $this->makeLink();
         if (is_string($t)) {
             $this->getSignalbyUuid($t);
             return;
+        }
+
+        // Okay maybe not a full UUID. Perhaps a NUUID.
+        $nuuid_agent = new Nuuid($this->thing, "nuuid");
+        $t = $nuuid_agent->extractNuuid($input);
+
+        if (is_string($t)) {
+            $response = $this->getSignalbyNuuid($t);
+
+            if ($response != true) {
+                $this->response .= "Got signal " . $t . ". ";
+                return;
+            }
+
+            $response = $this->getSignalbyId($t);
+
+            if ($response != true) {
+                $this->response .= "Got signal " . $t . ". ";
+                return;
+            }
+
+            $this->response .= "Match not found. ";
         }
 
         // Lets think about Signals.
@@ -696,118 +944,11 @@ $this->makeLink();
             }
         }
 
-        // If all else fails try the discriminator.
-        $this->requested_state = $this->discriminateInput($this->input); // Run the discriminator.
-        switch ($this->requested_state) {
-            case 'green':
-                $this->makeState('green');
-                $this->response = "Asserted a Green Signal.";
-                return;
-            case 'red':
-                $this->makeState('red');
-                $this->response = "Asserted a Red Signal.";
-                return;
-        }
-
         $this->readSignal();
-        $this->response = "Looked at the Signal.";
+        $this->response .= "Did not see a command. ";
 
         // devstack
         return "Message not understood";
         return false;
-    }
-
-    function discriminateInput($input, $discriminators = null)
-    {
-        //$input = "optout opt-out opt-out";
-
-        if ($discriminators == null) {
-            $discriminators = ['red', 'green'];
-        }
-
-        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        $aliases = [];
-
-        $aliases['red'] = ['r', 'red', 'on'];
-        $aliases['green'] = ['g', 'grn', 'gren', 'green', 'gem', 'off'];
-        //$aliases['reset'] = array('rst','reset','rest');
-        //$aliases['lap'] = array('lap','laps','lp');
-
-        $words = explode(" ", $input);
-
-        $count = [];
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                    //echo "sum";
-                }
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                        //echo "sum";
-                    }
-                }
-            }
-        }
-
-        $this->thing->log(
-            'Agent "Signal" matched ' . $total_count . ' discriminators.',
-            "DEBUG"
-        );
-        // Set total sum of all values to 1.
-
-        $normalized = [];
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
-        }
-
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-
-        foreach ($normalized as $key => $value) {
-            //echo $key, $value;
-
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-        }
-
-        //echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-        if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
     }
 }

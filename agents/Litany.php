@@ -51,7 +51,6 @@ class Litany extends Agent
      */
     public function getLitany($librex_name)
     {
-        //echo "foo";
         // Look up the meaning in the dictionary.
         if ($librex_name == "" or $librex_name == " " or $librex_name == null) {
             return false;

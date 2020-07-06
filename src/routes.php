@@ -937,6 +937,10 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             $thing = new Thing($uuid);
 
 
+//                            $channel = new Channel($thing, "web");
+//var_dump($channel->channel_name);
+
+
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
@@ -1014,6 +1018,11 @@ if ($command != $txt) {
             if ($channel == "thing") {
                 if (isset($thing_report['web'])) {
                     $channel = "web";
+
+                   new Channel($thing, "web");
+//var_dump($channel->channel_name);
+
+
                 } elseif (isset($thing_report['sms'])) {
                     $channel = "sms";
                 } else {
