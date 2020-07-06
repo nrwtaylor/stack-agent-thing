@@ -528,6 +528,8 @@ if ($this->hash_state == 'off') {
     function setUser($id = null)
     {
         if ($id == null) {
+        $settings = require $GLOBALS['stack_path'] . "private/settings.php";
+
             $id = "null@" . $settings['settings']['stack']['mail_postfix'];
         }
         $this->from = $id;

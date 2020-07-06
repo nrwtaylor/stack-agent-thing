@@ -13,8 +13,11 @@ class Watchdog extends Agent
     {
 
         $this->state = "red"; // running
-        $this->url = $this->thing->container['api']['watchdog']['url'];
 
+$this->url = false;
+if (isset($this->thing->container['api']['watchdog']['url'])) {
+        $this->url = $this->thing->container['api']['watchdog']['url'];
+}
         $this->thing_report['help'] = "Watches out for barks.";
     }
 
@@ -89,7 +92,9 @@ $this->response .= "Heard. ";
     }
 
     function doWatchdog($depth = null) {
-        file_get_contents("https://stackr.ca/watchdog");
+if ($this->url === false) {return true;}
+
+        file_get_contents($this->url);
     }
 
 

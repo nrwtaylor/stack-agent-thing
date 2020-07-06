@@ -23,7 +23,7 @@ class Cat extends Agent
 
             $response = "CAT | " . strtolower($v) . ".";
 
-            $this->cat_message = $response;
+            $this->cat_message = $response; // mewsage?
         } else {
             $this->cat_message = $this->agent_input;
         }

@@ -82,6 +82,10 @@ class Agent
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
+// And some more stuff
+        $this->short_name = $thing->container['stack']['short_name'];
+
+
         $this->sqlresponse = null;
 
         $this->thing->log('running on Thing ' . $this->thing->nuuid . '.');
