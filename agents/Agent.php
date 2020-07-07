@@ -82,9 +82,8 @@ class Agent
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-// And some more stuff
+        // And some more stuff
         $this->short_name = $thing->container['stack']['short_name'];
-
 
         $this->sqlresponse = null;
 
@@ -581,12 +580,15 @@ class Agent
                 $previous_thing->json->array_data['message']['agent'];
         }
 
-	$this->link = $this->web_prefix . 'thing/' . $this->uuid . '/' . strtolower($this->prior_agent);
+        $this->link =
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/' .
+            strtolower($this->prior_agent);
 
         return $this->link_uuid;
     }
-
-
 
     /**
      *
@@ -1614,12 +1616,10 @@ class Agent
             // If it is send it to the UUID agent.
 
             if (strtolower($input) == strtolower($uuid->uuid)) {
-
                 $uuid = new Uuid($this->thing);
                 $this->thing_report = $uuid->thing_report;
                 return $this->thing_report;
             }
-
         }
 
         $this->thing->log('Agent "Agent" looking for URL in input.');
@@ -1627,19 +1627,21 @@ class Agent
         $url = new Url($this->thing, "url");
         $urls = $url->extractUrls($input);
 
-        if (($urls !== true) and (isset($urls) and count($urls) > 0)) {
+        if ($urls !== true and (isset($urls) and count($urls) > 0)) {
             $this->thing->log(
                 'Agent "Agent" found a URL in input.',
                 "INFORMATION"
             );
 
-            $this->url = $urls[0];
+            if (isset($urls[0])) {
+                $this->url = $urls[0];
 
-            $tokens = explode(" ", $input);
-            if (count($tokens) == 1) {
-                $url = new Url($this->thing);
-                $this->thing_report = $url->thing_report;
-                return $this->thing_report;
+                $tokens = explode(" ", $input);
+                if (count($tokens) == 1) {
+                    $url = new Url($this->thing);
+                    $this->thing_report = $url->thing_report;
+                    return $this->thing_report;
+                }
             }
         }
 
@@ -1661,25 +1663,20 @@ class Agent
                 is_array($headcode->head_codes) and
                 count($headcode->head_codes) > 0
             ) {
+                // OK have found a headcode.
+                // But what if there is an active agent with the request?
 
-// OK have found a headcode.
-// But what if there is an active agent with the request?
-
-$tokens = explode(" ",$input);
-if (count($tokens) == 1) { 
-
-
-
-                $this->thing->log(
-                    'Agent "Agent" found a headcode in address.',
-                    "INFORMATION"
-                );
-                $headcode_thing = new Headcode($this->thing);
-                $this->thing_report = $headcode_thing->thing_report;
-                return $this->thing_report;
-}
-// Otherwise check in as last resort...
-
+                $tokens = explode(" ", $input);
+                if (count($tokens) == 1) {
+                    $this->thing->log(
+                        'Agent "Agent" found a headcode in address.',
+                        "INFORMATION"
+                    );
+                    $headcode_thing = new Headcode($this->thing);
+                    $this->thing_report = $headcode_thing->thing_report;
+                    return $this->thing_report;
+                }
+                // Otherwise check in as last resort...
             }
         }
         // Temporarily alias robots
@@ -2059,7 +2056,6 @@ if (count($tokens) == 1) {
             return $this->thing_report;
         }
 
-
         // Timecheck
         $this->thing_report = $this->timeout(15000);
         if ($this->thing_report != false) {
@@ -2094,25 +2090,18 @@ if (count($tokens) == 1) {
             return $this->thing_report;
         }
 
-
-
-            if (
-                is_array($headcode->head_codes) and
-                count($headcode->head_codes) > 0
-            ) {
-
-                $this->thing->log(
-                    'Agent "Agent" found a headcode in address.',
-                    "INFORMATION"
-                );
-                $headcode_thing = new Headcode($this->thing);
-                $this->thing_report = $headcode_thing->thing_report;
-                return $this->thing_report;
-
-            }
-
-
-
+        if (
+            is_array($headcode->head_codes) and
+            count($headcode->head_codes) > 0
+        ) {
+            $this->thing->log(
+                'Agent "Agent" found a headcode in address.',
+                "INFORMATION"
+            );
+            $headcode_thing = new Headcode($this->thing);
+            $this->thing_report = $headcode_thing->thing_report;
+            return $this->thing_report;
+        }
 
         switch (strtolower($this->context)) {
             case 'group':
@@ -2310,7 +2299,6 @@ if (count($tokens) == 1) {
         //            $this->thing_report = $chatbot->thing_report;
         //            return $this->thing_report;
         //        }
-
 
         $this->thing->log(
             '<pre> Agent "Agent" created a Redpanda agent.</pre>',

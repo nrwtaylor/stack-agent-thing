@@ -26,9 +26,10 @@ class Read extends Agent
             $this->link = "";
         }
 
-$this->do_not_read = false;
-$this->do_not_catalogue = false;
+        $this->do_not_read = false;
+        $this->do_not_catalogue = false;
 
+        $this->read_horizon = 6 * 60 * 60; // 6 hours
     }
 
     function run()
@@ -45,7 +46,8 @@ $this->do_not_catalogue = false;
                 $this->robot_agent->user_agent_short
             )
         ) {
-            $this->response .= "Robot " . $this->robot_agent->user_agent_short. " allowed. ";
+            $this->response .=
+                "Robot " . $this->robot_agent->user_agent_short . " allowed. ";
 
             if (
                 substr($this->link, 0, 4) === "http" or
@@ -62,29 +64,25 @@ $this->do_not_catalogue = false;
 
             $this->metaRead($this->contents);
             if ($this->noindexRead($this->contents)) {
-
-// Read as noindex do not set url
-$this->response .= 'Do not index. ';
+                // Read as noindex do not set url
+                $this->response .= 'Do not index. ';
             }
 
             if ($this->copyrightRead($this->contents)) {
-$this->response .= 'Saw a copyright notice. ';
-$this->do_not_read = true;
-}
-
+                $this->response .= 'Saw a copyright notice. ';
+                $this->do_not_read = true;
+            }
 
             if ($this->trademarkRead($this->contents)) {
-$this->response .= 'Saw a trademark notice. ';
-$this->do_not_read = true;
-}
+                $this->response .= 'Saw a trademark notice. ';
+                $this->do_not_read = true;
+            }
 
-// Okay to read meta. Get description.
-$description = $this->descriptionRead($this->contents);
-$this->response .= 'Read meta '. $description . ' ';
+            // Okay to read meta. Get description.
+            $description = $this->descriptionRead($this->contents);
+            $this->response .= 'Read meta ' . $description . ' ';
 
-//}
-
-
+            //}
 
             // Get all the URLs in the page.
             $url_agent = new Url($this->thing, "url");
@@ -109,7 +107,7 @@ $this->response .= 'Read meta '. $description . ' ';
         } else {
             $this->response .=
                 "Robot not allowed. " . $this->robot_agent->response;
-$this->do_not_read = true;
+            $this->do_not_read = true;
         }
     }
 
@@ -141,8 +139,113 @@ $this->do_not_read = true;
             return true;
         }
 
-
         return false;
+    }
+
+    public function readRead($text)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        if (strtolower($text) == "read") {
+            return false;
+        }
+
+        $tokens = explode(" ", strtolower($text));
+
+        $first_two_characters = strtolower(substr($text, 0, 2));
+
+        if ($first_two_characters == 's/') {
+            return false;
+        }
+
+        if (strpos($text, 'read') !== false) {
+        } else {
+            return false;
+        }
+
+        $tokens = explode(" ", $text);
+        if (strtolower($tokens[0]) == 'read') {
+            array_shift($tokens);
+            $text = trim(implode(" ", $tokens));
+        }
+
+        $text = preg_replace('/^read _/', '', $text);
+        $text = preg_replace('/^read_/', '', $text);
+
+        return $text;
+    }
+
+    public function getReads()
+    {
+        $reads_list = [];
+
+        $this->reads_list = [];
+        $this->unique_count = 0;
+
+        $findagent_thing = new Findagent($this->thing, 'read');
+        if (!is_array($findagent_thing->thing_report['things'])) {
+            return;
+        }
+        $count = count($findagent_thing->thing_report['things']);
+        $this->thing->log(
+            'Agent "Read" found ' .
+                count($findagent_thing->thing_report['things']) .
+                " Read Things."
+        );
+
+        //$rule_agent = new Rule($this->thing, "rule");
+
+        if ($count > 0) {
+            foreach (
+                array_reverse($findagent_thing->thing_report['things'])
+                as $thing_object
+            ) {
+                $uuid = $thing_object['uuid'];
+
+                if ($uuid == $this->uuid) {
+                    continue;
+                }
+
+                $variables_json = $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                $response = $this->readRead($thing_object['task']);
+
+                // This can be refactered I think with a call to the empty thing function.
+                //if ($response == false) {continue;}
+                //if ($response == true) {continue;}
+                //if ($response == null) {continue;}
+                if ($response == "") {
+                    continue;
+                }
+
+                if ($response === true) {
+                    continue;
+                }
+
+                $text = $response;
+
+                $age =
+                    strtotime($this->thing->time()) -
+                    strtotime($thing_object['created_at']);
+
+                if ($age > $this->read_horizon) {
+                    continue;
+                }
+
+                $read = [
+                    "url" => $response,
+                    "age" => $age,
+                    "uuid" => $thing_object['uuid'],
+                ];
+
+                $reads_list[] = $read;
+            }
+        }
+        $this->reads_list = $reads_list;
+        $this->unique_count = count($reads_list);
     }
 
     function trademarkRead($html)
@@ -165,26 +268,24 @@ $this->do_not_read = true;
             return true;
         }
 
-
         if (stripos($html, '™') !== false) {
-$this->response .= "trademark b";
+            $this->response .= "trademark b";
 
             return true;
         }
 
         if (stripos($html, '®') !== false) {
-$this->response .= "trademark c";
+            $this->response .= "trademark c";
 
             return true;
         }
-/*
+        /*
         if (stripos($html, 'tradem') !== false) {
             return true;
         }
 */
         return false;
     }
-
 
     function metaRead($html)
     {
@@ -201,7 +302,8 @@ $this->response .= "trademark c";
 
     /* A comment to break the confusion that the above string causes. */
 
-function noindexRead($html) {
+    function noindexRead($html)
+    {
         $doc = new \DOMDocument();
         //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         @$doc->loadHTML($html);
@@ -209,70 +311,67 @@ function noindexRead($html) {
         $xpath = new \DOMXpath($doc);
         //$elements = $xpath->query("*/div[@class='yourTagIdHere']");
 
-//$nodes = $xpath->query('meta[name="robots"');
-//$contents = $xpath->query('//meta[@name="description"]/@content');
+        //$nodes = $xpath->query('meta[name="robots"');
+        //$contents = $xpath->query('//meta[@name="description"]/@content');
 
-$contents = $xpath->query('//meta[@name="robots"]/@content');
+        $contents = $xpath->query('//meta[@name="robots"]/@content');
 
-$meta = array();
+        $meta = [];
 
-foreach($contents as $node){
-$meta[] = $node->nodeValue;
-}
+        foreach ($contents as $node) {
+            $meta[] = $node->nodeValue;
+        }
 
-$contents = $xpath->query('//meta[@name="ROBOTS"]/@content');
+        $contents = $xpath->query('//meta[@name="ROBOTS"]/@content');
 
+        foreach ($contents as $node) {
+            $meta[] = $node->nodeValue;
+        }
 
-
-foreach($contents as $node){
-$meta[] = $node->nodeValue;
-}
-
-foreach($meta as $i=>$tag) {
-
-if ($tag == "NOINDEX") {return true;}
-if ($tag == "noindex") {return true;}
-
-}
-return false;
-
-
-}
+        foreach ($meta as $i => $tag) {
+            if ($tag == "NOINDEX") {
+                return true;
+            }
+            if ($tag == "noindex") {
+                return true;
+            }
+        }
+        return false;
+    }
     /* A comment to break the confusion that the above string causes. */
 
-
-function descriptionRead($html) {
+    function descriptionRead($html)
+    {
         $doc = new \DOMDocument();
         //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         @$doc->loadHTML($html);
 
         $xpath = new \DOMXpath($doc);
 
-$contents = $xpath->query('//meta[@name="description"]/@content');
-$meta = array();
+        $contents = $xpath->query('//meta[@name="description"]/@content');
+        $meta = [];
 
-foreach($contents as $node){
-$meta[] = $node->nodeValue;
-}
+        foreach ($contents as $node) {
+            $meta[] = $node->nodeValue;
+        }
 
-$contents = $xpath->query('//meta[@name="DESCRIPTION"]/@content');
+        $contents = $xpath->query('//meta[@name="DESCRIPTION"]/@content');
 
-foreach($contents as $node){
-$meta[] = $node->nodeValue;
-}
+        foreach ($contents as $node) {
+            $meta[] = $node->nodeValue;
+        }
 
-foreach($meta as $i=>$tag) {
-//echo $i . " " . $tag . "<br>";
-}
+        foreach ($meta as $i => $tag) {
+            //echo $i . " " . $tag . "<br>";
+        }
 
-$response = "an empty description.";
-if (isset($meta[0])) {$response = $meta[0];}
+        $response = "an empty description.";
+        if (isset($meta[0])) {
+            $response = $meta[0];
+        }
 
-return $response;
-
-
-}
-
+        return $response;
+    }
 
     function set()
     {
@@ -295,6 +394,8 @@ return $response;
         $this->refreshed_at = $this->variables_agent->getVariables(
             "refreshed_at"
         );
+
+        $this->getReads();
     }
 
     function getUrl($url = null)
@@ -306,6 +407,32 @@ return $response;
         }
 
         $data_source = $this->link;
+
+        // Has this been read recently?
+        foreach ($this->reads_list as $i => $read) {
+            if ("http://" . $read['url'] == $this->link) {
+                if (!isset($last_seen)) {
+                    $last_seen = $read['age'];
+                }
+                if ($read['age'] < $last_seen) {
+                    $last_seen = $read['age'];
+                }
+            }
+
+            if ("https://" . $read['url'] == $this->link) {
+                if (!isset($last_seen)) {
+                    $last_seen = $read['age'];
+                }
+                if ($read['age'] < $last_seen) {
+                    $last_seen = $read['age'];
+                }
+            }
+        }
+
+        if (isset($last_seen)) {
+            $this->response .=
+                "Last read " . $this->thing->human_time($last_seen) . " ago. ";
+        }
 
         $options = [
             'http' => [
@@ -391,9 +518,13 @@ return $response;
 */
         $sms_message .= " | link " . $this->link;
 
-$sms_message .= " | Do not read flag ";
-if ($this->do_not_read) {$sms_message .= 'RED. ';} else {$sms_message .= 'GREEN. ';}
-/*
+        $sms_message .= " | Do not read flag ";
+        if ($this->do_not_read) {
+            $sms_message .= 'RED. ';
+        } else {
+            $sms_message .= 'GREEN. ';
+        }
+        /*
         if ($this->verbosity >= 9) {
             $sms_message .=
                 " | nuuid " . substr($this->variables_agent->thing->uuid, 0, 4);
@@ -403,7 +534,7 @@ if ($this->do_not_read) {$sms_message .= 'RED. ';} else {$sms_message .= 'GREEN.
                 'ms';
         }
 */
-//        $sms_message .= " | TEXT ?";
+        //        $sms_message .= " | TEXT ?";
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
