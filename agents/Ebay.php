@@ -207,7 +207,7 @@ if ($response == null) {return true;}
         );
     }
 
-    function getLink()
+    public function getLink($variable = null)
     {
         $this->link = "www.ebay.com";
     }
