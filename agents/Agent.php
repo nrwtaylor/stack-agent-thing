@@ -173,21 +173,21 @@ class Agent
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
 
             $web_thing = new Thing(null);
-            $web_thing->Create($this->from, "error", "try set failed.");
+            $web_thing->Create($this->from, "error", "Overflow: try set failed.");
 
             $this->thing_report['sms'] = "STACK | " . $this->response;
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
             $web_thing = new Thing(null);
-            $web_thing->Create($this->from, "error", "try set failed.");
+            $web_thing->Create($this->from, "error", "Throwable: Set failed." . $t->getMessage(). " " . $t->getTraceAsString());
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
             //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
             $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
             $web_thing = new Thing(null);
-            $web_thing->Create($this->from, "error", "try set failed.");
+            $web_thing->Create($this->from, "error", "Exception: Set failed.". $e->getMessage(). " " . $t->getTraceAsString() );
             $this->thing->log("caught exception");
             // Executed only in PHP 5, will not be reached in PHP 7
         }

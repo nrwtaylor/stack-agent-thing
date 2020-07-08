@@ -691,6 +691,8 @@ $this->sms_message = $sms;
                 return "green";
             }
 
+if ($alias_id ==null) {continue;} // ? badly formed alias?
+
             if (strpos($input, $alias_id) !== false) {
                 // alias found the word in it's list of alias_ids
                 // possibly tells us the alias_id generator is

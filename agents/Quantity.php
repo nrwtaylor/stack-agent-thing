@@ -64,7 +64,7 @@ class Quantity extends Agent
      *
      * @return unknown
      */
-/*
+    /*
     public function set()
     {
         if ($this->input == "quantity") {
@@ -135,8 +135,6 @@ class Quantity extends Agent
             "INFORMATION"
         );
     }
-
-
 
     public function respondResponse()
     {
@@ -259,9 +257,7 @@ class Quantity extends Agent
      */
     public function get()
     {
-
-
-$flag_variable_name ="";
+        $flag_variable_name = "";
         // Get the current Identities flag
         $this->quantity_agent = new Variables(
             $this->thing,
@@ -270,9 +266,12 @@ $flag_variable_name ="";
 
         // get gets the state of the Flag the last time
         // it was saved into the stack (serialized).
-        $this->previous_quantity = $this->quantity_agent->getVariable("quantity");
-        $this->refreshed_at = $this->quantity_agent->getVariable("refreshed_at");
-
+        $this->previous_quantity = $this->quantity_agent->getVariable(
+            "quantity"
+        );
+        $this->refreshed_at = $this->quantity_agent->getVariable(
+            "refreshed_at"
+        );
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
@@ -281,12 +280,7 @@ $flag_variable_name ="";
         } else {
             $this->quantity = $this->default_quantity;
         }
-
-}
-
-
-
-
+    }
 
     public function isQuantity($quantity = null)
     {
@@ -301,15 +295,19 @@ $flag_variable_name ="";
             $quantity = $this->quantity;
         }
 
-if (is_numeric($quantity)) {return true;}
+        if (is_numeric($quantity)) {
+            return true;
+        }
 
-if (strtolower($quantity) == "x") {return true;}
-if (strtolower($quantity) == "z") {return true;}
+        if (strtolower($quantity) == "x") {
+            return true;
+        }
+        if (strtolower($quantity) == "z") {
+            return true;
+        }
 
         return false;
     }
-
-
 
     /**
      *
@@ -489,7 +487,9 @@ if (strtolower($quantity) == "z") {return true;}
      */
     public function makeWeb()
     {
-if (!isset($this->quantities)) {$this->getQuantities();}
+        if (!isset($this->quantities)) {
+            $this->getQuantities();
+        }
 
         $test_message = "<b>Quantity Agent</b><p>";
 
@@ -611,6 +611,10 @@ if (!isset($this->quantities)) {$this->getQuantities();}
             $quantity = $this->quantity;
         }
 
+        if ($quantity === false) {
+            $quantity = $this->default_quantity;
+        }
+
         if (is_array($quantity)) {
             $this->quantity_string = true;
             return $this->quantity_string;
@@ -629,12 +633,12 @@ if (!isset($this->quantities)) {$this->getQuantities();}
         $s = $this->inject;
         $string_quantity = $this->stringQuantity($this->quantity);
         $headcode = "X";
-/*
+        /*
         if (isset($this->headcode_agent->head_code)) {
             $headcode = strtoupper($this->headcode_agent->head_code);
         }
 */
-/*
+        /*
         if (isset($this->headcode_agent->head_code)) {
             $headcode = strtoupper($this->headcode_agent->head_code);
         }
@@ -642,7 +646,6 @@ if (!isset($this->quantities)) {$this->getQuantities();}
         if (isset($this->quantity_agent->head_code)) {
             $headcode = strtoupper($this->quantity_agent->head_code);
         }
-
 
         $sms = "QUANTITY " . $headcode . " " . $string_quantity;
 

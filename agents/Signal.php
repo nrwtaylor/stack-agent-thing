@@ -627,6 +627,8 @@ class Signal extends Agent
         $sms_message =
             "SIGNAL " . strtoupper($signal_id) . " IS " . $state_text;
 
+$sms_message .= " | ";
+
         if ($this->verbosity > 6) {
             $sms_message .=
                 " | previous state " . strtoupper($this->previous_state);
@@ -654,11 +656,6 @@ $sms_message.= $this->idSignal($signal['id']) ." " ;
 }
 
 
-        if ($this->verbosity > 0) {
-            $sms_message .= " | " . $this->link . "";
-            $sms_message .= " Text HELP";
-        }
-
         if ($this->verbosity > 2) {
             if ($this->state == "red") {
                 $sms_message .= " | MESSAGE Green";
@@ -668,13 +665,14 @@ $sms_message.= $this->idSignal($signal['id']) ." " ;
                 $sms_message .= ' | MESSAGE Red';
             }
         }
-        $sms_message .= " " . $this->response;
+        $sms_message .= "" . trim($this->response);
 
+/*
         if ($this->verbosity > 0) {
             $sms_message .= " | " . $this->link . "";
             $sms_message .= " Text HELP";
         }
-
+*/
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;

@@ -260,7 +260,29 @@ class Train extends Agent
 
     function run()
     {
+
+$this->doTrain();
     }
+
+
+function doTrain() {
+
+        $available = $this->thing->human_time($this->available);
+
+        if (!isset($this->index)) {
+            $index = "0";
+        } else {
+            $index = $this->index;
+        }
+
+        //$s = $this->block_thing->state;
+        if (!isset($this->flag)) {
+            $this->getFlag();
+        }
+
+
+
+}
 
     function get()
     {
@@ -283,25 +305,26 @@ class Train extends Agent
 
         //$this->train_thing->thing = $this->variables_agent->thing;
         $this->train_thing = $this->variables_agent->thing;
-        $this->response .= "Got train. ";
+        //$this->response .= "Got train. ";
 
-        $this->getTrain();
-        //$this->getState();
+        $this->priorTrain();
     }
 
-    function getTrain($text = null)
+    function priorTrain($text = null)
     {
-        $this->getHeadcode();
 
-        $this->response .= 'Got head code ' . $this->head_code . '. ';
+//        $this->response .= 'Looking for train ' . $this->head_code . '. ';
 
 
         if (!isset($this->trains)) {
             $this->getTrains();
         }
 
-        $this->response .=
-            'Got last head code ' . $this->trains[1]['headcode'] . '. ';
+if (isset($this->trains[1])) {
+
+//        $this->response .=
+//            'Got last head code ' . $this->trains[1]['headcode'] . '. ';
+
 
         if ($this->head_code != $this->trains[1]['headcode']) {
             $this->response .= "Head code changed. ";
@@ -344,7 +367,7 @@ class Train extends Agent
                 }
             }
         }
-
+}
         $this->getAvailable();
         $this->getFlag();
         $this->getQuantity();
@@ -1425,7 +1448,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
     {
         $this->runtime_agent = new Runtime($this->train_thing, "runtime");
 
-        $this->runtime = $this->runtime_agent->minutes;
+        $this->runtime = $this->runtime_agent->runtime;
 
         return;
 
@@ -1456,7 +1479,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
         if (strtoupper($runtime) == "Z") {
             // Train must specifiy runtime.
-            $this->runtime->minutes = "Z";
+            $this->runtime = "Z";
         }
 
         if (is_numeric($runtime)) {
@@ -2115,7 +2138,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 */
         $choices = $this->thing->choice->makeLinks($this->state);
         $this->thing_report['choices'] = $choices;
-
+/*
         $available = $this->thing->human_time($this->available);
 
         if (!isset($this->index)) {
@@ -2128,20 +2151,10 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         if (!isset($this->flag)) {
             $this->getFlag();
         }
-
-        //$this->makeSMS();
-
-        //            $sms_message = "testtesttest train";
-        //            $this->thing_report['sms'] = $sms_message;
-        //            $this->sms_message = $sms_message;
-
-        //$this->makeEmail();
-
+*/
         $this->message = $this->sms_message;
-        // $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 18 Feb 2018 - testing if this works for email;
 
-        //$this->thing_report['message'] = "test";
 
         $this->thing_report['info'] = "Took a look at the train.";
         if ($this->agent_input == null) {

@@ -223,13 +223,14 @@ class Variables
 
             foreach ($things as $thing) {
                 // Check each of the Things.
-                $this->variables_thing = new Thing($thing['uuid']);
+        //        $this->variables_thing = new Thing($thing['uuid']);
 
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
 
-                if ($this->getVariableSet() == false) {
+                if ($this->getVariableSet($thing) == false) {
+
                     $this->thing->log(
                         $this->agent_prefix .
                             'got ' .
@@ -325,15 +326,20 @@ class Variables
         return $this->{$variable . "_overflow_flag"};
     }
 
-    function getVariableset()
+    function getVariableset($thing = null)
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
+
+                $this->variables_thing = new Thing($thing['uuid']);
+
 
         if (!isset($this->variables_thing->account['stack'])) {
             // No stack balance available.
             return null;
         }
+
+
 
         $variables = $this->variables_thing->account['stack']->json->array_data;
 
