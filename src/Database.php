@@ -554,6 +554,7 @@ if ($this->hash_state == 'off') {
      */
     function associationSearch($value, $max = null)
     {
+
         if ($max == null) {
             $max = 3;
         }
@@ -570,8 +571,16 @@ if ($this->hash_state == 'off') {
 
         try {
             $value = "%$value%"; // Value to search for in Variables
+
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND associations LIKE :value ORDER BY created_at DESC LIMIT :max";
+
+            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
+            // $query = "SELECT * FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) ORDER BY creat$
+            // $query = "SELECT uuid, task, nom_from, nom_to, created_at, message0, settings, variables FROM stack WHERE nom_from=:user_searc$
+
+            // $value = "*$value*"; // Value to search for in Variables
+            // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) $
 
             $sth = $this->container->db->prepare($query);
 
@@ -595,7 +604,6 @@ if ($this->hash_state == 'off') {
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
         }
-
         return $thingreport;
     }
 
