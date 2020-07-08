@@ -117,7 +117,7 @@ class Lattice extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         $this->thing->log(
-                'completed message. Timestamp = ' .
+            'completed message. Timestamp = ' .
                 number_format($this->thing->elapsed_runtime()) .
                 'ms.',
             "OPTIMIZE"
@@ -333,9 +333,7 @@ class Lattice extends Agent
 
     function rgbcolor($r, $g, $b)
     {
-
         $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
-
     }
 
     public function makePNG()
@@ -345,17 +343,25 @@ class Lattice extends Agent
             $this->canvas_size_y
         );
 
-imagesavealpha($this->image, true);
-$this->transparent_color = imagecolorallocatealpha($this->image, 0, 0, 0, 127);
-imagefill($this->image, 0, 0, $this->transparent_color);
-
+        imagesavealpha($this->image, true);
+        $this->transparent_color = imagecolorallocatealpha(
+            $this->image,
+            0,
+            0,
+            0,
+            127
+        );
+        imagefill($this->image, 0, 0, $this->transparent_color);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-/*
+
+        $this->light_grey = imagecolorallocate($this->image, 192, 192, 192);
+
+        /*
         imagefilledrectangle(
             $this->image,
             0,
@@ -365,9 +371,20 @@ imagefill($this->image, 0, 0, $this->transparent_color);
             $this->white
         );
 */
+
+        //$this->q_centre = 0;
+        //$this->r_centre = 0;
+        //$this->s_centre = 0;
+
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
         //        $this->drawLattice($this->canvas_size_x/2, $this->canvas_size_y/2);
-        $this->drawLattice();
+        $this->drawLattice(
+            $this->q_centre,
+            $this->r_centre,
+            $this->s_centre,
+            null,
+            0
+        );
 
         // Write the string at the top left
         $border = 30;
@@ -482,8 +499,10 @@ imagefill($this->image, 0, 0, $this->transparent_color);
         if (isset($this->angle)) {
             $angle = $this->angle;
         }
-$font_size = 10;
-if (isset($this->font_size)) {$font_size = $this->font_size;}
+        $font_size = 10;
+        if (isset($this->font_size)) {
+            $font_size = $this->font_size;
+        }
 
         $bbox = imagettfbbox($font_size, $angle, $font, $text);
         $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
@@ -521,6 +540,110 @@ if (isset($this->font_size)) {$font_size = $this->font_size;}
             $font,
             $text
         );
+    }
+
+    public function labelCell(
+        $q,
+        $r,
+        $s,
+        $center_x,
+        $center_y,
+        $text,
+        $angle = null,
+        $size = null,
+        $color = null
+    ) {
+        if ($size == null) {
+            $size = 10;
+        }
+
+        list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
+
+        // devstack add path
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        //        $text = "test";
+        // Add some shadow to the text
+        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+
+        $size = $this->canvas_size_x - 90;
+
+        $angle = 0;
+        if (isset($this->angle)) {
+            $angle = $this->angle;
+        }
+        $font_size = 10;
+        if (isset($this->font_size)) {
+            $font_size = $this->font_size;
+        }
+        /*
+        $bbox = imagettfbbox($font_size, $angle, $font, $text);
+        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+        $bbox["width"] =
+            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+        $bbox["height"] =
+            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+*/
+        //check width of the image
+        $width = imagesx($this->image);
+        $height = imagesy($this->image);
+        $pad = 0;
+        foreach (range(0, 5, 1) as $n) {
+            $angle_offset = 0.15;
+            $angle2 = ($n * pi()) / 3 + $angle_offset;
+            //var_dump($angle2);
+            $x = $x_pt;
+            $y = $y_pt;
+
+            $distance = 60;
+
+            $x = $x_pt + $distance * cos($angle2) - $distance * sin($angle2);
+            $y = $y_pt + $distance * sin($angle2) + $distance * cos($angle2);
+
+            $rotated_x =
+                $center_x +
+                ($x - $center_x) * cos($angle) -
+                ($y - $center_y) * sin($angle);
+            $rotated_y =
+                $center_y +
+                ($x - $center_x) * sin($angle) +
+                ($y - $center_y) * cos($angle);
+
+            if ($n == 0 or $n == 3) {
+                $text = $q;
+            }
+            if ($n == 1 or $n == 4) {
+                $text = $r;
+            }
+            if ($n == 2 or $n == 5) {
+                $text = $s;
+            }
+
+            $bbox = imagettfbbox($font_size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+
+            imagettftext(
+                $this->image,
+                $font_size,
+                $angle,
+                $rotated_x + $center_x - $bbox["width"] / 2,
+                $rotated_y + $center_y + $bbox["height"] / 2,
+                $color,
+                $font,
+                $text
+            );
+        }
     }
 
     public function drawTriangle()
@@ -651,7 +774,7 @@ if (isset($this->font_size)) {$font_size = $this->font_size;}
 
             $this->rgbcolor(255, 255, 255);
 
-$this->rgb = $this->transparent_color;
+            $this->rgb = $this->transparent_color;
             //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $color);
             imagefilledpolygon(
                 $this->image,
@@ -660,7 +783,6 @@ $this->rgb = $this->transparent_color;
 
                 $this->rgb
             );
-
 
             $this->rgbcolor(20, 20, 20);
             imagepolygon(
@@ -832,16 +954,21 @@ rgb
         return [$n, $p_melt, $p_freeze];
     }
 
-    public function initLattice()
+    public function initLattice($n = null)
     {
+        $this->q_centre = 0;
+        $this->r_centre = 0;
+        $this->s_centre = 0;
+
         $this->thing->log(
             $this->agent_prefix . 'initialized the lattice.',
             "INFORMATION"
         );
 
         //        $this->lattice_size = $n;
-        $n = $this->lattice_size;
-
+        if ($n == null) {
+            $n = $this->lattice_size;
+        }
         //$this->lattice_size = $n;
 
         $this->lattice = [];
@@ -999,10 +1126,7 @@ rgb
 
         foreach (range(0, $this->max) as $a) {
             foreach (range(0, $this->max) as $b) {
-                //            foreach (range(0, $a-3) as $b) {
                 if (!($a - $b > $a)) {
-                    //echo $a-$b . " " .-$a . " " .$b . "---" . ( ($a-$b) > $a) . "<br>";
-                    //                    $this->point_list[] = array($a-$b, -$a, $b);
                     $this->point_list[] = [$a - $b, -$a, $b];
                 }
             }
@@ -1061,8 +1185,19 @@ rgb
             //   $this->updateCell($q,$r,$s);
 
             // Gives any cell value
-            $cell = $this->lattice[$q][$r][$s];
+            $this->positive_coordinates_only = 'off';
+            if (
+                ($q < 0 or $r < 0 or $s < 0) and
+                $this->positive_coordinates_only == 'on'
+            ) {
+                continue;
+            }
 
+            if (!isset($this->lattice[$q][$r][$s])) {
+                continue;
+            }
+
+            $cell = $this->lattice[$q][$r][$s];
             $color = $this->black;
             if ($cell['state'] == 'on') {
                 $color = $this->grey;
@@ -1109,21 +1244,54 @@ rgb
                 $color
             );
 
-            $label = "(" . $q . ", " . $r . ", " . $s . ")";
-            //if ($label != null) {
-
             //imagestring($this->image, 2, $x_pt+$center_x, $y_pt+$center_y, $label, $textcolor);
-            $this->drawWord(
-                $q,
-                $r,
-                $s,
-                $center_x,
-                $center_y,
-                $label,
-                $angle,
-                $size,
-                $this->grey
-            );
+
+            $coordinate_position = "off";
+            if (isset($this->coordinate_position)) {
+                $coordinate_position = $this->coordinate_position;
+            }
+            if (
+                $coordinate_position == 'center' or
+                $coordinate_position == 'centre'
+            ) {
+                //dev stack
+                // Make lables positive coordinate set
+                $q_label = $q + 12;
+                $r_label = $r + 12;
+                $s_label = $s + 0;
+                $label =
+                    "(" . $q_label . ", " . $r_label . ", " . $s_label . ")";
+
+                $this->drawWord(
+                    $q,
+                    $r,
+                    $s,
+                    $center_x,
+                    $center_y,
+                    $label,
+                    $angle,
+                    $size,
+                    $this->light_grey
+                );
+            }
+
+            if (
+                $coordinate_position == 'wall' or
+                $coordinate_position == 'wall'
+            ) {
+                $label = null;
+                $this->labelCell(
+                    $q,
+                    $r,
+                    $s,
+                    $center_x,
+                    $center_y,
+                    $label,
+                    $angle,
+                    $size,
+                    $this->light_grey
+                );
+            }
 
             //}
 
@@ -1169,7 +1337,7 @@ rgb
 
         return;
     }
-/*
+    /*
     public function read()
     {
         //$this->thing->log("read");
@@ -1275,6 +1443,18 @@ rgb
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
+
+        if (strpos(strtolower($input), 'wall') !== false) {
+            $this->coordinate_position = "wall";
+        }
+
+        if (strpos(strtolower($input), 'center') !== false) {
+            $this->coordinate_position = "center";
+        }
+
+        if (strpos(strtolower($input), 'centre') !== false) {
+            $this->coordinate_position = "centre";
+        }
 
         if (count($pieces) == 1) {
             if ($input == 'lattice') {

@@ -221,6 +221,9 @@ class Snowflake extends Agent
     public function latticeSnowflake()
     {
         $lattice_agent = new Lattice($this->thing, "lattice");
+
+        $lattice_agent->initLattice();
+
         $lattice_agent->font_size = 16;
 
         $lattice_agent->max = 12;
@@ -236,7 +239,14 @@ class Snowflake extends Agent
         $lattice_agent->canvas_size_x = 2550;
         $lattice_agent->canvas_size_y = 2860;
 
-        $lattice_agent->initLattice();
+        //        $lattice_agent->initLattice();
+
+        $lattice_agent->q_centre = 8;
+        $lattice_agent->r_centre = 8;
+        $lattice_agent->s_centre = 8;
+
+        //$lattice_agent->drawLattice(10,10,10,25,0);
+
         $lattice_agent->makePNG();
 
         $this->hextile_PNG = $lattice_agent->PNG_embed;
