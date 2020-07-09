@@ -82,12 +82,6 @@ class Forgetcollection extends Agent
         }
 
         $this->forget_count += $count;
-        /*
-        $this->sms_message .=
-            "Completed request for this Identity. Forgot " .
-            $count .
-            " Things.";
-*/
     }
 
     public function makeSMS()
