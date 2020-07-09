@@ -244,7 +244,8 @@ class Signal extends Agent
 
         $uuid = $matched_uuids[0];
 
-        $this->response .= "Found signal match " . $this->idSignal($uuid) . ". ";
+        $this->response .=
+            "Found signal match " . $this->idSignal($uuid) . ". ";
 
         $this->signal_thing = new Thing($uuid);
         $this->signal = $this->thing->json->jsontoArray(
@@ -278,7 +279,8 @@ class Signal extends Agent
 
         $uuid = $matched_uuids[0];
 
-        $this->response .= "Found signal match " . $this->idSignal($uuid) . ". ";
+        $this->response .=
+            "Found signal match " . $this->idSignal($uuid) . ". ";
 
         $this->signal_thing = new Thing($uuid);
         $this->signal = $this->thing->json->jsontoArray(
@@ -627,7 +629,7 @@ class Signal extends Agent
         $sms_message =
             "SIGNAL " . strtoupper($signal_id) . " IS " . $state_text;
 
-$sms_message .= " | ";
+        $sms_message .= " | ";
 
         if ($this->verbosity > 6) {
             $sms_message .=
@@ -644,17 +646,14 @@ $sms_message .= " | ";
             //    $sms_message .= " | signal id " . strtoupper($this->signal['id']);
         }
 
-if (strtolower($this->input) == "signals") {
-$sms_message .= " Active signals: ";
-foreach($this->signals as $i=>$signal) {
-if ($signal['text'] == "signal post") {
-$sms_message.= $this->idSignal($signal['id']) ." " ;
-}
-
-}
-
-}
-
+        if (strtolower($this->input) == "signals") {
+            $sms_message .= " Active signals: ";
+            foreach ($this->signals as $i => $signal) {
+                if ($signal['text'] == "signal post") {
+                    $sms_message .= $this->idSignal($signal['id']) . " ";
+                }
+            }
+        }
 
         if ($this->verbosity > 2) {
             if ($this->state == "red") {
@@ -667,7 +666,7 @@ $sms_message.= $this->idSignal($signal['id']) ." " ;
         }
         $sms_message .= "" . trim($this->response);
 
-/*
+        /*
         if ($this->verbosity > 0) {
             $sms_message .= " | " . $this->link . "";
             $sms_message .= " Text HELP";
@@ -713,6 +712,8 @@ $sms_message.= $this->idSignal($signal['id']) ." " ;
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
+        $this->dark_grey = imagecolorallocate($this->image, 64, 64, 64);
+
         $this->red = imagecolorallocate($this->image, 231, 0, 0);
 
         $this->yellow = imagecolorallocate($this->image, 255, 239, 0);
@@ -750,6 +751,41 @@ $sms_message.= $this->idSignal($signal['id']) ." " ;
 
         $double_yellow_x = 30;
         $double_yellow_y = 25;
+
+        imagefilledellipse(
+            $this->image,
+            $green_x,
+            $green_y,
+            20,
+            20,
+            $this->dark_grey
+        );
+
+        imagefilledellipse(
+            $this->image,
+            $red_x,
+            $red_y,
+            20,
+            20,
+            $this->dark_grey
+        );
+
+        imagefilledellipse(
+            $this->image,
+            $yellow_x,
+            $yellow_y,
+            20,
+            20,
+            $this->dark_grey
+        );
+        imagefilledellipse(
+            $this->image,
+            $double_yellow_x,
+            $double_yellow_y,
+            20,
+            20,
+            $this->dark_grey
+        );
 
         if ($state == "green") {
             imagefilledellipse(

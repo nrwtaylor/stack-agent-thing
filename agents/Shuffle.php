@@ -22,7 +22,7 @@ class Shuffle extends Agent
 
     public function run()
     {
-        $this->thing->shuffle();
+        //        $this->thing->shuffle();
     }
 
     public function get()
@@ -92,12 +92,8 @@ class Shuffle extends Agent
             " Things.";
     }
 
-    function ageShuffle($age_unit = null)
+    public function thingsShuffle()
     {
-        if ($age_unit == null) {
-            return true;
-        }
-
         // Get all users records
 
         $this->thing->db->setUser($this->from);
@@ -107,11 +103,21 @@ class Shuffle extends Agent
 
         $this->total_things = count($things);
 
-        $start_time = time();
+        //$start_time = time();
 
+        //shuffle($things);
+        $things = array_reverse($things);
+        return $things;
+    }
+
+    public function ageShuffle($age_unit = null)
+    {
+        if ($age_unit == null) {
+            return true;
+        }
+
+        $things = $this->thingsShuffle();
         $count = 0;
-        shuffle($things);
-
         $start_time = time();
 
         while (count($things) > 1) {
@@ -141,6 +147,37 @@ class Shuffle extends Agent
             $this->shuffle_count = 0;
         }
         $this->shuffle_count += $count;
+    }
+
+    public function latestShuffle($number = null)
+    {
+        if ($number == null) {
+            return true;
+        }
+
+        $things = $this->thingsShuffle();
+        $count = 0;
+        $start_time = time();
+
+        while (count($things) > 1) {
+            $thing = array_pop($things);
+
+            if ($thing['uuid'] != $this->uuid) {
+                $this->thingShuffle($thing);
+                $count += 1;
+                if ($count >= $number) {
+                    break;
+                }
+            } else {
+            }
+        }
+
+        if (!isset($this->shuffle_count)) {
+            $this->shuffle_count = 0;
+        }
+        $this->shuffle_count += $count;
+        $this->response .=
+            "Shuffled the latest " . $this->shuffle_count . " Things. ";
     }
 
     private function weekShuffle()
@@ -213,6 +250,8 @@ class Shuffle extends Agent
     {
         $keywords = [
             'shuffle',
+            'latest',
+            'recent',
             'melt',
             'all',
             '?',
@@ -229,10 +268,7 @@ class Shuffle extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            $input = $this->subject;
-            //echo str_word_count($this->subject);
-
-            if (is_string($this->subject) and strlen($input) == 1) {
+            if (is_string($input) and strlen($input) == 1) {
                 // Test for single ? mark and call question()
                 $this->message = "Single question mark received";
                 //echo "single question mark received";
@@ -242,11 +278,17 @@ class Shuffle extends Agent
                 }
                 return;
             }
+
+            if ($input == 'shuffle') {
+                $this->response .= "No action taken. ";
+                return;
+            }
+
             //$this->message = "Request not understood";
-            $this->thing->shuffle();
-            $this->response .=
-                "This command will shuffle your stack. Text SHUFFLE ALL.";
-            return;
+            //            $this->thing->shuffle();
+            //            $this->response .=
+            //                "This command will shuffle your stack. Text SHUFFLE ALL.";
+            //            return;
         }
 
         // If there are more than one piece then look at order.
@@ -279,8 +321,16 @@ class Shuffle extends Agent
 
                         case 'all':
                             $this->allShuffle();
-                            $this->response .=
-                                "There was a problem shuffling all your Things. ";
+                            return;
+                        case 'recent':
+                        case 'latest':
+                            $number_agent = new Number($this->thing, "number");
+                            $number_agent->extractNumber($input);
+                            $number = 10;
+                            if ($number_agent->number != false) {
+                                $number = $number_agent->number;
+                            }
+                            $this->latestShuffle($number);
                             return;
 
                         case 'week':
