@@ -1713,6 +1713,9 @@ class Snowflake extends Agent
 
             $pdf->MultiCell(150, $line_height, $t, 0);
 
+
+
+
             $y = $pdf->GetY() + 0.95;
             $pdf->SetXY(15, $y);
             $text = "v0.0.4";
@@ -1738,6 +1741,8 @@ class Snowflake extends Agent
 
             //$pdfTitle = 'snowflake_'.$this->thing->nuuid.'.pdf';
             //$image = $pdf->Output('S', $pdfTitle);
+  //          $pdf->SetXY(50, 50);
+
 
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
