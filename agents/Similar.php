@@ -69,7 +69,7 @@ class Similar extends Agent
         }
     }
 
-    public function read()
+    public function read($text = null)
     {
         $this->readInstruction();
         $this->readSubject();
@@ -438,12 +438,12 @@ class Similar extends Agent
 
     public function readInstruction()
     {
-        if ($this->agent_instruction == null) {
+        if ($this->agent_input == null) {
             //$this->defaultCommand();
             return;
         }
 
-        $pieces = explode(" ", strtolower($this->agent_instruction));
+        $pieces = explode(" ", strtolower($this->agent_input));
 
         if (isset($pieces[0])) {
             $this->requested_thing_name = $pieces[0];

@@ -817,43 +817,6 @@ return $image;
     }
 
 
-    /**
-     *
-     * @return unknown
-     */
-    function read() {
-        return;
-        var_dump($this->last_roll);
-        var_dump($this->last_result);
-        exit();
-
-        if (($this->last_roll == false) or ($this->last_result == false)) {
-            $this->readSubject();
-            /*
-            $this->thing->json->writeVariable(
-                array("roll", "roll"),
-                $this->roll
-            );
-            $this->thing->json->writeVariable(
-                array("roll", "result"),
-                $this->result
-            );
-
-            $this->thing->log(
-                $this->agent_prefix . ' completed read.',
-                "OPTIMIZE"
-            );
-*/
-            return;
-        }
-
-        $this->roll = $this->last_roll;
-        $this->result = $this->last_result;
-
-        //        $this->get();
-        //        return $this->state;
-    }
-
 
     /**
      *

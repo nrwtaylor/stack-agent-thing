@@ -129,7 +129,7 @@ class Uuid extends Agent
             $this->thing->log(
                 'found a uuid (' . $this->uuid . ') in the text.'
             );
-            $this->response .= "Extracted a UUID. ";
+            //$this->response .= "Extracted a UUID. ";
             return $this->uuid;
         }
 
@@ -143,8 +143,8 @@ class Uuid extends Agent
         return true;
     }
 
-    public function readUuid($text = null) {
-
+    public function readUuid($text = null)
+    {
         $text = $this->input;
         return $text;
     }
@@ -189,7 +189,6 @@ class Uuid extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
     }
 
-
     /**
      *
      * @return unknown
@@ -198,6 +197,23 @@ class Uuid extends Agent
     {
         $input = $this->input;
         $this->extractUuid($input);
+
+        foreach ($this->uuids as $i => $uuid) {
+            $t = new Thing($uuid);
+            if ($t->thing !== false) {
+                if ($t->from == hash('sha256', $this->from)) {
+                    $this->response .= 'Channel ' . $uuid . '. ';
+                } else {
+                    $this->response .= 'Recognized ' . $uuid . '. ';
+                }
+            } else {
+                $this->response .= 'Did not recognize ' . $uuid . '. ';
+            }
+        }
+
+        if ($this->uuids == []) {
+            $this->response .= "Got uuid " . $this->uuid . ". ";
+        }
 
         // Then look for messages sent to UUIDS
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
@@ -215,9 +231,7 @@ class Uuid extends Agent
     function makeSMS()
     {
         $sms = "UUID | ";
-        $sms .= $this->uuid;
-        $sms .= " " . $this->response;
-        //        $this->sms_message .= ' | TEXT ?';
+        $sms .= "" . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
