@@ -1701,7 +1701,7 @@ class Snowflake extends Agent
             $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
 
-$pdf->Link(175,5,30,30, $link);
+//$pdf->Link(175,5,30,30, $link);
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -1715,7 +1715,7 @@ $pdf->Link(175,5,30,30, $link);
 
             $pdf->MultiCell(150, $line_height, $t, 0);
 
-$pdf->Link(15,7,150,10, $link);
+//$pdf->Link(15,7,150,10, $link);
 
 
             $y = $pdf->GetY() + 0.95;

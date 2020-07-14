@@ -47,6 +47,7 @@ class Signal extends Agent
 
     public function respondResponse()
     {
+        $this->makeHelp();
         $this->thing->flagGreen();
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -134,6 +135,86 @@ class Signal extends Agent
                 ' SIGNAL.',
             "INFORMATION"
         );
+    }
+
+    public function run()
+    {
+        // Get this too. Or put it in the run loop.
+        $this->helpSignal($this->signal['state']);
+        $this->infoSignal($this->signal['state']);
+    }
+
+    function helpSignal($text = null)
+    {
+        $a = $this->associationsSignal();
+
+        $next_signal_id = "X";
+        if (isset($a[0]['id'])) {
+            $next_signal_id = $a[0]['id'];
+        }
+        $next_signal_text = "Next SIGNAL " . $next_signal_id . ".";
+
+        if (strtolower($text) == "x") {
+            $state = "X";
+            $help = "Treat this signal as if it is broken. Text CONTROL.";
+        }
+
+        if (strtolower($text) == "red") {
+            $state = "red";
+            $help = "This Signal is RED. Text SIGNAL. Wait for it to change.";
+        }
+
+        if (strtolower($text) == "green") {
+            $state = "green";
+            $help =
+                "This Signal is GREEN. Keep going. Don't expect to stop. Text SIGNAL.";
+        }
+
+        if (strtolower($text) == "yellow") {
+            $state = "yellow";
+            $help =
+                "This Signal is YELLOW. Expect to stop at the next one. " .
+                $next_signal_text;
+        }
+
+        if (strtolower($text) == "double yellow") {
+            $state = "double yellow";
+            $help =
+                "This Signal is DOUBLE YELLOW. Expect to stop after the next one. " .
+                $next_signal_text;
+        }
+
+        $this->thing_report['help'] = $help;
+
+        return $help;
+    }
+
+    function infoSignal($text = null)
+    {
+        if (strtolower($text) == "x") {
+            $state = "X";
+            $info = "Signal is OFF. Or broken.";
+        }
+
+        if (strtolower($text) == "red") {
+            $state = "red";
+            $info = "This Signal is RED.";
+        }
+        if (strtolower($text) == "green") {
+            $state = "green";
+            $info = "This Signal is GREEN.";
+        }
+        if (strtolower($text) == "yellow") {
+            $state = "yellow";
+            $info = "This Signal is YELLOW.";
+        }
+        if (strtolower($text) == "double yellow") {
+            $state = "double yellow";
+            $info = "This Signal is DOUBLE YELLOW.";
+        }
+        $this->thing_report['info'] = $info;
+
+        return $info;
     }
 
     function makeState($text)
@@ -567,8 +648,48 @@ class Signal extends Agent
         $this->thing_report['link'] = $this->link;
     }
 
+    public function associationsSignal()
+    {
+        $association_array = [];
+        if (isset($this->associations->thing->thing->associations)) {
+            //$web .= "<p>";
+            //$association_text = "";
+
+            $associations_array = json_decode(
+                $this->associations->thing->thing->associations,
+                true
+            );
+            foreach ($associations_array as $agent_name => $associations) {
+                foreach ($associations as $i => $association_uuid) {
+                    $association_array[] = [
+                        'text' =>
+                            strtoupper(
+                                $this->idSignal(
+                                    $this->idSignal($association_uuid)
+                                )
+                            ) .
+                            " " .
+                            $agent_name,
+                        "id" => $this->idSignal(
+                            $this->idSignal($association_uuid)
+                        ),
+                        "agent_name" => $agent_name,
+                    ];
+                }
+            }
+        }
+        $this->associations = $association_array;
+        return $association_array;
+    }
+
     function makeHelp()
     {
+        // Get the latest Help signal.
+        if (!isset($this->thing_report['help'])) {
+            $this->helpSignal($this->signal['state']);
+        }
+
+        return;
         if ($this->signal['state'] == "X") {
             $this->thing_report['help'] = 'This Signal is not set.';
         }
