@@ -45,6 +45,18 @@ class Signal extends Agent
             'DOUBLE YELLOW means keep going. RED means stop.';
     }
 
+    public function lastSignal()
+    {
+    }
+
+    public function nextSignal()
+    {
+    }
+
+    public function currentSignal()
+    {
+    }
+
     public function respondResponse()
     {
         $this->makeHelp();
@@ -68,15 +80,21 @@ class Signal extends Agent
             return;
         }
 
-        $this->thing->json->writeVariable(
-            ["signal", "state"],
-            $this->signal['state']
-        );
+        //        $this->thing->json->writeVariable(
+        //            ["signal", "state"],
+        //            $this->signal['state']
+        //        );
+
         $this->thing->json->writeVariable(
             ["signal", "refreshed_at"],
             $this->current_time
         );
-        $this->thing->json->writeVariable(["signal", "text"], "X");
+        //        $this->thing->json->writeVariable(["signal", "text"], $this->signal['text']);
+
+        //$signal_nuuid = substr($this->signal['id'],0,4);
+
+        //        $this->thing->json->writeVariable(["signal", "id"], $signal_nuuid);
+
 
         $this->setSignal();
 
@@ -124,17 +142,9 @@ class Signal extends Agent
 
         $this->channel = new Channel($this->thing, "channel");
         $this->channel_name = $this->channel->channel_name;
-
         $this->response .= "Saw channel is " . $this->channel_name . ". ";
-        $this->getSignal();
 
-        $this->thing->log(
-            $this->agent_prefix .
-                'got a ' .
-                strtoupper($this->signal['state']) .
-                ' SIGNAL.',
-            "INFORMATION"
-        );
+        $this->getSignal();
     }
 
     public function run()
@@ -223,26 +233,27 @@ class Signal extends Agent
 
         if (strtolower($text) == "x") {
             $state = "X";
-            $this->text = "signal change";
+            $type = "signal x";
         }
 
         if (strtolower($text) == "red") {
             $state = "red";
-            $this->text = "signal change";
+            $type = "signal red";
         }
         if (strtolower($text) == "green") {
             $state = "green";
-            $this->text = "signal change";
+            $type = "signal green";
         }
         if (strtolower($text) == "yellow") {
             $state = "yellow";
-            $this->text = "signal change";
+            $type = "signal yellow";
         }
         if (strtolower($text) == "double yellow") {
             $state = "double yellow";
-            $this->text = "signal change";
+            $type = "signal double yellow";
         }
         $this->signal['state'] = $state;
+        $this->signal['text'] = $type;
         $this->state = $state;
         if ($state != null) {
             $this->response = "Selected " . $this->state . " signal.";
@@ -261,7 +272,7 @@ class Signal extends Agent
         );
         $this->signal_thing->json->writeVariable(
             ["signal", "text"],
-            "signal post"
+            $this->signal['text']
         );
 
         $this->associations->setAssociation($this->signal_thing->uuid);
@@ -280,9 +291,9 @@ class Signal extends Agent
         $this->signal_thing->state = "X";
         $this->signal_thing->text = "signal post";
 
-        $this->signal['state'] = "X";
+        $this->signal['state'] = $this->signal_thing->state;
         $this->signal['id'] = $this->signal_thing->uuid;
-        $this->signal['text'] = "signal post";
+        $this->signal['text'] = $this->signal_thing->text;
     }
 
     function getSignalbyUuid($uuid)
@@ -293,14 +304,36 @@ class Signal extends Agent
             return;
         }
 
-        $this->signal_thing = new Thing($uuid);
-        $this->signal = $this->thing->json->jsontoArray(
-            $this->signal_thing->thing->variables
+        $thing = new Thing($uuid);
+if ($thing->thing == false) {return true;}
+
+        $signal = $this->thing->json->jsontoArray(
+            $thing->thing->variables
         )['signal'];
 
+var_dump($signal);
+//exit();
+
+if ($signal['text']=='signal post') {
+
+//var_dump($signal['id']);
+$this->signal = $signal;
         $this->state = $this->signal['state'];
-        $this->signal_id = $this->signal_thing->uuid;
-        $this->signal['id'] = $this->signal_id;
+//        $this->signal_id = $this->signal_thing->uuid;
+//        $this->signal['id'] = $this->signal_id;
+
+        $this->signal_id = $thing->uuid;
+        $this->signal['state'] = $signal['state'];
+        $this->signal['id'] = $thing->uuid;
+//        $this->signal['text'] = $this->signal_thing->text;
+
+$this->signal_thing = $thing;
+
+
+return;
+//$this->signal['text'] = "merp";
+}
+return true;
     }
 
     function getSignalbyNuuid($nuuid)
@@ -387,8 +420,13 @@ class Signal extends Agent
         return $t;
     }
 
-    public function getSignal()
+    public function getSignal($text = null)
     {
+        if ($text != null) {
+            $t = $this->getSignalbyId($text);
+//devstack
+        }
+
         if (
             isset(
                 $this->thing->json->jsontoArray($this->thing->thing->variables)[
@@ -404,7 +442,13 @@ class Signal extends Agent
             $signal_id = "X";
             if (isset($this->signal['id'])) {
                 $this->signal_id = $this->signal['id'];
+                $this->response .= "Saw " . $this->signal_id . ". ";
+
+                $this->getSignalbyId($this->signal_id);
+                return;
             }
+
+            // Get the most recent signal command.
 
             //return;
         }
@@ -412,23 +456,35 @@ class Signal extends Agent
         if (!isset($this->signals)) {
             $this->getSignals();
         }
-
+        echo "\n";
         foreach ($this->signals as $i => $signal) {
-            if ($signal['text'] == "signal post") {
-                // Apply the latest known signal state.
+            echo $signal['id'] .
+                " " .
+                substr(hash('sha256', $signal['id']), 0, 4) .
+                " " .
+                $signal['text'] .
+                " " .
+                $signal['refreshed_at'] .
+                "\n";
 
-                $this->signal = $signal;
-
-                $this->signal_id = $signal['id'];
-                //       $this->signal_thing = new Thing($this->signal_id);
-
-                $this->getSignalbyUuid($this->signal_id);
-
-                return $this->signal_thing;
+            if (strtolower($signal['text']) != "signal post") {
+                continue;
             }
+
+            //            if ($signal['text'] == "signal post") {
+            // Apply the latest known signal state.
+            //$this->signal = $signal;
+            //$this->signal_id = $signal['id'];
+            //       $this->signal_thing = new Thing($this->signal_id);
+            $flag = $this->getSignalbyUuid($signal['uuid']);
+if ($flag !== true) {
+            return $this->signal_thing;
+}
+            //            }
         }
 
         // No signal post found.
+        return false;
         $this->signal = [
             "id" => $this->uuid,
             "state" => "X",
@@ -478,8 +534,9 @@ class Signal extends Agent
 
                 if (isset($variables['signal'])) {
                     $refreshed_at = "X";
-                    $signal_id = $uuid;
 
+ //                   $signal_id = $uuid;
+//$signal_id = "X";
                     if (isset($variables['signal']['refreshed_at'])) {
                         $refreshed_at = $variables['signal']['refreshed_at'];
                     }
@@ -494,14 +551,19 @@ class Signal extends Agent
                         $state = $variables['signal']['state'];
                     }
 
+
+if ($text == "signal post") {
+
                     $this->signals[] = [
-                        "id" => $signal_id,
+"uuid"=>$thing_object['uuid'],
+                        "id" => $this->idSignal($thing_object['uuid']),
                         "state" => $state,
                         "associations" => $associations,
                         "text" => $text,
                         "refreshed_at" => $refreshed_at,
                     ];
-                    $this->signalid_list[] = $signal_id;
+                    $this->signalid_list[] = $thing_object['uuid'];
+}
                 }
             }
         }
@@ -512,6 +574,7 @@ class Signal extends Agent
         }
         array_multisort($refreshed_at, SORT_DESC, $this->signals);
 
+        //$this->signals = array_reverse($this->signals);
         return [$this->signalid_list, $this->signals];
     }
 
@@ -533,9 +596,13 @@ class Signal extends Agent
             if (isset($this->signals) and is_array($this->signals)) {
                 $signal_text = "";
                 foreach ($this->signals as $i => $signal) {
-                    if ($signal['text'] != "signal post") {
+                    if (strtolower($signal['text']) == "x") {
                         continue;
                     }
+
+                    //                    if ($signal['text'] != "signal post") {
+                    //                        continue;
+                    //                    }
 
                     if ($this->signal_thing->uuid == $signal['id']) {
                         $flag = true;
@@ -678,7 +745,7 @@ class Signal extends Agent
                 }
             }
         }
-        $this->associations = $association_array;
+        //$this->associations = $association_array;
         return $association_array;
     }
 
@@ -727,6 +794,21 @@ class Signal extends Agent
         if ($this->verbosity >= 5) {
             $txt .=
                 'It was last refreshed at ' . $this->current_time . ' (UTC).';
+        }
+        $txt .= "\n";
+        foreach ($this->signals as $i => $signal) {
+$txt .= $signal['uuid'] . " ";
+
+            $txt .=
+                $signal['refreshed_at'] .
+             //   " " .
+             //   $signal['id'] .
+                " " .
+                strtoupper($this->idSignal($signal['id'])) .
+                " " .
+$signal['state'] ." ".
+                $signal['text'] .
+                "\n";
         }
 
         $this->thing_report['txt'] = $txt;
@@ -1060,14 +1142,8 @@ class Signal extends Agent
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case 'red':
-                            $this->thing->log(
-                                $this->agent_prefix .
-                                    'received request for RED SIGNAL.',
-                                "INFORMATION"
-                            );
                             $this->makeState('red');
                             return;
-
                         case 'green':
                             $this->makeState('green');
                             return;
