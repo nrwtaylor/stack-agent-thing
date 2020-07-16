@@ -143,7 +143,7 @@ class Agent
         $this->make();
 
         // This is where we deal with insufficient space to serialize the variabes to the stack.
-
+    //if (!isset($this->signal_thing)) {return true;}
         try {
             $this->set();
         } catch (\OverflowException $t) {
@@ -156,7 +156,6 @@ class Agent
                 "error",
                 "Overflow: try set failed."
             );
-
             $this->thing_report['sms'] = "STACK | " . $this->response;
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
@@ -170,6 +169,7 @@ class Agent
                     " " .
                     $t->getTraceAsString()
             );
+
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
             //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
             $this->thing->log("caught throwable.");
@@ -187,11 +187,9 @@ class Agent
             $this->thing->log("caught exception");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
-
         if ($this->agent_input == null or $this->agent_input == "") {
             $this->respond();
         }
-
         if (!isset($this->response)) {
             $this->response = "No response found.";
         }
@@ -246,7 +244,6 @@ class Agent
         $this->makePNGs();
         $this->makeSMS();
         $this->makeWeb();
-
         // Explore adding in INFO and HELP to web response.
         $agents = ["response", "help", "info"];
 
@@ -312,7 +309,6 @@ class Agent
         }
 
         $this->makeSnippet();
-
         $this->makeEmail();
         $this->makeTXT();
 
