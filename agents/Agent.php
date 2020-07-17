@@ -230,6 +230,52 @@ class Agent
     {
     }
 
+public function getThings($agent_name = null) {
+
+if ($agent_name == null) {$agent_name = "tick";}
+$agent_name = strtolower($agent_name);
+        $rules_list = [];
+
+        $this->rules_list = [];
+        $this->unique_count = 0;
+
+        $findagent_thing = new Findagent($this->thing, 'tick');
+        if (!is_array($findagent_thing->thing_report['things'])) {
+            return;
+        }
+        $count = count($findagent_thing->thing_report['things']);
+
+        //$rule_agent = new Rule($this->thing, "rule");
+
+        if ($count > 0) {
+            foreach (
+                array_reverse($findagent_thing->thing_report['things'])
+                as $thing_object
+            ) {
+                $uuid = $thing_object['uuid'];
+                $variables_json = $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+if (isset($variables[$agent_name])) {
+
+$things[] = $variables[$agent_name];
+
+}
+
+                $response = $this->readAgent($thing_object['task']);
+            }
+        }
+
+
+return $things;
+}
+
+public function readAgent($text = null) {
+// devstack
+return true;
+
+}
+
     /**
      *
      */
