@@ -101,6 +101,8 @@ class Thing
         try {
             $this->getThing($uuid);
         } catch (\Exception $e) {
+        $this->log("No Thing to get.");
+
             // Fail quietly. There was no Thing to get.
             //echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
@@ -161,11 +163,17 @@ class Thing
 
             $this->json = new Json($this->uuid);
 
+        $this->log("JSON connector made.");
+        $this->log("Made a thing from null.");
+
+
             // Testing this as of 15 June 2018.  Not used by framework yet.
             $this->variables = new Json($this->uuid);
             $this->variables->setField("variables");
 
             $this->choice = new Choice($this->uuid);
+
+        $this->log("Choice connector made.");
 
             // Sigh.  Hold this Thing to account.  Unless it is a forager.
             $this->state = 'foraging'; // Add code link later.
@@ -194,6 +202,7 @@ class Thing
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
             $this->db = new Database($this->uuid, 'null' . $this->mail_postfix);
+
             $this->log("Thing made a db connector.");
 
             // Provide handler for Json translation from/to MySQL.
@@ -231,6 +240,8 @@ class Thing
             // $message0-7 not implemented except for development testing.
 
             $this->Get();
+
+        $this->log("Get call completed.");
 
             // And fire up the stack balance calculation to make
             // sure stack balance snapshot is latest.
@@ -286,6 +297,7 @@ class Thing
         }
 
         $this->db = new Database($this->uuid, $from);
+        $this->log("Create. Database connector made.");
 
         // All records are associated with a posterior record.  Ideally
         // one of the two latest records matching the newly created
@@ -298,6 +310,8 @@ class Thing
         // some database calls and writes.
         //$ref_time = microtime(true);
         $this->associatePosterior($from, $to); // 3s 2s 3s
+        $this->log("Create. Associated posterior.");
+
         // Currently timing (27 Feb) at 268 ms 340ms 261ms
         // Currently timing (1 May 2019) at 5-8ms
         //echo number_format((microtime(true)-$ref_time)*1000) . "ms";
@@ -306,6 +320,8 @@ class Thing
         // Associate the new record to the last create record.
         if ($this->container['settings']['stack']['associate_prior'] === true) {
             $this->pushJson('associations', $prior_uuid);
+        $this->log("Create. Pushed json associations.");
+
         }
 
         // First query after instantiating Database. And after the associate
@@ -319,6 +335,8 @@ class Thing
         //$query = $this->db->Create($subject, $to); // 3s
 
         $query = $this->db->Create($subject, $to); // 3s
+        $this->log("Create. Database create call completed.");
+
 
         if ($query == true) {
             // will return true if successfull else it will return false
@@ -405,6 +423,10 @@ class Thing
         ///		$things = $thingreport['things'];
 
         //$this->stackBalance();
+
+        $this->log("Create completed.");
+        $this->log("Now called Get. (again?)");
+
 
         return $this->Get();
     }
@@ -842,6 +864,7 @@ class Thing
         // Passing test_redpanda.php 26 Apr.
         $thingreport = $this->db->priorGet(); // 3s
 
+$this->log("associatePosterior. PriorGet database call completed.");
         $posterior_thing = $thingreport['thing'];
 
         if ($posterior_thing != false) {
@@ -857,11 +880,14 @@ class Thing
                 //too many connection issue.  Leave it in for
                 //the time being.  25 Apr.
                 //unset($posterior_thing);
+$this->log("Associated posterior thing.");
             }
             return;
             //		return 'Posterior uuid ' . $posterior_thing->uuid .
             //				' associated with Thing uuid ' . $this->uuid;
         }
+
+$this->log("Posterior thing is false");
     }
 
     function associate($uuids = null, $mode = "default")

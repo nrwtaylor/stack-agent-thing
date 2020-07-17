@@ -17,57 +17,57 @@ error_reporting(-1);
 
 class Brilltagger extends Agent
 {
-
     private $dict;
-
 
     /**
      *
      */
-    function init() {
+    function init()
+    {
         $this->thing->log("init.");
 
         $this->wordpress_path_to = false;
 
         if (isset($this->thing->container['api']['wordpress']['path_to'])) {
-           $this->wordpress_path_to = $this->thing->container['api']['wordpress']['path_to'];
+            $this->wordpress_path_to =
+                $this->thing->container['api']['wordpress']['path_to'];
         }
-
-
     }
 
-    public function get() {
-$this->thing->log("get.");
-        if (isset($this->dict)) {return;}
+    public function get()
+    {
+        $this->thing->log("get.");
+        if (isset($this->dict)) {
+            return;
+        }
 
         // See if there is a faster way to pull the lexicon.
         // Rather than pulling it from the text file.
 
-        // If the stack is running alongside WordPress use get and set transient.
+        // Load word list into memory.
 
-        if ($this->wordpress_path_to !== false) {
-            require_once $this->wordpress_path_to. 'wp-load.php';
-            if (($this->dict = get_transient('agent-brilltagger-lexicon'))) {
-                $this->thing->log("loaded brilltagger lexicon from  wp transient store.");
-                return $this->dict;
-            }
+        $this->getMemcached();
+
+        //   if ($this->wordpress_path_to !== false) {
+        //       require_once $this->wordpress_path_to. 'wp-load.php';
+        if ($this->dict = $this->mem_cached->get('agent-brilltagger-lexicon')) {
+            $this->thing->log("loaded brilltagger lexicon from memory.");
+            return $this->dict;
         }
+        //    }
 
         $lexicon = $this->resource_path . "brilltagger/lexicon.txt";
         $fh = fopen($lexicon, 'r');
         while ($line = fgets($fh)) {
-
             $tags = explode(' ', $line);
 
             $this->dict[strtolower(array_shift($tags))] = $tags;
-
-
         }
         fclose($fh);
         $this->thing->log("got the brilltagger lexicon.");
 
         if ($this->wordpress_path_to !== false) {
-            set_transient('agent-brilltagger-lexicon', $this->dict);
+            $this->mem_cached->set('agent-brilltagger-lexicon', $this->dict);
         }
     }
 
@@ -75,71 +75,65 @@ $this->thing->log("get.");
      *
      * @param unknown $tags
      */
-    function printTag($tags) {
+    function printTag($tags)
+    {
         foreach ($tags as $t) {
-            echo $t['token'] . "/" . $t['tag'] .  " ";
+            echo $t['token'] . "/" . $t['tag'] . " ";
         }
         echo "\n";
     }
 
-
     /**
      *
      * @param unknown $tags
      */
-    function textTag($tags) {
-
+    function textTag($tags)
+    {
         $text = "";
 
         foreach ($tags as $t) {
-            $text .= $t['token'] . "/" . $t['tag'] .  " ";
+            $text .= $t['token'] . "/" . $t['tag'] . " ";
         }
         $text .= "\n";
         $this->text = $text;
     }
 
-
     /**
      *
      */
-    public function respondResponse() {
+    public function respondResponse()
+    {
         // Thing actions
         //$this->makeSMS();
         //$from = $this->from;
         //$to = $this->to;
 
-
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
     }
-
 
     /**
      *
      */
-    function makeSMS() {
-
+    function makeSMS()
+    {
         $this->thing_report['sms'] = "BRILL TAGGER | " . $this->text;
-
     }
-
 
     /**
      *
      */
-    public function readSubject() {
-
+    public function readSubject()
+    {
         // Strip out brilltagger commands.
         $input = $this->input;
 
         if (strtolower($input) == "brilltagger") {
+            return;
+        }
 
-return;
-}
-
-$this->thing->log("read " . $input .".");
-/*
+        $this->thing->log("read " . $input . ".");
+        /*
         if (strtolower($input) == "brilltagger") {
 //return;
 //}
@@ -155,21 +149,27 @@ $this->thing->log("read " . $input .".");
 */
 
         $whatIWant = $this->input;
-        if (($pos = strpos(strtolower($input), "brill tagger")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("brill tagger")); 
-        } elseif (($pos = strpos(strtolower($input), "brilltagger")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("brilltagger")); 
+        if (($pos = strpos(strtolower($input), "brill tagger")) !== false) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("brill tagger")
+            );
+        } elseif (
+            ($pos = strpos(strtolower($input), "brilltagger")) !== false
+        ) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("brilltagger")
+            );
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
         // Then run it through the classifier.
         $tags = $this->tag($filtered_input);
-$this->tags = $tags;
-//        $this->printTag($tags);
+        $this->tags = $tags;
+        //        $this->printTag($tags);
         $this->textTag($tags);
-
-
     }
 
     /**
@@ -177,8 +177,9 @@ $this->tags = $tags;
      * @param unknown $text
      * @return unknown
      */
-    public function tag($text) {
-$this->thing->log("brilltagger tag run.");
+    public function tag($text)
+    {
+        $this->thing->log("brilltagger tag run.");
         preg_match_all("/[\w\d\.]+/", $text, $matches);
         $nouns = array('NN', 'NNS');
 
@@ -200,9 +201,10 @@ $this->thing->log("brilltagger tag run.");
 
             // Converts verbs after 'the' to nouns
             if ($i > 0) {
-                if ($return[$i - 1]['tag'] == 'DT' &&
-                    in_array($return[$i]['tag'],
-                        array('VBD', 'VBP', 'VB'))) {
+                if (
+                    $return[$i - 1]['tag'] == 'DT' &&
+                    in_array($return[$i]['tag'], array('VBD', 'VBP', 'VB'))
+                ) {
                     $return[$i]['tag'] = 'NN';
                 }
             }
@@ -223,15 +225,19 @@ $this->thing->log("brilltagger tag run.");
             }
 
             // Common noun to adjective if it ends with al
-            if (in_array($return[$i]['tag'], $nouns)
-                && substr($token, -2) == 'al') {
+            if (
+                in_array($return[$i]['tag'], $nouns) &&
+                substr($token, -2) == 'al'
+            ) {
                 $return[$i]['tag'] = 'JJ';
             }
 
             // Noun to verb if the word before is 'would'
             if ($i > 0) {
-                if ($return[$i]['tag'] == 'NN'
-                    && strtolower($return[$i-1]['token']) == 'would') {
+                if (
+                    $return[$i]['tag'] == 'NN' &&
+                    strtolower($return[$i - 1]['token']) == 'would'
+                ) {
                     $return[$i]['tag'] = 'VB';
                 }
             }
@@ -242,20 +248,25 @@ $this->thing->log("brilltagger tag run.");
             }
 
             // Convert common noun to gerund
-            if (in_array($return[$i]['tag'], $nouns)
-                && substr($token, -3) == 'ing') {
+            if (
+                in_array($return[$i]['tag'], $nouns) &&
+                substr($token, -3) == 'ing'
+            ) {
                 $return[$i]['tag'] = 'VBG';
             }
 
             // If we get noun noun, and the second can be a verb, convert to verb
             if ($i > 0) {
-                if (in_array($return[$i]['tag'], $nouns)
-                    && in_array($return[$i-1]['tag'], $nouns)
-                    && isset($this->dict[strtolower($token)])) {
+                if (
+                    in_array($return[$i]['tag'], $nouns) &&
+                    in_array($return[$i - 1]['tag'], $nouns) &&
+                    isset($this->dict[strtolower($token)])
+                ) {
                     if (in_array('VBN', $this->dict[strtolower($token)])) {
                         $return[$i]['tag'] = 'VBN';
-                    } else if (in_array('VBZ',
-                            $this->dict[strtolower($token)])) {
+                    } elseif (
+                        in_array('VBZ', $this->dict[strtolower($token)])
+                    ) {
                         $return[$i]['tag'] = 'VBZ';
                     }
                 }
@@ -266,6 +277,4 @@ $this->thing->log("brilltagger tag run.");
 
         return $return;
     }
-
-
 }

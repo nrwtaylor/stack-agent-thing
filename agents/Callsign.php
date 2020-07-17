@@ -574,7 +574,7 @@ class Callsign extends Agent
                     break;
                 }
                 $file = $this->resource_path . 'amateur_delim.txt';
-                $pre_contents = file_get_contents($file);
+                $pre_contents = @file_get_contents($file);
 
                 if ($pre_contents == false) {
                     return true;
@@ -859,7 +859,10 @@ class Callsign extends Agent
                 }
             }
         }
+$first_name = "X";
+if (isset($this->callsign['first_name'])) {
         $first_name = $this->callsign["first_name"];
+}
 
         // If more than one first name is returned.
         $arr = explode(" ", $first_name);

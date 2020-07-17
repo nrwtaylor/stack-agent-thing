@@ -36,8 +36,8 @@ class Database
         $this->operations = 0;
         $this->log = [];
 
-        $this->hash_algorithm = 'sha256';
-//        $this->hash_state = 'on';
+//        $this->hash_algorithm = 'sha256';
+        //        $this->hash_state = 'on';
 
         // Database controls access by $uuid.
 
@@ -83,14 +83,14 @@ class Database
 
         $this->hash_state = 'off';
         if (isset($settings['settings']['stack']['hash'])) {
-        $this->hash_state = $settings['settings']['stack']['hash'];
+            $this->hash_state = $settings['settings']['stack']['hash'];
         }
 
         $this->hash_algorithm = 'sha256';
         if (isset($settings['settings']['stack']['hash'])) {
-        $this->hash_algorithm = $settings['settings']['stack']['hash_algorithm'];
+            $this->hash_algorithm =
+                $settings['settings']['stack']['hash_algorithm'];
         }
-
 
         $this->container = new \Slim\Container($settings);
 
@@ -126,8 +126,6 @@ class Database
         };
 
         $this->get_calling_function();
-        //        $this->caller = $r;
-        // $t[count($t)-2];
 
         $this->test("<b>" . $this->get_calling_function() . "</b>");
 
@@ -301,7 +299,7 @@ class Database
                 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
                 $this->web_prefix .
                 'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.',
+            'help' => 'Check your junk/spam folder.'
         ];
 
         // Runs in 0 to 8ms
@@ -374,7 +372,7 @@ class Database
         $thingreport = [
             'things' => false,
             'info' => 'Counted ' . $thing_count . '  records on stack.',
-            'help' => 'This is how big the stack is.',
+            'help' => 'This is how big the stack is.'
         ];
         $thingreport['number'] = $thing_count;
 
@@ -429,9 +427,9 @@ class Database
 
             $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
-if ($this->hash_state == 'off') {
-            $hash_nom_from = $nom_from;
-}
+            if ($this->hash_state == 'off') {
+                $hash_nom_from = $nom_from;
+            }
             $nom_to = $to;
 
             $query->execute();
@@ -477,7 +475,6 @@ if ($this->hash_state == 'off') {
             $sth->bindParam("uuid", $this->uuid);
             $sth->execute();
             $thing = $sth->fetchObject();
-
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -498,7 +495,7 @@ if ($this->hash_state == 'off') {
                 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
                 $this->web_prefix .
                 'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.',
+            'help' => 'Check your junk/spam folder.'
         ];
 
         $this->test();
@@ -529,7 +526,7 @@ if ($this->hash_state == 'off') {
     function setUser($id = null)
     {
         if ($id == null) {
-        $settings = require $GLOBALS['stack_path'] . "private/settings.php";
+            $settings = require $GLOBALS['stack_path'] . "private/settings.php";
 
             $id = "null@" . $settings['settings']['stack']['mail_postfix'];
         }
@@ -555,14 +552,13 @@ if ($this->hash_state == 'off') {
      */
     function associationSearch($value, $max = null)
     {
-
         if ($max == null) {
             $max = 3;
         }
         $max = (int) $max;
 
         $user_search = $this->from;
-//        $hash_user_search($this->hash_algorithm, $user_search);
+        //        $hash_user_search($this->hash_algorithm, $user_search);
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
@@ -684,7 +680,7 @@ if ($this->hash_state == 'off') {
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.',
+                'A list of Things which match at the provided phrase.'
         ];
 
         return $thingreport;
@@ -764,7 +760,6 @@ if ($this->hash_state == 'off') {
         } catch (\PDOException $e) {
             //            $t = new Thing(null);
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
-
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
         $things = $sth->fetchAll();
@@ -775,7 +770,7 @@ if ($this->hash_state == 'off') {
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.',
+                'A list of Things which match at the provided phrase.'
         ];
 
         return $thingreport;
@@ -802,9 +797,20 @@ if ($this->hash_state == 'off') {
 
         $sth->bindParam(":agent", $agent);
         $sth->bindParam(":horizon", $horizon, PDO::PARAM_INT);
-        $sth->execute();
+        //        $sth->execute();
 
-        $things = $sth->fetchAll();
+        //        $things = $sth->fetchAll();
+
+        try {
+            $sth->execute();
+            $things = $sth->fetchAll();
+        } catch (\PDOException $e) {
+            $things = array();
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
+
+            //            echo 'Caught exception: ', $e->getMessage(), "\n";
+        }
 
         $thingreport = [
             'things' => $things,
@@ -812,7 +818,7 @@ if ($this->hash_state == 'off') {
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.',
+                'A list of Things which match at the provided phrase.'
         ];
         return $thingreport;
     }
@@ -848,7 +854,7 @@ if ($this->hash_state == 'off') {
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.',
+                'A list of Things which match at the provided phrase.'
         ];
         return $thingreport;
     }
@@ -884,7 +890,7 @@ if ($this->hash_state == 'off') {
             'info' => 'Asked to delete records by agent.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A command to delete all but some of a specific agent records.',
+                'A command to delete all but some of a specific agent records.'
         ];
         return $thingreport;
     }
@@ -934,7 +940,7 @@ if ($this->hash_state == 'off') {
                 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
             'whatisthis' =>
-                'A list of Things which match at the provided phrase.',
+                'A list of Things which match at the provided phrase.'
         ];
         return $thingreport;
     }
@@ -978,7 +984,7 @@ if ($this->hash_state == 'off') {
         $thingreport = [
             'thing' => $things,
             'info' => 'Searches by nom_from and task.',
-            'help' => 'Keyword subject line search.',
+            'help' => 'Keyword subject line search.'
         ];
 
         return $thingreport;
@@ -1125,7 +1131,7 @@ if ($this->hash_state == 'off') {
             'associations',
             'task',
             'message0',
-            'settings',
+            'settings'
         ];
 
         // Double capitals to make you thing before you ask a Thing
@@ -1196,7 +1202,7 @@ if ($this->hash_state == 'off') {
             'things' => $things,
             'info' =>
                 'So here are the uuids of all records matching your request.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
+            'help' => 'It is up to you what you do with these.'
         ];
 
         return $thingreport;
@@ -1284,7 +1290,7 @@ if ($this->hash_state == 'off') {
             'thing' => $things,
             'info' => 'So here are Things which are flagged red.',
             'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which have status red.',
+            'whatisthis' => 'A list of Things which have status red.'
         ];
 
         return $thingreport;
@@ -1325,7 +1331,7 @@ if ($this->hash_state == 'off') {
         $thingreport = [
             'things' => $things,
             'info' => 'So here are Things which are flagged as stack reports.',
-            'help' => 'This reports on stack health',
+            'help' => 'This reports on stack health'
         ];
 
         return $thingreport;
@@ -1347,7 +1353,7 @@ if ($this->hash_state == 'off') {
             'thing' => $things,
             'info' => 'So here are Things which are flagged red.',
             'help' => 'It is up to you what you do with these.',
-            'whatisthis' => 'A list of Things which have status red.',
+            'whatisthis' => 'A list of Things which have status red.'
         ];
 
         return $thingreport;
@@ -1373,7 +1379,7 @@ if ($this->hash_state == 'off') {
             'info' => 'So here is the length of the variables field.',
             'help' =>
                 'There is a limit to the variables the stack can keep track of.',
-            'whatisthis' => 'The maximum length of the variables field.',
+            'whatisthis' => 'The maximum length of the variables field.'
         ];
 
         //$thingreport = false;
@@ -1403,8 +1409,7 @@ if ($this->hash_state == 'off') {
             'info' =>
                 'So here are Things matching at least one of the words provided. That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.',
-            'whatisthis' =>
-                'A list of Things which match at least one keyword.',
+            'whatisthis' => 'A list of Things which match at least one keyword.'
         ];
 
         //$thingreport = false;
@@ -1467,7 +1472,7 @@ if ($this->hash_state == 'off') {
                 'things' => $things,
                 'info' =>
                     'So here are three things you put on the stack.  That\'s what you wanted.',
-                'help' => 'It is up to you what you do with these.',
+                'help' => 'It is up to you what you do with these.'
             ];
         } else {
             $q =
@@ -1485,7 +1490,7 @@ if ($this->hash_state == 'off') {
                 'things' => $thing,
                 'info' =>
                     'So here are three things you put on the stack.  That\'s what you wanted.',
-                'help' => 'It is up to you what you do with these.',
+                'help' => 'It is up to you what you do with these.'
             ];
         }
 
@@ -1516,7 +1521,7 @@ if ($this->hash_state == 'off') {
             'thing' => $things,
             'info' =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
+            'help' => 'It is up to you what you do with these.'
         ];
 
         return $thingreport;
@@ -1586,7 +1591,7 @@ if ($this->hash_state == 'off') {
             'thing' => $things,
             'info' =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
-            'help' => 'It is up to you what you do with these.',
+            'help' => 'It is up to you what you do with these.'
         ];
 
         return $thingreport;

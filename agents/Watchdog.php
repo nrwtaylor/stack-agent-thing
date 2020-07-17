@@ -11,50 +11,51 @@ class Watchdog extends Agent
 {
     public function init()
     {
-
         $this->state = "red"; // running
 
-$this->url = false;
-if (isset($this->thing->container['api']['watchdog']['url'])) {
-        $this->url = $this->thing->container['api']['watchdog']['url'];
-}
+        $this->url = false;
+        if (isset($this->thing->container['api']['watchdog']['url'])) {
+            $this->url = $this->thing->container['api']['watchdog']['url'];
+        }
         $this->thing_report['help'] = "Watches out for barks.";
     }
-
 
     public function run()
     {
         $this->doWatchdog();
     }
 
-    public function makeChoice() {}
+    public function makeChoice()
+    {
+    }
 
     /**
      *
      * @return unknown
      */
-    public function respondResponse() {
+    public function respondResponse()
+    {
         $this->thing->flagGreen();
 
         // This should be the code to handle non-matching responses.
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
         //        $this->thing_report['sms'] = $this->sms_message;
-
     }
 
-    function set() {
+    function set()
+    {
         $this->thing->json->setField("variables");
 
-        $this->thing->json->writeVariable(array("watchdog",
-                "refreshed_at"),  $this->thing->json->time()
+        $this->thing->json->writeVariable(
+            array("watchdog", "refreshed_at"),
+            $this->thing->json->time()
         );
     }
-
 
     public function get()
     {
@@ -88,14 +89,15 @@ if (isset($this->thing->container['api']['watchdog']['url'])) {
 
     public function readSubject()
     {
-$this->response .= "Heard. ";
+        $this->response .= "Heard. ";
     }
 
-    function doWatchdog($depth = null) {
-if ($this->url === false) {return true;}
+    function doWatchdog($depth = null)
+    {
+        if ($this->url === false) {
+            return true;
+        }
 
         file_get_contents($this->url);
     }
-
-
 }
