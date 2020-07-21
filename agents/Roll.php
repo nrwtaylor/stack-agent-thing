@@ -108,27 +108,6 @@ class Roll extends Agent
     /**
      *
      */
-/*
-    function make() {
-
-        $this->makeSMS();
-        $this->makeMessage();
-        $this->makePNG();
-        $this->makePNGs();
-
-        $this->makeChoices();
-        $this->makeWeb();
-
-        $this->makeEmail();
-
-
-    }
-*/
-
-
-    /**
-     *
-     */
     function makeChoices() {
         $this->thing->choice->Create(
             $this->agent_name,
