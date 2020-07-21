@@ -14,7 +14,7 @@ class Read extends Agent
     function init()
     {
         $this->test = "Development code"; // Always
-        $this->keywords = ['read', 'link', 'date', 'wordlist'];
+        $this->keywords = ['read', 'link', 'date', 'wordlist', 'last'];
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -505,36 +505,16 @@ class Read extends Agent
 
         if ($this->verbosity >= 2) {
         }
-        /*
-        $a = implode(" | ", $this->addresses);
 
-        $addresses = $a;
-
-        $sms_message .= " | " . $addresses;
-
-        if ($this->verbosity >= 5) {
-            $sms_message .= " | wordlist " . $this->wordlist;
+        if ($this->link !== false) {
+            $sms_message .= " | link " . $this->link;
         }
-*/
-        $sms_message .= " | link " . $this->link;
-
         $sms_message .= " | Do not read flag ";
         if ($this->do_not_read) {
             $sms_message .= 'RED. ';
         } else {
             $sms_message .= 'GREEN. ';
         }
-        /*
-        if ($this->verbosity >= 9) {
-            $sms_message .=
-                " | nuuid " . substr($this->variables_agent->thing->uuid, 0, 4);
-            $sms_message .=
-                " | rtime " .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms';
-        }
-*/
-        //        $sms_message .= " | TEXT ?";
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
@@ -544,46 +524,51 @@ class Read extends Agent
     {
         $web = "<b>READ AGENT</b><p>";
 
-        if ($this->urls == true) {
+        if (isset($this->urls) and $this->urls == true) {
         } else {
             //var_dump($this->urls);
         }
 
         $web .= "<p><b>URLs read</b><br>";
-        $link_agent = new Link($this->thing, "link");
-        $link_agent->extractLinks($this->contents);
-        //var_dump($link_agent->links);
-        //exit();
-        $links = array_unique($link_agent->links);
-        foreach ($links as $i => $link) {
-            $unsafe_characters = ['{', '}'];
 
-            if (
-                preg_match(
-                    '/[' . preg_quote(implode(',', $unsafe_characters)) . ']+/',
-                    $link
-                )
-            ) {
-                continue;
+        if (isset($this->contents)) {
+            $link_agent = new Link($this->thing, "link");
+            $link_agent->extractLinks($this->contents);
+
+            $links = array_unique($link_agent->links);
+
+            foreach ($links as $i => $link) {
+                $unsafe_characters = ['{', '}'];
+
+                if (
+                    preg_match(
+                        '/[' .
+                            preg_quote(implode(',', $unsafe_characters)) .
+                            ']+/',
+                        $link
+                    )
+                ) {
+                    continue;
+                }
+
+                $web .= '<a href="' . $link . '">' . $link . '</a>' . '<br>';
             }
 
-            $web .= '<a href="' . $link . '">' . $link . '</a>' . '<br>';
+            $sentence = $this->sentences[0];
+
+            $word_agent = new Word($this->thing, "word");
+            $words = $word_agent->extractWords($this->contents);
+
+            $unique_words = array_unique($words);
+
+            $web .= "<p><b>Words read</b>" . '<br>';
+
+            foreach ($unique_words as $i => $unique_word) {
+                $web .= $unique_word . " ";
+            }
+
+            $web .= '<p>';
         }
-
-        $sentence = $this->sentences[0];
-
-        $word_agent = new Word($this->thing, "word");
-        $words = $word_agent->extractWords($this->contents);
-
-        $unique_words = array_unique($words);
-
-        $web .= "<p><b>Words read</b>" . '<br>';
-
-        foreach ($unique_words as $i => $unique_word) {
-            $web .= $unique_word . " ";
-        }
-
-        $web .= '<p>';
         $web .= $this->sms_message;
         $web .= '<br>';
         $this->thing_report['web'] = $web;
@@ -633,14 +618,53 @@ class Read extends Agent
         return $this->number;
     }
 
-    public function readSubject()
+    public function readSubject($input = null)
     {
-        $this->response = null;
+        //$input = null;
+
+        if ($input == null) {
+            $input = $this->assert($this->input);
+        }
+
+        $pieces = explode(" ", strtolower($input));
+
+        foreach ($pieces as $key => $piece) {
+            foreach ($this->keywords as $command) {
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
+                        case 'last':
+                            // devstack
+                            $this->getPrior();
+                            $task = $this->prior_thing['thing']->task;
+                            $uuid = $this->prior_thing['thing']->uuid;
+                            $nom_from = $this->prior_thing['thing']->nom_from;
+                            $nom_to = $this->prior_thing['thing']->nom_to;
+                            $created_at =
+                                $this->prior_thing['thing']->created_at;
+
+                            $input = $task;
+                            if (!isset($this->recursion_count)) {
+                                $this->recursion_count = 0;
+                            }
+
+                            if ($this->recursion_count < 2) {
+                                $this->recursion_count += 1;
+                                $this->readSubject($input);
+                            }
+
+                            if ($this->recursion_count == 1) {
+                                $this->response .= 'Read "' . $input . '" ';
+                            } else {
+                                $this->response .=
+                                    'Then read "' . $input . '" ';
+                            }
+                    }
+                }
+            }
+        }
+
+        //$this->response = null;
         $this->num_hits = 0;
-
-        $keywords = $this->keywords;
-
-        $input = $this->assert($this->input);
 
         $url_agent = new Url($this->thing, "url");
 

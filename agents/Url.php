@@ -331,7 +331,6 @@ if ($task_urls === true) {continue;}
         if ($urls === true) {
             return false;
         }
-
         if (count($urls) == 1) {
             return $urls[0];
         }

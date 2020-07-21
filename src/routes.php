@@ -964,6 +964,9 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             // Everything else
             $thing = new Thing($uuid);
 
+                $channel = new Channel($thing, "web");
+
+
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.

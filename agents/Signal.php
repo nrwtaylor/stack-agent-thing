@@ -71,17 +71,18 @@ class Signal extends Agent
     public function set()
     {
         if (!isset($this->signal_thing)) {
-            echo "merp";
-            exit();
+            // Nothing to set
+            return true;
         }
         if (isset($this->signal_thing->state)) {
             $this->signal['state'] = $this->signal_thing->state;
         }
 
-        $this->signal['id'] = $this->signalId($this->signal_thing->uuid);
+        $this->signal['id'] = $this->idSignal($this->signal_thing->uuid);
 
         $this->signal['uuid'] = $this->signal_thing->uuid;
 
+        $this->signal['text'] = "signal check";
         if (isset($this->signal_thing->text)) {
             $this->signal['text'] = $this->signal_thing->text;
         }
@@ -158,6 +159,14 @@ class Signal extends Agent
         $this->response .= "Saw channel is " . $this->channel_name . ". ";
 
         $this->getSignal();
+
+        foreach ($this->signals as $i => $signal) {
+            if ($signal['uuid'] == $this->signal_thing->uuid) {
+                //var_dump($signal);
+                $this->signal_thing->state = $signal['state'];
+                return;
+            }
+        }
     }
 
     public function run()
@@ -274,6 +283,7 @@ class Signal extends Agent
             $state = "double yellow";
             $type = "signal double yellow";
         }
+
         $this->signal_thing->state = $state;
         $this->signal_thing->text = $type;
         //$this->state = $state;
@@ -321,10 +331,6 @@ class Signal extends Agent
         $this->signal_thing = $thing;
         $this->signal_thing->state = "X";
         $this->signal_thing->text = "new signal";
-
-        // $this->signal['state'] = $this->signal_thing->state;
-        // $this->signal['id'] = $this->signal_thing->uuid;
-        // $this->signal['text'] = $this->signal_thing->text;
     }
 
     function getSignalbyUuid($uuid)
@@ -375,7 +381,7 @@ class Signal extends Agent
         }
 
         $uuid = $matched_uuids[0];
-        echo "matched uuid " . $uuid . "\n";
+        //echo "matched uuid " . $uuid . "\n";
         $this->signal_thing = new Thing($uuid);
         /* 
        $this->signal = $this->thing->json->jsontoArray(
@@ -436,8 +442,8 @@ class Signal extends Agent
         $text =
             $id .
             " " .
-            $uuid .
-            " " .
+            //            $uuid .
+            //            " " .
             " " .
             $state .
             " " .
@@ -478,7 +484,7 @@ class Signal extends Agent
 
             $signal_id = "X";
             if (isset($signal['uuid'])) {
-                $this->signal_id = $this->signalId($signal['uuid']);
+                $this->signal_id = $this->idSignal($signal['uuid']);
                 $this->response .= "Saw " . $this->signal_id . ". ";
 
                 $this->getSignalbyUuid($signal['uuid']);
@@ -503,10 +509,10 @@ class Signal extends Agent
         if (!isset($this->signals)) {
             $this->getSignals();
         }
-        echo "\n";
+        //echo "\n";
 
         foreach ($this->signals as $i => $signal) {
-            echo $this->textSignal($signal);
+            //echo $this->textSignal($signal);
             if (isset($signal['uuid'])) {
                 $flag = $this->getSignalbyUuid($signal['uuid']);
                 return;
@@ -654,6 +660,16 @@ class Signal extends Agent
         if (!isset($this->signals)) {
             $this->getSignals();
         }
+        $signal_table = '<div class="Table">
+                 <div class="TableRow">
+                 <div class="TableHead"><strong>ID</strong></div>
+                 <div class="TableHead"><span style="font-weight: bold;">State</span></div>
+                 <div class="TableHead"><strong>Text</strong></div></div>';
+
+        //            $id = $signal['id'];
+        //            $uuid = $signal['uuid'];
+        //            $state = $signal['state'];
+        //            $text = $signal['text'];
 
         if (isset($this->signals) and is_array($this->signals)) {
             $signal_text = "";
@@ -674,11 +690,35 @@ class Signal extends Agent
             array_multisort($refreshed_at, SORT_DESC, $signals);
 
             foreach ($signals as $i => $signal) {
+                $signal_table .= '<div class="TableRow">';
+
+                $signal_table .=
+                    '<div class="TableCell">' .
+                    strtoupper($signal['id']) .
+                    '</div>';
+
+                $state = "X";
+                if (isset($signal['state'])) {
+                    $state = $signal['state'];
+                }
+                $signal_table .=
+                    '<div class="TableCell">' . strtoupper($state) . '</div>';
+
+                $text = "X";
+                if (isset($signal['text'])) {
+                    $text = $signal['text'];
+                }
+
+                $signal_table .=
+                    '<div class="TableCell">' . strtoupper($text) . '</div>';
+                $signal_table .= '</div>';
+
                 //               if ($signal['text'] == "signal post") {
 
-                $signal_text .= nl2br($this->textSignal($signal));
+                //     $signal_text .= nl2br($this->textSignal($signal));
                 //               }
             }
+            $signal_text = $signal_table . '</div><p>';
 
             $web .= "<b>SIGNALS FOUND</b><br><p>" . $signal_text;
         }
@@ -1102,6 +1142,19 @@ class Signal extends Agent
 
             if ($response != true) {
                 $this->response .= "Got signal " . $t . ". ";
+
+                /*
+foreach($this->signals as $i=>$signal) {
+
+if ($signal['uuid'] == $this->signal_thing->uuid) {
+//var_dump($signal);
+$this->signal_thing->state = $signal['state'];
+return;
+}
+
+}
+*/
+
                 return;
             }
 
@@ -1114,6 +1167,19 @@ class Signal extends Agent
         // So look up the signal in associations.
 
         // signal - returns the uuid and the state of the current signal
+
+        if ($this->channel_name == 'web') {
+            $this->response .= "Detected web channel. ";
+
+            //$uuid = $this->signal_thing->uuid;
+            //$state = $this->signal_thing->state;
+            //    $this->getSignalbyUuid($uuid);
+
+            //            $response = $this->getSignalbyId($t);
+
+            // Do not effect a state change for web views.
+            return;
+        }
 
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
