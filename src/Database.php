@@ -92,6 +92,14 @@ class Database
                 $settings['settings']['stack']['hash_algorithm'];
         }
 
+        $this->get_prior = true;
+        if (isset($settings['settings']['stack']['get_prior'])) {
+            $this->get_prior =
+                $settings['settings']['stack']['get_prior'];
+        }
+
+
+
         $this->container = new \Slim\Container($settings);
 
         // create app instance
@@ -239,6 +247,20 @@ class Database
      */
     function priorGet($created_at = null)
     {
+
+if ($this->get_prior === false) {
+
+        $thingreport = [
+            'thing' => false,
+            'info' =>
+                'Prior get is off for this stack.',
+            'help' => 'No help available.'
+        ];
+
+return $thingreport;
+
+}
+
         $nom_from = $this->from;
         $hash_nom_from = hash($this->hash_algorithm, $nom_from);
         // Given a $uuid.  Find the previous record the $from user
