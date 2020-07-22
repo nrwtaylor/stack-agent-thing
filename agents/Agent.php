@@ -231,7 +231,7 @@ class Agent
     }
 
 public function getThings($agent_name = null) {
-
+$things = array();
 if ($agent_name == null) {$agent_name = "tick";}
 $agent_name = strtolower($agent_name);
         $rules_list = [];
@@ -239,7 +239,7 @@ $agent_name = strtolower($agent_name);
         $this->rules_list = [];
         $this->unique_count = 0;
 
-        $findagent_thing = new Findagent($this->thing, 'tick');
+        $findagent_thing = new Findagent($this->thing, $agent_name);
         if (!is_array($findagent_thing->thing_report['things'])) {
             return;
         }
@@ -258,7 +258,7 @@ $agent_name = strtolower($agent_name);
 
 if (isset($variables[$agent_name])) {
 
-$things[] = $variables[$agent_name];
+$things[$uuid] = $variables[$agent_name];
 
 }
 

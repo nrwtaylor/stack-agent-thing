@@ -74,6 +74,7 @@ class Signal extends Agent
             // Nothing to set
             return true;
         }
+
         if (isset($this->signal_thing->state)) {
             $this->signal['state'] = $this->signal_thing->state;
         }
@@ -96,7 +97,7 @@ class Signal extends Agent
             // Do not effect a state change for web views.
             return;
         }
-
+/*
         $this->thing->json->writeVariable(
             ["signal", "refreshed_at"],
             $this->current_time
@@ -118,7 +119,7 @@ class Signal extends Agent
                 $this->signal_thing->text
             );
         }
-
+*/
         $this->setSignal();
     }
 
@@ -325,12 +326,14 @@ class Signal extends Agent
 
     function newSignal()
     {
+echo "new signal";
         $thing = new Thing(null);
         $thing->Create('signal', 'signal', 'signal');
 
         $this->signal_thing = $thing;
         $this->signal_thing->state = "X";
         $this->signal_thing->text = "new signal";
+$this->signal_id = $this->idSignal($thing->uuid);
     }
 
     function getSignalbyUuid($uuid)
@@ -562,8 +565,10 @@ class Signal extends Agent
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 if (isset($variables['signal'])) {
+//                    if (!isset($variables['signal']['state'])) {
+//continue;
+//}
                     //$refreshed_at = "X";
-
                     //                   $signal_id = $uuid;
                     //$signal_id = "X";
                     if (isset($variables['signal']['refreshed_at'])) {
@@ -578,7 +583,16 @@ class Signal extends Agent
                     if (isset($variables['signal']['state'])) {
                         $signal['state'] = $variables['signal']['state'];
                     }
+/*
+var_dump($signal);
+if  (
+(isset($signal['refreshed_at'])) and 
+(!isset($signal['text'])) and
+(!isset($signa['state']))) {
 
+continue;
+}
+*/                    
                     //if ($text == "signal post") {
                     $signal["uuid"] = $thing_object['uuid'];
                     $signal["id"] = $this->idSignal($thing_object['uuid']);

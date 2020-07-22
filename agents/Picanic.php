@@ -17,7 +17,7 @@ class Picanic extends Agent
     {
         $this->node_list = ["picanic" => []];
 
-        $this->unit = "POINTS";
+        $this->unit = "ANTS";
 
         $this->character = new Character(
             $this->thing,
@@ -142,7 +142,7 @@ class Picanic extends Agent
         }
 
         // Load in the cast. And roles.
-        $file = $this->resource_path . '/whereisyogi/messages.txt';
+        $file = $this->resource_path . '/picanic/messages.txt';
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
@@ -230,11 +230,14 @@ class Picanic extends Agent
             "\n" .
             "You now have " .
             strtolower($this->text) .
-            "\n" .
-            $this->nom .
-            " " .
-            $this->unit;
+            //"\n" .
+            //$this->nom .
+            //" " .
+            //$this->unit .
+            "\n";
         // . $this->number . " " . $this->unit . ".";
+
+        $this->antsPicanic($this->number);
 
         if (
             $this->role_to == "X" and
@@ -273,6 +276,40 @@ class Picanic extends Agent
                 ".";
         }
     }
+
+public function antsPicanic($n = null) {
+
+// Create ants.
+// Ants correspond to perceived value of resource.
+//var_dump($this->from);
+//exit();
+
+//$datagram = array("to"=>"picanic","from"=>"ant","subject"=>$this->text);
+$datagram = array("to"=>$this->from,"from"=>"ant","subject"=>$this->text);
+
+
+foreach(range(0,$n) as $i) {
+
+$this->thing->spawn($datagram);
+
+
+}
+if ($this->number == 1) {
+$this->response .= "Made " . $this->number . " ant. ";
+} else {
+$this->response .= "Made " . $this->number . " ants. ";
+}
+
+
+
+$ants = $this->getThings('ant');
+//var_dump($ants);
+//exit();
+$count = count($ants);
+$this->response .= "Counted " . $count . " ants. ";
+
+
+}
 
     public function makeMessage()
     {
@@ -336,13 +373,13 @@ class Picanic extends Agent
         $web .= "<p>";
 
         $ago = $this->thing->human_time(time() - $this->refreshed_at);
-        $web .= "This inject was created about " . $ago . " ago. ";
+        $web .= "This picnic item was created about " . $ago . " ago. ";
 
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
         $web .=
-            "This proof-of-concept inject is hosted by the " .
+            "This text-based picnic is hosted by the " .
             ucwords($this->word) .
             " service.  Read the privacy policy at " .
             $privacy_link .
@@ -588,16 +625,31 @@ if (isset($this->thing_report['alt_text'])) {$alt_text = $this->thing_report['al
                 return;
             }
         }
-
-        $keywords = ["picanic"];
+        $keywords = ["reset", "picanic", "ants"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'picanic':
-                            $this->getCard();
+case 'reset':
 
-                            return;
+$ants = $this->getThings('ant');
+//$count = count($ants);
+$count = 0;
+foreach($ants as $uuid=>$ant) {
+//var_dump($uuid);
+$thing = new Thing($uuid);
+$thing->Forget();
+$count += 1;
+//var_dump($thing);
+//exit();
+
+}
+$this->response .= "Killed " . $count . " Ants. ";
+return;
+//                        case 'picanic':
+//                            $this->getCard();
+
+//                            return;
 
                         case 'on':
                         //$this->setFlag('green');
