@@ -143,7 +143,7 @@ class Agent
         $this->make();
 
         // This is where we deal with insufficient space to serialize the variabes to the stack.
-    //if (!isset($this->signal_thing)) {return true;}
+        //if (!isset($this->signal_thing)) {return true;}
         try {
             $this->set();
         } catch (\OverflowException $t) {
@@ -230,10 +230,13 @@ class Agent
     {
     }
 
-public function getThings($agent_name = null) {
-$things = array();
-if ($agent_name == null) {$agent_name = "tick";}
-$agent_name = strtolower($agent_name);
+    public function getThings($agent_name = null)
+    {
+        $things = [];
+        if ($agent_name == null) {
+            $agent_name = "tick";
+        }
+        $agent_name = strtolower($agent_name);
         $rules_list = [];
 
         $this->rules_list = [];
@@ -256,25 +259,22 @@ $agent_name = strtolower($agent_name);
                 $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-if (isset($variables[$agent_name])) {
-
-$things[$uuid] = $variables[$agent_name];
-
-}
+                if (isset($variables[$agent_name])) {
+                    $things[$uuid] = $variables[$agent_name];
+                }
 
                 $response = $this->readAgent($thing_object['task']);
             }
         }
 
+        return $things;
+    }
 
-return $things;
-}
-
-public function readAgent($text = null) {
-// devstack
-return true;
-
-}
+    public function readAgent($text = null)
+    {
+        // devstack
+        return true;
+    }
 
     /**
      *
@@ -590,7 +590,6 @@ return true;
         $match = 0;
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];
@@ -738,7 +737,6 @@ return true;
         }
 
         if ($agent_flag == true) {
-
             if (!isset($this->thing_report['sms'])) {
                 $this->thing_report['sms'] = "AGENT | Standby.";
             }
@@ -1371,6 +1369,15 @@ return true;
             $input = strtolower($agent_input_text);
         }
 
+        // Handle call intended for humans.
+//        $t = $this->assert($input);
+        $human_agent = new Human($this->thing, 'human');
+
+        if (is_string($human_agent->address)) {
+            $this->thing_report = $human_agent->thing_report;
+            return $this->thing_report;
+        }
+
         // Basically if the agent input directly matches an agent name
         // Then run it.
 
@@ -1718,9 +1725,7 @@ return true;
             return $this->thing_report;
         }
 
-        $this->thing->log(
-            'looking for optin/optout'
-        );
+        $this->thing->log('looking for optin/optout');
         //    $usermanager_thing = new Usermanager($this->thing,'usermanager');
 
         if (strpos($input, 'optin') !== false) {
@@ -1963,7 +1968,6 @@ return true;
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag
         ) {
-
             $frequency_thing = new Frequency($this->thing);
             if ($frequency_thing->response != "") {
                 //            $ars_thing = new Amateurradioservice($this->thing);
