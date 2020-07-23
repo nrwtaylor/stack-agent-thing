@@ -115,8 +115,11 @@ return true;}
         }
         array_multisort($refreshed_at, SORT_DESC, $things);
 
+        $age = 1e99;
+
+
         if (isset($things[0]['refreshed_at'])) {
-            $age = 1e99;
+//            $age = 1e99;
             $refreshed_at = $things[0]['refreshed_at'];
             $age = strtotime($this->current_time) - strtotime($refreshed_at);
         }
