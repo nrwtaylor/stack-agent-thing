@@ -35,8 +35,8 @@ class Log extends Agent
         }
 
         $this->state = "X";
-        if (isset($this->settings['log']['state'])) {
-            $this->state = $this->settings['log']['state'];
+        if (isset($this->thing->container['api']['log']['state'])) {
+            $this->state = $this->thing->container['api']['log']['state'];
         }
 
         $this->node_list = [
@@ -142,7 +142,6 @@ class Log extends Agent
         $highlight = [];
         foreach ($gap_time_sorted_log as $i => $log_entry) {
             $count += 1;
-            //var_dump($log_entry['gap_time']);
             $highlight[] = $log_entry['number'];
             if ($count >= $max_entries) {
                 break;
@@ -195,7 +194,8 @@ class Log extends Agent
      *
      * @return unknown
      */
-    function getLink()
+
+    function getLink($variable = null)
     {
         $block_things = [];
         // See if a block record exists.
@@ -261,9 +261,9 @@ class Log extends Agent
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
-            "php"
+            "log"
         );
-        $choices = $this->thing->choice->makeLinks('php');
+        $choices = $this->thing->choice->makeLinks('log');
 
         $this->thing_report['choices'] = $choices;
     }
@@ -322,9 +322,9 @@ class Log extends Agent
     function defaultButtons()
     {
         if (rand(1, 6) <= 3) {
-            $this->thing->choice->Create('php', $this->node_list, 'start a');
+            $this->thing->choice->Create('log', $this->node_list, 'log');
         } else {
-            $this->thing->choice->Create('php', $this->node_list, 'start b');
+            $this->thing->choice->Create('log', $this->node_list, 'code');
         }
 
         //$this->thing->choice->Choose("inside nest");

@@ -1,46 +1,57 @@
 <?php
 
-// Call regularly from cron 
-// On call determine best thing to be addressed.
-
-// Start by picking a random thing and seeing what needs to be done.
+namespace Nrwtaylor\StackAgentThing;
 
 
-//ini_set('display_startup_errors', 1);
-//ini_set('display_errors', 1);
-//error_reporting(-1);
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+// Call regularly from Tick 
+// On call determine prompts to be processed.
+
+// devstack
 
 //require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
 //require '../vendor/autoload.php';
-require '/var/www/html/stackr.ca/vendor/autoload.php';
-
-//require_once '../agents/watson.php';
-//require_once '../agents/translink.php';
-
-
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 // Agents can make calls with stack privileges
 //require_once '/var/www/html/stackr.ca/src/stackdb.php';
 
 
 
-class Prompt {
+class Prompt extends Agent {
 
-	function __construct(Thing $thing) {
+function init() {
+//	function __construct(Thing $thing) {
 
-		$this->thing = $thing;
-		$this->agent_name = 'prompt';
+//		$this->thing = $thing;
+//		$this->agent_name = 'prompt';
 
 		// So I could call
 		$this->test = false;
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 		// I think.
 		// Instead.
+/*
+        'short_name' => 'Imagen',
+        'path' => "/var/www/stackr.test/",
+        'name' => 'imagen',
+        'hash_algorithm' => 'sha256',
+        'hashtag' => '#devstack',
+        'hashmessage' => '#devstack',
+        'word' => 'hythe',
+                'state' => 'prod',
+                'uuid' => '787d6117-59db-4f00-8d8d-4f3be38e13f3',
+                'email'
+*/
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 		//$this->sqlresponse = null;
 
 
@@ -50,30 +61,38 @@ $this->node_list = array('start'=>
 		$this->node_list = array("start"=>array("scheduling"=>array("waiting"=>
 					array("reminding"=>array("learning")))));
 
-		echo '<pre> Agent "Prompt" running on Thing ';echo $this->uuid;echo'</pre>';
-
-
 
 		// Probably an unnecessary call, but it updates $this->thing.
 		// And we need the previous usermanager state.
 
-		$this->thing->Get();
+//		$this->thing->Get();
 
-		$this->current_state = $this->thing->getState('prompt');
+//		$this->current_state = $this->thing->getState('prompt');
 
-		echo '<pre> Agent "Prompt" previous usermanager state: ';echo $this->current_state;echo'</pre>';
+//		$this->thing->log('previous usermanager state: ' . $this->current_state);
 
 		// Current base agent.  Refactor as null.php?
 
-		$this->getSubject();
-		$thing_report = $this->setSignals();
+//		$this->getSubject();
+//		$thing_report = $this->setSignals();
 
-		$this->thing_report = $thing_report;
-		echo '<pre> Agent "Prompt" completed</pre>';
-		return;
+//		$this->thing_report = $thing_report;
 	}
 
-	public function setSignals() {
+
+public function get() {
+
+// devstack
+                //$this->thing->Get();
+
+
+                $this->current_state = $this->thing->getState('prompt');
+                //$this->getSubject();
+
+
+}
+
+	public function respondResponse() {
 
 		// Develop the various messages for each channel.
 
@@ -90,8 +109,6 @@ $this->node_list = array('start'=>
 		// The getSubject has come up with the best assessment
 		// of what the current_state is and what the request_state is.
 		if ($this->test) {
-//			echo '<pre> Agent "Usermanager" $this->current_state '; echo $this->current_state; echo ' </pre>';
-//			echo '<pre> Agent "Usermanager" $this->requested_state '; echo $this->requested_state; echo ' </pre>';
 			}
 
 
@@ -106,7 +123,6 @@ $this->node_list = array('start'=>
 //						$agent = new Optin($this->thing);
 						break;
 
-//                echo '<pre> Agent "Usermanager" chose optin</pre>';
 
 					case 'opt-out':
 //						$agent = new Optout($this->thing);
@@ -119,7 +135,7 @@ break;
 						// Web view of 
 						// thing/<34 char>/usermanager
 
-				           	echo '<pre> Agent "Prompt" null received no action</pre>';
+				           	//echo '<pre> Agent "Prompt" null received no action</pre>';
 
                            $this->thing->choice->Create('start', $this->node_list, "start");
 
@@ -138,8 +154,8 @@ break;
 
                                 $subject = $this->subject . ' - processed';
 
-                                $message = "We received a request for a prompt from Stackr.
-                                        <br>";
+                                $message = "We received a request for a prompt from " . $this->short_name .
+                                        "<br>";
 
 				$date_array = $this->extractDate();
 				$this->date = $date_array;
@@ -179,7 +195,7 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 
 
 					//$this->time_scale = $this->discriminateInput($input, array('minutes', 'days'));
-					echo $this->time_scale . "<br>";
+					//echo $this->time_scale . "<br>";
 
 
 				$message .= "<br>";
@@ -192,13 +208,27 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 
                                 //echo $choices['button'];
 
-                                $this->thing->email->sendGeneric($this->from,$this->agent_name,$subject, $message, $choices);
-                                echo '<pre> Agent "Prompt" terms sent to '; echo $this->from; echo ' </pre>';
+// devstack
+//                                $this->thing->email->sendGeneric($this->from,$this->agent_name,$subject, $message, $choices);
+//                                echo '<pre> Agent "Prompt" terms sent to '; echo $this->from; echo ' </pre>';
+
+//        $message_thing = new Message($this->thing, $this->thing_report);
+//        $thing_report['info'] = $message_thing->thing_report['info'];
+
+
 
                                 $thing_report = array('thing' => $this->thing->thing, 
 					'choices' => $choices, 
 					'info' => 'This is the opt-in agent responding to a valid opt-in request.',
 					'help' => 'Reads dates in the subject and tries to best schedule stuff');
+
+// Associated email?
+
+$thing = new Thing(null);
+$thing->Create($this->from, $this->agent_name, $subject);
+
+        $message_thing = new Message($thing, $thing_report);
+        $thing_report['info'] = $message_thing->thing_report['info'];
 
   
 
@@ -207,7 +237,7 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 						break;
 
 					default:
- echo '<pre> Agent "Prompt" default chose newuser</pre>';
+ $this->thing->log('default chose newuser');
 
 					  	$this->newuser();
                                                 break;
@@ -241,7 +271,7 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 
 
 
-	public function getSubject() {
+	public function readSubject() {
 
 
 //$this->node_list = array("start"=>array("scheduling"=>array("waiting"=>
@@ -402,7 +432,6 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 				if ($word == $discriminator) {
 					$count[$discriminator] = $count[$discriminator] + 1;
 					$total_count = $total_count + 1;
-						echo "sum";
 				}
 
 				foreach ($aliases[$discriminator] as $alias) {
@@ -410,7 +439,6 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 					if ($word == $alias) {
 						$count[$discriminator] = $count[$discriminator] + 1;
 						$total_count = $total_count + 1;
-						echo "sum";
 
 					}
 				}
@@ -418,7 +446,6 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 
 		}
 
-		echo "total count"; $total_count;
 		// Set total sum of all values to 1.
 
 		$normalized = array();
@@ -434,13 +461,11 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 		// Now see what the delta is between position 0 and 1
 
 		foreach ($normalized as $key=>$value) {
-			//echo $key, $value;
 			if ( isset($max) ) {$delta = $max-$value; break;}
 			if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
 		}
 
 
-			echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
 
 
 		if ($delta >= $minimum_discrimination) {
@@ -456,6 +481,3 @@ $date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minu
 
 
 }
-
-
-?>

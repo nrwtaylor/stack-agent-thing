@@ -7,84 +7,46 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Snow
+class Snow extends Agent
 {
-    public function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        if ($agent_input == null) {
-            $this->agent_input = $agent_input;
-        }
+        $this->node_list = ["snow" => ["stop", "snow"]];
 
-        $this->thing = $thing;
-        $this->agent_name = 'snow';
-        $this->agent_prefix = '"Snow" ' . ucwords($this->agent_name) . '" ';
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables snow " . $this->from
+        );
+    }
 
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {
-            $this->test = true;
-        }
-        // I think.
-        // Instead.
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
-        $this->node_list = array("snow"=>array("stop","snow"));
-
-        $this->thing->log('Agent "Snow" running on Thing '. $this->thing->nuuid . '.');
-
-        $this->variables_agent = new Variables($this->thing, "variables snow " . $this->from);
-        $this->current_time = $this->thing->time();
-        $this->get();
-        $this->readSubject();
-
-        // frame
+    public function run()
+    {
 
         $this->variable = 1;
         $this->snow();
 
-        // frame
-
-        $this->set();
-        if ($this->agent_input == null) {
-            $this->respond();
-        }
-
-        $this->thing->flagGreen();
-
-        $this->thing->log($this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        $this->thing_report['log'] = $this->thing->log;
-
-        return;
     }
 
     public function set()
     {
         $this->variables_agent->setVariable("snowflakes", $this->snowflakes);
-        $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-        return;
+        $this->variables_agent->setVariable(
+            "refreshed_at",
+            $this->current_time
+        );
     }
-
 
     public function get()
     {
         $this->snowflakes = $this->variables_agent->getVariable("snowflakes");
-        $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
+        $this->refreshed_at = $this->variables_agent->getVariable(
+            "refreshed_at"
+        );
 
-        $this->thing->log($this->agent_prefix .  'loaded ' . $this->snowflakes . ".");
-
-        return;
+        $this->thing->log(
+            $this->agent_prefix . 'loaded ' . $this->snowflakes . "."
+        );
     }
-
-
 
     public function countSnow()
     {
@@ -95,19 +57,17 @@ class Snow
 
     public function getSnowflake()
     {
-//echo "make a thing":
+        // Make a Thing.
         $thing = new Thing(null);
-//echo "turn it into a snowflake";
+        // Turn the Thing into a snowflake";
         $this->snowflake = new Snowflake($this->thing);
-//echo "count";
+        // Count this Snowflake.
         $this->countSnow();
     }
 
     public function imagineSnow()
     {
-
-        // because it is the same as the number falling on you.
-
+        // Because it is the same as the number falling on you.
         // In the performed case.
 
         new Thought($this->thing, "thought");
@@ -135,7 +95,6 @@ class Snow
 
             default:
                 $sms = "SNOW | It is snowing. Everywhere.";
-
         }
 
         $sms .= " | snowflakes " . $this->snowflakes;
@@ -149,22 +108,23 @@ class Snow
         switch ($this->snowflakes) {
             case 1:
                 $subject = "Snow request received";
-                $message = "It is snowing.\nhttps://www.facebook.com/yokoonopage/photos/a.10150157196475535.335529.10334070534/10152999025540535/?type=1&theater\n\n";
+                $message =
+                    "It is snowing.\nhttps://www.facebook.com/yokoonopage/photos/a.10150157196475535.335529.10334070534/10152999025540535/?type=1&theater\n\n";
 
                 break;
 
             case null:
 
             default:
-               $subject = "Snow request received";
-               $message = "It is still snowing.\n\n";
+                $subject = "Snow request received";
+                $message = "It is still snowing.\n\n";
         }
 
         $this->message = $message;
         $this->thing_report['email'] = $message;
     }
 
-    private function makeChoices()
+    public  function makeChoices()
     {
         $choices = $this->thing->choice->makeLinks('snow');
 
@@ -172,44 +132,42 @@ class Snow
         $this->thing_report['choices'] = $choices;
     }
 
-    public function respond()
+    public function respondResponse()
     {
         // Thing actions
         $this->thing->flagGreen();
 
-        // Get the current user-state.
-        $this->makeSMS();
-        $this->makeEmail();
         $this->makeChoices();
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
-        //$this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->thing_report['help'] = $this->agent_prefix . 'responding to the word snow';
+        $this->thing_report['help'] =
+            $this->agent_prefix . 'responding to the word snow';
         return $this->thing_report;
     }
 
     public function readSubject()
     {
         // Ignore subject.
-        return;
     }
 
     public function snow()
     {
-        // Call the Usermanager agent and update the state
         // Stochastically call snow.
         if (rand(1, $this->variable) == 1) {
             $this->getSnowflake();
         }
 
-        $this->thing->log($this->agent_prefix .' says, "Think that snow is falling everwhere\nall the time.\n"');
+        $this->thing->log(
+            $this->agent_prefix .
+                ' says, "Think that snow is falling everwhere\nall the time.\n"'
+        );
 
-        return;
     }
 }
+

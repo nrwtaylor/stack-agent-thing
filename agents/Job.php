@@ -102,37 +102,37 @@ class Job extends Agent {
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
         $this->thing->flagGreen();
 
         $choices = false;
 
-        $this->makePNG();
+       // $this->makePNG();
 
 
-        $from = $this->from;
-        $to = $this->to;
+       // $from = $this->from;
+       // $to = $this->to;
 
 
-        $subject = $this->subject;
+       // $subject = $this->subject;
 
         // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
+      //  $uuid = $this->uuid;
+      //  $sqlresponse = "yes";
 
-        $this->makeSMS();
+      //  $this->makeSMS();
 
-        $this->makeTXT();
-        $this->makeWeb();
-        $this->makeMessage();
+      //  $this->makeTXT();
+      //  $this->makeWeb();
+      //  $this->makeMessage();
         $this->thing_report['email'] = $this->message;
 
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->makePDF();
+      //  $this->makePDF();
 
         return $this->thing_report;
     }
@@ -302,6 +302,8 @@ class Job extends Agent {
 
         $head = '<p class="description">';
         $foot = '</p>';
+
+if (!isset($this->txt_message)) {$this->makeTXT();}
 
         $web_message = htmlspecialchars($this->txt_message . "\n\n");
         $web_message = nl2br($web_message);

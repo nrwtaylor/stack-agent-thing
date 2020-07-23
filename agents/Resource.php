@@ -311,8 +311,6 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
         if ($category == null) {
             $category = "Geographical Name";
         }
-//var_dump($category);
-//var_dump($value);
         // Is this find?
 
         //$selector_array = array(array("stop_id"=>$station_id_input));
@@ -357,7 +355,6 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
             // need to get places returning known relevant places
 
             if (($resource['name'] == $selector)) {
-//var_dump($resource);
                 $this->resource_name = $resource['name'];
                 $this->resource_quantity = $resource['quantity'];
                 $this->place = new Variables($this->thing, "variables " . $this->resource_name . " " . $this->from);
@@ -526,8 +523,7 @@ $this->thing->log( $this->agent_prefix .' set ' . $this->resource_quantity . ' a
 
             $this->getResources();
             $this->getResource($this->resource_name);
-
-var_dump($this->resource_name);
+$this->thing->log("resource name is " . $this->resource_name);
 
             $this->resource_thing = $this->thing;
 

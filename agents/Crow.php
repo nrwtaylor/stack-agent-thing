@@ -53,7 +53,6 @@ class Crow extends Agent
         if ($this->state == false) {$this->state = $this->default_state;}
         $this->crow_thing->choice->Create($this->primary_place, $this->node_list, $this->state);
         $this->crow_thing->choice->Choose($this->state);
-        //var_dump($this->state);
         $choices = $this->crow_thing->choice->makeLinks($this->state);
     }
 
@@ -62,11 +61,9 @@ class Crow extends Agent
      *
      */
     private function setState() {
-        echo "Crow setState() "  .$this->state . "\n";
         $this->crow_thing->choice->Create($this->primary_place, $this->node_list, $this->state);
         $this->crow_thing->choice->Choose($this->state);
         $choices = $this->crow_thing->choice->makeLinks($this->state);
-        //var_dump($choices);
     }
 
 
@@ -159,6 +156,7 @@ class Crow extends Agent
         //        $this->crow_thing->choice->Choose($this->state);
         //        $this->state = $this->crow_thing->choice->load($this->primary_place);
         $this->setState();
+
     }
 
 
@@ -320,7 +318,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
         if (!isset($this->crows[0])) {return true;}
 
         // Let's get some crow information.
-        //echo "\n";
         $crows_seen = "crows seen ";
         foreach ( $this->crows as $index=>$crow_thing) {
             $crow_nuuid = substr($crow_thing['uuid'], 0, 4);
@@ -346,11 +343,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
             if (isset($variables->place)) {$this->place = $variables->place;}
 
 
-            //var_dump($variables["crow"]);
-
-            //var_dump($crow_thing["nuuid"]);
-            //exit();
-            //echo $crow_thing->nuuid ." ";
             $crows_seen .= $crow_nuuid. " ";
 
         }
@@ -358,8 +350,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
         $crows_seen = trim($crows_seen);
 
         $crows_seen .= ".";
-        //echo $crows_seen . "\n";
-        //$this->thing = $this->crows[0];
     }
 
 
@@ -522,7 +512,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
             'start'=>"TEXT WEB / MIDDEN WORK / NEST MAINTENANCE"
         );
 
-        //echo "sms state " . $this->state .".\n";
 
         $sms = "CROW " . strtoupper($this->crow_thing->nuuid);
         //        $sms .= " | " . $this->thing_behaviour[$this->state];
@@ -572,7 +561,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
         $uuid = $crow['uuid'];
 
         $crow_nuuid = substr($crow['uuid'], 0, 4);
-        //echo "Next crow is " . $crow_nuuid . ".";
 
         $this->getCrow($crow_nuuid);
 
@@ -583,7 +571,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
      *
      */
     function doState() {
-        echo "doState start state " . $this->state .".\n";
         if ((!isset($this->state)) or ($this->state == null)) {
             //$this->response = "detected state null - run subject discriminator";
             $this->thing->log($this->agent_prefix . 'state is null.');
@@ -591,12 +578,9 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
 
         $this->state = $this->crow_thing->choice->load('roost');
 
-        //echo "this state is " .$this->state;
-        //echo "meep";
         if ($this->state == false) {
             //            $this->state = "inside nest";
             $this->getState();
-            var_dump($this->state);
         }
 
         // Will need to develop this to only only valid state changes.
@@ -639,8 +623,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
 
         //            $this->setState();
 
-        echo "doState end state " . $this->state .".\n";
-
 
     }
 
@@ -653,7 +635,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
 
         // Well first off.
         // If there is no state. Give the crow one.
-        //var_dump($this->state);
         if (!isset($this->state)) {$this->state = $this->default_state;}
         $this->getState();
         $filtered_text = strtolower($text);
@@ -663,14 +644,12 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
             switch ($ngram) {
             case "tag":
             case "tag crow":
-                echo "tagged " . $this->crow_thing->nuuid;
                 $this->response .= "Tagged Crow " . $this->crow_thing->nuuid . ". ";
                 break;
 
             case "next":
             case "next crow":
             case "crow next":
-                //echo "spawn";
                 $this->nextCrow();
                 $this->response .= "Got the next Crow.";
                 break;
@@ -737,7 +716,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
                 //$this->getCrow();
 
                 //$this->response .= "No state change. ";
-                // echo "not found => spawn()";
                 //$this->spawn();
             }
         }
@@ -888,7 +866,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
         // ->db->userSearch($keyword)
         // ->UUids($uuid = null)
 
-        //echo "crow state: " . $this->thing->getState('roost');
 
         // Form a haystack from the whole thing.
         $haystack ="";
@@ -944,7 +921,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
         $linked = array();
 
         foreach ($arr as $key=>$value) {
-            //echo $value;
             $temp_thing = new Thing($value);
 
             if ($temp_thing == false) {break;}

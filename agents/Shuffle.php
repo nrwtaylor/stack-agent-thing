@@ -5,120 +5,58 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-
 ini_set("allow_url_fopen", 1);
 
-class Shuffle {
+class Shuffle extends Agent
+{
+    public $var = 'hello';
 
+    function init()
+    {
+        if ($this->thing->container['stack']['state'] == 'dev') {
+            $this->test = true;
+        }
 
-	public $var = 'hello';
+        $this->node_list = ["start" => ["transit", "opt-in"]];
+    }
 
+    public function run()
+    {
+        //        $this->thing->shuffle();
+    }
 
-    function __construct(Thing $thing, $agent_input = null) {
-    $this->agent_input = $agent_input;
-
-
-	//function __construct($arguments) {
-
-		//echo $arguments;
-		//var_dump($arguments);
-//  $defaults = array(
-//    'uuid' => Uuid::uuid4(),
-//    'from' => NULL,
-//	'to' => NULL,
-//	'subject' => NULL,
-//	'sqlresponse' => NULL
-//  );
-
-//  $arguments = array_merge($defaults, $arguments);
-
-//  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
-
-		
-
-		$this->thing = $thing;
-
-        $this->thing_report['thing'] = $this->thing->thing;
-
-//$this->thing_report['message'] = "question meep";
-
-		$this->agent_name = 'shuffle';
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
-		$this->api_key = $this->thing->container['api']['translink'];
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		$this->sqlresponse = null;
-
-		// Allow for a new state tree to be introduced here.
-		$this->node_list = array("start"=>array("transit", "opt-in"));
-
-		$this->thing->log( 'Agent "Shuffle" running on Thing ' .  $this->uuid . '');
-		$this->thing->log( 'Agent "Shuffle" received this Thing "' . $this->subject .  '"');
-
-
-
+    public function get()
+    {
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("shuffle", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "shuffle",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
-
-            $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("shuffle", "refreshed_at"), $time_string );
-
+            $this->thing->json->writeVariable(
+                ["shuffle", "refreshed_at"],
+                $time_string
+            );
         }
+        $this->last_refreshed_at = $time_string;
+    }
 
-
-//		$this->readSubject(); // No need to read subject 'translink' is pretty clear.
-
-        $this->readSubject();
-
-        echo "shuffle commented out";
-        //$this->thing->shuffle();
-
-        if ($this->agent_input == null) {
-		    $this->thing_report = $this->respond();
-        }
-		$this->thing->log ('Agent "Shuffle" completed.');
-
-		return;
-
-		}
-
-	public function helpShuffle() {
-
-
-
-			//$this->message = "Thanks for the question mark.  Here are some things you can do.  The Management.";
-
-                	$this->response = 'Generates a new identifier for your Things.' ;
- 
-		return;
-	}
-
-
-
-   function allShuffle()
+    public function helpShuffle()
     {
+        $this->thing_report['help'] =
+            'Generates a new identifier for your Things.';
+    }
+
+    function allShuffle()
+    {
+        $this->shuffle_horizon = false;
 
         // Getting memory error from db looking
         // up balance for null
         if ($this->from == "null@" . $this->mail_postfix) {
-            $this->response = "Shuffle All requires an identity.";
+            $this->response .= "Shuffle All requires an identity. ";
 
             return;
         }
@@ -138,207 +76,281 @@ class Shuffle {
 
         $start_time = time();
 
-//        echo count ($this->total_things);
+        //        echo count ($this->total_things);
 
         while (count($things) > 1) {
-
             $thing = array_pop($things);
 
-            if ($thing['uuid'] != $this->uuid) {
-
-                $temp_thing = new Thing($thing['uuid']);
-                $temp_thing->Shuffle();
-
+            if ($this->thingShuffle($thing) != true) {
                 $count += 1;
-
-            } else {
-
-                //echo "match";
-
             }
         }
 
-
-        $this->response = "Completed request for this Identity. Shuffled ". $count . " Things.";
-
-        return;
+        $this->response .=
+            "Completed request for this Identity. Shuffled " .
+            $count .
+            " Things.";
     }
 
+    public function thingsShuffle()
+    {
+        // Get all users records
 
-    private function weekShuffle() {
-        $this->response = "Week shuffle not implemented.";
+        $this->thing->db->setUser($this->from);
+        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
+
+        $things = $thingreport['thing'];
+
+        $this->total_things = count($things);
+
+        //$start_time = time();
+
+        //shuffle($things);
+        $things = array_reverse($things);
+        return $things;
     }
 
-    private function dayShuffle() {
-        $this->response = "Day shuffle not implemented.";
+    public function ageShuffle($age_unit = null)
+    {
+        if ($age_unit == null) {
+            return true;
+        }
+
+        $things = $this->thingsShuffle();
+        $count = 0;
+        $start_time = time();
+
+        while (count($things) > 1) {
+            $thing = array_pop($things);
+
+            if ($thing['uuid'] != $this->uuid) {
+                $age =
+                    strtotime($this->thing->time()) -
+                    strtotime($thing['created_at']);
+
+                $age_text = $this->thing->human_time($age);
+                $thing_age_unit = explode(" ", $age_text)[1];
+
+                if ($thing_age_unit != $age_unit) {
+                    continue;
+                }
+
+                $this->thingShuffle($thing);
+                //            $temp_thing = new Thing($thing['uuid']);
+                //            $temp_thing->Forget();
+                $count += 1;
+            } else {
+            }
+        }
+
+        if (!isset($this->shuffle_count)) {
+            $this->shuffle_count = 0;
+        }
+        $this->shuffle_count += $count;
     }
 
-    private function hourShuffle() {
-        $this->response = "Hour shuffle not implemented.";
+    public function latestShuffle($number = null)
+    {
+        if ($number == null) {
+            return true;
+        }
+
+        $things = $this->thingsShuffle();
+        $count = 0;
+        $start_time = time();
+
+        while (count($things) > 1) {
+            $thing = array_pop($things);
+
+            if ($thing['uuid'] != $this->uuid) {
+                $this->thingShuffle($thing);
+                $count += 1;
+                if ($count >= $number) {
+                    break;
+                }
+            } else {
+            }
+        }
+
+        if (!isset($this->shuffle_count)) {
+            $this->shuffle_count = 0;
+        }
+        $this->shuffle_count += $count;
+        $this->response .=
+            "Shuffled the latest " . $this->shuffle_count . " Things. ";
     }
 
-    private function thingShuffle(){
-
-        //echo "shuffle commented out";
-        $this->thing->shuffle();
-
-        // And fix these pointers.  Now wrong.
-        $this->uuid = $this->thing->uuid;
-        $this->thing_report['thing'] = $this->thing->thing;
-
-
+    private function weekShuffle()
+    {
+        $this->ageShuffle('week');
+        $this->response .=
+            "Shuffled " . $this->shuffle_count . " week old things. ";
     }
 
+    private function dayShuffle()
+    {
+        $this->ageShuffle('day');
+        $this->response .=
+            "Shuffled " . $this->shuffle_count . " day old things. ";
+    }
 
-	private function respond() {
+    private function hourShuffle()
+    {
+        $this->ageShuffle('hour');
+        $this->response .=
+            "Shuffled " . $this->shuffle_count . " hour old things. ";
+    }
 
+    private function thingShuffle($thing = null)
+    {
+        if ($thing == null) {
+            //echo "shuffle commented out";
+            $this->thing->shuffle();
 
-		// Thing actions
-		$this->thing->flagGreen();
+            // And fix these pointers.  Now wrong.
+            $this->uuid = $this->thing->uuid;
+            $this->thing_report['thing'] = $this->thing->thing;
+            return;
+        }
 
-		// Generate email response.
+        if ($thing != null) {
+            if ($thing['uuid'] != $this->uuid) {
+                $temp_thing = new Thing($thing['uuid']);
+                $temp_thing->Shuffle();
+            }
+        }
+    }
 
-		$to = $this->thing->from;
+    public function respondResponse()
+    {
+        // Thing actions
+        $this->thing->flagGreen();
 
-		$from = "shuffle";
-
-
-
-		//$message = $this->readSubject();
-
-		//$message = "Thank you for your request.<p><ul>" . ucwords(strtolower($response)) . '</ul>' . $this->error . " <br>";
-
-		$this->thing->choice->Create($this->agent_name, $this->node_list, "shuffle");
-		$choices = $this->thing->choice->makeLinks('shuffle');
-
-
-		$this->thing_report['thing'] = $this->thing->thing;
-		$thing_report['choices'] = $choices;
-
-        $this->makeSMS();
+        $this->thing->choice->Create(
+            $this->agent_name,
+            $this->node_list,
+            "shuffle"
+        );
+        $choices = $this->thing->choice->makeLinks('shuffle');
+        $thing_report['choices'] = $choices;
 
         $this->thing_report['email'] = $this->sms_message;
 
-
         $message_thing = new Message($this->thing, $this->thing_report);
-
-        //$thing_report['info'] = $message_thing->thing_report['info'] ;
-
-		$this->thing_report['help'] = 'Shuffle.' . $this->helpShuffle();
-
-		return $this->thing_report;
-
-
-	}
+    }
 
     public function makeSMS()
     {
         $this->sms_message = "SHUFFLE | " . $this->response;
 
         $this->thing_report['sms'] = $this->sms_message;
-
-
     }
 
-	private function nextWord($phrase) {
+    public function readSubject()
+    {
+        $keywords = [
+            'shuffle',
+            'latest',
+            'recent',
+            'melt',
+            'all',
+            '?',
+            'this',
+            'day',
+            'week',
+            'hour',
+        ];
 
+        $input = strtolower($this->input);
 
-	}
+        $prior_uuid = null;
 
-	public function readSubject() {
+        $pieces = explode(" ", strtolower($input));
 
-		$this->response = null;
+        if (count($pieces) == 1) {
+            if (is_string($input) and strlen($input) == 1) {
+                // Test for single ? mark and call question()
+                $this->message = "Single question mark received";
+                //echo "single question mark received";
+                $this->helpShuffle();
+                if (!isset($this->response)) {
+                    $this->response .= "This agent shuffles UUIDs";
+                }
+                return;
+            }
 
+            if ($input == 'shuffle') {
+                $this->response .= "No action taken. ";
+                return;
+            }
 
-		$keywords = array('shuffle', 'melt');
+            //$this->message = "Request not understood";
+            //            $this->thing->shuffle();
+            //            $this->response .=
+            //                "This command will shuffle your stack. Text SHUFFLE ALL.";
+            //            return;
+        }
 
-		$input = strtolower($this->subject);
+        // If there are more than one piece then look at order.
 
-		$prior_uuid = null;
-
-		$pieces = explode(" ", strtolower($input));
-
-
-
-
-                if (count($pieces) == 1) {
-
-                        $input = $this->subject;
-                        //echo str_word_count($this->subject);
-			
-                        if (is_string($this->subject) and strlen($input) == 1 ) {
-				// Test for single ? mark and call question()
-				$this->message = "Single question mark received";
-				//echo "single question mark received";
-                    $this->helpShuffle();
-                    if (!isset($this->response)) {$this->response = "This agent shuffles UUIDs";}
-                                return;
-                        }
-	        		//$this->message = "Request not understood";
-    		    	$this->thing->shuffle();
-                    $this->response = "This Thing was shuffled.";
-                        return;
-
-        	}
-
-		// If there are more than one piece then look at order.
-
-		foreach ($pieces as $key=>$piece) {
-			foreach ($keywords as $command) {				
-				if (strpos(strtolower($piece),$command) !== false) {
-
-					switch($piece) {
-						case '?':	
-
-							if ($key + 1 > count($pieces)) {
-								//echo "last word is stop";
-								//$this->stop = false;
+        foreach ($pieces as $key => $piece) {
+            foreach ($keywords as $command) {
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
+                        case 'this':
+                            $this->thing->shuffle();
+                            $this->response .=
+                                'Gave this thing a different unique identifier. ';
+                        case '?':
+                            if ($key + 1 > count($pieces)) {
+                                //echo "last word is stop";
+                                //$this->stop = false;
                                 $this->helpShuffle();
-                                $this->response = "Question mark at end";
+                                $this->response .= "Question mark at end";
 
-								return;
-							} else {
-								// Question mark was in the string somewhere.
-								// Not so useful right now.
-								return;
-							}
-							break;
+                                return;
+                            } else {
+                                $this->helpShuffle();
+                                $this->response .=
+                                    "Saw a ? " . $this->thing_report['help'];
+                                // Question mark was in the string somewhere.
+                                // Not so useful right now.
+                                return;
+                            }
+                            break;
 
                         case 'all':
-                            $this->shuffleall();
-                            if (!isset($this->response)) {
-                                $this->response = "There was a problem shuffling all your Things.";
+                            $this->allShuffle();
+                            return;
+                        case 'recent':
+                        case 'latest':
+                            $number_agent = new Number($this->thing, "number");
+                            $number_agent->extractNumber($input);
+                            $number = 10;
+                            if ($number_agent->number != false) {
+                                $number = $number_agent->number;
                             }
+                            $this->latestShuffle($number);
                             return;
 
                         case 'week':
-                            $this->shuffleweek();
-                            if (!isset($this->response)) {
-                                $this->response = "Shuffled all your Things to the start of the week (Mon).";
-                            }
+                            $this->weekShuffle();
                             return;
 
-						default:
-							//echo 'default';
+                        case 'day':
+                            $this->dayShuffle();
+                            return;
 
-					}
+                        case 'day':
+                            $this->hourShuffle();
+                            return;
 
-				}
-			}
-
-		}
-		$this->response = "No Things were shuffled.";
-		return $this->response;
-	}
-
-
-
+                        default:
+                        //echo 'default';
+                    }
+                }
+            }
+        }
+        $this->response .= "No Things were shuffled. ";
+    }
 }
-
-
-
-
-?>
-
-
-

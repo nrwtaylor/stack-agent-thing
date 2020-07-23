@@ -497,7 +497,7 @@ class Choice {
                 $pos = strrpos($url, '/');
                 $to = $pos === false ? $url : substr($url, $pos + 1);
                 $word = ucfirst($item['choice']);
-                $html = '<a href="' . $url . '">' . $word .'</a>';
+                $html = '<a href="' . $url . '"><div class="choice-button">' . $word .'</div></a>';
 
                 $words[] = $word;
                 $links[] = $url;
@@ -516,6 +516,7 @@ class Choice {
 
 
         //$buttons = quoted_printable_decode($this->testhtml());
+/*
         $html_button_set =
 
             '<table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -540,6 +541,13 @@ class Choice {
 		</tr>
 	</tbody>
 </table>';
+*/
+        $html_button_set =
+
+            '<div class="choice-button-set">
+                        ' . $html_buttons . '
+             </div>';
+
 
 
         //$html_buttons
@@ -580,6 +588,10 @@ class Choice {
 			<a style="text-decoration: none; color: white;" href="'.
             $url_link . '"> '.  ''. $word . ''.' </a>
 			</td>';
+
+        $html_button = '<a href="'.
+            $url_link . '"><div class= "choice-button"> '.  ''. $word . ''.' </div></a>
+            ';
 
 
         return $html_button;

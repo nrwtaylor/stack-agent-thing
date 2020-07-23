@@ -73,7 +73,7 @@ class Ping extends Agent
     /**
      *
      */
-    public function makeSms() {
+    public function makeSMS() {
         $this->sms_message = "PING | A message from this Identity pinged us.";
         $this->sms_message .= " | Received " . $this->thing->human_time($this->ping_text) . " ago.";
 
@@ -105,7 +105,7 @@ class Ping extends Agent
      */
     public function makeMessage() {
         $message = "A message from this Identity pinged us.";
-        $message .= " Received " . $this->ping_text . " ago.";
+        $message .= " Received " . $this->thing->human_time($this->ping_text) . " ago.";
 
         $this->sms_message = $message;
         $this->thing_report['message'] = $message;

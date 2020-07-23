@@ -25,39 +25,13 @@ class Thankyou extends Agent {
         $this->thing_report["help"] = "Why thanks. Glad it was helpful and/or useful.";
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-/*
-    public function respond() {
-        $this->thing->flagGreen();
-
-
-        $this->makeSMS();
-        $this->makeChoices();
-
-        //$this->thing_report["info"] = "This is a ntp in a park.";
-        //$this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text RANGER.";
-
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'] ;
-
-        return $this->thing_report;
-    }
-*/
-
     public function makeSnippet() {
-    $this->thing_html['snippet'] = $this->thankyou_message ;
+    $this->thing_html['snippet'] = $this->message ;
 
     }
 
     public function makeWeb() {
-    $this->thing_html['web'] = $this->thankyou_message ;
+    $this->thing_html['web'] = $this->message ;
 
     }
 
@@ -97,25 +71,24 @@ $litany_agent = new Litany($this->thing, "litany thankyou");
             $v = $array[$k];
 
 
-$this->thankyou_response = $v;
+$this->response .= $v;
 
 if (isset($litany_agent->message)) {
 
-$this->thankyou_response = $litany_agent->message;
-
-
+$this->response .= $litany_agent->message;
+$this->message = $v;
 }
 
 
         // If we didn't receive the command NTP ...
 if (strtolower($this->input) != "thankyou") {
-    $this->thankyou_message = $this->thankyou_response;
-$this->response .= $this->thankyou_response;
+//    $this->thankyou_message = $this->thankyou_response;
+//$this->response .= "Quiet. ";
 return;
 }
 
-    $this->thankyou_message = $this->response;
-$this->response .= $this->thankyou_response;
+    //$this->thankyou_message = $this->response;
+//$this->response .= $this->thankyou_response;
 
     }
 
@@ -134,4 +107,3 @@ $this->response .= $this->thankyou_response;
 
 
 }
-

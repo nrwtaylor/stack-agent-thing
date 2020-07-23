@@ -21,10 +21,7 @@ class Help extends Agent {
      * @param Thing   $thing
      * @return unknown
      */
-//    function __construct(Thing $thing) {
     function init() {
-
-//        $this->thing_report['thing'] = false;
 
         if ($this->thing != true) {
 
@@ -35,13 +32,10 @@ class Help extends Agent {
             return $this->thing_report;
         }
 
-        $this->agent_name = 'help';
+//        $this->agent_name = 'help';
         $this->agent_version = 'redpanda';
 
-        $this->node_list = array('help'=>array('privacy', 'whatis'), 'start a'=>
-            array('useful', 'useful?'),
-            'start b'=>array('helpful', 'helpful?')
-        );
+        $this->node_list = array('help'=>array('help', 'info'));
 
         $this->namespace = "\\Nrwtaylor\\StackAgentThing\\";
 
@@ -114,14 +108,7 @@ class Help extends Agent {
 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    public function respond() {
-        // Thing actions
-        $this->makeSMS();
+public function set() {
 
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(array("help",
@@ -129,7 +116,14 @@ class Help extends Agent {
         );
 
 
-        //        $this->makeWeb();
+
+}
+
+    /**
+     *
+     * @return unknown
+     */
+    public function respondResponse() {
 
         $this->makeChoices();
 
@@ -138,17 +132,10 @@ class Help extends Agent {
         $this->thing_report['info'] = 'This is the help agent.';
         $this->thing_report['help'] = 'This agent takes a Thing and runs the Help agent on it.';
 
-        $this->thing->log ( '<pre> Agent "Help" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
-
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-
-        $this->makeWeb();
-        //        $this->thing_report['etime'] = "meep";
-
-        return $this->thing_report;
     }
 
 
@@ -156,7 +143,7 @@ class Help extends Agent {
      *
      * @return unknown
      */
-    function getLink() {
+    public function getLink($text = null) {
 
         $block_things = array();
         // See if a block record exists.
@@ -204,12 +191,6 @@ class Help extends Agent {
      * @return unknown
      */
     public function readSubject() {
-
-        //  $this->defaultButtons();
-//        $this->getHelp();
-        //$this->getHelp2();
-        $status = true;
-        return $status;
     }
 
 
@@ -218,7 +199,6 @@ class Help extends Agent {
      */
     function makeChoices() {
 
-        //$this->node_list = array("web"=>array("iching", "roll"));
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "help");
         $choices = $this->thing->choice->makeLinks('help');
@@ -255,5 +235,4 @@ class Help extends Agent {
 
 
     }
-
 }

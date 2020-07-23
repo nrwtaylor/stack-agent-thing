@@ -282,7 +282,7 @@ class Json
         $this->pushStream($value, 0);
 
         if ($this->db->last_update != true) {
-            echo "foo";
+            echo "fallingWater";
             return;
         }
         // Check if JSON string too long.
@@ -529,7 +529,7 @@ class Json
             $thing->Create(
                 null,
                 "human",
-                'Insufficient space in DB record ' . $this->uuid . "."
+                'Stack variables size exceeded ' . $this->uuid . " writing to field " . $this->field . "."
             );
             $thing_agent = new Hey($thing);
 
@@ -537,7 +537,7 @@ class Json
 
             //            throw new \Error('Insufficient space in DB record ' . $this->uuid . ".");
             throw new \OverflowException(
-                'Insufficient space in DB record ' . $this->uuid . "."
+                'Overflow: Insufficient space in DB record ' . $this->uuid . " writing to field " . $this->field . "."
             );
             //            $this->overload_length = strlen($this->json_data) - $this->char_max;
 

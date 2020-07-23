@@ -17,7 +17,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Snowflake
+class Snowflake extends Agent
 {
     public $var = 'hello';
 
@@ -26,88 +26,27 @@ class Snowflake
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-    public function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        $this->agent_input = $agent_input;
-
-        $this->agent_name = "snowflake";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
         $this->test = "Development code";
 
-        $this->thing = $thing;
+        $this->thing_report["info"] =
+            "A SNOWFLAKE is a semi-unique pattern with an associated UUID.";
+        $this->thing_report["help"] = 'Try "UUID SNOWFLAKE".';
 
-        $this->thing_report = ["thing" => $this->thing->thing];
-
-        $this->start_time = $this->thing->elapsed_runtime();
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
         $this->node_list = ["snowflake" => ["snowflake", "uuid"]];
-
-        $this->haystack =
-            $thing->uuid .
-            $thing->to .
-            $thing->subject .
-            $command_line .
-            $this->agent_input;
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'running on Thing ' .
-                $this->thing->nuuid .
-                '.',
-            "INFORMATION"
-        );
-        $this->thing->log(
-            $this->agent_prefix .
-                'received this Thing "' .
-                $this->subject .
-                '".',
-            "DEBUG"
-        );
 
         $this->current_time = $this->thing->json->time();
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-        $this->entity_name = $thing->container['stack']['entity_name'];
+        $this->entity_name = $this->thing->container['stack']['entity_name'];
 
         $this->default_canvas_size_x = 164;
         $this->default_canvas_size_y = 164;
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed init. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
-            "snowflake",
-            "refreshed_at",
-        ]);
-
-        if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
-                ["snowflake", "refreshed_at"],
-                $time_string
-            );
-        }
-
-        $split_time = $this->thing->elapsed_runtime();
 
         $agent = new Retention($this->thing, "retention");
         $this->retain_to = $agent->retain_to;
@@ -116,20 +55,7 @@ class Snowflake
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->thing->log(
-            $this->agent_prefix .
-                'got retention. ' .
-                number_format($this->thing->elapsed_runtime() - $split_time) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->readSubject();
-        $this->init();
         $this->initSnowflake();
-
-        // test
-        //$this->updateSnowflake();
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
@@ -141,34 +67,11 @@ class Snowflake
                 'ms.',
             "OPTIMIZE"
         );
+    }
 
+    public function set()
+    {
         $this->setSnowflake();
-
-        //        if ($this->agent_input == null) {
-        $this->setSignals();
-        //        }
-
-        $this->thing->log(
-            $this->agent_prefix . 'completed setSignals.',
-            "OPTIMIZE"
-        );
-        $this->thing->log(
-            $this->agent_prefix . 'completed setSnowflake.',
-            "OPTIMIZE"
-        );
-        $this->thing->log(
-            $this->agent_prefix .
-                'ran for ' .
-                number_format(
-                    $this->thing->elapsed_runtime() - $this->start_time
-                ) .
-                'ms.',
-            "OPTIMIZE"
-        );
-        $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
-
-        return;
     }
 
     // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
@@ -239,103 +142,19 @@ class Snowflake
 
     /**
      *
-     */
-    public function init()
-    {
-        if (!isset($this->max)) {
-            $this->max = 12;
-        }
-        if (!isset($this->size)) {
-            $this->size = 3.7;
-        }
-        if (!isset($this->lattice_size)) {
-            $this->lattice_size = 15;
-        }
-
-        $this->initLattice($this->max);
-        $this->initSegment();
-
-        $this->setProbability();
-        $this->setRules();
-    }
-
-    /**
-     *
      * @return unknown
      */
-    private function setSignals()
+    public function respondResponse()
     {
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "snowflake";
-        $this->makePNG();
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed makePNG. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->makeSMS();
-
-        $this->makeMessage();
-        //$this->makeTXT();
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed makeTXT. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
         $this->makeChoices();
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed makeChoices. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed makeWeb. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->thing_report["info"] = "This creates a snowflake.";
-        $this->thing_report["help"] = 'Try "UUID SNOWFLAKE"';
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'started message. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        $this->makeWeb();
-        //$this->makeChoices();
-        $this->makeTXT();
-        $this->makePDF();
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed message. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
         return $this->thing_report;
     }
 
@@ -344,25 +163,10 @@ class Snowflake
      */
     public function makeChoices()
     {
-        $this->thing->log(
-            $this->agent_prefix .
-                'started makeChoices. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
             "snowflake"
-        );
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed create choice. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
         );
 
         $this->choices = $this->thing->choice->makeLinks('snowflake');
@@ -375,8 +179,6 @@ class Snowflake
         );
 
         $this->thing_report['choices'] = $this->choices;
-
-        //  $this->thing_report['choices'] = false;
     }
 
     /**
@@ -414,8 +216,40 @@ class Snowflake
             '/snowflake.png" alt="snowflake" height="92" width="92">';
 
         $this->thing_report['message'] = $message;
+    }
 
-        return;
+    public function latticeSnowflake()
+    {
+        $lattice_agent = new Lattice($this->thing, "lattice");
+
+        $lattice_agent->initLattice();
+
+        $lattice_agent->font_size = 16;
+
+        $lattice_agent->max = 12;
+        $lattice_agent->size = 120;
+        $lattice_agent->lattice_size = 40;
+        $lattice_agent->angle = -pi() / 2;
+
+        $lattice_agent->center_x = 400;
+        $lattice_agent->center_y = 550;
+
+        //$lattice_agent->angle = 0;
+
+        $lattice_agent->canvas_size_x = 2550;
+        $lattice_agent->canvas_size_y = 2860;
+
+        //        $lattice_agent->initLattice();
+
+        $lattice_agent->q_centre = 8;
+        $lattice_agent->r_centre = 8;
+        $lattice_agent->s_centre = 8;
+
+        //$lattice_agent->drawLattice(10,10,10,25,0);
+
+        $lattice_agent->makePNG();
+
+        $this->hextile_PNG = $lattice_agent->PNG_embed;
     }
 
     /**
@@ -466,19 +300,34 @@ class Snowflake
         //        $this->binarySnowflake($this->decimal_snowflake);
 
         $this->thing->log(
-            $this->agent_prefix .
-                ' loaded decimal snowflake ' .
-                $this->decimal_snowflake .
-                '.',
+            'loaded decimal snowflake ' . $this->decimal_snowflake . '.',
             "INFORMATION"
         );
-        return;
     }
 
     /**
      *
      */
     public function initSnowflake()
+    {
+        if (!isset($this->max)) {
+            $this->max = 12;
+        }
+        if (!isset($this->size)) {
+            $this->size = 3.7;
+        }
+        if (!isset($this->lattice_size)) {
+            $this->lattice_size = 15;
+        }
+
+        $this->initLattice($this->max);
+        $this->initSegment();
+
+        $this->setProbability();
+        $this->setRules();
+    }
+
+    public function run()
     {
         $this->binarySnowflake($this->decimal_snowflake);
 
@@ -548,13 +397,9 @@ class Snowflake
         }
 
         $this->thing->log(
-            $this->agent_prefix .
-                ' loaded decimal snowflake ' .
-                $this->decimal_snowflake .
-                '.',
+            ' loaded decimal snowflake ' . $this->decimal_snowflake . '.',
             "INFORMATION"
         );
-        return;
     }
 
     /**
@@ -563,9 +408,10 @@ class Snowflake
     public function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.pdf';
-        $this->node_list = ["web" => ["snowflake", "uuid snowflake"]];
-
-        $web = '<a href="' . $link . '">';
+        $this->node_list = ["snowflake" => ["snowflake"]];
+        //$web = "<b>Snowflake Agent</b><br><p>";
+        $web = "";
+        $web .= '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -577,9 +423,10 @@ class Snowflake
         //$web .= $this->selector . "<br>";
 
         $this->timestampSnowflake($this->retain_to);
-        $web .= ucwords($this->timestamp) . "<br>";
+        $web .= ucwords($this->timestamp);
 
-        $web .= "<br><br>";
+        //$web .= "<p>";
+
         $this->thing_report['web'] = $web;
     }
 
@@ -835,7 +682,7 @@ class Snowflake
     }
 
     /**
-     *
+     *            $this->agent_prefix .
      */
     public function drawTriangle()
     {
@@ -1531,8 +1378,6 @@ class Snowflake
         foreach ($this->point_list as $point) {
             list($q, $r, $s) = $point;
 
-            //   $this->updateCell($q,$r,$s);
-
             // Gives any cell value
             $cell = $this->lattice[$q][$r][$s];
 
@@ -1563,16 +1408,6 @@ class Snowflake
                         $color = $this->grey;
                 }
 
-                /*
-                if ((isset($this->event)) and ($this->event->event_name == "vancouver pride 2018")) {
-
-                    $this->angle = ($this->selector_dec % 6) * 60;
-                    $distance = 1/4*sqrt(pow($q,2) + pow($r,2) + pow($s, 2) );
-                    $key = $distance % 5;
-                    $color = $this->color_palette[$key];
-
-                }
-*/
                 $this->snowflake_points[] = 1;
             } else {
                 $this->snowflake_points[] = 0;
@@ -1766,24 +1601,25 @@ class Snowflake
                 'ms.',
             "OPTIMIZE"
         );
-        $this->thing->log(
-            $this->agent_prefix . 'drew an snowflake.',
-            "INFORMATION"
-        );
-
-        return;
+        $this->thing->log('drew an snowflake.', "INFORMATION");
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    public function read()
+    public function get()
     {
-        //$this->thing->log("read");
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+            "snowflake",
+            "refreshed_at",
+        ]);
 
-        //        $this->get();
-        return $this->state;
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+                ["snowflake", "refreshed_at"],
+                $time_string
+            );
+        }
     }
 
     /**
@@ -1805,7 +1641,21 @@ class Snowflake
 
             $pdf->addPage($s['orientation'], $s);
             $pdf->useTemplate($tplidx1);
+            /*
+            if (isset($this->hextile_PNG)) {
+                $top_x = -6;
+                $top_y = 11;
 
+                $pdf->Image(
+                    $this->hextile_PNG,
+                    $top_x,
+                    $top_y,
+                    -300,
+                    -300,
+                    'PNG'
+                );
+            }
+*/
             $this->getNuuid();
             $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
             $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
@@ -1820,6 +1670,20 @@ class Snowflake
             $text = $this->whatis;
             $line_height = 20;
             $pdf->MultiCell(150, $line_height, $text, 0);
+
+            if (isset($this->hextile_PNG)) {
+                $top_x = -6;
+                $top_y = 11;
+
+                $pdf->Image(
+                    $this->hextile_PNG,
+                    $top_x,
+                    $top_y,
+                    -300,
+                    -300,
+                    'PNG'
+                );
+            }
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
@@ -1837,6 +1701,8 @@ class Snowflake
             $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
 
+//$pdf->Link(175,5,30,30, $link);
+
             $pdf->SetTextColor(0, 0, 0);
 
             $pdf->SetXY(15, 7);
@@ -1844,33 +1710,41 @@ class Snowflake
             $line_height = 4;
 
             $t = $this->thing_report['sms'];
+
+            $t = str_replace(" | ", "\n", $t);
+
             $pdf->MultiCell(150, $line_height, $t, 0);
 
-            $y = $pdf->GetY() + 0.9;
+//$pdf->Link(15,7,150,10, $link);
+
+
+            $y = $pdf->GetY() + 0.95;
             $pdf->SetXY(15, $y);
             $text = "v0.0.4";
             $pdf->MultiCell(
                 150,
                 $line_height,
                 $this->agent_name . " " . $text,
-                0
+                0,
+                "L"
             );
 
-            $text = $this->timestampSnowflake();
-            $y = $pdf->GetY() + 0.9;
-            $pdf->SetXY(15, $y);
-            $pdf->MultiCell(150, $line_height, $text, 0);
+            $y = $pdf->GetY() + 0.95;
 
-            $y = $pdf->GetY() + 0.9;
-            $pdf->SetXY(15, $y);
-            $text = "";
-            $pdf->MultiCell(150, $line_height, $text, 0);
-
-            $y = $pdf->GetY() + 0.9;
             $pdf->SetXY(15, $y);
             $text =
                 "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
-            $pdf->MultiCell(150, $line_height, $text, 0);
+            $pdf->MultiCell(150, $line_height, $text, 0, "L");
+
+            // Good until?
+            $text = $this->timestampSnowflake();
+            $pdf->SetXY(175, 35);
+            $pdf->MultiCell(30, $line_height, $text, 0, "L");
+
+            //$pdfTitle = 'snowflake_'.$this->thing->nuuid.'.pdf';
+            //$image = $pdf->Output('S', $pdfTitle);
+  //          $pdf->SetXY(50, 50);
+
 
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
@@ -1907,12 +1781,12 @@ class Snowflake
                 $this->max = 13;
                 $this->size = 4;
                 $this->lattice_size = 40;
-                $this->response = "Made a snowflake. Which will melt.";
+                $this->response .= "Made a snowflake. Which will melt. ";
                 return;
             }
         }
 
-        $keywords = ["uuid", "iterate", "pride", "flag"];
+        $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -1930,12 +1804,6 @@ class Snowflake
                                 "vancouver pride 2018"
                             );
                             $this->events[] = $event;
-                            //$event = new Event($this->thing,"#vanpride2018");
-                            //$this->events[] = $event;
-                            //$event = new Event($this->thing,"vancouver pride 40");
-                            //$this->events[] = $event;
-                            //$event = new Event($this->thing,"burnaby pride 1");
-                            //$this->events[] = $event;
 
                             $this->flag = new Flag($this->thing, "flag");
 
@@ -1961,9 +1829,7 @@ class Snowflake
                             $this->canvas_size_x = 164 * 1.5;
                             $this->canvas_size_y = 164 * 1.5;
 
-                            //$this->response = "Made a snowflake. Which will melt.";
-
-                            $this->response =
+                            $this->response .=
                                 "Made a vancouver pride 2018 snowflake.  It is going to melt.";
                             return;
 
@@ -1996,8 +1862,8 @@ class Snowflake
                             $this->canvas_size_x = 164 * 1;
                             $this->canvas_size_y = 164 * 1;
 
-                            $this->response =
-                                "Made a " . $this->flag->state . " snowflake.";
+                            $this->response .=
+                                "Made a " . $this->flag->state . " snowflake. ";
                             return;
 
                         case 'uuid':
@@ -2007,8 +1873,14 @@ class Snowflake
                             $this->size = 2.5;
                             $this->lattice_size = 40;
                             $this->decimalUuid();
-                            $this->response = "I created a UUID snowflake.";
+                            $this->response .=
+                                "Saw request for a UUID snowflake. ";
                             return;
+
+                        case 'hex':
+                            $this->latticeSnowflake();
+                            $this->response .= "Saw request for hexes. ";
+                            break;
 
                         case 'iterate':
                             $this->thing->log(
@@ -2017,14 +1889,14 @@ class Snowflake
                                 "INFORMATION"
                             );
                             $this->updateSnowflake();
-                            $this->response =
-                                "This snowflake ticked 1 interval.";
+                            $this->response .=
+                                "Saw request to iterate the snowflake. ";
                             return;
 
                         case 'on':
                             //$this->setFlag('green');
                             //break;
-                            $this->response = "Heard on.";
+                            $this->response .= "Heard on. ";
 
                         default:
                     }
@@ -2048,7 +1920,7 @@ class Snowflake
         $this->size = 4;
         $this->lattice_size = 40;
 
-        $this->response = "Made a binary snowflake.";
+        $this->response .= "Made a binary snowflake. ";
         return;
 
         if (strpos($input, 'uuid') !== false) {
@@ -2064,7 +1936,5 @@ class Snowflake
             $this->updateSnowflake();
             return;
         }
-
-        return;
     }
 }
