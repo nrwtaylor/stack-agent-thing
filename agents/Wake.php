@@ -1,4 +1,5 @@
 <?php
+namespace Nrwtaylor\StackAgentThing;
 // Call regularly from cron 
 // On call determine best thing to be addressed.
 
@@ -11,7 +12,7 @@ error_reporting(-1);
 
 //require '/home/wildtay3/public_html/stackr/vendor/autoload.php';
 //require '../vendor/autoload.php';
-require '/var/www/html/stackr.ca/vendor/autoload.php';
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 
 class Wake {
@@ -75,12 +76,6 @@ $this->node_list = array("start"=>array("sleep"=>array("wake"=>array("sleep"))))
                 } 
 
 
-
-
-//var_dump($this->reminder_ids);
-//exit();
-
-
 		// If readSubject is true then it has been responded to.
 
 		$this->readSubject();
@@ -93,11 +88,6 @@ $this->node_list = array("start"=>array("sleep"=>array("wake"=>array("sleep"))))
 
 	function setWaketime() {
 
-		//$thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record'), array('ant', 'email', 'transit' , 'translink'));
-                //$things = $thingreport['thing'];
-		
-	
-
                 $this->thing->json->setField("variables");
                 $this->thing->json->writeVariable(array("wake",
                         "wake_time"),  $this->wake_time );
@@ -106,35 +96,14 @@ $this->node_list = array("start"=>array("sleep"=>array("wake"=>array("sleep"))))
                 $this->thing->json->writeVariable(array("wake",
                         "state"),  'sleep' );
 
-
-		return;
 	}
 
-	
-
 	public function respond() {
-
-		// Thing actions
-
-//		$this->thing->json->setField("settings");
-//		$this->thing->json->writeVariable(array("reminder",
-//			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
-//			);
 
 		$this->thing->flagGreen();
 
 
 		$choices = $this->thing->choice->makeLinks('feedback');
-
-//		echo '<pre> Agent "Reminder" Thing : ';print_r($this->thing->thing);echo'</pre>';
-//		echo '<pre> Agent "Reminder" Thing : ';print_r($choices);echo'</pre>';
-//var_dump($choices);
-//exit();
-
-		// Compose email
-
-
-//		$stackr_url = 'https://stackr.co';
 
 
 		$subject = "Three things from your stack on a " . date("l") . ' in ' . date("F");
@@ -144,8 +113,6 @@ $this->node_list = array("start"=>array("sleep"=>array("wake"=>array("sleep"))))
 
 		$url = $this->web_prefix . "api/redpanda/thing/" . $uuid . "/random";
 
-//		$thingreport = $this->thing->db->userRecords($this->from,30);
-
 $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record'), array('ant', 'email', 'transit' , 'translink'));
 		$things = $thingreport['thing'];
 
@@ -153,10 +120,7 @@ $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record
 
 //		foreach ($things as $thing) {
 		foreach ($this->reminder_ids as $uuid) {
-// Build a haystack
 
-
-//			$temp_thing = new Thing($thing['uuid']);
                         $temp_thing = new Thing($uuid);
 
 
@@ -173,14 +137,12 @@ $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record
 			$this->ranked_things[] = array("name"=>$temp_thing->uuid,
 							"likes"=>$rank_score);
 
-//echo "<pre>";print_r($this->ranked_things);echo "</pre>";
 
 
 		}
 
 
 		$things = $this->get_flavors_by_likes(30);
-//		$things = $thingreport['thing'];
 
 
 		$message = "So here are three things you put on the stack.  That's what you wanted.<br>";
@@ -192,15 +154,6 @@ $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record
 		foreach ($things as $ranked_thing) {
 		
 			$thing = new Thing($ranked_thing['name']);
-
-		//	var_dump($thing);
-		//	exit();
-
-			//var_dump($thing);
-			//$t = '';
-//			$message .= '*' . $thing['task'] . ' ';
-//			$message .= $stackr_url . '/thing/' . $thing['uuid'] . '/forget';
-//			$message .= "\r\n";
 
 
 			if ( isset($thing->account) ){ 
@@ -317,15 +270,6 @@ return array_slice($popular, 0, $number);
 
 	function start() {
 
-//		$this->thing = new Thing(null);
-//		$this->thing->Create("redpanda.stack@gmail.com", "reminder", "start");
-
-		//$choice = new Choice($ant_thing->uuid);
-
-//		echo $thing->uuid . "<br>";
-
-		//$current_node = "inside nest";
-
 		if (rand(0,5)<=3) {
 			$this->thing->choice->Create('reminder', $this->node_list, 'feedback');
 		} else {
@@ -334,11 +278,8 @@ return array_slice($popular, 0, $number);
 		//$this->thing->choice->Choose("inside nest");
 		$this->thing->flagGreen();
 
-		return;
 	}
 
 
 
 }
-
-?>
