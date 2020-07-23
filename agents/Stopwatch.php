@@ -1,106 +1,33 @@
 <?php
+namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 //require '../vendor/autoload.php';
-require '/var/www/html/stackr.ca/vendor/autoload.php';
-require_once '/var/www/html/stackr.ca/agents/message.php';
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
+//require_once '/var/www/html/stackr.ca/agents/message.php';
 //require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
 								// factored to
 								// call agent 'Agent'
 
 ini_set("allow_url_fopen", 1);
 
-class Stopwatch 
+class Stopwatch extends Agent
 {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null) {
-
-        if ($agent_input == null) {$agent_input = "";}
-
-        $this->agent_input = $agent_input;
-
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+function init() {
+   // function __construct(Thing $thing, $agent_input = null) {
 
  $this->node_list = array("stop"=>array("start"=>array("split","stop"),"reset"),"reset");
 $this->thing->choice->load('stopwatch');
 
-        $this->current_time = $this->thing->json->time();
-
-        $this->get(); // Updates $this->elapsed_time;
-
-        // And so at this point we have a timer model.
-
-		// So created a token_generated_time field.
-        //        $this->thing->json->setField("variables");
-        //        $this->thing->json->writeVariable( array("stopwatch", "request_at"), $this->thing->json->time() );
-
-//$this->thing->json->time()
-
 
 		$this->test= "Development code"; // Always
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-
-
-
-//$this->thing->choice->Create('stopwatch', $this->node_list, 'stop');
-
-//$this->thing->choice->Choose("midden work");
-
-		echo '<pre> Agent "Stopwatch" running on Thing ';echo $this->uuid;echo'</pre>';
-		echo '<pre> Agent "Stopwatch" received this Thing "';echo $this->subject;echo'"</pre>';
-
-
-	// Read the elapsed time.  Or start.
-
- //               $this->current_time = $this->thing->json->time();
-
-//	echo $this->read(); // Updates $this->elapsed_time;
-
-		// Read the subject as passed to this class.
-
-//	echo '<pre> Agent "Stopwatch" start state is ';
-/*
-	$this->state = $thing->choice->load('stopwatch'); //this might cause problems
-	//echo $this->thing->getState('usermanager');
-	echo $this->state;
-	echo'"</pre>';
-*/
-
-		//$balance = array('amount'=>0, 'attribute'=>'transferable', 'unit'=>'tokens');
-       		//$t = $this->thing->newAccount($this->uuid, 'token', $balance); //This might be a problem
-
-		//$this->thing->account['token']->Credit(1);
-
-
-
-
-		$this->readSubject();
-		$this->respond();
-
-/*
-        echo '<pre> Agent "Stopwatch" end state is ';
-        $this->state = $thing->choice->load('stopwatch');
-        //echo $this->thing->getState('usermanager');
-        echo $this->state;
-        echo'"</pre>';
-*/
-
-
-		echo '<pre> Agent "Stopwatch" completed</pre>';
-
-		return;
 
 		}
 
@@ -111,16 +38,10 @@ $this->thing->choice->load('stopwatch');
     function set()
     {
         // Read the elapsed time ie 'look at stopwatch'.
-
-        // Don't update the db variable at this point, because
-        // the stopwatch command is not known ie stop, split, etc
-
         $this->thing->json->setField("variables");
         $this->thing->json->readVariable( array("stopwatch", "elapsed"), $this->elapsed_time );
         $this->thing->json->readVariable( array("stopwatch", "refreshed_at"), $this->current_time );
         $this->thing->choice->save('stopwatch', $this->state);
-
-        return;
     }
 
 
@@ -129,15 +50,19 @@ $this->thing->choice->load('stopwatch');
         // Read the elapsed time ie 'look at stopwatch'.
 
         // See if a stopwatch record exists.
-        require_once '/var/www/html/stackr.ca/agents/findagent.php';
+        //require_once '/var/www/html/stackr.ca/agents/findagent.php';
         $findagent_thing = new FindAgent($this->thing, 'stopwatch');
 
-var_dump($findagent_thing->thing_report);
-exit();
         foreach (array_reverse($findagent_thing->thing_report['things']) as $thing) {
 
-            $thing->json->setField("variables");
-            $thing->elapsed_time = $this->thing->json->readVariable( array("stopwatch", "elapsed"))  ;
+                $uuid = $thing['uuid'];
+                $variables_json = $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+if (!isset($variables['stopwatch'])) {continue;}
+if (!isset($variables['stopwatch']['elapsed'])) {continue;}
+
+$thing->elapsed_time = $variables['stopwatch']['elapsed'];
 
             if (($thing->refreshed_at == false) or ($thing->elapsed_time == false)) {
                 continue;
@@ -177,8 +102,9 @@ exit();
     }
 
 
-    function read()
+    function readStopwatch($variable = null)
     {
+return;
         $this->thing->log("read");
 
         $this->get();
@@ -195,11 +121,7 @@ exit();
         // Set elapsed time as 0 and state as stopped.
         $this->elapsed_time = 0;
         $this->thing->choice->Create('stopwatch', $this->node_list, 'stop');
-/*
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("stopwatch", "refreshed_at"), $this->current_time);
-        $this->thing->json->writeVariable( array("stopwatch", "elapsed"), $this->elapsed_time);
-*/
+
         $this->thing->choice->Choose('stop');
 
         $this->set();
@@ -222,9 +144,6 @@ exit();
         $this->thing->log("start");
 
         $this->get();
-
-echo "start";
-echo $this->previous_state;
 
 		if ($this->previous_state == 'stop') {
             $this->thing->choice->Choose('start');
@@ -253,57 +172,19 @@ echo $this->previous_state;
         return null;
     }
 
-	private function respond() {
+	public function respondResponse() {
 
 		// Thing actions
 
 		$this->thing->flagGreen();
-/*
-		// Stop
-		// Respond with elapsed time.
-		// Start
-		// Respond with elapsed time.
-		// Reset
-		// Set elapsed time to 0.
 
-		switch ($this->requested_state) {
- 		   case 'stop':
-        $this->stop();
-        break;
-    case 'start':
-        $this->start();
-        break;
-    case 'reset':
-        $this->reset();
-        break;
-
-    case 'split':
-        $this->split();
-        break;
-
-
-    default:
-       $this->read();
-}
-*/
 		// Generate email response.
 
-		$to = $this->thing->from;
-		$from = "stopwatch";
-
-		echo "<br>";
 
 		$choices = $this->thing->choice->makeLinks($this->state);
 		$this->thing_report['choices'] = $choices;
-		echo "<br>";
-		//echo $html_links;
-
-//$interval = date_diff($datetime1, $datetime2);
-//echo $interval->format('%R%a days');
 
 		$sms_message = "STOPWATCH | " . $this->elapsed_time . " | " . $this->state .  " | TEXT ?";
-
-//echo $sms_message;
 
 		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
 		$test_message .= '<br>Stopwatch state: ' . $this->state . '<br>';
@@ -324,16 +205,7 @@ echo $this->previous_state;
                         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
 
-
-		//$this->thing->email->sendGeneric($to,$from,$this->subject, $test_message, $choices);
-
 $this->thing_report['help'] = 'This is a stopwatch.';
-
-
-		//echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
-//echo $message;
-
-		return;
 
 
 	}
@@ -361,23 +233,9 @@ $this->thing_report['help'] = 'This is a stopwatch.';
         if (count($pieces) == 1) {
 
             if ($input == 'stopwatch') {
-                $this->read();
+                $this->readStopwatch();
                 return;
             }
-/*
-                        if ( $this->thing->choice->isValidState($input) ) {
-
-echo "valid state";
-				$this->requested_state = $input;
-                                $this->thing->choice->Choose($input);
-                               
-                                return $input;
-                        }
-*/
-
-
-
-
 
                         return "Request not understood";
 
@@ -390,24 +248,6 @@ echo "meepmeep";
             if (strpos(strtolower($piece),$command) !== false) {
 
                 switch($piece) {
-/*
-                                                case 'stopwatch':    
-
-                                                        if ($key + 1 > count($pieces)) {
-                                                                //echo "last word is stop";
-                                                                $this->stop = false;
-                                                                return "Request not understood";
-                                                        } else {
-                                                                //echo "next word is:";
-                                                                //var_dump($pieces[$index+1]);
-                                                                $command = $pieces[$key+1];
-
-								if ( $this->thing->choice->isValidState($command) ) {
-                                                                	return $command;
-								}
-                                                        }
-                                                        break;
-*/
 
     case 'start':
         $this->start();
@@ -451,7 +291,7 @@ echo "meepmeep";
             break;
     }
 
-    $this->read();
+    $this->readStopwatch();
 
 
 
@@ -580,6 +420,3 @@ echo "meepmeep";
         }
 
 }
-
-?>
-
