@@ -7,40 +7,43 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Nexmo {
-	
-
-	public $var = 'hello';
-
+class Nexmo
+{
+    public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
     {
         $this->agent_input = $agent_input;
-		$this->cost = 50;
+        $this->cost = 50;
 
-		$this->test= "Development code";
+        $this->test = "Development code";
 
-		$this->thing = $thing;
+        $this->thing = $thing;
 
-		$this->thing_report = array('thing' => $this->thing->thing);
-		$this->thing_report['info'] = 'This is a Nexmo agent.';
+        $this->thing_report = ['thing' => $this->thing->thing];
+        $this->thing_report['info'] = 'This is a Nexmo agent.';
 
-
-        $this->app_id = $this->thing->container['api']['microsoft']['edna']['appid'];
-        $this->app_secret = $this->thing->container['api']['microsoft']['edna']['appsecret'];
+        $this->app_id =
+            $this->thing->container['api']['microsoft']['edna']['appid'];
+        $this->app_secret =
+            $this->thing->container['api']['microsoft']['edna']['appsecret'];
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
-		$this->sqlresponse = null;
+        $this->sqlresponse = null;
 
-        $this->agent_prefix = 'Agent "Nexmo" ';	
+        $this->agent_prefix = 'Agent "Nexmo" ';
 
-        $this->node_list = array("sms send"=>array("sms send"));
+        $this->node_list = ["sms send" => ["sms send"]];
 
-		$this->thing->log( 'Agent "Nexmo" running on Thing ' .  $this->thing->nuuid . '.' );
-		$this->thing->log( 'Agent "Nexmo" received this Thing "' .  $this->subject . '".' );
+        $this->thing->log(
+            'Agent "Nexmo" running on Thing ' . $this->thing->nuuid . '.'
+        );
+        $this->thing->log(
+            'Agent "Nexmo" received this Thing "' . $this->subject . '".'
+        );
 
         // Get some stuff from the stack which will be helpful.
         $this->web_prefix = $thing->container['stack']['web_prefix'];
@@ -52,33 +55,38 @@ class Nexmo {
 
         $channel = new Channel($this->thing, "nexmo");
 
-		if ( $this->readSubject() == true) {
-			$this->thing_report = array('thing' => $this->thing->thing, 
-				'choices' => false,
-				'info' => "A Nexmo ID wasn't provided.",
-				'help' => 'from needs to be a number.');
+        if ($this->readSubject() == true) {
+            $this->thing_report = [
+                'thing' => $this->thing->thing,
+                'choices' => false,
+                'info' => "A Nexmo ID wasn't provided.",
+                'help' => 'from needs to be a number.',
+            ];
 
-		        $this->thing->log( 'Agent "Nexmo" completed without sending a message.' );
-			return;
-		}
-		$this->respond();
+            $this->thing->log(
+                'Agent "Nexmo" completed without sending a message.'
+            );
+            return;
+        }
+        $this->respond();
 
-		$this->thing->log ( 'Agent "Microsoft" completed.' );
+        $this->thing->log('Agent "Microsoft" completed.');
 
-		return;
-
-		}
+        return;
+    }
 
     function eventSet($input = null)
     {
-        if ($input == null) {$input = $this->body;}
+        if ($input == null) {
+            $input = $this->body;
+        }
 
-        $this->thing->log( '<pre> Agent "Nexmo" called eventSet()' );
+        $this->thing->log('<pre> Agent "Nexmo" called eventSet()');
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable( array("nexmo") , $input  );
+        $this->thing->json->writeVariable(["nexmo"], $input);
 
         //$this->thing->flagGreen();
 
@@ -88,8 +96,8 @@ class Nexmo {
     function getResponseurl()
     {
         //$activity = ($this->body['channelData']['clientActivityId']);
-        if ( isset ($this->body['channelData']['clientActivityId']) ) {
-            $this->activity_id =  $this->body['channelData']['clientActivityId'];
+        if (isset($this->body['channelData']['clientActivityId'])) {
+            $this->activity_id = $this->body['channelData']['clientActivityId'];
             return $this->activity_id;
         }
 
@@ -100,14 +108,13 @@ class Nexmo {
 
         return true;
     }
-
 
     function getActivity()
     {
         //$activity = ($this->body['channelData']['clientActivityId']);
 
-        if ( isset ($this->body['channelData']['clientActivityId']) ) {
-            $this->activity_id =  $this->body['channelData']['clientActivityId'];
+        if (isset($this->body['channelData']['clientActivityId'])) {
+            $this->activity_id = $this->body['channelData']['clientActivityId'];
             return $this->activity_id;
         }
 
@@ -119,11 +126,10 @@ class Nexmo {
         return true;
     }
 
-
     function getChannel()
     {
-        if ( isset ($this->body['conversation']['id']) ) {
-            $this->channel_id =  $this->body['conversation']['id'];
+        if (isset($this->body['conversation']['id'])) {
+            $this->channel_id = $this->body['conversation']['id'];
             return $this->channel_id;
         }
 
@@ -137,9 +143,8 @@ class Nexmo {
 
     function getUser()
     {
-
-        if ( isset ($this->body['from']['id']) ) {
-                    $this->user =  $this->body['from']['id'];
+        if (isset($this->body['from']['id'])) {
+            $this->user = $this->body['from']['id'];
             return $this->user;
         }
 
@@ -148,15 +153,13 @@ class Nexmo {
         //    return $this->user;
         //}
 
-
         return true;
     }
 
-
     function getText()
     {
-        if ( isset ($this->body['text']) ) {
-            $this->text =  $this->body['text'];
+        if (isset($this->body['text'])) {
+            $this->text = $this->body['text'];
             return $this->text;
         }
 
@@ -168,99 +171,91 @@ class Nexmo {
         return true;
     }
 
+    // -----------------------
 
+    private function respond()
+    {
+        // Thing actions
+        $this->thing->flagGreen();
 
+        // Generate email response.
 
+        $to = $this->from;
+        //		$from = $this->to;
 
-// -----------------------
+        //		if ($this->input != null) {
+        //			$test_message = $this->input;
+        //		} else {
+        //			$test_message = $this->subject;
+        //		}
 
-	private function respond() {
+        //        if ($this->input != null) {
+        //            $test_message = $this->input;
+        //        } else {
+        //            $test_message = $this->subject;
+        //        }
+        $test_message = null;
 
-		// Thing actions
-		$this->thing->flagGreen();
+        //		if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
+        $this->sendMessage($to, $test_message);
+        //			$this->thing->account['stack']->Debit($this->cost);
+        //			$this->thing->log("FB message sent");
 
-		// Generate email response.
-
-		$to = $this->from;
-//		$from = $this->to;
-
-//		if ($this->input != null) {
-//			$test_message = $this->input;
-//		} else {
-//			$test_message = $this->subject;
-//		}
-
-//        if ($this->input != null) {
-//            $test_message = $this->input;
-//        } else {
-//            $test_message = $this->subject;
-//        }
-$test_message = null;
-
-//		if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
-			$this->sendMessage($to, $test_message);
-//			$this->thing->account['stack']->Debit($this->cost);
-//			$this->thing->log("FB message sent");
-
-			$this->thing_report['info'] = '<pre> Agent "Nexmo" sent a message to ' . $this->from . '.</pre>';
-//
-//		} else {
-//
-//			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
-//		}/
-//exit();
+        $this->thing_report['info'] =
+            '<pre> Agent "Nexmo" sent a message to ' . $this->from . '.</pre>';
+        //
+        //		} else {
+        //
+        //			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
+        //		}/
+        //exit();
 
         $this->thing_report['choices'] = false;
-//$this->thing_report['info'] = 'This is a facebook message agent.';
+        //$this->thing_report['info'] = 'This is a facebook message agent.';
         $this->thing_report['help'] = 'In development.';
         $this->thing_report['log'] = $this->thing->log;
 
-		return;
+        return;
+    }
 
-
-	}
-
-
-	public function readSubject()
+    public function readSubject()
     {
+        if (is_array($this->agent_input)) {
+            $this->response = "Processed datagram.";
+            $this->eventSet($this->agent_input);
+            return;
+        }
 
-if (is_array($this->agent_input)) {
-        $this->response = "Processed datagram.";
-        $this->eventSet($this->agent_input);
-        return;
-}
+        if (is_string($this->agent_input)) {
+            $this->response = "Sent message.";
+            $this->message = $this->agent_input;
+            //$this->eventSet($this->agent_input);
+            return;
+        }
 
-if (is_string($this->agent_input)) {
-        $this->response = "Sent message.";
-    $this->message = $this->agent_input;
-        //$this->eventSet($this->agent_input);
-        return;
-} 
+        //$message_reply_id = $this->agent_input;
+        $this->thing->json->setField("variables");
+        $names = $this->thing->json->writeVariable(["nexmo", "reply_id"], null);
 
-
-//$message_reply_id = $this->agent_input;
-                    $this->thing->json->setField("variables");
-                    $names = $this->thing->json->writeVariable( array("nexmo", "reply_id"), null );
-
-//"channelData":{"clientActivityId":"1536536110650.9566644201124537.16"}}
+        //"channelData":{"clientActivityId":"1536536110650.9566644201124537.16"}}
 
         // Nothing to read.
-		return false;
-	}
+        return false;
+    }
 
     function eventGet()
     {
-        $this->thing->log( '<pre> Agent "Slack" called eventGet()</pre>' );
+        $this->thing->log('<pre> Agent "Slack" called eventGet()</pre>');
 
-//        $this->thing->db->setFrom($this->from);
-//echo "<br>";
-//        $this->thing->db->setFrom($this->from);
-//echo "<br>";
-//echo ($this->from);
-//echo ($this->to);
-//echo "<br>";
-$bodies = json_decode($this->thing->thing->message0, true);
-$this->body = $bodies['nexmo'];
+        //        $this->thing->db->setFrom($this->from);
+        //echo "<br>";
+        //        $this->thing->db->setFrom($this->from);
+        //echo "<br>";
+        //echo ($this->from);
+        //echo ($this->to);
+        //echo "<br>";
+        $bodies = json_decode($this->thing->thing->message0, true);
+        $this->body = $bodies['nexmo'];
 
         $this->variablesGet();
         return $this->body;
@@ -274,11 +269,8 @@ $this->body = $bodies['nexmo'];
         $this->activity_id = $this->getActivity();
         $this->service_url = $this->body['serviceUrl'];
 
-
-
         return;
     }
-
 
     function makeMessage($message = null)
     {
@@ -292,10 +284,11 @@ $this->body = $bodies['nexmo'];
         // "text":"'.$message.'",
 
         $jsonData =
-
-'{
+            '{
   "recipient":{
-    "id":"'. $sender.'"
+    "id":"' .
+            $sender .
+            '"
   },
   "message":{
     "attachment":{
@@ -306,14 +299,16 @@ $this->body = $bodies['nexmo'];
            {
             "title":"ICHING",
             "image_url":"https://<web_prefix>/thing/d0f11a91-cce9-4b04-b046-07cf5ead3d31/iching.png",
-            "subtitle":"' . $message . '"
+            "subtitle":"' .
+            $message .
+            '"
           }
         ]
       }
     }
   }
 }';
-/*
+        /*
  '{
             "recipient":{
                "id":"'. $sender.'"
@@ -333,21 +328,18 @@ $this->body = $bodies['nexmo'];
         }';
 */
         $this->json_message = $jsonData;
-
     }
 
     function makeBasicMessage($message = null)
     {
-
-//        if ($this->input != null) {
-//            $message = $this->input;
-//        } else {
-//            $message = $this->subject;
-//        }
-
+        //        if ($this->input != null) {
+        //            $message = $this->input;
+        //        } else {
+        //            $message = $this->subject;
+        //        }
 
         $sender = $this->from;
-/*
+        /*
         $jsonData = '{
             "recipient":{
                "id":"'. $sender.'"
@@ -358,62 +350,94 @@ $this->body = $bodies['nexmo'];
         }';
 */
 
-//                    $this->thing->json->setField("message0");
-//                    $names = $this->thing->json-readVariable( array("microsoft") );
+        //                    $this->thing->json->setField("message0");
+        //                    $names = $this->thing->json-readVariable( array("microsoft") );
 
-//var_dump($this->body);
+        //var_dump($this->body);
 
-//echo "<br>--------------------<br>";
+        //echo "<br>--------------------<br>";
 
-//exit();
+        //exit();
 
-if (!isset($this->message)) {$this->json_message = "No message provided.";return;}
+        if (!isset($this->message)) {
+            $this->json_message = "No message provided.";
+            return;
+        }
 
-$jsonData = '{"type": "message",
+        $jsonData =
+            '{"type": "message",
     "from": {
-        "id": "' . $this->body['recipient']['id'] . '",
-        "name": "' . $this->body['recipient']['name'] . '"
+        "id": "' .
+            $this->body['recipient']['id'] .
+            '",
+        "name": "' .
+            $this->body['recipient']['name'] .
+            '"
     },
     "conversation": {
-        "id": "' . $this->body['conversation']['id'] . '"
+        "id": "' .
+            $this->body['conversation']['id'] .
+            '"
     },
    "recipient": {
-        "id": "' . $this->body['from']['id'] . '",
-        "name": "' .$this->body['from']['name'] . '"
+        "id": "' .
+            $this->body['from']['id'] .
+            '",
+        "name": "' .
+            $this->body['from']['name'] .
+            '"
     },
     "text": "I have several times available on Saturday!"
 }';
 
-$jsonData = '{"type": "message",
+        $jsonData =
+            '{"type": "message",
     "from": {
-        "id": "' . $this->body['recipient']['id'] . '",
-        "name": "' . $this->body['recipient']['name'] . '"
+        "id": "' .
+            $this->body['recipient']['id'] .
+            '",
+        "name": "' .
+            $this->body['recipient']['name'] .
+            '"
     },
     "conversation": {
-        "id": "' . $this->body['conversation']['id'] . '"
+        "id": "' .
+            $this->body['conversation']['id'] .
+            '"
     },
    "recipient": {
-        "id": "' . $this->body['from']['id'] . '",
-        "name": "' .$this->body['from']['name'] . '"
+        "id": "' .
+            $this->body['from']['id'] .
+            '",
+        "name": "' .
+            $this->body['from']['name'] .
+            '"
     },
-    "text": "' . $this->message .'"
+    "text": "' .
+            $this->message .
+            '"
 }';
 
-//var_dump($jsonData);
-//exit();
+        //var_dump($jsonData);
+        //exit();
         $this->json_message = $jsonData;
-
     }
 
     function authorizeMessage()
     {
-        $url = "https://login.microsoftonline.com/botframework.com/oauth2/v2.0/token";
+        $url =
+            "https://login.microsoftonline.com/botframework.com/oauth2/v2.0/token";
 
         //Initiate cURL.
         $ch = curl_init($url);
 
         //$jsonDataEncoded = "grant_type=client_credentials&client_id=" . $this->app_id . "&client_secret=" . $this->app_secret . "&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default";
-        $jsonDataEncoded = "grant_type=client_credentials&client_id=" . $this->app_id . "&client_secret=" . $this->app_secret . "&scope=https%3A%2F%2Fapi.botframework.com%2F.default";
+        $jsonDataEncoded =
+            "grant_type=client_credentials&client_id=" .
+            $this->app_id .
+            "&client_secret=" .
+            $this->app_secret .
+            "&scope=https%3A%2F%2Fapi.botframework.com%2F.default";
 
         //Tell cURL that we want to send a POST request.
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -422,32 +446,28 @@ $jsonData = '{"type": "message",
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
 
         //Set the content type to application/json
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/x-www-form-urlencoded',
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         //Execute the request
         //if( !empty($message_to_reply) ){
-            $result = curl_exec($ch);
+        $result = curl_exec($ch);
         //}
 
-
-        $result_json = json_decode($result,true);
+        $result_json = json_decode($result, true);
         $this->access_token = $result_json['access_token'];
-
-
 
         return;
     }
 
-
-
     function sendMessage($to, $text)
     {
-
         // Get access token each time
         $this->authorizeMessage();
 
-// Respond with https://docs.microsoft.com/en-us/azure/bot-service/rest-api/bot-framework-rest-connector-api-reference?view=azure-bot-service-3.0
-/*
+        // Respond with https://docs.microsoft.com/en-us/azure/bot-service/rest-api/bot-framework-rest-connector-api-reference?view=azure-bot-service-3.0
+        /*
 {
     "type": "message",
     "from": {
@@ -479,9 +499,9 @@ Content-Type: application/json
 
         $conversation_id = $this->channel_id;
         $activity_id = $this->activity_id;
-// https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/bots/bot-conversations/bots-conversations#sending-replies-to-messages
-        $endpoint = "conversations/" . $conversation_id . "/activities/". $activity_id;
-
+        // https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/bots/bot-conversations/bots-conversations#sending-replies-to-messages
+        $endpoint =
+            "conversations/" . $conversation_id . "/activities/" . $activity_id;
 
         $url = $this->service_url . "v3/" . $endpoint;
 
@@ -493,45 +513,43 @@ Content-Type: application/json
         $this->makeBasicMessage();
         $jsonData = $this->json_message;
         //Encode the array into JSON.
-//        $jsonDataEncoded = $jsonData;
+        //        $jsonDataEncoded = $jsonData;
 
-//        $j = json_encode($jsonDataEncoded);
+        //        $j = json_encode($jsonDataEncoded);
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         //Set the content type to application/json
-//        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-//        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $this->access_token));
+        //        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        //        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $this->access_token));
 
-
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json',
-                                            'Authorization: Bearer ' . $this->access_token));
-
-
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->access_token,
+        ]);
 
         //Execute the request
-  //      if( !empty($message_to_reply) ){
-            $result = curl_exec($ch);
-  //      }
+        //      if( !empty($message_to_reply) ){
+        $result = curl_exec($ch);
+        //      }
 
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-//echo "<br>" ."return code is " . $httpCode . "<br>";
-//var_dump($result);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        //echo "<br>" ."return code is " . $httpCode . "<br>";
+        //var_dump($result);
 
-
-                    $this->thing->json->setField("variables");
-                    $names = $this->thing->json->writeVariable( array("nexmo", "result"), $result );
-                        $time_string = $this->thing->json->time();
-                        $this->thing->json->writeVariable( array("nexmo", "refreshed_at"), $time_string );
-
-
+        $this->thing->json->setField("variables");
+        $names = $this->thing->json->writeVariable(
+            ["nexmo", "result"],
+            $result
+        );
+        $time_string = $this->thing->json->time();
+        $this->thing->json->writeVariable(
+            ["nexmo", "refreshed_at"],
+            $time_string
+        );
 
         return;
     }
-
-
 }
-
-?>
