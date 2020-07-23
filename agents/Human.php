@@ -31,6 +31,14 @@ class Human extends Agent
         $this->node_list = ["human" => ["human", "agent"]];
     }
 
+public function set() {
+
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable( array("human", "refreshed_at"), $this->current_time );
+
+
+}
+
     /**
      *
      * @return unknown
@@ -54,7 +62,7 @@ class Human extends Agent
 
         $to = $this->address;
 
-        $thing->Create($to, $thing->uuid, 's/ human ' . $this->from);
+        $thing->Create($to, $thing->uuid, 'human ' . $this->from);
         $thing->flagGreen();
 
         $thing_report['thing'] = $thing;
@@ -74,7 +82,14 @@ class Human extends Agent
         $input = $this->assert($this->input);
 
         $address_agent = new Address($this->thing, 'address');
-        $address = $address_agent->isAddress($input);
+
+        $address = $address_agent->isAddress($this->to, "human");
+
+        // Is there a reference to a known human?
+        if ($address === false or $address === true) {
+            $address = $address_agent->isAddress($input, "human");
+        }
+
         $this->address = $address;
 
         $this->human();
