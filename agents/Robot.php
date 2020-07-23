@@ -39,7 +39,7 @@ class Robot extends Agent
             $user_agent_long =
                 $this->thing->container['api']['robot']['user_agent_long'];
             ini_set('user_agent', $user_agent_long);
-            $this->user_agent_long;
+            $this->user_agent_long = $user_agent_long;
         }
 
         if (
@@ -73,6 +73,18 @@ class Robot extends Agent
         //$this->thing->flagGreen();
 
         return;
+    }
+
+    public function metaRobot($html)
+    {
+        // devstack
+
+        $doc = new \DOMDocument();
+        //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
+        @$doc->loadHTML($html);
+
+        $xpath = new \DOMXpath($doc);
+        $contents = $xpath->query('/html/head/meta[@name="robots"]/@content');
     }
 
     /**
@@ -210,6 +222,16 @@ class Robot extends Agent
         }
 
         $response_text = "Hello. ";
+
+        /*
+            $this->user_agent_long = $user_agent_long;
+            $this->user_agent_short =
+        $this->useragent = ini_get("user_agent");
+*/
+
+        //$response_text .= $this->user_agent_long . " " . $this->user_agent_short . " ";
+        $response_text .= $this->useragent;
+
         if (isset($this->response) and $this->response != "") {
             $response_text = $this->response;
         }
@@ -235,7 +257,7 @@ class Robot extends Agent
         $web .= "<br><br>";
 
         if ($this->hits_count == 0) {
-            $web .= "You seem to be human.";
+            $web .= "You seem to be human.<br>";
         } else {
             $web .=
                 "Your header matches against the following known bot strings:<br>";
@@ -244,6 +266,19 @@ class Robot extends Agent
                 $web .= $hit_text . "<br>";
             }
         }
+
+        $web .= '<p>';
+        $web .= file_get_contents($this->resource_path . 'robot/robot.html');
+        $web .= '<p>';
+        $web .= 'This example tells our bot not to read any of your site.<br>';
+        $web .=
+            '<div class="code">User-agent: ' . $this->user_agent_short . '<br>';
+        $web .= 'Disallow: /</div>';
+
+        $web .= 'This example tells our bot to actively crawl your site.<br>';
+        $web .=
+            '<div class="code">User-agent: ' . $this->user_agent_short . '<br>';
+        $web .= 'Allow: /</div>';
 
         $this->thing_report['web'] = $web;
     }
@@ -382,6 +417,10 @@ class Robot extends Agent
             $url_parts = explode('/', $url);
 
             $host = $url_parts[0];
+        }
+        // Error condition no link provided.
+        if ($host == "") {
+            return true;
         }
 
         if (!isset($parsed['scheme'])) {

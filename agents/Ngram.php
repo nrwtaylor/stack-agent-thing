@@ -18,64 +18,11 @@ class Ngram extends Agent {
      * @param unknown $agent_input (optional)
      */
     function init() {
-//    function __construct(Thing $thing, $agent_input = null) {
-
-//        $this->start_time = microtime(true);
-//        if ($agent_input == null) {}
-//        $this->agent_input = $agent_input;
-//        $this->thing = $thing;
-//        $this->start_time = $this->thing->elapsed_runtime();
-
-//        $this->agent_prefix = 'Agent "N-Gram" ';
-
-//        $this->thing_report['thing'] = $this->thing->thing;
-
-//        $this->uuid = $thing->uuid;
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/words/';
 
-//        if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
-//        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-//        if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
-
-
-//        $this->sqlresponse = null;
-
-//        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-//        $this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
-
-
-
         $this->keywords = array();
 
-//        $this->thing->json->setField("variables");
-//        $time_string = $this->thing->json->readVariable( array("ngram", "refreshed_at") );
-
-//        if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-//            $time_string = $this->thing->json->time();
-//            $this->thing->json->writeVariable( array("ngram", "refreshed_at"), $time_string );
-//        }
-
-        // If it has already been processed ...
-//        $this->reading = $this->thing->json->readVariable( array("ngram", "reading") );
-
- //       $this->readSubject();
-/*
-        $this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
-
-        if ($this->agent_input == null) {$this->respond();}
-
-        if (count($this->ngrams) != 0) {
-            $this->ngram = $this->ngrams[0];
-            $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->ngram . '.');
-
-
-        } else {
-            $this->ngram = null;
-            $this->thing->log($this->agent_prefix . 'did not find words.');
-        }
-*/
         $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
 
         $this->thing_report['log'] = $this->thing->log;
@@ -103,7 +50,7 @@ public function set() {
 
         $this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
 
-        if ($this->agent_input == null) {$this->respond();}
+//        if ($this->agent_input == null) {$this->respond();}
 
         if (count($this->ngrams) != 0) {
             $this->ngram = $this->ngrams[0];
@@ -211,7 +158,7 @@ public function set() {
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
 
         $this->cost = 100;
 
@@ -231,14 +178,14 @@ public function set() {
 
 
         // Make SMS
-        $this->makeSMS();
-        $this->thing_report['sms'] = $this->sms_message;
+ //       $this->makeSMS();
+ //       $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
         $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail();
+ //       $this->makeEmail();
 
         $this->thing_report['email'] = $this->sms_message;
 

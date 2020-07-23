@@ -182,14 +182,14 @@ $this->thing->log("extracted words.");
 
         $this->thing->log("ewolWords.");
 
-
-        if ($this->wordpress_path_to !== false) {
-            require_once $this->wordpress_path_to. 'wp-load.php';
-            if (($this->ewol_dictionary = get_transient('agent-ewol-dictionary'))) {
-                $this->thing->log("loaded ewol dictionary from  wp transient store.");
+if (!isset($this->mem_cached)) {$this->getMemcached();}
+        //if ($this->wordpress_path_to !== false) {
+        //    require_once $this->wordpress_path_to. 'wp-load.php';
+            if (($this->ewol_dictionary = $this->mem_cached->get('agent-ewol-dictionary'))) {
+                $this->thing->log("loaded ewol dictionary from memory.");
                 return;
             }
-        }
+        //}
 
 
 
@@ -212,7 +212,7 @@ if ($c == false) {return true;}
 
 
         if ($this->wordpress_path_to !== false) {
-            set_transient('agent-ewol-dictionary', $this->ewol_dictionary);
+            $this->mem_cached->set('agent-ewol-dictionary', $this->ewol_dictionary);
         }
 
 
@@ -235,30 +235,31 @@ if ($c == false) {return true;}
             $file = $this->resource_path_words . 'words.txt';
 
 
-        if ($this->wordpress_path_to !== false) {
-try {
-            require_once $this->wordpress_path_to. 'wp-load.php';
-            if (($contents = get_transient('agent-words-list'))) {
+//        if ($this->wordpress_path_to !== false) {
+//try {
+//            require_once $this->wordpress_path_to. 'wp-load.php';
+$this->getMemcached();
+            if (($contents = $this->mem_cached->get('agent-words-list'))) {
 $this->words_list = $contents;
-                $this->thing->log("loaded words from wp transient store.");
+                $this->thing->log("loaded words from memory.");
 
                 break;
 }
 
-}        catch (\Throwable $t) {
-$this->wordpress = "off";
+//}        catch (\Throwable $t) {
+//$this->wordpress = "off";
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
-            //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
-            $this->thing->log("caught throwable.");
+            //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";//
+ //           $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
-        }
-        catch (\Exception $e) {
-$this->wordpress = "off";
+ //       }
+ //       catch (\Exception $e) {
+//$this->wordpress = "off";
             $this->thing->log("caught exception");
             // Executed only in PHP 5, will not be reached in PHP 7
-        }
+  //      }
 
-        }
+    //    }
 
 
 
@@ -268,9 +269,9 @@ $this->wordpress = "off";
             $contents = file_get_contents($file);
 
 
-        if (($this->wordpress_path_to !== false) and ($this->wordpress != "off")){
-            set_transient('agent-words-list', $contents);
-        }
+ //       if (($this->wordpress_path_to !== false) and ($this->wordpress != "off")){
+            $this->mem_cached->set('agent-words-list', $contents);
+ //       }
 
                 $this->thing->log("loaded words from text file.");
 
@@ -354,19 +355,19 @@ if (!isset($this->ewol_dictionary)) {$this->ewolWords();
 
         if (isset($this->contents)) {return $this->contents;}
 
-        if ($this->wordpress_path_to !== false) {
+     //   if ($this->wordpress_path_to !== false) {
 
-        if (($this->contents = get_transient('agent-word-contents'))) {
+        if (($this->contents = $this->mem_cached->get('agent-word-contents'))) {
             return $this->contents;
         }
-        }
+     //   }
 
         $file = $this->resource_path_words . 'words.txt';
         $this->contents = file_get_contents($file);
 
-        if ($this->wordpress_path_to !== false) {
-            set_transient('agent-word-contents', $this->contents);
-        }
+     //   if ($this->wordpress_path_to !== false) {
+            $this->mem_cached->set('agent-word-contents', $this->contents);
+     //   }
 
     }
 

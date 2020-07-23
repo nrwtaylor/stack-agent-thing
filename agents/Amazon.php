@@ -198,7 +198,7 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
             "thumbnail" => $link_thumbnail,
             "link" => $url,
             "source" => "amazon:" . $asin,
-            "amazon" => $amazon_item
+            "vendor" => $amazon_item
         );
 
 /* ebay reference

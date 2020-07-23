@@ -264,7 +264,7 @@ class Coordinate
         if (!isset($this->coordinates)) {
             $this->getCoordinates();
         }
-        //var_dump ($this->coordinates);
+
         foreach ($this->coordinates as $coordinate) {
             // Match the first matching place
 
@@ -304,7 +304,6 @@ class Coordinate
     //function makeCoordinate($v)
     //{
 
-    //    var_dump($v);
 
     //}
 
@@ -331,8 +330,6 @@ class Coordinate
         if ($findagent_thing->thing_report['things'] == true) {
         }
 
-        //var_dump(count($findagent_thing->thing_report['things']));
-        //var_dump($findagent_thing->thing_report['things'] == true);
 
         if (!$this->is_positive_integer($count)) {
             //echo $count;
@@ -414,15 +411,6 @@ class Coordinate
         }
         array_multisort($refreshed_at, SORT_DESC, $this->coordinates);
 
-        /*
-// Get latest per place
-$this->places = array();
-foreach($filtered_places as $key=>$filtered_place) {
-//var_dump($filtered_place);
-
-        $this->places[] = $filtered_place;
-}
-*/
         $this->old_coordinates = $this->coordinates;
         $this->coordinates = [];
         foreach ($this->old_coordinates as $key => $row) {
@@ -849,10 +837,6 @@ foreach($filtered_places as $key=>$filtered_place) {
             return $this->coordinate_string;
         }
 
-        // if ($coordinate == null) {echo "foo";$coordinate = $this->coordinate;}
-
-        // if ($coordinate == true) {$coordinate = array();}
-        // if ($coordinate == false) {$coordinate = array();}
         $this->coordinate_string = "(" . implode(",", $coordinate) . ")";
         return $this->coordinate_string;
     }
@@ -861,11 +845,7 @@ foreach($filtered_places as $key=>$filtered_place) {
     {
         $this->inject = null;
         $s = $this->inject;
-        //echo "makesms";
-        //echo implode(" ", $this->coordinate);
-        //echo "\n";
         $string_coordinate = $this->stringCoordinate($this->coordinate);
-        //echo $string_coordinate;
 
         $sms = "COORDINATE " . $string_coordinate;
 
@@ -975,7 +955,7 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         $this->last_coordinate = $last_coordinate['coordinate'];
         $this->last_refreshed_at = $last_coordinate['refreshed_at'];
-        var_dump($last_coordinate['coordinate']);
+
         //        foreach(array_reverse($this->coordinates) as $key=>$coordinate) {
 
         //            if ($coordinate['coordinate'] == $this->last_coordinate) {

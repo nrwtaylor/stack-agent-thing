@@ -109,7 +109,7 @@ class Pdf extends Agent
 
     }
 
-    function getLink()
+    function getLink($variable = null)
     {
 
         $block_things = array();

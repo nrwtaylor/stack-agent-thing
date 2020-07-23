@@ -13,23 +13,21 @@ ini_set("allow_url_fopen", 1);
 
 class Duplicable
 {
-
-	public $var = 'hello';
+    public $var = 'hello';
 
     function __construct(Thing $thing, $agent_input = null)
     {
-
         $this->agent_input = $agent_input;
 
-		$this->agent_name = "duplicable";
+        $this->agent_name = "duplicable";
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
+        $this->test = "Development code";
 
-		$this->thing = $thing;
+        $this->thing = $thing;
 
-        $this->thing_report  = array("thing"=>$this->thing->thing);
+        $this->thing_report = ["thing" => $this->thing->thing];
 
-        $this->start_time = $this->thing->elapsed_runtime(); 
+        $this->start_time = $this->thing->elapsed_runtime();
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
@@ -39,16 +37,28 @@ class Duplicable
         $this->from = $thing->from;
         $this->subject = $thing->subject;
 
-        $this->node_list = array("duplicable"=>array("index", "uuid"));
+        $this->node_list = ["duplicable" => ["index", "uuid"]];
 
-
-		$this->haystack = $thing->uuid . 
-				$thing->to . 
-				$thing->subject . 
-				$command_line .
-		                $this->agent_input;
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
-        $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
+        $this->haystack =
+            $thing->uuid .
+            $thing->to .
+            $thing->subject .
+            $command_line .
+            $this->agent_input;
+        $this->thing->log(
+            $this->agent_prefix .
+                'running on Thing ' .
+                $this->thing->nuuid .
+                '.',
+            "INFORMATION"
+        );
+        $this->thing->log(
+            $this->agent_prefix .
+                'received this Thing "' .
+                $this->subject .
+                '".',
+            "DEBUG"
+        );
 
         $this->current_time = $this->thing->time();
 
@@ -58,15 +68,27 @@ class Duplicable
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        $this->thing->log( $this->agent_prefix .'completed init. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed init. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("duplicable", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "duplicable",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("duplicable", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["duplicable", "refreshed_at"],
+                $time_string
+            );
         }
 
         $split_time = $this->thing->elapsed_runtime();
@@ -87,23 +109,45 @@ class Duplicable
 
         //$this->thing->log( $this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
         $this->setDuplicable();
-        if ($this->agent_input == null) {$this->setSignals();}
+        if ($this->agent_input == null) {
+            $this->setSignals();
+        }
 
-        $this->thing->log( $this->agent_prefix .'completed setSignals. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed setSignals. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
-        $this->thing->log( $this->agent_prefix .'completed setDuplicable. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed setDuplicable. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
+        $this->thing->log(
+            $this->agent_prefix .
+                'ran for ' .
+                number_format(
+                    $this->thing->elapsed_runtime() - $this->start_time
+                ) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
         $this->thing_report['log'] = $this->thing->log;
 
-		return;
-	}
+        return;
+    }
 
-// https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
+    // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
 
-// -----------------------
+    // -----------------------
 
-/*
+    /*
     function getNuuid()
     {
         $agent = new Nuuid($this->thing, "nuuid");
@@ -122,82 +166,136 @@ class Duplicable
         $this->quick_response_png = $agent->PNG_embed;
     }
 
-
     function init()
     {
-        if (!isset($this->min)) {$this->min = 1;}
-        if (!isset($this->max)) {$this->max = 9999;}
-        if (!isset($this->size)) {$this->size = 4;}
+        if (!isset($this->min)) {
+            $this->min = 1;
+        }
+        if (!isset($this->max)) {
+            $this->max = 9999;
+        }
+        if (!isset($this->size)) {
+            $this->size = 4;
+        }
 
         //$this->setProbability();
-       // $this->setRules();
+        // $this->setRules();
     }
 
-	private function setSignals()
+    private function setSignals()
     {
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		$to = $this->thing->from;
-		$from = "duplicable";
+        $to = $this->thing->from;
+        $from = "duplicable";
 
-//        $this->makePNG();
+        //        $this->makePNG();
 
-        $this->thing->log( $this->agent_prefix .'completed makePNG. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed makePNG. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
         $this->makeSMS();
 
         $this->makeMessage();
         //$this->makeTXT();
-        $this->thing->log( $this->agent_prefix .'completed makeTXT. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed makeTXT. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
         $this->makeChoices();
-        $this->thing->log( $this->agent_prefix .'completed makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed makeChoices. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
-        $this->thing->log( $this->agent_prefix .'completed makeWeb. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed makeWeb. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
+        $this->thing_report["info"] = "This creates a duplicable number set.";
+        $this->thing_report["help"] = 'Try "DUPLICABLE"';
 
- 		$this->thing_report["info"] = "This creates a duplicable number set.";
- 		$this->thing_report["help"] = 'Try "DUPLICABLE"';
-
-        $this->thing->log( $this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'started message. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
         $this->makeWeb();
 
         $this->makeTXT();
         $this->makePDF();
-        $this->thing->log( $this->agent_prefix .'completed message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed message. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
+        return $this->thing_report;
+    }
 
-		return $this->thing_report;
-
-
-	}
-
-    function makeChoices ()
+    function makeChoices()
     {
-       $this->thing->log( $this->agent_prefix .'started makeChoices. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'started makeChoices. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
-       $this->thing->choice->Create($this->agent_name, $this->node_list, "duplicable");
-       $this->thing->log( $this->agent_prefix .'completed create choice. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+        $this->thing->choice->Create(
+            $this->agent_name,
+            $this->node_list,
+            "duplicable"
+        );
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed create choice. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
-       $this->choices = $this->thing->choice->makeLinks('duplicable');
-       $this->thing->log( $this->agent_prefix .'completed makeLinks. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-
+        $this->choices = $this->thing->choice->makeLinks('duplicable');
+        $this->thing->log(
+            $this->agent_prefix .
+                'completed makeLinks. Timestamp = ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
         $this->thing_report['choices'] = $this->choices;
 
-     //  $this->thing_report['choices'] = false;
-
-
+        //  $this->thing_report['choices'] = false;
     }
-
-
 
     function makeSMS()
     {
         $sms = "DUPLICABLE | ";
-        $sms .= $this->web_prefix . "thing/".$this->uuid."/duplicable.pdf";
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/duplicable.pdf";
         $sms .= ' | ' . 'Made a non-duplicable index.';
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -205,47 +303,67 @@ class Duplicable
 
     function makeMessage()
     {
-
         $message = "Stackr made a non-duplicable index for you.<br>";
 
         $uuid = $this->uuid;
 
-        $message .= "Keep on stacking.\n\n<p>" . $this->web_prefix . "thing/$uuid/duplicable\n \n\n<br> ";
+        $message .=
+            "Keep on stacking.\n\n<p>" .
+            $this->web_prefix .
+            "thing/$uuid/duplicable\n \n\n<br> ";
 
         $this->thing_report['message'] = $message;
 
         return;
-
     }
 
     function setDuplicable()
     {
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("duplicable", "index"), $this->index );
-        $this->thing->log($this->agent_prefix . ' saved duplicable index ' . $this->index . '.', "INFORMATION") ;
+        $this->thing->json->writeVariable(
+            ["duplicable", "index"],
+            $this->index
+        );
+        $this->thing->log(
+            $this->agent_prefix .
+                ' saved duplicable index ' .
+                $this->index .
+                '.',
+            "INFORMATION"
+        );
     }
 
     function getDuplicable()
     {
-
         $this->thing->json->setField("variables");
-        $this->index = $this->thing->json->readVariable( array("duplicable", "index") );
+        $this->index = $this->thing->json->readVariable([
+            "duplicable",
+            "index",
+        ]);
 
         if ($this->index == false) {
-            $this->thing->log($this->agent_prefix . ' did not find a duplicable index.', "INFORMATION") ;
+            $this->thing->log(
+                $this->agent_prefix . ' did not find a duplicable index.',
+                "INFORMATION"
+            );
             // Return.
             return true;
         }
 
-        $this->thing->log($this->agent_prefix . ' loaded duplicable index ' . $this->index . '.', "INFORMATION") ;
+        $this->thing->log(
+            $this->agent_prefix .
+                ' loaded duplicable index ' .
+                $this->index .
+                '.',
+            "INFORMATION"
+        );
         return;
     }
 
     function makeWeb()
     {
-
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
-        $this->node_list = array("web"=>array("duplicable","nuuid"));
+        $this->node_list = ["web" => ["duplicable", "nuuid"]];
 
         $web = '<a href="' . $link . '">';
         //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
@@ -258,19 +376,18 @@ class Duplicable
 
     function makeTXT()
     {
-
         $txt = "This is an index of NON-TRANSPOSABLE NUMBERS.\n";
         $txt .= 'DUPLICABLE NUMBERS omitted.';
         $txt .= "\n";
         //$txt .= count($this->lattice). ' cells retrieved.';
 
         $txt .= "\n";
-            //$txt .= str_pad("INDEX", 15, ' ', STR_PAD_LEFT);
-            //$txt .= " " . str_pad("DUPLICABLE", 10, " ", STR_PAD_LEFT);
-            //$txt .= " " . str_pad("STATE", 10, " " , STR_PAD_RIGHT);
-            //$txt .= " " . str_pad("VALUE", 10, " ", STR_PAD_LEFT);
+        //$txt .= str_pad("INDEX", 15, ' ', STR_PAD_LEFT);
+        //$txt .= " " . str_pad("DUPLICABLE", 10, " ", STR_PAD_LEFT);
+        //$txt .= " " . str_pad("STATE", 10, " " , STR_PAD_RIGHT);
+        //$txt .= " " . str_pad("VALUE", 10, " ", STR_PAD_LEFT);
 
-            //$txt .= " " . str_pad("COORD (X,Y)", 6, " ", STR_PAD_LEFT);
+        //$txt .= " " . str_pad("COORD (X,Y)", 6, " ", STR_PAD_LEFT);
 
         $txt .= "\n";
         $txt .= "\n";
@@ -278,54 +395,80 @@ class Duplicable
         $num_rows = 40;
         $num_columns = 10;
         $offset = 0;
-        $page =1;
+        $page = 1;
         $i = 1;
 
+        $this->duplicables_list = [];
+        foreach (range($this->min, $this->max) as $index) {
+            if ($this->duplicables_index[$index] == false) {
+                continue;
+            }
 
-$this->duplicables_list = array();
-foreach(range($this->min,$this->max) as $index) {
-    if ($this->duplicables_index[$index] == false) {continue;}
+            $this->duplicables_list[$i] = $this->duplicables_index[$index];
+            $i += 1;
+            $max_i = $i;
+        }
 
-    $this->duplicables_list[$i] = $this->duplicables_index[$index];
-    $i +=1;
-    $max_i = $i;
-}
+        $i = 0;
+        $blanks = true;
+        if ($blanks) {
+            $max_i = $this->max;
+        }
 
-$i =0;
-$blanks = true;
-if ($blanks) {
-    $max_i = $this->max;
-}
+        $num_pages = ceil($this->max / ($num_rows * $num_columns));
+        while ($i <= $max_i) {
+            $txt .= "PAGE " . $page . " OF " . $num_pages . "\n";
+            $txt .=
+                "FROM " .
+                ($i + 1) .
+                " TO " .
+                $num_rows * $num_columns * $page .
+                "\n";
+            $txt .= "\n";
+            foreach (range(1, $num_rows) as $row) {
+                foreach (range(1, $num_columns) as $col) {
+                    $local_offset = 0;
+                    $i =
+                        ($page - 1) * $num_rows * $num_columns +
+                        ($col - 1) * $num_rows +
+                        $row +
+                        $offset;
 
-$num_pages = ceil($this->max / ($num_rows * $num_columns));
-while ($i<=$max_i) {
-        $txt .= "PAGE " . $page . " OF " . $num_pages . "\n";
-        $txt .= "FROM " . ($i+1) . " TO " . (($num_rows * $num_columns)*($page )) ."\n";
-        $txt .= "\n";
-        foreach(range(1,$num_rows) as $row) {
-            foreach(range(1,$num_columns) as $col) {
-                $local_offset = 0;
-                $i = (($page - 1) * $num_rows * $num_columns) + ($col-1) * $num_rows + $row + $offset;
-
-                if ($blanks) {
-                    if (!isset($this->duplicables_index[$i + $local_offset])) {continue;}
-                    $txt .= " " . str_pad($this->duplicables_index[$i + $local_offset], 10, ' ', STR_PAD_LEFT);
-                } else {
-                    $txt .= " " . str_pad($this->duplicables_list[$i], 10, ' ', STR_PAD_LEFT);
+                    if ($blanks) {
+                        if (
+                            !isset($this->duplicables_index[$i + $local_offset])
+                        ) {
+                            continue;
+                        }
+                        $txt .=
+                            " " .
+                            str_pad(
+                                $this->duplicables_index[$i + $local_offset],
+                                10,
+                                ' ',
+                                STR_PAD_LEFT
+                            );
+                    } else {
+                        $txt .=
+                            " " .
+                            str_pad(
+                                $this->duplicables_list[$i],
+                                10,
+                                ' ',
+                                STR_PAD_LEFT
+                            );
+                    }
                 }
+                $txt .= "\n";
             }
             $txt .= "\n";
+            $page += 1;
         }
-        $txt .= "\n";
-        $page += 1;
-
-}
-
 
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
     }
-/*
+    /*
     public function makePNG()
     {
 
@@ -423,8 +566,8 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 
     function setRules()
     {
-        $this->rules = array();
-/*
+        $this->rules = [];
+        /*
         $this->rules[0][0][0][0][0][1] = 1;
         $this->rules[0][0][0][0][1][1] = 2;
         $this->rules[0][0][0][1][0][1] = 3;
@@ -441,113 +584,115 @@ $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
 */
     }
 
-
     function initDuplicables()
     {
-        $this->thing->log($this->agent_prefix . 'initialized the duplicables index.', "INFORMATION");
+        $this->thing->log(
+            $this->agent_prefix . 'initialized the duplicables index.',
+            "INFORMATION"
+        );
 
-        $this->duplicables_index = array();
-        $this->duplicability_index = array();
+        $this->duplicables_index = [];
+        $this->duplicability_index = [];
 
         //$value= array("name"=>null, "state"=>null, "value"=>0);
-        foreach(range($this->min,$this->max) as $i){
+        foreach (range($this->min, $this->max) as $i) {
             if (isset($this->duplicables_index[$i])) {
-            continue;}
+                continue;
+            }
             $this->duplicables_index[$i] = $i;
             $arr = $this->getDuplicables($i);
 
-            if ($arr == false) {continue;}
+            if ($arr == false) {
+                continue;
+            }
             //$this->duplicability_index[$i] = 0;
 
-            foreach($arr as $key=>$value) {
+            foreach ($arr as $key => $value) {
                 $v = implode($value);
-//                echo $v . "\n";
+                //                echo $v . "\n";
                 if ($v > $i) {
                     //$this->duplicables_index[$value] = $i;
-                   $this->duplicables_index[$v] = false; 
-                   //$this->duplicability_index[$v] = $this->getDuplicability($v);
-
-                } 
+                    $this->duplicables_index[$v] = false;
+                    //$this->duplicability_index[$v] = $this->getDuplicability($v);
+                }
             }
         }
-//exit();
+        //exit();
     }
-//        foreach($this->duplicables_index as $key=>$value){
-//            echo $value. " ";
-//        }
-//echo "meep";
-//exit();
+    //        foreach($this->duplicables_index as $key=>$value){
+    //            echo $value. " ";
+    //        }
+    //echo "meep";
+    //exit();
 
     function getDuplicability($n)
     {
         $d = 1;
 
-        foreach(range(-2,2,1) as $i) {
-
-            if(!isset($this->duplicables_index)) {continue;}
+        foreach (range(-2, 2, 1) as $i) {
+            if (!isset($this->duplicables_index)) {
+                continue;
+            }
             if ($this->duplicables_index[$n + $i] == false) {
                 // is duplicable;
                 $d += 1;
             }
         }
 
-        return $d/5;
-
-
+        return $d / 5;
     }
 
-    function echoDuplicables() {
-//
-//        $rows = 20;
-//        $columns = 5;
-
-//        foreach(range(0,$rows) as $row_index) {
-//            foreach(range(0,columns) as $column_index) {
-//            echo $row_index . " " . $column_index . " ".$value. " ";
-//        }
-
-    }
-
-    function getDuplicables($n) 
+    function echoDuplicables()
     {
+        //
+        //        $rows = 20;
+        //        $columns = 5;
 
-//$n = "1234";
-$n = ltrim($n, '0');
+        //        foreach(range(0,$rows) as $row_index) {
+        //            foreach(range(0,columns) as $column_index) {
+        //            echo $row_index . " " . $column_index . " ".$value. " ";
+        //        }
+    }
 
-//$this->size = 2;
+    function getDuplicables($n)
+    {
+        //$n = "1234";
+        $n = ltrim($n, '0');
+
+        //$this->size = 2;
         $elems = str_split($n);
 
         $num_digits = $this->size;
         $num_digits = count($elems);
 
         //strlen($n)
-//var_dump(count($elems));
-//echo "<br>";
+        //var_dump(count($elems));
+        //echo "<br>";
 
-//echo $this->size;
-//echo "<br>";
+        //echo $this->size;
+        //echo "<br>";
 
-$i = 0;
-while($i < $num_digits - count($elems)) {
-//    echo $i . "<br>";
-   array_unshift($elems, null);
-    $i += 1;
-}
-/*
+        $i = 0;
+        while ($i < $num_digits - count($elems)) {
+            //    echo $i . "<br>";
+            array_unshift($elems, null);
+            $i += 1;
+        }
+        /*
 echo "<br>";
 */
-//$elems = array('A','B','C');
-//$v = $this->permutations($elems);
-//echo "meep\n";
+        //$elems = array('A','B','C');
+        //$v = $this->permutations($elems);
+        //echo "meep\n";
 
-//$v = $this->computePermutations($elems);
-$v = $this->computeTranspositions($elems);
+        //$v = $this->computePermutations($elems);
+        $v = $this->computeTranspositions($elems);
 
-//var_dump($v);
+        //var_dump($v);
 
-//exit();
+        //exit();
 
-/*
+        /*
 //echo $n;
 foreach($v as $key=>$elem){
     //for ($elem as $k=>$v) {
@@ -559,37 +704,39 @@ foreach($v as $key=>$elem){
 }
 */
 
-//exit();
+        //exit();
         return $v;
     }
 
-function computeTranspositions($array) {
-//echo "foo";
-//echo count($array);
-//var_dump($array);
-    if (count($array) == 1) {return false;}
-//var_dump($array);
-    $result = [];
-    foreach(range(0,count($array)-2) as $i) {
-        $tmp_array = $array;
-        $tmp = $tmp_array[$i];
-        $tmp_array[$i] = $tmp_array[$i+1];
-        $tmp_array[$i+1] = $tmp;
-        //$this->array_swap($array, $i, $i+1);
-        $result[] = $tmp_array;
-//        var_dump($array);
+    function computeTranspositions($array)
+    {
+        //echo "foo";
+        //echo count($array);
+        //var_dump($array);
+        if (count($array) == 1) {
+            return false;
+        }
+        //var_dump($array);
+        $result = [];
+        foreach (range(0, count($array) - 2) as $i) {
+            $tmp_array = $array;
+            $tmp = $tmp_array[$i];
+            $tmp_array[$i] = $tmp_array[$i + 1];
+            $tmp_array[$i + 1] = $tmp;
+            //$this->array_swap($array, $i, $i+1);
+            $result[] = $tmp_array;
+            //        var_dump($array);
+        }
+
+        //exit();
+        return $result;
     }
-
-//exit();
-    return $result;
-
-}
-/*
+    /*
 function array_swap(&$array,$swap_a,$swap_b){
    list($array[$swap_a],$array[$swap_b]) = array($array[$swap_b],$array[$swap_a]);
 }
 */
-/*
+    /*
 function computePermutations($array) {
     $result = [];
 
@@ -615,7 +762,7 @@ function computePermutations($array) {
     return $result;
 }
 */
-/*
+    /*
 function permutations(array $elements)
 {
     if (count($elements) <= 1) {
@@ -633,7 +780,7 @@ function permutations(array $elements)
     }
 }
 */
-/*
+    /*
 function pc_permute($items, $perms = array( )) {
     if (empty($items)) { 
         print join(' ', $perms) . "<br>";
@@ -648,7 +795,7 @@ function pc_permute($items, $perms = array( )) {
     }
 }
 */
-/*
+    /*
 function comb ($n, $elems) {
     if ($n > 0) {
       $tmp_set = array();
@@ -665,27 +812,22 @@ function comb ($n, $elems) {
     }
 }
 */
-//$elems = array('A','B','C');
-//$v = comb(4, $elems);
-
-
-
+    //$elems = array('A','B','C');
+    //$v = comb(4, $elems);
 
     function read()
     {
         return $this->state;
     }
 
-
     function extractDuplicable($input)
     {
         if (!isset($this->duplicables)) {
-            $this->duplicables = array();
+            $this->duplicables = [];
         }
 
         return $this->duplicables;
     }
-
 
     public function makePDF()
     {
@@ -695,118 +837,136 @@ function comb ($n, $elems) {
         $pdf = new Fpdi\Fpdi();
 
         $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
-        $pdf->SetFont('Helvetica','',10);
+        $pdf->SetFont('Helvetica', '', 10);
 
-        $tplidx1 = $pdf->importPage(3, '/MediaBox');  
+        $tplidx1 = $pdf->importPage(3, '/MediaBox');
 
         $s = $pdf->getTemplatesize($tplidx1);
 
-        $pdf->addPage($s['orientation'], $s);  
-//        $pdf->useTemplate($tplidx1,0,0,215);  
-        $pdf->useTemplate($tplidx1);  
+        $pdf->addPage($s['orientation'], $s);
+        //        $pdf->useTemplate($tplidx1,0,0,215);
+        $pdf->useTemplate($tplidx1);
 
+        //$separator = "\r\n";
+        //$line = strtok($this->thing_report['txt'], $separator);
 
-//$separator = "\r\n";
-//$line = strtok($this->thing_report['txt'], $separator);
-
-//while ($line !== false) {
-//    # do something with $line
-//    $line = strtok( $separator );
-//echo $line;
-//}
-        $pdf->SetTextColor(0,0,0);
-
+        //while ($line !== false) {
+        //    # do something with $line
+        //    $line = strtok( $separator );
+        //echo $line;
+        //}
+        $pdf->SetTextColor(0, 0, 0);
 
         $num_rows = 40;
         $num_columns = 10;
         $offset = 0;
-        $page =1;
+        $page = 1;
         $i = 1;
 
+        $i = 0;
+        $blanks = true;
+        if ($blanks) {
+            $max_i = $this->max;
+        }
 
+        $num_pages = ceil($this->max / ($num_rows * $num_columns));
 
-$i =0;
-$blanks = true;
-if ($blanks) {
-    $max_i = $this->max;
-}
+        while ($i <= $max_i) {
+            $pdf->SetXY(15, 10);
 
-$num_pages = ceil($this->max / ($num_rows * $num_columns));
+            $txt = "PAGE " . $page . " OF " . $num_pages . "\n";
+            $pdf->Write(0, $txt);
 
-while ($i<=$max_i) {
-        $pdf->SetXY(15, 10);
+            $pdf->SetXY(15, 15);
 
-        $txt = "PAGE " . $page . " OF " . $num_pages . "\n";
-        $pdf->Write(0, $txt);
+            $txt =
+                "INDICES FROM " .
+                ($i + 1) .
+                " TO " .
+                $num_rows * $num_columns * $page .
+                "\n";
+            $pdf->Write(0, $txt);
 
-        $pdf->SetXY(15, 15);
+            foreach (range(1, $num_rows) as $row) {
+                foreach (range(1, $num_columns) as $col) {
+                    $local_offset = 0;
+                    $i =
+                        ($page - 1) * $num_rows * $num_columns +
+                        ($col - 1) * $num_rows +
+                        $row +
+                        $offset;
 
-        $txt = "INDICES FROM " . ($i+1) . " TO " . (($num_rows * $num_columns)*($page )) ."\n";
-        $pdf->Write(0, $txt);
+                    if ($blanks) {
+                        if (
+                            !isset($this->duplicables_index[$i + $local_offset])
+                        ) {
+                            continue;
+                        }
+                        if (
+                            $this->duplicables_index[$i + $local_offset] ==
+                            false
+                        ) {
+                            continue;
+                        }
 
+                        $txt =
+                            " " .
+                            str_pad(
+                                $this->duplicables_index[$i + $local_offset],
+                                10,
+                                ' ',
+                                STR_PAD_LEFT
+                            );
 
+                        $pdf->SetXY(10 + ($col - 1) * 19, 30 + $row * 5);
+                        $pdf->Write(0, $txt);
+                    } else {
+                        $txt .=
+                            " " .
+                            str_pad(
+                                $this->duplicables_list[$i],
+                                10,
+                                ' ',
+                                STR_PAD_LEFT
+                            );
 
-
-        foreach(range(1,$num_rows) as $row) {
-            foreach(range(1,$num_columns) as $col) {
-                $local_offset = 0;
-                $i = (($page - 1) * $num_rows * $num_columns) + ($col-1) * $num_rows + $row + $offset;
-
-                if ($blanks) {
-                    if (!isset($this->duplicables_index[$i + $local_offset])) {continue;}
-                    if ($this->duplicables_index[$i + $local_offset] == false) {continue;}
-
-                    $txt = " " . str_pad($this->duplicables_index[$i + $local_offset], 10, ' ', STR_PAD_LEFT);
-
-                    $pdf->SetXY(10 + ($col-1) *19, 30 + $row *5);
-                    $pdf->Write(0, $txt);
-
-                } else {
-                    $txt .= " " . str_pad($this->duplicables_list[$i], 10, ' ', STR_PAD_LEFT);
-
-                    $pdf->SetXY(10 + ($col-1) *19, 30 + $row *5);
-                    $pdf->Write(0, $txt);
-
+                        $pdf->SetXY(10 + ($col - 1) * 19, 30 + $row * 5);
+                        $pdf->Write(0, $txt);
+                    }
                 }
+                $txt .= "\n";
             }
             $txt .= "\n";
+            $page += 1;
+
+            // Bubble
+            $pdf->SetFont('Helvetica', '', 12);
+            $pdf->SetXY(17, 248);
+
+            $txt = "DUPLICABLE | An index to reduce transposition";
+            $pdf->Write(0, $txt);
+
+            $pdf->SetXY(17, 253);
+
+            $txt = "errors. To help prevent duplicate data entry.";
+            $pdf->Write(0, $txt);
+
+            $pdf->SetFont('Helvetica', '', 10);
+
+            if ($i > $max_i) {
+            } else {
+                $pdf->addPage($s['orientation'], $s);
+                //        $pdf->useTemplate($tplidx1,0,0,215);
+                $pdf->useTemplate($tplidx1);
+            }
         }
-        $txt .= "\n";
-        $page += 1;
 
+        //exit();
 
+        //        $this->getNuuid();
+        //        $pdf->Image($this->nuuid_png,5,18,20,20,'PNG');
 
-        // Bubble
-        $pdf->SetFont('Helvetica','',12);
-        $pdf->SetXY(17, 248);
-
-        $txt = "DUPLICABLE | An index to reduce transposition";
-        $pdf->Write(0, $txt);
-
-        $pdf->SetXY(17, 253);
-
-        $txt = "errors. To help prevent duplicate data entry.";
-        $pdf->Write(0, $txt);
-
-        $pdf->SetFont('Helvetica','',10);
-
-        if ($i > $max_i) {
-        } else {
-        $pdf->addPage($s['orientation'], $s);  
-//        $pdf->useTemplate($tplidx1,0,0,215);  
-        $pdf->useTemplate($tplidx1);  
-        }
-}
-
-
-
-
-//exit();
-
-//        $this->getNuuid();
-//        $pdf->Image($this->nuuid_png,5,18,20,20,'PNG');
-
-//        $pdf->Image($this->PNG_embed,5,5,20,20,'PNG');
+        //        $pdf->Image($this->PNG_embed,5,5,20,20,'PNG');
 
         // $pdf->SetTextColor(0,0,0);
         // $pdf->SetXY(50, 50);
@@ -815,50 +975,44 @@ while ($i<=$max_i) {
 
         // Page 2
 
-//        $tplidx2 = $pdf->importPage(2);
+        //        $tplidx2 = $pdf->importPage(2);
 
-//        $s = $pdf->getTemplatesize($tplidx2);
+        //        $s = $pdf->getTemplatesize($tplidx2);
 
-//        $pdf->addPage($s['orientation'], $s);  
-//        $pdf->useTemplate($tplidx1,0,0,215);  
-//        $pdf->useTemplate($tplidx2);  
+        //        $pdf->addPage($s['orientation'], $s);
+        //        $pdf->useTemplate($tplidx1,0,0,215);
+        //        $pdf->useTemplate($tplidx2);
 
-        $tplidx2 = $pdf->importPage(2, '/MediaBox');  
-        $pdf->addPage($s['orientation'], $s);  
-//        $pdf->useTemplate($tplidx1,0,0,215);  
-        $pdf->useTemplate($tplidx2);  
+        $tplidx2 = $pdf->importPage(2, '/MediaBox');
+        $pdf->addPage($s['orientation'], $s);
+        //        $pdf->useTemplate($tplidx1,0,0,215);
+        $pdf->useTemplate($tplidx2);
 
+        //        $tplidx2 = $pdf->importPage(2);
 
-
-//        $tplidx2 = $pdf->importPage(2);
-
-//        $pdf->addPage();
-//        $pdf->useTemplate($tplidx2,0,0);
+        //        $pdf->addPage();
+        //        $pdf->useTemplate($tplidx2,0,0);
         // Generate some content for page 2
 
-        $pdf->SetFont('Helvetica','',10);
+        $pdf->SetFont('Helvetica', '', 10);
 
-
-
-        $this->txt = "".$this->uuid.""; // Pure uuid.  
+        $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
         //$this->getUuid();
         //$pdf->Image($this->uuid_png,175,5,30,30,'PNG');
 
         $this->getQuickresponse();
-        $pdf->Image($this->quick_response_png,175,5,30,30,'PNG');
+        $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
 
+        $pdf->SetTextColor(0, 0, 0);
 
-        $pdf->SetTextColor(0,0,0);
+        //        $pdf->SetXY(15, 10);
+        //        $t = $this->web_prefix . "thing/".$this->uuid;
+        //        $t = $this->uuid;
 
-//        $pdf->SetXY(15, 10);
-//        $t = $this->web_prefix . "thing/".$this->uuid;
-//        $t = $this->uuid;
-
-        $pdf->SetTextColor(0,0,0);
+        $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(15, 10);
         $t = $this->thing_report['sms'] . "";
-
 
         $pdf->Write(0, $t);
 
@@ -870,34 +1024,30 @@ while ($i<=$max_i) {
         $pdf->SetXY(15, 20);
         $pdf->Write(0, $text);
 
-/*
+        /*
         ob_start();
         $image = $pdf->Output('', 'I');
         $image = ob_get_contents();
         ob_clean();
 */
-          $image = $pdf->Output('', 'S');
-
+        $image = $pdf->Output('', 'S');
 
         $this->thing_report['pdf'] = $image;
 
         return $this->thing_report['pdf'];
     }
 
-	public function readSubject()
+    public function readSubject()
     {
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-
             if ($input == 'duplicable') {
-
                 $this->getDuplicable();
 
-                if ((!isset($this->index)) or 
-                    ($this->index == null)) {
+                if (!isset($this->index) or $this->index == null) {
                     $this->index = 1;
                 }
 
@@ -909,35 +1059,29 @@ while ($i<=$max_i) {
             }
         }
 
-        $keywords = array("duplicable","transcribe");
-        foreach ($pieces as $key=>$piece) {
+        $keywords = ["duplicable", "transcribe"];
+        foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
-                    switch($piece) {
-
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
                         case 'duplicable':
-
                             $this->getDuplicable();
 
                             return;
 
                         case 'on':
-                            //$this->setFlag('green');
-                            //break;
-
+                        //$this->setFlag('green');
+                        //break;
 
                         default:
-                     }
+                    }
                 }
             }
         }
 
-
-
         $this->getDuplicable();
 
-        if ((!isset($this->index)) or 
-            ($this->index == null)) {
+        if (!isset($this->index) or $this->index == null) {
             $this->index = 1;
         }
 
@@ -945,11 +1089,6 @@ while ($i<=$max_i) {
         //$this->size = 4;
         //$this->lattice_size = 40;
 
-    return;
+        return;
     }
-
 }
-
-
-
-?>

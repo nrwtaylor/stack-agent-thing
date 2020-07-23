@@ -5,40 +5,53 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Quota {
-
-	function __construct(Thing $thing, $agent_input = null) {
-
+class Quota
+{
+    function __construct(Thing $thing, $agent_input = null)
+    {
         $this->agent_input = $agent_input;
 
-		$this->thing = $thing;
+        $this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
 
-		$this->agent_name = 'quota';
+        $this->agent_name = 'quota';
         $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
 
         $this->thing_report['thing'] = $this->thing->thing;
 
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
+        // So I could call
+        if ($this->thing->container['stack']['state'] == 'dev') {
+            $this->test = true;
+        }
+        // I think.
+        // Instead.
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
 
-        $quotas_list = array("railway", "block", "train", "daily", "hourly", "minute", "second");
-        $quotas_list = array("daily");
+        $quotas_list = [
+            "railway",
+            "block",
+            "train",
+            "daily",
+            "hourly",
+            "minute",
+            "second",
+        ];
+        $quotas_list = ["daily"];
 
         //message_perminute_limit
 
         $this->quota_name = "message_perminute";
         $quota_period = 60;
 
-        $this->period_limit = $this->thing->container['api']['quota'][$this->quota_name . '_limit'];
-//$this->period_limit = 5;
+        $this->period_limit =
+            $this->thing->container['api']['quota'][
+                $this->quota_name . '_limit'
+            ];
+        //$this->period_limit = 5;
         //$this->quota_daily = $this->thing->container['api']['quota'][$this->quota_name . '_limit'];
         //$this->quota_hourly = $this->thing->container['api']['quota']['this->message_hourly_limit'];
 
@@ -48,46 +61,62 @@ class Quota {
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-		$this->node_list = array("quota"=>array("opt-in"));
+        $this->node_list = ["quota" => ["opt-in"]];
 
-        $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
+        $this->thing->log(
+            $this->agent_prefix .
+                'running on Thing ' .
+                $this->thing->nuuid .
+                '.',
+            "INFORMATION"
+        );
 
         //foreach ($quotas_list as $key=>$value) {
-            // Pattern $this->{"default_" . $variable_name};
-            $this->variables = new Variables($this->thing, "variables quota_" . $this->quota_name . " " . $this->from);
-       // }
+        // Pattern $this->{"default_" . $variable_name};
+        $this->variables = new Variables(
+            $this->thing,
+            "variables quota_" . $this->quota_name . " " . $this->from
+        );
+        // }
 
         $this->current_time = $this->thing->json->time();
-
 
         // Check whether quota should be reset
         $this->get();
 
         // Check whether quota should be reset
         $t = strtotime($this->current_time) - strtotime($this->reset_at);
-        //var_dump($t);
-        if ($t > $quota_period) { $this->quotaReset();}
+        if ($t > $quota_period) {
+            $this->quotaReset();
+        }
 
-		$this->readSubject();
+        $this->readSubject();
 
         $this->setFlag();
         $this->set();
         if ($agent_input == null) {
- 		    $this->respond();
+            $this->respond();
         }
 
+        $this->thing->flagGreen();
 
-		$this->thing->flagGreen();
+        $this->thing->log(
+            $this->agent_prefix .
+                'ran for ' .
+                number_format(
+                    $this->thing->elapsed_runtime() - $this->start_time
+                ) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
-
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
+        $this->thing_report['etime'] = number_format(
+            $this->thing->elapsed_runtime()
+        );
         $this->thing_report['log'] = $this->thing->log;
 
-    	return;
-	}
-
-
+        return;
+    }
 
     function set()
     {
@@ -98,17 +127,23 @@ class Quota {
         return;
     }
 
-
     function get()
     {
         $this->counter = $this->variables->getVariable("counter");
         $this->reset_at = $this->variables->getVariable("reset_at");
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
 
-        if ($this->counter == null) {$this->counter = 1;}
-        if ($this->reset_at == null) {$this->reset_at = $this->current_time;}
+        if ($this->counter == null) {
+            $this->counter = 1;
+        }
+        if ($this->reset_at == null) {
+            $this->reset_at = $this->current_time;
+        }
 
-        $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".", "DEBUG");
+        $this->thing->log(
+            $this->agent_prefix . 'loaded ' . $this->counter . ".",
+            "DEBUG"
+        );
 
         return;
     }
@@ -125,7 +160,10 @@ class Quota {
             $colour = "red";
         }
 
-        $this->flag_thing = new Flag($this->thing, 'flag_quota_'. $this->quota_name . " " . $colour);
+        $this->flag_thing = new Flag(
+            $this->thing,
+            'flag_quota_' . $this->quota_name . " " . $colour
+        );
         $this->flag = $this->flag_thing->state;
 
         // Is this do our set?,  Setting signals.
@@ -136,15 +174,21 @@ class Quota {
         $sms = "QUOTA | ";
 
         $sms .= "flag " . strtoupper($this->flag_thing->state) . " ";
-        $sms .= $this->quota_name . " " . $this->counter . " of " . $this->period_limit . "";
+        $sms .=
+            $this->quota_name .
+            " " .
+            $this->counter .
+            " of " .
+            $this->period_limit .
+            "";
 
         switch (true) {
-            case ($this->counter > $this->period_limit):
+            case $this->counter > $this->period_limit:
                 $sms .= " | ";
                 $sms .= 'Quota exceeded. | ';
                 $sms .= "Text QUOTA RESET";
                 break;
-            case ($this->counter > 0.5 * $this->period_limit):
+            case $this->counter > 0.5 * $this->period_limit:
                 $sms .= ' | ';
                 $sms .= "Text QUOTA RESET";
                 break;
@@ -155,51 +199,51 @@ class Quota {
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
-
     }
 
-
-    public function makeEmail() {
-
+    public function makeEmail()
+    {
         switch ($this->counter) {
             case 1:
-                // drop through
+            // drop through
             case 2:
-                // drop through
-            case null;
-                // drop through
+            // drop through
+            case null:
+            // drop through
             default:
-                $message = "QUOTA | Acknowledged. " . $this->web_prefix . "privacy";
+                $message =
+                    "QUOTA | Acknowledged. " . $this->web_prefix . "privacy";
         }
 
-            $this->message = $message;
-            $this->thing_report['email'] = $message;
+        $this->message = $message;
+        $this->thing_report['email'] = $message;
     }
-
 
     public function makeChoices()
     {
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "quota");
+        $this->thing->choice->Create(
+            $this->agent_name,
+            $this->node_list,
+            "quota"
+        );
         $choices = $this->thing->choice->makeLinks('quota');
         $this->thing_report['choices'] = $choices;
         return;
     }
 
-
-
-	public function respond()
+    public function respond()
     {
-		// Thing actions
+        // Thing actions
 
-		// New user is triggered when there is no nom_from in the db.
-		// If this is the case, then Stackr should send out a response
-		// which explains what stackr is and asks either
-		// for a reply to the email, or to send an email to opt-in@<email postfix>.
+        // New user is triggered when there is no nom_from in the db.
+        // If this is the case, then Stackr should send out a response
+        // which explains what stackr is and asks either
+        // for a reply to the email, or to send an email to opt-in@<email postfix>.
 
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// Get the current user-state.
+        // Get the current user-state.
         $this->makeSMS();
         $this->makeEmail();
         $this->makeChoices();
@@ -212,12 +256,13 @@ class Quota {
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->thing_report['help'] = $this->agent_prefix  .'manages stack quotas.';
+        $this->thing_report['help'] =
+            $this->agent_prefix . 'manages stack quotas.';
 
-		return;
-	}
+        return;
+    }
 
-	public function readSubject()
+    public function readSubject()
     {
         // Process as User>Agent or as Thing>Agent?
         if ($this->agent_input == null) {
@@ -228,47 +273,44 @@ class Quota {
 
         // Check for other ideas in the message
         switch (true) {
-            case (strpos(strtolower($piece),"reset") !== false):
-               // Match phrase within phrase
+            case strpos(strtolower($piece), "reset") !== false:
+                // Match phrase within phrase
                 $this->quotaReset();
                 break;
 
-            case (strpos(strtolower($piece),"use") !== false):
-               // Match phrase within phrase
+            case strpos(strtolower($piece), "use") !== false:
+                // Match phrase within phrase
                 $this->quotaUse();
                 break;
 
-            case true;
+            case true:
                 $this->quota();
             default:
         }
 
-//        $this->quota();
-		return;
-	}
+        //        $this->quota();
+        return;
+    }
 
-	function quota()
+    function quota()
     {
-
         if ($this->counter >= 10000) {
             $this->state = "Meep";
         }
 
-		return;
-	}
+        return;
+    }
 
-    function quotaReset() 
+    function quotaReset()
     {
         $this->reset_at = $this->current_time;
         $this->counter = 1;
         return;
     }
 
-    function quotaUse() 
+    function quotaUse()
     {
         $this->counter += 1;
         return;
     }
-
-
 }

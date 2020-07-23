@@ -83,10 +83,11 @@ class Roll extends Agent
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         $this->thing->flagGreen();
 
-//        $choices = false;
+        $this->makeChoices();
+
 
         $this->thing_report["info"] = "This rolls a dice.  See
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
@@ -101,25 +102,6 @@ class Roll extends Agent
         }
 
         return $this->thing_report;
-    }
-
-
-    /**
-     *
-     */
-    function make() {
-
-        $this->makeSMS();
-        $this->makeMessage();
-        $this->makePNG();
-        $this->makePNGs();
-
-        $this->makeChoices();
-        $this->makeWeb();
-
-        $this->makeEmail();
-
-
     }
 
 
@@ -813,43 +795,6 @@ return $image;
 
     }
 
-
-    /**
-     *
-     * @return unknown
-     */
-    function read() {
-        return;
-        var_dump($this->last_roll);
-        var_dump($this->last_result);
-        exit();
-
-        if (($this->last_roll == false) or ($this->last_result == false)) {
-            $this->readSubject();
-            /*
-            $this->thing->json->writeVariable(
-                array("roll", "roll"),
-                $this->roll
-            );
-            $this->thing->json->writeVariable(
-                array("roll", "result"),
-                $this->result
-            );
-
-            $this->thing->log(
-                $this->agent_prefix . ' completed read.',
-                "OPTIMIZE"
-            );
-*/
-            return;
-        }
-
-        $this->roll = $this->last_roll;
-        $this->result = $this->last_result;
-
-        //        $this->get();
-        //        return $this->state;
-    }
 
 
     /**

@@ -12,18 +12,19 @@ error_reporting(-1);
 // This is written to be understandable.
 // Apologies.
 
-
 class Text extends Agent
 {
     public $var = 'hello';
 
-    public function getNgrams($input, $n = 3) {
-if (!isset($this->ngrams)) {$this->ngrams = array();}
+    public function getNgrams($input, $n = 3)
+    {
+        if (!isset($this->ngrams)) {
+            $this->ngrams = array();
+        }
         $words = explode(' ', $input);
         $ngrams = array();
 
-        foreach ($words as $key=>$value) {
-
+        foreach ($words as $key => $value) {
             if ($key < count($words) - ($n - 1)) {
                 $ngram = "";
                 for ($i = 0; $i < $n; $i++) {
@@ -33,64 +34,56 @@ if (!isset($this->ngrams)) {$this->ngrams = array();}
             }
         }
 
-
         return $ngrams;
     }
 
+    public function trimAlpha($text)
+    {
+        $letters = array();
+        $new_text = "";
+        $flag = false;
+        foreach (range(0, mb_strlen($text)) as $i) {
+            $letter = substr($text, $i, 1);
+            //if (ctype_alpha($letter)) {$flag = true;}
+            if (ctype_alnum($letter)) {
+                $flag = true;
+            }
 
+            //if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
+            if (!ctype_alnum($letter) and $flag == false) {
+                $letter = "";
+            }
 
-    public function trimAlpha($text) {
-$letters = array();
-$new_text = "";
-$flag = false;
-foreach(range(0, mb_strlen($text)) as $i) {
+            $letters[] = $letter;
+        }
 
-$letter = substr($text,$i,1);
-//if (ctype_alpha($letter)) {$flag = true;}
-if (ctype_alnum($letter)) {$flag = true;}
+        //$text = $new_text;
 
+        $new_text = "";
+        $flag = false;
+        foreach (array_reverse($letters) as $i => $letter) {
+            //$letter = substr($text,$i,1);
+            //if (ctype_alpha($letter)) {$flag = true;}
+            if (ctype_alnum($letter)) {
+                $flag = true;
+            }
 
-//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
-if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
+            //if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
+            if (!ctype_alnum($letter) and $flag == false) {
+                $letter = "";
+            }
 
-$letters[] = $letter;
+            $n = count($letters) - $i - 1;
 
-}
+            $letters[$n] = $letter;
+        }
+        $new_text = implode("", $letters);
 
-//$text = $new_text;
-
-$new_text = "";
-$flag = false;
-foreach(array_reverse($letters) as $i=>$letter) {
-
-//$letter = substr($text,$i,1);
-//if (ctype_alpha($letter)) {$flag = true;}
-if (ctype_alnum($letter)) {$flag = true;}
-
-
-//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
-if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
-
-$n = count($letters) - $i -1;
-
-$letters[$n] = $letter;
-
-}
-$new_text = implode("",$letters);
-
-return $new_text;
-
-
-
-
+        return $new_text;
     }
-
-
-
 
     public function init()
     {
-
         $this->node_list = array("start" => array("helpful", "useful"));
 
         $this->thing_report['info'] = 'Text did not add anything useful.';
@@ -98,33 +91,36 @@ return $new_text;
             "An agent which provides search insight. Click on a button.";
 
         $this->thing->log("Initialized Text.", "DEBUG");
-
     }
 
-    public function postfixText($text = null, $post_fix = null, $allowed_length = 64, $part_tokens = false) {
-if ($text == null) {return true;}
-$text = trim($text);
-if ($post_fix == null) {$post_fix = "";}
+    public function postfixText(
+        $text = null,
+        $post_fix = null,
+        $allowed_length = 64,
+        $part_tokens = false
+    ) {
+        if ($text == null) {
+            return true;
+        }
+        $text = trim($text);
+        if ($post_fix == null) {
+            $post_fix = "";
+        }
 
+        $tokens = explode(" ", $text);
 
-$tokens = explode(" " , $text);
+        $new_text = trim(
+            substr($text, 0, $allowed_length - mb_strlen($post_fix))
+        );
 
+        $tokens_new = explode(" ", $new_text);
+        $last_index = count($tokens_new) - 1;
+        if ($tokens_new[$last_index] != $tokens[$last_index]) {
+            $tokens_new[$last_index] = "";
+        }
+        $new_text = trim(implode(" ", $tokens_new)) . $post_fix;
 
-
-$new_text = trim(substr($text, 0, $allowed_length - mb_strlen($post_fix)));
-
-$tokens_new = explode(" ", $new_text);
-$last_index = count($tokens_new) - 1 ;
-if ($tokens_new[$last_index] != $tokens[$last_index]) {
-
-$tokens_new[$last_index] = "";
-
-}
-$new_text = trim(implode(" ", $tokens_new)) . $post_fix;
-
-//$wp->text_agent->postfixText($capt, $post_fix, $allowed_length);
-return $new_text;
-
+        return $new_text;
     }
 
     function extractCodes($input = null)
@@ -164,11 +160,10 @@ return $new_text;
         return $this->codes;
     }
 
-
     function extractNumbers($input = null)
     {
-// Numbers as text.
-// Vs agent number.
+        // Numbers as text.
+        // Vs agent number.
 
         if (is_array($input)) {
             return true;
@@ -194,17 +189,15 @@ return $new_text;
             //    $codes[] = $value;
             //}
 
-//            if (
-//                preg_match('/[A-Za-z]/', $token) &&
-//                preg_match('/[0-9]/', $token)
-//            ) {
+            //            if (
+            //                preg_match('/[A-Za-z]/', $token) &&
+            //                preg_match('/[0-9]/', $token)
+            //            ) {
 
             if (
-//                preg_match('/[0-9]/', $token)
-is_numeric($token)
+                //                preg_match('/[0-9]/', $token)
+                is_numeric($token)
             ) {
-
-
                 $numbers[] = $token;
             }
         }
@@ -237,32 +230,25 @@ is_numeric($token)
             //    $codes[] = $value;
             //}
 
-//            if (
-//                preg_match('/[A-Za-z]/', $token) &&
-//                preg_match('/[0-9]/', $token)
-//            ) {
+            //            if (
+            //                preg_match('/[A-Za-z]/', $token) &&
+            //                preg_match('/[0-9]/', $token)
+            //            ) {
 
-//            if (
-//                preg_match('/[A-Za-z]/', $token) &&
-//                preg_match('/[0-9]/', $token)
-//            ) {
-//                $hyphens[] = $token;
-//            }
+            //            if (
+            //                preg_match('/[A-Za-z]/', $token) &&
+            //                preg_match('/[0-9]/', $token)
+            //            ) {
+            //                $hyphens[] = $token;
+            //            }
 
-            if (
-preg_match('/^[^\W-]+-[^\W-]+$/', $token)
-            ) {
-
-
+            if (preg_match('/^[^\W-]+-[^\W-]+$/', $token)) {
                 $hyphens[] = $token;
             }
-
-
         }
         $this->hyphenates = $hyphens;
         return $this->hyphenates;
     }
-
 
     public function run()
     {
@@ -272,151 +258,146 @@ preg_match('/^[^\W-]+-[^\W-]+$/', $token)
     public function makeResponse()
     {
         // This is a short simple structured response.
-        if (!isset($this->response)) {$this->response = "";}
+        if (!isset($this->response)) {
+            $this->response = "";
+        }
         $this->response .= 'Asked about,"' . $this->subject . '"' . '. ';
     }
 
-
-public function textN3($input) {
-
-$p_array = explode(" ",$input);
-$text = "";
-foreach($p_array as $i=>$word) {
-if ($i >= 3) {break;}
-$text .= $word ." ";
-
-}
-$text = trim($text);
-return $text;
-}
-
-public function textNouns($input) {
-
-global $wp;
-if (!isset($wp->brilltagger_agent)) {
-$wp->brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
-}
-
-$tags = $wp->brilltagger_agent->tag($input);
-
-
-//$word_agent = new Word($this->thing, "word");
-//$tags = $wp->brilltagger_agent->tags;
-$text = "";
-foreach ($tags as $index=>$tag) {
-
-
-if (is_numeric($tag["token"])) {continue;}
-
-if(1 === preg_match('~[0-9]~', $tag["token"])){
-continue;
-}
-$token = $tag["token"];
-
-
-// False. Is not a word.
-//$nearest_word = $word_agent->isWord($token);
-
-//echo $token ." " . $nearest_word . "<br>";
-//if ($nearest_word == false) {continue;}
-
- if (strpos($tag["tag"], 'VB') !== false) {
-        $text .= $tag["token"]. " ";
-continue;
+    public function textN3($input)
+    {
+        $p_array = explode(" ", $input);
+        $text = "";
+        foreach ($p_array as $i => $word) {
+            if ($i >= 3) {
+                break;
+            }
+            $text .= $word . " ";
+        }
+        $text = trim($text);
+        return $text;
     }
 
+    public function textNouns($input)
+    {
+        global $wp;
+        if (!isset($this->thing->brilltagger_agent)) {
+            $this->thing->brilltagger_agent = new Brilltagger(
+                $this->thing,
+                "brilltagger"
+            );
+        }
 
+        $tags = $this->thing->brilltagger_agent->tag($input);
 
- if (strpos($tag["tag"], 'JJ') !== false) {
-        $text .= $tag["token"]. " ";
-continue;
+        $text = "";
+        foreach ($tags as $index => $tag) {
+            if (is_numeric($tag["token"])) {
+                continue;
+            }
+
+            if (1 === preg_match('~[0-9]~', $tag["token"])) {
+                continue;
+            }
+            $token = $tag["token"];
+
+            // False. Is not a word.
+            //$nearest_word = $word_agent->isWord($token);
+
+            //echo $token ." " . $nearest_word . "<br>";
+            //if ($nearest_word == false) {continue;}
+
+            if (strpos($tag["tag"], 'VB') !== false) {
+                $text .= $tag["token"] . " ";
+                continue;
+            }
+
+            if (strpos($tag["tag"], 'JJ') !== false) {
+                $text .= $tag["token"] . " ";
+                continue;
+            }
+
+            if (strpos($tag["tag"], 'NN') !== false) {
+                $text .= $tag["token"] . " ";
+                continue;
+            }
+        }
+
+        $text = trim($text);
+        $this->thing->log(
+            'text adjectives and nouns built query, "' . $text . '".'
+        );
+        return $text;
     }
 
+    function textOr($input)
+    {
+        $text = "(" . trim($input) . ")";
+        $text = str_replace(" ", ",", $text);
 
-
-
-    if (strpos($tag["tag"], 'NN') !== false) {
-        $text .= $tag["token"]. " ";
-continue;
+        $text = trim($text);
+        // Any words
+        return $text;
     }
 
+    public function compressText($text1, $text2)
+    {
+        $raw = $text1 . " " . $text2;
+        $raw = strtolower($raw);
+        $filtered = implode(' ', array_unique(explode(' ', $raw)));
+        return $filtered;
+    }
 
-}
+    function textNgram($input, $t = "@1")
+    {
+        $text = "(" . trim($input) . ")";
+        $text = str_replace(" ", ",", $text);
 
-$text = trim($text);
-$this->thing->log('text adjectives and nouns built query, "'. $text .'".');
-return $text;
+        $text = $t . " " . trim($text);
+        // Any words
+        return $text;
+    }
 
-}
+    public function posText($text = null, $pattern = "mixed-adjective")
+    {
+        // dev stack
 
-function textOr($input) {
+        if ($text == null) {
+            return true;
+        }
 
-$text = "(" . trim($input). ")";
-$text = str_replace(" ", ",", $text);
+        $processed_text = $this->tagText($text);
+        $pattern_tokens = explode("-", $pattern);
+        $process_text_tokens = explode("-", $pattern);
 
-$text = trim($text);
-// Any words
-return $text;
+        foreach ($pattern_tokens as $i => $pattern_token) {
+        }
+    }
 
-}
+    public function tagText($text = null)
+    {
+        global $wp;
+        if ($text == null) {
+            return false;
+        }
+        if (!isset($this->thing->brilltagger_agent)) {
+            $this->thing->brilltagger_agent = new Brilltagger(
+                null,
+                "brilltagger"
+            );
+        }
 
-public function compressText($text1, $text2) {
-$raw = $text1 . " " . $text2;
-$raw = strtolower($raw);
-$filtered = implode(' ', array_unique(explode(' ', $raw)));
-return $filtered;
+        if (!isset($this->thing->mixed_agent)) {
+            $this->thing->mixed_agent = new Mixed(null, "brilltagger");
+        }
 
-}
+        if (!isset($this->thing->alpha_agent)) {
+            $this->thing->alpha_agent = new Alpha(null, "alpha");
+        }
 
+        $tags = $this->thing->brilltagger_agent->tag($text);
 
-function textNgram($input, $t = "@1") {
-
-$text = "(" . trim($input). ")";
-$text = str_replace(" ", ",", $text);
-
-$text = $t . " ". trim($text);
-// Any words
-return $text;
-
-}
-
-public function posText($text = null, $pattern = "mixed-adjective") {
-
-// dev stack
-
-if ($text == null) {return true;}
-
-
-$processed_text = $this->tagText($text);
-$pattern_tokens = explode("-", $pattern);
-$process_text_tokens = explode("-", $pattern);
-
-foreach($pattern_tokens as $i=>$pattern_token) {
-}
-
-
-}
-
-public function tagText($text = null) {
-
-global $wp;
-if ($text == null) {return false;}
-if (!isset($wp->brilltagger_agent)) {
-$wp->brilltagger_agent = new Brilltagger(null, "brilltagger");
-}
-
-if (!isset($wp->mixed_agent)) {
-$wp->mixed_agent = new Mixed(null, "brilltagger");
-}
-
-if (!isset($wp->alpha_agent)) {
-$wp->alpha_agent = new Alpha(null, "alpha");
-}
-
-
-$tags = $wp->brilltagger_agent->tag($text);
-
-/*
+        /*
 foreach($tags as $i=>$token_tag) {
 
 $tag= $token_tag['tag'];
@@ -426,74 +407,60 @@ echo $token . "  " . $tag  . "<br>";
 }
 */
 
-// --- now it gets tricky.
-// https://cs.uwaterloo.ca/~jimmylin/downloads/brill-javadoc/edu/mit/csail/brill/BrillTagger.html
+        // --- now it gets tricky.
+        // https://cs.uwaterloo.ca/~jimmylin/downloads/brill-javadoc/edu/mit/csail/brill/BrillTagger.html
 
-$arr = array("adjective"=>array('JJ', 'JJR', 'JJS'),
-"noun"=>array('NN','NNS','NNP','NNPS'),
-"pronoun"=>array('PRP','PRPS','WP'),
-"verb"=>array('VB','VBD','VBG','VBN','VBP','VBZ'),
-"adverb"=>array('RB','RBR','RBS','WRB'),
-"preposition"=>array('IN')
+        $arr = array(
+            "adjective" => array('JJ', 'JJR', 'JJS'),
+            "noun" => array('NN', 'NNS', 'NNP', 'NNPS'),
+            "pronoun" => array('PRP', 'PRPS', 'WP'),
+            "verb" => array('VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'),
+            "adverb" => array('RB', 'RBR', 'RBS', 'WRB'),
+            "preposition" => array('IN')
+        );
 
-);
+        //$pattern_tokens = explode("-", $pattern);
 
-//$pattern_tokens = explode("-", $pattern);
+        $processed_text = "";
+        foreach ($tags as $i => $token_tag) {
+            $tag = $tags[$i]['tag'];
+            $token = $tags[$i]['token'];
 
-$processed_text = "";
-foreach($tags as $i=>$token_tag){
+            switch (true) {
+                case $this->thing->mixed_agent->isMixed($token):
+                    $tags[$i]['pos'] = 'mixed';
+                    break;
+                case is_numeric($token):
+                    $tags[$i]['pos'] = 'numeric';
+                    break;
+                case $this->thing->alpha_agent->isAlpha($token):
+                    if (in_array($tag, $arr['adjective'])) {
+                        $tags[$i]['pos'] = 'adjective';
+                    } else {
+                        $tags[$i]['pos'] = 'alpha';
+                    }
 
-$tag = $tags[$i]['tag'];
-$token = $tags[$i]['token'];
-/*
-if (!isset($tags[$i]['pos'])) {$tags[$i]['pos'] = "X";}
-if ($wp->alpha_agent->isAlpha($token)) {$tags[$i]['pos']= 'alpha';}
-if (in_array($tag,$arr)) {$tags[$i]['pos']= 'adjective';}
+                    break;
+                case !isset($tags[$i]['pos']):
+                default:
+                    $tags[$i]['pos'] = "X";
+                    break;
+            }
 
-if ($wp->mixed_agent->isMixed($token)) {$tags[$i]['pos']= 'mixed';}
-*/
+            $processed_text .= "-" . $tags[$i]['pos'];
+        }
+        $processed_text = trim($processed_text, "-");
 
-switch (true) {
-    case ($wp->mixed_agent->isMixed($token)):
-        $tags[$i]['pos']= 'mixed';
-       break;
-    case (is_numeric($token)):
-        $tags[$i]['pos']= 'numeric'; 
-        break;
-    case ($wp->alpha_agent->isAlpha($token)):
-        if (in_array($tag,$arr['adjective'])) {$tags[$i]['pos']= 'adjective';} else
-        {$tags[$i]['pos']= 'alpha';}
+        return $processed_text;
+    }
 
-        break;
-    case (!isset($tags[$i]['pos'])):
-    default:
-        $tags[$i]['pos'] = "X";
-        break;
-}
-
-
-
-$processed_text .= "-" . $tags[$i]['pos'];
-}
-$processed_text = trim($processed_text,"-");
-
-
-
-return $processed_text;
-
-}
-
-
-
-
-
-
-public function make() {}
+    public function make()
+    {
+    }
 
     public function doText($text = null)
     {
-}
-
+    }
 
     public function set()
     {
@@ -507,10 +474,8 @@ public function make() {}
             $time_string
         );
 
-
-/// ?
-//$place_agent thing = new Place($this->thing, $ngram);
-
+        /// ?
+        //$place_agent thing = new Place($this->thing, $ngram);
 
         $this->thing->log("Set text refreshed_at.");
     }
@@ -521,18 +486,17 @@ public function make() {}
 
         $codes = $this->extractCodes($post_title);
         $numbers = $this->extractNumbers($post_title);
-        $hyphenates = $wp->text_agent->extractHyphenates($post_title);
+        $hyphenates = $this->thing->text_agent->extractHyphenates($post_title);
 
-$alpha_agent = new Alpha($this->thing,"alpha");
-$mixed_agent = new Mixed($this->thing,"mixed");
-$word_agent = new Word($this->thing, "word");
-$brilltagger_agent = new Brilltagger($this->thing,"brilltagger");
-$slug_agent = new Slug($this->thing, "slug");
-$singular_agent = new Singular($this->thing, "singular");
+        $alpha_agent = new Alpha($this->thing, "alpha");
+        $mixed_agent = new Mixed($this->thing, "mixed");
+        $word_agent = new Word($this->thing, "word");
+        $brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
+        $slug_agent = new Slug($this->thing, "slug");
+        $singular_agent = new Singular($this->thing, "singular");
 
-$alphas = $alpha_agent->extractAlphas($post_title);
-$mixeds = $mixed_agent->extractMixeds($post_title);
-
+        $alphas = $alpha_agent->extractAlphas($post_title);
+        $mixeds = $mixed_agent->extractMixeds($post_title);
 
         $words = $word_agent->extractWords($post_title);
         $notwords = $word_agent->notwords;
@@ -551,12 +515,10 @@ $mixeds = $mixed_agent->extractMixeds($post_title);
             }
 
             $p .= $token . " ";
-
-     }
+        }
 
         $p = trim($p);
         $post_title = $p;
-
 
         $adjectives = "";
         $nouns = "";
@@ -574,26 +536,21 @@ $mixeds = $mixed_agent->extractMixeds($post_title);
         $adjectives = trim($adjectives);
         $nouns = trim($nouns);
 
-$processed_text = array("adjectives"=>$adjectives,
-"nouns"=>$nouns,
-"codes"=>$codes,
-"alphas"=>$alphas,
-"mixed"=>$mixeds,
-"words"=>$words,
-"notwords"=>$notwords);
+        $processed_text = array(
+            "adjectives" => $adjectives,
+            "nouns" => $nouns,
+            "codes" => $codes,
+            "alphas" => $alphas,
+            "mixed" => $mixeds,
+            "words" => $words,
+            "notwords" => $notwords
+        );
     }
 
-
-
-
-
-
-
-
-public function readSubject() {
-
-if ($this->input == "text") {return;}
-
-}
-
+    public function readSubject()
+    {
+        if ($this->input == "text") {
+            return;
+        }
+    }
 }

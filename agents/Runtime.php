@@ -28,6 +28,8 @@ class Runtime extends Agent {
         $this->keywords = array('next', 'accept', 'clear', 'drop', 'add', 'new');
         $this->test= "Development code"; // Always iterative.
 
+$this->default_runtime = "X";
+
         //        $this->runtime = false;
 
     }
@@ -36,6 +38,7 @@ class Runtime extends Agent {
     /**
      *
      */
+/*
     function set() {
 
         if ($this->runtime == false) {return;}
@@ -51,6 +54,65 @@ class Runtime extends Agent {
         //      $this->thing->json->writeVariable( array("run_at", "refreshed_at"), $this->current_time );
 
     }
+*/
+/*
+    function assertRuntime($input)
+    {
+        if (($pos = strpos(strtolower($input), "runtime is")) !== false) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("runtime is")
+            );
+        } elseif (($pos = strpos(strtolower($input), "runtime")) !== false) {
+            $whatIWant = substr(strtolower($input), $pos + strlen("runtime"));
+        }
+
+        $filtered_input = ltrim(strtolower($whatIWant), " ");
+
+        $runtime = $this->extractRuntime($filtered_input);
+        if ($runtime) {
+            //true so make a place
+            $this->makeRuntime($runtime);
+        }
+    }
+*/
+
+
+    function set($requested_runtime = null)
+    {
+        if ($requested_runtime == null) {
+            if (!isset($this->requested_runtime)) {
+                $this->requested_runtime = "X"; // If not sure, show X.
+
+                if (isset($this->runtime)) {
+                    $this->requested_runtime = $this->runtime;
+                }
+                // Set default behaviour.
+                // $this->requested_state = "green";
+                // $this->requested_state = "red";
+                //                $this->requested_state = "green"; // If not sure, show green.
+            }
+
+            $requested_runtime = $this->requested_runtime;
+        }
+
+        $this->runtime = $requested_runtime;
+        $this->refreshed_at = $this->current_time;
+
+        $this->variables->setVariable("runtime", $this->runtime);
+
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
+        //$this->variables_thing->setVariable("flag_id", $this->nuuid);
+
+        $this->variables->setVariable("refreshed_at", $this->current_time);
+
+        $this->thing->log(
+            $this->agent_prefix . 'set Runtime to ' . $this->runtime,
+            "INFORMATION"
+        );
+    }
+
+
 
 
     /**
@@ -68,20 +130,56 @@ class Runtime extends Agent {
         return $this->run_time;
     }
 
+    public function get()
+    {
 
-    /**
-     *
-     * @param unknown $run_at (optional)
-     */
-    function get($run_at = null) {
-        $this->runtime = new Variables($this->thing, "variables runtime " . $this->from);
 
-        if ($this->runtime == false) {return;}
+$flag_variable_name ="";
+        // Get the current Identities flag
+        $this->variables = new Variables(
+            $this->thing,
+            "variables runtime" . $flag_variable_name . " " . $this->from
+        );
 
-        $this->minutes = $this->runtime->getVariable("minutes");
+        // get gets the state of the Flag the last time
+        // it was saved into the stack (serialized).
+        $this->previous_runtime = $this->variables->getVariable("runtime");
+        $this->refreshed_at = $this->variables->getVariable("refreshed_at");
 
-        $this->refreshed_at = $this->runtime->getVariable("refreshed_at");
 
+        // If it is a valid previous_state, then
+        // load it into the current state variable.
+        if ($this->isRuntime($this->previous_runtime)) {
+            $this->runtime = $this->previous_runtime;
+        } else {
+            $this->runtime = $this->default_runtime;
+        }
+
+
+}
+
+
+    public function isRuntime($runtime = null)
+    {
+
+
+        // Validates whether the Flag is green or red.
+        // Nothing else is allowed.
+
+        if ($runtime == null) {
+            if (!isset($this->runtime)) {
+                $this->runtime = "X";
+            }
+
+            $runtime = $this->runtime;
+        }
+
+if (is_numeric($runtime)) {return true;}
+
+if (strtolower($runtime) == "x") {return true;}
+if (strtolower($runtime) == "z") {return true;}
+
+        return false;
     }
 
 
@@ -92,7 +190,7 @@ class Runtime extends Agent {
      */
     function extractRuntime($input = null) {
 
-        $this->minutes = "X";
+//        $this->runtime = "X";
         $periods = array(1440=>array("d", "days", "dys", "dys", "dy", "day"),
             60=>array("h", "hours", "hrs", "hs", "hr"),
             1=>array("minutes", "m", "mins", "min", "mn"));
@@ -145,9 +243,8 @@ class Runtime extends Agent {
             }
         }
 
-        if (count($list) == 1) { $this->minutes = $list[0];}
-
-        return $this->minutes;
+        if (count($list) == 1) { $this->runtime = $list[0];}
+        return $this->runtime;
     }
 
 
@@ -167,7 +264,7 @@ class Runtime extends Agent {
      * @return unknown
      */
     function extractTime($input = null) {
-        $this->minutes = "X";
+        $this->runtime = "X";
         $days = array(22=>array("default"),
             15=>array("quarter hour", "quarter", "1/4", "0.25"),
             30=>array("half hour", "half hour", "half", "0.5"),
@@ -178,21 +275,21 @@ class Runtime extends Agent {
 
 
             if (strpos(strtolower($input), strtolower($key)) !== false) {
-                $this->minutes = $key;
+                $this->runtime = $key;
                 break;
             }
 
             foreach ($day_names as $day_name) {
 
                 if (strpos(strtolower($input), strtolower($day_name)) !== false) {
-                    $this->minutes = $key;
+                    $this->runtime = $key;
                     break;
                 }
             }
         }
 
 
-        return $this->minutes;
+        return $this->runtime;
     }
 
 
@@ -213,14 +310,18 @@ class Runtime extends Agent {
      */
     public function makeSMS() {
         $sms_message = "RUNTIME";
+if (isset($this->variables->head_code)) {
+        $sms_message .= " " . strtoupper($this->variables->head_code);
+}
 
+$sms_message .= " " .$this->runtime . " ";
         $sms_message .= $this->response;
 
-        if ($this->minutes == "X") {
+        if ($this->runtime == "X") {
             $sms_message .= " Set RUNTIME.";
         }
 
-        $sms_message .= " | nuuid " . strtoupper($this->runtime->nuuid);
+        $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
@@ -231,21 +332,21 @@ class Runtime extends Agent {
     /**
      *
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
 
         $this->thing->flagGreen();
 
         $response_text = "Please set RUNTIME.";
-        if ($this->minutes != false) {
-            $response_text = "" . $this->minutes . " minutes.";
+        if ($this->runtime != false) {
+            $response_text = "" . $this->runtime . " minutes.";
         }
         $this->response .= " | " . $response_text;
 
         // Generate email response.
 
-        $to = $this->thing->from;
-        $from = "runtime";
+  //      $to = $this->thing->from;
+  //      $from = "runtime";
 
         //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
@@ -253,7 +354,7 @@ class Runtime extends Agent {
 
         //$this->makeTXT();
 
-        $this->makeSMS();
+//        $this->makeSMS();
 
         $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
 
@@ -272,11 +373,11 @@ class Runtime extends Agent {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
 
-        $this->makeTXT();
+ //       $this->makeTXT();
 
         $this->thing_report['help'] = 'This is the runtime manager.';
 
-        return;
+ //       return;
     }
 
 
@@ -314,7 +415,7 @@ class Runtime extends Agent {
         }
 
         if (strpos($this->input, "reset") !== false) {
-            $this->minutes = "X";
+            $this->runtime = "X";
 
             return;
         }
@@ -322,20 +423,19 @@ class Runtime extends Agent {
 
         $this->extractRuntime($this->input);
 
-        if ($this->minutes == "X") {
+        if ($this->runtime == "X") {
             $this->extractTime($this->input);
         }
 
-
-
+        $this->requested_runtime = $this->runtime;
         if ($this->agent_input == "extract") {return;}
 
 
         $pieces = explode(" ", strtolower($this->input));
 
-        if ($this->minutes == "X") {
+        if ($this->runtime == "X") {
 
-            $this->get();
+//            $this->get();
             return;
         }
 

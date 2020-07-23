@@ -177,7 +177,6 @@ class Place extends Agent
         $place_code_candidate = null;
 
         $alpha_agent = new A4($this->thing,"a4");
-//var_dump($alpha_agent->alpha);
 //        $place_code_candidate = $this->thing->nuuid;
         $place_code_candidate = $alpha_agent->alpha;
 
@@ -450,15 +449,6 @@ $found = false;
         }
         array_multisort($refreshed_at, SORT_DESC, $this->places);
 
-/*
-// Get latest per place
-$this->places = array();
-foreach($filtered_places as $key=>$filtered_place) {
-//var_dump($filtered_place);
-
-        $this->places[] = $filtered_place;
-}
-*/
 
         $this->old_places = $this->places;
         $this->places = array();
@@ -1165,22 +1155,6 @@ $choices = false;
  */
        }
 
-//var_dump($input);
-/*
-        if (isset($this->agent_input)) {
-            $input = $this->agent_input;
-        } else {
-            $input = strtolower($this->subject);
-        }
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-        //$haystack = $this->agent_input . " " . $this->from;
-        $haystack = $input . " " . $this->from;
-*/
-
-        // Would normally just use a haystack.
-        // Haystack doesn't work well here because we want to run the extraction on the cleanest signal.
-        // Think about this.
-		// $haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
 
