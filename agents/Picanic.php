@@ -128,7 +128,7 @@ class Picanic extends Agent
     {
         $sms = "PICANIC\n";
         $sms .= $this->traffic;
-        $sms .= $this->ants_max . " maximum allowed Ants.\n";
+        //$sms .= $this->ants_max . " maximum allowed Ants.\n";
         $sms .= $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
