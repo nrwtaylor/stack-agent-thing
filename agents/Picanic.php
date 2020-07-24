@@ -15,9 +15,9 @@ class Picanic extends Agent
 
     public function init()
     {
-        $this->node_list = ["picanic" => []];
+        $this->node_list = ["picanic" => ["picanic"]];
 
-        $this->unit = "ANTS";
+        $this->unit = "POINTS";
 
         $this->character = new Character(
             $this->thing,
@@ -61,24 +61,42 @@ class Picanic extends Agent
         );
         $this->number = $this->thing->json->readVariable(["picanic", "number"]);
         $this->suit = $this->thing->json->readVariable(["picanic", "suit"]);
+
+        // Maintain a stack variable
+        // For the maximum number of ants that can be tolerated this round.
+
+        $this->variables = new Variables(
+            $this->thing,
+            "variables picanic " . $this->from
+        );
+
+        $ants_max = $this->variables->getVariable("ants_max");
+        if ($this->ants_max !== false) {
+            $this->ants_max = $ants_max;
+        }
     }
 
     public function set()
     {
+        $this->variables->setVariable("ants_max", $this->ants_max);
     }
 
     function initPicanic()
     {
         // devstack
         if (!isset($this->channel_count)) {
-            $this->channel_count = 2;
+            $this->channel_count = 1;
         }
-        if (!isset($this->volunteer_count)) {
-            $this->volunteer_count = 3;
+
+        if (!isset($this->player_count)) {
+            $this->player_count = 4; // Assume 4.
         }
+
         if (!isset($this->food)) {
             $this->food = "X";
         }
+
+        $this->ants_max = rand(10, 99);
     }
 
     public function respondResponse()
@@ -109,8 +127,9 @@ class Picanic extends Agent
     function makeSMS()
     {
         $sms = "PICANIC\n";
+        $sms .= $this->traffic;
+        $sms .= $this->ants_max . " maximum allowed Ants.\n";
         $sms .= $this->response;
-
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -139,7 +158,7 @@ class Picanic extends Agent
             return;
         }
 
-        // Load in the cast. And roles.
+        // Load in the picnic items.
         $file = $this->resource_path . '/picanic/messages.txt';
         $contents = file_get_contents($file);
 
@@ -219,7 +238,7 @@ class Picanic extends Agent
         $this->fictional_to = $this->getPersona($this->role_to);
         $this->fictional_from = $this->getPersona($this->role_from);
 
-        $this->response =
+        $this->traffic =
             "TO " .
             //$this->fictional_to .
             //", " .
@@ -246,7 +265,7 @@ class Picanic extends Agent
             $this->role_from == "X" and
             $this->text == "X"
         ) {
-            $this->response = $this->number . " " . $this->unit . ".";
+            $this->traffic = $this->number . " " . $this->unit . ".";
         }
 
         if (
@@ -254,7 +273,7 @@ class Picanic extends Agent
             $this->role_from == "X" and
             $this->text != "X"
         ) {
-            $this->response =
+            $this->traffic =
                 $this->text . "\n" . $this->number . " " . $this->unit . ".";
         }
 
@@ -263,7 +282,7 @@ class Picanic extends Agent
             $this->role_from != "X" and
             $this->text != "X"
         ) {
-            $this->response =
+            $this->traffic =
                 "to: < ? >" .
                 " from: " .
                 $this->fictional_from .
@@ -283,8 +302,6 @@ class Picanic extends Agent
     {
         // Create ants.
         // Ants correspond to perceived value of resource.
-        //var_dump($this->from);
-        //exit();
 
         //$datagram = array("to"=>"picanic","from"=>"ant","subject"=>$this->text);
         $datagram = [
@@ -309,8 +326,8 @@ class Picanic extends Agent
         $count = count($ants);
         $this->response .= "Counted " . $count . " ants. ";
 
-        if ($count > rand(10, 50)) {
-            $this->response .= "ANTS. ANTS. ANTS. ";
+        if ($count > $this->ants_max) {
+            $this->response .= "ANTS. There are lots of Ants. ";
         }
     }
 
@@ -620,7 +637,7 @@ class Picanic extends Agent
 
         if (count($pieces) == 1) {
             if ($input == 'picanic') {
-                $this->getCard();
+                //$this->getCard();
 
                 return;
             }
@@ -642,6 +659,10 @@ class Picanic extends Agent
                                 //var_dump($thing);
                                 //exit();
                             }
+                            $this->ants_max = rand(10, 90);
+                            $this->response .=
+                                "Set ant max to " . $this->ants_max . ". ";
+
                             $this->response .= "Killed " . $count . " Ants. ";
                             return;
                         //                        case 'picanic':
@@ -659,6 +680,6 @@ class Picanic extends Agent
             }
         }
 
-        $this->getCard();
+        //$this->getCard();
     }
 }

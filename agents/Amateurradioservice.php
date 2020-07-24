@@ -175,6 +175,21 @@ class Amateurradioservice extends Agent {
         $this->thing_report['choices'] = $choices;
     }
 
+public function notAmateurradioservice($text = null) {
+
+if (strpos($text, 'ham and cheese') !== false) {
+    return true;
+}
+
+if (strpos($text, 'a ham') !== false) {
+    return true;
+}
+
+
+return false;
+
+
+}
 
     /**
      *
@@ -260,6 +275,12 @@ $this->response = $c->response;
         $input= $this->input;
         //var_dump($this->input);
         $strip_words = array("amateur radio service", "ham", "ars", "amateur radio", "amateurradioservice", "frequency");
+
+if ($this->notAmateurradioservice($input)) {
+
+throw new \Exception('Wrong agent.');
+}
+
 
 
         foreach ($strip_words as $i=>$strip_word) {
