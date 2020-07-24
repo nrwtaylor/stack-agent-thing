@@ -32,7 +32,6 @@ class Picanic extends Agent
         $this->initPicanic();
     }
 
-
     public function run()
     {
     }
@@ -118,7 +117,6 @@ class Picanic extends Agent
 
     public function getPersona($role = null)
     {
-
         if ($role == "X") {
             $this->picanic = "Where is Yogi";
             return;
@@ -151,6 +149,9 @@ class Picanic extends Agent
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
+                if (trim($line) == "") {
+                    continue;
+                }
                 $arr = explode(",", $line);
 
                 $nom = $arr[0]; // Describer of the card
@@ -220,18 +221,19 @@ class Picanic extends Agent
 
         $this->response =
             "TO " .
-            $this->fictional_to .
-            ", " .
+            //$this->fictional_to .
+            //", " .
             $this->role_to .
             "\nFROM " .
-            $this->fictional_from .
-            ", " .
+            //$this->fictional_from .
+            //", " .
             $this->role_from .
             "\n" .
             "You now have " .
             strtolower($this->text) .
-            //"\n" .
-            //$this->nom .
+            " [" .
+            $this->suit .
+            "] " .
             //" " .
             //$this->unit .
             "\n";
@@ -277,39 +279,40 @@ class Picanic extends Agent
         }
     }
 
-public function antsPicanic($n = null) {
+    public function antsPicanic($n = null)
+    {
+        // Create ants.
+        // Ants correspond to perceived value of resource.
+        //var_dump($this->from);
+        //exit();
 
-// Create ants.
-// Ants correspond to perceived value of resource.
-//var_dump($this->from);
-//exit();
+        //$datagram = array("to"=>"picanic","from"=>"ant","subject"=>$this->text);
+        $datagram = [
+            "to" => $this->from,
+            "from" => "ant",
+            "subject" => $this->text,
+        ];
 
-//$datagram = array("to"=>"picanic","from"=>"ant","subject"=>$this->text);
-$datagram = array("to"=>$this->from,"from"=>"ant","subject"=>$this->text);
+        foreach (range(0, $n) as $i) {
+            $this->thing->spawn($datagram);
+        }
 
+        if ($this->number == 1) {
+            $this->response .= "" . $this->number . " POINT. ";
+        } else {
+            $this->response .= "" . $this->number . " POINTS. ";
+        }
 
-foreach(range(0,$n) as $i) {
+        $ants = $this->getThings('ant');
+        //var_dump($ants);
+        //exit();
+        $count = count($ants);
+        $this->response .= "Counted " . $count . " ants. ";
 
-$this->thing->spawn($datagram);
-
-
-}
-if ($this->number == 1) {
-$this->response .= "Made " . $this->number . " ant. ";
-} else {
-$this->response .= "Made " . $this->number . " ants. ";
-}
-
-
-
-$ants = $this->getThings('ant');
-//var_dump($ants);
-//exit();
-$count = count($ants);
-$this->response .= "Counted " . $count . " ants. ";
-
-
-}
+        if ($count > rand(10, 50)) {
+            $this->response .= "ANTS. ANTS. ANTS. ";
+        }
+    }
 
     public function makeMessage()
     {
@@ -354,14 +357,12 @@ $this->response .= "Counted " . $count . " ants. ";
 
         $web .= "<p>";
 
-
         if (
             isset($this->fictional_to) and
             isset($this->role_to) and
             isset($this->fictional_from) and
             isset($this->role_from)
         ) {
-
         }
 
         $web .= "<p>";
@@ -405,9 +406,8 @@ $this->response .= "Counted " . $count . " ants. ";
     }
 
     public function makeImage()
-
-   // public function makePNG()
     {
+        // public function makePNG()
         $this->image = imagecreatetruecolor(164, 164);
 
         $width = imagesx($this->image);
@@ -541,19 +541,16 @@ $this->response .= "Counted " . $count . " ants. ";
 
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
+    }
 
-}
+    public function makeAlttext()
+    {
+        $this->thing_report['alt_text'] =
+            $this->number . " " . $this->unit . "";
+    }
 
-public function makeAlttext() {
-
-$this->thing_report['alt_text'] = $this->number . " " . $this->unit . "";
-
-
-}
-
-public function makePNG() {
-
-
+    public function makePNG()
+    {
         // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
         if (ob_get_contents()) {
             ob_clean();
@@ -567,14 +564,18 @@ public function makePNG() {
 
         $this->thing_report['png'] = $imagedata;
 
-$alt_text = 'picanic token';
-if (isset($this->thing_report['alt_text'])) {$alt_text = $this->thing_report['alt_text'];}
+        $alt_text = 'picanic token';
+        if (isset($this->thing_report['alt_text'])) {
+            $alt_text = $this->thing_report['alt_text'];
+        }
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="'. $alt_text . '"/>';
+            '"alt="' .
+            $alt_text .
+            '"/>';
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
 
@@ -585,8 +586,7 @@ if (isset($this->thing_report['alt_text'])) {$alt_text = $this->thing_report['al
         return $response;
     }
 
-
-// devstack
+    // devstack
     public function read($variable = null)
     {
         if (
@@ -630,26 +630,24 @@ if (isset($this->thing_report['alt_text'])) {$alt_text = $this->thing_report['al
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-case 'reset':
+                        case 'reset':
+                            $ants = $this->getThings('ant');
+                            //$count = count($ants);
+                            $count = 0;
+                            foreach ($ants as $uuid => $ant) {
+                                //var_dump($uuid);
+                                $thing = new Thing($uuid);
+                                $thing->Forget();
+                                $count += 1;
+                                //var_dump($thing);
+                                //exit();
+                            }
+                            $this->response .= "Killed " . $count . " Ants. ";
+                            return;
+                        //                        case 'picanic':
+                        //                            $this->getCard();
 
-$ants = $this->getThings('ant');
-//$count = count($ants);
-$count = 0;
-foreach($ants as $uuid=>$ant) {
-//var_dump($uuid);
-$thing = new Thing($uuid);
-$thing->Forget();
-$count += 1;
-//var_dump($thing);
-//exit();
-
-}
-$this->response .= "Killed " . $count . " Ants. ";
-return;
-//                        case 'picanic':
-//                            $this->getCard();
-
-//                            return;
+                        //                            return;
 
                         case 'on':
                         //$this->setFlag('green');
