@@ -80,10 +80,10 @@ class Endat extends Agent
      */
     function get($run_at = null)
     {
-$headcode_agent = new Headcode($this->thing, "headcode");
-$this->head_code = $headcode_agent->head_code;
+        $headcode_agent = new Headcode($this->thing, "headcode");
+        $this->head_code = $headcode_agent->head_code;
 
-$at_agent = new At($this->thing, "headcode");
+        $at_agent = new At($this->thing, "headcode");
 
         if ($this->endat == false) {
             return;
@@ -116,7 +116,6 @@ $at_agent = new At($this->thing, "headcode");
     {
         //var_dump($this->hour);
         //var_dump($this->minute);
-
         if (!isset($this->end_at) and !isset($this->runtime)) {
             if (!isset($this->run_at)) {
                 $this->run_at = "X";
@@ -125,25 +124,27 @@ $at_agent = new At($this->thing, "headcode");
         }
 
         if (!isset($this->end_at)) {
-            $this->getEndat();
+            $this->end_at = "X";
+            //     $this->getEndat();
         }
 
         if (!isset($this->runtime)) {
             $this->getRuntime();
         }
-
         switch (true) {
-            case strtoupper($this->end_at) != "X" and
-                strtoupper($this->end_at) != "Z":
-                $this->run_at = strtotime(
-                    $this->end_at . "-" . $this->runtime->minutes . "minutes"
+            case strtoupper($this->run_at) != "X" and
+                strtoupper($this->run_at) != "Z":
+                $epoch_time = strtotime(
+                    $this->run_at . "+" . $this->runtime->minutes . "minutes"
                 );
+
+                $this->end_at = $this->thing->time($epoch_time);
+
                 break;
             default:
-                $this->run_at = $this->trainTime();
+                $this->end_at = $this->trainTime();
         }
-
-        return $this->run_at;
+        return $this->end_at;
     }
 
     /**
@@ -319,17 +320,16 @@ $at_agent = new At($this->thing, "headcode");
         //        return array($this->day, $this->hour, $this->minute);
     }
 
-    public function timeEndat($text = null) {
+    public function timeEndat($text = null)
+    {
+        $time_string = $text;
+        if ($text == null) {
+            $time_string = $this->day . " " . $this->hour . ":" . $this->minute;
+        }
 
-       $time_string = $text;
-       if ($text == null) {
-          $time_string = $this->day . " " . $this->hour .":". $this->minute;
-       }
+        $this->time = strtotime($time_string);
 
-       $this->time = strtotime($time_string);
-
-       return $this->time;
-
+        return $this->time;
     }
 
     /**
@@ -503,7 +503,7 @@ $at_agent = new At($this->thing, "headcode");
         //if ($minute == 'X') {$minute_text = "X";}
 
         $day_text = $day;
-$sms_message .= " " .$this->head_code .  " ";
+        $sms_message .= " " . $this->head_code . " ";
         $sms_message .=
             " | day " .
             $day_text .
@@ -645,16 +645,14 @@ $sms_message .= " " .$this->head_code .  " ";
 
         if (strpos($filtered_input, "now") !== false) {
             $this->extractEndat($this->current_time);
-return;
+            return;
         }
 
         //        $this->extractRunat($this->input);
         if ($this->input == "endat") {
-//            $this->extractRunat($filtered_input);
+            //            $this->extractRunat($filtered_input);
             return;
         }
-
-
 
         //        if (strpos($this->agent_input, "runat") !== false) {
 
