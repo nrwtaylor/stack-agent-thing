@@ -452,10 +452,7 @@ class Ant extends Agent
 
     public function readSubject()
     {
-        //$this->response = null;
-
         if ($this->state == null) {
-            //$this->response = "detected state null - run subject discriminator";
             $this->thing->log(
                 $this->agent_prefix .
                     'state is null.  Subject discriminator run.'
@@ -463,7 +460,6 @@ class Ant extends Agent
 
             switch ($this->subject) {
                 case "spawn":
-                    //echo "spawn";
                     $this->spawn();
                     $place = new Place($this->thing, "hive");
                     $this->response .= "Spawned an Ant at Hive. ";
@@ -513,29 +509,22 @@ class Ant extends Agent
 
         switch ($this->state) {
             case "spawn":
-                //echo "spawn";
-                //$this->spawn();
                 $this->response .= "Spawned Ant.";
                 break;
             case "kill":
                 $this->response .= "Dead Ant.";
-                //$this->kill();
                 break;
             case "foraging":
-                //$this->thing->choice->Choose("foraging");
                 $this->response .= "Foraging.";
                 break;
             case "inside nest":
-                //$this->thing->choice->Choose("in nest");
                 $this->response .= "Ant is Inside Nest.";
                 break;
             case "nest maintenance":
                 $this->response .= "Ant is doing Nest Maintenance.";
-                //$this->thing->choice->Choose("nest maintenance");
                 break;
             case "patrolling":
                 $this->response .= "Ant is Patrolling.";
-                //$this->thing->choice->Choose("patrolling");
                 break;
             case "midden work":
                 $this->response .= "Ant is doing Midden Work.";
@@ -554,16 +543,10 @@ class Ant extends Agent
                         '".'
                 );
                 $this->response .= "Ant is broken.";
-            // echo "not found";
 
             // this case really shouldn't happen.
             // but it does when a web button lands us here.
 
-            //if (rand(0,5)<=3) {
-            //         $this->thing->choice->Create('hive', $this->node_list, "inside nest");
-            //} else {
-            //	$this->thing->choice->Create('hive', $this->node_list, "midden work");
-            //}
         }
 
         $input = strtolower($this->subject);
@@ -734,7 +717,7 @@ class Ant extends Agent
 
         // And then don't do anything with the list.
         $this->response .=
-            "Collected Uuids and then discarded them without action.";
+            "Collected ". count($linked). " Uuids and then discarded them without action.";
     }
 
     function spawn()
