@@ -302,11 +302,10 @@ $app->group('/api', function () use ($app) {
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
             } else {
+
                 $sms_thing = new Thing(null);
                 $sms_thing->Create($body['msisdn'], $body['to'], $body['text']);
-                //                $sms_thing->Create( $body['msisdn'], 'agent', $body['text'] );
 
-                //$m = new Microsoft($microsoft_thing, $body);
                 $channel = new Channel($sms_thing, "sms");
 
                 $agent = new Agent($sms_thing);
@@ -803,7 +802,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     'Content-Type',
                     'text/plain'
                 );
-break;
+            break;
         case $command == "termsofuse":
         case $command == "terms-of-use":
             $thing = new Thing($uuid);
@@ -854,16 +853,12 @@ break;
 
 
                 if ($uuid == null) {
-                    $web_thing->Create("agent", "web", $command);
 
-//                if ($content === false or $content == null) {
                     $response->write(false);
                     return $response->withHeader(
                         'Content-Type',
                         $content_types[$ext_name]
                     );
-//                }
-
 
                 }
 
@@ -892,6 +887,11 @@ break;
                     return $response->withStatus(404);
                 }
 
+                //if ($ext_name == 'json') {
+                //    return $response->withStatus(404);
+                //}
+
+
                 try {
                     $agent_namespace_name =
                         '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
@@ -909,7 +909,6 @@ break;
                 }
 
                 $content = $agent->thing_report[strtolower($ext_name)];
-
                 if (preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $content)) {
                     //   //return TRUE;
                     //} else {
@@ -961,29 +960,32 @@ break;
                     );
                 }
             }
-            // So the uuid is null
-            if ($uuid == null) {
-                $thing->Create("web@stackr.ca", "agent", $command);
-            }
+
             $slug = new Slug($thing, $command);
 
-            if (isset($slug->state) and $slug->state == "off") {
-                $datagram = [];
-                $datagram['thing'] = false;
-                $datagram['thing_report'] = false;
+            // So the uuid is null
+            if ($uuid == null) {
+                if (isset($slug->state) and $slug->state == "off") {
 
-                return $this->renderer->render(
-                    $response,
-                    'thing.phtml',
-                    $datagram
-                );
+                    $datagram = [];
+                    $datagram['thing'] = false;
+                    $datagram['thing_report'] = false;
+
+                    return $this->renderer->render(
+                        $response,
+                        'thing.phtml',
+                        $datagram
+                   );
+               }
+
             }
 
             // Unaddressed web request to a Thing existing on the stack.
             // Enter into stack as coming from web and addressed to stack agent.
-            //          if ($uuid == null) {
-            //              $thing->Create("web@stackr.ca", "agent", $command);
-            //          }
+///if ($thing->thing == false) {
+                     if ($uuid == null) {
+                          $thing->Create("web@stackr.ca", "agent", $command);
+                      }
 
             $filtered_command = $command;
             if (!is_numeric($command)) {
