@@ -27,16 +27,12 @@ class Roll extends Agent
         $this->width = 125;
         $this->height = $this->width;
 
-        //test
-//        $this->drawD20(2);
-
         $this->node_list = array("roll" => array("roll", "card"));
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-        $this->thing_report["info"] = "This rolls a dice.  See
-                                https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
+        $this->thing_report["info"] = "This rolls a dice.";
         $this->thing_report['help'] = 
-                'This is about dice with more than 6 sides.  Try "Roll d20". Or "Roll 3d20+17. Or "Card"';
+                'Try ROLL d6. Or ROLL d20. Or ROLL 3d3.';
 
 
     }
@@ -57,7 +53,7 @@ class Roll extends Agent
             ));
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
+      //      $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 array("roll", "refreshed_at"),
@@ -67,7 +63,7 @@ class Roll extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
+        //$this->thing->json->setField("variables");
         $this->last_roll = strtolower(
             $this->thing->json->readVariable(array("roll", "roll"))
         );
@@ -136,18 +132,7 @@ class Roll extends Agent
         $choices = $this->thing->choice->makeLinks('roll');
 
         $web = '<a href="' . $link . '">';
-        //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/roll.png" jpg"
-        //                width="100" height="100"
-        //                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/roll.tx$
 
-        //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/snowflake.png">';
-        /*
-        if (!isset($this->html_image)) {
-            $this->makePNG();
-        }
-
-        $web .= $this->html_image;
-*/
         $web .= '<div class="imageset">';
         foreach ($this->thing_report['pngs'] as $name=>$image_string) {
 
@@ -192,16 +177,6 @@ class Roll extends Agent
             "web"
         );
         $choices = $this->thing->choice->makeLinks('web');
-/*
-        if (!isset($this->html_image)) {
-            $this->makePNG($this->image);
-        }
-*/
-        //        $web = '<a href="' . $link . '">' . $this->html_image . "</a>";
-        //        $web .= "<br>";
-
-        //var_dump($this->thing_report['pngs']);
-        //exit();
 
         $text = "off";
         if ($text == "on") {
@@ -301,25 +276,6 @@ class Roll extends Agent
         $this->thing_report['message'] = $message;
     }
 
-
-    /*
-    function extractRoll($input) {
-
-//echo $input;
-//exit();
-
-preg_match('/^(\\d)?d(\\d)(\\+\\d)?$/',$input,$matches);
-
-print_r($matches);
-
-$t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
-                '$a="$1"? : 1;for(; $i++<$a; $s+=rand(1,$2) );echo$s$3;',
-                $input)?:'echo"Invalid input";';
-
-
-    }
-*/
-
     /**
      *
      * @param unknown $number (optional)
@@ -327,46 +283,19 @@ $t = preg_filter('/^(\\d)?d(\\d)(\\+\\d)?$/',
      * @return unknown
      */
     public function makeImage($number = null, $die = null) {
-        //var_dump($number);
-        //var_dump($die);
-        //if (isset($this->image)) {return;}
-        // here DB request or some processing
 
         if (($die == null) and ($number == null)) {
             if (isset($this->result[2])) {return true;} // Can't figure this out.
 
-            //var_dump($this->result);
-            //            $die = "d6";
-            //if (isset($this->roll)) {$die = $this->roll;}
-            //            $number = $this->result[0]['d6'];
             $die_array = $this->result[0];
 
             reset($die_array);
-            //echo key($die_array) . ' = ' . current($die_array);
             $die = key($die_array);
             $number = current($die_array);
 
 
         }
         if ($die == "roll") {return true;}
-        //echo "number " . $number . " die " . $die. "<br>";
-        /*
-if ($number == null) {
-    $number = $this->result[count($this->result) - 1]['roll'];
-
-//        if ($die == "d6") {
-//            $number = $this->result[0]['d6'];
-//        }
-}
-
-
-if ($die == null) {
-    $die = $this->roll;
-}
-*/
-        //var_dump($die);
-        //var_dump($number);
-        //echo $die ." " . $number ."<br>";
 
         $image = imagecreatetruecolor($this->width, $this->height);
 
@@ -379,12 +308,7 @@ if ($die == null) {
         imagefilledrectangle($image, 0, 0, $this->width, $this->height, $white);
 
         $textcolor = imagecolorallocate($image, 0, 0, 0);
-        /*
-        if (count($this->result) != 2) {
-            $this->image = $image;
-            return $image;
-        }
-*/
+
         if ($die == "d6") {
             $image = $this->drawD6($number);
             return $image;
@@ -406,7 +330,6 @@ if ($die == null) {
                 imageline($image, $ptc_x, $ptc_y, $pta_x, $pta_y, $black);
             }
 
-            //$font = $GLOBALS['stack'] . 'vendor/nrwtaylor/stack-agent-thing/resources/roll/KeepCalm-Medium.ttf';
             $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
             $text = $number;
@@ -531,8 +454,6 @@ if ($die == null) {
                 $white
             );
 
-            //            $number = $this->result[0]['d6'];
-
             // Build pip array
             $pips = array();
             $pips[1] = array(array(1, 1));
@@ -580,7 +501,7 @@ if ($die == null) {
                 );
             }
 
-return $image;
+        return $image;
     }
 
     /**
@@ -594,8 +515,6 @@ return $image;
         }
         if ($image == true) {return true;}
 
-        //if (!isset($this->image)) {$this->makeImage();}
-
         $agent = new Png($this->thing, "png");
         $image = $this->makeImage();
 
@@ -607,7 +526,6 @@ return $image;
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
 
-        //$this->thing_report['png'] = $agent->PNG;
         $this->thing_report['png'] = $agent->image_string;
     }
 
@@ -616,14 +534,12 @@ return $image;
      *
      */
     public function makePNGs() {
-        //if (!isset($this->image)) {$this->makeImage();}
         $this->thing_report['pngs'] = array();
         //return;
         $agent = new Png($this->thing, "png");
 
         foreach ($this->result as $index=>$die_array) {
             reset($die_array);
-            //echo key($die_array) . ' = ' . current($die_array);
             $die = key($die_array);
             $number = current($die_array);
 
@@ -631,10 +547,6 @@ return $image;
             if ($image === true) {continue;}
 
             $agent->makePNG($image);
-
-            //        $this->html_image = $agent->html_image;
-            //        $this->image = $agent->image;
-            //        $this->PNG = $agent->PNG;
 
             $alt_text = "Image of a " .$die . " die with a roll of " . $number . ".";
 
@@ -649,36 +561,6 @@ return $image;
 
 
         }
-        /*
-        $this->image_string = base64_encode($imagedata);
-
-        $this->PNG_embed = "data:image/png;base64,".$this->image_string;
-        $this->PNG = $imagedata;
-
-        $this->thing_report['png'] = $imagedata;
-
-        if (isset($this->result[1]['roll'])) {
-            $alt_text = "Rolled " . $this->roll . " and got " . $this->result[1]['roll'] . ".";
-        } else {
-            $alt_text = "Roll result not available";
-        }
-        // Removing height fixes problem with image squashing on mobile devices
-        // Prodstack css
-        $html = '<img src="data:image/png;base64,'. $this->image_string . '"
-                width="' . $this->width .'"
-                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/png.txt">';
-*/
-
-        //        $this->makeImage();
-
-        //        $agent->makePNG($this->image);
-
-        //        $this->html_image = $agent->html_image;
-        //        $this->image = $agent->image;
-        //        $this->PNG = $agent->PNG;
-
-        //$this->thing_report['png'] = $agent->PNG;
-        //        $this->thing_report['pngs'] = array('dice-1'=>$agent->image_string);
     }
 
 
@@ -775,7 +657,6 @@ return $image;
     function set() {
 
         if ($this->last_roll == false or $this->last_result == false) {
-            //            $this->readSubject();
 
             $this->thing->json->writeVariable(
                 array("roll", "roll"),
@@ -794,8 +675,6 @@ return $image;
 
 
     }
-
-
 
     /**
      *
@@ -818,7 +697,6 @@ return $image;
         }
 
         $this->roll = false;
-        //array_pop($arr);
         return false;
     }
 
@@ -888,21 +766,7 @@ return $image;
 
             $this->getRoll($input);
 
-            //        $words = explode(" ", $input);
-
-            //        if ((count($words) ==1) and ($words[0] == $this->agent_name)) {
-            //            $input = "d6";
-            //        }
-
-            //        if ($words[0] == $this->agent_name) {
-            //         array_shift($words);
-            //            if (count($words) == 0) {
             $input = "d6";
-            //            } else {
-            //             $input = implode(" ", $words);
-            //                $input = $this->roll;
-            //            }
-            //        }
 
             if ($this->roll == false) {
                 $this->roll = "d6";
@@ -915,14 +779,10 @@ return $image;
             $dies = explode("+", $this->roll);
 
             if (count($dies) == 0) {
-                //$dies[0] = "d6";
-                //return;
                 return "Invalid input";
             }
 
             foreach ($dies as $die) {
-                //echo $die;
-
                 $elements = explode("d", $die, 2);
 
                 if (count($elements) == 1 and is_numeric($elements[0])) {
@@ -937,12 +797,10 @@ return $image;
                         $N_rolls = 1;
                         $die_N = $elements[1];
                     } else {
+                        // Not sure what user is asking for.
                         // Roll a d6 if unclear
                         $N_rolls = 1;
                         $die_N = 6;
-                        //return;
-
-                        //     return "Invalid input";
                     }
 
                     for ($i = 1; $i <= $N_rolls; $i++) {

@@ -803,6 +803,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     'text/plain'
                 );
             break;
+
         case $command == "termsofuse":
         case $command == "terms-of-use":
             $thing = new Thing($uuid);
@@ -853,7 +854,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
 
                 if ($uuid == null) {
-
                     $response->write(false);
                     return $response->withHeader(
                         'Content-Type',
