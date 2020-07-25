@@ -6,9 +6,9 @@
  */
 
 namespace Nrwtaylor\StackAgentThing;
-// (c) 2018 Stackr Interactive Ltd
+// (c) 2020 Stackr Interactive Ltd
 
-// whitefox 27 June 2019
+// whitefox 24 July 2020
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -152,9 +152,7 @@ $app->group('/api', function () use ($app) {
             $client = new \GearmanClient();
             $client->addServer();
 
-            //$client->doNormal("call_agent", $arr);
             $client->doHighBackground("call_agent", $arr);
-            //echo "Gearman worker called";
 
             return;
             // $response->withHeader('HTTP/1.0 200 OK')
@@ -284,46 +282,10 @@ $app->group('/api', function () use ($app) {
             ob_flush();
             flush();
 
-            //$input = json_encode($body);
-            ///            $thing = new Thing(null);
-            // ---
-            /// $nom_to = "null";
-            ///$sender_id = "null";
-            ///$test_text = "s/ nexmo sms";
-            ///                    $thing->Create($sender_id, $nom_to, $test_text );
-
-            ///                $channel = new Channel($thing,"sms");
-
-            ///                    $agent = new Sms($thing, $body);
-
-            //                $agent = new Agent($thing);
-
-            ///                    $thing->flagRed();
-            ///                    $response_text = "foo";
-            ///                    return $this->response->write($response_text)
-            ///                                ->withStatus(200);
-
-            // ---
 
             $message_id = $body['messageId'];
 
-            //$id_array = $this->get('messageids');
-            //$id_array[] = $message_id;
-            //if (!isset($app->nexmo_ids)) {$app->nexmo_ids = "";}
-
-            //    if($this->has('ids')) {
-            //$inject_text = "merp";
-            //    }
-            //$c = $app->getContainer();
-            //$inject_text = $app->getContainer()['message_ids'];
-            ////$inject_text = $c['message_ids'];
-
-            //$app->nexmo_ids .= $message_id;
-            //$inject_text = " " . $app->nexmo_ids;
-            //$inject_text = $app->get('ids');
-            //$inject_text = implode(" " ,$id_array->id_list);
             $inject_text = "";
-            //$inject_text = " " .implode(" " , $id_array);
             $queue = true;
 
             // Flag Red so that the agent handler picks it up.
@@ -337,8 +299,6 @@ $app->group('/api', function () use ($app) {
 
                 $client = new \GearmanClient();
                 $client->addServer();
-                //$client->addServer("10.0.0.24");
-                //$client->addServer("10.0.0.25");
                 $client->doNormal("call_agent", $arr);
                 //$client->doHighBackground("call_agent", $arr);
             } else {
@@ -364,15 +324,6 @@ $app->group('/api', function () use ($app) {
             $response,
             $args
         ) {
-            /*
-	        // Create an empty Thing
-		    $slack_thing = new Thing(null);
-
-            //$channel = new Channel($slack_thing, "slack");
-		    // Retrieve the body of the request
-            $body = $request->getParsedBody();
-*/
-            //var_dump($body);
 
             ob_start();
 
@@ -892,8 +843,28 @@ break;
 
                 $web_thing = new Thing($uuid);
 
+                $content_types = [
+                    "pdf" => 'application/pdf',
+                    "png" => 'image/png',
+                    "txt" => 'text/plain',
+                    "php" => 'text/plain',
+                    "log" => 'text/plain',
+                    "json" => 'application/json',
+                ];
+
+
                 if ($uuid == null) {
                     $web_thing->Create("agent", "web", $command);
+
+//                if ($content === false or $content == null) {
+                    $response->write(false);
+                    return $response->withHeader(
+                        'Content-Type',
+                        $content_types[$ext_name]
+                    );
+//                }
+
+
                 }
 
                 if ($web_thing->thing == false) {
@@ -907,14 +878,6 @@ break;
                     );
                 }
 
-                $content_types = [
-                    "pdf" => 'application/pdf',
-                    "png" => 'image/png',
-                    "txt" => 'text/plain',
-                    "php" => 'text/plain',
-                    "log" => 'text/plain',
-                    "json" => 'application/json',
-                ];
 
                 // See if the extension name is one of these.
 
