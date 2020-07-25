@@ -852,7 +852,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     'Content-Type',
                     'text/plain'
                 );
-
+break;
         case $command == "termsofuse":
         case $command == "terms-of-use":
             $thing = new Thing($uuid);
