@@ -840,6 +840,19 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             return $this->renderer->render($response, 'thing.phtml', $bleep);
             break;
 
+        case $command == "robots.txt":
+            $thing = new Thing($uuid);
+            $thing->Create("robot", "routes", "s/ web robots");
+
+            $robot_agent = new Robot($thing);
+
+            $content = $robot_agent->thing_report['txt'];
+                $response->write($content);
+                return $response->withHeader(
+                    'Content-Type',
+                    'text/plain'
+                );
+
         case $command == "termsofuse":
         case $command == "terms-of-use":
             $thing = new Thing($uuid);
