@@ -266,7 +266,7 @@ class Robot extends Agent
                 $web .= $hit_text . "<br>";
             }
         }
-
+if (isset($this->user_agent_short)) {
         $web .= '<p>';
         $web .= file_get_contents($this->resource_path . 'robot/robot.html');
         $web .= '<p>';
@@ -279,6 +279,7 @@ class Robot extends Agent
         $web .=
             '<div class="code">User-agent: ' . $this->user_agent_short . '<br>';
         $web .= 'Allow: /</div>';
+}
 
         $this->thing_report['web'] = $web;
     }
