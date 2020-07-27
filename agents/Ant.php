@@ -13,18 +13,16 @@ class Ant extends Agent
 
     function init()
     {
-
         $this->test = "Development code";
 
-
         // Example API
-//        $this->api_key = $this->thing->container['api']['translink'];
+        //        $this->api_key = $this->thing->container['api']['translink'];
 
         // Load in some characterizations.
-        $this->short_name = $this->thing->container['stack']['short_name'];
-        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
-        $this->mail_prefix = $this->thing->container['stack']['mail_prefix'];
-        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+        //        $this->short_name = $this->thing->container['stack']['short_name'];
+        //        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
+        //        $this->mail_prefix = $this->thing->container['stack']['mail_prefix'];
+        //        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
 
         $this->sms_seperator =
             $this->thing->container['stack']['sms_separator']; // |
@@ -160,16 +158,14 @@ class Ant extends Agent
         );
         $this->thing->log($this->agent_prefix . 'completed.');
 
-        //        $this->thing_report['log'] = $this->thing->log;
-
         $this->thing->flagRed();
     }
 
     function run()
     {
-        //var_dump($this->state);
-        //var_dump($this->left_count);
-        //var_dump($this->right_count);
+        $pheromone_agent = new Pheromone($this->thing, "pheromone");
+        $this->pheromone_value = $pheromone_agent->value;
+
         $this->left_count += rand(0, 1);
         $this->right_count += rand(0, 1);
 
@@ -194,7 +190,6 @@ class Ant extends Agent
 
     function set()
     {
-
         $this->thing->json->setField("variables");
 
         $this->thing->json->writeVariable(
@@ -246,7 +241,6 @@ class Ant extends Agent
             "ant",
             "right_count",
         ]);
-
     }
 
     public function respondResponse()
@@ -290,11 +284,7 @@ class Ant extends Agent
 
         // Generate email response.
 
-        $to = $this->thing->from;
-        $from = "ant";
-
         $this->makeChoices();
-        //$this->makeWeb();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -305,7 +295,6 @@ class Ant extends Agent
             'This is the "Ant" Agent. It organizes your Things.';
 
         $this->thing->flagRed();
-
     }
 
     public function makeWeb()
@@ -343,9 +332,6 @@ class Ant extends Agent
         $test_message .= '<br>' . $this->litany[$this->state] . '<br>';
         $test_message .= '<br>' . $this->ant_narrative[$this->state] . '<br>';
 
-        // $test_message .= '<p>Agent "Ant" is responding to your web view of datagram subject "' . $this->subject . '", ';
-        // $test_message .= "which was received " . $this->thing->human_time($this->thing->elapsed_runtime()) . " ago.";
-
         $refreshed_at = max($this->created_at, $this->created_at);
         $test_message .= "<p>";
         $ago = $this->thing->human_time(
@@ -353,9 +339,6 @@ class Ant extends Agent
         );
         $test_message .= "<br>Thing happened about " . $ago . " ago.";
 
-        //$test_message .= '<br>' .$this->whatisthis[$this->state] . '<br>';
-
-        //$this->thing_report['sms'] = $this->message['sms'];
         $this->thing_report['web'] = $test_message;
     }
 
@@ -443,8 +426,8 @@ class Ant extends Agent
         $sms = "ANT | " . $this->thing->nuuid;
         $sms .= " | " . $this->thing_behaviour[$this->state];
         $sms .= " | " . $this->ant_behaviour[$this->state];
-        $sms .= " " . $this->response;
-        $sms .= " | " . $this->prompt_litany[$this->state];
+        $sms .= " " . trim($this->response);
+        $sms .= " | " . trim($this->prompt_litany[$this->state]);
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -471,6 +454,7 @@ class Ant extends Agent
                 case "foraging":
                     $this->thing->choice->Choose("foraging");
                     $this->response .= "This Ant is Foraging. ";
+                    $this->foraging();
                     break;
                 case "inside nest":
                     $this->thing->choice->Choose("inside nest");
@@ -494,7 +478,7 @@ class Ant extends Agent
 
                     break;
                 default:
-                    $this->response .= "Ant spawned.";
+                    $this->response .= "Ant spawned. ";
                     // echo "not found => spawn()";
                     $this->spawn();
             }
@@ -502,32 +486,29 @@ class Ant extends Agent
 
         $this->state = $this->thing->choice->load('hive');
 
-        //echo "this state is " .$this->state;
-        //echo "meep";
-
         // Will need to develop this to only only valid state changes.
 
         switch ($this->state) {
             case "spawn":
-                $this->response .= "Spawned Ant.";
+                $this->response .= "Spawned Ant. ";
                 break;
             case "kill":
-                $this->response .= "Dead Ant.";
+                $this->response .= "Dead Ant. ";
                 break;
             case "foraging":
-                $this->response .= "Foraging.";
+                $this->response .= "Foraging. ";
                 break;
             case "inside nest":
-                $this->response .= "Ant is Inside Nest.";
+                $this->response .= "Ant is Inside Nest. ";
                 break;
             case "nest maintenance":
-                $this->response .= "Ant is doing Nest Maintenance.";
+                $this->response .= "Ant is doing Nest Maintenance. ";
                 break;
             case "patrolling":
-                $this->response .= "Ant is Patrolling.";
+                $this->response .= "Ant is Patrolling. ";
                 break;
             case "midden work":
-                $this->response .= "Ant is doing Midden Work.";
+                $this->response .= "Ant is doing Midden Work. ";
                 $this->middenwork();
 
                 // Need to figure out how to set flag to red given that respond will then reflag it as green.
@@ -546,7 +527,6 @@ class Ant extends Agent
 
             // this case really shouldn't happen.
             // but it does when a web button lands us here.
-
         }
 
         $input = strtolower($this->subject);
@@ -569,7 +549,6 @@ class Ant extends Agent
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case 'left':
-                            //var_dump($this->left_count);
                             $this->left_count += 1;
                             $this->response .= "Ant moved left.";
                             break;
@@ -597,15 +576,10 @@ class Ant extends Agent
 
     function middenwork()
     {
-        $middenwork = "on";
-        if ($middenwork != "on") {
-            $this->response = "No work done.";
-            return;
-        }
-
-        // So here we define what a midden work does when it is called by the agenthandler.
         // Midden Work is the building and maintenance work of the stack.
         // Midden Work is about putting Things back in their place.
+
+        // So here we define what a foraging does when it is called by the agenthandler.
 
         // First Thing that is out of place are the button clicks which are posterior uuid linked.
 
@@ -642,6 +616,17 @@ class Ant extends Agent
         // ->UUids($uuid = null)
 
         //echo "ant state: " . $this->thing->getState('hive');
+
+        // Form a haystack from the whole thing.
+    }
+
+    function foraging()
+    {
+        $middenwork = "on";
+        if ($middenwork != "on") {
+            $this->response = "No work done.";
+            return;
+        }
 
         // Form a haystack from the whole thing.
         $haystack = "";
@@ -706,6 +691,9 @@ class Ant extends Agent
             // print_r($temp_thing->thing->uuid);
             $haystack = json_encode($temp_thing->thing);
 
+            // Add pheromone to thing.
+            $pheromone_agent = new Pheromone($temp_thing, "pheromone");
+
             if (
                 strpos($haystack, $this->uuid) !== false and
                 $value != $this->uuid
@@ -717,7 +705,9 @@ class Ant extends Agent
 
         // And then don't do anything with the list.
         $this->response .=
-            "Collected ". count($linked). " Uuids and then discarded them without action.";
+            "Visited " .
+            count($linked) .
+            " Uuids and added Pheromone to each. ";
     }
 
     function spawn()
