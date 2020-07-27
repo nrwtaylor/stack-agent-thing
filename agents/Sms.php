@@ -33,6 +33,8 @@ class Sms
         $this->api_key = $this->thing->container['api']['nexmo']['api_key'];
         $this->api_secret = $this->thing->container['api']['nexmo']['api_secret'];
 
+        $this->numbers = $this->thing->container['stack']['sms_numbers'];
+
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -104,10 +106,6 @@ class Sms
             $this->thing->log( 'completed without sending a message.' );
             return;
         }
-//        $this->respond();
-//        $this->thing->log ( 'completed.' );
-
-
 
 		$this->respond();
 
@@ -116,8 +114,6 @@ class Sms
         $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
 
 		$this->thing->log ( '<pre> Agent "Sms" completed</pre>' );
-
-		return;
 
 	}
 
@@ -134,6 +130,7 @@ class Sms
 
     public function getClient()
     {
+//devstack
 return;
 if (!isset($this->body)) {return;}
         // https://developers.google.com/api-client-library/php/auth/web-app
@@ -186,7 +183,6 @@ if (!isset($this->body)) {return;}
 
 		if ($this->input != null) {
 			$test_message = $this->input;
-//var_dump($test_message);
 		} else {
 			$test_message = $this->subject;
 		}
@@ -208,7 +204,13 @@ if (!isset($this->body)) {return;}
             // But for now replace sms seperators and translate to \n
             $test_message = str_replace(" | ", "\n", $test_message);
 
-			$this->sendSms($to, $test_message);
+			$response = $this->sendSms($to, $test_message);
+
+            if ($response === true) {
+                $this->thing_report['info'] = 'did not send a SMS.';
+                return;
+            }
+
 			$this->thing->account['stack']->Debit($this->cost);
 
 // Investigate short codes
@@ -228,7 +230,6 @@ if (!isset($this->body)) {return;}
 
         $this->thing_report['help'] = "This is the agent that manages SMS.";
 
-		return;
 	}
 
 
@@ -246,17 +247,24 @@ if (!isset($this->body)) {return;}
 
     function sendSMS($to, $text)
     {
-$type = "text";
-if (strlen($text) != strlen(utf8_decode($text)))
-{
-    $type = "unicode";
-}
+
+
+        if (!in_array($to, $this->numbers)) {
+            return true;
+        }
+
+        $type = "text";
+
+        if (strlen($text) != strlen(utf8_decode($text)))
+        {
+            $type = "unicode";
+        }
 
         $url = 'https://rest.nexmo.com/sms/json?' . http_build_query(
             [
                 'api_key' =>  $this->api_key,
                 'api_secret' => $this->api_secret,
-'type'=>$type,
+                'type'=>$type,
                 'to' => $to,
                 'from' => $this->to,
                 'text' => $text
@@ -266,8 +274,6 @@ if (strlen($text) != strlen(utf8_decode($text)))
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
-
-        echo $response;
 
         //Decode the json object you retrieved when you ran the request.
         $decoded_response = json_decode($response, true);
@@ -281,10 +287,7 @@ if (strlen($text) != strlen(utf8_decode($text)))
             }
         }
 
-    return;
     }
-
-
 
     function sendUSshortcode($to, $text)
     {
@@ -297,7 +300,7 @@ if (strlen($text) != strlen(utf8_decode($text)))
       'api_key' =>  $this->api_key,
       'api_secret' => $this->api_secret,
       'to' => $to,
-	'message' => $text
+      'message' => $text
     ]
 );
 
@@ -306,12 +309,9 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 
 // devstack log to db
-//echo $response;
-
 
   //Decode the json object you retrieved when you ran the request.
   $decoded_response = json_decode($response, true);
-//echo $decoded_response;
 
   error_log('You sent ' . $decoded_response['message-count'] . ' messages.');
 
@@ -322,7 +322,6 @@ $response = curl_exec($ch);
           error_log("Error {$message['status']} {$message['error-text']}");
       }
   }
-    return;
     }
 
 
