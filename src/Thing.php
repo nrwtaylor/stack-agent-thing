@@ -101,7 +101,7 @@ class Thing
         try {
             $this->getThing($uuid);
         } catch (\Exception $e) {
-        $this->log("No Thing to get.");
+            $this->log("No Thing to get.");
 
             // Fail quietly. There was no Thing to get.
             //echo 'Caught exception: ',  $e->getMessage(), "\n";
@@ -163,9 +163,8 @@ class Thing
 
             $this->json = new Json($this->uuid);
 
-        $this->log("JSON connector made.");
-        $this->log("Made a thing from null.");
-
+            $this->log("JSON connector made.");
+            $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
             $this->variables = new Json($this->uuid);
@@ -173,7 +172,7 @@ class Thing
 
             $this->choice = new Choice($this->uuid);
 
-        $this->log("Choice connector made.");
+            $this->log("Choice connector made.");
 
             // Sigh.  Hold this Thing to account.  Unless it is a forager.
             $this->state = 'foraging'; // Add code link later.
@@ -241,7 +240,7 @@ class Thing
 
             $this->Get();
 
-        $this->log("Get call completed.");
+            $this->log("Get call completed.");
 
             // And fire up the stack balance calculation to make
             // sure stack balance snapshot is latest.
@@ -280,7 +279,7 @@ class Thing
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
-        $message0 = array();
+        $message0 = [];
         $message0['50 words'] = null;
         $message0['500 words'] = null;
 
@@ -320,8 +319,7 @@ class Thing
         // Associate the new record to the last create record.
         if ($this->container['settings']['stack']['associate_prior'] === true) {
             $this->pushJson('associations', $prior_uuid);
-        $this->log("Create. Pushed json associations.");
-
+            $this->log("Create. Pushed json associations.");
         }
 
         // First query after instantiating Database. And after the associate
@@ -336,7 +334,6 @@ class Thing
 
         $query = $this->db->Create($subject, $to); // 3s
         $this->log("Create. Database create call completed.");
-
 
         if ($query == true) {
             // will return true if successfull else it will return false
@@ -382,7 +379,7 @@ class Thing
 
         // Which means the stack can reset a Things balance.  Handy.
 
-        $this->account = array();
+        $this->account = [];
 
         // Kind of ugly.  But I guess this isn't Python.  And null
         // accounts can't be allowed.
@@ -427,7 +424,6 @@ class Thing
         $this->log("Create completed.");
         $this->log("Now called Get. (again?)");
 
-
         return $this->Get();
     }
 
@@ -442,7 +438,7 @@ class Thing
         }
 
         if (!isset($this->account)) {
-            $this->account = array();
+            $this->account = [];
         }
 
         $this->account[$account_name] = new Account(
@@ -459,7 +455,7 @@ class Thing
     {
         $this->json->setField("variables");
 
-        $accounts = $this->json->readVariable(array("account"));
+        $accounts = $this->json->readVariable(["account"]);
 
         // At this point we have a PHP array of all accounts on
         // this Thing.
@@ -491,7 +487,7 @@ class Thing
 
         $things = $thingreport['things'];
 
-        if ($things == null or $things == array()) {
+        if ($things == null or $things == []) {
             return false;
         }
 
@@ -518,37 +514,17 @@ class Thing
         return $this->time;
     }
 
-    function microtime($time = null)
+    function microtime($microtime = null)
     {
-        if ($time == null) {
-            $time = time();
+        if ($microtime == null) {
+            $microtime = microtime();
         }
-        //$this->time = gmdate("Y-m-d\TH:i:s.u\Z", $time);
-
-        list($usec, $sec) = explode(' ', microtime());
-        //print date('Y-m-d H:i:s', $sec) . $usec;
+        list($usec, $sec) = explode(' ', $microtime);
 
         $this->microtime = date('Y-m-d H:i:s', $sec) . " " . $usec;
 
         return $this->microtime;
     }
-
-    /*
-        public function PDF($pdf_name = null) {
-		return;
-                $param = $_GET['id'];
-
-                ob_start("callback");
-                // here DB request or some processing
-                $codeText = "thing:".$this->uuid;
-                // end of processing here
-                $debugLog = ob_get_contents();
-                ob_end_clean();
-                QRcode::png($codeText,false,QR_ECLEVEL_Q,4); 
-
-                return;
-                }
-*/
 
     public function test($variable = null, $agent = null, $action = null)
     {
@@ -572,7 +548,7 @@ class Thing
         $variables = $this->account['stack']->json->array_data;
 
         if (isset($variables[$variable_set])) {
-            $this->$variable_set = (object) array($variables[$variable_set])[0];
+            $this->$variable_set = (object) [$variables[$variable_set]][0];
 
             if (!isset($this->$variable_set->$variable)) {
                 $this->$variable_set->$variable = false; //Not found
@@ -616,7 +592,7 @@ class Thing
     public function Ignore()
     {
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "status"), "green");
+        $this->json->writeVariable(["thing", "status"], "green");
         $this->Get();
     }
 
@@ -624,7 +600,7 @@ class Thing
     {
         // Make the Thing show Red
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "status"), "red");
+        $this->json->writeVariable(["thing", "status"], "red");
         $this->Get();
     }
 
@@ -632,7 +608,7 @@ class Thing
     {
         // Make the Thing show Red
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "silence"), "on");
+        $this->json->writeVariable(["thing", "silence"], "on");
         $this->Get();
     }
 
@@ -640,14 +616,14 @@ class Thing
     {
         // Make the Thing show Red
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "silence"), "off");
+        $this->json->writeVariable(["thing", "silence"], "off");
         $this->Get();
     }
 
     public function isSilent()
     {
         // Ask if the Thing is Green
-        $var_path = array("thing", "silence");
+        $var_path = ["thing", "silence"];
         if ($this->json->readVariable($var_path) == "on") {
             return true;
         }
@@ -658,7 +634,7 @@ class Thing
     {
         // Make the Thing show Amber
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "status"), "amber");
+        $this->json->writeVariable(["thing", "status"], "amber");
         $this->Get();
     }
 
@@ -666,14 +642,14 @@ class Thing
     {
         // Make the Thing show Green
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "status"), "green");
+        $this->json->writeVariable(["thing", "status"], "green");
         $this->Get();
     }
 
     public function isRed()
     {
         // Ask if the Thing is Red
-        $var_path = array("thing", "status");
+        $var_path = ["thing", "status"];
         if ($this->json->readVariable($var_path) == "red") {
             return true;
         }
@@ -683,7 +659,7 @@ class Thing
     public function isGreen()
     {
         // Ask if the Thing is Green
-        $var_path = array("thing", "status");
+        $var_path = ["thing", "status"];
         if ($this->json->readVariable($var_path) == "green") {
             return true;
         }
@@ -694,7 +670,7 @@ class Thing
     public function isAmber()
     {
         // Ask if the Thing is Amber.  Is it ready to go?
-        $var_path = array("thing", "status");
+        $var_path = ["thing", "status"];
         if ($this->json->readVariable($var_path) == "amber") {
             return true;
         }
@@ -721,7 +697,7 @@ class Thing
     public function flagGet()
     {
         // More open way to ask a thing for its flag
-        $var_path = array("thing", "status");
+        $var_path = ["thing", "status"];
         return $this->json->readVariable($var_path);
     }
 
@@ -733,7 +709,7 @@ class Thing
         }
 
         $this->json->setField("variables");
-        $this->json->writeVariable(array("thing", "status"), $color);
+        $this->json->writeVariable(["thing", "status"], $color);
         $this->Get();
     }
 
@@ -821,7 +797,7 @@ class Thing
 
         $things = $thingreport['things'];
 
-        $states = array();
+        $states = [];
         foreach ($things as $thing) {
             $uuid = $thing['uuid'];
 
@@ -837,7 +813,7 @@ class Thing
             $states[] = $t;
         }
 
-        if ($states == array()) {
+        if ($states == []) {
             return $this->current_state = null;
         }
 
@@ -864,7 +840,7 @@ class Thing
         // Passing test_redpanda.php 26 Apr.
         $thingreport = $this->db->priorGet(); // 3s
 
-$this->log("associatePosterior. PriorGet database call completed.");
+        $this->log("associatePosterior. PriorGet database call completed.");
         $posterior_thing = $thingreport['thing'];
 
         if ($posterior_thing != false) {
@@ -880,14 +856,14 @@ $this->log("associatePosterior. PriorGet database call completed.");
                 //too many connection issue.  Leave it in for
                 //the time being.  25 Apr.
                 //unset($posterior_thing);
-$this->log("Associated posterior thing.");
+                $this->log("Associated posterior thing.");
             }
             return;
             //		return 'Posterior uuid ' . $posterior_thing->uuid .
             //				' associated with Thing uuid ' . $this->uuid;
         }
 
-$this->log("Posterior thing is false");
+        $this->log("Posterior thing is false");
     }
 
     function associate($uuids = null, $mode = "default")
@@ -897,7 +873,7 @@ $this->log("Posterior thing is false");
         }
 
         if (is_string($uuids)) {
-            $uuids = array($uuids);
+            $uuids = [$uuids];
         }
 
         if (is_array($uuids)) {
@@ -905,7 +881,6 @@ $this->log("Posterior thing is false");
             $this->json->setField("associations");
 
             foreach ($uuids as $uuid) {
-
                 //$this->json->setField("associations");
                 //$this->json->pushStream($uuid);
                 if ($mode == "default") {
@@ -1017,7 +992,7 @@ $this->log("Posterior thing is false");
             return '0 seconds';
         }
 
-        $a = array(
+        $a = [
             10 * 365 * 24 * 60 * 60 => 'decade',
             365 * 24 * 60 * 60 => 'year',
             30 * 24 * 60 * 60 => 'month',
@@ -1025,9 +1000,9 @@ $this->log("Posterior thing is false");
             24 * 60 * 60 => 'day',
             60 * 60 => 'hour',
             60 => 'minute',
-            1 => 'second'
-        );
-        $a_plural = array(
+            1 => 'second',
+        ];
+        $a_plural = [
             'decade' => 'decade',
             'year' => 'years',
             'month' => 'months',
@@ -1035,8 +1010,8 @@ $this->log("Posterior thing is false");
             'day' => 'days',
             'hour' => 'hours',
             'minute' => 'minutes',
-            'second' => 'seconds'
-        );
+            'second' => 'seconds',
+        ];
 
         foreach ($a as $secs => $str) {
             $d = $etime / $secs;

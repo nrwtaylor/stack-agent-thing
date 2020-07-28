@@ -879,13 +879,17 @@ class Agent
     {
         // See if the previous subject line is relevant
         $this->thing->db->setUser($this->from);
-        $prior_thing_report = $this->thing->db->priorGet();
-        $this->prior_thing = $prior_thing_report;
+        $prior_thing = $this->thing->db->priorGet();
+        $this->prior_thing = $prior_thing;
 
-        $task = $prior_thing_report['thing']->task;
-        $nom_to = $prior_thing_report['thing']->nom_to;
+        $this->prior_task = $prior_thing['thing']->task;
+        $this->prior_agent = $prior_thing['thing']->nom_to;
 
-        $temp_haystack = $nom_to . ' ' . $task;
+        $uuid = $prior_thing['thing']->uuid;
+        $variables_json = $prior_thing['thing']->variables;
+        $variables = $this->thing->json->jsontoArray($variables_json);
+
+        $this->prior_variables = $variables;
     }
 
     /**
@@ -1348,6 +1352,7 @@ class Agent
      */
     public function readSubject()
     {
+
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;
@@ -1755,6 +1760,15 @@ class Agent
             $this->thing_report = $usermanager_thing->thing_report;
             return $this->thing_report;
         }
+
+
+
+$this->getLink();
+if (strtolower($this->prior_agent) == "baseline") {
+$baseline_agent = new Baseline($this->thing, "response");
+}
+
+
         // Then look for messages sent to UUIDS
         $this->thing->log('looking for UUID in address.', 'INFORMATION');
 
@@ -1816,7 +1830,6 @@ class Agent
                 }
             }
         }
-
         // Remove references to named chatbot agents
         //        $chatbot = new Chatbot($this->thing,"chatbot");
         //        $input =  $chatbot->filtered_input;
