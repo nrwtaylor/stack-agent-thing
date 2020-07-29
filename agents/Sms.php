@@ -248,8 +248,7 @@ if (!isset($this->body)) {return;}
     function sendSMS($to, $text)
     {
 
-
-        if (!in_array($to, $this->numbers)) {
+        if (!in_array($this->to, $this->numbers)) {
             return true;
         }
 
