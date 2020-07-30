@@ -1,201 +1,201 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-// Call regularly from cron 
-// On call determine best thing to be addressed.
 
-// Start by picking a random thing and seeing what needs to be done.
-
+// Helps with remembering things.
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Remember {
+class Remember extends Agent
+{
+    function init()
+    {
+        if ($this->thing != true) {
+            $this->thing_report = [
+                'thing' => false,
+                'info' => 'Tried to run remember on a null Thing.',
+                'help' => "That isn't going to work",
+            ];
 
-	function __construct(Thing $thing) {
-
-                if ($thing->thing != true) {
-
-        	        $this->thing_report = array('thing' => false, 
-						'info' => 'Tried to run remember on a null Thing.',
-						'help' => "That isn't going to work"
-							);
-
-                	return $this->thing_report;
-                }
-
-	
-		$this->thing = $thing;
-		$this->agent_name = 'remember';
-		$this->agent_version = 'redpanda';
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
-
-		$this->web_prefix = $this->thing->container['stack']['web_prefix'];
-
-		$this->node_list = array('remember'=>
-					array('remember again'),
-				'alt start'=>array('maintain')
-					);
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-		$this->sqlresponse = null;
-
-		$this->thing->log('<pre> Agent "Remember" running on Thing ' . $this->thing->nuuid . '.</pre>');
-		$this->thing->log('<pre> Agent "Remember" received this Thing "' . $this->subject . '".</pre>');
-
-
-
-//$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
-
-
-
-
-
-
-                $this->thing->json->setField("variables");
-                $time_string = $this->thing->json->readVariable( array("remember", "refreshed_at") );
-
-                if ($time_string == false) {
-                        $this->thing->json->setField("variables");
-                        $time_string = $this->thing->json->time();
-                        $this->thing->json->writeVariable( array("remember", "refreshed_at"), $time_string );
-                }
-
-                $this->thing->json->setField("variables");
-                $this->remember_status = $this->thing->json->readVariable( array("remember", "status") );
-
-                if ( ($this->remember_status == false) ) {
-                        $this->thing->log( '<pre> Agent "Remember" setRemember() </pre>' );
-                        $this->setRemember();
-                } 
-
-
-
-
-		// If readSubject is true then it has been responded to.
-
-		$this->readSubject();
-		$this->respond();
-
-
-		$this->thing->log('<pre>Agent "Remember" completed.</pre>');
-        $this->thing_report['log'] = $this->thing->log;
-		return;
-	}
-
-
-        function setRemember() {
-
-           //     $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record'), array('ant', 'email', 'transit' , 'translink'));
-           //     $things = $thingreport['thing'];
-
-           //     $this->reminder_ids = array();
-
-           //     foreach ($things as $thing) {
-
-             //           $this->reminder_ids[] = $thing['uuid'];
-
-               // }
-
-                $this->thing->json->setField("variables");
-                $this->thing->json->writeVariable(array("remember",
-                        "status"),  true );
-
-                return;
+            return $this->thing_report;
         }
 
+        $this->agent_version = 'redpanda';
+
+        // So I could call
+        if ($this->thing->container['stack']['state'] == 'dev') {
+            $this->test = true;
+        }
+        // I think.
+        // Instead.
+
+        $this->node_list = [
+            'remember' => ['remember again'],
+            'alt start' => ['maintain'],
+        ];
+    }
+
+    function setRemember()
+    {
+        //     $thingreport = $this->thing->db->reminder($this->from, array('s/', 'stack record'), array('ant', 'email', 'transit' , 'translink'));
+        //     $things = $thingreport['thing'];
+
+        //     $this->reminder_ids = array();
+
+        //     foreach ($things as $thing) {
+
+        //           $this->reminder_ids[] = $thing['uuid'];
+
+        // }
+
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(["remember", "status"], true);
+    }
+
+    public function get()
+    {
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+            "remember",
+            "refreshed_at",
+        ]);
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+                ["remember", "refreshed_at"],
+                $time_string
+            );
+        }
+
+        $this->thing->json->setField("variables");
+        $this->reminder_ids = $this->thing->json->readVariable([
+            "remember",
+            "status",
+        ]);
+    }
+
+    public function set()
+    {
+        $this->thing->json->setField("settings");
+        $this->thing->json->writeVariable(
+            ["remember", "received_at"],
+            gmdate("Y-m-d\TH:i:s\Z", time())
+        );
+    }
+    public function run()
+    {
+    }
+
+    public function respond()
+    {
+    } // Turns off response.
+
+    public function doRemember()
+    {
+        $this->thing->flagGreen();
+
+        $this->creditRemember();
+
+        //$this->doRemember();
+
+        $choices = $this->thing->choice->makeLinks('remember');
+
+        $this->thing_report = [
+            'thing' => $this->thing,
+            'choices' => $choices,
+            'info' => 'This is a reminder.',
+            'help' =>
+                'This is probably stuff you want to remember.  Or forget.',
+        ];
+
+        if (isset($this->remember_status) and $this->remember_status == false) {
+            $this->thing->log('set Remember.');
+            $this->setRemember();
+        }
+
+        /*
+        if (isset($this->thing->account)) {
+            $this->thing->account['thing']->Credit(100);
+            $this->thing->account['stack']->Debit(-100);
+            $this->thing->log(
+                'credited 100 to the Thing ' .
+                    $this->thing->nuuid .
+                    ".",
+                "INFORMATION"
+            );
+            $this->response .= 'Credited 100 to the Thing ' .
+                    $this->thing->nuuid .
+                    ".";
 
 
+        } else {
+            $this->thing->log(
+                'could not access accounts on Thing.',
+                "WARNING"
+            );
+            $this->response .= 'Could not access accounts on Thing ' .
+                    $this->thing->nuuid .
+                    "."; 
+        }
+*/
+    }
 
-	public function respond() {
+    public function creditRemember()
+    {
+        if (isset($this->thing->account)) {
+            $this->thing->account['thing']->Credit(100);
+            $this->thing->account['stack']->Debit(-100);
+            $this->thing->log(
+                'credited 100 to the Thing ' . $this->thing->nuuid . ".",
+                "INFORMATION"
+            );
+            $this->response .=
+                'Credited 100 to the Thing ' . $this->thing->nuuid . ".";
+        } else {
+            $this->thing->log('could not access accounts on Thing.', "WARNING");
+            $this->response .=
+                'Could not access accounts on Thing ' .
+                $this->thing->nuuid .
+                ".";
+        }
+    }
 
+    public function makeSMS()
+    {
+        $sms = "REMEMBER | " . $this->response;
+        $this->thing_report['sms'] = $sms;
+    }
 
-		// Thing actions
+    public function readSubject()
+    {
+        $uuid_agent = new Uuid($this->thing, "uuid");
+        // This is recursive.
 
-		$this->thing->json->setField("settings");
-		$this->thing->json->writeVariable(array("remember",
-			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
-			);
+        if ($uuid_agent->uuid != $this->uuid) {
+            $thing = new Thing($uuid_agent->uuid);
+            $remember_agent = new Remember($thing, "remember");
+            $this->response .= $remember_agent->response . " ";
+            return;
+        }
 
+        $this->start();
+        $this->doRemember();
+    }
 
-
-
-                $this->thing->json->setField("variables");
-                $time_string = $this->thing->json->readVariable( array("remember", "refreshed_at") );
-
-                if ($time_string == false) {
-                        $this->thing->json->setField("variables");
-                        $time_string = $this->thing->json->time();
-                        $this->thing->json->writeVariable( array("remember", "refreshed_at"), $time_string );
-                }
-
-                $this->thing->json->setField("variables");
-                $this->reminder_ids = $this->thing->json->readVariable( array("remember", "status") );
-
-                if ( ($this->reminder_ids == false) ) {
-                        $this->thing->log( '<pre> Agent "Reminder" setReminders() </pre>' );
-                        $this->setRemember();
-                } 
-
-
-
-
-		$this->thing->flagGreen();
-
-		$choices = $this->thing->choice->makeLinks('remember');
-if ( isset($this->thing->account) ) {
-        	$this->thing->account['thing']->Credit(100);
-		$this->thing->account['stack']->Debit(-100);
-                $this->thing->log( '<pre> Agent "Remember" credited 100 to the Thing ' . $this->thing->nuuid . ".", "INFORMATION");
-} else {
-
-                $this->thing->log( '<pre> Agent "Remember" could not access accounts on Thing.</pre>', "WARNING");
-
-
+    function start()
+    {
+        if (rand(0, 5) <= 3) {
+            $this->thing->choice->Create('remember', $this->node_list, 'start');
+        } else {
+            $this->thing->choice->Create(
+                'remember',
+                $this->node_list,
+                'alt start'
+            );
+        }
+        $this->thing->flagGreen();
+    }
 }
-
-
-                $choices = $this->thing->choice->makeLinks('remember');
-
-		$this->thing_report = array('thing' => $this->thing->thing, 'choices' => $choices, 'info' => 'This is a reminder.','help' => 'This is probably stuff you want to remember.  Or forget.');
-
-
-
-		return $this->thing_report;
-	}
-
-	public function readSubject() {
-
-		$this->start();
-
-		$status = true;
-		return $status;		
-	}
-
-	function start() {
-
-		if (rand(0,5) <= 3) {
-			$this->thing->choice->Create('remember', $this->node_list, 'start');
-		} else {
-			$this->thing->choice->Create('remember', $this->node_list, 'alt start');
-		}
-		//$this->thing->choice->Choose("inside nest");
-		$this->thing->flagGreen();
-
-		return;
-	}
-
-
-
-}
-
-
-?>

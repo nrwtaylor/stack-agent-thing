@@ -42,7 +42,7 @@ class Privacy extends Agent {
      *
      */
     public function privacy() {
-        $this->makeAgent("privacy");
+        $this->makeChannel("privacy");
         $this->makeChoices();
     }
 

@@ -42,7 +42,7 @@ class Bananasplit extends Agent {
      *
      */
     public function squirrel() {
-        $this->makeAgent("bananasplit");
+        $this->makeChannel("bananasplit");
     }
 
 

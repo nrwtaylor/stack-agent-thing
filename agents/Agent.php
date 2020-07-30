@@ -134,6 +134,9 @@ class Agent
 
 }
 */
+
+//$link_agent = new Link($this->thing,"link");
+
         $this->init();
         $this->get();
 
@@ -281,6 +284,7 @@ class Agent
      */
     public function make()
     {
+        $this->makeAgent();
         $this->makeResponse();
         //        $this->makeChoices();
         $this->makeMessage();
@@ -289,6 +293,7 @@ class Agent
         $this->makePNG();
         $this->makePNGs();
         $this->makeSMS();
+
         $this->makeWeb();
         // Explore adding in INFO and HELP to web response.
         $agents = ["response", "help", "info"];
@@ -359,6 +364,30 @@ class Agent
         $this->makeTXT();
 
         $this->makePDF();
+
+$this->makeKeyword();
+$this->makeLink();
+
+//var_dump((new Link)->extractLinks($this->thing_report['sms']));
+
+if (true) {
+if (!isset($this->link_count)) {$this->link_count =0;}
+$this->link_count += 1;
+
+//$link_agent = new Link($this->thing,"link");
+if ((isset($this->thing_report['sms'])) and (isset($this->thing_report['link']))) {
+
+if (strpos($this->thing_report['sms'], $this->thing_report['link']) !== false) {
+ //   echo 'true';
+} else {
+
+
+$this->thing_report['sms'] .= " " . $this->thing_report['link'];
+}
+
+}
+}
+
     }
 
     /**
@@ -423,11 +452,27 @@ class Agent
         $this->calling_agent = null;
     }
 
+public function makeAgent() {
+
+$this->currentAgent();
+$agent = "help";
+if (isset($this->current_agent)) {
+$agent = $this->current_agent;
+
+$this->thing_report['agent'] = $agent;
+}
+
+
+}
+
+
     /**
      *
      */
-    function makeAgent($name = null)
+    function makeChannel($name = null)
     {
+
+
         $text = strtolower($this->agent_name);
         $file = $this->resource_path . '/' . $text . '/' . $text . '.txt';
         $contents = file_get_contents($file);
@@ -570,6 +615,26 @@ class Agent
             $this->created_at = $thing->created_at;
         }
     }
+
+public function currentAgent() {
+
+//        $previous_thing = new Thing($block_thing['uuid']);
+//        $this->prior_thing = $previous_thing;
+        if (!isset($this->thing->json->array_data['message']['agent'])) {
+            $this->current_agent = "help";
+        } else {
+            $this->current_agent =
+                $this->thing->json->array_data['message']['agent'];
+        }
+/*
+        $this->link =
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/' .
+            strtolower($this->current_agent);
+*/
+}
 
     /**
      *
@@ -770,12 +835,95 @@ class Agent
     {
     }
 
+
+public function makeLink()
+{
+//$link = $this->web_prefix . "thing/" . $this->uuid . "/" . $this->agent_name;
+//$this->thing_report['link'] = $link;
+//return;
+
+//if (isset($this->thing_report['link'])) {return;}
+//$link = $this->web_prefix;
+
+//if (isset($this->keyword)) {
+//$link = $this->web_prefix . "thing/" . $this->uuid . "/" . $this->keyword;
+//}
+
+
+if (isset($this->link)) {
+$link = $this->link;
+}
+
+if (isset($this->agent->link)) {
+var_dump($this->agent->link);
+$link = $this->agent->link;
+}
+
+if (isset($this->current_agent)) {
+        $link =
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/' .
+            strtolower($this->current_agent);
+}
+
+if ((!isset($link)) and (isset($this->keyword))) {
+$link = $this->web_prefix . "thing/" . $this->uuid . "/" . $this->keyword;
+}
+
+if (!isset($link)) {
+$link = $this->web_prefix;
+}
+
+
+
+$this->link = $link;
+$this->thing_report['link'] = $link;
+
+}
+
     /**
      *
      */
     public function makePDF()
     {
     }
+
+public function makeKeyword() {
+
+$keyword = "help";
+
+if (isset($this->thing_report['sms'])) {
+$tokens = explode("|", $this->thing_report['sms']);
+if (isset($tokens[0])) {
+$keyword = strtolower($tokens[0]);
+}
+}
+
+if (isset($this->keywords[0])) {
+$keyword = $this->keywords[0];
+}
+
+
+if (isset($this->keyword)) {
+$keyword = $this->keyword;
+}
+
+
+if (isset($this->agent->keywords[0])) {
+$keyword = $this->agent->keywords[0];
+}
+
+
+if (isset($this->agent->keyword)) {
+$keyword = $this->agent->keyword;
+}
+
+
+$this->keyword = $keyword;
+$this->thing_report['keyword'] = $keyword;
+}
 
     /**
      *
@@ -1377,6 +1525,8 @@ class Agent
         // Handle call intended for humans.
 //        $t = $this->assert($input);
         $human_agent = new Human($this->thing, 'human');
+
+//$web_agent = new Web($this->thing,'web');
 
         if (is_string($human_agent->address)) {
             $this->thing_report = $human_agent->thing_report;

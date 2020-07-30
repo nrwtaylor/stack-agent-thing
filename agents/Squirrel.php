@@ -42,7 +42,7 @@ class Squirrel extends Agent {
      *
      */
     public function squirrel() {
-        $this->makeAgent("squirrel");
+        $this->makeChannel("squirrel");
     }
 
 

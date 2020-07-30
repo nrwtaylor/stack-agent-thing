@@ -42,7 +42,7 @@ class Tabletop extends Agent {
      *
      */
     public function tabletop() {
-        $this->makeAgent("tabletop");
+        $this->makeChannel("tabletop");
     }
 
 

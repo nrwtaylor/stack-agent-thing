@@ -48,6 +48,8 @@ class Link extends Agent
         $this->node_list = ['link' => ['link']];
     }
 
+public function run() {}
+
     /** * * @param unknown $text (optional) * @return unknown */
     public function extractLinks($text = null)
     {
@@ -162,10 +164,10 @@ class Link extends Agent
                 $this->thing->account['thing']->balance['amount'] .
                 ''
         );
-
+if ($this->agent_input == null) {
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-
+}
         //        return $this->thing_report;
     }
 
@@ -175,5 +177,10 @@ class Link extends Agent
      */
     public function readSubject()
     {
+$input = strtolower($this->input);
+if ($input == "link") {
+return;
+}
+
     }
 }

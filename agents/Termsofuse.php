@@ -37,7 +37,7 @@ class Termsofuse extends Agent {
      *
      */
     public function termsofuse() {
-        $this->makeAgent("termsofuse");
+        $this->makeChannel("termsofuse");
     }
 
 

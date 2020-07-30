@@ -38,6 +38,10 @@ class Web extends Agent {
             'link'=>array('helpful', 'helpful?')
         );
 
+        $this->initWeb();
+}
+
+public function initWeb() {
         $this->default_state = 'on';
         if (isset($this->thing->container['api']['web']['default_state'])) {
             $this->default_state = $this->thing->container['api']['web']['default_state'];
@@ -143,6 +147,10 @@ class Web extends Agent {
      *
      */
     public function run() {
+//$this->doWeb();
+    }
+
+public function doWeb() {
 
         if ($this->state == 'on') {
             $this->linkWeb();
@@ -156,8 +164,9 @@ class Web extends Agent {
             }
 
         }
-    }
 
+
+}
 
     /**
      *
@@ -210,16 +219,11 @@ class Web extends Agent {
         $this->thing_report['choices'] = $choices;
         $this->thing_report['info'] = 'This is the web agent.';
         $this->thing_report['help'] = 'This agent takes an UUID and runs the Web agent on it.';
-
-        //        $this->thing->log ( '<pre> Agent "Web" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
-
+if ($this->agent_input == null) {
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        //        $this->makeWeb();
-
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-
-        //        return $this->thing_report;
+}
     }
 
 
@@ -294,8 +298,19 @@ class Web extends Agent {
      */
     public function readSubject() {
 
-        $input = $this->input;
+        $input = strtolower($this->input);
         $this->filtered_input = $this->assert($input);
+            var_dump($input);
+            if ($input == "web") {
+$this->doWeb();
+            $this->response .= "Requested web. ";
+            return;
+
+        }
+
+        $this->doWeb();
+
+        //$this->filtered_input = $this->assert($input);
 
         //var_dump($filtered_input);
 
@@ -310,8 +325,7 @@ class Web extends Agent {
      *
      */
     function makeWeb() {
-
-        // devstack build a web page with information in the thing
+//return;  
 
         $this->thing_report['web'] = $this->filtered_input;
 
