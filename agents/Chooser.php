@@ -1,15 +1,13 @@
 <?php
+namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-require '/var/www/html/stackr.ca/vendor/autoload.php';
-
 ini_set("allow_url_fopen", 1);
 
-class Clerk {
+class Chooser {
 	
 
 	public $var = 'hello';

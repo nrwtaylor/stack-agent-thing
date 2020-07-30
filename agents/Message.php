@@ -529,7 +529,7 @@ $this->stack_email = $this->email;
 
 
 
-        if ( is_numeric($from) and isset($this->sms_message) ) {
+        if ( is_numeric($from) and isset($this->sms_message) and (mb_strlen($from) <= 10)) {
             $this->thing_report['channel'] = 'sms'; // one of sms, email, keyword etc
 
             // Cost is handled by sms.php
