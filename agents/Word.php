@@ -235,9 +235,6 @@ if ($c == false) {return true;}
             $file = $this->resource_path_words . 'words.txt';
 
 
-//        if ($this->wordpress_path_to !== false) {
-//try {
-//            require_once $this->wordpress_path_to. 'wp-load.php';
 $this->getMemcached();
             if (($contents = $this->mem_cached->get('agent-words-list'))) {
 $this->words_list = $contents;
@@ -246,32 +243,14 @@ $this->words_list = $contents;
                 break;
 }
 
-//}        catch (\Throwable $t) {
-//$this->wordpress = "off";
-            //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
-            //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";//
- //           $this->thing->log("caught throwable.");
-            // Executed only in PHP 7, will not match in PHP 5
- //       }
- //       catch (\Exception $e) {
-//$this->wordpress = "off";
             $this->thing->log("caught exception");
-            // Executed only in PHP 5, will not be reached in PHP 7
-  //      }
-
-    //    }
-
-
-
 
 
 
             $contents = file_get_contents($file);
 
 
- //       if (($this->wordpress_path_to !== false) and ($this->wordpress != "off")){
             $this->mem_cached->set('agent-words-list', $contents);
- //       }
 
                 $this->thing->log("loaded words from text file.");
 
