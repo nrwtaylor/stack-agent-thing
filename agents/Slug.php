@@ -27,6 +27,17 @@ class Slug extends Agent
         if (isset($this->settings['state'])) {
             $this->state = $this->settings['state'];
         }
+
+        if (
+            isset(
+                $this->thing->container['api']['slug']['allowed_slugs_resource']
+            )
+        ) {
+            $this->allowed_slugs_resource =
+                $this->thing->container['api']['slug'][
+                    'allowed_slugs_resource'
+                ];
+        }
     }
 
     /**
@@ -141,6 +152,22 @@ class Slug extends Agent
         $status = true;
 
         return $status;
+    }
+
+    public function isSlug($text = null)
+    {
+        if ($text == null) {
+            return false;
+        }
+
+        $allowed_endpoints = require $this->resource_path .
+            $this->allowed_slugs_resource;
+
+        if (in_array($text, $allowed_endpoints)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

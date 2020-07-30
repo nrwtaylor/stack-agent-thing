@@ -165,11 +165,6 @@ class Wave extends Agent
 
     function getWave()
     {
-        //        $this->alias = "Logan's run";
-        //        require_once '/var/www/html/stackr.ca/agents/alias.php';
-        //        $this->alias_thing = new Alias($this->variables_agent->thing, 'alias');
-        //        $this->alias = $this->alias_thing->alias;
-
         $buoy = $this->noaa_buoy_id;
         //"44025";
         //$buoy = "44025";
@@ -411,40 +406,6 @@ class Wave extends Agent
 
         return $this->height;
     }
-
-    /*
-    function getVariable($variable_name = null, $variable = null) {
-
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
 
     function getFlag()
     {
@@ -783,7 +744,6 @@ class Wave extends Agent
                             return;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }

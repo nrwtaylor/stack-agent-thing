@@ -8,7 +8,7 @@
 namespace Nrwtaylor\StackAgentThing;
 // (c) 2020 Stackr Interactive Ltd
 
-// whitefox 24 July 2020
+// whitefox 30 July 2020
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -991,7 +991,21 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             if (!is_numeric($command)) {
                 $filtered_command = str_replace("-", " ", $slug->slug);
             }
+/*
+            if (!$slug->isSlug($filtered_command)) {
+                    $t = new Notfound($thing);
 
+                    $datagram = [];
+                    $datagram['thing'] = $t;
+                    $datagram['thing_report'] = $t->thing_report;
+
+                    return $this->renderer->render(
+                        $response->withStatus(404),
+                        'thing.phtml',
+                        $datagram
+                   );
+            }
+*/
             $agent = new Agent($thing, $filtered_command);
 
             $thing_report = $agent->thing_report;
@@ -1021,6 +1035,22 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $thing_report['email'] = $makeemail_agent->email_message;
                     break;
                 default:
+
+                    // Check if it should be a 404 Not Found.
+                    if (!$slug->isSlug($filtered_command)) {
+                        $t = new Notfound($thing);
+
+                        $datagram = [];
+                        $datagram['thing'] = $t;
+                        $datagram['thing_report'] = $t->thing_report;
+
+                        return $this->renderer->render(
+                            $response->withStatus(404),
+                            'thing.phtml',
+                            $datagram
+                        );
+                    }
+
                     if (isset($thing_report['web'])) {
                         $channel = "web";
                     } elseif (isset($thing_report['sms'])) {
@@ -1054,6 +1084,8 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $thing->json->size_overflow .
                     " characters not saved.";
             }
+
+
             //if ($thing->json->size_overflow != false) {echo "Stack write failed.";}
 
             // We have to give a response.  Bleep.
