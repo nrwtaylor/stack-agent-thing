@@ -96,7 +96,7 @@ class Png {
  		$this->thing_report["info"] = "This makes a PNG.";
 
         if (!isset($this->thing_report['help'])) {
- 		    $this->thing_report["help"] = 'This is about dice with more than 6 sides.  Try "ROLL d20"';
+ 		    $this->thing_report["help"] = 'No help available.';
         }
 
         if ($this->agent_input == null) {

@@ -148,7 +148,7 @@ class Baseline extends Agent
     function setBank($bank = null)
     {
         if ($bank == "baseline" or $bank == null) {
-            $this->bank = "baseline-a02";
+            $this->bank = "baseline-a03";
         }
     }
 
@@ -158,7 +158,7 @@ class Baseline extends Agent
         //return $this->bank;
 
         if (!isset($this->state) or $this->state == "easy") {
-            $this->bank = "baseline-a02";
+            $this->bank = "baseline-a03";
         }
 
         if (isset($this->inject) and $this->inject != false) {
@@ -209,6 +209,14 @@ class Baseline extends Agent
 
     public function calcBaseline()
     {
+        if (
+            $this->microtime_agent->epochtimeMicrotime($this->timestamp) <
+            $this->microtime_agent->epochtimeMicrotime($this->last_timestamp)
+        ) {
+            $this->response_time = "X";
+            return;
+        }
+
         $age =
             $this->microtime_agent->epochtimeMicrotime($this->timestamp) -
             $this->microtime_agent->epochtimeMicrotime($this->last_timestamp);
@@ -218,7 +226,9 @@ class Baseline extends Agent
     function makeSMS()
     {
         $sms = "BASELINE " . "\n";
-        $sms .= $this->response_time * 1000 . "ms\n";
+        if (is_numeric($this->response_time)) {
+            $sms .= number_format($this->response_time * 1000) . "ms\n";
+        }
         $sms .= trim($this->short_message) . "\n";
 
         $sms .= "TEXT WEB";
@@ -228,16 +238,31 @@ class Baseline extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
+    public function getBaseline()
+    {
+        $this->lines = $this->loadBank('baseline-a03');
+    }
+
     public function getMessages()
     {
-        if (isset($this->messages)) {
-            return;
-        }
+        $this->messages = $this->loadBank('questions-a01');
+    }
+
+    public function loadBank($bank_name = null)
+    {
+        //if (isset($this->messages)) {
+        //    return;
+        //}
+        $lines = [];
         // Load in the name of the message bank.
         $this->getBank();
 
         // Latest transcribed sets.
-        $this->filename = $this->bank . ".txt";
+
+        if ($bank_name == null) {
+            $bank_name = $this->bank;
+        }
+        $this->filename = $bank_name . ".txt";
 
         $filename = "baseline/" . $this->filename;
         $file = $this->resource_path . $filename;
@@ -302,7 +327,7 @@ class Baseline extends Agent
                     "text" => $text,
                 ];
 
-                $this->messages[] = $message_array;
+                $lines[] = $message_array;
                 //              }
             }
 
@@ -310,6 +335,9 @@ class Baseline extends Agent
         } else {
             // error opening the file.
         }
+
+        //$this->messages = $lines;
+        return $lines;
     }
 
     public function getInject()
@@ -333,11 +361,58 @@ class Baseline extends Agent
         }
     }
 
+    public function getWord()
+    {
+        $tokens = [];
+        $text = "";
+        foreach ($this->lines as $i => $line) {
+            $new_tokens = explode(" ", $line['text']);
+            foreach ($new_tokens as $j => $token) {
+                $tokens[] = preg_replace('/[^\w\s]/', '', $token);
+            }
+            //$tokens = array_merge($new_tokens, $tokens);
+            $text .= $line['text'] . " ";
+        }
+
+        $brilltagger = new Brilltagger($this->thing, "brilltagger");
+        $m = $brilltagger->tag($text);
+        $this->baseline_tokens = $m;
+
+        foreach ($tokens as $i => $token) {
+            if (mb_strlen($token) <= 6) {
+                unset($tokens[$i]);
+            }
+        }
+
+        //        $token = $tokens[array_rand($tokens)];
+        // score tokens
+
+        foreach ($tokens as $i => $token) {
+            if (!isset($score[strtolower($token)])) {
+                $score[strtolower($token)] = 0;
+            }
+            $score[strtolower($token)] += 1;
+        }
+
+        $max_score = 0;
+        foreach ($score as $i => $s) {
+            if ($s > $max_score) {
+                $token = $i;
+                $max_score = $s;
+            }
+        }
+
+        return $token;
+    }
+
     public function getMessage()
     {
         //        $this->getInject();
         $this->getMessages();
 
+        $this->getBaseline();
+
+        $word = $this->getWord();
         $is_empty_inject = true;
 
         if ($this->inject === false) {
@@ -385,6 +460,43 @@ class Baseline extends Agent
         }
 
         $this->message = $message;
+        foreach ($this->baseline_tokens as $i => $tagged_token) {
+            if ($tagged_token['tag'] == "VBD") {
+                $verbs[] = $tagged_token['token'];
+            }
+        }
+
+        $verb = $verbs[array_rand($verbs)];
+
+        // verb not used it appears the interjection is a constant.
+
+        //$text = $text . " " . ucwords($word) . ".";
+
+        if (stripos($text, "<verb>") !== false) {
+            $text = str_replace("<verb>", $word, $text);
+            $text = str_replace("<Verb>", ucwords($word), $text);
+        } else {
+            $text = $text . " " . ucwords($word) . ".";
+        }
+
+        if (rand(1, 6) <= 2) {
+            $line = $this->lines[array_rand($this->lines)];
+            //$phrases = explode(array(".",","),$line);
+            $phrases = preg_split("/ (.|,) /", $line['text']);
+
+            $phrase = $phrases[array_rand($phrases)];
+            $text = $phrase;
+
+            $ngrams = new Ngram($this->thing, "ngram");
+
+            $t = $ngrams->extractNgrams($phrase, 3);
+            if ($t != []) {
+                $phrase = $t[array_rand($t)];
+            }
+
+            $text = $phrase;
+        }
+        //exit();
 
         $this->message['text'] = $text;
 

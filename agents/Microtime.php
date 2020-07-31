@@ -35,15 +35,13 @@ return $text;
 public function epochtimeMicrotime($text = null) {
 if (is_numeric($text)) {return true;}
 
-
 if ($text == null) {$text = $this->thing->microtime();}
 
 $t = explode(' ',$text);
-
+//var_dump($t);
 $non_micro = $t[0] . " " . $t[1];
 $micro = $t[2];
-        $timestamp = strtotime($non_micro) + $micro;
-
+        $timestamp = (float) strtotime($non_micro) + $micro;
 
 
 return $timestamp;
