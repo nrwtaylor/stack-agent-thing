@@ -119,8 +119,3 @@ class Come {
     }
 
 }
-
-
-
-return;
-?>
