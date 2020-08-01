@@ -1,6 +1,6 @@
 <?php
 /**
- * Uuid.php
+ * Repeater.php
  *
  * @package default
  */
@@ -8,7 +8,7 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-// Recognizes and handles UUIDS.
+// Recognizes and handles Repeaters.
 // Does not generate them.  That is a Thing function.
 
 ini_set('display_startup_errors', 1);
@@ -35,23 +35,9 @@ class Repeater extends Agent
 
         $this->aliases = array("learning"=>array("good job"));
 
-//        $this->makePNG();
-
         $this->thing_report['help'] = "Recognizes repeaters.";
 
     }
-
-//function run() {
-//}
-
-    /**
-     *
-     
-    function getQuickresponse() {
-        $agent = new Qr($this->thing, "qr");
-        $this->quick_response_png = $agent->PNG_embed;
-    }
-*/
 
 
 function hasRepeater($text) {
@@ -73,11 +59,7 @@ return false;
             $this->repeaters = array();
         }
 
-//        $pattern = "|[a-zA-Z]{1-2}[1-9]{1}[a-zA-Z]{1-3}|";
-
-
         $pattern = "|[a-zA-Z]{1,2}[1-9]{1}[a-zA-Z]{1,3}|";
-
 
         preg_match_all($pattern, $input, $m);
 
@@ -162,39 +144,20 @@ function set() {
     public function respondResponse() {
         // Thing actions
 
-//        $this->thing->json->setField("settings");
-//        $this->thing->json->writeVariable(array("frequency",
-//                "received_at"),  $this->thing->json->time()
-//        );
-
         $this->thing->flagGreen();
 
-//        $from = $this->from;
-//        $to = $this->to;
-
-//        $subject = $this->subject;
-
-        // Now passed by Thing object
-//        $uuid = $this->uuid;
-//        $sqlresponse = "yes";
-
-//        $message = "Thank you $from here is a UUID.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
-//        $message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
-
-        $this->makeSMS();
+//        $this->makeSMS();
 
         $this->thing_report['email'] = $this->thing_report['sms'];
 
-        $this->makePNG();
+//        $this->makePNG();
 
         $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        //$this->thing_report['thing'] = $this->thing->thing;
-
-        $this->makeWeb();
+//        $this->makeWeb();
     }
 
 
@@ -205,9 +168,6 @@ function set() {
     public function readSubject() {
         $this->extractRepeater($this->input);
 
-//            $pieces = explode(" ", strtolower($this->input));
-
-
         $input = $this->input;
         $whatIWant = $this->input;
         if (($pos = strpos(strtolower($input), "repeater")) !== FALSE) { 
@@ -217,34 +177,6 @@ function set() {
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
-
-
-
-//                if (count($pieces) == 1) {
-//echo "merp";
-
-//$a = new Agent($this->thing, "amateurradioservice 156.580");
-//var_dump($a->response);
-//var_dump($a->sms_message);
-
-
-//exit();
-
-//$a = new Amateurradioservice($this->thing, $filtered_input);
-//$a->doAmateurradioservice($this->input)
-//foreach($this->frequencies as $index=>$frequency) {
-//var_dump($frequency);
-//$a->doAmateurradioservice($frequency);
-
-//$a->input = $frequency;
-//    $a->getMatches($frequency, "CSV");
-//    var_dump($a->message);
-//    var_dump($a->response);
-
-
-//}
-//                }
-
 
     }
 

@@ -100,8 +100,6 @@ class Tone extends Agent
 
     public function extractTones($text)
     {
-        //var_dump($text);
-
         $array = str_split($text);
 
         $this->semitones = [];
@@ -128,20 +126,17 @@ class Tone extends Agent
         }
 
         $this->tones = $matches;
-        $this->response .= 'Found ' . implode(' ', $matches);
 
-        //var_dump($matches);
+if ($matches == array()) {
+$this->response .= "Did not see tones. ";
+} else {
+        $this->response .= 'Found ' . implode(' ', $matches) . ". ";
+}
+
         return;
 
-        //var_dump($this->semitones);
-        //var_dump($text);
+// devstack
 
-        //$regex_string = '#\b(' . implode($this->semitones,"|") . ')\b#';
-        //var_dump($regex_string);
-
-        //$regex_string = '#\b(rain|dry|clear)\b#';
-
-        //$regex_string = '#\B(a|a\#|b|c|d|e|f|g)\B#';
         $regex_string =
             '^\b([CDEFGAB](?:b|bb)*(?:#|##|sus|maj|min|aug)*[\d\/]*(?:[CDEFGAB](?:b|bb)*(?:#|##|sus|maj|min|aug)*[\d\/]*)*)(?=\s|$)(?! \w)/i^';
         //$regex_string = '^\b[A-G](?:m|b|#|sus|\d)*(?:\b|(?<=#))^';

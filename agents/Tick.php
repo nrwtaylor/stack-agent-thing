@@ -60,6 +60,10 @@ class Tick extends Agent
     {
         $this->tick_count = $this->tick_count + 1;
 
+        // Give each tick a microtime stamp.
+        $microtime_agent = new Microtime($this->thing, "microtime");
+
+        // Get a list of RED flagged things needing work.
         $things = $this->thing->db->getRed();
 
         $entities = ['Ant', 'Crow', 'Bear', 'Dog', 'Cat', 'Entity'];
@@ -76,7 +80,6 @@ class Tick extends Agent
 
             foreach ($entities as $j => $entity_name) {
                 if (isset($variables[strtolower($entity_name)])) {
-                    //var_dump($variables[strtolower($entity_name)]);
                     $thing = new Thing($thing['uuid']);
 
                     $this->getAgent(
@@ -95,10 +98,8 @@ class Tick extends Agent
                 $forget_count += 1;
             }
 
-            //}
         }
 
-        //       }
         $this->response .=
             "Counted " .
             $entity_count .
@@ -158,7 +159,6 @@ class Tick extends Agent
             $this->agent_prefix . 'loaded ' . $this->tick_count . ".",
             "DEBUG"
         );
-        //        $this->tick_count = $this->tick_count + 1;
     }
 
     /**
@@ -166,6 +166,7 @@ class Tick extends Agent
      */
     function respond()
     {
+        // devstack test removing this function.
         $this->makeSMS();
         $this->makeMessage();
     }

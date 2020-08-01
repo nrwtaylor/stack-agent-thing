@@ -42,8 +42,8 @@ class Identity extends Agent
     function run() {
 
         $this->makeChoices();
-        $this->makeSMS();
-        $this->makeWeb();
+//        $this->makeSMS();
+//        $this->makeWeb();
 
     }
 
@@ -77,7 +77,6 @@ class Identity extends Agent
      *
      */
     function get() {
-        //        if (!isset($this->requested_state)) {$this->requested_state = "X";}
 
         $this->previous_state = $this->variables_thing->getVariable("state")  ;
 
@@ -233,6 +232,7 @@ class Identity extends Agent
             return;
         }
 
+        // Don't read anything else.
         //        $this->read();
 
         return "Message not understood";

@@ -93,6 +93,13 @@ class Watchdog extends Agent
     public function readSubject()
     {
         $this->response .= "Heard. ";
+        $input = $this->input;
+        if ($input == 'watchdog') {
+            return;
+        }
+
+        $read_agent = new Read($this->thing, "read");
+        $this->response .= $read_agent->response;
     }
 
     function doWatchdog()
@@ -105,9 +112,10 @@ class Watchdog extends Agent
     {
         $things = $this->getThings('tick');
 
-if ($things == null) {
-$this->response .= "No ticks found. ";
-return true;}
+        if ($things == null) {
+            $this->response .= "No ticks found. ";
+            return true;
+        }
 
         $refreshed_at = [];
         foreach ($things as $key => $row) {
@@ -117,9 +125,8 @@ return true;}
 
         $age = 1e99;
 
-
         if (isset($things[0]['refreshed_at'])) {
-//            $age = 1e99;
+            //            $age = 1e99;
             $refreshed_at = $things[0]['refreshed_at'];
             $age = strtotime($this->current_time) - strtotime($refreshed_at);
         }
