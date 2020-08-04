@@ -1516,6 +1516,10 @@ class Agent
             $input = strtolower($agent_input_text);
         }
 
+
+        $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
+
+
         // Handle call intended for humans.
         //        $t = $this->assert($input);
         $human_agent = new Human($this->thing, 'human');
@@ -1531,12 +1535,10 @@ class Agent
         // Then run it.
 
         // So look hear to generalize that.
-        //$agents = new Agents($this->thing, "agents");
-        //foreach ($agents->agents as $agent_class_name=>$agent_name) {
+
         $text = urldecode($agent_input_text);
         $text = strtolower($text);
-        //if ( $text == $this->agent_input) {
-        //}
+
         $arr = explode(' ', trim($text));
 
         $arr = explode('\%20', trim($text));
@@ -1643,7 +1645,6 @@ class Agent
                     return $this->thing_report;
                 }
             }
-            //if (strtolower($input) == 'forget') {
 
             if (strpos($input, 'all') !== false) {
                 // pass through
@@ -1660,8 +1661,8 @@ class Agent
             }
         }
 
-        $check_beetlejuice = false;
-        if ($check_beetlejuice) {
+        $check_beetlejuice = "off";
+        if ($check_beetlejuice == "on") {
             $this->thing->log(
                 'created a Beetlejuice agent looking for incoming message repeats.'
             );

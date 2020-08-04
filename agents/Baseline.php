@@ -268,7 +268,17 @@ class Baseline extends Agent
         $file = $this->resource_path . $filename;
         //        $contents = file_get_contents($file);
 
-        $handle = fopen($file, "r");
+        $handle = @fopen($file, "r");
+
+        if ($handle === false) {
+            $this->title = 'Not available';
+            $this->author = 'Not available';
+            $this->date = 'Not available';
+            $this->version = 'Not available';
+            $lines = array();
+            return $lines;
+        }
+
         $count = 0;
 
         $bank_info = null;
@@ -314,8 +324,6 @@ class Baseline extends Agent
                     continue;
                 }
 
-                //if ($bank_fino == null) {continue;}
-
                 $count += 1;
 
                 //              if ($line_count == 10) {
@@ -343,6 +351,8 @@ class Baseline extends Agent
     public function getInject()
     {
         $this->getMessages();
+
+        if ((!isset($this->messages)) or ($this->messages == array()) ) {return true;}
 
         if ($this->inject == false) {
             $this->num = array_rand($this->messages);
@@ -394,11 +404,14 @@ class Baseline extends Agent
             $score[strtolower($token)] += 1;
         }
 
-        $max_score = 0;
-        foreach ($score as $i => $s) {
-            if ($s > $max_score) {
-                $token = $i;
-                $max_score = $s;
+        $token = false;
+        if (isset($score)) {
+            $max_score = 0;
+            foreach ($score as $i => $s) {
+                if ($s > $max_score) {
+                    $token = $i;
+                    $max_score = $s;
+                }
             }
         }
 
@@ -419,9 +432,12 @@ class Baseline extends Agent
             $is_empty_inject = false;
         }
 
+        $text = "Test.";
+        $message['text'] = $text;
+
         while (true) {
             $this->getInject();
-
+            if (!isset($this->num)) {break;}
             $message = $this->messages[$this->num];
 
             $text = $message['text'];
@@ -466,8 +482,10 @@ class Baseline extends Agent
             }
         }
 
-        $verb = $verbs[array_rand($verbs)];
-
+        $verb = "X";
+        if (isset($verbs)) {
+            $verb = $verbs[array_rand($verbs)];
+        }
         // verb not used it appears the interjection is a constant.
 
         //$text = $text . " " . ucwords($word) . ".";
@@ -476,27 +494,30 @@ class Baseline extends Agent
             $text = str_replace("<verb>", $word, $text);
             $text = str_replace("<Verb>", ucwords($word), $text);
         } else {
-            $text = $text . " " . ucwords($word) . ".";
-        }
-
-        if (rand(1, 6) <= 2) {
-            $line = $this->lines[array_rand($this->lines)];
-            //$phrases = explode(array(".",","),$line);
-            $phrases = preg_split("/ (.|,) /", $line['text']);
-
-            $phrase = $phrases[array_rand($phrases)];
-            $text = $phrase;
-
-            $ngrams = new Ngram($this->thing, "ngram");
-
-            $t = $ngrams->extractNgrams($phrase, 3);
-            if ($t != []) {
-                $phrase = $t[array_rand($t)];
+            if ($word != false) {
+                $text = $text . " " . ucwords($word) . ".";
             }
-
-            $text = $phrase;
         }
-        //exit();
+
+        if (count($this->lines) > 0) {
+            if (rand(1, 6) <= 2) {
+                $line = $this->lines[array_rand($this->lines)];
+                //$phrases = explode(array(".",","),$line);
+                $phrases = preg_split("/ (.|,) /", $line['text']);
+
+                $phrase = $phrases[array_rand($phrases)];
+                $text = $phrase;
+
+                $ngrams = new Ngram($this->thing, "ngram");
+
+                $t = $ngrams->extractNgrams($phrase, 3);
+                if ($t != []) {
+                    $phrase = $t[array_rand($t)];
+                }
+
+                $text = $phrase;
+            }
+	}
 
         $this->message['text'] = $text;
 
@@ -571,12 +592,6 @@ class Baseline extends Agent
             $this->thing->nuuid .
             " - " .
             $this->thing->thing->created_at;
-
-        //        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
-
-        //        $web .= "Inject was created about ". $ago . " ago.";
-        //        $web .= "<p>";
-        //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
 
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";

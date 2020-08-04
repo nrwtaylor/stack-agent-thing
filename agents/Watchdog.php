@@ -110,7 +110,8 @@ class Watchdog extends Agent
 
     function tickWatchdog($depth = null)
     {
-        $things = $this->getThings('tick');
+// This watchdog watches for cron ticks.
+        $things = $this->getThings('cron');
 
         if ($things == null) {
             $this->response .= "No ticks found. ";
@@ -135,7 +136,8 @@ class Watchdog extends Agent
         if ($age > $tick_limit_seconds) {
             //echo 'merp';
             $thing = new Thing(null);
-            $thing->Create('merp', 'merp', 'Watchdog barks');
+// Document as $thing->Create('to', 'from', 'message text')
+            $thing->Create('human', 'watchdog', 'Watchdog barked. It has been quiet since '. $age);
             $thing->thing_report['sms'] = "merp";
             $web = "";
             $web .= "This number was made about ago.";
