@@ -320,5 +320,91 @@ function getInput() {
 
 }
 
+    function discriminateInput($input, $discriminators = null)
+    {
+        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
 
+        if (count($discriminators) > 4) {
+            $minimum_discrimination = $default_discriminator_thresholds[4];
+        } else {
+            $minimum_discrimination =
+                $default_discriminator_thresholds[count($discriminators)];
+        }
+
+        //$input = "optout opt-out opt-out";
+
+        if ($discriminators == null) {
+            $discriminators = ['minutes', 'hours'];
+        }
+
+        $aliases = [];
+
+        $aliases['minutes'] = ['m', 'mins', 'mns', 'minits'];
+        $aliases['hours'] = ['hours', 'h', 'hr', 'hrs', 'hsr'];
+
+if (isset($this->aliases)) {
+$aliases = $this->aliases;
+}
+
+
+        $words = explode(" ", $input);
+
+        $count = [];
+
+        $total_count = 0;
+        // Set counts to 1.  Bayes thing...
+        foreach ($discriminators as $discriminator) {
+            $count[$discriminator] = 1;
+            $total_count = $total_count + 1;
+        }
+        // ...and the total count.
+
+        foreach ($words as $word) {
+            foreach ($discriminators as $discriminator) {
+                if ($word == $discriminator) {
+                    $count[$discriminator] = $count[$discriminator] + 1;
+                    $total_count = $total_count + 1;
+                }
+
+                foreach ($aliases[$discriminator] as $alias) {
+                    if ($word == $alias) {
+                        $count[$discriminator] = $count[$discriminator] + 1;
+                        $total_count = $total_count + 1;
+                    }
+                }
+            }
+        }
+
+        // Set total sum of all values to 1.
+
+        $normalized = [];
+        foreach ($discriminators as $discriminator) {
+            $normalized[$discriminator] = $count[$discriminator] / $total_count;
+        }
+
+        // Is there good discrimination
+        arsort($normalized);
+
+        // Now see what the delta is between position 0 and 1
+
+        foreach ($normalized as $key => $value) {
+            if (isset($max)) {
+                $delta = $max - $value;
+                break;
+            }
+            if (!isset($max)) {
+                $max = $value;
+                $selected_discriminator = $key;
+            }
+        }
+
+        if ($delta >= $minimum_discrimination) {
+            //echo "discriminator" . $discriminator;
+            return $selected_discriminator;
+        } else {
+            return false; // No discriminator found.
+        }
+
+        return true;
+    }
 }
