@@ -151,7 +151,6 @@ class Authcode extends Agent
         //$run_at = $this->current_time;
         //$runtime = 2; //hours until expiry.
 
-        //       $authority_agent = new Authority($this->thing, "authority");
         $authority = $this->authority_agent->makeAuthority($name);
         $this->authority_agent->set();
         $this->getAuthcodes();
@@ -191,9 +190,7 @@ class Authcode extends Agent
 
         $sms =
             $this->authcode_message .
-            " " .
             $authorities_list .
-            " " .
             $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;

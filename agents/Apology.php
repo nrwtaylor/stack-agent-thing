@@ -8,7 +8,7 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Authority extends Agent
+class Apology extends Agent
 {
     public $var = 'hello';
 
@@ -20,56 +20,55 @@ class Authority extends Agent
 
     public function run()
     {
-        $this->doAuthority();
-        //$this->makeAuthority();
+        $this->doApology();
     }
 
     public function set()
     {
         $this->thing->json->setField("variables");
 
-        $this->authority['refreshed_at'] = $this->current_time;
+        $this->apology['refreshed_at'] = $this->current_time;
 
-        $this->thing->json->writeVariable(["authority"], $this->authority);
+        $this->thing->json->writeVariable(["apology"], $this->apology);
     }
 
-    public function isAuthority($authority = null)
+    public function isApology($apology = null)
     {
-        if ($authority == null) {
+        if ($apology == null) {
             return false;
         }
 
-        if (!isset($authority['run_at'])) {
+        if (!isset($apology['run_at'])) {
             return false;
         }
 
-        $age = strtotime($this->current_time) - strtotime($authority['run_at']);
+        $age = strtotime($this->current_time) - strtotime($apology['run_at']);
 
-        if ($age / (60 * 60) < $authority['runtime']) {
+        if ($age / (60 * 60) < $apology['runtime']) {
             return true;
         }
 
         return false;
     }
 
-    public function doAuthority()
+    public function doApology()
     {
         // From perspective of channel.
 
         // Check for a token authority.
         // Check for a list authority.
-        $this->getAuthorities();
+        $this->getApologies();
 
         // Calculate the expiry of the authority.
 
         // Check if the authority has expired. Is in the past.
 
         if ($this->agent_input == null) {
-            $array = ['No authority found.'];
+            $array = ['No apology found.'];
             $k = array_rand($array);
             $v = $array[$k];
 
-            $response = "AUTHORITY | " . $v;
+            $response = "APOLOGY | " . $v;
 
             $this->message = $response; // mewsage?
         } else {
@@ -77,49 +76,49 @@ class Authority extends Agent
         }
     }
 
-    function makeAuthority($text = null)
+    function makeApology($text = null)
     {
-$name = "stack token";
-if ($text != null) {
-$name = $text;
-}
+        $name = "sorry";
+        if ($text != null) {
+            $name = $text;
+        }
 
         $run_at = $this->current_time;
         $runtime = 8; //hours until expiry.
 
-        $authority = [
+        $apology = [
             "name" => $name,
             "run_at" => $run_at,
             "runtime" => $runtime,
         ];
-        $this->authority = $authority;
-$this->response .= "Made an authority. ";
-return $authority;
+        $this->apology = $apology;
+        $this->response .= "Made an apology. ";
+        return $apology;
     }
 
-    function getAuthorities()
+    function getApologies()
     {
-        $this->authorities = [];
-        $things = $this->getThings('authority');
-        foreach ($things as $uuid => $authority) {
-            if (!isset($authority['name'])) {
+        $this->apologies = [];
+        $things = $this->getThings('apology');
+        foreach ($things as $uuid => $apology) {
+            if (!isset($apology['name'])) {
                 continue;
             }
 
-            $response = $this->isAuthority($authority);
+            $response = $this->isApology($apology);
 
             //if ($response === true) {continue;}
             if ($response === false) {
                 continue;
             }
 
-            $this->authorities[$authority['name']][$uuid] = $authority;
+            $this->apologies[$apology['name']][$uuid] = $apology;
         }
     }
 
     function getNegativetime()
     {
-        $agent = new Negativetime($this->thing, "authority");
+        $agent = new Negativetime($this->thing, "apology");
         $this->negative_time = $agent->negative_time; //negative time is asking
     }
 
@@ -129,11 +128,9 @@ return $authority;
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] =
-            "This is an authority keeping an eye on what is allowed.";
-        $this->thing_report["help"] = "This is about being transparent.";
+        $this->thing_report["info"] = "This is an apology.";
+        $this->thing_report["help"] = "This is about saying sorry.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
 
@@ -145,21 +142,21 @@ return $authority;
 
     function makeSMS()
     {
-        $this->node_list = ["authority" => ["authorities", "author"]];
-        $authorities_list = "";
+        $this->node_list = ["apology" => ["apologies", "author"]];
+        $apologies_list = "";
 
-        foreach ($this->authorities as $name => $authority) {
-            $authorities_list .= $name . " / ";
+        foreach ($this->apologies as $name => $apology) {
+            $apologies_list .= $name . " / ";
         }
-        $sms = $this->message . " " . $authorities_list;
+        $sms = $this->message . " " . $apologies_list;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "authority");
-        $choices = $this->thing->choice->makeLinks('authority');
+        $this->thing->choice->Create('channel', $this->node_list, "apology");
+        $choices = $this->thing->choice->makeLinks('apology');
         $this->thing_report['choices'] = $choices;
     }
 

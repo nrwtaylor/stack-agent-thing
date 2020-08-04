@@ -1,13 +1,14 @@
 <?php
+namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 //require '../vendor/autoload.php';
-require '/var/www/html/stackr.ca/vendor/autoload.php';
-require_once '/var/www/html/stackr.ca/agents/message.php';
-require_once '/var/www/html/stackr.ca/agents/block.php';
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
+//require_once '/var/www/html/stackr.ca/agents/message.php';
+//namespace Nrwtaylor\StackAgentThing;require_once '/var/www/html/stackr.ca/agents/block.php';
 
 //require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
 								// factored to
@@ -15,23 +16,15 @@ require_once '/var/www/html/stackr.ca/agents/block.php';
 
 ini_set("allow_url_fopen", 1);
 
-class Shift 
+class Shift extends Agent
 {
 
     public $var = 'hello';
-
-    function __construct(Thing $thing, $agent_input = null) {
-
-        if ($agent_input == null) {$agent_input = "";}
-
-        $this->agent_input = $agent_input;
+public function init() {
 
         $this->keyword = "shift";
 
         $this->requested_state = "X";
-
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->node_list = array("off"=>array("on"=>array("off")));
 
@@ -65,32 +58,9 @@ class Shift
 
         $this->current_time = $this->thing->json->time();
 
-        $this->get(); // Updates $this->elapsed_time;
-
-        // And so at this point we have a timer model.
 
 		$this->test= "Development code"; // Always
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-		$this->thing->log('<pre>Agent "Shift" running on Thing ' . $this->thing->nuuid . ".</pre>");
-		$this->thing->log('<pre>Agent "Shift" received this Thing, "' . $this->subject .  '".</pre>') ;
-
-		$this->readSubject();
-		$this->respond();
-
-		$this->thing->log('<pre> Agent "Shift" completed.</pre>');
-
-        $this->thing_report['keyword'] = $this->state;
-
-        // Display log with agent report by echo.
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
 
 		}
 
@@ -104,7 +74,6 @@ class Shift
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
         $this->hour = date("H",$t);
         $this->minute =  date("i",$t);
 
@@ -194,8 +163,8 @@ class Shift
     function get()
     {
 
-        require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        $findagent_thing = new FindAgent($this->thing, $this->keyword);
+       // require_once '/var/www/html/stackr.ca/agents/findagent.php';
+        $findagent_thing = new Findagent($this->thing, $this->keyword);
 
         foreach (array_reverse($findagent_thing->thing_report['things']) as $thing_obj) {
 
@@ -264,7 +233,7 @@ class Shift
     }
 
 
-    function read()
+    function readShift()
     {
         $this->getBlocks();
 
@@ -312,8 +281,6 @@ class Shift
             }
 
         }
-        return;
-
     }
 
 
@@ -332,13 +299,11 @@ class Shift
 
         $this->setShifts();
 
-        //$this->thing->log("Choice selected was " . $choice);
-
         return $this->state;
     }
 
 
-	private function respond() {
+	public function respondResponse() {
 
 		// Thing actions
 
@@ -354,10 +319,7 @@ class Shift
 
 		$sms_message = "SHIFT = " . strtoupper($this->state);
         $sms_message .= " | Last shift was " . strtoupper($this->previous_state);
-        //$sms_message .= " | Now " . strtoupper($this->state);
-        //$sms_message .= " | Requested " . strtoupper($this->requested_state);
-        //$sms_message .= " | Current " . strtoupper($this->base_thing->choice->current_node);
-        //$sms_message .= " | nuuid " . strtoupper($this->thing->nuuid);
+
         $sms_message .= " | base nuuid " . strtoupper($this->base_thing->nuuid);
 
         if (isset($this->block_list)) {
@@ -416,53 +378,20 @@ class Shift
         if (count($pieces) == 1) {
 
             if ($input == $this->keyword) {
-                $this->read();
+                $this->readShift();
                 return;
             }
-/*
-                        if ( $this->thing->choice->isValidState($input) ) {
-
-echo "valid state";
-				$this->requested_state = $input;
-                                $this->thing->choice->Choose($input);
-                               
-                                return $input;
-                        }
-*/
-
-
-
 
 
                         return "Request not understood";
 
                 }
 
-//echo "meepmeep";
-
     foreach ($pieces as $key=>$piece) {
         foreach ($keywords as $command) {
             if (strpos(strtolower($piece),$command) !== false) {
 
                 switch($piece) {
-/*
-                                                case 'stopwatch':    
-
-                                                        if ($key + 1 > count($pieces)) {
-                                                                //echo "last word is stop";
-                                                                $this->stop = false;
-                                                                return "Request not understood";
-                                                        } else {
-                                                                //echo "next word is:";
-                                                                //var_dump($pieces[$index+1]);
-                                                                $command = $pieces[$key+1];
-
-								if ( $this->thing->choice->isValidState($command) ) {
-                                                                	return $command;
-								}
-                                                        }
-                                                        break;
-*/
 
     case 'on':
         $this->selectChoice('on');
@@ -473,13 +402,8 @@ echo "valid state";
     case 'next':
 
         $choices = $this->base_thing->choice->makeLinks($this->state);
-//        $this->thing_report['choices'] = $choices;
-
-        //$this->thing->choice->Choose("foraging");
-       // $a = $this->base_thing->choice->makeChoices();
 
 $next = strtolower(array_pop($choices['words']));
-//exit();
 
         $this->selectChoice($next);
         return;
@@ -512,15 +436,9 @@ $next = strtolower(array_pop($choices['words']));
         case 'off':
             $this->selectChoice('off');
             return;
-        //case 'reset':
-        //    $this->reset();
-        //    break;
-        //case 'split':
-        //    $this->split();
-        //    break;
     }
 
-    $this->read();
+    $this->readShift();
 
 
 
@@ -533,16 +451,6 @@ $next = strtolower(array_pop($choices['words']));
 		return false;
 
 	
-	}
-
-
-
-
-
-
-	function kill() {
-		// No messing about.
-		return $this->thing->Forget();
 	}
 
        function discriminateInput($input, $discriminators = null) {
@@ -597,7 +505,6 @@ $next = strtolower(array_pop($choices['words']));
                                 if ($word == $discriminator) {
                                         $count[$discriminator] = $count[$discriminator] + 1;
                                         $total_count = $total_count + 1;
-                                                //echo "sum";
                                 }
 
                                 foreach ($aliases[$discriminator] as $alias) {
@@ -605,7 +512,6 @@ $next = strtolower(array_pop($choices['words']));
                                         if ($word == $alias) {
                                                 $count[$discriminator] = $count[$discriminator] + 1;
                                                 $total_count = $total_count + 1;
-                                                //echo "sum";
                                         }
                                 }
                         }
@@ -628,18 +534,13 @@ $next = strtolower(array_pop($choices['words']));
                 // Now see what the delta is between position 0 and 1
 
                 foreach ($normalized as $key=>$value) {
-                        //echo $key, $value;
 
           if ( isset($max) ) {$delta = $max-$value; break;}
                         if ( !isset($max) ) {$max = $value;$selected_discriminator = $key; }
                 }
 
 
-                        echo '<pre> Agent "Usermanager" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-
                 if ($delta >= $minimum_discrimination) {
-                        //echo "discriminator" . $discriminator;
                         return $selected_discriminator;
                 } else {
                         return false; // No discriminator found.
@@ -649,6 +550,3 @@ $next = strtolower(array_pop($choices['words']));
         }
 
 }
-
-?>
-
