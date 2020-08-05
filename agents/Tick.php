@@ -108,6 +108,18 @@ class Tick extends Agent
             $forget_count .
             " Things. ";
 
+        // Spawn stack jobs
+            $datagram = [
+                "to" => "null" . $this->mail_postfix,
+                "from" => "tick",
+                "subject" => "job stack",
+            ];
+
+            $this->thing->spawn($datagram);
+
+
+
+
         if ($this->tick_count > $this->max_tick_count) {
             $this->tick_count = 1;
             $this->doBar();

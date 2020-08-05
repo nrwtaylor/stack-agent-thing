@@ -29,8 +29,6 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
-        // Start the timer
-
         //microtime(true);
         if ($thing == null) {
             $thing = new Thing(null);
@@ -54,6 +52,10 @@ class Agent
 
         $this->thing = $thing;
         $this->thing_report['thing'] = $this->thing;
+
+        if (!isset($this->thing->run_count)) {
+            $this->thing->run_count = 0;
+        }
 
         $this->thing->log("Got thing.");
         // So I could call
@@ -284,6 +286,9 @@ class Agent
      */
     public function make()
     {
+        // So ... don't call yourself.
+        // Don't do a make on yourself.
+
         $this->makeAgent();
         $this->makeResponse();
         //        $this->makeChoices();
@@ -368,27 +373,36 @@ class Agent
         $this->makeKeyword();
         $this->makeLink();
 
-        if (true) {
-            if (!isset($this->link_count)) {
-                $this->link_count = 0;
-            }
-            $this->link_count += 1;
+        // devstack
 
-            //$link_agent = new Link($this->thing,"link");
+        if ($this->agent_name != "web" and !isset($this->thing->web_agent)) {
+            $this->thing->web_agent = new Web($this->thing, "agent");
+            $this->web_state = $this->thing->web_agent->state;
+        }
+
+        //        if ($this->agent_name != "url" and !isset($this->thing->url_agent)) {
+        //            $this->thing->url_agent = new Url($this->thing);
+        //        }
+
+        $web_state = "off";
+        if (isset($this->web_state)) {
+            $web_state = $this->web_state;
+        }
+
+        if (
+            isset($this->thing->web_agent->state) and
+            $this->thing->web_agent->state == "on"
+        ) {
             if (
                 isset($this->thing_report['sms']) and
-                isset($this->thing_report['link'])
+                //and (!$this->thing->url_agent->hasUrls($this->thing_report['sms']))
+                substr($this->thing_report['link'], -4) != "help"
             ) {
-                if (
-                    strpos(
-                        $this->thing_report['sms'],
-                        $this->thing_report['link']
-                    ) !== false
-                ) {
-                    //   echo 'true';
-                } else {
-                    $this->thing_report['sms'] .=
-                        " " . $this->thing_report['link'];
+                if (substr_count($this->thing_report['sms'], "http") == 0) {
+                    $this->thing_report['sms'] =
+                        $this->thing_report['sms'] .
+                        " " .
+                        $this->thing_report['link'];
                 }
             }
         }
@@ -420,6 +434,32 @@ class Agent
         //$agent_thing = new Agent($this->thing, "agent");
         // No result for now
         //$this->test = null;
+    }
+
+    public function parse($text = null)
+    {
+    }
+
+    public function load($resource_name = null)
+    {
+        if ($resource_name == null) {
+            return true;
+        }
+
+        $file = $this->resource_path . '/' . $resource_name;
+        $contents = file_get_contents($file);
+
+        $handle = fopen($file, "r");
+
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                $this->parse($line);
+            }
+            fclose($handle);
+        } else {
+            return true;
+            // error opening the file.
+        }
     }
 
     /**
@@ -1220,6 +1260,11 @@ class Agent
         if ($thing == null) {
             $thing = $this->thing;
         }
+        // Do not call self.
+        // devstack depthcount
+        if (strtolower($this->agent_name) == strtolower($agent_class_name)) {
+            return true;
+        }
 
         //if ($agent_class_name == 'Test') {return false;}
 
@@ -1516,9 +1561,7 @@ class Agent
             $input = strtolower($agent_input_text);
         }
 
-
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
-
 
         // Handle call intended for humans.
         //        $t = $this->assert($input);
