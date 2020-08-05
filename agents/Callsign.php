@@ -149,6 +149,18 @@ class Callsign extends Agent
         $this->callsign_action = $this->variables->getVariable("action");
         $this->callsign_text = $this->variables->getVariable("callsign");
         $this->refreshed_at = $this->variables->getVariable("refreshed_at");
+
+        $this->getZones();
+    }
+
+    public function getZones()
+    {
+        $city_agent = new City($this->thing, "city");
+        $this->city_name = $city_agent->city_name;
+        $this->zones = [];
+        if ($this->city_name == 'Vancouver') {
+            $this->zones = ['VE7', 'VA7'];
+        }
     }
 
     /**
@@ -408,6 +420,11 @@ class Callsign extends Agent
             $hits = 0;
             $hit_flag = false;
 
+            $zone = substr($callsign, 0, 3);
+            if (in_array($zone, $this->zones)) {
+                $score = $score * 10;
+            }
+
             $multiplier = 1;
             foreach ($tokens as $i => $token) {
                 $matched_tokens = 0;
@@ -520,7 +537,6 @@ class Callsign extends Agent
         $text_characters = str_split($text);
         $score = 0;
         foreach ($callsign_characters as $i => $value) {
-
             $callsign_character = strtolower($callsign_characters[$i]);
             $text_character = strtolower($text_characters[$i]);
 
@@ -859,10 +875,10 @@ class Callsign extends Agent
                 }
             }
         }
-$first_name = "X";
-if (isset($this->callsign['first_name'])) {
-        $first_name = $this->callsign["first_name"];
-}
+        $first_name = "X";
+        if (isset($this->callsign['first_name'])) {
+            $first_name = $this->callsign["first_name"];
+        }
 
         // If more than one first name is returned.
         $arr = explode(" ", $first_name);
@@ -878,14 +894,47 @@ if (isset($this->callsign['first_name'])) {
         }
 
         if (count($this->callsigns) > 1) {
+            $callsigns = $this->callsigns;
+
+            $score = [];
+            foreach ($this->callsigns as $key => $row) {
+                $score[$key] = $row['score'];
+            }
+            array_multisort($score, SORT_DESC, $callsigns);
+
+            $t = "";
+
+            foreach ($callsigns as $callsign => $call) {
+                if (mb_strlen($t) > 80) {break;}
+                if (!isset($last_score)) {
+                    $last_score = $call['score'];
+                }
+
+                //$t .= $callsign ." " . $call['first_name'] . " [" . $call['score']."] / ";
+
+                if ($call['score'] == $last_score) {
+                    $t .= $callsign . " " . $call['first_name'] . " / ";
+                    // . $call['score']."] / ";
+                }
+
+                if ($call['score'] != $last_score) {
+                    break;
+                }
+
+                $last_score = $call['score'];
+            }
+
             $this->response =
                 "Read " .
                 count($this->callsigns) .
-                " callsigns. Best " .
-                $this->callsign["callsign"] .
-                " " .
-                $first_name .
-                ".";
+                " callsigns. " .
+                // "Best " .
+                //                $this->callsign["callsign"] .
+                //                " " .
+                //                $first_name .
+                //                ". " .
+                "Might be " .
+                $t;
             return;
         }
 
