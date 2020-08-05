@@ -160,6 +160,20 @@ class Text extends Agent
         return $this->codes;
     }
 
+public function punctuateText($text) {
+
+$text = trim($text);
+if ( substr($text, -1) == ".") {return $text;}
+
+if ( substr($text, -1) == "!") {return $text;}
+if ( substr($text, -1) == "?") {return $text;}
+
+$text .= ".";
+return $text;
+
+
+}
+
     function extractNumbers($input = null)
     {
         // Numbers as text.

@@ -7,6 +7,8 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// devstack
+
 class Clerk extends Agent
 {
     public $var = 'hello';
@@ -14,74 +16,107 @@ class Clerk extends Agent
     function init()
     {
         $this->api_key = $this->thing->container['api']['clerk'];
+        $this->account_name = 'thing';
+        $this->thing_report['help'] = 'Try CLERK CREDIT THING 10.';
+        $this->amount = 0;
     }
 
     public function run()
     {
         $this->thing->flagGreen();
 
-        $new_number =
+        $this->new_number =
             $this->thing->account[$this->account_name]->balance['amount'];
-        $this->response .= "new number :" . $new_number;
+
+        $this->response .= "new number :" . $this->new_number;
+
+        $this->response .= 'Account name ' . $this->account_name . '. ';
 
         $this->message =
             "Thank you for your request.  The following accounting was done: " .
-            $old_number .
+            $this->prior_balance .
             " + " .
             $this->amount .
             " = " .
-            $new_number;
+            $this->balance;
     }
 
     public function makeSMS()
     {
-        $sms = $this->response;
+        $sms = "CLERK | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
+    public function creditClerk()
+    {
+        $this->response .= 'identified a Credit transaction.';
+        $this->old_number =
+            $this->thing->account[$this->account_name]->balance['amount'];
+
+        if (!isset($this->amount)) {
+            $this->response .= "An amount is needed. ";
+            return true;
+        }
+
+        $this->thing->account[$this->account_name]->Credit($this->amount);
+        $this->amount =
+            $this->thing->account[$this->account_name]->balance['amount'];
+    }
+
+    public function getBalance()
+    {
+        $this->balance =
+            $this->thing->account[$this->account_name]->balance['amount'];
+    }
+
+    public function createClerk()
+    {
+        $this->response .= 'identified an Account creation transaction.';
+        $balance = [
+            "amount" => $this->amount,
+            "attribute" => $this->attribute,
+            "unit" => $this->unit,
+        ];
+        $this->thing->newAccount($this->account_name, $balance);
+        $this->old_number = 0;
+    }
     public function readSubject()
     {
         $command = $this->assert($this->input);
+        $this->prior_balance = $this->getBalance();
+        $this->amount = $this->extractAmount();
 
-        switch ($command) {
+        $input_agent = new Input($this->thing, "input");
+        $discriminators = ["statement", "create", "credit", "destroy"];
+        $input_agent->aliases['statement'] = ['statement'];
+        $input_agent->aliases['create'] = ['create'];
+        $input_agent->aliases['credit'] = ['credit'];
+        $input_agent->aliases['destroy'] = ['destroy'];
+
+        $response = $input_agent->discriminateInput($command, $discriminators);
+
+        switch ($response) {
             case 'credit':
-                $this->response .= 'identified a Credit transaction.';
-                $old_number =
-                    $this->thing->account[$this->account_name]->balance[
-                        'amount'
-                    ];
-
-                $this->thing->account[$this->account_name]->Credit(
-                    $this->amount
-                );
-                echo $this->thing->account[$this->account_name]->balance[
-                    'amount'
-                ];
+                $this->creditClerk();
                 break;
             case 'create':
-                $this->response .=
-                    'identified an Account creation transaction.';
-                $balance = [
-                    "amount" => $this->amount,
-                    "attribute" => $this->attribute,
-                    "unit" => $this->unit,
-                ];
-                $this->thing->newAccount($this->account_name, $balance);
-                $old_number = 0;
+                $this->createClerk();
                 break;
-
             case 'destroy':
                 //etc
                 break;
 
+            case false:
+                $this->response .= "Noted. ";
             default:
             //echo 'default';
         }
 
         // Look for one number in the subject line.
         // If there is more than one, don't use any.
-        $this->amount = $this->getAmount();
+        //        $this->amount = $this->extractAmount();
+        $this->getBalance();
 
         if ($this->scoreCredit() > $this->scoreCreate()) {
             // Likely subject is a Credit instruction
@@ -94,7 +129,7 @@ class Clerk extends Agent
         return false;
     }
 
-    public function getAmount()
+    public function extractAmount()
     {
         //$this->subject = "1 2 -3 -4.5,56 90 123.01 -80.01 100,23 -34, 100,000,000";
 
@@ -113,6 +148,7 @@ class Clerk extends Agent
 
         if (count($numbers) == 1) {
             $this->amount = $numbers[0];
+            $this->response .= "Got " . $this->amount . " amount. ";
             return $numbers[0];
         }
         if (count($numbers) > 1) {
@@ -133,7 +169,6 @@ class Clerk extends Agent
 
         $input = strtolower($this->subject);
         $pieces = explode(" ", strtolower($input));
-
         foreach ($keywords as $command) {
             foreach ($pieces as $key => $piece) {
                 if (strpos(strtolower($piece), $command) !== false) {

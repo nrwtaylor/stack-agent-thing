@@ -7,6 +7,8 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// devstack
+
 class Train extends Agent
 {
     // A Train is a headcode with a alias (name).
@@ -196,6 +198,9 @@ class Train extends Agent
 
     function parseTrain()
     {
+
+
+
         return;
         // Given closest train in $this->train_thing.
 
@@ -297,6 +302,7 @@ function doTrain() {
             "variables " . $this->default_train_name . " " . $this->from
         );
 */
+
         $this->variables_agent = new Variables(
             $this->train_thing,
             "variables " . $this->default_train_name . "_" . $this->head_code ." ". $this->from
@@ -305,6 +311,7 @@ function doTrain() {
 
         //$this->train_thing->thing = $this->variables_agent->thing;
         $this->train_thing = $this->variables_agent->thing;
+
         //$this->response .= "Got train. ";
 
         $this->priorTrain();
@@ -315,7 +322,6 @@ function doTrain() {
 
 //        $this->response .= 'Looking for train ' . $this->head_code . '. ';
 
-
         if (!isset($this->trains)) {
             $this->getTrains();
         }
@@ -324,7 +330,6 @@ if (isset($this->trains[1])) {
 
 //        $this->response .=
 //            'Got last head code ' . $this->trains[1]['headcode'] . '. ';
-
 
         if ($this->head_code != $this->trains[1]['headcode']) {
             $this->response .= "Head code changed. ";
@@ -375,7 +380,6 @@ if (isset($this->trains[1])) {
         $this->getIndex();
         $this->getRunat();
         $this->getAlias();
-
         // Now have a train thing.
     }
 
@@ -569,6 +573,39 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             }
 */
         }
+
+if ($this->trains == array()) {
+
+$refreshed_at = $this->current_time;
+            $train = [
+                "state" => 'red',
+                "index" => 1,
+                "headcode" => '0z99',
+                "flag" => 'green',
+                "runat" => [
+                    "day" => 'X',
+                    "hour" => 'X',
+                    "minute" => 'X',
+                ],
+                "endat" => [
+                    "day" => 'X',
+                    "hour" => 'X',
+                    "minute" => 'X',
+                ],
+                "runtime" => 'X',
+                "alias" => 'Train',
+                "available" => 'Z',
+                "quantity" => 'X',
+                "route" => 'X',
+                "consist" => 'X',
+                "refreshed_at" => $refreshed_at,
+            ];
+
+
+$this->trains[] = $train;
+}
+
+//var_dump($this->trains);
     }
 
     public function selectTrain()
@@ -1110,7 +1147,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
         //exit();
     }
-
+/*
     function getVariable($variable_name = null, $variable = null)
     {
         // This function does a minor kind of magic
@@ -1157,7 +1194,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         // setting is found.
         return false;
     }
-
+*/
     function extractEndat()
     {
         if (!isset($this->events)) {
@@ -1359,6 +1396,13 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
     function getAvailable()
     {
+
+$available_agent = new Available($this->thing, "train");
+
+
+if (!isset($this->runat_agent)) {
+$this->runat_agent = new Runat($this->thing, "runat");
+}
         // Calculate the amount of time remaining for the train
 
         if (!isset($this->runat) and !isset($this->endat)) {

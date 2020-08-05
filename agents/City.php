@@ -111,8 +111,6 @@ class City
 
         $city->setVariable("city_name", $this->city_name);
         $city->setVariable("refreshed_at", $this->refreshed_at);
-
-        return;
     }
 
     function isCode()
@@ -160,8 +158,6 @@ class City
         // Pull up the current headcode
         $this->get();
         // So this should create a headcode in the next quantity unit.
-
-        return;
     }
 
     function getCity($selector = null)
@@ -286,9 +282,12 @@ class City
 
         // Add in a set of default cities
         $file = $this->resource_path .'city/cities.txt';
-        $contents = file_get_contents($file);
 
-        $handle = fopen($file, "r");
+//        $contents = file_get_contents($file);
+
+        $handle = @fopen($file, "r");
+
+        if ($handle === false) {return true;}
 
         if ($handle) {
 
@@ -988,10 +987,3 @@ class City
 	}
 
 }
-
-/* More on places
-
-Lots of different ways to number places.
-
-*/
-?>

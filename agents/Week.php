@@ -30,8 +30,7 @@ class Week extends Agent
     {
         $this->test = "Development code";
 
-        $this->thing_report["info"] =
-            "A WEEK is a repeating pattern of days.";
+        $this->thing_report["info"] = "A WEEK is a repeating pattern of days.";
         $this->thing_report["help"] = 'Click on the image for a PDF.';
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
@@ -60,20 +59,19 @@ class Week extends Agent
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
 
-
         $this->canvas_size_x = $this->default_canvas_size_x;
         $this->canvas_size_y = $this->default_canvas_size_y;
 
-$this->size = min($this->default_canvas_size_x, $this->default_canvas_size_y);
-
+        $this->size = min(
+            $this->default_canvas_size_x,
+            $this->default_canvas_size_y
+        );
     }
 
     public function set()
     {
         $this->setWeek();
     }
-
-    // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
 
     /**
      *
@@ -133,7 +131,7 @@ $this->size = min($this->default_canvas_size_x, $this->default_canvas_size_y);
             $text = "X";
         } else {
             $t = $this->retain_to;
-             $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
+            $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
             //$text = "CLICK FOR PDF";
         }
         $this->timestamp = $text;
@@ -292,7 +290,6 @@ $this->size = min($this->default_canvas_size_x, $this->default_canvas_size_y);
             return true;
         }
 
-
         $this->thing->log(
             'loaded decimal week ' . $this->decimal_week . '.',
             "INFORMATION"
@@ -408,16 +405,6 @@ $this->size = min($this->default_canvas_size_x, $this->default_canvas_size_y);
         $web .= $this->html_image;
         $web .= "</a>";
         $web .= "<br>";
-
-        //$web .= $this->selector_hex . "<br>";
-        //$web .= $this->selector_dec . "<br>";
-        //$web .= $this->angle . "<br>";
-        //$web .= $this->selector . "<br>";
-
-        //$this->timestampWeek($this->retain_to);
-        //$web .= ucwords($this->timestamp);
-
-        //$web .= "<p>";
 
         $this->thing_report['web'] = $web;
     }
@@ -607,7 +594,7 @@ $this->size = min($this->default_canvas_size_x, $this->default_canvas_size_y);
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
         $size = $canvas_size_x - 90;
-$size = 20;
+        $size = 20;
         $angle = 0;
 
         $bbox = imagettfbbox($size, $angle, $font, $text);
@@ -624,7 +611,7 @@ $size = 20;
         $width = imagesx($this->image);
         $height = imagesy($this->image);
         $pad = 0;
-//        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->black, $font, $text);
+        //        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->black, $font, $text);
 
         //imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
@@ -712,226 +699,6 @@ $size = 20;
 
     /**
      *
-     * @param unknown $r
-     * @param unknown $g
-     * @param unknown $b
-     * @param unknown $s
-     * @return unknown
-     */
-    public function hextopixel($r, $g, $b, $s)
-    {
-        if ($r + $g + $b != 0) {
-            return;
-        }
-
-        $y = (3 / 2) * $s * $b;
-        // $b = 2/3 * $y / $s
-        $x = sqrt(3) * $s * ($b / 2 + $r);
-        //$x = - sqrt(3) * $s * ( $b/2 + $g )
-        //$r = (sqrt(3)/3 * $x - $y/3 ) / $s
-        //$g = -(sqrt(3)/3 * $x + $y/3 ) / $s
-
-        return [$x, $y];
-    }
-
-    /**
-     *
-     * @param unknown $q
-     * @param unknown $r
-     * @param unknown $s
-     * @param unknown $center_x
-     * @param unknown $center_y
-     * @param unknown $angle
-     * @param unknown $size
-     * @param unknown $color    (optional)
-     */
-    public function drawHexagon(
-        $q,
-        $r,
-        $s,
-        $center_x,
-        $center_y,
-        $angle,
-        $size,
-        $color = null,
-        $quantity = null
-    ) {
-        //if ($color == null) {
-        //    $color = $this->white;
-        //    $color_outline = $this->grey;
-        //}
-
-        list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
-
-        if ($this->draw_center == true) {
-            // Draw centre points of hexagons
-            imageline(
-                $this->image,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $this->black
-            );
-        }
-
-        $arr = [0, 1, 2, 3, 4, 5];
-        list($x_old, $y_old) = $this->hex_corner(
-            $x_pt,
-            $y_pt,
-            $size,
-            $angle,
-            count($arr) - 1
-        );
-        $point_array = [];
-        foreach ($arr as &$value) {
-            list($x, $y) = $this->hex_corner(
-                $x_pt,
-                $y_pt,
-                $size,
-                $angle,
-                $value
-            );
-
-            $point_array[] = $x + $center_x;
-            $point_array[] = $y + $center_y;
-            //imageline($this->image, $x+60, $y+60, $x_old+60, $y_old+60, $this->black);
-
-            $x_old = $x;
-            $y_old = $y;
-        }
-
-        if ($this->draw_outline == true) {
-            imagepolygon(
-                $this->image,
-                $point_array,
-                count($point_array) / 2,
-                $this->black
-            );
-        }
-        /*
-        if ($color == null) {
-            $color_outline = $this->grey;
-            $r = 155;
-            $g = 183;
-            $b = 217;
-            $this->rgbcolor(rand($r-20,$r+10),rand($g-10,$g+10),rand($b-40, $b+20));
-            // Need consistency from image to image
-            $this->rgbcolor(155,183,217);
-            $color = $this->rgb;
-        }
-*/
-
-        if ($color != null) {
-            // Because this determines what is frozen and not frozen
-
-            //        if ($color != $this->white) {
-
-            $this->rgbcolor(100, 100, 217);
-            $color_outline = $this->rgb;
-
-            $r = 155;
-            $g = 183;
-            $b = 217;
-            $this->rgbcolor(
-                rand($r - 20, $r + 10),
-                rand($g - 10, $g + 10),
-                rand($b - 40, $b + 20)
-            );
-            // Need consistency from image to image
-            $this->rgbcolor(155, 183, 217);
-            $color = $this->rgb;
-
-            //            $color_outline = $color;
-
-            // $color = $this->rgb;
-
-            // Flag
-            if (isset($this->flag->state)) {
-                //                $color= $this->{$this->flag->state};
-
-                // Draw a white rectangle
-                if (!isset($this->flag->state) or $this->flag->state == false) {
-                    $color = $this->grey;
-                } else {
-                    if (isset($this->{$this->flag->state})) {
-                        $color = $this->{$this->flag->state};
-                    } elseif (isset($this->{'flag_' . $this->flag->state})) {
-                        $color = $this->{'flag_' . $this->flag->state};
-                    }
-                    // $color_outline = $color;
-                }
-                $color_outline = $color;
-            }
-
-            if (!isset($this->events[0])) {
-                $this->event = false;
-            } else {
-                $this->event = $this->events[0];
-            }
-
-            if ($quantity == null) {
-                $quantity = 1;
-            }
-            $color = $this->ice_color_palette[$quantity];
-
-            // Vancouver Pride 2018
-            if (
-                isset($this->event) and
-                    $this->event != false and
-                    $this->event->event_name == "vancouver pride 2018" or
-                isset($this->flag->state) and $this->flag->state == "rainbow"
-            ) {
-                $this->selector_hex = substr($this->uuid, 0, 1); // A random number from 0 to 9.
-                $this->selector_dec = $this->hextodec($this->selector_hex);
-
-                $this->selector = $this->selector_dec % 3;
-                $index_array = [
-                    ($q + 10.5) * 0.28,
-                    ($q + 11) * 0.28,
-                    ($q + 11) * 0.265,
-                ];
-                $color_index = $index_array[$this->selector];
-                $color = $this->green;
-
-                if (isset($this->color_palette[$color_index])) {
-                    $color = $this->color_palette[$color_index];
-                    $color_outline = $this->rgb;
-                }
-
-                if ($color_index < 0 or $color_index >= 6) {
-                    $color = $this->rgb;
-                    $color_outline = $this->white;
-                }
-            }
-
-            imagefilledpolygon(
-                $this->image,
-                $point_array,
-                count($point_array) / 2,
-                $color
-            );
-            //imagefilledpolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
-
-            imagepolygon(
-                $this->image,
-                $point_array,
-                count($point_array) / 2,
-                $color_outline
-            );
-            /*
-            if ((isset($this->event)) and ($this->event->event_name == "vancouver pride 2018")) {
-                imagepolygon($this->image, $point_array, count($point_array)/2, $color_outline);
-            } else {
-                $this->rgbcolor(100,100,217);
-                imagepolygon($this->image, $point_array, count($point_array)/2, $this->rgb);
-            }
-*/
-        }
-    }
-
-    /**
-     *
      */
     public function setProbability()
     {
@@ -998,37 +765,6 @@ $size = 20;
                 }
                 break;
         }
-    }
-
-    /**
-     *
-     * @param unknown $value
-     * @return unknown
-     */
-    public function hextodec($value)
-    {
-        $n = $value;
-
-        if ($value == 'a') {
-            $n = 10;
-        }
-        if ($value == 'b') {
-            $n = 11;
-        }
-        if ($value == 'c') {
-            $n = 12;
-        }
-        if ($value == 'd') {
-            $n = 13;
-        }
-        if ($value == 'e') {
-            $n = 14;
-        }
-        if ($value == 'f') {
-            $n = 15;
-        }
-
-        return $n;
     }
 
     /**
@@ -1320,13 +1056,27 @@ $size = 20;
         }
     }
 
-public function drawWeek() {
-$size = null;
+    public function drawWeek($type = null)
+    {
+        if ($type == null) {
+            $type = $this->type;
+        }
+        if ($type == "wedge") {
+            $this->wedgeWeek();
+            return;
+        }
+
+        $this->sliceWeek();
+    }
+
+    public function sliceWeek()
+    {
+        $size = null;
         if ($size == null) {
             $size = $this->size;
         }
-$border = 100;
-$size = 1000- $border;
+        $border = 100;
+        $size = 1000 - $border;
 
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
@@ -1336,27 +1086,64 @@ $size = 1000- $border;
             $canvas_size_y = $this->default_canvas_size_y;
         }
 
+        $width_slice = ($canvas_size_x - 2 * $border) / 7;
 
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
 
-            // Draw out the state
-            $center_x = $canvas_size_x / 2;
-            $center_y = $canvas_size_y / 2;
+        // devstack rotation not yet implemented
+        if (!isset($this->angle)) {
+            $this->angle = 0;
+        }
 
-            // devstack rotation not yet implemented
-            if (!isset($this->angle)) {
-                $this->angle = 0;
-            }
+        foreach (range(0, 7, 1) as $i) {
+            imageline(
+                $this->image,
+                $width_slice * $i,
+                0,
+                $width_slice * $i,
+                $canvas_size_y,
+                $this->black
+            );
+        }
+    }
 
-$init_angle = -1 * pi()/2;
-            $angle = 2 * 3.14159 / 7;
-//$x_pt =  230;
-//$y_pt = 230;
+    public function wedgeWeek()
+    {
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
 
-foreach(range(0,6,1) as $i) {
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
 
-$x_pt = $size * cos(($angle * $i)+ $init_angle);
-$y_pt = $size * sin(($angle * $i) + $init_angle);
-/*
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        // devstack rotation not yet implemented
+        if (!isset($this->angle)) {
+            $this->angle = 0;
+        }
+
+        $init_angle = (-1 * pi()) / 2;
+        $angle = (2 * 3.14159) / 7;
+        //$x_pt =  230;
+        //$y_pt = 230;
+
+        foreach (range(0, 6, 1) as $i) {
+            $x_pt = $size * cos($angle * $i + $init_angle);
+            $y_pt = $size * sin($angle * $i + $init_angle);
+            /*
             imageline(
                 $this->image,
                 $center_x + $x_pt,
@@ -1374,24 +1161,19 @@ $y_pt = $size * sin(($angle * $i) + $init_angle);
                 $center_y + $y_pt,
                 $this->black
             );
+        }
 
-}
-/*
-            imageline(
-                $this->image,
-                0,
-                0,
-                30,
-                30,
-                $this->black
-            );
-*/
-
-imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->black);
-
-
-
-}
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            0,
+            360,
+            $this->black
+        );
+    }
 
     public function get()
     {
@@ -1490,7 +1272,7 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
             $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
 
-//$pdf->Link(175,5,30,30, $link);
+            //$pdf->Link(175,5,30,30, $link);
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -1504,8 +1286,7 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
 
             $pdf->MultiCell(150, $line_height, $t, 0);
 
-//$pdf->Link(15,7,150,10, $link);
-
+            //$pdf->Link(15,7,150,10, $link);
 
             $y = $pdf->GetY() + 0.95;
             $pdf->SetXY(15, $y);
@@ -1530,7 +1311,6 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
-
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
@@ -1545,6 +1325,7 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
      */
     public function readSubject()
     {
+        $this->type = "wedge";
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
@@ -1569,6 +1350,15 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
                 $this->response .= "Made a week. Which will pass. ";
                 return;
             }
+        }
+
+        $input_agent = new Input($this->thing, "input");
+        $discriminators = ['wedge', 'slice'];
+        $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
+        $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
+        $type = $input_agent->discriminateInput($input, $discriminators);
+        if ($type != false) {
+            $this->type = $type;
         }
 
         $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
@@ -1658,8 +1448,7 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
                             $this->size = 2.5;
                             $this->lattice_size = 40;
                             $this->decimalUuid();
-                            $this->response .=
-                                "Saw request for a UUID week. ";
+                            $this->response .= "Saw request for a UUID week. ";
                             return;
 
                         case 'hex':
@@ -1691,10 +1480,7 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
 
         $this->getWeek();
 
-        if (
-            !isset($this->decimal_week) or
-            $this->decimal_week == null
-        ) {
+        if (!isset($this->decimal_week) or $this->decimal_week == null) {
             $this->decimal_week = rand(1, rand(1, 10) * 1e11);
         }
 
@@ -1714,8 +1500,7 @@ imagearc($this->image, $center_x, $center_y, 2* $size, 2* $size, 0, 360, $this->
 
         if ($this->agent_input == "week iterate") {
             $this->thing->log(
-                $this->agent_prefix .
-                    'received a command to update the week.',
+                'received a command to update the week.',
                 "INFORMATION"
             );
             $this->updateWeek();

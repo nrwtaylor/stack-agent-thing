@@ -275,7 +275,7 @@ class Baseline extends Agent
             $this->author = 'Not available';
             $this->date = 'Not available';
             $this->version = 'Not available';
-            $lines = array();
+            $lines = [];
             return $lines;
         }
 
@@ -352,7 +352,9 @@ class Baseline extends Agent
     {
         $this->getMessages();
 
-        if ((!isset($this->messages)) or ($this->messages == array()) ) {return true;}
+        if (!isset($this->messages) or $this->messages == []) {
+            return true;
+        }
 
         if ($this->inject == false) {
             $this->num = array_rand($this->messages);
@@ -437,7 +439,9 @@ class Baseline extends Agent
 
         while (true) {
             $this->getInject();
-            if (!isset($this->num)) {break;}
+            if (!isset($this->num)) {
+                break;
+            }
             $message = $this->messages[$this->num];
 
             $text = $message['text'];
@@ -517,9 +521,12 @@ class Baseline extends Agent
 
                 $text = $phrase;
             }
-	}
+        }
+        $text_agent = new Text($this->thing, "text");
 
-        $this->message['text'] = $text;
+        $punctuated_text = $text_agent->punctuateText($text);
+
+        $this->message['text'] = $punctuated_text;
 
         $this->text = trim($this->message['text'], "//");
 
