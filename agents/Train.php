@@ -28,7 +28,7 @@ class Train extends Agent
 
     function init()
     {
-        $this->start_time = microtime(true);
+//        $this->start_time = microtime(true);
 
         $this->keyword = "train";
 
@@ -38,8 +38,6 @@ class Train extends Agent
         $this->test = "Development code"; // Always
 
         $this->num_hits = 0;
-
-        //        $this->agent_prefix = 'Agent "Train" ';
 
         $this->node_list = ["red" => ["green" => ["red"]]];
         $this->thing->choice->load('train');
@@ -64,7 +62,11 @@ class Train extends Agent
         $this->negative_time = true;
 
         $this->default_train_name = "train";
+$this->initTrain();
     }
+
+public function initTrain() {
+}
 
     function idTrain($text = null)
     {
@@ -146,18 +148,9 @@ class Train extends Agent
         $this->variables_agent->setVariable("state", $requested_state);
         $this->variables_agent->setVariable("head_code", $this->head_code);
 
-        //        $this->variables_agent->setVariable("alias", $this->alias);
         $this->setAlias();
-
-        //        $this->variables_agent->setVariable("index", $this->index);
         $this->setIndex();
-
-        //        $this->variables_agent->setVariable("run_at", $this->run_at);
-
         $this->setRunat();
-
-        //        $this->variables_agent->setVariable("quantity", $this->quantity);
-
         $this->setQuantity();
 
         $this->variables_agent->setVariable("available", $this->available);
@@ -308,7 +301,6 @@ function doTrain() {
             "variables " . $this->default_train_name . "_" . $this->head_code ." ". $this->from
         );
 
-
         //$this->train_thing->thing = $this->variables_agent->thing;
         $this->train_thing = $this->variables_agent->thing;
 
@@ -368,18 +360,25 @@ if (isset($this->trains[1])) {
                         $this->getFlag();
                     }
                     $this->flag->state = $train['flag'];
+$this->train = $train;
                     return;
                 }
             }
         }
 }
+// No prior train found.
         $this->getAvailable();
         $this->getFlag();
         $this->getQuantity();
         $this->getState();
         $this->getIndex();
         $this->getRunat();
+$this->getEndat();
+$this->getRuntime();
         $this->getAlias();
+
+    $this->train = ['runat'=>$this->runat, 'runtime'=>$this->runtime,
+    'alias'=>$this->alias,'flag'=> $this->flag->state];
         // Now have a train thing.
     }
 
@@ -1396,9 +1395,9 @@ $this->trains[] = $train;
 
     function getAvailable()
     {
-
+$this->available = "X";
+return;
 $available_agent = new Available($this->thing, "train");
-
 
 if (!isset($this->runat_agent)) {
 $this->runat_agent = new Runat($this->thing, "runat");
@@ -1492,7 +1491,11 @@ $this->runat_agent = new Runat($this->thing, "runat");
     {
         $this->runtime_agent = new Runtime($this->train_thing, "runtime");
 
-        $this->runtime = $this->runtime_agent->runtime;
+$this->runtime = $this->runtime_agent->runtime;
+if ($this->runtime_agent->runtime == false) {
+$runtime = "X";
+}
+        $this->runtime = $runtime;
 
         return;
 
@@ -1821,6 +1824,8 @@ $this->runat_agent = new Runat($this->thing, "runat");
         $this->flag = new Flag($this->train_thing, 'flag');
         //$this->flag = $this->flag_thing->state;
 
+if ($this->flag->state === false) {$this->flag->state = "X";}
+
         return $this->flag->state;
     }
     /*
@@ -1911,7 +1916,6 @@ $this->runat_agent = new Runat($this->thing, "runat");
     {
         $this->thing->log("reset");
 
-        //$this->get();
         // Set elapsed time as 0 and state as stopped.
         $this->elapsed_time = 0;
         $this->thing->choice->Create('train', $this->node_list, 'red');
@@ -1930,7 +1934,6 @@ $this->runat_agent = new Runat($this->thing, "runat");
     function stop()
     {
         $this->thing->log("stop");
-        //$this->get();
         $this->thing->choice->Choose('red');
         //$this->set();
         //                $this->elapsed_time = time() - strtotime($time_string);
@@ -2239,15 +2242,15 @@ $this->runat_agent = new Runat($this->thing, "runat");
             $txt .= "" . "runat " . $runat_text . " ";
         }
 
-        $txt .= " " . "runtime " . $array->runtime;
+        $txt .= " " . "runtime " . $array['runtime'];
 
         if (isset($array->endat)) {
             $endat_text =
-                $array->endat->day .
+                $array['endat']->day .
                 " " .
-                $array->endat->hour .
+                $array['endat']->hour .
                 ":" .
-                $this->endat->minute;
+                $array['endat']->minute;
 
             $txt .= " " . "endat " . $endat_text;
         }
@@ -2404,7 +2407,7 @@ $this->runat_agent = new Runat($this->thing, "runat");
         $test_message .= '<br>runtime ' . $this->runtime;
 
         if (!isset($this->sms_message)) {
-            $this->makeSMS;
+            $this->makeSMS();
         }
         $test_message .= '<p>';
         $test_message .= 'SMS Text';
@@ -2444,8 +2447,10 @@ $this->runat_agent = new Runat($this->thing, "runat");
         //        $sms_message .= ' "' . strtoupper($this->alias). '"';
         //$this->getAlias();
 
+if ($this->alias != null) {
+//        $this->runtime = $this->runtime_agent->runtime;
         $sms_message .= " " . strtoupper($this->alias);
-
+}
         //$this->getAvailable();
         if ($this->r_type == 'instruction') {
             //$sms_message .= " false";
@@ -2584,7 +2589,7 @@ $this->runat_agent = new Runat($this->thing, "runat");
             }
         }
 
-        $sms_message .= "Report follows: " . $this->textTrain();
+        $sms_message .= "Report follows: " . $this->textTrain($this->train);
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
@@ -2696,7 +2701,7 @@ $this->runat_agent = new Runat($this->thing, "runat");
         //$this->response = null;
         $this->num_hits = 0;
 
-        $keywords = $this->keywords;
+//        $keywords = $this->keywords;
         /*
         if ($this->agent_input != null) {
             // If agent input has been provided then
@@ -2749,6 +2754,7 @@ $this->runat_agent = new Runat($this->thing, "runat");
             $this->extracted_train['headcode'] != false
         ) {
         }
+
         /*
         $this->extractRunat($haystack);
         $this->extractEndat($haystack);
@@ -2778,7 +2784,7 @@ $this->runat_agent = new Runat($this->thing, "runat");
         //    $this->extractRuntime();
 
         foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
+            foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case 'red':
@@ -2898,7 +2904,12 @@ $this->runat_agent = new Runat($this->thing, "runat");
 
         // If all else fails try the discriminator.
 
-        $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+$input_agent = new Input($this->thing, "input");
+            $discriminators = ['accept', 'clear'];
+        $input_agent->aliases['accept'] = ['accept', 'add', '+'];
+        $input_agent->aliases['clear'] = ['clear', 'drop', 'clr', '-'];
+
+        $this->requested_state = $input_agent->discriminateInput($haystack); // Run the discriminator.
         switch ($this->requested_state) {
             case 'start':
                 $this->start();
@@ -2914,94 +2925,9 @@ $this->runat_agent = new Runat($this->thing, "runat");
                 break;
         }
 
-        //$this->read();
 
         return "Message not understood";
 
         return false;
-    }
-
-    function discriminateInput($input, $discriminators = null)
-    {
-        //$input = "optout opt-out opt-out";
-
-        if ($discriminators == null) {
-            $discriminators = ['accept', 'clear'];
-        }
-
-        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        $aliases = [];
-
-        $aliases['accept'] = ['accept', 'add', '+'];
-        $aliases['clear'] = ['clear', 'drop', 'clr', '-'];
-
-        $words = explode(" ", $input);
-
-        $count = [];
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                }
-
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                    }
-                }
-            }
-        }
-
-        // Set total sum of all values to 1.
-
-        $normalized = [];
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
-        }
-
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-
-        foreach ($normalized as $key => $value) {
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-        }
-
-        if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
     }
 }

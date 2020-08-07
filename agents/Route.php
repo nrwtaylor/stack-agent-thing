@@ -156,19 +156,14 @@ class Route extends Agent
         return $headcode_time;
     }
 
-    function read()
+    function read($text = null)
     {
         $this->thing->log("read");
-
-        //        $this->get();
-        return;
     }
 
     function addHeadcode()
     {
-        //$this->makeHeadcode();
         $this->get();
-        return;
     }
 
     function makeTXT()

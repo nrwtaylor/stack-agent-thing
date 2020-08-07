@@ -560,6 +560,8 @@ class Job extends Agent
         $input = $this->input;
         $filtered_input = strtolower($this->assert($input));
 
+$do_job_flag = "red";
+if ($do_job_flag == "green") {
         if ($filtered_input == 'stack') {
             $job = $this->jobs[array_rand($this->jobs)][0];
             $datagram = [
@@ -573,6 +575,7 @@ class Job extends Agent
 
             return;
         }
+}
         $this->index = "meep";
         $this->response = "Made a new job sheet.";
         $status = true;

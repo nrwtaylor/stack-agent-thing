@@ -652,6 +652,9 @@ return $thingreport;
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
+            //$query =
+            //    'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);

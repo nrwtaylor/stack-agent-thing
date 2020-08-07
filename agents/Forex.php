@@ -5,8 +5,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-ini_set("allow_url_fopen", 1);
-
 class Forex extends Agent
 {
     // This gets Forex from an API.
@@ -53,12 +51,8 @@ class Forex extends Agent
             $this->current_time
         );
 
-        //        $this->thing->choice->save('wave', $this->state);
-
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
-
-        return;
     }
 
     function get()
@@ -103,65 +97,18 @@ class Forex extends Agent
         return $this->price;
     }
 
-    public function getLink($ref)
+    public function getLink($ref = null)
     {
+        if ($ref == null) {
+            return true;
+        }
         // Give it the message returned from the API service
 
         $this->link = "https://www.google.com/search?q=" . $ref;
         return $this->link;
     }
 
-    function getVariable($variable_name = null, $variable = null)
-    {
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset($this->{"default_" . $variable_name})) {
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-
-    function getFlag()
-    {
-        $this->flag_thing = new Flag($this->variables_agent->thing, 'flag');
-        $this->flag = $this->flag_thing->state;
-
-        return $this->flag;
-    }
-
-    function setFlag($colour)
-    {
-        $this->flag_thing = new Flag(
-            $this->variables_agent->thing,
-            'flag ' . $colour
-        );
-        $this->flag = $this->flag_thing->state;
-
-        return $this->flag;
-    }
-
-    public function respond()
+    public function respondResponse()
     {
         // Thing actions
 
@@ -174,12 +121,12 @@ class Forex extends Agent
         $choices = false;
         $this->thing_report['choices'] = $choices;
 
-        $this->flag = "green";
-        if (strtolower($this->flag) == "red") {
-            $sms_message = "FOREX = SURF'S UP";
-        } else {
-            $sms_message = "FOREX " . $this->currency_pair;
-        }
+        //$this->flag = "green";
+        //if (strtolower($this->flag) == "red") {
+        //    $sms_message = "FOREX = SURF'S UP";
+        //} else {
+        $sms_message = "FOREX " . $this->currency_pair;
+        //}
 
         if ($this->verbosity >= 2) {
             //            $sms_message .= " | flag " . strtoupper($this->flag);
@@ -262,25 +209,8 @@ class Forex extends Agent
     {
         $this->response = null;
         $this->num_hits = 0;
-        // Extract uuids into
 
-        //$this->number = extractNumber();
-
-        $keywords = $this->keywords;
-
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->subject);
-        }
-
-        $this->input = $input;
-
-        $haystack =
-            $this->agent_input . " " . $this->from . " " . $this->subject;
+        $input = $this->input;
 
         $prior_uuid = null;
 
@@ -316,7 +246,7 @@ class Forex extends Agent
         }
 
         foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
+            foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case 'verbosity':
@@ -334,121 +264,7 @@ class Forex extends Agent
             }
         }
 
-        $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-        switch ($this->requested_state) {
-            case 'start':
-                $this->start();
-                break;
-            case 'stop':
-                $this->stop();
-                break;
-            case 'reset':
-                $this->reset();
-                break;
-            case 'split':
-                $this->split();
-                break;
-        }
-
-        return "Message not understood";
-
+        $this->requested_state = null;
         return false;
-    }
-
-    function kill()
-    {
-        // No messing about.
-        return $this->thing->Forget();
-    }
-
-    function discriminateInput($input, $discriminators = null)
-    {
-        //$input = "optout opt-out opt-out";
-
-        if ($discriminators == null) {
-            $discriminators = ['accept', 'clear'];
-        }
-
-        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        $aliases = [];
-
-        $aliases['accept'] = ['accept', 'add', '+'];
-        $aliases['clear'] = ['clear', 'drop', 'clr', '-'];
-
-        $words = explode(" ", $input);
-
-        $count = [];
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                    //echo "sum";
-                }
-
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                        //echo "sum";
-                    }
-                }
-            }
-        }
-
-        //echo "total count"; $total_count;
-        // Set total sum of all values to 1.
-
-        $normalized = [];
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
-        }
-
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-
-        foreach ($normalized as $key => $value) {
-            //echo $key, $value;
-
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-        }
-
-        //echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
-        if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
     }
 }

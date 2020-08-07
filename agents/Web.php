@@ -187,7 +187,7 @@ class Web extends Agent
     function makeSMS()
     {
         if ($this->state == 'off') {
-            $sms = "WEB | OFF";
+            $sms = "WEB | OFF. Try WEB ON.";
         }
         if ($this->state == 'on') {
             //        $sms = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
