@@ -7,72 +7,71 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Question
+class Question extends Agent
 {
 	public $var = 'hello';
 
-    function __construct(Thing $thing)
+function init()
+//    function __construct(Thing $thing)
     {
-        $this->start_time = $thing->elapsed_runtime();
-        $this->agent_prefix = 'Agent "Question" ';
+//        $this->start_time = $thing->elapsed_runtime();
+//        $this->agent_prefix = 'Agent "Question" ';
 
-        $this->thing = $thing;
-        $this->thing->elapsed_runtime();
+//        $this->thing = $thing;
+//        $this->thing->elapsed_runtime();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->thing_report['thing'] = $this->thing->thing;
 
-		$this->agent_name = 'question';
+//		$this->agent_name = 'question';
 
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 
         $this->email = $this->thing->container['stack']['email'];
 
-        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . '.');
+//        $this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid . '.');
 
-        $this->current_time = $this->thing->time();
-        $this->verbosity = 9;
+//        $this->current_time = $this->thing->time();
+//        $this->verbosity = 9;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 
-		$this->sqlresponse = null;
+//		$this->sqlresponse = null;
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-        $this->nominal = $thing->container['stack']['nominal'];
-        $this->mail_regulatory = $thing->container['stack']['mail_regulatory'];
+        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+        $this->word = $this->thing->container['stack']['word'];
+        $this->email = $this->thing->container['stack']['email'];
+        $this->nominal = $this->thing->container['stack']['nominal'];
+        $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
 
 
-        $this->entity_name = $thing->container['stack']['entity_name'];
+        $this->entity_name = $this->thing->container['stack']['entity_name'];
 
 
 
 		// Allow for a new state tree to be introduced here.
 		$this->node_list = array("start"=>array("transit", "opt-in"));
 
-		$this->readSubject();
+//		$this->readSubject();
 
-        $this->respond();
+//        $this->respond();
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
+//        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
 
-        $this->thing_report['log'] = $this->thing->log;
+//        $this->thing_report['log'] = $this->thing->log;
 
-		return;
-
+//		return;
 	}
 
 	public function question()
     {
-
-        $this->sms_message = 'QUESTION | Ignored a question.';
+        $this->sms_message = 'QUESTION | Did not understand the question.';
         $this->response = true;
         return;
 
@@ -130,7 +129,7 @@ class Question
 
 
 
-	private function respond()
+	public function respondResponse()
     {
 
 		// Thing actions
@@ -186,7 +185,6 @@ class Question
 		$prior_uuid = null;
 
 		$pieces = explode(" ", strtolower($input));
-
         if (count($pieces) == 1) {
 
             $input = $this->subject;
@@ -200,7 +198,7 @@ class Question
             }
 
             $this->question();
-            return;
+            return true;
         }
 
 		// If there are more than one piece then look at order.
@@ -246,9 +244,7 @@ class Question
             return;
         }
 		// Message not understood
-        return;
+        return false;
 	}
 
 }
-
-?>
