@@ -72,7 +72,12 @@ class Question
 	public function question()
     {
 
+        $this->sms_message = 'QUESTION | Ignored a question.';
+        $this->response = true;
+        return;
+
         $this->sms_message = 'QUESTION | forwarded to a human.';
+
         $this->message = $this->sms_message;
 
         $message = 'The question is "' .  $this->subject . '"';
