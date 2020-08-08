@@ -700,7 +700,7 @@ class Quantity extends Agent
                     switch ($piece) {
                         case 'next':
                             $this->thing->log("read subject next quantity");
-                            $this->nextQuantity();
+                            //$this->nextQuantity();
                             break;
 
                         case 'drop':
