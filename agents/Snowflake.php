@@ -373,8 +373,6 @@ class Snowflake extends Agent
         }
 
         $this->decimal_snowflake = $dec;
-
-        return;
     }
 
     /**
@@ -1628,7 +1626,7 @@ class Snowflake extends Agent
      */
     public function makePDF()
     {
-        $this->getWhatis($this->subject);
+        $this->getWhatis($this->input);
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
@@ -1760,7 +1758,8 @@ class Snowflake extends Agent
      */
     public function readSubject()
     {
-        $input = strtolower($this->subject);
+//        $input = strtolower($this->subject);
+        $input = strtolower($this->input);
 
         $pieces = explode(" ", strtolower($input));
 

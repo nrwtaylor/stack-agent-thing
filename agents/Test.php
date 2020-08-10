@@ -7,18 +7,69 @@ class Test extends Agent
 
     public function set()
     {
-        $this->response = true;
+        //   $this->response = true;
     }
 
     function init()
     {
         $this->thing_report["info"] =
-            "This is saying you are here, when someone needs you.";
-        $this->thing_report["help"] = "This is about being very consistent.";
+            "Tests Agent behaviour.";
+        $this->thing_report["help"] = "This is about testing an agent response.";
     }
 
-    function doTest($input = null)
+    function randomTest($input = null)
     {
+        $file =
+            $GLOBALS['stack_path'] .
+            'vendor/nrwtaylor/stack-agent-thing/agents';
+
+        $files = scandir($file);
+
+        foreach ($files as $i => $file) {
+            if (substr($file, -4) != ".php") {
+                unset($files[$i]);
+                continue;
+            }
+
+            if (substr($file, 0, 1) == "_") {
+                unset($files[$i]);
+                continue;
+            }
+
+            if (strtolower(substr($file, 0, 1)) == substr($file, 0, 1)) {
+                unset($files[$i]);
+                continue;
+            }
+        }
+
+        $file = $files[array_rand($files)];
+
+        $tokens = explode(".", $file);
+        $agent_name = $tokens[0];
+
+        $this->response .= "Agent tested: " . $agent_name . ". ";
+
+        //if (rand(0,1) == 1) {
+
+        $agent = $this->getAgent($agent_name); // Push agent response.
+        //} else {
+        //$agent = $this->getAgent($agent_name, strtolower($agent_name)); //  Do not push response.
+        //}
+        if ($agent === true) {
+            $this->response .= "Test response: TRUE. ";
+            return;
+        }
+
+        if ($agent === false) {
+            $this->response .= "Test response: FALSE. ";
+            return;
+        }
+
+        $sms = $agent->thing_report['sms'];
+        $response = $agent->thing_report['response'];
+
+        //$this->callAgent($agent_name);
+        $this->response .= "Test response: " . $sms . " " . $response . " / ";
     }
 
     function resultTest()
@@ -47,14 +98,9 @@ class Test extends Agent
         $this->negative_time = $agent->negative_time; //negative time is asking
     }
 
-    // -----------------------
-
     public function respondResponse()
     {
         $this->thing->flagGreen();
-
-        //		$to = $this->thing->from;
-        //		$from = "test";
 
         $this->makeChoices();
 
@@ -67,6 +113,7 @@ class Test extends Agent
 
     function run()
     {
+        //$this->test();
     }
 
     function makeSMS()
@@ -89,25 +136,11 @@ class Test extends Agent
     public function readSubject()
     {
         $input = $this->input;
-        //$this->extractAgents($input);
-        //var_dump($this->responsive_agents);
-
-        //echo "test readsibject";
-
-        //$input = $this->input;
-
-        //$t = $this->getCallingagent();
-        //var_dump($t);
 
         if ($input == "test") {
-            $this->response .= "I'm here. ";
+            $this->randomTest();
+            $this->response .= "Ran a random test. ";
             return;
         }
-
-        //devstack
-        //if (!isset($this->agents)) {
-        //$this->extractAgents($input);
-        //}
-        //var_dump($this->agents);
     }
 }

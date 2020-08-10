@@ -652,8 +652,10 @@ return $thingreport;
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
-            //$query =
-            //    'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
+        //$value = "+$value"; // Value to search for in Variables
+
+        //    $query =
+        //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
 
             $sth = $this->container->db->prepare($query);
 
@@ -1131,6 +1133,7 @@ return $thingreport;
             $thingreport['info'] =
                 'So here are the uuids of all records matching your request.  That\'s what you wanted.';
             $thingreport['help'] = 'No matching records returned.';
+
 
             return $thingreport;
         } else {
