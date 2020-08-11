@@ -33,13 +33,7 @@ class Nonsense extends Agent
 
         $this->initNonsense();
     }
-    /*
-public function set() {
 
-        $this->setNonsense();
-
-}
-*/
     public function get()
     {
         $this->thing->json->setField("variables");
@@ -74,14 +68,6 @@ public function set() {
     {
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "nonsense";
-
-        //        $this->makeSMS();
-
-        //        $this->makeMessage();
-        //$this->makeTXT();
-
         $this->makeChoices();
 
         $this->thing_report["info"] = "This creates a duplicable number set.";
@@ -89,21 +75,8 @@ public function set() {
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-        //        $this->makeWeb();
 
-        //        $this->makeTXT();
-        //        $this->makePDF();
-        /*
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed message. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-*/
-
-        return $this->thing_report;
+//        return $this->thing_report;
     }
 
     function makeChoices()
@@ -164,40 +137,8 @@ public function set() {
             "<p>" . $this->web_prefix . "thing/$uuid/nonsense\n \n\n<br> ";
 
         $this->thing_report['message'] = $message;
-
-        return;
     }
-    /*
-    function setNonsense()
-    {
-        //        $this->thing->json->setField("variables");
-        //        $this->thing->json->writeVariable( array("nonsense", "index"), $this->index );
-        //var_dump($this->index);
-        //        $this->thing->log($this->agent_prefix . ' saved duplicable index ' . $this->index[0] . '.', "INFORMATION") ;
-    }
-*/
-    /*
-    function getNonsense()
-    {
-        //        $this->thing->json->setField("variables");
-        //        $this->index = $this->thing->json->readVariable( array("nonsense", "index") );
 
-        //        if ($this->index == false) {
-        //            $this->thing->log($this->agent_prefix . ' did not find a duplicable index.', "INFORMATION") ;
-        // Return.
-        //            return true;
-        //        }
-
-        $this->thing->log(
-            $this->agent_prefix .
-                ' loaded nonsense index ' .
-                $this->index .
-                '.',
-            "INFORMATION"
-        );
-        return;
-    }
-*/
     function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
@@ -400,20 +341,10 @@ public function set() {
         return $result;
     }
 
-    function readNonsense()
+    function readNonsense($text = null)
     {
-//        return $this->state;
     }
-    /*
-    function extractNuuid($input)
-    {
-        if (!isset($this->duplicables)) {
-            $this->duplicables = [];
-        }
 
-        return $this->duplicables;
-    }
-*/
     public function makePDF()
     {
         $txt = $this->thing_report['txt'];
@@ -633,10 +564,5 @@ public function set() {
             $this->index = 1;
         }
 
-        //$this->max = 9999;
-        //$this->size = 4;
-        //$this->lattice_size = 40;
-
-        return;
     }
 }

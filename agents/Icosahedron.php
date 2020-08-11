@@ -147,7 +147,7 @@ exit();
         //$yaw = atan2($camz, $camx);
         //$pitch = atan2($camy, pow((pow($camx,2) + pow($camz,2)),0.5) );
 
-        echo "yaw " . $yaw . " " . "pitch " . $pitch . "<br>";
+        //echo "yaw " . $yaw . " " . "pitch " . $pitch . "<br>";
 
         $x_camera_offset = $this->width / 2;
         $y_camera_offset = $this->height / 2;
@@ -159,7 +159,7 @@ exit();
             $normal = $triangle['normal'];
             $normal[2] = $normal[2] * -1;
 
-            echo "face normal " .
+            //echo "face normal " .
                 $normal[0] .
                 " - " .
                 $normal[1] .
@@ -186,7 +186,7 @@ exit();
 
             $dot_product = $camx * $x + $camy * $y + $camz * $z;
 
-            echo "dot product" . $dot_product . "<br>";
+            //echo "dot product" . $dot_product . "<br>";
 
             // Is face away from camera?
             if ($dot_product < 0) {
@@ -245,11 +245,11 @@ exit();
                     $max_length = $length;
                 }
 
-                echo "length " . $length . "<br>";
+                //echo "length " . $length . "<br>";
             }
 
             // Skip pointy triangles;
-            echo "length ratio " . $max_length / $min_length . "<br>";
+            //echo "length ratio " . $max_length / $min_length . "<br>";
 
             $half_perimeter = ($lengths[0] + $lengths[1] + $lengths[2]) / 2;
 
@@ -261,7 +261,7 @@ exit();
                 0.5
             );
 
-            echo "area " . $area . "<br>";
+            //echo "area " . $area . "<br>";
 
             if ($area < 10) {
                 continue;
@@ -273,7 +273,7 @@ exit();
 
             foreach ($triangle['vertices'] as $j => $point) {
                 $point[2] = $point[2] * -1;
-
+/*
                 echo "3D " .
                     $point[0] .
                     " " .
@@ -281,7 +281,7 @@ exit();
                     " " .
                     $point[2] .
                     "<br>";
-
+*/
                 /*
 $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
 */
@@ -319,7 +319,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
                 //if ($y <= 0) {continue;}
 
                 //echo $x ." " . $y ." " . $z ."\n";
-
+/*
                 echo "2D (" .
                     $x_old .
                     "," .
@@ -329,7 +329,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
                     "," .
                     $y_2d .
                     ")<br>";
-
+*/
                 imageline(
                     $this->image,
                     $x_old + $x_camera_offset,

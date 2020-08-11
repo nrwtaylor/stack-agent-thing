@@ -34,7 +34,18 @@ class Wordpress extends Agent
 
         // require wp-load.php to use built-in WordPress functions
         // Set the Wordpress location in settings
+//        require_once($this->path_to . "wp-load.php");
+
+if (isset($this->path_to)) {
+
+try {
         require_once($this->path_to . "wp-load.php");
+} catch (Throwable $e) {
+$this->state = 'off';
+$this->response .= "Wordpress not found. ";
+}
+
+}
 
         $this->thing_report['help'] = 'Communicates with the Wordpress API.';
 
@@ -51,7 +62,7 @@ class Wordpress extends Agent
     public function run() {
     }
 
-    function test() {
+    public function test() {
        $test_result = "OK";
        if (!isset($this->response)) {$test_result = "Not OK";}
        $test_result = $this->test_result;

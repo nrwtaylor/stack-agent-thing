@@ -373,6 +373,9 @@ class Agent
         $this->makeKeyword();
         $this->makeLink();
 
+        $this->makeHelp();
+        $this->makeInfo();
+
         // devstack
 
         if ($this->agent_name != "web" and !isset($this->thing->web_agent)) {
@@ -921,6 +924,21 @@ class Agent
         $this->link = $link;
         $this->thing_report['link'] = $link;
     }
+
+    /**
+     *
+     */
+    public function makeHelp()
+    {
+    }
+
+    /**
+     *
+     */
+    public function makeInfo()
+    {
+    }
+
 
     /**
      *

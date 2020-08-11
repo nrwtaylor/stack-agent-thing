@@ -80,6 +80,19 @@ class Callagent
             //register_shutdown_function('shutDownFunction');
             try {
                 $agent = new Agent($thing, $this->agent_instruction);
+            } catch (\Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
+
+                //require_once '/var/www/html/stackr.ca/agents/bork.php';
+
+                $message = $ex->getMessage();
+                $code = $ex->getCode();
+                $file = $ex->getFile();
+                $line = $ex->getLine();
+
+                $input = $message . ' / ' . $code . ' / ' . $file . ' / ' . $line;
+
+                $agent = new Bork($thing, 'agenthandler/' . $input );
+
             } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
 
                 //require_once '/var/www/html/stackr.ca/agents/bork.php';

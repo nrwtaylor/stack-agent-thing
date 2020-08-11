@@ -64,7 +64,7 @@ $this->thing_report['sms'] = "MESSAGE IDENTITY | " . $this->identifier;
     {
     }
 
-    function read()
+    function read($text = null)
     {
 //        return $this->state;
     }

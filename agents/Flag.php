@@ -222,11 +222,6 @@ class Flag extends Agent
 
         $this->thing->flagGreen();
 
-        // Generate email response.
-
-        //		$to = $this->thing->from;
-        //		$from = $this->keyword;
-
         if ($this->state == "inside nest") {
             $t = "NOT SET";
         } else {
@@ -241,7 +236,7 @@ class Flag extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         //$this->thing_report['help'] = 'This Flag is either RED or GREEN. RED means busy.';
-        $this->makeHelp();
+        //$this->makeHelp();
     }
 
     function makeHelp()
@@ -277,9 +272,9 @@ class Flag extends Agent
             $flag_state = $this->state;
         }
 
-//        $headcode_text = strtoupper($this->head_code);
-$headcode_text = $this->head_code;
-//$headcode_text = "XXXX";
+        $headcode_text = strtoupper($this->head_code);
+        //$headcode_text = "XXXX";
+
         $sms_message =
             "FLAG " . $headcode_text . " IS " . strtoupper($flag_state);
         if ($this->verbosity > 6) {
@@ -343,13 +338,6 @@ $headcode_text = $this->head_code;
 
     public function makeImage()
     {
-        //var_dump ($this->state);
-        //exit();
-        // here DB request or some processing
-        //        $codeText = "thing:".$this->state;
-
-        // Create a 55x30 image
-
         $this->image = imagecreatetruecolor(200, 125);
         //$red = imagecolorallocate($this->image, 255, 0, 0);
         //$green = imagecolorallocate($this->image, 0, 255, 0);
@@ -412,7 +400,6 @@ $headcode_text = $this->head_code;
             }
         }
 
-        //imagefilledrectangle($image, 0, 0, 200, 125, ${$this->state});
         if ($this->state == "rainbow") {
             //    $color = $this->grey;
             foreach (range(0, 5) as $n) {
@@ -420,7 +407,6 @@ $headcode_text = $this->head_code;
                 $b = $n * (200 / 6) + 200 / 6;
                 $color = $this->color_palette[$n];
 
-                //                imagefilledrectangle($this->image, $a, 0, $b, 125, $color);
                 $a = $n * (125 / 6);
                 $b = $n * (125 / 6) + 200 / 6;
 
@@ -486,10 +472,6 @@ $headcode_text = $this->head_code;
         } else {
             $input = strtolower($this->subject);
         }
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-        //$haystack = $this->agent_input . " " . $this->from;
-        //$haystack = $input . " " . $this->from;
-        $haystack = "";
 
         //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
@@ -548,7 +530,11 @@ $headcode_text = $this->head_code;
 
         // If all else fails try the discriminator.
         //        if (!isset($haystack)) {$this->response = "Did nothing."; return;}
+
+/*
         $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+
+
         switch ($this->requested_state) {
             case 'green':
                 $this->selectChoice('green');
@@ -557,98 +543,11 @@ $headcode_text = $this->head_code;
                 $this->selectChoice('red');
                 return;
         }
-
+*/
         $this->readFlag();
 
         // devstack
         return "Message not understood";
         return false;
-    }
-
-    function discriminateInput($input, $discriminators = null)
-    {
-        //$input = "optout opt-out opt-out";
-
-        if ($discriminators == null) {
-            $discriminators = ['red', 'green'];
-        }
-
-        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        $aliases = [];
-
-        $aliases['red'] = ['r', 'red', 'on'];
-        $aliases['green'] = ['g', 'grn', 'gren', 'green', 'gem', 'off'];
-        //$aliases['reset'] = array('rst','reset','rest');
-        //$aliases['lap'] = array('lap','laps','lp');
-
-        $words = explode(" ", $input);
-
-        $count = [];
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                }
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                    }
-                }
-            }
-        }
-
-        $this->thing->log(
-            'Agent "Flag" matched ' . $total_count . ' discriminators.',
-            "DEBUG"
-        );
-        // Set total sum of all values to 1.
-
-        $normalized = [];
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
-        }
-
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-
-        foreach ($normalized as $key => $value) {
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-        }
-
-        if ($delta >= $minimum_discrimination) {
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
     }
 }
