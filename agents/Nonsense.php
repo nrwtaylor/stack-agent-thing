@@ -400,9 +400,9 @@ public function set() {
         return $result;
     }
 
-    function read()
+    function readNonsense()
     {
-        return $this->state;
+//        return $this->state;
     }
     /*
     function extractNuuid($input)

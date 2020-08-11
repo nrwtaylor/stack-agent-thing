@@ -65,9 +65,15 @@ class Test extends Agent
             return;
         }
 
+$sms = "TEST | No SMS response.";
+if (isset($agent->thing_report['sms'])) {
         $sms = $agent->thing_report['sms'];
-        $response = $agent->thing_report['response'];
+}
 
+$response = "No response.";
+if (isset($agent->thing_report['response'])) {
+        $response = $agent->thing_report['response'];
+}
         //$this->callAgent($agent_name);
         $this->response .= "Test response: " . $sms . " " . $response . " / ";
     }
