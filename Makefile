@@ -7,7 +7,7 @@ mpm-workers-max=200
 mpm-child-cnxns=10000
 YOUR_EMAIL=myaddress@example.com
 
-all: lamp mysql php apachefiling resources gearman supervisor cron tailoring verify memcached
+all: lamp mysql php apachefiling resources gearman supervisor cron tailoring memcached
 
 # remember to update your system
 
