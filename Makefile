@@ -17,7 +17,7 @@ lamp:
 	sudo apt install php7.2 libapache2-mod-php php-mysql
 	sudo apt install php-curl php-json php-cgi
 # check the default state in apache2.conf
-	sudo sed -i 's/KeepAlive/KeepAlive On/g' /etc/apache2/apache2.conf
+	sudo sed -i 's/^KeepAlive Off/KeepAlive On/g' /etc/apache2/apache2.conf
 # write sed statement to insert mpm_prefork.conf values  -----!!!!
 #	sudo sed -i '/?????????/$(mpm-servers)' /etc/apache2/mods-available/mpm_prefork.conf
 #	sudo sed -i '/?????????/$(mpm-spares-min)' /etc/apache2/mods-available/mpm_prefork.conf
@@ -38,8 +38,10 @@ lamp:
 	sudo sed -i 's/SERVERNAME/$(SERVERNAME)/g' /etc/apache2/sites-available/$(SERVERNAME).conf; \
 	sudo sed -i 's/YOUR_EMAIL/$(YOUR_EMAIL)/g' /etc/apache2/sites-available/$(SERVERNAME).conf
 	sudo mkdir -p /var/www/$(SERVERNAME)/{public_html,logs}
-	sudo chown -R $www-data:$www-data /var/www/$(SERVERNAME)/public_html
-	sudo chmod -R 755 /var/www/$(SERVERNAME)/public_html
+	sudo chown root:root /var/www
+	sudo chmod 755 /var/www/
+	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)
+	sudo chmod -R 774 /var/www/$(SERVERNAME)
 	sudo a2ensite $(SERVERNAME).conf
 	sudo cp scripts/.htaccess /var/www/$(SERVERNAME)
 	install mod_rewrite module; sudo a2enmod rewrite; \
