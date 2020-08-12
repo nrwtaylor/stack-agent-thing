@@ -14,7 +14,7 @@ all: lamp mysql php apachefiling resources gearman supervisor cron tailoring mem
 lamp:  
 	sudo apt install apache2
 	sudo apt install mysql-server
-	sudo apt install php7.2 libapache2-mod-php7.2 php-mysql
+	sudo apt install php7.2 libapache2-mod-php php-mysql
 	sudo apt install php-curl php-json php-cgi
 # check the default state in apache2.conf
 	sudo sed -i 's/KeepAlive/KeepAlive On/g' /etc/apache2.conf
