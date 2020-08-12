@@ -5,14 +5,10 @@ These are the current build instructions as of October 2019.
 1. Install Ubuntu latest.
 
 Which finds you here.
-sudo apt-get update
-sudo apt-get install php-mbstring
-sudo apt-get install php7.2-xml
-sudo apt-get install php-intl
 
 2. Install LAMP stack.
 
-Curated instructions here. Stop at configuration.
+Curated instructions here. Stop at configuration. Use the Install Packages Separately.
 https://www.linode.com/docs/web-servers/lamp/install-lamp-stack-on-ubuntu-18-04/
 
 3. MySQL
@@ -67,6 +63,11 @@ SELECT * FROM stack ORDER BY created_at DESC limit 99;
 3. Setup PHP
 3 cont. Install PHP extensions
 
+sudo apt-get update
+sudo apt-get install php-mbstring
+sudo apt-get install php7.2-xml
+sudo apt-get install php-intl
+
 sudo apt install php7.2-bcmath
 sudo apt install php7.0-gd
 (ignore php7.0 module already enabled, not enabling PHP 7.2)
@@ -79,19 +80,29 @@ sudo service apache2 restart
 mkdir /var/www/stackr.test
 cd /var/www/stackr.test
 
-Set up folder permissions.
 https://stackoverflow.com/questions/22390001/runtimeexception-vendor-does-not-exist-and-could-not-be-created/43513522#43513522
+sudo usermod -a -G www-data `whoami`
+
+sudo chown root:root /var/www
+sudo chmod 755 /var/www/
+
+sudo chown -R www-data:www-data /var/www/stackr.test
+sudo chmod -R 774 /var/www/stackr.test
 
 More on folder permissions.
 https://askubuntu.com/questions/767504/permissions-problems-with-var-www-html-and-my-own-home-directory-for-a-website
 
 wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/composer.json
-? cp nrwtaylor/stack-agent-thing/public
-? cp nrwtaylor/stack-agent-thing/private
 sudo apt install composer
 composer install
 
-Load in resources under /resources
+Load in template public and private configuration files.
+cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/public /var/www/stackr.test/
+cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/private /var/www/stackr.test/
+
+Load in resources under /resources.
+cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/resources /var/www/stackr.test/
+
 
 # Can stop here if there is no need to serve stack web requests.
 
@@ -178,18 +189,6 @@ systemctl restart apache2
 
 sudo service apache2 reload
 
-4 (cont.) Establish web server file area.
-
-https://stackoverflow.com/questions/22390001/runtimeexception-vendor-does-not-exist-and-could-not-be-created/43513522#43513522
-sudo usermod -a -G www-data `whoami`
-
-sudo chown root:root /var/www
-sudo chmod 755 /var/www/
-
-sudo chown -R www-data:www-data /var/www/stackr.test
-sudo chmod -R 774 /var/www/stackr.test
-
-
 6. Build resources
 
 The resources folder contains custom resources for this stack.
@@ -223,7 +222,7 @@ https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar
 
 ---
 
-10 (cont.) Install Gearman
+10 (cont.) More on installing Gearman
 https://gist.github.com/himelnagrana/9758209
 
 sudo apt-get update
@@ -442,23 +441,6 @@ Remove forward slash from /Gearman in line 62.
 12. Verify Snowflake (web, PNG, PDF)
 
 
--
-https://stackoverflow.com/questions/23635746/htaccess-redirect-from-site-root-to-public-folder-hiding-public-in-url
-
-Make .htaccess in stackr.test
-
-user@server:/var/www/stackr.test$ 
-sudo nano .htaccess
-
-RewriteEngine On
-RewriteBase /My-Project/
-
-RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]
-RewriteRule ^ %1 [L,NE,R=302]
-
-RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
-
-sudo service apache2 restart #urgh
 
 ---
 
@@ -474,6 +456,7 @@ Index is a standalone non db page.  With no thing access
 
 
 ---
+
 Add resource files
 
 Copy in resource files ... there are sample resource files for 
@@ -509,7 +492,6 @@ https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-f
 
 sudo nano /etc/mysql/mysqld.cnf
 max_connection = 1000
-
 
 Posted on June 13, 2017 by peter
 MySQL max_connections limited to 214 on Ubuntu Foo
