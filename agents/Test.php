@@ -217,7 +217,12 @@ if (isset($agent->thing_report['response'])) {
         }
 
         $web = "";
-        foreach ($this->tests as $uuid => $test) {
+        foreach ($this->tests as $uuid => $thing) {
+
+            // devstack.
+            $test = $thing->variables['test'];
+            //$test = $thing['variables']['test'];
+
             if (!isset($test['text'])) {
                 continue;
             }

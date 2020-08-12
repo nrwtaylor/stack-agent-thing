@@ -587,13 +587,14 @@ class Modo extends Agent
      * @param unknown $ref
      * @return unknown
      */
+/*
     function getLink($ref) {
         // Give it the message returned from the API service
 
         $this->link = "https://www.google.com/search?q=" . $ref;
         return $this->link;
     }
-
+*/
 
     /**
      *

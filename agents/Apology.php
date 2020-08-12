@@ -100,7 +100,11 @@ class Apology extends Agent
     {
         $this->apologies = [];
         $things = $this->getThings('apology');
-        foreach ($things as $uuid => $apology) {
+        foreach ($things as $uuid => $thing) {
+
+            // devstack.
+            $apology = $thing->variables['apology'];
+
             if (!isset($apology['name'])) {
                 continue;
             }

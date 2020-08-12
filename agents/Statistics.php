@@ -4,7 +4,6 @@ namespace Nrwtaylor\StackAgentThing;
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-
 class Statistics extends Agent
 {
     function init()
@@ -18,25 +17,35 @@ class Statistics extends Agent
 
         $this->node_list = ["start"];
 
-        $this->variable_name = "age" . "_" . "number";
-        $this->variable_agent = "age";
+        $this->count = 0;
+        $this->sum = 0;
+        $this->sum_squared = 0;
+        $this->sum_squared_difference = 0;
+        $this->minimum = null;
+        $this->maximum = null;
+    }
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
-            "statistics",
-            $this->variable_name,
-            "refreshed_at",
-        ]);
-
-        if ($time_string == false) {
-            // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+    public function get()
+    {
+        if (!isset($this->statistics_thing)) {
+            $this->statistics_thing = $this->thing;
         }
+        //        if (is_numeric($this->response_time)) {
+        //return;
+        //$this->getStatistics();
+    }
+
+    public function getStatistics()
+    {
+        // devstack
+        // no need to load last statistics.
+        // calculate
 
         $this->thing->db->setFrom($this->from);
-        $thing_report = $this->thing->db->agentSearch($this->variable_agent, 3);
+        //        $thing_report = $this->thing->db->agentSearch($this->variable_agent, 3);
+
+        $thing_report = $this->thing->db->agentSearch('statistics', 3);
+
         $things = $thing_report['things'];
 
         $this->sms_message = "";
@@ -44,53 +53,26 @@ class Statistics extends Agent
 
         if ($things == false) {
             // No age information store found.
-            $this->resetCounts();
+            $this->initStatistics();
         } else {
             foreach ($things as $thing) {
-                $thing = new Thing($thing['uuid']);
-                //		var_dump($thing);
+                $uuid = $thing['uuid'];
 
-                $thing->json->setField("variables");
+                $variables_json = $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+                if (!isset($variables['statistics'])) {
+                    continue;
+                }
+
+                exit();
+                /*
                 $this->age = $thing->json->readVariable([
-                    "statistics",
-                    $this->variable_name,
-                    "mean",
-                ]);
                 $this->count = $thing->json->readVariable([
-                    "statistics",
-                    $this->variable_name,
-                    "count",
-                ]);
                 $this->sum = floatval(
-                    $thing->json->readVariable([
-                        "statistics",
-                        $this->variable_name,
-                        "sum",
-                    ])
-                );
                 $this->sum_squared = floatval(
-                    $thing->json->readVariable([
-                        "statistics",
-                        $this->variable_name,
-                        "sum_squared",
-                    ])
-                );
                 $this->sum_squared_difference = floatval(
-                    $thing->json->readVariable([
-                        "statistics",
-                        $this->variable_name,
-                        "sum_squared_difference",
-                    ])
-                );
-
                 $this->earliest_seen = strtotime(
-                    $thing->json->readVariable([
-                        "statistics",
-                        $this->variable_name,
-                        "earliest_seen",
-                    ])
-                );
-
+*/
                 if (
                     $this->age == false or
                     $this->count == false or
@@ -105,7 +87,7 @@ class Statistics extends Agent
                     break;
                 }
 
-                $this->resetCounts();
+                $this->initStatistics();
             }
         }
     }
@@ -114,78 +96,98 @@ class Statistics extends Agent
     {
     }
 
-    function resetCounts()
+    function initStatistics()
     {
-        $this->sms_message = "Reset stream stats. | ";
+        $this->response .= "Reset stream stats. ";
         $this->count = 0;
         $this->sum = 0;
         $this->sum_squared = 0;
         $this->sum_squared_difference = 0;
+        $this->minimum = null;
+        $this->maximum = null;
 
         $this->statistics_thing = new Thing(null);
         $this->statistics_thing->Create(
             $this->from,
             'statistics',
-            's/ channel . ' . $this->variable_name
+            's/ channel . ' . $this->variable_agent . " " . $this->variable_name
         );
         $this->statistics_thing->flagGreen();
     }
 
-    function stackAge()
+    function calcStatistics()
     {
-        // Calculate streamed adhoc sample statistics
-        // Like calculating stream statistics.
-        // Keep track of counts.  And sums.  And squares of sums.
-        // And sums of differences of squares.
+        $variable_agent = $this->variable_agent;
+        $variable_name = $this->variable_name;
 
-        // Get all users records
-        $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
-
-        $things = $thingreport['thing'];
-
-        foreach ($things as $thing) {
-            $created_at = $thing['created_at'];
-        }
-        //echo "meep";
-        //	exit();
+        $things = $this->getThings('baseline');
 
         $this->total_things = count($things);
-        $this->sum = $this->sum;
 
         $this->sample_count = 0;
-        $this->count = $this->count;
-
         $start_time = time();
-$count_zeros = 0;
-        $variables = [];
+        $count_zeros = 0;
+        $proportion = 1.0;
         shuffle($things);
-        while ($this->total_things > 0) {
+        while (count($things) > 0) {
             //		        shuffle($things);
             $thing = array_pop($things);
+            $uuid = $thing->uuid;
 
-            $uuid = $thing['uuid'];
+            $variables = $thing->variables;
+            $created_at = $thing->created_at;
 
-            $variables_json = $thing['variables'];
-            $variables = $this->thing->json->jsontoArray($variables_json);
-
-$created_at = strtotime($thing['created_at']);
-
-
-            if ( (!isset($this->earliest_seen)) or 
+            if (
+                !isset($this->earliest_seen) or
                 $created_at < $this->earliest_seen or
                 $this->earliest_seen == false
             ) {
                 $this->earliest_seen = $created_at;
+
+           //     $this->number = $variables[$variable_agent][$variable_name];
             }
 
-            $time_now = time();
 
-            $number = $time_now - $created_at; //age
+            if (
+                !isset($this->latest_seen) or
+                $created_at > $this->latest_seen or
+                $this->latest_seen == false
+            ) {
+                $this->latest_seen = $created_at;
+if (is_numeric($variables[$variable_agent][$variable_name])) {
+
+                $this->number = $variables[$variable_agent][$variable_name];
+}
+            }
+
+
+
+
+            if (!isset($variables[$variable_agent][$variable_name])) {
+                continue;
+            }
+
+            $number = $variables[$variable_agent][$variable_name];
+            if (strtolower($number) == 'x') {
+                continue;
+            }
+            if (strtolower($number) == 'z') {
+                continue;
+            }
+            if (strtolower($number) === true) {
+                continue;
+            }
+            if (strtolower($number) == false) {
+                continue;
+            }
+            if (strtolower($number) == null) {
+                continue;
+            }
+
             $numbers[] = $number;
 
             if ($number == 0) {
-            $count_zeros += 1;
+                $count_zeros += 1;
                 continue;
             }
 
@@ -196,16 +198,35 @@ $created_at = strtotime($thing['created_at']);
             $this->sum_squared += $number * $number;
 
             if (time() - $start_time > 2) {
+                $this->thing->log("Sampled for more than 2s");
                 // timed out
                 break;
             }
 
-            if ($this->sample_count > $this->total_things / 20) {
-                // 5% should be enough for sampling
+            if ($this->sample_count > $this->total_things * $proportion) {
+                //echo " Sampled 1 in 4";
+                // 20% should be enough for sampling
                 break;
             }
-        }
 
+            //       }
+
+            if (is_numeric($number)) {
+                if ($this->minimum == null) {
+                    $this->minimum = $number;
+                }
+                if ($this->maximum == null) {
+                    $this->maximum = $number;
+                }
+
+                if ($number < $this->minimum) {
+                    $this->minimum = $number;
+                }
+                if ($number > $this->maximum) {
+                    $this->maximum = $number;
+                }
+            }
+        }
         // Calculate the mean
         $this->mean = $this->sum / $this->count;
 
@@ -227,6 +248,32 @@ $created_at = strtotime($thing['created_at']);
         $end_time = time();
         $this->calc_time = $end_time - $start_time;
 
+        if ($count_zeros > 0) {
+            $this->response .= "Counted " . $count_zeros . " zeros. ";
+        }
+        return $this->mean;
+    }
+
+    public function set()
+    {
+        /*
+//return;
+$statistics = array($this->variable_name =>
+array(
+"mean"=>$this->mean,
+"count"=>$this->count,
+"sum"=>$this->sum,
+"sum_squared"=>floatval($this->sum_squared),
+"sum_squared_difference"=>floatval($this->sum_squared_difference),
+"earliest_seen"=>$this->earliest_seen,
+"minimum"=>$this->minimum,
+"maximum"=>$this->maximum
+));
+*/
+        $statistics = $this->statistics;
+        $this->statistics_thing->json->writeVariable("statistics", $statistics);
+
+        return;
         // Store counts
         $this->statistics_thing->db->setFrom($this->from);
 
@@ -257,18 +304,25 @@ $created_at = strtotime($thing['created_at']);
             $this->earliest_seen
         );
 
-        $this->statistics_thing->flagGreen();
+        $this->statistics_thing->json->writeVariable(
+            ["statistics", $this->variable_name, "minimum"],
+            $this->minimum
+        );
 
-if ($count_zeros > 0) {
-$this->response .= "Counted " . $count_zeros . " zeros. ";
-}
-        return $this->mean;
+        $this->statistics_thing->json->writeVariable(
+            ["statistics", $this->variable_name, "maximum"],
+            $this->maximum
+        );
+
+        $this->statistics_thing->flagGreen();
     }
 
     public function makeSMS()
     {
         $this->sms_message =
-            "STATISTICS " . $this->variable_name . " MEAN is " .
+            "STATISTICS " .
+            $this->variable_name .
+            " MEAN is " .
             number_format($this->mean) .
             " | " .
             $this->sms_message;
@@ -293,7 +347,7 @@ $this->response .= "Counted " . $count_zeros . " zeros. ";
                 " | ";
         }
 
-$this->sms_message .= " "  . $this->response;
+        $this->sms_message .= " " . $this->response;
 
         $this->thing_report['sms'] = $this->sms_message;
     }
@@ -306,13 +360,68 @@ $this->sms_message .= " "  . $this->response;
         $message_thing = new Message($this->thing, $this->thing_report);
     }
 
-public function run() {
+    public function makeStatistics()
+    {
+        //return;
+        $statistics = [
+            $this->variable_agent => [
+                $this->variable_name => [
+                    "mean" => $this->mean,
+                    "count" => $this->count,
+                    "sum" => $this->sum,
+                    "sum_squared" => floatval($this->sum_squared),
+                    "sum_squared_difference" => floatval(
+                        $this->sum_squared_difference
+                    ),
+                    "earliest_seen" => $this->earliest_seen,
+                    "latest_seen" => $this->latest_seen,
+                    "minimum" => $this->minimum,
+                    "maximum" => $this->maximum,
+                    "number" => $this->number
 
-$this->stackAge();
+                ],
+            ],
+        ];
 
-}
+        $this->statistics = $statistics;
+    }
+
+    public function run()
+    {
+        //return;
+        $this->calcStatistics();
+        $this->makeStatistics();
+    }
 
     public function readSubject()
     {
+        //return;
+        $input = strtolower($this->input);
+
+        if ($input == 'statistics') {
+            return;
+        }
+
+        $filtered_input = $this->assert($input);
+
+        $tokens = explode(" ", $filtered_input);
+        $this->variable_agent = $tokens[0];
+
+        if (!isset($tokens[1])) {
+            // Unexpected.
+            $this->variable_name = "number";
+            return;
+        }
+
+        $this->variable_name = $tokens[1];
+
+        $this->response .=
+            "Using " .
+            $this->variable_agent .
+            " and " .
+            $this->variable_name .
+            ". ";
+
+        $this->getStatistics();
     }
 }

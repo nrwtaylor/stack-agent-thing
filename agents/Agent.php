@@ -264,8 +264,16 @@ class Agent
                 $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
+//$thing = new \stdClass();
+$thing = new Thing(null);
+$thing->uuid = $thing_object['uuid'];
+$thing->variables = $variables;
+$thing->created_at = $thing_object['created_at'];
+
                 if (isset($variables[$agent_name])) {
-                    $things[$uuid] = $variables[$agent_name];
+//                    $things[$uuid] = $variables[$agent_name];
+                    $things[$uuid] = $thing;
+
                 }
 
                 $response = $this->readAgent($thing_object['task']);
@@ -274,6 +282,47 @@ class Agent
 
         return $things;
     }
+
+    public function getVariables($agent_name = null)
+    {
+        $variables_array = [];
+        if ($agent_name == null) {
+            $agent_name = "tick";
+        }
+        $agent_name = strtolower($agent_name);
+        $rules_list = [];
+
+        $this->rules_list = [];
+        $this->unique_count = 0;
+
+        $findagent_thing = new Findagent($this->thing, $agent_name);
+        if (!is_array($findagent_thing->thing_report['things'])) {
+            return;
+        }
+        $count = count($findagent_thing->thing_report['things']);
+
+        //$rule_agent = new Rule($this->thing, "rule");
+
+        if ($count > 0) {
+            foreach (
+                array_reverse($findagent_thing->thing_report['things'])
+                as $thing_object
+            ) {
+                $uuid = $thing_object['uuid'];
+                $variables_json = $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                //if (isset($variables[$agent_name])) {
+                    $variables_array[$uuid] = $variables;
+                //}
+
+                //$response = $this->readAgent($thing_object['task']);
+            }
+        }
+
+        return $variables_array;
+    }
+
 
     public function readAgent($text = null)
     {

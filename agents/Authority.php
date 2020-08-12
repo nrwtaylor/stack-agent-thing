@@ -101,7 +101,10 @@ return $authority;
     {
         $this->authorities = [];
         $things = $this->getThings('authority');
-        foreach ($things as $uuid => $authority) {
+        foreach ($things as $uuid => $thing) {
+            // devstack.
+            $authority = $thing->variables['authority'];
+
             if (!isset($authority['name'])) {
                 continue;
             }

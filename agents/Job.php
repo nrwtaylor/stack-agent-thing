@@ -31,6 +31,16 @@ class Job extends Agent
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
+
+        $state = 'off';
+if (isset($this->thing->container['api']['job']['state'])) {
+$state = $this->thing->container['api']['job']['state'];
+
+}
+$this->state = $state;
+
+
+
         $this->index_type = "index";
 
         $this->node_list = [
@@ -560,8 +570,7 @@ class Job extends Agent
         $input = $this->input;
         $filtered_input = strtolower($this->assert($input));
 
-$do_job_flag = "red";
-if ($do_job_flag == "green") {
+if ($this->state == 'on') {
         if ($filtered_input == 'stack') {
             $job = $this->jobs[array_rand($this->jobs)][0];
             $datagram = [

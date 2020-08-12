@@ -5,9 +5,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
 ini_set("allow_url_fopen", 1);
 
 class Bible extends Agent
@@ -18,7 +15,6 @@ class Bible extends Agent
     {
         $this->api_key = $this->thing->container['api']['biblesearch'];
         $this->retain_for = 1; // Retain for at least 1 hour.
-
         // Allow for a new state tree to be introduced here.
         $this->node_list = ["start" => ["useful", "useful?"]];
     }
@@ -83,7 +79,7 @@ class Bible extends Agent
 
         $this->sms_message .= " | text source bibles.org datafeed";
     }
-
+    /*
     public function Parse($url)
     {
         $fileContents = file_get_contents($url);
@@ -98,7 +94,7 @@ class Bible extends Agent
 
         return $json;
     }
-
+*/
     public function nullAction()
     {
         $this->thing->json->setField("variables");
@@ -201,7 +197,11 @@ class Bible extends Agent
             $keywords = $options[$k];
         }
 
-        $url = 'https://bibles.org/v2/verses.xml?keyword=' . $keywords;
+        //$url = 'https://bibles.org/v2/verses.xml?keyword=' . $keywords;
+
+        // devstack. endpoint has changed.
+        //$url = 'https://labs.bible.org/api/?passage=John+3:16-17';
+        $url = 'https://labs.bible.org/api/?keyword=samaritan';
 
         //var_dump($url);
         $xml = $this->getXML($url);
@@ -229,6 +229,7 @@ class Bible extends Agent
 
         // Do the request
         $response = curl_exec($ch);
+
         curl_close($ch);
         //$xml = simplexml_load_string($response);
         $xml = new SimpleXMLElement($response);
@@ -283,7 +284,7 @@ class Bible extends Agent
             $input = ltrim(strtolower($emoji_thing->translated_input));
         }
 
-        $this->response = null;
+        //        $this->response = null;
 
         $keywords = ['bible'];
 
@@ -314,7 +315,6 @@ class Bible extends Agent
                                 $input
                             );
                             $words = ltrim($words);
-
                             $this->getBible($words);
                             return;
 

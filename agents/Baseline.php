@@ -46,10 +46,10 @@ class Baseline extends Agent
         }
 
         if ($state == "easy" or $state == "hard") {
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     function set($requested_state = null)
@@ -82,7 +82,7 @@ class Baseline extends Agent
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
-        if (!$this->isBaseline($this->previous_state)) {
+        if ($this->isBaseline($this->previous_state)) {
             $this->state = $this->previous_state;
         } else {
             $this->state = $this->default_state;
@@ -223,13 +223,36 @@ class Baseline extends Agent
         $this->response_time = $age;
     }
 
+public function statisticsBaseline() {
+
+$statistics_agent = new Statistics($this->thing, "statistics baseline response_time");
+$this->response .= $statistics_agent->response;
+//var_dump($statistics_agent->statistics);
+
+$this->statistics_text = "[" . $statistics_agent->minimum . " (" . $statistics_agent->mean . ") " . $statistics_agent->maximum . "] " . "N=" . $statistics_agent->count. " " . $statistics_agent->number;
+
+}
+
+
     function makeSMS()
     {
         $sms = "BASELINE " . "\n";
         if (is_numeric($this->response_time)) {
             $sms .= number_format($this->response_time * 1000) . "ms\n";
         }
+
+if (isset($this->statistics_text)) {
+$sms .= $this->statistics_text . "\n";
+}
+
+
         $sms .= trim($this->short_message) . "\n";
+
+
+        if (is_string($this->response)) {
+            $sms .= $this->response . "\n";
+        }
+
 
         $sms .= "TEXT WEB";
         // $this->response;
@@ -534,7 +557,7 @@ class Baseline extends Agent
 
         if ($this->text == "X") {
             //$this->response = $this->number . " " . $this->unit . ".";
-            $this->response = "No message to pass.";
+            $this->response .= "No message to pass.";
         }
     }
 
@@ -623,7 +646,7 @@ class Baseline extends Agent
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
-
+$this->statisticsBaseline();
         if (count($pieces) == 1) {
             if ($input == 'baseline') {
                 $this->getMessage();

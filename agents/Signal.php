@@ -35,9 +35,9 @@ class Signal extends Agent
         $this->refreshed_at = null;
 
         $this->current_time = $this->thing->time();
-
         // devstack
-        $this->associations = new Associations($this->thing, $this->subject);
+        $this->associate_agent = new Associate($this->thing, $this->subject);
+
 
         $this->thing_report['help'] =
             'This Signal is either RED, GREEN, YELLOW or DOUBLE YELLOW. Text SIGNAL DOUBLE YELLOW.';
@@ -89,7 +89,7 @@ class Signal extends Agent
         }
 
         if (isset($this->signal_thing->uuid)) {
-            $this->associations->setAssociation($this->signal_thing->uuid);
+            $this->signal_thing->associate($this->signal_thing->uuid);
         }
 
         if ($this->channel_name == 'web') {
@@ -310,7 +310,7 @@ class Signal extends Agent
             $this->current_time
         );
 
-        $this->associations->setAssociation($this->signal_thing->uuid);
+        $this->signal_thing->associate($this->signal_thing->uuid);
     }
 
     function makeSignal()

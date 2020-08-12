@@ -118,17 +118,22 @@ class Watchdog extends Agent
             return true;
         }
 
+//            // devstack.
+//            $test = $thing->variables['test'];
+//            //$test = $thing['variables']['test'];
+
+
         $refreshed_at = [];
-        foreach ($things as $key => $row) {
-            $refreshed_at[$key] = $row['refreshed_at'];
+        foreach ($things as $uuid => $thing) {
+            $refreshed_at[$uuid] = $thing->variables['cron']['refreshed_at'];
         }
         array_multisort($refreshed_at, SORT_DESC, $things);
 
         $age = 1e99;
 
-        if (isset($things[0]['refreshed_at'])) {
+        if (isset($things[0]->variables['cron']['refreshed_at'])) {
             //            $age = 1e99;
-            $refreshed_at = $things[0]['refreshed_at'];
+            $refreshed_at = $things[0]->variables['cron']['refreshed_at'];
             $age = strtotime($this->current_time) - strtotime($refreshed_at);
         }
 

@@ -679,7 +679,7 @@ class Charley extends Agent
         return $result;
     }
 
-    function read()
+    function readCharley()
     {
         return $this->state;
     }
