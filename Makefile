@@ -17,7 +17,7 @@ lamp:
 	sudo apt install php7.2 libapache2-mod-php php-mysql
 	sudo apt install php-curl php-json php-cgi
 # check the default state in apache2.conf
-	sudo sed -i 's/KeepAlive/KeepAlive On/g' /etc/apache2.conf
+	sudo sed -i 's/KeepAlive/KeepAlive On/g' /etc/apache2/apache2.conf
 # write sed statement to insert mpm_prefork.conf values  -----!!!!
 #	sudo sed -i '/?????????/$(mpm-servers)' /etc/apache2/mods-available/mpm_prefork.conf
 #	sudo sed -i '/?????????/$(mpm-spares-min)' /etc/apache2/mods-available/mpm_prefork.conf
