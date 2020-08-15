@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-SERVERNAME=stackr.test
+SERVERNAME=stackr-make.test
 mpm-servers=4
 mpm-spares-min=3
 mpm-spares-max=40
