@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 // Recognizes and handles UUIDS.
@@ -15,38 +14,55 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-
 class Amount extends Agent
 {
-
-
     /**
      *
      */
-    function init() {
+    function init()
+    {
         $this->agent_name = "AMOUNT";
 
         $this->stack_state = $this->thing->container['stack']['state'];
         $this->short_name = $this->thing->container['stack']['short_name'];
 
-        $this->locale = $this->thing->container['stack']['locale'];
-//        $this->created_at =  strtotime($this->thing->thing->created_at);
+        $locale = 'en_CA';
+        if (isset($this->thing->container['stack']['locale'])) {
+            $locale = $this->thing->container['stack']['locale'];
+        }
+        $this->locale = $locale;
 
-        $this->node_list = array("amount"=>
-            array("currency", "worth", "price", "value", "fiat", "reckoning", "cost", "charge"));
+        //        $this->created_at =  strtotime($this->thing->thing->created_at);
+
+        $this->node_list = [
+            "amount" => [
+                "currency",
+                "worth",
+                "price",
+                "value",
+                "fiat",
+                "reckoning",
+                "cost",
+                "charge",
+            ],
+        ];
 
         //$this->aliases = array("learning"=>array("good job"));
 
         $this->thing_report['help'] = "Recognizes text with an amount in it. ";
     }
 
-public function extractAmount($input = null){
-
-if (!isset($this->amounts)) {$this->extractAmounts($input);}
-$this->amount = "X";
-if (isset($this->amounts[0])) {$this->amount = $this->amounts[0];}
-return $this->amount;
-}
+    public function extractAmount($input = null)
+    {
+        if (!isset($this->amounts)) {
+            $this->extractAmounts($input);
+        }
+        $this->amount = "X";
+        if (isset($this->amounts[0])) {
+            $this->amount = $this->amounts[0];
+        }
+        return $this->amount;
+    }
 
     function extractAmounts($input = null)
     {
@@ -62,144 +78,139 @@ return $this->amount;
         //echo "foo";
         //echo $a->parseCurrency($num, $currency) . "\n";
 
-        $tokens = explode(' ',$input);
-        $amounts = array();
+        $tokens = explode(' ', $input);
+        $amounts = [];
 
         foreach ($tokens as $key => $token) {
+            $n = $a->parseCurrency($token, $currency);
 
-            $n =  $a->parseCurrency($token, $currency);
-
-            if ( is_numeric($n) ) {
-
-               $amount = array("currency"=>$currency, "amount"=>$n);
-               $amounts[] = $amount;
+            if (is_numeric($n)) {
+                $amount = ["currency" => $currency, "amount" => $n];
+                $amounts[] = $amount;
             }
         }
 
         foreach ($tokens as $key => $token) {
-$currency_arr = array("dollars", "dollar");
-//            if (strtolower($token) == "dollars") {
-if (in_array(strtolower($token), $currency_arr)) {
-            //$n =  $a->parseCurrency($token, $currency);
+            $currency_arr = ["dollars", "dollar"];
+            //            if (strtolower($token) == "dollars") {
+            if (in_array(strtolower($token), $currency_arr)) {
+                //$n =  $a->parseCurrency($token, $currency);
 
-if (!isset($tokens[$key - 1])) {continue;}
+                if (!isset($tokens[$key - 1])) {
+                    continue;
+                }
 
-            if ( is_numeric($tokens[$key - 1]) ) 
-{
-
-$n = floatval($tokens[$key - 1]);
-               $amount = array("currency"=>"USD", "amount"=>$n);
-               $amounts[] = $amount;
+                if (is_numeric($tokens[$key - 1])) {
+                    $n = floatval($tokens[$key - 1]);
+                    $amount = ["currency" => "USD", "amount" => $n];
+                    $amounts[] = $amount;
+                }
             }
-            }
-
         }
-
-
 
         $this->amounts = $amounts;
         return $this->amounts;
     }
-
 
     /**
      *
      * @param unknown $text
      * @return unknown
      */
-    function hasAmount($text) {
-
-
+    function hasAmount($text)
+    {
         $this->extractAmounts($text);
-        if ((isset($this->amounts)) and (count($this->amounts) > 0)) {return true;}
+        if (isset($this->amounts) and count($this->amounts) > 0) {
+            return true;
+        }
         return false;
-
     }
 
-
-    function set() {
-
+    function set()
+    {
         $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(array("amount",
-                "received_at"),  $this->thing->json->time()
+        $this->thing->json->writeVariable(
+            ["amount", "received_at"],
+            $this->thing->json->time()
         );
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
-
+    public function readSubject()
+    {
         // Test
         // $this->input = "amount 21.65 54.2 sdfdsaf $21.32 -$543.345345";
         $this->extractAmounts($this->input);
-        if ((isset($this->amount)) and ($this->amount != null)) {
-
+        if (isset($this->amount) and $this->amount != null) {
             $this->response = "Amount spotted.";
             return;
         }
 
-
-        $input= $this->input;
+        $input = $this->input;
         //var_dump($this->input);
-        $strip_words = array("amount");
+        $strip_words = ["amount"];
 
-
-        foreach ($strip_words as $i=>$strip_word) {
-
+        foreach ($strip_words as $i => $strip_word) {
             $whatIWant = $input;
-            if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
-                $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
-            } elseif (($pos = strpos(strtolower($input), $strip_word)) !== FALSE) {
-                $whatIWant = substr(strtolower($input), $pos+strlen($strip_word));
+            if (
+                ($pos = strpos(strtolower($input), $strip_word . " is")) !==
+                false
+            ) {
+                $whatIWant = substr(
+                    strtolower($input),
+                    $pos + strlen($strip_word . " is")
+                );
+            } elseif (
+                ($pos = strpos(strtolower($input), $strip_word)) !== false
+            ) {
+                $whatIWant = substr(
+                    strtolower($input),
+                    $pos + strlen($strip_word)
+                );
             }
 
             $input = $whatIWant;
         }
 
-
         $filtered_input = ltrim(strtolower($input), " ");
 
         return false;
-
     }
 
-public function filterAmount($text = null) {
-
-}
+    public function filterAmount($text = null)
+    {
+    }
 
     /**
      *
      */
-    function makeResponse() {
-        if (isset($this->response)) {return;}
+    function makeResponse()
+    {
+        if (isset($this->response)) {
+            return;
+        }
         $this->response = "X";
-        if ((isset($this->amounts)) and (count($this->amounts) > 0 )) {
+        if (isset($this->amounts) and count($this->amounts) > 0) {
             $this->response = "";
-            foreach ($this->amounts as $index=>$amount) {
-
-                $this->response .= $amount ." ";
-
+            foreach ($this->amounts as $index => $amount) {
+                $this->response .= $amount . " ";
             }
         }
-
     }
-
 
     /**
      *
      */
-    function makeSMS() {
-
+    function makeSMS()
+    {
         $this->sms_message = strtoupper($this->agent_name) . " | ";
 
         $t = "";
-        foreach($this->amounts as $i=>$amount) {
+        foreach ($this->amounts as $i => $amount) {
             $t .= $amount['amount'] . $amount['currency'] . " ";
-
         }
         $t = trim($t);
         $this->sms_message .= $t . " ";
@@ -208,23 +219,20 @@ public function filterAmount($text = null) {
         $this->sms_message .= ' | TEXT CHANNEL';
 
         $this->thing_report['sms'] = $this->sms_message;
-
     }
-
 
     /**
      *
      */
-    function makeChoices() {
+    function makeChoices()
+    {
     }
-
 
     /**
      *
      */
-    function makeImage() {
+    function makeImage()
+    {
         $this->image = null;
     }
-
-
 }

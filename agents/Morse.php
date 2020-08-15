@@ -317,7 +317,7 @@ if (isset($this->keywords[0])) {$this->keyword = $this->keywords[0];}
             if ($phrase == "") {continue;}
             $english_phrases[] = $phrase;
         }
-var_dump($dict);
+
 //        $text =  $dict[0];
 
 //        preg_match_all("/\[([^\]]*)\]/", $text, $matches);
