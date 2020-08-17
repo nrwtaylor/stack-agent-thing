@@ -109,7 +109,8 @@ class Rule extends Agent
 
 
         $tokens = explode(" ", strtolower($text));
-        if ($tokens[1] == "etiquette" and substr($text, 0, 1) == "@") {
+
+        if ((isset($tokens[1])) and ($tokens[1] == "etiquette" and substr($text, 0, 1) == "@")) {
             return false;
         }
 
@@ -127,7 +128,7 @@ class Rule extends Agent
     private function colourRule()
     {
         if ($this->suit == 'welfare' or $this->suit == 'routine') {
-            $this->colour = "black";
+            $this->colour = "yellow";
         } else {
             $this->colour = "red";
         }
