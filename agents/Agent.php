@@ -264,16 +264,15 @@ class Agent
                 $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-//$thing = new \stdClass();
-$thing = new Thing(null);
-$thing->uuid = $thing_object['uuid'];
-$thing->variables = $variables;
-$thing->created_at = $thing_object['created_at'];
+                //$thing = new \stdClass();
+                $thing = new Thing(null);
+                $thing->uuid = $thing_object['uuid'];
+                $thing->variables = $variables;
+                $thing->created_at = $thing_object['created_at'];
 
                 if (isset($variables[$agent_name])) {
-//                    $things[$uuid] = $variables[$agent_name];
+                    //                    $things[$uuid] = $variables[$agent_name];
                     $things[$uuid] = $thing;
-
                 }
 
                 $response = $this->readAgent($thing_object['task']);
@@ -313,7 +312,7 @@ $thing->created_at = $thing_object['created_at'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 //if (isset($variables[$agent_name])) {
-                    $variables_array[$uuid] = $variables;
+                $variables_array[$uuid] = $variables;
                 //}
 
                 //$response = $this->readAgent($thing_object['task']);
@@ -322,7 +321,6 @@ $thing->created_at = $thing_object['created_at'];
 
         return $variables_array;
     }
-
 
     public function readAgent($text = null)
     {
@@ -988,7 +986,6 @@ $thing->created_at = $thing_object['created_at'];
     {
     }
 
-
     /**
      *
      */
@@ -1332,8 +1329,12 @@ $thing->created_at = $thing_object['created_at'];
         if (strtolower($this->agent_name) == strtolower($agent_class_name)) {
             return true;
         }
+        register_shutdown_function([$this, "shutdownHandler"]);
 
         //if ($agent_class_name == 'Test') {return false;}
+        set_error_handler([$this, 'warning_handler'], E_WARNING | E_NOTICE);
+
+        //set_error_handler("warning_handler", E_WARNING);
 
         try {
             $agent_namespace_name =
@@ -1351,6 +1352,7 @@ $thing->created_at = $thing_object['created_at'];
             }
 
             $agent = new $agent_namespace_name($thing, $agent_input);
+            restore_error_handler();
 
             // If the agent returns true it states it's response is not to be used.
             if (isset($agent->response) and $agent->response === true) {
@@ -1364,9 +1366,11 @@ $thing->created_at = $thing_object['created_at'];
 
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
+            restore_error_handler();
             $this->thing->log('caught throwable.', "WARNING");
             return false;
         } catch (\Error $ex) {
+            restore_error_handler();
             // Error is the base class for all internal PHP error exceptions.
             $this->thing->log(
                 'caught error. Could not load "' . $agent_class_name . '".',
@@ -2643,7 +2647,6 @@ $thing->created_at = $thing_object['created_at'];
 
         foreach ($strip_words as $i => $strip_word) {
             //                    $strip_word = $strip_word['words'];
-
             $whatIWant = $input;
             if (
                 ($pos = strpos(strtolower($input), $strip_word . " is")) !==
@@ -2696,6 +2699,7 @@ $thing->created_at = $thing_object['created_at'];
         $this->thing->log($errno);
         $this->thing->log($errstr);
 
+        $this->response .= "Warning seen. " . $errno . " " . $errstr . ". ";
         // do something
     }
 
@@ -2714,5 +2718,42 @@ $thing->created_at = $thing_object['created_at'];
         $this->thing->log($e);
         // do some erorr handling here, such as logging, emailing errors
         // to the webmaster, showing the user an error page etc
+        $this->response .= "Agent could not run. ";
+    }
+
+    function shutdownHandler()
+    {
+        //will be called when php script ends.
+        $this->response .= "Shutdown thing. ";
+        $lasterror = error_get_last();
+        switch ($lasterror['type']) {
+            case E_ERROR:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_USER_ERROR:
+            case E_RECOVERABLE_ERROR:
+            case E_CORE_WARNING:
+            case E_COMPILE_WARNING:
+            case E_PARSE:
+                $error =
+                    "[SHUTDOWN] lvl:" .
+                    $lasterror['type'] .
+                    " | msg:" .
+                    $lasterror['message'] .
+                    " | file:" .
+                    $lasterror['file'] .
+                    " | ln:" .
+                    $lasterror['line'];
+                $this->mylog($error, "fatal");
+        }
+    }
+
+    function mylog($error, $errlvl)
+    {
+        echo $this->response;
+        echo "\n";
+        echo $this->thing->log;
+        //...do whatever you want...
+        //echo $this->uuid;
     }
 }

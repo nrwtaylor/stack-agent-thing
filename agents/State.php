@@ -14,6 +14,9 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// devstack
+// Build a tree of allowed states.
+
 class State extends Agent
 {
     public $var = 'hello';

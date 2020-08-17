@@ -1,6 +1,9 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+// devstack explore
+//use PHPUnit\Framework\TestCase;
+
 class Test extends Agent
 {
     public $var = 'hello';
@@ -45,14 +48,24 @@ class Test extends Agent
         if (isset($this->agents[strtolower($text)])) {
             $agent_name = $this->agents[strtolower($text)];
             $this->test_text = $agent_name;
+
+            $this->response .= "Test text is " . $this->test_text . ". ";
+
+//     $stub = $this->getMockBuilder($this->test_text)->disableOriginalConstructor()->getMock();
+//      $stub->method("init")->willReturn(11);
+        // Calling $stub->doSomething() will now return
+        // 'foo'.
+//        $this->assertEquals('foo', $stub->init());
+
+
             $agent = $this->getAgent($agent_name); // Push agent response.
-            $this->response .= "Tested " . $agent_name . " response. ";
+            $this->response .= "Tested " . $agent_name . " response. " . $agent->response;
         } else {
             // Either
             //$agent = new Agent($this->thing,"agent");
             $this->test_text = 'agent';
             $agent = $this->getAgent('agent', $text);
-            $this->response .= "Tested agent response. ";
+            $this->response .= "Tested agent response. " . $agent->response;
             // Neither is providing a thing_report.
         }
 
@@ -138,38 +151,6 @@ class Test extends Agent
         $agent_name = $tokens[0];
 
         $this->response .= "Agent tested: " . $agent_name . ". ";
-        /*
-<<<<<<< Updated upstream
-
-        //if (rand(0,1) == 1) {
-
-        $agent = $this->getAgent($agent_name); // Push agent response.
-        //} else {
-        //$agent = $this->getAgent($agent_name, strtolower($agent_name)); //  Do not push response.
-        //}
-        if ($agent === true) {
-            $this->response .= "Test response: TRUE. ";
-            return;
-        }
-
-        if ($agent === false) {
-            $this->response .= "Test response: FALSE. ";
-            return;
-        }
-
-$sms = "TEST | No SMS response.";
-if (isset($agent->thing_report['sms'])) {
-        $sms = $agent->thing_report['sms'];
-}
-
-$response = "No response.";
-if (isset($agent->thing_report['response'])) {
-        $response = $agent->thing_report['response'];
-}
-        //$this->callAgent($agent_name);
-        $this->response .= "Test response: " . $sms . " " . $response . " / ";
-=======
-*/
         $this->test($agent_name);
     }
 
