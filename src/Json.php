@@ -456,6 +456,10 @@ class Json
             $dest = &$dest[$key];
         }
 
+        if (is_array($finalKey)) {
+           throw new Exception('Array received as path.');
+           return true;
+        }
         $dest[$finalKey] = $value;
     }
 
