@@ -224,10 +224,39 @@ class Alias extends Agent
                 'ms.'
         );
 
+
+        $this->thing->json->setField("variables");
+        $this->head_code = $this->thing->json->readVariable([
+            "headcode",
+            "head_code",
+        ]);
+
+        $flag_variable_name = "_" . $this->head_code;
+
+        // Get the current Identities flag
+//        $this->flag = new Variables(
+//            $this->thing,
+//            "variables flag" . $flag_variable_name . " " . $this->from
+//        );
+
+
+/*
         $this->variables_agent = new Variables(
             $this->thing,
             "variables alias " . $this->from
         );
+*/
+
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables alias" . $flag_variable_name . " " . $this->from
+        );
+
+        $this->alias = $this->variables_agent->getVariable("alias");
+        $this->alias_id = $this->variables_agent->getVariable("alias_id");
+
+return;
+
         $this->variables_agent->getVariables();
 
         $this->thing->log(
@@ -500,7 +529,8 @@ class Alias extends Agent
             "ALIAS | Could not find an agent to respond to your message.";
         $this->node_list = ["alias" => ["agent", "message"]];
 
-        $sms = "ALIAS " . strtoupper($this->alias_id);
+        $sms = "ALIAS " . strtoupper($this->alias_id) . " ";
+$sms .= strtoupper($this->head_code) . " ";
         $sms .= " | alias " . strtoupper($this->alias);
 
         $sms .= " | nuuid " . substr($this->variables_agent->uuid, 0, 4);

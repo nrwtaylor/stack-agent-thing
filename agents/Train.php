@@ -28,8 +28,6 @@ class Train extends Agent
 
     function init()
     {
-//        $this->start_time = microtime(true);
-
         $this->keyword = "train";
 
         $this->start_time = $this->thing->elapsed_runtime();
@@ -44,6 +42,9 @@ class Train extends Agent
 
         $this->agents = [
             'flag',
+            'runtime',
+            'runat',
+            'endat',
             'state',
             'quantity',
             'alias',
@@ -397,18 +398,57 @@ $this->train = $train;
 
         $this->flag_agent = $this->getAgent('Flag','flag');
         $this->flag = $this->flag_agent->state;
-// $this->flag->state =
 
 
         // Get headcode quantity
         $this->quantity_agent = $this->getAgent('Quantity','quantity');
         $this->quantity = $this->quantity_agent->quantity;
-//var_dump($this->quantity);
+
         $this->state_agent = $this->getAgent('State','state');
         $this->state = $this->state_agent->state;
 
         $this->alias_agent = $this->getAgent('Alias','alias');
         $this->alias = $this->alias_agent->alias;
+//var_dump($this->alias_agent->alias);
+//var_dump($this->alias_agent->alias_id);
+        $this->runtime_agent = $this->getAgent('Runtime','runtime');
+        $this->runtime = $this->runtime_agent->runtime;
+
+// devstack
+        $this->runat_agent = $this->getAgent('Runat','runat');
+        if (!isset($this->runat)) {
+            $this->runat = new \stdClass();
+        }
+
+        $this->runat->day = $this->runat_agent->day;
+        $this->runat->hour = $this->runat_agent->hour;
+        $this->runat->minute = $thi->runat_agent->minute;
+
+
+        $this->endat_agent = $this->getAgent('Endat','endat');
+        if (!isset($this->endat)) {
+            $this->endat = new \stdClass();
+        }
+
+        $this->endat->day = $this->endat_agent->day;
+        $this->endat->hour = $this->endat_agent->hour;
+        $this->endat->minute = $thi->endat_agent->minute;
+
+
+
+//foreach($this->runat_agent as $i=>$j) {
+//var_dump($i);
+//}
+
+//var_dump($this->runat_agent);
+//exit();
+//$run_at = $this->runat_agent->agent_variable;
+// devstack
+//var_dump($run_at);
+//exit();
+//        $this->runat->day = $day;
+//        $this->runat->hour = $hour;
+//        $this->runat->minute = $minute;
 
 
 //var_dump($this->quantity);
@@ -418,10 +458,10 @@ $this->train = $train;
 //        $this->getQuantity();
 //        $this->getState();
         $this->getIndex();
-        $this->getRunat();
+//        $this->getRunat();
 
-        $this->getEndat();
-        $this->getRuntime();
+//        $this->getEndat();
+//        $this->getRuntime();
 
 //        $this->getAlias();
 
@@ -1902,33 +1942,10 @@ $this->flag = $flag;
         $t->set();
     }
 
-    /*
-    function extractUuids($input)
-    {
-        if (!isset($this->uuids)) {
-            $this->uuids = [];
-        }
-
-        $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-
-        preg_match_all($pattern, $input, $m);
-
-        $arr = $m[0];
-        //array_pop($arr);
-
-        return $arr;
-    }
-*/
     function trains()
     {
     }
-    /*
-    function read()
-    {
-        $this->thing->log("read");
-        return $this->available;
-    }
-*/
+
     function addTrain()
     {
         $this->makeTrain(null);
@@ -2592,18 +2609,33 @@ if ($this->alias != null) {
 //$sms_message .= "quantity " . $this->quantity . " ";
 foreach($this->agents as $i=>$agent_name) {
 
-$variable_name = strtolower($agent_name);
+    $variable_name = strtolower($agent_name);
 
 
-if (isset($this->{$variable_name})) {
-$sms_message .= $agent_name . " ";
-//var_dump($variable_name);
-//var_dump($this->{$variable_name});
-if (!is_string($this->{$variable_name})) {$sms_message .= "X". " "; continue;}
-//exit();
-$sms_message .= $this->{strtolower($agent_name)} . " ";
+    if (isset($this->{$variable_name})) {
+        $sms_message .= $agent_name . " ";
 
-}
+        if (is_string($this->{$variable_name})) {
+            $sms_message .= $this->{strtolower($agent_name)} . " ";
+            continue;
+        }
+
+        if (is_array($this->{$variable_name})) {
+            $sms_message .= implode(" ", $this->{$variable_name}) . " ";
+            continue;
+        }
+
+        if (is_object($this->{$variable_name})) {
+
+            $agent_variable = (array) $this->{$variable_name};
+            $text = implode(" " , $agent_variable);
+
+            $sms_message .= $text . " "; 
+            continue; 
+        }
+
+
+    }
 
 }
 
@@ -2657,7 +2689,7 @@ $sms_message .= $this->{strtolower($agent_name)} . " ";
             }
         }
 
-        $sms_message .= "Report follows: " . $this->textTrain($this->train);
+        // $sms_message .= "Report follows: " . $this->textTrain($this->train);
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
@@ -2927,7 +2959,7 @@ $sms_message .= $this->{strtolower($agent_name)} . " ";
                         //        break;
 
                         default:
-                        //$this->read();
+                        $this->readTrain();
                     }
                 }
             }
