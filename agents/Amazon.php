@@ -349,10 +349,12 @@ $keywords= $text;
         );
 
         $request = $this->getRequest($request_array);
-var_dump($request);
+// devstack
+//var_dump($request);
 
         $amazon_array = $this->getAmazon($request);
-var_dump($amazon_array);
+// devstack
+//var_dump($amazon_array);
 if (!isset($amazon_array['Items'])) {
 if (isset($amazon_array['Error'])) {
 

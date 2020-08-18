@@ -60,48 +60,6 @@ class Quantity extends Agent
         $this->test = "Development code"; // Always iterative.
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    /*
-    public function set()
-    {
-        if ($this->input == "quantity") {
-            return true;
-        }
-
-        if ($this->agent_input == "extract") {
-            return true;
-        }
-
-        if (!isset($this->refreshed_at)) {
-            $this->refreshed_at = $this->thing->time();
-        }
-        $quantity = $this->quantity;
-        if ($this->quantity == true and !is_numeric($this->quantity)) {
-            return;
-        }
-
-        $this->refreshed_at = $this->current_time;
-
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["quantity", "quantity"],
-            $this->quantity
-        );
-        $this->thing->json->writeVariable(
-            ["quantity", "refreshed_at"],
-            $this->refreshed_at
-        );
-
-        $this->thing->log(
-            $this->agent_prefix . ' set ' . $this->quantity . ".",
-            "INFORMATION"
-        );
-    }
-*/
-
     function set($requested_quantity = null)
     {
         if ($requested_quantity == null) {

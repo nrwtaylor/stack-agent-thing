@@ -32,6 +32,7 @@ class Test extends Agent
 
     function init()
     {
+ob_start();
         $this->thing_report["info"] = "Tests Agent behaviour.";
         $this->thing_report["help"] =
             "This is about testing an agent response.";
@@ -189,6 +190,13 @@ class Test extends Agent
 
     function run()
     {
+        $text = ob_get_contents();
+
+        if ($text == "") {return;}
+
+        if (is_string($text)) {
+            $this->response .= "Output buffer seen. " . $text . ". ";
+        }
     }
 
     public function makeWeb()

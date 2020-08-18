@@ -27,7 +27,7 @@ class Makephp
         $file = @file_get_contents(__DIR__ . '/../agents/'. $class_name . '.php');
 
         if($file=== FALSE) { // handle error here... }
-            echo "Agent 'make php' says " .ucwords($input) . " is not a recognized Agent on this Stack.";
+            $file = "Agent 'make php' says " .ucwords($input) . " is not a recognized Agent on this Stack.";
         }
 
         $this->thing_report = array('thing' => $thing, 
