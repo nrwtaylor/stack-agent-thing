@@ -409,8 +409,7 @@ $this->train = $train;
 
         $this->alias_agent = $this->getAgent('Alias','alias');
         $this->alias = $this->alias_agent->alias;
-//var_dump($this->alias_agent->alias);
-//var_dump($this->alias_agent->alias_id);
+
         $this->runtime_agent = $this->getAgent('Runtime','runtime');
         $this->runtime = $this->runtime_agent->runtime;
 
@@ -2562,7 +2561,9 @@ if ($this->alias != null) {
             //$this->flag = $this->train_thing->flag;
 
             if (isset($this->flag)) {
-                $sms_message .= " | flag " . strtoupper($this->flag);
+                $flag = $this->flag;
+                if ($this->flag == false) {$flag = "X";}
+                $sms_message .= " | flag " . strtoupper($flag);
             }
         }
 
@@ -2613,6 +2614,11 @@ foreach($this->agents as $i=>$agent_name) {
 
 
     if (isset($this->{$variable_name})) {
+
+        if ($this->{strtolower($agent_name)} === false) { 
+            continue;
+        }
+
         $sms_message .= $agent_name . " ";
 
         if (is_string($this->{$variable_name})) {
@@ -2621,15 +2627,15 @@ foreach($this->agents as $i=>$agent_name) {
         }
 
         if (is_array($this->{$variable_name})) {
-            $sms_message .= implode(" ", $this->{$variable_name}) . " ";
+            $text = trim(implode(" ", $this->{$variable_name})); 
+            $sms_message .= $text . " ";
             continue;
         }
 
         if (is_object($this->{$variable_name})) {
 
             $agent_variable = (array) $this->{$variable_name};
-            $text = implode(" " , $agent_variable);
-
+            $text = trim(implode(" " , $agent_variable));
             $sms_message .= $text . " "; 
             continue; 
         }

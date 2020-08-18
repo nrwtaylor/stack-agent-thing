@@ -616,6 +616,7 @@ class Variables
 
         $train_agents = [
             "flag",
+            "state",
             "quantity",
             "alias",
             "slug",

@@ -1,6 +1,6 @@
 <?php
 /**
- * Crow.php
+ * State.php
  *
  * @package default
  */
@@ -27,149 +27,159 @@ class State extends Agent
     {
         $this->test = "Development code";
 
-        $this->primary_place = "roost";
-        $this->signals = ["on", "off"];
+        //        $this->primary_place = "roost";
+        $this->primary_place = "state";
+
+        $this->default_state = "off";
+
+        $this->keyword = "state";
 
         $this->node_list = [
-            "inside nest" => [
-                "nest maintenance" => ["patrolling" => "foraging", "foraging"],
-            ],
-            "midden work" => "foraging",
+            "on" => ["off" => ["on"]],
+            "off" => ["on" => ["off"]],
         ];
 
         $this->thing_report['help'] = 'This is the state agent.';
-
-        $entity = new Entity($this->thing, "state");
-        $this->state_thing = $entity->thing;
     }
 
-    public function get()
+    /**
+     *
+     */
+    private function setState()
     {
-        // devstack
-        // Use the settings array to find out what states are available to this thing.
-        $settings_json = $this->thing->thing->settings;
-        $settings = $this->thing->json->jsontoArray($settings_json);
-    }
-
-    function run()
-    {
-        $this->doState();
-    }
-
-    private function getState()
-    {
-        $this->state = $this->state_thing->choice->load($this->primary_place);
+        return;
         $this->state_thing->choice->Create(
             $this->primary_place,
             $this->node_list,
             $this->state
         );
         $this->state_thing->choice->Choose($this->state);
-
         $choices = $this->state_thing->choice->makeLinks($this->state);
     }
 
-    private function setState()
+    function run()
     {
-        $this->state_thing->choice->Choose($this->state);
-        $choices = $this->state_thing->choice->makeLinks($this->state);
+    }
+
+    public function get()
+    {
+        $flag_variable_name = "";
+        // Get the current Identities flag
+        $this->state_agent = new Variables(
+            $this->thing,
+            "variables state" . $flag_variable_name . " " . $this->from
+        );
+
+        // get gets the state of the Flag the last time
+        // it was saved into the stack (serialized).
+        $this->previous_state = $this->state_agent->getVariable("state");
+        $this->refreshed_at = $this->state_agent->getVariable("refreshed_at");
+
+        $this->state = $this->previous_state;
     }
 
     /**
      *
      */
+
     public function set()
     {
-        $this->state_thing->json->writeVariable(
-            ["state", "name"],
-            $this->state_name
-        );
-        $this->state_thing->json->writeVariable(
-            ["state", "signal"],
-            $this->signal
-        );
+        $this->state_agent->setVariable("state", $this->state);
+        $this->state_agent->setVariable("refreshed_at", $this->current_time);
+
+        $this->setState();
     }
 
-    function doState()
+    public function makeChoices()
     {
-        if (!isset($this->state) or $this->state == null) {
-            //$this->response = "detected state null - run subject discriminator";
-            $this->thing->log($this->agent_prefix . 'state is null.');
+        $choices = $this->thing->choice->makeLinks($this->state);
+        $this->choices = $choices;
+        $this->thing_report['choices'] = $choices;
+    }
+
+    function respondResponse()
+    {
+        //        $this->thing_report['sms'] = "STATE " . "| " . $this->response;
+    }
+
+    public function makeSMS()
+    {
+        $sms = "STATE ";
+
+        $sms .= strtoupper($this->state_agent->head_code) . " ";
+
+        $sms .= strtoupper($this->state) . "";
+
+        if ($this->previous_state != $this->state) {
+            $sms .= " ";
+            $sms .= "was previously " . strtoupper($this->previous_state);
         }
 
-        $this->state = $this->thing->choice->load('roost');
+        $sms .= " | ";
 
-        // Will need to develop this to only only valid state changes.
-        switch ($this->state) {
-            case "on":
-                //$this->spawn();
-                $this->response .= "Spawn state. ";
-                $this->onState();
-                break;
-            case "off":
-                $this->response .= "Dead Crow. ";
-                $this->offState();
-                //$this->kill();
-                break;
-            case "foraging":
-                //$this->thing->choice->Choose("foraging");
-                $this->response .= "Foraging. ";
-                break;
-            case "inside nest":
-                //$this->thing->choice->Choose("in nest");
-                $this->response .= "Crow is Inside Nest. ";
-                break;
-            case "nest maintenance":
-                $this->response .= "Crow is doing Nest Maintenance. ";
-                //$this->thing->choice->Choose("nest maintenance");
-                break;
-            case "patrolling":
-                $responses = [
-                    "Crow is Watching for predators. ",
-                    "Crow is analyzing humans. ",
-                    "Crow is questing for the oracle. ",
-                    "Crow has found a Peanut's comic strip. ",
-                ];
-                $this->response .= array_rand($responses);
-                break;
-            case "midden work":
-                $this->response .= "Crow is doing Midden Work. ";
-                break;
+        $sms .= $this->response;
+        $choice_text = "Choices are ";
 
-            case false:
-                $this->response .= "Heisenberg.";
+        $this->thing->choice->Create(
+            $this->primary_place,
+            $this->node_list,
+            $this->state
+        );
 
-            case true:
-            case null:
-            case false:
+        $choices = $this->thing->choice->getChoices();
 
-            default:
-                $this->thing->log(
-                    'invalid state provided "' . $this->state . "."
-                );
-                $this->response = "State handling is broken. ";
+        foreach ($choices as $i => $choice_name) {
+            $choice_text .= strtoupper($choice_name) . " / ";
+        }
+        $sms .= $choice_text;
+        $this->thing_report['sms'] = $sms;
+    }
+
+    public function readState()
+    {
+    }
+
+    public function isState($state = null)
+    {
+        if ($state == null) {
+            return false;
+        }
+        $this->thing->choice->Create('state', $this->node_list);
+        $message = $this->thing->choice->getChoices($state);
+
+        if ($message == []) {
+            return false;
+        }
+        return true;
+    }
+
+    public function chooseState($state)
+    {
+        $this->state = $state;
+        return;
+
+        // devstack
+
+        $t = $this->state_thing->choice->Choose($state);
+        $m = $this->state_thing->choice->load('state');
+    }
+
+    public function readSubject()
+    {
+        $input = $this->input;
+        $filtered_input = $this->assert($input);
+
+        if ($filtered_input == "") {
+            $this->response .= "Got state. ";
+            return;
         }
 
-        $this->signal = "X";
-        $this->state_name = "X";
-    }
+        if (!$this->isState($filtered_input)) {
+            $this->response .= "State not recognized. ";
+            return;
+        }
 
-    function respond()
-    {
-        $this->thing_report['sms'] = "STATE " . "| " . $this->response;
-    }
-
-    function onState()
-    {
-        $this->state = "on";
-    }
-
-    function offState()
-    {
-        $this->state = "off";
-    }
-
-    function readSubject()
-    {
+        $this->chooseState($filtered_input);
+        return;
     }
 }

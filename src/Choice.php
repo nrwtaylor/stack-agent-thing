@@ -690,9 +690,4 @@ class Choice {
             if ($value === $needle) {return array();}
         }
     }
-
-
-
-
-
 }

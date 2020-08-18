@@ -68,6 +68,8 @@ class Headcode
             "INFORMATION"
         );
 
+        $this->response = null;
+
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         // Get some stuff from the stack which will be helpful.
@@ -174,7 +176,7 @@ class Headcode
         $this->thing_report['log'] = $this->thing->log;
 
         if (!isset($this->response)) {
-            $this->response = "No response found.";
+            $this->response .= "No response found. ";
         }
 
         $this->thing_report['response'] = $this->response;
@@ -1048,10 +1050,10 @@ class Headcode
         $sms_message .= " | ";
 
         //        $sms_message .= $this->route . " [" . $this->consist . "] " . $this->quantity;
-        $sms_message .= "A headcode needs a ROUTE, a CONSIST, and a QUANTITY. ";
+        //$sms_message .= "A headcode needs a ROUTE, a CONSIST, and a QUANTITY. ";
         //        $sms_message .= " | index " . $this->index;
         //        $sms_message .= " | available " . $this->available;
-
+$sms_message .= $this->response;
         //$sms_message .= " | from " . $this->headcodeTime($this->start_at) . " to " . $this->headcodeTime($this->end_at);
         //$sms_message .= " | now " . $this->headcodeTime();
         //        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
@@ -1141,7 +1143,7 @@ class Headcode
 
     public function readSubject()
     {
-        $this->response = null;
+        //$this->response = null;
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
@@ -1217,7 +1219,7 @@ class Headcode
 
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
-            $this->response = "Extract";
+            $this->response .= "Extract. ";
             return;
         }
 
@@ -1228,7 +1230,7 @@ class Headcode
         if (count($pieces) == 1) {
             if ($input == 'headcode') {
                 $this->read();
-                $this->response = "Read headcode";
+                $this->response .= "Read headcode. ";
                 return;
             }
         }
@@ -1240,20 +1242,20 @@ class Headcode
                         case 'next':
                             $this->thing->log("read subject nextheadcode");
                             $this->nextheadcode();
-                            $this->response = "Got next headcode";
+                            $this->response .= "Got next headcode. ";
                             break;
 
                         case 'drop':
                             //     //$this->thing->log("read subject nextheadcode");
                             $this->dropheadcode();
-                            $this->response = "Dropped headcode";
+                            $this->response .= "Dropped headcode. ";
                             break;
 
                         case 'add':
                             //     //$this->thing->log("read subject nextheadcode");
                             //$this->makeheadcode();
                             $this->get();
-                            $this->response = "Added headcode";
+                            $this->response .= "Added headcode. ";
                             break;
 
                         default:
@@ -1270,12 +1272,12 @@ class Headcode
 
         if ($this->isData($this->head_code)) {
             $this->set();
-            $this->response = "Set headcode to " . strtoupper($this->head_code);
+            $this->response .= "Set headcode to " . strtoupper($this->head_code) . ". ";
             return;
         }
 
         $this->read();
-        $this->response = "Read";
+        $this->response .= "Read. ";
 
         return "Message not understood";
 
