@@ -260,7 +260,6 @@ class Signal extends Agent
         if (!isset($this->signal_thing)) {
             return true;
         }
-
         $state = null;
 
         if (strtolower($text) == "x") {
@@ -326,9 +325,9 @@ class Signal extends Agent
 
     function newSignal()
     {
-echo "new signal";
+        $this->response .= "Called for a new signal. ";
         $thing = new Thing(null);
-        $thing->Create('signal', 'signal', 'signal');
+        $thing->Create($this->from, 'signal', 'signal');
 
         $this->signal_thing = $thing;
         $this->signal_thing->state = "X";
@@ -506,7 +505,6 @@ $this->signal_id = $this->idSignal($thing->uuid);
             // Get the most recent signal command.
             //return;
         }
-
         // Haven't found the signal in the thing.
 
         if (!isset($this->signals)) {
@@ -527,6 +525,8 @@ $this->signal_id = $this->idSignal($thing->uuid);
             }
         }
 
+        $this->response .= "Did not find a signal. ";
+
         // Can't find a signal.
         return false;
     }
@@ -544,7 +544,6 @@ $this->signal_id = $this->idSignal($thing->uuid);
                 count($findagent_thing->thing_report['things']) .
                 " signal Things."
         );
-
         if (!$this->is_positive_integer($count)) {
             // No signals found
         } else {
@@ -553,7 +552,6 @@ $this->signal_id = $this->idSignal($thing->uuid);
                 as $thing_object
             ) {
                 $uuid = $thing_object['uuid'];
-
                 $associations_json = $thing_object['associations'];
                 $associations = $this->thing->json->jsontoArray(
                     $associations_json
