@@ -11,7 +11,7 @@ all: lamp mysql php apachefiling resources gearman supervisor cron tailoring mem
 
 # remember to update your system
 
-lamp:  
+lamp:
 	sudo apt install apache2
 	sudo apt install mysql-server
 	sudo apt install php7.2 libapache2-mod-php php-mysql
@@ -38,32 +38,27 @@ lamp:
 	sudo sed -i 's/SERVERNAME/$(SERVERNAME)/g' /etc/apache2/sites-available/$(SERVERNAME).conf; \
 	sudo sed -i 's/YOUR_EMAIL/$(YOUR_EMAIL)/g' /etc/apache2/sites-available/$(SERVERNAME).conf
 	sudo mkdir -p /var/www/$(SERVERNAME)/{public_html,logs}
-<<<<<<< HEAD
-	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)/public_html
-	sudo chmod -R 774 /var/www/$(SERVERNAME)/public_html
-=======
 	sudo chown root:root /var/www
 	sudo chmod 755 /var/www/
 	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)
 	sudo chmod -R 774 /var/www/$(SERVERNAME)
->>>>>>> 4c79b6f93c2d28a746820331db6ca9c7ec53d8ac
 	sudo a2ensite $(SERVERNAME).conf
 	sudo cp scripts/.htaccess /var/www/$(SERVERNAME)
 	install mod_rewrite module; sudo a2enmod rewrite; \
 	sudo service apache2 reload
 #	sudo a2dissite 000-default.conf
 #	sudo systemctl reload apache2
-	
-mysql: 
+
+mysql:
 	mysql -u root -p -e "CREATE USER 'stackuser'@'%' IDENTIFIED BY 'stackuser'"
 	mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'stackuser'@'%' WITH GRANT OPTION"
 	mysql -u stackuser -p -e "CREATE DATABASE stack_db"
 	mysql -u stackuser -p stack_db < templates/database_schema.sql
-	
+
 # innodb:
 # innodb performance settings
 
-php: 
+php:
 	sudo apt-get update
 	sudo apt-get install php-mbstring
 	sudo apt-get install php7.2-xml
@@ -113,7 +108,7 @@ supervisor:
 	sudo apt-get install supervisor; \
 	sudo cp scripts/supervisor.conf /etc/supervisor/conf.d
 	sudo sed 's/SERVERNAME/$(SERVERNAME)/g' /etc/supervisor/conf.d
-	
+
 cron:
 	line="* * * * * cd /var/www/$(SERVERNAME) && /usr/bin/php -q /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1"; \
 	(sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
@@ -123,8 +118,8 @@ tailoring:
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/src/Thing.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/src/worker.php
-    sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Emailhandler.php
-	
+	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Emailhandler.php
+
 #verify:
 
 #postfix:
@@ -137,5 +132,5 @@ clean:
 	rm -Rvf /var/www/$(SERVERNAME)
 	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf
 #	rm -f /etc/apache2/sites-available/000-default.conf
-# perhaps also:  mysql? php? 
+# perhaps also:  mysql? php?
 
