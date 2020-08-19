@@ -38,7 +38,6 @@ class Signal extends Agent
         // devstack
         $this->associate_agent = new Associate($this->thing, $this->subject);
 
-
         $this->thing_report['help'] =
             'This Signal is either RED, GREEN, YELLOW or DOUBLE YELLOW. Text SIGNAL DOUBLE YELLOW.';
         $this->thing_report['info'] =
@@ -70,9 +69,12 @@ class Signal extends Agent
 
     public function set()
     {
+        echo "signal set\n";
         if (!isset($this->signal_thing)) {
+            //$this->signal_thing = $this->thing;
+            echo "signal set signal_thing not set\n";
             // Nothing to set
-            return true;
+            //return true;
         }
 
         if (isset($this->signal_thing->state)) {
@@ -97,7 +99,7 @@ class Signal extends Agent
             // Do not effect a state change for web views.
             return;
         }
-/*
+        /*
         $this->thing->json->writeVariable(
             ["signal", "refreshed_at"],
             $this->current_time
@@ -329,10 +331,13 @@ class Signal extends Agent
         $thing = new Thing(null);
         $thing->Create($this->from, 'signal', 'signal');
 
+        $agent = new Signal($thing, "signal");
+
         $this->signal_thing = $thing;
         $this->signal_thing->state = "X";
         $this->signal_thing->text = "new signal";
-$this->signal_id = $this->idSignal($thing->uuid);
+
+        $this->signal_id = $this->idSignal($thing->uuid);
     }
 
     function getSignalbyUuid($uuid)
@@ -544,6 +549,11 @@ $this->signal_id = $this->idSignal($thing->uuid);
                 count($findagent_thing->thing_report['things']) .
                 " signal Things."
         );
+
+        //$things = $this->getThings("signal");
+        //var_dump($things);
+        //exit();
+
         if (!$this->is_positive_integer($count)) {
             // No signals found
         } else {
@@ -563,9 +573,9 @@ $this->signal_id = $this->idSignal($thing->uuid);
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 if (isset($variables['signal'])) {
-//                    if (!isset($variables['signal']['state'])) {
-//continue;
-//}
+                    //                    if (!isset($variables['signal']['state'])) {
+                    //continue;
+                    //}
                     //$refreshed_at = "X";
                     //                   $signal_id = $uuid;
                     //$signal_id = "X";
@@ -581,7 +591,7 @@ $this->signal_id = $this->idSignal($thing->uuid);
                     if (isset($variables['signal']['state'])) {
                         $signal['state'] = $variables['signal']['state'];
                     }
-/*
+                    /*
 var_dump($signal);
 if  (
 (isset($signal['refreshed_at'])) and 
@@ -590,7 +600,8 @@ if  (
 
 continue;
 }
-*/                    
+*/
+
                     //if ($text == "signal post") {
                     $signal["uuid"] = $thing_object['uuid'];
                     $signal["id"] = $this->idSignal($thing_object['uuid']);
@@ -607,7 +618,6 @@ continue;
             $refreshed_at[$key] = $row['refreshed_at'];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->signals);
-
         //$this->signals = array_reverse($this->signals);
         return [$this->signalid_list, $this->signals];
     }
@@ -763,8 +773,11 @@ continue;
 
     function makeLink()
     {
-        $this->link =
-            $this->web_prefix . 'thing/' . $this->signal['id'] . '/signal';
+        $uuid = $this->signal_thing->uuid;
+        //        $this->link =
+        //            $this->web_prefix . 'thing/' . $this->signal['id'] . '/signal';
+
+        $this->link = $this->web_prefix . 'thing/' . $uuid . '/signal';
 
         $this->thing_report['link'] = $this->link;
     }
@@ -1099,6 +1112,7 @@ continue;
 
     public function readSignal()
     {
+        echo "merp";
     }
 
     public function readSubject()
