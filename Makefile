@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-SERVERNAME=stackr.test
+SERVERNAME=stackr-make.test
 mpm-servers=4
 mpm-spares-min=3
 mpm-spares-max=40
@@ -123,6 +123,7 @@ tailoring:
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/src/Thing.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/src/worker.php
+    sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Emailhandler.php
 	
 #verify:
 

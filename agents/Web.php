@@ -93,8 +93,6 @@ class Web extends Agent
         if ($state != false) {
             $this->state = $state;
         }
-        //var_dump("variables");
-        //var_dump($state);
     }
 
     /**
@@ -128,7 +126,7 @@ class Web extends Agent
         $context = stream_context_create($opts);
         $url = $this->url_post;
         $result = file_get_contents($url, false, $context);
-        var_dump($result);
+        //var_dump($result);
     }
 
     /**

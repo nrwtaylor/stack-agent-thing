@@ -12,8 +12,6 @@ class Makephp
 
     function __construct(Thing $thing, $input = null)
     {
-echo "meep";
-
 	    $this->input = $input;
 
         $class_name = ucwords($input);
@@ -26,27 +24,11 @@ echo "meep";
 
         $stack_state = $thing->container['stack']['state'];
 
-//        if ($stack_state == "prod") {
-//            $class_name = strtolower($class_name); // only in production
-//        }
-
         $file = @file_get_contents(__DIR__ . '/../agents/'. $class_name . '.php');
 
         if($file=== FALSE) { // handle error here... }
-            echo "Agent 'make php' says " .ucwords($input) . " is not a recognized Agent on this Stack.";
+            $file = "Agent 'make php' says " .ucwords($input) . " is not a recognized Agent on this Stack.";
         }
-
-        echo "\n";
-
-	    if ($input == null) {
-		    echo "Agent 'make php' says 'Nothing received'";//
-	    } else {
-		    echo "Agent 'make php' says '" . $input . "' received.";
-	    }
-
-        echo "\n";
-        echo "\n";
-        echo $this->web_prefix;
 
         $this->thing_report = array('thing' => $thing, 
             'php' => $file);

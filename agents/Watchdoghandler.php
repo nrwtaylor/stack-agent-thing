@@ -4,9 +4,6 @@ require '/var/www/stackr.test/vendor/autoload.php';
 
 $GLOBALS['stack'] = '/var/www/stackr.test/';
 
-//use GearmanClient;
-//https://stackoverflow.com/questions/36787079/php-class-not-found-when-using-namespace
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -46,8 +43,8 @@ class Watchdoghandler
     function __construct(Thing $thing, $agent_input = null)
     {
 
-		echo '<pre> watchdoghandler started running ';echo date("Y-m-d H:i:s");echo'</pre>';
-		echo '<pre> watchdoghandler version redpanda 16 July 2020';echo'</pre>';
+//		echo '<pre> watchdoghandler started running ';echo date("Y-m-d H:i:s");echo'</pre>';
+//		echo '<pre> watchdoghandler version redpanda 16 July 2020';echo'</pre>';
 
 		$this->stack_idle_mode = 'use'; // Prevents stack generated execution when idle.
 

@@ -953,13 +953,13 @@ $web .= "<p>";
                         case 'acp125g':
                         case 'empty':
                             $this->setBank($piece);
-                            continue;
+                            continue 2;
                         case 'hard':
                         case 'easy':
                         case 'none':
 
                             $this->setState($piece);
-                            continue;
+                            continue 2;
 //                        case '16ln':
 //                        case 'acp125g':
 //                        case 'empty':

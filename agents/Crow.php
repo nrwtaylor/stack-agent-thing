@@ -66,6 +66,29 @@ class Crow extends Agent
         $choices = $this->crow_thing->choice->makeLinks($this->state);
     }
 
+    private function getCrow($requested_nuuid = null) {
+
+
+        $entity_input = "get crow";
+        if ($requested_nuuid != null) {$entity_input = "get crow ".$requested_nuuid;} else {$entity_input = "get crow";}
+
+if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
+
+        $entity = new Entity($this->crow_thing, $entity_input );
+
+        $this->crow_thing = $entity->thing;
+
+        $this->state = $this->crow_thing->choice->load($this->primary_place);
+        $this->uuid = $this->crow_thing->uuid;
+        $this->nuuid = $this->crow_thing->nuuid;
+
+        $this->getState();
+        $this->getCave();
+
+        $this->choices = $this->crow_thing->choice->makeLinks($this->state);
+
+    }
+
 
     /**
      *

@@ -48,7 +48,7 @@ class Slack
        	$this->subject = $thing->subject;
 		$this->sqlresponse = null;
 
-var_dump($this->from);
+//var_dump($this->from);
 if($this->from == "null@stackr.ca") {return;}
 
 		$this->node_list = array("sms send"=>array("sms send"));

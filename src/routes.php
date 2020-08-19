@@ -965,6 +965,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             // So the uuid is null
             if ($uuid == null) {
+
                 if (isset($slug->state) and $slug->state == "off") {
 
                     $datagram = [];
@@ -979,7 +980,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                }
 
             }
-
             // Unaddressed web request to a Thing existing on the stack.
             // Enter into stack as coming from web and addressed to stack agent.
 ///if ($thing->thing == false) {
@@ -1035,7 +1035,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $thing_report['email'] = $makeemail_agent->email_message;
                     break;
                 default:
-
                     // Check if it should be a 404 Not Found.
                     if (!$slug->isSlug($filtered_command)) {
                         $t = new Notfound($thing);

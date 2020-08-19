@@ -68,7 +68,7 @@ class Twitter extends Agent
                 $this->findWord('affect', $piece);
             }
         }
-        exit();
+//        exit();
         // Append a new person to the file
         $current .= "John Smith\n";
         // Write the contents back to the file
