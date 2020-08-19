@@ -38,8 +38,15 @@ lamp:
 	sudo sed -i 's/SERVERNAME/$(SERVERNAME)/g' /etc/apache2/sites-available/$(SERVERNAME).conf; \
 	sudo sed -i 's/YOUR_EMAIL/$(YOUR_EMAIL)/g' /etc/apache2/sites-available/$(SERVERNAME).conf
 	sudo mkdir -p /var/www/$(SERVERNAME)/{public_html,logs}
+<<<<<<< HEAD
 	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)/public_html
 	sudo chmod -R 774 /var/www/$(SERVERNAME)/public_html
+=======
+	sudo chown root:root /var/www
+	sudo chmod 755 /var/www/
+	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)
+	sudo chmod -R 774 /var/www/$(SERVERNAME)
+>>>>>>> 4c79b6f93c2d28a746820331db6ca9c7ec53d8ac
 	sudo a2ensite $(SERVERNAME).conf
 	sudo cp scripts/.htaccess /var/www/$(SERVERNAME)
 	install mod_rewrite module; sudo a2enmod rewrite; \
