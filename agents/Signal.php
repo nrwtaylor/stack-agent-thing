@@ -69,10 +69,8 @@ class Signal extends Agent
 
     public function set()
     {
-        echo "signal set\n";
         if (!isset($this->signal_thing)) {
             //$this->signal_thing = $this->thing;
-            echo "signal set signal_thing not set\n";
             // Nothing to set
             //return true;
         }
@@ -1140,7 +1138,7 @@ continue;
 
         if (count($pieces) == 1) {
             if ($input == $this->keyword) {
-                $this->response .= "Got the signal. ";
+                $this->response .= "Got the current signal. ";
                 return;
             }
         }
