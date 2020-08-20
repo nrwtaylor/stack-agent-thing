@@ -771,13 +771,14 @@ continue;
 
     function makeLink()
     {
-        $uuid = $this->signal_thing->uuid;
-        //        $this->link =
-        //            $this->web_prefix . 'thing/' . $this->signal['id'] . '/signal';
+        $link = $this->web_prefix;
 
-        $this->link = $this->web_prefix . 'thing/' . $uuid . '/signal';
-
-        $this->thing_report['link'] = $this->link;
+        if (isset($this->signal_thing->uuid)) {
+            $uuid = $this->signal_thing->uuid;
+            $link = $this->web_prefix . 'thing/' . $uuid . '/signal';
+        }
+        $this->link = $link;
+        $this->thing_report['link'] = $link;
     }
 
     public function associationsSignal()
@@ -890,11 +891,11 @@ continue;
             $sms_message .= " Active signals: ";
             foreach ($this->signals as $i => $signal) {
                 if (isset($signal['id'])) {
-                    $sms_message .= $signal['id'] . " ";
-                }
-
-                if (isset($signal['uuid'])) {
+                    $sms_message .= strtoupper($signal['id']) . " ";
+                    $sms_message .= strtoupper($signal['state']) . " / ";
+                } elseif (isset($signal['uuid'])) {
                     $sms_message .= $this->idSignal($signal['uuid']) . " ";
+                    $sms_message .= strtoupper($signal['state']) . " / ";
                 }
             }
         }
@@ -1110,7 +1111,7 @@ continue;
 
     public function readSignal()
     {
-        echo "merp";
+        //echo "merp";
     }
 
     public function readSubject()
@@ -1139,6 +1140,11 @@ continue;
         if (count($pieces) == 1) {
             if ($input == $this->keyword) {
                 $this->response .= "Got the current signal. ";
+                return;
+            }
+
+            if ($input == 'signals') {
+                $this->response .= "Got active signals. ";
                 return;
             }
         }

@@ -280,10 +280,11 @@ $this->stack_email = $this->email;
      * @return unknown
      */
     function checkFacebook($searchfor) {
+        if (!is_numeric($searchfor)) {return false;}
+
         // Check address against the beta list
         $file = $this->resource_path . 'facebook/fbid.txt';
         $contents = @file_get_contents($file);
-
         if ($contents == false) {return;}
 
         $pattern = "|\b($searchfor)\b|";

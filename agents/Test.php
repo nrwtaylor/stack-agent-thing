@@ -32,7 +32,7 @@ class Test extends Agent
 
     function init()
     {
-ob_start();
+        ob_start();
         $this->thing_report["info"] = "Tests Agent behaviour.";
         $this->thing_report["help"] =
             "This is about testing an agent response.";
@@ -52,21 +52,47 @@ ob_start();
 
             $this->response .= "Test text is " . $this->test_text . ". ";
 
-//     $stub = $this->getMockBuilder($this->test_text)->disableOriginalConstructor()->getMock();
-//      $stub->method("init")->willReturn(11);
-        // Calling $stub->doSomething() will now return
-        // 'foo'.
-//        $this->assertEquals('foo', $stub->init());
+            //     $stub = $this->getMockBuilder($this->test_text)->disableOriginalConstructor()->getMock();
+            //      $stub->method("init")->willReturn(11);
+            // Calling $stub->doSomething() will now return
+            // 'foo'.
+            //        $this->assertEquals('foo', $stub->init());
+set_time_limit(20);
 
+$thing = new Thing(null);
+var_dump($this->from);
+var_dump($agent_name);
+$thing->Create($this->from, "agent", $agent_name);
+$agent = new Agent($thing);
 
-            $agent = $this->getAgent($agent_name); // Push agent response.
-            $this->response .= "Tested " . $agent_name . " response. " . $agent->response;
+//var_dump($a->thing_report['sms']);
+//var_dump($a->thing_report['response']);
+
+//$agent = new \stdClass();
+//$agent->response = $a->thing_report['response'];
+//$agent->response = $a->thing_report['sms']
+
+//            $agent = $this->getAgent($agent_name); // Push agent response.
+
+            if (isset($agent->thing_report['response'])) {
+                $this->response .=
+                    "Got " .
+                    $agent_name .
+                    " response. " .
+                    trim($agent->thing_report['response']) .
+                    " ";
+            } else {
+                $this->response .=
+                    "Did not get a " . $agent_name . " response. ";
+            }
         } else {
             // Either
             //$agent = new Agent($this->thing,"agent");
             $this->test_text = 'agent';
             $agent = $this->getAgent('agent', $text);
-            $this->response .= "Tested agent response. " . $agent->response;
+            $this->response .=
+                "Tested agent response. " . trim($agent->thing_report['response']) . " ";
+
             // Neither is providing a thing_report.
         }
 
@@ -80,29 +106,34 @@ ob_start();
             return;
         }
 
-        try {
-            $agent->test();
-        } catch (\Throwable $e) {
-            $this->response .= 'Threw: ' . $e->getMessage() . ". ";
+        if (!method_exists($agent, 'test')) {
+            $this->response .= 'No agent self-test found. ';
+        } else {
+            try {
+                $agent->test();
+            } catch (\Throwable $e) {
+                $this->response .= 'Threw: ' . $e->getMessage() . ". ";
+            }
         }
 
-        $sms = 'No SMS. ';
+        $sms = 'No SMS.';
         if (isset($agent->thing_report['sms'])) {
-            $sms = $agent->thing_report['sms'];
+            $sms = "Test SMS message: " . $agent->thing_report['sms'];
         }
+        $this->response .= $sms . " / ";
 
-        $response = "No response .";
-        if (isset($agent->thing_report['response'])) {
-            $response = $agent->thing_report['response'];
+        $response = "No response.";
+        if (
+            isset($agent->thing_report['response']) and
+            $agent->thing_report['response'] != false
+        ) {
+            $response = "Test response: " . $agent->thing_report['response'];
         }
-        $this->response .= "Test response: " . $sms . " " . $response . " / ";
+        $this->response .= $response . " / ";
     }
 
     public function get()
     {
-        //  $this->last_refreshed_at = $this->variables_thing->getVariables("refreshed_at");
-
-        //$this->getTests();
     }
 
     public function getTests()
@@ -110,10 +141,13 @@ ob_start();
         $things = $this->getThings('test');
 
         $this->tests = $things;
+        //$this->loadTests();
     }
 
     public function agentsTest()
     {
+        // Get list of keywords.
+
         $file =
             $GLOBALS['stack_path'] .
             'vendor/nrwtaylor/stack-agent-thing/agents';
@@ -140,12 +174,25 @@ ob_start();
             $agent_name = $tokens[0];
             $this->agents[strtolower($agent_name)] = $agent_name;
         }
+
+        // Get tests from text file.
+        $this->loadTests();
+
+        // Filter list.
+        $not_allowed = ["stop", "forgetall"];
+        foreach ($agents as $agent_name => $test_string) {
+            if (in_array(strtolower($agent_name), $not_allowed)) {
+                unset($agents[$agent_name]);
+            }
+        }
+
     }
 
     function randomTest($input = null)
     {
         $this->agentsTest();
         $files = $this->agents;
+        //var_dump($files);
         $file = $files[array_rand($files)];
 
         $tokens = explode(".", $file);
@@ -192,10 +239,28 @@ ob_start();
     {
         $text = ob_get_contents();
 
-        if ($text == "") {return;}
+        if ($text == "") {
+            return;
+        }
 
         if (is_string($text)) {
             $this->response .= "Output buffer seen. " . $text . ". ";
+        }
+    }
+
+    public function loadTests()
+    {
+        $file = $this->resource_path . 'test/tests.txt';
+        $contents = file_get_contents($file);
+
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+            $this->agents[strtolower($line)] = $line;
+
+            // do something with $line
+            $line = strtok($separator);
         }
     }
 
@@ -207,7 +272,6 @@ ob_start();
 
         $web = "";
         foreach ($this->tests as $uuid => $thing) {
-
             // devstack.
             $test = $thing->variables['test'];
             //$test = $thing['variables']['test'];

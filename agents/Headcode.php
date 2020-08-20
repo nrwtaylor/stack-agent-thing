@@ -1041,11 +1041,13 @@ class Headcode
 
         $sms_message =
             "HEADCODE " .
-            strtoupper($this->head_code) .
-            " " .
-            $flag_state .
-            " | ";
-        $sms_message .= "" . $this->link;
+            strtoupper($this->head_code);
+
+        if ($flag_state != false) {
+            $sms_message .= " " . strtoupper($flag_state);
+        }
+
+        //$sms_message .= "" . $this->link;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
 

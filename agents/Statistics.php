@@ -144,9 +144,8 @@ class Statistics extends Agent
             ) {
                 $this->earliest_seen = $created_at;
 
-           //     $this->number = $variables[$variable_agent][$variable_name];
+                //     $this->number = $variables[$variable_agent][$variable_name];
             }
-
 
             if (
                 !isset($this->latest_seen) or
@@ -154,14 +153,10 @@ class Statistics extends Agent
                 $this->latest_seen == false
             ) {
                 $this->latest_seen = $created_at;
-if (is_numeric($variables[$variable_agent][$variable_name])) {
-
-                $this->number = $variables[$variable_agent][$variable_name];
-}
+                if (is_numeric($variables[$variable_agent][$variable_name])) {
+                    $this->number = $variables[$variable_agent][$variable_name];
+                }
             }
-
-
-
 
             if (!isset($variables[$variable_agent][$variable_name])) {
                 continue;
@@ -228,26 +223,27 @@ if (is_numeric($variables[$variable_agent][$variable_name])) {
             }
         }
         // Calculate the mean
-        $this->mean = $this->sum / $this->count;
+        if ($this->count > 0) {
+            $this->mean = $this->sum / $this->count;
 
-        // Calculate the sum squared difference
-        $this->sum_squared_difference = $this->sum_squared_difference;
+            // Calculate the sum squared difference
+            $this->sum_squared_difference = $this->sum_squared_difference;
 
-        foreach ($numbers as $number) {
-            $squared_difference =
-                ($number - $this->mean) * ($number - $this->mean);
-            $this->sum_squared_difference += $squared_difference;
+            foreach ($numbers as $number) {
+                $squared_difference =
+                    ($number - $this->mean) * ($number - $this->mean);
+                $this->sum_squared_difference += $squared_difference;
+            }
+
+            // Calculate the variance.  Precursor to standard deviation.
+            $this->variance = $this->sum_squared_difference / $this->count;
+
+            // Calculation the standard deviation.
+            $this->standard_deviation = sqrt($this->variance);
+
+            $end_time = time();
+            $this->calc_time = $end_time - $start_time;
         }
-
-        // Calculate the variance.  Precursor to standard deviation.
-        $this->variance = $this->sum_squared_difference / $this->count;
-
-        // Calculation the standard deviation.
-        $this->standard_deviation = sqrt($this->variance);
-
-        $end_time = time();
-        $this->calc_time = $end_time - $start_time;
-
         if ($count_zeros > 0) {
             $this->response .= "Counted " . $count_zeros . " zeros. ";
         }
@@ -377,8 +373,7 @@ array(
                     "latest_seen" => $this->latest_seen,
                     "minimum" => $this->minimum,
                     "maximum" => $this->maximum,
-                    "number" => $this->number
-
+                    "number" => $this->number,
                 ],
             ],
         ];

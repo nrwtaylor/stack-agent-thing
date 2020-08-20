@@ -345,7 +345,7 @@ return;
         $this->thing->log(
             $this->agent_prefix . 'found an alias and made a Alias entry.'
         );
-        $this->response .= 'Asked to make a Alias. But did not. ';
+        //$this->response .= 'Asked to make a Alias. But did not. ';
     }
 
     function extractAlias($input = null)
@@ -529,21 +529,27 @@ return;
             "ALIAS | Could not find an agent to respond to your message.";
         $this->node_list = ["alias" => ["agent", "message"]];
 
-        $sms = "ALIAS " . strtoupper($this->alias_id) . " ";
-$sms .= strtoupper($this->head_code) . " ";
-        $sms .= " | alias " . strtoupper($this->alias);
+$sms = "ALIAS ";
+if ($this->alias_id != "alias") {
+        $sms = strtoupper($this->alias_id);
+}
+$sms .= strtoupper($this->head_code);
+$sms .= " ";
+        $sms .= "| alias " . strtoupper($this->alias);
 
-        $sms .= " | nuuid " . substr($this->variables_agent->uuid, 0, 4);
-        $sms .= " | nuuid " . substr($this->alias_thing->uuid, 0, 4);
+        $sms .= " | variables nuuid " . substr($this->variables_agent->uuid, 0, 4);
+        $sms .= " | alias nuuid " . substr($this->alias_thing->uuid, 0, 4);
 
         $sms .= " | context " . $this->context;
         $sms .= " | alias id " . $this->alias_id;
 
+/*
         $sms .=
             " | ~rtime " .
             number_format($this->thing->elapsed_runtime()) .
             "ms";
-        $sms .= $this->response;
+*/
+        $sms .= " ". $this->response;
 
         //        $this->sms_messages[] = $sms_message;
 
@@ -630,6 +636,7 @@ $sms .= strtoupper($this->head_code) . " ";
         if (count($pieces) == 1) {
             if ($this->input == 'alias') {
                 $this->num_hits += 1;
+                $this->response .= "Saw request for current alias. ";
                 return;
             }
         }

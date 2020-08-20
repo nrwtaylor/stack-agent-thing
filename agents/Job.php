@@ -31,15 +31,11 @@ class Job extends Agent
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-
         $state = 'off';
-if (isset($this->thing->container['api']['job']['state'])) {
-$state = $this->thing->container['api']['job']['state'];
-
-}
-$this->state = $state;
-
-
+        if (isset($this->thing->container['api']['job']['state'])) {
+            $state = $this->thing->container['api']['job']['state'];
+        }
+        $this->state = $state;
 
         $this->index_type = "index";
 
@@ -106,12 +102,7 @@ $this->state = $state;
             $this->thing->json->time()
         );
 
-        $this->thing->json->writeVariable(
-            ["job", "response"],
-            $this->response
-        );
-
-
+        $this->thing->json->writeVariable(["job", "response"], $this->response);
     }
 
     /**
@@ -569,22 +560,32 @@ $this->state = $state;
     {
         $input = $this->input;
         $filtered_input = strtolower($this->assert($input));
+        if ($this->state == 'on') {
+            if ($filtered_input == 'stack') {
+                $manager_agent = new Manager($this->thing, "manager");
+                if ($manager_agent->queued_jobs > 100) {
+                    $this->response .=
+                        "Too many (" .
+                        $manager_agent->queued_jobs .
+                        ") jobs queued. ";
+                    return;
+                }
+                //$manager->workers_running;
+                //$manager->workers_connected;
 
-if ($this->state == 'on') {
-        if ($filtered_input == 'stack') {
-            $job = $this->jobs[array_rand($this->jobs)][0];
-            $datagram = [
-                "to" => "null" . $this->mail_postfix,
-                "from" => "job",
-                "subject" => "s/ " . $job['text'],
-            ];
+                $job = $this->jobs[array_rand($this->jobs)][0];
+                $datagram = [
+                    "to" => "null" . $this->mail_postfix,
+                    "from" => "job",
+                    "subject" => "s/ " . $job['text'],
+                ];
 
-            $this->thing->spawn($datagram);
-            $this->response .= "Spawned " . $job['text'] . ". ";
+                $this->thing->spawn($datagram);
+                $this->response .= "Spawned " . $job['text'] . ". ";
 
-            return;
+                return;
+            }
         }
-}
         $this->index = "meep";
         $this->response = "Made a new job sheet.";
         $status = true;
