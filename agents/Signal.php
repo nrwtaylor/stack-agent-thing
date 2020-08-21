@@ -42,8 +42,6 @@ class Signal extends Agent
             'This Signal is either RED, GREEN, YELLOW or DOUBLE YELLOW. Text SIGNAL DOUBLE YELLOW.';
         $this->thing_report['info'] =
             'DOUBLE YELLOW means keep going. RED means stop.';
-
-        //$this->signal_thing = false;
     }
 
     public function lastSignal()
@@ -286,7 +284,7 @@ class Signal extends Agent
 
         $this->signal_thing->state = $state;
         $this->signal_thing->text = $type;
-        //$this->state = $state;
+
         if ($state != null) {
             $this->response = "Selected " . $state . " signal.";
         }
@@ -318,9 +316,6 @@ class Signal extends Agent
             return true;
         }
 
-        //        if (isset($this->state) and $this->state != "X") {
-        //            $this->signal['state'] = $this->state;
-        //        }
     }
 
     function newSignal()
@@ -386,8 +381,19 @@ class Signal extends Agent
         }
 
         $uuid = $matched_uuids[0];
-        //echo "matched uuid " . $uuid . "\n";
+
         $this->signal_thing = new Thing($uuid);
+
+        $signal = $this->thing->json->jsontoArray($this->signal_thing->thing->variables)[
+            'signal'
+        ];
+
+        $this->signal_id = $this->signal_thing->uuid;
+
+        if (isset($signal['state'])) {
+            $this->signal_thing->state = $signal['state'];
+        }
+
         /* 
        $this->signal = $this->thing->json->jsontoArray(
             $this->signal_thing->thing->variables
@@ -513,7 +519,6 @@ class Signal extends Agent
         if (!isset($this->signals)) {
             $this->getSignals();
         }
-        //echo "\n";
 
         foreach ($this->signals as $i => $signal) {
             //echo $this->textSignal($signal);
@@ -547,10 +552,6 @@ class Signal extends Agent
                 count($findagent_thing->thing_report['things']) .
                 " signal Things."
         );
-
-        //$things = $this->getThings("signal");
-        //var_dump($things);
-        //exit();
 
         if (!$this->is_positive_integer($count)) {
             // No signals found
@@ -589,24 +590,12 @@ class Signal extends Agent
                     if (isset($variables['signal']['state'])) {
                         $signal['state'] = $variables['signal']['state'];
                     }
-                    /*
-var_dump($signal);
-if  (
-(isset($signal['refreshed_at'])) and 
-(!isset($signal['text'])) and
-(!isset($signa['state']))) {
 
-continue;
-}
-*/
-
-                    //if ($text == "signal post") {
                     $signal["uuid"] = $thing_object['uuid'];
                     $signal["id"] = $this->idSignal($thing_object['uuid']);
 
                     $this->signals[] = $signal;
                     $this->signalid_list[] = $thing_object['uuid'];
-                    //}
                 }
             }
         }
@@ -616,7 +605,7 @@ continue;
             $refreshed_at[$key] = $row['refreshed_at'];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->signals);
-        //$this->signals = array_reverse($this->signals);
+
         return [$this->signalid_list, $this->signals];
     }
 
@@ -944,7 +933,7 @@ continue;
         //$test_message .= 'And the signal is ' . strtoupper($this->state) . ".";
 
         $this->message = $message;
-        $this->thing_report['message'] = $message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
+        $this->thing_report['message'] = $message;
     }
 
     public function makeImage()
@@ -1200,13 +1189,6 @@ return;
 
         if ($this->channel_name == 'web') {
             $this->response .= "Detected web channel. ";
-
-            //$uuid = $this->signal_thing->uuid;
-            //$state = $this->signal_thing->state;
-            //    $this->getSignalbyUuid($uuid);
-
-            //            $response = $this->getSignalbyId($t);
-
             // Do not effect a state change for web views.
             return;
         }
