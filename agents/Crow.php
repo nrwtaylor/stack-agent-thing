@@ -266,51 +266,6 @@ if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
 
     /**
      *
-     * @param unknown $requested_nuuid (optional)
-     */
-    private function getCrow($requested_nuuid = null) {
-
-
-        $entity_input = "get crow";
-        if ($requested_nuuid != null) {$entity_input = "get crow ".$requested_nuuid;} else {$entity_input = "get crow";}
-        //        $this->response .= "requested entity ". $entity_input. ". ";
-
-        //        $this->response .= "call entity " . $entity_input .". ";
-
-if (!isset($this->crow_thing)) {$this->crow_thing = $this->thing;}
-
-        $entity = new Entity($this->crow_thing, $entity_input );
-//        $entity = new Entity($this->thing, $entity_input );
-
-        //        $this->thing = $entity->thing;
-        $this->crow_thing = $entity->thing;
-
-        $this->state = $this->crow_thing->choice->load($this->primary_place);
-        $this->uuid = $this->crow_thing->uuid;
-        $this->nuuid = $this->crow_thing->nuuid;
-
-//        $this->response .= "Got crow " . $this->nuuid . ". ";
-
-        //        $this->response .= "received entity " . $this->nuuid . ". ";
-
-
-        //        if ($this->x == 0) {$this->x = random_int(1,20);}
-
-        $this->getState();
-
-        $this->getCave();
-
-        $this->choices = $this->crow_thing->choice->makeLinks($this->state);
-
-        //        $this->response .= "crow thing nuuid " . $this->crow_thing->nuuid . ". ";
-        //        $this->response .= "crow thing uuid " . $this->crow_thing->uuid . ". ";
-        //        $this->response .= "state is " . $this->state . ". ";
-
-    }
-
-
-    /**
-     *
      * @return unknown
      */
     private function getCrows() {

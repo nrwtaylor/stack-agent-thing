@@ -266,6 +266,8 @@ class Agent
 
                 //$thing = new \stdClass();
                 $thing = new Thing(null);
+                $thing->subject = $thing_object['task'];
+
                 $thing->uuid = $thing_object['uuid'];
                 $thing->variables = $variables;
                 $thing->created_at = $thing_object['created_at'];
@@ -2750,9 +2752,10 @@ class Agent
 
     function mylog($error, $errlvl)
     {
-        echo $this->response;
-        echo "\n";
-        echo $this->thing->log;
+var_dump($error);
+//        echo $this->response;
+//        echo "\n";
+//        echo $this->thing->log;
         //...do whatever you want...
         //echo $this->uuid;
     }

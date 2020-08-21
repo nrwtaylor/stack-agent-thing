@@ -558,6 +558,8 @@ class Job extends Agent
      */
     public function readSubject()
     {
+// test
+// $this->state = "on";
         $input = $this->input;
         $filtered_input = strtolower($this->assert($input));
         if ($this->state == 'on') {
@@ -573,7 +575,26 @@ class Job extends Agent
                 //$manager->workers_running;
                 //$manager->workers_connected;
 
+
                 $job = $this->jobs[array_rand($this->jobs)][0];
+
+/*
+$spawn_text = "Spawned " . $job['text'] . ". ";
+
+echo "text " . $job['text'] . "\n";
+echo "period " . $job['period'] . "\n";
+
+
+foreach($this->run_jobs as $i=>$run_job) {
+echo "response " . $run_job['response'] ."\n";
+echo "created at " . $run_job['created_at'] . "\n";
+//echo "text " . $job['text'] . "\n";
+//echo "period " . $job['period'] . "\n";
+
+}
+*/
+
+
                 $datagram = [
                     "to" => "null" . $this->mail_postfix,
                     "from" => "job",
@@ -600,22 +621,44 @@ class Job extends Agent
 
     public function getJobs()
     {
+
+$this->run_jobs = array();
+$agent_name = 'job';
         $things = $this->getThings('job');
 
         if ($things == []) {
             return true;
         }
 
-        foreach (array_reverse($things) as $thing_object) {
-            //               $uuid = $thing_object['uuid'];
-            //               $variables_json = $thing_object['variables'];
-            //               $variables = $this->thing->json->jsontoArray($variables_json);
+        foreach (array_reverse($things) as $thing) {
 
+            $subject = $thing->subject;
+            $variables = $thing->variables;
+            $created_at = $thing->created_at;
+//var_dump($variables);
+
+//var_dump($thing_object);
+//                           $uuid = $thing_object['uuid'];
+//                           $variables_json = $thing_object['variables'];
+//                           $variables = $this->thing->json->jsontoArray($variables_json);
+//
+//var_dump($variables);
+//exit();
             //$job = array('uuid'=>$uuid, 'refreshed_at'=>0);
 
-            //                if (isset($variables[$agent_name])) {
+                            if (isset($variables[$agent_name])) {
+$job = array("subject"=>$subject,
+"created_at"=>$created_at);
+
+$job = array_merge($job, $variables[$agent_name] );
+
+$this->run_jobs[] = $job;
+
+//var_dump($subject);
+//var_dump($created_at);
+//var_dump($variables[$agent_name]);
             //                    $things[$uuid] = $variables[$agent_name];
-            //                }
+                            }
 
             //                $response = $this->readAgent($thing_object['task']);
         }

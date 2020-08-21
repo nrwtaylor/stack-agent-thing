@@ -68,6 +68,12 @@ class Litany extends Agent
 
         $contents = @file_get_contents($file);
         // devstack add \b to Word
+
+        if ($contents === false) {$this->resource .= "Resource " . $librex_name . " not available. ";
+            $this->litany = null;
+            return $this->litany;
+        }
+
         $this->litany = explode('\r\n', $contents);
         return $this->litany;
     }

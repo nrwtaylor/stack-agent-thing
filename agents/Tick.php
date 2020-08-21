@@ -97,7 +97,6 @@ class Tick extends Agent
                 $thing->Forget();
                 $forget_count += 1;
             }
-
         }
 
         $this->response .=
@@ -109,16 +108,15 @@ class Tick extends Agent
             " Things. ";
 
         // Spawn stack jobs
-            $datagram = [
-                "to" => "null" . $this->mail_postfix,
-                "from" => "tick",
-                "subject" => "job stack",
-            ];
 
-            $this->thing->spawn($datagram);
+        // devtest.
+        $datagram = [
+            "to" => "null" . $this->mail_postfix,
+            "from" => "job",
+            "subject" => "s/ job stack",
+        ];
 
-
-
+        $this->thing->spawn($datagram);
 
         if ($this->tick_count > $this->max_tick_count) {
             $this->tick_count = 1;
