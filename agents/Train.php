@@ -435,34 +435,7 @@ $this->train = $train;
 
 
 
-//foreach($this->runat_agent as $i=>$j) {
-//var_dump($i);
-//}
-
-//var_dump($this->runat_agent);
-//exit();
-//$run_at = $this->runat_agent->agent_variable;
-// devstack
-//var_dump($run_at);
-//exit();
-//        $this->runat->day = $day;
-//        $this->runat->hour = $hour;
-//        $this->runat->minute = $minute;
-
-
-//var_dump($this->quantity);
-// No prior train found.
-//        $this->getAvailable();
-//        $this->getFlag();
-//        $this->getQuantity();
-//        $this->getState();
         $this->getIndex();
-//        $this->getRunat();
-
-//        $this->getEndat();
-//        $this->getRuntime();
-
-//        $this->getAlias();
 
     $this->train = ['runat'=>$this->runat, 'runtime'=>$this->runtime,
     'alias'=>$this->alias,'flag'=> $this->flag];
@@ -489,7 +462,7 @@ $this->train = $train;
         // requests too.
         // Think about that.
         //require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        $findagent_thing = new Findagent($this->thing, 'train');
+        //$findagent_thing = new Findagent($this->thing, 'train');
 
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to
@@ -505,9 +478,9 @@ $this->train = $train;
         $this->trains = [];
 
 
-$things = $findagent_thing->thing_report['things'];
-$things = $this->getThings('train');
-var_dump($things);
+	//$things = $findagent_thing->thing_report['things'];
+	$things = $this->getThings('train');
+
         foreach ($things as $train_thing) {
             //            $thing = new Thing($train_thing['uuid']);
 
