@@ -504,7 +504,11 @@ $this->train = $train;
         $this->max_index = 0;
         $this->trains = [];
 
-        foreach ($findagent_thing->thing_report['things'] as $train_thing) {
+
+$things = $findagent_thing->thing_report['things'];
+$things = $this->getThings('train');
+var_dump($things);
+        foreach ($things as $train_thing) {
             //            $thing = new Thing($train_thing['uuid']);
 
             //            $variables_json= $train_thing['variables'];
@@ -2880,6 +2884,21 @@ foreach($this->agents as $i=>$agent_name) {
                 $this->response .= "Current train retrieved. ";
                 return;
             }
+
+            if ($input == 'trains') {
+
+                $this->headcode_thing->getHeadcodes();
+                $headcode_text = "";
+                foreach ($this->headcode_thing->unique_headcodes as $i=>$headcode) {
+                    $headcode_text .= $headcode['head_code'] . " ";
+                }
+                $this->response .= $headcode_text;
+
+                $this->response .= "Looked for Current trains. ";
+                return;
+            }
+
+
         }
 
         //    $this->getRunat();

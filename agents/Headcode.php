@@ -381,6 +381,18 @@ class Headcode
                 ];
 
                 $this->headcodes[] = $headcode;
+
+                if (!isset($this->unique_headcodes[$head_code])) {
+                    $this->unique_headcodes[$head_code] = $headcode;
+                }
+                if (
+                    strtotime($refreshed_at) >
+                    strtotime(
+                        $this->unique_headcodes[$head_code]['refreshed_at']
+                    )
+                ) {
+                    $this->unique_headcodes[$head_code] = $headcode;
+                }
             }
         }
 
@@ -1039,9 +1051,7 @@ class Headcode
             $flag_state = $this->flag->state;
         }
 
-        $sms_message =
-            "HEADCODE " .
-            strtoupper($this->head_code);
+        $sms_message = "HEADCODE " . strtoupper($this->head_code);
 
         if ($flag_state != false) {
             $sms_message .= " " . strtoupper($flag_state);
@@ -1055,7 +1065,7 @@ class Headcode
         //$sms_message .= "A headcode needs a ROUTE, a CONSIST, and a QUANTITY. ";
         //        $sms_message .= " | index " . $this->index;
         //        $sms_message .= " | available " . $this->available;
-$sms_message .= $this->response;
+        $sms_message .= $this->response;
         //$sms_message .= " | from " . $this->headcodeTime($this->start_at) . " to " . $this->headcodeTime($this->end_at);
         //$sms_message .= " | now " . $this->headcodeTime();
         //        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
@@ -1274,7 +1284,8 @@ $sms_message .= $this->response;
 
         if ($this->isData($this->head_code)) {
             $this->set();
-            $this->response .= "Set headcode to " . strtoupper($this->head_code) . ". ";
+            $this->response .=
+                "Set headcode to " . strtoupper($this->head_code) . ". ";
             return;
         }
 
