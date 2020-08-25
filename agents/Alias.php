@@ -129,6 +129,26 @@ class Alias extends Agent
         return $this->context;
     }
 
+    public function isAlias($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        if (!isset($this->aliases_list)) {
+            $this->getAliases();
+        }
+
+        foreach ($this->aliases_list as $i => $alias) {
+            $alias_name = strtolower($alias['alias']);
+            if (strtolower($text) == $alias_name) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function getAliases()
     {
         $this->aliases_list = [];
@@ -154,7 +174,6 @@ class Alias extends Agent
             //echo $thing_object['task'];
 
             if ($thing_object['nom_to'] != "usermanager") {
-
                 $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
@@ -224,7 +243,6 @@ class Alias extends Agent
                 'ms.'
         );
 
-
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
             "headcode",
@@ -234,13 +252,12 @@ class Alias extends Agent
         $flag_variable_name = "_" . $this->head_code;
 
         // Get the current Identities flag
-//        $this->flag = new Variables(
-//            $this->thing,
-//            "variables flag" . $flag_variable_name . " " . $this->from
-//        );
+        //        $this->flag = new Variables(
+        //            $this->thing,
+        //            "variables flag" . $flag_variable_name . " " . $this->from
+        //        );
 
-
-/*
+        /*
         $this->variables_agent = new Variables(
             $this->thing,
             "variables alias " . $this->from
@@ -255,14 +272,12 @@ class Alias extends Agent
         $this->alias = $this->variables_agent->getVariable("alias");
         $this->alias_id = $this->variables_agent->getVariable("alias_id");
 
-return;
+        return;
 
         $this->variables_agent->getVariables();
 
         $this->thing->log(
-            'Timestamp ' .
-                $this->thing->elapsed_runtime() .
-                'ms.'
+            'Timestamp ' . $this->thing->elapsed_runtime() . 'ms.'
         );
 
         // So if no alias records are returned, then this is the first
@@ -326,20 +341,17 @@ return;
         $allow_create_alias = true;
 
         if ($allow_create_alias) {
-
             $this->thing->log(
-                    'found an alias ' .
+                'found an alias ' .
                     $this->alias .
                     'and made a Alias entry' .
                     $this->alias_id .
                     '.'
             );
-
         } else {
             $this->thing->log(
                 $this->agent_prefix . 'was not allowed to make a Alias entry.'
             );
-
         }
 
         $this->thing->log(
@@ -449,7 +461,6 @@ return;
         $txt .= "\n";
 
         foreach ($this->aliases_list as $key => $alias) {
-
             $txt .= " " . str_pad($alias['alias'], 24, " ", STR_PAD_RIGHT);
 
             if (!isset($alias['alias_id'])) {
@@ -529,27 +540,27 @@ return;
             "ALIAS | Could not find an agent to respond to your message.";
         $this->node_list = ["alias" => ["agent", "message"]];
 
-$sms = "ALIAS ";
-if ($this->alias_id != "alias") {
-        $sms = strtoupper($this->alias_id);
-}
-$sms .= strtoupper($this->head_code);
-$sms .= " ";
+        $sms = "ALIAS ";
+        if ($this->alias_id != "alias") {
+            $sms = strtoupper($this->alias_id);
+        }
+        $sms .= strtoupper($this->head_code);
+        $sms .= " ";
         $sms .= "| alias " . strtoupper($this->alias);
 
-        $sms .= " | variables nuuid " . substr($this->variables_agent->uuid, 0, 4);
-        $sms .= " | alias nuuid " . substr($this->alias_thing->uuid, 0, 4);
+        //        $sms .= " | variables nuuid " . substr($this->variables_agent->uuid, 0, 4);
+        //        $sms .= " | alias nuuid " . substr($this->alias_thing->uuid, 0, 4);
 
-        $sms .= " | context " . $this->context;
-        $sms .= " | alias id " . $this->alias_id;
+        //        $sms .= " | context " . $this->context;
+        //        $sms .= " | alias id " . $this->alias_id;
 
-/*
+        /*
         $sms .=
             " | ~rtime " .
             number_format($this->thing->elapsed_runtime()) .
             "ms";
 */
-        $sms .= " ". $this->response;
+        $sms .= " " . $this->response;
 
         //        $this->sms_messages[] = $sms_message;
 

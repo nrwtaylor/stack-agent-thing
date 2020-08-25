@@ -659,13 +659,10 @@ class Agent
         $pos = strpos(strtolower($input), $agent);
 
         if (($pos = strpos(strtolower($input), $agent . " is")) !== false) {
-            $whatIWant = substr(
-                $input,
-                $pos + strlen($agent . " is")
-            );
+            $whatIWant = substr($input, $pos + strlen($agent . " is"));
         } elseif (($pos = strpos(strtolower($input), $agent)) !== false) {
             // Distinguish if assertion match is at beginning or end of text.
-            if (strlen($input) ==($pos + strlen($agent))) {
+            if (strlen($input) == $pos + strlen($agent)) {
                 $length = strlen($input) - strlen($agent);
                 $whatIWant = substr($input, 0, $length);
             } else {
@@ -674,7 +671,9 @@ class Agent
         }
         $filtered_input = trim($whatIWant, " ");
 
-if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
+        if ($flag_lowercase === true) {
+            $filtered_input = strtolower($filtered_input);
+        }
 
         return $filtered_input;
     }
@@ -1053,9 +1052,13 @@ if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
 
     public function makeChoices()
     {
-
-        if (isset($this->thing_report['choices'])) {return;}
-        if (isset($this->choices)) {$this->thing_report['choices'] = $this->choices; return;}
+        if (isset($this->thing_report['choices'])) {
+            return;
+        }
+        if (isset($this->choices)) {
+            $this->thing_report['choices'] = $this->choices;
+            return;
+        }
 
         $choices = false;
         $this->thing_report['choices'] = $choices;
@@ -2433,9 +2436,6 @@ if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
             return $this->thing_report;
         }
 
-
-
-
         $this->thing->log('now looking for Resource.');
         $resource_agent = new Resource($this->thing, "resource");
 
@@ -2448,11 +2448,6 @@ if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
             $this->thing_report = $resource_agent->thing_report;
             return $this->thing_report;
         }
-
-
-
-
-
 
         switch (strtolower($this->context)) {
             case 'group':
@@ -2606,9 +2601,8 @@ if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
         // It needs to be here to pick up four letter
         // aliases ie Ivor.
         $alias_thing = new Alias($this->thing, 'extract');
-        $this->alias = $alias_thing->alias;
 
-        if ($this->alias != null) {
+        if ($alias_thing->isAlias($input) === true) {
             // Alias was recognized.
             $alias_thing = new Alias($this->thing);
             $this->thing_report = $alias_thing->thing_report;
@@ -2732,15 +2726,24 @@ if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
      * @param unknown $errno
      * @param unknown $errstr
      */
-    function warning_handler($errno, $errstr,$errfile, $errline)
+    function warning_handler($errno, $errstr, $errfile, $errline)
     {
         //throw new \Exception('Class not found.');
         //trigger_error("Fatal error", E_USER_ERROR);
         $this->thing->log($errno);
         $this->thing->log($errstr);
 
-        $console = "Warning seen. " . $errline . " " . $errfile . " " . $errno . " " . $errstr . ". ";
-echo $console . "\n";
+        $console =
+            "Warning seen. " .
+            $errline .
+            " " .
+            $errfile .
+            " " .
+            $errno .
+            " " .
+            $errstr .
+            ". ";
+        echo $console . "\n";
         $this->response .= "Warning seen. " . $errstr . ". ";
         // do something
     }
@@ -2792,10 +2795,10 @@ echo $console . "\n";
 
     function mylog($error, $errlvl)
     {
-var_dump($error);
-//        echo $this->response;
-//        echo "\n";
-//        echo $this->thing->log;
+        var_dump($error);
+        //        echo $this->response;
+        //        echo "\n";
+        //        echo $this->thing->log;
         //...do whatever you want...
         //echo $this->uuid;
     }

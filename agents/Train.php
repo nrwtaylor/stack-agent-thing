@@ -426,6 +426,8 @@ $this->available = $available;
         $this->resource_agent = $this->getAgent('Resource','resource');
         $this->resource = $this->resource_agent->resource_name;
 
+        $this->consist_agent = $this->getAgent('Consist','consist');
+        $this->consist = $this->consist_agent->consist;
 
 // devstack
         $this->runat_agent = $this->getAgent('Runat','runat');
@@ -2323,6 +2325,7 @@ foreach($this->agents as $i=>$agent_name) {
 
     $variable_name = strtolower($agent_name);
 
+$capitalize_flag = true;
 
     if (isset($this->{$variable_name})) {
 
@@ -2330,24 +2333,37 @@ foreach($this->agents as $i=>$agent_name) {
             continue;
         }
 
+if (strtolower($agent_name) == 'consist') {$capitalize_flag = false;}
+
         $txt .= $agent_name . " ";
 
         if (is_string($this->{$variable_name})) {
-            $txt .= strtoupper($this->{strtolower($agent_name)}) . " ";
+
+$text_string = $this->{strtolower($agent_name)};
+if ($capitalize_flag === true) {
+    $text_string = strtoupper($text_string);
+}
+            $txt .= $text_string . " ";
             continue;
         }
 
         if (is_array($this->{$variable_name})) {
-            $text = strtoupper(trim(implode(" ", $this->{$variable_name}))); 
-            $txt .= $text . " ";
+            $text_string = trim(implode(" ", $this->{$variable_name}));
+if ($capitalize_flag === true) {
+$text_string = strtoupper($text); 
+}
+            $txt .= $text_string . " ";
             continue;
         }
 
         if (is_object($this->{$variable_name})) {
 
             $agent_variable = (array) $this->{$variable_name};
-            $text = strtoupper(trim(implode(" " , $agent_variable)));
-            $txt .= $text . " "; 
+            $text_string = trim(implode(" " , $agent_variable));
+if ($capitalize_flag === true) {
+$text_string = strtoupper($text_string);
+}
+            $txt .= $text_string . " "; 
             continue; 
         }
 
@@ -2358,43 +2374,9 @@ foreach($this->agents as $i=>$agent_name) {
 
 
 
-        $txt .= " " . "now " . $this->trainTime();
-//        $txt .= " ";
+        $txt .= "" . "now " . $this->trainTime();
 
-
-
-/*
-
-
-
-        if (isset($array->alias)) {
-            $txt .= 'alias ' . $array->alias . " ";
-        }
-
-        if (isset($array->index)) {
-            $txt .= 'index ' . $array->index . " ";
-        }
-
-        if (isset($array->available)) {
-            $txt .= 'available ' . $array->available . " ";
-        }
-
-        if (isset($array->quantity)) {
-            $txt .= 'quantity ' . $array->quantity . " ";
-        }
-
-        if (isset($array->flag)) {
-            $txt .= "flag " . strtoupper($array->flag->state) . " ";
-        }
-
-        if (isset($array->route)) {
-            $txt .= "route " . $array->route . " ";
-        }
-
-        if (isset($array->consist)) {
-            $txt .= "consist " . $this->consist . " ";
-        }
-*/
+$txt = trim($txt);
         return $txt;
     }
 
@@ -2599,7 +2581,7 @@ if ($this->alias != null) {
 
             $sms_message .= " | " . $available_text;
         }
-
+/*
         if ($this->verbosity >= 1) {
             //$this->train_thing->flag = $this->getFlag();
             //$this->flag = $this->train_thing->flag;
@@ -2610,13 +2592,14 @@ if ($this->alias != null) {
                 $sms_message .= " | flag " . strtoupper($flag);
             }
         }
-
+*/
+/*
         if ($this->verbosity >= 1) {
             if (isset($this->response)) {
                 $sms_message .= " | " . $this->response;
             }
         }
-
+*/
         if ($this->verbosity > 2) {
             if (!isset($this->route)) {
                 $route = "X";
@@ -2650,46 +2633,15 @@ if ($this->alias != null) {
                 number_format($this->thing->elapsed_runtime()) .
                 "ms";
         }
-/*
-//$sms_message .= "quantity " . $this->quantity . " ";
-foreach($this->agents as $i=>$agent_name) {
 
-    $variable_name = strtolower($agent_name);
-
-
-    if (isset($this->{$variable_name})) {
-
-        if ($this->{strtolower($agent_name)} === false) { 
-            continue;
-        }
-
-        $sms_message .= $agent_name . " ";
-
-        if (is_string($this->{$variable_name})) {
-            $sms_message .= strtoupper($this->{strtolower($agent_name)}) . " ";
-            continue;
-        }
-
-        if (is_array($this->{$variable_name})) {
-            $text = strtoupper(trim(implode(" ", $this->{$variable_name}))); 
-            $sms_message .= $text . " ";
-            continue;
-        }
-
-        if (is_object($this->{$variable_name})) {
-
-            $agent_variable = (array) $this->{$variable_name};
-            $text = strtoupper(trim(implode(" " , $agent_variable)));
-            $sms_message .= $text . " "; 
-            continue; 
-        }
-
-
-    }
-
-}
-*/
 $sms_message .= $this->textTrain();
+
+//        if ($this->verbosity >= 1) {
+            if (isset($this->response)) {
+                $sms_message .= " | " . $this->response;
+            }
+//        }
+
 
         if ($this->verbosity > 3) {
             if ($this->train_thing == false) {
