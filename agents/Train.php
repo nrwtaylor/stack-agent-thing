@@ -51,7 +51,9 @@ class Train extends Agent
             'name',
             'available',
             'resource',
-            'link'
+            'link',
+            'route',
+            'consist'
         ];
 
 
@@ -168,7 +170,8 @@ public function initTrain() {
             $requested_state = $this->requested_state;
         }
         // Update calculated variables.
-        $this->available = $this->getAgent('available')->available;
+//        $this->available = $this->getAgent('available')->available;
+$this->getAvailable();
 
         $this->variables_agent->setVariable("state", $requested_state);
         $this->variables_agent->setVariable("head_code", $this->head_code);
@@ -394,7 +397,14 @@ $this->train = $train;
 
         // devstack.
         $this->available_agent = $this->getAgent('Available','available');
-        $this->available = $this->available_agent->available;
+$available = "X";
+if ($this->available_agent == false) {
+$available = "?";
+}
+if (isset($this->available_agent->available)) {
+        $available = $this->available_agent->available;
+}
+$this->available = $available;
 
         $this->flag_agent = $this->getAgent('Flag','flag');
         $this->flag = $this->flag_agent->state;
@@ -413,6 +423,10 @@ $this->train = $train;
         $this->runtime_agent = $this->getAgent('Runtime','runtime');
         $this->runtime = $this->runtime_agent->runtime;
 
+        $this->resource_agent = $this->getAgent('Resource','resource');
+        $this->resource = $this->resource_agent->resource_name;
+
+
 // devstack
         $this->runat_agent = $this->getAgent('Runat','runat');
         if (!isset($this->runat)) {
@@ -421,7 +435,7 @@ $this->train = $train;
 
         $this->runat->day = $this->runat_agent->day;
         $this->runat->hour = $this->runat_agent->hour;
-        $this->runat->minute = $thi->runat_agent->minute;
+        $this->runat->minute = $this->runat_agent->minute;
 
 
         $this->endat_agent = $this->getAgent('Endat','endat');
@@ -431,7 +445,7 @@ $this->train = $train;
 
         $this->endat->day = $this->endat_agent->day;
         $this->endat->hour = $this->endat_agent->hour;
-        $this->endat->minute = $thi->endat_agent->minute;
+        $this->endat->minute = $this->endat_agent->minute;
 
 
 
@@ -468,18 +482,19 @@ $this->train = $train;
         // We need the newest block as that is most likely to be relevant to
         // what we are doing.
 
-        $this->thing->log(
-            'found ' .
-                count($findagent_thing->thing_report['things']) .
-                " Train Agent Things."
-        );
-
         $this->max_index = 0;
         $this->trains = [];
 
 
 	//$things = $findagent_thing->thing_report['things'];
 	$things = $this->getThings('train');
+
+        $this->thing->log(
+            'found ' .
+                count($things) .
+                " Train Agent Things."
+        );
+
 
         foreach ($things as $train_thing) {
             //            $thing = new Thing($train_thing['uuid']);
@@ -2261,11 +2276,12 @@ $this->flag = $flag;
 
     function textTrain($array = null)
     {
+
         if ($array == null) {
             $array = $this;
         }
         $txt = "";
-
+/*
         if (isset($array->state)) {
             $txt .= 'state ' . $this->state . " ";
         }
@@ -2299,6 +2315,57 @@ $this->flag = $flag;
 
         $txt .= " " . "now " . $this->trainTime();
         $txt .= " ";
+*/
+
+//$txt = "";
+
+foreach($this->agents as $i=>$agent_name) {
+
+    $variable_name = strtolower($agent_name);
+
+
+    if (isset($this->{$variable_name})) {
+
+        if ($this->{strtolower($agent_name)} === false) { 
+            continue;
+        }
+
+        $txt .= $agent_name . " ";
+
+        if (is_string($this->{$variable_name})) {
+            $txt .= strtoupper($this->{strtolower($agent_name)}) . " ";
+            continue;
+        }
+
+        if (is_array($this->{$variable_name})) {
+            $text = strtoupper(trim(implode(" ", $this->{$variable_name}))); 
+            $txt .= $text . " ";
+            continue;
+        }
+
+        if (is_object($this->{$variable_name})) {
+
+            $agent_variable = (array) $this->{$variable_name};
+            $text = strtoupper(trim(implode(" " , $agent_variable)));
+            $txt .= $text . " "; 
+            continue; 
+        }
+
+
+    }
+
+}
+
+
+
+        $txt .= " " . "now " . $this->trainTime();
+//        $txt .= " ";
+
+
+
+/*
+
+
 
         if (isset($array->alias)) {
             $txt .= 'alias ' . $array->alias . " ";
@@ -2327,7 +2394,7 @@ $this->flag = $flag;
         if (isset($array->consist)) {
             $txt .= "consist " . $this->consist . " ";
         }
-
+*/
         return $txt;
     }
 
@@ -2517,7 +2584,7 @@ if ($this->alias != null) {
                 }
             }
         } else {
-            $available_text = "X";
+            $available_text = "X minutes. ";
             if (is_numeric($this->available)) {
                 $available_text =
                     round($this->available / 60, 0) . ' minutes remaining. ';
@@ -2583,7 +2650,7 @@ if ($this->alias != null) {
                 number_format($this->thing->elapsed_runtime()) .
                 "ms";
         }
-
+/*
 //$sms_message .= "quantity " . $this->quantity . " ";
 foreach($this->agents as $i=>$agent_name) {
 
@@ -2599,12 +2666,12 @@ foreach($this->agents as $i=>$agent_name) {
         $sms_message .= $agent_name . " ";
 
         if (is_string($this->{$variable_name})) {
-            $sms_message .= $this->{strtolower($agent_name)} . " ";
+            $sms_message .= strtoupper($this->{strtolower($agent_name)}) . " ";
             continue;
         }
 
         if (is_array($this->{$variable_name})) {
-            $text = trim(implode(" ", $this->{$variable_name})); 
+            $text = strtoupper(trim(implode(" ", $this->{$variable_name}))); 
             $sms_message .= $text . " ";
             continue;
         }
@@ -2612,7 +2679,7 @@ foreach($this->agents as $i=>$agent_name) {
         if (is_object($this->{$variable_name})) {
 
             $agent_variable = (array) $this->{$variable_name};
-            $text = trim(implode(" " , $agent_variable));
+            $text = strtoupper(trim(implode(" " , $agent_variable)));
             $sms_message .= $text . " "; 
             continue; 
         }
@@ -2621,7 +2688,8 @@ foreach($this->agents as $i=>$agent_name) {
     }
 
 }
-
+*/
+$sms_message .= $this->textTrain();
 
         if ($this->verbosity > 3) {
             if ($this->train_thing == false) {
@@ -2863,7 +2931,7 @@ foreach($this->agents as $i=>$agent_name) {
                 $this->headcode_thing->getHeadcodes();
                 $headcode_text = "";
                 foreach ($this->headcode_thing->unique_headcodes as $i=>$headcode) {
-                    $headcode_text .= $headcode['head_code'] . " ";
+                    $headcode_text .= strtoupper($headcode['head_code']) . " ";
                 }
                 $this->response .= $headcode_text;
 

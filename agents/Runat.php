@@ -26,6 +26,11 @@ class Runat extends Agent
     {
         $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
         $this->test = "Development code"; // Always iterative.
+
+
+
+
+
         $this->runat = new Variables(
             $this->thing,
             "variables runat " . $this->from
@@ -80,10 +85,10 @@ class Runat extends Agent
      */
     function get($run_at = null)
     {
-$headcode_agent = new Headcode($this->thing, "headcode");
-$this->head_code = $headcode_agent->head_code;
+        $headcode_agent = new Headcode($this->thing, "headcode");
+        $this->head_code = $headcode_agent->head_code;
 
-$at_agent = new At($this->thing, "headcode");
+        //$at_agent = new At($this->thing, "runat");
 
         if ($this->runat == false) {
             return;
@@ -503,9 +508,11 @@ $at_agent = new At($this->thing, "headcode");
         //if ($minute == 'X') {$minute_text = "X";}
 
         $day_text = $day;
-$sms_message .= " " .$this->head_code .  " ";
+
+        $sms_message .= " " .strtoupper($this->head_code) .  " ";
         $sms_message .=
-            " | day " .
+            "| ".
+            " day " .
             $day_text .
             " hour " .
             $hour_text .
@@ -524,7 +531,7 @@ $sms_message .= " " .$this->head_code .  " ";
             $sms_message .= " | Set RUNAT. ";
         }
 
-        $sms_message .= "| nuuid " . strtoupper($this->runat->nuuid);
+        // $sms_message .= "| nuuid " . strtoupper($this->runat->nuuid);
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
@@ -536,22 +543,11 @@ $sms_message .= " " .$this->head_code .  " ";
      */
     public function respondResponse()
     {
-        // Thing actions
-
         $this->thing->flagGreen();
 
-        // Generate email response.
-
-        //$to = $this->thing->from;
-        //$from = "runat";
-
-        //$choices = $this->thing->choice->makeLinks($this->state);
-        $choices = false;
-        $this->thing_report['choices'] = $choices;
-
-        //$this->makeTXT();
-
-        //$this->makeSMS();
+        $this->makeChoices();
+        //$choices = false;
+        //$this->thing_report['choices'] = $choices;
 
         $test_message =
             'Last thing heard: "' .
@@ -576,7 +572,7 @@ $sms_message .= " " .$this->head_code .  " ";
 
         //$this->makeTXT();
 
-        $this->thing_report['help'] = 'This is a headcode.';
+        $this->thing_report['help'] = 'Try RUNAT NOW. RUNAT MON 10:40. Or RUNAT RESET.';
     }
 
     /**
@@ -627,8 +623,8 @@ $sms_message .= " " .$this->head_code .  " ";
      */
     public function readSubject()
     {
-        $this->response .= 'Hello. ';
-        //$this->response = null;
+        // $this->response .= 'Hello. ';
+        // $this->response = null;
         $this->num_hits = 0;
 
         $input = $this->input;

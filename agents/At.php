@@ -15,6 +15,10 @@ ini_set("allow_url_fopen", 1);
 
 class At extends Agent
 {
+
+    // devstack backlog 
+    // recognize runat finishat stopat closeat startat as agents pointing to At.
+
     public $var = 'hello';
 
     /**
@@ -26,10 +30,8 @@ class At extends Agent
     {
         $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
         $this->test = "Development code"; // Always iterative.
-        $this->at = new Variables(
-            $this->thing,
-            "variables at " . $this->from
-        );
+
+        $this->tag = "at";
     }
 
     /**
@@ -80,6 +82,10 @@ class At extends Agent
      */
     function get($run_at = null)
     {
+        $this->at = new Variables(
+            $this->thing,
+            "variables " . $this->tag . " " . $this->from);
+
         if ($this->at == false) {
             return;
         }
@@ -105,8 +111,6 @@ class At extends Agent
 
     function getAt()
     {
-        //var_dump($this->hour);
-        //var_dump($this->minute);
 
         if (!isset($this->end_at) and !isset($this->runtime)) {
             if (!isset($this->run_at)) {
@@ -229,23 +233,16 @@ class At extends Agent
         $hour = $this->parsed_date['hour'];
         $day = $this->extractDay($input);
 
-        //var_dump($minute);
-        //var_dump($hour);
-        //var_dump($day);
         // See what numbers are in the input
         if (!isset($this->numbers)) {
             $this->extractNumbers($input);
         }
         $this->extractNumbers($input);
 
-        //var_dump($this->numbers);
         if (isset($this->numbers) and count($this->numbers) == 0) {
         } elseif (count($this->numbers) == 1) {
 
             if (strlen($this->numbers[0]) == 4) {
-
-                //var_dump($minute);
-                //var_dump($hour);
 
                 if ($minute == 0 and $hour == 0) {
                     $minute = substr($this->numbers[0], 2, 2);
@@ -436,8 +433,7 @@ class At extends Agent
     /**
      *
      */
-    public function makeSMS()
-    {
+    public function textAt() {
         $day = "X";
         if (isset($this->day)) {
             $day = $this->day;
@@ -459,27 +455,49 @@ class At extends Agent
 
         //if ($minute == null) {$minute = "X";}
 
-        //var_dump($this->hour);
-        //var_dump($this->minute);
-
-        $sms_message = "AT";
-
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
-        //if ($hour == 'X') {$hour_text = "X";}
+        if ($hour == 'X') {$hour_text = "XX";}
 
         $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
-        //if ($minute == 'X') {$minute_text = "X";}
+        if ($minute == 'X') {$minute_text = "XX";}
 
         $day_text = $day;
-        $sms_message .=
-            " | day " .
-            $day_text .
-            " hour " .
-            $hour_text .
-            " minute " .
-            $minute_text .
-            " ";
+        $text = 
+            $day_text . " " .
+            $hour_text . ":" .
+            $minute_text;
+
+return $text;
+}
+public function makeSMS() {
+
+$sms_message = "AT IS " . $this->textAt();
+//$sms_message .= " | ";
         $sms_message .= $this->response;
+
+
+
+
+
+        $day = "X";
+        if (isset($this->day)) {
+            $day = $this->day;
+        }
+        if ($day == null) {
+            $day = "X";
+        }
+
+        $hour = "X";
+        if (isset($this->hour)) {
+            $hour = $this->hour;
+        }
+        //if ($hour == null) {$hour = "X";}
+
+        $minute = "X";
+        if (isset($this->minute)) {
+            $minute = $this->minute;
+        }
+
 
         if (
             !$this->isInput($day) or
@@ -507,27 +525,8 @@ class At extends Agent
 
         $this->thing->flagGreen();
 
-        // Generate email response.
-
-        //$to = $this->thing->from;
-        //$from = "runat";
-
-        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
         $this->thing_report['choices'] = $choices;
-
-        //$this->makeTXT();
-
-        //$this->makeSMS();
-
-        $test_message =
-            'Last thing heard: "' .
-            $this->subject .
-            '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
-
-        $test_message .= '<br>' . $this->sms_message;
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -540,8 +539,6 @@ class At extends Agent
             $this->thing_report['info'] =
                 'Agent input was "' . $this->agent_input . '".';
         }
-
-        //$this->makeTXT();
 
         $this->thing_report['help'] = 'This is a headcode.';
     }
@@ -598,8 +595,7 @@ class At extends Agent
         $this->num_hits = 0;
 
         $input = $this->input;
-        $filtered_input = $this->assert($input);
-
+        $filtered_input = $this->assert($input, "at");
         $keywords = $this->keywords;
         if (strpos($filtered_input, "reset") !== false) {
             $this->hour = "X";
@@ -613,12 +609,19 @@ class At extends Agent
             return;
         }
 
-        //        if (strpos($this->agent_input, "runat") !== false) {
 
-        //            $this->extractRunat($this->agent_input);
+$alpha_agent = new Alpha($this->thing, "alpha");
 
-        //            return;
-        //        }
+if ($alpha_agent->isAlpha($filtered_input) === true) {
+    $this->tag = $filtered_input ."at";
+// reload with new at tag.
+$this->get();
+}
+
+
+//var_dump($this->tag);
+
+
         $this->extractAt($filtered_input);
     }
 }

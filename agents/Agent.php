@@ -340,7 +340,7 @@ class Agent
 
         $this->makeAgent();
         $this->makeResponse();
-        //        $this->makeChoices();
+        //$this->makeChoices();
         $this->makeMessage();
         $this->makeChart();
         $this->makeImage();
@@ -649,22 +649,33 @@ class Agent
      * @param unknown $agent (optional)
      * @return unknown
      */
-    function assert($input, $agent = null)
+    function assert($input, $agent = null, $flag_lowercase = true)
     {
         if ($agent == null) {
             $agent = $this->agent_name;
         }
         $whatIWant = $input;
+
+        $pos = strpos(strtolower($input), $agent);
+
         if (($pos = strpos(strtolower($input), $agent . " is")) !== false) {
             $whatIWant = substr(
-                strtolower($input),
+                $input,
                 $pos + strlen($agent . " is")
             );
         } elseif (($pos = strpos(strtolower($input), $agent)) !== false) {
-            $whatIWant = substr(strtolower($input), $pos + strlen($agent));
+            // Distinguish if assertion match is at beginning or end of text.
+            if (strlen($input) ==($pos + strlen($agent))) {
+                $length = strlen($input) - strlen($agent);
+                $whatIWant = substr($input, 0, $length);
+            } else {
+                $whatIWant = substr($input, $pos + strlen($agent));
+            }
         }
+        $filtered_input = trim($whatIWant, " ");
 
-        $filtered_input = ltrim(strtolower($whatIWant), " ");
+if ($flag_lowercase === true) {$filtered_input = strtolower($filtered_input);}
+
         return $filtered_input;
     }
 
@@ -1042,6 +1053,12 @@ class Agent
 
     public function makeChoices()
     {
+
+        if (isset($this->thing_report['choices'])) {return;}
+        if (isset($this->choices)) {$this->thing_report['choices'] = $this->choices; return;}
+
+        $choices = false;
+        $this->thing_report['choices'] = $choices;
     }
 
     /**
@@ -2416,6 +2433,27 @@ class Agent
             return $this->thing_report;
         }
 
+
+
+
+        $this->thing->log('now looking for Resource.');
+        $resource_agent = new Resource($this->thing, "resource");
+
+        if (!$resource_agent->isResource($input)) {
+            //        if (!$place_thing->isPlace($this->subject)) {
+            //if (($place_thing->place_code == null) and ($place_thing->place_name == null) ) {
+        } else {
+            // place found
+            $resource_agent = new Resource($this->thing);
+            $this->thing_report = $resource_agent->thing_report;
+            return $this->thing_report;
+        }
+
+
+
+
+
+
         switch (strtolower($this->context)) {
             case 'group':
                 // Now if it is a head_code, it might also be a train...
@@ -2694,14 +2732,16 @@ class Agent
      * @param unknown $errno
      * @param unknown $errstr
      */
-    function warning_handler($errno, $errstr)
+    function warning_handler($errno, $errstr,$errfile, $errline)
     {
         //throw new \Exception('Class not found.');
         //trigger_error("Fatal error", E_USER_ERROR);
         $this->thing->log($errno);
         $this->thing->log($errstr);
 
-        $this->response .= "Warning seen. " . $errno . " " . $errstr . ". ";
+        $console = "Warning seen. " . $errline . " " . $errfile . " " . $errno . " " . $errstr . ". ";
+echo $console . "\n";
+        $this->response .= "Warning seen. " . $errstr . ". ";
         // do something
     }
 

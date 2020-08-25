@@ -25,6 +25,7 @@ class Resource extends Agent
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->keywords = [
+            'make',
             'resource',
             'next',
             'accept',
@@ -50,9 +51,11 @@ class Resource extends Agent
         $this->test = "Development code"; // Always iterative.
 
         $this->thing_report['help'] =
-            'This is a Resource.  A quantity of Things.';
+            'Try MAKE RESOURCE FUEL. And QUANTITY 10.';
     }
 
+    // devstack
+    // Get list of channel resources.
     function nextResource($file_name, $selector_array = null)
     {
         //if ($file_name == null) {
@@ -254,6 +257,23 @@ class Resource extends Agent
         }
     }
 
+    public function isResource($text = null)
+    {
+        if ($text == null) {
+            return false;
+        }
+
+        $resourcename_list = array_map('strtolower', $this->resourcename_list);
+
+        foreach ($resourcename_list as $i => $resourcename) {
+            if ($resourcename == strtolower($text)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function getResource($selector = null)
     {
         foreach ($this->resources as $resource) {
@@ -268,7 +288,7 @@ class Resource extends Agent
                     "variables " . $this->resource_name . " " . $this->from
                 );
 
-                $this->response .= "Got resource. ";
+                //$this->response .= "Got resource. ";
 
                 return [$this->resource_name, $this->resource_quantity];
             }
@@ -277,40 +297,41 @@ class Resource extends Agent
         return true;
     }
 
+    // devstack
+    // use getThings
+
     function getResources()
     {
         $this->resourcename_list = [];
         $this->resources = [];
 
-        $findagent_thing = new Findagent($this->thing, 'resource');
+        $things = $this->getThings('resource');
+
+        //        $findagent_thing = new Findagent($this->thing, 'resource');
 
         $this->thing->log(
-            'Agent "Place" found ' .
-                count($findagent_thing->thing_report['things']) .
-                " resource Things."
+            'Agent "Place" found ' . count($things) . " resource Things."
         );
 
-        if ($findagent_thing->thing_report['things'] == true) {
-        }
+        //        if ($findagent_thing->thing_report['things'] == true) {
+        //        }
 
-        if (
-            count($findagent_thing->thing_report['things']) == 0 or
-            $findagent_thing->thing_report['things'] == 0
-        ) {
+        if (count($things) == 0) {
             // No places found
         } else {
-            $this->response .= "Found some resources on the stack. ";
-            foreach (
-                array_reverse($findagent_thing->thing_report['things'])
-                as $thing_object
-            ) {
+            //$this->response .= "Found some resources on the stack. ";
+            foreach (array_reverse($things) as $thing) {
                 // While timing is an issue of concern
 
-                $uuid = $thing_object['uuid'];
+                //     $uuid = $thing_object['uuid'];
 
                 // refactor to avoid unnecessary Thing
-                $thing = new Thing($uuid);
-                $variables = $thing->account['stack']->json->array_data;
+                //     $thing = new Thing($uuid);
+                //     $variables = $thing->account['stack']->json->array_data;
+
+                $subject = $thing->subject;
+                $variables = $thing->variables;
+                $created_at = $thing->created_at;
 
                 if (isset($variables['resource'])) {
                     $resource_quantity = $this->default_resource_quantity;
@@ -357,6 +378,8 @@ class Resource extends Agent
         // Indexing not implemented
         $this->max_index = 0;
 
+        $this->resourcename_list = array_unique($this->resourcename_list);
+
         return [$this->resourcename_list, $this->resources];
     }
 
@@ -367,13 +390,23 @@ class Resource extends Agent
 
         $resource_name = "X";
 
-        if ((isset($this->resource_name)) and ($resource_name != null)) {
+        if (isset($this->resource_name) and $resource_name != null) {
             $resource_name = $this->resource_name;
         }
 
+        $this->head_code = $this->thing->json->readVariable([
+            "headcode",
+            "head_code",
+        ]);
+        $flag_variable_name = "_" . $this->head_code;
+
         $this->place = new Variables(
             $this->thing,
-            "variables " . $resource_name . " " . $this->from
+            "variables " .
+                $resource_name .
+                $flag_variable_name .
+                " " .
+                $this->from
         );
 
         $this->resource_quantity = $this->place->getVariable(
@@ -421,11 +454,9 @@ class Resource extends Agent
         $ad_hoc = true;
 
         if ($ad_hoc != false) {
-            $this->response .= "Making a resource. ";
-
             $this->default_resource_quantity = "X";
 
-            $this->response .= "Resource is Useable but we might lose it.";
+            //$this->response .= "Resource is Useable but we might lose it.";
 
             $this->index = $this->max_index + 1;
             $this->max_index = $this->index;
@@ -437,6 +468,11 @@ class Resource extends Agent
             $this->current_resource_name = $resource_name;
             $this->resource_name = $resource_name;
 
+            $this->place = new Variables(
+                $this->thing,
+                "variables " . $this->resource_name . " " . $this->from
+            );
+
             $this->set();
 
             $this->getResources();
@@ -444,6 +480,9 @@ class Resource extends Agent
             $this->thing->log("resource name is " . $this->resource_name);
 
             $this->resource_thing = $this->thing;
+
+            $this->response .=
+                "Made new resource : " . strtoupper($this->resource_name) . ". ";
         }
 
         $this->thing->log('found a Resource and pointed to it.');
@@ -611,18 +650,32 @@ class Resource extends Agent
 
     public function makeSMS()
     {
-        $sms_message = "RESOURCE " . strtoupper($this->resource_name);
-        $sms_message .= " | ";
+        $sms = "RESOURCE " . strtoupper($this->resource_name);
+        $sms .= " ";
+        $sms .= strtoupper($this->head_code);
+        $sms .= " ";
+
+        $sms .= "|";
+
+        /*
+$resource_quantity = "X";
 
         if (!isset($this->resource_quantity)) {
-            $this->resource_quantity = "X";
-        }
 
-        $sms_message .= strtoupper($this->resource_quantity);
-        $sms_message .= " " . $this->response;
+if (strtolower($this->last_resource_name) == strtolower($this->resource_name) ) {
+        $resource_quantity =  $this->last_resource_quantity;
+}
 
-        $this->sms_message = $sms_message;
-        $this->thing_report['sms'] = $sms_message;
+}
+$this->resource_quantity = $resource_quantity;
+
+        $sms .= strtoupper($this->resource_quantity);
+*/
+
+        $sms .= " " . $this->response;
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     public function respondResponse()
@@ -737,6 +790,7 @@ class Resource extends Agent
                         case 'create':
                         case 'place':
                         case 'add':
+                            //var_dump("merp");
                             $this->assertResource(strtolower($input));
                             return;
 
@@ -748,6 +802,8 @@ class Resource extends Agent
 
         if ($this->resource_name != null) {
             $this->getResource($this->resource_name);
+            $this->response .= "Got resource. ";
+
             $this->thing->log(
                 $this->agent_prefix .
                     'using extracted resource_name ' .
