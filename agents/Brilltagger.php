@@ -117,7 +117,15 @@ class Brilltagger extends Agent
      */
     function makeSMS()
     {
-        $this->thing_report['sms'] = "BRILL TAGGER | " . $this->text;
+        if (!isset($this->text)) {
+            $text =
+                "Try BRILLTAGGER The quick brown fox jumped over the lazy dog.";
+        }
+        if (isset($this->text)) {
+            $text = $this->text;
+        }
+
+        $this->thing_report['sms'] = "BRILL TAGGER | " . $text;
     }
 
     /**
@@ -133,20 +141,6 @@ class Brilltagger extends Agent
         }
 
         $this->thing->log("read " . $input . ".");
-        /*
-        if (strtolower($input) == "brilltagger") {
-//return;
-//}
-            $this->getTask();
-//            $this->doSyllables($this->link_task);
-        // Then run it through the classifier.
-        $tags = $this->tag($this->link_task);
-//        $this->printTag($tags);
-        $this->textTag($tags);
-
-            return;
-        }
-*/
 
         $whatIWant = $this->input;
         if (($pos = strpos(strtolower($input), "brill tagger")) !== false) {
@@ -181,13 +175,13 @@ class Brilltagger extends Agent
     {
         $this->thing->log("brilltagger tag run.");
         preg_match_all("/[\w\d\.]+/", $text, $matches);
-        $nouns = array('NN', 'NNS');
+        $nouns = ['NN', 'NNS'];
 
-        $return = array();
+        $return = [];
         $i = 0;
         foreach ($matches[0] as $token) {
             // default to a common noun
-            $return[$i] = array('token' => $token, 'tag' => 'NN');
+            $return[$i] = ['token' => $token, 'tag' => 'NN'];
 
             // remove trailing full stops
             if (substr($token, -1) == '.') {
@@ -203,7 +197,7 @@ class Brilltagger extends Agent
             if ($i > 0) {
                 if (
                     $return[$i - 1]['tag'] == 'DT' &&
-                    in_array($return[$i]['tag'], array('VBD', 'VBP', 'VB'))
+                    in_array($return[$i]['tag'], ['VBD', 'VBP', 'VB'])
                 ) {
                     $return[$i]['tag'] = 'NN';
                 }

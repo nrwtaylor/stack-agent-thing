@@ -107,10 +107,12 @@ class Rule extends Agent
             return false;
         }
 
-
         $tokens = explode(" ", strtolower($text));
 
-        if ((isset($tokens[1])) and ($tokens[1] == "etiquette" and substr($text, 0, 1) == "@")) {
+        if (
+            isset($tokens[1]) and
+            ($tokens[1] == "etiquette" and substr($text, 0, 1) == "@")
+        ) {
             return false;
         }
 
@@ -120,7 +122,7 @@ class Rule extends Agent
             return false;
         }
 
-        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
+        //$image = @file_get_contents($this->resource_path . 'rule/' . $filename);
 
         return $text;
     }
@@ -245,7 +247,8 @@ class Rule extends Agent
 
         $filename = $this->svgRule($rule);
 
-        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
+        //        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
+
         $web = "<b>Rule Agents</b><br>";
         $web .= "<p>";
         $web .= "<p>";
@@ -253,7 +256,7 @@ class Rule extends Agent
         if ($this->readRule($this->subject) !== false) {
             $web .= $this->readRule($this->subject);
 
-            $web .= "<center>" . $image . "</center>";
+            //            $web .= "<center>" . $image . "</center>";
 
             $web .= "<p>";
             $web .= "To forget this rule CLICK on the FORGET button.<p>";
@@ -268,12 +271,12 @@ class Rule extends Agent
     {
         $rule = ["nom" => $this->nom, "suit" => $this->suit];
 
-        $filename = $this->svgRule($rule);
+        //        $filename = $this->svgRule($rule);
 
-        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
+        //        $image = @file_get_contents($this->resource_path . 'rule/' . $filename);
 
-        $web = "<center" . $image . "</center";
-
+        //        $web = "<center" . $image . "</center";
+        $web = $this->nom . " " . $this->suit . " " . $this->input;
         $this->thing_report['snippet'] = $web;
     }
 

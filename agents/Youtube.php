@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-require_once '/var/www/stackr.test/vendor/autoload.php';
+//require_once '/var/www/stackr.test/vendor/autoload.php';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -26,11 +26,6 @@ class Youtube extends Agent
         $this->api_key =
             $this->thing->container['api']['google']['youtube']['api_key'];
 
-        $this->variables_agent = new Variables(
-            $this->thing,
-            "variables " . "youtube" . " " . $this->from
-        );
-
         $this->thing_report['help'] =
             'This provides video search via the Youtube API. Try YOUTUBE MIND THE GAP.';
 
@@ -49,6 +44,12 @@ class Youtube extends Agent
 
     function get()
     {
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables " . "youtube" . " " . $this->from
+        );
+
+
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable(
             "refreshed_at"
@@ -71,20 +72,21 @@ class Youtube extends Agent
             $this->video_id = $this->items[0]['id'];
         }
 
-if (!isset($this->video_id)) {return false;}
+        if (!isset($this->video_id)) {
+            return false;
+        }
 
-$transcript = $this->transcriptYoutube($this->video_id);
+        $transcript = $this->transcriptYoutube($this->video_id);
 
         $caption_id = $this->captionidYoutube($this->video_id);
-if ($caption_id === true) {$this->response .= "No caption id found. "; return;}
+        if ($caption_id === true) {
+            $this->response .= "No caption id found. ";
+            return;
+        }
 
-// test
-$this->response .= "Caption id is " . $caption_id . ". ";
-//$caption = $this->captionYoutube($caption_id);
-
-
-
-
+        // test
+        $this->response .= "Caption id is " . $caption_id . ". ";
+        //$caption = $this->captionYoutube($caption_id);
     }
 
     public function getVideos()
@@ -102,7 +104,9 @@ $this->response .= "Caption id is " . $caption_id . ". ";
             $keywords = urlencode($this->search_words);
         }
 
-        if (!isset($this->items_count)) {$this->items_count = 0;}
+        if (!isset($this->items_count)) {
+            $this->items_count = 0;
+        }
 
         $data_source =
             "https://www.googleapis.com/youtube/v3/search?key=" .
@@ -116,7 +120,9 @@ $this->response .= "Caption id is " . $caption_id . ". ";
 
         $items = $this->parseYoutube($json_data);
 
-if (!is_array($items)) {return true;}
+        if (!is_array($items)) {
+            return true;
+        }
 
         $this->items = $items;
         $this->items_count = count($this->items);
@@ -139,7 +145,9 @@ if (!is_array($items)) {return true;}
 
         $json_data = json_decode($data, true);
 
-if (!isset($json_data['items'][0]['id'])) {return true;}
+        if (!isset($json_data['items'][0]['id'])) {
+            return true;
+        }
 
         $caption_id = $json_data['items'][0]['id'];
 
@@ -160,20 +168,19 @@ if (!isset($json_data['items'][0]['id'])) {return true;}
             'googleauthorize'
         );
 
-$http = $googleauthorize_agent->client->authorize();
-//$response = $http->request(
-// 'GET',
-// 'https://www.googleapis.com/youtube/v3/captions/id=' .
-//            $caption_id);
+        $http = $googleauthorize_agent->client->authorize();
+        //$response = $http->request(
+        // 'GET',
+        // 'https://www.googleapis.com/youtube/v3/captions/id=' .
+        //            $caption_id);
 
-$response = $http->request(
- 'GET',
- '/youtube/v3/captions/id=' .
-            $caption_id);
+        $response = $http->request(
+            'GET',
+            '/youtube/v3/captions/id=' . $caption_id
+        );
 
-
-var_dump($response);
-exit();
+        var_dump($response);
+        exit();
         /*
 // returns a Guzzle HTTP Client
 $httpClient = $googleauthorize_agent->client->authorize();
@@ -185,7 +192,7 @@ exit();
 
 */
 
-/*
+        /*
         var_dump($googleauthorize_agent->access_token);
 
         $options = [
@@ -279,16 +286,14 @@ exit();
         return $items;
     }
 
-public function transcriptYoutube($video_id = null) {
+    public function transcriptYoutube($video_id = null)
+    {
+        $data_source =
+            "http://video.google.com/timedtext?lang=en&v=" . $video_id;
 
-$data_source = "http://video.google.com/timedtext?lang=en&v=" . $video_id;
-
-//        $data = file_get_contents($data_source);
-//        $json_data = json_decode($data, true);
-
-return;
-
-}
+        //        $data = file_get_contents($data_source);
+        //        $json_data = json_decode($data, true);
+    }
 
     public function getLink($ref = null)
     {
@@ -356,7 +361,9 @@ return;
     {
         $sms = "YOUTUBE";
         $items_count = 0;
-        if (isset($this->items_count)) {$items_count = $this->items_count;}
+        if (isset($this->items_count)) {
+            $items_count = $this->items_count;
+        }
 
         switch ($this->items_count) {
             case 0:
@@ -442,7 +449,7 @@ return;
         if (count($pieces) == 1) {
             if ($input == 'youtube') {
                 //$this->search_words = null;
-                $this->response .= "Asked Youtube about nothing.";
+                $this->response .= "Asked Youtube about nothing. ";
                 return;
             }
         }

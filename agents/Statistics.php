@@ -15,6 +15,9 @@ class Statistics extends Agent
         // I think.
         // Instead.
 
+        $this->variable_agent = "statistics";
+        $this->variable_name = "number";
+
         $this->node_list = ["start"];
 
         $this->count = 0;
@@ -121,6 +124,10 @@ class Statistics extends Agent
         $variable_name = $this->variable_name;
 
         $things = $this->getThings('baseline');
+
+        if ($things == null) {
+            return false;
+        }
 
         $this->total_things = count($things);
 
@@ -247,6 +254,9 @@ class Statistics extends Agent
         if ($count_zeros > 0) {
             $this->response .= "Counted " . $count_zeros . " zeros. ";
         }
+        if (!isset($this->mean)) {
+            $this->mean = "X";
+        }
         return $this->mean;
     }
 
@@ -315,37 +325,35 @@ array(
 
     public function makeSMS()
     {
-        $this->sms_message =
-            "STATISTICS " .
-            $this->variable_name .
-            " MEAN is " .
-            number_format($this->mean) .
-            " | " .
-            $this->sms_message;
-        $this->sms_message .=
-            "SD " . number_format($this->standard_deviation) . " | ";
-        $this->sms_message .=
-            number_format($this->sample_count) .
-            " Things sampled from " .
-            number_format($this->total_things) .
-            " in " .
-            $this->calc_time .
-            "s | ";
-        $this->sms_message .= "COUNT " . number_format($this->count) . " | ";
+        $sms = "STATISTICS " . $this->variable_name . " ";
+
+        if ($this->count != 0) {
+            $sms .= "MEAN is " . number_format($this->mean);
+            $sms .= "| ";
+            //            $this->sms_message;
+            $sms .= "SD " . number_format($this->standard_deviation) . " | ";
+            $sms .=
+                number_format($this->sample_count) .
+                " Things sampled from " .
+                number_format($this->total_things) .
+                " in " .
+                $this->calc_time .
+                "s ";
+        }
+        $sms .= "COUNT " . number_format($this->count) . "";
 
         if (false) {
-            $this->sms_message .= "SUM " . number_format($this->sum) . " | ";
-            $this->sms_message .=
-                "SUM SQUARED " . number_format($this->sum_squared) . " | ";
-            $this->sms_message .=
-                "SUM SQUARED DIFFERENCE " .
-                number_format($this->sum_squared_difference) .
-                " | ";
+            $sms .= "sum " . number_format($this->sum) . "";
+            $sms .= "sum squared " . number_format($this->sum_squared) . "";
+            $sms .=
+                "sum squared difference " .
+                number_format($this->sum_squared_difference);
         }
 
-        $this->sms_message .= " " . $this->response;
-
-        $this->thing_report['sms'] = $this->sms_message;
+        $sms .= " |";
+        $sms .= " " . $this->response;
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     public function respondResponse()
@@ -358,6 +366,16 @@ array(
 
     public function makeStatistics()
     {
+        if ($this->count == 0) {
+            $statistics = [
+                $this->variable_agent => [
+                    $this->variable_name => [],
+                ],
+            ];
+            $this->statistics = $statistics;
+            return;
+        }
+
         //return;
         $statistics = [
             $this->variable_agent => [
@@ -394,15 +412,19 @@ array(
         $input = strtolower($this->input);
 
         if ($input == 'statistics') {
+            $this->response .= "Saw statistics. ";
+
             return;
         }
 
         $filtered_input = $this->assert($input);
 
         $tokens = explode(" ", $filtered_input);
+
         $this->variable_agent = $tokens[0];
 
         if (!isset($tokens[1])) {
+            $this->response .= "Did not see a variable name. ";
             // Unexpected.
             $this->variable_name = "number";
             return;
