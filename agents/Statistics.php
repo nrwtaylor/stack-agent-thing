@@ -154,20 +154,27 @@ class Statistics extends Agent
                 //     $this->number = $variables[$variable_agent][$variable_name];
             }
 
+            if (!isset($variables[$variable_agent][$variable_name])) {
+                continue;
+            }
+
+
             if (
                 !isset($this->latest_seen) or
                 $created_at > $this->latest_seen or
                 $this->latest_seen == false
             ) {
                 $this->latest_seen = $created_at;
+
+
                 if (is_numeric($variables[$variable_agent][$variable_name])) {
                     $this->number = $variables[$variable_agent][$variable_name];
                 }
             }
 
-            if (!isset($variables[$variable_agent][$variable_name])) {
-                continue;
-            }
+//            if (!isset($variables[$variable_agent][$variable_name])) {
+//                continue;
+//            }
 
             $number = $variables[$variable_agent][$variable_name];
             if (strtolower($number) == 'x') {
