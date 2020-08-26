@@ -1,23 +1,33 @@
 SHELL=/bin/bash
-SERVERNAME=stackr-make.test
+SERVERNAME=stackr.test
 mpm-servers=4
 mpm-spares-min=3
 mpm-spares-max=40
 mpm-workers-max=200
 mpm-child-cnxns=10000
 YOUR_EMAIL=myaddress@example.com
+MYSQLPASSWORD=Stack_1user
+AGENT_LOCATION=
 
-all: lamp mysql php apachefiling resources gearman supervisor cron tailoring memcached
+.PHONY: help
+help: ## Show this help
+	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+all: init lamp mysql php apachefiling resources gearman supervisor cron tailoring memcached ## Do everything
 
 # remember to update your system
+init:  ## Update system
+	@echo "===== Updating System"
+	sudo -- bash -c 'apt-get update; apt-get --assume-yes upgrade'
 
-lamp:
-	sudo apt install apache2
-	sudo apt install mysql-server
-	sudo apt install php7.2 libapache2-mod-php php-mysql
-	sudo apt install php-curl php-json php-cgi
+lamp:  ## Install LAMP stack
+	@echo "===== Installing LAMP stack"
+	sudo apt --assume-yes install apache2
+	-sudo apt --assume-yes install mysql-server
+	sudo apt --assume-yes install php7.2 libapache2-mod-php php-mysql
+	sudo apt --assume-yes install php-curl php-json php-cgi
 # check the default state in apache2.conf
-	sudo sed -i 's/^KeepAlive/KeepAlive On/g' /etc/apache2/apache2.conf
+	sudo sed -i 's/^KeepAlive Off/KeepAlive On/g' /etc/apache2/apache2.conf
 # write sed statement to insert mpm_prefork.conf values  -----!!!!
 #	sudo sed -i '/?????????/$(mpm-servers)' /etc/apache2/mods-available/mpm_prefork.conf
 #	sudo sed -i '/?????????/$(mpm-spares-min)' /etc/apache2/mods-available/mpm_prefork.conf
@@ -49,45 +59,61 @@ lamp:
 #	sudo a2dissite 000-default.conf
 #	sudo systemctl reload apache2
 
-mysql:
-	mysql -u root -p -e "CREATE USER 'stackuser'@'%' IDENTIFIED BY 'stackuser'"
-	mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'stackuser'@'%' WITH GRANT OPTION"
-	mysql -u stackuser -p -e "CREATE DATABASE stack_db"
-	mysql -u stackuser -p stack_db < templates/database_schema.sql
+mysql: ## Set up MySQL
+	@echo "===== Setting up MySQL"
+	-mysql -u root -p -e "CREATE USER 'stackuser'@'%' IDENTIFIED BY '$(MYSQLPASSWORD)'" || (@echo "Could not create stackuser $$?";)
+#ifeq ("$$?", 0)
+#	@echo "ok - $$?"
+#else
+#	@echo "not ok - $$?"
+#endif
+	# stackuser setup and passwords need improvement
+	@echo "===== == Set up Stack DB MySQL user:"
+	-mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'stackuser'@'%' WITH GRANT OPTION" || (@echo "Could not grant permissions to stackuser $$?";)
+	-mysql -u stackuser --password=$(MYSQLPASSWORD) -e "CREATE DATABASE stack_db" || (@echo "Could not create database $$?";)
+	-mysql -u stackuser --password=$(MYSQLPASSWORD) stack_db < templates/database_schema.sql || (@echo "Could not add schemas $$?";)
 
 # innodb:
 # innodb performance settings
 
-php:
-	sudo apt-get update
-	sudo apt-get install php-mbstring
-	sudo apt-get install php7.2-xml
-	sudo apt-get install php-intl
-	sudo apt install php7.2-bcmath
-#	sudo apt install php7.0-gd
-	sudo apt-get install php7.2-gd
-	sudo apt-get install php-curl
-	sudo apt-get install php-fpm
+php: ## Set up PHP
+	sudo apt-get --assume-yes install -f php-mbstring
+	sudo apt-get --assume-yes install -f php7.2-xml
+	sudo apt-get --assume-yes install -f php-intl
+	sudo apt-get --assume-yes install -f php7.2-bcmath
+	#	sudo apt install php7.0-gd
+	sudo apt-get --assume-yes install -f php7.2-gd
+	sudo apt-get --assume-yes  install -f php-curl
+	sudo apt-get --assume-yes install -f php-fpm
 	sudo service apache2 restart
 
-apachefiling:
-	mkdir /var/www/$(SERVERNAME)
-	# establish server file area
+apachefiling: ## Create and assemble filing for Apache2 server
+	sudo mkdir /var/www/$(SERVERNAME); \
+	case "$$?" in \
+	esac; \
+	# establish server file area - as root vs as user?
 	cd /var/www/$(SERVERNAME); \
 	sudo usermod -a -G www-data `whoami`; \
 	sudo chown root:root /var/www; \
 	sudo chmod 755 /var/www/; \
 	sudo chown -R www-data:www-data /var/www/$(SERVERNAME); \
 	sudo chmod -R 774 /var/www/$(SERVERNAME); \
-	wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/composer.json; \
-	sudo apt install composer; composer install
-	cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
-	cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
+	wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/composer.json
+	cd /var/www/$(SERVERNAME); \
+	sudo apt-get --assume-yes install composer; composer install
+	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
+	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
 
-resources:
-	cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/resources /var/www/$(SERVERNAME)/resources/
+#agent:  ## Add commandline shell interface
+#	sudo -- bash -c "touch $AGENT_LOCATION/agent; chmod +X $AGENT_LOCATION/agent"
+#	get PATH and add $AGENT_LOCATION to the PATH:
+#	https://unix.stackexchange.com/questions/11530/adding-directory-to-path-through-makefile
+#	not possible from within make to get persistence
 
-gearman:
+resources: ## Set up resources
+	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/resources /var/www/$(SERVERNAME)/resources/
+
+gearman: ## Install Gearman
 	sudo apt-get install php-gearman
 	sudo apt install gearman-tools
 #replaces:
@@ -104,16 +130,16 @@ gearman:
 #	sudo nano /etc/php5/conf.d/gearman.ini #[and then write extension=gearman.so as content of the file, save it and close it]
 	sudo service apache2 restart
 
-supervisor:
+supervisor: ## Install Supervisor
 	sudo apt-get install supervisor; \
 	sudo cp scripts/supervisor.conf /etc/supervisor/conf.d
 	sudo sed 's/SERVERNAME/$(SERVERNAME)/g' /etc/supervisor/conf.d
 
-cron:
+cron: ## Set up scheduled events
 	line="* * * * * cd /var/www/$(SERVERNAME) && /usr/bin/php -q /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1"; \
 	(sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
 
-tailoring:
+tailoring: ## Set your servername in system files
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/src/Thing.php
@@ -124,13 +150,15 @@ tailoring:
 
 #postfix:
 
-memcached:
+memcached: ## Install MemCache Daemon
 	sudo apt-get update; sudo apt-get install memcached; \
 	sudo apt-get install -y php-memcached
 
-clean:
+clean: ## Clean up the web folders and settings
 	rm -Rvf /var/www/$(SERVERNAME)
 	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf
+	
 #	rm -f /etc/apache2/sites-available/000-default.conf
+#	rm -f apache settings for SERVERNAME
 # perhaps also:  mysql? php?
 
