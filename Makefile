@@ -7,21 +7,20 @@ mpm-workers-max=200
 mpm-child-cnxns=10000
 YOUR_EMAIL=myaddress@example.com
 MYSQLPASSWORD=Stack_1user
-AGENT_LOCATION=
+AGENT_LOCATION=../agent
 
 .PHONY: help
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-all: init lamp mysql php apachefiling resources gearman supervisor cron tailoring memcached ## Do everything
+all: init lamp mysql php apachefiling resources gearman supervisor cron tailoring memcached ## Do everything, in order
 
-# remember to update your system
 init:  ## Update system
-	@echo "===== Updating System"
+	@echo "===== Updating System ==============="
 	sudo -- bash -c 'apt-get update; apt-get --assume-yes upgrade'
 
 lamp:  ## Install LAMP stack
-	@echo "===== Installing LAMP stack"
+	@echo "===== Installing LAMP stack ==============="
 	sudo apt --assume-yes install apache2
 	-sudo apt --assume-yes install mysql-server
 	sudo apt --assume-yes install php7.2 libapache2-mod-php php-mysql
@@ -60,7 +59,7 @@ lamp:  ## Install LAMP stack
 #	sudo systemctl reload apache2
 
 mysql: ## Set up MySQL
-	@echo "===== Setting up MySQL"
+	@echo "===== Setting up MySQL ==============="
 	-mysql -u root -p -e "CREATE USER 'stackuser'@'%' IDENTIFIED BY '$(MYSQLPASSWORD)'" || (@echo "Could not create stackuser $$?";)
 #ifeq ("$$?", 0)
 #	@echo "ok - $$?"
@@ -68,7 +67,7 @@ mysql: ## Set up MySQL
 #	@echo "not ok - $$?"
 #endif
 	# stackuser setup and passwords need improvement
-	@echo "===== == Set up Stack DB MySQL user:"
+	@echo "----- -- Set up Stack DB MySQL user: ---------------"
 	-mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'stackuser'@'%' WITH GRANT OPTION" || (@echo "Could not grant permissions to stackuser $$?";)
 	-mysql -u stackuser --password=$(MYSQLPASSWORD) -e "CREATE DATABASE stack_db" || (@echo "Could not create database $$?";)
 	-mysql -u stackuser --password=$(MYSQLPASSWORD) stack_db < templates/database_schema.sql || (@echo "Could not add schemas $$?";)
@@ -77,6 +76,7 @@ mysql: ## Set up MySQL
 # innodb performance settings
 
 php: ## Set up PHP
+	@echo "===== Setting up PHP ==============="
 	sudo apt-get --assume-yes install -f php-mbstring
 	sudo apt-get --assume-yes install -f php7.2-xml
 	sudo apt-get --assume-yes install -f php-intl
@@ -88,6 +88,7 @@ php: ## Set up PHP
 	sudo service apache2 restart
 
 apachefiling: ## Create and assemble filing for Apache2 server
+	@echo "===== Creating filesystem for Apache2 server ==============="
 	sudo mkdir /var/www/$(SERVERNAME); \
 	case "$$?" in \
 	esac; \
@@ -104,16 +105,26 @@ apachefiling: ## Create and assemble filing for Apache2 server
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
 
-#agent:  ## Add commandline shell interface
-#	sudo -- bash -c "touch $AGENT_LOCATION/agent; chmod +X $AGENT_LOCATION/agent"
+#agent:  $(AGENT_LOCATION)/agent ## Add commandline shell interface to call Stackr
+#ifneq ("$(wildcard $(AGENT_LOCATION))","")	
+#FILE_EXISTS = 1
+#else
+#FILE_EXISTS = 0
+#endif
+#ifeq ("$(FILE_EXISTS)","0")
+#	mkdir $(AGENT_LOCATION)
+#endif
+#	sudo -- bash -c "touch $(AGENT_LOCATION)/agent; chmod +X $(AGENT_LOCATION)/agent"
 #	get PATH and add $AGENT_LOCATION to the PATH:
 #	https://unix.stackexchange.com/questions/11530/adding-directory-to-path-through-makefile
 #	not possible from within make to get persistence
 
 resources: ## Set up resources
+	@echo "===== Setting up resources ==============="
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/resources /var/www/$(SERVERNAME)/resources/
 
 gearman: ## Install Gearman
+	@echo "===== Installing Gearman ==============="
 	sudo apt-get install php-gearman
 	sudo apt install gearman-tools
 #replaces:
@@ -131,15 +142,18 @@ gearman: ## Install Gearman
 	sudo service apache2 restart
 
 supervisor: ## Install Supervisor
+	@echo "===== Installing Supervisor ==============="
 	sudo apt-get install supervisor; \
 	sudo cp scripts/supervisor.conf /etc/supervisor/conf.d
 	sudo sed 's/SERVERNAME/$(SERVERNAME)/g' /etc/supervisor/conf.d
 
 cron: ## Set up scheduled events
+	@echo "===== Setting up scheduled events (cron) ==============="
 	line="* * * * * cd /var/www/$(SERVERNAME) && /usr/bin/php -q /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1"; \
 	(sudo crontab -u root -l; echo "$line" ) | sudo crontab -u root -
 
 tailoring: ## Set your servername in system files
+	@echo "===== Setting your server name in system files ==============="
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
 	sudo sed -i 's/stackr.test/$(SERVERNAME)/g' /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/src/Thing.php
@@ -151,10 +165,12 @@ tailoring: ## Set your servername in system files
 #postfix:
 
 memcached: ## Install MemCache Daemon
+	@echo "===== Installing MemCache Daemon =============="
 	sudo apt-get update; sudo apt-get install memcached; \
 	sudo apt-get install -y php-memcached
 
 clean: ## Clean up the web folders and settings
+	@echo "===== Cleaning up: removing web folders and settings ==============="
 	rm -Rvf /var/www/$(SERVERNAME)
 	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf
 	
