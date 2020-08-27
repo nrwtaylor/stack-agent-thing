@@ -1,6 +1,6 @@
 {
     "name": "nrwtaylor/stack-agent-thing",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "description": "Stack Agent Thing framework",
     "require": {
         "slim/slim": "^3.0",
@@ -8,10 +8,9 @@
         "ramsey/uuid": "^3.7",
         "monolog/monolog": "^1.23",
         "hyperthese/php-serial": "*",
+        "nrwtaylor/stack-agent-thing":"*",
         "linkorb/tty": "dev-master",
-        "nrwtaylor/stack-agent-thing": "*",
         "setasign/fpdi-fpdf": "^2.0",
-        "monolog/monolog": ">=1.10",
         "endroid/qr-code": "^3.2",
         "ekinhbayar/brill-tagger": "^0.3.1",
         "vanderlee/syllable": "^1.5",
