@@ -13,7 +13,7 @@ AGENT_LOCATION=../agent
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-all: init lamp mysql php apachefiling resources gearman supervisor cron tailoring memcached ## Do everything, in order
+all: init lamp mysql php apachefiling agent resources gearman supervisor cron tailoring memcached ## Do everything, in order
 
 init:  ## Update system
 	@echo "===== Updating System ==============="
@@ -99,11 +99,18 @@ apachefiling: ## Create and assemble filing for Apache2 server
 	sudo chmod 755 /var/www/; \
 	sudo chown -R www-data:www-data /var/www/$(SERVERNAME); \
 	sudo chmod -R 774 /var/www/$(SERVERNAME); \
-	wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/composer.json
+	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/composer.json
 	cd /var/www/$(SERVERNAME); \
-	sudo apt-get --assume-yes install composer; composer install
+	sudo apt-get --assume-yes install composer; composer install	
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
+	# sudo cp -r . /var/www/$(SERVERNAME)
+
+agent:
+	cd /var/www/$(SERVERNAME); \
+	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/agent; \
+	touch agent; \
+	chmod u+x agent
 
 #agent:  $(AGENT_LOCATION)/agent ## Add commandline shell interface to call Stackr
 #ifneq ("$(wildcard $(AGENT_LOCATION))","")	

@@ -827,7 +827,7 @@ $this->resource_quantity = $resource_quantity;
         }
 
         //$input = $this->assert($input);
-        $resource = $this->assert();
+        $resource = $this->assert($input);
         if (!$this->getResource(strtolower($resource))) {
             // Resource was found
             // And loaded
