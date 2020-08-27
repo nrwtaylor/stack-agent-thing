@@ -178,3 +178,5 @@ clean: ## Clean up the web folders and settings
 #	rm -f apache settings for SERVERNAME
 # perhaps also:  mysql? php?
 
+patch:
+	sudo sh scripts/patch_local.sh

@@ -26,4 +26,6 @@
         "psr-4": {"Nrwtaylor\\StackAgentThing\\": ["src/", "agents/"]}
 
     }
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
