@@ -32,7 +32,7 @@ return [
         ],
 
 	    'stack' => [
-                    'word' => '<not set>',
+            'word' => '<not set>',
 		    'short_name' => '<not set>',
             'entity_name' => '<not set',
             'server_location' => '<NOT SET>',
@@ -51,12 +51,17 @@ return [
 		    'cron_period' => 60,
 		    'thing_resolution' => 1,
 		    'max_db_connections' => 100,
-		    'web_prefix' => (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/",
+		    'web_prefix' => '<not set>',
 		    'sms_separator' => '|',
 		    'sms_address' => '<not set>',
 		    'retain_for' => array('amount'=> 8, 'attribute'=>'time', 'unit'=>'hours'),
             'persist_for' => array('amount'=> 2, 'attribute'=>'time', 'unit'=>'days'),
-            'path' => "/var/www/stackr.test/";
+            'path' => "/var/www/stackr.test/",
+            'name' => 'nostromo',
+            'hash' => 'on',
+            'hash_algorithm' => 'sha256',
+            'hashtag' => '#devstack',
+
         ],
 
 	    'api' => [
@@ -78,8 +83,7 @@ return [
                 "token_uri"=>"<private>",
                 "auth_provider_x509_cert_url"=>"<private>",
                 "client_secret"=>"<private>",
-                "redirect_uris"=>(isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]/",
- . "api/redpanda/googlecalendar"
+                "redirect_uris"=>"<example>",
             ],
             'telegram' => [
                 "api_id"=>"<private>",
@@ -122,7 +126,26 @@ return [
         'robot' => array('user_agent'=>'<not set>'),
 
 		'watson weather' => false,
-        
+
+        'slug' => [
+                    "state"=>'on', // turn slug responses on and off
+                    'allowed_slugs_resource'=>'slug/slugs.php'
+                ],
+
+               'job' => [
+                    "state"=>'off' // turn job responses on and off
+                ],
+
+
+                'pheromone' => [
+                    "velocity_factor"=>-1e-9,
+                    "acceleration_factor"=>-1e-6  // adjust pheromone
+                ],
+
+'bar'=>array("default_max_bar_count"=>20),
+'tick'=>array("default_max_tick_count"=>4),
+
+
     	'agent' => [
 	    	'clerk' => array('scalar'=>100, '<not set>', '<not set>'),
         ],
