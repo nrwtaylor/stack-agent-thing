@@ -106,7 +106,7 @@ apachefiling: ## Create and assemble filing for Apache2 server
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
 	# sudo cp -r . /var/www/$(SERVERNAME)
 
-agent:
+agent: ## Add commandline shell interface to call Stackr
 	cd /var/www/$(SERVERNAME); \
 	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/agent; \
 	touch agent; \
@@ -185,5 +185,5 @@ clean: ## Clean up the web folders and settings
 #	rm -f apache settings for SERVERNAME
 # perhaps also:  mysql? php?
 
-patch:
+patch: ## Activate a patch
 	sudo sh scripts/patch_local.sh
