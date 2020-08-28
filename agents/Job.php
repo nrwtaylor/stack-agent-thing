@@ -24,7 +24,7 @@ class Job extends Agent
 
         $this->web_prefix = $this->thing->container['stack']['web_prefix'];
 
-        $this->mail_postfix = '<@something?>';
+        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
         $this->word = '<job?>';
         $this->email = '<email address?>';
         $this->entity_name = '<us?>';

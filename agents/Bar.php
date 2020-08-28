@@ -342,6 +342,16 @@ class Bar extends Agent
             $this->response .= "Checked stack latency. ";
         }
 
+        if ($this->bar_count % 5 == 0) {
+            $thing = new Thing(null);
+            $thing->Create(null, "manager", 's/ manager');
+            $stackcount = new Manager($thing, 'manager');
+
+            $this->response .= "Checked manager. ";
+        }
+
+
+
         if ($this->bar_count % 7 == 0) {
             $arr = json_encode(array(
                 "to" => "null" . $this->mail_postfix,

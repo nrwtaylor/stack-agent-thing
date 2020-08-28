@@ -277,8 +277,7 @@ $this->response = "Gearman snowflake worker started.";
 
         $this->chart_agent = new Chart(
             $this->thing,
-            "chart manager " . $this->from
-        );
+            "chart manager " . "null" . $this->mail_postfix);
         $this->chart_agent->points = $this->points;
 
         $this->chart_agent->x_min = $x_min;
