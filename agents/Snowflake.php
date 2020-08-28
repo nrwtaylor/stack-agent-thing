@@ -102,8 +102,10 @@ class Snowflake extends Agent
      *
      * @param unknown $input
      */
-    function getWhatis($input)
+    function whatisSnowflake($input)
     {
+        $filtered_input = $this->assert($input);
+        /*
         $whatis = "snowflake";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
@@ -117,6 +119,9 @@ class Snowflake extends Agent
 
         //$filtered_input = ltrim(strtolower($whatIWant), " ");
         $filtered_input = ltrim($whatIWant, " ");
+*/
+
+        $this->response .= "is " . $filtered_input . ". ";
 
         $this->whatis = $filtered_input;
     }
@@ -189,8 +194,8 @@ class Snowflake extends Agent
         $cell = $this->lattice[0][0][0];
         //$sms = "SNOWFLAKE | cell (0,0,0) state ". strtoupper($cell['state']);
         $sms = "SNOWFLAKE | ";
-        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/snowflake";
-        $sms .= " | " . $this->response;
+        //$sms .= $this->web_prefix . "thing/" . $this->uuid . "/snowflake";
+        $sms .= "" . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -1279,7 +1284,9 @@ class Snowflake extends Agent
         $Output = '';
         if (preg_match("/^\d+$/", $Input)) {
             while ($Input != '0') {
-                $Output .= chr(48 + ($Input[strlen($Input) - 1] % 2));
+                $s = strval($Input);
+
+                $Output .= chr(48 + ($s[strlen($s) - 1] % 2));
                 $Input = bcdiv($Input, '2');
             }
             $Output = strrev($Output);
@@ -1626,7 +1633,7 @@ class Snowflake extends Agent
      */
     public function makePDF()
     {
-        $this->getWhatis($this->input);
+        $this->whatisSnowflake($this->input);
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
@@ -1699,7 +1706,7 @@ class Snowflake extends Agent
             $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
 
-//$pdf->Link(175,5,30,30, $link);
+            //$pdf->Link(175,5,30,30, $link);
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -1713,8 +1720,7 @@ class Snowflake extends Agent
 
             $pdf->MultiCell(150, $line_height, $t, 0);
 
-//$pdf->Link(15,7,150,10, $link);
-
+            //$pdf->Link(15,7,150,10, $link);
 
             $y = $pdf->GetY() + 0.95;
             $pdf->SetXY(15, $y);
@@ -1741,8 +1747,7 @@ class Snowflake extends Agent
 
             //$pdfTitle = 'snowflake_'.$this->thing->nuuid.'.pdf';
             //$image = $pdf->Output('S', $pdfTitle);
-  //          $pdf->SetXY(50, 50);
-
+            //          $pdf->SetXY(50, 50);
 
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
@@ -1758,7 +1763,7 @@ class Snowflake extends Agent
      */
     public function readSubject()
     {
-//        $input = strtolower($this->subject);
+        //        $input = strtolower($this->subject);
         $input = strtolower($this->input);
 
         $pieces = explode(" ", strtolower($input));

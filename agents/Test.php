@@ -57,22 +57,22 @@ class Test extends Agent
             // Calling $stub->doSomething() will now return
             // 'foo'.
             //        $this->assertEquals('foo', $stub->init());
-set_time_limit(20);
+            set_time_limit(20);
 
-$thing = new Thing(null);
-var_dump($this->from);
-var_dump($agent_name);
-$thing->Create($this->from, "agent", $agent_name);
-$agent = new Agent($thing);
+            $thing = new Thing(null);
+            var_dump($this->from);
+            var_dump($agent_name);
+            $thing->Create($this->from, "agent", $agent_name);
+            $agent = new Agent($thing);
 
-//var_dump($a->thing_report['sms']);
-//var_dump($a->thing_report['response']);
+            //var_dump($a->thing_report['sms']);
+            //var_dump($a->thing_report['response']);
 
-//$agent = new \stdClass();
-//$agent->response = $a->thing_report['response'];
-//$agent->response = $a->thing_report['sms']
+            //$agent = new \stdClass();
+            //$agent->response = $a->thing_report['response'];
+            //$agent->response = $a->thing_report['sms']
 
-//            $agent = $this->getAgent($agent_name); // Push agent response.
+            //            $agent = $this->getAgent($agent_name); // Push agent response.
 
             if (isset($agent->thing_report['response'])) {
                 $this->response .=
@@ -91,7 +91,9 @@ $agent = new Agent($thing);
             $this->test_text = 'agent';
             $agent = $this->getAgent('agent', $text);
             $this->response .=
-                "Tested agent response. " . trim($agent->thing_report['response']) . " ";
+                "Tested agent response. " .
+                trim($agent->thing_report['response']) .
+                " ";
 
             // Neither is providing a thing_report.
         }
@@ -132,6 +134,32 @@ $agent = new Agent($thing);
         $this->response .= $response . " / ";
     }
 
+    public function readTest($text) {
+$response = "";
+//$a = ['warning', 'notice', 'no response'];
+$a = ['warning', 'notice', 'no sms'];
+
+
+foreach($a as $i=>$flag_text) {
+
+if (stripos($text, $flag_text) !== false) {
+    $response .= " " . strtoupper($flag_text);
+}
+
+}
+
+$response = trim($response);
+
+if ($response == "") {$response = "PASS";}
+
+
+
+
+
+return $response;
+
+    }
+
     public function get()
     {
     }
@@ -139,6 +167,13 @@ $agent = new Agent($thing);
     public function getTests()
     {
         $things = $this->getThings('test');
+
+        // Sort things by created at.
+        $created_at = [];
+        foreach ($things as $key => $row) {
+            $created_at[$key] = strtotime($row->created_at);
+        }
+        array_multisort($created_at, SORT_DESC, $things);
 
         $this->tests = $things;
         //$this->loadTests();
@@ -185,7 +220,6 @@ $agent = new Agent($thing);
                 unset($agents[$agent_name]);
             }
         }
-
     }
 
     function randomTest($input = null)
@@ -270,7 +304,34 @@ $agent = new Agent($thing);
             $this->getTests();
         }
 
+        $head = '
+            <td>
+            <table border="0" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF; border-bottom:0; border-radius:10px">
+            <tr>
+            <td align="center" valign="top">
+            <div padding: 5px; text-align: center">';
+
+        $foot = "</td></div></td></tr></tbody></table></td></tr>";
+        /*
         $web = "";
+        //$web = '<a href="' . $link . '">';
+        $web .= $this->image_embedded;
+        //$web .= "</a>";
+        $web .= "<br>";
+        $web .= "<p>";
+
+        $web .= "<b>Agent Age</b>";
+*/
+        $web = "";
+        $web .= "<p>";
+        $web .= '<table>';
+        $web .= '<th>' . 'age' . "</th><th>" . 'Things' . "</th>";
+
+        //        foreach ($this->tubs as $tub_name => $tub_quantity) {
+        //            $web .= '<tr>';
+        //            $web .= '<th>'.$tub_name . "</th><th>" . $tub_quantity . "</th>";
+        //            $web .= "</tr>";
+
         foreach ($this->tests as $uuid => $thing) {
             // devstack.
             $test = $thing->variables['test'];
@@ -285,15 +346,78 @@ $agent = new Agent($thing);
             if (!isset($test['refreshed_at'])) {
                 continue;
             }
-
+            /*
             $text =
                 $test['refreshed_at'] .
                 " " .
                 $test['text'] .
                 " " .
                 $test['response'];
-            $web .= $text . "<br>";
+*/
+            //echo "merp";
+            //exit();
+            //var_dump($thing->uuid);
+            //var_dump($thing->nuuid);
+            //foreach ($thing as $i=>$j) {
+            //var_dump($i);
+            //}
+            //exit();
+
+            $link =
+                $this->web_prefix .
+                'thing/' .
+                $this->uuid .
+                '/' .
+                strtolower($this->agent_name);
+
+            $text = $thing->nuuid;
+            $html = '<a href="' . $link . '">' . $text . '</a>';
+
+$test_result =                 $this->readTest($test['response']);
+
+            $web .= '<tr>';
+            $web .=
+                '<th>' .
+                $html .
+                "</th>" .
+                '<th>' .
+                $test_result .
+                "</th>" .
+                '<th>' .
+                $test['refreshed_at'] .
+                "</th><th>" .
+                $test['text'] .
+                "</th>";
+
+if (strtolower($test_result )== "pass") {
+    // devstack
+    // remove this explode
+    $t = explode('SMS message: ', $test['response']);
+if (isset($t[1])) {
+    $u = $t[1];
+    $t = explode('/ No response. ', $u);
+    $text = $t[0];
+//var_dump($text);
+//    exit();
+//    $text = "merp";
+    $web .=         "<th>" .
+                $text .
+                "</th>";
+}
+} else {
+
+    $web .=         "<th>" .
+                $test['response'] .
+                "</th>";
+}
+
+
+            $web .= "</tr>";
+
+            //$web .= $text . "<br>";
         }
+        $web .= "</table>";
+
         $this->thing_report['web'] = $web;
     }
 

@@ -209,6 +209,10 @@ class Wave extends Agent
                 //        echo "<br>";
                 // Split time info in fields
                 //$time_info = preg_split('/\s+/', $fields[1]);
+
+if (!isset($fields[1])) {continue;}
+
+
                 $time_info = preg_split('/ +/', $fields[1]);
 
                 //        var_dump($time_info);
@@ -326,9 +330,9 @@ class Wave extends Agent
                     1
                 );
             } else {
-                $height = round($wave['height'], 2);
-                $direction = intval($wave['direction']);
-                $period = round($wave['period'], 1);
+                $height = round($wave['height'] ?? null, 2);
+                $direction = intval($wave['direction'] ?? null);
+                $period = round($wave['period'] ?? null, 1);
             }
 
             //echo "height " . $height. " direction " . $direction . " period " . $period . "<br>";

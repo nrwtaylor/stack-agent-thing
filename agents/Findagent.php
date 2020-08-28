@@ -206,11 +206,18 @@ class Findagent
 		$this->thing_report['choices'] = false;
 
 
-		$sms_end = strtoupper( strip_tags( $this->choices['link'] ) );
+        $t = "";
+        if ((isset($this->choice['link'])) and ($this->choices['link'] !== false)) {
 
-        $x = implode("", explode("FORGET", $sms_end, 2));
+            $sms_end = strtoupper( strip_tags( $this->choices['link'] ) );
+            $x = implode("", explode("FORGET", $sms_end, 2));
 
-		$this->sms_message =  strtoupper($this->agent_name) . " | " . $this->sms_message . " | TEXT" . $x;
+            $t = " | TEXT " . $x;
+        }
+
+        $this->sms_message =  strtoupper($this->agent_name) . " | " . $this->sms_message . $t;
+
+
 
 
 		$this->message = $this->sms_message;

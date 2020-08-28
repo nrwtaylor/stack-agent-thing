@@ -1713,7 +1713,10 @@ function fatalErrorShutdownHandler()
     //exit();
 
     $last_error = error_get_last();
-    if ($last_error['type'] === E_ERROR) {
+
+//var_dump($last_error);
+
+    if ( ($last_error['type'] ?? null) === E_ERROR) {
         // fatal error
         myErrorHandler(
             E_ERROR,

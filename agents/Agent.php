@@ -82,6 +82,8 @@ class Agent
 
         // And some more stuff
         $this->short_name = $thing->container['stack']['short_name'];
+        $this->stack_state = $thing->container['stack']['state'];
+
 
         $this->sqlresponse = null;
 
@@ -1270,6 +1272,19 @@ class Agent
 
         return false;
     }
+
+    public function timestampAgent($text = null)
+    {
+        if ($text == null) {
+            $text = $this->thing->thing->created_at;
+        }
+        $time = strtotime($text);
+
+        $text = strtoupper(date('Y M d D H:i', $time));
+        $this->timestamp = $text;
+        return $this->timestamp;
+    }
+
 
     /**
      *
@@ -2771,7 +2786,8 @@ class Agent
         //will be called when php script ends.
         $this->response .= "Shutdown thing. ";
         $lasterror = error_get_last();
-        switch ($lasterror['type']) {
+
+        switch ($lasterror['type'] ?? null) {
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:

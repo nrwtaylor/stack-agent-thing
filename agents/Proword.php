@@ -289,7 +289,14 @@ class Proword extends Word
         $line = strtok($contents, $separator);
 
         while ($line !== false) {
+
             $word = $this->parseProword($line);
+
+            if ($word === false) {
+                $line = strtok($separator);
+                continue;
+            }
+
             $this->prowords[$word['proword']] = $word;
             // do something with $line
             $line = strtok($separator);

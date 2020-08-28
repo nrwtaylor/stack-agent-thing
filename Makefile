@@ -75,7 +75,7 @@ mysql: ## Set up MySQL
 # innodb:
 # innodb performance settings
 
-php: ## Set up PHP
+php: ## Set up PHP extensions
 	@echo "===== Setting up PHP ==============="
 	sudo apt-get --assume-yes install -f php-mbstring
 	sudo apt-get --assume-yes install -f php7.2-xml
@@ -83,6 +83,18 @@ php: ## Set up PHP
 	sudo apt-get --assume-yes install -f php7.2-bcmath
 	#	sudo apt install php7.0-gd
 	sudo apt-get --assume-yes install -f php7.2-gd
+	sudo apt-get --assume-yes  install -f php-curl
+	sudo apt-get --assume-yes install -f php-fpm
+	sudo service apache2 restart
+
+php7-4: ## Set up PHP extensions
+	@echo "===== Setting up PHP 7.4 ==============="
+	sudo apt-get --assume-yes install -f php-mbstring
+	sudo apt-get --assume-yes install -f php7.4-xml
+	sudo apt-get --assume-yes install -f php-intl
+	sudo apt-get --assume-yes install -f php7.4-bcmath
+	#   sudo apt install php7.0-gd
+	sudo apt-get --assume-yes install -f php7.4-gd
 	sudo apt-get --assume-yes  install -f php-curl
 	sudo apt-get --assume-yes install -f php-fpm
 	sudo service apache2 restart
