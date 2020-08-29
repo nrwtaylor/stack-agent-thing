@@ -203,6 +203,12 @@ clean: ## Clean up the web folders and settings
 patch: ## Activate a patch
 	sudo sh scripts/patch_local.sh
 
-debug: ## Enhanced debugging (dev optional?)
+debug: ## Enhanced debugging environment (dev optional?)
 	sudo apt install php-dev
 	sudo pecl install xdebug
+
+configuration:
+# sudo nano /etc/sysctl.conf
+# fs.file-max = 65535
+
+

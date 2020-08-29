@@ -1103,13 +1103,14 @@ class Headcode
         }
 
         $this->makeSMS();
-
+/*
         $test_message =
             'Last thing heard: "' .
             $this->subject .
             '".  Your next choices are [ ' .
             $choices['link'] .
             '].';
+
         $test_message .= '<br>headcode state: ' . $this->state . '<br>';
 
         $test_message .= '<br>' . $this->sms_message;
@@ -1118,7 +1119,7 @@ class Headcode
 
         $test_message .= '<br>run_at: ' . $this->run_at;
         $test_message .= '<br>end_at: ' . $this->end_at;
-
+*/
         //		$test_message .= '<br>Requested state: ' . $this->requested_state;
 
         //$this->thing_report['sms'] = $sms_message;

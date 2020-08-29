@@ -320,7 +320,7 @@ class Test extends Agent
         $web = "";
         $web .= "<p>";
         $web .= '<table>';
-        $web .= '<th>' . 'age' . "</th><th>" . 'Things' . "</th>";
+        $web .= '<th>' . 'nuuid' . "</th><th>" . 'result' . "</th><th>" . 'timestamp' . "</th><th>" . 'text' . "</th><th>" . 'test response' . "</th>";
 
         //        foreach ($this->tubs as $tub_name => $tub_quantity) {
         //            $web .= '<tr>';
