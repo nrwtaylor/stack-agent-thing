@@ -7,27 +7,34 @@ error_reporting(-1);
 
 class Stack extends Agent
 {
-	public $var = 'hello';
+    public $var = 'hello';
 
     function init()
     {
-
         $this->created_at = $this->thing->thing->created_at;
 
         $this->current_time = $this->thing->json->time();
 
         $this->default_state = "off";
-$this->state = $this->default_state;
+        $this->state = $this->default_state;
         $this->countStack();
 
-        $this->node_list = array("stack"=>array("agent","thing"), "null"=>array("stack"));
+        $this->node_list = ["stack" => ["agent", "thing"], "null" => ["stack"]];
 
-        $this->thing->log('<pre> Agent "Stack" running on Thing ' . $this->thing->nuuid . '.</pre>',"INFORMATION");
+        $this->thing->log(
+            '<pre> Agent "Stack" running on Thing ' .
+                $this->thing->nuuid .
+                '.</pre>',
+            "INFORMATION"
+        );
 
         // Probably an unnecessary call, but it updates $this->thing.
         // And we need the previous usermanager state.
-        $this->stack = new Variables($this->thing, "variables stack " . $this->from);
-/*
+        $this->stack = new Variables(
+            $this->thing,
+            "variables stack " . $this->from
+        );
+        /*
         $this->get();
 
 		$this->readSubject();
@@ -44,12 +51,10 @@ $this->state = $this->default_state;
     function resetStack()
     {
         $this->getStart();
-
     }
 
     function set($requested_state = null)
     {
-
         if ($requested_state == null) {
             if (!isset($this->requested_state)) {
                 // Set default behaviour.
@@ -65,21 +70,18 @@ $this->state = $this->default_state;
 
         $this->stack->setVariable("state", $this->state);
 
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4); 
+        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
         //$this->variables_thing->setVariable("flag_id", $this->nuuid);
 
         $this->stack->setVariable("refreshed_at", $this->current_time);
 
-        $this->stack->setVariable("count", $this->count );
-        $this->stack->setVariable("identity", $this->identity );
+        $this->stack->setVariable("count", $this->count);
+        $this->stack->setVariable("identity", $this->identity);
 
-
-        //$this->makeChoices();
-        //$this->makePNG();
-
-        $this->thing->log($this->agent_prefix . 'set Stack to ' . $this->state, "INFORMATION");
-
-        return;
+        $this->thing->log(
+            $this->agent_prefix . 'set Stack to ' . $this->state,
+            "INFORMATION"
+        );
     }
 
     function get()
@@ -93,21 +95,25 @@ $this->state = $this->default_state;
 
         if (isset($identity)) {
             $this->identity = $identity;
-            $this-> response = "Got existing identity.";
+            $this->response = "Got existing identity.";
         }
 
-       $f = $this->getThing();
+        $f = $this->getThing();
         if ($f == true) {
             $this->getStart();
             $f = $this->getThing();
             $this->response = "Got new identity.";
         }
 
-        if ($f == true) {$this->thing->log( "Failed to retrieve thing"); return;}
+        if ($f == true) {
+            $this->thing->log("Failed to retrieve thing");
+            return;
+        }
 
-
-        $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
-
+        $this->thing->log(
+            $this->agent_prefix . 'got from db ' . $this->previous_state,
+            "INFORMATION"
+        );
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
@@ -117,16 +123,18 @@ $this->state = $this->default_state;
             $this->state = $this->default_state;
         }
 
+        //        $this->getThing();
 
-//        $this->getThing();
+        //        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
+        //        $check = $this->thing->choice->current_node;
 
-       
-
-//        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
-//        $check = $this->thing->choice->current_node;
-
-        $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
-
+        $this->thing->log(
+            $this->agent_prefix .
+                'got a ' .
+                strtoupper($this->state) .
+                ' FLAG.',
+            "INFORMATION"
+        );
 
         return;
     }
@@ -137,24 +145,30 @@ $this->state = $this->default_state;
         // Nothing else is allowed.
 
         if ($state == null) {
-            if (!isset($this->state)) {$this->state = $this->default_state;}
+            if (!isset($this->state)) {
+                $this->state = $this->default_state;
+            }
             $state = $this->state;
         }
 
-        if (($state == "red") or ($state == "green")) {return false;}
+        if ($state == "red" or $state == "green") {
+            return false;
+        }
 
         return true;
     }
 
-
     function getStart()
     {
-
         // This returns an uuid
 
-        $thing_json = @file_get_contents($this->web_prefix . "api/redpanda/start");
+        $thing_json = @file_get_contents(
+            $this->web_prefix . "api/redpanda/start"
+        );
 
-        if ($thing_json == false) {return true;}
+        if ($thing_json == false) {
+            return true;
+        }
 
         $thing_array = json_decode($thing_json, true);
 
@@ -164,20 +178,26 @@ $this->state = $this->default_state;
         }
 
         $this->identity = $thing_array["thing"]["uuid"];
-        return;
     }
 
     function getThing()
     {
-        $this->thing->log("Loading " . $this->identity . " from " . str_replace("@","",$this->mail_postfix) . ".");
+        $this->thing->log(
+            "Loading " .
+                $this->identity .
+                " from " .
+                str_replace("@", "", $this->mail_postfix) .
+                "."
+        );
         $url = $this->web_prefix . "api/redpanda/thing/" . $this->identity;
 
         $thing_json = @file_get_contents($url);
 
-        if ($thing_json == false) {return true;}
+        if ($thing_json == false) {
+            return true;
+        }
 
         $thing_report = $this->thing->json->jsontoArray($thing_json);
-
 
         if ($thing_report['thing'] == null) {
             echo "Thing not found.";
@@ -191,32 +211,34 @@ $this->state = $this->default_state;
         $this->settings = $thing['settings'];
 
         return;
-/*
+        /*
         $this->stack = $thing_array;
 
         $this->agent = $this->variables['agent'];
         $this->account = $this->variables['account'];
 */
-
     }
 
     function variablesStack()
     {
-
         $this->agent = $this->variables['agent'];
         $this->account = $this->variables['account'];
-
     }
 
     function printArrayList($array, $h = null, $depth = 0)
     {
-        if ($array == false) {$h = "No data found."; return $h;}
+        if ($array == false) {
+            $h = "No data found.";
+            return $h;
+        }
 
         $depth = $depth + 1;
-        if ($h = null) {$h = "Start";}
+        if ($h = null) {
+            $h = "Start";
+        }
         $h .= "<ul>";
 
-        foreach($array as $k => $v) {
+        foreach ($array as $k => $v) {
             if (is_array($v)) {
                 $h .= "<li>" . $k . "</li>";
                 //$depth = $depth + 1;
@@ -224,8 +246,10 @@ $this->state = $this->default_state;
                 //$depth = $depth - 1;
                 continue;
             }
-            if (($v == null) or ($v == false)) {$v= "X";}
-            $h .= "<li>" . $k . " is " .  $v . "</li>";
+            if ($v == null or $v == false) {
+                $v = "X";
+            }
+            $h .= "<li>" . $k . " is " . $v . "</li>";
         }
         $h .= "</ul>";
         $depth = $depth - 1;
@@ -234,36 +258,37 @@ $this->state = $this->default_state;
 
     public function makeWeb()
     {
-        if (!isset($this->variables)) {$this->getThing();}
+        if (!isset($this->variables)) {
+            $this->getThing();
+        }
 
         $w = "<b>Stack Agent</b><br>";
-//        $w .= "stack is " . $this->stack_uuid. "<br>";
+        //        $w .= "stack is " . $this->stack_uuid. "<br>";
         $w .= "state is " . strtoupper($this->state) . "<br>";
 
         $w .= "identity is " . $this->identity . "<br>";
         $w .= "count is " . $this->count . "<br>";
         $w .= "response is " . $this->response . "<br>";
         $w .= "message is " . $this->sms_message . "<br>";
-      //  $w .= print_r($this->variables) . "<br>";
+        //  $w .= print_r($this->variables) . "<br>";
         $w .= "Variables<br>";
-$variables = array();
-if (isset($this->variables)) {$variables = $this->variables;}
+        $variables = [];
+        if (isset($this->variables)) {
+            $variables = $this->variables;
+        }
 
         $w .= $this->printArrayList($variables) . "<br>";
-        $w .= "Settings<br>";       
+        $w .= "Settings<br>";
 
+        $settings = [];
+        if (isset($this->settings)) {
+            $variables = $this->settings;
+        }
 
-$settings =array();
-if (isset($this->settings)) {$variables = $this->settings;}
-
-         $w .= $this->printArrayList($settings) . "<br>";             
-        
-
+        $w .= $this->printArrayList($settings) . "<br>";
 
         $this->thing_report['web'] = $w;
-
     }
-
 
     public function makeChoices()
     {
@@ -271,19 +296,24 @@ if (isset($this->settings)) {$variables = $this->settings;}
         // $choices = false;
 
         if ($this->from == "null" . $this->mail_postfix) {
-            $this->thing->choice->Create($this->agent_name, $this->node_list, "null");
+            $this->thing->choice->Create(
+                $this->agent_name,
+                $this->node_list,
+                "null"
+            );
             $choices = $this->thing->choice->makeLinks("null");
         } else {
-            $this->thing->choice->Create($this->agent_name, $this->node_list, "stack");
+            $this->thing->choice->Create(
+                $this->agent_name,
+                $this->node_list,
+                "stack"
+            );
             $choices = $this->thing->choice->makeLinks('stack');
         }
-
 
         $this->thing_report['choices'] = $choices;
         return;
     }
-
-
 
     private function getCount()
     {
@@ -292,87 +322,87 @@ if (isset($this->settings)) {$variables = $this->settings;}
         }
     }
 
-
-    function countStack() 
+    function countStack()
     {
         $thing_report = $this->thing->db->count();
         $this->count = $thing_report['number'];
     }
 
-
     function isNumeric($number = null)
     {
         return is_numeric($number);
     }
-// -----------------------
 
-	public function respond() {
+    public function respondResponse()
+    {
+        $this->thing->flagGreen();
 
+        // This should be the code to handle non-matching responses.
 
-		$this->thing->flagGreen();
+        //		$to = $this->thing->from;
 
-		// This should be the code to handle non-matching responses.
+        //		$from = "stack";
+        //		$subject = 's/pingback ';
 
-		$to = $this->thing->from;
+        //		$message = 'Stack checker.';
 
-		$from = "stack";
-		$subject = 's/pingback ';	
+        //$email->sendGeneric($to,$from,$this->subject, $message);
+        //$thing->thing->email->sendGeneric($to,$from,$this->subject, $message);
 
-		$message = 'Stack checker.';
+        //		$received_at = strtotime($this->thing->thing->created_at);
 
-		//$email->sendGeneric($to,$from,$this->subject, $message);
-		//$thing->thing->email->sendGeneric($to,$from,$this->subject, $message);
+        //$ago = Thing::human_time ( time() - $received_at );
 
-		$received_at = strtotime($this->thing->thing->created_at);
-
-		//$ago = Thing::human_time ( time() - $received_at );
-
-        $ago = $this->thing->human_time ( time() - $received_at );
+        //        $ago = $this->thing->human_time ( time() - $received_at );
 
         $this->makeChoices();
-        $this->makeSMS();
+        //     $this->makeSMS();
 
-		$this->thing_report['email'] = $this->sms_message;
-		$this->thing_report['message'] = $this->sms_message;
-
+        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->messageStack($this->response);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-$this->thing_report['keyword'] = 'pingback';
-//$this->thing_report['info'] = 'Ping agent pinged back';
-$this->thing_report['help'] = 'Useful for checking the stack.';
+        $this->thing_report['keyword'] = 'stack';
+        //$this->thing_report['info'] = 'Ping agent pinged back';
+        $this->thing_report['help'] = 'Useful for checking the stack.';
 
-            $this->makeWeb();
+        //          $this->makeWeb();
 
-		return $this->thing_report;
-
-
-	}
+        //	return $this->thing_report;
+    }
 
     function messageStack($text = null)
     {
         //file_get_contents($this->web_prefix . "api/redpanda/" . $text);
-        $text = @file_get_contents($this->web_prefix . "api/redpanda/" . "stack");
-        if ($text == false) {return true;}
-
+        $text = @file_get_contents(
+            $this->web_prefix . "api/redpanda/" . "stack"
+        );
+        if ($text == false) {
+            return true;
+        }
     }
 
     function makeSMS()
     {
         $this->sms_message = "STACK";
-        $this->sms_message .= " | count " . number_format($this->count) . " Things";
-        if (!isset($this->identity)) {$identity = "X";} else {$identity = $this->identity;}
+        $this->sms_message .=
+            " | count " . number_format($this->count) . " Things";
+        if (!isset($this->identity)) {
+            $identity = "X";
+        } else {
+            $identity = $this->identity;
+        }
         $this->sms_message .= " | identity " . $identity;
         $this->sms_message .= " | TEXT LATENCY";
 
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-	public function readSubject()
+    public function readSubject()
     {
-	}
-
+    }
 }

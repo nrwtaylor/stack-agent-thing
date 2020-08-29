@@ -144,7 +144,10 @@ resources: ## Set up resources
 
 gearman: ## Install Gearman
 	@echo "===== Installing Gearman ==============="
-	sudo apt-get install php-gearman
+	sudo add-apt-repository ppa:ondrej/php -y && \
+    	sudo apt-get update && \
+    	sudo apt-get install -y -q php-gearman
+	#	sudo apt-get install php-gearman
 	sudo apt install gearman-tools
 #replaces:
 #	sudo -- bash -c 'apt update; apt upgrade'
@@ -199,3 +202,7 @@ clean: ## Clean up the web folders and settings
 
 patch: ## Activate a patch
 	sudo sh scripts/patch_local.sh
+
+debug: ## Enhanced debugging (dev optional?)
+	sudo apt install php-dev
+	sudo pecl install xdebug

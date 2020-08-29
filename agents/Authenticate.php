@@ -25,7 +25,7 @@ class Authenticate extends Agent
         ];
 
         $this->response .= 'Start state is ';
-        $this->state = $thing->choice->load('token'); //this might cause problems
+        $this->state = $this->thing->choice->load('token'); //this might cause problems
         $this->response .= $this->state . ". ";
 
         $this->thing->account['thing']->Debit(10);
@@ -34,7 +34,7 @@ class Authenticate extends Agent
     public function set() {
 
         $this->thing->choice->Choose($this->state);
-        $this->state = $thing->choice->load('token');
+        $this->state = $this->thing->choice->load('token');
     }
 
     public function respondResponse()
@@ -46,7 +46,7 @@ class Authenticate extends Agent
         $choices = $this->thing->choice->makeLinks($this->state);
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
 
 
         /*

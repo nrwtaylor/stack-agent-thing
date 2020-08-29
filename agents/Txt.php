@@ -96,7 +96,7 @@ class Txt extends Agent {
      *
      * @return unknown
      */
-    function getLink() {
+    public function getLink($text = null) {
 
         $block_things = array();
         // See if a stack record exists.

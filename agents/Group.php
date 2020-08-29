@@ -100,7 +100,9 @@ class Group extends Agent
             $text = $this->input;
         }
         $groups = $this->findGroup($text);
-if ($groups === false) {return false;}
+        if ($groups === false) {
+            return false;
+        }
         $tokens = $this->extractGroups($text);
         foreach ($tokens as $j => $token) {
             foreach ($groups as $i => $group) {
@@ -246,7 +248,7 @@ if ($groups === false) {return false;}
 
         if (count($groups) == 0) {
             $this->response .= "";
-            $this->response .= " | No group found.";
+            $this->response .= "No group found. ";
             $this->thing_report['groups'] = false;
             $this->group_id = null;
         } else {
@@ -266,7 +268,7 @@ if ($groups === false) {return false;}
             "start"
         );
         $this->choices = $this->thing->choice->makeLinks("listen");
-$this->groups = $groups;
+        $this->groups = $groups;
         return $this->thing_report['groups'];
     }
 
@@ -470,8 +472,9 @@ $this->groups = $groups;
         $this->thing_report['sms'] = $sms;
     }
 
-public function textGroups($text = null) {
-$t = "";
+    public function textGroups($text = null)
+    {
+        $t = "";
         $this->findGroup(); // Might need to call this in the set-up.
 
         $groups = [];
@@ -481,14 +484,12 @@ $t = "";
         ) {
             $groups = $this->thing_report['groups'];
         }
-$groups = array_unique($groups);
+        $groups = array_unique($groups);
         foreach ($groups as $i => $group) {
-
-$t .= $group . " ";
-
+            $t .= $group . " ";
         }
-return trim($t);
-}
+        return trim($t);
+    }
 
     public function readSubject()
     {
@@ -598,11 +599,10 @@ $this->response .= "Didn't see screen. So did not screen. ";
                 return;
             }
 
-
             if ($input == 'groups') {
-$this->response .= "Heard request for groups. ";
-$this->response .= $this->textGroups() ." ";
-/*
+                $this->response .= "Heard request for groups. ";
+                $this->response .= $this->textGroups() . " ";
+                /*
                 if ($this->group_id != null) {
                     $this->response .=
                         "Retrieved the current group identity. Group is " .
@@ -616,8 +616,6 @@ $this->response .= $this->textGroups() ." ";
                 $this->num_hits += 1;
                 return;
             }
-
-
 
             if ($input == 'group') {
                 if ($this->group_id != null) {
@@ -648,7 +646,10 @@ $this->response .= $this->textGroups() ." ";
                 $this->num_hits += 1;
                 return;
             }
-            if ((isset($this->subject[0])) and (ctype_alpha($this->subject[0]) == true)) {
+            if (
+                isset($this->subject[0]) and
+                ctype_alpha($this->subject[0]) == true
+            ) {
                 // Strip out first letter and process remaning 4 or 5 digit number
                 //$input = substr($input, 1);
             }

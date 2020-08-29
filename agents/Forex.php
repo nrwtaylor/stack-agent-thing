@@ -154,13 +154,18 @@ class Forex extends Agent
         }
 
         //        $sms_message .=  " | TEXT HELP";
+$next_choices_text = "";
+if (isset($choices['link'])) {
 
+$next_choices_text = 'Your next choices are [ ' .
+            $choices['link']  .
+            '].';
+
+}
         $test_message =
             'Last thing heard: "' .
             $this->subject .
-            '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
+            '".  ' . $next_choices_text;
 
         $test_message .= '<br>' . $sms_message;
 

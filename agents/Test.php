@@ -60,8 +60,8 @@ class Test extends Agent
             set_time_limit(20);
 
             $thing = new Thing(null);
-            var_dump($this->from);
-            var_dump($agent_name);
+            //var_dump($this->from);
+            //var_dump($agent_name);
             $thing->Create($this->from, "agent", $agent_name);
             $agent = new Agent($thing);
 
@@ -134,30 +134,25 @@ class Test extends Agent
         $this->response .= $response . " / ";
     }
 
-    public function readTest($text) {
-$response = "";
-//$a = ['warning', 'notice', 'no response'];
-$a = ['warning', 'notice', 'no sms'];
+    public function readTest($text)
+    {
+        $response = "";
+        //$a = ['warning', 'notice', 'no response'];
+        $a = ['warning', 'notice', 'no sms'];
 
+        foreach ($a as $i => $flag_text) {
+            if (stripos($text, $flag_text) !== false) {
+                $response .= " " . strtoupper($flag_text);
+            }
+        }
 
-foreach($a as $i=>$flag_text) {
+        $response = trim($response);
 
-if (stripos($text, $flag_text) !== false) {
-    $response .= " " . strtoupper($flag_text);
-}
+        if ($response == "") {
+            $response = "PASS";
+        }
 
-}
-
-$response = trim($response);
-
-if ($response == "") {$response = "PASS";}
-
-
-
-
-
-return $response;
-
+        return $response;
     }
 
     public function get()
@@ -215,9 +210,9 @@ return $response;
 
         // Filter list.
         $not_allowed = ["stop", "forgetall"];
-        foreach ($agents as $agent_name => $test_string) {
+        foreach ($this->agents as $agent_name => $test_string) {
             if (in_array(strtolower($agent_name), $not_allowed)) {
-                unset($agents[$agent_name]);
+                unset($this->agents[$agent_name]);
             }
         }
     }
@@ -373,7 +368,7 @@ return $response;
             $text = $thing->nuuid;
             $html = '<a href="' . $link . '">' . $text . '</a>';
 
-$test_result =                 $this->readTest($test['response']);
+            $test_result = $this->readTest($test['response']);
 
             $web .= '<tr>';
             $web .=
@@ -389,28 +384,22 @@ $test_result =                 $this->readTest($test['response']);
                 $test['text'] .
                 "</th>";
 
-if (strtolower($test_result )== "pass") {
-    // devstack
-    // remove this explode
-    $t = explode('SMS message: ', $test['response']);
-if (isset($t[1])) {
-    $u = $t[1];
-    $t = explode('/ No response. ', $u);
-    $text = $t[0];
-//var_dump($text);
-//    exit();
-//    $text = "merp";
-    $web .=         "<th>" .
-                $text .
-                "</th>";
-}
-} else {
-
-    $web .=         "<th>" .
-                $test['response'] .
-                "</th>";
-}
-
+            if (strtolower($test_result) == "pass") {
+                // devstack
+                // remove this explode
+                $t = explode('SMS message: ', $test['response']);
+                if (isset($t[1])) {
+                    $u = $t[1];
+                    $t = explode('/ No response. ', $u);
+                    $text = $t[0];
+                    //var_dump($text);
+                    //    exit();
+                    //    $text = "merp";
+                    $web .= "<th>" . $text . "</th>";
+                }
+            } else {
+                $web .= "<th>" . $test['response'] . "</th>";
+            }
 
             $web .= "</tr>";
 

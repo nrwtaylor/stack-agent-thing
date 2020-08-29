@@ -35,6 +35,8 @@ class Wave extends Agent
             "p",
         ];
 
+        $this->default_state = 'on';
+
         $this->default_run_time = $this->current_time;
         $this->negative_time = true;
     }
@@ -78,7 +80,8 @@ class Wave extends Agent
             $this->wave_thing = $this->thing;
         }
 
-        if ($requested_state == null) {
+        $requested_state = $this->state;
+        if (isset($this->requested_state)) {
             $requested_state = $this->requested_state;
         }
 
@@ -147,6 +150,10 @@ class Wave extends Agent
             "refreshed_at"
         );
 
+        if (!isset($this->previous_state)) {
+            $this->previous_state = $this->default_state;
+        }
+
         $this->verbosity = $this->variables_agent->getVariable("verbosity");
 
         $this->thing->choice->Create(
@@ -154,7 +161,7 @@ class Wave extends Agent
             $this->node_list,
             $this->previous_state
         );
-        $this->thing->choice->Choose($this->requested_state);
+        //$this->thing->choice->Choose($this->requested_state);
 
         $this->state = $this->thing->choice->current_node;
 
@@ -210,8 +217,9 @@ class Wave extends Agent
                 // Split time info in fields
                 //$time_info = preg_split('/\s+/', $fields[1]);
 
-if (!isset($fields[1])) {continue;}
-
+                if (!isset($fields[1])) {
+                    continue;
+                }
 
                 $time_info = preg_split('/ +/', $fields[1]);
 
@@ -307,7 +315,9 @@ if (!isset($fields[1])) {continue;}
             //echo "period ". $wave['period'] . " " . $next_wave_set[$i]['period'] . "<br>";
 
             //echo "minute " . $at_minute . "<br>";
-
+            if ($wave == false) {
+                continue;
+            }
             if (isset($next_wave_set[$i]['height'])) {
                 //echo "<br>";
                 $height = round(
@@ -334,8 +344,6 @@ if (!isset($fields[1])) {continue;}
                 $direction = intval($wave['direction'] ?? null);
                 $period = round($wave['period'] ?? null, 1);
             }
-
-            //echo "height " . $height. " direction " . $direction . " period " . $period . "<br>";
 
             $wave_set_interpolated[] = [
                 "height" => $height,
@@ -441,9 +449,9 @@ if (!isset($fields[1])) {continue;}
         $from = "wave";
 
         //echo "<br>";
-
-        $choices = $this->thing->choice->makeLinks($this->state);
-        $this->thing_report['choices'] = $choices;
+        $this->makeChoices();
+        $this->choices = $this->thing->choice->makeLinks($this->state);
+        $this->thing_report['choices'] = $this->choices;
 
         //$interval = date_diff($datetime1, $datetime2);
         //echo $interval->format('%R%a days');
@@ -454,7 +462,7 @@ if (!isset($fields[1])) {continue;}
             $this->flag = strtoupper($this->getFlag());
         }
         //$this->link = "https://magicseaweed.com/Hampton-Beach-Surf-Report/2074/";
-
+        /*
         if (strtolower($this->flag) == "red") {
             $sms_message = "WAVE = SURF'S UP";
         } else {
@@ -501,8 +509,9 @@ if (!isset($fields[1])) {continue;}
 
             $sms_message .= " | rtime " . number_format($milliseconds) . 'ms';
         }
-
-        switch ($this->index) {
+$index = null;
+if (isset($this->index)) {$index = $this->index;}
+        switch ($index) {
             case null:
                 $sms_message .= " | TEXT WAVE ";
 
@@ -510,11 +519,9 @@ if (!isset($fields[1])) {continue;}
 
             case '1':
                 $sms_message .= " | TEXT WAVE";
-                //$sms_message .=  " | TEXT ADD BLOCK";
                 break;
             case '2':
                 $sms_message .= " | TEXT WAVE";
-                //$sms_message .=  " | TEXT BLOCK";
                 break;
             case '3':
                 $sms_message .= " | TEXT WAVE";
@@ -526,26 +533,11 @@ if (!isset($fields[1])) {continue;}
                 $sms_message .= " | TEXT ?";
                 break;
         }
+*/
 
-        $test_message =
-            'Last thing heard: "' .
-            $this->subject .
-            '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
-        $test_message .= '<br>Train state: ' . $this->state . '<br>';
-
-        $test_message .= '<br>' . $sms_message;
-
-        $test_message .=
-            '<br>Current node: ' . $this->thing->choice->current_node;
-
-        $test_message .= '<br>run_at: ' . $this->run_at;
-        $test_message .= '<br>end_at: ' . $this->end_at;
-
-        $this->thing_report['sms'] = $sms_message;
-        $this->thing_report['email'] = $sms_message;
-        $this->thing_report['message'] = $sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        //        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
@@ -553,6 +545,114 @@ if (!isset($fields[1])) {continue;}
 
         $this->thing_report['help'] =
             'This triggers based on specific NOAA buoy data parameters.';
+    }
+
+    public function makeChoices()
+    {
+        $this->choices = $this->thing->choice->makeLinks($this->state);
+        $this->thing_report['choices'] = $this->choices;
+    }
+
+    public function makeSMS()
+    {
+        if (strtolower($this->flag) == "red") {
+            $sms_message = "WAVE = SURF'S UP";
+        } else {
+            $sms_message = "WAVE";
+        }
+
+        if ($this->verbosity >= 2) {
+            $sms_message .= " | flag " . strtoupper($this->flag);
+            $sms_message .= " | direction " . strtoupper($this->direction) . "";
+            $sms_message .= " | height " . strtoupper($this->height) . "m";
+            $sms_message .= " | period " . strtoupper($this->period) . "s";
+            $sms_message .= " | source NOAA Wavewatch III ";
+        }
+
+        if ($this->verbosity >= 9) {
+            $sms_message .= " | nowcast " . $this->day . " " . $this->hour;
+        }
+
+        if ($this->verbosity >= 5) {
+            $sms_message .=
+                " | notch " .
+                $this->notch_height .
+                "m " .
+                $this->notch_direction .
+                " " .
+                $this->notch_spread .
+                " " .
+                $this->notch_min_period .
+                "s";
+        }
+
+        if ($this->verbosity >= 2) {
+            $sms_message .= " | buoy " . $this->noaa_buoy_id;
+        }
+
+        $sms_message .= " | curated link " . $this->link;
+
+        if ($this->verbosity >= 9) {
+            $sms_message .=
+                " | nuuid " . substr($this->variables_agent->thing->uuid, 0, 4);
+
+            $run_time = microtime(true) - $this->start_time;
+            $milliseconds = round($run_time * 1000);
+
+            $sms_message .= " | rtime " . number_format($milliseconds) . 'ms';
+        }
+        $index = null;
+        if (isset($this->index)) {
+            $index = $this->index;
+        }
+        switch ($index) {
+            case null:
+                $sms_message .= " | TEXT WAVE ";
+
+                break;
+
+            case '1':
+                $sms_message .= " | TEXT WAVE";
+                break;
+            case '2':
+                $sms_message .= " | TEXT WAVE";
+                break;
+            case '3':
+                $sms_message .= " | TEXT WAVE";
+                break;
+            case '4':
+                $sms_message .= " | TEXT WAVE";
+                break;
+            default:
+                $sms_message .= " | TEXT ?";
+                break;
+        }
+        $this->sms_message = $sms_message;
+
+        $this->thing_report['sms'] = $sms_message;
+    }
+
+    public function makeMessage()
+    {
+        // devstack
+        $this->makeChoices();
+        $this->makeSMS();
+
+        $test_message =
+            'Last thing heard: "' .
+            $this->subject .
+            '".  Your next choices are [ ' .
+            $this->choices['link'] .
+            '].';
+        $test_message .= '<br>Train state: ' . $this->state . '<br>';
+
+        $test_message .= '<br>' . $this->sms_message;
+
+        $test_message .=
+            '<br>Current node: ' . $this->thing->choice->current_node;
+
+        //        $test_message .= '<br>run_at: ' . $this->run_at;
+        //        $test_message .= '<br>end_at: ' . $this->end_at;
     }
 
     public function extractNumber($input = null)

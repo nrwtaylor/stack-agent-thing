@@ -130,6 +130,15 @@ class Job extends Agent
         if (trim($line) == "") {
             return true;
         }
+
+        $first_character = substr($line,0,1);
+
+        switch ($first_character) {
+        case "#":
+            return true;
+        }
+
+
         $arr = explode(",", $line);
         $period = $arr[0]; // Describer of the card
         $text = trim($arr[1]);

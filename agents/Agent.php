@@ -9,8 +9,10 @@
  *
  * @package default
  */
-
 namespace Nrwtaylor\StackAgentThing;
+
+//require '/var/www/stackr.test/resources/debug/HardCoreDebugLogger.php';
+//HardCoreDebugLogger::register();
 
 // Agent resolves message disposition
 
@@ -29,6 +31,7 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
+
         //microtime(true);
         if ($thing == null) {
             $thing = new Thing(null);
