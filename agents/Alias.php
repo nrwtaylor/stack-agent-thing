@@ -65,6 +65,13 @@ class Alias extends Agent
 
     function set()
     {
+
+if (strtolower($this->input) == strtolower($this->agent_name)) {
+
+return false;
+
+}
+
         // A block has some remaining amount of resource and
         // an indication where to start.
 
@@ -542,7 +549,7 @@ class Alias extends Agent
 
         $sms = "ALIAS ";
         if ($this->alias_id != "alias") {
-            $sms = strtoupper($this->alias_id);
+            $sms .= strtoupper($this->alias_id);
         }
         $sms .= strtoupper($this->head_code);
         $sms .= " ";

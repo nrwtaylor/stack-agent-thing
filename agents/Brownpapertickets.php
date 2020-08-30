@@ -7,128 +7,116 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Brownpapertickets
+class Brownpapertickets extends Agent
 {
     // This gets events from the Brownpapertickets API. Only Vancouver at the moment.
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        $this->start_time = $thing->elapsed_runtime();
-        $this->agent_input = $agent_input;
+        $this->keyword = "brownpapertickets";
 
-        $this->keyword = "mordok";
+        $this->test = "Development code"; // Always
 
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->keywords = [
+            'brownpapertickets',
+            'brown',
+            'paper',
+            'tickets',
+            'event',
+            'show',
+            'happening',
+        ];
 
-        $this->test= "Development code"; // Always
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-        $this->agent_prefix = 'Agent "Brown Paper Tickets" ';
-
-        //$this->node_list = array("off"=>array("on"=>array("off")));
-
-        $this->keywords = array('brownpapertickets','brown', 'paper', 'tickets', 'event','show','happening');
-
-        $this->current_time = $this->thing->json->time();
-
-        $this->developer_id = $this->thing->container['api']['brownpapertickets'];
-
+        $this->developer_id =
+            $this->thing->container['api']['brownpapertickets'];
         $this->run_time_max = 360; // 5 hours
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "brown_paper_tickets" . " " . $this->from);
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables " . "brown_paper_tickets" . " " . $this->from
+        );
+    }
 
-        // Loads in variables.
-        $this->get(); 
-
-		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
-		$this->thing->log('received this Thing "'.  $this->subject . '".');
-
-		$this->readSubject();
-
+    public function run()
+    {
         $this->getApi();
-
-		$this->respond();
-
-        $this->end_time = microtime(true);
-        $this->actual_run_time = $this->end_time - $this->start_time;
-        $milliseconds = round($this->actual_run_time * 1000);
-
-        $this->thing->log( 'ran for ' . $milliseconds . 'ms.' );
-
-		$this->thing->log( 'completed.');
-
-        $this->thing_report['log'] = $this->thing->log;
-
-		return;
-
-	}
+    }
 
     function set()
     {
-        $this->thing->log( $this->agent_prefix .  'set counter  ' . $this->counter . ".", "DEBUG");
+        $this->thing->log(
+            $this->agent_prefix . 'set counter  ' . $this->counter . ".",
+            "DEBUG"
+        );
 
         $this->variables_agent->setVariable("counter", $this->counter);
-        $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-        return;
+        $this->variables_agent->setVariable(
+            "refreshed_at",
+            $this->current_time
+        );
     }
 
     function get()
     {
         $this->counter = $this->variables_agent->getVariable("counter");
-        $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
+        $this->refreshed_at = $this->variables_agent->getVariable(
+            "refreshed_at"
+        );
 
         $this->thing->log(' got counter ' . $this->counter . ".", "DEBUG");
 
         $this->counter = $this->counter + 1;
-
-        return;
     }
+
+    // devstack
+    // handle other cities
 
     function getApi($sort_order = null)
     {
-        if (isset($this->events)) {return $this->events;}
+        if (isset($this->events)) {
+            return $this->events;
+        }
 
-        if ($sort_order == null) {$sort_order = "popularity";}
+        if ($sort_order == null) {
+            $sort_order = "popularity";
+        }
 
         $city = "vancouver";
-        $c = new City($this->thing,"city");
-        $city = $c->city_name; 
+        $c = new City($this->thing, "city");
+        $city = $c->city_name;
 
         if (strtolower($city) != "vancouver") {
-            $this->response = "Events not enabled for " . $city . ".";
+            $this->response = "Events not enabled for " . $city . ". ";
             $this->available_events_count = 0;
             $this->events = true;
             $this->events_count = 0;
-            $this->thing->log( 'did not get any events.');
+            $this->thing->log('did not get any events.');
 
             return true;
-
         }
+        $this->city = $city;
         // "America/Vancouver" apparently
 
         $keywords = "";
-        if (isset($this->search_words)) {$keywords = $this->search_words;}
+        if (isset($this->search_words)) {
+            $keywords = $this->search_words;
+        }
 
         $keywords = str_replace(" ", "%20%", $keywords);
 
         // Custom feed built in developer part of Brown Paper Tickets.
-        $data = file_get_contents("https://www.brownpapertickets.com/eventfeed/627");
+        $data = file_get_contents(
+            "https://www.brownpapertickets.com/eventfeed/627"
+        );
 
         if ($data == false) {
             $this->response = "Could not ask Brown Paper Tickets.";
             $this->available_events_count = 0;
             $this->events = true;
             $this->events_count = 0;
-            $this->thing->log( 'did not get any events.');
+            $this->thing->log('did not get any events.');
 
             return true;
             // Invalid query of some sort.
@@ -138,32 +126,31 @@ class Brownpapertickets
 
         // devstack
         // https://stackoverflow.com/questions/6167279/converting-a-simplexml-object-to-an-array
-        $events = json_decode(json_encode($data_xml), TRUE);
+        $events = json_decode(json_encode($data_xml), true);
 
         $this->eventsBrownpapertickets($events);
 
-
-
         $this->available_events_count = count($this->events);
-        $this->thing->log('getApi got ' . $this->available_events_count . " available events.");
+        $this->thing->log(
+            'getApi got ' . $this->available_events_count . " available events."
+        );
 
         return false;
-
     }
 
     function array_flatten(array $array)
     {
-        $flat = array(); // initialize return array
+        $flat = []; // initialize return array
         $stack = array_values($array); // initialize stack
-        while($stack) // process stack until done
-        {
+        while ($stack) {
+            // process stack until done
             $value = array_shift($stack);
-            if (is_array($value)) // a value to further process
-            {
+            if (is_array($value)) {
+                // a value to further process
                 $stack = array_merge(array_values($value), $stack);
             }
-            else // a value to take
-            {
+            // a value to take
+            else {
                 $flat[] = $value;
             }
         }
@@ -172,15 +159,23 @@ class Brownpapertickets
 
     function eventsBrownpapertickets($events)
     {
-        if (!isset($this->events)) {$this->events = array();}
-        if($events == null) {$this->events_count = 0;return;}
+        if (!isset($this->events)) {
+            $this->events = [];
+        }
+        if ($events == null) {
+            $this->events_count = 0;
+            return;
+        }
 
         // devstack sort
 
-        foreach($events['event'] as $not_used=>$event) {
-
-            $city = "vancouver";
-            if (strtolower($event['city']) != $city) {continue;}
+        foreach ($events['event'] as $not_used => $event) {
+            // $city = "vancouver";
+            $city = strtolower($this->city);
+            //var_dump($event['city']);
+            if (strtolower(trim($event['city'])) != $city) {
+                continue;
+            }
 
             $id = $event['id'];
 
@@ -194,7 +189,9 @@ class Brownpapertickets
             $end_at = $event['end_date']; // local event time
 
             $runtime = strtotime($end_at) - strtotime($run_at);
-            if ($runtime <= 0) {$runtime = "X";}
+            if ($runtime <= 0) {
+                $runtime = "X";
+            }
 
             $venue_name = $event['venue_name'];
 
@@ -206,17 +203,33 @@ class Brownpapertickets
                 $link = $event['link'];
             }
 
-            $event_array = array("event"=>$event_name, "runat"=>$run_at, "runtime"=>$runtime, "place"=>$venue_name, "link"=>$link, "datagram"=>$event);
+            $event_array = [
+                "event" => $event_name,
+                "runat" => $run_at,
+                "runtime" => $runtime,
+                "place" => $venue_name,
+                "link" => $link,
+                "datagram" => $event,
+            ];
 
             $pieces = $this->array_flatten($event_array, " ");
 
-            // Make a haystack and needles to find.
-            $haystack = implode(" " , $pieces);
-            $needles = explode(" ",$this->search_words);
+            if (isset($this->search_words)) {
+                // Make a haystack and needles to find.
+                $haystack = implode(" ", $pieces);
+                $needles = explode(" ", $this->search_words);
+                $search_result = $this->match_all($needles, $haystack);
 
-            $search_result = ($this->match_all($needles, $haystack));
+                if ($search_result != false) {
+                    $this->events[$id] = $event_array;
+                }
+            }
 
-            if ($search_result != false) {
+            if (
+                !isset($this->search_words) or
+                $this->search_words == null or
+                $this->search_words == ""
+            ) {
                 $this->events[$id] = $event_array;
             }
         }
@@ -227,23 +240,23 @@ class Brownpapertickets
     //http://activelab.io/code-snippets/check-if-a-string-contains-specific-words-in-php
     function match_all($needles, $haystack)
     {
-        if(empty($needles)){
+        if (empty($needles)) {
             return false;
         }
 
-        foreach($needles as $needle) {
-            if (strpos($haystack, $needle) == false) {
+        foreach ($needles as $needle) {
+            if (stripos($haystack, $needle) == false) {
                 return false;
             }
         }
         return true;
     }
 
-    function getLink($ref)
+    function getLink($text = null)
     {
         // Give it the message returned from the API service
 
-        $this->link = "https://www.brownpapertickets.com"; 
+        $this->link = "https://www.brownpapertickets.com";
         return $this->link;
     }
 
@@ -259,54 +272,57 @@ class Brownpapertickets
 
         // Load as new event things onto stack
         $thing = new Thing(null);
-        $thing->Create("brownpapertickets@stackr.ca","events", "s/ event brownpapertickets " . $eventful_id);
+        $thing->Create(
+            "brownpapertickets@stackr.ca",
+            "events",
+            "s/ event brownpapertickets " . $eventful_id
+        );
 
         // make sure the right fields are directly given
 
-        new Event($thing, "event is ". $event['event']);
-        new Runat($thing, "runat is ". $event['runat']);
-        new Place($thing, "place is ". $event['place']);
+        new Event($thing, "event is " . $event['event']);
+        new Runat($thing, "runat is " . $event['runat']);
+        new Place($thing, "place is " . $event['place']);
         new Link($thing, "link is " . $event['link']);
-
     }
 
-	private function respond()
+    public function respondResponse()
     {
+        // Thing actions
 
-		// Thing actions
+        $this->thing->flagGreen();
+        // Generate email response.
 
-		$this->thing->flagGreen();
-		// Generate email response.
-
-		$to = $this->thing->from;
-		$from = "brownpapertickets";
+        //		$to = $this->thing->from;
+        //		$from = "brownpapertickets";
 
         $choices = false;
-		$this->thing_report['choices'] = $choices;
+        $this->thing_report['choices'] = $choices;
 
         $this->flag = "green";
 
-        $this->makeSms();
-        $this->makeMessage();
+        //      $this->makeSms();
+        //    $this->makeMessage();
 
-        $this->makeWeb();
+        //  $this->makeWeb();
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        $this->thing_report['help'] = 'This provides events using the Brown Paper Tickets API.';
+        $this->thing_report['help'] =
+            'This provides events using the Brown Paper Tickets API.';
 
         $this->thingreportBrownpapertickets();
 
-		return;
-	}
+        //		return;
+    }
 
-    public function eventString($event) 
+    public function eventString($event)
     {
         $event_date = date_parse($event['runat']);
 
@@ -314,96 +330,105 @@ class Brownpapertickets
         $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
 
         $simple_date_text = $month_name . " " . $event_date['day'];
-        $event_string = ""  . $simple_date_text;
-        $event_string .= " "  . $event['event'];
+        $event_string = "" . $simple_date_text;
+        $event_string .= " " . $event['event'];
 
-        $runat = new Runat($this->thing, "extract ". $event['runtime']);
+        $runat = new Runat($this->thing, "extract " . $event['runtime']);
 
-        $event_string .= " "  . $runat->day;
-        $event_string .= " "  . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
-        $event_string .= ":"  . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
+        $event_string .= " " . $runat->day;
+        $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
+        $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
 
-        $run_time = new Runtime($this->thing, "extract " .$event['runtime']);
+        $runtime_agent = new Runtime(
+            $this->thing,
+            "extract " . $event['runtime']
+        );
 
         if ($event['runtime'] != "X") {
-            $event_string .= " " . $this->thing->human_time($run_time->minutes);
+            $event_string .=
+                " " . $this->thing->human_time($runtime_agent->runtime);
         }
 
-        $event_string .= " "  . $event['place'];
+        $event_string .= " " . $event['place'];
 
         return $event_string;
     }
 
     public function makeWeb()
     {
-        if (!isset($this->search_words)) {$s = "";} else {$s = $this->search_words;}
+        if (!isset($this->search_words)) {
+            $s = "";
+        } else {
+            $s = $this->search_words;
+        }
 
         $html = "<b>BROWN PAPER TICKETS " . $s . "</b>";
         $html .= "<p><b>Brown Paper Tickets Events</b>";
 
-        if ((!isset($this->events)) or ($this->events === true)) {
+        if (!isset($this->events) or $this->events === true) {
             $html .= "<br>No events found on Brown Paper Tickets.";
         } else {
+            foreach ($this->events as $id => $event) {
+                $event_html = $this->eventString($event);
 
-        foreach ($this->events as $id=>$event) {
+                // Make a link to the Brown Paper Tickets page
+                $link = "https://www.brownpapertickets.com/event/" . $id;
+                $html_link = '<a href="' . $link . '">';
+                $html_link .= "brown paper tickets";
+                $html_link .= "</a>";
 
-            $event_html = $this->eventString($event);
+                $html_link_brownpapertickets = $html_link;
 
-            // Make a link to the Brown Paper Tickets page
-            $link = "https://www.brownpapertickets.com/event/" . $id;
-            $html_link = '<a href="' . $link . '">';
-            $html_link .= "brown paper tickets";
-            $html_link .= "</a>";
+                // Get event link. Normally an artist/performer link.
+                $link = $event['link'];
 
-            $html_link_brownpapertickets = $html_link;
+                if ($link != null) {
+                    $scheme = parse_url($link, PHP_URL_SCHEME);
+                    if (empty($scheme)) {
+                        $link = 'http://' . ltrim($link, '/');
+                    }
 
-            // Get event link. Normally an artist/performer link.
-            $link = $event['link'];
-
-            if ($link != null) {
-
-                $scheme = parse_url($link, PHP_URL_SCHEME);
-                if (empty($scheme)) {
-                    $link = 'http://' . ltrim($link, '/');
+                    $html_link_event = '<a href="' . $link . '">';
+                    $html_link_event .= "event link";
+                    $html_link_event .= "</a>";
+                } else {
+                    $html_link_event = "";
                 }
 
-                $html_link_event = '<a href="' . $link . '">';
-                $html_link_event .= "event link";
-                $html_link_event .= "</a>";
-
-            } else {
-                $html_link_event = "";
-            }
-
-            $html .= "<br>" . $event_html . " " . $html_link_event . " " . $html_link_brownpapertickets;;
-
+                $html .=
+                    "<br>" .
+                    $event_html .
+                    " " .
+                    $html_link_event .
+                    " " .
+                    $html_link_brownpapertickets;
             }
         }
         $this->html_message = $html;
     }
 
-    public function makeSms()
+    public function makeSMS()
     {
         $sms = "BROWN PAPER TICKETS";
 
         switch ($this->events_count) {
             case 0:
-                $sms .= " | No events found.";
+                $sms .= " | No events found in " . $this->city . ".";
                 break;
             case 1:
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
-                $sms .= " | " .$event_html;
+                $sms .= " | " . $event_html;
 
                 if ($this->available_events_count != $this->events_count) {
-                    $sms .= $this->events_count. " retrieved";
+                    $sms .= $this->events_count . " retrieved";
                 }
 
                 break;
             default:
-                $sms .= " "  . $this->available_events_count . ' events ';
+                $sms .= " " . $this->available_events_count . ' events ';
                 if ($this->available_events_count != $this->events_count) {
-                    $sms .= $this->events_count. " retrieved";
+                    $sms .= $this->events_count . " retrieved";
                 }
 
                 $event = reset($this->events);
@@ -428,20 +453,20 @@ class Brownpapertickets
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
 
-                $message .= " found "  . $event_html . ".";
+                $message .= " found " . $event_html . ".";
 
                 break;
             default:
-                $message .= " found "  . $this->available_events_count . ' events.';
+                $message .=
+                    " found " . $this->available_events_count . ' events.';
 
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
-                $message .= " This was one of them. " . $event_html .".";
+                $message .= " This was one of them. " . $event_html . ".";
         }
 
         $this->message = $message;
     }
-
 
     private function thingreportBrownpapertickets()
     {
@@ -459,12 +484,10 @@ class Brownpapertickets
         $keywords = $this->keywords;
 
         if ($this->agent_input != null) {
-
             // If agent input has been provided then
             // ignore the subject.
             // Might need to review this.
             $input = strtolower($this->agent_input);
-
         } else {
             $input = strtolower($this->subject);
         }
@@ -473,50 +496,56 @@ class Brownpapertickets
 
         $pieces = explode(" ", strtolower($input));
 
-		// So this is really the 'sms' section
-		// Keyword
+        // So this is really the 'sms' section
+        // Keyword
         if (count($pieces) == 1) {
-
             if ($input == 'brownpapertickets') {
                 //$this->search_words = null;
                 $this->response = "Asked Brown Paper Tickets about events.";
                 return;
             }
-
         }
 
-        foreach ($pieces as $key=>$piece) {
+        foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
-
-                    switch($piece) {
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
                         default:
                     }
-
                 }
             }
         }
 
-
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "brownpapertickets is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("brownpapertickets is")); 
-        } elseif (($pos = strpos(strtolower($input), "brownpapertickets")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("brownpapertickets")); 
+        if (
+            ($pos = strpos(strtolower($input), "brownpapertickets is")) !==
+            false
+        ) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("brownpapertickets is")
+            );
+        } elseif (
+            ($pos = strpos(strtolower($input), "brownpapertickets")) !== false
+        ) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("brownpapertickets")
+            );
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            $this->response = "Asked Brown Paper Tickets about " . $this->search_words . " events";
+            $this->response =
+                "Asked Brown Paper Tickets about " .
+                $this->search_words .
+                " events";
             return false;
         }
 
         $this->response = "Message not understood";
-		return true;
-
-	}
-
+        return true;
+    }
 }
-?>

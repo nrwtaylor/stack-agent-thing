@@ -343,22 +343,12 @@ $sms_message .= " " .$this->runtime . " ";
         }
         $this->response .= " | " . $response_text;
 
-        // Generate email response.
-
-  //      $to = $this->thing->from;
-  //      $from = "runtime";
-
         //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
         $this->thing_report['choices'] = $choices;
 
-        //$this->makeTXT();
-
-//        $this->makeSMS();
-
-        $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
-
-        $test_message .= '<br>' . $this->sms_message;
+        //$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
+        //$test_message .= '<br>' . $this->sms_message;
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -373,11 +363,7 @@ $sms_message .= " " .$this->runtime . " ";
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
 
- //       $this->makeTXT();
-
         $this->thing_report['help'] = 'This is the runtime manager.';
-
- //       return;
     }
 
 

@@ -1803,6 +1803,7 @@ $runtime = "X";
         }
 
         $this->alias_agent->alias = $this->alias;
+
         $this->alias_agent->set();
 
         $t = new Alias($this->thing, "alias");
@@ -1822,6 +1823,11 @@ $runtime = "X";
 
         $this->alias_agent = new Alias($this->train_thing, 'alias');
         $this->alias = $this->alias_agent->alias;
+
+// devstack. 
+// Figure this out.
+//        $this->alias = strtoupper($this->alias_agent->alias_id);
+
 
         $this->aliases = [
             "Logans run",

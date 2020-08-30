@@ -890,6 +890,7 @@ $found = false;
         if (!empty($this->place_code)) {
             //$sms .= " | " . $this->web_prefix . 'thing/' . $this->uuid . '/place';
             $sms .= " | " . $this->link;
+            $sms .= " ";
         }
 
         if (isset($this->response)) {
