@@ -21,6 +21,7 @@ class IChing extends Agent
     function init()
     {
         $this->thing_report['help'] = 'Text ICHING TELL ME ABOUT SOMETHING.';
+        $this->thing_report['info'] = $this->info();
 
         // Generate an iching reading.
 
@@ -39,11 +40,15 @@ class IChing extends Agent
      */
     function get()
     {
+        // Take a look at this thing for IChing variables.
+
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "iching",
             "refreshed_at",
         ]);
+
+        // And if there is no IChing timestamp create one now.
 
         if ($time_string == false) {
             $this->thing->json->setField("variables");
@@ -93,6 +98,7 @@ class IChing extends Agent
      */
     function getReading()
     {
+        $line = array();
         foreach (str_split(strval($this->reading)) as $number) {
             if ($number == 9) {
                 $line[0] = 'yin';
@@ -184,20 +190,18 @@ class IChing extends Agent
 
         $this->thing_report['txt'] = $this->sms_message;
 
-        //        if ($this->thing->account['stack']->balance['amount'] >= $this->cost) {
+        // devstack
 
-        $this->thing->log('found enough balance to send a Message');
+//        $this->thing->log('found enough balance to send a Message');
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->thing->account['stack']->Debit($this->cost);
+//        if ($this->thing->account != false) {
+//            $this->thing->account['stack']->Debit($this->cost);
+//        }
 
-        //        } else {
-
-        $this->thing->log('NOT enough balance to send a Message');
-
-        //        }
+//        $this->thing->log('NOT enough balance to send a Message');
 
         $this->thing->json->writeVariable(
             ["iching", "reading"],

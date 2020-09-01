@@ -1001,6 +1001,23 @@ class Agent
      */
     public function makeInfo()
     {
+        if (!isset($this->thing_report['info'])) {
+
+            if (isset($this->info)) {
+                $this->thing_report['info'] = $this->info;
+                return;
+            }
+
+            $info = $this->info();
+            $this->thing_report['info'] = $info;
+            $this->info = $info;
+
+        }
+    }
+
+    public function info() {
+        $info = "Text WIKIPEDIA " . strtoupper($this->agent_name) . ".";
+        return $info;
     }
 
     /**

@@ -97,8 +97,13 @@ class makeEmail
 
 	public function generateHTML($raw_message, $choices = null)
     {
-		$html_button_set = $choices['button'];
+        $html_button_set = "";
+
 		if ($choices == null) {$html_button_set = "";}
+
+        if ($choices != false) {
+            $html_button_set = $choices['button'];
+        }
 
 
 
@@ -197,7 +202,7 @@ Hi,
 
 <tr>
     <td valign="top" style=" font-size: 16px; text-align: left; border-top: 1px #dddddd solid;">
-' . $choices["button"] . '
+' . $html_button_set . '
 </td>
 </tr>
 
