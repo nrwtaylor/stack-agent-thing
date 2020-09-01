@@ -17,22 +17,17 @@ class Alias extends Agent
     // Then find the latest alias record in that context.
 
     public $var = 'hello';
-    function init()
+    public function init()
     {
         $this->keyword = "alias";
 
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
+//        $this->start_time = $this->thing->elapsed_runtime();
+//        $this->thing_report['thing'] = $this->thing->thing;
 
         $this->test = "Development code"; // Always
 
         //$this->thing->choice->load('alias');
         $this->node_list = ["off" => ["on" => ["off"]]];
-
-        // This isn't going to help because we don't know if this
-        // is the base.
-        //        $this->state = "off";
-        //        $this->thing->choice->load($this->keyword);
 
         $this->current_time = $this->thing->json->time();
 
@@ -49,7 +44,7 @@ class Alias extends Agent
         $this->alias = null;
         $this->alias_id = null;
 
-        $this->current_time = $this->thing->json->time();
+//        $this->current_time = $this->thing->json->time();
 
         $default_alias_name = "alias";
     }
@@ -65,12 +60,9 @@ class Alias extends Agent
 
     function set()
     {
-
-if (strtolower($this->input) == strtolower($this->agent_name)) {
-
-return false;
-
-}
+        if (strtolower($this->input) == strtolower($this->agent_name)) {
+            return false;
+        }
 
         // A block has some remaining amount of resource and
         // an indication where to start.
@@ -198,7 +190,6 @@ return false;
                 }
             }
         }
-
         return $this->aliases_list;
     }
 
@@ -390,6 +381,18 @@ return false;
                 $this->left_grams = $pieces[0];
                 $this->right_grams = $pieces[1];
 
+                if (strtolower($this->left_grams) == "alias") {
+                    $this->alias_id = 'alias';
+                    $this->alias = $this->right_grams;
+                    return;
+                }
+
+                if (strtolower($this->right_grams) == "alias") {
+                    $this->alias_id = 'alias';
+                    $this->alias = $this->left_grams;
+                    return;
+                }
+
                 $left_num_words = count(explode(" ", $this->left_grams));
                 $right_num_words = count(explode(" ", $this->right_grams));
 
@@ -548,12 +551,22 @@ return false;
         $this->node_list = ["alias" => ["agent", "message"]];
 
         $sms = "ALIAS ";
-        if ($this->alias_id != "alias") {
-            $sms .= strtoupper($this->alias_id);
+        //if ($this->alias_id != "alias") {
+        //    $sms .= "alias id " . strtoupper($this->alias_id) . " ";
+        //}
+
+        if ((isset($this->alias_id)) and (strtolower($this->alias_id) != 'alias')) {
+            $sms .= "alias id " . strtoupper($this->alias_id) . " ";
         }
+
+        if (isset($this->alias)) {
+            $sms .= "" . strtoupper($this->alias) . " ";
+        }
+
         $sms .= strtoupper($this->head_code);
-        $sms .= " ";
-        $sms .= "| alias " . strtoupper($this->alias);
+
+//        $sms .= " ";
+//        $sms .= "| alias " . strtoupper($this->alias);
 
         //        $sms .= " | variables nuuid " . substr($this->variables_agent->uuid, 0, 4);
         //        $sms .= " | alias nuuid " . substr($this->alias_thing->uuid, 0, 4);
@@ -569,17 +582,10 @@ return false;
 */
         $sms .= " " . $this->response;
 
-        //        $this->sms_messages[] = $sms_message;
-
-        //        $this->sms_message = $this->sms_messages[0];
-
-        //$sms = $sms_message;
-
-        //        $this->thing_report['sms'] = $this->sms_messages[0];
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
-
+/*
     function isPlace($input)
     {
         // recognize a place on the alias list
@@ -620,7 +626,7 @@ return false;
 
         return "red";
     }
-
+*/
     public function readSubject()
     {
         $this->num_hits = 0;
@@ -689,7 +695,6 @@ return false;
         // So we know we don't just have a keyword.
 
         if (isset($this->alias)) {
-            //$this->thing->log('Agent "Block" found a run_at and a run_time and made a Block.'$
             // Likely matching a head_code to a uuid.
             $this->makeAlias($this->alias);
             return;
@@ -704,13 +709,14 @@ return false;
 
         // Guess we check if it's a Place then?
 
+/*
         if ($this->isPlace($input)) {
             $place_thing = new Place($this->thing); // no agent because this now takes message priority
             $this->thing_report['info'] =
                 'Agent "Alias" sent the datagram to Place';
             return;
         }
-
+*/
         $this->readAlias();
 
         return false;
