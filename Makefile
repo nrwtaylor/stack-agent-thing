@@ -8,12 +8,16 @@ mpm-child-cnxns=10000
 YOUR_EMAIL=myaddress@example.com
 MYSQLPASSWORD=Stack_1user
 AGENT_LOCATION=../agent
+#WEB_PREFIX=http:\/\/localhost:8000\/ 
+#LOCAL_PORT=8000
 
 .PHONY: help
 help: ## Show this help
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 all: init lamp mysql php apachefiling agent resources gearman supervisor cron tailoring memcached ## Do everything, in order
+
+dev: php-7.4 ## Do all the bleeding-edge setup items
 
 init:  ## Update system
 	@echo "===== Updating System ==============="
@@ -87,7 +91,7 @@ php: ## Set up PHP extensions
 	sudo apt-get --assume-yes install -f php-fpm
 	sudo service apache2 restart
 
-php7-4: ## Set up PHP extensions
+php7-4: ## Set up PHP extensions - bleeding edge
 	@echo "===== Setting up PHP 7.4 ==============="
 	sudo apt-get --assume-yes install -f php-mbstring
 	sudo apt-get --assume-yes install -f php7.4-xml
@@ -116,14 +120,26 @@ apachefiling: ## Create and assemble filing for Apache2 server
 	sudo apt-get --assume-yes install composer; composer install	
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
+	wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/private/settings.php --output-document=/var/www/$(SERVERNAME)/private/settings.php; 
 	# sudo cp -r . /var/www/$(SERVERNAME)
 
-agent: ## Add commandline shell interface to call Stackr
+
+memcached: ## Install MemCache Daemon
+	@echo "===== Installing MemCache Daemon =============="
+	sudo apt-get update; sudo apt-get install memcached; \
+	sudo apt-get install -y php-memcached
+
+agent: ## Add commandline shell interface to call the stack
 	cd /var/www/$(SERVERNAME); \
 	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/agent; \
-	touch agent; \
-	chmod u+x agent
-
+	sudo touch agent; \
+	sudo chmod u+x agent
+	sed -i 's/"host" => "<private>"/"host" => "localhost"/' settings.php; \
+	sed -i 's/"dbname" => "<private>"/"dbname" => "stack_db"/' settings.php; \
+	sed -i 's/"user" => "<private>"/"user" => "stackuser"/' settings.php; \
+	sed -i 's/"pass" => "<private>"/"pass" => "$(MYSQLPASSWORD)"/' settings.php
+	sed -i 's/'web_prefix' => '<not set>'/'web_prefix' => 'http:\/\/localhost:8000\//' settings.php
+	
 #agent:  $(AGENT_LOCATION)/agent ## Add commandline shell interface to call Stackr
 #ifneq ("$(wildcard $(AGENT_LOCATION))","")	
 #FILE_EXISTS = 1
@@ -138,7 +154,7 @@ agent: ## Add commandline shell interface to call Stackr
 #	https://unix.stackexchange.com/questions/11530/adding-directory-to-path-through-makefile
 #	not possible from within make to get persistence
 
-resources: ## Set up resources
+resources: ## Set up resources for the stack
 	@echo "===== Setting up resources ==============="
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/resources /var/www/$(SERVERNAME)/resources/
 
@@ -186,11 +202,6 @@ tailoring: ## Set your servername in system files
 
 #postfix:
 
-memcached: ## Install MemCache Daemon
-	@echo "===== Installing MemCache Daemon =============="
-	sudo apt-get update; sudo apt-get install memcached; \
-	sudo apt-get install -y php-memcached
-
 clean: ## Clean up the web folders and settings
 	@echo "===== Cleaning up: removing web folders and settings ==============="
 	rm -Rvf /var/www/$(SERVERNAME)
@@ -207,7 +218,7 @@ debug: ## Enhanced debugging environment (dev optional?)
 	sudo apt install php-dev
 	sudo pecl install xdebug
 
-configuration:
+configuration: 
 # sudo nano /etc/sysctl.conf
 # fs.file-max = 65535
 
