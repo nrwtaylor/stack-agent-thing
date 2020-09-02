@@ -11,27 +11,14 @@ class Poll extends Agent
 {
     function init()
     {
-        //	function __construct(Thing $thing)
-        //		$this->thing = $thing;
-        //		$this->agent_name = 'start';
-        //      $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-
-        //        $this->thing_report['thing'] = $this->thing->thing;
 
         // So I could call
         if ($this->thing->container['stack']['state'] == 'dev') {
             $this->test = true;
         }
-        // I think.
-        // Instead.
-
-        //      $this->uuid = $thing->uuid;
-        //    $this->to = $thing->to;
-        //  $this->from = $thing->from;
-        //$this->subject = $thing->subject;
 
         $agent_list = ["yes", "maybe", "no"];
-        // $agent_name = $agent_list[array_rand($agent_list)];
+
         shuffle($agent_list);
 
         $this->node_list = [
@@ -42,31 +29,15 @@ class Poll extends Agent
             "thanks" => "results",
         ];
 
-        //      $this->thing->log( $this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.</pre>', "INFORMATION");
-
         $this->variables_agent = new Variables(
             $this->thing,
             "variables poll " . $this->from
         );
 
-        //      $this->current_time = $this->thing->json->time();
-
         $this->verbosity = 1;
-
-        //      $this->get();
-        //	$this->readSubject();
-
-        //    $this->set();
-        // 		$this->respond();
 
         $this->thing->flagGreen();
 
-        //     $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
-        //
-        //      $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        //    $this->thing_report['log'] = $this->thing->log;
-
-        //	return;
     }
 
     public function set()
@@ -181,6 +152,7 @@ class Poll extends Agent
 
     public function makeChoices()
     {
+//$this->node_list = array("poll"=>$this->responses);
         // Make buttons
         $this->thing->choice->Create(
             $this->agent_name,
@@ -188,11 +160,6 @@ class Poll extends Agent
             "poll"
         );
         $choices = $this->thing->choice->makeLinks('poll');
-        // $choices = false;
-
-        //if ($this->from == "null@stackr.ca") {
-        //    $choices = $this->thing->choice->makeLinks("agents");
-        //}
 
         $this->thing_report['choices'] = $choices;
     }
@@ -208,10 +175,8 @@ class Poll extends Agent
 
         $this->thing->flagGreen();
 
-        //$this->makeSMS();
-        //$this->makeEmail();
         $this->makeChoices();
-        //$this->makeWeb();
+
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['sms'] = $this->sms_message;
@@ -225,8 +190,40 @@ class Poll extends Agent
             $this->agent_prefix . 'responding to a poll of some sort.';
     }
 
+
+    public function readPoll($text = null) {
+        if ($text == null) {return true;}
+
+        $filtered_input = $this->assert($text);
+
+$tokens = explode("/",$filtered_input);
+
+var_dump($tokens);
+
+$this->question = trim($tokens[0]);
+
+foreach($tokens as $i=>$j) {
+if ($i == 0) {continue;}
+
+$this->nomnom_agent = new Nomnom($this->thing, 'nomnom');
+
+$text = trim($j);
+
+$reponse_text = (strtolower($text));
+
+
+$response = ['count' => 0, 'text'=> $text];
+$this->responses[$response_text] = $response;
+
+}
+var_dump($this->responses);
+
+    }
+
     public function readSubject()
     {
+        $input = $this->input;
+        $this->readPoll($input);
         $this->start();
     }
 
