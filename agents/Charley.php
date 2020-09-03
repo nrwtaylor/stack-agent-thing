@@ -22,6 +22,11 @@ class Charley extends Agent
         $this->unit = "FUEL";
         $this->getNuuid();
 
+        $this->mode = "voice";
+        if (isset($this->thing->container['api']['charley']['mode'])) {
+            $this->mode = $this->thing->container['api']['charley']['mode'];
+        }
+
         $this->character = new Character(
             $this->thing,
             "character is Charles T. Owl"
@@ -49,7 +54,11 @@ class Charley extends Agent
             "variables charley " . $this->from
         );
 
-        $this->mode = $this->variables->getVariable("mode");
+        $mode = $this->variables->getVariable("mode");
+
+        if ($mode != false) {
+            $this->mode = $mode;
+        }
 
         // Borrow this from iching
         $this->thing->json->setField("variables");
@@ -74,14 +83,12 @@ class Charley extends Agent
         $this->number = $this->thing->json->readVariable(["charley", "number"]);
         $this->suit = $this->thing->json->readVariable(["charley", "suit"]);
 
-
-
         if (
             $this->nom == false or
             $this->number == false or
             $this->suit == false
         ) {
-$this->getCard();
+            $this->getCard();
 
             $this->thing->json->writeVariable(["charley", "nom"], $this->nom);
             $this->thing->json->writeVariable(
@@ -194,6 +201,8 @@ $this->getCard();
             $sms .= $this->radiogram;
         }
 
+        $sms .= " " . $this->response;
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -283,11 +292,21 @@ $this->getCard();
         }
 
         // Load in the cast. And roles.
-        $file = $this->resource_path . 'charley/messages.txt';
+        $file = $this->resource_path . 'charley/messages-a01.txt';
 
         if (!file_exists($file)) {
-            $this->response .= "Could not load cards. ";
+            $this->response .= "Could not load radiogram cards. ";
             return;
+        }
+
+        if ($this->mode == 'voice') {
+            $file = $this->resource_path . 'charley/voice-a01.txt';
+
+            if (!file_exists($file)) {
+                $this->response .= "Could not load voice cards. ";
+
+                return true;
+            }
         }
 
         $contents = file_get_contents($file);
@@ -298,6 +317,7 @@ $this->getCard();
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
+                //var_dump($line);
                 $arr = explode(",", $line);
 
                 $nom = $arr[0]; // Describer of the card
@@ -353,7 +373,6 @@ $this->getCard();
         $this->getCards();
 
         if ($this->nom == false or $this->suit == false) {
-
             if (!isset($this->card_list)) {
                 return true;
             }
@@ -375,19 +394,41 @@ $this->getCard();
         $this->role_to = $this->card['to'];
 
         if ($this->number == "X") {
-            $this->number = "REPORT";
+            $this->instruction = "REPORT" . " " . $this->unit;
         }
         if ($this->number == 0.5) {
-            $this->number = "HALVE";
+            $this->instruction = "HALVE" . " " . $this->unit;
+        }
+
+        if ($this->number == "x0.5") {
+            $this->instruction = "HALVE" . " " . $this->unit;
+        }
+
+        if ($this->number == "MISS") {
+            $this->instruction = "MISS A TURN";
+        }
+
+        if ($this->number == "-") {
+            $this->instruction = "CHALLENGE";
+        }
+
+        if ($this->number == "FIRST") {
+            $this->instruction = "FIRST CHECKIN";
+        }
+
+        if ($this->number == "0") {
+            $this->instruction = "NO CHANGE TO " . $this->unit;
         }
 
         if (is_numeric($this->number)) {
             if ($this->number < 0) {
-                $this->number = "SUBTRACT " . abs($this->number);
+                $this->instruction =
+                    "SUBTRACT " . abs($this->number) . " " . $this->unit;
             }
             if ($this->number > 0) {
-                $this->number = "ADD " . $this->number;
+                $this->instruction = "ADD " . $this->number . " " . $this->unit;
             }
+
             //if ($this->number == 0) {$this->number = "BINGO";}
         }
 
@@ -408,17 +449,14 @@ $this->getCard();
             "INJECT " .
             $this->text .
             "\n" .
-            $this->number .
-            " " .
-            $this->unit .
-            ".";
+            $this->instruction;
 
         if (
             $this->role_to == "X" and
             $this->role_from == "X" and
             $this->text == "X"
         ) {
-            $this->radiogram = $this->number . " " . $this->unit . ".";
+            $this->radiogram = $this->instruction;
         }
 
         if (
@@ -426,8 +464,7 @@ $this->getCard();
             $this->role_from == "X" and
             $this->text != "X"
         ) {
-            $this->radiogram =
-                $this->text . "\n" . $this->number . " " . $this->unit . ".";
+            $this->radiogram = $this->text . "\n" . $this->instruction;
         }
 
         if (
@@ -444,17 +481,15 @@ $this->getCard();
                 " / " .
                 $this->text .
                 "\n" .
-                $this->number .
-                " " .
-                $this->unit .
-                ".";
+                $this->instruction;
         }
+
+        $this->radiogram .= ".";
 
         //if (isset($this->text)) {
 
-        $this->voice = $this->text;
-
-        //}
+        $this->voice = $this->text . "\n" . $this->instruction;
+        $this->voice .= ".";
     }
 
     function makeMessage()
@@ -542,7 +577,7 @@ $this->getCard();
         }
 
         $web .= "<p>";
-        $web .= "<b>" . $this->number . " " . $this->unit . "</b><br>";
+        $web .= "<b>" . $this->instruction . "</b><br>";
         $web .= "<p>";
 
         //if(isset($this->role_from)) {$web .= $this->role_from;}
@@ -709,7 +744,7 @@ $this->getCard();
                 $text
             );
 
-            $text = $this->number . " " . strtoupper($this->unit);
+            $text = $this->instruction;
 
             $size = 9.5;
             $angle = 0;
