@@ -33,9 +33,6 @@ class Statistics extends Agent
         if (!isset($this->statistics_thing)) {
             $this->statistics_thing = $this->thing;
         }
-        //        if (is_numeric($this->response_time)) {
-        //return;
-        //$this->getStatistics();
     }
 
     public function getStatistics()
@@ -158,7 +155,6 @@ class Statistics extends Agent
                 continue;
             }
 
-
             if (
                 !isset($this->latest_seen) or
                 $created_at > $this->latest_seen or
@@ -166,15 +162,14 @@ class Statistics extends Agent
             ) {
                 $this->latest_seen = $created_at;
 
-
                 if (is_numeric($variables[$variable_agent][$variable_name])) {
                     $this->number = $variables[$variable_agent][$variable_name];
                 }
             }
 
-//            if (!isset($variables[$variable_agent][$variable_name])) {
-//                continue;
-//            }
+            //            if (!isset($variables[$variable_agent][$variable_name])) {
+            //                continue;
+            //            }
 
             $number = $variables[$variable_agent][$variable_name];
             if (strtolower($number) == 'x') {
@@ -382,6 +377,10 @@ array(
             $this->statistics = $statistics;
             return;
         }
+        $number = "X";
+        if (isset($this->number)) {
+            $number = $this->number;
+        }
 
         //return;
         $statistics = [
@@ -398,7 +397,7 @@ array(
                     "latest_seen" => $this->latest_seen,
                     "minimum" => $this->minimum,
                     "maximum" => $this->maximum,
-                    "number" => $this->number,
+                    "number" => $number,
                 ],
             ],
         ];

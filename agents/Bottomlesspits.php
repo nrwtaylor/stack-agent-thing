@@ -188,22 +188,6 @@ $this->node_list = $this->bottomless_pits;
     }
 
 
-/*
-    public function run()
-    {
-//        $this->thing->choice->Choose($this->state);
-//        $this->thing->log('state is "' . $this->state . '".');
-
-      //  $this->getWumpus();
- //       $this->getClocktime();
-   //     $this->getBar();
-     //   $this->getCoordinate();
-
-     //   $this->getTick();
-
-
-    }
-*/
     public function loop()
     {
 

@@ -31,7 +31,6 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
-
         //microtime(true);
         if ($thing == null) {
             $thing = new Thing(null);
@@ -86,7 +85,6 @@ class Agent
         // And some more stuff
         $this->short_name = $thing->container['stack']['short_name'];
         $this->stack_state = $thing->container['stack']['state'];
-
 
         $this->sqlresponse = null;
 
@@ -1002,7 +1000,6 @@ class Agent
     public function makeInfo()
     {
         if (!isset($this->thing_report['info'])) {
-
             if (isset($this->info)) {
                 $this->thing_report['info'] = $this->info;
                 return;
@@ -1011,11 +1008,11 @@ class Agent
             $info = $this->info();
             $this->thing_report['info'] = $info;
             $this->info = $info;
-
         }
     }
 
-    public function info() {
+    public function info()
+    {
         $info = "Text WIKIPEDIA " . strtoupper($this->agent_name) . ".";
         return $info;
     }
@@ -1304,7 +1301,6 @@ class Agent
         $this->timestamp = $text;
         return $this->timestamp;
     }
-
 
     /**
      *
@@ -1690,6 +1686,37 @@ class Agent
         }
 
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
+
+        // See if the string has a pointer to a channel nuuid.
+
+        $nuuid = new Nuuid($this->thing, "nuuid");
+        $nuuid->extractNuuid($input);
+
+        if (isset($nuuid->nuuid_uuid) and is_string($nuuid->nuuid_uuid)) {
+            $thing = new Thing($nuuid->nuuid_uuid);
+
+            $f = trim(str_replace($nuuid->nuuid_uuid, "", $input));
+
+            $agent = new Agent($thing, $f);
+            $this->thing_report = $agent->thing_report;
+            return;
+        }
+
+        $uuid = new Uuid($this->thing, "uuid");
+        $uuid = $uuid->extractUuid($input);
+
+        if (isset($uuid) and is_string($uuid)) {
+            $thing = new Thing($uuid);
+
+            //if (!(($thing == false) or ($thing== true))) {
+            if ($thing->thing != false) {
+                $f = trim(str_replace($uuid, "", $input));
+
+                $agent = new Agent($thing, $f);
+                $this->thing_report = $agent->thing_report;
+                return;
+            }
+        }
 
         // Handle call intended for humans.
         //        $t = $this->assert($input);
@@ -2177,6 +2204,7 @@ class Agent
                 // Otherwise check in as last resort...
             }
         }
+
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
             $this->thing->log(

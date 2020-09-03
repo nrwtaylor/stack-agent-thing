@@ -394,6 +394,13 @@ process_name=gearman-worker-%(process_num)s
 sudo supervisorctl reload
 
 -
+
+http://supervisord.org/configuration.html#supervisord-section-values
+supervisord.conf
+add to supervisord section
+minfds = 10000
+
+-
 Helpful
 http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.html
 

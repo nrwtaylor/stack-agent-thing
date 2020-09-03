@@ -10,76 +10,6 @@ class Hey extends Agent
 {
 
 	public $var = 'hello';
-/*
-
-    function __construct(Thing $thing, $agent_input = null)
-    {
-        $this->agent_input = $agent_input;
-		if ($agent_input == null) {
-			$this->requested_agent = "Hey";
-		} else {
-			$this->requested_agent = $input;
-
-			//echo $this->requested_agent;
-			
-
-			//echo $input;
-			//exit();
-		}
-
-
-
-		$this->thing = $thing;
-
-        $this->current_time = $this->thing->time();
-
-		$this->agent_name = 'hey';
-//	        $thing_report['thing'] = $this->thing->thing;
-
-                $this->thing_report['thing'] = $this->thing->thing;
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
-		$this->api_key = $this->thing->container['api']['translink'];
-
-		$this->retain_for = 4; // Retain for at least 4 hours.
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        $this->num_hits = 0;
-
-		$this->sqlresponse = null;
-
-		// Allow for a new state tree to be introduced here.
-		$this->node_list = array("start"=>array("useful", "useful?"));
-
-		$this->thing->log( '<pre> Agent "Hey" running on Thing ' . $this->thing->nuuid . '.</pre>' );
-		$this->thing->log( '<pre> Agent "Hey" received this Thing "' . $this->subject . '".</pre>');
-
-
-        $this->readSubject();
-
-        $this->startHey();
-
-		$this->respond();
-
-        $this->thing_report['info'] = 'Hey';
-        $this->thing_report['help'] = "An agent which says, 'Hey'. Type 'Web' on the next line.";
-        $this->thing_report['num_hits'] = $this->num_hits;
-
-		$this->thing->log( 'completed.' );
-
-        $this->thing_report['log'] = $this->thing->log;
-        $this->thing_report['response'] = $this->response;
-
-		return;
-
-		}
-*/
 
     public function run()
     {
@@ -89,11 +19,10 @@ class Hey extends Agent
     public function init()
     {
 
-        //$this->agent_input = $agent_input;
         if ($this->agent_input == null) {
             $this->requested_agent = "Hey";
         } else {
-            $this->requested_agent = $input;
+            $this->requested_agent = $this->agent_input;
         }
 
         $this->retain_for = 4; // Retain for at least 4 hours.
@@ -101,18 +30,8 @@ class Hey extends Agent
 
         $this->num_hits = 0;
 
-        $this->sqlresponse = null;
-
         // Allow for a new state tree to be introduced here.
         $this->node_list = array("start"=>array("useful", "useful?"));
-
-//        $this->thing->log( '<pre> Agent "Hey" running on Thing ' . $this->thing->nuuid . '.</pre>' );
-//        $this->thing->log( '<pre> Agent "Hey" received this Thing "' . $this->subject . '".</pre>');
-
-
-//        $this->readSubject();
-
-//        $this->startHey();
 
 
         $this->thing_report['info'] = 'Hey';
@@ -148,17 +67,11 @@ class Hey extends Agent
     }
 
 
-// -----------------------
 
-	public function respond()
+	public function respondResponse()
     {
 		// Thing actions
 		$this->thing->flagGreen();
-
-		// Generate email response.
-		$to = $this->thing->from;
-
-		$from = "hey";
 
 		$this->thing->choice->Create($this->agent_name, $this->node_list, "start");
 		$choices = $this->thing->choice->makeLinks('start');
@@ -174,9 +87,7 @@ class Hey extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
-        $this->makeWeb();
 
-		return $this->thing_report;
 	}
 
     public function makeWeb()
@@ -215,7 +126,6 @@ class Hey extends Agent
         $this->nod = new Nod($this->thing, "nod");
 
 		$this->response = null;
-		return;
 	}
 
 }

@@ -885,16 +885,20 @@ class Coordinate
         $this->makeSMS();
         $this->makeWeb();
 
+/*
         $test_message =
             'Last thing heard: "' .
             $this->subject .
             '".  Your next choices are [ ' .
             $choices['link'] .
             '].';
+
+
+
         $test_message .= '<br>headcode state: ' . $this->state . '<br>';
 
         $test_message .= '<br>' . $this->sms_message;
-
+*/
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 

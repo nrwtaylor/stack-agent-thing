@@ -315,6 +315,8 @@ return $thingreport;
             $thing = false;
         }
 
+        $sth = null;
+
         $thingreport = [
             'thing' => $thing,
             'info' =>
@@ -356,7 +358,8 @@ return $thingreport;
             //$sth->bindParam(":field_text", $field_text);
 
             $sth->execute();
-
+//            $sth = null;
+            //$sth->close();
             $this->last_update = false;
         } catch (\Exception $e) {
             // Devstack - decide how to handle thing full
@@ -375,6 +378,8 @@ return $thingreport;
             $this->last_update = true;
         }
 
+        $sth = null;
+
         $this->operations_time += microtime(true) - $this->split_time;
         $this->operations += 1;
         //$this->test("writeField");
@@ -390,6 +395,9 @@ return $thingreport;
         $sth->execute();
 
         $thing_count = $sth->fetchColumn();
+
+        $sth = null;
+
 
         $thingreport = [
             'things' => false,
@@ -455,7 +463,8 @@ return $thingreport;
             $nom_to = $to;
 
             $query->execute();
-
+$query = null;
+return true;
             return $query;
         } catch (\Exception $e) {
             // Devstack - decide how to handle thing full
@@ -497,6 +506,9 @@ return $thingreport;
             $sth->bindParam("uuid", $this->uuid);
             $sth->execute();
             $thing = $sth->fetchObject();
+
+            $sth = null;
+
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -536,6 +548,9 @@ return $thingreport;
         );
         $sth->bindParam("uuid", $this->uuid);
         $sth->execute();
+
+        $sth = null;
+
 
         $thingreport = ['info' => 'That thing was forgotten.'];
         return $thingreport;
@@ -612,6 +627,8 @@ return $thingreport;
 
             $things = $sth->fetchAll();
 
+            $sth = null;
+
             $thingreport['info'] =
                 'So here are Things with the association you provided. That\'s what you want';
             $thingreport['things'] = $things;
@@ -668,6 +685,8 @@ return $thingreport;
 
             $things = $sth->fetchAll();
 
+            $sth = null;
+
             $thingreport['info'] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport['things'] = $things;
@@ -679,6 +698,43 @@ return $thingreport;
 
         return $thingreport;
     }
+
+    function nuuidSearch($nuuid)
+    {
+        $user_search = $this->from;
+        $hash_user_search = hash($this->hash_algorithm, $user_search);
+
+        $nuuid = "$nuuid%"; // Value to search for in Variables
+
+        $thingreport['things'] = [];
+
+        try {
+            $query =
+                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND uuid LIKE :nuuid ORDER BY created_at DESC";
+
+            $sth = $this->container->db->prepare($query);
+
+            $sth->bindParam(":user_search", $user_search);
+            $sth->bindParam(":hash_user_search", $hash_user_search);
+
+            $sth->bindParam(":nuuid", $nuuid);
+            $sth->execute();
+
+            $things = $sth->fetchAll();
+
+            $sth = null;
+
+            $thingreport['info'] =
+                'So here are Things with the nuuid you provided.';
+            $thingreport['things'] = $things;
+        } catch (\PDOException $e) {
+            $thingreport['info'] = $e->getMessage();
+            $thingreport['things'] = [];
+        }
+
+        return $thingreport;
+    }
+
 
     /**
      *
@@ -790,6 +846,9 @@ return $thingreport;
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
         $things = $sth->fetchAll();
+
+        $sth = null;
+
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
         $thingreport = [
             'things' => $things,
@@ -831,6 +890,9 @@ return $thingreport;
         try {
             $sth->execute();
             $things = $sth->fetchAll();
+
+            $sth = null;
+
         } catch (\PDOException $e) {
             $things = array();
             //            $t = new Thing(null);
@@ -1614,6 +1676,8 @@ return $thingreport;
         $sth->bindParam("nom_from", $nom_from);
         $sth->execute();
         $things = $sth->fetchAll();
+
+        $sth = null;
 
         $thingreport = [
             'thing' => $things,

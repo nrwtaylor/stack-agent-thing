@@ -301,7 +301,7 @@ class Nonsense extends Agent
             $v[$i] = $word;
         }
 
-        $this->nonsense = implode($v, " ");
+        $this->nonsense = implode(" ", $v);
 
         return $v;
     }

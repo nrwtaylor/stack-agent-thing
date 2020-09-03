@@ -9,65 +9,82 @@ ini_set("allow_url_fopen", 1);
 
 class Sms
 {
+    public $var = 'hello';
 
-	public $var = 'hello';
-
-    function __construct(Thing $thing, $input = null) 
+    function __construct(Thing $thing, $input = null)
     {
         $this->body = null;
-        if (is_array($input)) {$this->body = $input;}
+        if (is_array($input)) {
+            $this->body = $input;
+        }
 
-		$this->input = $input;
-		$this->cost = 50;
+        $this->input = $input;
+        $this->cost = 50;
 
         $this->agent_prefix = 'Agent "SMS"';
 
-		$this->test= "Development code";
+        $this->test = "Development code";
 
-		$this->thing = $thing;
+        $this->thing = $thing;
         $this->thing_report['thing'] = $this->thing->thing;
-
 
         // Example
 
         $this->api_key = $this->thing->container['api']['nexmo']['api_key'];
-        $this->api_secret = $this->thing->container['api']['nexmo']['api_secret'];
+        $this->api_secret =
+            $this->thing->container['api']['nexmo']['api_secret'];
 
-        $this->numbers = $this->thing->container['stack']['sms_numbers'];
-
+        $this->numbers = [];
+        if (isset($this->thing->container['stack']['sms_numbers'])) {
+            $this->numbers = $this->thing->container['stack']['sms_numbers'];
+        }
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
         $this->from = $thing->from;
         $this->subject = $thing->subject;
-		$this->sqlresponse = null;
+        $this->sqlresponse = null;
 
         // Borrow this from iching
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("sms", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "sms",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("sms", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["sms", "refreshed_at"],
+                $time_string
+            );
         }
 
         $this->thing->json->setField("variables");
-        $this->sms_count = $this->thing->json->readVariable( array("sms", "count") );
+        $this->sms_count = $this->thing->json->readVariable(["sms", "count"]);
 
-        if ($this->sms_count == false) {$this->sms_count = 0;}
+        if ($this->sms_count == false) {
+            $this->sms_count = 0;
+        }
 
         //$this->sendSMS();
         //$this->sendUSshortcode();
 
-        $this->node_list = array("sms send"=>array("sms send"));
+        $this->node_list = ["sms send" => ["sms send"]];
 
-		$this->thing->log( '<pre> Agent "Sms" running on Thing ' .  $this->uuid . ' </pre>' );
-		$this->thing->log( '<pre> Agent "Sms" received this Thing "' .  $this->subject . '"</pre>' );
+        $this->thing->log(
+            '<pre> Agent "Sms" running on Thing ' . $this->uuid . ' </pre>'
+        );
+        $this->thing->log(
+            '<pre> Agent "Sms" received this Thing "' .
+                $this->subject .
+                '"</pre>'
+        );
         $this->sms_per_message_responses = 1;
-        $this->sms_horizon = 2 *60; //s
+        $this->sms_horizon = 2 * 60; //s
 
-/*
+        /*
         if ( $this->sms_count >= $per_message_responses) {
             $this->thing_report = array('thing' => $this->thing->thing, 
                 'choices' => false,
@@ -79,7 +96,7 @@ class Sms
         }
 */
 
-/*
+        /*
 		if ( $this->readSubject() == true) {
 			$this->thing_report = array('thing' => $this->thing->thing, 
 				'choices' => false,
@@ -97,54 +114,64 @@ class Sms
 
         $this->getClient();
 
-        if ( $this->readSubject() == true) {
-            $this->thing_report = array('thing' => $this->thing->thing, 
+        if ($this->readSubject() == true) {
+            $this->thing_report = [
+                'thing' => $this->thing->thing,
                 'choices' => false,
                 'info' => "A cell number wasn't provided.",
-                'help' => 'from needs to be a number.');
+                'help' => 'from needs to be a number.',
+            ];
 
-            $this->thing->log( 'completed without sending a message.' );
+            $this->thing->log('completed without sending a message.');
             return;
         }
 
-		$this->respond();
+        $this->respond();
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
+        $this->thing->log(
+            $this->agent_prefix .
+                'ran for ' .
+                number_format($this->thing->elapsed_runtime()) .
+                'ms.',
+            "OPTIMIZE"
+        );
 
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
+        $this->thing_report['etime'] = number_format(
+            $this->thing->elapsed_runtime()
+        );
 
-		$this->thing->log ( '<pre> Agent "Sms" completed</pre>' );
-
-	}
+        $this->thing->log('<pre> Agent "Sms" completed</pre>');
+    }
 
     function eventSet($input = null)
     {
-      //  if ($input == null) {$input = $this->body;}
+        //  if ($input == null) {$input = $this->body;}
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message0");
-        $this->thing->json->writeVariable( array("sms") , $input  );
+        $this->thing->json->writeVariable(["sms"], $input);
     }
-
 
     public function getClient()
     {
-//devstack
-return;
-if (!isset($this->body)) {return;}
+        //devstack
+        return;
+        if (!isset($this->body)) {
+            return;
+        }
         // https://developers.google.com/api-client-library/php/auth/web-app
-//        $key_file_location = $this->thing->container['api']['google_service']['key_file_location'];
+        //        $key_file_location = $this->thing->container['api']['google_service']['key_file_location'];
 
-//        $this->client = new \Google_Client();
-//        $this->client->setApplicationName("Stan");
-//        $this->client->setAuthConfig($key_file_location);
-//        $this->client->setScopes(['https://www.googleapis.com/auth/chat.bot']);
+        //        $this->client = new \Google_Client();
+        //        $this->client->setApplicationName("Stan");
+        //        $this->client->setAuthConfig($key_file_location);
+        //        $this->client->setScopes(['https://www.googleapis.com/auth/chat.bot']);
 
-//        $hangoutschat = new \Google_Service_HangoutsChat($this->client);
+        //        $hangoutschat = new \Google_Service_HangoutsChat($this->client);
 
-//        $message = new \Google_Service_HangoutsChat_Message();
-//var_dump($this->body);
+        //        $message = new \Google_Service_HangoutsChat_Message();
+        //var_dump($this->body);
         $text = $this->body['text'];
 
         //$type = $this->body["type"];
@@ -153,39 +180,36 @@ if (!isset($this->body)) {return;}
 
         $user_name = $this->body['to'];
 
+        //                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
 
-//                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
+        ///        $thing = new Thing(null);
+        ///        $thing->Create($space_name,$user_name,$text);
+        ///        $agent = new Agent($thing);
 
-
-///        $thing = new Thing(null);
-///        $thing->Create($space_name,$user_name,$text);
-///        $agent = new Agent($thing);
-
-///        $response = $agent->thing_report['sms'];
+        ///        $response = $agent->thing_report['sms'];
 
         //$message->setText($response);
-///        $this->sms_message = $response;
+        ///        $this->sms_message = $response;
         //$hangoutschat->spaces_messages->create($space_name, $message);
 
-///        $this->sendSMS($user_name, $response);
-
+        ///        $this->sendSMS($user_name, $response);
     }
 
+    // -----------------------
 
-// -----------------------
+    private function respond()
+    {
+        // Thing actions
+        $this->thing->flagGreen();
 
-	private function respond() {
-		// Thing actions
-		$this->thing->flagGreen();
+        // Generate email response.
+        $to = $this->from;
 
-		// Generate email response.
-		$to = $this->from;
-
-		if ($this->input != null) {
-			$test_message = $this->input;
-		} else {
-			$test_message = $this->subject;
-		}
+        if ($this->input != null) {
+            $test_message = $this->input;
+        } else {
+            $test_message = $this->subject;
+        }
 
         $this->thing_report['sms'] = "SMS | " . $test_message;
 
@@ -197,78 +221,77 @@ if (!isset($this->body)) {return;}
         // Don't send a message if there isn't enough balance,
         // the number of responses per message would be exceeded, or
         // if the message would be sent 'too late'.
-		if (($this->thing->account['stack']->balance['amount'] >= $this->cost ) and
-            ($this->sms_count < $this->sms_per_message_responses) and
-            ($time_ago < $this->sms_horizon )) {
+        if (
+            $this->thing->account['stack']->balance['amount'] >= $this->cost and
+            $this->sms_count < $this->sms_per_message_responses and
+            $time_ago < $this->sms_horizon
+        ) {
             // Dev stack Read in stack sms seperator value
             // But for now replace sms seperators and translate to \n
             $test_message = str_replace(" | ", "\n", $test_message);
 
-			$response = $this->sendSms($to, $test_message);
+            $response = $this->sendSms($to, $test_message);
 
             if ($response === true) {
                 $this->thing_report['info'] = 'did not send a SMS.';
                 return;
             }
 
-			$this->thing->account['stack']->Debit($this->cost);
+            $this->thing->account['stack']->Debit($this->cost);
 
-// Investigate short codes
-// $this->sendUSshortcode($to, $test_message);
+            // Investigate short codes
+            // $this->sendUSshortcode($to, $test_message);
 
-			$this->thing_report['info'] = '<pre> Agent "Sms" sent a SMS to ' . $this->from . '.</pre>';
+            $this->thing_report['info'] =
+                '<pre> Agent "Sms" sent a SMS to ' . $this->from . '.</pre>';
 
-            $this->thing->json->writeVariable( array("sms", "count"), $this->sms_count + 1 );
-
-
-
-		} else {
-
-			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
-		}
-
+            $this->thing->json->writeVariable(
+                ["sms", "count"],
+                $this->sms_count + 1
+            );
+        } else {
+            $this->thing_report['info'] =
+                'SMS not sent.  Balance of ' .
+                $this->thing->account['stack']->balance['amount'] .
+                " less than " .
+                $this->cost;
+        }
 
         $this->thing_report['help'] = "This is the agent that manages SMS.";
+    }
 
-	}
-
-
-	public function readSubject()
+    public function readSubject()
     {
-		if ( !is_numeric($this->from) ) {
-			// This isn't a textable number.
-			return true;
-		}
+        if (!is_numeric($this->from)) {
+            // This isn't a textable number.
+            return true;
+        }
 
-		return false;
-	}
-
-
+        return false;
+    }
 
     function sendSMS($to, $text)
     {
-
         if (!in_array($this->to, $this->numbers)) {
             return true;
         }
 
         $type = "text";
 
-        if (strlen($text) != strlen(utf8_decode($text)))
-        {
+        if (strlen($text) != strlen(utf8_decode($text))) {
             $type = "unicode";
         }
 
-        $url = 'https://rest.nexmo.com/sms/json?' . http_build_query(
-            [
-                'api_key' =>  $this->api_key,
+        $url =
+            'https://rest.nexmo.com/sms/json?' .
+            http_build_query([
+                'api_key' => $this->api_key,
                 'api_secret' => $this->api_secret,
-                'type'=>$type,
+                'type' => $type,
                 'to' => $to,
                 'from' => $this->to,
-                'text' => $text
-            ]
-        );
+                'text' => $text,
+            ]);
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -277,51 +300,55 @@ if (!isset($this->body)) {return;}
         //Decode the json object you retrieved when you ran the request.
         $decoded_response = json_decode($response, true);
 
-        error_log('You sent ' . $decoded_response['message-count'] . ' messages.');
-        foreach ( $decoded_response['messages'] as $message ) {
+        error_log(
+            'You sent ' . $decoded_response['message-count'] . ' messages.'
+        );
+        foreach ($decoded_response['messages'] as $message) {
             if ($message['status'] == 0) {
                 error_log("Success " . $message['message-id']);
             } else {
-                error_log("Error {$message['status']} {$message['error-text']}");
+                error_log(
+                    "Error {$message['status']} {$message['error-text']}"
+                );
             }
         }
-
     }
 
     function sendUSshortcode($to, $text)
     {
-
         //https://rest.nexmo.com/sc/us/alert/json?api_key={$your_key}&api_secret={$your_secret}&
         // to={$to}&key1={$value1}&key2={$value2}
 
-        $url = 'https://rest.nexmo.com/sc/us/alert/json?' . http_build_query(
-            [
-      'api_key' =>  $this->api_key,
-      'api_secret' => $this->api_secret,
-      'to' => $to,
-      'message' => $text
-    ]
-);
+        $url =
+            'https://rest.nexmo.com/sc/us/alert/json?' .
+            http_build_query([
+                'api_key' => $this->api_key,
+                'api_secret' => $this->api_secret,
+                'to' => $to,
+                'message' => $text,
+            ]);
 
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
 
-// devstack log to db
+        // devstack log to db
 
-  //Decode the json object you retrieved when you ran the request.
-  $decoded_response = json_decode($response, true);
+        //Decode the json object you retrieved when you ran the request.
+        $decoded_response = json_decode($response, true);
 
-  error_log('You sent ' . $decoded_response['message-count'] . ' messages.');
+        error_log(
+            'You sent ' . $decoded_response['message-count'] . ' messages.'
+        );
 
-  foreach ( $decoded_response['messages'] as $message ) {
-      if ($message['status'] == 0) {
-          error_log("Success " . $message['message-id']);
-      } else {
-          error_log("Error {$message['status']} {$message['error-text']}");
-      }
-  }
+        foreach ($decoded_response['messages'] as $message) {
+            if ($message['status'] == 0) {
+                error_log("Success " . $message['message-id']);
+            } else {
+                error_log(
+                    "Error {$message['status']} {$message['error-text']}"
+                );
+            }
+        }
     }
-
-
 }

@@ -218,7 +218,7 @@ class Uuid extends Agent
         // Then look for messages sent to UUIDS
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
         if (preg_match($pattern, $this->to)) {
-            $this->thing->log('Agent "UUID" found a  UUID in address.');
+            $this->thing->log('Agent "UUID" found a UUID in address.');
         }
 
         $status = true;

@@ -6,8 +6,6 @@ use setasign\Fpdi;
 ini_set("allow_url_fopen", 1);
 
 // devstack
-// slow.
-// degraded.
 // dev.
 
 class Tickle extends Agent
@@ -16,6 +14,7 @@ class Tickle extends Agent
 
     function init()
     {
+        $this->initTickle();
         $this->test = "Development code";
 
         $this->node_list = ["tickle" => ["tickle", "tickles", "tickler"]];
@@ -30,8 +29,7 @@ class Tickle extends Agent
             $this->size = 4;
         }
 
-      $this->tickle_now = $this->nowTickle();
-
+        $this->tickle_now = $this->nowTickle();
 
         $this->initTickle();
     }
@@ -72,12 +70,12 @@ class Tickle extends Agent
 
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This creates a tickle. Text WIKIPEDIA TICKLER FILE.";
+        $this->thing_report["info"] =
+            "This creates a tickle. Text WIKIPEDIA TICKLER FILE.";
         $this->thing_report["help"] = 'Try "TICKLER"';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-
     }
 
     function makeChoices()
@@ -120,7 +118,9 @@ class Tickle extends Agent
     function makeSMS()
     {
         $sms = "TICKLE | ";
-        $sms .= "tickle " . $this->textTickle($this->tickle) . " ";
+        if (isset($this->tickle)) {
+            $sms .= "tickle " . $this->textTickle($this->tickle) . " ";
+        }
         $sms .= "now " . $this->textTickle($this->tickle_now) . " ";
 
         $sms .= $this->response;
@@ -133,8 +133,11 @@ class Tickle extends Agent
 
     function makeMessage()
     {
-        $message = $this->textTickle($this->tickle) . "<br>";
-
+        $message = "No message.";
+        if (isset($this->tickle)) {
+            $text = $this->textTickle($this->tickle);
+            $message = $text . "<br>";
+        }
         $uuid = $this->uuid;
 
         $message .=
@@ -145,11 +148,17 @@ class Tickle extends Agent
 
     public function textTickle($tickle = null)
     {
+        if ($tickle == null) {
+            return false;
+        }
+        if ($tickle == false) {
+            return "";
+        }
         // Create a line of text from a tickle object
         // ignore hour and minute for now.
 
         $text =
-            "month " . 
+            "month " .
             $tickle['month'] .
             " day " .
             $tickle['day'] .
@@ -187,26 +196,41 @@ class Tickle extends Agent
     {
         //if ($text == null) {return false;}
 
-        $at_agent = new At($this->thing, "at");
+        //$at_agent = new At($this->thing, "at");
 
-        $at_agent->extractAt($text);
+        $this->at_agent->extractAt($text);
 
-        $month = "X";
+        $month = $this->at_agent->month;
 
-        $day = $at_agent->day;
-        $hour = $at_agent->hour;
-        $minute = $at_agent->minute;
+        $day = $this->at_agent->day;
+        $hour = $this->at_agent->hour;
+        $minute = $this->at_agent->minute;
 
-        $number_agent = new Number($this->thing, "number");
-        $number_agent->extractNumber($text);
-        $number = $number_agent->number;
+        $day_number = $this->at_agent->day_number;
+
+        //$number_agent = new Number($this->thing, "number");
+        $this->number_agent->extractNumber($text);
+
+        $number = "X";
+        if (count($this->number_agent->numbers) == 1) {
+            $number = $this->number_agent->number;
+        }
+
+if (($number == "X") and (is_numeric($day_number))) {
+$number = $day_number;
+
+}
+
+//$text = "test";
 
         $tickle = [
             "month" => $month,
             "day" => $day,
+            "day number" => $day_number,
             "hour" => $hour,
             "minute" => $minute,
             "number" => $number,
+            "text" => $text
         ];
 
         if ($text == null) {
@@ -215,6 +239,57 @@ class Tickle extends Agent
 
         return $tickle;
     }
+
+function tableTickle($tickles = null) {
+
+        $tickle_now = $this->nowTickle();
+
+
+if ($tickles == null) {return false;}
+
+            // factor into seperate agent.
+            $html_table = '<div class="Table">
+                 <div class="TableRow">
+                 <div class="TableHead"><strong>ID</strong></div>';
+
+foreach($this->tickle_now as $i=>$j) {
+
+$html_table .=
+                 '<div class="TableHead"><span style="font-weight: bold;">' . ucwords($i) . '</span></div>';
+
+}
+
+$html_table .= '</div>';
+
+            foreach ($tickles as $uuid => $tickle) {
+                $html_table .= '<div class="TableRow">';
+
+                    $html_table .=
+                        '<div class="TableCell">' . substr($uuid, 0, 4) . '</div>';
+
+                $t = "";
+                foreach ($tickle as $bin_name => $q) {
+                    $cell_content = $q;
+                    if (strtolower($q) == strtolower($tickle_now[$bin_name])) {
+                        $t .= "Matched " . $bin_name . " ";
+                        $cell_content = "<b>" . $q ."</b>";
+                    }
+
+                    $html_table .=
+                        '<div class="TableCell">' . $cell_content . '</div>';
+                }
+
+
+                $html_table .= '</div>';
+            }
+            $html_table = $html_table . '</div><p>';
+//            $web .= $html_table;
+//            $web .= "<br>";
+
+return $html_table;
+
+
+}
 
     function makeWeb()
     {
@@ -234,41 +309,30 @@ class Tickle extends Agent
         //            $web .= $value . "<br>";
         //            if ($i == 10) {break;} else {$i += 1;}
         //        }
-
-        $web .= $this->textTickle($this->tickle);
-
-        $web .= "<br>";
-
+        if (isset($this->tickle)) {
+            $web .= $this->textTickle($this->tickle);
+            $web .= "<br>";
+        }
         if (!isset($this->tickles)) {
             $this->getTickles();
         }
+
+//        $html_table = $this->tableTickle($this->tickles);
+
         if (isset($this->tickles)) {
-            foreach ($this->tickles as $uuid => $array) {
-                //$text= $this->textTickle($array);
 
-                $haystack =
-                    $array['subject'] .
-                    " created " .
-                    $array['created_at'] .
-                    " " .
-                    $array['variables']['refreshed_at'];
+            $ref_tickles = array($tickle_now);
+            $html_table = $this->tableTickle($ref_tickles);
 
-                $tickle = $this->makeTickle($haystack);
-                $t = "";
-                foreach ($tickle as $bin_name => $q) {
-                    if (strtolower($q) == strtolower($tickle_now[$bin_name])) {
-                        $t .= "Matched " . $bin_name . " ";
-                    }
-                }
+            $web .= $html_table;
+            $web .= "<br>";
+            $web .= "<p>";
 
-                //exit();
+            $html_table = $this->tableTickle($this->tickles);
 
-                $web .= $haystack;
-                $web .= "<br>";
-                $web .= $t;
-                // exit();
-                // $this->textTickle();
-            }
+            $web .= $html_table;
+            $web .= "<br>";
+
         }
 
         $web .= "<br><br>";
@@ -280,15 +344,8 @@ class Tickle extends Agent
         $txt = "This is an index of semi-unique TICKLE.\n";
         $txt .= 'Duplicate TICKLE omitted.';
         $txt .= "\n";
-        //$txt .= count($this->lattice). ' cells retrieved.';
 
         $txt .= "\n";
-        //$txt .= str_pad("INDEX", 15, ' ', STR_PAD_LEFT);
-        //$txt .= " " . str_pad("DUPLICABLE", 10, " ", STR_PAD_LEFT);
-        //$txt .= " " . str_pad("STATE", 10, " " , STR_PAD_RIGHT);
-        //$txt .= " " . str_pad("VALUE", 10, " ", STR_PAD_LEFT);
-
-        //$txt .= " " . str_pad("COORD (X,Y)", 6, " ", STR_PAD_LEFT);
 
         $txt .= "\n";
         $txt .= "\n";
@@ -298,15 +355,6 @@ class Tickle extends Agent
         $offset = 0;
         $page = 1;
         $i = 1;
-
-        //$this->duplicables_list = array();
-        //foreach(range($this->min,$this->max) as $index) {
-        //    if ($this->index[$index] == false) {continue;}
-
-        //    $this->duplicables_list[$i] = $this->index[$index];
-        //    $i +=1;
-        //    $max_i = $i;
-        //}
 
         $i = 0;
         $blanks = true;
@@ -368,6 +416,8 @@ class Tickle extends Agent
 
     public function initTickle()
     {
+        $this->at_agent = new At($this->thing, "at");
+        $this->number_agent = new Number($this->thing, "number");
     }
 
     public function readTickle($text = null)
@@ -569,16 +619,20 @@ class Tickle extends Agent
                 $created_at = $thing->created_at;
 
                 if (isset($variables[$agent_name])) {
-                    $tickle = [
-                        "subject" => $subject,
-                        "name" => $agent_name,
-                        "variables" => $variables[$agent_name],
-                        "created_at" => $created_at,
-                    ];
+ //                   $tickle = [
+ //                       "subject" => $subject,
+ //                       "name" => $agent_name,
+ //                       "variables" => $variables[$agent_name],
+ //                       "created_at" => $created_at,
+ //                   ];
 
                     if (!isset($tickles[$uuid])) {
                         $tickles[$uuid] = [];
                     }
+
+$tickle = $this->makeTickle($subject);
+
+
                     $tickles[$uuid] = array_merge($tickles[$uuid], $tickle);
 
                     //$this->tickles[] = $tickle;

@@ -98,7 +98,7 @@ class Quiet extends Agent
             $this->response .= "Got previous state. ";
         }
 
-        $this->response .= $this->previous_state . ". ";
+        //$this->response .= $this->previous_state . ". ";
 
         if (!isset($this->previous_state)) {
             $this->previous_state = "off";

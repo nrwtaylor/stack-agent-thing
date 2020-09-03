@@ -229,8 +229,15 @@ class At extends Agent
     {
         $this->parsed_date = date_parse($input);
 
+        $month = $this->parsed_date['month'];
+        $this->month = $month;
+
         $minute = $this->parsed_date['minute'];
         $hour = $this->parsed_date['hour'];
+
+        $day_number = $this->parsed_date['day'];
+        $this->day_number = $day_number;
+
         $day = $this->extractDay($input);
 
         // See what numbers are in the input

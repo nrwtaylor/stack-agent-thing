@@ -223,16 +223,37 @@ class Baseline extends Agent
         $this->response_time = $age;
     }
 
-public function statisticsBaseline() {
+    public function statisticsBaseline()
+    {
+        $statistics_agent = new Statistics(
+            $this->thing,
+            "statistics baseline response_time"
+        );
+        $this->response .= $statistics_agent->response;
+        //var_dump($statistics_agent->statistics);
 
-$statistics_agent = new Statistics($this->thing, "statistics baseline response_time");
-$this->response .= $statistics_agent->response;
-//var_dump($statistics_agent->statistics);
-
-$this->statistics_text = "[" . $statistics_agent->minimum . " (" . $statistics_agent->mean . ") " . $statistics_agent->maximum . "] " . "N=" . $statistics_agent->count. " " . $statistics_agent->number;
-
-}
-
+        $this->statistics_text = "";
+        if (
+            isset($statistics_agent->minimum) and
+            isset($statistics_agent->mean) and
+            isset($statistics_agent->maximum) and
+            isset($statistics_agent->count) and
+            isset($statistics_agent->number)
+        ) {
+            $this->statistics_text =
+                "[" .
+                $statistics_agent->minimum .
+                " (" .
+                $statistics_agent->mean .
+                ") " .
+                $statistics_agent->maximum .
+                "] " .
+                "N=" .
+                $statistics_agent->count .
+                " " .
+                $statistics_agent->number;
+        }
+    }
 
     function makeSMS()
     {
@@ -241,18 +262,15 @@ $this->statistics_text = "[" . $statistics_agent->minimum . " (" . $statistics_a
             $sms .= number_format($this->response_time * 1000) . "ms\n";
         }
 
-if (isset($this->statistics_text)) {
-$sms .= $this->statistics_text . "\n";
-}
-
+        if (isset($this->statistics_text)) {
+            $sms .= $this->statistics_text . "\n";
+        }
 
         $sms .= trim($this->short_message) . "\n";
-
 
         if (is_string($this->response)) {
             $sms .= $this->response . "\n";
         }
-
 
         $sms .= "TEXT WEB";
         // $this->response;
@@ -646,7 +664,7 @@ $sms .= $this->statistics_text . "\n";
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
-$this->statisticsBaseline();
+        $this->statisticsBaseline();
         if (count($pieces) == 1) {
             if ($input == 'baseline') {
                 $this->getMessage();
