@@ -644,16 +644,6 @@ $agent_name = 'job';
             $subject = $thing->subject;
             $variables = $thing->variables;
             $created_at = $thing->created_at;
-//var_dump($variables);
-
-//var_dump($thing_object);
-//                           $uuid = $thing_object['uuid'];
-//                           $variables_json = $thing_object['variables'];
-//                           $variables = $this->thing->json->jsontoArray($variables_json);
-//
-//var_dump($variables);
-//exit();
-            //$job = array('uuid'=>$uuid, 'refreshed_at'=>0);
 
                             if (isset($variables[$agent_name])) {
 $job = array("subject"=>$subject,
@@ -663,13 +653,7 @@ $job = array_merge($job, $variables[$agent_name] );
 
 $this->run_jobs[] = $job;
 
-//var_dump($subject);
-//var_dump($created_at);
-//var_dump($variables[$agent_name]);
-            //                    $things[$uuid] = $variables[$agent_name];
                             }
-
-            //                $response = $this->readAgent($thing_object['task']);
         }
     }
 
