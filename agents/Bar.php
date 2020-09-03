@@ -439,6 +439,7 @@ class Bar extends Agent
         }
         $count_notation = $this->bar_count + 1;
 
+if (file_exists($font)) {
         if ($count_notation != 1 or $count_notation == $this->max_bar_count) {
             imagettftext(
                 $this->image,
@@ -467,6 +468,8 @@ class Bar extends Agent
                 $count_notation + 1
             );
         }
+}
+
     }
 
     public function makePNG()

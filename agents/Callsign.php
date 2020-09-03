@@ -589,7 +589,11 @@ class Callsign extends Agent
                     $contents = $this->callsigns_list;
                     break;
                 }
+
                 $file = $this->resource_path . 'amateur_delim.txt';
+
+                if (file_exists($file) === false) {return true;}
+
                 $pre_contents = @file_get_contents($file);
 
                 if ($pre_contents == false) {
@@ -610,8 +614,10 @@ class Callsign extends Agent
                 }
 
                 $file = $this->resource_path . 'special_callsign.txt';
-                $contents .= file_get_contents($file);
 
+if (file_exists($file) != false) {
+                $contents .= file_get_contents($file);
+}
                 $this->callsigns_list = $contents;
 
                 break;

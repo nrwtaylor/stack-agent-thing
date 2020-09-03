@@ -207,7 +207,17 @@ class Png {
         imagefilledrectangle($image, 0, 0, 125, 125, $white);
         $textcolor = imagecolorallocate($image, 0, 0, 0);
 
+        //check width of the image 
+        $width = imagesx($image); 
+        $height = imagesy($image);
+
+        $this->width = $width;
+        $this->height = $height;
+
+
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+
+if (file_exists($font)) {
 
 $text = $this->text;
 
@@ -222,17 +232,17 @@ $text = $this->text;
         $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
         $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
         extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-
+/*
         //check width of the image 
         $width = imagesx($image); 
         $height = imagesy($image);
 
         $this->width = $width;
         $this->height = $height;
-
+*/
         $pad = 0;
         imagettftext($image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $text);
-
+}
         //var_dump ($width);
         imagestring($image, 2, 100, 0, $this->thing->nuuid, $textcolor);
 

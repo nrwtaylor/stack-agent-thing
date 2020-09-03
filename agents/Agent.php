@@ -2366,6 +2366,8 @@ class Agent
                 $findagent_agent = new Findagent($this->thing, $entity_name);
 
                 $things = $findagent_agent->thing_report['things'];
+
+if (!isset($things[0])) {break;}
                 $uuid = $things[0]['uuid'];
 
                 $thing = new Thing($uuid);

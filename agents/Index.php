@@ -219,6 +219,9 @@ $image_width = 125;
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
         $sizes_allowed = array(72,36,24,18,12,6);
 
+if (file_exists($font)) {
+
+
         foreach($sizes_allowed as $size) {
 
             $angle = 0;
@@ -238,6 +241,9 @@ $image_width = 125;
 
         $pad = 0;
         imagettftext($image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $text);
+
+}
+
         imagestring($image, 2, $image_width-35, 10, $this->thing->nuuid, $textcolor);
 
         $this->image = $image;

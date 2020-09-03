@@ -19,26 +19,6 @@ class City extends Agent
 
     public function init()
     {
-        //    function __construct(Thing $thing, $agent_input = null)
-        //    {
-        //        $this->agent_input = $agent_input;
-
-        //        $this->thing = $thing;
-        //        $this->start_time = $this->thing->elapsed_runtime();
-        //        $this->thing_report['thing'] = $this->thing->thing;
-        //        $this->agent_name = "city";
-        //       $this->agent_prefix = 'Agent "City" ';
-
-        //     $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
-
-        // $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
-
-        // Get some stuff from the stack which will be helpful.
-        //        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        //    $this->word = $thing->container['stack']['word'];
-        //  $this->email = $thing->container['stack']['email'];
-
         $this->keywords = [
             'city',
             'next',
@@ -62,19 +42,6 @@ class City extends Agent
 
         $this->test = "Development code"; // Always iterative.
 
-        // Non-nominal
-        //        $this->uuid = $thing->uuid;
-        //      $this->to = $thing->to;
-
-        // Potentially nominal
-        //  $this->subject = $thing->subject;
-
-        // Treat as nominal
-        //      $this->from = $thing->from;
-
-        // Agent variables
-        //    $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
-
         $this->state = null; // to avoid error messages
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/city';
@@ -87,26 +54,6 @@ class City extends Agent
             "variables city " . $this->from
         );
         $this->city_code = $this->railway_city->getVariable("city_code");
-
-        //		$this->readSubject();
-
-        // Generate a response based on that intent.
-
-        //        if ($this->agent_input == null) {
-        //		    $this->Respond();
-        //        }
-
-        //        if ($this->agent_input != "extract") {
-        //            $this->set();
-        //        }
-
-        //        $this->thing->log( $this->agent_prefix .' loaded city_name ' . $this->city_name . " and city_code " . $this->city_code . "." );
-
-        //      $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-        //    $this->thing_report['log'] = $this->thing->log;
-        //  $this->thing_report['response'] = $this->response;
-
-        //		return;
     }
 
     function set()
@@ -884,44 +831,46 @@ class City extends Agent
             $white
         );
 
+        $width = imagesx($image);
+        $height = imagesy($image);
+
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
         $sizes_allowed = [72, 36, 24, 12, 6];
 
-        foreach ($sizes_allowed as $size) {
-            $angle = 0;
-            $bbox = imagettfbbox($size, $angle, $font, $text);
-            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            $bbox["width"] =
-                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-            $bbox["height"] =
-                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        if (file_exists($font)) {
+            foreach ($sizes_allowed as $size) {
+                $angle = 0;
+                $bbox = imagettfbbox($size, $angle, $font, $text);
+                $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+                $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+                $bbox["width"] =
+                    max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                    min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+                $bbox["height"] =
+                    max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                    min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+                extract($bbox, EXTR_PREFIX_ALL, 'bb');
 
-            //check width of the image
-            $width = imagesx($image);
-            $height = imagesy($image);
-            if ($bbox['width'] < $image_width - 50) {
-                break;
+                if ($bbox['width'] < $image_width - 50) {
+                    break;
+                }
             }
-        }
 
-        $pad = 0;
-        imagettftext(
-            $image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
-            $grey,
-            $font,
-            $text
-        );
+            $pad = 0;
+            imagettftext(
+                $image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + $bb_height / 2,
+                $grey,
+                $font,
+                $text
+            );
+        }
         imagestring(
             $image,
             2,

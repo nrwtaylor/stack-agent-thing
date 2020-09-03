@@ -222,6 +222,9 @@ class Chatbot extends Agent
         $this->chatbots = array();
         // Load in the cast. And roles.
         $file = $this->resource_path .'/chatbot/chatbot.txt';
+
+        if (!file_exists($file)) {return true;}
+
         $contents = @file_get_contents($file);
 
         if ($contents === false) {$this->response .= "No chatbot list found. "; return true;}

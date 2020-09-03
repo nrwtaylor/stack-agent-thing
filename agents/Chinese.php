@@ -45,7 +45,10 @@ class Chinese extends Agent {
             $words = $this->getConcept($text);
             if ($words != false) {
                 $this->words = array_merge($this->getConcept($text));
+
+if (isset($this->words[0])) {
                 $this->word = $this->words[0];
+}
             }
         }
 
@@ -264,7 +267,13 @@ if (isset($this->keywords[0])) {
         // Makes a one character dictionary
 
         $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+
+$contents = "";
+if (file_exists($file)) {
+
         $contents = file_get_contents($file);
+}
+
 
 
         $separator = "\r\n";
@@ -606,26 +615,53 @@ if ($value == 6) {$pointer += 1;}
             // Drop through
         case 'keywords':
             $file = $this->resource_path .'chinese/chinese-keywords.txt';
-            $contents = file_get_contents($file);
+$contents = "";
+if (file_exists($file)) {
+
+        $contents = file_get_contents($file);
+}
             break;
         case 'agent':
             $file = $this->resource_path . 'chinese/chinese-agent.txt';
-            $contents = file_get_contents($file);
+$contents = "";
+if (file_exists($file)) {
+
+        $contents = file_get_contents($file);
+}
 
             break;
         case 'list':
             $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
-            $contents = file_get_contents($file);
+//            $contents = file_get_contents($file);
+$contents = "";
+if (file_exists($file)) {
+
+        $contents = file_get_contents($file);
+}
+
+
             break;
 
         case 'english-chinese':
             $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
-            $contents = file_get_contents($file);
+//            $contents = file_get_contents($file);
+$contents = "";
+if (file_exists($file)) {
+
+        $contents = file_get_contents($file);
+}
+
             break;
 
         case 'unicode':
             $file = $this->resource_path . 'chinese/unicode.txt';
-            $contents = file_get_contents($file);
+//            $contents = file_get_contents($file);
+$contents = "";
+if (file_exists($file)) {
+
+        $contents = file_get_contents($file);
+}
+
             break;
         case 'context':
             $this->contextChinese();

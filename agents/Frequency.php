@@ -233,6 +233,8 @@ if (!isset($this->band)) {return;}
 
         $data_source = $this->resource_path . "ised/frequencies.txt";
 
+if (!file_exists($data_source)) {return;}
+
         $file_flag = true;
 
         $data = @file_get_contents($data_source);

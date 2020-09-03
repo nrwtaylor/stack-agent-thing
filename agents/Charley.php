@@ -74,11 +74,15 @@ class Charley extends Agent
         $this->number = $this->thing->json->readVariable(["charley", "number"]);
         $this->suit = $this->thing->json->readVariable(["charley", "suit"]);
 
+
+
         if (
             $this->nom == false or
             $this->number == false or
             $this->suit == false
         ) {
+$this->getCard();
+
             $this->thing->json->writeVariable(["charley", "nom"], $this->nom);
             $this->thing->json->writeVariable(
                 ["charley", "number"],
@@ -128,13 +132,15 @@ class Charley extends Agent
         //var_dump($this->c->agent->matches);
 
         $this->charlies = [];
+        if (isset($this->c->agent->matches['charley'])) {
+            $matches = $this->c->agent->matches['charley'];
 
-        $matches = $this->c->agent->matches['charley'];
-
-        foreach ($matches as $i => $match) {
-            //var_dump($match);
-            $this->charlies[] = $match['words'];
+            foreach ($matches as $i => $match) {
+                //var_dump($match);
+                $this->charlies[] = $match['words'];
+            }
         }
+
         //var_dump($this->charlies);
         // Charley variables
 
@@ -159,11 +165,9 @@ class Charley extends Agent
         $this->makeChoices();
 
         $this->thing_report["info"] = "This creates an exercise message.";
-        // 		$this->thing_report["help"] = 'Try NONSENSE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-        //        $this->makeWeb();
     }
 
     public function makeChoices()
@@ -181,10 +185,12 @@ class Charley extends Agent
     public function makeSMS()
     {
         $sms = "CHARLEY " . $this->mode . "\n";
-        if ($this->mode == 'voice') {
+
+        if ($this->mode == 'voice' and isset($this->voice)) {
             $sms .= $this->voice;
         }
-        if ($this->mode == 'radiogram') {
+
+        if ($this->mode == 'radiogram' and isset($this->radiogram)) {
             $sms .= $this->radiogram;
         }
 
@@ -196,6 +202,11 @@ class Charley extends Agent
     {
         // Load in the cast. And roles.
         $file = $this->resource_path . '/charley/charley.txt';
+
+        if (!file_exists($file)) {
+            return true;
+        }
+
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
@@ -272,7 +283,13 @@ class Charley extends Agent
         }
 
         // Load in the cast. And roles.
-        $file = $this->resource_path . '/charley/messages.txt';
+        $file = $this->resource_path . 'charley/messages.txt';
+
+        if (!file_exists($file)) {
+            $this->response .= "Could not load cards. ";
+            return;
+        }
+
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
@@ -336,13 +353,18 @@ class Charley extends Agent
         $this->getCards();
 
         if ($this->nom == false or $this->suit == false) {
+
+            if (!isset($this->card_list)) {
+                return true;
+            }
+
             $this->card = $this->card_list[array_rand($this->card_list)];
             $this->nom = $this->card['nom'];
             $this->suit = $this->card['suit'];
             $this->number = $this->card['number'];
         }
 
-        $this->card = $this->cards[$this->nom][$this->suit];
+        $this->card = $this->cards[strtoupper($this->nom)][$this->suit];
 
         $this->text = $this->card['text'];
         if ($this->text == "ROCKY") {
@@ -437,8 +459,10 @@ class Charley extends Agent
 
     function makeMessage()
     {
-        $message = $this->radiogram . "<br>";
-
+        $message = "";
+        if (isset($this->radiogram)) {
+            $message .= $this->radiogram . "<br>";
+        }
         $uuid = $this->uuid;
 
         $message .=
@@ -512,10 +536,10 @@ class Charley extends Agent
             $web .= "<b>FROM (ROLE)</b> " . $this->role_from . "<br>";
         }
 
-        $web .= "<p>";
-        //        if(isset($this->text)) {
-        $web .= $this->text;
-        //        }
+        if (isset($this->text)) {
+            $web .= "<p>";
+            $web .= $this->text;
+        }
 
         $web .= "<p>";
         $web .= "<b>" . $this->number . " " . $this->unit . "</b><br>";
@@ -555,9 +579,9 @@ class Charley extends Agent
         $txt = "Traffic for CHARLEY.\n";
         $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
         $txt .= "\n";
-
-        $txt .= $this->radiogram;
-
+        if (isset($this->radiogram)) {
+            $txt .= $this->radiogram;
+        }
         $txt .= "\n";
 
         $this->thing_report['txt'] = $txt;
@@ -660,55 +684,57 @@ class Charley extends Agent
 
         $size = 72;
         $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-        $pad = 0;
 
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
-            $textcolor,
-            $font,
-            $text
-        );
+        if (file_exists($font)) {
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            $pad = 0;
 
-        $text = $this->number . " " . strtoupper($this->unit);
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + $bb_height / 2,
+                $textcolor,
+                $font,
+                $text
+            );
 
-        $size = 9.5;
-        $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            $text = $this->number . " " . strtoupper($this->unit);
 
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            ($height * 11) / 12,
-            $textcolor,
-            $font,
-            $text
-        );
+            $size = 9.5;
+            $angle = 0;
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, 'bb');
 
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                ($height * 11) / 12,
+                $textcolor,
+                $font,
+                $text
+            );
+        }
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 

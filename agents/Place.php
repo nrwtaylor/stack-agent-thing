@@ -467,8 +467,11 @@ $found = false;
             }
         }
 
+
         // Add in a set of default places
         $file = $this->resource_path . 'place/places.txt';
+
+if (file_exists($file)) {
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
@@ -495,7 +498,7 @@ $found = false;
         } else {
             // error opening the file.
         }
-
+}
         // Indexing not implemented
         $this->max_index = 0;
 
@@ -1070,6 +1073,11 @@ $found = false;
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
         $sizes_allowed = [72, 36, 24, 12, 6];
 
+            $width = imagesx($image);
+            $height = imagesy($image);
+
+if (file_exists($font)) {
+
         foreach ($sizes_allowed as $size) {
             $angle = 0;
             $bbox = imagettfbbox($size, $angle, $font, $text);
@@ -1084,8 +1092,8 @@ $found = false;
             extract($bbox, EXTR_PREFIX_ALL, 'bb');
 
             //check width of the image
-            $width = imagesx($image);
-            $height = imagesy($image);
+//            $width = imagesx($image);
+//            $height = imagesy($image);
             if ($bbox['width'] < $image_width - 50) {
                 break;
             }
@@ -1102,6 +1110,8 @@ $found = false;
             $font,
             $text
         );
+}
+
         imagestring(
             $image,
             2,

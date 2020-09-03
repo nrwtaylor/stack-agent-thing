@@ -269,7 +269,13 @@ class Proword extends Word
 
         $this->librex_name = $librex_name;
 
-        $this->librex = file_get_contents($file);
+$contents = "";
+if (file_exists($file)) {
+        $contents = file_get_contents($file);
+}
+
+
+        $this->librex = $contents;
     }
 
     /**

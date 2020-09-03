@@ -442,6 +442,8 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             $angle = 0;
             $pad = 0;
 
+if (file_exists($font)) {
+
             imagettftext(
                 $this->image,
                 $size,
@@ -452,6 +454,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
                 $font,
                 $text
             );
+}
 
             $y = $y + $inc;
         }

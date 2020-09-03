@@ -622,22 +622,27 @@ class Snowflake extends Agent
         $size = $canvas_size_x - 90;
         $angle = 0;
 
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
         //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
-        $pad = 0;
-        //imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
 
+        if (file_exists($font)) {
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            //check width of the image
+            //        $width = imagesx($this->image);
+            //        $height = imagesy($this->image);
+            $pad = 0;
+            //imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
+        }
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
         // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
@@ -1638,14 +1643,22 @@ class Snowflake extends Agent
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
 
-            $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
             $pdf->SetFont('Helvetica', '', 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');
-            $s = $pdf->getTemplatesize($tplidx1);
+            $file = $this->resource_path . 'snowflake/bubble.pdf';
+            if (file_exists($file)) {
+                $pdf->setSourceFile($file);
 
-            $pdf->addPage($s['orientation'], $s);
-            $pdf->useTemplate($tplidx1);
+                //            $pdf->SetFont('Helvetica', '', 10);
+
+                $tplidx1 = $pdf->importPage(1, '/MediaBox');
+                $s = $pdf->getTemplatesize($tplidx1);
+
+                $pdf->addPage($s['orientation'], $s);
+                $pdf->useTemplate($tplidx1);
+            } else {
+                $pdf->addPage();
+            }
             /*
             if (isset($this->hextile_PNG)) {
                 $top_x = -6;
@@ -1663,6 +1676,7 @@ class Snowflake extends Agent
 */
             $this->getNuuid();
             $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+            $pdf->SetFont('Helvetica', '', 10);
             $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
@@ -1691,12 +1705,16 @@ class Snowflake extends Agent
             }
 
             // Page 2
-            $tplidx2 = $pdf->importPage(2);
+            if (file_exists($file)) {
+                $tplidx2 = $pdf->importPage(2);
 
-            $pdf->addPage($s['orientation'], $s);
+                $pdf->addPage($s['orientation'], $s);
 
-            $pdf->useTemplate($tplidx2, 0, 0);
-            // Generate some content for page 2
+                $pdf->useTemplate($tplidx2, 0, 0);
+                // Generate some content for page 2
+            } else {
+                $pdf->addPage();
+            }
 
             $pdf->SetFont('Helvetica', '', 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.

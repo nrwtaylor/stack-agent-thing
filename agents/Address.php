@@ -53,6 +53,8 @@ class Address extends Agent
         $file =
             $this->resource_path . $address_book . '/' . $address_book . '.txt';
 
+if (!file_exists($file)) {return true;}
+
         $handle = fopen($file, "r");
 
         if ($handle) {

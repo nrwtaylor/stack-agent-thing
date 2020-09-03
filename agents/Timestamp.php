@@ -47,9 +47,10 @@ class Timestamp extends Agent
 
     function test()
     {
-        $test_corpus = @file_get_contents(
-            $this->resource_path . "timestamp/test.txt"
-        );
+$file = $this->resource_path . "timestamp/test.txt";
+if (!file_exists($file)) {return true;}
+
+        $test_corpus = @file_get_contents($file);
         if ($test_corpus === false) {
             $this->response .= "Could not load test corpus. ";
             return true;

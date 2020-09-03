@@ -229,6 +229,8 @@ class Nuuid extends Agent
         $radius = (1.165 * (164 - 2 * $border)) / 3;
 
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+if (file_exists($font)) {
+
         $text = $this->thing->nuuid;
 
         // Add some shadow to the text
@@ -263,7 +265,7 @@ class Nuuid extends Agent
             $font,
             $text
         );
-
+}
         // imagestring($image, 2, 100, 0, $this->roll, $textcolor);
         // imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
 

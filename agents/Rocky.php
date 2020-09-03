@@ -55,6 +55,7 @@ class Rocky extends Agent
 
     function set($requested_state = null)
     {
+        $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(["rocky", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
@@ -460,6 +461,7 @@ class Rocky extends Agent
             $this->inject = $this->bank . "-" . $this->num;
         } else {
             $arr = explode("-", $this->inject);
+//var_dump($arr);
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }

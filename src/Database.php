@@ -315,7 +315,7 @@ return $thingreport;
             $thing = false;
         }
 
-        $sth = null;
+        //$sth = null;
 
         $thingreport = [
             'thing' => $thing,
@@ -378,7 +378,7 @@ return $thingreport;
             $this->last_update = true;
         }
 
-        $sth = null;
+        //$sth = null;
 
         $this->operations_time += microtime(true) - $this->split_time;
         $this->operations += 1;
@@ -396,7 +396,7 @@ return $thingreport;
 
         $thing_count = $sth->fetchColumn();
 
-        $sth = null;
+        //$sth = null;
 
 
         $thingreport = [
@@ -507,7 +507,7 @@ return true;
             $sth->execute();
             $thing = $sth->fetchObject();
 
-            $sth = null;
+            //$sth = null;
 
         } catch (\Exception $e) {
             // devstack look get the error code.
@@ -549,7 +549,7 @@ return true;
         $sth->bindParam("uuid", $this->uuid);
         $sth->execute();
 
-        $sth = null;
+        //$sth = null;
 
 
         $thingreport = ['info' => 'That thing was forgotten.'];
@@ -627,7 +627,7 @@ return true;
 
             $things = $sth->fetchAll();
 
-            $sth = null;
+            //$sth = null;
 
             $thingreport['info'] =
                 'So here are Things with the association you provided. That\'s what you want';
@@ -685,7 +685,7 @@ return true;
 
             $things = $sth->fetchAll();
 
-            $sth = null;
+            //$sth = null;
 
             $thingreport['info'] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
@@ -722,7 +722,7 @@ return true;
 
             $things = $sth->fetchAll();
 
-            $sth = null;
+            //$sth = null;
 
             $thingreport['info'] =
                 'So here are Things with the nuuid you provided.';
@@ -847,7 +847,7 @@ return true;
         }
         $things = $sth->fetchAll();
 
-        $sth = null;
+        //$sth = null;
 
         //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
         $thingreport = [
@@ -891,7 +891,7 @@ return true;
             $sth->execute();
             $things = $sth->fetchAll();
 
-            $sth = null;
+        //    $sth = null;
 
         } catch (\PDOException $e) {
             $things = array();

@@ -51,6 +51,8 @@ class ACP125G extends Agent
 
     function set($requested_state = null)
     {
+        $this->thing->json->setField("variables");
+
         $this->thing->json->writeVariable( array("acp125g", "inject"), $this->inject );
 
         $this->refreshed_at = $this->current_time;

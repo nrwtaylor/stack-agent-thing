@@ -221,7 +221,10 @@ class Word extends Agent
         $contents = "";
         foreach (range("A", "Z") as $v) {
             $file = $this->resource_path_ewol . $v . ' Words.txt';
-            $c = @file_get_contents($file);
+            $c = false;
+            if (file_exists($file)) {
+                $c = @file_get_contents($file);
+            }
             if ($c == false) {
                 return true;
             }
@@ -275,8 +278,10 @@ class Word extends Agent
 
                 $this->thing->log("caught exception");
 
-                $contents = file_get_contents($file);
-
+                $contents = false;
+                if (file_exists($file)) {
+                    $contents = file_get_contents($file);
+                }
                 $this->mem_cached->set('agent-words-list', $contents);
 
                 $this->thing->log("loaded words from text file.");
@@ -292,7 +297,9 @@ class Word extends Agent
                 $contents = "";
                 foreach (range("A", "Z") as $v) {
                     $file = $this->resource_path_ewol . $v . ' Words.txt';
-                    $contents .= file_get_contents($file);
+                    if (file_exists($file)) {
+                        $contents .= file_get_contents($file);
+                    }
                 }
                 $this->ewol_list = $contents;
                 break;
@@ -304,7 +311,10 @@ class Word extends Agent
                 }
 
                 $file = $this->resource_path_words . 'mordok.txt';
-                $contents = file_get_contents($file);
+                $contents = "";
+                if ($file_exists($file)) {
+                    $contents = file_get_contents($file);
+                }
                 $this->mordok_list = $contents;
                 break;
             case 'context':
@@ -382,8 +392,12 @@ class Word extends Agent
         //   }
 
         $file = $this->resource_path_words . 'words.txt';
-        $this->contents = file_get_contents($file);
+        $contents = "";
+        if (file_exists($file)) {
+            $contents = file_get_contents($file);
+        }
 
+        $this->contents = $contents;
         //   if ($this->wordpress_path_to !== false) {
         $this->mem_cached->set('agent-word-contents', $this->contents);
         //   }
@@ -394,7 +408,12 @@ class Word extends Agent
         if (!isset($this->contents)) {
             //$this->getContents();
             $file = $this->resource_path_words . 'words.txt';
-            $contents = file_get_contents($file);
+
+            $contents = "";
+            if (file_exists($file)) {
+                $contents = file_get_contents($file);
+            }
+
             $this->contents = $contents;
         }
 
@@ -443,7 +462,11 @@ class Word extends Agent
     function nearestWord($input)
     {
         $file = $this->resource_path_words . 'words.txt';
-        $contents = file_get_contents($file);
+
+        $contents = "";
+        if (file_exists($file)) {
+            $contents = file_get_contents($file);
+        }
 
         $words = explode("\n", $contents);
 
