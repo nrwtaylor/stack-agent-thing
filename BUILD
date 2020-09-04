@@ -60,6 +60,10 @@ USE stack_db;
 pager less -SFX;
 SELECT * FROM stack ORDER BY created_at DESC limit 99;
 
+Configure my.cnf
+innodb_buffer_pool_size=1G
+
+
 3. Setup PHP
 3 cont. Install PHP extensions
 

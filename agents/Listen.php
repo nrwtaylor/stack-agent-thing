@@ -71,11 +71,24 @@ class Listen extends Agent
         $this->thing->log('looking for contextually close groups');
 
         $group_thing = new Group($this->thing, "find");
-        $this->group_id = $group_thing->thing_report['groups'][0];
+
+        $group_id = false;
+        if (isset($group_thing->thing_report['groups'][0])) {
+            $group_id = $group_thing->thing_report['groups'][0];
+        }
+        //$this->thing->log(
+        //    'found a group nearby called ' . $this->group_id . ''
+        //);
+
+        if ($group_id != false) {$this->group_id = $group_id;
 
         $this->thing->log(
             'found a group nearby called ' . $this->group_id . ''
         );
+
+
+}
+
     }
 
     public function joinGroup($group = null)

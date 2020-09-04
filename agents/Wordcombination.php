@@ -33,35 +33,38 @@ class Wordcombination extends Agent
     public function get()
     {
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable(array(
+        $time_string = $this->thing->json->readVariable([
             "wordcombination",
-            "refreshed_at"
-        ));
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             //$this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                array("wordcombination", "refreshed_at"),
+                ["wordcombination", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(array(
+        $this->reading = $this->thing->json->readVariable([
             "wordcombination",
-            "reading"
-        ));
+            "reading",
+        ]);
     }
 
     public function set()
     {
         $this->thing->json->writeVariable(
-            array("wordcombination", "reading"),
+            ["wordcombination", "reading"],
             $this->reading
         );
 
-        if (count($this->wordcombinations) != 0) {
+        if (
+            isset($this->wordcombinations) and
+            count($this->wordcombinations) != 0
+        ) {
             $this->wordcombination = $this->wordcombinations[0];
             $this->thing->log(
                 $this->agent_prefix .
@@ -106,10 +109,10 @@ class Wordcombination extends Agent
         if (count($words) <= 1) {
             $result = $words;
         } else {
-            $result = array();
+            $result = [];
             for ($i = 0; $i < count($words); ++$i) {
                 $firstword = $words[$i];
-                $remainingwords = array();
+                $remainingwords = [];
                 for ($j = 0; $j < count($words); ++$j) {
                     if ($i != $j) {
                         $remainingwords[] = $words[$j];
@@ -150,39 +153,30 @@ class Wordcombination extends Agent
     {
         $this->cost = 100;
 
-        // Thing stuff
-
         $this->thing->flagGreen();
 
-        // Compose email
-
-        //  $status = false;//
-        //  $this->response = false;
-
-        //  $this->thing->log( "this reading:" . $this->reading );
-
-        // Make SMS
-        $this->makeSMS();
-        $this->thing_report['sms'] = $this->sms_message;
+        //        $this->makeSMS();
+        //        $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
         $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail();
+        //        $this->makeEmail();
 
         $this->thing_report['email'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->reading = count($this->words);
-        $this->thing->json->writeVariable(
-            array("word", "reading"),
-            $this->reading
-        );
+        $this->reading = "X";
+        if (isset($this->words) and count($this->words) > 0) {
+            $this->reading = count($this->words);
+        }
 
-        return $this->thing_report;
+        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
+
+        //        return $this->thing_report;
     }
 
     /**
@@ -193,11 +187,13 @@ class Wordcombination extends Agent
         if (isset($this->words)) {
             if (count($this->words) == 0) {
                 $this->sms_message = "WORD ORDER | no words found";
+                $this->thing_report['sms'] = $this->sms_message;
                 return;
             }
 
             if ($this->words[0] == false) {
                 $this->sms_message = "WORD ORDER | no words found";
+                $this->thing_report['sms'] = $this->sms_message;
                 return;
             }
 
@@ -207,11 +203,13 @@ class Wordcombination extends Agent
                 $this->sms_message = "WORD ORDER IS ";
             }
             $this->sms_message .= implode(" ", $this->words);
+            $this->thing_report['sms'] = $this->sms_message;
+
             return;
         }
 
         $this->sms_message = "WORD ORDER | no match found";
-        return;
+        $this->thing_report['sms'] = $this->sms_message;
     }
 
     /**
@@ -228,19 +226,21 @@ class Wordcombination extends Agent
      */
     public function readSubject()
     {
-if ($this->input == "wordcombination") {return;}
+        if ($this->input == "wordcombination") {
+            return;
+        }
 
         $input = strtolower($this->subject);
         if ($this->agent_input != null) {
             $input = $this->agent_input;
         }
 
-        $keywords = array(
+        $keywords = [
             'wordcombination',
             'word combination',
             'word combo',
-            'word jumble'
-        );
+            'word jumble',
+        ];
         $pieces = explode(" ", strtolower($input));
 
         $this->word_count = count($pieces);

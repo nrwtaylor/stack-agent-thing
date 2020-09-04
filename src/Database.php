@@ -315,7 +315,7 @@ return $thingreport;
             $thing = false;
         }
 
-        //$sth = null;
+        $sth = null;
 
         $thingreport = [
             'thing' => $thing,
@@ -378,7 +378,7 @@ return $thingreport;
             $this->last_update = true;
         }
 
-        //$sth = null;
+        $sth = null;
 
         $this->operations_time += microtime(true) - $this->split_time;
         $this->operations += 1;
@@ -396,8 +396,7 @@ return $thingreport;
 
         $thing_count = $sth->fetchColumn();
 
-        //$sth = null;
-
+        $sth = null;
 
         $thingreport = [
             'things' => false,
@@ -507,8 +506,6 @@ return true;
             $sth->execute();
             $thing = $sth->fetchObject();
 
-            //$sth = null;
-
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -522,6 +519,8 @@ return true;
 
             $thing = false;
         }
+
+        $sth = null;
 
         $thingreport = [
             'thing' => $thing,
@@ -549,7 +548,7 @@ return true;
         $sth->bindParam("uuid", $this->uuid);
         $sth->execute();
 
-        //$sth = null;
+        $sth = null;
 
 
         $thingreport = ['info' => 'That thing was forgotten.'];
@@ -640,6 +639,9 @@ return true;
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
         }
+        
+        $sth = null;
+
         return $thingreport;
     }
 
@@ -667,7 +669,7 @@ return true;
 
         try {
             $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
         //$value = "+$value"; // Value to search for in Variables
 
@@ -685,8 +687,6 @@ return true;
 
             $things = $sth->fetchAll();
 
-            //$sth = null;
-
             $thingreport['info'] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport['things'] = $things;
@@ -695,6 +695,8 @@ return true;
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
         }
+
+        $sth = null;
 
         return $thingreport;
     }
@@ -722,8 +724,6 @@ return true;
 
             $things = $sth->fetchAll();
 
-            //$sth = null;
-
             $thingreport['info'] =
                 'So here are Things with the nuuid you provided.';
             $thingreport['things'] = $things;
@@ -731,6 +731,8 @@ return true;
             $thingreport['info'] = $e->getMessage();
             $thingreport['things'] = [];
         }
+
+        $sth = null;
 
         return $thingreport;
     }
@@ -765,6 +767,8 @@ return true;
             'whatisthis' =>
                 'A list of Things which match at the provided phrase.'
         ];
+
+        $sth = null;
 
         return $thingreport;
     }
@@ -847,9 +851,8 @@ return true;
         }
         $things = $sth->fetchAll();
 
-        //$sth = null;
+        $sth = null;
 
-        //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.', 'help'$
         $thingreport = [
             'things' => $things,
             'info' =>
@@ -891,8 +894,6 @@ return true;
             $sth->execute();
             $things = $sth->fetchAll();
 
-        //    $sth = null;
-
         } catch (\PDOException $e) {
             $things = array();
             //            $t = new Thing(null);
@@ -900,6 +901,8 @@ return true;
 
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
         }
+
+        $sth = null;
 
         $thingreport = [
             'things' => $things,
@@ -937,6 +940,8 @@ return true;
 
         $things = $sth->fetchAll();
 
+        $sth = null;
+
         $thingreport = [
             'things' => $things,
             'info' =>
@@ -972,8 +977,9 @@ return true;
         $sth->execute();
 
         //        $things = $sth->fetchAll();
-        //var_dump($things);
-        //exit();
+
+        $sth = null;
+
         $thingreport = [
             'things' => null,
             'info' => 'Asked to delete records by agent.',
@@ -1023,6 +1029,8 @@ return true;
             $things = false;
         }
 
+        $sth = null;
+
         $thingreport = [
             'things' => $things,
             'info' =>
@@ -1070,6 +1078,8 @@ return true;
             $things = false;
         }
 
+        $sth = null;
+
         $thingreport = [
             'thing' => $things,
             'info' => 'Searches by nom_from and task.',
@@ -1085,7 +1095,7 @@ return true;
 
         $user_search = $this->from;
 
-        $query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' ORDER BY created_at DESC";
+        $query = "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC";
 
 
         $sth = $this->container->db->prepare($query);
@@ -1288,6 +1298,8 @@ return true;
         $sth->execute();
         $things = $sth->fetchAll();
 
+        $sth = null;
+
         $thingreport = [
             'things' => $things,
             'info' =>
@@ -1370,11 +1382,7 @@ return true;
         //$thing = $sth->fetchObject();
         $things = $sth->fetchAll();
 
-        //$this->uuid = $thing->uuid;
-
-        //$this->to = $thing->nom_to;
-        //$this->from = $thing->nom_from;
-        //$this->subject = $thing->task;
+        $sth = null;
 
         $thingreport = [
             'thing' => $things,
@@ -1418,6 +1426,8 @@ return true;
 
         $things = $sth->fetchAll();
 
+        $sth = null;
+
         $thingreport = [
             'things' => $things,
             'info' => 'So here are Things which are flagged as stack reports.',
@@ -1438,6 +1448,8 @@ return true;
         $sth = $this->container->db->prepare($query);
         $sth->execute();
         $things = $sth->fetchAll();
+
+        $sth = null;
 
         $thingreport = [
             'thing' => $things,
@@ -1463,6 +1475,8 @@ return true;
 
         $keys = array_keys($response);
 
+        $sth = null;
+
         $thingreport = [
             'thing' => false,
             'db' => $response,
@@ -1471,8 +1485,6 @@ return true;
                 'There is a limit to the variables the stack can keep track of.',
             'whatisthis' => 'The maximum length of the variables field.'
         ];
-
-        //$thingreport = false;
 
         return $thingreport;
     }
@@ -1492,6 +1504,8 @@ return true;
         $response = $sth->fetchAll();
 
         $keys = array_keys($response);
+
+        $sth = null;
 
         $thingreport = [
             'thing' => false,
@@ -1554,10 +1568,6 @@ return true;
             //      $thing = $sth->fetchObject();
             $things = $sth->fetchAll();
 
-            //    $this->to = $thing->nom_to;
-            //      $this->from = $thing->nom_from;
-            //      $this->subject = $thing->task;
-
             $thingreport = [
                 'things' => $things,
                 'info' =>
@@ -1583,6 +1593,8 @@ return true;
                 'help' => 'It is up to you what you do with these.'
             ];
         }
+
+        $sth = null;
 
         return $thingreport;
     }
@@ -1613,6 +1625,8 @@ return true;
                 'So here are three things you put on the stack.  That\'s what you wanted.',
             'help' => 'It is up to you what you do with these.'
         ];
+
+        $sth = null;
 
         return $thingreport;
     }
