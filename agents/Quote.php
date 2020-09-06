@@ -184,7 +184,7 @@ class Quote extends Agent
         $this->makeChoices();
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] = "This creates a question.";
+        $this->thing_report["info"] = "This creates a quote.";
         $this->thing_report["help"] = 'Try QUOTE.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -213,9 +213,9 @@ class Quote extends Agent
         $this->thing_report['txt'] = $sms;
     }
 
-    public function textQuote($text = null)
+    public function infoQuote($text = null)
     {
-        $t = $this->stripQuote($this->text) . "\n";
+        $t = $this->stripQuote($text) . "\n";
 
         $r = str_replace(' 	', '/', $t);
 
@@ -226,6 +226,13 @@ class Quote extends Agent
             if ($answer == "") {
                 continue;
             }
+
+            // Tailoring.
+            if (is_numeric($answer) and $answer < 100) {
+                continue;
+            }
+
+            // And one more.
             if (substr($answer, 0, 1) == "[") {
                 continue;
             }
@@ -244,7 +251,7 @@ class Quote extends Agent
 
         $sms .= trim($this->short_message) . "\n";
 
-        $sms .= $this->textQuote($this->text) . "";
+        $sms .= $this->infoQuote($this->text) . "";
 
         //$sms .= "TEXT WEB";
 
@@ -334,6 +341,11 @@ class Quote extends Agent
             return true;
         }
 
+        if (!isset($tokens[2])) {
+            return true;
+        }
+
+
         $title = trim(explode(":", $meta[0])[1]);
         $this->title = $title;
         $author = trim(explode(":", $meta[1])[1]);
@@ -400,7 +412,6 @@ class Quote extends Agent
 
     public function getMessage()
     {
-        //        $this->getInject();
         $this->getMessages();
 
         $is_empty_inject = true;
@@ -543,7 +554,7 @@ class Quote extends Agent
 
     public function readSubject()
     {
-        $input = strtolower($this->subject);
+        $input = strtolower($this->input);
 
         $pieces = explode(" ", strtolower($input));
 
