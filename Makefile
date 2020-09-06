@@ -212,7 +212,8 @@ clean: ## Clean up the web folders and settings
 # perhaps also:  mysql? php?
 
 patch: ## Activate a patch
-	sudo sh scripts/patch_local.sh
+	cp -rf . /var/www/$(SERVERNAME)/vendor/nrwtaylor
+	# sudo sh scripts/patch_local.sh
 
 debug: ## Enhanced debugging environment (dev optional?)
 	sudo apt install php-dev
