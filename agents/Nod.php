@@ -8,7 +8,7 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-class Nod {
+class Nod extends Agent {
     // An exercise in augemented virtual collaboration. With water.
     // But a Thing needs to know what minding the gap is.
 
@@ -26,64 +26,78 @@ class Nod {
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
-    function __construct(Thing $thing, $agent_input = null) {
+
+    function init() {
+    //function __construct(Thing $thing, $agent_input = null) {
         // Precise timing
-        $this->start_time = $thing->elapsed_runtime();
+      //  $this->start_time = $thing->elapsed_runtime();
 
-        $this->agent_input = $agent_input;
-        $this->thing = $thing;
+//        $this->agent_input = $agent_input;
+  //      $this->thing = $thing;
 
-        $this->thing_report['thing'] = $thing;
-        $this->agent_name = "nod";
+    //    $this->thing_report['thing'] = $thing;
+      //  $this->agent_name = "nod";
 
         $this->retain_for = 24; // Retain for at least 24 hours.
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
+//        $this->uuid = $thing->uuid;
+  //      $this->to = $thing->to;
+    //    $this->from = $thing->from;
+      //  $this->subject = $thing->subject;
+        //$this->sqlresponse = null;
 
         $this->state = "dev";
 
-        $this->thing->log( 'running on Thing ' . $this->thing->nuuid . '.');
-        $this->thing->log( 'received this Thing "' . $this->subject . '"');
-        $this->thing->log( 'received this Agent Input "' . $this->subject . '"');
+//        $this->thing->log( 'running on Thing ' . $this->thing->nuuid . '.');
+  //      $this->thing->log( 'received this Thing "' . $this->subject . '"');
+    //    $this->thing->log( 'received this Agent Input "' . $this->subject . '"');
 
         // Get some stuff from the stack which will be helpful.
         // Until NOD gets its own.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+ //       $this->web_prefix = $thing->container['stack']['web_prefix'];
+   //     $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+     //   $this->word = $thing->container['stack']['word'];
+       // $this->email = $thing->container['stack']['email'];
 
         $this->time_travel_unit_name = "s";
         $this->time_unit_name = "seconds";
 
-        $this->get(); // load in last known position variables for current player
+    //    $this->get(); // load in last known position variables for current player
 
-        $this->readSubject();
+    //    $this->readSubject();
 
-        $this->doNod();
+//        $this->doNod();
 
-        $this->respond();
+//        $this->respond();
 
-        if ($this->agent_input != "nod") {
-            $this->set();
-        }
+//        if ($this->agent_input != "nod") {
+//            $this->set();
+//        }
         $this->thing->log( 'completed.');
 
         //echo $this->thing->elapsed_runtime() - $this->start_time;
 
 
-        return;
+//        return;
     }
 
+public function run() {
+
+        $this->doNod();
+
+
+}
 
     /**
      * Add in code for setting the current distance travelled.
      */
     function set() {
+
+        if ($this->agent_input == "nod") {
+            return;
+        }
+
+
         // UK Commonwealth spelling
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable( array("nod", "time_travelled"), $this->time_travelled );
@@ -133,28 +147,28 @@ class Nod {
      *
      * @return unknown
      */
-    private function respond() {
+    public function respondResponse() {
         $this->thing->flagGreen();
 
         // This should be the code to handle non-matching responses.
 
-        $to = $this->thing->from;
-        $from = "nod";
+        //$to = $this->thing->from;
+        //$from = "nod";
 
-        $this->makeMessage();
-        $this->makeSms();
+        //$this->makeMessage();
+        //$this->makeSms();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'] ;
         }
 
-        $this->makeWeb();
+        //$this->makeWeb();
 
 
-        $this->thing_report['sms'] = $this->sms_message;
+//        $this->thing_report['sms'] = $this->sms_message;
 
-        return $this->thing_report;
+  //      return $this->thing_report;
     }
 
 
@@ -207,11 +221,15 @@ class Nod {
     public function lastNod() {
         $this->getTime();
 
-        $findagent_thing = new Findagent($this->thing, 'nod');
+       // $findagent_thing = new Findagent($this->thing, 'nod');
 
-        $this->thing->log('Agent "Nod" found ' . count($findagent_thing->thing_report['things']) ." Nod Agent Things." );
-
-        $this->last_created_at =  $findagent_thing->thing_report['things'][0]['created_at'];
+$things = $this->getThings('nod');
+$count = 0;
+if (is_array($things)) {
+$count = count($things);
+}
+        $this->thing->log('Agent "Nod" found ' . $count ." Nod Agent Things." );
+        $this->last_created_at =  $things[0]['created_at'];
     }
 
 
@@ -366,7 +384,7 @@ class Nod {
     /**
      *
      */
-    public function makeSms() {
+    public function makeSMS() {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
         if ((!isset($this->tick_time)) or ($this->tick_time == 0)) {
@@ -478,6 +496,3 @@ class Nod {
 
 
 }
-
-
-?>
