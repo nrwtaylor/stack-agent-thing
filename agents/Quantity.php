@@ -141,28 +141,35 @@ class Quantity extends Agent
         $this->quantities = [];
 
         // See if a headcode record exists.
-        $findagent_thing = new Findagent($this->thing, 'quantity');
-        $count = count($findagent_thing->thing_report['things']);
+        //$findagent_thing = new Findagent($this->thing, 'quantity');
+
+$things = $this->getThings('quantity');
+
+
+if ($things == true) {return;}
+if ($things == null) {return;}
+
+        $count = count($things);
         $this->thing->log(
             'Agent "Quantity" found ' .
-                count($findagent_thing->thing_report['things']) .
+                $count .
                 " quantity Things."
         );
 
-        if ($findagent_thing->thing_report['things'] == true) {
+        if ($things == true) {
         }
 
         if (!$this->is_positive_integer($count)) {
         } else {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
-                as $thing_object
+                array_reverse($things)
+                as $i=>$thing
             ) {
-                $uuid = $thing_object['uuid'];
-
-                $variables_json = $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
-
+                //$uuid = $thing_object['uuid'];
+$uuid = $thing->uuid;
+                //$variables_json = $thing_object['variables'];
+                //$variables = $this->thing->json->jsontoArray($variables_json);
+$variables = $thing->variables;
                 if (
                     isset($variables['quantity']) and
                     isset($variables['headcode'])

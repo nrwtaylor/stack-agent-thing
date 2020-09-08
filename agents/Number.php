@@ -258,14 +258,20 @@ class Number extends Agent
     function historyNumber() {
 
         // See if a stack record exists.
-        $findagent_thing = new Findagent($this->thing, 'number '. $this->horizon);
+        //$findagent_thing = new Findagent($this->thing, 'number '. $this->horizon);
+$things = $this->getThings('number');
 
         $this->numbers_history = array();
-        foreach ($findagent_thing->thing_report['things'] as $thing_object) {
 
-            $variables_json= $thing_object['variables'];
-            $variables = $this->thing->json->jsontoArray($variables_json);
+if ($things == true) {return;}
+if ($things == null) {return;}
 
+
+        foreach ($things as $i=>$thing) {
+
+       //     $variables_json= $thing_object['variables'];
+       //     $variables = $this->thing->json->jsontoArray($variables_json);
+$variables = $thing->variables;
             if (isset($variables['number'])) {
 
                 $number = "X";

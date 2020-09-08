@@ -778,6 +778,10 @@ if ($this->stack_state == 'prod') {
 
         $match = 0;
 
+if ($findagent_thing->thing_report['things'] == true) {
+$this->link_uuid = null;
+return false;}
+
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
@@ -2125,7 +2129,7 @@ if ($this->stack_state == 'prod') {
         }
 
         $this->getLink();
-        if (strtolower($this->prior_agent) == "baseline") {
+        if ( (isset($this->prior_agent)) and (strtolower($this->prior_agent) == "baseline")) {
             $baseline_agent = new Baseline($this->thing, "response");
         }
 

@@ -342,11 +342,20 @@ class Place extends Agent
         $this->places = [];
 
         // See if a headcode record exists.
-        $findagent_thing = new Findagent($this->thing, 'place');
-        $count = count($findagent_thing->thing_report['things']);
+//        $findagent_thing = new Findagent($this->thing, 'place');
+//        $count = count($findagent_thing->thing_report['things']);
+$things = $this->getThings('place');
+
+        $this->max_index = 0;
+
+if ($things == true) {return;}
+if ($things == null) {return;}
+
+$count = count($things);
+
         $this->thing->log(
             'found ' .
-                count($findagent_thing->thing_report['things']) .
+                $count .
                 " place Things."
         );
 
@@ -356,21 +365,21 @@ class Place extends Agent
         //            return array($this->placecode_list, $this->placename_list, $this->places);
         //        }
 
-        if ($findagent_thing->thing_report['things'] == true) {
+        if ($things == true) {
         }
 
         if (!$this->is_positive_integer($count)) {
             // No places found
         } else {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
-                as $thing_object
+                array_reverse($things)
+                as $i=>$thing
             ) {
-                $uuid = $thing_object['uuid'];
-
-                $variables_json = $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
-
+                //$uuid = $thing_object['uuid'];
+$uuid = $thing->uuid;
+                //$variables_json = $thing_object['variables'];
+                //$variables = $this->thing->json->jsontoArray($variables_json);
+$variables = $thing->variables;
                 if (isset($variables['place'])) {
                     $place_code = $this->default_place_code;
                     $place_name = $this->default_place_name;

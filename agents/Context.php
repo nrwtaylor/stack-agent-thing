@@ -152,23 +152,32 @@ class Context
 
         $this->context_thing->json->writeVariable( array("context", "state"), $requested_state );
 
+if (isset($this->context)) {
         $this->context_thing->json->writeVariable( array("context", "context"), $this->context );
+}
+if (isset($this->context_id)) {
         $this->context_thing->json->writeVariable( array("context", "context_id"), $this->context_id );
-
+}
+if (isset($this->variables_agent)) {
         $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
+}
 //!        $this->thing->choice->save('context', $this->state);
 
         $this->thing->json->writeVariable( array("context", "state"), $requested_state );
 
+if (isset($this->context)) {
+
         $this->thing->json->writeVariable( array("context", "context"), $this->context );
+}
+if (isset($this->context_id)) {
+
         $this->thing->json->writeVariable( array("context", "context_id"), $this->context_id );
+}
         $this->thing->json->writeVariable( array("context", "refreshed_at"), $this->current_time );
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
 
-        return;
     }
 
 
@@ -180,54 +189,10 @@ class Context
         // See if a context record exists.
 //        require_once '/var/www/html/stackr.ca/agents/findagent.php';
         $findagent_thing = new Findagent($this->thing, 'thing');
-
         $this->max_index =0;
         $match = 0;
 
-/*
-        $this->contexts = array('identity'=>'uuid',
-                            'headcode'=>'head_code',
-                            'train'=>'head_code',
-                            'transit'=>'transit_id',
-                            'circus'=>null,
-                            'event'=>null,
-                            'place'=>null,
-                            'group'=>'group_id');
-*/
-/*
-        foreach ($findagent_thing->thing_report['things'] as $thing_object) {
-            $ref_time = microtime(true);
-            $uuid = $thing_object['uuid'];
-
-            $thing= new Thing($uuid);
-
-            foreach ($this->contexts as $context=>$context_id) {
-                //echo $context; echo $context_id;
-                //echo "<br>";                
-//exit();
-
-                $variables = $thing->account['stack']->json->array_data;
-
-                if (isset($variables[$context])) {
-
-
-                    $this->context = $context;
-                    $this->context_id = $variables[$context][$context_id];
-                    //break;
-
-                    $this->previous_contexts[] = array("context"=>$this->context, "id"=>$this->context_id, "task"=>$thing_object['task']);;
-                }
-
-            }
-        $run_time = microtime(true) - $ref_time;
-        $milliseconds = round($run_time * 1000);
-        if ($this->verbosity == 9) {
-        $this->thing->log( $this->agent_prefix .' context get forloop ' . $milliseconds . 'ms.' );
-        }
-
-        }
-
-*/
+if ($findagent_thing->thing_report['things'] == true) {return;}
 
         foreach ($findagent_thing->thing_report['things'] as $thing_object) {
             $ref_time = microtime(true);
@@ -965,5 +930,3 @@ function warning_handler($errno, $errstr) {
 
 
 }
-
-?>
