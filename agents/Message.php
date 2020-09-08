@@ -23,6 +23,8 @@ class Message {
      */
     function __construct(Thing $thing, $agent_input = null) {
 
+        $this->response = "";
+
         $this->thing = $thing;
 
         // Set this but overwrite it later if agent_input received

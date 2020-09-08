@@ -2295,6 +2295,8 @@ class Agent
 
         $this->thing->log('now looking at Group Context.');
 
+
+if ($this->stack_state == 'dev') {
         $group_thing = new Group($this->thing, "group");
 
         if (!$group_thing->isGroup($input)) {
@@ -2306,6 +2308,7 @@ class Agent
             $this->thing_report = $group_thing->thing_report;
             return $this->thing_report;
         }
+}
 
         // Here are some other places
 
@@ -2532,6 +2535,7 @@ if (!isset($things[0])) {break;}
         switch (strtolower($this->context)) {
             case 'group':
                 // Now if it is a head_code, it might also be a train...
+if ($this->stack_state == 'dev') {
                 $group_thing = new Group($this->thing, 'group');
                 $this->groups = $group_thing->groups;
 
@@ -2547,6 +2551,8 @@ if (!isset($things[0])) {break;}
 
                     return $this->thing_report;
                 }
+}
+
 
                 //Timecheck
                 $this->thing_report = $this->timeout(
