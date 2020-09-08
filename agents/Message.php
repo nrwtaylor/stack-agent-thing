@@ -351,6 +351,34 @@ $this->stack_email = $this->email;
         }
     }
 
+    public function uuidMessage() {
+
+        $token_thing = new Tokenlimiter($this->thing, 'uuid');
+
+        $dev_overide = null;
+        if ( ($token_thing->thing_report['token'] == 'uuid' ) or ($dev_overide == true) ) {
+
+        } else {
+            $this->response .= "No uuid token found. ";
+            return;
+        }
+
+        $uuid_agent = new Uuid($this->thing, "uuid");
+        $uuids = $uuid_agent->extractUuids($this->sms_message);
+
+        $uuids = array_merge($uuids, $uuid_agent->extractUuids($this->email_message));
+
+        foreach($uuids as $i=>$uuid) {
+
+            $this->sms_message = str_replace($uuid, "<private>", $this->sms_message);
+            $this->email_message = str_replace($uuid, "<private", $this->email_message);
+
+        }
+
+        $this->thing_report['sms'] = $this->sms_message; 
+        $this->thing_report['email'] = $this->email_message; 
+
+    }
 
     /**
      *
@@ -358,6 +386,8 @@ $this->stack_email = $this->email;
      */
     public function respond() {
         //        $this->thing_report['info'] = 'No info available.';
+
+        $this->uuidMessage();
 
         if ($this->isOpen() == "off") {
             $this->thing->log( $this->agent_prefix . ' messaging is off.' , "WARNING");
