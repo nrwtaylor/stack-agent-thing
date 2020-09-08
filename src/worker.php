@@ -2,16 +2,13 @@
 namespace Nrwtaylor\StackAgentThing;
 
 // Refactor to use GLOBAL variable
-//require $GLOBALS['stack_path'] . "vendor/autoload.php";
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require __DIR__ . '/../vendor/autoload.php';
 require '/var/www/stackr.test/vendor/autoload.php';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-echo "Worker redpanda 15 June 2018\n";
+echo "Worker whitefox 8 September 2020\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 $worker->addServer();
@@ -46,11 +43,12 @@ $worker->addFunction($name, function() use($task) {
 while ($worker->work()) {
     echo "\nWaiting for a job\n";
 
-    //  if ($worker->returnCode() != GEARMAN_SUCCESS)
-    //  {
-    //    echo "return_code: " . $worker->returnCode() . "\n";
-    //  }
-    //    echo "\nGearman return code " . $worker->returnCode() . "\n";
+//      if ($worker->returnCode() != GEARMAN_SUCCESS)
+//      {
+//        echo "return_code: " . $worker->returnCode() . "\n";
+//      }
+//        echo "\nGearman return code " . $worker->returnCode() . "\n";
+
 }
 
 function call_agent_function($job)
@@ -73,7 +71,7 @@ function call_agent_function($job)
         $start_time = $thing->elapsed_runtime();
         $thing->Create($arr['to'], $arr['from'], $arr['subject']);
     }
-    //$thing->agent_input = $agent_input;
+
     if ($thing->thing == false) {
         echo "Thing is false";
         return true;
@@ -82,16 +80,15 @@ function call_agent_function($job)
     echo "worker uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
     echo "job timestamp " . $thing->thing->created_at . "\n";
-    //echo "agent input" . $thing->agent_input . "\n";
+
+    echo "agent input" . $agent_input . "\n";
+
     $do_not_respond = false;
     if (isset($arr['body']['messageId'])) {
         $message_id = $arr['body']['messageId'];
 
         $m = $thing->db->variableSearch(null, $message_id);
 
-        //if ( (isset($m['things'])) and (count($m['things']) > 0) ) {
-        //echo "Found existing message already.";
-        //}
         var_dump(count($m['things']));
         if (count($m['things']) > 0) {
             echo "Found message already.";
@@ -105,12 +102,9 @@ function call_agent_function($job)
     $thing->json->setField("message0");
     $thing->json->writeVariable(["msg"], $arr);
 
-    //$thing = new Thing($uuid);
     if ($do_not_respond == false) {
         echo "worker call agent\n";
         $t = new Agent($thing);
-
-        echo "bar";
     }
 
     if (!isset($t->thing_report['sms'])) {
@@ -126,12 +120,11 @@ function call_agent_function($job)
         $t->thing_report['png'] = base64_encode($t->thing_report['png']);
     }
 
-    //    if (isset($t->thing_report['sms'])) {
-    //        $t->thing_report['sms'] = htmlentities($t->thing_report['sms']);
-    //    }
-
     $t->thing_report['png'] = null;
     $t->thing_report['pdf'] = null;
+
+    // Not needed either.
+    $t->thing_report['thing'] = null;
 
     echo "worker ran for " .
         number_format($thing->elapsed_runtime() - $start_time) .
