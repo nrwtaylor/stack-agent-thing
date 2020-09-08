@@ -230,7 +230,6 @@ class Baseline extends Agent
             "statistics baseline response_time"
         );
         $this->response .= $statistics_agent->response;
-        //var_dump($statistics_agent->statistics);
 
         $this->statistics_text = "";
         if (
@@ -428,6 +427,7 @@ class Baseline extends Agent
         }
 
         $brilltagger = new Brilltagger($this->thing, "brilltagger");
+
         $m = $brilltagger->tag($text);
         $this->baseline_tokens = $m;
 
@@ -661,7 +661,7 @@ class Baseline extends Agent
 
     public function readSubject()
     {
-        $input = strtolower($this->subject);
+        $input = strtolower($this->input);
 
         $pieces = explode(" ", strtolower($input));
         $this->statisticsBaseline();

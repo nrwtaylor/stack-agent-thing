@@ -136,6 +136,9 @@ class Statistics extends Agent
         while (count($things) > 0) {
             //		        shuffle($things);
             $thing = array_pop($things);
+
+            if (!isset($thing->uuid)) {continue;}
+
             $uuid = $thing->uuid;
 
             $variables = $thing->variables;

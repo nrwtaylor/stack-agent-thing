@@ -355,7 +355,7 @@ $this->stack_email = $this->email;
 
         $token_thing = new Tokenlimiter($this->thing, 'uuid');
 
-        $dev_overide = null;
+        $dev_overide = false;
         if ( ($token_thing->thing_report['token'] == 'uuid' ) or ($dev_overide == true) ) {
 
         } else {
@@ -366,17 +366,15 @@ $this->stack_email = $this->email;
         $uuid_agent = new Uuid($this->thing, "uuid");
         $uuids = $uuid_agent->extractUuids($this->sms_message);
 
-        $uuids = array_merge($uuids, $uuid_agent->extractUuids($this->email_message));
 
         foreach($uuids as $i=>$uuid) {
 
-            $this->sms_message = str_replace($uuid, "<private>", $this->sms_message);
-            $this->email_message = str_replace($uuid, "<private", $this->email_message);
+            $this->sms_message = str_replace($uuid, "private", $this->sms_message);
 
         }
 
         $this->thing_report['sms'] = $this->sms_message; 
-        $this->thing_report['email'] = $this->email_message; 
+
 
     }
 
@@ -559,8 +557,8 @@ $this->stack_email = $this->email;
         }
 
 
-
-        if ( is_numeric($from) and isset($this->sms_message) and (mb_strlen($from) <= 10)) {
+        if ( is_numeric($from) and isset($this->sms_message) ) {
+        //if ( is_numeric($from) and isset($this->sms_message) and (mb_strlen($from) <= 10)) {
             $this->thing_report['channel'] = 'sms'; // one of sms, email, keyword etc
 
             // Cost is handled by sms.php

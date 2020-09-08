@@ -2876,7 +2876,7 @@ if (!isset($things[0])) {break;}
 
     function mylog($error, $errlvl)
     {
-        var_dump($error);
+//        var_dump($error);
         //        echo $this->response;
         //        echo "\n";
         //        echo $this->thing->log;
