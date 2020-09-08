@@ -92,6 +92,7 @@ class Nuuid extends Agent
         }
 
         if (is_array($nuuids) and count($nuuids) == 1) {
+            $this->response .= "Got this NUUID. ";
             $this->nuuid = $nuuids[0];
             $this->thing->log(
                 'found a nuuid (' . $this->nuuid . ') in the text.'
@@ -178,15 +179,9 @@ class Nuuid extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $web = '<a href="' . $link . '">';
-        $web .=
-            '<img src= "' .
-            $this->web_prefix .
-            'thing/' .
-            $this->uuid .
-            '/nuuid.png">';
+$web .= $this->html_image;
         $web .= "</a>";
 
-//        $web .= "<br><br>";
         $this->thing_report['web'] = $web;
     }
 
@@ -288,6 +283,30 @@ if (file_exists($font)) {
         $this->PNG = $imagedata;
         imagedestroy($this->image);
 
+
+
+        $alt_text = "nuuid for " . $this->uuid;
+
+        $html =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"
+                width="' .
+            $width .
+            '"  
+                alt="' .
+            $alt_text .
+            '" longdesc = "' .
+            $this->web_prefix .
+            'thing/' .
+            $this->uuid .
+            '/qr.txt">';
+
+        $this->html_image = $html;
+
+
+
+
         return $response;
     }
 
@@ -311,9 +330,13 @@ if (file_exists($font)) {
         $things = $thing_report['things'];
 
         if (count($things) == 1) {
+            $this->response .= "Got a UUID from the stack. ";
             $nuuid_uuid = $things[0]['uuid'];
             return $nuuid_uuid;
         }
+
+        $this->response .= "Did not find a corresponding UUID. ";
+
         return false;
     }
 
@@ -330,6 +353,7 @@ if (file_exists($font)) {
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'nuuid') {
+                $this->response .= "Made a random NUUID. ";
                 return;
             }
         }

@@ -76,6 +76,8 @@ class Email {
         $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
         $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
 
+        $this->robot_name = $this->thing->container['stack']['robot_name'];
+
         $this->short_name = $this->thing->container['stack']['short_name'];
 
         $this->word = $thing->container['stack']['word'];
@@ -645,6 +647,9 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
      */
     function generateMultipart($from, $raw_message, $choices = null) {
 
+
+$from = $this->robot_name. $this->mail_postfix;
+
         // useful in dev - to create the same message received by email.
         $this->generateHTML($raw_message, $choices);
 
@@ -720,8 +725,8 @@ Stackr. In order not to receive anymore notifications from Stackr use the follow
      */
     public function sendGeneric($to, $from, $subject, $raw_message, $choices = null) {
 
-        $from = $from .$this->mail_postfix;
-
+    //    $from = $from .$this->mail_postfix;
+$from = $this->robot_name. $this->mail_postfix;
 
         //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
 

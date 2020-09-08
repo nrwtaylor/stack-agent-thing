@@ -77,7 +77,6 @@ class Ping extends Agent
         $this->sms_message = "PING | A message from this Identity pinged us.";
         $this->sms_message .= " | Received " . $this->thing->human_time($this->ping_text) . " ago.";
 
-        $this->sms_message .= " | TEXT WATSON";
         $this->thing_report['sms'] = $this->sms_message;
     }
 

@@ -70,6 +70,9 @@ class makeEmail
         $this->stack_state = $thing->container['stack']['state'];
         $this->short_name = $thing->container['stack']['short_name'];
 
+        $this->robot_name = $thing->container['stack']['robot_name'];
+
+
         // Create some short-cuts.
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -287,6 +290,8 @@ $this->email_message = $message;
 
 	function generateMultipart($from, $raw_message, $choices = null)
     {
+        $from = $this->robot_name .$this->mail_postfix;
+
         // useful in dev - to create the same message received by email.
         $this->generateHTML($raw_message, $choices);
 
@@ -342,7 +347,8 @@ $this->email_message = $message;
 
 	public function sendGeneric($to,$from,$subject,$raw_message, $choices = null)
     {
-		$from = $from .$this->mail_postfix;
+
+		$from = $this->robot_name .$this->mail_postfix;
 
 //https://webdesign.tutsplus.com/articles/build-an-html-email-template-from-scratch--webdesign-12770
 

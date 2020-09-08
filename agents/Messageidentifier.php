@@ -64,12 +64,12 @@ $this->thing_report['sms'] = "MESSAGE IDENTITY | " . $this->identifier;
     {
     }
 
-    function read($text = null)
+    function readMessageidentifier($text = null)
     {
 //        return $this->state;
     }
 
-	public function respond()
+	public function respondResponse()
     {
 
 		// Thing actions
@@ -91,7 +91,7 @@ $this->thing_report['sms'] = "MESSAGE IDENTITY | " . $this->identifier;
         }
         $this->thing_report['help'] = 'This is your Identity.  You can turn your Identity ON and OFF.';
 
-		return;
+//		return;
 
 
 	}

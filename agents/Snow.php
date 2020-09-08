@@ -94,7 +94,7 @@ class Snow extends Agent
             case null:
 
             default:
-                $sms = "SNOW | It is snowing. Everywhere.";
+                $sms = 'SNOW | "It is snowing. Everywhere." ~Yoko Ono';
         }
 
         $sms .= " | snowflakes " . $this->snowflakes;

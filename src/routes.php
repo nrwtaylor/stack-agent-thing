@@ -979,6 +979,20 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                    );
                }
 
+                if (isset($slug) and (!$slug->isSlug($command))) {
+
+                    $datagram = [];
+                    $datagram['thing'] = false;
+                    $datagram['thing_report'] = false;
+
+                    return $this->renderer->render(
+                        $response,
+                        'thing.phtml',
+                        $datagram
+                   );
+               }
+
+
             }
             // Unaddressed web request to a Thing existing on the stack.
             // Enter into stack as coming from web and addressed to stack agent.

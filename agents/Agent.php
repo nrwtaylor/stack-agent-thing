@@ -353,8 +353,13 @@ class Agent
 
         $this->makeWeb();
         // Explore adding in INFO and HELP to web response.
-        $agents = ["response", "help", "info"];
+        $dev_agents = ["response", "help", "info"];
+        $prod_agents = ["response", "help"];
 
+$agents = $dev_agents;
+if ($this->stack_state == 'prod') {
+    $agents = $prod_agents;
+}
         $web = "";
         //        if (isset($this->thing_report['web'])) {
         if (isset($this->thing_report['web'])) {
