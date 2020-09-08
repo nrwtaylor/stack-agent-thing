@@ -615,8 +615,23 @@ class Agent
             return;
         }
 
-        $this->mem_cached = new \Memcached(); //point 2.
-        $this->mem_cached->addServer("127.0.0.1", 11211);
+        // Null?
+       // $this->mem_cached = null;
+
+        try {
+            $this->mem_cached = new \Memcached(); //point 2.
+            $this->mem_cached->addServer("127.0.0.1", 11211);
+        } catch (\Throwable $t) {
+            // Failto
+            $this->mem_cached = new Memory($this->thing, "memory");
+            //restore_error_handler();
+            $this->thing->log('caught throwable.', "WARNING");
+            return;
+        } catch (\Error $ex) {
+
+            return true;
+        }
+
     }
 
     /**
