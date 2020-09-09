@@ -46,9 +46,6 @@ class Winlink extends Agent
         $searchfor = "@winlink.org";
         // Check address against the beta list
 
-        //        $file = '/var/www/stackr.test/resources/slack/id.txt';
-        //        $contents = file_get_contents($file);
-
         if ( strpos(strtolower($this->from), '@winlink.org') !== false) {
             return true;
         }

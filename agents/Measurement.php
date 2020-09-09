@@ -119,8 +119,6 @@ class Measurement extends Agent
         }
     }
 
-    // /var/www/stackr.test/resources/measurement/units-2.19$ sudo nano definitions.units
-
     function extractMeasurements($input = null)
     {
         $filtered_string = "";

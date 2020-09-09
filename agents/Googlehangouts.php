@@ -1,7 +1,6 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-require_once '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/stackr.test/vendor/autoload.php';
+require_once '/var/www/stackr.test/vendor/autoload.php';
 
 
 ini_set('display_startup_errors', 1);

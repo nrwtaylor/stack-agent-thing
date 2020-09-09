@@ -8,8 +8,6 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-//require_once '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/stackr.test/vendor/autoload.php';
 
 
 // Splits sentences into syllables.

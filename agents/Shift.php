@@ -5,15 +5,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-//namespace Nrwtaylor\StackAgentThing;require_once '/var/www/html/stackr.ca/agents/block.php';
-
-//require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
-// factored to
-// call agent 'Agent'
-
 ini_set("allow_url_fopen", 1);
 
 class Shift extends Agent
@@ -207,7 +198,6 @@ class Shift extends Agent
 
     function get()
     {
-        // require_once '/var/www/html/stackr.ca/agents/findagent.php';
         $findagent_thing = new Findagent($this->thing, $this->keyword);
 
         foreach (

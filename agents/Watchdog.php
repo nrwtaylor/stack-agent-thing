@@ -1,8 +1,5 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-//require '/var/www/stackr.test/vendor/autoload.php';
-
-//$GLOBALS['stack'] = '/var/www/stackr.test/';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);

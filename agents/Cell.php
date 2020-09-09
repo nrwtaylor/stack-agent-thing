@@ -445,7 +445,6 @@ class Cell
 
         
         // devstack add path
-        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "test";
         // Add some shadow to the text
@@ -533,7 +532,6 @@ $size = 10;
         list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
 
         // devstack add path
-        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 //        $text = "test";
         // Add some shadow to the text

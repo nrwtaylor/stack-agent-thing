@@ -693,7 +693,6 @@ class Inject extends Agent
 
 
         // devstack add path
-        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "INJET";

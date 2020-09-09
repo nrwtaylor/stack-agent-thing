@@ -271,7 +271,6 @@ $subject = $this->subject;
         }
 
         //new
-        //        require_once '/var/www/html/stackr.ca/agents/makeemail.php';
         $this->thing_report['choices'] = $this->choices;
         $makeemail_agent = new Makeemail($this->thing, $this->thing_report);
 

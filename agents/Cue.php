@@ -4,18 +4,6 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-//require_once '/var/www/html/stackr.ca/agents/headcode.php';
-//require_once '/var/www/html/stackr.ca/agents/flag.php';
-//require_once '/var/www/html/stackr.ca/agents/consist.php';
-//require_once '/var/www/html/stackr.ca/agents/variables.php';
-
-
-//require '/var/www/html/stackr.ca/public/agenthandler.php'; // until the callAgent call can be
-								// factored to
-								// call agent 'Agent'
 
 ini_set("allow_url_fopen", 1);
 
@@ -145,7 +133,6 @@ class Cue
 
     function getContext()
     {
-//        require_once '/var/www/html/stackr.ca/agents/context.php';
         $this->context_agent = new Context($this->thing, "context");
         $this->context =  $this->context_agent->context;
         $this->context_id = $this->context_agent->context_id;
