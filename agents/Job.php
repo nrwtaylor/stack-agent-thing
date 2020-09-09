@@ -582,7 +582,7 @@ class Job extends Agent
                 }
                 //$manager->workers_running;
                 //$manager->workers_connected;
-                if ($this->jobs == null) {
+                if ((!isset($this->jobs)) or ($this->jobs == null)) {
                     $this->response .= "No jobs found. ";
                     return;
                 }
