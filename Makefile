@@ -212,7 +212,7 @@ clean: ## Clean up the web folders and settings
 # perhaps also:  mysql? php?
 
 patch: ## Activate a patch
-	cp -rf . /var/www/$(SERVERNAME)/vendor/nrwtaylor
+	sudo cp -rf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/
 	# sudo sh scripts/patch_local.sh
 
 debug: ## Enhanced debugging environment (dev optional?)

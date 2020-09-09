@@ -2,7 +2,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 // Refactor to use GLOBAL variable
-require '/var/www/html/stackr.ca/vendor/autoload.php';
+require '/var/www/stackr.test/vendor/autoload.php';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
