@@ -2,7 +2,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 // Refactor to use GLOBAL variable
-require '/var/www/stackr.test/vendor/autoload.php';
+require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -15,11 +15,25 @@ $worker->addServer();
 $uuid = null;
 $name = "call_agent";
 $task = "Nrwtaylor\StackAgentThing\call_agent_function";
-$worker->addFunction(
-    "call_agent",
-    "Nrwtaylor\StackAgentThing\call_agent_function",
-    $uuid
-);
+//$worker->addFunction(
+//    $name,
+//    $task,
+//    $uuid
+//);
+
+
+$worker->addFunction($name, function() use($task) {
+     try {
+         $result = call_user_func_array($task, func_get_args());
+     } catch(\Exception $e) {
+         $result = GEARMAN_WORK_EXCEPTION;
+         echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+         // Send exception to Exceptional so it can be logged with details
+         Exceptional::handle_exception($e, FALSE);
+     }
+
+     return $result;
+},$uuid);
 
 /*
 $worker->addFunction($name, function() use($task) {
@@ -137,6 +151,5 @@ function call_agent_function($job)
 
     return $json;
 
-    //    return json_encode($t->thing_report);
 }
 ?>
