@@ -5,10 +5,10 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
-class Nod extends Agent {
+class Nod extends Agent
+{
     // An exercise in augemented virtual collaboration. With water.
     // But a Thing needs to know what minding the gap is.
 
@@ -20,162 +20,120 @@ class Nod extends Agent {
 
     // See getEnergy() for dev
 
-
     /**
      *
      * @param Thing   $thing
      * @param unknown $agent_input (optional)
      */
 
-    function init() {
-    //function __construct(Thing $thing, $agent_input = null) {
-        // Precise timing
-      //  $this->start_time = $thing->elapsed_runtime();
-
-//        $this->agent_input = $agent_input;
-  //      $this->thing = $thing;
-
-    //    $this->thing_report['thing'] = $thing;
-      //  $this->agent_name = "nod";
-
+    function init()
+    {
         $this->retain_for = 24; // Retain for at least 24 hours.
 
-//        $this->uuid = $thing->uuid;
-  //      $this->to = $thing->to;
-    //    $this->from = $thing->from;
-      //  $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
         $this->state = "dev";
-
-//        $this->thing->log( 'running on Thing ' . $this->thing->nuuid . '.');
-  //      $this->thing->log( 'received this Thing "' . $this->subject . '"');
-    //    $this->thing->log( 'received this Agent Input "' . $this->subject . '"');
-
-        // Get some stuff from the stack which will be helpful.
-        // Until NOD gets its own.
- //       $this->web_prefix = $thing->container['stack']['web_prefix'];
-   //     $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-     //   $this->word = $thing->container['stack']['word'];
-       // $this->email = $thing->container['stack']['email'];
 
         $this->time_travel_unit_name = "s";
         $this->time_unit_name = "seconds";
 
-    //    $this->get(); // load in last known position variables for current player
-
-    //    $this->readSubject();
-
-//        $this->doNod();
-
-//        $this->respond();
-
-//        if ($this->agent_input != "nod") {
-//            $this->set();
-//        }
-        $this->thing->log( 'completed.');
-
-        //echo $this->thing->elapsed_runtime() - $this->start_time;
-
-
-//        return;
     }
 
-public function run() {
-
+    public function run()
+    {
         $this->doNod();
-
-
-}
+    }
 
     /**
      * Add in code for setting the current distance travelled.
      */
-    function set() {
-
+    function set()
+    {
         if ($this->agent_input == "nod") {
             return;
         }
 
-
         // UK Commonwealth spelling
         $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable( array("nod", "time_travelled"), $this->time_travelled );
+        $names = $this->thing->json->writeVariable(
+            ["nod", "time_travelled"],
+            $this->time_travelled
+        );
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("nod", "refreshed_at"), $time_string );
+        $this->thing->json->writeVariable(
+            ["nod", "refreshed_at"],
+            $time_string
+        );
 
         $nod_timestamp = $this->thing->microtime();
-        $this->thing->json->writeVariable( array("nod", "timestamp"), $nod_timestamp );
+        $this->thing->json->writeVariable(["nod", "timestamp"], $nod_timestamp);
     }
-
 
     /**
      *
      */
-    function get() {
+    function get()
+    {
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("nod", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "nod",
+            "refreshed_at",
+        ]);
 
-        $micro_timestamp = $this->thing->json->readVariable( array("nod", "timestamp") );
+        $micro_timestamp = $this->thing->json->readVariable([
+            "nod",
+            "timestamp",
+        ]);
 
         // Keep second level timestamp because I'm not
         // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("nod", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["nod", "refreshed_at"],
+                $time_string
+            );
         }
 
         // And in microtime code for Nod.
         if ($micro_timestamp == false) {
             $micro_timestamp = $this->thing->microtime();
-            $this->thing->json->writeVariable( array("nod", "timestamp"), $micro_timestamp );
+            $this->thing->json->writeVariable(
+                ["nod", "timestamp"],
+                $micro_timestamp
+            );
         }
-
 
         // If it has already been processed ...
         $this->last_timestamp = $micro_timestamp;
 
-
-        $this->time_travelled = $this->thing->json->readVariable( array("nod", "time_travelled") );
-        $this->response = "Loaded Nod time travelled and microsecond timestamp."; // Because
+        $this->time_travelled = $this->thing->json->readVariable([
+            "nod",
+            "time_travelled",
+        ]);
+        $this->response =
+            "Loaded Nod time travelled and microsecond timestamp."; // Because
     }
 
-
     /**
-     * -----------------------
      *
      * @return unknown
      */
-    public function respondResponse() {
+    public function respondResponse()
+    {
         $this->thing->flagGreen();
-
-        // This should be the code to handle non-matching responses.
-
-        //$to = $this->thing->from;
-        //$from = "nod";
-
-        //$this->makeMessage();
-        //$this->makeSms();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        //$this->makeWeb();
-
-
-//        $this->thing_report['sms'] = $this->sms_message;
-
-  //      return $this->thing_report;
     }
-
 
     /**
      *
      */
-    private function nodDo() {
+    private function nodDo()
+    {
         // What does nod do. doNod is doing a Nod.
 
         // Nod is a tool to connect to our world.  Welcome.
@@ -193,8 +151,6 @@ public function run() {
         // A Nod is a unit of energy.  It happens to be exactly the same as a metric calorie.
         // Weird.
 
-
-
         // And then Nod figures out how for that energy would have got you along your path.
 
         // Welcome to <Insert Robot Name Here>.  The Robot Coxswain.
@@ -209,34 +165,34 @@ public function run() {
         // Sure.
 
         $this->getEnergy();
-
-
-
     }
-
 
     /**
      *
      */
-    public function lastNod() {
+    public function lastNod()
+    {
         $this->getTime();
 
-       // $findagent_thing = new Findagent($this->thing, 'nod');
+        // $findagent_thing = new Findagent($this->thing, 'nod');
 
-$things = $this->getThings('nod');
-$count = 0;
-if (is_array($things)) {
-$count = count($things);
-}
-        $this->thing->log('Agent "Nod" found ' . $count ." Nod Agent Things." );
-        $this->last_created_at =  $things[0]['created_at'];
+        $things = $this->getThings('nod');
+        $count = 0;
+
+        if (!is_array($things)) {
+            return false;
+        }
+
+        $count = count($things);
+        $this->thing->log('Agent "Nod" found ' . $count . " Nod Agent Things.");
+        $this->last_created_at = $things[0]['created_at'];
     }
-
 
     /**
      *
      */
-    public function doNod() {
+    public function doNod()
+    {
         // What is to do a Nod.
 
         // This will be the full cycle of a Nod.
@@ -246,30 +202,29 @@ $count = count($things);
         // For now take unit of energy and convert it into distance travelled.
         $this->energy_number = 1;
 
-
         $time_travelled = $this->nodEnergy($this->energy_number);
 
         $this->getTime();
 
-        $this->max_tick_time = 60*4; // Four minutes
+        $this->max_tick_time = 60 * 4; // Four minutes
 
         if ($this->tick_time > $this->max_tick_time) {
             $this->flag = new Flag($this->thing, "red");
         }
 
-
         // I think a Nod is not the catching a prompt.
-
     }
-
 
     /**
      *
      * @param unknown $energy_text (optional)
      * @return unknown
      */
-    private function nodEnergy($energy_text = null) {
-        if ($energy_text == null) {$energy_text = $this->energy->number;}
+    private function nodEnergy($energy_text = null)
+    {
+        if ($energy_text == null) {
+            $energy_text = $this->energy->number;
+        }
 
         $scalar = 0;
         $this->velocity = 0;
@@ -284,25 +239,30 @@ $count = count($things);
         $this->time_travelled += $this->tick_time;
 
         return $this->time_travelled;
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    public function getTime() {
-        if (isset($this->elapsed_clock)) {return $this->elapsed_clock;}
+    public function getTime()
+    {
+        if (isset($this->elapsed_clock)) {
+            return $this->elapsed_clock;
+        }
         // Only do this once.
         // Can't have calculations based on different timestamps.
-        if (!isset($this->current_timestamp)) {$this->current_timestamp = $this->thing->microtime();}
+        if (!isset($this->current_timestamp)) {
+            $this->current_timestamp = $this->thing->microtime();
+        }
 
         //$this->current_timestamp = $this->thing->microtime();
-        $this->elapsed_clock = $this->microtime_diff($this->last_timestamp, $this->current_timestamp);
+        $this->elapsed_clock = $this->microtime_diff(
+            $this->last_timestamp,
+            $this->current_timestamp
+        );
         return $this->elapsed_clock;
     }
-
 
     /**
      * https://gist.github.com/hadl/5721816
@@ -311,7 +271,8 @@ $count = count($things);
      * @param unknown $end
      * @return unknown
      */
-    function microtime_diff($start, $end) {
+    function microtime_diff($start, $end)
+    {
         // Lots of testing needed on this :/
         // Date maths.  Urgh.
 
@@ -327,13 +288,14 @@ $count = count($things);
         return floatval($diff_date) + floatval($diff_clock) + $diff_usec;
     }
 
-
     /**
      *
      */
-    private function getEnergy() {
+    private function getEnergy()
+    {
         // Insert code to talk to Concept2.
-        $text = "Nonsense text string, json string, or other text representation of 1 energy units";
+        $text =
+            "Nonsense text string, json string, or other text representation of 1 energy units";
 
         // Going to be a call from a peeple for a nod.  So it should be provided.
         // So retrieve the noddy energy last posted.
@@ -343,17 +305,19 @@ $count = count($things);
         // Which means we now have
     }
 
-
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
+    public function readSubject()
+    {
+        $this->thing_report['help'] =
+            "Helps folk check if you are okay. TEXT WEB.";
 
-        $this->thing_report['help'] = "Helps folk check if you are okay. TEXT WEB.";
-
-
-        if ($this->agent_input == "nod") {$this->lastNod(); return;}
+        if ($this->agent_input == "nod") {
+            $this->lastNod();
+            return;
+        }
 
         $input = strtolower($this->subject);
 
@@ -362,7 +326,6 @@ $count = count($things);
             $this->response = "Thanks for the word.";
             return;
         }
-
 
         $this->response = "Nodded.";
         //$this->sms_message = "SPLOSH | https://dictionary.cambridge.org/dictionary/english/splosh";
@@ -373,26 +336,23 @@ $count = count($things);
         //  $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['email'] = $this->message;
 
-
         $this->nodDo();
-
 
         return $this->response;
     }
 
-
     /**
      *
      */
-    public function makeSMS() {
+    public function makeSMS()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
-        if ((!isset($this->tick_time)) or ($this->tick_time == 0)) {
+        if (!isset($this->tick_time) or $this->tick_time == 0) {
             $sms = "NOD ";
         } else {
             //$sms = "NODDED " . $this->thing->human_time($this->tick_time);
             $sms = "NOD";
-
         }
 
         //$sms .= " | https://www.urbandictionary.com/define.php?term=nod";
@@ -402,17 +362,20 @@ $count = count($things);
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-
     /**
      *
      */
-    public function makeMessage() {
+    public function makeMessage()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
-        if ((!isset($this->tick_time)) or ($this->tick_time == 0)) {
+        if (!isset($this->tick_time) or $this->tick_time == 0) {
             $message = "Nod ";
         } else {
-            $message = "Nodded off for " . $this->thing->human_time($this->tick_time) .".";
+            $message =
+                "Nodded off for " .
+                $this->thing->human_time($this->tick_time) .
+                ".";
         }
 
         //$sms .= " | https://www.urbandictionary.com/define.php?term=nod";
@@ -422,12 +385,11 @@ $count = count($things);
         $this->thing_report['message'] = $message;
     }
 
-
     /**
      *
      */
-    public function makeWeb() {
-
+    public function makeWeb()
+    {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/nod';
 
         $flag = "";
@@ -437,8 +399,6 @@ $count = count($things);
 
         $html = "<b>NOD " . $flag;
         $html = "</b>";
-
-
 
         $html .= "<p><b>Nod Variables</b>";
         //$html .= '<br>state ' . $this->state . '';
@@ -450,9 +410,12 @@ $count = count($things);
 
         // $html .= "<br>Elapsed time between nods " . $this->elapsed_clock * 1e3 . $this->time_unit_name;
 
-        $html .= "<br>Nod time " . $this->thing->human_time($this->elapsed_clock);
+        $html .=
+            "<br>Nod time " . $this->thing->human_time($this->elapsed_clock);
 
-        $html .= "<br>Time travelled " . $this->thing->human_time($this->time_travelled); // Commonwealth spelling
+        $html .=
+            "<br>Time travelled " .
+            $this->thing->human_time($this->time_travelled); // Commonwealth spelling
         $html .= " (" . number_format(intval($this->time_travelled)) . "s)."; // Commonwealth spelling
 
         // You can hardcode you Splosh page here
@@ -467,32 +430,25 @@ $count = count($things);
         $html .= "<br>";
         $html .= "<br>";
         $html .= 'Nod says, "';
-        $html .= $this->message. '"';
-
+        $html .= $this->message . '"';
 
         $warranty = new Warranty($this->thing, "warranty");
 
-        $html .= "<p><br>" . "This is a developmental tool. Sometimes it might not work. If you have resources, we hope you can make it more reliable.";
+        $html .=
+            "<p><br>" .
+            "This is a developmental tool. Sometimes it might not work. If you have resources, we hope you can make it more reliable.";
 
-        $html .= "<p><br>" . "Thank you for your recent nod. " . $warranty->message;
+        $html .=
+            "<p><br>" . "Thank you for your recent nod. " . $warranty->message;
 
         //exit();
 
         $html .= "<p>";
         $html .= "<br>Last nod time " . $this->last_timestamp;
 
-
-
         //$html .= "<br>Check-in was " . intval($this->time_travelled) . "ms ago."; // Commonwealth spelling
-
-
 
         $this->web_message = $html;
         $this->thing_report['web'] = $this->web_message;
     }
-
-
-
-
-
 }

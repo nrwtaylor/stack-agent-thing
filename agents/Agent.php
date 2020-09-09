@@ -11,9 +11,6 @@
  */
 namespace Nrwtaylor\StackAgentThing;
 
-//require '/var/www/stackr.test/resources/debug/HardCoreDebugLogger.php';
-//HardCoreDebugLogger::register();
-
 // Agent resolves message disposition
 
 ini_set('display_startup_errors', 1);
@@ -267,10 +264,10 @@ class Agent
                 $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-
                 $associations_json = $thing_object['associations'];
-                $associations = $this->thing->json->jsontoArray($associations_json);
-
+                $associations = $this->thing->json->jsontoArray(
+                    $associations_json
+                );
 
                 //$thing = new \stdClass();
                 $thing = new Thing(null);
@@ -285,7 +282,7 @@ class Agent
 
                 $thing->associations = $associations;
 
-                if ( (isset($variables[$agent_name])) or ($agent_name == 'things')) {
+                if (isset($variables[$agent_name]) or $agent_name == 'things') {
                     //                    $things[$uuid] = $variables[$agent_name];
                     $things[$uuid] = $thing;
                 }
@@ -366,10 +363,10 @@ class Agent
         $dev_agents = ["response", "help", "info"];
         $prod_agents = ["response", "help"];
 
-$agents = $dev_agents;
-if ($this->stack_state == 'prod') {
-    $agents = $prod_agents;
-}
+        $agents = $dev_agents;
+        if ($this->stack_state == 'prod') {
+            $agents = $prod_agents;
+        }
         $web = "";
         //        if (isset($this->thing_report['web'])) {
         if (isset($this->thing_report['web'])) {
@@ -516,7 +513,12 @@ if ($this->stack_state == 'prod') {
             return true;
         }
 
-        $file = $this->resource_path . '/' . $resource_name;
+        $file = $this->resource_path . '' . $resource_name;
+
+        if (!file_exists($file)) {
+            return true;
+        }
+
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
@@ -631,7 +633,7 @@ if ($this->stack_state == 'prod') {
         }
 
         // Null?
-       // $this->mem_cached = null;
+        // $this->mem_cached = null;
 
         try {
             $this->mem_cached = new \Memcached(); //point 2.
@@ -643,10 +645,8 @@ if ($this->stack_state == 'prod') {
             $this->thing->log('caught throwable.', "WARNING");
             return;
         } catch (\Error $ex) {
-
             return true;
         }
-
     }
 
     /**
@@ -788,9 +788,10 @@ if ($this->stack_state == 'prod') {
 
         $match = 0;
 
-if ($findagent_thing->thing_report['things'] == true) {
-$this->link_uuid = null;
-return false;}
+        if ($findagent_thing->thing_report['things'] == true) {
+            $this->link_uuid = null;
+            return false;
+        }
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
             if ($block_thing['nom_to'] != "usermanager") {
@@ -991,7 +992,6 @@ return false;}
         }
 
         if (isset($this->agent->link)) {
-            //var_dump($this->agent->link);
             $link = $this->agent->link;
         }
 
@@ -1720,7 +1720,7 @@ return false;}
             $input = strtolower($agent_input_text);
         }
 
-//$input = strtolower($this->input);
+        //$input = strtolower($this->input);
 
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
 
@@ -1773,7 +1773,6 @@ return false;}
         $text = urldecode($agent_input_text);
 
         //$text = urldecode($input);
-
 
         $text = strtolower($text);
 
@@ -2145,7 +2144,10 @@ return false;}
         }
 
         $this->getLink();
-        if ( (isset($this->prior_agent)) and (strtolower($this->prior_agent) == "baseline")) {
+        if (
+            isset($this->prior_agent) and
+            strtolower($this->prior_agent) == "baseline"
+        ) {
             $baseline_agent = new Baseline($this->thing, "response");
         }
 
@@ -2320,20 +2322,19 @@ return false;}
 
         $this->thing->log('now looking at Group Context.');
 
+        if ($this->stack_state == 'dev') {
+            $group_thing = new Group($this->thing, "group");
 
-if ($this->stack_state == 'dev') {
-        $group_thing = new Group($this->thing, "group");
-
-        if (!$group_thing->isGroup($input)) {
-            //        if (!$place_thing->isPlace($this->subject)) {
-            //if (($place_thing->place_code == null) and ($place_thing->place_n>
-        } else {
-            // place found
-            $group_thing = new Group($this->thing);
-            $this->thing_report = $group_thing->thing_report;
-            return $this->thing_report;
+            if (!$group_thing->isGroup($input)) {
+                //        if (!$place_thing->isPlace($this->subject)) {
+                //if (($place_thing->place_code == null) and ($place_thing->place_n>
+            } else {
+                // place found
+                $group_thing = new Group($this->thing);
+                $this->thing_report = $group_thing->thing_report;
+                return $this->thing_report;
+            }
         }
-}
 
         // Here are some other places
 
@@ -2410,7 +2411,9 @@ if ($this->stack_state == 'dev') {
 
                 $things = $findagent_agent->thing_report['things'];
 
-if (!isset($things[0])) {break;}
+                if (!isset($things[0])) {
+                    break;
+                }
                 $uuid = $things[0]['uuid'];
 
                 $thing = new Thing($uuid);
@@ -2560,24 +2563,23 @@ if (!isset($things[0])) {break;}
         switch (strtolower($this->context)) {
             case 'group':
                 // Now if it is a head_code, it might also be a train...
-if ($this->stack_state == 'dev') {
-                $group_thing = new Group($this->thing, 'group');
-                $this->groups = $group_thing->groups;
+                if ($this->stack_state == 'dev') {
+                    $group_thing = new Group($this->thing, 'group');
+                    $this->groups = $group_thing->groups;
 
-                if ($this->groups != null) {
-                    // Group was recognized.
-                    // Assign to Group manager.
+                    if ($this->groups != null) {
+                        // Group was recognized.
+                        // Assign to Group manager.
 
-                    // devstack Should check here for four letter
-                    // words ie ivor dave help
+                        // devstack Should check here for four letter
+                        // words ie ivor dave help
 
-                    $group_thing = new Group($this->thing);
-                    $this->thing_report = $group_thing->thing_report;
+                        $group_thing = new Group($this->thing);
+                        $this->thing_report = $group_thing->thing_report;
 
-                    return $this->thing_report;
+                        return $this->thing_report;
+                    }
                 }
-}
-
 
                 //Timecheck
                 $this->thing_report = $this->timeout(
@@ -2907,7 +2909,7 @@ if ($this->stack_state == 'dev') {
 
     function mylog($error, $errlvl)
     {
-//        var_dump($error);
+        //        var_dump($error);
         //        echo $this->response;
         //        echo "\n";
         //        echo $this->thing->log;

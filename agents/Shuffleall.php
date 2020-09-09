@@ -3,15 +3,6 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-
-
-//require_once('/var/www/html/stackr.ca/lib/fpdf.php');
-//require_once('/var/www/html/stackr.ca/lib/fpdi.php');
-
-//require_once '/var/www/html/stackr.ca/agents/message.php';
-
-//include_once('/var/www/html/stackr.ca/src/pdf.php'); 
-
 // devstack Shuffeall, comes from Forgetall, leads to Stack Balance.
 
 class Shuffleall {

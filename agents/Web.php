@@ -19,17 +19,7 @@ class Web extends Agent
      */
     function init()
     {
-        /*
-        if ($this->thing->thing != true) {
-
-
-//            $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $thing->uuid .  '');
-            $this->thing_report['info'] = 'Tried to run Web on a null Thing.';
-            $this->thing_report['help'] = "That isn't going to work";
-            return $this->thing_report;
-        }
-*/
-        $this->agent_version = 'redpanda';
+        $this->agent_version = 'whitefox';
 
         $this->node_list = [
             'web' => ['useful', 'useful?'],
@@ -47,8 +37,6 @@ class Web extends Agent
                 $this->thing->container['api']['web']['default_state'];
         }
         $this->state = $this->default_state;
-
-        //$this->state = "off";
 
         $this->default_mode = 'local';
         if (isset($this->thing->container['api']['web']['default_mode'])) {
@@ -84,14 +72,11 @@ class Web extends Agent
             $this->thing,
             "variables " . "web" . " " . $this->from
         );
-        //$this->last_refreshed_at = $this->variables->getVariable("refreshed_at");
-
-        // Don't need this as can access headcode variables at $this->headcode
-        //$this->head_code = $this->headcode->getVariable("head_code");
 
         $state = $this->variables->getVariable("state");
 
         if ($state != false) {
+            $this->previous_state = $state;
             $this->state = $state;
         }
     }
@@ -162,12 +147,12 @@ class Web extends Agent
      */
     public function run()
     {
-        //$this->doWeb();
     }
 
     public function doWeb()
     {
-        if ($this->state == 'on') {
+        if ($this->state == 'on' or $this->state == 'prompt') {
+            $this->response .= "Made a web link. ";
             $this->linkWeb();
 
             if ($this->mode == 'remote') {
@@ -186,10 +171,10 @@ class Web extends Agent
     function makeSMS()
     {
         if ($this->state == 'off') {
-            $sms = "WEB | OFF. Try WEB ON.";
+            $sms = "WEB | Web links are OFF. Try WEB PROMPT. Or WEB ON.";
         }
-        if ($this->state == 'on') {
-            //        $sms = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent);
+
+        if ($this->state == 'on' or $this->state == 'prompt') {
 
             $sms = "WEB";
 
@@ -197,8 +182,10 @@ class Web extends Agent
                 $sms .= " | " . $this->stack_link;
             }
 
-            $sms .= " | " . $this->response;
         }
+
+        $sms .= " " . $this->response;
+
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -250,11 +237,9 @@ class Web extends Agent
      */
     function linkWeb($text = null)
     {
-        //    function getLink($text = null) {
         $this->thing->log("called get web link.");
         $things = [];
         // See if a stack record exists.
-        //$findagent_thing = new Findagent($this->thing, 'thing');
 
         $things = $this->getThings('thing');
 
@@ -264,23 +249,21 @@ class Web extends Agent
 
         $link_uuids = [];
 
-        foreach (array_reverse($things) as $uuid=>$thing) {
-//            $this->thing->log(
-//                $thing['task'] .
-//                    " " .
-//                    $thing['nom_to'] .
-//                    " " .
-//                    $thing['nom_from']
-//            );
+        foreach (array_reverse($things) as $uuid => $thing) {
+            //            $this->thing->log(
+            //                $thing['task'] .
+            //                    " " .
+            //                    $thing['nom_to'] .
+            //                    " " .
+            //                    $thing['nom_from']
+            //            );
 
-$nom_to = $thing->nom_to;;
+            $nom_to = $thing->nom_to;
             if ($nom_to == "usermanager") {
                 continue;
             }
 
-         //   $variables_json = $block_thing['variables'];
-         //   $variables = $this->thing->json->jsontoArray($variables_json);
-$variables = $thing->variables;
+            $variables = $thing->variables;
             if (isset($variables['message']['agent'])) {
                 $this->prior_agent = $variables['message']['agent'];
                 if (
@@ -352,24 +335,33 @@ $variables = $thing->variables;
         }
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['on', 'off'];
+        $discriminators = ['on', 'prompt', 'off'];
         $input_agent->aliases['on'] = ['on'];
         $input_agent->aliases['off'] = ['off'];
-        $response = $input_agent->discriminateInput($this->filtered_input, $discriminators);
+        $input_agent->aliases['prompt'] = ['prompt', 'x', 'X', 'poll'];
 
-        if ($response == "on") {
+        $response = $input_agent->discriminateInput(
+            $this->filtered_input,
+            $discriminators
+        );
+
+        if ($response == "on" and $this->previous_state != 'on') {
             $this->state = "on";
+            $this->response .= "Set web links to ON. ";
         }
-        if ($response == "off") {
+        if ($response == "off" and $this->previous_state != 'off') {
             $this->state = "off";
+            $this->response .= "Set web links to OFF. ";
+        }
+
+        if ($response == "prompt" and $this->previous_state != 'prompt') {
+            $this->state = "prompt";
+            $this->response .= "Set web links to PROMPT only. ";
         }
 
         $this->doWeb();
 
         $this->defaultButtons();
-        $status = true;
-        $this->response = "Made a web link. ";
-        return $status;
     }
 
     /**
