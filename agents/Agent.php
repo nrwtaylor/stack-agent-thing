@@ -1706,6 +1706,7 @@ return false;}
         // to specific Identities.
 
         $agent_input_text = $this->agent_input;
+
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
@@ -1718,6 +1719,8 @@ return false;}
         } else {
             $input = strtolower($agent_input_text);
         }
+
+//$input = strtolower($this->input);
 
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
 
@@ -1767,8 +1770,11 @@ return false;}
         // Then run it.
 
         // So look hear to generalize that.
-
         $text = urldecode($agent_input_text);
+
+        //$text = urldecode($input);
+
+
         $text = strtolower($text);
 
         $arr = explode(' ', trim($text));
@@ -1783,10 +1789,10 @@ return false;}
         $arr = array_merge($arr, $onegrams);
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
+
         usort($arr, function ($a, $b) {
             return strlen($b) <=> strlen($a);
         });
-
         $matches = [];
 
         foreach ($arr as $i => $ngram) {

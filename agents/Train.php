@@ -1,6 +1,6 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-// bounty
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -26,7 +26,7 @@ class Train extends Agent
 
     public $var = 'hello';
 
-    function init()
+    public function init()
     {
         $this->keyword = "train";
 
@@ -86,7 +86,7 @@ $this->initTrain();
 public function initTrain() {
 }
 
-    function idTrain($text = null)
+    public function idTrain($text = null)
     {
         if ($text == null) {
             return null;
@@ -143,16 +143,7 @@ public function initTrain() {
         }
     }
 
-/*
-    public function getAgent(
-        $agent_class_name = null,
-        $agent_input = null,
-        $thing = null
-    ) {
-*/
-
-
-    function set()
+    public function set()
     {
         // A block has some remaining amount of resource and
         // an indication where to start.
@@ -197,7 +188,7 @@ $this->getAvailable();
         $this->refreshed_at = $this->current_time;
     }
 
-    function nextTrain()
+    public function nextTrain()
     {
         $this->thing->log("next train");
         // Pull up the current block
@@ -217,7 +208,7 @@ $this->getAvailable();
         return $this->available;
     }
 
-    function parseTrain()
+    public function parseTrain()
     {
 
 
@@ -284,14 +275,14 @@ $this->getAvailable();
         );
     }
 
-    function run()
+    public function run()
     {
 
 $this->doTrain();
     }
 
 
-function doTrain() {
+public function doTrain() {
 
         $available = $this->thing->human_time($this->available);
 
@@ -754,8 +745,7 @@ $this->trains[] = $train;
 
                 $this->train_thing = $this->thing;
 
-                $this->
-get();
+                $this->get();
 
                 //$this->variables_agent = new Variables($this->train_thing,"variables " . $this->default_train_name . " " . $this->from);
                 //$this->train_thing = true;
@@ -2250,36 +2240,19 @@ $this->flag = $flag;
 */
         $choices = $this->thing->choice->makeLinks($this->state);
         $this->thing_report['choices'] = $choices;
-/*
-        $available = $this->thing->human_time($this->available);
 
-        if (!isset($this->index)) {
-            $index = "0";
-        } else {
-            $index = $this->index;
-        }
-
-        //$s = $this->block_thing->state;
-        if (!isset($this->flag)) {
-            $this->getFlag();
-        }
-*/
         $this->message = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 18 Feb 2018 - testing if this works for email;
 
-
         $this->thing_report['info'] = "Took a look at the train.";
-        if ($this->agent_input == null) {
+//        if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
-        }
-
-        //$this->makeWeb();
+ //       }
 
         $this->thing_report['help'] =
             'This is a Train. Trains have Flags.  Messaging RED will show the Red Flag.  Messaging GREEN will show the Green Flag.';
 
-        //return;
     }
 
     function textTrain($array = null)
@@ -2535,6 +2508,7 @@ $txt = trim($txt);
 
     public function makeSMS()
     {
+
         $this->node_list = ["train"];
 
         $sms_message = "TRAIN ";
@@ -2702,7 +2676,8 @@ $sms_message .= $this->textTrain();
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
-        return $this->sms_message;
+
+        //return $this->sms_message;
     }
 
     function extractEvents($input)
@@ -2844,8 +2819,10 @@ $sms_message .= $this->textTrain();
                 number_format($this->thing->elapsed_runtime()) .
                 'ms.'
         );
+
         $uuid_agent = new Uuid($this->train_thing, "uuid");
         $uuids = $uuid_agent->extractUuids($input);
+
         //        $uuids = $this->extractUuids($input);
         $this->thing->log(
             $this->agent_prefix . " counted " . count($uuids) . " uuids."
