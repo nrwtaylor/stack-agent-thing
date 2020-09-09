@@ -17,35 +17,16 @@ class Stack extends Agent
 
         $this->default_state = "off";
         $this->state = $this->default_state;
-        $this->countStack();
+//        $this->countStack();
 
         $this->node_list = ["stack" => ["agent", "thing"], "null" => ["stack"]];
 
-        $this->thing->log(
-            '<pre> Agent "Stack" running on Thing ' .
-                $this->thing->nuuid .
-                '.</pre>',
-            "INFORMATION"
-        );
+    }
 
-        // Probably an unnecessary call, but it updates $this->thing.
-        // And we need the previous usermanager state.
-        $this->stack = new Variables(
-            $this->thing,
-            "variables stack " . $this->from
-        );
-        /*
-        $this->get();
+    public function run() {
 
-		$this->readSubject();
+        $this->countStack();
 
-        $this->set();
-        if ($this->agent_input == null) {
-		    $this->thing_report = $this->respond();
-        }
-*/
-
-        $this->thing_report['log'] = $this->thing->log;
     }
 
     function resetStack()
@@ -86,6 +67,11 @@ class Stack extends Agent
 
     function get()
     {
+        $this->stack = new Variables(
+            $this->thing,
+            "variables stack " . $this->from
+        );
+
         // get gets the state of the Flag the last time
         // it was saved into the stack (serialized).
         $this->previous_state = $this->stack->getVariable("state");
@@ -200,7 +186,7 @@ class Stack extends Agent
         $thing_report = $this->thing->json->jsontoArray($thing_json);
 
         if ($thing_report['thing'] == null) {
-            echo "Thing not found.";
+            $this->response .= "Thing not found. ";
             return true;
             // No thing found
         }
@@ -210,13 +196,6 @@ class Stack extends Agent
         $this->variables = $thing["variables"];
         $this->settings = $thing['settings'];
 
-        return;
-        /*
-        $this->stack = $thing_array;
-
-        $this->agent = $this->variables['agent'];
-        $this->account = $this->variables['account'];
-*/
     }
 
     function variablesStack()
@@ -337,26 +316,7 @@ class Stack extends Agent
     {
         $this->thing->flagGreen();
 
-        // This should be the code to handle non-matching responses.
-
-        //		$to = $this->thing->from;
-
-        //		$from = "stack";
-        //		$subject = 's/pingback ';
-
-        //		$message = 'Stack checker.';
-
-        //$email->sendGeneric($to,$from,$this->subject, $message);
-        //$thing->thing->email->sendGeneric($to,$from,$this->subject, $message);
-
-        //		$received_at = strtotime($this->thing->thing->created_at);
-
-        //$ago = Thing::human_time ( time() - $received_at );
-
-        //        $ago = $this->thing->human_time ( time() - $received_at );
-
         $this->makeChoices();
-        //     $this->makeSMS();
 
         $this->thing_report['email'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
@@ -370,14 +330,10 @@ class Stack extends Agent
         //$this->thing_report['info'] = 'Ping agent pinged back';
         $this->thing_report['help'] = 'Useful for checking the stack.';
 
-        //          $this->makeWeb();
-
-        //	return $this->thing_report;
     }
 
     function messageStack($text = null)
     {
-        //file_get_contents($this->web_prefix . "api/redpanda/" . $text);
         $text = @file_get_contents(
             $this->web_prefix . "api/redpanda/" . "stack"
         );

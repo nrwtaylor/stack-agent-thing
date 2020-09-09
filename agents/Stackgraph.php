@@ -23,20 +23,17 @@ class Stackgraph extends Agent
         $this->height = 200;
         $this->width = 300;
 
-        $this->readInput();
+//        $this->readInput();
 
-        $this->thing->log(
-            $this->agent_prefix .
-                'settings are: ' .
-                $this->agent .
-                ' ' .
-                $this->name .
-                ' ' .
-                $this->identity .
-                "."
-        );
 
         $this->node_list = ["stackgraph"];
+
+    }
+
+    function readSubject() {
+
+        $this->readInput();
+
 
     }
 
@@ -67,19 +64,8 @@ class Stackgraph extends Agent
 
         $this->points = [];
         foreach ($things as $thing) {
-            // Check each of the three Things.
-            /*
-            $this->variables_thing = new Thing($thing['uuid']);
-
-            $thing = new Thing($thing['uuid']);
-            $thing->json->setField("variables");
-
-            $count = $thing->getVariable("stack", "count");
-            $refreshed_at = strtotime($thing->getVariable("stack", "refreshed_at"));
-*/
 
             $variables_json = $thing['variables'];
-
             $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (!isset($variables['stack'])) {
@@ -114,101 +100,6 @@ class Stackgraph extends Agent
         }
     }
 
-    /*
-    function getAgent() 
-    {
-    }
-*/
-
-    function getVariables($agent = null)
-    {
-        return;
-        if ($agent == null) {
-            $agent = $this->agent;
-        }
-
-        $this->variables_horizon = 99;
-        $this->variables_agent = $agent; // Allows getVariables to pull in a different agents variables.
-        // Here we only need to save the count.
-        // But need to inspect Tally
-
-        //        $this->variables_agent = $agent;
-
-        // So this returns the last 3 tally Things.
-        // which should be enough.  One should be enough.
-        // But this just provides some resiliency.
-
-        $this->thing->log('requested the variables.', 'DEBUG');
-
-        // We will probably want a getThings at some point.
-        $this->thing->db->setFrom($this->identity);
-        $thing_report = $this->thing->db->agentSearch(
-            $this->variables_agent,
-            $this->variables_horizon
-        );
-        $things = $thing_report['things'];
-
-        if ($things == false) {
-            $this->startVariables();
-            return;
-        }
-
-        $this->thing->log(
-            'got ' . count($things) . ' recent Tally Things.',
-            'INFORMATION'
-        );
-
-        $this->counter_uuids = [];
-
-        foreach ($things as $thing) {
-            // Check each of the three Things.
-            $this->variables_thing = new Thing($thing['uuid']);
-
-            $uuid = $thing['uuid'];
-            $variable = $this->getVariable('variable');
-            $name = $this->getVariable('name');
-            $next_uuid = $this->getVariable('next_uuid');
-
-            if ($this->name == $name) {
-                $this->counter_uuids[] = $uuid;
-                break;
-            }
-        }
-
-        $match_uuid = $next_uuid;
-
-        $split_time = $this->thing->elapsed_runtime();
-        $index = 0;
-
-        while (true) {
-            foreach ($things as $thing) {
-                // Check each of the three Things.
-                $this->variables_thing = new Thing($thing['uuid']);
-
-                $uuid = $thing['uuid'];
-                $variable = $this->getVariable('counter');
-                //$name = $this->getVariable('name');
-                $next_uuid = $this->getVariable('next_uuid');
-
-                if ($name == $match_uuid) {
-                    $this->counter_uuids[] = $uuid;
-                    break;
-                }
-            }
-
-            $match_uuid = $next_uuid;
-
-            $index += 1;
-
-            $max_time = 1000 * 10; //ms
-            if ($this->thing->elapsed_runtime() - $split_time > $max_time) {
-                break;
-            }
-        }
-
-        return;
-    }
-
     function startVariables()
     {
         $this->thing->log('started a count.');
@@ -219,41 +110,6 @@ class Stackgraph extends Agent
 
         $this->setVariable("variable", 0);
         $this->setVariable("name", $this->name);
-    }
-
-    function getVariable($variable = null)
-    {
-        // Pulls variable from the database
-        // and sets variables thing on the current record.
-        // so shouldn't need to adjust the $this-> set
-        // of variables and can refactor that out.
-
-        // All variables should be callable by
-        // $this->variables_thing.
-
-        // The only Thing variable of use is $this->from
-        // which is used to set the identity for
-        // self-tallies.  (Thing and Agent are the
-        // only two role descriptions.)
-
-        if ($variable == null) {
-            $variable = 'variable';
-        }
-
-        $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-
-        $this->variables_agent = "tallycounter";
-
-        $this->variables_thing->$variable = $this->variables_thing->json->readVariable(
-            [$this->variables_agent, $variable]
-        );
-
-        // And then load it into the thing
-        //        $this->$variable = $this->variables_thing->$variable;
-        //        $this->variables_thing->flagGreen();
-
-        return $this->variables_thing->$variable;
     }
 
     function setVariable($variable = null, $value)
