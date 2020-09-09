@@ -267,7 +267,7 @@ if ($things === true) {return;}
 if ($things === null) {return;}
 
 
-        foreach ($things as $i=>$thing) {
+        foreach ($things as $uuid=>$thing) {
 
        //     $variables_json= $thing_object['variables'];
        //     $variables = $this->thing->json->jsontoArray($variables_json);
@@ -292,7 +292,7 @@ $variables = $thing->variables;
             if (!is_numeric($number) ) {continue;}
 
             $this->numbers_history[] = array("timestamp"=>$refreshed_at, "created_at"=>strtotime($refreshed_at), "calling_agent"=>$calling_agent,
-                "number"=>$number, "uuid"=>$thing_object['uuid']);
+                "number"=>$number, "uuid"=>$uuid);
 
         }
 

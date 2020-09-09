@@ -307,6 +307,8 @@ class Resource extends Agent
 
         $things = $this->getThings('resource');
 
+        if (!is_array($things)) {return;}
+
         //        $findagent_thing = new Findagent($this->thing, 'resource');
 
         $this->thing->log(

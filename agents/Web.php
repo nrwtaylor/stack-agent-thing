@@ -90,6 +90,7 @@ class Web extends Agent
         //$this->head_code = $this->headcode->getVariable("head_code");
 
         $state = $this->variables->getVariable("state");
+
         if ($state != false) {
             $this->state = $state;
         }
@@ -251,9 +252,11 @@ class Web extends Agent
     {
         //    function getLink($text = null) {
         $this->thing->log("called get web link.");
-        $block_things = [];
+        $things = [];
         // See if a stack record exists.
-        $findagent_thing = new Findagent($this->thing, 'thing');
+        //$findagent_thing = new Findagent($this->thing, 'thing');
+
+        $things = $this->getThings('thing');
 
         $this->max_index = 0;
 
@@ -261,22 +264,23 @@ class Web extends Agent
 
         $link_uuids = [];
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-            $this->thing->log(
-                $block_thing['task'] .
-                    " " .
-                    $block_thing['nom_to'] .
-                    " " .
-                    $block_thing['nom_from']
-            );
+        foreach (array_reverse($things) as $uuid=>$thing) {
+//            $this->thing->log(
+//                $thing['task'] .
+//                    " " .
+//                    $thing['nom_to'] .
+//                    " " .
+//                    $thing['nom_from']
+//            );
 
-            if ($block_thing['nom_to'] == "usermanager") {
+$nom_to = $thing->nom_to;;
+            if ($nom_to == "usermanager") {
                 continue;
             }
 
-            $variables_json = $block_thing['variables'];
-            $variables = $this->thing->json->jsontoArray($variables_json);
-
+         //   $variables_json = $block_thing['variables'];
+         //   $variables = $this->thing->json->jsontoArray($variables_json);
+$variables = $thing->variables;
             if (isset($variables['message']['agent'])) {
                 $this->prior_agent = $variables['message']['agent'];
                 if (
@@ -291,7 +295,7 @@ class Web extends Agent
                     continue;
                 }
 
-                $this->link_uuid = $block_thing['uuid'];
+                $this->link_uuid = $uuid;
 
                 $previous_thing = new Thing($this->link_uuid);
 
@@ -351,7 +355,7 @@ class Web extends Agent
         $discriminators = ['on', 'off'];
         $input_agent->aliases['on'] = ['on'];
         $input_agent->aliases['off'] = ['off'];
-        $response = $input_agent->discriminateInput($input, $discriminators);
+        $response = $input_agent->discriminateInput($this->filtered_input, $discriminators);
 
         if ($response == "on") {
             $this->state = "on";
@@ -364,7 +368,7 @@ class Web extends Agent
 
         $this->defaultButtons();
         $status = true;
-        $this->response = "Made a web link.";
+        $this->response = "Made a web link. ";
         return $status;
     }
 

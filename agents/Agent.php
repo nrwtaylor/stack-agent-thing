@@ -277,12 +277,15 @@ class Agent
                 $thing->subject = $thing_object['task'];
 
                 $thing->uuid = $thing_object['uuid'];
+                $thing->nom_to = $thing_object['nom_to'];
+                $thing->nom_from = $thing_object['nom_from'];
+
                 $thing->variables = $variables;
                 $thing->created_at = $thing_object['created_at'];
 
                 $thing->associations = $associations;
 
-                if (isset($variables[$agent_name])) {
+                if ( (isset($variables[$agent_name])) or ($agent_name == 'things')) {
                     //                    $things[$uuid] = $variables[$agent_name];
                     $things[$uuid] = $thing;
                 }
