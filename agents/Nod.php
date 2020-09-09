@@ -34,7 +34,6 @@ class Nod extends Agent
 
         $this->time_travel_unit_name = "s";
         $this->time_unit_name = "seconds";
-
     }
 
     public function run()
@@ -126,7 +125,6 @@ class Nod extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-
     }
 
     /**
@@ -184,8 +182,19 @@ class Nod extends Agent
         }
 
         $count = count($things);
-        $this->thing->log('Agent "Nod" found ' . $count . " Nod Agent Things.");
-        $this->last_created_at = $things[0]['created_at'];
+        $this->thing->log('found ' . $count . " Nod Agent Things.");
+
+
+        //$created_at = [];
+        foreach ($things as $uuid => $thing) {
+            if (!isset($last_created_at)) {
+                $last_created_at = $thing->created_at;
+            }
+            if (strtotime($thing->created_at) > strtotime($last_created_at)) {
+                $last_created_at = $thing->created_at;
+            }
+        }
+        $this->last_created_at = $last_created_at;
     }
 
     /**
@@ -311,6 +320,7 @@ class Nod extends Agent
      */
     public function readSubject()
     {
+        $this->lastNod();
         $this->thing_report['help'] =
             "Helps folk check if you are okay. TEXT WEB.";
 

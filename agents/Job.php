@@ -131,13 +131,12 @@ class Job extends Agent
             return true;
         }
 
-        $first_character = substr($line,0,1);
+        $first_character = substr($line, 0, 1);
 
         switch ($first_character) {
-        case "#":
-            return true;
+            case "#":
+                return true;
         }
-
 
         $arr = explode(",", $line);
         $period = $arr[0]; // Describer of the card
@@ -567,8 +566,8 @@ class Job extends Agent
      */
     public function readSubject()
     {
-// test
-// $this->state = "on";
+        // test
+        // $this->state = "on";
         $input = $this->input;
         $filtered_input = strtolower($this->assert($input));
         if ($this->state == 'on') {
@@ -583,11 +582,14 @@ class Job extends Agent
                 }
                 //$manager->workers_running;
                 //$manager->workers_connected;
-
+                if ($this->jobs == null) {
+                    $this->response .= "No jobs found. ";
+                    return;
+                }
 
                 $job = $this->jobs[array_rand($this->jobs)][0];
 
-/*
+                /*
 $spawn_text = "Spawned " . $job['text'] . ". ";
 
 echo "text " . $job['text'] . "\n";
@@ -602,7 +604,6 @@ echo "created at " . $run_job['created_at'] . "\n";
 
 }
 */
-
 
                 $datagram = [
                     "to" => "null" . $this->mail_postfix,
@@ -630,9 +631,8 @@ echo "created at " . $run_job['created_at'] . "\n";
 
     public function getJobs()
     {
-
-$this->run_jobs = array();
-$agent_name = 'job';
+        $this->run_jobs = [];
+        $agent_name = 'job';
         $things = $this->getThings('job');
 
         if ($things == []) {
@@ -640,20 +640,17 @@ $agent_name = 'job';
         }
 
         foreach (array_reverse($things) as $thing) {
-
             $subject = $thing->subject;
             $variables = $thing->variables;
             $created_at = $thing->created_at;
 
-                            if (isset($variables[$agent_name])) {
-$job = array("subject"=>$subject,
-"created_at"=>$created_at);
+            if (isset($variables[$agent_name])) {
+                $job = ["subject" => $subject, "created_at" => $created_at];
 
-$job = array_merge($job, $variables[$agent_name] );
+                $job = array_merge($job, $variables[$agent_name]);
 
-$this->run_jobs[] = $job;
-
-                            }
+                $this->run_jobs[] = $job;
+            }
         }
     }
 
