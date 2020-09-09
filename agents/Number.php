@@ -263,8 +263,8 @@ $things = $this->getThings('number');
 
         $this->numbers_history = array();
 
-if ($things == true) {return;}
-if ($things == null) {return;}
+if ($things === true) {return;}
+if ($things === null) {return;}
 
 
         foreach ($things as $i=>$thing) {

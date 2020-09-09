@@ -315,7 +315,6 @@ class Signal extends Agent
         if (!isset($this->signal_thing)) {
             return true;
         }
-
     }
 
     function newSignal()
@@ -384,9 +383,9 @@ class Signal extends Agent
 
         $this->signal_thing = new Thing($uuid);
 
-        $signal = $this->thing->json->jsontoArray($this->signal_thing->thing->variables)[
-            'signal'
-        ];
+        $signal = $this->thing->json->jsontoArray(
+            $this->signal_thing->thing->variables
+        )['signal'];
 
         $this->signal_id = $this->signal_thing->uuid;
 
@@ -544,40 +543,31 @@ class Signal extends Agent
         $this->signalid_list = [];
         $this->signals = [];
 
+        $things = $this->getThings('signal');
+
+        if ($things === null) {
+            return;
+        }
+        if ($things === true) {
+            return;
+        }
+        $count = count($things);
         // See if a headcode record exists.
-        $findagent_thing = new Findagent($this->thing, 'signal');
-        $count = count($findagent_thing->thing_report['things']);
-        $this->thing->log(
-            'Agent "Signal" found ' .
-                count($findagent_thing->thing_report['things']) .
-                " signal Things."
-        );
+        //$findagent_thing = new Findagent($this->thing, 'signal');
+        //$count = count($findagent_thing->thing_report['things']);
+        $this->thing->log('Agent "Signal" found ' . $count . " signal Things.");
 
         if (!$this->is_positive_integer($count)) {
             // No signals found
         } else {
-            foreach (
-                array_reverse($findagent_thing->thing_report['things'])
-                as $thing_object
-            ) {
-                $uuid = $thing_object['uuid'];
-                $associations_json = $thing_object['associations'];
-                $associations = $this->thing->json->jsontoArray(
-                    $associations_json
-                );
+            foreach (array_reverse($things) as $uuid => $thing) {
+                $associations = $thing->associations;
+
                 $signal = [];
                 $signal["associations"] = $associations;
 
-                $variables_json = $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
-
+                $variables = $thing->variables;
                 if (isset($variables['signal'])) {
-                    //                    if (!isset($variables['signal']['state'])) {
-                    //continue;
-                    //}
-                    //$refreshed_at = "X";
-                    //                   $signal_id = $uuid;
-                    //$signal_id = "X";
                     if (isset($variables['signal']['refreshed_at'])) {
                         $signal['refreshed_at'] =
                             $variables['signal']['refreshed_at'];
@@ -591,11 +581,11 @@ class Signal extends Agent
                         $signal['state'] = $variables['signal']['state'];
                     }
 
-                    $signal["uuid"] = $thing_object['uuid'];
-                    $signal["id"] = $this->idSignal($thing_object['uuid']);
+                    $signal["uuid"] = $uuid;
+                    $signal["id"] = $this->idSignal($uuid);
 
                     $this->signals[] = $signal;
-                    $this->signalid_list[] = $thing_object['uuid'];
+                    $this->signalid_list[] = $uuid;
                 }
             }
         }

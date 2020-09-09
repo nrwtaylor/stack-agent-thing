@@ -348,8 +348,8 @@ $things = $this->getThings('place');
 
         $this->max_index = 0;
 
-if ($things == true) {return;}
-if ($things == null) {return;}
+if ($things === true) {return;}
+if ($things === null) {return;}
 
 $count = count($things);
 

@@ -146,8 +146,8 @@ class Quantity extends Agent
 $things = $this->getThings('quantity');
 
 
-if ($things == true) {return;}
-if ($things == null) {return;}
+if ($things === true) {return;}
+if ($things === null) {return;}
 
         $count = count($things);
         $this->thing->log(

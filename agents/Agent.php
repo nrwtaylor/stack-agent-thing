@@ -267,6 +267,11 @@ class Agent
                 $variables_json = $thing_object['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
+
+                $associations_json = $thing_object['associations'];
+                $associations = $this->thing->json->jsontoArray($associations_json);
+
+
                 //$thing = new \stdClass();
                 $thing = new Thing(null);
                 $thing->subject = $thing_object['task'];
@@ -274,6 +279,8 @@ class Agent
                 $thing->uuid = $thing_object['uuid'];
                 $thing->variables = $variables;
                 $thing->created_at = $thing_object['created_at'];
+
+                $thing->associations = $associations;
 
                 if (isset($variables[$agent_name])) {
                     //                    $things[$uuid] = $variables[$agent_name];
