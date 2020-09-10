@@ -121,8 +121,9 @@ class Snowflake extends Agent
         $filtered_input = ltrim($whatIWant, " ");
 */
 
-        $this->response .= "is " . $filtered_input . ". ";
-
+if ( (is_string($filtered_input)) and ($filtered_input != "")) {
+        $this->response .= 'Is "' . $filtered_input . '". ';
+}
         $this->whatis = $filtered_input;
     }
 

@@ -151,7 +151,8 @@ class Web extends Agent
 
     public function doWeb()
     {
-        if ($this->state == 'on' or $this->state == 'prompt') {
+        if ($this->state == 'prompt') {
+//        if ($this->state == 'on' or $this->state == 'prompt') {
             $this->response .= "Made a web link. ";
             $this->linkWeb();
 
@@ -330,7 +331,6 @@ class Web extends Agent
 
         if ($input == "web") {
             $this->doWeb();
-            $this->response .= "Requested web. ";
             return;
         }
 

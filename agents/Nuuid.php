@@ -133,7 +133,7 @@ class Nuuid extends Agent
         $sms = "NUUID ";
 
         if (strtolower($this->input) == 'nuuid') {
-            $sms .= "IS " . $this->thing->nuuid;
+            $sms .= "IS " . $this->thing->nuuid . " ";
         }
 
         $sms .= "| ";

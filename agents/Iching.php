@@ -366,6 +366,7 @@ class IChing extends Agent
         $response .= $this->html_image;
         $response .= '<br>';
 
+/*
         $response .=
             '<img src = "' .
             $this->web_prefix .
@@ -385,7 +386,7 @@ class IChing extends Agent
             '/iching.txt">';
 
         $response .= '<br>';
-
+*/
         $web .= $response;
 
         $web .= "Hexagram " . $this->hexagram_number . "</center>";

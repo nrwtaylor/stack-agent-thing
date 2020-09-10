@@ -197,7 +197,7 @@ class Signal extends Agent
 
         if (strtolower($text) == "x") {
             $state = "X";
-            $help = "Treat this signal as if it is broken. Text CONTROL.";
+            $help = "Treat this signal as if it is broken. Try SIGNAL RED and see if it changes colour.";
         }
 
         if (strtolower($text) == "red") {
