@@ -76,12 +76,15 @@ class Signal extends Agent
         if (isset($this->signal_thing->state)) {
             $this->signal['state'] = $this->signal_thing->state;
         }
+        if (isset($this->signal_thing->uuid)) {
+            $this->signal['id'] = $this->idSignal($this->signal_thing->uuid);
+        }
 
-        $this->signal['id'] = $this->idSignal($this->signal_thing->uuid);
-
-        $this->signal['uuid'] = $this->signal_thing->uuid;
-
+        if (isset($this->signal_thing->uuid)) {
+            $this->signal['uuid'] = $this->signal_thing->uuid;
+        }
         $this->signal['text'] = "signal check";
+
         if (isset($this->signal_thing->text)) {
             $this->signal['text'] = $this->signal_thing->text;
         }
@@ -160,7 +163,6 @@ class Signal extends Agent
             $this->response .= "Saw channel is " . $this->channel_name . ". ";
         } else {
             $this->response .= "Did not recognize channel name. ";
-
         }
         $this->getSignal();
 
@@ -197,7 +199,11 @@ class Signal extends Agent
 
         if (strtolower($text) == "x") {
             $state = "X";
-            $help = "Treat this signal as if it is broken. Try SIGNAL RED and see if it changes colour.";
+            $help = "No signal found. Text NEW SIGNAL.";
+            if (isset($this->signal_thing)) {
+                $help =
+                    "Treat this signal as if it is broken. Try SIGNAL RED and see if it changes colour.";
+            }
         }
 
         if (strtolower($text) == "red") {
@@ -297,6 +303,10 @@ class Signal extends Agent
 
     function setSignal($text = null)
     {
+        if (!isset($this->signal_thing)) {
+            return true;
+        }
+
         $this->signal_thing->json->writeVariable(
             ["signal", "state"],
             $this->signal['state']
@@ -1123,7 +1133,7 @@ class Signal extends Agent
 
         if (count($pieces) == 1) {
             if ($input == $this->keyword) {
-                $this->response .= "Got the current signal. ";
+                //$this->response .= "Got the current signal. ";
                 return;
             }
 

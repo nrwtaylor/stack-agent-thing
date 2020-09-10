@@ -155,9 +155,8 @@ class Web extends Agent
             $this->linkWeb();
         }
 
-
         if ($this->state == 'prompt') {
-//        if ($this->state == 'on' or $this->state == 'prompt') {
+            //        if ($this->state == 'on' or $this->state == 'prompt') {
             $this->response .= "Made a web link. ";
             $this->linkWeb();
 
@@ -181,13 +180,11 @@ class Web extends Agent
         }
 
         if ($this->state == 'on' or $this->state == 'prompt') {
-
             $sms = "WEB";
 
             if (isset($this->stack_link)) {
                 $sms .= " | " . $this->stack_link;
             }
-
         }
 
         $sms .= " " . $this->response;
@@ -228,7 +225,7 @@ class Web extends Agent
         $this->thing_report['choices'] = $choices;
         $this->thing_report['info'] = 'This is the web agent.';
         $this->thing_report['help'] =
-            'This agent takes an UUID and runs the Web agent on it.';
+            'This agent reads URLs. Try CARD. Then WEB.';
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
 
@@ -298,24 +295,34 @@ class Web extends Agent
         //        $token_thing->revokeTokens(); // Because
         //        $agent_thing = new Agent($previous_thing,"agent");
         //        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
-        $previous_thing->silenceOn();
-        $quiet_thing = new Quiet($previous_thing, "on");
-        $agent_thing = new Agent($previous_thing, $this->prior_agent, 'agent');
 
-        if (isset($agent_thing->thing_report['web'])) {
-            $this->web = $agent_thing->thing_report['web'];
+        $this->link_uuid = $this->uuid;
+        $this->stack_link = $this->web_prefix;
+
+        if (isset($previous_thing)) {
+            $previous_thing->silenceOn();
+            $quiet_thing = new Quiet($previous_thing, "on");
+            $agent_thing = new Agent(
+                $previous_thing,
+                $this->prior_agent,
+                'agent'
+            );
+
+            if (isset($agent_thing->thing_report['web'])) {
+                $this->web = $agent_thing->thing_report['web'];
+            }
+
+            if (!isset($agent_thing->thing_report['web'])) {
+                $this->web_exists = false;
+            }
+
+            $this->stack_link =
+                $this->web_prefix .
+                "thing/" .
+                $this->link_uuid .
+                "/" .
+                strtolower($this->prior_agent);
         }
-
-        if (!isset($agent_thing->thing_report['web'])) {
-            $this->web_exists = false;
-        }
-
-        $this->stack_link =
-            $this->web_prefix .
-            "thing/" .
-            $this->link_uuid .
-            "/" .
-            strtolower($this->prior_agent);
 
         return $this->link_uuid;
     }
