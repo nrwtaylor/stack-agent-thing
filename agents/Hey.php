@@ -96,7 +96,9 @@ class Hey extends Agent
 
         $html .= "<br>Last nod html " . $this->nod->last_timestamp;
 
+if (isset($this->nod->last_created_at)) {
         $html .= "<br>Last nod sms " . $this->nod->last_created_at;
+
 
         $timestamp = $this->nod->last_timestamp;
         $t = explode(" ",$timestamp);
@@ -111,6 +113,8 @@ class Hey extends Agent
         $nearest_time = min($html_time, $sms_time);
 
         $html .= "<br>Last nod was " . $this->thing->human_time($nearest_time) . " ago.";
+}
+
 
         $warranty = new Warranty($this->thing, "warranty");
 

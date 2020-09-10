@@ -155,8 +155,13 @@ class Signal extends Agent
     {
         $this->channel = new Channel($this->thing, "channel");
         $this->channel_name = $this->channel->channel_name;
-        $this->response .= "Saw channel is " . $this->channel_name . ". ";
 
+        if (is_string($this->channel_name)) {
+            $this->response .= "Saw channel is " . $this->channel_name . ". ";
+        } else {
+            $this->response .= "Did not recognize channel name. ";
+
+        }
         $this->getSignal();
 
         foreach ($this->signals as $i => $signal) {

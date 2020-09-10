@@ -345,12 +345,26 @@ $shift_state = "off";
     {
 //        set_error_handler(array($this, '\Nrwtaylor\StackAgentThing\warning_handler'), E_WARNING);
 //        set_error_handler('\Nrwtaylor\StackAgentThing\warning_handler', E_WARNING);
+
+        foreach ($this->contexts as $context=>$context_id) {
+
+              if (stripos(strtolower($this->subject . " " . $this->agent_input),strtolower($context)) !== false) {
+
+                $this->context = $context;
+                $this->context_id = $context_id;
+                return;
+
+        }
+
+
+        }
+
+
         set_error_handler(array($this, 'warning_handler'), E_WARNING);
 
 //        set_error_handler("warning_handler", E_WARNING);
 
         foreach ($this->contexts as $context=>$context_id) {
-
 
             $agent_class_name = ucfirst($context);
                 $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
@@ -628,6 +642,15 @@ $this->thing->log($this->agent_prefix . 'extracted ' . $this->context . ' ' . $t
                 $this->set();
                 return;
             }
+
+            if ($this->input == 'train') {
+$this->makeContext('train');
+                $this->set();
+                return;
+            }
+
+
+
         }
 
 

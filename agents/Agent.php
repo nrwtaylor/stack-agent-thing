@@ -2514,7 +2514,6 @@ class Agent
         $context_thing = new Context($this->thing, "extract");
         $this->context = $context_thing->context;
         $this->context_id = $context_thing->context_id;
-
         $this->thing->log(
             'ran Context ' .
                 number_format($this->thing->elapsed_runtime() - $split_time) .
@@ -2546,6 +2545,7 @@ class Agent
             $this->thing_report = $headcode_thing->thing_report;
             return $this->thing_report;
         }
+
 
         $this->thing->log('now looking for Resource.');
         $resource_agent = new Resource($this->thing, "resource");

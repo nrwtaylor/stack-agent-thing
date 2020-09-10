@@ -390,7 +390,7 @@ $this->train = $train;
         $this->available_agent = $this->getAgent('Available','available');
 $available = "X";
 if ($this->available_agent == false) {
-$available = "?";
+$available = "Z";
 }
 if (isset($this->available_agent->available)) {
         $available = $this->available_agent->available;
@@ -454,6 +454,9 @@ $this->available = $available;
         if (isset($this->trains)) {
             return;
         }
+// devstack.
+// No need to load up all the trains yet.
+return;
         // Loads current block into $this->block_thing
 
         $match = false;
@@ -489,16 +492,16 @@ $this->available = $available;
         );
 
 
-        foreach ($things as $train_thing) {
+        foreach ($things as $uuid=>$train_thing) {
             //            $thing = new Thing($train_thing['uuid']);
 
             //            $variables_json= $train_thing['variables'];
             //            $variables = $this->thing->json->jsontoArray($variables_json);
 
-            $uuid = $train_thing['uuid'];
+            //$uuid = $train_thing['uuid'];
 
-            $variables_json = $train_thing['variables'];
-            $variables = $this->thing->json->jsontoArray($variables_json);
+            $variables = $train_thing->variables;
+            //$variables = $this->thing->json->jsontoArray($variables_json);
 
             $refreshed_at = "X";
 
@@ -2509,6 +2512,10 @@ $txt = trim($txt);
     public function makeSMS()
     {
 
+//$sms = "TRAIN";
+//$this->sms_message = $sms;
+//$this->thing_report['sms'] = $sms;
+//return;
         $this->node_list = ["train"];
 
         $sms_message = "TRAIN ";

@@ -219,6 +219,13 @@ $this->response = "Gearman snowflake worker started.";
         $this->points = [];
         $things = $this->getThings('manager');
 
+        if (!is_array($things)) {
+$this->x_min = 0;
+$this->x_max = time();
+$this->y_min = 0;
+$this->y_max = 10;
+return;}
+
         foreach (array_reverse($things) as $i => $thing) {
             if (!isset($thing->variables['manager']['queued_jobs'])) {
                 continue;
