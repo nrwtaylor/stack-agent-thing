@@ -262,12 +262,14 @@ class Web extends Agent
 
             $nom_to = $thing->nom_to;
 
+
             if ($nom_to == "usermanager") {
                 continue;
             }
 
             $variables = $thing->variables;
             if (isset($variables['message']['agent'])) {
+
                 $this->prior_agent = $variables['message']['agent'];
                 if (
                     in_array(strtolower($this->prior_agent), [
