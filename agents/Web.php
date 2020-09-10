@@ -240,6 +240,11 @@ class Web extends Agent
      */
     function linkWeb($text = null)
     {
+
+        $this->link_uuid = $this->uuid;
+        $this->stack_link = $this->web_prefix;
+
+
         $this->thing->log("called get web link.");
         $things = [];
         // See if a stack record exists.
@@ -252,16 +257,11 @@ class Web extends Agent
 
         $link_uuids = [];
 
+
         foreach (array_reverse($things) as $uuid => $thing) {
-            //            $this->thing->log(
-            //                $thing['task'] .
-            //                    " " .
-            //                    $thing['nom_to'] .
-            //                    " " .
-            //                    $thing['nom_from']
-            //            );
 
             $nom_to = $thing->nom_to;
+
             if ($nom_to == "usermanager") {
                 continue;
             }
@@ -295,9 +295,6 @@ class Web extends Agent
         //        $token_thing->revokeTokens(); // Because
         //        $agent_thing = new Agent($previous_thing,"agent");
         //        if (!isset($agent_thing->thing_report['web'] )) {$this->web_exists = false;}
-
-        $this->link_uuid = $this->uuid;
-        $this->stack_link = $this->web_prefix;
 
         if (isset($previous_thing)) {
             $previous_thing->silenceOn();
