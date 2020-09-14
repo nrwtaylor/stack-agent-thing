@@ -182,14 +182,37 @@ class Robot extends Agent
             $txt = "# welcome robot\n";
         }
 
-        $jarvis = new Jarvis($this->thing, "jarvis");
-        $txt .= "# " . $jarvis->sms_message . "\n";
+        // Are there any stack robots which might want to say something.
+        $file = $this->resource_path . 'robot/robots.php';
 
-        $txt .= 'User-agent: *';
-        $txt .= "\n";
+        if (file_exists($file)) {
 
-        $txt .= 'Disallow:';
-        $txt .= "\n";
+            $stack_bots = require $file;
+
+            $agent_class_name = $stack_bots[array_rand($stack_bots)];
+
+            $agent_namespace_name =
+                '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+
+
+//            $bot = $this->getAgent(strtolower($stack_bot), 'robot', $this->thing);
+            //$bot = $this->getAgent($stack_bot, 'robot');
+$bot = new $agent_namespace_name($this->thing, strtolower($agent_class_name));
+//$bot = new $agent_class_name($this->thing, strtolower($agent_class_name));
+
+if ($bot !== false) {
+            $txt .= "# " . $bot->thing_report['sms'] . "\n";
+}
+            //$jarvis = new Jarvis($this->thing, "jarvis");
+            //$txt .= "# " . $jarvis->sms_message . "\n";
+        }
+
+        $file = $this->resource_path . 'robot/robots.txt';
+
+        if (file_exists($file)) {
+            $txt .= "\n";
+            $txt .= file_get_contents($file);
+        }
 
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;

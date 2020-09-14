@@ -1454,6 +1454,7 @@ class Agent
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
             restore_error_handler();
+
             $this->thing->log('caught throwable.', "WARNING");
             return false;
         } catch (\Error $ex) {
@@ -1464,6 +1465,7 @@ class Agent
                 "WARNING"
             );
             $message = $ex->getMessage();
+
             // $code = $ex->getCode();
             $file = $ex->getFile();
             $line = $ex->getLine();
