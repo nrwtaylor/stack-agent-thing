@@ -189,33 +189,32 @@ class Stopwatch extends Agent
 
         $this->get();
 
-        if ($this->stopwatch_thing->choice->current_node == 'stopped') {
-            $this->stopwatch_thing->choice->Choose('running');
+        switch ($this->stopwatch_thing->choice->current_node) {
+            case 'running':
+                $t =
+                    strtotime($this->current_time) -
+                    strtotime($this->refreshed_at);
 
-            $this->stopwatch_thing->flagSet('red');
+                $this->elapsed_time = $t + strtotime($this->elapsed_time);
+                $this->set();
+                $this->stopwatch_thing->elapsed_time = $this->elapsed_time;
+                $this->response .= "Saw it already running. ";
+                return;
+            case false:
+            case 'stopped':
+                $this->stopwatch_thing->choice->Choose('running');
 
-            //$this->state = 'running';
-            $this->set();
+                $this->stopwatch_thing->flagSet('red');
 
-            $this->response .= "Started the clock. ";
+                //$this->state = 'running';
+                $this->set();
 
-            return;
+                $this->response .= "Started the clock. ";
+
+                return;
         }
 
-        if ($this->stopwatch_thing->choice->current_node == 'running') {
-            //echo $this->current_time;
-            //ech
-            $t =
-                strtotime($this->current_time) - strtotime($this->refreshed_at);
-
-            $this->elapsed_time = $t + strtotime($this->elapsed_time);
-            $this->set();
-            $this->stopwatch_thing->elapsed_time = $this->elapsed_time;
-            $this->response .= "Saw it already running. ";
-            return;
-        }
-
-        throw 'not running and stopped.';
+        //        throw 'not running and stopped.';
     }
 
     public function respondResponse()
