@@ -104,7 +104,7 @@ if (!file_exists($file)) {return true;}
 
         $m = '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
 
-        $m .= "timestamp " . $this->timestamp . "<br>";
+        $m .= $this->timestamp . "<br>";
 
         $m .= $this->response;
 
@@ -115,7 +115,7 @@ if (!file_exists($file)) {return true;}
     public function makeSMS()
     {
         $sms_message = "TIMESTAMP";
-        $sms_message .= " | timestamp " . $this->timestamp;
+        $sms_message .= " | " . $this->timestamp;
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -144,7 +144,7 @@ if (!file_exists($file)) {return true;}
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        $this->thing_report['help'] = 'This returns the current timestamp.';
+        $this->thing_report['help'] = 'This returns the current timestamp. Now. Try MICROTIME. Or TIME.';
     }
 
     function isData($variable)
@@ -189,6 +189,8 @@ if (!file_exists($file)) {return true;}
         }
 
         $pieces = explode(" ", strtolower($input));
+
+
 
         if ($this->timestamp == "X") {
         }
