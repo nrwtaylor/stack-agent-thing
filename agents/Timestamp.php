@@ -12,9 +12,22 @@ class Timestamp extends Agent
     public $var = 'hello';
     function init()
     {
-        $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
-
+        //$this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
+        $this->keywords = [
+            'millis',
+            'milli',
+            'milliseconds',
+            'ms',
+            'microtime',
+            'micros',
+            'micro',
+            'microseconds',
+            'microseconds',
+        ];
         $this->current_time = $this->thing->json->microtime();
+
+        // Default is not to show end user microtime.
+        $this->micro_time_flag = false;
 
         $this->test = "Development code"; // Always iterative.
 
@@ -47,8 +60,10 @@ class Timestamp extends Agent
 
     function test()
     {
-$file = $this->resource_path . "timestamp/test.txt";
-if (!file_exists($file)) {return true;}
+        $file = $this->resource_path . "timestamp/test.txt";
+        if (!file_exists($file)) {
+            return true;
+        }
 
         $test_corpus = @file_get_contents($file);
         if ($test_corpus === false) {
@@ -84,7 +99,7 @@ if (!file_exists($file)) {return true;}
         return $this->timestamp;
     }
 
-    function read($variable = null)
+    function readTimestamp($variable = null)
     {
     }
 
@@ -104,7 +119,14 @@ if (!file_exists($file)) {return true;}
 
         $m = '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
 
-        $m .= $this->timestamp . "<br>";
+        $parts = explode(" ", $this->timestamp);
+
+        $timestamp = $parts[0] . " " . $parts[1];
+        if ($this->micro_time_flag === true) {
+            $timestamp = $this->timestamp;
+        }
+
+        $m .= $timestamp . "<br>";
 
         $m .= $this->response;
 
@@ -115,7 +137,15 @@ if (!file_exists($file)) {return true;}
     public function makeSMS()
     {
         $sms_message = "TIMESTAMP";
-        $sms_message .= " | " . $this->timestamp;
+
+        $parts = explode(" ", $this->timestamp);
+
+        $timestamp = $parts[0] . " " . $parts[1];
+        if ($this->micro_time_flag === true) {
+            $timestamp = $this->timestamp;
+        }
+
+        $sms_message .= " | " . $timestamp;
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
@@ -144,7 +174,8 @@ if (!file_exists($file)) {return true;}
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        $this->thing_report['help'] = 'This returns the current timestamp. Now. Try MICROTIME. Or TIME.';
+        $this->thing_report['help'] =
+            'This returns the current timestamp. Now. Try MICROTIME. Or TIME.';
     }
 
     function isData($variable)
@@ -158,7 +189,7 @@ if (!file_exists($file)) {return true;}
 
     public function readSubject()
     {
-        $this->response = "Returns the current timestamp.";
+        $this->response .= "Returns the current timestamp.";
 
         if ($this->agent_input == "test") {
             $this->test();
@@ -180,17 +211,26 @@ if (!file_exists($file)) {return true;}
 
         $prior_uuid = null;
 
-        // Is there a headcode in the provided datagram
-
-        //   $this->extractTimestamp();
-
         if ($this->agent_input == "extract") {
             return;
         }
 
         $pieces = explode(" ", strtolower($input));
 
-
+        foreach ($pieces as $key => $piece) {
+            foreach ($this->keywords as $command) {
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
+                        case 'milli':
+                        case 'micro':
+                        case 'ms':
+                            $this->micro_time_flag = true;
+                            break;
+                        default:
+                    }
+                }
+            }
+        }
 
         if ($this->timestamp == "X") {
         }
@@ -198,5 +238,4 @@ if (!file_exists($file)) {return true;}
         return "Message not understood";
         return false;
     }
-
 }
