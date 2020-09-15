@@ -1724,6 +1724,12 @@ class Agent
 
         //$input = strtolower($this->input);
 
+        // Recognize and ignore stack commands.
+        // Devstack
+        if (substr($this->subject, 0, 2) == 's/') {
+            return false;
+        }
+
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
 
         // See if the string has a pointer to a channel nuuid.
@@ -2547,7 +2553,6 @@ class Agent
             $this->thing_report = $headcode_thing->thing_report;
             return $this->thing_report;
         }
-
 
         $this->thing->log('now looking for Resource.');
         $resource_agent = new Resource($this->thing, "resource");
