@@ -44,9 +44,14 @@ class Search extends Agent
             "search_encoding" => "url",
         ],
         "ebay ca" => [
-            "search_prefix" => '%uFFFD php web link appearinghttps://ebay.ca/?s=',
+            "search_prefix" => 'https://ebay.ca/?s=',
             "search_space" => "+",
         ],
+        "duckduckgo" => [
+            "search_prefix" => 'https://duckduckgo.com/?q=',
+            "search_space" => "+",
+        ],
+
     ];
 
     public function init()
