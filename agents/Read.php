@@ -26,7 +26,7 @@ class Read extends Agent
             $this->link = "";
         }
 
-        $this->do_not_read = false;
+        $this->do_not_cache = false;
         $this->do_not_catalogue = false;
 
         $this->read_horizon = 6 * 60 * 60; // 6 hours
@@ -40,74 +40,94 @@ class Read extends Agent
 
         $this->robot_agent = new Robot($this->thing, $this->link);
 
-        if (
-            $this->robot_agent->robots_allowed(
-                $this->link,
-                $this->robot_agent->user_agent_short
-            )
-        ) {
-            $this->response .=
-                "Robot " . $this->robot_agent->user_agent_short . " allowed. ";
+        $robot_allowed = $this->robot_agent->robots_allowed(
+            $this->link,
+            $this->robot_agent->user_agent_short
+        );
 
-            if (
-                substr($this->link, 0, 4) === "http" or
-                substr($this->link, 0, 5) === "https"
-            ) {
-                // Okay.
-            } elseif (isset($this->robot_agent->scheme)) {
-                $this->link = $this->robot_agent->scheme . '://' . $this->link;
-            } else {
-                return true;
-            }
-            // Populate $this->contents
-            $this->getUrl($this->link);
+        switch ($robot_allowed) {
+            case false:
+                $this->response .=
+                    "Robot not allowed. " . $this->robot_agent->response;
+                $this->do_not_cache = true;
+                $this->do_not_index = true;
+                break;
 
-            $this->metaRead($this->contents);
-            if ($this->noindexRead($this->contents)) {
-                // Read as noindex do not set url
-                $this->response .= 'Do not index. ';
-            }
+            case null:
+                $this->response .= "No response from the resource. ";
+                $this->do_not_cache = true;
+                $this->do_not_index = true;
+                break;
+            case true:
+                // if (
+                //     $this->robot_agent->robots_allowed(
+                //         $this->link,
+                //         $this->robot_agent->user_agent_short
+                //     )
+                // ) {
+                $this->do_not_index = false;
+                $this->response .=
+                    "Robot " .
+                    $this->robot_agent->user_agent_short .
+                    " may read. ";
 
-            if ($this->copyrightRead($this->contents)) {
-                $this->response .= 'Saw a copyright notice. ';
-                $this->do_not_read = true;
-            }
-
-            if ($this->trademarkRead($this->contents)) {
-                $this->response .= 'Saw a trademark notice. ';
-                $this->do_not_read = true;
-            }
-
-            // Okay to read meta. Get description.
-            $description = $this->descriptionRead($this->contents);
-            $this->response .= 'Read meta ' . $description . ' ';
-
-            //}
-
-            // Get all the URLs in the page.
-            $url_agent = new Url($this->thing, "url");
-            $this->urls = $url_agent->extractUrls($this->contents);
-            $text = strip_tags($this->contents);
-            // Remove multiple spaces
-            $text = preg_replace('/\s+/', ' ', $text);
-            // Remove start and end spaces
-            $text = trim($text);
-
-            //https://stackoverflow.com/questions/16377437/split-a-text-into-sentences
-            $pattern = '/(?<=[.?!])\s+(?=[a-z])/i';
-
-            //$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
-            $this->sentences = preg_split($pattern, $text);
-
-            foreach ($this->sentences as $i => $sentence) {
-                if (stripos($sentence, $this->search_phrase) !== false) {
-                    $this->matched_sentences[] = $sentence;
+                if (
+                    substr($this->link, 0, 4) === "http" or
+                    substr($this->link, 0, 5) === "https"
+                ) {
+                    // Okay.
+                } elseif (isset($this->robot_agent->scheme)) {
+                    $this->link =
+                        $this->robot_agent->scheme . '://' . $this->link;
+                } else {
+                    return true;
                 }
-            }
-        } else {
-            $this->response .=
-                "Robot not allowed. " . $this->robot_agent->response;
-            $this->do_not_read = true;
+                // Populate $this->contents
+                $this->getUrl($this->link);
+
+                $this->metaRead($this->contents);
+                if ($this->noindexRead($this->contents)) {
+                    $this->do_not_index = true;
+                    // Read as noindex do not set url
+                    $this->response .= 'Do not index. ';
+                }
+
+                if ($this->copyrightRead($this->contents)) {
+                    $this->response .= 'Saw a copyright notice. ';
+                    $this->do_not_cache = true;
+                }
+
+                if ($this->trademarkRead($this->contents)) {
+                    $this->response .= 'Saw a trademark notice. ';
+                    $this->do_not_cache = true;
+                }
+
+                // Okay to read meta. Get description.
+                $description = $this->descriptionRead($this->contents);
+                $this->response .= 'Read meta ' . $description . ' ';
+
+                //}
+
+                // Get all the URLs in the page.
+                $url_agent = new Url($this->thing, "url");
+                $this->urls = $url_agent->extractUrls($this->contents);
+                $text = strip_tags($this->contents);
+                // Remove multiple spaces
+                $text = preg_replace('/\s+/', ' ', $text);
+                // Remove start and end spaces
+                $text = trim($text);
+
+                //https://stackoverflow.com/questions/16377437/split-a-text-into-sentences
+                $pattern = '/(?<=[.?!])\s+(?=[a-z])/i';
+
+                //$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
+                $this->sentences = preg_split($pattern, $text);
+
+                foreach ($this->sentences as $i => $sentence) {
+                    if (stripos($sentence, $this->search_phrase) !== false) {
+                        $this->matched_sentences[] = $sentence;
+                    }
+                }
         }
     }
 
@@ -289,10 +309,16 @@ class Read extends Agent
 
     function metaRead($html)
     {
+        if ($html == "") {
+            return true;
+        }
+
         $doc = new \DOMDocument();
         //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
-        @$doc->loadHTML($html);
 
+        libxml_use_internal_errors(true);
+        $doc->loadHTML($html);
+        libxml_clear_errors();
         $xpath = new \DOMXpath($doc);
         //$elements = $xpath->query("*/div[@class='yourTagIdHere']");
         $elements = $xpath->query(
@@ -304,9 +330,16 @@ class Read extends Agent
 
     function noindexRead($html)
     {
+        if ($html == "") {
+            return true;
+        }
+
         $doc = new \DOMDocument();
         //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
-        @$doc->loadHTML($html);
+
+        libxml_use_internal_errors(true);
+        $doc->loadHTML($html);
+        libxml_clear_errors();
 
         $xpath = new \DOMXpath($doc);
         //$elements = $xpath->query("*/div[@class='yourTagIdHere']");
@@ -342,9 +375,15 @@ class Read extends Agent
 
     function descriptionRead($html)
     {
+        if ($html == "") {
+            return true;
+        }
+
         $doc = new \DOMDocument();
         //$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
-        @$doc->loadHTML($html);
+        libxml_use_internal_errors(true);
+        $doc->loadHTML($html);
+        libxml_clear_errors();
 
         $xpath = new \DOMXpath($doc);
 
@@ -375,6 +414,7 @@ class Read extends Agent
 
     function set()
     {
+        $this->cacheRead();
         $this->variables_agent->setVariable("state", $this->state);
 
         $this->variables_agent->setVariable("link", $this->link);
@@ -385,6 +425,20 @@ class Read extends Agent
         );
 
         $this->refreshed_at = $this->current_time;
+    }
+
+    function cacheRead()
+    {
+        if ($this->do_not_cache === true) {
+            return;
+        }
+
+        $this->response .= "Cached contents. ";
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $this->thing->json->writeVariable(["read"], $this->contents);
     }
 
     function get()
@@ -443,7 +497,19 @@ class Read extends Agent
         ];
 
         $context = stream_context_create($options);
-        $data = file_get_contents($data_source, false, $context);
+
+        set_error_handler(function () {
+            /* ignore errors */
+        });
+
+        $data = @file_get_contents($data_source, false, $context);
+
+        restore_error_handler();
+
+        if ($data === false) {
+            $this->response .= "No datasource found. ";
+            return true;
+        }
 
         if (isset($http_response_header[0])) {
             $response_string = $http_response_header[0];
@@ -509,12 +575,21 @@ class Read extends Agent
         if ($this->link !== false) {
             $sms_message .= " | link " . $this->link;
         }
-        $sms_message .= " | Do not read flag ";
-        if ($this->do_not_read) {
-            $sms_message .= 'RED. ';
+        $sms_message .= " | cache flag ";
+        if ($this->do_not_cache) {
+            $sms_message .= 'RED';
         } else {
-            $sms_message .= 'GREEN. ';
+            $sms_message .= 'GREEN';
         }
+
+        $sms_message .= " index flag ";
+        if ($this->do_not_index) {
+            $sms_message .= 'RED';
+        } else {
+            $sms_message .= 'GREEN';
+        }
+
+        $sms_message .= ". ";
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;

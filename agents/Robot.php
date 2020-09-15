@@ -186,7 +186,6 @@ class Robot extends Agent
         $file = $this->resource_path . 'robot/robots.php';
 
         if (file_exists($file)) {
-
             $stack_bots = require $file;
 
             $agent_class_name = $stack_bots[array_rand($stack_bots)];
@@ -194,15 +193,17 @@ class Robot extends Agent
             $agent_namespace_name =
                 '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
 
-
-//            $bot = $this->getAgent(strtolower($stack_bot), 'robot', $this->thing);
+            //            $bot = $this->getAgent(strtolower($stack_bot), 'robot', $this->thing);
             //$bot = $this->getAgent($stack_bot, 'robot');
-$bot = new $agent_namespace_name($this->thing, strtolower($agent_class_name));
-//$bot = new $agent_class_name($this->thing, strtolower($agent_class_name));
+            $bot = new $agent_namespace_name(
+                $this->thing,
+                strtolower($agent_class_name)
+            );
+            //$bot = new $agent_class_name($this->thing, strtolower($agent_class_name));
 
-if ($bot !== false) {
-            $txt .= "# " . $bot->thing_report['sms'] . "\n";
-}
+            if ($bot !== false) {
+                $txt .= "# " . $bot->thing_report['sms'] . "\n";
+            }
             //$jarvis = new Jarvis($this->thing, "jarvis");
             //$txt .= "# " . $jarvis->sms_message . "\n";
         }
@@ -289,20 +290,28 @@ if ($bot !== false) {
                 $web .= $hit_text . "<br>";
             }
         }
-if (isset($this->user_agent_short)) {
-        $web .= '<p>';
-        $web .= file_get_contents($this->resource_path . 'robot/robot.html');
-        $web .= '<p>';
-        $web .= 'This example tells our bot not to read any of your site.<br>';
-        $web .=
-            '<div class="code">User-agent: ' . $this->user_agent_short . '<br>';
-        $web .= 'Disallow: /</div>';
+        if (isset($this->user_agent_short)) {
+            $web .= '<p>';
+            $web .= file_get_contents(
+                $this->resource_path . 'robot/robot.html'
+            );
+            $web .= '<p>';
+            $web .=
+                'This example tells our bot not to read any of your site.<br>';
+            $web .=
+                '<div class="code">User-agent: ' .
+                $this->user_agent_short .
+                '<br>';
+            $web .= 'Disallow: /</div>';
 
-        $web .= 'This example tells our bot to actively crawl your site.<br>';
-        $web .=
-            '<div class="code">User-agent: ' . $this->user_agent_short . '<br>';
-        $web .= 'Allow: /</div>';
-}
+            $web .=
+                'This example tells our bot to actively crawl your site.<br>';
+            $web .=
+                '<div class="code">User-agent: ' .
+                $this->user_agent_short .
+                '<br>';
+            $web .= 'Allow: /</div>';
+        }
 
         $this->thing_report['web'] = $web;
     }
@@ -464,7 +473,16 @@ if (isset($this->user_agent_short)) {
 
         foreach ($schemes as $i => $scheme) {
             $robots_link = $scheme . "://" . $host . "/robots.txt";
+
+            set_error_handler(function () {
+                /* ignore errors */
+            });
+
             $robotstxt = file($robots_link);
+            restore_error_handler();
+            if ($robotstxt === false) {
+                continue;
+            }
             if (empty($robotstxt)) {
                 continue;
             } else {
@@ -475,6 +493,11 @@ if (isset($this->user_agent_short)) {
         //exit();
         // if there isn't a robots, then we're allowed in
         //https://serverfault.com/questions/154820/what-happens-if-a-website-does-not-have-a-robots-txt-file
+
+        if ($robotstxt === false) {
+            return null;
+        }
+
         if (empty($robotstxt)) {
             return true;
         }
