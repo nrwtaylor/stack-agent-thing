@@ -59,16 +59,12 @@ class Qr extends Agent
 
         $this->node_list = ["qr" => ["qr", "uuid"]];
         // Make buttons
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "qr");
-        $choices = $this->thing->choice->makeLinks('qr');
+//        $this->thing->choice->Create($this->agent_name, $this->node_list, "qr");
+//        $choices = $this->thing->choice->makeLinks('qr');
 
         $alt_text = "QR code with the uuid " . $this->uuid;
 
         $web = '<a href="' . $link . '" ' . 'alt="' . $alt_text . '" >';
-        //$web_prefix = "http://localhost:8080/";
-        //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/qr.png" jpg"
-        //                width="100" height="100"
-        //                alt="' . $alt_text . '" longdesc = "' . $this->web_prefix . 'thing/' .$this->uuid . '/qr.txt">';
 
         $web .= $this->html_image;
 
@@ -76,17 +72,8 @@ class Qr extends Agent
 
         $web .= "<br>";
 
-        //$received_at = strtotime($this->thing->thing->created_at);
-        //$ago = $this->thing->human_time ( $this->created_at );
-        //$web .= "Created about ". $ago . " ago.";
-        //$web .= "<b>QR (Quick Response) Agent</b><br>";
         $web .= 'Code will scan as "' . $this->quick_response . '". ';
         $web .= '<p>';
-
-        //        $web .=
-        //            "Thing created at " .
-        //            strtoupper(date('Y M d D H:m', $this->thing->thing->created_at)) .
-        //            "<br>";
 
         $timestamp = $this->timestampAgent();
 
@@ -100,13 +87,6 @@ class Qr extends Agent
     public function respondResponse()
     {
         // Thing actions
-
-        //$this->thing->json->setField("settings");
-        //$this->thing->json->writeVariable(
-        //    ["qr", "received_at"],
-        //    $this->thing->json->time()
-        //);
-
         $this->thing->flagGreen();
 
         $from = $this->from;
@@ -145,7 +125,7 @@ class Qr extends Agent
         // to be sent a receipt.
 
         // Then look for messages sent to UUIDS
-        $this->thing->log('Agent "QR" looking for QR in address.');
+        $this->thing->log('looking for QR in address.');
         //    $uuid_thing = new Uuid($this->thing, 'uuid');
 
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";

@@ -48,9 +48,9 @@ class Uuid extends Agent
      */
     function getQuickresponse()
     {
-        $this->uuid_agent = new Qr($this->thing, $this->link);
-        $this->quick_response_png = $this->uuid_agent->PNG_embed;
-        $this->html_image = $this->uuid_agent->html_image;
+        $this->qr_agent = new Qr($this->thing, $this->link);
+        $this->quick_response_png = $this->qr_agent->PNG_embed;
+        $this->html_image = $this->qr_agent->html_image;
     }
 
     /**
@@ -65,7 +65,6 @@ class Uuid extends Agent
         }
 
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
-
         preg_match_all($pattern, $input, $m);
 
         $arr = $m[0];
@@ -119,11 +118,14 @@ class Uuid extends Agent
      */
     function extractUuid($input)
     {
-        $uuids = $this->extractUuids($input);
+        if (!isset($this->uuids)) {
+            $this->uuids = $this->extractUuids($input);
+        }
+        $uuids = $this->uuids;
+
         if (!is_array($uuids)) {
             return true;
         }
-
         if (is_array($uuids) and count($uuids) == 1) {
             $this->uuid = $uuids[0];
             $this->thing->log(
@@ -189,6 +191,25 @@ class Uuid extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
     }
 
+    public function validateUuids($uuids = null)
+    {
+        if ($uuids == null) {
+            $uuids = $this->uuids;
+        }
+
+        foreach ($uuids as $i => $uuid) {
+            $t = new Thing($uuid);
+            if ($t->thing !== false) {
+                if ($t->from == hash('sha256', $this->from)) {
+                    $this->response .= 'Channel ' . $uuid . '. ';
+                } else {
+                    $this->response .= 'Recognized ' . $uuid . '. ';
+                }
+            } else {
+                $this->response .= 'Did not recognize ' . $uuid . '. ';
+            }
+        }
+    }
     /**
      *
      * @return unknown
@@ -197,7 +218,7 @@ class Uuid extends Agent
     {
         $input = $this->input;
         $this->extractUuid($input);
-
+        /*
         foreach ($this->uuids as $i => $uuid) {
             $t = new Thing($uuid);
             if ($t->thing !== false) {
@@ -210,6 +231,7 @@ class Uuid extends Agent
                 $this->response .= 'Did not recognize ' . $uuid . '. ';
             }
         }
+*/
 
         if ($this->uuids == []) {
             $this->response .= "Got uuid " . $this->uuid . ". ";

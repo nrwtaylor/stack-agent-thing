@@ -1779,6 +1779,7 @@ class Agent
         $this->robot_agent = new Robot($this->thing, 'robot');
 
         if ($this->robot_agent->isRobot()) {
+            $this->response .= 'We think you are a robot.';
             $this->thing_report = $this->robot_agent->thing_report;
             return;
         }

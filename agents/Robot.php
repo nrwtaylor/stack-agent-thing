@@ -56,10 +56,16 @@ class Robot extends Agent
         $this->useragent = ini_get("user_agent");
         $url = rtrim($this->web_prefix . "/");
 
-        //$help_agent = new Help($this->thing, 'help');
-        //$help_agent->makeHelp();
-$this->thing_report['help'] = "merp";
-        //$this->thing_report['help'] = $help_agent->thing_report['help'];
+        $this->thing_report['help'] = 'Deals with robots. Mostly.';
+
+        if ($this->stack_state == 'dev') {
+            $this->thing->log("calling Help Agent.");
+            $help_agent = new Help($this->thing, 'help');
+            $help_agent->makeHelp();
+            $this->thing->log("called Help Agent.");
+            $this->thing_report['help'] = $help_agent->thing_report['help'];
+        }
+
     }
 
     public function setRobot()

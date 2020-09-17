@@ -502,9 +502,12 @@ class Chinese extends Agent
                     $pointer += $value + 1;
                     break;
                 }
-
                 //echo "test if character string " . $test_character_string . " is in dictionary.\n";
+
+                // Devstack
+                // Next line testing at 22ms.
                 $text_temp = $this->findChinese('list', $test_character_string);
+
 
                 if ($text_temp == false) {
                     //echo "Not in dictionary" . "\n";
@@ -679,13 +682,15 @@ class Chinese extends Agent
         return 'U+' . strtoupper($res);
     }
 
+
+
     /**
      *
      * @param unknown $librex
      * @param unknown $searchfor
      * @return unknown
      */
-    public function findChinese($librex, $searchfor)
+    public function getContents($librex = null)
     {
         // Look up the meaning in the dictionary.
         if ($librex == "" or $librex == " " or $librex == null) {
@@ -755,6 +760,16 @@ class Chinese extends Agent
                     $this->resource_path .
                     'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
         }
+        $this->contents = $contents;
+    }
+
+    public function findChinese($librex, $searchfor)
+    {
+        if (!isset($this->contents)) {
+        $this->getContents($librex);}
+
+        // factor out
+        $contents = $this->contents;
 
         if (!isset($contents) or $contents == false) {
             $this->matches = [];
@@ -778,15 +793,15 @@ class Chinese extends Agent
             // finalise the regular expression, matching the whole line
             $pattern = "/^.*" . $pattern . ".*\$/m";
         }
-
         // search, and store all matching occurences in $matches
         $m = false;
+
         if (preg_match_all($pattern, $contents, $matches)) {
             //echo "Found matches:\n";
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
-        }
 
+        }
         return $m;
     }
 
