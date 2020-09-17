@@ -73,13 +73,22 @@ class Makelog
         $t = "\nSelf-reported Agent chain-of-custody\n";
         foreach(($this->agent_sequence) as $key=>$array) {
             $t .= $array["agent_name"];
+
+if (!isset($prior_run_for)) {
+$prior_run_for = 0;
+}
+
             if ($array["run_for"] != "X") {
-                $t .= " (" . number_format($array["run_for"]) . "ms)";
+                $t .= " (" . number_format($array["run_for"] - $prior_run_for) . "ms)";
                 $t .= " | ";
+                $prior_run_for = $array['run_for'];
             }  else {
                 $t .= " > ";
             }
         }
+
+
+
         $t .= "\n";
 
         $file .= $t. "\n";

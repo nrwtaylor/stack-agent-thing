@@ -371,6 +371,15 @@ class Agent
         //        if (isset($this->thing_report['web'])) {
         if (isset($this->thing_report['web'])) {
             foreach ($agents as $i => $agent_name) {
+                if (
+                    !isset($this->thing_report[$agent_name]) or
+                    $this->thing_report[$agent_name] == null
+                ) {
+                    if (isset($this->{$agent_name})) {
+                        $this->thing_report[$agent_name] = $this->{$agent_name};
+                    }
+                }
+
                 if (!isset($this->thing_report[$agent_name])) {
                     continue;
                 }
@@ -1727,7 +1736,51 @@ class Agent
         // Recognize and ignore stack commands.
         // Devstack
         if (substr($this->subject, 0, 2) == 's/') {
-            return false;
+            if (
+                substr($this->subject, 0, 5) == 's/ is' and
+                substr($this->subject, -6) == 'button'
+            ) {
+                $t = str_replace('s/ is', '', $this->subject);
+                $t = str_replace('button', '', $t);
+                $t = trim($t);
+                $button_agent = $t;
+            }
+
+            $agent_tokens = explode(' ', $this->agent_input);
+            // Expect at least  tokens.
+            // Get the last alpha tokens.
+
+            $selected_agent_tokens = [];
+            foreach (array_reverse($agent_tokens) as $i => $agent_token) {
+                //if (is_string($agent_token)) {
+
+                if (ctype_alpha(str_replace(' ', '', $agent_token)) === false) {
+                    break;
+                }
+                $selected_agent_tokens[] = $agent_token;
+            }
+
+            $token_agent = implode(' ', array_reverse($selected_agent_tokens));
+
+            if (isset($button_agent) and isset($token_agent)) {
+                if ($button_agent != $token_agent) {
+                    return false;
+                }
+            }
+
+            if ($button_agent == $token_agent) {
+                $this->response .=
+                    "Clicked the " . strtoupper($button_agent) . " button.";
+            }
+        }
+
+        // Dev test for robots
+        $this->thing->log('created a Robot agent.', "INFORMATION");
+        $this->robot_agent = new Robot($this->thing, 'robot');
+
+        if ($this->robot_agent->isRobot()) {
+            $this->thing_report = $this->robot_agent->thing_report;
+            return;
         }
 
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
@@ -2261,8 +2314,10 @@ class Agent
                 '<pre> Agent created a Robot agent</pre>',
                 "INFORMATION"
             );
-            $robot_thing = new Robot($this->thing);
-            $this->thing_report = $robot_thing->thing_report;
+            if (!isset($this->robot_agent)) {
+                $this->robot_agent = new Robot($this->thing);
+            }
+            $this->thing_report = $this->robot_agent->thing_report;
             return $this->thing_report;
         }
 

@@ -56,7 +56,10 @@ class Robot extends Agent
         $this->useragent = ini_get("user_agent");
         $url = rtrim($this->web_prefix . "/");
 
-        $this->thing_report['help'] = 'Checks if you are a robot.';
+        //$help_agent = new Help($this->thing, 'help');
+        //$help_agent->makeHelp();
+$this->thing_report['help'] = "merp";
+        //$this->thing_report['help'] = $help_agent->thing_report['help'];
     }
 
     public function setRobot()
@@ -126,7 +129,13 @@ class Robot extends Agent
 
     public function isRobot()
     {
-        if ($this->hits > 1) {
+        // true when determined as a Robot.
+
+        // Has a string of text in the Robot headers list matched?
+        // Robot is self-identifying. 
+        // Hello. Welcome. Thanks for the declaration.
+
+        if (count($this->hits) >= 1) {
             return true;
         }
         return false;

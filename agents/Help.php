@@ -53,14 +53,14 @@ class Help extends Agent {
 
         if (!isset($this->prior_agent)) {
             $this->help = "Did not get prior agent.";
-            $this->thing_report['help'] = $this->help;
+//            $this->thing_report['help'] = $this->help;
             return;
         }
 
 
         if (strtolower($this->prior_agent) == "help") {
             $this->help = "Asks the previous Agent for help.";
-            $this->thing_report['help'] = "Asks the Agent for help.";
+//            $this->thing_report['help'] = "Asks the Agent for help.";
             return;
         }
 
@@ -70,7 +70,7 @@ class Help extends Agent {
 
             $agent = new $agent_class_name($this->prior_thing);
 
-            $thing_report = $agent->thing_report;
+            $this->help = $agent->thing_report['help'];
 
         } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
             $this->thing->log( $this->agent_prefix .'borked on "' . $agent_class_name . '".', "WARNING" );
@@ -85,14 +85,28 @@ class Help extends Agent {
             $bork_agent = new Bork($this->thing, $input);
 //            $thing_report['help'] = $bork_agent->thing_report['help'] . " " . $input;
 
-            $thing_report['help'] = "Could not retrieve help for that agent.";
+            $this->help = "Could not retrieve help for that agent.";
             //continue;
         }
 
-        $this->help = "No help available yet for this agent";
-        if (isset($thing_report['help'])) {
-             $this->help = $thing_report['help'];
+        //$this->help = "No help available yet for this agent";
+//        if (isset($thing_report['help'])) {
+//             $this->help = $thing_report['help'];
+//        }
+
+    }
+
+
+    public function makeHelp() {
+
+        $help = "No help available.";
+        if (isset($this->help)) {
+            $help = $this->help;
         }
+
+        if (isset($this->thing_report['help'])) {return;}
+
+        $this->thing_report['help'] = $this->help;
 
     }
 
