@@ -73,8 +73,10 @@ class Help extends Agent
                 $this->namespace . ucwords(strtolower($this->prior_agent));
 
             $agent = new $agent_class_name($this->prior_thing);
+            if (isset($agent->thing_report['help'])) {
+                $this->help = $agent->thing_report['help'];
+            }
 
-            $this->help = $agent->thing_report['help'];
         } catch (\Error $ex) {
             // Error is the base class for all internal PHP error exceptions.
             $this->thing->log(
@@ -108,7 +110,8 @@ class Help extends Agent
             return;
         }
 
-        $this->thing_report['help'] = $this->help;
+        $this->help = $help;
+        $this->thing_report['help'] = $help;
     }
 
     /**

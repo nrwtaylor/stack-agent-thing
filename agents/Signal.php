@@ -31,7 +31,12 @@ class Signal extends Agent
         $this->default_state = "green";
         $this->node_list = ["green" => ["red" => ["green"]]];
 
+        $this->show_uuid = 'off';
+
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/signal';
+
+        $this->show_link = 'on';
+
         $this->refreshed_at = null;
 
         $this->current_time = $this->thing->time();
@@ -162,7 +167,7 @@ class Signal extends Agent
         if (is_string($this->channel_name)) {
             $this->response .= "Saw channel is " . $this->channel_name . ". ";
         } else {
-            $this->response .= "Did not recognize channel name. ";
+            $this->response .= "No channel name. ";
         }
         $this->getSignal();
 
@@ -851,9 +856,15 @@ class Signal extends Agent
 
         $signal_id = "X";
         if (isset($this->signal_thing->uuid)) {
-            $signal_id = $this->signal_thing->uuid;
-            $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
-            $signal_id = $this->idSignal($signal_id);
+            if ($this->show_uuid == 'off') {
+                $signal_id = $this->signal_thing->uuid;
+                $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
+                $signal_id = $this->idSignal($signal_id);
+            } elseif ($this->show_uuid == 'on') {
+                $signal_id = $this->signal_thing->uuid;
+                //            $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
+                //            $signal_id = $this->idSignal($signal_id);
+            }
         }
 
         $state_text = "X";
@@ -911,6 +922,11 @@ class Signal extends Agent
             $sms_message .= " Text HELP";
         }
 */
+
+        if ($this->show_link == 'on') {
+            $sms_message .= " " . $this->link;
+        }
+
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
     }
@@ -1086,6 +1102,33 @@ class Signal extends Agent
         }
     }
 
+    public function uuidSignal()
+    {
+        // Better way of doing this. Surely.
+        //$signal_id = $this->idSignal($this->signal_thing->signal_thing->uuid);
+        $this->show_uuid = 'on';
+
+        //$this->response .= "signal uuid is " .$this->signal_thing->uuid . ". ";
+    }
+
+    public function linkSignal()
+    {
+        // Better way of doing this. Surely.
+        //$signal_id = $this->idSignal($this->signal_thing->signal_thing->uuid);
+
+        if (isset($this->signal_thing->uuid)) {
+            $this->link =
+                $this->web_prefix .
+                'thing/' .
+                $this->signal_thing->uuid .
+                '/signal';
+        }
+
+        $this->show_link = 'on';
+        //$this->link = $this->web_prefix . "/thing/"  . $this->signal_thing->uuid . "/signal-uuid";
+        //$this->response .= $this->link . " ";
+    }
+
     public function makePNG()
     {
         if (!isset($this->image)) {
@@ -1105,13 +1148,15 @@ class Signal extends Agent
 
     public function readSignal()
     {
-        //echo "merp";
     }
 
     public function readSubject()
     {
         $keywords = [
             'signal',
+            'uuid',
+            'link',
+            'web',
             'x',
             'X',
             'red',
@@ -1202,6 +1247,14 @@ return;
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
+                        case 'uuid':
+                            $this->uuidSignal();
+                            break;
+                        case 'web':
+                        case 'link':
+                            $this->linkSignal();
+                            break;
+
                         case 'red':
                             $this->changeSignal('red');
                             return;

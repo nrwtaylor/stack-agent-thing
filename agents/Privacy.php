@@ -30,6 +30,8 @@ class Privacy extends Agent {
         $this->mail_regulatory = $this->thing->container['stack']['mail_regulatory'];
         $this->web_prefix = $this->thing->container['stack']['web_prefix'];
 
+        $this->email = $this->thing->container['stack']['email'];
+
         $this->node_list = array("start"=>array("start","opt-in", "terms of use"));
         $this->privacy();
 
@@ -53,6 +55,9 @@ class Privacy extends Agent {
     public function makeWeb() {
         $file = $GLOBALS['stack_path'] . 'resources/privacy/privacy.html';
         $contents = file_get_contents($file);
+
+$contents = str_replace('<email>', $this->email, $contents);
+
         $this->thing_report['web'] = $contents;
     }
 

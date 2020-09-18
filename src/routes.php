@@ -8,7 +8,7 @@
 namespace Nrwtaylor\StackAgentThing;
 // (c) 2020 Stackr Interactive Ltd
 
-// whitefox 30 July 2020
+// whitefox 16 September 2020
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -138,26 +138,29 @@ $app->group('/api', function () use ($app) {
         });
 
         // Operational end-point for NEXMO
-        $app->get('/gearman', function ($request, $response, $args) {
-            $body = $request->getParsedBody();
+        $app->get(
+            $app->getContainer()->get('settings')['api']['gearman']['webhook'],
+            function ($request, $response, $args) {
+                $body = $request->getParsedBody();
 
-            //echo "meep";
-            //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
-            $arr = json_encode([
-                "to" => "web@stackr.ca",
-                "from" => "snowflake",
-                "subject" => "snowflake",
-            ]);
+                //echo "meep";
+                //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
+                $arr = json_encode([
+                    "to" => "web@stackr.ca",
+                    "from" => "snowflake",
+                    "subject" => "snowflake",
+                ]);
 
-            $client = new \GearmanClient();
-            $client->addServer();
+                $client = new \GearmanClient();
+                $client->addServer();
 
-            $client->doHighBackground("call_agent", $arr);
+                $client->doHighBackground("call_agent", $arr);
 
-            return;
-            // $response->withHeader('HTTP/1.0 200 OK')
-            //                ->withStatus(200);
-        });
+                return;
+                // $response->withHeader('HTTP/1.0 200 OK')
+                //                ->withStatus(200);
+            }
+        );
 
         // Operational end-point for Microsoft
         $app->post(
@@ -250,235 +253,238 @@ $app->group('/api', function () use ($app) {
         );
 
         // Operational end-point for NEXMO
-        $app->post('/nexmo', function ($request, $response, $args) {
-            $body = $request->getParsedBody();
+        $app->post(
+            $app->getContainer()->get('settings')['api']['nexmo']['webhook'],
+            function ($request, $response, $args) {
+                $body = $request->getParsedBody();
 
-            ignore_user_abort(true);
-            set_time_limit(0);
+                ignore_user_abort(true);
+                set_time_limit(0);
 
-            ob_start();
+                ob_start();
 
-            $prod = true;
-            if ($prod == true) {
-                $serverProtocol = filter_input(
-                    INPUT_SERVER,
-                    'SERVER_PROTOCOL',
-                    FILTER_SANITIZE_STRING
-                );
-                header($serverProtocol . ' 200 OK');
-                // Disable compression (in case content length is compressed).
-                header('Content-Encoding: none');
-                header('Content-Length: ' . ob_get_length());
+                $prod = true;
+                if ($prod == true) {
+                    $serverProtocol = filter_input(
+                        INPUT_SERVER,
+                        'SERVER_PROTOCOL',
+                        FILTER_SANITIZE_STRING
+                    );
+                    header($serverProtocol . ' 200 OK');
+                    // Disable compression (in case content length is compressed).
+                    header('Content-Encoding: none');
+                    header('Content-Length: ' . ob_get_length());
 
-                // Close the connection.
-                header('Connection: close');
-            } else {
-                header('HTTP/1.0 200 OK');
-                header("Content-Type: application/json");
-                header('Content-Length: ' . ob_get_length());
-            }
+                    // Close the connection.
+                    header('Connection: close');
+                } else {
+                    header('HTTP/1.0 200 OK');
+                    header("Content-Type: application/json");
+                    header('Content-Length: ' . ob_get_length());
+                }
 
-            ob_end_flush();
-            ob_flush();
-            flush();
+                ob_end_flush();
+                ob_flush();
+                flush();
 
+                $message_id = $body['messageId'];
 
-            $message_id = $body['messageId'];
+                $inject_text = "";
 
-            $inject_text = "";
-            $queue = true;
+                $queue = true;
 
-            // Flag Red so that the agent handler picks it up.
-            if ($queue) {
-                $arr = json_encode([
-                    "to" => $body['msisdn'],
-                    "from" => $body['to'],
-                    "subject" => $body['text'] . $inject_text,
-                    "body" => $body,
-                ]);
+                // Flag Red so that the agent handler picks it up.
+                if ($queue) {
+                    $arr = json_encode([
+                        "to" => $body['msisdn'],
+                        "from" => $body['to'],
+                        "subject" => $body['text'] . $inject_text,
+                        "body" => $body,
+                    ]);
 
-                $client = new \GearmanClient();
-                $client->addServer();
-                $client->doNormal("call_agent", $arr);
-                //$client->doHighBackground("call_agent", $arr);
-            } else {
+                    $client = new \GearmanClient();
+                    $client->addServer();
+                    $client->doNormal("call_agent", $arr);
+                    //$client->doHighBackground("call_agent", $arr);
+                } else {
+                    $sms_thing = new Thing(null);
+                    $sms_thing->Create(
+                        $body['msisdn'],
+                        $body['to'],
+                        $body['text']
+                    );
 
-                $sms_thing = new Thing(null);
-                $sms_thing->Create($body['msisdn'], $body['to'], $body['text']);
+                    $channel = new Channel($sms_thing, "sms");
 
-                $channel = new Channel($sms_thing, "sms");
+                    $agent = new Agent($sms_thing);
+                }
 
-                $agent = new Agent($sms_thing);
-            }
-
-            $message = "Stackr received a message from ";
-            $message .= $body['msisdn'] . " to " . $body['to'];
-            $message .= " which said " . $body['text'] . ".";
-
-            return $response->withHeader('HTTP/1.0 200 OK')->withStatus(200);
-        });
-
-        $app->post('/webhook_slack_86qn6p11', function (
-            $request,
-            $response,
-            $args
-        ) {
-
-            ob_start();
-
-            $prod = true;
-            if ($prod == true) {
-                $serverProtocol = filter_input(
-                    INPUT_SERVER,
-                    'SERVER_PROTOCOL',
-                    FILTER_SANITIZE_STRING
-                );
-                header($serverProtocol . ' 200 OK');
-                // Disable compression (in case content length is compressed).
-                header('Content-Encoding: none');
-                header('Content-Length: ' . ob_get_length());
-
-                // Close the connection.
-                header('Connection: close');
-            } else {
-                header('HTTP/1.0 200 OK');
-                header("Content-Type: application/json");
-                header('Content-Length: ' . ob_get_length());
-            }
-
-            ob_end_flush();
-            ob_flush();
-            flush();
-
-            // Create an empty Thing
-            $slack_thing = new Thing(null);
-            //$channel = new Channel($slack_thing,"slack");
-
-            //$channel = new Channel($slack_thing, "slack");
-            // Retrieve the body of the request
-            $body = $request->getParsedBody();
-
-            //                $channel = new Channel($slack_thing,"slack");
-
-            // Check if this is a webhook verification
-            //https://api.slack.com/events/url_verification
-            if (isset($body['type']) and $body['type'] == 'url_verification') {
-                $challenge = $body['challenge'];
-                $slack_thing->Create($sender_id, $page_id, $body['type']);
-
-                $body = $response->getBody();
-                $body->write($challenge);
+                $message = "Stackr received a message from ";
+                $message .= $body['msisdn'] . " to " . $body['to'];
+                $message .= " which said " . $body['text'] . ".";
 
                 return $response
                     ->withHeader('HTTP/1.0 200 OK')
                     ->withStatus(200);
             }
+        );
 
-            $verify_token = 'hellomordok';
+        $app->post(
+            $app->getContainer()->get('settings')['api']['slack']['webhook'],
+            function ($request, $response, $args) {
+                ob_start();
 
-            // https://gist.github.com/stefanzweifel/04be27486517cd7d3422
-            $query = $request->getQueryParams();
-            //$body = $response->getBody();
-
-            $input = json_decode(file_get_contents("php://input"), true);
-
-            echo "Slack says it's good to remind you that the button is doing something. ";
-
-            if (isset($body['event'])) {
-                echo "An event was received";
-                if ($body['event']['type'] == "message") {
-                    echo "and identified as a message";
-                    $nom_to = $body['api_app_id'];
-                    $sender_id = $body['event']['user'];
-
-                    $test_text = $body['event']['text'];
-
-                    $test_text = ltrim(
-                        str_replace("<@U6N5VCYDT>", "", $test_text)
+                $prod = true;
+                if ($prod == true) {
+                    $serverProtocol = filter_input(
+                        INPUT_SERVER,
+                        'SERVER_PROTOCOL',
+                        FILTER_SANITIZE_STRING
                     );
-                    $slack_thing->Create($sender_id, $nom_to, $test_text);
+                    header($serverProtocol . ' 200 OK');
+                    // Disable compression (in case content length is compressed).
+                    header('Content-Encoding: none');
+                    header('Content-Length: ' . ob_get_length());
 
-                    $channel = new Channel($slack_thing, "slack");
+                    // Close the connection.
+                    header('Connection: close');
+                } else {
+                    header('HTTP/1.0 200 OK');
+                    header("Content-Type: application/json");
+                    header('Content-Length: ' . ob_get_length());
+                }
+
+                ob_end_flush();
+                ob_flush();
+                flush();
+
+                // Create an empty Thing
+                $slack_thing = new Thing(null);
+                //$channel = new Channel($slack_thing,"slack");
+
+                //$channel = new Channel($slack_thing, "slack");
+                // Retrieve the body of the request
+                $body = $request->getParsedBody();
+
+                //                $channel = new Channel($slack_thing,"slack");
+
+                // Check if this is a webhook verification
+                //https://api.slack.com/events/url_verification
+                if (
+                    isset($body['type']) and
+                    $body['type'] == 'url_verification'
+                ) {
+                    $challenge = $body['challenge'];
+                    $slack_thing->Create($sender_id, $page_id, $body['type']);
+
+                    $body = $response->getBody();
+                    $body->write($challenge);
+
+                    return $response
+                        ->withHeader('HTTP/1.0 200 OK')
+                        ->withStatus(200);
+                }
+
+                $verify_token = 'hellomordok';
+
+                // https://gist.github.com/stefanzweifel/04be27486517cd7d3422
+                $query = $request->getQueryParams();
+                //$body = $response->getBody();
+
+                $input = json_decode(file_get_contents("php://input"), true);
+
+                echo "Slack says it's good to remind you that the button is doing something. ";
+
+                if (isset($body['event'])) {
+                    echo "An event was received";
+                    if ($body['event']['type'] == "message") {
+                        echo "and identified as a message";
+                        $nom_to = $body['api_app_id'];
+                        $sender_id = $body['event']['user'];
+
+                        $test_text = $body['event']['text'];
+
+                        $test_text = ltrim(
+                            str_replace("<@U6N5VCYDT>", "", $test_text)
+                        );
+                        $slack_thing->Create($sender_id, $nom_to, $test_text);
+
+                        $channel = new Channel($slack_thing, "slack");
+
+                        $slack_agent = new Slack($slack_thing, $body);
+
+                        $slack_agent = new Agent($slack_thing);
+
+                        $slack_thing->flagRed();
+                        $response_text = "foo";
+                        return $this->response
+                            ->write($response_text)
+                            ->withStatus(200);
+                    }
+                }
+
+                // So it is not a message event?
+                // Perhaps it is a command.
+                if (isset($body['command'])) {
+                    echo "Command accepted. ";
+                    //$sender_id = $body['user_id'] . "-" . $body['channel_id'];
+                    $sender_id = $body['user_id'];
+
+                    $page_id = "mordok";
+                    $text = $body['text'];
+
+                    $slack_thing->Create($sender_id, $page_id, $text);
 
                     $slack_agent = new Slack($slack_thing, $body);
+                    $channel = new Channel($slack_thing, "slack");
+                    //$slack_agent = new Agent($slack_thing, $body);
 
+                    //$slack_agent = new Slack($slack_thing);
                     $slack_agent = new Agent($slack_thing);
 
                     $slack_thing->flagRed();
-                    $response_text = "foo";
+                    $response_text = "";
+
                     return $this->response
                         ->write($response_text)
                         ->withStatus(200);
                 }
-            }
 
-            // So it is not a message event?
-            // Perhaps it is a command.
-            if (isset($body['command'])) {
-                echo "Command accepted. ";
-                //$sender_id = $body['user_id'] . "-" . $body['channel_id'];
-                $sender_id = $body['user_id'];
+                if (isset($body['payload'])) {
+                    echo "Slack datagram transmitted.";
+                    //$sender_id = $body['user_id'];
+                    $sender_id = "not extracted";
+                    $page_id = "mordok";
+                    $text = "s/ button press"; //$body['text'];
+                    $slack_thing->Create($sender_id, $page_id, $text);
 
-                $page_id = "mordok";
-                $text = $body['text'];
+                    $slack_agent = new Slack($slack_thing, $body);
+                    $slack_thing->flagRed();
 
-                $slack_thing->Create($sender_id, $page_id, $text);
+                    $response_text = "";
 
-                $slack_agent = new Slack($slack_thing, $body);
-                $channel = new Channel($slack_thing, "slack");
-                //$slack_agent = new Agent($slack_thing, $body);
+                    return $this->response
+                        ->write($response_text)
+                        ->withStatus(200);
+                }
 
-                //$slack_agent = new Slack($slack_thing);
-                $slack_agent = new Agent($slack_thing);
+                foreach ($body as $key => $value) {
+                    $t = $t . " " . $key;
+                }
 
-                /*
-                    $arr = json_encode(array("to"=>$sender_id, "from"=>$page_id, "subject"=>$text));
-                    $client= new \GearmanClient();
-                    $client->addServer();
-//$client->addServer("10.0.0.24");
-//$client->addServer("10.0.0.25");
-                    //$client->doNormal("call_agent", $arr);
-                    $client->doHighBackground("call_agent", $arr);
-*/
+                $test_text = $t;
+                //$test_text = $body['event']['text'];
+                ob_start();
+                var_dump($body);
+                $test_text = ob_get_clean();
 
-                $slack_thing->flagRed();
-                $response_text = "";
-
-                return $this->response->write($response_text)->withStatus(200);
-            }
-
-            if (isset($body['payload'])) {
-                echo "Slack datagram transmitted.";
-                //$sender_id = $body['user_id'];
+                //$test_text="ht";
                 $sender_id = "not extracted";
-                $page_id = "mordok";
-                $text = "s/ button press"; //$body['text'];
-                $slack_thing->Create($sender_id, $page_id, $text);
+                $page_id = "not extracted";
 
-                $slack_agent = new Slack($slack_thing, $body);
-                $slack_thing->flagRed();
-
-                $response_text = "";
-
-                return $this->response->write($response_text)->withStatus(200);
+                $slack_thing->Create($sender_id, $page_id, $test_text);
             }
-
-            foreach ($body as $key => $value) {
-                $t = $t . " " . $key;
-            }
-
-            $test_text = $t;
-            //$test_text = $body['event']['text'];
-            ob_start();
-            var_dump($body);
-            $test_text = ob_get_clean();
-
-            //$test_text="ht";
-            $sender_id = "not extracted";
-            $page_id = "not extracted";
-
-            $slack_thing->Create($sender_id, $page_id, $test_text);
-        });
+        );
 
         $app->post(
             $app->getContainer()->get('settings')['api']['facebook']['webhook'],
@@ -733,6 +739,26 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
     $command = ltrim($command, " ");
     $command = rtrim($command, " ");
 
+    //var_dump($command);
+    //exit();
+    if (substr($command, 0, 15) == 'googleauthorize') {
+        $thing = new Thing(null);
+        $thing->Create("web", "routes", "s/ web googleauthorize");
+        $googleauthorize_agent = new Googleauthorize($thing);
+
+        $thing_report = $googleauthorize_agent->thing_report;
+        $thing_report['requested_channel'] = 'thing';
+
+        $thing_report['etime'] = number_format($thing->elapsed_runtime());
+        $thing_report['request'] = $thing->subject;
+
+        $thing->flagGreen();
+
+        $bleep = [];
+        $bleep['thing_report'] = $thing_report;
+
+        return $this->renderer->render($response, 'thing.phtml', $bleep);
+    }
     // extract uuid
     // See if there is a UUID in the web address, and
     // extract it to $uuid.   null if not found.
@@ -797,13 +823,9 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             $robot_agent = new Robot($thing);
 
             $content = $robot_agent->thing_report['txt'];
-                $response->write($content);
-                return $response->withHeader(
-                    'Content-Type',
-                    'text/plain'
-                );
+            $response->write($content);
+            return $response->withHeader('Content-Type', 'text/plain');
             break;
-
         case $command == "termsofuse":
         case $command == "terms-of-use":
             $thing = new Thing($uuid);
@@ -852,14 +874,15 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     "json" => 'application/json',
                 ];
 
-
                 if ($uuid == null) {
                     $response->write(false);
-                    return $response->withHeader(
-                        'Content-Type',
-                        $content_types[$ext_name]
-                    );
 
+                    if (isset($content_types[$ext_name])) {
+                        return $response->withHeader(
+                            'Content-Type',
+                            $content_types[$ext_name]
+                        );
+                    }
                 }
 
                 if ($web_thing->thing == false) {
@@ -872,7 +895,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                         $datagram
                     );
                 }
-
 
                 // See if the extension name is one of these.
 
@@ -890,7 +912,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 //if ($ext_name == 'json') {
                 //    return $response->withStatus(404);
                 //}
-
 
                 try {
                     $agent_namespace_name =
@@ -939,8 +960,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             // Everything else
             $thing = new Thing($uuid);
 
-                $channel = new Channel($thing, "web");
-
+            $channel = new Channel($thing, "web");
 
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
@@ -965,9 +985,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             // So the uuid is null
             if ($uuid == null) {
-
                 if (isset($slug->state) and $slug->state == "off") {
-
                     $datagram = [];
                     $datagram['thing'] = false;
                     $datagram['thing_report'] = false;
@@ -976,11 +994,10 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                         $response,
                         'thing.phtml',
                         $datagram
-                   );
-               }
+                    );
+                }
 
-                if (isset($slug) and (!$slug->isSlug($command))) {
-
+                if (isset($slug) and !$slug->isSlug($command)) {
                     $datagram = [];
                     $datagram['thing'] = false;
                     $datagram['thing_report'] = false;
@@ -989,37 +1006,28 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                         $response,
                         'thing.phtml',
                         $datagram
-                   );
-               }
-
-
+                    );
+                }
             }
+
             // Unaddressed web request to a Thing existing on the stack.
             // Enter into stack as coming from web and addressed to stack agent.
-///if ($thing->thing == false) {
-                     if ($uuid == null) {
-                          $thing->Create("web@stackr.ca", "agent", $command);
-                      }
+            ///if ($thing->thing == false) {
+            if ($uuid == null) {
+                $thing->Create("web@stackr.ca", "agent", $command);
+            }
 
             $filtered_command = $command;
             if (!is_numeric($command)) {
                 $filtered_command = str_replace("-", " ", $slug->slug);
             }
-/*
-            if (!$slug->isSlug($filtered_command)) {
-                    $t = new Notfound($thing);
 
-                    $datagram = [];
-                    $datagram['thing'] = $t;
-                    $datagram['thing_report'] = $t->thing_report;
-
-                    return $this->renderer->render(
-                        $response->withStatus(404),
-                        'thing.phtml',
-                        $datagram
-                   );
+            $compression_thing = new Compression($thing, $filtered_command);
+            if (isset($compression_thing->filtered_input)) {
+                // Compressions found.
+                $filtered_command = $compression_thing->filtered_input;
             }
-*/
+
             $agent = new Agent($thing, $filtered_command);
 
             $thing_report = $agent->thing_report;
@@ -1029,6 +1037,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             $arr = explode(' ', trim($command));
             $channel = $arr[0];
+
             switch ($channel) {
                 case "thing":
                     //    if ($channel == "thing") {
@@ -1049,21 +1058,8 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $thing_report['email'] = $makeemail_agent->email_message;
                     break;
                 default:
-                    // Check if it should be a 404 Not Found.
-                    if (!$slug->isSlug($filtered_command)) {
-                        $t = new Notfound($thing);
-
-                        $datagram = [];
-                        $datagram['thing'] = $t;
-                        $datagram['thing_report'] = $t->thing_report;
-
-                        return $this->renderer->render(
-                            $response->withStatus(404),
-                            'thing.phtml',
-                            $datagram
-                        );
-                    }
-
+                    //var_dump($channel);
+                    //var_dump($thing_report['sms']);
                     if (isset($thing_report['web'])) {
                         $channel = "web";
                     } elseif (isset($thing_report['sms'])) {
@@ -1083,6 +1079,15 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 strpos($command, "thing") !== false
             ) {
                 $thing_report['requested_channel'] = "thing";
+
+                $datagram = [];
+                $datagram['thing'] = false;
+                $datagram['thing_report'] = false;
+                return $this->renderer->render(
+                    $response,
+                    'thing.phtml',
+                    $datagram
+                );
             }
 
             // Flag the Thing Green.
@@ -1097,8 +1102,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $thing->json->size_overflow .
                     " characters not saved.";
             }
-
-
             //if ($thing->json->size_overflow != false) {echo "Stack write failed.";}
 
             // We have to give a response.  Bleep.
