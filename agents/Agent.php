@@ -1765,7 +1765,7 @@ class Agent
             $hyphenated_token_agent = implode('-', array_reverse($selected_agent_tokens));
 
             if (isset($button_agent) and isset($token_agent))  {
-                $flag = true;
+                $flag = false;
                 if ($button_agent == $agglutinated_token_agent) {
                     $flag = true;
                 }
