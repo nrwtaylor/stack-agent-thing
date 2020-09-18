@@ -14,6 +14,8 @@ class Thing
 {
     public $var = 'hello';
 
+    public $from = null;
+
     function __construct($uuid, $test_message = null)
     {
         // Now at 0.0.10
@@ -170,7 +172,7 @@ class Thing
             $this->variables = new Json($this->uuid);
             $this->variables->setField("variables");
 
-            $this->choice = new Choice($this->uuid);
+            $this->choice = new Choice($this->uuid, $this->from);
 
             $this->log("Choice connector made.");
 
@@ -214,7 +216,7 @@ class Thing
 
             // Provide handler to support state maps and navigation.
             // And state persistence through de-instantiation/instantiation.
-            $this->choice = new Choice($this->uuid);
+            $this->choice = new Choice($this->uuid, $this->from);
             $this->log("Thing made a choice connector.");
 
             // Cost of connecting to a Thing is 100 <units>.
@@ -483,7 +485,7 @@ class Thing
 
         // "WORK ON STACK BALANCE";
 
-        $thingreport = $this->db-- > UUids(); // Designed to accept null as $this->uuid.
+        $thingreport = $this->db->UUids(); // Designed to accept null as $this->uuid.
 
         $things = $thingreport['things'];
 

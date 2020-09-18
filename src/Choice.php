@@ -22,11 +22,13 @@ class Choice {
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($uuid) {
+    function __construct($uuid, $nom_from = null) {
 
         $this->json = new Json($uuid);
 
         $this->uuid = $uuid;
+
+        $this->from = $nom_from;
 
         // Access state settings as required.
         $settings = require $GLOBALS['stack_path'] . "private/settings.php";
@@ -51,6 +53,13 @@ class Choice {
         }
 
         $this->stack_state = $this->container['stack']['state'];
+
+        $this->choice_association = 'off';
+        if (isset($this->container['stack']['choice_association'])) {
+            $this->choice_association = $this->container['stack']['choice_association'];
+        }
+
+
 
         // Watch for issues in test.
         //  $this->state = true;
@@ -337,13 +346,28 @@ class Choice {
         // As of 27 Feb 2018 - 2,942ms 1169ms, 1134ms
         $this->split_time = microtime(true);
 
-        $choice_thing->Create(null, "choice", 's/ is ' . $choice . ' button');
+        $from = null;
+
+        if ( (isset($this->choice_association)) and ($this->choice_association == 'random') ) {
+            $from = $choice_thing->getUUid();
+        }
+
+        if ( (isset($this->choice_association)) and ($this->choice_association == 'from') ) {
+            $from = $this->from;
+
+            if ($this->from == null) {
+
+                $from = $choice_thing->getUuid();
+
+            }
+
+        }
+
+        $choice_thing->Create($from, "choice", 's/ is ' . $choice . ' button');
         // Timing at 199, 173, 368, 201ms
         //echo number_format(round( (microtime(true) - $this->split_time)*1000 )) . "ms"; echo "<br>";
 
-
         $choice_thing->choice->Create($this->name, $this->node_list, $choice);
-
 
         // Write state forward to newly created Thing.
         // [I think 'choice_list' can safely be re-named ant.]

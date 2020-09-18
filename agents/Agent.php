@@ -1761,11 +1761,26 @@ class Agent
             }
 
             $token_agent = implode(' ', array_reverse($selected_agent_tokens));
+            $agglutinated_token_agent = implode('', array_reverse($selected_agent_tokens));
+            $hyphenated_token_agent = implode('-', array_reverse($selected_agent_tokens));
 
-            if (isset($button_agent) and isset($token_agent)) {
-                if ($button_agent != $token_agent) {
-                    return false;
+            if (isset($button_agent) and isset($token_agent))  {
+                $flag = true;
+                if ($button_agent == $agglutinated_token_agent) {
+                    $flag = true;
                 }
+
+                if ($button_agent == $hyphenated_token_agent) {
+                    $flag = true;
+                }
+
+
+                if ($button_agent == $token_agent) {
+                    $flag = true;
+                }
+
+                if ($flag === false) {return false;}
+
             }
 
             if ($button_agent == $token_agent) {
