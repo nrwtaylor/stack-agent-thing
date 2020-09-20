@@ -974,6 +974,7 @@ class Signal extends Agent
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
+        $this->light_grey = imagecolorallocate($this->image, 210, 210, 210);
         $this->dark_grey = imagecolorallocate($this->image, 64, 64, 64);
 
         $this->red = imagecolorallocate($this->image, 231, 0, 0);
@@ -992,6 +993,76 @@ class Signal extends Agent
             } elseif (isset($this->{'signal_' . $state})) {
                 $color = $this->{'signal_' . $state};
             }
+        }
+
+        $signal_id = $this->signal_thing->uuid;
+        $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
+        $signal_id = $this->idSignal($signal_id);
+
+        $text = strtoupper($signal_id);
+
+        $width = imagesx($this->image);
+        $height = imagesy($this->image);
+
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+
+        $font = null; //
+
+        if (file_exists($font)) {
+            // Add some shadow to the text
+            //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+
+            $size = 8;
+            $angle = 90;
+
+            $pad = 0;
+            $vertical_text = false;
+
+            if ($vertical_text) {
+                $angle = 90;
+
+                imagettftext(
+                    $this->image,
+                    $size,
+                    $angle,
+                    ($width * 95) / 100,
+                    ($height * 95) / 100,
+                    $this->light_grey,
+                    $font,
+                    $text
+                );
+            } else {
+                $angle = 0;
+
+                imagettftext(
+                    $this->image,
+                    $size,
+                    $angle,
+                    ($width * 50) / 100,
+                    ($height * 97) / 100,
+                    $this->light_grey,
+                    $font,
+                    $text
+                );
+            }
+        } else {
+            imagestring(
+                $this->image,
+                2,
+                150,
+                100,
+                $this->flag->nuuid,
+                $textcolor
+            );
+
+            imagestring(
+                $this->image,
+                2,
+                ($width * 6) / 10,
+                ($height * 90) / 100,
+                $text,
+                $this->light_grey
+            );
         }
 
         // Bevel top of signal image
