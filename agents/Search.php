@@ -85,8 +85,6 @@ class Search extends Agent
                         continue;
                     }
 
-                    var_dump($resource_token);
-
                     if (
                         !isset($this->selected_search_resources[$name]['score'])
                     ) {
@@ -114,7 +112,7 @@ class Search extends Agent
             $context_agent = new Context($this->thing, "context");
             $this->context = $context_agent->context;
         }
-        //var_dump($this->context);
+
         // Refactor.
         // Which can be coded into Agent.
     }
@@ -368,19 +366,15 @@ class Search extends Agent
 
         if ($this->engine_state != 'prod') {
             foreach ($this->search_links as $search_engine => $link) {
-                //var_dump($link);
+
                 //$link2 = html_entity_decode($link);
                 //$link = utf8_encode($link);
                 //echo $link;
                 //$link =  html_entity_decode($link, ENT_COMPAT);
-                //var_dump($link);
-
-                //var_dump(mb_detect_encoding($link));
 
                 //$link = htmlentities($link);
                 //$link = utf8_encode($link);
-                //var_dump($link);
-                //var_dump(mb_detect_encoding($link));
+
                 $line =
                     $search_engine .
                     ' <a href="' .
@@ -432,9 +426,6 @@ class Search extends Agent
                 return;
             }
         }
-        //var_dump($this->search_text);
-        //var_dump($pieces);
-        //exit();
 
         $this->keywords = ['product', 'news', 'list', 'random'];
         foreach ($pieces as $key => $piece) {
