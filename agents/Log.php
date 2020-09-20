@@ -285,12 +285,6 @@ class Log extends Agent
 
         $this->node_list = ["web" => ["iching", "roll"]];
 
-        //$web = '<a href="' . $link . '">';
-        //$web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
-        //$web .= "</a>";
-        //$web .= "<br>";
-        //$web .= '<img src= "https://stackr.ca/thing/' . $this->link_uuid . '/flag.png">';
-
         $web = "";
         $agent_text = "No";
         if (isset($this->prior_agent)) {

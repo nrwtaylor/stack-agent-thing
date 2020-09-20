@@ -54,6 +54,8 @@ class Is extends Agent
         $this->email_message = "IS | ";
     }
 
+    public function respond() {}
+
     public function readSubject()
     {
         $input = strtolower($this->subject);

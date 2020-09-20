@@ -501,7 +501,7 @@ class Job extends Agent
 
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->thing->log('Caught exception: ' .  $e->getMessage());
         }
 
         return $this->thing_report['pdf'];
@@ -589,22 +589,6 @@ class Job extends Agent
 
                 $job = $this->jobs[array_rand($this->jobs)][0];
 
-                /*
-$spawn_text = "Spawned " . $job['text'] . ". ";
-
-echo "text " . $job['text'] . "\n";
-echo "period " . $job['period'] . "\n";
-
-
-foreach($this->run_jobs as $i=>$run_job) {
-echo "response " . $run_job['response'] ."\n";
-echo "created at " . $run_job['created_at'] . "\n";
-//echo "text " . $job['text'] . "\n";
-//echo "period " . $job['period'] . "\n";
-
-}
-*/
-
                 $datagram = [
                     "to" => "null" . $this->mail_postfix,
                     "from" => "job",
@@ -660,25 +644,6 @@ echo "created at " . $run_job['created_at'] . "\n";
      */
     public function PNG()
     {
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and testing, including re-installing apache on my computer a couple of times, I traced the problem to an included file.
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
-
-        //http://php.net/manual/en/function.imagepng.php
-
-        //header('Content-Type: text/html');
-        //echo "Hello World";
-        //exit();
-
-        //header('Content-Type: image/png');
-        //QRcode::png('PHP QR Code :)');
-        //exit();
-        // here DB request or some processing
-
         $snowflake_agent = new Snowflake($this->thing, "snowflake");
 
         $snowflake_agent->makePNG();

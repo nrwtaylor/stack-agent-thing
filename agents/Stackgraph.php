@@ -473,7 +473,6 @@ class Stackgraph extends Agent
         $border = 30;
         $radius = (1.165 * (125 - 2 * $border)) / 3;
 
-        //$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
         $font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
 
         $text = "test";

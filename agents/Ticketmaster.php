@@ -263,34 +263,7 @@ $this->events_count = count($this->events);
         $this->link = "https://www.google.com/search?q=" . $ref; 
         return $this->link;
     }
-/*
-    public function makeEvent()
-    {
 
-
-
-    // Need to check whether the events exists...
-    // This can be post response.   
-
-
-    // Load as new event things onto stack
-    $thing = new Thing(null);
-    $thing->Create("ticketmaster@stackr.ca","events", "s/ event ticketmaster " . $ref);
-
-    // make sure the right fields are directly given
-
-    new Event($thing, "event is ". $event_title);
-    new Runat($thing, "runat is ". $run_at);
-    new Place($thing, "place is ". $venue_name);
-    new Link($thing, "link is " . $link);
-
-
-
-
-
-
-    }
-*/
 
     function getVariable($variable_name = null, $variable = null) {
 

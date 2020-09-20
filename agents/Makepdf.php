@@ -95,23 +95,9 @@ class makePdf {
 
 	$this->input = $input;
 
-//	if ($input == null) {
-//		echo "Agent 'make pdf' says 'Nothing received'";//
-//	} else {
-//		echo "Agent 'make pdf' says '" . $input . "' received.";
-//	}
-
-//	require_once('/var/www/html/stackr.ca/agents/agent.php');
-
 	$agent_thing = new Agent($thing, $input);
         $this->thing_report = array('thing' => $thing->thing, 
                         'pdf' => $agent_thing->thing_report['pdf']);
-
-
-
-//ob_clean();
-//echo $agent_thing->thing_report['pdf'];
-//exit();
 
 	}
 

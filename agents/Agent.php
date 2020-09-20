@@ -83,6 +83,8 @@ class Agent
         $this->short_name = $thing->container['stack']['short_name'];
         $this->stack_state = $thing->container['stack']['state'];
 
+        $this->stack_engine_state = $thing->container['stack']['engine_state'];
+
         $this->sqlresponse = null;
 
         $this->thing->log('running on Thing ' . $this->thing->nuuid . '.');
@@ -364,7 +366,7 @@ class Agent
         $prod_agents = ["response", "help"];
 
         $agents = $dev_agents;
-        if ($this->stack_state == 'prod') {
+        if ($this->stack_engine_state == 'prod') {
             $agents = $prod_agents;
         }
         $web = "";
@@ -2401,7 +2403,7 @@ class Agent
 
         $this->thing->log('now looking at Group Context.');
 
-        if ($this->stack_state == 'dev') {
+        if ($this->stack_engine_state == 'dev') {
             $group_thing = new Group($this->thing, "group");
 
             if (!$group_thing->isGroup($input)) {
@@ -2641,7 +2643,7 @@ class Agent
         switch (strtolower($this->context)) {
             case 'group':
                 // Now if it is a head_code, it might also be a train...
-                if ($this->stack_state == 'dev') {
+                if ($this->stack_engine_state == 'dev') {
                     $group_thing = new Group($this->thing, 'group');
                     $this->groups = $group_thing->groups;
 
@@ -2934,8 +2936,11 @@ class Agent
             " " .
             $errstr .
             ". ";
-        echo $console . "\n";
-        $this->response .= "Warning seen. " . $errstr . ". ";
+
+        if ($this->stack_engine_state != 'prod') {
+            echo $console . "\n";
+            $this->response .= "Warning seen. " . $errstr . ". ";
+        }
         // do something
     }
 

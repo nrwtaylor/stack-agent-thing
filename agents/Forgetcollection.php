@@ -9,13 +9,10 @@ class Forgetcollection extends Agent
     {
         $this->node_list = ["start"];
 
-        $this->thing_report['help'] = "Try FORGET DAYS. Or FORGET TODAY.";
+        $this->help = "Try FORGET WEEK. Or FORGET TODAY. Or FORGET ALL CHOICE.";
+        $this->thing_report['help'] = $this->help;
         $this->thing_report['info'] =
             "Makes collections of datagrams and forgets them.";
-
-        $this->thing->log(
-            'Agent "Forget Collection" running on Thing ' . $this->uuid . '.'
-        );
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
@@ -33,8 +30,6 @@ class Forgetcollection extends Agent
                 $time_string
             );
         }
-
-        $this->sms_message = "";
     }
 
     function doForgetcollection($age_unit = null)
@@ -70,8 +65,15 @@ class Forgetcollection extends Agent
                 $age_text = $this->thing->human_time($age);
                 $thing_age_unit = explode(" ", $age_text)[1];
 
-                if ($thing_age_unit != $age_unit) {
+                if ($thing_age_unit != $age_unit and $age_unit != 'all') {
                     continue;
+                }
+                if (isset($this->agent_tokens)) {
+                    if (
+                        !array_key_exists($thing['nom_to'], $this->agent_tokens)
+                    ) {
+                        continue;
+                    }
                 }
 
                 $temp_thing = new Thing($thing['uuid']);
@@ -86,17 +88,30 @@ class Forgetcollection extends Agent
 
     public function makeSMS()
     {
-        if ($this->sms_message == "") {
-            $this->sms_message =
-                "FORGET COLLECTION | " .
-                $this->sms_message .
-                " " .
-                "Forgot " .
-                $this->forget_count .
-                " | TEXT PRIVACY";
+        $selected_text = "";
+        if (isset($this->selected_tokens)) {
+            $selected_text = trim(
+                implode(" ", array_keys($this->selected_tokens))
+            );
         }
-        //      $this->thing_report['thing'] = $this->thing->thing;
-        $this->thing_report['sms'] = $this->sms_message;
+
+        $agents_text = "";
+        if (isset($this->agent_tokens)) {
+            $agents_text = trim(implode(" ", array_keys($this->agent_tokens)));
+        }
+        $sms = "FORGET COLLECTION ";
+        $sms .= $selected_text . " ";
+        $sms .= $agents_text . " ";
+        $sms .=
+            "| " .
+            "Forgot " .
+            $this->forget_count .
+            " Things. " .
+            $this->response .
+            "";
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     public function makeEMail()
@@ -115,6 +130,14 @@ class Forgetcollection extends Agent
 
     public function readSubject()
     {
+        $input = $this->input;
+
+        //if (strtolower($input) =='forgetcollection all') {
+        //    $forgetall_agent = new Forgetall($this->thing);
+        //    $this->sms_message = $forgetall_agent->sms_message;
+        //    return;
+        //}
+
         $forget_tokens = [
             "all",
             "today",
@@ -133,50 +156,57 @@ class Forgetcollection extends Agent
             "months",
             "year",
             "years",
-            "everything",
         ];
-        $tokens = explode(" ", $this->subject);
+
+        $tokens = explode(" ", $input);
+
+        if (count($tokens) == 1) {
+            if ($input == 'forgetcollection') {
+                $this->response .= $this->help;
+                return;
+            }
+        }
+
         foreach ($tokens as $i => $token) {
             if (in_array(strtolower($token), $forget_tokens)) {
+                $this->selected_tokens[$token] = true;
                 $selected_token = $token;
-                break;
+                //break;
+            }
+        }
+
+        $forget_agents = ['choice', 'null'];
+        foreach ($tokens as $i => $token) {
+            if (in_array(strtolower($token), $forget_agents)) {
+                $this->agent_tokens[$token] = true;
+                //break;
             }
         }
 
         if (!isset($selected_token)) {
-            $this->sms_message .= "Incomplete forget request. ";
-        }
-
-        if ($selected_token == "everything") {
-            $forgetall_agent = new Forgetall($this->thing);
-            $this->sms_message = $forgetall_agent->sms_message;
-
+            $this->response = "Incomplete forget request. ";
             return;
         }
 
-        if ($selected_token == "all") {
-            $forgetall_agent = new Forgetall($this->thing);
-            $this->sms_message = $forgetall_agent->sms_message;
-            return;
-        }
+        foreach ($this->selected_tokens as $selected_token => $a) {
+            if ($selected_token == "today") {
+                $this->doForgetcollection('second');
+                $this->doForgetcollection('seconds');
+                $this->doForgetcollection('minute');
+                $this->doForgetcollection('minutes');
+                $this->doForgetcollection('hour');
+                $this->doForgetcollection('hours');
+                $this->doForgetcollection('day');
+                return;
+            }
 
-        if ($selected_token == "today") {
-            $this->doForgetcollection('second');
-            $this->doForgetcollection('seconds');
-            $this->doForgetcollection('minute');
-            $this->doForgetcollection('minutes');
-            $this->doForgetcollection('hour');
-            $this->doForgetcollection('hours');
-            $this->doForgetcollection('day');
-            return;
-        }
+            if ($selected_token == "now") {
+                $this->doForgetcollection('minute');
+                return;
+            }
 
-        if ($selected_token == "now") {
-            $this->doForgetcollection('minute');
-            return;
+            // And forget this ...
+            $this->doForgetcollection($selected_token);
         }
-
-        // And forget this ...
-        $this->doForgetcollection($selected_token);
     }
 }

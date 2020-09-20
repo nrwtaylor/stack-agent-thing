@@ -77,7 +77,7 @@ $GLOBALS['received_at'] = $thing_report['thing']->variables->array_data['message
 }
 
 function nestAhref($html) {
-                $html = str_replace('</a>','</object></a>', $html);
+                $html = str_replace('</a>','</a></object>', $html);
                 $processed_html = str_replace('<a ','<object><a ', $html);
 return $processed_html;
 }

@@ -197,13 +197,9 @@ class Pdf extends Agent
         $web = '<a href="' . $link . '">';
         $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
         $web .= "</a>";
-        //$web .= "<br>";
-        //$web .= '<img src= "https://stackr.ca/thing/' . $this->link_uuid . '/flag.png">';
 
         $web .= "<br>";
         $web .= '<b>' . ucwords($this->prior_agent) . ' Agent</b><br>';
-
-        //$web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
 
         $web .= 'This Thing said it heard, "' . $this->subject . '".<br>';
         $web .= $this->sms_message . "<br>";

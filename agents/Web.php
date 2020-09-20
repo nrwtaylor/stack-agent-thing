@@ -266,11 +266,11 @@ class Web extends Agent
             if ($nom_to == "usermanager") {
                 continue;
             }
-
             $variables = $thing->variables;
             if (isset($variables['message']['agent'])) {
 
                 $this->prior_agent = $variables['message']['agent'];
+
                 if (
                     in_array(strtolower($this->prior_agent), [
                         'web',
@@ -286,6 +286,9 @@ class Web extends Agent
                 $this->link_uuid = $uuid;
 
                 $previous_thing = new Thing($this->link_uuid);
+//dev
+//$agent = new Agent($previous_thing,'agent');
+//var_dump($agent->agent_name);
 
                 break;
             }
@@ -301,11 +304,11 @@ class Web extends Agent
         if (isset($previous_thing)) {
             $previous_thing->silenceOn();
             $quiet_thing = new Quiet($previous_thing, "on");
-            $agent_thing = new Agent(
-                $previous_thing,
-                $this->prior_agent,
-                'agent'
-            );
+            //$agent_thing = new Agent($previous_thing,'agent');
+
+            $agent_thing = new Agent($previous_thing,$this->prior_agent);
+
+//var_dump($agent_thing->thing_report['agent']);
 
             if (isset($agent_thing->thing_report['web'])) {
                 $this->web = $agent_thing->thing_report['web'];

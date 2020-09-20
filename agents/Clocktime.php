@@ -115,7 +115,7 @@ class Clocktime
 
     function test()
     {
-        $test_corpus = file_get_contents("/var/www/html/stackr.ca/resources/clocktime/test.txt");
+        $test_corpus = file_get_contents($this->resource_path . "clocktime/test.txt");
         $test_corpus = explode("\n", $test_corpus);
 
         $this->response = "";
@@ -222,7 +222,7 @@ class Clocktime
 
             // Test for non-recognized edge case
             if (preg_match("(o'clock|oclock)", $input) === 1) {
-//                require_once '/var/www/html/stackr.ca/agents/number.php';
+
                 $number_agent = new Number($this->thing, "number " . $input);
                 if (count($number_agent->numbers) == 1) {
                     $this->hour = $number_agent->numbers[0];

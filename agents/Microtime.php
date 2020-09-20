@@ -177,23 +177,23 @@ class Microtime extends Agent
             $web .= "" . $this->timestamp;
         }
 
-        $web .= "<p>";
+//        $web .= "<p>";
 
-        $web .= "Message Metadata - ";
+//        $web .= "Message Metadata - ";
 
-        $web .= $this->thing->nuuid . " - " . $this->thing->thing->created_at;
+//        $web .= $this->thing->nuuid . " - " . $this->thing->thing->created_at;
 
-        $web .= "<br>";
+//        $web .= "<br>";
 
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
-        $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
-        );
-        $web .= "Microtime timestamp was created about " . $ago . " ago. ";
+//        $ago = $this->thing->human_time(
+//            time() - strtotime($this->thing->thing->created_at)
+//        );
+//        $web .= "Microtime timestamp was created about " . $ago . " ago. ";
 
-        $web .= "<br>";
+//        $web .= "<br>";
 
         $this->thing_report['web'] = $web;
     }

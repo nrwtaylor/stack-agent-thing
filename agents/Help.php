@@ -119,6 +119,8 @@ class Help extends Agent
      */
     public function makeSMS()
     {
+        if (!isset($this->help)) {$this->makeHelp();}
+
         $this->sms_message =
             "HELP | " . ucwords($this->prior_agent) . " | " . $this->help;
         //$this->sms_message .= " | TEXT INFO";
