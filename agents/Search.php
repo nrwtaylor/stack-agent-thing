@@ -148,9 +148,11 @@ class Search extends Agent
             }
             $tokens = explode(" ", $resource['tokens']);
             foreach ($tokens as $i => $token_name) {
-                $search_tokens[$token_name] = true;
+                $search_tokens[$token_name][] = $name;
             }
         }
+
+        //var_dump($search_tokens);
 
         if ($text == null) {
             return true;
@@ -181,19 +183,30 @@ class Search extends Agent
                 continue;
             }
 
-            if ($flag === false) {
-                foreach ($this->search_resources as $name => $resource) {
-                    if ($this->in($name, $part) !== false) {
-                        $this->selected_search_resources[$name] = $resource;
+            foreach ($search_tokens as $t => $services) {
+                $tokens = explode(" ", $t);
+                //}
+                //var_dump($tokens);
 
-                        continue 2;
+                foreach ($tokens as $i => $token) {
+                    if (
+                        $this->in($token, $part) !== false or
+                        $this->in($token . 's', $part) !== false or
+                        $this->in($token, $part . 's') !== false
+                    ) {
+                        foreach ($services as $i => $service) {
+                            $this->selected_search_resources[$service] =
+                                $this->search_resources[$service];
+                        }
                     }
                 }
             }
 
             if ($flag === false) {
-                foreach ($search_tokens as $name => $resource) {
+                foreach ($this->search_resources as $name => $resource) {
                     if ($this->in($name, $part) !== false) {
+                        $this->selected_search_resources[$name] = $resource;
+
                         continue 2;
                     }
                 }
@@ -366,7 +379,6 @@ class Search extends Agent
 
         if ($this->engine_state != 'prod') {
             foreach ($this->search_links as $search_engine => $link) {
-
                 //$link2 = html_entity_decode($link);
                 //$link = utf8_encode($link);
                 //echo $link;
