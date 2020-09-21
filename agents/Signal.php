@@ -35,7 +35,7 @@ class Signal extends Agent
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/signal';
 
-        $this->show_link = 'on';
+        $this->show_link = 'off';
 
         $this->refreshed_at = null;
 
@@ -64,10 +64,11 @@ class Signal extends Agent
     public function respondResponse()
     {
         $this->makeHelp();
+        $this->makeInfo();
         $this->thing->flagGreen();
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        //$thing_report['info'] = $message_thing->thing_report['info'];
     }
 
     public function set()
@@ -103,29 +104,6 @@ class Signal extends Agent
             // Do not effect a state change for web views.
             return;
         }
-        /*
-        $this->thing->json->writeVariable(
-            ["signal", "refreshed_at"],
-            $this->current_time
-        );
-
-        if (
-            isset($this->signal_thing->state) and
-            $this->signal_thing->state != null
-        ) {
-            $this->thing->json->writeVariable(
-                ["signal", "state"],
-                $this->signal_thing->state
-            );
-        }
-
-        if (isset($this->signal_thing->text) and $this->signal_thing->text) {
-            $this->thing->json->writeVariable(
-                ["signal", "text"],
-                $this->signal_thing->text
-            );
-        }
-*/
         $this->setSignal();
     }
 
@@ -446,7 +424,7 @@ class Signal extends Agent
         }
         $id = "X";
         if (isset($signal['id'])) {
-            $id = $signal['id'];
+            $id = strtoupper($signal['id']);
         }
 
         $uuid = "X";
@@ -456,7 +434,7 @@ class Signal extends Agent
 
         $state = "X";
         if (isset($signal['state'])) {
-            $state = $signal['state'];
+            $state = strtoupper($signal['state']);
         }
 
         $text = "X";
@@ -630,15 +608,16 @@ class Signal extends Agent
     {
         $web = null;
         if (isset($this->signal_thing)) {
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+            //$link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+            //            $link = $this->link;
             $web = "";
             $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
             $web .= "<p>";
-            $web .= '<a href="' . $link . '">';
+            //            $web .= '<a href="' . $link . '">';
             //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/sig>
             $web .= $this->html_image;
 
-            $web .= "</a>";
+            //            $web .= "</a>";
             $web .= "<br>";
 
             $state_text = "X";
@@ -650,7 +629,7 @@ class Signal extends Agent
             $web = "";
             $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
             $web .= "<p>";
-            $web .= '<a href="' . $link . '">';
+            $web .= '<a href="' . $this->link . '">';
             //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/sig>
             $web .= $this->html_image;
 
@@ -684,11 +663,6 @@ class Signal extends Agent
                  <div class="TableHead"><strong>ID</strong></div>
                  <div class="TableHead"><span style="font-weight: bold;">State</span></div>
                  <div class="TableHead"><strong>Text</strong></div></div>';
-
-        //            $id = $signal['id'];
-        //            $uuid = $signal['uuid'];
-        //            $state = $signal['state'];
-        //            $text = $signal['text'];
 
         if (isset($this->signals) and is_array($this->signals)) {
             $signal_text = "";
@@ -731,15 +705,15 @@ class Signal extends Agent
                 $signal_table .=
                     '<div class="TableCell">' . strtoupper($text) . '</div>';
                 $signal_table .= '</div>';
-
-                //               if ($signal['text'] == "signal post") {
-
-                //     $signal_text .= nl2br($this->textSignal($signal));
-                //               }
             }
             $signal_text = $signal_table . '</div><p>';
 
             $web .= "<b>SIGNALS FOUND</b><br><p>" . $signal_text;
+            $web .= "<p>";
+
+            $web .= "<b>INFO</b><br><p>";
+            $this->makeInfo();
+            $web .= $this->info;
         }
 
         if (isset($this->associations->thing->thing->associations)) {
@@ -768,14 +742,46 @@ class Signal extends Agent
         $this->thing_report['web'] = $web;
     }
 
+    public function makeInfo()
+    {
+        $id_text = "X";
+        if (isset($this->signal_thing->uuid)) {
+            $id_text = strtoupper($this->idSignal($this->signal_thing->uuid));
+        }
+
+        $web = "";
+        if ($this->signal_thing->uuid == $this->uuid) {
+            $web .=
+                "The FORGET button will delete this SIGNAL ID " .
+                $id_text .
+                ". There is no undo.<br>";
+        } else {
+            $web .=
+                "The FORGET button will not delete this SIGNAL ID " .
+                $id_text .
+                ". The SIGNAL will persist the text CHANNEL. Text SIGNAL THING LINK.";
+        }
+
+        $this->info = $web;
+        $this->thing_report['info'] = $web;
+    }
+
     function makeLink()
     {
-        $link = $this->web_prefix;
-
+        $id_text = "X";
         if (isset($this->signal_thing->uuid)) {
-            $uuid = $this->signal_thing->uuid;
-            $link = $this->web_prefix . 'thing/' . $uuid . '/signal';
+            $id_text = strtoupper($this->idSignal($this->signal_thing->uuid));
         }
+
+        $signal_id = 'signal' . '-' . $id_text;
+
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/signal';
+
+        if (isset($this->signal_thing->uuid) and $this->show_uuid == 'on') {
+            $uuid = $this->signal_thing->uuid;
+            $link = $this->web_prefix . 'thing/' . $uuid . '/' . $signal_id;
+        }
+
         $this->link = $link;
         $this->thing_report['link'] = $link;
     }
@@ -784,9 +790,6 @@ class Signal extends Agent
     {
         $association_array = [];
         if (isset($this->associations->thing->thing->associations)) {
-            //$web .= "<p>";
-            //$association_text = "";
-
             $associations_array = json_decode(
                 $this->associations->thing->thing->associations,
                 true
@@ -804,7 +807,7 @@ class Signal extends Agent
                 }
             }
         }
-        //$this->associations = $association_array;
+
         return $association_array;
     }
 
@@ -849,6 +852,8 @@ class Signal extends Agent
 
     function makeSMS()
     {
+        $this->makeLink();
+
         $state = "X";
         if (isset($this->signal_thing->state)) {
             $state = $this->signal_thing->state;
@@ -856,14 +861,12 @@ class Signal extends Agent
 
         $signal_id = "X";
         if (isset($this->signal_thing->uuid)) {
-            if ($this->show_uuid == 'off') {
+            $signal_id = $this->signal_thing->uuid;
+            $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
+            $signal_id = $this->idSignal($signal_id);
+
+            if ($this->show_uuid == 'on' and $this->show_link == 'off') {
                 $signal_id = $this->signal_thing->uuid;
-                $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
-                $signal_id = $this->idSignal($signal_id);
-            } elseif ($this->show_uuid == 'on') {
-                $signal_id = $this->signal_thing->uuid;
-                //            $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
-                //            $signal_id = $this->idSignal($signal_id);
             }
         }
 
@@ -916,13 +919,6 @@ class Signal extends Agent
         }
         $sms_message .= "" . trim($this->response);
 
-        /*
-        if ($this->verbosity > 0) {
-            $sms_message .= " | " . $this->link . "";
-            $sms_message .= " Text HELP";
-        }
-*/
-
         if ($this->show_link == 'on') {
             $sms_message .= " " . $this->link;
         }
@@ -950,8 +946,6 @@ class Signal extends Agent
         if ($state == 'green') {
             $message .= 'It is a GOOD time now. ';
         }
-
-        //$test_message .= 'And the signal is ' . strtoupper($this->state) . ".";
 
         $this->message = $message;
         $this->thing_report['message'] = $message;
@@ -1175,29 +1169,12 @@ class Signal extends Agent
 
     public function uuidSignal()
     {
-        // Better way of doing this. Surely.
-        //$signal_id = $this->idSignal($this->signal_thing->signal_thing->uuid);
         $this->show_uuid = 'on';
-
-        //$this->response .= "signal uuid is " .$this->signal_thing->uuid . ". ";
     }
 
     public function linkSignal()
     {
-        // Better way of doing this. Surely.
-        //$signal_id = $this->idSignal($this->signal_thing->signal_thing->uuid);
-
-        if (isset($this->signal_thing->uuid)) {
-            $this->link =
-                $this->web_prefix .
-                'thing/' .
-                $this->signal_thing->uuid .
-                '/signal';
-        }
-
         $this->show_link = 'on';
-        //$this->link = $this->web_prefix . "/thing/"  . $this->signal_thing->uuid . "/signal-uuid";
-        //$this->response .= $this->link . " ";
     }
 
     public function makePNG()
@@ -1226,7 +1203,10 @@ class Signal extends Agent
         $keywords = [
             'signal',
             'uuid',
+            'thing',
             'link',
+            'uri',
+            'url',
             'web',
             'x',
             'X',
@@ -1283,18 +1263,6 @@ class Signal extends Agent
             if ($response != true) {
                 $this->response .= "Got signal " . $t . ". ";
 
-                /*
-foreach($this->signals as $i=>$signal) {
-
-if ($signal['uuid'] == $this->signal_thing->uuid) {
-//var_dump($signal);
-$this->signal_thing->state = $signal['state'];
-return;
-}
-
-}
-*/
-
                 return;
             }
 
@@ -1309,7 +1277,7 @@ return;
         // signal - returns the uuid and the state of the current signal
 
         if ($this->channel_name == 'web') {
-            $this->response .= "Detected web channel. ";
+            $this->response .= "Made a web signal panel. ";
             // Do not effect a state change for web views.
             return;
         }
@@ -1319,8 +1287,11 @@ return;
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case 'uuid':
+                        case 'thing':
                             $this->uuidSignal();
                             break;
+                        case 'url':
+                        case 'uri':
                         case 'web':
                         case 'link':
                             $this->linkSignal();
