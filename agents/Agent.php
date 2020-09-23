@@ -349,7 +349,7 @@ class Agent
     {
         // So ... don't call yourself.
         // Don't do a make on yourself.
-
+$this->thing->log("start make.");
         $this->makeAgent();
         $this->makeResponse();
         //$this->makeChoices();
@@ -484,6 +484,7 @@ class Agent
                 }
             }
         }
+$this->thing->log("completed make.");
     }
 
     /**
@@ -1406,6 +1407,8 @@ class Agent
         $this->thing->log('read "' . $this->subject . '".');
 
         $this->readSubject();
+        $this->thing->log('completed read.');
+
     }
 
     /**
