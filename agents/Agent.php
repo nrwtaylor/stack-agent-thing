@@ -2129,14 +2129,22 @@ class Agent
         }
         // expand out chinese characters
         // Added to stack 29 July 2019 NRW Taylor
-        $chinese_thing = new Chinese($this->thing, $input);
-        $this->thing_report = $chinese_thing->thing_report;
-        if (
-            isset($chinese_thing->chineses) and
-            isset($chinese_thing->translated_input)
-        ) {
-            $input = $chinese_thing->translated_input;
+        $this->thing->log("expand out chinese characters");
+
+        $chinese_agent = new Chinese($this->thing, 'chinese');
+        if ($chinese_agent->hasChinese($input) === true) {
+
+            $chinese_thing = new Chinese($this->thing, $input);
+            $this->thing_report = $chinese_thing->thing_report;
+            if (
+                isset($chinese_thing->chineses) and
+                isset($chinese_thing->translated_input)
+            ) {
+                $input = $chinese_thing->translated_input;
+            }
+
         }
+        $this->thing->log("expand out compression phrases");
 
         // And then compress
         // devstack - replace this with a fast general character

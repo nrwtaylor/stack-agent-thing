@@ -18,16 +18,21 @@ class Chinese extends Agent
      */
     function init()
     {
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
-        $string = $this->subject;
-
         $this->keyword = "chinese";
 
         // devstack
 
         $this->getMemcached();
 
+        $this->words = [];
+    }
+
+    public function doChinese($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+        $string = $text;
         $chineses = $this->extractChinese($string);
 
         $this->getChinese();
@@ -55,7 +60,7 @@ class Chinese extends Agent
         }
 
         $this->keywords = [];
-        $this->keyword = "chinese";
+        //$this->keyword = "chinese";
 
         foreach ($arr as $key => $value) {
             $text = $this->findChinese('mordok', $value);
@@ -72,8 +77,6 @@ class Chinese extends Agent
                 }
             }
         }
-
-        $this->thing->log("end init");
     }
 
     /**
@@ -107,6 +110,12 @@ class Chinese extends Agent
      */
     function set()
     {
+        if (!isset($this->chinese)) {
+            return true;
+        }
+
+        $this->reading = $this->chinese;
+
         $this->thing->json->writeVariable(
             ["chinese", "reading"],
             $this->reading
@@ -118,27 +127,6 @@ class Chinese extends Agent
      */
     function run()
     {
-        if ($this->chinese != false) {
-            if (isset($this->word['traditional'])) {
-                $this->thing->log(
-                    'keyword ' .
-                        $this->keyword .
-                        " word  " .
-                        $this->word["traditional"] .
-                        '.'
-                );
-            }
-
-            $this->thing->log(
-                'completed with a reading of ' . $this->chinese . '.'
-            );
-        } else {
-            $this->thing->log('did not find chinese.');
-        }
-
-        //        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
-
-        $this->thingreportChinese();
     }
 
     /**
@@ -860,38 +848,16 @@ class Chinese extends Agent
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         $this->cost = 100;
 
-        // Thing stuff
         $this->thing->flagGreen();
-
-        // Make SMS
-        $this->makeSMS();
-        //        $this->thing_report['sms'] = $this->sms_message;
-
-        // Make message
-        $this->thing_report['message'] = $this->sms_message;
-
-        // Make email
-        $this->makeEmail();
-        $this->thing_report['email'] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-
-        $this->makeWeb();
-
-        $this->reading = $this->chinese;
-        $this->thing->json->writeVariable(
-            ["chinese", "reading"],
-            $this->reading
-        );
-
-        return $this->thing_report;
     }
 
     /**
@@ -948,7 +914,10 @@ class Chinese extends Agent
     {
         switch (true) {
             case isset($this->word):
-                if (!$this->has_chinese_characters) {
+                if (
+                    isset($this->has_chinese_characters) and
+                    !$this->has_chinese_characters
+                ) {
                     // Assume english to chinese
                     $sms = "CHINESE | ";
                     foreach ($this->words as $word) {
@@ -972,8 +941,9 @@ class Chinese extends Agent
                 // Assume this means a word was found.
                 $this->sms_message = "CHINESE ";
                 $this->sms_message .= count($this->words) . " phrases found.";
-                $this->sms_message .= " | ";
-
+                if (count($this->words) != 0) {
+                    $this->sms_message .= " | ";
+                }
                 if (isset($this->word['english'])) {
                     $this->sms_message .= implode(
                         " / ",
@@ -1032,7 +1002,7 @@ class Chinese extends Agent
                 }
 
                 $this->sms_message .= " | Heard " . $this->keyword . ". ";
-                $this->sms_message .= " | TEXT ?";
+                //                $this->sms_message .= " | TEXT ?";
                 //            return;
 
                 break;
@@ -1080,7 +1050,9 @@ class Chinese extends Agent
      */
     function makeEmail()
     {
-        $this->email_message = "CHINESE | ";
+        //$this->email_message = "CHINESE | ";
+        $this->email_message = $this->sms_message;
+        $this->thing_report['email'] = $this->sms_message;
     }
 
     /**
@@ -1104,22 +1076,51 @@ class Chinese extends Agent
         return $input;
     }
 
+    public function hasChinese($text = null)
+    {
+        $this->extractChinese($text);
+
+        if (count($this->chineses) > 0) {
+            //$has_chinese_characters = true;
+            return true;
+        } else {
+            //$has_chinese_characters = false;
+            return false;
+        }
+
+        //$this->has_chinese_characters = $has_chinese_characters;
+    }
+
     /**
      *
      * @return unknown
      */
     public function readSubject()
     {
-        $input = $this->subject;
-
+        //$input = $this->subject;
+        $input = strtolower($this->input);
         //        $input = $this->test();
         //$input = $this->input;
 
+        $this->thing->log($input);
+
         if (strtolower($input) == "chinese") {
-            $this->chineseThing();
+            //            $this->chineseThing();
             $this->response = "Retrieved a message with Chinese in it.";
             return;
         }
+
+        // No chinese characters seen.
+        if ($this->hasChinese($input) === false) {
+            $tokens = explode(" ", $input);
+            if ($tokens[0] == 'chinese') {
+                $input = $this->assert($input);
+            } else {
+                return;
+            }
+        }
+
+        $this->doChinese();
 
         $halves = explode(' ', $input, 2); // create a two-element(maximum) array
 
@@ -1144,14 +1145,7 @@ class Chinese extends Agent
 
         $string_length = mb_strlen($filtered_input);
 
-        $this->extractChinese($filtered_input);
-
-        if (count($this->chineses) > 0) {
-            $has_chinese_characters = true;
-        } else {
-            $has_chinese_characters = false;
-        }
-
+        $has_chinese_characters = $this->hasChinese($filtered_input);
         $this->has_chinese_characters = $has_chinese_characters;
 
         if ($has_chinese_characters) {
