@@ -759,7 +759,7 @@ class Signal extends Agent
             $web .=
                 "The FORGET button will not delete this SIGNAL ID " .
                 $id_text .
-                ". The SIGNAL will persist the text CHANNEL. Text SIGNAL THING LINK.";
+                ". The SIGNAL will persist in the text CHANNEL. Text SIGNAL THING LINK for a forgettable link.";
         }
 
         $this->info = $web;

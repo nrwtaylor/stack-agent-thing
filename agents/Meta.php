@@ -1,109 +1,65 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Meta
+class Meta extends Agent
 {
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->start_time = microtime(true);
+        $this->uuid = $this->thing->uuid;
 
-        if ($agent_input == null) {
-        }
-
-        $this->agent_input = $agent_input;
-
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-
-        $this->agent_name = 'meta';
-        $this->agent_prefix = 'Agent "Nonnom" ';
-
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->uuid = $thing->uuid;
-
-        if (!isset($thing->to)) {
+        if (!isset($this->thing->to)) {
             $this->to = null;
         } else {
-            $this->to = $thing->to;
+            $this->to = $this->thing->to;
         }
-        if (!isset($thing->from)) {
+        if (!isset($this->thing->from)) {
             $this->from = null;
         } else {
-            $this->from = $thing->from;
+            $this->from = $this->thing->from;
         }
-        if (!isset($thing->subject)) {
-            $this->subject = $agent_input;
+        if (!isset($this->thing->subject)) {
+            $this->subject = $this->agent_input;
         } else {
-            $this->subject = $thing->subject;
+            $this->subject = $this->thing->subject;
         }
 
-        $this->sqlresponse = null;
+        $this->keywords = [];
 
-        $this->thing->log(
-            $this->agent_prefix .
-                'running on Thing ' .
-                $this->thing->nuuid .
-                '.'
+        $this->reading = null;
+    }
+
+    function set()
+    {
+        /*
+        $this->thing->json->writeVariable(
+            array("meta", "reading"),
+            $this->reading
         );
-        $this->thing->log(
-            $this->agent_prefix .
-                'received this Thing "' .
-                $this->subject .
-                '".'
-        );
+*/
+    }
 
-        $this->keywords = array();
-
+    function get()
+    {
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable(array(
-            "nonnom",
-            "refreshed_at"
-        ));
+        $time_string = $this->thing->json->readVariable([
+            "meta",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                array("nonnom", "refreshed_at"),
+                ["meta", "refreshed_at"],
                 $time_string
             );
         }
-
+        /*
         // If it has already been processed ...
         $this->reading = $this->thing->json->readVariable(array(
-            "nonnom",
+            "meta",
             "reading"
         ));
-
-        $this->readSubject();
-
-        $this->thing->json->writeVariable(
-            array("nonnom", "reading"),
-            $this->reading
-        );
-
-        if ($this->agent_input == null) {
-            $this->Respond();
-        }
-
-        $this->reading = null;
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed with a reading of ' .
-                $this->reading .
-                '.'
-        );
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'ran for ' .
-                number_format(
-                    $this->thing->elapsed_runtime() - $this->start_time
-                ) .
-                'ms.'
-        );
-
-        $this->thing_report['log'] = $this->thing->log;
+*/
     }
 
     function getMeta($thing = null)
@@ -134,11 +90,11 @@ class Meta
             $this->subject = $thing->subject;
         }
 
-        $data_gram = array(
+        $data_gram = [
             "from" => $this->from,
             "to" => $this->to,
-            "message" => $this->subject
-        );
+            "message" => $this->subject,
+        ];
 
         $this->meta = $data_gram;
         $this->meta_string = implode(" ", $data_gram);
@@ -155,24 +111,24 @@ class Meta
         }
 
         if ($input == "") {
-            $data_gram = array("from" => null, "to" => null, "message" => null);
+            $data_gram = ["from" => null, "to" => null, "message" => null];
 
             $this->meta = $data_gram;
             return;
         }
-/*
+        /*
         if (!isset($this->words)) {
             $this->getWords($input);
         }
 */
-        $sections = array("from", "to", "message");
+        $sections = ["from", "to", "message"];
 
         $parse_section = null;
         $message = "";
         $to = "";
         $from = "";
 
-$this->tokens = explode(" ", $input);
+        $this->tokens = explode(" ", $input);
 
         foreach ($this->tokens as $temp => $word) {
             foreach ($sections as $temp => $section) {
@@ -189,8 +145,8 @@ $this->tokens = explode(" ", $input);
                         $message_count += 1;
                         $message .= " " . $word;
                     }
-break;
-      //              continue;
+                    break;
+                //              continue;
                 case "to":
                     if (!isset($to_count)) {
                         $to_count = 1;
@@ -198,8 +154,8 @@ break;
                         $to_count += 1;
                         $to .= " " . $word;
                     }
-break;
-      //              continue;
+                    break;
+                //              continue;
                 case "from":
                     if (!isset($from_count)) {
                         $from_count = 1;
@@ -207,8 +163,8 @@ break;
                         $from_count += 1;
                         $from .= " " . $word;
                     }
-break;
-      //              continue;
+                    break;
+                //              continue;
             }
         }
 
@@ -227,22 +183,26 @@ break;
         $this->words = $agent->words;
     }
 
-    public function Respond()
+    public function respondResponse()
     {
+        if ($this->agent_input != null) {
+            return;
+        }
+
         $this->cost = 100;
 
         // Thing stuff
         $this->thing->flagGreen();
 
         // Make SMS
-        $this->makeSMS();
-        $this->thing_report['sms'] = $this->sms_message;
+        //$this->makeSMS();
+        //$this->thing_report['sms'] = $this->sms_message;
 
         // Make message
         $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail();
+        //$this->makeEmail();
 
         $this->thing_report['email'] = $this->sms_message;
 
@@ -251,7 +211,7 @@ break;
 
         if (isset($this->meta)) {
             $this->thing->json->writeVariable(
-                array($this->agent_name, "meta"),
+                [$this->agent_name, "meta"],
                 $this->meta
             );
         }
@@ -291,7 +251,7 @@ break;
     {
         $input = strtolower($this->subject);
 
-        $keywords = array('meta', 'metadata');
+        $keywords = ['meta', 'metadata'];
         $pieces = explode(" ", strtolower($input));
 
         foreach ($pieces as $key => $piece) {

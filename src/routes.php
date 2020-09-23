@@ -710,6 +710,7 @@ $app->group('/api', function () use ($app) {
 
 // Route handler for everything after the /
 $app->get('[/{params:.*}]', function ($request, $response, $args) {
+
     //    ini_set("max_input_time", 2); //s
     //set_time_limit(2);
 
@@ -848,6 +849,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             break;
 
         case strpos($last, ".") !== false:
+
             // File request of some sort
 
             // Unless it is a number and a number
@@ -905,7 +907,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     }
                 }
 
-                if ($found == false) {
+                if ($found === false) {
                     return $response->withStatus(404);
                 }
 
@@ -921,7 +923,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     //echo 'Caught exception: ',  $e->getMessage(), "\n";
                     return $response->withStatus(404);
                 }
-
                 ob_clean();
                 if (!isset($agent->thing_report[strtolower($ext_name)])) {
                     //var_dump($ext_name);

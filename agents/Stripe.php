@@ -107,7 +107,25 @@ class Stripe extends Agent
 
     // devstack
 
-    public function makeWeb()
+
+
+    public function makeWeb() {
+$web = '
+<form action="charge.php" method="post">
+  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+          data-key="<?php echo $stripe['publishable_key']; ?>"
+          data-description="Access for a year"
+          data-amount="5000"
+          data-locale="auto"></script>
+</form>';
+
+$this->web = $web;
+$this->thing_report['web'] = $web;
+
+
+    }
+
+    public function dev_makeWeb()
     {
         // https://stripe.com/docs/checkout/integration-builder
 

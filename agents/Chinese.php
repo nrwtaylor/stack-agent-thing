@@ -26,6 +26,8 @@ class Chinese extends Agent
 
         // devstack
 
+        $this->getMemcached();
+
         $chineses = $this->extractChinese($string);
 
         $this->getChinese();
@@ -70,6 +72,8 @@ class Chinese extends Agent
                 }
             }
         }
+
+        $this->thing->log("end init");
     }
 
     /**
@@ -115,17 +119,14 @@ class Chinese extends Agent
     function run()
     {
         if ($this->chinese != false) {
-
             if (isset($this->word['traditional'])) {
-
-            $this->thing->log(
-                'keyword ' .
-                    $this->keyword .
-                    " word  " .
-                    $this->word["traditional"] .
-                    '.'
-            );
-
+                $this->thing->log(
+                    'keyword ' .
+                        $this->keyword .
+                        " word  " .
+                        $this->word["traditional"] .
+                        '.'
+                );
             }
 
             $this->thing->log(
@@ -236,7 +237,7 @@ class Chinese extends Agent
                 }
             }
         }
-
+        $this->thing->log('best concept ' . $best_concept);
         return $best_concept;
     }
 
@@ -502,12 +503,12 @@ class Chinese extends Agent
                     $pointer += $value + 1;
                     break;
                 }
+
                 //echo "test if character string " . $test_character_string . " is in dictionary.\n";
 
                 // Devstack
                 // Next line testing at 22ms.
                 $text_temp = $this->findChinese('list', $test_character_string);
-
 
                 if ($text_temp == false) {
                     //echo "Not in dictionary" . "\n";
@@ -527,9 +528,7 @@ class Chinese extends Agent
                     $pointer += 1;
                 }
             }
-
             $english_word = $this->getWord($text, $character_string);
-
             if ($english_word === true) {
                 //true I guess
                 $translation .= $character_string;
@@ -682,8 +681,6 @@ class Chinese extends Agent
         return 'U+' . strtoupper($res);
     }
 
-
-
     /**
      *
      * @param unknown $librex
@@ -695,6 +692,21 @@ class Chinese extends Agent
         // Look up the meaning in the dictionary.
         if ($librex == "" or $librex == " " or $librex == null) {
             return false;
+        }
+
+        // Already loaded by this thing?
+        if (isset($this->contents[$librex])) {
+            return $this->contents[$librex];
+        }
+
+        // Avalable via memcache
+        $contents = $this->mem_cached->get(
+            'agent-chinese-contents-' . strtolower($librex)
+        );
+
+        if ($contents != false) {
+            $this->contents[$librex] = $contents;
+            return $this->contents[$librex];
         }
 
         switch ($librex) {
@@ -760,24 +772,33 @@ class Chinese extends Agent
                     $this->resource_path .
                     'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
         }
-        $this->contents = $contents;
+
+        $this->contents[$librex] = $contents;
+
+        $this->mem_cached->set(
+            'agent-chinese-contents-' . strtolower($librex),
+            $this->contents[$librex]
+        );
+
+        //$this->contents = $contents;
     }
 
     public function findChinese($librex, $searchfor)
     {
-        if (!isset($this->contents)) {
-        $this->getContents($librex);}
+        if (!isset($this->contents[$librex])) {
+            $this->getContents($librex);
+        }
 
         // factor out
-        $contents = $this->contents;
+        $contents = $this->contents[$librex];
 
         if (!isset($contents) or $contents == false) {
             $this->matches = [];
             return true;
         }
 
+        $this->thing->log('searchfor ' . $searchfor);
         // devstack add \b to Word
-
         $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*" . $pattern . ".*\$/m";
@@ -796,12 +817,42 @@ class Chinese extends Agent
         // search, and store all matching occurences in $matches
         $m = false;
 
-        if (preg_match_all($pattern, $contents, $matches)) {
-            //echo "Found matches:\n";
+        //$pattern = '/' . '\b' . $searchfor . '\b/m';
+
+        $this->thing->log('regex ' . $pattern);
+
+        if (true) {
+            if (preg_match_all($pattern, $contents, $matches)) {
+                //echo "Found matches:\n";
+                $m = implode("\n", $matches[0]);
+                $this->matches = $matches;
+            }
+        } else {
+            // devstack
+            // dev faster?
+            // speed test wth stripos.
+            // But matches part words.
+
+            // Does not match words.
+            // Do not use. Dev/test only.
+
+            $matches[0] = [];
+            $separator = "\r\n";
+
+            $line = strtok($contents, $separator);
+            while ($line !== false) {
+                if (mb_stripos($line, $searchfor) !== false) {
+                    $matches[0][] = $line;
+                }
+
+                $line = strtok($separator);
+            }
+            //exit();
+
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
-
         }
+
         return $m;
     }
 
