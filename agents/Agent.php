@@ -653,9 +653,10 @@ class Agent
             // Failto
             $this->mem_cached = new Memory($this->thing, "memory");
             //restore_error_handler();
-            $this->thing->log('caught throwable.', "WARNING");
+            $this->thing->log('caught memcached throwable. made memory', "WARNING");
             return;
         } catch (\Error $ex) {
+            $this->thing->log('caught memcached error.', "WARNING");
             return true;
         }
     }

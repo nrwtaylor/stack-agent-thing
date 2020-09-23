@@ -124,7 +124,7 @@ class Variables
         // Commented out 4 Jul 2018
         // Toss in a refreshed.
         //$time_string = $this->thing->time();
-        //$this->setVariable("refreshed_at", $time_string);
+        //$this->wsetVariable("refreshed_at", $time_string);
 
         $this->thing->log(
             $this->agent_prefix .
@@ -137,10 +137,30 @@ class Variables
         );
 
         $this->thing_report['log'] = $this->thing->log;
+        $this->makeVariables();
     }
 
-    function setVariables()
+    function makeVariables()
     {
+        $text = "";
+        foreach ($this->variable_set_names as $name => $variable_set) {
+            $text .= $name . " (" . $variable_set['count'] . ") ";
+        }
+        $this->thing_report['variables'] = $text;
+    }
+
+    function setVariables($uuid = null)
+    {
+        //        if ($uuid != null) {
+        //$this->variables_thing = $this->things[$uuid];
+        //}
+
+        if ($uuid == null) {
+            $thing = $this->variables_thing;
+        }
+        if (isset($this->things[$uuid])) {
+            $thing = $this->things[$uuid];
+        }
         $this->thing->db->setFrom($this->identity);
 
         $refreshed_at = false;
@@ -152,13 +172,13 @@ class Variables
 
             // Intentionally write to the variable thing.  And the current thing.
             if (isset($variable_name)) {
-                $this->variables_thing->json->writeVariable(
+                $thing->json->writeVariable(
                     [$this->variable_set_name, $variable_name],
-                    $this->variables_thing->$variable_name
+                    $thing->$variable_name
                 );
-                $this->thing->json->writeVariable(
+                $thing->json->writeVariable(
                     [$this->variable_set_name, $variable_name],
-                    $this->variables_thing->$variable_name
+                    $thing->$variable_name
                 );
             }
 
@@ -222,15 +242,30 @@ class Variables
             );
 
             foreach ($things as $thing) {
+                $thing_object = $thing;
+                $variables_json = $thing_object['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+                $count = 1;
+                if (isset($this->variable_set_names['count'])) {
+                    $count = $this->variable_set_names['count'] + 1;
+                }
+
+                $variable_set = ["count" => $count];
+
+                $this->variable_set_names[$variable_set_name] = $variable_set;
+                //($variables[$variable_set_name]);
+                //exit();
                 // Check each of the Things.
-        //        $this->variables_thing = new Thing($thing['uuid']);
+                //        $this->variables_thing = new Thing($thing['uuid']);
 
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
 
-                if ($this->getVariableSet($thing) == false) {
+                $uuid = $thing['uuid'];
 
+                if ($this->getVariableSet($uuid) == false) {
                     $this->thing->log(
                         $this->agent_prefix .
                             'got ' .
@@ -241,7 +276,7 @@ class Variables
                     // Should echo the matching variable sets
                     $match_count += 1;
 
-                    $this->setVariables(); // Make sure thing and stack match.
+                    $this->setVariables($thing['uuid']); // Make sure thing and stack match.
                     // Consider seeing if this is really needed.
 
                     return;
@@ -326,22 +361,25 @@ class Variables
         return $this->{$variable . "_overflow_flag"};
     }
 
-    function getVariableset($thing = null)
+    function getVariableset($uuid = null)
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
 
-                $this->variables_thing = new Thing($thing['uuid']);
+        if (!isset($this->things[$uuid])) {
+            $this->things[$uuid] = new Thing($uuid);
+        }
 
+        $this->variables_thing = $this->things[$uuid];
 
         if (!isset($this->variables_thing->account['stack'])) {
             // No stack balance available.
             return null;
         }
 
-
-
         $variables = $this->variables_thing->account['stack']->json->array_data;
+        //        $variables_json = $thing['variables'];
+        //        $variables = $this->thing->json->jsontoArray($variables_json);
 
         if (isset($variables[$this->variable_set_name])) {
             $this->context = "train";
@@ -350,15 +388,15 @@ class Variables
             $this->agent_variables = [];
             // Load to Thing variable for operations.
             foreach ($t as $name => $variable) {
-                $this->variables_thing->$name = $variable;
+                //                $this->variables_thing->$name = $variable;
+
+                $this->things[$uuid]->$name = $variable;
                 $this->agent_variables[] = $name;
             }
-
             return false;
         } else {
             return null;
         }
-
         return false;
     }
 

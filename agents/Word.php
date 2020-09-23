@@ -32,6 +32,7 @@ class Word extends Agent
 
         $this->thing_report['help'] =
             "Screens against a list of over four hundred thousand words.";
+        $this->getMemcached();
     }
 
     function set()
@@ -203,9 +204,9 @@ class Word extends Agent
 
         $this->thing->log("ewolWords.");
 
-        if (!isset($this->mem_cached)) {
-            $this->getMemcached();
-        }
+        //if (!isset($this->mem_cached)) {
+        //    $this->getMemcached();
+        //}
         //if ($this->wordpress_path_to !== false) {
         //    require_once $this->wordpress_path_to. 'wp-load.php';
         if (
@@ -262,13 +263,24 @@ class Word extends Agent
             case null:
             // Drop through
             case 'list':
+                if (ctype_alpha($searchfor)) {
+                    $s = strtolower($searchfor);
+                    $value = $this->mem_cached->get(
+                        'agent-words-stack-' . strtolower($s)
+                    );
+                    if ($value == true) {
+                        $this->thing->log("Found word in words-stack.");
+                        return $searchfor;
+                    }
+                }
+
                 if (isset($this->words_list)) {
                     $contents = $this->words_list;
                     break;
                 }
                 $file = $this->resource_path_words . 'words.txt';
 
-                $this->getMemcached();
+                //$this->getMemcached();
                 if ($contents = $this->mem_cached->get('agent-words-list')) {
                     $this->words_list = $contents;
                     $this->thing->log("loaded words from memory.");
@@ -339,6 +351,14 @@ class Word extends Agent
         // search, and store all matching occurences in $matches
         if (preg_match_all($pattern, $contents, $matches)) {
             $m = $matches[0][0];
+
+            if (ctype_alpha($m)) {
+                $this->mem_cached->set(
+                    'agent-words-stack-' . strtolower($m),
+                    true
+                );
+            }
+
             return $m;
         } else {
             return false;
