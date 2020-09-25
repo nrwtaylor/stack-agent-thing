@@ -28,7 +28,7 @@ class Flip extends Agent
         $this->node_list = ["flip" => ["coin", "flip", "card"]];
 
         $this->thing_report["info"] = "This flips a coin.";
-        $this->thing_report['help'] = 'Try FLIP COIN.';
+        $this->thing_report['help'] = 'Try FLIP HEADS. Or FLIP TAILS.';
     }
 
     /**
