@@ -1828,10 +1828,15 @@ $this->thing->log("completed make.");
         if (isset($uuid) and is_string($uuid)) {
             $thing = new Thing($uuid);
 
-            //if (!(($thing == false) or ($thing== true))) {
             if ($thing->thing != false) {
-                $f = trim(str_replace($uuid, "", $input));
 
+                $f = trim(str_replace($uuid, "", $input));
+                if (($f == "") or ($f == 'agent')) {
+
+                    $agent = new Uuid($thing, $f);
+                    $this->thing_report = $agent->thing_report;
+                    return;
+                }
                 $agent = new Agent($thing, $f);
                 $this->thing_report = $agent->thing_report;
                 return;

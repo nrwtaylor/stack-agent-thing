@@ -9,15 +9,7 @@ class Channel extends Agent
 {
     function init()
     {
-        $this->start_time = microtime(true);
-
-        $this->thing->log(
-            '<pre> Agent "Channel" started running on Thing ' .
-                date("Y-m-d H:i:s") .
-                '</pre>'
-        );
         $this->node_list = array("channel" => array("cue primary channel"));
-
     }
 
     public function set()

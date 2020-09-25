@@ -21,13 +21,6 @@ class Uuid extends Agent
      */
     function init()
     {
-        $this->stack_state = $this->thing->container['stack']['state'];
-        $this->short_name = $this->thing->container['stack']['short_name'];
-
-        $this->thing->log(
-            'started running on Thing ' . date("Y-m-d H:i:s") . ''
-        );
-
         $this->node_list = [];
 
         $this->aliases = ["learning" => ["good job"]];
@@ -35,8 +28,6 @@ class Uuid extends Agent
 
         $this->thing_report['help'] =
             "Makes a universally unique identifier. Try NUUID.";
-
-        $this->thing->log('Agent "Uuid" found ' . $this->uuid);
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
 
@@ -72,6 +63,37 @@ class Uuid extends Agent
         $this->uuids = $arr;
         return $arr;
     }
+
+    public function isUuid($text = null) {
+
+        if ($text == null) {return false;}
+
+        if (!isset($this->uuids)) {$this->extractUuids($text);}
+
+        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
+
+        if (strtolower($this->uuids[0]) == strtolower($text)) {
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+    public function hasUuid($text = null) {
+
+        if ($text == null) {return false;}
+
+        if (!isset($this->uuids)) {$this->extractUuids($text);}
+
+        if (count($this->uuids) > 0) {return true;} // Too many. Is not A uui>
+
+        return false;
+
+    }
+
 
     public function set()
     {
@@ -252,8 +274,11 @@ class Uuid extends Agent
      */
     function makeSMS()
     {
+        $response_text = $this->response;
+        if ($this->response == "") {$response_text = "No UUID response from this channel.";} 
+
         $sms = "UUID | ";
-        $sms .= "" . $this->response;
+        $sms .= "" . $response_text;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
