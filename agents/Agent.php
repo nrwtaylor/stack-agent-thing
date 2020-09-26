@@ -2496,7 +2496,10 @@ class Agent
             !$frequency_exception_flag
         ) {
             $frequency_thing = new Frequency($this->thing);
-            if ($frequency_thing->response != "") {
+
+            if ((isset($frequency_thing->band_matches)) or
+                stripos($input, 'frequency')) {
+            //if ($frequency_thing->response != "") {
                 //            $ars_thing = new Amateurradioservice($this->thing);
                 $this->thing_report = $frequency_thing->thing_report;
                 return $this->thing_report;
@@ -2873,6 +2876,14 @@ class Agent
             //exit();
         }
 
+
+        // Most useful thing is to acknowledge the url.
+        if (count($urls) > 0) {
+            $this->thing_report = $url->thing_report;
+            return $this->thing_report;
+        }
+
+
         return $this->thing_report;
 
         if (isset($chinese_thing->chineses) or isset($emoji_thing->emojis)) {
@@ -2885,6 +2896,7 @@ class Agent
         //            $this->thing_report = $chatbot->thing_report;
         //            return $this->thing_report;
         //        }
+
 
         $this->thing->log(
             '<pre> Agent "Agent" created a Redpanda agent.</pre>',

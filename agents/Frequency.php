@@ -220,7 +220,7 @@ if (!isset($this->band)) {return;}
     function doFrequency($text = null) {
         $text = trim($text);
 
-        $channel_text = "Merp.";
+        $channel_text = "Not recognized.";
         $this->response = $channel_text;
         $this->message = $this->response;
 
