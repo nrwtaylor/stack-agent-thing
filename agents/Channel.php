@@ -356,7 +356,7 @@ class Channel extends Agent
         $this->ux_ui = "slow app start-up";
     }
 
-    function readFrom()
+    function readFrom($text = null)
     {
         if (isset($this->channel_name)) {
             return;

@@ -349,7 +349,7 @@ class Agent
     {
         // So ... don't call yourself.
         // Don't do a make on yourself.
-$this->thing->log("start make.");
+        $this->thing->log("start make.");
         $this->makeAgent();
         $this->makeResponse();
         //$this->makeChoices();
@@ -484,7 +484,7 @@ $this->thing->log("start make.");
                 }
             }
         }
-$this->thing->log("completed make.");
+        $this->thing->log("completed make.");
     }
 
     /**
@@ -654,7 +654,10 @@ $this->thing->log("completed make.");
             // Failto
             $this->mem_cached = new Memory($this->thing, "memory");
             //restore_error_handler();
-            $this->thing->log('caught memcached throwable. made memory', "WARNING");
+            $this->thing->log(
+                'caught memcached throwable. made memory',
+                "WARNING"
+            );
             return;
         } catch (\Error $ex) {
             $this->thing->log('caught memcached error.', "WARNING");
@@ -1406,9 +1409,35 @@ $this->thing->log("completed make.");
 
         $this->thing->log('read "' . $this->subject . '".');
 
+        $this->readFrom();
+
         $this->readSubject();
         $this->thing->log('completed read.');
+    }
 
+    public function readFrom($text = null)
+    {
+        $from = $this->from;
+        if ($text != null) {
+            $from = text;
+        }
+
+        // Get uuid from incoming datagram.
+        // Devstack
+
+        // $uuid = some function of from
+        $uuid = false;
+
+        if (isset($uuid) and is_string($uuid)) {
+            $thing = new Thing($uuid);
+
+            if ($thing->thing != false) {
+                //$this->thing = $thing->thing;
+                $agent = new Agent($thing->thing);
+
+                return;
+            }
+        }
     }
 
     /**
@@ -1767,10 +1796,16 @@ $this->thing->log("completed make.");
             }
 
             $token_agent = implode(' ', array_reverse($selected_agent_tokens));
-            $agglutinated_token_agent = implode('', array_reverse($selected_agent_tokens));
-            $hyphenated_token_agent = implode('-', array_reverse($selected_agent_tokens));
+            $agglutinated_token_agent = implode(
+                '',
+                array_reverse($selected_agent_tokens)
+            );
+            $hyphenated_token_agent = implode(
+                '-',
+                array_reverse($selected_agent_tokens)
+            );
 
-            if (isset($button_agent) and isset($token_agent))  {
+            if (isset($button_agent) and isset($token_agent)) {
                 $flag = false;
                 if ($button_agent == $agglutinated_token_agent) {
                     $flag = true;
@@ -1780,13 +1815,13 @@ $this->thing->log("completed make.");
                     $flag = true;
                 }
 
-
                 if ($button_agent == $token_agent) {
                     $flag = true;
                 }
 
-                if ($flag === false) {return false;}
-
+                if ($flag === false) {
+                    return false;
+                }
             }
 
             if ($button_agent == $token_agent) {
@@ -1829,10 +1864,8 @@ $this->thing->log("completed make.");
             $thing = new Thing($uuid);
 
             if ($thing->thing != false) {
-
                 $f = trim(str_replace($uuid, "", $input));
-                if (($f == "") or ($f == 'agent')) {
-
+                if ($f == "" or $f == 'agent') {
                     $agent = new Uuid($thing, $f);
                     $this->thing_report = $agent->thing_report;
                     return;
@@ -2142,7 +2175,6 @@ $this->thing->log("completed make.");
 
         $chinese_agent = new Chinese($this->thing, 'chinese');
         if ($chinese_agent->hasChinese($input) === true) {
-
             $chinese_thing = new Chinese($this->thing, $input);
             $this->thing_report = $chinese_thing->thing_report;
             if (
@@ -2151,7 +2183,6 @@ $this->thing->log("completed make.");
             ) {
                 $input = $chinese_thing->translated_input;
             }
-
         }
         $this->thing->log("expand out compression phrases");
 
