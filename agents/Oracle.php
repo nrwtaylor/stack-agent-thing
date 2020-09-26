@@ -54,9 +54,6 @@ class Oracle extends Agent
 
         $this->response .= "Sent message to the oracle."; 
 
-var_dump($thing->from);
-var_dump($this->to);
-var_dump($this->subject);
 
     }
 
