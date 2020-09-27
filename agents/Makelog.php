@@ -158,7 +158,7 @@ $this->thing_report['snippet'] = "Merp.";
                 $run_for = $run_time;
                 $previous_run_time = $run_time;
 
-                $this->agent_run_for[] = array("agent_name"=>$agent_name, "run_for"=>$run_for);
+                $this->agent_run_for[] = array("agent_name"=>$agent_name, "run_for"=>$run_for, "text"=>$line);
 
             }
 

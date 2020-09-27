@@ -351,6 +351,7 @@ class Agent
         // Don't do a make on yourself.
         $this->thing->log("start make.");
         $this->makeAgent();
+
         $this->makeResponse();
         //$this->makeChoices();
         $this->makeMessage();
@@ -359,8 +360,9 @@ class Agent
         $this->makePNG();
         $this->makePNGs();
         $this->makeSMS();
-
         $this->makeWeb();
+
+
         // Explore adding in INFO and HELP to web response.
         $dev_agents = ["response", "help", "info"];
         $prod_agents = ["response", "help"];
