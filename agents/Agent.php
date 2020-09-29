@@ -144,14 +144,18 @@ class Agent
         $this->init();
         $this->get();
 
+
+try {
+
         $this->read();
+
 
         $this->run();
         $this->make();
 
         // This is where we deal with insufficient space to serialize the variabes to the stack.
         //if (!isset($this->signal_thing)) {return true;}
-        try {
+//        try {
             $this->set();
         } catch (\OverflowException $t) {
             $this->response =
@@ -1413,6 +1417,7 @@ class Agent
 
         $this->readFrom();
 
+//if ((isset($this->do_not_respond)) and ($this->do_not_respond == true)) {return;}
         $this->readSubject();
         $this->thing->log('completed read.');
     }
@@ -1423,6 +1428,17 @@ class Agent
         if ($text != null) {
             $from = text;
         }
+
+
+        $deny_agent = new Deny($this->thing, "deny");
+        
+        if ($deny_agent->isDeny() === true) {
+
+$this->do_not_respond = true;
+//return;
+throw new \Exception("Address not allowed.");
+
+}
 
         // Get uuid from incoming datagram.
         // Devstack
