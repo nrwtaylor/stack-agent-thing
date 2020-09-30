@@ -37,7 +37,7 @@ class Card extends Agent
         // I think.
         // Instead.
 
-        $this->node_list = ["card" => ["card", "charley", "roll", "trivia"]];
+        $this->node_list = ["card" => ["card", "roll", "trivia"]];
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->thing->log(

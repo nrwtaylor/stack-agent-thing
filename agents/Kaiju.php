@@ -31,7 +31,7 @@ class Kaiju extends Agent
         }
         $this->node_list = ["kaiju" => ["kaiju"]];
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+//        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->unit = "Health";
 
@@ -44,12 +44,25 @@ class Kaiju extends Agent
         $this->height = 200;
         $this->width = 300;
 
-        $this->horizon = (10 * 24 * 60) / 15;
+        $this->horizon = (10 * 24 * 60) / 10;
 
         $this->series = ['kaiju'];
         $this->default_y_spread = 100;
 
         $this->default_preferred_step = 20;
+
+        $this->parameters = array(
+            'kaiju_voltage' =>['text'=>'voltage (V)'],
+            'bilge_level'=>['text'=>'bilge level (mm)'],
+            'magnetic_field'=>['text' => 'magnetic flux (uT)'],
+            'pressure'=>['text'=>'pressure (mBar)'],
+            'dv_dt'=>['text'=>'dV/dt graph (V/s)'],
+            'vertical_acceleration'=>['text'=>'Vertical acceleration (g)'],
+            'kaiju_temperature'=>['text'=>'Kaiju temperature (C)'],
+            'roll'=>['text'=>'roll (degrees)'],
+            'pitch'=>['text'=>'pitch (degrees)'],
+            'heading'=>['text'=>'heading (degrees)'],
+        );
 
         $this->character = new Character($this->thing, "character is Kaiju");
 
@@ -82,13 +95,13 @@ class Kaiju extends Agent
     {
         if ($state == null) {
             if (!isset($this->state)) {
-                $this->state = "easy";
+                $this->state = "simple";
             }
 
             $state = $this->state;
         }
 
-        if ($state == "easy" or $state == "hard") {
+        if ($state == "simple" or $state == "full") {
             return false;
         }
 
@@ -145,206 +158,9 @@ class Kaiju extends Agent
         }
     }
 
-    function drawGraph1()
-    {
-        if (!isset($this->points)) {
-            return true;
-        }
-
-        $this->chart_agent = new Chart(
-            $this->thing,
-            "chart age " . $this->from
-        );
-
-        $this->image = $this->chart_agent->image;
-        $this->black = $this->chart_agent->black;
-        $this->red = $this->chart_agent->red;
-        $this->grey = $this->chart_agent->grey;
-
-        $this->chart_width = $this->width - 20;
-        $this->chart_height = $this->height - 20;
-
-        $this->chart_agent->chart_width = $this->chart_width;
-        $this->chart_agent->chart_height = $this->chart_height;
-
-        $num_points = count($this->points);
-        $column_width = $this->width / $num_points;
-
-        $series_1 = $this->points[0]['series_1'];
-        $series_2 = $this->points[0]['series_2'];
-
-        $refreshed_at = $this->points[0]['refreshed_at'];
-
-        // Get min and max
-        if (!isset($y_min)) {
-            $y_min = $series_1 + $series_2;
-        }
-        if (!isset($y_max)) {
-            $y_max = $series_1 + $series_2;
-        }
-
-        if (!isset($x_min)) {
-            $x_min = $refreshed_at;
-        }
-        if (!isset($x_max)) {
-            $x_max = $refreshed_at;
-        }
-
-        $i = 0;
-        foreach ($this->points as $point) {
-            $series_1 = $point['series_1'];
-            $queue_time = $point['series_2'];
-            $elapsed_time = $series_1 + $series_2;
-
-            $refreshed_at = $point['refreshed_at'];
-
-            if ($elapsed_time == null or $elapsed_time == 0) {
-                continue;
-            }
-
-            if ($elapsed_time < $y_min) {
-                $y_min = $elapsed_time;
-            }
-            if ($elapsed_time > $y_max) {
-                $y_max = $elapsed_time;
-            }
-
-            if ($refreshed_at < $x_min) {
-                $x_min = $refreshed_at;
-            }
-            if ($refreshed_at > $x_max) {
-                $x_max = $refreshed_at;
-            }
-
-            $i += 1;
-        }
-
-        $x_max = strtotime($this->current_time);
-
-        $this->chart_agent->y_min = $y_min;
-        $this->chart_agent->y_max = $y_max;
-        $this->chart_agent->x_min = $x_min;
-        $this->chart_agent->x_max = $x_max;
-
-        $i = 0;
-
-        foreach ($this->points as $point) {
-            $series_1 = $point['series_1'];
-            $series_2 = $point['series_2'];
-            $elapsed_time = $series_1 + $series_2;
-            $refreshed_at = $point['refreshed_at'];
-
-            $y_spread = $y_max - $y_min;
-            if ($y_spread == 0) {
-                $y_spread = $this->default_y_spread;
-                $this->y_spread = $y_spread;
-            }
-
-            $y =
-                10 +
-                $this->chart_height -
-                (($elapsed_time - $y_min) / $y_spread) * $this->chart_height;
-            $x =
-                10 +
-                (($refreshed_at - $x_min) / ($x_max - $x_min)) *
-                    $this->chart_width;
-
-            if (!isset($x_old)) {
-                $x_old = $x;
-            }
-            if (!isset($y_old)) {
-                $y_old = $y;
-            }
-
-            // +1 to overlap bars
-            $width = $x - $x_old;
-
-            $offset = 1.5;
-
-            imagefilledrectangle(
-                $this->chart_agent->image,
-                $x_old - $offset,
-                $y_old - $offset,
-                $x_old + $width / 2 + $offset,
-                $y_old + $offset,
-                $this->red
-            );
-
-            imagefilledrectangle(
-                $this->chart_agent->image,
-                $x_old + $width / 2 - $offset,
-                $y_old - $offset,
-                $x - $width / 2 + $offset,
-                $y + $offset,
-                $this->red
-            );
-
-            imagefilledrectangle(
-                $this->chart_agent->image,
-                $x - $width / 2 - $offset,
-                $y - $offset,
-                $x + $offset,
-                $y + $offset,
-                $this->red
-            );
-
-            $y_old = $y;
-            $x_old = $x;
-
-            $i += 1;
-        }
-
-        $allowed_steps = [
-            0.02,
-            0.05,
-            0.2,
-            0.5,
-            2,
-            5,
-            10,
-            20,
-            25,
-            50,
-            100,
-            200,
-            250,
-            500,
-            1000,
-            2000,
-            2500,
-            10000,
-            20000,
-            25000,
-            100000,
-            200000,
-            250000,
-        ];
-        $inc = ($y_max - $y_min) / 5;
-
-        $closest_distance = $y_max;
-
-        foreach ($allowed_steps as $key => $step) {
-            $distance = abs($inc - $step);
-            if ($distance < $closest_distance) {
-                $closest_distance = $distance;
-                $preferred_step = $step;
-            }
-        }
-
-        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
-
-        //echo "merp";
-        //exit();
-
-        //        $this->chart_agent->image = $this->image;
-        $this->chart_agent->makePNG();
-        $this->image_embedded = $this->chart_agent->image_embedded;
-        $this->image = $this->chart_agent->image;
-        //        $this->html_image = $this->chart_agent->html_image;
-
-        return $this->image;
-    }
-
+    // devstack
+    // move to Chart?
+    // Refactor as multiple signal graph
     function drawGraph2()
     {
         if (!isset($this->points)) {
@@ -497,268 +313,6 @@ class Kaiju extends Agent
         //        $this->html_image = $this->chart_agent->html_image;
     }
 
-    function drawGraph3()
-    {
-        if (!isset($this->points)) {
-            return true;
-        }
-
-        $this->chart_agent = new Chart(
-            $this->thing,
-            "chart age " . $this->from
-        );
-        //$this->chart_agent->blankImage();
-        $this->image = $this->chart_agent->image;
-        $this->black = $this->chart_agent->black;
-        $this->red = $this->chart_agent->red;
-        $this->grey = $this->chart_agent->grey;
-
-        $this->chart_width = $this->width - 20;
-        $this->chart_height = $this->height - 20;
-
-        $this->chart_agent->chart_width = $this->chart_width;
-        $this->chart_agent->chart_height = $this->chart_height;
-
-        $num_points = count($this->points);
-        $column_width = $this->width / $num_points;
-        $magnetic_field = $this->points[0]['magnetic_field'];
-
-        $refreshed_at = $this->points[0]['refreshed_at'];
-
-        // Get min and max
-        if (!isset($y_min)) {
-            $y_min = $magnetic_field;
-        }
-        if (!isset($y_max)) {
-            $y_max = $magnetic_field;
-        }
-
-        if (!isset($x_min)) {
-            $x_min = $refreshed_at;
-        }
-        if (!isset($x_max)) {
-            $x_max = $refreshed_at;
-        }
-
-        $i = 0;
-        foreach ($this->points as $point) {
-            $magnetic_field = $point['magnetic_field'];
-            $refreshed_at = $point['refreshed_at'];
-
-            if ($magnetic_field == null) {
-                continue;
-            }
-
-            if ($magnetic_field < $y_min) {
-                $y_min = $magnetic_field;
-            }
-            if ($magnetic_field > $y_max) {
-                $y_max = $magnetic_field;
-            }
-
-            if ($refreshed_at < $x_min) {
-                $x_min = $refreshed_at;
-            }
-            if ($refreshed_at > $x_max) {
-                $x_max = $refreshed_at;
-            }
-
-            $i += 1;
-        }
-
-        $x_max = strtotime($this->current_time);
-
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
-
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
-
-        $this->chart_agent->y_min = $y_min;
-        $this->chart_agent->y_max = $y_max;
-        $this->chart_agent->x_min = $x_min;
-        $this->chart_agent->x_max = $x_max;
-
-        //return true;
-        $this->drawSeries('magnetic_field');
-
-        $allowed_steps = [
-            0.02,
-            0.05,
-            0.2,
-            0.5,
-            2,
-            5,
-            10,
-            20,
-            25,
-            50,
-            100,
-            200,
-            250,
-            500,
-            1000,
-            2000,
-            2500,
-            10000,
-            20000,
-            25000,
-            100000,
-            200000,
-            250000,
-        ];
-        $inc = ($y_max - $y_min) / 5;
-
-        $closest_distance = $y_max;
-
-        foreach ($allowed_steps as $key => $step) {
-            $distance = abs($inc - $step);
-            if ($distance < $closest_distance) {
-                $closest_distance = $distance;
-                $preferred_step = $step;
-            }
-        }
-        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
-
-        $this->chart_agent->image = $this->image;
-        $this->chart_agent->makePNG();
-        $this->image_embedded = $this->chart_agent->image_embedded;
-        $this->image = $this->chart_agent->image;
-        //        $this->html_image = $this->chart_agent->html_image;
-    }
-
-    function drawGraph4()
-    {
-        $series_name = 'pressure';
-
-        if (!isset($this->points)) {
-            return true;
-        }
-
-        $this->chart_agent = new Chart(
-            $this->thing,
-            "chart age " . $this->from
-        );
-        //$this->chart_agent->blankImage();
-        $this->image = $this->chart_agent->image;
-        $this->black = $this->chart_agent->black;
-        $this->red = $this->chart_agent->red;
-        $this->grey = $this->chart_agent->grey;
-
-        $this->chart_width = $this->width - 20;
-        $this->chart_height = $this->height - 20;
-
-        $this->chart_agent->chart_width = $this->chart_width;
-        $this->chart_agent->chart_height = $this->chart_height;
-
-        $num_points = count($this->points);
-        $column_width = $this->width / $num_points;
-        $magnetic_field = $this->points[0][$series_name];
-
-        $refreshed_at = $this->points[0]['refreshed_at'];
-
-        // Get min and max
-        if (!isset($y_min)) {
-            $y_min = $magnetic_field;
-        }
-        if (!isset($y_max)) {
-            $y_max = $magnetic_field;
-        }
-
-        if (!isset($x_min)) {
-            $x_min = $refreshed_at;
-        }
-        if (!isset($x_max)) {
-            $x_max = $refreshed_at;
-        }
-
-        $i = 0;
-        foreach ($this->points as $point) {
-            $magnetic_field = $point[$series_name];
-            $refreshed_at = $point['refreshed_at'];
-
-            if ($magnetic_field == null) {
-                continue;
-            }
-
-            if ($magnetic_field < $y_min) {
-                $y_min = $magnetic_field;
-            }
-            if ($magnetic_field > $y_max) {
-                $y_max = $magnetic_field;
-            }
-
-            if ($refreshed_at < $x_min) {
-                $x_min = $refreshed_at;
-            }
-            if ($refreshed_at > $x_max) {
-                $x_max = $refreshed_at;
-            }
-
-            $i += 1;
-        }
-
-        $x_max = strtotime($this->current_time);
-
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
-
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
-
-        $this->chart_agent->y_min = $y_min;
-        $this->chart_agent->y_max = $y_max;
-        $this->chart_agent->x_min = $x_min;
-        $this->chart_agent->x_max = $x_max;
-
-        //return true;
-        $this->drawSeries($series_name);
-
-        $allowed_steps = [
-            0.02,
-            0.05,
-            0.2,
-            0.5,
-            2,
-            5,
-            10,
-            20,
-            25,
-            50,
-            100,
-            200,
-            250,
-            500,
-            1000,
-            2000,
-            2500,
-            10000,
-            20000,
-            25000,
-            100000,
-            200000,
-            250000,
-        ];
-        $inc = ($y_max - $y_min) / 5;
-
-        $closest_distance = $y_max;
-
-        foreach ($allowed_steps as $key => $step) {
-            $distance = abs($inc - $step);
-            if ($distance < $closest_distance) {
-                $closest_distance = $distance;
-                $preferred_step = $step;
-            }
-        }
-        $this->chart_agent->drawGrid($y_min, $y_max, $preferred_step);
-
-        $this->chart_agent->image = $this->image;
-        $this->chart_agent->makePNG();
-        $this->image_embedded = $this->chart_agent->image_embedded;
-        $this->image = $this->chart_agent->image;
-        //        $this->html_image = $this->chart_agent->html_image;
-    }
-
     function drawGraph($series_name = null)
     {
         //$series_name = 'dv_dt';
@@ -807,7 +361,7 @@ class Kaiju extends Agent
         $i = 0;
         foreach ($this->points as $point) {
             $magnetic_field = $point[$series_name];
-            //if ($series_name == "bilge_level") {var_dump($point); exit();echo $magnetic_field;}
+
             $refreshed_at = $point['refreshed_at'];
 
             if ($magnetic_field == null) {
@@ -923,7 +477,6 @@ class Kaiju extends Agent
         $i = 0;
         foreach ($this->points as $point) {
             //$y = array();
-
             $series = $point[$series_name];
 
             //            $temperature_2 = $point['temperature_2'];
@@ -1108,8 +661,8 @@ class Kaiju extends Agent
      */
     function setState($state)
     {
-        $this->state = "easy";
-        if (strtolower($state) == "hard" or strtolower($state) == "easy") {
+        $this->state = "simple";
+        if (strtolower($state) == "simple" or strtolower($state) == "full") {
             $this->state = $state;
         }
     }
@@ -1121,7 +674,7 @@ class Kaiju extends Agent
     function getState()
     {
         if (!isset($this->state)) {
-            $this->state = "easy";
+            $this->state = "simple";
         }
         return $this->state;
     }
@@ -1132,17 +685,7 @@ class Kaiju extends Agent
      */
     function setBank($bank = null)
     {
-        //if (($bank == "easy") or ($bank == null)) {
-        //    $this->bank = "easy-a03";
-        //}
-
-        //if ($bank == "hard") {
-        //    $this->bank = "hard-a05";
-        //}
-
-        //if ($bank == "16ln") {
         $this->bank = "16ln-a00";
-        //}
     }
 
     /**
@@ -1182,8 +725,6 @@ class Kaiju extends Agent
             return;
         }
 
-        //var_dump($this->kaiju_address);
-        //exit();
 
         $this->kaiju_thing = new Thing(null);
         $this->kaiju_thing->Create(
@@ -1218,7 +759,6 @@ class Kaiju extends Agent
                 $link_uuids[] = $block_thing['uuid'];
                 //                $kaiju_messages[] = $block_thing['task'];
                 $kaiju_messages[] = $block_thing;
-                //var_dump($block_thing['task']);
                 // if ($match == 2) {break;}
                 // Get upto 10 matches
                 if ($match == $this->horizon) {
@@ -1248,7 +788,6 @@ class Kaiju extends Agent
                 $temperature_2 = str_replace("C", "", $data_array[11]);
                 $temperature_3 = str_replace("C", "", $data_array[12]);
 
-                //var_dump($parsed_thing);
                 $magnetic_field_text = $parsed_thing['magnetic_field'];
                 $magnetic_field = $this->parseData($magnetic_field_text)[
                     'magnetic_field'
@@ -1260,14 +799,27 @@ class Kaiju extends Agent
                 $bilge_level_text = $parsed_thing['bilge_level'];
                 $bilge_level = $this->parseData($bilge_level_text)['bilge'];
 
-                //$array = array();
-                //$array["refreshed_at"] = $parsed_thing['created_at'];
-                //$array["series_1"] = $voltage;
-                //$array["series_2"] = 0;
-                //var_dump($array);
+                $vertical_acceleration_text = $parsed_thing['vertical_acceleration'];
+                $vertical_acceleration = $this->parseData($vertical_acceleration_text)['vertical_acceleration'];
 
-                //var_dump($data_array[2]);
-                $this->points[] = [
+                $kaiju_temperature_text = $parsed_thing['kaiju_temperature'];
+                $kaiju_temperature_text = str_replace("C", "", $kaiju_temperature_text);
+
+
+                $kaiju_temperature = floatval($kaiju_temperature_text);
+
+                $roll_text = $parsed_thing['roll'];
+                $roll = $roll_text;
+
+                $pitch_text = $parsed_thing['pitch'];
+                $pitch = $pitch_text;
+
+                $heading_text = $parsed_thing['heading'];
+                $heading_text = str_replace("M", "", $heading_text);
+
+                $heading = $heading_text;
+
+                $point = [
                     "refreshed_at" => strtotime($parsed_thing['created_at']),
                     "series_1" => $voltage["voltage"],
                     "series_2" => 0,
@@ -1276,11 +828,19 @@ class Kaiju extends Agent
                     "temperature_3" => $temperature_3,
                     "magnetic_field" => $magnetic_field,
                     "pressure" => $pressure,
-                    "bilge_level" => $bilge_level,
-                ];
-                //$this->points[] = array("refreshed_at"=>$parsed_thing['created_at'], $voltage, "series_2"=>0);
+                    ];
 
-                //         $this->points[] = array("refreshed_at"=>$created_at, "run_time"=>$run_time, "queue_time"=>$queue_time);
+                $point['kaiju_voltage'] = $voltage["voltage"];
+
+                $point['bilge_level'] = $bilge_level;
+                $point['vertical_acceleration'] = $vertical_acceleration;
+                $point['kaiju_temperature'] = $kaiju_temperature;
+                $point['roll'] = $roll;
+                $point['pitch'] = $pitch;
+                $point['heading'] = $heading;
+
+                $this->points[] = $point;
+
             }
         }
 
@@ -1294,7 +854,7 @@ class Kaiju extends Agent
             "V" => "voltage",
             "Pa" => "pressure",
             "uT" => "magnetic_field",
-            "g" => "acceleration",
+            "g" => "vertical_acceleration",
             "mm" => "bilge",
         ];
 
@@ -1337,28 +897,12 @@ class Kaiju extends Agent
             }
         }
 
-        //        if ($searchfor == null) {return null;}
 
         $this->kaiju_address = null;
         if (count($kaiju_list) == 1) {
             $this->kaiju_address = $kaiju_list[0];
         }
-        //$this->getKaiju();
-        //        $this->kaiju_thing = new Thing(null);
-
-        //        $agent_sms = new Sms($thing,"sms");
-
-        //        $agent_sms->sendSMS($kaiju_address, "thing"
     }
-
-    //    function getKaiju()
-    //    {
-
-    //        $agent_sms = new Sms($this->thing,"sms");
-
-    // $agent_sms->sendSMS("XXXXXXXXXX", "thing");
-
-    //    }
 
     /**
      *
@@ -1424,14 +968,6 @@ class Kaiju extends Agent
             return;
         }
 
-        //var_dump($dict);
-        //var_dump(count($dict));
-
-        //foreach($dict as $index=>$phrase) {
-        //    if ($index == 0) {continue;}
-        //    if ($phrase == "") {continue;}
-        //    $english_phrases[] = $phrase;
-        //}
         if (count($dict) == 12) {
             $nuuid = $dict[2];
             $kaiju_voltage = $dict[3];
@@ -1537,10 +1073,6 @@ class Kaiju extends Agent
             $clock_time = $dict[15] . " " . $dict[16];
         }
 
-        //        $dict = explode(",",$text);
-        //        $kaiju_owner = $dict[0];
-        //        $kaiju_address = trim($dict[1]);
-
         if (!isset($nuuid)) {
             var_dump($dict);
         }
@@ -1555,7 +1087,6 @@ class Kaiju extends Agent
             "pitch" => $pitch,
             "roll" => $roll,
             "heading" => $heading,
-
             "temperature_1" => $temperature_1,
             "temperature_2" => $temperature_2,
             "temperature_3" => $temperature_3,
@@ -1589,40 +1120,26 @@ class Kaiju extends Agent
         return $this->bank;
     }
 
-    //    public function makeImage() {
-    //       $this->image = null;
-
-    //    }
-
     /**
      *
      */
-    public function respond()
+    public function respondResponse()
     {
-        //$this->getAddress($this->thing->from);
-        //$this->getKaiju();
 
         $this->getResponse();
 
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "kaiju";
+//        $to = $this->thing->from;
+//        $from = "kaiju";
 
-        $this->makeSMS();
-
-        $this->makeMessage();
-        // $this->makeTXT();
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This creates an exercise message.";
-        $this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
+        $this->thing_report["info"] = "This reads a Thing message.";
+        $this->thing_report["help"] = 'Try KAIJU 10. Or KAIJU 4.';
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-        $this->makeWeb();
-
-        $this->makeTXT();
     }
 
     /**
@@ -1691,29 +1208,13 @@ class Kaiju extends Agent
         $this->thing_report['message'] = $message;
     }
 
-    /**
-     *
-     */
-    function getBar()
-    {
-        $this->bar = new Bar($this->thing, "display");
-    }
-
-    /**
-     *
-     */
-    function setInject()
-    {
-    }
 
     /**
      *
      */
     public function makePNGs()
     {
-        //if (!isset($this->image)) {$this->makeImage();}
         $this->thing_report['pngs'] = [];
-        //return;
         $agent = new Png($this->thing, "png");
     }
 
@@ -1726,37 +1227,26 @@ class Kaiju extends Agent
 
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/kaiju';
 
-        $this->drawGraph1();
-
-        $graph1_image_embedded = $this->chart_agent->image_embedded;
 
         $this->drawGraph2();
         $graph2_image_embedded = $this->chart_agent->image_embedded;
 
         $this->makePNG();
 
-        $this->drawGraph3();
-
-        $this->makePNG();
-        $graph3_image_embedded = $this->chart_agent->image_embedded;
-
-        $this->drawGraph('pressure');
-
-        $this->makePNG();
-        $graph4_image_embedded = $this->chart_agent->image_embedded;
-
-        $this->drawGraph('bilge_level');
-
-        $this->makePNG();
-        $graph6_image_embedded = $this->chart_agent->image_embedded;
-
         $this->calcDvdt();
 
         //$this->blankImage();
-        $this->drawGraph('dv_dt');
-        $this->makePNG();
-        //        if (!isset($this->html_image)) {$this->makePNG();}
-        $graph5_image_embedded = $this->chart_agent->image_embedded;
+
+        $parameters = $this->parameters;
+
+        $title = array();
+        foreach($parameters as $parameter=>$text) {
+            $this->drawGraph($parameter);
+            $this->makePNG();
+            $graph_image_embedded[$parameter] = $this->chart_agent->image_embedded;
+            $title[$parameter] = $text['text'];
+        }
+
 
         $web = "<b>Kaiju Agent</b>";
         $web .= "<p>";
@@ -1804,18 +1294,8 @@ class Kaiju extends Agent
         }
 
         if (isset($this->points)) {
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph1_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
-
-            $web .= "voltage graph (V)";
-
-            $web .= "<br><br>";
 
             $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
             $web .= $graph2_image_embedded;
             $web .= "</a>";
             $web .= "<br>";
@@ -1824,50 +1304,22 @@ class Kaiju extends Agent
 
             $web .= "<br><br>";
 
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph6_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
+            foreach($parameters as $parameter=>$meta) {
 
-            $web .= "bilge level graph (mm)";
+                $web .= '<a href="' . $link . '">';
+                $web .= $graph_image_embedded[$parameter];
+                $web .= "</a>";
+                $web .= "<br>";
 
-            $web .= "<br><br>";
+                $web .= $meta['text'];
 
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph3_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
+                $web .= "<br><br>";
 
-            $web .= "magnetic flux graph (uT)";
+            }
 
-            $web .= "<br><br>";
-
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph4_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
-
-            $web .= "pressure graph (mBar)";
-
-            $web .= "<br><br>";
-
-            $web .= '<a href="' . $link . '">';
-            //        $web .= $this->image_embedded;
-            $web .= $graph5_image_embedded;
-            $web .= "</a>";
-            $web .= "<br>";
-
-            $web .= "dV/dt graph (V/s)";
-
-            $web .= "<br><br>";
         }
 
         $web .= "Requested about " . $ago . " ago. ";
-        //        $web .= "<p>";
-        //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
 
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= "This link will expire in " . $togo . ".<br>";
@@ -1977,8 +1429,6 @@ class Kaiju extends Agent
      */
     public function makeKaiju()
     {
-        //        $this->makePDF();
-        //        $this->thing_report['percs'] = $this->thing_report['pdf'];
     }
 
     /**
@@ -1991,6 +1441,14 @@ class Kaiju extends Agent
         $input = strtolower($this->subject);
         if (isset($this->test_flag) and $this->test_flag === true) {
             $input = $this->test_string;
+        }
+
+        $number_agent = new Number($this->thing, 'number');
+        $number = $number_agent->extractNumber($input);
+
+        if ($number != null) {
+            $this->response .= "Set horion to " . $number . " days. ";
+            $this->horizon = ($number * 24 * 60);
         }
 
         $pieces = explode(" ", strtolower($input));
@@ -2007,13 +1465,13 @@ class Kaiju extends Agent
             }
         }
 
-        $keywords = ["test", "kaiju", "hard", "easy", "hey", "on", "off"];
+        $keywords = ["test", "kaiju", "simple", "full", "hey", "on", "off"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'hard':
-                        case 'easy':
+                        case 'simple':
+                        case 'full':
                             $this->setState($piece);
                             $this->setBank($piece);
 
