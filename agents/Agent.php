@@ -122,7 +122,6 @@ class Agent
         if (isset($this->dev) and $this->dev == true) {
             $this->debug();
         }
-
         // First things first... see if Mordok is on.
         /* Think about how this should work and the user UX/UI
             $mordok_agent = new Mordok($this->thing);
@@ -146,9 +145,7 @@ class Agent
 
 
 try {
-
         $this->read();
-
 
         $this->run();
         $this->make();
@@ -214,7 +211,6 @@ try {
             $this->thing->elapsed_runtime()
         );
         $this->thing_report['log'] = $this->thing->log;
-
         if (isset($this->test) and $this->test) {
             $this->test();
         }
