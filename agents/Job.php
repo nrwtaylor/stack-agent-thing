@@ -416,14 +416,17 @@ class Job extends Agent
      */
     public function makePDF()
     {
+        $file = $this->resource_path . 'snowflake/bubble.pdf';
+        if (!file_exists($file)) {return true;}
+
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
 
-            $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
+            $pdf->setSourceFile($file);
             $pdf->SetFont('Helvetica', '', 10);
 
-            $tplidx1 = $pdf->importPage(3, '/MediaBox');
+            $tplidx1 = $pdf->importPage(2, '/MediaBox');
             $s = $pdf->getTemplatesize($tplidx1);
 
             $pdf->addPage($s['orientation'], $s);
