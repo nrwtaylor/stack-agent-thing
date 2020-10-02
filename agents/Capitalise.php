@@ -19,9 +19,9 @@ class Capitalise extends Agent
         $this->capitalisations = array();
         $this->capitalisation = null;
 
-        global $wp;
-        if (!isset($wp->slug_agent)) {
-            $wp->slug_agent = new Slug($this->thing, "slug");
+        //global $wp;
+        if (!isset($this->slug_agent)) {
+            $this->slug_agent = new Slug($this->thing, "slug");
         }
 
         //$lines = array("The quick brown fox was not Capitalized.", "The Return of the Jedi was.", "The Jedi attack.","The Attack of the Clones.");
@@ -34,7 +34,7 @@ class Capitalise extends Agent
     {
         //return strtoupper($text);
 
-        global $wp;
+        //global $wp;
         $h_test = $this->getCapitalisation($text);
         $tks = explode(" ", $text);
         $s = mb_strlen($h_test);
@@ -100,8 +100,8 @@ class Capitalise extends Agent
 
     function addCapitalisation($capitalisation)
     {
-        global $wp;
-        $slug = $wp->slug_agent->getSlug($capitalisation);
+        //global $wp;
+        $slug = $this->slug_agent->getSlug($capitalisation);
 
         if (!isset($this->capitalisations)) {
             $this->capitalisations = array();
@@ -149,8 +149,8 @@ class Capitalise extends Agent
 
     function preferredCapitalisation($text)
     {
-        global $wp;
-        $slug = $wp->slug_agent->getSlug($text);
+        //global $wp;
+        $slug = $this->slug_agent->getSlug($text);
 
         if (!isset($this->capitalisations[$slug])) {
             $this->addCapitalisation($text);
@@ -206,7 +206,7 @@ class Capitalise extends Agent
      */
     function getCapitalisation($text = null)
     {
-        global $wp;
+        //global $wp;
         //        $agent = "agent";
         //        if (isset($this->search_agent)) {
         //            $agent = $this->search_agent;

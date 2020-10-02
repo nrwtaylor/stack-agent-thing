@@ -35,7 +35,6 @@ class Search extends Agent
         if (file_exists($file)) {
             $this->search_resources = require $file;
         }
-
         // https://codereview.stackexchange.com/questions/165263/move-one-element-before-another-in-an-associated-array
         $arr = $this->search_resources;
         while (count($arr) != 0) {
@@ -72,6 +71,12 @@ class Search extends Agent
         if (!isset($this->selected_search_resources)) {
             $this->selected_search_resources = $this->search_resources;
         }
+
+	if (!isset($this->search_tokens)) {
+            $this->response .= "No search tokens found. ";
+            return true;
+        }
+
         foreach ($this->search_tokens as $search_token => $a) {
             foreach ($this->selected_search_resources as $name => $resource) {
                 if (!isset($resource['tokens'])) {
@@ -98,6 +103,7 @@ class Search extends Agent
 
         $refreshed_at = [];
         foreach ($this->selected_search_resources as $key => $row) {
+            if (!isset($row['score'])) {$score[$key] = 0; continue;}
             $score[$key] = $row['score'];
         }
         array_multisort($score, SORT_DESC, $this->selected_search_resources);
@@ -157,6 +163,8 @@ class Search extends Agent
         if ($text == null) {
             return true;
         }
+
+if (!isset($search_tokens)) {return true;}
 
         if (substr($text, 0, 6) != 'search') {
             $parts = explode("search", strtolower($text));
@@ -377,7 +385,7 @@ class Search extends Agent
         }
         $web .= "</div>";
 
-        if ($this->engine_state != 'prod') {
+        if ($this->stack_engine_state != 'prod') {
             foreach ($this->search_links as $search_engine => $link) {
                 //$link2 = html_entity_decode($link);
                 //$link = utf8_encode($link);
