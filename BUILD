@@ -60,6 +60,7 @@ USE stack_db;
 pager less -SFX;
 SELECT * FROM stack ORDER BY created_at DESC limit 99;
 DELETE FROM stack WHERE nom_from='null@<mail_postfix>' and nom_to='choice' and created_at < NOW() - INTERVAL 1 WEEK;
+DELETE FROM stack WHERE nom_from='null@stackr.ca' and created_at < NOW() - INTERVAL 1 WEEK;
 
 Configure my.cnf
 innodb_buffer_pool_size=1G
