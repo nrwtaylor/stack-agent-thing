@@ -216,12 +216,6 @@ class Glossary extends Agent
         if (!isset($this->librex_matches) or $this->librex_matches == null) {
             $this->makeGlossary();
         }
-        //var_dump($this->matches);
-        //$this->split_time = $this->thing->elapsed_runtime();
-        //$this->time_budget = 10000;
-
-        //$s = shuffle($this->agents);
-
         $count = 0;
         while ($count < 10) {
             $count += 1;
@@ -263,14 +257,6 @@ class Glossary extends Agent
 
         $this->glossary_agents[] = $agent;
 
-        //var_dump($s);
-        //foreach($s as $i=>$agent) {
-        //var_dump($agent);
-        //        do {
-        //echo "MERP";
-        //$array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
-        //$k = array_rand($this->agents);
-        //$v = $this->agents[$k];
         $v = $agent;
         $agent_class_name = $v["name"];
         $agent_namespace_name =
@@ -304,14 +290,12 @@ class Glossary extends Agent
             if (isset($test_agent->thing_report['help'])) {
                 $help_text = $test_agent->thing_report['help'];
             }
-            // var_dump($help_text);
         } catch (\Throwable $ex) {
             // Error is the base class for all internal PHP error exceptio$
 
             //            } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptio$
             //echo $agent_name . "[ RED ]" . "\n";
             $m = $ex->getMessage();
-            //var_dump($m);
             $help_text = "No help available.";
             //continue;
         }
@@ -321,18 +305,7 @@ class Glossary extends Agent
             "text" => $help_text,
         ];
 
-        //echo "time " . ($this->thing->elapsed_runtime() - $this->split_time) . "\n";
-        // if  ($this->thing->elapsed_runtime() - $this->split_time > $this->time_budget) {break;}
-        //}
-        //var_dump($this->test_results);
-        //echo "done";
-        //exit();
     }
-
-    //function makeGlossary() {
-
-    //$t = explode($this->data,"\n");
-    //var_dump($t);
 
     function uc_first_word($string)
     {
@@ -341,6 +314,34 @@ class Glossary extends Agent
         $s[0] = strtoupper(strtolower($s[0]));
         $s = implode(' ', $s);
         return $s;
+    }
+
+    public function htmlGlossary($array)
+    {
+        if (!isset($this->slug_agent)) {
+            $this->slug_agent = new Slug($this->thing, "slug");
+        }
+
+        $line = $this->uc_first_word($array['text']);
+        $line = $this->bold_first_word($line);
+
+        $t = $line;
+
+        if ($this->slug_agent->isSlug(strtolower($array['name']))) {
+            $html =
+                '<a href="' .
+                $this->web_prefix .
+                '' .
+                strtolower($array['name']) .
+                '">' .
+                strtoupper($array['name']) .
+                '</a>';
+
+            //$t = str_replace($array['name'], $html, $line);
+            $t = preg_replace('/\b' . $array['name'] . '\b/u', $html, $line);
+        }
+
+        return $t;
     }
 
     function bold_first_word($string)
@@ -428,13 +429,10 @@ class Glossary extends Agent
      */
     function makeGlossary()
     {
-        //$this->makeGlossary();
-        //var_dump($this->getLibrex("Nonsense"));
-
         $librex_agent = new Librex($this->thing, "glossary/glossary");
 
         $librex_agent->getMatches();
-        //var_dump($librex_agent->matches);
+
         $txt = "";
         ksort($librex_agent->matches);
         foreach ($librex_agent->matches as $agent_name => $packet) {
@@ -465,11 +463,6 @@ class Glossary extends Agent
 
         $librex_agent->getMatch($text);
 
-        //echo "matching " . $text .".\n";
-        //var_dump($librex_agent->matches);
-        //var_dump($librex_agent->response);
-        //var_dump($librex_agent->best_match);
-
         $this->librex_response = $librex_agent->response;
         $this->librex_best_match = $librex_agent->best_match;
 
@@ -482,13 +475,11 @@ class Glossary extends Agent
      */
     function makeTxt()
     {
-        //$this->makeGlossary();
-        //var_dump($this->getLibrex("Nonsense"));
 
         $librex_agent = new Librex($this->thing, "glossary/glossary");
 
         $librex_agent->getMatches();
-        //var_dump($librex_agent->matches);
+
         $txt = "";
         ksort($librex_agent->matches);
         foreach ($librex_agent->matches as $agent_name => $packet) {
@@ -512,19 +503,22 @@ class Glossary extends Agent
      */
     function makeWeb()
     {
+        // Use this to recognize open links.
+        //$slug_agent = new Slug($this->thing,"slug");
+
         $web = '<b>Glossary</b>';
         $web .= "<p><p>";
         $librex_agent = new Librex($this->thing, "glossary/glossary");
 
         $librex_agent->getMatches();
-        //var_dump($librex_agent->matches);
-        //$txt = "";
+
         ksort($librex_agent->matches);
         foreach ($librex_agent->matches as $agent_name => $packet) {
             if (!isset($prior_firstChar)) {
                 $prior_firstChar = "";
             }
 
+            // Seperate out alphabetically.
             $firstChar = mb_substr($agent_name, 0, 1, "UTF-8");
             if ($prior_firstChar != $firstChar) {
                 $web .= "<p>" . "<b>" . $firstChar . "</b><br>";
@@ -563,9 +557,14 @@ class Glossary extends Agent
                 continue;
             }
 
-            $web .= $this->bold_first_word(
-                $this->uc_first_word($packet['words']) . "<br>"
-            );
+            $arr = ["name" => $agent_name, "text" => $packet['words']];
+            $html = $this->htmlGlossary($arr);
+
+            //     $web .= $this->bold_first_word(
+            //         $this->uc_first_word($packet['words']) . "<br>"
+            $web .= $html . "<br>";
+
+            //      );
             //            $web .= $agent_name . " " .$packet['words'] ."<br>";
         }
 
@@ -582,7 +581,7 @@ class Glossary extends Agent
     public function readSubject()
     {
         $input = $this->input;
-        //var_dump($input);
+
         if (strtolower($input) != "glossary") {
             $strip_word = "glossary";
             $whatIWant = $input;
@@ -604,13 +603,10 @@ class Glossary extends Agent
             }
 
             $input = trim($whatIWant);
-            //var_dump($input);
+
             $this->response = $this->getLibrex($input);
-            //var_dump($this->response);
-            //exit();
         }
 
-        //$this->glossary();
         return false;
     }
 }
