@@ -338,6 +338,20 @@ if ($task_urls === true) {continue;}
         return false;
     }
 
+    public function stripUrls($text = null, $replace_text = null) {
+        if ($text == null) {$text = $this->input;}
+        if ($replace_text == null) {$replace_text = "";}
+
+        $urls = $this->extractUrls($text);
+
+        foreach ($urls as $i=>$url) {
+
+            $text = str_replace($url, $replace_text, $text);
+
+        }
+        return $text;
+    }
+
     public function readSubject()
     {
         $this->response = null;

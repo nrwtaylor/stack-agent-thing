@@ -53,9 +53,8 @@ class Train extends Agent
             'resource',
             'link',
             'route',
-            'consist'
+            'consist',
         ];
-
 
         $this->keywords = [
             'train',
@@ -71,6 +70,8 @@ class Train extends Agent
             'green',
         ];
 
+        $this->time_seperator = ":";
+
         $this->verbosity = 2;
 
         $this->default_runtime = $this->current_time;
@@ -80,11 +81,12 @@ class Train extends Agent
         // And to add Trains to named resources.
         // Later.
         $this->default_train_name = "train";
-$this->initTrain();
+        $this->initTrain();
     }
 
-public function initTrain() {
-}
+    public function initTrain()
+    {
+    }
 
     public function idTrain($text = null)
     {
@@ -161,8 +163,8 @@ public function initTrain() {
             $requested_state = $this->requested_state;
         }
         // Update calculated variables.
-//        $this->available = $this->getAgent('available')->available;
-$this->getAvailable();
+        //        $this->available = $this->getAgent('available')->available;
+        $this->getAvailable();
 
         $this->variables_agent->setVariable("state", $requested_state);
         $this->variables_agent->setVariable("head_code", $this->head_code);
@@ -210,9 +212,6 @@ $this->getAvailable();
 
     public function parseTrain()
     {
-
-
-
         return;
         // Given closest train in $this->train_thing.
 
@@ -277,13 +276,11 @@ $this->getAvailable();
 
     public function run()
     {
-
-$this->doTrain();
+        $this->doTrain();
     }
 
-
-public function doTrain() {
-
+    public function doTrain()
+    {
         $available = $this->thing->human_time($this->available);
 
         if (!isset($this->index)) {
@@ -296,10 +293,7 @@ public function doTrain() {
         if (!isset($this->flag)) {
             $this->getFlag();
         }
-
-
-
-}
+    }
 
     function get()
     {
@@ -308,7 +302,7 @@ public function doTrain() {
             $this->train_thing = $this->thing;
         }
         $this->getHeadcode();
-/*
+        /*
         $this->variables_agent = new Variables(
             $this->train_thing,
             "variables " . $this->default_train_name . " " . $this->from
@@ -317,111 +311,107 @@ public function doTrain() {
 
         $this->variables_agent = new Variables(
             $this->train_thing,
-            "variables " . $this->default_train_name . "_" . $this->head_code ." ". $this->from
+            "variables " .
+                $this->default_train_name .
+                "_" .
+                $this->head_code .
+                " " .
+                $this->from
         );
 
-        //$this->train_thing->thing = $this->variables_agent->thing;
         $this->train_thing = $this->variables_agent->thing;
 
-// Which is an object with all the variables.
-
+        // Which is an object with all the variables.
         $this->priorTrain();
     }
 
     function priorTrain($text = null)
     {
-
-//        $this->response .= 'Looking for train ' . $this->head_code . '. ';
-
         if (!isset($this->trains)) {
             $this->getTrains();
         }
 
-if (isset($this->trains[1])) {
+        if (isset($this->trains[1])) {
 
-//        $this->response .=
-//            'Got last head code ' . $this->trains[1]['headcode'] . '. ';
+            if ($this->head_code != $this->trains[1]['headcode']) {
+                $this->response .= "Head code changed. ";
 
-        if ($this->head_code != $this->trains[1]['headcode']) {
-            $this->response .= "Head code changed. ";
+                foreach ($this->trains as $i => $train) {
+                    if ($train['headcode'] == $this->head_code) {
+                        $this->state = $train['state'];
+                        $this->index = $train['index'];
+                        $this->alias = $train['alias'];
+                        $this->head_code = $train['headcode'];
 
-            foreach ($this->trains as $i => $train) {
-                if ($train['headcode'] == $this->head_code) {
-                    $this->state = $train['state'];
-                    $this->index = $train['index'];
-                    $this->alias = $train['alias'];
-                    $this->head_code = $train['headcode'];
+                        if (!isset($this->runat)) {
+                            $this->runat = new \stdClass();
+                        }
 
-                    if (!isset($this->runat)) {
-                        $this->runat = new \stdClass();
+                        $this->runat->day = $train['runat']['day'];
+                        $this->runat->hour = $train['runat']['hour'];
+                        $this->runat->minute = $train['runat']['minute'];
+
+                        if (!isset($this->endat)) {
+                            $this->endat = new \stdClass();
+                        }
+
+                        $this->endat->day = $train['endat']['day'];
+                        $this->endat->hour = $train['endat']['hour'];
+                        $this->endat->minute = $train['endat']['minute'];
+
+                        $this->runtime = $train['runtime'];
+                        $this->quantity = $train['quantity'];
+
+                        $this->route = $train['route'];
+                        $this->consist = $train['consist'];
+
+                        $this->available = $train['available'];
+                        if (!isset($this->flag)) {
+                            $this->getFlag();
+                        }
+                        $this->flag = $train['flag'];
+                        $this->train = $train;
+                        return;
                     }
-
-                    $this->runat->day = $train['runat']['day'];
-                    $this->runat->hour = $train['runat']['hour'];
-                    $this->runat->minute = $train['runat']['minute'];
-
-                    if (!isset($this->endat)) {
-                        $this->endat = new \stdClass();
-                    }
-
-                    $this->endat->day = $train['endat']['day'];
-                    $this->endat->hour = $train['endat']['hour'];
-                    $this->endat->minute = $train['endat']['minute'];
-
-                    $this->runtime = $train['runtime'];
-                    $this->quantity = $train['quantity'];
-
-                    $this->route = $train['route'];
-                    $this->consist = $train['consist'];
-
-                    $this->available = $train['available'];
-                    if (!isset($this->flag)) {
-                        $this->getFlag();
-                    }
-                    $this->flag = $train['flag'];
-$this->train = $train;
-                    return;
                 }
             }
         }
-}
 
         // devstack.
-        $this->available_agent = $this->getAgent('Available','available');
-$available = "X";
-if ($this->available_agent == false) {
-$available = "Z";
-}
-if (isset($this->available_agent->available)) {
-        $available = $this->available_agent->available;
-}
-$this->available = $available;
+        $this->available_agent = $this->getAgent('Available', 'available');
+        $available = "X";
+        if ($this->available_agent == false) {
+            $available = "Z";
+        }
+        if (isset($this->available_agent->available)) {
+            $available = $this->available_agent->available;
+        }
+        $this->available = $available;
 
-        $this->flag_agent = $this->getAgent('Flag','flag');
+        $this->flag_agent = $this->getAgent('Flag', 'flag');
         $this->flag = $this->flag_agent->state;
 
-
         // Get headcode quantity
-        $this->quantity_agent = $this->getAgent('Quantity','quantity');
+        $this->quantity_agent = $this->getAgent('Quantity', 'quantity');
         $this->quantity = $this->quantity_agent->quantity;
 
-        $this->state_agent = $this->getAgent('State','state');
+        $this->state_agent = $this->getAgent('State', 'state');
         $this->state = $this->state_agent->state;
 
-        $this->alias_agent = $this->getAgent('Alias','alias');
+        $this->alias_agent = $this->getAgent('Alias', 'alias');
         $this->alias = $this->alias_agent->alias;
 
-        $this->runtime_agent = $this->getAgent('Runtime','runtime');
+        $this->runtime_agent = $this->getAgent('Runtime', 'runtime');
         $this->runtime = $this->runtime_agent->runtime;
 
-        $this->resource_agent = $this->getAgent('Resource','resource');
+        $this->resource_agent = $this->getAgent('Resource', 'resource');
         $this->resource = $this->resource_agent->resource_name;
 
-        $this->consist_agent = $this->getAgent('Consist','consist');
+        $this->consist_agent = $this->getAgent('Consist', 'consist');
         $this->consist = $this->consist_agent->consist;
 
-// devstack
-        $this->runat_agent = $this->getAgent('Runat','runat');
+        // devstack
+        $this->runat_agent = $this->getAgent('Runat', 'runat');
         if (!isset($this->runat)) {
             $this->runat = new \stdClass();
         }
@@ -430,8 +420,7 @@ $this->available = $available;
         $this->runat->hour = $this->runat_agent->hour;
         $this->runat->minute = $this->runat_agent->minute;
 
-
-        $this->endat_agent = $this->getAgent('Endat','endat');
+        $this->endat_agent = $this->getAgent('Endat', 'endat');
         if (!isset($this->endat)) {
             $this->endat = new \stdClass();
         }
@@ -440,12 +429,14 @@ $this->available = $available;
         $this->endat->hour = $this->endat_agent->hour;
         $this->endat->minute = $this->endat_agent->minute;
 
-
-
         $this->getIndex();
 
-    $this->train = ['runat'=>$this->runat, 'runtime'=>$this->runtime,
-    'alias'=>$this->alias,'flag'=> $this->flag];
+        $this->train = [
+            'runat' => $this->runat,
+            'runtime' => $this->runtime,
+            'alias' => $this->alias,
+            'flag' => $this->flag,
+        ];
         // Now have a train thing.
     }
 
@@ -454,9 +445,9 @@ $this->available = $available;
         if (isset($this->trains)) {
             return;
         }
-// devstack.
-// No need to load up all the trains yet.
-return;
+        // devstack.
+        // No need to load up all the trains yet.
+        return;
         // Loads current block into $this->block_thing
 
         $match = false;
@@ -481,18 +472,12 @@ return;
         $this->max_index = 0;
         $this->trains = [];
 
+        //$things = $findagent_thing->thing_report['things'];
+        $things = $this->getThings('train');
 
-	//$things = $findagent_thing->thing_report['things'];
-	$things = $this->getThings('train');
+        $this->thing->log('found ' . count($things) . " Train Agent Things.");
 
-        $this->thing->log(
-            'found ' .
-                count($things) .
-                " Train Agent Things."
-        );
-
-
-        foreach ($things as $uuid=>$train_thing) {
+        foreach ($things as $uuid => $train_thing) {
             //            $thing = new Thing($train_thing['uuid']);
 
             //            $variables_json= $train_thing['variables'];
@@ -648,9 +633,8 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 */
         }
 
-if ($this->trains == array()) {
-
-$refreshed_at = $this->current_time;
+        if ($this->trains == []) {
+            $refreshed_at = $this->current_time;
             $train = [
                 "state" => 'red',
                 "index" => 1,
@@ -675,11 +659,10 @@ $refreshed_at = $this->current_time;
                 "refreshed_at" => $refreshed_at,
             ];
 
+            $this->trains[] = $train;
+        }
 
-$this->trains[] = $train;
-}
-
-//var_dump($this->trains);
+        //var_dump($this->trains);
     }
 
     public function selectTrain()
@@ -790,10 +773,7 @@ $this->trains[] = $train;
 
                 $this->route = $thing->getVariable("train", "route");
                 $this->consist = $thing->getVariable("train", "consist");
-                $this->runtime = $thing->getVariable(
-                    "train",
-                    "runtime"
-                );
+                $this->runtime = $thing->getVariable("train", "runtime");
 
                 $this->available = $this->getAvailable();
                 $this->end_at = $this->getEndat();
@@ -1149,7 +1129,8 @@ $this->trains[] = $train;
                 if ($input['hour'] != false and $input['minute'] != false) {
                     $this->hour = $input['hour'];
                     $this->minute = $input['minute'];
-                    $train_time = $this->hour . $this->minute;
+                    $train_time =
+                        $this->hour . $this->time_seperator . $this->minute;
                     return $train_time;
                 }
 
@@ -1174,7 +1155,7 @@ $this->trains[] = $train;
         $this->hour = date("H", $t);
         $this->minute = date("i", $t);
 
-        $train_time = $this->hour . $this->minute;
+        $train_time = $this->hour . $this->time_seperator . $this->minute;
 
         if ($input == null) {
             $this->train_time = $train_time;
@@ -1221,54 +1202,7 @@ $this->trains[] = $train;
 
         //exit();
     }
-/*
-    function getVariable($variable_name = null, $variable = null)
-    {
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
 
-        if (!isset($variable)) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return "X";
-        }
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // See if the thing variable is found
-
-        if (isset($this->train->$variable_name)) {
-            $this->$variable_name = $this->train->$variable_name;
-
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset($this->{"default_" . $variable_name})) {
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
     function extractEndat()
     {
         if (!isset($this->events)) {
@@ -1470,13 +1404,13 @@ $this->trains[] = $train;
 
     function getAvailable()
     {
-$this->available = "X";
-return;
-$available_agent = new Available($this->thing, "train");
+        $this->available = "X";
+        return;
+        $available_agent = new Available($this->thing, "train");
 
-if (!isset($this->runat_agent)) {
-$this->runat_agent = new Runat($this->thing, "runat");
-}
+        if (!isset($this->runat_agent)) {
+            $this->runat_agent = new Runat($this->thing, "runat");
+        }
         // Calculate the amount of time remaining for the train
 
         if (!isset($this->runat) and !isset($this->endat)) {
@@ -1566,10 +1500,10 @@ $this->runat_agent = new Runat($this->thing, "runat");
     {
         $this->runtime_agent = new Runtime($this->train_thing, "runtime");
 
-$this->runtime = $this->runtime_agent->runtime;
-if ($this->runtime_agent->runtime == false) {
-$runtime = "X";
-}
+        $this->runtime = $this->runtime_agent->runtime;
+        if ($this->runtime_agent->runtime == false) {
+            $runtime = "X";
+        }
         $this->runtime = $runtime;
 
         return;
@@ -1817,10 +1751,9 @@ $runtime = "X";
         $this->alias_agent = new Alias($this->train_thing, 'alias');
         $this->alias = $this->alias_agent->alias;
 
-// devstack. 
-// Figure this out.
-//        $this->alias = strtoupper($this->alias_agent->alias_id);
-
+        // devstack.
+        // Figure this out.
+        //        $this->alias = strtoupper($this->alias_agent->alias_id);
 
         $this->aliases = [
             "Logans run",
@@ -1904,23 +1837,14 @@ $runtime = "X";
     {
         $this->flag_agent = new Flag($this->train_thing, 'flag');
         //$this->flag = $this->flag_thing->state;
-$flag = $this->flag_agent->state;
-if ($this->flag_agent->state === false) {$flag = "X";}
-$this->flag = $flag;
+        $flag = $this->flag_agent->state;
+        if ($this->flag_agent->state === false) {
+            $flag = "X";
+        }
+        $this->flag = $flag;
         return $this->flag;
     }
-    /*
-    function setFlag($colour)
-    {
-        $this->flag_thing = new Flag(
-            $this->train_thing,
-            'flag ' . $colour
-        );
-        $this->flag = $this->flag_thing->state; // No headcode found
 
-        return $this->flag;
-    }
-*/
     function setFlag($colour)
     {
         //$this->runat_agent->timeRunat();
@@ -2014,16 +1938,11 @@ $this->flag = $flag;
                 strtotime($this->current_time) - strtotime($this->refreshed_at);
 
             $this->elapsed_time = $t + strtotime($this->elapsed_time);
-            //$this->set();
             return;
         }
 
         $this->thing->choice->Choose('start');
         $this->state = 'start';
-        //$this->set();
-        //return;
-
-        //       return null;
     }
 
     function makeTXT()
@@ -2217,30 +2136,8 @@ $this->flag = $flag;
 
     public function respondResponse()
     {
-        //$this->makeTXT();
-
-        // Thing actions
-        // At some point this is where the
-        // Train can be set to run until concluded.
-        // For now flag as Green to
-
         $this->thing->flagGreen();
-        // Generate email response.
 
-        //$to = $this->thing->from;
-        //$from = "train";
-
-        /*
-        if (isset($this->requested_state)) {
-            $this->state = $this->requested_state;
-        } else {
-            if (!isset($this->previous_state)) {
-                $this->previous_state = "train";
-            }
-
-            $this->state = $this->previous_state;
-        }
-*/
         $choices = $this->thing->choice->makeLinks($this->state);
         $this->thing_report['choices'] = $choices;
 
@@ -2248,117 +2145,71 @@ $this->flag = $flag;
         $this->thing_report['message'] = $this->sms_message; // NRWTaylor 18 Feb 2018 - testing if this works for email;
 
         $this->thing_report['info'] = "Took a look at the train.";
-//        if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
- //       }
+        //        if ($this->agent_input == null) {
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        //       }
 
         $this->thing_report['help'] =
             'This is a Train. Trains have Flags.  Messaging RED will show the Red Flag.  Messaging GREEN will show the Green Flag.';
-
     }
 
     function textTrain($array = null)
     {
-
         if ($array == null) {
             $array = $this;
         }
         $txt = "";
-/*
-        if (isset($array->state)) {
-            $txt .= 'state ' . $this->state . " ";
+
+        foreach ($this->agents as $i => $agent_name) {
+            $variable_name = strtolower($agent_name);
+
+            $capitalize_flag = true;
+
+            if (isset($this->{$variable_name})) {
+                if ($this->{strtolower($agent_name)} === false) {
+                    continue;
+                }
+
+                if (strtolower($agent_name) == 'consist') {
+                    $capitalize_flag = false;
+                }
+
+                $txt .= $agent_name . " ";
+
+                if (is_string($this->{$variable_name})) {
+                    $text_string = $this->{strtolower($agent_name)};
+                    if ($capitalize_flag === true) {
+                        $text_string = strtoupper($text_string);
+                    }
+                    $txt .= $text_string . " ";
+                    continue;
+                }
+
+                if (is_array($this->{$variable_name})) {
+                    $text_string = trim(implode(" ", $this->{$variable_name}));
+                    if ($capitalize_flag === true) {
+                        $text_string = strtoupper($text);
+                    }
+                    $txt .= $text_string . " ";
+                    continue;
+                }
+
+                if (is_object($this->{$variable_name})) {
+                    $agent_variable = (array) $this->{$variable_name};
+                    $text_string = trim(implode(" ", $agent_variable));
+                    if ($capitalize_flag === true) {
+                        $text_string = strtoupper($text_string);
+                    }
+                    $txt .= $text_string . " ";
+                    continue;
+                }
+            }
         }
-
-        // $run_at = $this->trainTime($array->runat);
-        //if (!$this->thing->isData($run_at)) {$run_at = "X";}
-
-        if (isset($array->runat)) {
-            $runat_text =
-                $array->runat->day .
-                " " .
-                $array->runat->hour .
-                ":" .
-                $this->runat->minute;
-
-            $txt .= "" . "runat " . $runat_text . " ";
-        }
-
-        $txt .= " " . "runtime " . $array['runtime'];
-
-        if (isset($array->endat)) {
-            $endat_text =
-                $array['endat']->day .
-                " " .
-                $array['endat']->hour .
-                ":" .
-                $array['endat']->minute;
-
-            $txt .= " " . "endat " . $endat_text;
-        }
-
-        $txt .= " " . "now " . $this->trainTime();
-        $txt .= " ";
-*/
-
-//$txt = "";
-
-foreach($this->agents as $i=>$agent_name) {
-
-    $variable_name = strtolower($agent_name);
-
-$capitalize_flag = true;
-
-    if (isset($this->{$variable_name})) {
-
-        if ($this->{strtolower($agent_name)} === false) { 
-            continue;
-        }
-
-if (strtolower($agent_name) == 'consist') {$capitalize_flag = false;}
-
-        $txt .= $agent_name . " ";
-
-        if (is_string($this->{$variable_name})) {
-
-$text_string = $this->{strtolower($agent_name)};
-if ($capitalize_flag === true) {
-    $text_string = strtoupper($text_string);
-}
-            $txt .= $text_string . " ";
-            continue;
-        }
-
-        if (is_array($this->{$variable_name})) {
-            $text_string = trim(implode(" ", $this->{$variable_name}));
-if ($capitalize_flag === true) {
-$text_string = strtoupper($text); 
-}
-            $txt .= $text_string . " ";
-            continue;
-        }
-
-        if (is_object($this->{$variable_name})) {
-
-            $agent_variable = (array) $this->{$variable_name};
-            $text_string = trim(implode(" " , $agent_variable));
-if ($capitalize_flag === true) {
-$text_string = strtoupper($text_string);
-}
-            $txt .= $text_string . " "; 
-            continue; 
-        }
-
-
-    }
-
-}
-
-
 
         $txt .= "" . "now " . $this->trainTime();
 
-$txt = trim($txt);
+        $txt = trim($txt);
         return $txt;
     }
 
@@ -2511,11 +2362,10 @@ $txt = trim($txt);
 
     public function makeSMS()
     {
-
-//$sms = "TRAIN";
-//$this->sms_message = $sms;
-//$this->thing_report['sms'] = $sms;
-//return;
+        //$sms = "TRAIN";
+        //$this->sms_message = $sms;
+        //$this->thing_report['sms'] = $sms;
+        //return;
         $this->node_list = ["train"];
 
         $sms_message = "TRAIN ";
@@ -2525,10 +2375,10 @@ $txt = trim($txt);
         //        $sms_message .= ' "' . strtoupper($this->alias). '"';
         //$this->getAlias();
 
-if ($this->alias != null) {
-//        $this->runtime = $this->runtime_agent->runtime;
-        $sms_message .= " " . strtoupper($this->alias);
-}
+        if ($this->alias != null) {
+            //        $this->runtime = $this->runtime_agent->runtime;
+            $sms_message .= " " . strtoupper($this->alias);
+        }
         //$this->getAvailable();
         if ($this->r_type == 'instruction') {
             //$sms_message .= " false";
@@ -2568,25 +2418,7 @@ if ($this->alias != null) {
 
             $sms_message .= " | " . $available_text;
         }
-/*
-        if ($this->verbosity >= 1) {
-            //$this->train_thing->flag = $this->getFlag();
-            //$this->flag = $this->train_thing->flag;
 
-            if (isset($this->flag)) {
-                $flag = $this->flag;
-                if ($this->flag == false) {$flag = "X";}
-                $sms_message .= " | flag " . strtoupper($flag);
-            }
-        }
-*/
-/*
-        if ($this->verbosity >= 1) {
-            if (isset($this->response)) {
-                $sms_message .= " | " . $this->response;
-            }
-        }
-*/
         if ($this->verbosity > 2) {
             if (!isset($this->route)) {
                 $route = "X";
@@ -2621,14 +2453,13 @@ if ($this->alias != null) {
                 "ms";
         }
 
-$sms_message .= $this->textTrain();
+        $sms_message .= $this->textTrain();
 
-//        if ($this->verbosity >= 1) {
-            if (isset($this->response)) {
-                $sms_message .= " | " . $this->response;
-            }
-//        }
-
+        //        if ($this->verbosity >= 1) {
+        if (isset($this->response)) {
+            $sms_message .= " | " . $this->response;
+        }
+        //        }
 
         if ($this->verbosity > 3) {
             if ($this->train_thing == false) {
@@ -2762,7 +2593,6 @@ $sms_message .= $this->textTrain();
             return $this->runtime;
             $this->runtime = $piece;
             $this->num_hits += 1;
-            //$this->thing->log('Agent "Block" found a "run time" of ' . $this->quantity .'.');
         }
 
         return true;
@@ -2789,36 +2619,16 @@ $sms_message .= $this->textTrain();
 
         // At this point the previous train will be loaded.
 
-        //$this->response = null;
         $this->num_hits = 0;
 
-//        $keywords = $this->keywords;
-        /*
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->subject);
-        }
-
-        $this->input = $input;
-*/
         $input = $this->input;
 
         $haystack =
             $this->agent_input . " " . $this->from . " " . $this->subject;
 
-        //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
         $prior_uuid = null;
 
-        //$this->getHeadcode();
-        //$headcode_thing = new Headcode($this->thing, 'headcode '.$input);
-        //$this->head_code = $headcode_thing->head_code; // Not sure about the direct variable
-        // probably okay if the variable is renamed to variable.  Or if $headcode_thing
-        // resolves to the variable.
 
         $this->thing->log(
             $this->agent_prefix .
@@ -2848,12 +2658,6 @@ $sms_message .= $this->textTrain();
         ) {
         }
 
-        /*
-        $this->extractRunat($haystack);
-        $this->extractEndat($haystack);
-        $this->extractRuntime($haystack);
-        $this->extractHeadcode();
-*/
         if ($this->agent_input == "extract") {
             return;
         }
@@ -2869,10 +2673,12 @@ $sms_message .= $this->textTrain();
             }
 
             if ($input == 'trains') {
-
                 $this->headcode_thing->getHeadcodes();
                 $headcode_text = "";
-                foreach ($this->headcode_thing->unique_headcodes as $i=>$headcode) {
+                foreach (
+                    $this->headcode_thing->unique_headcodes
+                    as $i => $headcode
+                ) {
                     $headcode_text .= strtoupper($headcode['head_code']) . " ";
                 }
                 $this->response .= $headcode_text;
@@ -2880,16 +2686,7 @@ $sms_message .= $this->textTrain();
                 $this->response .= "Looked for Current trains. ";
                 return;
             }
-
-
         }
-
-        //    $this->getRunat();
-        //    $this->getEndat();
-        //    $this->getRuntime();
-        //    $this->extractRunat();
-        //    $this->extractEndat();
-        //    $this->extractRuntime();
 
         foreach ($pieces as $key => $piece) {
             foreach ($this->keywords as $command) {
@@ -2967,7 +2764,7 @@ $sms_message .= $this->textTrain();
                         //        break;
 
                         default:
-                        $this->readTrain();
+                            $this->readTrain();
                     }
                 }
             }
@@ -3001,19 +2798,10 @@ $sms_message .= $this->textTrain();
             return;
         }
 
-        //    if ((isset($this->run_time)) and (isset($this->run_at))) {
-        // Good chance with both these set that asking for a new
-        // block to be created, or to override existing block.
-        //        $this->thing->log('Agent "Block" found a run time.');
-
-        //        $this->nextBlock();
-        //        return;
-        //    }
-
         // If all else fails try the discriminator.
 
-$input_agent = new Input($this->thing, "input");
-            $discriminators = ['accept', 'clear'];
+        $input_agent = new Input($this->thing, "input");
+        $discriminators = ['accept', 'clear'];
         $input_agent->aliases['accept'] = ['accept', 'add', '+'];
         $input_agent->aliases['clear'] = ['clear', 'drop', 'clr', '-'];
 
@@ -3032,7 +2820,6 @@ $input_agent = new Input($this->thing, "input");
                 $this->split();
                 break;
         }
-
 
         return "Message not understood";
 
