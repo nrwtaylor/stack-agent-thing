@@ -21,7 +21,33 @@ error_reporting(-1);
 // API group
 $app->group('/api', function () use ($app) {
     // This is the whitefox API.  Accessible at api/whitefox/
-    $app->group('/whitefox', function () use ($app) {});
+    $app->group('/whitefox', function () use ($app) {
+
+        $app->post($app->getContainer()->get('settings')['api']['stripe'][
+                'webhook'
+            ],
+
+            function ($request, $response, $args) {
+
+            $credential_set = $this->get('settings')['api']['stripe']['credential_set'];
+
+       $secret_key =
+            $this->get('settings')['api']['stripe'][$credential_set]['secret_key'];
+
+            \Stripe\Stripe::setApiKey($secret_key);
+
+            $thing = new Thing(null);
+            $thing->Create("stripe", "routes", "s/ web stripe");
+
+            $stripe_agent = new Stripe($thing);
+            $session = $stripe_agent->checkoutStripe();
+
+            return $response->withJson([ 'id' => $session->id ])->withStatus(200);
+
+
+        });
+
+    });
 
     // Introducing redpanda
     $app->group('/redpanda', function () use ($app) {

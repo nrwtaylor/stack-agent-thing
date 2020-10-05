@@ -1,6 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+//use Stripe\Stripe;
+
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -53,7 +55,6 @@ class Stripe extends Agent
 
         $this->publishable_key =
             $this->thing->container['api']['stripe'][$word]['publishable_key'];
-        //        $this->devID = $this->thing->container['api']['stripe'][$word]['secret_key'];
 
         $this->desired_state =
             $this->thing->container['api']['stripe']['state'];
@@ -62,6 +63,39 @@ class Stripe extends Agent
 
         $this->thing_report['help'] = 'This reads the Stripe catalog.';
     }
+
+    public function itemStripe($item = null) {
+
+        if ($item == null) {
+            $item = [
+
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'T-shirt',
+                        ],
+                        'unit_amount' => 2000,
+                    ],
+            ];
+
+
+        }
+
+        return $item;
+
+    }
+
+    public function quantityStripe($quantity = null) {
+
+        if ($quanity == null) {
+            $quantity = 1;
+        }
+
+        return $quantity;
+
+    }
+
+
 
     public function errorStripe()
     {
@@ -97,6 +131,59 @@ class Stripe extends Agent
         return $this->message;
     }
 
+    public function checkoutStripe()
+    {
+//$success_url = 'https://example.com/success';
+//$cancel_url = 'https://example.com/cancel';
+
+$success_url = $this->web_prefix . 'thing/' . $this->thing->uuid . '/'. 'stripe-success';
+$cancel_url = $this->web_prefix . 'thing/' . $this->thing->uuid . '/'. 'stripe-cancel';
+/*
+$line_item = $this->itemStripe();
+$quantity = $this->quantityStripe();
+
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [
+                [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'T-shirt',
+                        ],
+                        'unit_amount' => 2000,
+                    ],
+                    'quantity' => $quantity,
+                ],
+            ],
+            'mode' => 'payment',
+            'success_url' => $success_url,
+            'cancel_url' => $cancel_url,
+        ]);
+*/
+
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [
+                [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'T-shirt',
+                        ],
+                        'unit_amount' => 2000,
+                    ],
+                    'quantity' => 1,
+                ],
+            ],
+            'mode' => 'payment',
+            'success_url' => $success_url,
+            'cancel_url' => $cancel_url,
+        ]);
+
+        return $session;
+    }
+
     function run()
     {
         // Make sure the Snippet code is being run.
@@ -107,122 +194,64 @@ class Stripe extends Agent
 
     // devstack
 
-
-
-    public function makeWeb() {
-$web = '
-<form action="charge.php" method="post">
-  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-          data-key="<?php echo $stripe['publishable_key']; ?>"
-          data-description="Access for a year"
-          data-amount="5000"
-          data-locale="auto"></script>
-</form>';
-
-$this->web = $web;
-$this->thing_report['web'] = $web;
-
-
-    }
-
-    public function dev_makeWeb()
+    public function makeWeb()
     {
-        // https://stripe.com/docs/checkout/integration-builder
+        $stripe_library_script =
+            '<script src="https://js.stripe.com/v3/"></script>';
 
-        $head = '    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
-
-    <script src="https://js.stripe.com/v3/"></script>';
-
-        $endpoint = '/thing/' . $this->uuid . '/stripe';
-        $product_image = "";
+        $credential = $this->publishable_key;
 
         $script =
-            '<script type="text/javascript">
-
-    // Create an instance of the Stripe object with your publishable API key
-
-    var stripe = Stripe("' .
+            '  <script type="text/javascript">
+      // Create an instance of the Stripe object with your publishable API key
+      var stripe = Stripe(\'' .
             $this->publishable_key .
-            '");
+            '\');
+      var checkoutButton = document.getElementById(\'checkout-button\');
 
-    var checkoutButton = document.getElementById("checkout-button");
-
-    checkoutButton.addEventListener("click", function () {
-
-      fetch("' .
-            $endpoint .
-            '", {
-
-        method: "POST",
-
-      })
-
-        .then(function (response) {
-
+      checkoutButton.addEventListener(\'click\', function() {
+        // Create a new Checkout Session using the server-side endpoint you
+        // created in step 3.
+        fetch(\'/api/whitefox/stripe-checkout\', {
+          method: \'POST\',
+        })
+        .then(function(response) {
           return response.json();
-
         })
-
-        .then(function (session) {
-
+        .then(function(session) {
           return stripe.redirectToCheckout({ sessionId: session.id });
-
         })
-
-        .then(function (result) {
-
-          // If redirectToCheckout fails due to a browser or network
-
+        .then(function(result) {
+          // If `redirectToCheckout` fails due to a browser or network
           // error, you should display the localized error message to your
-
-          // customer using error.message.
-
+          // customer using `error.message`.
           if (result.error) {
-
             alert(result.error.message);
-
           }
-
         })
-
-        .catch(function (error) {
-
-          console.error("Error:", error);
-
+        .catch(function(error) {
+          console.error(\'Error:\', error);
         });
+      });
+    </script>
+';
 
-    });
+        $web =
+            $stripe_library_script .
+            '<button id="checkout-button">Checkout</button>' .
+            $script;
 
-  </script>';
+$web .= "subject " . $this->subject;
+$web .= "input ". $this->input;
+$web .= "agent_input " . $this->agent_input;
 
-        $product =
-            '      <div class="product">
+if ($this->subject == 's/ web stripe') {
+$this->response .= "Saw a web stripe.";
+$web .= "<div>". "Thanks." . "</div>";
 
-        <img
+}
 
-          src="' .
-            $this->web_prefix .
-            $product_image .
-            '"
-
-          alt="The product image"
-
-        />
-
-        <div class="description">
-
-          <h3>Stubborn Attachments</h3>
-
-          <h5>$20.00</h5>
-
-        </div>
-
-      </div>
-
-      <button id="checkout-button">Checkout</button>';
-
-        $web = $product . $head . $script;
-
+        $this->web = $web;
         $this->thing_report['web'] = $web;
     }
 
@@ -590,6 +619,7 @@ $this->thing_report['web'] = $web;
 
     public function readSubject()
     {
+//var_dump($this->input);
         $this->thing->log('Stripe read input, "' . $this->input . '".');
         //$this->response .= null;
 

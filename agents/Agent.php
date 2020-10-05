@@ -1821,6 +1821,12 @@ throw new \Exception("Address not allowed.");
 
             if (isset($button_agent) and isset($token_agent)) {
                 $flag = false;
+
+                if ($button_agent == $token_agent) {
+                    $this->response .=
+                        "Clicked the " . strtoupper($button_agent) . " button.";
+                }
+
                 if ($button_agent == $agglutinated_token_agent) {
                     $flag = true;
                 }
@@ -1838,10 +1844,10 @@ throw new \Exception("Address not allowed.");
                 }
             }
 
-            if ($button_agent == $token_agent) {
-                $this->response .=
-                    "Clicked the " . strtoupper($button_agent) . " button.";
-            }
+            //if ($button_agent == $token_agent) {
+            //    $this->response .=
+            //        "Clicked the " . strtoupper($button_agent) . " button.";
+            //}
         }
 
         // Dev test for robots
