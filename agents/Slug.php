@@ -154,6 +154,16 @@ class Slug extends Agent
         return $status;
     }
 
+    public function getSlugs() {
+
+        $allowed_endpoints = require $this->resource_path .
+            $this->allowed_slugs_resource;
+
+        $this->slugs = $allowed_endpoints;
+        return $this->slugs;
+
+    }
+
     public function isSlug($text = null)
     {
         if ($text == null) {

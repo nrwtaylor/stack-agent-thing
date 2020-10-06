@@ -214,8 +214,9 @@ class Glossary extends Agent
         $exclude_agents = ["Emailhandler", "Forgetall", "Tally"];
 
         if (!isset($this->librex_matches) or $this->librex_matches == null) {
-            $this->makeGlossary();
+            $this->readGlossary();
         }
+
         $count = 0;
         while ($count < 10) {
             $count += 1;
@@ -304,7 +305,6 @@ class Glossary extends Agent
             "agent_name" => $agent_class_name,
             "text" => $help_text,
         ];
-
     }
 
     function uc_first_word($string)
@@ -316,33 +316,93 @@ class Glossary extends Agent
         return $s;
     }
 
-
-function sort($a,$b){
-    return strlen($b)-strlen($a);
-}
-
-
-    public function htmlGlossary($array)
+    function sort($a, $b)
     {
-        $command_agent = new Command($this->thing, "command");
-        $commands = $command_agent->extractCommands($array['text']);
+        return strlen($b) - strlen($a);
+    }
 
-        usort($commands, function($a, $b) {
+    public function commandsGlossary($matches)
+    {
+        $slug_agent = new Slug($this->thing, "slug");
+        $command_agent = new Command($this->thing, "command");
+        //$commands = $command_agent->extractCommands($array['text']);
+
+        $commands = [];
+        foreach ($matches as $agent_name => $packet) {
+            $l = $this->uc_first_word($packet['words']);
+
+            $commands_new = $command_agent->extractCommands($l);
+
+            $commands = array_merge($commands, $commands_new);
+        }
+
+        foreach($slug_agent->getSlugs() as $i=>$slug) {
+            $s = str_replace("-"," ",$slug);
+            $s = strtoupper($s);
+            $commands[] = $s;
+        }
+
+        array_unique($commands);
+
+        usort($commands, function ($a, $b) {
             return strlen($b) <=> strlen($a);
         });
 
+        // Check if isSlug.
 
+        $web_commands = [];
+
+        foreach ($commands as $i => $command) {
+            if ($slug_agent->isSlug(strtolower($command))) {
+                $web_commands[] = $command;
+                continue;
+            }
+
+            $hyphenated_command = str_replace(" ", "-", strtolower($command));
+            if ($slug_agent->isSlug($hyphenated_command)) {
+                $web_commands[] = $command;
+            }
+        }
+
+        $this->web_commands = $web_commands;
+        $this->commands = $commands;
+        return $commands;
+    }
+
+    public function htmlGlossary($array)
+    {
+        //        $command_agent = new Command($this->thing, "command");
+        //        $commands = $command_agent->extractCommands($array['text']);
+
+        //        usort($commands, function($a, $b) {
+        //            return strlen($b) <=> strlen($a);
+        //        });
         if (!isset($this->slug_agent)) {
             $this->slug_agent = new Slug($this->thing, "slug");
         }
 
+        //$line = $array['text'];
         $line = $this->uc_first_word($array['text']);
-        $line = $this->bold_first_word($line);
+        //        $line = $this->bold_first_word($line);
 
         $t = $line;
-        foreach($commands as $i=>$command) {
-            if ($this->slug_agent->isSlug(strtolower($command))) {
 
+        foreach ($this->commands as $i => $command) {
+
+            if (substr($t, 0, strlen($command)) === $command) {
+
+                $html = '<b>' . strtoupper($command) . '</b>';
+
+                //                $t = preg_replace('/' . $command . '/i', $html, $t);
+                $t = preg_replace('/\b' . $command . '\b/u', $html, $t, 1);
+
+                break;
+            }
+        }
+
+        foreach ($this->web_commands as $i => $command) {
+
+            if (stripos($line, $command) !== false) {
                 $slug = $this->slug_agent->extractSlug($command);
 
                 $html =
@@ -354,9 +414,12 @@ function sort($a,$b){
                     strtoupper($command) .
                     '</a>';
 
-//                $t = str_replace($command, $html, $t);
+                //                $t = str_replace($command, $html, $t);
                 $t = preg_replace('/\b' . $command . '\b/u', $html, $t);
+                //                $t = preg_replace('/' . $command . '/', $html, $t);
             }
+            //var_dump($t);
+            //echo "<br>";
         }
 
         return $t;
@@ -445,7 +508,7 @@ function sort($a,$b){
     /**
      *
      */
-    function makeGlossary()
+    function readGlossary()
     {
         $librex_agent = new Librex($this->thing, "glossary/glossary");
 
@@ -453,6 +516,9 @@ function sort($a,$b){
 
         $txt = "";
         ksort($librex_agent->matches);
+
+        //$this->commandsGlossary($librex_agent->matches);
+
         foreach ($librex_agent->matches as $agent_name => $packet) {
             //if (!isset($prior_firstChar)) {$prior_firstChar = "";}
             //$firstChar = mb_substr($agent_name, 0, 1, "UTF-8");
@@ -464,6 +530,8 @@ function sort($a,$b){
 
         //    $this->thing_report['txt'] = $txt;
         $this->librex_matches = $librex_agent->matches;
+        $this->response .= "Read glossary. ";
+        $this->commandsGlossary($this->librex_matches);
     }
 
     /**
@@ -493,7 +561,6 @@ function sort($a,$b){
      */
     function makeTxt()
     {
-
         $librex_agent = new Librex($this->thing, "glossary/glossary");
 
         $librex_agent->getMatches();
@@ -598,6 +665,7 @@ function sort($a,$b){
      */
     public function readSubject()
     {
+        $this->readGlossary();
         $input = $this->input;
 
         if (strtolower($input) != "glossary") {
