@@ -296,6 +296,10 @@ class Token extends Agent
         if (!isset($this->token) or $this->token == false) {
             $this->getToken($input);
         }
+//var_dump($input);
+if ($input == 'red-token') {
+$this->redToken();
+}
 
         $pieces = explode(" ", strtolower($input));
 
@@ -336,6 +340,9 @@ class Token extends Agent
         $web .= $this->subject . "<br>";
 
         if ($this->subject == 'red-token') {
+$this->redToken();
+$web .= $this->web_redtoken;
+/*
             $item = null;
             $item = ['text' => 'Red Token', 'price' => '1'];
 
@@ -353,7 +360,7 @@ class Token extends Agent
             if (isset($item['description'])) {$help_text = $item['description'];}
             $this->help = $help_text;
             $this->thing_report['help'] = $help_text;
-
+*/
         }
 
         /*
@@ -394,6 +401,31 @@ class Token extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
+    public function redToken() {
+
+            $item = null;
+            $item = ['text' => 'Red Token', 'price' => '1'];
+
+            $item_agent = new Item($this->thing, "item");
+            $item = $item_agent->item;
+
+            $payment_agent = new Payment($this->thing, "payment");
+            $payment_agent->itemPayment($item);
+            $payment_agent->item = $item;
+
+            $payment_agent->makeSnippet();
+            $web = $payment_agent->snippet;
+
+            $help_text = $item['title'];
+            if (isset($item['description'])) {$help_text = $item['description'];}
+            $this->help = $help_text;
+            $this->thing_report['help'] = $help_text;
+
+        $this->web_redtoken = $web;
+
+
+    }
+
     /**
      *
      */
@@ -426,3 +458,4 @@ class Token extends Agent
     }
 */
 }
+

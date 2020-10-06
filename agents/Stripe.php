@@ -165,10 +165,14 @@ class Stripe extends Agent
         //$success_url = 'https://example.com/success';
         //$cancel_url = 'https://example.com/cancel';
 
+        // Give the success call it's own UUID.
+        $thing = new Thing(null);
+        $thing->Create($this->from, "stripe", "stripe-success");
+
         $success_url =
             $this->web_prefix .
             'thing/' .
-            $this->thing->uuid .
+            $thing->uuid .
             '/' .
             'stripe-success';
         $cancel_url =
