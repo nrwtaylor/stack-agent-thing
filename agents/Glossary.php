@@ -340,22 +340,24 @@ function sort($a,$b){
         $line = $this->bold_first_word($line);
 
         $t = $line;
-
         foreach($commands as $i=>$command) {
             if ($this->slug_agent->isSlug(strtolower($command))) {
+
+                $slug = $this->slug_agent->extractSlug($command);
+
                 $html =
                     '<a href="' .
                     $this->web_prefix .
                     '' .
-                    strtolower($command) .
+                    $slug .
                     '">' .
                     strtoupper($command) .
                     '</a>';
 
-                //$t = str_replace($array['name'], $html, $line);
-                $t = preg_replace('/\b' . $array['name'] . '\b/u', $html, $line);
+//                $t = str_replace($command, $html, $t);
+                $t = preg_replace('/\b' . $command . '\b/u', $html, $t);
             }
-    }
+        }
 
         return $t;
     }

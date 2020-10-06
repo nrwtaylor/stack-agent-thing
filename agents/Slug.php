@@ -167,6 +167,13 @@ class Slug extends Agent
             return true;
         }
 
+$hyphenated_text = strtolower(str_replace(" ","-",$text));
+        if (in_array($hyphenated_text, $allowed_endpoints)) {
+            return true;
+        }
+
+
+
         return false;
     }
 
