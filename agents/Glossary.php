@@ -316,8 +316,22 @@ class Glossary extends Agent
         return $s;
     }
 
+
+function sort($a,$b){
+    return strlen($b)-strlen($a);
+}
+
+
     public function htmlGlossary($array)
     {
+        $command_agent = new Command($this->thing, "command");
+        $commands = $command_agent->extractCommands($array['text']);
+
+        usort($commands, function($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
+
+
         if (!isset($this->slug_agent)) {
             $this->slug_agent = new Slug($this->thing, "slug");
         }
@@ -327,19 +341,21 @@ class Glossary extends Agent
 
         $t = $line;
 
-        if ($this->slug_agent->isSlug(strtolower($array['name']))) {
-            $html =
-                '<a href="' .
-                $this->web_prefix .
-                '' .
-                strtolower($array['name']) .
-                '">' .
-                strtoupper($array['name']) .
-                '</a>';
+        foreach($commands as $i=>$command) {
+            if ($this->slug_agent->isSlug(strtolower($command))) {
+                $html =
+                    '<a href="' .
+                    $this->web_prefix .
+                    '' .
+                    strtolower($command) .
+                    '">' .
+                    strtoupper($command) .
+                    '</a>';
 
-            //$t = str_replace($array['name'], $html, $line);
-            $t = preg_replace('/\b' . $array['name'] . '\b/u', $html, $line);
-        }
+                //$t = str_replace($array['name'], $html, $line);
+                $t = preg_replace('/\b' . $array['name'] . '\b/u', $html, $line);
+            }
+    }
 
         return $t;
     }
