@@ -25,7 +25,7 @@ class Stripe extends Agent
         $this->email = $this->thing->container['stack']['email'];
         $this->stack_email = $this->email;
 
-        $this->response = "Init Stipe. ";
+        //$this->response .= "Connected to Stripe. ";
         $this->flag = "green";
         $this->stripe_daily_call_count = 0;
         $this->test = "Development code"; // Always
@@ -61,41 +61,70 @@ class Stripe extends Agent
 
         $this->run_time_max = 360; // 5 hours
 
-        $this->thing_report['help'] = 'This reads the Stripe catalog.';
+        $this->thing_report['help'] = 'Takes payments to the stack using Stripe.';
     }
 
-    public function itemStripe($item = null) {
+    public function priceStripe()
+    {
+        if (!isset($this->item)) {
+            $this->itemStripe();
+        }
+        $item = $this->item;
 
-        if ($item == null) {
-            $item = [
+        $currency = 'usd';
+        $unit_price = $item['price'] * 100; // Adjust variable for Stripe.
+        $name = $item['text'];
 
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => 'T-shirt',
-                        ],
-                        'unit_amount' => 2000,
-                    ],
-            ];
+        //                        'product_data' => [
+        //                          'name' => 'Test Product',
+        //
+        //                          'images' => ["https://i.imgur.com/EHyR2nP.png"],
+        //                    ],
 
+        $images = ["https://i.imgur.com/EHyR2nP.png"];
 
+        $price = [
+            'currency' => $currency,
+            'product_data' => [
+                'name' => $name,
+            ],
+            'unit_amount' => $unit_price,
+        ];
+        if (isset($images)) {
+            $price['product_data']['images'] = $images;
+        }
+        return $price;
+    }
+
+    public function itemStripe($item = null)
+    {
+        if (isset($this->item) and $item == null) {
+            return $this->item;
+        }
+        if ($item != null) {
+            $this->item = $item;
+            return $this->item;
         }
 
-        return $item;
+        $item_agent = new Item($this->thing, "item");
+        $this->item = $item_agent->item;
 
+        /*
+        $this->item = ['text' => 'Red Token',
+'price'=>1];
+*/
+        return $this->item;
     }
 
-    public function quantityStripe($quantity = null) {
+    public function quantityStripe($quantity = null)
+    {
+        return 1;
+        //        if ($quanity == null) {
+        //            $quantity = 1;
+        //        }
 
-        if ($quanity == null) {
-            $quantity = 1;
-        }
-
-        return $quantity;
-
+        //        return $quantity;
     }
-
-
 
     public function errorStripe()
     {
@@ -133,26 +162,41 @@ class Stripe extends Agent
 
     public function checkoutStripe()
     {
-//$success_url = 'https://example.com/success';
-//$cancel_url = 'https://example.com/cancel';
+        //$success_url = 'https://example.com/success';
+        //$cancel_url = 'https://example.com/cancel';
 
-$success_url = $this->web_prefix . 'thing/' . $this->thing->uuid . '/'. 'stripe-success';
-$cancel_url = $this->web_prefix . 'thing/' . $this->thing->uuid . '/'. 'stripe-cancel';
-/*
-$line_item = $this->itemStripe();
-$quantity = $this->quantityStripe();
+        $success_url =
+            $this->web_prefix .
+            'thing/' .
+            $this->thing->uuid .
+            '/' .
+            'stripe-success';
+        $cancel_url =
+            $this->web_prefix .
+            'thing/' .
+            $this->thing->uuid .
+            '/' .
+            'stripe-cancel';
 
-        $session = \Stripe\Checkout\Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => [
-                [
-                    'price_data' => [
+        //$line_item = $this->itemStripe();
+        /*
+$price_data = [
                         'currency' => 'usd',
                         'product_data' => [
                             'name' => 'T-shirt',
                         ],
                         'unit_amount' => 2000,
-                    ],
+                    ];
+*/
+        $price_data = $this->priceStripe();
+        $quantity = $this->quantityStripe();
+
+        //$quantity = 1;
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [
+                [
+                    'price_data' => $price_data,
                     'quantity' => $quantity,
                 ],
             ],
@@ -160,8 +204,8 @@ $quantity = $this->quantityStripe();
             'success_url' => $success_url,
             'cancel_url' => $cancel_url,
         ]);
-*/
 
+        /*
         $session = \Stripe\Checkout\Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [
@@ -180,6 +224,9 @@ $quantity = $this->quantityStripe();
             'success_url' => $success_url,
             'cancel_url' => $cancel_url,
         ]);
+*/
+
+        $this->response .= "Made a checkout session. ";
 
         return $session;
     }
@@ -196,60 +243,26 @@ $quantity = $this->quantityStripe();
 
     public function makeWeb()
     {
-        $stripe_library_script =
-            '<script src="https://js.stripe.com/v3/"></script>';
+        if (isset($this->item)) {
+            $item = $this->item;
+        } else {
+            $item = $this->itemStripe();
+        }
 
-        $credential = $this->publishable_key;
+        $item_web = "<div>";
+        $item_web .= "Item: ";
+        $item_web .= $item['text'] . " ";
+        $item_web .= $item['price'] . " ";
+        $item_web .= "</div>";
+        $web = "";
+        $web .= $item_web;
 
-        $script =
-            '  <script type="text/javascript">
-      // Create an instance of the Stripe object with your publishable API key
-      var stripe = Stripe(\'' .
-            $this->publishable_key .
-            '\');
-      var checkoutButton = document.getElementById(\'checkout-button\');
+        $this->makeSnippet();
+        $web .= $this->snippet;
 
-      checkoutButton.addEventListener(\'click\', function() {
-        // Create a new Checkout Session using the server-side endpoint you
-        // created in step 3.
-        fetch(\'/api/whitefox/stripe-checkout\', {
-          method: \'POST\',
-        })
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(session) {
-          return stripe.redirectToCheckout({ sessionId: session.id });
-        })
-        .then(function(result) {
-          // If `redirectToCheckout` fails due to a browser or network
-          // error, you should display the localized error message to your
-          // customer using `error.message`.
-          if (result.error) {
-            alert(result.error.message);
-          }
-        })
-        .catch(function(error) {
-          console.error(\'Error:\', error);
-        });
-      });
-    </script>
-';
-
-        $web =
-            $stripe_library_script .
-            '<button id="checkout-button">Checkout</button>' .
-            $script;
-
-$web .= "subject " . $this->subject;
-$web .= "input ". $this->input;
-$web .= "agent_input " . $this->agent_input;
-
-if ($this->subject == 's/ web stripe') {
-$this->response .= "Saw a web stripe.";
-$web .= "<div>". "Thanks." . "</div>";
-
-}
+        if (isset($this->stripe_web)) {
+            $web .= "<div>" . $this->stripe_web . "</div>";
+        }
 
         $this->web = $web;
         $this->thing_report['web'] = $web;
@@ -273,9 +286,6 @@ $web .= "<div>". "Thanks." . "</div>";
             "refreshed_at",
             $this->current_time
         );
-
-        //     if ($this->last_state == false) {
-        //            $this->readSubject();
 
         $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
 
@@ -308,55 +318,6 @@ $web .= "<div>". "Thanks." . "</div>";
 
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["stripe"], $response);
-    }
-
-    function getStripe()
-    {
-        $this->success_url = $this->web_prefix;
-        $this->cancel_url = $this->cancel_prefix;
-
-        $this->stripe = new \Stripe\StripeClient($this->publishable_key);
-
-        $checkout_session = \Stripe\Checkout\Session::create([
-            'payment_method_types' => ['card'],
-
-            'line_items' => [
-                [
-                    'price_data' => [
-                        'currency' => 'usd',
-
-                        'unit_amount' => 2000,
-
-                        'product_data' => [
-                            'name' => 'Test Product',
-
-                            'images' => ["https://i.imgur.com/EHyR2nP.png"],
-                        ],
-                    ],
-
-                    'quantity' => 1,
-                ],
-            ],
-
-            'mode' => 'payment',
-
-            'success_url' => $this->success_url,
-
-            'cancel_url' => $this->cancel_url,
-        ]);
-
-        echo json_encode(['id' => $checkout_session->id]);
-
-        $this->thing->log('called getStripe()');
-
-        $this->thing->db->setFrom($this->from);
-
-        $this->thing->json->setField("message0");
-        $response = $this->thing->json->readVariable(["stripe"]);
-
-        //                $this->variablesGet();
-
-        return $response;
     }
 
     public function getLink($variable = null)
@@ -403,9 +364,6 @@ $web .= "<div>". "Thanks." . "</div>";
         if ($text == null) {
             $text = "MErp";
         }
-
-        //var_dump($text);
-        //var_dump($text['errorMessage']['error']['message']);
 
         $log_text = "Error message not found.";
         if (isset($text['errorMessage']['error']['message'])) {
@@ -518,6 +476,24 @@ $web .= "<div>". "Thanks." . "</div>";
         $this->thing->log("search for " . $text . ".");
     }
 
+    public function webStripe()
+    {
+        $url = "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+
+        $escaped_url = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+        $tokens = explode("/", $escaped_url);
+
+        $command = end($tokens);
+
+        if ($command == 'stripe-cancel') {
+            $this->stripe_web = "Sorry you decided not to pay.";
+        }
+
+        if ($command == 'stripe-success') {
+            $this->stripe_web = "Thanks for your payment.";
+        }
+    }
+
     function stripeApi($text = null)
     {
         if ($this->state == "off") {
@@ -533,12 +509,59 @@ $web .= "<div>". "Thanks." . "</div>";
             return;
         }
 
-        $web = "Stripe Dev";
+        //        $web = "Stripe Dev";
+
+        $stripe_library_script =
+            '<script src="https://js.stripe.com/v3/"></script>';
+
+        $credential = $this->publishable_key;
+
+        $script =
+            '  <script type="text/javascript">
+      // Create an instance of the Stripe object with your publishable API key
+      var stripe = Stripe(\'' .
+            $this->publishable_key .
+            '\');
+      var checkoutButton = document.getElementById(\'checkout-button\');
+
+      checkoutButton.addEventListener(\'click\', function() {
+        // Create a new Checkout Session using the server-side endpoint you
+        // created in step 3.
+        fetch(\'/api/whitefox/stripe-checkout\', {
+          method: \'POST\',
+        })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(session) {
+          return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function(result) {
+          // If `redirectToCheckout` fails due to a browser or network
+          // error, you should display the localized error message to your
+          // customer using `error.message`.
+          if (result.error) {
+            alert(result.error.message);
+          }
+        })
+        .catch(function(error) {
+          console.error(\'Error:\', error);
+        });
+      });
+    </script>
+';
+
+        $web =
+            $stripe_library_script .
+            '<button id="checkout-button">Checkout</button>' .
+            $script;
 
         $snippet_prefix = '<span class = "' . $this->agent_name . '">';
         $snippet_postfix = '</span>';
         //$web .= $web_items;
         $web = $snippet_prefix . $web . $snippet_postfix;
+
+        $this->snippet = $web;
         $this->thing_report['snippet'] = $web;
         $this->thing->log("made snippet.");
     }
@@ -619,7 +642,6 @@ $web .= "<div>". "Thanks." . "</div>";
 
     public function readSubject()
     {
-//var_dump($this->input);
         $this->thing->log('Stripe read input, "' . $this->input . '".');
         //$this->response .= null;
 
@@ -631,7 +653,12 @@ $web .= "<div>". "Thanks." . "</div>";
             $this->state = "off";
             return;
         }
-
+        /*
+        if ($this->subject == 's/ web stripe') {
+            $this->webStripe();
+            return;
+        }
+*/
         $this->state = $this->last_state;
 
         if ($this->last_state == "off") {
@@ -643,6 +670,11 @@ $web .= "<div>". "Thanks." . "</div>";
 
         if (strtolower($this->input) == "stripe") {
             $this->response .= "Checked Stripe state. ";
+            return;
+        }
+
+        if ($this->subject == 's/ web stripe') {
+            $this->webStripe();
             return;
         }
 

@@ -25,12 +25,31 @@ class Payment extends Agent
 
         $item = array_pop($this->items);
 
-        $this->link = $item['link'];
+        //$this->link = $item['link'];
+        $this->link =
+            $this->web_prefix . 'thing/' . $this->thing->uuid . '/payment';
+
         $this->price = $item['price'];
         $this->text = $item['text'];
 
         $this->node_list = ["payment" => ["forget"]];
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+    }
+
+    public function itemPayment($item = null)
+    {
+        if (isset($this->item) and $item == null) {
+            return $this->item;
+        }
+        if ($item != null) {
+            $this->item = $item;
+            return $this->item;
+        }
+
+        $item_agent = new Item($this->thing, "item");
+        $this->item = $item_agent->item;
+
+        return $this->item;
     }
 
     public function get()
@@ -113,7 +132,6 @@ class Payment extends Agent
             "routine" => "S",
             "welfare" => "D",
         ];
-
     }
 
     public function makeWeb()
@@ -123,25 +141,45 @@ class Payment extends Agent
         $html_link = '<a href="' . $link . '">' . $text . '</a>';
 
         $web = "";
-        $web .="<p>";
+        $web .= "<p>";
         $web .= "Click on the link below to send payment.";
-        $web .="<p>";
-
-        $web .= "<p>";
-        $web .= $html_link;
         $web .= "<p>";
 
+        //$web .= "<p>";
+        //$web .= $html_link;
+        $web .= "<p>";
+        if (!isset($this->snippet)) {
+            $this->makeSnippet();
+        }
+        $web .= $this->snippet;
         $this->thing_report['web'] = $web;
     }
 
     public function makeSnippet()
     {
-        $link = $this->link;
-        $text = $this->text;
-        $html_link = '<a href="' . $link . '">' . $text . '</a>';
+        //        $link = $this->link;
+        //        $text = $this->text;
+        //        $html_link = '<a href="' . $link . '">' . $text . '</a>';
 
-        $web = $html_link;
+        //        $web = $html_link;
 
+        if (!isset($this->item)) {
+            $this->itemPayment();
+        }
+
+        $stripe_agent = new Stripe($this->thing, "stripe");
+        $stripe_agent->itemStripe($this->item);
+        $stripe_agent->makeSnippet();
+        $web = $stripe_agent->snippet;
+
+        $item_web = "<div>";
+        $item_web .= "Item: ";
+        $item_web .= $this->item['text'] . " ";
+        $item_web .= $this->item['price'] . " ";
+        $item_web .= "</div>";
+        //$web .= $item_web;
+
+        $this->snippet = $item_web . $web;
         $this->thing_report['snippet'] = $web;
     }
 
