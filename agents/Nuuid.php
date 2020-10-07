@@ -179,7 +179,7 @@ class Nuuid extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
         $web = '<a href="' . $link . '">';
-$web .= $this->html_image;
+        $web .= $this->html_image;
         $web .= "</a>";
 
         $this->thing_report['web'] = $web;
@@ -223,44 +223,44 @@ $web .= $this->html_image;
         $border = 30;
         $radius = (1.165 * (164 - 2 * $border)) / 3;
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-if (file_exists($font)) {
-
-        $text = $this->thing->nuuid;
-
-        // Add some shadow to the text
-        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
-
-        $size = 26;
-        $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-
-        //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
-        $pad = 0;
 
-        // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
-            $this->grey,
-            $font,
-            $text
-        );
-}
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        if (file_exists($font)) {
+            $text = $this->thing->nuuid;
+
+            // Add some shadow to the text
+            //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
+
+            $size = 26;
+            $angle = 0;
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+
+            //check width of the image
+            $pad = 0;
+
+            // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + $bb_height / 2,
+                $this->grey,
+                $font,
+                $text
+            );
+        }
         // imagestring($image, 2, 100, 0, $this->roll, $textcolor);
         // imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
 
@@ -283,8 +283,6 @@ if (file_exists($font)) {
         $this->PNG = $imagedata;
         imagedestroy($this->image);
 
-
-
         $alt_text = "nuuid for " . $this->uuid;
 
         $html =
@@ -303,9 +301,6 @@ if (file_exists($font)) {
             '/qr.txt">';
 
         $this->html_image = $html;
-
-
-
 
         return $response;
     }
@@ -372,6 +367,5 @@ if (file_exists($font)) {
             $this->nuuid_uuid = $nuuid_uuid;
             $this->response .= "Found that Thing. ";
         }
-
     }
 }
