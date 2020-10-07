@@ -143,17 +143,18 @@ class Agent
         $this->init();
         $this->get();
 
-
 try {
         $this->read();
 
         $this->run();
+
         $this->make();
 
         // This is where we deal with insufficient space to serialize the variabes to the stack.
         //if (!isset($this->signal_thing)) {return true;}
 //        try {
             $this->set();
+
         } catch (\OverflowException $t) {
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
@@ -168,6 +169,9 @@ try {
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
+//var_dump($t);
+//exit();
+            $this->thing_report['sms'] = $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -183,6 +187,8 @@ try {
             $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
+echo "foo";
+exit();
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -195,9 +201,11 @@ try {
             $this->thing->log("caught exception");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
+
         if ($this->agent_input == null or $this->agent_input == "") {
             $this->respond();
         }
+
         if (!isset($this->response)) {
             $this->response = "No response found.";
         }

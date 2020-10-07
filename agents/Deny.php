@@ -77,7 +77,8 @@ class Deny extends Agent
         $file = $this->resource_path . 'deny/deny.txt';
 
         if (!file_exists($file)) {
-            throw "File does not exist";
+            return null;
+            //            throw new \Exception("File does not exist");
         }
 
         $handle = fopen($file, "r");

@@ -307,9 +307,13 @@ class Robot extends Agent
         }
         if (isset($this->user_agent_short)) {
             $web .= '<p>';
-            $web .= file_get_contents(
-                $this->resource_path . 'robot/robot.html'
-            );
+
+            if (file_exists($this->resource_path . 'robot/robot.html')) {
+
+                $web .= file_get_contents(
+                    $this->resource_path . 'robot/robot.html'
+                );
+            }
         }
 
         $this->thing_report['web'] = $web;
