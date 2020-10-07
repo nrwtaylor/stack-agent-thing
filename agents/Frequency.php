@@ -61,9 +61,6 @@ class Frequency extends Agent
 if (!isset($this->channel['vector'])) {return;}
 
         $data = $this->channel['vector'];
-        //var_dump($data);
-
-        //$data = strip_tags($
 
         $t = explode("\n", $data);
         $flag = false;
@@ -140,7 +137,6 @@ if (!isset($this->channel['vector'])) {return;}
     function printFrequencies() {
         $t = "";
         foreach ($this->band as $i=>$frequency) {
-            var_dump($frequency);
             $text = implode(" / ", $frequency["lines"]);
 
             $text = str_replace("end primary service", "", $text);
@@ -286,7 +282,6 @@ if (!isset($this->link)) {$this->link = null;}
 
 
         $this->extractFrequencies($text);
-        //var_dump($this->frequencies);
         if ((isset($this->frequencies)) and (count($this->frequencies) > 0)) {return true;}
         return false;
 
@@ -414,18 +409,14 @@ if (!isset($this->link)) {$this->link = null;}
      * @return unknown
      */
     public function readSubject() {
-        //var_dump($this->input);
         $this->extractFrequency($this->input);
 
         $this->extractMultiplier($this->input);
-        //var_dump($this->frequency);
 
         if ((isset($this->frequency)) and ($this->frequency != null)) {
 
             $this->response = "Frequency spotted.";
             $this->findFrequency($this->frequency);
-            //var_dump($this->band_matches);
-            //exit();
 
 $t = "No band matches. ";
 if (isset($this->band_matches)) {
@@ -455,7 +446,6 @@ if (isset($this->band_matches)) {
 
 
         $input= $this->input;
-        //var_dump($this->input);
         $strip_words = array("frequency");
 
 
@@ -474,7 +464,6 @@ if (isset($this->band_matches)) {
 
         $filtered_input = ltrim(strtolower($input), " ");
 
-        //var_dump($input);
         $this->doFrequency($filtered_input);
 
 

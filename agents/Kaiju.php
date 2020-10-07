@@ -1073,9 +1073,9 @@ class Kaiju extends Agent
             $clock_time = $dict[15] . " " . $dict[16];
         }
 
-        if (!isset($nuuid)) {
-            var_dump($dict);
-        }
+        //if (!isset($nuuid)) {
+        //    var_dump($dict);
+        //}
 
         $parsed_line = [
             "nuuid" => $nuuid,
@@ -1490,7 +1490,7 @@ class Kaiju extends Agent
                             $this->test_flag = true;
                             $this->test();
                             $l = $this->parseThing($this->test_string);
-                            var_dump($l);
+                            //var_dump($l);
                             return;
 
                         case 'on':

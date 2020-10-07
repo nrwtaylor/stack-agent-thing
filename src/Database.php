@@ -869,6 +869,54 @@ return true;
         return $thingreport;
     }
 
+
+    function fromCount($horizon = null)
+    {
+
+        $query =
+            'SELECT DISTINCT nom_from FROM stack';
+
+        if ($horizon != null) {
+
+            $horizon = (int) $horizon;
+            $query =
+                'SELECT DISTINCT nom_from FROM stack WHERE created_at > (NOW() - INTERVAL :horizon HOUR)';
+
+        }
+
+        $sth = $this->container->db->prepare($query);
+
+        if ($horizon != null) {
+            $sth->bindParam(":horizon", $horizon, PDO::PARAM_INT);
+        }
+
+        try {
+            $sth->execute();
+            $things = $sth->fetchAll();
+
+        } catch (\PDOException $e) {
+            $things = array();
+            //            $t = new Thing(null);
+            //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
+
+            //            echo 'Caught exception: ', $e->getMessage(), "\n";
+        }
+
+        $sth = null;
+
+        $thingreport = [
+            'things' => $things,
+            'info' =>
+                'Count unique nom_from in the stack.',
+            'help' => 'It is up to you what you do with these.',
+            'whatisthis' =>
+                'A count of the nom_from channels in the stack.'
+        ];
+        return $thingreport;
+    }
+
+
+
     function agentCount($agent, $horizon = 48)
     {
         //SELECT COUNT(*) FROM stack WHERE nom_to="agent" AND created_at > (NOW() - INTERVAL 6 HOUR);

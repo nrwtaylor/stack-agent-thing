@@ -560,6 +560,12 @@ $price_data = [
             '<button id="checkout-button">Checkout</button>' .
             $script;
 
+        $web =
+            $stripe_library_script .
+            '<div class="choice-button" id="checkout-button">Checkout</div>' .
+            $script;
+
+
         $snippet_prefix = '<span class = "' . $this->agent_name . '">';
         $snippet_postfix = '</span>';
         //$web .= $web_items;
