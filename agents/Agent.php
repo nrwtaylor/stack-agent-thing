@@ -1758,6 +1758,8 @@ throw new \Exception("Address not allowed.");
      */
     public function readSubject()
     {
+echo "merp";
+exit();
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;

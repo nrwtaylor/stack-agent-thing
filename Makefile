@@ -105,6 +105,10 @@ php7-4: ## Set up PHP extensions - bleeding edge
 
 apachefiling: ## Create and assemble filing for Apache2 server
 	@echo "===== Creating filesystem for Apache2 server ==============="
+ifneq ("$(wildcard /var/www/$(SERVERNAME))","")
+	@echo "exists"
+else 
+	echo "does not"; \
 	sudo mkdir /var/www/$(SERVERNAME); \
 	case "$$?" in \
 	esac; \
@@ -121,6 +125,7 @@ apachefiling: ## Create and assemble filing for Apache2 server
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/private /var/www/$(SERVERNAME)/private/
 	wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/private/settings.php --output-document=/var/www/$(SERVERNAME)/private/settings.php; 
+endif
 	# sudo cp -r . /var/www/$(SERVERNAME)
 
 
@@ -134,11 +139,13 @@ agent: ## Add commandline shell interface to call the stack
 	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/agent; \
 	sudo touch agent; \
 	sudo chmod u+x agent
+	cd /var/www/$(SERVERNAME)/private; \
 	sed -i 's/"host" => "<private>"/"host" => "localhost"/' settings.php; \
 	sed -i 's/"dbname" => "<private>"/"dbname" => "stack_db"/' settings.php; \
 	sed -i 's/"user" => "<private>"/"user" => "stackuser"/' settings.php; \
-	sed -i 's/"pass" => "<private>"/"pass" => "$(MYSQLPASSWORD)"/' settings.php
-	sed -i 's/'web_prefix' => '<not set>'/'web_prefix' => 'http:\/\/localhost:8000\//' settings.php
+	sed -i 's/"pass" => "<private>"/"pass" => "$(MYSQLPASSWORD)"/' settings.php; \
+	# next not working -- create sed script to group all commands?
+	sed -i 's/\'web_prefix\' => \'<not set>\'/\'web_prefix\' => \'http:\/\/localhost:8000\/\'/' settings.php
 	
 #agent:  $(AGENT_LOCATION)/agent ## Add commandline shell interface to call Stackr
 #ifneq ("$(wildcard $(AGENT_LOCATION))","")	
@@ -223,4 +230,7 @@ configuration:
 # sudo nano /etc/sysctl.conf
 # fs.file-max = 65535
 
-
+test: ## Test agent works
+	cd /var/www/$(SERVERNAME); \
+	./agent roll; \
+	./agent nuuid
