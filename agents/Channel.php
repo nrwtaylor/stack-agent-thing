@@ -34,6 +34,11 @@ class Channel extends Agent
     public function initChannels()
     {
         $resource_name = 'channel/channels.php';
+
+        if (!file_exists($this->resource_path . $resource_name)) {
+            return true;
+        }
+
         $this->channels_resource = require $this->resource_path .
             $resource_name;
         $this->verbosityChannel();
@@ -41,8 +46,6 @@ class Channel extends Agent
 
     public function variableChannel()
     {
-
-
     }
 
     public function verbosityChannel()
@@ -90,7 +93,6 @@ class Channel extends Agent
         } elseif ($this->agent_input != null) {
             $this->channel_name = $this->agent_input;
         }
-
     }
 
     public function respondResponse()
@@ -124,7 +126,6 @@ class Channel extends Agent
 
     function resourceChannel($channel_name = null)
     {
-
         $channel_resource = null;
         if (isset($this->channels_resource[$channel_name])) {
             $channel_resource = $this->channels_resource[$channel_name];
@@ -132,7 +133,18 @@ class Channel extends Agent
 
         if ($channel_resource == null) {
             $this->channel = $channel_name;
+
+            if (!isset($this->channels_resource['unknown'])) {
+                $this->channel = "null";
+                return;
+            }
+
             $channel_resource = $this->channels_resource['unknown'];
+        }
+
+        if ($channel_resource == null) {
+            $this->channel = "null";
+            return;
         }
 
         foreach ($channel_resource as $descriptor => $description) {
@@ -207,7 +219,7 @@ class Channel extends Agent
             return;
         }
 
-//        $this->channel = "unknown";
+        //        $this->channel = "unknown";
         $this->resourceChannel("unknown");
     }
 

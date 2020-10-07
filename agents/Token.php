@@ -29,9 +29,18 @@ class Token extends Agent
         }
 
         $this->thing_report['help'] = "This gets tokens from the datagram.";
-
+        $this->initTokens();
 
     }
+
+    public function initTokens()
+    {
+        $resource_name = 'token/tokens.php';
+        $this->tokens_resource = require $this->resource_path .
+            $resource_name;
+        //$this->verbosityChannel();
+    }
+
 
     /**
      *
@@ -296,10 +305,25 @@ class Token extends Agent
         if (!isset($this->token) or $this->token == false) {
             $this->getToken($input);
         }
-//var_dump($input);
+
 if ($input == 'red-token') {
-$this->redToken();
+$this->colourToken('red');
 }
+
+if ($input == 'blue-token') {
+$this->colourToken('blue');
+}
+
+if ($input == 'yellow-token') {
+$this->colourToken('yellow');
+}
+
+if ($input == 'green-token') {
+$this->colourToken('green');
+}
+
+
+
 
         $pieces = explode(" ", strtolower($input));
 
@@ -339,29 +363,19 @@ $this->redToken();
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         $web .= $this->subject . "<br>";
 
-        if ($this->subject == 'red-token') {
-$this->redToken();
-$web .= $this->web_redtoken;
-/*
-            $item = null;
-            $item = ['text' => 'Red Token', 'price' => '1'];
+        $colours = ['red','blue','yellow','green'];
 
-            $item_agent = new Item($this->thing, "item");
-            $item = $item_agent->item;
-
-            $payment_agent = new Payment($this->thing, "payment");
-            $payment_agent->itemPayment($item);
-            $payment_agent->item = $item;
-
-            $payment_agent->makeSnippet();
-            $web .= $payment_agent->snippet;
-
-            $help_text = $item['title'];
-            if (isset($item['description'])) {$help_text = $item['description'];}
-            $this->help = $help_text;
-            $this->thing_report['help'] = $help_text;
-*/
+foreach($colours as $colour) {
+        if ($this->subject == $colour .'-token') {
+            $this->colourToken($colour);
+            $web .= $this->web_token[$colour];
         }
+}
+
+
+
+
+
 
         /*
         if (!isset($this->slugs[0])) {
@@ -401,19 +415,30 @@ $web .= $this->web_redtoken;
         $this->thing_report['sms'] = $sms;
     }
 
-    public function redToken() {
+    public function colourToken($colour = null) {
+
+        if ($colour == null) {return true;}
 
             $item = null;
-            $item = ['text' => 'Red Token', 'price' => '1'];
 
-            $item_agent = new Item($this->thing, "item");
+            // Load token defintitions.
+            $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
+
+            if (isset($this->tokens_resource[$colour.'-token'])) {
+                $item = $this->tokens_resource[$colour. '-token'];
+            }
+
+
+// TODO: Check item creation
+            $item_agent = new Item($this->thing, $item);
             $item = $item_agent->item;
 
             $payment_agent = new Payment($this->thing, "payment");
-            $payment_agent->itemPayment($item);
-            $payment_agent->item = $item;
-
+            //$payment_agent->itemPayment($item);
+            //$payment_agent->item = $item;
+//$payment_agent->item = ['text'=>'mersad','price'=>24.24];
             $payment_agent->makeSnippet();
+//$button_html = $payment_agent->makeButton($item);
             $web = $payment_agent->snippet;
 
             $help_text = $item['title'];
@@ -421,7 +446,8 @@ $web .= $this->web_redtoken;
             $this->help = $help_text;
             $this->thing_report['help'] = $help_text;
 
-        $this->web_redtoken = $web;
+            $this->web_token[$colour] = $web;
+        
 
 
     }

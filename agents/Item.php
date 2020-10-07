@@ -291,32 +291,7 @@ class Item extends Agent
 
         return $this->words;
     }
-    /*
-    public function getNgrams($items = null)
-    {
-        global $wp;
 
-        $this->ngram_agent = new Ngram($this->thing, "ngram");
-
-        $this->ngrams = array();
-        foreach ($this->items as $vendor_id => $item) {
-            $slug = $wp->slug_agent->extractSlug($item['title']);
-            //$words = explode("-", $slug);
-
-            $s = str_replace("-", " ", $slug);
-            $ngrams = $this->ngram_agent->getNgrams($s, 2);
-
-            $this->ngrams = array_merge($this->ngrams, $ngrams);
-
-            $this->ngrams = array_filter($this->ngrams, function ($arrayEntry) {
-                return !is_numeric($arrayEntry);
-            });
-        }
-        $this->ngrams = array_unique($this->ngrams);
-
-        return $this->ngrams;
-    }
-*/
     public function getAge($item)
     {
         $age = "Fresh";
@@ -606,10 +581,16 @@ class Item extends Agent
         //$this->tile_title = $arr['subject'];
         if (isset($text['agent_input'])) {
             $item = $text['agent_input'];
-
             $this->item = $item;
             $this->source = "null";
             return;
+        }
+
+        if ((is_array($text)) and (isset($text['text'])) and (isset($text['price']))) {
+            $this->item = $text;
+            if (!isset($this->item['title'])) {$this->item['title'] = $this->item['text'];}
+            $this->source = "null";
+           return;
         }
 
         //$tokens = explode(" ", $this->post_title);
@@ -717,13 +698,12 @@ class Item extends Agent
         // An array. Probably Gearman sending a tile to be cached.
         if (is_array($this->agent_input) and $this->agent_input != []) {
             $this->thing->log("Found an array. Extract. Set.");
-            echo "found an array. extracting item.";
+
             $this->extractItem($this->agent_input);
             $this->setItem($this->item);
-            //            $this->getItems($this->agent_input);
 
             $this->response .=
-                'Extracted tile from "' . $this->agent_input . '".';
+                'Extracted tile from agent input. ';
 
             return;
         }

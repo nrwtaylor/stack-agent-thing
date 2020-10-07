@@ -163,14 +163,20 @@ class Payment extends Agent
 
         //        $web = $html_link;
 
-        if (!isset($this->item)) {
-            $this->itemPayment();
-        }
+//        if (!isset($this->item)) {
+//            $this->itemPayment();
+//        }
 
         $stripe_agent = new Stripe($this->thing, "stripe");
-        $stripe_agent->itemStripe($this->item);
+        //$stripe_agent->itemStripe($this->item);
         $stripe_agent->makeSnippet();
         $web = $stripe_agent->snippet;
+
+        //if (!isset($this->item)) {
+        //    $this->itemPayment();
+       // }
+$item_agent = new Item($this->thing,"item");
+$this->item = $item_agent->item;
 
         $item_web = "<div>";
         $item_web .= "Item: ";

@@ -98,6 +98,7 @@ class Stripe extends Agent
 
     public function itemStripe($item = null)
     {
+/*
         if (isset($this->item) and $item == null) {
             return $this->item;
         }
@@ -105,7 +106,7 @@ class Stripe extends Agent
             $this->item = $item;
             return $this->item;
         }
-
+*/
         $item_agent = new Item($this->thing, "item");
         $this->item = $item_agent->item;
 
@@ -192,10 +193,23 @@ $price_data = [
                         'unit_amount' => 2000,
                     ];
 */
-        $price_data = $this->priceStripe();
-        $quantity = $this->quantityStripe();
 
-        //$quantity = 1;
+$item_agent = new Item($this->thing,"item");
+$item = $item_agent->item;
+
+
+        //$price_data = $this->priceStripe($item);
+        //$quantity = $this->quantityStripe($item);
+$price_data = [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => $item['text'],
+                        ],
+                        'unit_amount' => $item['price']*100,
+                    ];
+
+
+        $quantity = 1;
         $session = \Stripe\Checkout\Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [
@@ -247,12 +261,16 @@ $price_data = [
 
     public function makeWeb()
     {
+/*
         if (isset($this->item)) {
             $item = $this->item;
         } else {
             $item = $this->itemStripe();
         }
-
+*/
+//$item = $this->item;
+$item_agent = new Item($this->thing,"item");
+$item = $item_agent->item;
         $item_web = "<div>";
         $item_web .= "Item: ";
         $item_web .= $item['text'] . " ";
@@ -555,14 +573,18 @@ $price_data = [
     </script>
 ';
 
+$item_agent= new Item($this->thing,"item");
+$item = $item_agent->item;
+
+$button_text = $item['text'] . ' ' . $item['price']; 
         $web =
             $stripe_library_script .
-            '<button id="checkout-button">Checkout</button>' .
+            '<button id="checkout-button">'. $button_text . '</button>' .
             $script;
 
         $web =
             $stripe_library_script .
-            '<div class="choice-button" id="checkout-button">Checkout</div>' .
+            '<div class="choice-button" id="checkout-button">'.$button_text.'</div>' .
             $script;
 
 
