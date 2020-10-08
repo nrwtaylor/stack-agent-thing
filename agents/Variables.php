@@ -141,6 +141,12 @@ class Variables
 
     function setVariables()
     {
+if (!isset($this->thing->db)) {
+
+$this->response .= "Could not write to stack. ";
+return;
+
+}
         $this->thing->db->setFrom($this->identity);
 
         $refreshed_at = false;
@@ -192,6 +198,15 @@ class Variables
         );
 
         // We will probably want a getThings at some point.
+
+// Is there a database?
+if (!isset($this->thing->db)) {
+echo 'merp';
+throw new \Exception('Stack not found.');
+$this->response .= "Stack not found. ";
+return;
+
+}
 
         $this->thing->db->setFrom($this->identity);
 
@@ -381,6 +396,10 @@ class Variables
 
     function getVariable($variable = null)
     {
+if (!isset($this->thing->db)) {
+return true;
+}
+
         // Pulls variable from the database
         // and sets variables thing on the current record.
         // so shouldn't need to adjust the $this-> set
@@ -413,6 +432,9 @@ class Variables
 
     function setVariable($variable = null, $value)
     {
+if (!isset($this->thing->db)) {
+return true;
+}
         // Take a variable in the variables_thing and save
         // into the database.  Probably end
         // up coding setVariables, to

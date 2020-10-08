@@ -1070,7 +1070,7 @@ class Headcode
         //$sms_message .= " | now " . $this->headcodeTime();
         //        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
-        $sms_message .= "Text QUANTITY";
+        //$sms_message .= "Text QUANTITY";
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
 

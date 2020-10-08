@@ -168,6 +168,15 @@ class Emoji
         return $new_words;
     }
 
+    public function hasEmoji($text = null) {
+
+        if ((isset($this->emojis)) and ($this->emojis != [])) {
+            return true;
+        }
+
+
+    }
+
     function extractEmoji($string)
     {
         preg_match_all(
