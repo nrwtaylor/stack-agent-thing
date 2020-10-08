@@ -149,6 +149,8 @@ class Signal extends Agent
         }
         $this->getSignal();
 
+if (!isset($this->signals)) {return true;}
+
         foreach ($this->signals as $i => $signal) {
             if ($signal['uuid'] == $this->signal_thing->uuid) {
                 //var_dump($signal);
@@ -468,6 +470,10 @@ class Signal extends Agent
             $t = $this->getSignalbyId($text);
             return;
         }
+
+if (!isset($this->thing->thing->variables)) {
+$this->response .= 'No stack found. ';
+return true;}
 
         if (
             isset(
@@ -988,8 +994,10 @@ class Signal extends Agent
                 $color = $this->{'signal_' . $state};
             }
         }
-
+$signal_id = "X";
+if (isset($this->signal_thing->uuid)) {
         $signal_id = $this->signal_thing->uuid;
+}
         $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
         $signal_id = $this->idSignal($signal_id);
 
@@ -1040,15 +1048,22 @@ class Signal extends Agent
                 );
             }
         } else {
+
+/*
+            $flag_nuuid = "X";
+            if (isset($this->flag->nuuid)) {
+                $flag_nuuid = $this->flag_nuuid;
+            }
+
             imagestring(
                 $this->image,
                 2,
                 150,
                 100,
-                $this->flag->nuuid,
+                $flag_nuuid,
                 $textcolor
             );
-
+*/
             imagestring(
                 $this->image,
                 2,

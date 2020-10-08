@@ -70,6 +70,7 @@ class Weather extends Agent
         // https://www.weather.gc.ca/city/pages/bc-74_metric_e.html
         $link = str_replace("/rss/city/", "/city/pages/", $this->xml_link);
         $this->link = str_replace("_e.xml", "_metric_e.html", $link);
+        $this->thing_report['link'] = $this->link;
     }
 
     /**
@@ -414,20 +415,20 @@ class Weather extends Agent
     /**
      *
      */
-    public function respond()
+    public function respondResponse()
     {
         // Thing actions
         $this->thing->flagGreen();
         // Generate email response.
 
-        $to = $this->thing->from;
-        $from = "weather";
+        //$to = $this->thing->from;
+        //$from = "weather";
 
         $choices = false;
         $this->thing_report['choices'] = $choices;
 
-        $this->makeSms();
-        $this->makeMessage();
+        //$this->makeSms();
+        //$this->makeMessage();
 
         $this->thing_report['email'] = $this->sms_message;
         //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -482,7 +483,7 @@ class Weather extends Agent
     /**
      *
      */
-    public function makeSms()
+    public function makeSMS()
     {
         if (!isset($this->response) or $this->response == null) {
             $this->response =

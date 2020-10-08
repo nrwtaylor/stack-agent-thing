@@ -85,7 +85,9 @@ class Ping extends Agent
      *
      */
     public function getPing() {
-        $received_at = strtotime($this->thing->thing->created_at);
+        //$received_at = strtotime($this->thing->thing->created_at);
+       // $received_at = strtotime($this->created_at);
+        $received_at = $this->created_at;
         $this->ping_time = time() - $received_at;
 
         if ($this->ping_time < 1) {

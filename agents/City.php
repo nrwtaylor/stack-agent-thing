@@ -207,15 +207,14 @@ class City extends Agent
 
         // See if a headcode record exists.
         $findagent_thing = new Findagent($this->thing, 'city');
-        $count = count($findagent_thing->thing_report['things']);
-        $this->thing->log(
-            'Agent "City" found ' .
-                count($findagent_thing->thing_report['things']) .
-                " city Things."
-        );
 
         if ($findagent_thing->thing_report['things'] == true) {
+            return true;
         }
+
+
+        $count = count($findagent_thing->thing_report['things']);
+
 
         if (!$this->is_positive_integer($count)) {
             // No places found

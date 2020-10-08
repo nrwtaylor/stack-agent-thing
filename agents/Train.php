@@ -1342,9 +1342,16 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         $this->runat_agent->set();
 
         $t = new Runat($this->thing, "runat");
-        $t->day = $this->runat['day'];
-        $t->hour = $this->runat['hour'];
-        $t->minute = $this->runat['minute'];
+
+//        $t->day = $this->runat['day'];
+//        $t->hour = $this->runat['hour'];
+//        $t->minute = $this->runat['minute'];
+
+        $t->day = $this->runat->day;
+        $t->hour = $this->runat->hour;
+        $t->minute = $this->runat->minute;
+
+
 
         $t->set();
     }

@@ -134,8 +134,8 @@ if ( (is_string($filtered_input)) and ($filtered_input != "")) {
      */
     public function timestampSnowflake($t = null)
     {
-        $s = $this->thing->thing->created_at;
-
+       // $s = $this->thing->thing->created_at;
+$s = $this->created_at;
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {

@@ -23,7 +23,7 @@ class Txt extends Agent {
 
         if ($this->thing->thing != true) {
 
-            $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $thing->uuid .  '');
+            $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $this->thing->uuid .  '');
             $this->thing_report['info'] = 'Tried to run Web on a null Thing.';
             $this->thing_report['help'] = "That isn't going to work";
 
@@ -47,21 +47,37 @@ class Txt extends Agent {
         $this->getLink();
     }
 
+public function makeSMS() {
+
+        $sms = "TXT | ";
+$txt_link = "No link available.";
+if ((isset($this->link_uuid)) and ($this->link_uuid != null)) {
+        $txt_link = $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".txt";
+        }
+$sms .= $txt_link;
+
+        $sms .= " | " . $this->response;
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
+
+
+}
 
     /**
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         // Thing actions
 
         //        $web_thing = new Thing(null);
         //        $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
 
-        $this->sms_message = "TXT | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".txt";
+//        $this->sms_message = "TXT | " . $this->web_prefix . "thing/" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".txt";
 
-        $this->sms_message .= " | " . $this->response;
-        $this->thing_report['sms'] = $this->sms_message;
+//        $this->sms_message .= " | " . $this->response;
+//        $this->thing_report['sms'] = $this->sms_message;
 
 
         $this->thing->json->setField("variables");
@@ -101,6 +117,11 @@ class Txt extends Agent {
         $block_things = array();
         // See if a stack record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
+
+if($findagent_thing->thing_report['things'] === true) {
+        $this->response = "Could not make a link. ";
+
+return null;}
 
         $this->max_index =0;
 
@@ -151,6 +172,8 @@ class Txt extends Agent {
         $agent_thing = new Agent($previous_thing);
         if (!isset($agent_thing->thing_report['txt'] )) {$this->txt_exists = false;}
 
+        $this->response = "Made a txt link. ";
+
 
         return $this->link_uuid;
     }
@@ -162,9 +185,9 @@ class Txt extends Agent {
      */
     public function readSubject() {
 
-        $this->defaultButtons();
+        //$this->defaultButtons();
         $status = true;
-        $this->response = "Made a txt link.";
+        //$this->response = "Made a txt link.";
         return $status;
     }
 
@@ -200,20 +223,6 @@ class Txt extends Agent {
 
     }
 
-
-    /**
-     *
-     */
-    function defaultButtons() {
-
-        if (rand(1, 6) <= 3) {
-            $this->thing->choice->Create('web', $this->node_list, 'start a');
-        } else {
-            $this->thing->choice->Create('web', $this->node_list, 'start b');
-        }
-
-        $this->thing->flagGreen();
-    }
 
 
 }

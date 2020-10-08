@@ -65,6 +65,7 @@ class Agent
         if ($this->thing->container['stack']['engine_state'] == 'dev') {
             $this->dev = true;
         }
+
         $this->getMeta();
         $this->thing->log("Got meta.");
         // Tell the thing to be quiet
@@ -149,7 +150,6 @@ try {
         $this->run();
 
         $this->make();
-
         // This is where we deal with insufficient space to serialize the variabes to the stack.
         //if (!isset($this->signal_thing)) {return true;}
 //        try {
@@ -165,13 +165,12 @@ try {
                 "error",
                 "Overflow: try set failed."
             );
-            $this->thing_report['sms'] = "STACK | " . $this->response;
+            $this->thing_report['sms'] = "AGENT | " . $this->response;
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
-//var_dump($t);
-//exit();
-            $this->thing_report['sms'] = $t->getMessage();
+
+            $this->thing_report['sms'] = "AGENT | " . $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -182,13 +181,17 @@ try {
                     $t->getTraceAsString()
             );
 
+//var_dump($t->getMessage());
+//var_dump($t->getLine());
+//var_dump($t->getFile());
+
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
             //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
             $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
-echo "foo";
-exit();
+            $this->thing_report['sms'] = "AGENT | " . $t->getMessage();
+
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -222,6 +225,7 @@ exit();
         if (isset($this->test) and $this->test) {
             $this->test();
         }
+
     }
 
     /**
@@ -483,6 +487,7 @@ exit();
         ) {
             if (
                 isset($this->thing_report['sms']) and
+                //(isset($this->thing_report['link'])) and
                 //and (!$this->thing->url_agent->hasUrls($this->thing_report['sms']))
                 substr($this->thing_report['link'], -4) != "help"
             ) {
@@ -749,31 +754,36 @@ exit();
 
         // Non-nominal
         $this->uuid = $thing->uuid;
-        if (!isset($thing->to)) {
-            $this->to = null;
-        } else {
+
+        if (isset($thing->to)) {
             $this->to = $thing->to;
         }
 
         // Potentially nominal
-        if (!isset($thing->subject)) {
-            $this->subject = null;
-        } else {
+        if (isset($thing->subject)) {
             $this->subject = $thing->subject;
         }
 
         // Treat as nomina
-        if (!isset($thing->from)) {
-            $this->from = null;
-        } else {
+        if (isset($thing->from)) {
             $this->from = $thing->from;
         }
         // Treat as nomina
-        if (!isset($thing->created_at)) {
-            $this->created_at = null;
-        } else {
+        if (isset($thing->created_at)) {
             $this->created_at = $thing->created_at;
         }
+
+        if (isset($this->thing->thing->created_at)) {
+            $this->created_at = strtotime($this->thing->thing->created_at);
+        }
+if (!isset($this->to)) {$this->to = "null";}
+if (!isset($this->from)) {$this->from = "null";}
+if (!isset($this->subject)) {$this->subject = "merp";}
+//if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
+if (!isset($this->created_at)) {$this->created_at = time();}
+
+
+
     }
 
     public function currentAgent()
@@ -813,6 +823,11 @@ exit();
         $this->max_index = 0;
 
         $match = 0;
+
+if (!isset($findagent_thing->thing_report['things'])) {
+$this->link_uuid = null;
+return true;
+}
 
         if ($findagent_thing->thing_report['things'] == true) {
             $this->link_uuid = null;
@@ -1195,7 +1210,6 @@ exit();
     {
         //$this->makeResponse();
         // So this is the response if nothing else has responded.
-
         if (!isset($this->thing_report['sms'])) {
             if (isset($this->sms_message)) {
                 $this->thing_report['sms'] = $this->sms_message;
@@ -1225,6 +1239,10 @@ exit();
      */
     public function getPrior()
     {
+if (!isset($this->thing->db)) {
+$this->response .= "Stack not available. ";
+return true;}
+
         // See if the previous subject line is relevant
         $this->thing->db->setUser($this->from);
         $prior_thing = $this->thing->db->priorGet();
@@ -1353,7 +1371,9 @@ exit();
     public function timestampAgent($text = null)
     {
         if ($text == null) {
-            $text = $this->thing->thing->created_at;
+            //$text = $this->thing->thing->created_at;
+            $text = $this->created_at;
+
         }
         $time = strtotime($text);
 
@@ -1421,7 +1441,6 @@ exit();
 
         $this->readFrom();
 
-//if ((isset($this->do_not_respond)) and ($this->do_not_respond == true)) {return;}
         $this->readSubject();
         $this->thing->log('completed read.');
     }
@@ -1435,8 +1454,8 @@ exit();
 
 
         $deny_agent = new Deny($this->thing, "deny");
-        
-        if ($deny_agent->isDeny() === true) {
+
+        if (($deny_agent->isDeny() === true) and ($deny_agent->isDeny() != null)) {
 
 $this->do_not_respond = true;
 //return;
@@ -1782,6 +1801,7 @@ throw new \Exception("Address not allowed.");
         $input = strtolower(
             $agent_input_text . " " . $this->to . " " . $this->subject
         );
+
         if ($this->agent_input == null) {
             $input = strtolower($this->to . " " . $this->subject);
         } else {
@@ -1910,16 +1930,19 @@ throw new \Exception("Address not allowed.");
 
         //$web_agent = new Web($this->thing,'web');
 
-        if (is_string($human_agent->address)) {
+        if ((isset($human_agent->address)) and (is_string($human_agent->address))) {
             $this->thing_report = $human_agent->thing_report;
             return $this->thing_report;
         }
 
         // Basically if the agent input directly matches an agent name
         // Then run it.
-
         // So look hear to generalize that.
-        $text = urldecode($agent_input_text);
+
+
+        //$text = urldecode($agent_input_text);
+        $text = urldecode($input);
+
 
         //$text = urldecode($input);
 
@@ -2569,6 +2592,8 @@ throw new \Exception("Address not allowed.");
             foreach ($entity_list as $key => $entity_name) {
                 $findagent_agent = new Findagent($this->thing, $entity_name);
 
+if (!isset($findagent_agent->thing_report['things'])) {continue;}
+
                 $things = $findagent_agent->thing_report['things'];
 
                 if (!isset($things[0])) {
@@ -2672,8 +2697,10 @@ throw new \Exception("Address not allowed.");
         $split_time = $this->thing->elapsed_runtime();
 
         $context_thing = new Context($this->thing, "extract");
+
         $this->context = $context_thing->context;
         $this->context_id = $context_thing->context_id;
+
         $this->thing->log(
             'ran Context ' .
                 number_format($this->thing->elapsed_runtime() - $split_time) .
@@ -2899,14 +2926,13 @@ throw new \Exception("Address not allowed.");
         ) {
             $c = new Chinese($this->thing, "chinese");
             $this->thing_report = $c->thing_report;
-            //            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
             return $this->thing_report;
-            //exit();
         }
 
 
         // Most useful thing is to acknowledge the url.
-        if (count($urls) > 0) {
+        if ($urls !== true and (isset($urls) and count($urls) > 0)) {
+
             $this->thing_report = $url->thing_report;
             return $this->thing_report;
         }
