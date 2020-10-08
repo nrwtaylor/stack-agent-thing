@@ -32,11 +32,25 @@ class Variables
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
 
+// Review.
+// This is needed for null things.
+// Need to extend Variables with Agent.
+// And avoid recursive calls.
+
+$this->to = 'null';
+if (isset($thing->to)) {
+        $this->to = $thing->to;
+}
+        $this->from = $thing->from;
+
+$this->subject = 'merp';
+if (isset($thing->subject)) {
+        $this->subject = $thing->subject;
+}
         $this->identity = $this->from;
+
+$this->response = "";
 
         // Setup Agent
         $this->agent = strtolower(get_class());
@@ -200,13 +214,8 @@ return;
         // We will probably want a getThings at some point.
 
 // Is there a database?
-if (!isset($this->thing->db)) {
-echo 'merp';
-throw new \Exception('Stack not found.');
-$this->response .= "Stack not found. ";
-return;
-
-}
+$things = false;
+if (isset($this->thing->db)) {
 
         $this->thing->db->setFrom($this->identity);
 
@@ -218,7 +227,7 @@ return;
         );
 
         $things = $thing_report['things'];
-
+}
         // When we have that list of Things, we check it for the tally we are looking for.
         // Review using $this->limit as search length limiter.  Might even just
         // limit search to N microseconds of search.
