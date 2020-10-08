@@ -32,16 +32,10 @@ class Variables
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->uuid = $thing->uuid;
-
-        $this->to = "X";
-        if (isset($thing->to)) {
-            $this->to = $thing->to;
-        }
+        $this->to = $thing->to;
         $this->from = $thing->from;
-        $this->subject = "X";
-        if (isset($thing->subject)) {
         $this->subject = $thing->subject;
-        }
+
         $this->identity = $this->from;
 
         // Setup Agent
@@ -198,10 +192,6 @@ class Variables
         );
 
         // We will probably want a getThings at some point.
-
-if (!isset($this->thing->db)) {
-throw new \Exception("Stack not available.");
-}
 
         $this->thing->db->setFrom($this->identity);
 

@@ -278,7 +278,6 @@ class Thing
 
     function Create($from = null, $to = "", $subject = "")
     {
-
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
@@ -337,13 +336,6 @@ class Thing
 
         $query = $this->db->Create($subject, $to); // 3s
         $this->log("Create. Database create call completed.");
-
-
-        $this->to = $to;
-        $this->from = $from;
-        $this->subject = $subject;
-
-
 
         if ($query == true) {
             // will return true if successfull else it will return false
