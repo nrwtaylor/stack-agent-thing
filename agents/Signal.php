@@ -756,16 +756,22 @@ return true;}
         }
 
         $web = "";
-        if ($this->signal_thing->uuid == $this->uuid) {
-            $web .=
+        if (isset($this->signal_thing->uuid)) {
+            if ($this->signal_thing->uuid == $this->uuid) {
+                $web .=
                 "The FORGET button will delete this SIGNAL ID " .
                 $id_text .
                 ". There is no undo.<br>";
-        } else {
-            $web .=
+            } else {
+                $web .=
                 "The FORGET button will not delete this SIGNAL ID " .
                 $id_text .
                 ". The SIGNAL will persist in the text CHANNEL. Text SIGNAL THING LINK for a forgettable link.";
+            }
+        } else {
+
+            $web .= "There are no signals. Text NEW SIGNAL to create a signal.";
+
         }
 
         $this->info = $web;

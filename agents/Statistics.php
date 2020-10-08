@@ -282,7 +282,7 @@ array(
 ));
 */
         $statistics = $this->statistics;
-        $this->statistics_thing->json->writeVariable("statistics", $statistics);
+        $this->statistics_thing->json->writeVariable(["statistics"], $statistics);
 
         return;
         // Store counts
