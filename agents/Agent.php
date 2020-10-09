@@ -1766,8 +1766,8 @@ throw new \Exception("Address not allowed.");
      */
     public function readSubject()
     {
-echo "merp";
-exit();
+//echo "merp 2020-10-07";
+//exit();
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;
