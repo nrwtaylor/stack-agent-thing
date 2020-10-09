@@ -141,16 +141,6 @@ class Headcode
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/headcode';
 
-        //        $this->thing->log('<pre> Agent "Headcode" running on Thing '. $this->thing->nuuid . '.</pre>');
-        //        $this->thing->log('<pre> Agent "Headcode" received this Thing "'.  $this->subject . '".</pre>');
-
-        //$split_time = $this->thing->elapsed_runtime();
-        //        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
-        //        $this->head_code = $this->headcode->getVariable('head_code', null);
-
-        //$this->get();
-
-        //$this->thing->log( $this->agent_prefix .' set up variables in ' . number_format($this->thing->elapsed_runtime() - $split_time) . 'ms.' );
 
         $this->state = null; // to avoid error messages
 
@@ -223,6 +213,10 @@ class Headcode
         $this->headcode->setVariable("run_at", $this->run_at);
         $this->headcode->setVariable("quantity", $this->quantity);
         $this->headcode->setVariable("available", $this->available);
+
+    //    $this->response .=
+    //        "Set headcode to " . strtoupper($this->head_code) . ". ";
+
     }
 
     function nextHeadcode()
@@ -315,6 +309,27 @@ class Headcode
         $this->headcode_list = [];
         // See if a headcode record exists.
         $findagent_thing = new Findagent($this->thing, 'headcode');
+
+        if($findagent_thing->thing_report['things'] === true) {
+            $head_code = 'X';
+            $this->headcode_list[] = $head_code;
+
+                $headcode = [
+                    "head_code" => $head_code,
+                    "refreshed_at" => $this->thing->time(), // ?
+                    "flag" => 'X',
+                    "consist" => 'X',
+                    "route" => 'X',
+                    "runtime" => 'X',
+                    "quantity" => 'X',
+                    "route" => 'X',
+                ];
+
+            $this->headcodes[] = $headcode;
+            $this->response .= 'Could not get a headcode. ';
+
+            return;
+        }
 
         $this->thing->log(
             'Agent "Headcode" found ' .
@@ -1057,7 +1072,6 @@ class Headcode
             $sms_message .= " " . strtoupper($flag_state);
         }
 
-        //$sms_message .= "" . $this->link;
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
 
@@ -1070,7 +1084,7 @@ class Headcode
         //$sms_message .= " | now " . $this->headcodeTime();
         //        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
-        $sms_message .= "Text QUANTITY";
+        //$sms_message .= "Text QUANTITY";
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
 

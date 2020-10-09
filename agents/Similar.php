@@ -157,7 +157,7 @@ class Similar extends Agent
         $t = $findagent_thing->thing_report;
 
         $count = 0;
-        if (is_array($t['things'])) {
+        if ((isset($t['things'])) and (is_array($t['things']))) {
             $count = count($t['things']);
         }
 

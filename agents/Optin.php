@@ -6,130 +6,76 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Optin {
-
-	function __construct(Thing $thing)
+class Optin extends Agent
+{
+    public function init()
     {
+        $this->node_list = ["opt-in" => ["new user", "opt-out", "unsubscribe"]];
 
-		$this->thing = $thing;
-		$this->agent_name = 'optin';
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-
-        $this->thing_report['thing'] = $this->thing->thing;
-
-
-		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-		// I think.
-		// Instead.
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-		//$this->sqlresponse = null;
-
-		$this->node_list = array("opt-in"=>array("new user", "opt-out","unsubscribe"));
-
-
-        $this->thing->log( '<pre> Agent "Usermanager" running on Thing '. $this->thing->nuuid . '.</pre>');
-
-
-        $this->variables_agent = new Variables($this->thing, "variables optin " . $this->from);
-        $this->current_time = $this->thing->json->time();
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-
-		//echo "construct email responser";
-
-		// If readSubject is true then it has been responded to.
-		// Forget thing.
-
-//		$this->previous_state = $this->thing->getState('usermanager');
-
-		//echo '<pre> Agent "Optin" previous usermanager state: ';echo $this->previous_state;echo'</pre>';
-
-        $this->get();
-		$this->readSubject();
-
-        $this->set();
- 		$this->respond();
-
-		//$this->thing_report = $thing_report;
-
-		$this->thing->flagGreen();
-
-//		echo '<pre> Agent "Optin" completed</pre>';
-
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.' );
-
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        $this->thing_report['log'] = $this->thing->log;
-
-
-    	return;
-	}
-
-
+        $this->thing->flagGreen();
+    }
 
     function set()
     {
         $this->variables_agent->setVariable("counter", $this->counter);
-        $this->variables_agent->setVariable("refreshed_at", $this->current_time);
-
-//        $this->thing->choice->save('usermanager', $this->state);
-
-        return;
+        $this->variables_agent->setVariable(
+            "refreshed_at",
+            $this->current_time
+        );
     }
-
 
     function get()
     {
-        $this->counter = $this->variables_agent->getVariable("counter");
-        $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables optin " . $this->from
+        );
 
-        $this->thing->log( 'Agent "Optin" loaded ' . $this->counter . ".");
+        $this->counter = $this->variables_agent->getVariable("counter");
+        $this->refreshed_at = $this->variables_agent->getVariable(
+            "refreshed_at"
+        );
+
+        $this->thing->log('Agent "Optin" loaded ' . $this->counter . ".");
 
         $this->counter = $this->counter + 1;
-
-        return;
     }
 
-    public function makeSMS() {
-
+    public function makeSMS()
+    {
         switch ($this->counter) {
             case 1:
-                $sms = "OPT-IN | Thank you for opting into Stackr.  " . $this->web_prefix ." | Opted-in.";
+                $sms =
+                    "OPT-IN | Thank you for opting into " .
+                    $this->short_name .
+                    ". " .
+                    $this->web_prefix .
+                    " | Opted-in.";
                 break;
             case 2:
-                $sms = "OPT-IN | Read our Privacy Policy at " . $this->web_prefix . "privacy | Opted-in.";
+                $sms =
+                    "OPT-IN | Read our Privacy Policy at " .
+                    $this->web_prefix .
+                    "privacy | Opted-in.";
                 break;
 
-            case null;
+            case null:
 
             default:
-                $sms = "OPT-IN | " . $this->web_prefix . "privacy | Acknowledged.";
-
+                $sms =
+                    "OPT-IN | " . $this->web_prefix . "privacy | Acknowledged.";
         }
 
-            $sms .= " | counter " . $this->counter;
+        $sms .= " | counter " . $this->counter;
 
-            $this->sms_message = $sms;
-            $this->thing_report['sms'] = $sms;
-
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
-
-    public function makeEmail() {
-
+    public function makeEmail()
+    {
         switch ($this->counter) {
             case 1:
-
                 $subject = "Well hello?";
 
                 $message = "So an action you took (or someone else took) opted you into 
@@ -150,34 +96,33 @@ class Optin {
             case 2:
                 $subject = "Opt-in request accepted";
 
-                $message = "Thank you for your opt-in request.  'optin' has 
-                    added ".$this->from." to the accepted list of Stackr emails.
+                $message =
+                    "Thank you for your opt-in request.  'optin' has 
+                    added " .
+                    $this->from .
+                    " to the accepted list of Stackr emails.
                     You can now use Stackr.  Keep on stacking.\n\n";
 
                 break;
 
-            case null;
+            case null:
 
             default:
-                $message = "OPT-IN | Acknowledged.  " . $this->web_prefix . "privacy";
-
+                $message =
+                    "OPT-IN | Acknowledged.  " . $this->web_prefix . "privacy";
         }
 
-            $this->message = $message;
-            $this->thing_report['email'] = $message;
-
+        $this->message = $message;
+        $this->thing_report['email'] = $message;
     }
 
     function makeWeb()
     {
-
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/start';
 
-        $this->node_list = array("new user"=>array("glossary", "warranty"));
+        $this->node_list = ["new user" => ["glossary", "warranty"]];
 
         $this->makeChoices();
-
-//        if (!isset($this->html_image)) {$this->makePNG();}
 
         $web = "<b>Opt-in Agent</b>";
         $web .= "<p>";
@@ -185,7 +130,6 @@ class Optin {
 
         $web .= "Text OPTIN in your text channel.";
 
-//        $web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         $web .= "<br>";
 
         $web .= "<p>";
@@ -193,42 +137,36 @@ class Optin {
         $this->thing_report['web'] = $web;
     }
 
-
-    private function makeChoices()
+    public function makeChoices()
     {
+        $choices = $this->thing->choice->makeLinks('opt-in');
 
-            $choices = $this->thing->choice->makeLinks('opt-in');
-
-            $this->choices = $choices;
-            $this->thing_report['choices'] = $choices;
-
+        $this->choices = $choices;
+        $this->thing_report['choices'] = $choices;
     }
 
+    public function respondResponse()
+    {
+        // Thing actions
 
+        // New user is triggered when there is no nom_from in the db.
+        // If this is the case, then Stackr should send out a response
+        // which explains what stackr is and asks either
+        // for a reply to the email, or to send an email to opt-in@<email postfix>.
 
-	public function respond() {
+        $this->thing->json->setField("settings");
+        $this->thing->json->writeVariable(
+            [$this->agent_name, "opt-in", "received_at"],
+            date("Y-m-d H:i:s")
+        );
 
-		// Thing actions
+        $this->thing->flagGreen();
 
-		// New user is triggered when there is no nom_from in the db.
-		// If this is the case, then Stackr should send out a response
-		// which explains what stackr is and asks either
-		// for a reply to the email, or to send an email to opt-in@<email postfix>.
+        // Get the current user-state.
 
-		$this->thing->json->setField("settings");
-		$this->thing->json->writeVariable(array($this->agent_name,"opt-in",
-			"received_at"),  date("Y-m-d H:i:s")
-			);
-
-		$this->thing->flagGreen();
-
-		// Get the current user-state.
-
-
-
-        $this->makeSMS();
-        $this->makeEmail();
-        $this->makeChoices();
+        //    $this->makeSMS();
+        //  $this->makeEmail();
+        //   $this->makeChoices();
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
@@ -239,32 +177,25 @@ class Optin {
 
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->thing_report['help'] = 'Agent "Optin" responding to an instruction to opt-in.';
-        $this->makeWeb();
+        $this->thing_report['help'] =
+            'Agent "Optin" responding to an instruction to opt-in.';
+        //    $this->makeWeb();
 
-		return;
-	}
+        //		return;
+    }
 
-
-
-	public function readSubject() {
+    public function readSubject()
+    {
         $this->optin();
-//		$this->thing->choice->Choose("new user");
-		return;		
+    }
 
-	}
-
-
-	function optin() {
-
+    function optin()
+    {
         // Call the Usermanager agent and update the state
         $agent = new Usermanager($this->thing, "usermanager optin");
-        $this->thing->log( $this->agent_prefix .'called the Usermanager to update user state to optin.' );
-
-
-		return;
-	}
+        $this->thing->log(
+            $this->agent_prefix .
+                'called the Usermanager to update user state to optin.'
+        );
+    }
 }
-
-
-?>

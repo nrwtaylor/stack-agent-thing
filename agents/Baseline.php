@@ -258,7 +258,7 @@ class Baseline extends Agent
             isset($statistics_agent->number)
         ) {
             $this->statistics_text =
-                $statistics_agent->number .
+                $statistics_agent->number . 's'.
                 ' ' .
                 "[" .
                 $statistics_agent->minimum .
@@ -285,7 +285,7 @@ class Baseline extends Agent
 
         $sms .= trim($this->short_message) . "\n";
 
-        if (is_string($this->response)) {
+        if ((is_string($this->response)) and ($this->response != "")) {
             $sms .= $this->response . "\n";
         }
 

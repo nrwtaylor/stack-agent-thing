@@ -185,7 +185,7 @@ class Burst extends Agent
 
         if ($this->verbosity >= 2) {
             $count = 0;
-            if (is_array($t['things'])) {
+            if ((isset($t['things'])) and (is_array($t['things']))) {
                 $count = count($t['things']);
             }
 
@@ -204,6 +204,8 @@ class Burst extends Agent
         $this->burst = 0;
         $this->burstiness = 0;
         $this->flag = "green";
+
+if (!isset($t['things'][0]['created_at'])) {return true;}
 
         $created_at = $t['things'][0]['created_at'];
 

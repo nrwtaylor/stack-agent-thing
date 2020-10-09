@@ -149,6 +149,8 @@ class Signal extends Agent
         }
         $this->getSignal();
 
+if (!isset($this->signals)) {return true;}
+
         foreach ($this->signals as $i => $signal) {
             if ($signal['uuid'] == $this->signal_thing->uuid) {
                 //var_dump($signal);
@@ -469,6 +471,10 @@ class Signal extends Agent
             return;
         }
 
+if (!isset($this->thing->thing->variables)) {
+$this->response .= 'No stack found. ';
+return true;}
+
         if (
             isset(
                 $this->thing->json->jsontoArray($this->thing->thing->variables)[
@@ -750,16 +756,22 @@ class Signal extends Agent
         }
 
         $web = "";
-        if ($this->signal_thing->uuid == $this->uuid) {
-            $web .=
+        if (isset($this->signal_thing->uuid)) {
+            if ($this->signal_thing->uuid == $this->uuid) {
+                $web .=
                 "The FORGET button will delete this SIGNAL ID " .
                 $id_text .
                 ". There is no undo.<br>";
-        } else {
-            $web .=
+            } else {
+                $web .=
                 "The FORGET button will not delete this SIGNAL ID " .
                 $id_text .
                 ". The SIGNAL will persist in the text CHANNEL. Text SIGNAL THING LINK for a forgettable link.";
+            }
+        } else {
+
+            $web .= "There are no signals. Text NEW SIGNAL to create a signal.";
+
         }
 
         $this->info = $web;
@@ -988,8 +1000,10 @@ class Signal extends Agent
                 $color = $this->{'signal_' . $state};
             }
         }
-
+$signal_id = "X";
+if (isset($this->signal_thing->uuid)) {
         $signal_id = $this->signal_thing->uuid;
+}
         $signal_nuuid = strtoupper(substr($signal_id, 0, 4));
         $signal_id = $this->idSignal($signal_id);
 
@@ -1040,15 +1054,22 @@ class Signal extends Agent
                 );
             }
         } else {
+
+/*
+            $flag_nuuid = "X";
+            if (isset($this->flag->nuuid)) {
+                $flag_nuuid = $this->flag_nuuid;
+            }
+
             imagestring(
                 $this->image,
                 2,
                 150,
                 100,
-                $this->flag->nuuid,
+                $flag_nuuid,
                 $textcolor
             );
-
+*/
             imagestring(
                 $this->image,
                 2,

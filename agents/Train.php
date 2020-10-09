@@ -490,9 +490,9 @@ class Train extends Agent
 
             $refreshed_at = "X";
 
-            if (!isset($variables['train'])) {
-                continue;
-            }
+            //if (!isset($variables['train'])) {
+            //    continue;
+            //}
 
             if (isset($variables['train']['refreshed_at'])) {
                 $refreshed_at = $variables["train"]["refreshed_at"];
@@ -1342,9 +1342,16 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         $this->runat_agent->set();
 
         $t = new Runat($this->thing, "runat");
-        $t->day = $this->runat['day'];
-        $t->hour = $this->runat['hour'];
-        $t->minute = $this->runat['minute'];
+
+//        $t->day = $this->runat['day'];
+//        $t->hour = $this->runat['hour'];
+//        $t->minute = $this->runat['minute'];
+
+        $t->day = $this->runat->day;
+        $t->hour = $this->runat->hour;
+        $t->minute = $this->runat->minute;
+
+
 
         $t->set();
     }
@@ -1947,15 +1954,15 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
     function makeTXT()
     {
-        $txt =
-            'This is a TRAIN for RAILWAY ' .
-            $this->variables_agent->nuuid .
-            '. ';
-        $txt .= "\n";
+     //   $txt =
+     //       'This is a TRAIN for RAILWAY ' .
+     //       $this->variables_agent->nuuid .
+     //       '. ';
+     //   $txt .= "\n";
 
-        $this->thing_report['txt'] = "merp";
-        return;
-
+     //   $this->thing_report['txt'] = "merp";
+    //    return;
+$txt = "";
         if (!isset($this->trains)) {
             $this->getTrains();
         }
@@ -2116,6 +2123,130 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
             $txt .= "\n";
         }
+
+
+
+/*
+
+        $table = [];
+
+
+        foreach ($this->trains as $key => $train) {
+
+            $head_code = "X";
+            if (isset($train['headcode'])) {
+                $head_code = $train['headcode'];
+            }
+            $table[$head_code] = [];
+            $table[$head_code]['head_code'] = $head_code;
+
+
+            $index = 'X';
+            if (isset($train['index'])) {
+                  $index = $train['index'];
+            }
+            $table[$head_code]['index'] = $index;
+
+            $alias = "X";
+            if (isset($train['alias'])) {
+                $alias = $train['alias'];
+            }
+            $table[$head_code]['alias'] = $alias;
+
+
+            $state = "X";
+            if (isset($train['state'])) {
+                $state =$train['state'];
+            }
+            $table[$head_code]['flag'] = $state;
+
+            $flag = "X";
+            if (isset($train['state'])) {
+                $flag =$train['state'];
+            }
+            $table[$head_code]['flag'] = $flag;
+
+            $run_at = "X";
+            if (isset($train['runat'])) {
+                $run_at = $this->trainTime($train['runat']);
+            }
+            $table[$head_code]['run_at'] = $run_at;
+
+
+            $end_at = "X";
+            if (isset($train['endat'])) {
+                $end_at = $this->trainTime($train['endat']);
+            }
+            $table[$head_code]['end_at'] = $end_at;
+
+
+            $runtime = "X";
+            if (isset($train['runtime'])) {
+                $runtime = $train['runtime'];
+            }
+            $table[$head_code]['runtime'] = $runtime;
+
+
+
+            $available = $train['available'];
+            $table[$head_code]['available'] = $available;
+
+
+            $quantity = " ";
+            if (isset($train['quantity'])) {
+                $quantity = $train['quantity'];
+            }
+            $table[$head_code]['quantity'] = $quantity;
+
+            $consist = $train['consist'];
+            $table[$head_code]['consist'] = $consist;
+
+            if (isset($train['route'])) {
+               $route = $train['route'];
+            }
+            $table[$head_code]['route'] = $route;
+
+        }
+        $table_agent = new Table($this->thing, "table");
+
+        $table_layout = [
+            'index' => ['INDEX' => 7],
+            'head_code' => ['HEAD' => 4],
+            'alias' => ['ALIAS' => 10],
+            'state' => ['STATE'=>6],
+            'flag' => ['FLAG' => 6],
+            'day' => ['DAY' => 4],
+
+            'run_at' => ['RUNAT' => 6],
+            'end_at' => ['ENDAT' => 6],
+
+            'runtime' => ['RUNTIME' => 8],
+
+            'available' => ['AVAILABLE' => 6],
+            'quantity' => ['QUANTITY' => 9],
+            'consist' => ['CONSIST' => 6],
+            'route' => ['ROUTE' => 6],
+        ];
+
+$table_agent->table = $table_layout;
+
+
+
+
+
+
+$table_text = $table_agent->textTable($table);
+$txt .= $table_text;
+
+
+
+*/
+
+
+
+
+
+
         //exit();
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;

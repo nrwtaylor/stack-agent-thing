@@ -142,7 +142,6 @@ class Agent
 
         $this->init();
         $this->get();
-
 try {
         $this->read();
 
@@ -182,13 +181,18 @@ try {
                     $t->getTraceAsString()
             );
 
+echo $t->getLine(). "---".$t->getFile() . $t->getMessage();
+echo "\n";
+
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
             //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
             $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
-echo "foo";
-exit();
+
+echo $t->getLine(). "---".$t->getFile() . $t->getMessage();
+echo "\n";
+
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -743,6 +747,7 @@ exit();
      */
     public function getMeta($thing = null)
     {
+/*
         if ($thing == null) {
             $thing = $this->thing;
         }
@@ -774,6 +779,43 @@ exit();
         } else {
             $this->created_at = $thing->created_at;
         }
+*/
+
+
+        if ($thing == null) {
+            $thing = $this->thing;
+        }
+
+        // Non-nominal
+        $this->uuid = $thing->uuid;
+
+        if (isset($thing->to)) {
+            $this->to = $thing->to;
+        }
+
+        // Potentially nominal
+        if (isset($thing->subject)) {
+            $this->subject = $thing->subject;
+        }
+
+        // Treat as nomina
+        if (isset($thing->from)) {
+            $this->from = $thing->from;
+        }
+        // Treat as nomina
+        if (isset($thing->created_at)) {
+            $this->created_at = $thing->created_at;
+        }
+
+        if (isset($this->thing->thing->created_at)) {
+            $this->created_at = strtotime($this->thing->thing->created_at);
+        }
+if (!isset($this->to)) {$this->to = "null";}
+if (!isset($this->from)) {$this->from = "null";}
+if (!isset($this->subject)) {$this->subject = "merp";}
+//if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
+if (!isset($this->created_at)) {$this->created_at = time();}
+
     }
 
     public function currentAgent()
@@ -1353,7 +1395,8 @@ exit();
     public function timestampAgent($text = null)
     {
         if ($text == null) {
-            $text = $this->thing->thing->created_at;
+            //$text = $this->thing->thing->created_at;
+            $text = $this->created_at;
         }
         $time = strtotime($text);
 
@@ -1635,7 +1678,6 @@ throw new \Exception("Address not allowed.");
             if (count($agents) > 1 and $agent_class_name == "Email") {
                 continue;
             }
-
             if ($this->getAgent($agent_class_name)) {
                 $score = 1;
                 $responsive_agents[] = [
@@ -1887,6 +1929,7 @@ throw new \Exception("Address not allowed.");
             return;
         }
 
+
         $uuid = new Uuid($this->thing, "uuid");
         $uuid = $uuid->extractUuid($input);
 
@@ -1921,7 +1964,10 @@ throw new \Exception("Address not allowed.");
         // Then run it.
 
         // So look hear to generalize that.
+
         $text = urldecode($agent_input_text);
+
+        //$text = urldecode($input);
 
         //$text = urldecode($input);
 
@@ -2195,14 +2241,14 @@ throw new \Exception("Address not allowed.");
         // character recognizer of concepts.
         $emoji_thing = new Emoji($this->thing, "emoji");
         $this->thing_report = $emoji_thing->thing_report;
-        if (isset($emoji_thing->emojis)) {
+        if ($emoji_thing->hasEmoji() === true) {
+        //if ((isset($emoji_thing->emojis)) and ($emoji_thing->emojis != [])) {
             // Emoji found.
             $input = $emoji_thing->translated_input;
         }
         // expand out chinese characters
         // Added to stack 29 July 2019 NRW Taylor
         $this->thing->log("expand out chinese characters");
-
         $chinese_agent = new Chinese($this->thing, 'chinese');
         if ($chinese_agent->hasChinese($input) === true) {
             $chinese_thing = new Chinese($this->thing, $input);
@@ -2215,7 +2261,6 @@ throw new \Exception("Address not allowed.");
             }
         }
         $this->thing->log("expand out compression phrases");
-
         // And then compress
         // devstack - replace this with a fast general character
         // character recognizer of concepts.
@@ -2224,10 +2269,8 @@ throw new \Exception("Address not allowed.");
             // Compressions found.
             $input = $compression_thing->filtered_input;
         }
-
         $input = trim($input);
         $this->input = $input;
-
         // Check if it is a command (starts with s slash)
         if (strtolower(substr($input, 0, 2)) != "s/") {
             // Okay here check for input
@@ -2404,6 +2447,7 @@ throw new \Exception("Address not allowed.");
             }
         }
 
+
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
             $this->thing->log(
@@ -2423,6 +2467,7 @@ throw new \Exception("Address not allowed.");
                 'ms.',
             "OPTIMIZE"
         );
+
 
         $arr = $this->extractAgents($input);
 
@@ -2867,6 +2912,7 @@ throw new \Exception("Address not allowed.");
                     return $this->thing_report;
                 }
         }
+
 
         // So if it falls through to here ... then we are really struggling.
 

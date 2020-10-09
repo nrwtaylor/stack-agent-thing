@@ -30,8 +30,9 @@ class Uuid extends Agent
             "Makes a universally unique identifier. Try NUUID.";
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
-
-        $this->created_at = strtotime($this->thing->thing->created_at);
+//if (isset($this->thing->thing->created_at)) {
+//        $this->created_at = strtotime($this->thing->thing->created_at);
+//}
     }
 
     /**
@@ -89,7 +90,6 @@ class Uuid extends Agent
         if (!isset($this->uuids)) {$this->extractUuids($text);}
 
         if (count($this->uuids) > 0) {return true;} // Too many. Is not A uui>
-
         return false;
 
     }
@@ -192,8 +192,6 @@ class Uuid extends Agent
 
         $web .= "<br>";
         $web .= $this->readUuid() . "<br>";
-
-        $web .=
             "CREATED AT " .
             strtoupper(date('Y M d D H:m', $this->created_at)) .
             "<br>";

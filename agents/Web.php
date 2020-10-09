@@ -251,6 +251,8 @@ class Web extends Agent
 
         $things = $this->getThings('thing');
 
+        if ($things == null) {return $this->link_uuid;}
+
         $this->max_index = 0;
 
         $match = 0;

@@ -1,173 +1,239 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Wordgame {
-
-	function __construct(Thing $thing, $agent_input = null)
+class Wordgame
+{
+    function __construct(Thing $thing, $agent_input = null)
     {
-//echo "meep";
-//var_dump($agent_input);
+        //echo "meep";
+        //var_dump($agent_input);
 
         $this->start_time = $thing->elapsed_runtime();
-        if ($agent_input == null) {}
+        if ($agent_input == null) {
+        }
         $this->agent_input = $agent_input;
-		$this->thing = $thing;
+        $this->thing = $thing;
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->agent_prefix = 'Agent "Word" ';
 
-//        $this->thing_report  = array("thing"=>$this->thing->thing);
+        //        $this->thing_report  = array("thing"=>$this->thing->thing);
         $this->thing_report['thing'] = $this->thing->thing;
 
-	    $this->uuid = $thing->uuid;
+        $this->uuid = $thing->uuid;
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/words/';
 
-//$this->getLetters();
-//$this->word_agent = new Word($this->thing, "word");
-//$this->word_agent->ewolWords();
+        //$this->getLetters();
+        //$this->word_agent = new Word($this->thing, "word");
+        //$this->word_agent->ewolWords();
 
-//$this->getLetters();
+        //$this->getLetters();
 
         $this->show_best_words = true;
         $this->show_best_score = true;
 
-        if (!isset($thing->to)) {$this->to = null;} else {$this->to = $thing->to;}
-        if (!isset($thing->from)) {$this->from = null;} else {$this->from = $thing->from;}
-	    if (!isset($thing->subject)) {$this->subject = $agent_input;} else {$this->subject = $thing->subject;}
+        if (!isset($thing->to)) {
+            $this->to = null;
+        } else {
+            $this->to = $thing->to;
+        }
+        if (!isset($thing->from)) {
+            $this->from = null;
+        } else {
+            $this->from = $thing->from;
+        }
+        if (!isset($thing->subject)) {
+            $this->subject = $agent_input;
+        } else {
+            $this->subject = $thing->subject;
+        }
 
+        $this->sqlresponse = null;
 
-		$this->sqlresponse = null;
+        $this->thing->log(
+            $this->agent_prefix .
+                'running on Thing ' .
+                $this->thing->nuuid .
+                '.'
+        );
+        $this->thing->log(
+            $this->agent_prefix .
+                'received this Thing "' .
+                $this->subject .
+                '".'
+        );
 
-		$this->thing->log($this->agent_prefix . 'running on Thing ' . $this->thing->nuuid .'.');
-		$this->thing->log($this->agent_prefix . 'received this Thing "' . $this->subject .  '".');
+        //        $test = "6     U+1F604     😄   grinning face with smiling eyes     eye | face | grinning face with smiling eyes | mouth | open | smile";
 
-//        $test = "6     U+1F604     😄   grinning face with smiling eyes     eye | face | grinning face with smiling eyes | mouth | open | smile";
+        //        $string =  $this->subject;
 
+        //        $words =$this->extractWord($string);
 
-//        $string =  $this->subject;
+        //        $this->getWord();
 
-//        $words =$this->extractWord($string);
-
-//        $this->getWord();
-
-
-
-
-        $this->keywords = array();
+        $this->keywords = [];
 
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("word", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "word",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             //$this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("word", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["word", "refreshed_at"],
+                $time_string
+            );
         }
 
         // If it has already been processed ...
-        $this->search_words = $this->thing->json->readVariable( array("word", "letters") );
+        $this->search_words = $this->thing->json->readVariable([
+            "word",
+            "letters",
+        ]);
 
         $this->response = "Loaded letters.";
 
-        if ($this->search_words == false)  {
+        if ($this->search_words == false) {
             $this->readSubject();
         }
 
-if ($this->search_words == "s/ is wordgame button") {$this->search_words ="";$this->response = "Button pressed.";}
-//$this->getLetters();
-$this->word_agent = new Word($this->thing, "word");
-$this->word_agent->ewolWords();
+        if ($this->search_words == "s/ is wordgame button") {
+            $this->search_words = "";
+            $this->response = "Button pressed.";
+        }
+        //$this->getLetters();
+        $this->word_agent = new Word($this->thing, "word");
+        $this->word_agent->ewolWords();
 
-$this->getLetters();
+        $this->getLetters();
 
+        $this->thing->json->writeVariable(
+            ["word", "letters"],
+            $this->search_words
+        );
 
-            $this->thing->json->writeVariable( array("word", "letters"), $this->search_words );
+        if ($this->agent_input == null) {
+            $this->Respond();
+        }
 
-            if ($this->agent_input == null) {$this->Respond();}
-
-            $this->set();
+        $this->set();
 
         if (count($this->best_words) != 0) {
-		    $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->best_words[0]['word'] . '.');
+            $this->thing->log(
+                $this->agent_prefix .
+                    'completed with a reading of ' .
+                    $this->best_words[0]['word'] .
+                    '.'
+            );
         } else {
             $this->thing->log($this->agent_prefix . 'did not find words.');
         }
 
-        $this->thing->log($this->agent_prefix . 'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
+        $this->thing->log(
+            $this->agent_prefix .
+                'ran for ' .
+                number_format(
+                    $this->thing->elapsed_runtime() - $this->start_time
+                ) .
+                'ms.'
+        );
 
         $this->thing_report['log'] = $this->thing->log;
         $this->thing_report['response'] = $this->response;
-
-	}
+    }
 
     function set()
     {
         $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable( array("wordgame", "letters"), $this->search_words );
+        $names = $this->thing->json->writeVariable(
+            ["wordgame", "letters"],
+            $this->search_words
+        );
         //$this->thing->json->setField("variables");
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("wordgame", "refreshed_at"), $time_string );
-
-
-
+        $this->thing->json->writeVariable(
+            ["wordgame", "refreshed_at"],
+            $time_string
+        );
     }
 
     function scoreWord($text)
     {
-        if (($text =="") or ($text == null)) {return 0;}
+        if ($text == "" or $text == null) {
+            return 0;
+        }
 
-        if (!isset($this->letter_scores)) {$this->initBag();}
+        if (!isset($this->letter_scores)) {
+            $this->initBag();
+        }
 
         //var_dump($text);
         $letters = str_split($text);
         $score = 0;
-        foreach($letters as $letter) {
-
+        foreach ($letters as $letter) {
             $score += $this->letter_scores[strtoupper($letter)];
         }
         //echo $score;
 
         return $score;
-
     }
-
 
     function initBag()
     {
+        $letter_bag = [
+            0 => [" " => 2],
+            1 => [
+                "E" => 12,
+                "A" => 9,
+                "I" => 9,
+                "O" => 8,
+                "N" => 6,
+                "R" => 6,
+                "T" => 6,
+                "L" => 4,
+                "S" => 4,
+                "U" => 4,
+            ],
+            2 => ["D" => 4, "G" => 3],
+            3 => ["B" => 2, "C" => 2, "M" => 2, "P" => 2],
+            4 => ["F" => 2, "H" => 2, "V" => 2, "W" => 2, "Y" => 2],
+            5 => ["K" => 1],
+            8 => ["J" => 1, "X" => 1],
+            10 => ["Q" => 1, "Z" => 1],
+        ];
 
-        $letter_bag = array(0=>array(" "=>2),
-                            1=>array("E"=>12,"A"=>9,"I"=>9,"O"=>8,"N"=>6,"R"=>6,"T"=>6,"L"=>4,"S"=>4,"U"=>4),
-                            2=>array("D"=>4,"G"=>3),
-                            3=>array("B"=>2, "C"=>2, "M"=>2, "P"=>2),
-                            4=>array("F"=>2, "H"=>2, "V"=>2, "W"=>2, "Y"=>2),
-                            5=>array("K"=>1),
-                            8=>array("J"=>1,"X"=>1),
-                            10=>array("Q"=>1,"Z"=>1));
-
-        $this->letter_tiles = array();
-        foreach($letter_bag as $score=>$tile_set) {
-            foreach($tile_set as $letter=>$quantity) {
-                foreach(range(1,$quantity) as $n) {
-                    $this->letter_tiles[] = array("letter"=>$letter,"score"=>$score);
+        $this->letter_tiles = [];
+        foreach ($letter_bag as $score => $tile_set) {
+            foreach ($tile_set as $letter => $quantity) {
+                foreach (range(1, $quantity) as $n) {
+                    $this->letter_tiles[] = [
+                        "letter" => $letter,
+                        "score" => $score,
+                    ];
                     $this->letter_scores[$letter] = $score;
                 }
             }
         }
-
-
     }
 
     function randomLetters($n = null)
     {
-        if ($n == null) {$n = 7;}
+        if ($n == null) {
+            $n = 7;
+        }
 
-        if (!isset($this->letter_tiles)) {$this->initBag();}
+        if (!isset($this->letter_tiles)) {
+            $this->initBag();
+        }
         shuffle($this->letter_tiles);
 
-        $player_letter_tiles = array();
-        $elems = array();
-        foreach(range(1,7) as $n) {
+        $player_letter_tiles = [];
+        $elems = [];
+        foreach (range(1, 7) as $n) {
             $tile = array_pop($this->letter_tiles);
             //$player_letter_tiles[] = array_pop($tile);
             $player_letter_tiles[] = $tile;
@@ -176,17 +242,18 @@ $this->getLetters();
         }
 
         return $elems;
-
     }
 
     function getLetters()
     {
-        if (!isset($this->letter_tiles)) {$this->initBag();}
-    shuffle($this->letter_tiles);
+        if (!isset($this->letter_tiles)) {
+            $this->initBag();
+        }
+        shuffle($this->letter_tiles);
 
-        $player_letter_tiles = array();
-        $elems = array();
-        foreach(range(1,7) as $n) {
+        $player_letter_tiles = [];
+        $elems = [];
+        foreach (range(1, 7) as $n) {
             $tile = array_pop($this->letter_tiles);
             //$player_letter_tiles[] = array_pop($tile);
             $player_letter_tiles[] = $tile;
@@ -194,170 +261,169 @@ $this->getLetters();
             $elems[] = $tile['letter'];
         }
 
-$this->player_tiles = $player_letter_tiles;
+        $this->player_tiles = $player_letter_tiles;
 
-
-
-if ((isset($this->search_words)) and ($this->search_words != "")) {
-    $elems = str_split($this->search_words);} else {
-$this->search_words = implode($elems,"");
-$this->response = "Selected 7 letters";
-}
-
-
-// https://stackoverflow.com/questions/12160843/generate-all-possible-combinations-using-a-set-of-strings
-
-$letter_arrangements = array();
-//$set = array("a", "b", "c");
-$this->gen_nos($elems, $letter_arrangements);
-
-// Remove dupes
-$letter_arrangements = array_unique($letter_arrangements);
-
-
-// Create seven tile variants for asterisk
-
-
-foreach ($letter_arrangements as $letter_arrangement) {
-    $letters = str_split($letter_arrangement);
-    foreach($letters as $i=>$letter) {
-        if (($letter == "*")) {
-                $letter_arrangement[$i] = "?";
-
-                $max_padding = 7 - mb_strlen($letter_arrangement);
-
-                foreach(range(0,$max_padding) as $x) {
-                    if ($x == 0) {continue;} // Allow zero space
-                    //$inserted = array($v);
-                    //array_splice( $letter_arrangement, $i, 0, $inserted );
-
-                    $letter_arrangement = substr_replace($letter_arrangement, "?", $i, 0);
-                    $letter_arrangements[] = $letter_arrangement;
-                    echo $letter_arrangement . "\n";
-                }
-          }
-    }
-}
-
-
-
-// Create A-Z variants for blanks
-
-foreach ($letter_arrangements as $letter_arrangement) {
-    $letters = str_split($letter_arrangement);
-    foreach($letters as $i=>$letter) {
-        if (($letter == " ") or ($letter == "?")) {
-            foreach(range('a','z') as $v){
-                $letter_arrangement[$i] = strtoupper($v);
-                $letter_arrangements[] = $letter_arrangement;
-            }
-          }
-    }
-}
-
-
-
-
-
-// Remove variants with a space
-
-foreach ($letter_arrangements as $i=>$letter_arrangement) {
-    $letters = str_split($letter_arrangement);
-    foreach($letters as $key=>$letter) {
-        if(($letter == " ") or ($letter =="?")) {
-            unset($letter_arrangements[$i]);
+        if (isset($this->search_words) and $this->search_words != "") {
+            $elems = str_split($this->search_words);
+        } else {
+            $this->search_words = implode("", $elems);
+            $this->response = "Selected 7 letters";
         }
-        
-    }
-}
 
+        // https://stackoverflow.com/questions/12160843/generate-all-possible-combinations-using-a-set-of-strings
 
-$this->letter_arrangements = $letter_arrangements;
+        $letter_arrangements = [];
+        //$set = array("a", "b", "c");
+        $this->gen_nos($elems, $letter_arrangements);
 
-//$word = new Word($this->thing, "word");
+        // Remove dupes
+        $letter_arrangements = array_unique($letter_arrangements);
 
-$min_score = 1;
-$high_score = 0;
-$best_word_list = array();
-foreach($this->letter_arrangements as $letter_arrangement) {
+        // Create seven tile variants for asterisk
 
-    $score = $this->scoreWord($letter_arrangement);
-    //if ($score <= $min_score) {continue;}
-if (mb_strlen($letter_arrangement) == 1) {continue;} //Disallow 1 word words
+        foreach ($letter_arrangements as $letter_arrangement) {
+            $letters = str_split($letter_arrangement);
+            foreach ($letters as $i => $letter) {
+                if ($letter == "*") {
+                    $letter_arrangement[$i] = "?";
 
-    // Quicker to score first.  Then do a full dictionary lookup.
-//    $is_word = $word->findWord("ewol",$letter_arrangement);
-//var_dump($this->word_agent->ewol_dictionary);
-//exit();
-$is_word = isset($this->word_agent->ewol_dictionary[strtolower($letter_arrangement)]);
+                    $max_padding = 7 - mb_strlen($letter_arrangement);
 
-    if ( $is_word == true ) {
-        $high_score = $score;
-        array_unshift($best_word_list, array("word"=>$letter_arrangement,"score"=>$score));
+                    foreach (range(0, $max_padding) as $x) {
+                        if ($x == 0) {
+                            continue;
+                        } // Allow zero space
+                        //$inserted = array($v);
+                        //array_splice( $letter_arrangement, $i, 0, $inserted );
 
-        //$score = $this->scoreWord($letter_arrangement);
-        $this->thing->log($letter_arrangement. " " . $score . ".");
-    }
+                        $letter_arrangement = substr_replace(
+                            $letter_arrangement,
+                            "?",
+                            $i,
+                            0
+                        );
+                        $letter_arrangements[] = $letter_arrangement;
+                        echo $letter_arrangement . "\n";
+                    }
+                }
+            }
+        }
 
-}
+        // Create A-Z variants for blanks
 
-//var_dump($best_word_list);
+        foreach ($letter_arrangements as $letter_arrangement) {
+            $letters = str_split($letter_arrangement);
+            foreach ($letters as $i => $letter) {
+                if ($letter == " " or $letter == "?") {
+                    foreach (range('a', 'z') as $v) {
+                        $letter_arrangement[$i] = strtoupper($v);
+                        $letter_arrangements[] = $letter_arrangement;
+                    }
+                }
+            }
+        }
 
-//https://stackoverflow.com/questions/1597736/how-to-sort-an-array-of-associative-arrays-by-value-of-a-given-key-in-php
+        // Remove variants with a space
 
-$score = array();
-foreach ($best_word_list as $key => $row)
-{
-    $score[$key] = $row['score'];
-}
+        foreach ($letter_arrangements as $i => $letter_arrangement) {
+            $letters = str_split($letter_arrangement);
+            foreach ($letters as $key => $letter) {
+                if ($letter == " " or $letter == "?") {
+                    unset($letter_arrangements[$i]);
+                }
+            }
+        }
+
+        $this->letter_arrangements = $letter_arrangements;
+
+        //$word = new Word($this->thing, "word");
+
+        $min_score = 1;
+        $high_score = 0;
+        $best_word_list = [];
+        foreach ($this->letter_arrangements as $letter_arrangement) {
+            $score = $this->scoreWord($letter_arrangement);
+            //if ($score <= $min_score) {continue;}
+            if (mb_strlen($letter_arrangement) == 1) {
+                continue;
+            } //Disallow 1 word words
+
+            // Quicker to score first.  Then do a full dictionary lookup.
+            //    $is_word = $word->findWord("ewol",$letter_arrangement);
+            //var_dump($this->word_agent->ewol_dictionary);
+            //exit();
+            $is_word = isset(
+                $this->word_agent->ewol_dictionary[
+                    strtolower($letter_arrangement)
+                ]
+            );
+
+            if ($is_word == true) {
+                $high_score = $score;
+                array_unshift($best_word_list, [
+                    "word" => $letter_arrangement,
+                    "score" => $score,
+                ]);
+
+                //$score = $this->scoreWord($letter_arrangement);
+                $this->thing->log($letter_arrangement . " " . $score . ".");
+            }
+        }
+
+        //var_dump($best_word_list);
+
+        //https://stackoverflow.com/questions/1597736/how-to-sort-an-array-of-associative-arrays-by-value-of-a-given-key-in-php
+
+        $score = [];
+        foreach ($best_word_list as $key => $row) {
+            $score[$key] = $row['score'];
+        }
         array_multisort($score, SORT_DESC, $best_word_list);
 
         $this->best_words = $best_word_list;
-
     }
 
     function gen_nos(&$set, &$results)
     {
+        //exit();
+        for ($i = 0; $i < count($set); $i++) {
+            $results[] = $set[$i];
+            $tempset = $set;
+            array_splice($tempset, $i, 1);
+            $tempresults = [];
+            $this->gen_nos($tempset, $tempresults);
+            foreach ($tempresults as $res) {
+                $results[] = $set[$i] . $res;
 
-
-//exit();
-    for($i=0; $i<count($set); $i++) {
-        $results[] = $set[$i];
-        $tempset = $set;
-        array_splice($tempset, $i, 1);
-        $tempresults = array();
-        $this->gen_nos($tempset, $tempresults);
-        foreach($tempresults as $res) {
-
-
-            $results[] = $set[$i] . $res;
-
-        $t =  $this->thing->elapsed_runtime() - $this->start_time;
-        if ($t > 8000) {$this->response = "Too many letters. Ran out of time.";return;}
-
-
+                $t = $this->thing->elapsed_runtime() - $this->start_time;
+                if ($t > 8000) {
+                    $this->response = "Too many letters. Ran out of time.";
+                    return;
+                }
+            }
         }
     }
-}
 
     function lengthWordgame($text, $n = null)
     {
+        if ($n == null) {
+            $n = 2;
+        }
 
-        if ($n == null) {$n = 2;}
+        $n = [2, 3];
 
-        $n = array(2,3);
-
-//        foreach($n as $word_length) {
-        foreach($this->letter_arrangements as $letter_arrangement) {
-            foreach($n as $word_length) {
-
+        //        foreach($n as $word_length) {
+        foreach ($this->letter_arrangements as $letter_arrangement) {
+            foreach ($n as $word_length) {
                 $characters = mb_strlen($letter_arrangement);
                 if ($characters == $word_length) {
-
-//                    $word = new Word($this->thing, "word");
-//                    $is_word = $word->findWord("ewol",$letter_arrangement);
-$is_word = isset($this->word_agent->ewol_dictionary[strtolower($letter_arrangement)]);
-
+                    //                    $word = new Word($this->thing, "word");
+                    //                    $is_word = $word->findWord("ewol",$letter_arrangement);
+                    $is_word = isset(
+                        $this->word_agent->ewol_dictionary[
+                            strtolower($letter_arrangement)
+                        ]
+                    );
 
                     if ($is_word == true) {
                         $words[] = $letter_arrangement;
@@ -368,71 +434,73 @@ $is_word = isset($this->word_agent->ewol_dictionary[strtolower($letter_arrangeme
         $this->selective_length_words = $words;
     }
 
-    function anagrams($text) {
-$letters = str_split($text);
+    function anagrams($text)
+    {
+        $letters = str_split($text);
 
-$combos = $letters;
-$lastres = $letters;
-for ($i = 1; $i < count($letters); $i++) {
-    $newres = array();
-    foreach ($lastres as $r) {
-        foreach ($letters as $let) {
-            $newres[] = $r . $let;
-        }
-    }
-
-    foreach ($newres as $w) {
-        $combos[] = $w;
-    }
-
-    $lastres = $newres;
-}
-
-return $combos;
-
-}
-
-function create_possible_arrays($string) {
-    $letters = str_split($string);
-
-    $combos = array_unique($letters);
-    $lastres = $letters;
-    for ($i = 1; $i < count($letters); $i++) {
-        $newres = array();
-        foreach ($lastres as $r) {
-            foreach ($letters as $let) {
-                $new = $r . $let;
-                if (!in_array($new, $newres)) {
-                    $newres[] = $new;
-
-                    // Action
-                    $combos[] = $new;
+        $combos = $letters;
+        $lastres = $letters;
+        for ($i = 1; $i < count($letters); $i++) {
+            $newres = [];
+            foreach ($lastres as $r) {
+                foreach ($letters as $let) {
+                    $newres[] = $r . $let;
                 }
-
             }
+
+            foreach ($newres as $w) {
+                $combos[] = $w;
+            }
+
+            $lastres = $newres;
         }
 
-        $lastres = $newres;
-
+        return $combos;
     }
 
-    return $combos;
-}
+    function create_possible_arrays($string)
+    {
+        $letters = str_split($string);
+
+        $combos = array_unique($letters);
+        $lastres = $letters;
+        for ($i = 1; $i < count($letters); $i++) {
+            $newres = [];
+            foreach ($lastres as $r) {
+                foreach ($letters as $let) {
+                    $new = $r . $let;
+                    if (!in_array($new, $newres)) {
+                        $newres[] = $new;
+
+                        // Action
+                        $combos[] = $new;
+                    }
+                }
+            }
+
+            $lastres = $newres;
+        }
+
+        return $combos;
+    }
 
     // For an array of n words, return an array of n! strings, each containing the words in a different order.
-    function wordcombos ($words) {
-        if ( count($words) <= 1 ) {
+    function wordcombos($words)
+    {
+        if (count($words) <= 1) {
             $result = $words;
         } else {
-            $result = array();
-            for ( $i = 0; $i < count($words); ++$i ) {
+            $result = [];
+            for ($i = 0; $i < count($words); ++$i) {
                 $firstword = $words[$i];
-                $remainingwords = array();
-                for ( $j = 0; $j < count($words); ++$j ) {
-                    if ( $i <> $j ) $remainingwords[] = $words[$j];
+                $remainingwords = [];
+                for ($j = 0; $j < count($words); ++$j) {
+                    if ($i != $j) {
+                        $remainingwords[] = $words[$j];
+                    }
                 }
                 $combos = $this->wordcombos($remainingwords);
-                for ( $j = 0; $j < count($combos); ++$j ) {
+                for ($j = 0; $j < count($combos); ++$j) {
                     $result[] = $firstword . '' . $combos[$j];
                 }
             }
@@ -440,22 +508,21 @@ function create_possible_arrays($string) {
         return $result;
     }
 
-
-function comb ($n, $elems) {
-    if ($n > 0) {
-      $tmp_set = array();
-      $res = $this->comb($n-1, $elems);
-      foreach ($res as $ce) {
-          foreach ($elems as $e) {
-             array_push($tmp_set, $ce . $e);
-          }
-       }
-       return $tmp_set;
+    function comb($n, $elems)
+    {
+        if ($n > 0) {
+            $tmp_set = [];
+            $res = $this->comb($n - 1, $elems);
+            foreach ($res as $ce) {
+                foreach ($elems as $e) {
+                    array_push($tmp_set, $ce . $e);
+                }
+            }
+            return $tmp_set;
+        } else {
+            return [''];
+        }
     }
-    else {
-        return array('');
-    }
-}
 
     function getWords($test)
     {
@@ -463,12 +530,15 @@ function comb ($n, $elems) {
             return false;
         }
 
-        $new_words = array();
+        $new_words = [];
 
-        if ($test == "") {return $new_words;}
+        if ($test == "") {
+            return $new_words;
+        }
 
-        $pattern = '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){1,}/';
-  //      $t = explode("  ", $test);
+        $pattern =
+            '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){1,}/';
+        //      $t = explode("  ", $test);
         $t = preg_split($pattern, $test);
 
         //$n = count($t)-1;
@@ -476,94 +546,97 @@ function comb ($n, $elems) {
         //$words = explode(" | ", $t[4] );
         //$new_words = array();
 
-        foreach($t as $key=>$word) {
+        foreach ($t as $key => $word) {
             $new_words[] = trim($word);
         }
-//
-//var_dump($new_words);
+        //
+        //var_dump($new_words);
         return $new_words;
     }
 
-
     public function stripPunctuation($input, $replace_with = " ")
     {
-        $unpunctuated = preg_replace('/[\:\;\/\!\?\#\.\,\'\"\{\}\[\]\<\>\(\)]/i', $replace_with, $input);
+        $unpunctuated = preg_replace(
+            '/[\:\;\/\!\?\#\.\,\'\"\{\}\[\]\<\>\(\)]/i',
+            $replace_with,
+            $input
+        );
         return $unpunctuated;
     }
 
-
-
-
     function extractWords($string)
     {
-//echo "\n";
-//                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
-//echo $string . "\n";
+        //echo "\n";
+        //                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
+        //echo $string . "\n";
 
-        preg_match_all('/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){2,}/', $string, $words);
-        //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 ) 
+        preg_match_all(
+            '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){2,}/',
+            $string,
+            $words
+        );
+        //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 )
         $w = $words[0];
 
-//echo implode("_",$w) . "\n";
+        //echo implode("_",$w) . "\n";
 
+        $this->words = [];
 
-        $this->words = array();
-
-        foreach ($w as $key=>$value) {
-
+        foreach ($w as $key => $value) {
             // Return dictionary entry.
             $value = $this->stripPunctuation($value);
 
             $text = $this->findWord('list', $value);
 
             if ($text != false) {
-                 //   echo "word is " . $text . "\n";
+                //   echo "word is " . $text . "\n";
                 $this->words[] = $text;
             } else {
-                 //   echo "word is not " . $value . "\n";
+                //   echo "word is not " . $value . "\n";
             }
         }
 
         if (count($this->words) != 0) {
             $this->word = $this->words[0];
         } else {
-//            $text = $this->nearestWord($value);
-//echo $text;
-//exit();
+            //            $text = $this->nearestWord($value);
+            //echo $text;
+            //exit();
             $this->word = null;
         }
-
 
         return $this->words;
     }
 
-
-    function getWord() {
+    function getWord()
+    {
         if (!isset($this->words)) {
             $this->extractWords($this->subject);
         }
-        if (count($this->words) == 0) {$this->word = false;return false;}
+        if (count($this->words) == 0) {
+            $this->word = false;
+            return false;
+        }
         $this->word = $this->words[0];
         return $this->word;
     }
 
-
-
-
     function findWord($librex, $searchfor)
     {
-        if (($librex == "") or ($librex == " ") or ($librex == null)) {return false;}
-//echo getcwd();
-//exit();
+        if ($librex == "" or $librex == " " or $librex == null) {
+            return false;
+        }
+        //echo getcwd();
+        //exit();
         switch ($librex) {
             case null:
-                // Drop through
+            // Drop through
             case 'list':
                 $file = $this->resource_path . 'words.txt';
                 $contents = file_get_contents($file);
                 break;
             case 'mordok':
-                $file =  $this->resource_path . 'mordok.txt';
+                $file = $this->resource_path . 'mordok.txt';
                 $contents = file_get_contents($file);
                 break;
             case 'context':
@@ -575,14 +648,13 @@ function comb ($n, $elems) {
             case 'emotion':
                 break;
             default:
-                $file = $this->resource_path .  'words.txt';
-
+                $file = $this->resource_path . 'words.txt';
         }
 
         $pattern = "|\b($searchfor)\b|";
         // search, and store all matching occurences in $matches
 
-        if(preg_match_all($pattern, $contents, $matches)){
+        if (preg_match_all($pattern, $contents, $matches)) {
             $m = $matches[0][0];
             return $m;
         } else {
@@ -594,118 +666,106 @@ function comb ($n, $elems) {
 
     function nearestWord($input)
     {
-        if ($input == "") {return true;}
+        if ($input == "") {
+            return true;
+        }
 
-                $file = $this->resource_path . 'words.txt';
-                $contents = file_get_contents($file);
+        $file = $this->resource_path . 'words.txt';
+        $contents = file_get_contents($file);
 
         $words = explode("\n", $contents);
 
         $nearness_min = 1e6;
         $word = false;
 
-        foreach ($words as $key=>$word) {
+        foreach ($words as $key => $word) {
             $nearness = levenshtein($input, $word);
             //$nearness = similar_text($word, $input);
 
             if ($nearness < $nearness_min) {
-                $word_list = array();
+                $word_list = [];
                 $nearness_min = $nearness;
             }
             if ($nearness_min == $nearness) {
                 $word_list[] = $word;
-
             }
-
         }
 
         $nearness_max = 0;
         $word = false;
 
-        foreach ($word_list as $key=>$word) {
+        foreach ($word_list as $key => $word) {
             //$nearness = levenshtein($input, $word);
             $nearness = similar_text($word, $input);
 
-// Figure out how to deal with sequences of question marks
-//var_dump($word);
-//var_dump($input);
-//exit();
+            // Figure out how to deal with sequences of question marks
+            //var_dump($word);
+            //var_dump($input);
+            //exit();
             if ($nearness > $nearness_max) {
-                $new_word_list = array();
+                $new_word_list = [];
                 $nearness_min = $nearness;
             }
             if ($nearness_min == $nearness) {
                 $new_word_list[] = $word;
-
             }
-
         }
 
-
-        $nearest_word = implode(" " ,$new_word_list);
-
+        $nearest_word = implode(" ", $new_word_list);
 
         return $nearest_word;
     }
 
+    public function Respond()
+    {
+        $this->cost = 100;
 
+        // Thing stuff
 
+        $this->thing->flagGreen();
 
-	public function Respond() {
+        // Compose email
 
-		$this->cost = 100;
+        //		$status = false;//
+        //		$this->response = false;
 
-		// Thing stuff
-
-
-		$this->thing->flagGreen();
-
-		// Compose email
-
-//		$status = false;//
-//		$this->response = false;
-
-//		$this->thing->log( "this reading:" . $this->reading );
-
-
-
+        //		$this->thing->log( "this reading:" . $this->reading );
 
         // Make SMS
         $this->makeSMS();
-		$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['sms'] = $this->sms_message;
 
         // Make message
-		$this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         // Make email
-        $this->makeEmail(); 
+        $this->makeEmail();
 
-//        $this->thing_report['email'] = array('to'=>$this->from,
-//                'from'=>'emoji',
-//                'subject' => $this->subject,
-//                'message' => $this->email_message,
-//                'choices' => false);
+        //        $this->thing_report['email'] = array('to'=>$this->from,
+        //                'from'=>'emoji',
+        //                'subject' => $this->subject,
+        //                'message' => $this->email_message,
+        //                'choices' => false);
 
-//		$email = new Makeemail($this->thing);
-//		$this->thing_report['email'] = $email->thing_report['email'];
+        //		$email = new Makeemail($this->thing);
+        //		$this->thing_report['email'] = $email->thing_report['email'];
         $this->thing_report['email'] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
         $this->makeWeb();
         $this->makeChoices();
-        $this->thing_report['help'] = "Tells you the highest scoring letter arrangement. Or the score.";
+        $this->thing_report['help'] =
+            "Tells you the highest scoring letter arrangement. Or the score.";
 
-            //$this->reading = count($this->words);
-            //$this->thing->json->writeVariable(array("word", "reading"), $this->reading);
+        //$this->reading = count($this->words);
+        //$this->thing->json->writeVariable(array("word", "reading"), $this->reading);
 
-
-
-		return $this->thing_report;
-	}
+        return $this->thing_report;
+    }
 
     function makeChoices()
     {
@@ -714,63 +774,66 @@ function comb ($n, $elems) {
         $this->thing_report['choices'] = $choices;
     }
 
+    function makeSMS()
+    {
+        $this->node_list = ["wordgame" => ["wordgame"]];
 
+        $index = 0;
+        $max_index = 3;
+        $best_words = "";
 
-    function makeSMS() {
+        foreach ($this->best_words as $best_word) {
+            if ($index > $max_index) {
+                break;
+            }
+            if ($index == 0) {
+                $best_words .=
+                    " " . str_pad("", mb_strlen($best_word['word']), "?");
+            } else {
+                $best_words .= " " . strtoupper($best_word['word']);
+            }
+            $index++;
+            //$best_words .= " " .strtoupper($best_word['word']). " (" . $best_word['score'] .")";
+        }
 
-        $this->node_list = array("wordgame"=>array("wordgame"));
+        if (isset($this->best_words[1]['score'])) {
+            $second_best_score = $this->best_words[1]['score'];
+        }
 
+        $text = str_replace(" ", "?", $this->search_words);
 
-$index = 0;
-$max_index = 3;
-$best_words = "";
+        $sms = "WORDGAME " . strtoupper($text);
 
-foreach($this->best_words as $best_word) {
-    if ($index > $max_index) {break;}
-    if ($index == 0) {$best_words .= " " . str_pad("", mb_strlen($best_word['word']), "?");} else {
+        switch (true) {
+            case !isset($this->best_words[0]):
+                //      $sms .= " | " . $this->response;
+                break;
 
-    $best_words .= " " .strtoupper($best_word['word']);
-    }
-    $index++;
-    //$best_words .= " " .strtoupper($best_word['word']). " (" . $best_word['score'] .")";
-}
+            case strtoupper($this->best_words[0]['word']) ==
+                strtoupper($this->search_words):
+                $sms .= " | scores " . $this->best_words[0]['score'];
+                break;
+            case $this->show_best_words != true:
+                $sms .= " | best words " . trim($best_words);
+                break;
+            case $this->show_best_score != true:
+                $sms .=
+                    " | " .
+                    strtoupper($this->best_words[1]['word']) .
+                    " scores " .
+                    $second_best_score;
+                break;
+            default:
+            //        $sms .= " | " . $this->response;
 
-if (isset($this->best_words[1]['score'])) {
-    $second_best_score = $this->best_words[1]['score'];
-}
+            //   echo "i is not equal to 0, 1 or 2";
+        }
 
-                            $text = str_replace(" ","?",$this->search_words);
+        if (isset($this->response)) {
+            $sms .= " | " . $this->response;
+        }
 
-
-                $sms = "WORDGAME " . strtoupper($text);
-
-
-switch (true) {
-    case (!isset($this->best_words[0])):
-  //      $sms .= " | " . $this->response;
-        break;
-
-    case (strtoupper($this->best_words[0]['word']) == strtoupper($this->search_words)):
-            $sms .= " | scores " . $this->best_words[0]['score'];
-        break;
-    case ($this->show_best_words != true):
-            $sms .= " | best words " . trim($best_words);
-        break;
-    case ($this->show_best_score != true):
-        $sms .= " | " . strtoupper($this->best_words[1]['word']) . " scores " . $second_best_score;
-        break;
-    default:
-//        $sms .= " | " . $this->response;
-
-    //   echo "i is not equal to 0, 1 or 2";
-}
-
-
-if (isset($this->response)) {
-        $sms .= " | " . $this->response;
-}
-
-/*
+        /*
         if (strtoupper($this->best_words[0]['word']) == strtoupper($this->search_words)) {
             $sms .= " | scores " . $this->best_words[0]['score'];
 
@@ -790,54 +853,52 @@ if (isset($this->response)) {
 */
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
-   return;
+        return;
     }
 
     function makeWeb()
     {
+        $this->node_list = ["wordgame" => ["wordgame"]];
 
+        //$letter_arrangements = implode(" ",$this->letter_arrangements);
+        //$word = new Word($this->thing, "word");
+        //$word->extractWords($letter_arrangements);
+        //var_dump($word->words);
+        //exit();
 
-        $this->node_list = array("wordgame"=>array("wordgame"));
-
-//$letter_arrangements = implode(" ",$this->letter_arrangements);
-//$word = new Word($this->thing, "word");
-//$word->extractWords($letter_arrangements);
-//var_dump($word->words);
-//exit();
-
-                            $text = str_replace(" ","?",$this->search_words);
-
+        $text = str_replace(" ", "?", $this->search_words);
 
         $html = "<b>WORDGAME " . strtoupper($text) . "</b><br>";
 
         $html .= "<p><b>Best scoring word</b>";
 
-
-        $html .= "<br>" . $this->best_words[0]['word'] . " scores " . $this->best_words[0]['score'];
+        $html .=
+            "<br>" .
+            $this->best_words[0]['word'] .
+            " scores " .
+            $this->best_words[0]['score'];
 
         $html .= "<p><b>Dictionary words</b>";
         $html .= "<br>";
-        foreach($this->best_words as $best_word) {
+        foreach ($this->best_words as $best_word) {
             //$html .= " " . $best_word["word"] . " (" . $best_word["score"]. ")";
             $html .= " " . $best_word["word"];
-
         }
         $html .= "<p><b>Game letters and tile scores</b>";
 
+        $html .= "<br>" . $text . "<br>";
 
-        $html .= "<br>" . $text  . "<br>";
+        foreach (str_split($this->search_words) as $letter) {
+            $score = $this->letter_scores[strtoupper($letter)];
 
-foreach(str_split($this->search_words) as $letter) {
+            if ($letter == " ") {
+                $letter = "?";
+            }
 
-    $score = $this->letter_scores[strtoupper($letter)];
+            $html .= $letter . "" . $score . " ";
+        }
 
-        if ($letter == " ") {$letter = "?";}
-
-        $html .= $letter .  "" . $score . " ";
-
-}
-
-/*
+        /*
         $frame = "";
         foreach($this->player_tiles as $player_tile) {
             $frame .= " " .  $player_tile["letter"] . $player_tile["score"];
@@ -852,113 +913,93 @@ foreach(str_split($this->search_words) as $letter) {
         $this->thing_report['web'] = $html;
     }
 
-    function makeEmail() {
-
+    function makeEmail()
+    {
         $this->email_message = "WORD | ";
-
     }
 
-
-
-	public function readSubject() {
-
-//        $this->translated_input = $this->wordsEmoji($this->subject);
+    public function readSubject()
+    {
+        //        $this->translated_input = $this->wordsEmoji($this->subject);
 
         $input = strtolower($this->subject);
-//        $this->extractWords($input);
-//var_dump($this->words);
+        //        $this->extractWords($input);
+        //var_dump($this->words);
 
-
-//        if (count($this->words) == 0) {
-//            return;
-//        }
+        //        if (count($this->words) == 0) {
+        //            return;
+        //        }
 
         $this->show_best_words = false;
         $this->show_best_score = false;
 
-        $keywords = array('wordgame', 'best');
+        $keywords = ['wordgame', 'best'];
         $pieces = explode(" ", strtolower($input));
 
-
-        foreach ($pieces as $key=>$piece) {
+        foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
-
-                    switch($piece) {
-
-                        case 'wordgame':   
-
-
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
+                        case 'wordgame':
                             $prefix = 'wordgame';
-                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
+                            $words = preg_replace(
+                                '/^' . preg_quote($prefix, '/') . '/',
+                                '',
+                                $input
+                            );
                             $words = ltrim($words);
 
-                            $text = str_replace(" ","?",$words);
+                            $text = str_replace(" ", "?", $words);
                             $this->search_words = $words;
 
                             $this->response = "Used provided letters.";
-//var_dump($this->search_words);
-//exit();
+                        //var_dump($this->search_words);
+                        //exit();
 
-//                            $this->extractWords($words);
-//var_dump($this->search_words);
-//exit();
-//                            if ($this->word != null) {return;}
+                        //                            $this->extractWords($words);
+                        //var_dump($this->search_words);
+                        //exit();
+                        //                            if ($this->word != null) {return;}
 
-//                            $this->lengthWordgame($words);
+                        //                            $this->lengthWordgame($words);
 
-                            //return;
+                        //return;
 
                         case 'length':
 
-//                            $length = 5;
+                        //                            $length = 5;
 
-//                            $this->lengthWordgame($words);
-
-
+                        //                            $this->lengthWordgame($words);
 
                         default:
 
-                            //echo 'default';
-
+                        //echo 'default';
                     }
-
                 }
             }
-
         }
 
         //if ($this->word != null) {return;}
 
-
-//var_dump($input);
-//exit();
+        //var_dump($input);
+        //exit();
 
         $this->nearest_word = $this->nearestWord($this->search_words);
-//var_dump($this->word);
+        //var_dump($this->word);
         //$this->extractWords($input);
 
-		$status = true;
+        $status = true;
 
+        return $status;
+    }
 
-	return $status;		
-	}
-
-
-
-
-
-
-    function contextWord () 
+    function contextWord()
     {
-
-$this->word_context = '
+        $this->word_context = '
 ';
 
-return $this->word_context;
+        return $this->word_context;
+    }
 }
-}
-
-
 
 ?>

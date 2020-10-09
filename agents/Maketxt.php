@@ -32,13 +32,14 @@ class makeTxt
 	    $this->agent_thing = new Agent($thing, $input);
 
         if (isset($this->agent_thing->thing_report['txt'])) {
-        	$this->thing_report['txt'] = $this->agent_thing->thing_report['txt'];
+
+//            $text = iconv("ISO-8859-1","UTF-8", $this->agent_thing->thing_report['txt']); 
+            $text = $this->agent_thing->thing_report['txt'];
+
+        	$this->thing_report['txt'] = $text;
         } else {
             $this->thing_report['txt'] = "MAKE TXT | No text file response found.";
         }
 	}
 
 }
-
-
-?>

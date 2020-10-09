@@ -632,20 +632,8 @@ class Word extends Agent
         } else {
             $input = strtolower($this->agent_input);
 
-            //             $prefix = 'word';
-            //                        $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-            //                        $words = ltrim($words);
-            //                        $this->search_words = $words;
-            //                        $this->extractWords($words);
-            //
-            //                        if ($this->word != null) {return;}
         }
 
-        //if ($input == "word") {return;}
-
-        //        if (count($this->words) == 0) {
-        //            return;
-        //        }
 
         $keywords = ['word', 'random'];
         $pieces = explode(" ", strtolower($input));
@@ -658,14 +646,7 @@ class Word extends Agent
                             $number_agent = new Number($this->thing, "number");
                             $number_agent->extractNumber($input);
 
-                            //                            $prefix = 'word';
-                            //                            $words = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $input);
-                            //                            $words = ltrim($words);
-                            //                            $this->search_words = $words;
-
-                            //                            $this->extractWords($words);
                             $this->randomWord($number_agent->number);
-
                             if ($this->word != null) {
                                 return;
                             }

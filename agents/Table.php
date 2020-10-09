@@ -1,10 +1,4 @@
 <?php
-/**
- * Table.php
- *
- * @package default
- */
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -13,95 +7,149 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// devstack
+
 class Table extends Agent
 {
-    public $var = 'hello';
-
-    /**
-     *
-     */
     public function init()
     {
-        $this->test = "Development code";
+        $this->dataTable();
+    }
 
-        $this->primary_place = "roost";
-        $this->signals = ["on", "off"];
+    public function readSubject()
+    {
+    }
 
-        $this->node_list = [
-            "on the table" => [
-                "on the table" => [
-                    "off the table" => "off the table",
-                    "on the table",
-                ],
-            ],
-            "off the table" => "on the table",
+    public function dataTable()
+    {
+        $data = [];
+        $data['X'] = [
+            'index' => 4,
+            'head_code' => 'X',
+            'alias' => 'X',
+            'flag' => 'X',
+            'day' => 'X',
+            'run_at' => 'X',
+            'end_at' => 'X',
+            'runtime' => 'X',
+            'available' => 'X',
+            'quantity' => 'X',
+            'consist' => 'X',
+            'route' => 'X',
         ];
 
-        $this->thing_report['help'] =
-            'This is the table agent. Try ON THE TABLE. Or OFF THE TABLE.';
-
-        // devstack
-        //$agent = new Entity($this->thing, "table");
-        //$this->agent_thing = $agent->thing;
+        $this->data = $data;
     }
 
-    function run()
+    public function getTable()
     {
-        $this->doTable();
-    }
+        //        $table = [['a' => ['b', 'c', 'd']], ['e' => ['f', 'g', 'h']]];
 
-    /**
-     *
-     */
-    public function set()
-    {
-    }
+        $table = [
+            'index' => ['INDEX' => 7],
+            'head_code' => ['HEAD' => 4],
+            'alias' => ['ALIAS' => 10],
+            'flag' => ['FLAG' => 6],
+            'day' => ['DAY' => 4],
 
-    function doTable()
-    {
-    }
+            'run_at' => ['RUNAT' => 6],
+            'end_at' => ['ENDAT' => 6],
 
-    function offTable()
-    {
-        $this->response .= "That is off the table. ";
-    }
+            'runtime' => ['RUNTIME' => 8],
 
-    function onTable()
-    {
-        $this->response .= "That is on the table. ";
+            'available' => ['AVAILABLE' => 6],
+            'quantity' => ['QUANTITY' => 9],
+            'consist' => ['CONSIST' => 6],
+            'route' => ['ROUTE' => 6],
+        ];
+
+        $this->table = $table;
     }
 
     public function makeSMS()
     {
-        $sms = "TABLE | " . $this->response;
+        $sms = "TABLE | Text TEXT. Or TXT.";
         $this->thing_report['sms'] = $sms;
+        $this->sms = $sms;
     }
 
-    function readSubject()
+    public function makeTXT($table = null)
     {
-        $input = new Input($this->thing, "input");
-
-        $discriminators = ['on', 'off'];
-
-        $aliases = [];
-
-        $aliases['on'] = ['on', 'on the table'];
-        $aliases['off'] = ['off', 'off the table'];
-
-        $input->aliases = $aliases;
-        $response = $input->discriminateInput($this->input, $discriminators);
-
-        if ($response === false) {
-            $this->response .= "Did not see anything on the table. ";
-            return;
+        if ($table == null) {
+            $table = $this->table;
         }
 
-        if ($response == 'on') {
-            $this->onTable();
+        $t = $this->textTable($table);
+
+        $this->txt = $t;
+        $this->thing_report['txt'] = $t;
+    }
+
+    public function cellTable($variable)
+    {
+        $key = key($variable);
+        $value = $variable[$key];
+        $width = $value[key($value)];
+
+        $t .= " " . str_pad($key, $value, " ", STR_PAD_LEFT);
+
+        return $t;
+    }
+
+    public function headerTable()
+    {
+        $this->getTable();
+        $t = "";
+        foreach ($this->table as $i => $table_variable) {
+            $variable_name = key($table_variable);
+            $value = $variable_name;
+            $width = $table_variable[$value];
+
+            $variable = [$value => $width];
+
+            $t .= $this->cellTable($variable);
         }
 
-        if ($response == 'off') {
-            $this->offTable();
+        return $t;
+    }
+
+    public function rowTable($row_id)
+    {
+        $variable = $this->data[$row_id];
+        $t = "";
+        foreach ($this->table as $key => $x) {
+            $value = $variable[$key];
+
+            $width = 5;
+            $k = $this->table[$key];
+
+            $title = key($k);
+
+            $width = $k[$title];
+
+            $v = [$value => $width];
+            $t .= $this->cellTable($v);
         }
+
+        return $t;
+    }
+
+    public function textTable($data = null)
+    {
+        $this->getTable();
+        if ($data == null and !isset($this->data)) {
+            $this->getData();
+            $data = $this->data;
+        }
+
+        $this->data = $data;
+        $t = "";
+        $t .= $this->headerTable();
+        $t .= "\n";
+        foreach ($this->data as $row_id => $variable) {
+            $t .= $this->rowTable($row_id);
+            $t .= "\n";
+        }
+        return $t;
     }
 }

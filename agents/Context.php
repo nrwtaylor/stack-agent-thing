@@ -216,6 +216,11 @@ class Context
 
     function getContexts()
     {
+$this->default_context = "identity";
+$this->context = $this->default_context;
+$this->context_id = 1;
+
+
         $context_things = [];
         $this->previous_contexts = [];
 
@@ -224,6 +229,8 @@ class Context
         $findagent_thing = new Findagent($this->thing, 'thing');
         $this->max_index = 0;
         $match = 0;
+
+if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
 
         if ($findagent_thing->thing_report['things'] == true) {
             return;

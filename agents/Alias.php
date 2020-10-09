@@ -131,7 +131,7 @@ class Alias extends Agent
     public function isAlias($text = null)
     {
         if ($text == null) {
-            return true;
+            return null;
         }
 
         if (!isset($this->aliases_list)) {
@@ -153,6 +153,8 @@ class Alias extends Agent
         $this->aliases_list = [];
 
         $findagent_thing = new Findagent($this->thing, 'alias');
+
+        if($findagent_thing->thing_report['things'] === true) {return true;}
 
         $this->thing->log(
             'Agent "Alias" found ' .

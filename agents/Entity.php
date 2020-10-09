@@ -758,6 +758,16 @@ class Entity extends Agent
         $txt = 'These are ENTITIES for RAILWAY ' . $this->entity->nuuid . '. ';
         $txt .= "\n";
 
+        if(!isset($this->entities)) {
+
+
+            $txt .= "No entities found.";
+            $this->txt = $txt;
+            $this->thing_report['txt'] = $txt;
+
+            return;
+        }
+
         $count = "X";
         if (is_array($this->entities)) {
             $count = count($this->entities);

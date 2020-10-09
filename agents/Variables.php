@@ -32,11 +32,25 @@ class Variables
         $this->start_time = $this->thing->elapsed_runtime();
 
         $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
 
+// Review.
+// This is needed for null things.
+// Need to extend Variables with Agent.
+// And avoid recursive calls.
+
+$this->to = 'null';
+if (isset($thing->to)) {
+        $this->to = $thing->to;
+}
+        $this->from = $thing->from;
+
+$this->subject = 'merp';
+if (isset($thing->subject)) {
+        $this->subject = $thing->subject;
+}
         $this->identity = $this->from;
+
+$this->response = "";
 
         // Setup Agent
         $this->agent = strtolower(get_class());
@@ -141,6 +155,12 @@ class Variables
 
     function setVariables()
     {
+if (!isset($this->thing->db)) {
+
+$this->response .= "Could not write to stack. ";
+return;
+
+}
         $this->thing->db->setFrom($this->identity);
 
         $refreshed_at = false;
@@ -193,6 +213,10 @@ class Variables
 
         // We will probably want a getThings at some point.
 
+// Is there a database?
+$things = [null];
+if (isset($this->thing->db)) {
+
         $this->thing->db->setFrom($this->identity);
 
         // Returns variable sets managed by Variables.
@@ -203,7 +227,7 @@ class Variables
         );
 
         $things = $thing_report['things'];
-
+}
         // When we have that list of Things, we check it for the tally we are looking for.
         // Review using $this->limit as search length limiter.  Might even just
         // limit search to N microseconds of search.
@@ -330,8 +354,14 @@ class Variables
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
-
-                $this->variables_thing = new Thing($thing['uuid']);
+//if (!isset($thing['uuid'])) {
+//    $thing['uuid'] = null;
+//}
+$uuid = null;
+if (isset($thing['uuid'])) {
+$uuid = $thing['uuid'];
+}
+                $this->variables_thing = new Thing($uuid);
 
 
         if (!isset($this->variables_thing->account['stack'])) {
@@ -362,25 +392,39 @@ class Variables
         return false;
     }
 
-    function echoVariableset()
+    public function makeVariableset() {
+
     {
         // Urgh :/
-
-        echo "<br>Screened on: " . $this->variable_set_name . "<br>";
-        echo "<br>nuuid " . substr($this->variables_thing->uuid, 0, 4) . "<br>";
+        $t = "";
+        $t .= "<br>Screened on: " . $this->variable_set_name . "<br>";
+        $t .= "<br>nuuid " . substr($this->variables_thing->uuid, 0, 4) . "<br>";
 
         foreach ($this->agent_variables as $key => $variable_name) {
-            echo $variable_name .
+            $t .= $variable_name .
                 " is " .
                 $this->variables_thing->$variable_name .
                 " ";
-            echo "<br>";
+            $t .= "<br>";
         }
-        echo "<br>";
+        $t .= "<br>";
+        return $t;
+    }
+
+
+    }
+
+    function echoVariableset()
+    {
+        echo $this->makeVariableset();
     }
 
     function getVariable($variable = null)
     {
+if (!isset($this->thing->db)) {
+return true;
+}
+
         // Pulls variable from the database
         // and sets variables thing on the current record.
         // so shouldn't need to adjust the $this-> set
@@ -413,6 +457,9 @@ class Variables
 
     function setVariable($variable = null, $value)
     {
+if (!isset($this->thing->db)) {
+return true;
+}
         // Take a variable in the variables_thing and save
         // into the database.  Probably end
         // up coding setVariables, to

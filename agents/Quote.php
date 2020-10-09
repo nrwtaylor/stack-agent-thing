@@ -41,7 +41,7 @@ class Quote extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->quote = new Variables(
+        $this->variables_agent = new Variables(
             $this->thing,
             "variables quote " . $this->from
         );
@@ -70,10 +70,13 @@ class Quote extends Agent
 
         $this->refreshed_at = $this->current_time;
 
-        $this->quote->setVariable("state", $this->state);
-        $this->quote->setVariable("mode", $this->mode);
+        $this->variables_agent->setVariable("state", $this->state);
+        $this->variables_agent->setVariable("mode", $this->mode);
 
-        $this->quote->setVariable("refreshed_at", $this->current_time);
+        $this->variables_agent->setVariable(
+            "refreshed_at",
+            $this->current_time
+        );
 
         $this->thing->log(
             $this->agent_prefix . 'set Radio Relay to ' . $this->state,
@@ -83,9 +86,11 @@ class Quote extends Agent
 
     function get()
     {
-        $this->previous_state = $this->quote->getVariable("state");
-        $this->previous_mode = $this->quote->getVariable("mode");
-        $this->refreshed_at = $this->quote->getVariable("refreshed_at");
+        $this->previous_state = $this->variables_agent->getVariable("state");
+        $this->previous_mode = $this->variables_agent->getVariable("mode");
+        $this->refreshed_at = $this->variables_agent->getVariable(
+            "refreshed_at"
+        );
 
         $this->thing->log(
             $this->agent_prefix . 'got from db ' . $this->previous_state,
@@ -345,7 +350,6 @@ class Quote extends Agent
             return true;
         }
 
-
         $title = trim(explode(":", $meta[0])[1]);
         $this->title = $title;
         $author = trim(explode(":", $meta[1])[1]);
@@ -472,11 +476,11 @@ class Quote extends Agent
 
         $this->message['text'] = $text;
 
-        $this->quote = trim($this->message['quote'], "//");
+        $this->quote_text = trim($this->message['quote'], "//");
 
         $this->text = trim($this->message['text'], "//");
 
-        $this->short_message = "" . $this->quote . "\n";
+        $this->short_message = "" . $this->quote_text . "\n";
 
         if ($this->text == "X") {
             $this->response = "No message to pass.";

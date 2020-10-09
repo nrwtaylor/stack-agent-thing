@@ -11,13 +11,9 @@ class Stack extends Agent
 
     function init()
     {
-        $this->created_at = $this->thing->thing->created_at;
-
-        $this->current_time = $this->thing->json->time();
 
         $this->default_state = "off";
         $this->state = $this->default_state;
-//        $this->countStack();
 
         $this->node_list = ["stack" => ["agent", "thing"], "null" => ["stack"]];
 
@@ -185,7 +181,8 @@ class Stack extends Agent
 
         $thing_report = $this->thing->json->jsontoArray($thing_json);
 
-        if ($thing_report['thing'] == null) {
+        
+        if ((!isset($thing_report['thing'])) or ($thing_report['thing'] == null)) {
             $this->response .= "Thing not found. ";
             return true;
             // No thing found

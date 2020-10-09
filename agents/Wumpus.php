@@ -543,7 +543,7 @@ $this->bottomless_pits = $agent->bottomless_pits;
 
         if (isset($this->caves[strval($this->x)])) {
             $this->choices_text = "";
-            $this->cave_list_text = trim(implode($this->caves[strval($this->x)], " ")) . "";
+            $this->cave_list_text = trim(implode(" ", $this->caves[strval($this->x)])) . "";
         }
 
 
@@ -820,7 +820,7 @@ $this->state = "END";
 
         if (isset($this->caves[strval($this->x)])) {
             $this->choices_text = "";
-            $this->cave_list_text = trim(implode($this->caves[strval($this->x)], " ")) . "";
+            $this->cave_list_text = trim(implode(" ",$this->caves[strval($this->x)])) . "";
         }
 
 if ($this->run_flag == "wumpus") {
