@@ -447,7 +447,7 @@ class Train extends Agent
         }
         // devstack.
         // No need to load up all the trains yet.
-        return;
+        //return;
         // Loads current block into $this->block_thing
 
         $match = false;
@@ -662,7 +662,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             $this->trains[] = $train;
         }
 
-        //var_dump($this->trains);
     }
 
     public function selectTrain()
@@ -1954,14 +1953,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
     function makeTXT()
     {
-        $txt =
-            'This is a TRAIN for RAILWAY ' .
-            $this->variables_agent->nuuid .
-            '. ';
-        $txt .= "\n";
-
-        $this->thing_report['txt'] = "merp";
-        return;
 
         if (!isset($this->trains)) {
             $this->getTrains();
@@ -1970,6 +1961,26 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         if (is_array($this->trains)) {
             $count = count($this->trains);
         }
+
+        $table = [];
+/*
+        $table['X'] = [
+            'index' => 4,
+            'head_code' => 'X',
+            'alias' => 'X',
+            'flag' => 'X',
+            'day' => 'X',
+            'run_at' => 'X',
+            'end_at' => 'X',
+            'runtime' => 'X',
+            'available' => 'X',
+            'quantity' => 'X',
+            'consist' => 'X',
+            'route' => 'X',
+        ];
+*/
+
+        $txt = "";
 
         $txt .= $count . ' Trains retrieved.';
 
@@ -2017,116 +2028,119 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         $txt .= "\n";
 
         foreach ($this->trains as $key => $train) {
-            //$txt .= implode(" ", $train);
 
-            $index_text = str_pad("X", 7, 'X', STR_PAD_LEFT);
-            if (isset($train['index']['index'])) {
-                $index_text = str_pad(
-                    $train['index']['index'],
-                    7,
-                    '0',
-                    STR_PAD_LEFT
-                );
+            $head_code = "X";
+            if (isset($train['headcode'])) {
+                $head_code = $train['headcode'];
             }
+            $table[$head_code] = [];
+            $table[$head_code]['head_code'] = $head_code;
 
-            $txt .= $index_text;
 
-            $text_headcode = "XXXX";
-            //headcode", "head_code"
-            if (isset($train['headcode']['head_code'])) {
-                $text_headcode =
-                    " " .
-                    str_pad(
-                        strtoupper($train['headcode']['head_code']),
-                        4,
-                        "X",
-                        STR_PAD_LEFT
-                    );
+            $index = 'X';
+            if (isset($train['index'])) {
+                  $index = $train['index'];
             }
+            $table[$head_code]['index'] = $index;
 
-            $txt .= $text_headcode;
-
-            $alias_text = str_pad(" ", 10, 'X', STR_PAD_RIGHT);
-
-            if (isset($train['alias']['alias'])) {
-                $alias_text =
-                    " " .
-                    str_pad($train['alias']['alias'], 10, " ", STR_PAD_RIGHT);
+            $alias = "X";
+            if (isset($train['alias'])) {
+                $alias = $train['alias'];
             }
+            $table[$head_code]['alias'] = $alias;
 
-            $txt .= $alias_text;
 
-            $flag_text = str_pad(" ", 6, 'X', STR_PAD_RIGHT);
-            if (isset($train['flag']['state'])) {
-                $flag_text =
-                    " " .
-                    str_pad($train['flag']['state'], 6, " ", STR_PAD_RIGHT);
+            $flag = "X";
+            if (isset($train['state'])) {
+                $flag =$train['state'];
             }
+            $table[$head_code]['flag'] = $flag;
 
-            $txt .= $flag_text;
-
-            $day = strtoupper(substr($this->trainDay($train['run_at']), 0, 3));
-
-            $txt .= " " . str_pad($day, 4, " ", STR_PAD_LEFT);
-
-            $run_at_text = str_pad("XXXX", 6, " ", STR_PAD_LEFT);
-
-            if (isset($train['run_at'])) {
-                $run_at_text =
-                    " " .
-                    str_pad(
-                        $this->trainTime($train['run_at']),
-                        6,
-                        " ",
-                        STR_PAD_LEFT
-                    );
+            $run_at = "X";
+            if (isset($train['runat'])) {
+                $run_at = $this->trainTime($train['runat']);
             }
+            $table[$head_code]['run_at'] = $run_at;
 
-            $txt .= $run_at_text;
 
-            $txt .=
-                " " .
-                str_pad(
-                    $this->trainTime($train['end_at']),
-                    6,
-                    " ",
-                    STR_PAD_LEFT
-                );
-
-            if (isset($train['runtime']['minutes'])) {
-                $txt .=
-                    " " .
-                    str_pad($train['runtime']['minutes'], 8, " ", STR_PAD_LEFT);
+            $run_at = "X";
+            if (isset($train['endat'])) {
+                $end_at = $this->trainTime($train['endat']);
             }
-            $txt .= " " . str_pad($train['available'], 6, " ", STR_PAD_LEFT);
+            $table[$head_code]['end_at'] = $end_at;
 
-            $quantity_text = " " . str_pad(" ", 9, " ", STR_PAD_LEFT);
 
-            if (isset($train['runtime']['minutes'])) {
-                $quantity_text =
-                    " " .
-                    str_pad(
-                        $train['quantity']['quantity'],
-                        9,
-                        " ",
-                        STR_PAD_LEFT
-                    );
+            $runtime = "X";
+            if (isset($train['runtime'])) {
+                $runtime = $train['runtime'];
             }
+            $table[$head_code]['runtime'] = $runtime;
 
-            $txt .= $quantity_text;
-            $txt .= " " . str_pad($train['consist'], 6, " ", STR_PAD_LEFT);
-            if (isset($train['route']['route'])) {
-                $txt .=
-                    " " .
-                    str_pad($train['route']['route'], 6, " ", STR_PAD_LEFT);
+
+
+            $available = $train['available'];
+            $table[$head_code]['available'] = $available;
+
+
+            $quantity = " ";
+            if (isset($train['quantity'])) {
+                $quantity = $train['quantity'];
             }
+            $table[$head_code]['quantity'] = $quantity;
 
-            $txt .= "\n";
+            $consist = $train['consist'];
+            $table[$head_code]['consist'] = $consist;
+
+            if (isset($train['route'])) {
+               $route = $train['route'];
+            }
+            $table[$head_code]['route'] = $route;
+
         }
-        //exit();
+        $table_agent = new Table($this->thing, "table");
+
+        $table_layout = [
+            'index' => ['INDEX' => 7],
+            'head_code' => ['HEAD' => 4],
+            'alias' => ['ALIAS' => 10],
+            'flag' => ['FLAG' => 6],
+            'day' => ['DAY' => 4],
+
+            'run_at' => ['RUNAT' => 6],
+            'end_at' => ['ENDAT' => 6],
+
+            'runtime' => ['RUNTIME' => 8],
+
+            'available' => ['AVAILABLE' => 6],
+            'quantity' => ['QUANTITY' => 9],
+            'consist' => ['CONSIST' => 6],
+            'route' => ['ROUTE' => 6],
+        ];
+
+$table_agent->table = $table_layout;
+
+
+
+
+
+
+$table_text = $table_agent->textTable($table);
+$txt .= $table_text;
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
     }
+
+/*
+public function tableTrain($train, $head_code, $variable_name) {
+
+            $value = "X";
+            if (isset($train[$variable_name][$variable_name])) {
+                $value = $train[$variable_name][$variable_name];
+            }
+            $this->train_table[$head_code]['alias'] = $value;
+
+}
+*/
 
     public function getState()
     {

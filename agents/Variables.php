@@ -214,7 +214,7 @@ return;
         // We will probably want a getThings at some point.
 
 // Is there a database?
-$things = false;
+$things = [null];
 if (isset($this->thing->db)) {
 
         $this->thing->db->setFrom($this->identity);
@@ -354,8 +354,14 @@ if (isset($this->thing->db)) {
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
-
-                $this->variables_thing = new Thing($thing['uuid']);
+//if (!isset($thing['uuid'])) {
+//    $thing['uuid'] = null;
+//}
+$uuid = null;
+if (isset($thing['uuid'])) {
+$uuid = $thing['uuid'];
+}
+                $this->variables_thing = new Thing($uuid);
 
 
         if (!isset($this->variables_thing->account['stack'])) {
@@ -386,21 +392,31 @@ if (isset($this->thing->db)) {
         return false;
     }
 
-    function echoVariableset()
+    public function makeVariableset() {
+
     {
         // Urgh :/
-
-        echo "<br>Screened on: " . $this->variable_set_name . "<br>";
-        echo "<br>nuuid " . substr($this->variables_thing->uuid, 0, 4) . "<br>";
+        $t = "";
+        $t .= "<br>Screened on: " . $this->variable_set_name . "<br>";
+        $t .= "<br>nuuid " . substr($this->variables_thing->uuid, 0, 4) . "<br>";
 
         foreach ($this->agent_variables as $key => $variable_name) {
-            echo $variable_name .
+            $t .= $variable_name .
                 " is " .
                 $this->variables_thing->$variable_name .
                 " ";
-            echo "<br>";
+            $t .= "<br>";
         }
-        echo "<br>";
+        $t .= "<br>";
+        return $t;
+    }
+
+
+    }
+
+    function echoVariableset()
+    {
+        echo $this->makeVariableset();
     }
 
     function getVariable($variable = null)
