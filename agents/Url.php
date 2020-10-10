@@ -21,10 +21,6 @@ class Url extends Agent
     {
     }
 
-    //    function set()
-    //    {
-    //    }
-
     public function set()
     {
         $this->thing->json->setField("variables");
@@ -56,7 +52,7 @@ class Url extends Agent
         $web = "<b>URL Agent</b><br><p>";
         $web .= "<p>";
 
-        if ((isset($this->urls)) and (count($this->urls) > 0)) {
+        if (isset($this->urls) and count($this->urls) > 0) {
             $web .= "<b>COLLECTED URLS</b><br><p>";
             $web .= "<ul>";
             //$urls = array_unique($this->urls);
@@ -178,7 +174,9 @@ class Url extends Agent
 
                 if (isset($variables['url'])) {
                     $task_urls = $this->extractUrls($thing_object['task']);
-if ($task_urls === true) {continue;}
+                    if ($task_urls === true) {
+                        continue;
+                    }
                     if (count($task_urls) == 0) {
                         continue;
                     }
@@ -250,19 +248,10 @@ if ($task_urls === true) {continue;}
         $text = str_replace('url', '', $text);
         $text = trim($text);
         // https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
-
-        // Require http...
-        //$pattern = '#\bhttps?://[^,\s()<>]+(?:\([\w\d]+\)|([^,[:punct:]\s]|/))#';
-        //        $pattern =
-        //            '#^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$#';
-        //$pattern == '/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/';
-
-        //$pattern = '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
         $pattern =
             '#\b(https://)?([^\s()<>]+)?(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
 
         // https://stackoverflow.com/questions/6427530/regular-expression-pattern-to-match-url-with-or-without-http-www
-
         $regex = '((https?|ftp)://)?';
         $regex .= '([a-z0-9+!*(),;?&=$_.-]+(:[a-z0-9+!*(),;?&=$_.-]+)?@)?';
         $regex .=
@@ -291,19 +280,6 @@ if ($task_urls === true) {continue;}
 
         $urls = $this->filterUrls($urls);
 
-        /*
-        foreach ($urls as $i => $url) {
-            $parts = explode(" ", $url);
-            //var_dump($parts);
-            if (count($parts) == 1) {
-                if (stripos($url, '.') !== false) {
-                    $urls[$i] = explode(' ', $url)[0];
-                } else {
-                    unset($urls[$i]);
-                }
-            }
-        }
-*/
         return $urls;
     }
 
@@ -338,16 +314,19 @@ if ($task_urls === true) {continue;}
         return false;
     }
 
-    public function stripUrls($text = null, $replace_text = null) {
-        if ($text == null) {$text = $this->input;}
-        if ($replace_text == null) {$replace_text = "";}
+    public function stripUrls($text = null, $replace_text = null)
+    {
+        if ($text == null) {
+            $text = $this->input;
+        }
+        if ($replace_text == null) {
+            $replace_text = "";
+        }
 
         $urls = $this->extractUrls($text);
 
-        foreach ($urls as $i=>$url) {
-
+        foreach ($urls as $i => $url) {
             $text = str_replace($url, $replace_text, $text);
-
         }
         return $text;
     }
@@ -357,9 +336,12 @@ if ($task_urls === true) {continue;}
         $this->response = null;
         $this->num_hits = 0;
 
-        //        $keywords = $this->keywords;
+        //$input = $this->assert($this->input);
+        $input = $this->subject;
+        if (isset($this->agent_input)) {
+            $input = $this->agent_input;
+        }
 
-        $input = $this->assert($this->input);
         if ($input == '') {
             $this->getUrl();
             return;
