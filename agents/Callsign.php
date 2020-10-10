@@ -227,6 +227,11 @@ class Callsign extends Agent
 
     function getCallsigns()
     {
+        if ( (isset($this->callsign_list)) and (isset($this->callsigns)) ) {
+
+        return [$this->callsign_list, $this->callsigns];
+}
+
         $this->callsign_list = [];
         $this->callsigns = [];
 
@@ -337,7 +342,9 @@ class Callsign extends Agent
      */
     function extractCallsigns($string)
     {
-        $pattern = '/\b\w*?\p{N}\w*\b/u';
+//        $pattern = '/\b\w*?\p{N}\w*\b/u';
+        $pattern = '/\b[a-z]{1,2}[0-9]{1}[a-z]{1,3}\b/i';
+
         preg_match_all($pattern, $string, $callsigns);
 
         $w = $callsigns[0];
@@ -785,6 +792,7 @@ if (file_exists($file) != false) {
             $this->input
         );
         $callsigns = ltrim($callsigns);
+
 
         $this->search_callsigns = $callsigns;
         $this->extractCallsigns($callsigns);

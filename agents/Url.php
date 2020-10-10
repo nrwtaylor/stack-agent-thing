@@ -336,11 +336,31 @@ class Url extends Agent
         $this->response = null;
         $this->num_hits = 0;
 
+        $input = $this->input;
+/*
         //$input = $this->assert($this->input);
         $input = $this->subject;
         if ((isset($this->agent_input)) and ($this->agent_input != "")) {
             $input = $this->agent_input;
         }
+*/
+        //$input = $this->assert($this->input);
+
+        $string = $input;
+        $str_pattern = 'url';
+        $str_replacement = '';
+        $filtered_input = $input;
+        if (strpos($string, $str_pattern) !== false) {
+            $occurrence = strpos($string, $str_pattern);
+            $filtered_input = substr_replace(
+                $string,
+                $str_replacement,
+                strpos($string, $str_pattern),
+                strlen($str_pattern)
+            );
+        }
+
+        $input_input = trim($filtered_input);
 
         if ($input == '') {
             $this->getUrl();
@@ -371,3 +391,4 @@ class Url extends Agent
         return;
     }
 }
+

@@ -2568,6 +2568,7 @@ throw new \Exception("Address not allowed.");
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag
         ) {
+var_dump("agent merp");
             $frequency_thing = new Frequency($this->thing);
 
             if ((isset($frequency_thing->band_matches)) or
@@ -2581,6 +2582,7 @@ throw new \Exception("Address not allowed.");
 
         $repeater_thing = new Repeater($this->thing, "extract");
         $this->thing_report = $repeater_thing->thing_report;
+
         if (
             $repeater_thing->hasRepeater($input) and !$frequency_exception_flag
         ) {
