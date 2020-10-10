@@ -338,7 +338,7 @@ class Url extends Agent
 
         //$input = $this->assert($this->input);
         $input = $this->subject;
-        if (isset($this->agent_input)) {
+        if ((isset($this->agent_input)) and ($this->agent_input != "")) {
             $input = $this->agent_input;
         }
 
