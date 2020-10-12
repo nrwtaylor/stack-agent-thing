@@ -223,14 +223,20 @@ class Web extends Agent
         $this->thing_report['message'] = $this->response;
 
         $this->thing_report['choices'] = $choices;
-        $this->thing_report['info'] = 'This is the web agent.';
+        $this->thing_report['info'] = 'Text WEB after getting a RESPONSE for a clickable link.';
         $this->thing_report['help'] =
-            'This agent reads URLs. Try CARD. Then WEB.';
+            'WEB is either ON or OFF. Try WEB ON. Or WEB OFF.';
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
+            if ($message_thing->thing_report['info'] != 'No info available.') {
+                $this->thing_report['info'] = $message_thing->thing_report['info'];
+            }
 
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
+
+        
+
+
     }
 
     /**

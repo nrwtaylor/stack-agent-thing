@@ -22,10 +22,12 @@ class Stripe extends Agent
 
     function init()
     {
+
+        $this->item_id = 'default-token';
+
         $this->email = $this->thing->container['stack']['email'];
         $this->stack_email = $this->email;
 
-        //$this->response .= "Connected to Stripe. ";
         $this->flag = "green";
         $this->stripe_daily_call_count = 0;
         $this->test = "Development code"; // Always
@@ -46,6 +48,8 @@ class Stripe extends Agent
             return true;
         }
 
+
+
         $this->credential_set =
             $this->thing->container['api']['stripe']['credential_set'];
 
@@ -58,6 +62,19 @@ class Stripe extends Agent
 
         $this->desired_state =
             $this->thing->container['api']['stripe']['state'];
+
+        $this->stripe_endpoint = '/api/whitefox/stripe-checkout';
+        if (isset($this->thing->container['api']['stripe']['webhook'])) {
+        $this->stripe_endpoint = '/api/whitefox'. 
+            $this->thing->container['api']['stripe']['webhook'];
+        }
+
+        $this->default_currency =  'usd';
+        if (isset($this->thing->container['api']['stripe']['default_currency'])) {
+        $this->default_currency  = 
+            $this->thing->container['api']['stripe']['default_currency'];
+        }
+
 
         $this->run_time_max = 360; // 5 hours
 
@@ -98,6 +115,7 @@ class Stripe extends Agent
 
     public function itemStripe($item = null)
     {
+
 /*
         if (isset($this->item) and $item == null) {
             return $this->item;
@@ -161,10 +179,19 @@ class Stripe extends Agent
         return $this->message;
     }
 
-    public function checkoutStripe()
+    public function checkoutStripe($input = null)
     {
         //$success_url = 'https://example.com/success';
         //$cancel_url = 'https://example.com/cancel';
+
+
+
+        //$this->thing->db->setFrom($this->from);
+
+        //$this->thing->json->setField("message0");
+        //$this->thing->json->writeVariable( array("stripe_input_test") , $input  );
+$this->setStripe();
+
 
         // Give the success call it's own UUID.
         $thing = new Thing(null);
@@ -183,25 +210,20 @@ class Stripe extends Agent
             '/' .
             'stripe-cancel';
 
-        //$line_item = $this->itemStripe();
-        /*
-$price_data = [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => 'T-shirt',
-                        ],
-                        'unit_amount' => 2000,
-                    ];
-*/
+$item_id = $this->agent_input['params']['item'];
 
-$item_agent = new Item($this->thing,"item");
+$item_agent = new Item($this->thing,$item_id);
 $item = $item_agent->item;
 
+//$this->default_currency = 'cad';
 
-        //$price_data = $this->priceStripe($item);
-        //$quantity = $this->quantityStripe($item);
+$currency = $this->default_currency;
+if (isset($item['currency'])) {
+$currency = $item['currency'];
+}
+
 $price_data = [
-                        'currency' => 'usd',
+                        'currency' => $currency,
                         'product_data' => [
                             'name' => $item['text'],
                         ],
@@ -269,12 +291,17 @@ $price_data = [
         }
 */
 //$item = $this->item;
-$item_agent = new Item($this->thing,"item");
+//$item_agent = new Item($this->thing,"item");
+$item_agent = new Item($this->thing,$this->item_id);
+
 $item = $item_agent->item;
+
         $item_web = "<div>";
         $item_web .= "Item: ";
+        $item_web .= $this->item_id. " ";
         $item_web .= $item['text'] . " ";
         $item_web .= $item['price'] . " ";
+
         $item_web .= "</div>";
         $web = "";
         $web .= $item_web;
@@ -326,8 +353,30 @@ $item = $item_agent->item;
 
         $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE");
         //    }
+
+$this->setStripe();
+
     }
 
+public function setStripe() {
+
+$test = true;
+if ($test) {
+        if ((isset($this->agent_input)) and (is_array($this->agent_input)) ) {$input = $this->agent_input;
+
+        $this->thing->log( '<pre> Agent "Slack" called eventSet()' );
+
+        $this->thing->db->setFrom($this->from);
+
+        $this->thing->json->setField("message0");
+        $this->thing->json->writeVariable( array("stripe") , $input  );
+}
+}
+
+
+}
+
+/*
     function setStripe($response = null)
     {
         if ($response == null) {
@@ -341,7 +390,7 @@ $item = $item_agent->item;
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["stripe"], $response);
     }
-
+*/
     public function getLink($variable = null)
     {
         $this->link = "www.stripe.com";
@@ -538,6 +587,18 @@ $item = $item_agent->item;
 
         $credential = $this->publishable_key;
 
+$item_agent= new Item($this->thing,$this->item_id);
+$item = $item_agent->item;
+//var_dump($this->item_id);
+
+$test = '?item=' . $this->item_id;
+
+//if(isset($item['id')) {
+//    $test = '?item=' . $item['id'];
+//}
+
+//$test = '?item=yellow-token';
+$end_point = $this->stripe_endpoint . $test;
         $script =
             '  <script type="text/javascript">
       // Create an instance of the Stripe object with your publishable API key
@@ -549,7 +610,7 @@ $item = $item_agent->item;
       checkoutButton.addEventListener(\'click\', function() {
         // Create a new Checkout Session using the server-side endpoint you
         // created in step 3.
-        fetch(\'/api/whitefox/stripe-checkout\', {
+        fetch(\'' . $end_point . '\', {
           method: \'POST\',
         })
         .then(function(response) {
@@ -573,10 +634,13 @@ $item = $item_agent->item;
     </script>
 ';
 
-$item_agent= new Item($this->thing,"item");
-$item = $item_agent->item;
+//$item_agent= new Item($this->thing,"item");
+//$item_agent= new Item($this->thing,$this->item_id);
+//$item = $item_agent->item;
 
-$button_text = $item['text'] . ' ' . $item['price']; 
+//$button_text = 'Buy ' . $item['text'] . ' ' . $item['price'] . $this->item_id; 
+$button_text = 'Buy ' . $item['text'] . ' ' . $item['price']; 
+
         $web =
             $stripe_library_script .
             '<button id="checkout-button">'. $button_text . '</button>' .
@@ -592,6 +656,8 @@ $button_text = $item['text'] . ' ' . $item['price'];
         $snippet_postfix = '</span>';
         //$web .= $web_items;
         $web = $snippet_prefix . $web . $snippet_postfix;
+
+//$web .= "stripe merp";
 
         $this->snippet = $web;
         $this->thing_report['snippet'] = $web;
@@ -674,16 +740,24 @@ $button_text = $item['text'] . ' ' . $item['price'];
 
     public function readSubject()
     {
-        $this->thing->log('Stripe read input, "' . $this->input . '".');
+//$this->item_id = "red-token";
+        //$this->thing->log('Stripe read input, "' . $this->input . '".');
         //$this->response .= null;
 
-        if (strtolower($this->input) == "stripe on") {
+        if ((is_string($this->input)) and (strtolower($this->input) == "stripe on")) {
             $this->state = "on";
             return;
         }
-        if (strtolower($this->input) == "stripe off") {
+        if ((is_string($this->input)) and (strtolower($this->input) == "stripe off")) {
             $this->state = "off";
             return;
+        }
+
+        if (is_string($this->input)) {
+//var_dump($this->input);
+            $this->item_id = $this->input;
+
+
         }
         /*
         if ($this->subject == 's/ web stripe') {
@@ -700,7 +774,7 @@ $button_text = $item['text'] . ' ' . $item['price'];
 
         //$this->state = $this->last_state;
 
-        if (strtolower($this->input) == "stripe") {
+        if ((is_string($this->input)) and (strtolower($this->input) == "stripe")) {
             $this->response .= "Checked Stripe state. ";
             return;
         }
@@ -712,6 +786,9 @@ $button_text = $item['text'] . ' ' . $item['price'];
 
         $keywords = $this->keywords;
 
+
+if (is_string($this->input)) {
+
         $input = $this->input;
 
         $pieces = explode(" ", strtolower($input));
@@ -719,10 +796,20 @@ $button_text = $item['text'] . ' ' . $item['price'];
         // So this is really the 'sms' section
         // Keyword
 
-        if ($this->agent_input == "stripe") {
+
+
+        if ((is_string($this->agent_input)) and ($this->agent_input == "stripe") ) {
             $this->response .= "Set up a connector to the Stripe API(s). ";
             return;
         }
+
+/*
+        if (is_array($this->agent_input)) {
+            $this->response .= "Saw an input array. Set up a connector to the Stripe API(s). ";
+            return;
+        }
+*/
+
 
         if (count($pieces) == 1) {
             if ($input == 'stripe') {
@@ -754,6 +841,7 @@ $button_text = $item['text'] . ' ' . $item['price'];
             return false;
         }
 
+}
         $this->thing->log("did not understand subject.");
 
         $this->response .= "Message not understood. ";

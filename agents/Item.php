@@ -55,6 +55,26 @@ class Item extends Agent
                 $this->thing->container['api']['item']['item_horizon'];
         }
 
+        $this->default_items = [];
+        if (isset($this->thing->container['api']['item']['items'])) {
+            $this->default_items =
+                $this->thing->container['api']['item']['items'];
+        }
+        $this->addItems($this->default_items, false);
+
+        $items = [
+            'default_item' => [
+                'title' => 'Default Token',
+                'text' => 'Defaultish Token test',
+                'price' => 6.99,
+                'description' => 'Default Tokens give you additional UUIDs.',
+            ],
+        ];
+
+        $items = require '/var/www/stackr.test/resources/item/items.php';
+
+        $this->addItems($items, false);
+
         $this->default_item = null;
         if (isset($this->thing->container['api']['item']['default_item'])) {
             $this->default_item =
@@ -85,23 +105,29 @@ class Item extends Agent
         $this->item_id = "X";
     }
 
-    public function itemGet()
+    public function getItem($item_id = null)
     {
+        if (isset($this->items[$item_id])) {
+            $item = $this->items[$item_id];
+            $this->item = $item;
+
+            $this->price_amount = "X";
+            if (isset($item['price'])) {
+                $this->price_amount = $item['price'];
+            }
+
+            $this->price_amount = "X";
+            if (isset($item['price'])) {
+                $this->price_amount = $item['price'];
+            }
+            return;
+        }
+
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("variables");
         $item = $this->thing->json->readVariable(["item", "item"]);
-        /*
-        if ($this->item != false) {
-            $this->item['created_at'] = $this->thing->thing->created_at;
-            $this->item['price'] = 1;
 
-            //       }
-            //$this->variablesGet();
-
-            $this->response .= "Got item from message0. ";
-        }
-*/
         if ($item === false) {
             $item = $this->default_item;
         }
@@ -136,7 +162,7 @@ class Item extends Agent
 
         $this->thing->log('start item cache subject search "' . $text . '".');
 
-        $arr = explode("-", $this->getSlug($text));
+        $arr = explode("-", $this->slug_agent->getSlug($text));
         $t = "";
         foreach ($arr as $i => $token) {
             if ($mode == "and") {
@@ -161,30 +187,29 @@ class Item extends Agent
         $this->thing->log(
             'found ' . $count . ' items which responded to "' . $text . '".'
         );
-        echo "item<br>";
+
+        $this->response .= 'item';
+        //echo "item<br>";
         foreach (array_reverse($things) as $i => $thing) {
             $variables_json = $thing['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
             if (!isset($variables['item'])) {
-                echo "No item found<br>";
+                $this->response .= 'No item found. ';
                 continue;
             }
 
             $item = $variables['item'];
-            echo "Found " . $item['title'] . ' in the item cache./n';
+            $this->response .=
+                "Found " . $item['title'] . ' in the item cache.';
             $items[] = $item;
         }
 
         $this->thing->log('made ' . count($this->items) . ' items.', "DEBUG");
         $this->addItems($items, false);
-
-        return;
     }
 
     public function selectItems($text)
     {
-        $slug_agent = new Slug(null, "slug");
-
         $this->matching_items = null;
 
         if (!isset($this->items) or $this->items == []) {
@@ -199,10 +224,8 @@ class Item extends Agent
             }
             $item_title = $item['title'];
 
-            //            $tile_words = explode(" ", strtolower($tile_title));
-            $item_words = explode("-", $this->getSlug($item_title['title']));
+            $item_words = explode("-", $this->slug_agent->getSlug($item_title));
 
-            //$text_words = explode(" " , strtolower($text));
             $count = 0;
             foreach ($item_words as $j => $item_word) {
                 foreach ($text_words as $k => $text_word) {
@@ -210,7 +233,6 @@ class Item extends Agent
                     if (strtolower($item_word) == strtolower($text_word)) {
                         $count += 1;
                     }
-                    //echo $tile_word ." " . $text_word . "<br>";
                 }
             }
 
@@ -279,7 +301,7 @@ class Item extends Agent
 
         $this->words = [];
         foreach ($this->items as $vendor_id => $item) {
-            $slug = $wp->slug_agent->extractSlug($item['title']);
+            $slug = $this->slug_agent->extractSlug($item['title']);
             $words = explode("-", $slug);
             $this->words = array_merge($this->words, $words);
 
@@ -321,7 +343,7 @@ class Item extends Agent
     public function run()
     {
         // Call to generate pattern for this class.
-        $this->spamTitle();
+        //$this->spamTitle();
     }
 
     public function makeResponse()
@@ -361,7 +383,7 @@ class Item extends Agent
             str_replace("-", " ", $found_post_title)
         );
 
-        $arr = explode("-", $this->getSlug($found_post_title));
+        $arr = explode("-", $this->slug_agent->getSlug($found_post_title));
 
         $n = end($arr);
         if (is_numeric($n) and $n > 1000000) {
@@ -561,6 +583,41 @@ class Item extends Agent
         //                $this->makeCache($ebay_items);
     }
 
+    public function addItems($items = null)
+    {
+        // Manage adding items to $this->items
+        // And only translate ebay items for now.
+
+        if ($items == null) {
+            return true;
+        }
+
+        // Need to test this
+        $this->thing->log("received " . count($items) . " items to add.");
+
+        //        if (isset($items)) {
+        $total_age_seconds = 0;
+        $count_add = 0;
+
+        foreach ($items as $index => $item) {
+            $count_add += 1;
+
+            $this->items[$index] = $item;
+        }
+
+        //       }
+        $this->thing->log(
+            "Now have " . count($this->items) . " unique fresh items."
+        );
+        if ($count_add > 0) {
+            $mean_age_seconds = (float) ($total_age_seconds / $count_add);
+            $this->thing->log(
+                "Tile pool has a mean age of " .
+                    $this->thing->human_time($mean_age_seconds) .
+                    "."
+            );
+        }
+    }
     public function makeCounts()
     {
         $this->count = count($this->items);
@@ -586,11 +643,17 @@ class Item extends Agent
             return;
         }
 
-        if ((is_array($text)) and (isset($text['text'])) and (isset($text['price']))) {
+        if (
+            is_array($text) and
+            isset($text['text']) and
+            isset($text['price'])
+        ) {
             $this->item = $text;
-            if (!isset($this->item['title'])) {$this->item['title'] = $this->item['text'];}
+            if (!isset($this->item['title'])) {
+                $this->item['title'] = $this->item['text'];
+            }
             $this->source = "null";
-           return;
+            return;
         }
 
         //$tokens = explode(" ", $this->post_title);
@@ -636,7 +699,9 @@ class Item extends Agent
 
     public function get()
     {
-        $this->itemGet();
+        $this->slug_agent = new Slug(null, "slug");
+
+        $this->getItem();
     }
 
     public function set()
@@ -699,11 +764,26 @@ class Item extends Agent
         if (is_array($this->agent_input) and $this->agent_input != []) {
             $this->thing->log("Found an array. Extract. Set.");
 
-            $this->extractItem($this->agent_input);
-            $this->setItem($this->item);
+            $item = $this->agent_input;
+            $this->item = $item;
+            $this->response .= 'Extracted tile from agent_input array. ';
 
-            $this->response .=
-                'Extracted tile from agent input. ';
+            return;
+        }
+
+        if (is_string($this->agent_input) and $this->agent_input != "") {
+            $this->thing->log("Found an string. Look up the item. Get. Set.");
+
+            $item_id = 'default_item';
+            $items = $this->items;
+            if (isset($items[$this->agent_input])) {
+                $item_id = $this->agent_input;
+            }
+
+            $this->getItem($item_id);
+            $this->item_id = $item_id;
+
+            $this->response .= 'Extracted tile from agent input. ';
 
             return;
         }
@@ -719,7 +799,6 @@ class Item extends Agent
         $this->getItems($this->agent_input);
         $this->response .= 'Get items.';
 
-        //$this->selectTiles($this->input);
         $this->thing->log("Read subject.", "DEBUG");
     }
 }

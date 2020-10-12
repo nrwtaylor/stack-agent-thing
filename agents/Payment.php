@@ -175,7 +175,8 @@ class Payment extends Agent
         //if (!isset($this->item)) {
         //    $this->itemPayment();
        // }
-$item_agent = new Item($this->thing,"item");
+
+$item_agent = new Item($this->thing,$stripe_agent->item_id);
 $this->item = $item_agent->item;
 
         $item_web = "<div>";

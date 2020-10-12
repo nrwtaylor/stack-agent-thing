@@ -310,6 +310,11 @@ if ($input == 'red-token') {
 $this->colourToken('red');
 }
 
+if ($input == 'purple-token') {
+$this->colourToken('purple');
+}
+
+
 if ($input == 'blue-token') {
 $this->colourToken('blue');
 }
@@ -423,14 +428,19 @@ foreach($colours as $colour) {
 
             // Load token defintitions.
             $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
-
+$item_id = 'grey'.'-token';
             if (isset($this->tokens_resource[$colour.'-token'])) {
+$item_id = $colour.'-token';
                 $item = $this->tokens_resource[$colour. '-token'];
             }
 
 
 // TODO: Check item creation
-            $item_agent = new Item($this->thing, $item);
+
+            //$item_agent = new Item($this->thing, $item_slug);
+            //$item_agent = new Item($this->thing, $item);
+            $item_agent = new Item($this->thing, $item_id);
+
             $item = $item_agent->item;
 
             $payment_agent = new Payment($this->thing, "payment");

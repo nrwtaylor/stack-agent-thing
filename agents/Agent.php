@@ -376,8 +376,8 @@ echo "\n";
 
 
         // Explore adding in INFO and HELP to web response.
-        $dev_agents = ["response", "help", "info"];
-        $prod_agents = ["response", "help"];
+        $dev_agents = ["response", "help", "info", "sms","message"];
+        $prod_agents = ["response", "help", "info"];
 
         $agents = $dev_agents;
         if ($this->stack_engine_state == 'prod') {
