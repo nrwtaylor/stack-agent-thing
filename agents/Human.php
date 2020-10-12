@@ -56,7 +56,7 @@ public function set() {
             'HUMAN | The datagram was forwarded to a mapped address.';
         $this->message = $this->word . ' forwarded to a mapped address.';
 
-        $message = $this->subject;
+        $message = $this->subject . $this->agent_input . $this->response;
 
         $thing = new Thing(null);
 
