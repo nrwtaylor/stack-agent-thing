@@ -88,7 +88,7 @@ function call_agent_function($job)
 
     if ($thing->thing == false) {
         echo "Thing is false";
-        return true;
+        //return true;
     }
     echo "worker nuuid " . $thing->nuuid . "\n";
     echo "worker uuid " . $thing->uuid . "\n";
