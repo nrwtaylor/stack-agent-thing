@@ -168,8 +168,7 @@ try {
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
-//var_dump($t);
-//exit();
+
             $this->thing_report['sms'] = $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -2568,7 +2567,7 @@ throw new \Exception("Address not allowed.");
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag
         ) {
-var_dump("agent merp");
+
             $frequency_thing = new Frequency($this->thing);
 
             if ((isset($frequency_thing->band_matches)) or

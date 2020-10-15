@@ -50,18 +50,20 @@ class Callsign extends Agent
             "call sign",
         ];
 
+        $this->loadCallsigns();
+
         $this->thing_report['help'] =
             'Recognises the following modifiers. ' .
             ucwords(trim(implode(" ", $this->keywords)) . ".");
     }
 
-    function getTimezone()
+    function deprecate_getTimezone()
     {
         // Eventually call the timezone agent.
         $this->time_zone = "America/Vancouver";
     }
 
-    function t($timestamp)
+    function deprecate_t($timestamp)
     {
         $i = 1;
         $this->getTimezone();
@@ -227,10 +229,9 @@ class Callsign extends Agent
 
     function getCallsigns()
     {
-        if ( (isset($this->callsign_list)) and (isset($this->callsigns)) ) {
-
-        return [$this->callsign_list, $this->callsigns];
-}
+        if (isset($this->callsign_list) and isset($this->callsigns)) {
+            return [$this->callsign_list, $this->callsigns];
+        }
 
         $this->callsign_list = [];
         $this->callsigns = [];
@@ -342,7 +343,7 @@ class Callsign extends Agent
      */
     function extractCallsigns($string)
     {
-//        $pattern = '/\b\w*?\p{N}\w*\b/u';
+        //        $pattern = '/\b\w*?\p{N}\w*\b/u';
         $pattern = '/\b[a-z]{1,2}[0-9]{1}[a-z]{1,3}\b/i';
 
         preg_match_all($pattern, $string, $callsigns);
@@ -353,10 +354,18 @@ class Callsign extends Agent
 
         $this->callsigns = [];
 
+        $url_agent = new Url($this->thing, "url");
+
         foreach ($w as $key => $value) {
             // Return dictionary entry.
+
+            $value = $url_agent->stripUrls($value);
+
+            // TODO - Check if a known callsign is in the URL.
+
             $value = $this->stripPunctuation($value);
-            $text = $this->findCallsign('list', $value);
+
+            $text = $this->findCallsign($value);
 
             if ($text === true) {
                 return true;
@@ -545,6 +554,10 @@ class Callsign extends Agent
         $score = 0;
         foreach ($callsign_characters as $i => $value) {
             $callsign_character = strtolower($callsign_characters[$i]);
+
+            if (!isset($text_characters[$i])) {
+                break;
+            }
             $text_character = strtolower($text_characters[$i]);
 
             if ($callsign_character == $text_character) {
@@ -582,58 +595,53 @@ class Callsign extends Agent
      * @param unknown $searchfor
      * @return unknown
      */
-    function findCallsign($librex, $searchfor)
+    function loadCallsigns()
     {
-        if ($librex == "" or $librex == " " or $librex == null) {
-            return false;
+        //function findCallsign($librex, $searchfor)
+        if (isset($this->callsigns_list)) {
+            $contents = $this->callsigns_list;
+            return;
         }
 
-        switch ($librex) {
-            case null:
-            // Drop through
-            case 'list':
-                if (isset($this->callsigns_list)) {
-                    $contents = $this->callsigns_list;
-                    break;
-                }
+        $file = $this->resource_path . 'amateur_delim.txt';
 
-                $file = $this->resource_path . 'amateur_delim.txt';
-
-                if (file_exists($file) === false) {return true;}
-
-                $pre_contents = @file_get_contents($file);
-
-                if ($pre_contents == false) {
-                    return true;
-                }
-
-                // Remove address info from search space.
-                $arr = explode("\n", $pre_contents);
-                $contents = "";
-                foreach ($arr as $key => $line) {
-                    $fields = explode(";", $line);
-                    if (!isset($fields[1])) {
-                        continue;
-                    }
-
-                    $contents .=
-                        $fields[0] . ";" . $fields[1] . ";" . $fields[2] . "\n";
-                }
-
-                $file = $this->resource_path . 'special_callsign.txt';
-
-if (file_exists($file) != false) {
-                $contents .= file_get_contents($file);
-}
-                $this->callsigns_list = $contents;
-
-                break;
-            default:
-                $file = $this->resource_path . 'amateur_delim.txt';
+        if (file_exists($file) === false) {
+            return true;
         }
 
+        $pre_contents = @file_get_contents($file);
+
+        if ($pre_contents == false) {
+            return true;
+        }
+
+        // Remove address info from search space.
+        $arr = explode("\n", $pre_contents);
+        $contents = "";
+        foreach ($arr as $key => $line) {
+            $fields = explode(";", $line);
+            if (!isset($fields[1])) {
+                continue;
+            }
+
+            $contents .=
+                $fields[0] . ";" . $fields[1] . ";" . $fields[2] . "\n";
+        }
+
+        $file = $this->resource_path . 'special_callsign.txt';
+
+        if (file_exists($file) != false) {
+            $contents .= file_get_contents($file);
+        }
+        $this->callsigns_list = $contents;
+        $this->contents = $contents;
+    }
+
+    function findCallsign($searchfor)
+    {
         $line_matches = [];
 
+        $contents = $this->contents;
         foreach (explode(" ", $searchfor) as $word) {
             $regex_pieces = "(?=.*" . $word . ")";
             $pattern = "/^" . $regex_pieces . ".*$/mi";
@@ -644,12 +652,38 @@ if (file_exists($file) != false) {
             preg_match_all($pattern, $contents, $matches);
             $line_matches = array_merge($line_matches, $matches[0]);
         }
-        $best_score = 0;
 
+        // Filter down list.
+        $filtered_line_matches = [];
+        $searchfor_tokens = explode(" ", $searchfor);
+        foreach ($searchfor_tokens as $searchfor_token) {
+            foreach ($line_matches as $line_match) {
+                $line_match_tokens = explode(";", $line_match);
+
+                $line_match_tokens = array_map(
+                    'strtolower',
+                    $line_match_tokens
+                );
+                if (
+                    in_array(strtolower($searchfor_token), $line_match_tokens)
+                ) {
+                    $filtered_line_matches[] = $line_match;
+                }
+            }
+        }
+
+        $line_match_count = count($line_matches);
+        $filtered_line_match_count = count($filtered_line_matches);
+
+        if ($filtered_line_match_count > 0 and $line_match_count > 100) {
+            $line_matches = $filtered_line_matches;
+        }
+
+        $best_score = 0;
         $sorted_matches = [];
         $test_array = [];
         foreach ($line_matches as $line) {
-            $score = $this->getCloseness($line, $searchfor);
+            $score = $this->closenessCallsign($line, $searchfor);
 
             if ($score != 0) {
                 // Add to the bottom.
@@ -680,7 +714,7 @@ if (file_exists($file) != false) {
      * @param unknown $text
      * @return unknown
      */
-    function getCloseness($line, $text)
+    function closenessCallsign($line, $text)
     {
         $words = preg_split('/[^a-z0-9.\']+/i', $line);
         $score = 0;
@@ -792,7 +826,6 @@ if (file_exists($file) != false) {
             $this->input
         );
         $callsigns = ltrim($callsigns);
-
 
         $this->search_callsigns = $callsigns;
         $this->extractCallsigns($callsigns);
@@ -919,7 +952,9 @@ if (file_exists($file) != false) {
             $t = "";
 
             foreach ($callsigns as $callsign => $call) {
-                if (mb_strlen($t) > 80) {break;}
+                if (mb_strlen($t) > 80) {
+                    break;
+                }
                 if (!isset($last_score)) {
                     $last_score = $call['score'];
                 }
