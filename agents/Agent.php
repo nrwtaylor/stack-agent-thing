@@ -2292,20 +2292,21 @@ throw new \Exception("Address not allowed.");
         // Now pick up obvious cases where the keywords are embedded
         // in the $input string.
         if (strtolower($input) == 'agent') {
-            $this->thing->log('created a Usermanager agent.');
-            //            $usermanager_thing = new Usermanager($this->thing);
-            //$link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
             $this->getLink();
-            //$link = $this->link_uuid;
-            $link =
-                $this->web_prefix .
-                "agent/" .
-                $this->link_uuid .
-                "/" .
-                strtolower($this->prior_agent);
+            $agent_text = "Ready.";
+            if (isset($this->prior_agent)) {
+                $link =
+                    $this->web_prefix .
+                    "agent/" .
+                    $this->link_uuid .
+                    "/" .
+                    strtolower($this->prior_agent);
+                $agent_text = $link;
+                $this->response .= "Made an agent link. ";
+            }
 
             $this->thing_report['sms'] =
-                "AGENT | " . $link . " Made an agent link.";
+                "AGENT | " . $agent_text . $this->response;
             return $this->thing_report;
         }
 

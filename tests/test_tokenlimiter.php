@@ -23,7 +23,7 @@ echo '<pre> thingtest.php $test_thing->thing (at Instantiation): '; print_r($tok
 $test_email = $token_limiter_thing->container['stack']['email']; // or
 
 
-if ($token_limiter_thing->container['stack']['state'] != 'dev') {exit();};
+//if ($token_limiter_thing->container['stack']['state'] != 'dev') {exit();};
 
 
 $token_limiter_thing->Create($test_email, "limiter", "Hey limiter at " . date("Y-m-d H:i:s"));
@@ -35,7 +35,7 @@ echo '<pre> thingtest.php $test_thing->thing (after Create): '; print_r($token_l
 echo '<pre> thingtest.php $test_thing->thing (before Usermanager): '; print_r($token_limiter_thing->thing); echo '</pre>';
 
 // 5 things per 8 units.  To a limit of 3.
-new TokenLimiter($token_limiter_thing, 5, 8, 3); // five per 8.  Of 3.  The Genie's Deal.
+new Tokenlimiter($token_limiter_thing, 5, 8, 3); // five per 8.  Of 3.  The Genie's Deal.
 
 echo '<pre> thingtest.php $test_thing->thing (after Usermanager): '; print_r($token_limiter_thing->thing); echo '</pre>';
 

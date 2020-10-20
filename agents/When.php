@@ -11,6 +11,33 @@ class When extends Agent
 
     function init()
     {
+        $this->initWhen();
+    }
+
+    public function initWhen() {
+
+        $this->preferences_location = null;
+        if (
+            isset(
+                $this->thing->container['api']['when']['preferences_location']
+            )
+        ) {
+            $preferences =
+                $this->thing->container['api']['when']['preferences_location'];
+        }
+
+
+        $this->calendar_location = null;
+        if (
+            isset(
+                $this->thing->container['api']['when']['calendar_location']
+            )
+        ) {
+            $this->calendar_location = 
+                $this->thing->container['api']['when']['calendar_location'];
+        }
+
+        $this->calendar_contents = file_get_contents($this->calendar_location);
     }
 
     function run()
@@ -79,6 +106,14 @@ class When extends Agent
         $this->sms_message =
             "WHEN " . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
+    }
+
+    public function makeTXT() {
+
+        $text = $this->calendar_contents;
+        $this->txt = $text;
+        $this->thing_report['txt'] = $text;
+
     }
 
     function makeChoices()
