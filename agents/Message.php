@@ -51,7 +51,7 @@ class Message extends Agent
         $this->word = $this->thing->container['stack']['word'];
         $this->email = $this->thing->container['stack']['email'];
         $this->stack_email = $this->email;
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+//        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->node_list = ["start" => ["useful", "useful?"]];
 
@@ -93,6 +93,10 @@ class Message extends Agent
             }
         }
     }
+
+    public function run() {}
+
+    public function make() {}
 
     /**
      *
@@ -309,7 +313,7 @@ class Message extends Agent
         return false;
     }
 
-    public function smsMessage($from)
+    public function emailMessage($from)
     {
         if (
             filter_var($from, FILTER_VALIDATE_EMAIL) and isset($this->message)
