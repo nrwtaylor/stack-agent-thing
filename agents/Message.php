@@ -84,6 +84,17 @@ class Message extends Agent
             return true;
         }
 
+        // Adjust code to get class name.
+        // After update of Message to extend Agent.
+        if (isset($trace[3]['class'])) {
+            $class_name = $trace[3]['class'];
+            return $class_name;
+        }
+
+        // Default if can not parse.
+        return "help";
+
+/*
         $class_name = $trace[1]['class'];
         // +1 to i cos we have to account for calling this function
         for ($i = 1; $i < count($trace); $i++) {
@@ -98,6 +109,7 @@ class Message extends Agent
                 }
             }
         }
+*/
     }
 
     public function run() {$this->respondMessage();}
@@ -299,6 +311,7 @@ class Message extends Agent
 
     public function set()
     {
+
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(
             ["message", "outcome"],
