@@ -4,7 +4,6 @@
  *
  * @package default
  */
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -51,6 +50,13 @@ class Message extends Agent
         $this->word = $this->thing->container['stack']['word'];
         $this->email = $this->thing->container['stack']['email'];
         $this->stack_email = $this->email;
+
+        $this->default_message_log = null;
+        if (isset($this->thing->container['api']['message']['default_message_log'])) {
+            $this->default_message_log = $this->thing->container['api']['message']['default_message_log'];
+        }
+
+
 //        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->node_list = ["start" => ["useful", "useful?"]];
@@ -61,7 +67,7 @@ class Message extends Agent
         $channel = new Channel($this->thing, "channel");
         $this->channel_name = $channel->channel_name;
 
-        $timestamp = new Timestamp($thing, "timestamp");
+        $timestamp = new Timestamp($this->thing, "timestamp");
     }
 
     /**
@@ -94,7 +100,7 @@ class Message extends Agent
         }
     }
 
-    public function run() {}
+    public function run() {$this->respondMessage();}
 
     public function make() {}
 
@@ -300,9 +306,11 @@ class Message extends Agent
         );
 
         // Test
-        $file = '/tmp/message_test_log.txt';
-        $text = $this->thing_report['info'];
-        file_put_contents($file, $text, FILE_APPEND | LOCK_EX);
+        if ($this->default_message_log != null) {
+            $file = $this->default_message_log;
+            $text = $this->thing_report['info'] . "\n";
+            file_put_contents($file, $text, FILE_APPEND | LOCK_EX);
+        }
     }
 
     public function smsMessage($from)
@@ -385,20 +393,22 @@ class Message extends Agent
         $this->thing_report['sms'] = $this->sms_message;
     }
 
+    public function respond() {}
+
     /**
      *
      * @return unknown
      */
-    public function respond()
+    public function respondMessage()
     {
         //        $this->thing_report['info'] = 'No info available.';
 
-        if ($this->thing->isSilent()) {
-            return;
-        }
+//        if ($this->thing->isSilent()) {
+//            return;
+//        }
 
         $this->uuidMessage();
-
+/*
         if ($this->isOpen() == "off") {
             $this->thing->log(
                 $this->agent_prefix . ' messaging is off.',
@@ -409,7 +419,7 @@ class Message extends Agent
 
             //            return; Do not implement until usermanager is defaulting to start
         }
-
+*/
         if (isset($this->do_not_send) and $this->do_not_send == true) {
             $this->thing->log($this->agent_prefix . ' do not send.', "WARNING");
             $this->thing_report['info'] = 'Agent "Message" says do not send.';
@@ -600,7 +610,7 @@ class Message extends Agent
             return $this->thing_report;
         }
 
-        if ($this->smsMessage($from)) {
+        if ($this->smsMessage($from) === true) {
             //        if ( is_numeric($from) and isset($this->sms_message) ) {
             //if ( is_numeric($from) and isset($this->sms_message) and (mb_strlen($from) <= 10)) {
             $this->thing_report['channel'] = 'sms'; // one of sms, email, keyword etc
@@ -656,7 +666,7 @@ class Message extends Agent
         // Recognize and respond to email messages,
         // IF there is a formatted email message.
 
-        if ($this->emailMessage($from)) {
+        if ($this->emailMessage($from) === true) {
             //if ( filter_var($from, FILTER_VALIDATE_EMAIL) and isset($this->message) ) {
             $this->thing_report['info'] =
                 'Agent "Message" did not send an email message.';
@@ -730,6 +740,10 @@ class Message extends Agent
         }
 
         return $this->thing_report;
+    }
+
+    public function read($text = null)
+    {
     }
 
     /**
