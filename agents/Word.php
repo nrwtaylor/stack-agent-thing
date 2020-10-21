@@ -117,6 +117,92 @@ class Word extends Agent
         return $unpunctuated;
     }
 
+    public function imageWord($text = null)
+    {
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_x;
+        } else {
+            $canvas_size_x = 164;
+            $canvas_size_y = 164;
+        }
+
+        $image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
+        //$this->image = imagecreatetruecolor(164, 164);
+
+        $this->white = imagecolorallocate($image, 255, 255, 255);
+        $this->black = imagecolorallocate($image, 0, 0, 0);
+
+        imagecolortransparent($image, $this->white);
+
+        imagefilledrectangle(
+            $image,
+            0,
+            0,
+            $canvas_size_x,
+            $canvas_size_y,
+            $this->white
+        );
+
+        $textcolor = imagecolorallocate($image, 0, 0, 0);
+
+        // Write the string at the top left
+        $border = 30;
+        $r = 1.165;
+
+        $radius = ($r * ($canvas_size_x - 2 * $border)) / 3;
+
+        // devstack add path
+        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+
+        $size = 26;
+
+        $angle = 0;
+
+        //check width of the image
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        //        if (file_exists($font)) {
+        $bbox = imagettfbbox($size, $angle, $font, $text);
+        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+        $bbox["width"] =
+            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+        $bbox["height"] =
+            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        //check width of the image
+        //        $width = imagesx($this->image);
+        //        $height = imagesy($this->image);
+        $pad = 0;
+        imagettftext(
+            $image,
+            $size,
+            $angle,
+            $width / 2 - $bb_width / 2,
+            $height / 2 + $bb_height / 2,
+            $grey,
+            $font,
+            $text
+        );
+        //        }
+
+        if (ob_get_contents()) {
+            ob_clean();
+        }
+
+        ob_start();
+        imagepng($image);
+        $imagedata = ob_get_contents();
+
+        ob_end_clean();
+        $PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
+        return $PNG_embed;
+    }
+
     /**
      *
      * @param unknown $string
@@ -631,9 +717,7 @@ class Word extends Agent
             $input = strtolower($this->subject);
         } else {
             $input = strtolower($this->agent_input);
-
         }
-
 
         $keywords = ['word', 'random'];
         $pieces = explode(" ", strtolower($input));
