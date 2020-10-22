@@ -133,6 +133,46 @@ class Uuid extends Agent
         return $stripped_input;
     }
 
+    public function decimalUuid($uuid = null)
+    {
+        $hex = str_replace("-", "", $uuid);
+
+        $dec = 0;
+        $len = strlen($hex);
+        for ($i = 1; $i <= $len; $i++) {
+            $dec = bcadd(
+                $dec,
+                bcmul(
+                    strval(hexdec($hex[$i - 1])),
+                    bcpow('16', strval($len - $i))
+                )
+            );
+        }
+        return $dec;
+    }
+
+    /**
+     *
+     */
+    public function binaryUuid()
+    {
+        $hex = str_replace("-", "", $this->uuid);
+
+        $bin = 0;
+        $len = strlen($hex);
+        for ($i = 1; $i <= $len; $i++) {
+            $dec = bcadd(
+                $dec,
+                bcmul(
+                    strval(hex2bin($hex[$i - 1])),
+                    bcpow('16', strval($len - $i))
+                )
+            );
+        }
+
+    }
+
+
     /**
      *
      * @param unknown $input

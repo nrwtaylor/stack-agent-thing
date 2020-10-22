@@ -121,9 +121,9 @@ class Snowflake extends Agent
         $filtered_input = ltrim($whatIWant, " ");
 */
 
-if ( (is_string($filtered_input)) and ($filtered_input != "")) {
-        $this->response .= 'Is "' . $filtered_input . '". ';
-}
+        if (is_string($filtered_input) and $filtered_input != "") {
+            $this->response .= 'Is "' . $filtered_input . '". ';
+        }
         $this->whatis = $filtered_input;
     }
 
@@ -134,8 +134,8 @@ if ( (is_string($filtered_input)) and ($filtered_input != "")) {
      */
     public function timestampSnowflake($t = null)
     {
-       // $s = $this->thing->thing->created_at;
-$s = $this->created_at;
+        // $s = $this->thing->thing->created_at;
+        $s = $this->created_at;
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {
@@ -253,6 +253,8 @@ $s = $this->created_at;
 
         //$lattice_agent->drawLattice(10,10,10,25,0);
 
+        //$lattice_agent->makeImage();
+
         $lattice_agent->makePNG();
 
         $this->hextile_PNG = $lattice_agent->PNG_embed;
@@ -362,8 +364,12 @@ $s = $this->created_at;
     /**
      *
      */
+    /*
     public function decimalUuid()
     {
+        $uuid_agent = new Uuid($this->thing, "uuid");
+        $this->decimal_snowflake = $uuid->decimalUuid($this->uuid);
+return;
         $hex = str_replace("-", "", $this->uuid);
 
         $dec = 0;
@@ -380,7 +386,7 @@ $s = $this->created_at;
 
         $this->decimal_snowflake = $dec;
     }
-
+*/
     /**
      *
      */
@@ -528,6 +534,8 @@ $s = $this->created_at;
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+        imagecolortransparent($this->image, $this->white);
 
         // For Vancouver Pride 2018
 
@@ -1674,21 +1682,52 @@ $s = $this->created_at;
                 );
             }
 */
+
             $this->getNuuid();
-            $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+            //            $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+
+            //            $pdf->SetFont('Helvetica', '', 10);
+            //            $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
+
+            switch (true) {
+                case isset($this->hextile_PNG):
+                    $pdf->Image($this->nuuid_png, 20, 13, 20, 20, 'PNG');
+
+                    break;
+                default:
+                    $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+            }
+
             $pdf->SetFont('Helvetica', '', 10);
             $pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
 
+            $tokens = explode(" ", $this->whatis);
+
             $pdf->SetFont('Helvetica', '', 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
+            $dev = false;
+            if ($dev == true) {
+                $i = 0;
+                $j = 0;
+                $word_agent = new Word($this->thing, "word");
+                foreach ($tokens as $token) {
+                    $png_image = $word_agent->imageWord($token);
+                    $pdf->Image($png_image, 5 + $i, 5 + $j, 20, 20, 'PNG');
+                    $i += 10;
+                    $j += 10;
+                }
+            }
 
-            $pdf->SetXY(140, 7);
+            $pdf->SetXY(140 + $i * 10, 7);
             $text = $this->whatis;
+            //$text = $token;
             $line_height = 20;
             $pdf->MultiCell(150, $line_height, $text, 0);
+            //$i += 1;
+            //}
 
             if (isset($this->hextile_PNG)) {
                 $top_x = -6;
@@ -1894,7 +1933,13 @@ $s = $this->created_at;
 
                             $this->size = 2.5;
                             $this->lattice_size = 40;
-                            $this->decimalUuid();
+
+                            $uuid_agent = new Uuid($this->thing, "uuid");
+                            $this->decimal_snowflake = $uuid_agent->decimalUuid(
+                                $this->uuid
+                            );
+
+                            //                            $this->decimalUuid();
                             $this->response .=
                                 "Saw request for a UUID snowflake. ";
                             return;
