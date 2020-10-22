@@ -96,6 +96,19 @@ class Googlecalendar extends Agent
             return $ics_url;
         }
 
+        // TODO Test
+        if (filter_var($text, FILTER_VALIDATE_EMAIL)) {
+
+            $email_address = urlencode($text);
+            $ics_url =
+                "https://calendar.google.com/calendar/ical/" .
+                $email_address .
+                "/public/basic.ics";
+            $this->addresses[] = $ics_url;
+            return $ics_url;
+        }
+
+
         return false;
     }
 

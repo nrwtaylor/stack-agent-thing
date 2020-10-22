@@ -34,7 +34,7 @@ class Calendar extends Agent
         $this->thing->flagGreen();
 
         $this->thing_report["info"] = "This is a calendar.";
-        $this->thing_report["help"] = "This is about seeings Events.";
+        $this->thing_report["help"] = "This is about seeing Calendar Events.";
 
         //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
@@ -74,16 +74,19 @@ class Calendar extends Agent
 
     function makeSMS()
     {
-        $calendar_text = "No calendar information available.";
+        $calendar_text = "";
         if (isset($this->events)) {
             $time_agent = new Time($this->thing, "time");
 
             $calendar_text = "";
             foreach ($this->events as $event) {
+
+                $runtime = $this->thing->human_time(strtotime($event->dtend) - strtotime($event->dtstart));
+
                 $calendar_text .=
                     $time_agent->textTime($event->dtstart) .
                     " " .
-                    $time_agent->textTime($event->dtend) .
+                    $runtime .
                     " " .
                     $event->summary .
                     " " .
@@ -96,10 +99,12 @@ class Calendar extends Agent
             if (mb_strlen($calendar_text) > 140) {
                 $calendar_text = "";
                 foreach ($this->events as $event) {
+                    $runtime = $this->thing->human_time(strtotime($event->dtend) - strtotime($event->dtstart));
+
                     $calendar_text .=
                         $time_agent->textTime($event->dtstart) .
                         " " .
-                        $time_agent->textTime($event->dtend) .
+                        $runtime .
                         " " .
                         $event->summary .
                         "\n";
@@ -109,7 +114,7 @@ class Calendar extends Agent
 
         $this->node_list = ["calendar" => ["calendar", "dog"]];
         $this->sms_message =
-            "CALENDAR\n" . $calendar_text . "\n" . $this->response;
+            "CALENDAR\n" . $calendar_text . "" . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
     }
 
@@ -159,6 +164,8 @@ class Calendar extends Agent
                 'filterDaysBefore' => null, // Default value
                 'skipRecurrence' => false, // Default value
             ]);
+            $this->response .= 'Read calendar. ';
+
             // $ical->initFile('ICal.ics');
             // $ical->initUrl('https://raw.githubusercontent.com/u01jmg3/ics-parser/master/examples/ICal.ics>
         } catch (\Exception $e) {
@@ -203,7 +210,7 @@ class Calendar extends Agent
         $str_pattern = 'calendar';
         $str_replacement = '';
 
-        if (strpos($string, $str_pattern) !== false) {
+        if (stripos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
             $filtered_input = substr_replace(
                 $string,
@@ -230,7 +237,6 @@ class Calendar extends Agent
 
         if (is_string($ics_link)) {
             $this->file = $ics_link;
-            $this->response .= 'Saw a calendar. ';
             return;
         }
 
