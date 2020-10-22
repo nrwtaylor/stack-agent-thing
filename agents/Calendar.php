@@ -18,9 +18,16 @@ class Calendar extends Agent
 
     public function doCalendar()
     {
-        if (isset($this->file) and is_string($this->file)) {
-            $this->readCalendar($this->file);
+
+foreach($this->ics_links as $ics_link) {
+
+//$file = $this->file;
+$file = $ics_link;
+        if (isset($file) and is_string($file)) {
+            $this->readCalendar($file);
         }
+
+}
 
         if ($this->agent_input == null) {
             $this->calendar_message = $this->calendar_text; // mewsage?
@@ -152,6 +159,14 @@ class Calendar extends Agent
         $this->thing_report['choices'] = $choices;
     }
 
+    public function eventCalendar($arr = null) {
+        // TODO Pass this through Event.
+        // And then re-factor.
+        $event = $arr;
+        return $event;
+
+    }
+
     public function readCalendar($file)
     {
         try {
@@ -164,6 +179,7 @@ class Calendar extends Agent
                 'filterDaysBefore' => null, // Default value
                 'skipRecurrence' => false, // Default value
             ]);
+
             $this->response .= 'Read calendar. ';
 
             // $ical->initFile('ICal.ics');
@@ -173,7 +189,19 @@ class Calendar extends Agent
             return true;
         }
 
-        $this->events = $ical->eventsFromInterval('1 week');
+        $events = $ical->eventsFromInterval('1 week');
+
+        if (!isset($this->events)) {$this->events = [];}
+
+        foreach ($events as $event) {
+            $this->events[] = $this->eventCalendar($event);
+        }
+
+        // Sort events list by start time.
+        // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
+        usort($this->events,function($first,$second){
+            return strtotime($first->dtstart) > strtotime($second->dtstart);
+        });
 
         $time_agent = new Time($this->thing, "time");
 
@@ -228,17 +256,24 @@ class Calendar extends Agent
             return;
         }
 
+$tokens = explode(" " ,$filtered_input);
+$ics_links = [];
+foreach($tokens as $i=>$token) {
+
         // See if Googlecalendar recognizes this.
         $googlecalendar_agent = new Googlecalendar(
             $this->thing,
             "googlecalendar"
         );
-        $ics_link = $googlecalendar_agent->icsGooglecalendar($filtered_input);
+        $ics_link = $googlecalendar_agent->icsGooglecalendar($token);
+$ics_links[] = $ics_link;
+}
+$this->ics_links = $ics_links;
 
-        if (is_string($ics_link)) {
-            $this->file = $ics_link;
-            return;
-        }
+//        if (is_string($ics_link)) {
+//            $this->file = $ics_link;
+//            return;
+//        }
 
         return false;
     }
