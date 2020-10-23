@@ -128,11 +128,13 @@ class Atsign extends Agent
             $atsigns_text = "No @ signs found. ";
         } else {
             $atsigns_text = "";
-            foreach ($this->atsigns as $atsign) {
+
+            foreach ($this->atsigns as $i=>$atsign) {
                 $atsigns_text .= $atsign . " ";
             }
             $atsigns_text = trim($atsigns_text);
         }
+
         $sms_message .= " | " . $atsigns_text;
 
         $this->thing_report['sms'] = $sms_message;
@@ -145,7 +147,8 @@ class Atsign extends Agent
 
         $this->atsign = "X";
         if (isset($this->atsigns[0])) {
-            $this->atsign = $this->atsigns[0]['atsign'];
+            //$this->atsign = $this->atsigns[0]['atsign'];
+            $this->atsign = $this->atsigns[0];
         }
     }
 
@@ -185,19 +188,21 @@ class Atsign extends Agent
                         continue;
                     }
                     $task_atsigns = $this->filterAtsigns($task_atsigns);
+                    //$atsign = [
+                    //    "atsign" => implode(" ", $task_atsigns),
+                    //    "uuid" => $thing_object['uuid'],
+                    //];
 
-                    $atsign = [
-                        "atsign" => implode(" ", $task_atsigns),
-                        "uuid" => $thing_object['uuid'],
-                    ];
 
-                    $atsigns[] = $atsign;
+                    $atsign = implode(" ", $task_atsigns);
+                    $atsigns = array_merge($atsigns, $task_atsigns);
+                    //$atsigns[] = $atsign;
                 }
             }
         }
 
         $atsigns = array_reverse($atsigns);
-        $this->atsigns = $atsigns;
+        $this->atsigns = array_unique($atsigns);
     }
 
     public function filterAtsigns($atsigns = null)
