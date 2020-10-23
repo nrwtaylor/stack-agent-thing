@@ -49,7 +49,12 @@ class Compression extends Agent
 
         $text = $this->filtered_input;
         foreach ($matches as $agent_name => $compression) {
-            $text = str_ireplace($compression[0]['words'], $agent_name, $text);
+            //            $text = str_ireplace($compression[0]['words'], $agent_name, $text);
+            $text = preg_replace(
+                '/\b' . $compression[0]['words'] . '\b/ui',
+                $agent_name,
+                $text
+            );
         }
 
         $this->filtered_input = $text;

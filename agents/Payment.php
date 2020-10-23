@@ -157,33 +157,18 @@ class Payment extends Agent
 
     public function makeSnippet()
     {
-        //        $link = $this->link;
-        //        $text = $this->text;
-        //        $html_link = '<a href="' . $link . '">' . $text . '</a>';
-
-        //        $web = $html_link;
-
-//        if (!isset($this->item)) {
-//            $this->itemPayment();
-//        }
-
         $stripe_agent = new Stripe($this->thing, "stripe");
         //$stripe_agent->itemStripe($this->item);
         $stripe_agent->makeSnippet();
         $web = $stripe_agent->snippet;
 
-        //if (!isset($this->item)) {
-        //    $this->itemPayment();
-       // }
-$item_agent = new Item($this->thing,"item");
-$this->item = $item_agent->item;
+        $item_agent = new Item($this->thing, $stripe_agent->item_id);
+        $this->item = $item_agent->item;
 
         $item_web = "<div>";
-        $item_web .= "Item: ";
-        $item_web .= $this->item['text'] . " ";
-        $item_web .= $this->item['price'] . " ";
+        $item_web .= $this->item['description'] . " ";
+
         $item_web .= "</div>";
-        //$web .= $item_web;
 
         $this->snippet = $item_web . $web;
         $this->thing_report['snippet'] = $web;

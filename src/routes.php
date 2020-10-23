@@ -39,7 +39,28 @@ $app->group('/api', function () use ($app) {
             $thing = new Thing(null);
             $thing->Create("stripe", "routes", "s/ web stripe");
 
-            $stripe_agent = new Stripe($thing);
+                $body = $request->getParsedBody();
+                $getParam = $request->getQueryParams();
+                //$threadKey = $getParam('threadKey');
+                $params_json = $getParam;
+                $args_json = $args;
+
+                //$uri = $request->getUri();
+                //$method = $uri->getQuery();
+                //$threadKey = $app->request()->params('threadKey');
+                //$threadKey = $request->params('');
+                //$data = json_decode($request->getBody()) ?: $request->params();
+                //$data = json_decode( $app->request->getBody() ) ?: $app->request->p>
+                $data = [
+                    "params" => $params_json,
+                    "args" => $args_json,
+                    "body" => $body,
+                    "merp"=>"merp"
+                ];
+
+//$data = ["test"=>"merp"];
+//$data = "stripe";
+            $stripe_agent = new Stripe($thing, $data);
             $session = $stripe_agent->checkoutStripe();
 
             return $response->withJson([ 'id' => $session->id ])->withStatus(200);

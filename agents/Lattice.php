@@ -336,7 +336,7 @@ class Lattice extends Agent
         $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
     }
 
-    public function makePNG()
+    public function makeImage()
     {
         $this->image = imagecreatetruecolor(
             $this->canvas_size_x,
@@ -437,7 +437,12 @@ class Lattice extends Agent
         //xob_clean();
 
         // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
+    }
 
+    public function makePNG()
+    {
+        //if (!isset($this->image)) {$this->makeImage();}
+        $this->makeImage();
         if (ob_get_contents()) {
             ob_clean();
         }

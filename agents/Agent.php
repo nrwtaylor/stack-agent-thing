@@ -168,8 +168,7 @@ try {
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
-//var_dump($t);
-//exit();
+
             $this->thing_report['sms'] = $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -376,8 +375,8 @@ echo "\n";
 
 
         // Explore adding in INFO and HELP to web response.
-        $dev_agents = ["response", "help", "info"];
-        $prod_agents = ["response", "help"];
+        $dev_agents = ["response", "help", "info", "sms","message"];
+        $prod_agents = ["response", "help", "info"];
 
         $agents = $dev_agents;
         if ($this->stack_engine_state == 'prod') {
@@ -1434,12 +1433,16 @@ if (!isset($this->created_at)) {$this->created_at = time();}
             case strtolower($this->agent_input) == "extract":
             case strtolower($this->agent_input) ==
                 strtolower($this->agent_name):
-                $this->input = strtolower($text);
+//                $this->input = strtolower($text);
+                $this->input = $text;
+
                 break;
             default:
-                $this->input = strtolower($this->agent_input);
-        }
+//                $this->input = strtolower($this->agent_input);
+                $this->input = $this->agent_input;
 
+        }
+/*
         if (!is_array($this->input)) {
             $whatIWant = $this->input;
             if (
@@ -1459,7 +1462,7 @@ if (!isset($this->created_at)) {$this->created_at = time();}
             }
             $this->input = trim($whatIWant);
         }
-
+*/
         $this->thing->log('read "' . $this->subject . '".');
 
         $this->readFrom();
@@ -1822,7 +1825,7 @@ throw new \Exception("Address not allowed.");
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
-
+/*
         $input = strtolower(
             $agent_input_text . " " . $this->to . " " . $this->subject
         );
@@ -1831,6 +1834,15 @@ throw new \Exception("Address not allowed.");
         } else {
             $input = strtolower($agent_input_text);
         }
+*/
+        $input = $agent_input_text . " " . $this->to . " " . $this->subject;
+
+        if ($this->agent_input == null) {
+            $input = $this->to . " " . $this->subject;
+        } else {
+            $input = $agent_input_text;
+        }
+
 
         //$input = strtolower($this->input);
 
@@ -1960,6 +1972,10 @@ throw new \Exception("Address not allowed.");
             return $this->thing_report;
         }
 
+        // Strip @ callsigns from input
+        $atsign_agent = new Atsign($this->thing, "atsign");
+        $input = $atsign_agent->stripAtsigns($input);
+
         // Basically if the agent input directly matches an agent name
         // Then run it.
 
@@ -1973,9 +1989,9 @@ throw new \Exception("Address not allowed.");
 
         $text = strtolower($text);
 
-        $arr = explode(' ', trim($text));
+        //$arr = explode(' ', trim($text));
 
-        $arr = explode('\%20', trim($text));
+        $arr = explode('\%20', trim(strtolower($text)));
 
         $agents = [];
         $onegrams = $this->getNgrams($text, $n = 1);
@@ -2295,20 +2311,21 @@ throw new \Exception("Address not allowed.");
         // Now pick up obvious cases where the keywords are embedded
         // in the $input string.
         if (strtolower($input) == 'agent') {
-            $this->thing->log('created a Usermanager agent.');
-            //            $usermanager_thing = new Usermanager($this->thing);
-            //$link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
             $this->getLink();
-            //$link = $this->link_uuid;
-            $link =
-                $this->web_prefix .
-                "agent/" .
-                $this->link_uuid .
-                "/" .
-                strtolower($this->prior_agent);
+            $agent_text = "Ready.";
+            if (isset($this->prior_agent)) {
+                $link =
+                    $this->web_prefix .
+                    "agent/" .
+                    $this->link_uuid .
+                    "/" .
+                    strtolower($this->prior_agent);
+                $agent_text = $link;
+                $this->response .= "Made an agent link. ";
+            }
 
             $this->thing_report['sms'] =
-                "AGENT | " . $link . " Made an agent link.";
+                "AGENT | " . $agent_text . $this->response;
             return $this->thing_report;
         }
 
@@ -2570,6 +2587,7 @@ throw new \Exception("Address not allowed.");
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag
         ) {
+
             $frequency_thing = new Frequency($this->thing);
 
             if ((isset($frequency_thing->band_matches)) or
@@ -2583,6 +2601,7 @@ throw new \Exception("Address not allowed.");
 
         $repeater_thing = new Repeater($this->thing, "extract");
         $this->thing_report = $repeater_thing->thing_report;
+
         if (
             $repeater_thing->hasRepeater($input) and !$frequency_exception_flag
         ) {
@@ -2594,8 +2613,10 @@ throw new \Exception("Address not allowed.");
                 return $this->thing_report;
             } else {
                 $ars_thing = new Amateurradioservice($this->thing);
-                $this->thing_report = $ars_thing->thing_report;
-                return $this->thing_report;
+                if ($ars_thing->callsign != null) {
+                    $this->thing_report = $ars_thing->thing_report;
+                    return $this->thing_report;
+                }
             }
         }
 

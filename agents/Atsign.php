@@ -7,14 +7,14 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Url extends Agent
+class Atsign extends Agent
 {
     public $var = 'hello';
 
     function init()
     {
         $this->thing_report['help'] =
-            'Text URL < A web link> to add a link to this list.';
+            'Text AT SIGN < A web link> to add a link to this list.';
     }
 
     function run()
@@ -25,7 +25,7 @@ class Url extends Agent
     {
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(
-            ["url", "refreshed_at"],
+            ["atsign", "refreshed_at"],
             $this->thing->json->time()
         );
     }
@@ -47,36 +47,35 @@ class Url extends Agent
 
     function makeWeb()
     {
-        $this->getUrls();
+        $this->getAtsigns();
 
-        $web = "<b>URL Agent</b><br><p>";
+        $web = "<b>AT SIGN Agent</b><br><p>";
         $web .= "<p>";
 
-        if (isset($this->urls) and count($this->urls) > 0) {
-            $web .= "<b>COLLECTED URLS</b><br><p>";
+        if (isset($this->atsigns) and count($this->atsigns) > 0) {
+            $web .= "<b>COLLECTED AT SIGNS</b><br><p>";
             $web .= "<ul>";
-            //$urls = array_unique($this->urls);
 
-            $tempArr = array_unique(array_column($this->urls, 'url'));
-            $urls = array_intersect_key($this->urls, $tempArr);
+            $tempArr = array_unique(array_column($this->atsigns, 'atsign'));
+            $atsigns = array_intersect_key($this->atsigns, $tempArr);
 
-            foreach ($urls as $i => $url_array) {
-                $url = $url_array['url'];
+            foreach ($atsigns as $i => $atsign_array) {
+                $atsign = $atsign_array['atsign'];
 
-                $url_link =
+                $atsign_link =
                     $this->web_prefix .
                     "thing/" .
-                    $url_array['uuid'] .
+                    $atsign_array['uuid'] .
                     "/forget";
-                $html_link = "[" . '<a href="' . $url_link . '">forget</a>]';
+                $html_link = "[" . '<a href="' . $atsign_link . '">forget</a>]';
 
-                if (stripos($url, "://") !== false) {
-                    $link = '<a href="' . $url . '">' . $url . '</a>';
+                if (stripos($atsign, "://") !== false) {
+                    $link = '<a href="' . $atsign . '">' . $atsign . '</a>';
                     $web .= "<li>" . $link . " " . $html_link . "<br>";
 
                     continue;
-                } elseif (stripos($url, ":/") !== false) {
-                    $link = '<a href="' . $url . '">' . $url . '</a>';
+                } elseif (stripos($atsign, ":/") !== false) {
+                    $link = '<a href="' . $atsign . '">' . $atsign . '</a>';
                     $try_link = '[Try ' . str_replace(":/", "://", $link) . ']';
                     $web .= "<li>" . $link . " " . $try_link . "<br>";
 
@@ -84,15 +83,15 @@ class Url extends Agent
                 } else {
                     $link =
                         'Try <a href="https://' .
-                        $url .
+                        $atsign .
                         '">' .
                         "https://" .
-                        $url .
+                        $atsign .
                         '</a>';
 
                     $web .=
                         "<li>" .
-                        $url .
+                        $atsign .
                         ' [' .
                         $link .
                         ']' .
@@ -101,7 +100,7 @@ class Url extends Agent
                     continue;
                 }
 
-                $web .= "<li>" . $url . $html_link . "<br>";
+                $web .= "<li>" . $atsign . $html_link . "<br>";
             }
 
             $web .= "</ul>";
@@ -116,7 +115,7 @@ class Url extends Agent
 
     function makeSMS()
     {
-        $sms_message = "URL";
+        $sms_message = "AT SIGN";
         if (isset($this->response) and $this->response != "") {
             $sms_message .= " | ";
             $sms_message .= $this->response;
@@ -125,32 +124,36 @@ class Url extends Agent
         if ($this->verbosity >= 2) {
         }
 
-        if ($this->url == "X") {
-            $urls_text = "No urls found. ";
+        if ($this->atsign == "X") {
+            $atsigns_text = "No @ signs found. ";
         } else {
-            $urls_text = $this->url;
+            $atsigns_text = "";
+            foreach ($this->atsigns as $atsign) {
+                $atsigns_text .= $atsign . " ";
+            }
+            $atsigns_text = trim($atsigns_text);
         }
-        $sms_message .= " | " . $urls_text;
+        $sms_message .= " | " . $atsigns_text;
 
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
     }
 
-    public function getUrl()
+    public function getAtsign()
     {
-        $this->getUrls();
+        $this->getAtsigns();
 
-        $this->url = "X";
-        if (isset($this->urls[0])) {
-            $this->url = $this->urls[0]['url'];
+        $this->atsign = "X";
+        if (isset($this->atsigns[0])) {
+            $this->atsign = $this->atsigns[0]['atsign'];
         }
     }
 
-    public function getUrls()
+    public function getAtsigns()
     {
-        $urls = [];
+        $atsigns = [];
 
-        $findagent_thing = new Findagent($this->thing, 'url');
+        $findagent_thing = new Findagent($this->thing, 'atsign');
 
         if (!is_array($findagent_thing->thing_report['things'])) {
             return;
@@ -171,55 +174,58 @@ class Url extends Agent
                     strtotime($this->thing->time()) -
                     strtotime($thing_object['created_at']);
 
-                if (isset($variables['url'])) {
-                    $task_urls = $this->extractUrls($thing_object['task']);
-                    if ($task_urls === true) {
+                if (isset($variables['atsign'])) {
+                    $task_atsigns = $this->extractAtsigns(
+                        $thing_object['task']
+                    );
+                    if ($task_atsigns === true) {
                         continue;
                     }
-                    if (count($task_urls) == 0) {
+                    if (count($task_atsigns) == 0) {
                         continue;
                     }
-                    $task_urls = $this->filterUrls($task_urls);
+                    $task_atsigns = $this->filterAtsigns($task_atsigns);
 
-                    $url = [
-                        "url" => implode(" ", $task_urls),
+                    $atsign = [
+                        "atsign" => implode(" ", $task_atsigns),
                         "uuid" => $thing_object['uuid'],
                     ];
 
-                    $urls[] = $url;
+                    $atsigns[] = $atsign;
                 }
             }
         }
 
-        $urls = array_reverse($urls);
-        $this->urls = $urls;
+        $atsigns = array_reverse($atsigns);
+        $this->atsigns = $atsigns;
     }
 
-    public function filterUrls($urls = null)
+    public function filterAtsigns($atsigns = null)
     {
-        if (!is_array($urls)) {
+        if (!is_array($atsigns)) {
             return true;
         }
-        foreach ($urls as $i => $url) {
-            $parts = explode(" ", $url);
+        /*
+        foreach ($atsigns as $i => $atsign) {
+            $parts = explode(" ", $atsign);
             if (count($parts) == 1) {
-                if (stripos($url, '.') !== false) {
-                    $urls[$i] = explode(' ', $url)[0];
+                if (stripos($atsign, '.') !== false) {
+                    $atsigns[$i] = explode(' ', $atsign)[0];
                 } else {
-                    unset($urls[$i]);
+                    unset($atsigns[$i]);
                 }
             }
 
-            if (stripos($url, "://") !== false) {
+            if (stripos($atsign, "://") !== false) {
                 continue;
             }
 
-            if (stripos($url, ":/") !== false) {
-                unset($urls[$i]);
+            if (stripos($atsign, ":/") !== false) {
+                unset($atsigns[$i]);
             }
 
             // Did this pick up a decimal.
-            $tokens = explode(".", $url);
+            $tokens = explode(".", $atsign);
             if (count($tokens) == 2) {
                 if (!is_numeric($tokens[0])) {
                     continue;
@@ -227,10 +233,12 @@ class Url extends Agent
                 if (!is_numeric($tokens[1])) {
                     continue;
                 }
-                unset($urls[$i]);
+                unset($atsigns[$i]);
             }
         }
-        return $urls;
+*/
+
+        return $atsigns;
     }
 
     public function respondResponse()
@@ -248,82 +256,63 @@ class Url extends Agent
         $this->thing_report['help'] = 'This reads a web resource.';
     }
 
-    public function extractUrls($text = null)
+    public function extractAtsigns($text = null)
     {
         if ($text == null) {
             return true;
         }
 
-        $text = str_replace('url is', '', $text);
-        $text = str_replace('url', '', $text);
+        $text = str_replace('atsign is', '', $text);
+        $text = str_replace('atsign', '', $text);
         $text = trim($text);
-        // https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
-        $pattern =
-            '#\b(https://)?([^\s()<>]+)?(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
 
-        // https://stackoverflow.com/questions/6427530/regular-expression-pattern-to-match-url-with-or-without-http-www
-        $regex = '((https?|ftp)://)?';
-        $regex .= '([a-z0-9+!*(),;?&=$_.-]+(:[a-z0-9+!*(),;?&=$_.-]+)?@)?';
-        $regex .=
-            "([a-z0-9\-\.]*)\.(([a-z]{2,4})|([0-9]{1,3}\.([0-9]{1,3})\.([0-9]{1,3})))";
-        $regex .= '(:[0-9]{2,5})?';
-        $regex .= '(/([a-z0-9+$_%-]\.?)+)*/?';
-        $regex .= '(\?[a-z+&\$_.-][a-z0-9;:@&%=+/$_.-]*)?';
-        $regex .= '(#[a-z_.-][a-z0-9+$%_.-]*)?';
-
-        $pattern = "#" . $regex . "#";
-
-        $pattern =
-            '/^(http|https)?:\/\/|(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/';
-
-        $pattern =
-            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
-
+        // https://stackoverflow.com/questions/1812883/preg-match-all-words-start-with-an
+        $pattern = "/((?<!\S)@\w+(?!\S))/";
         preg_match_all($pattern, $text, $match);
-        if (!isset($urls)) {
-            $urls = [];
+        if (!isset($atsigns)) {
+            $atsigns = [];
         }
 
-        $urls = array_merge($urls, $match[0]);
-        $urls = array_unique($urls);
+        $atsigns = array_merge($atsigns, $match[0]);
+        $atsigns = array_unique($atsigns);
         // Deal with spaces
-        $urls = $this->filterUrls($urls);
+        $atsigns = $this->filterAtsigns($atsigns);
 
-        return $urls;
+        return $atsigns;
     }
 
-    public function hasUrl($text = null)
+    public function hasAtsign($text = null)
     {
-        $urls = $this->extractUrls($text);
+        $atsigns = $this->extractAtsigns($text);
 
-        // No URLS found.
-        if ($urls === true) {
+        // No @ signs found.
+        if ($atsigns === true) {
             return false;
         }
 
-        if (count($urls) >= 1) {
+        if (count($atsigns) >= 1) {
             return true;
         }
 
         return false;
     }
 
-    public function extractUrl($text = null)
+    public function extractAtsign($text = null)
     {
-        $urls = $this->extractUrls($text);
+        $atsigns = $this->extractAtsigns($text);
 
-        // No URLS found.
-        if ($urls === true) {
+        // No AT SIGNS found.
+        if ($atsigns === true) {
             return false;
         }
-        if (count($urls) == 1) {
-            return $urls[0];
+        if (count($atsigns) == 1) {
+            return $atsigns[0];
         }
 
         return false;
     }
 
-    public function stripUrls($text = null, $replace_text = null)
+    public function stripAtsigns($text = null, $replace_text = null)
     {
         if ($text == null) {
             $text = $this->input;
@@ -332,10 +321,9 @@ class Url extends Agent
             $replace_text = "";
         }
 
-        $urls = $this->extractUrls($text);
-
-        foreach ($urls as $i => $url) {
-            $text = str_replace($url, $replace_text, $text);
+        $atsigns = $this->extractAtsigns($text);
+        foreach ($atsigns as $i => $atsign) {
+            $text = str_replace($atsign, $replace_text, $text);
         }
         return $text;
     }
@@ -356,7 +344,7 @@ class Url extends Agent
         //$input = $this->assert($this->input);
 
         $string = $input;
-        $str_pattern = 'url';
+        $str_pattern = 'atsign';
         $str_replacement = '';
         $filtered_input = $input;
         if (strpos($string, $str_pattern) !== false) {
@@ -369,27 +357,27 @@ class Url extends Agent
             );
         }
 
-        $input_input = trim($filtered_input);
+        $input = trim($filtered_input);
 
         if ($input == '') {
-            $this->getUrl();
+            $this->getAtsign();
             return;
         }
 
-        $this->url = $input;
+        $this->atsign = $input;
 
-        // Get urls from string
-        $this->urls = $this->extractUrls($input);
-        $this->url = "X";
-        if (isset($this->urls[0])) {
-            $this->url = $this->urls[0];
+        // Get as signs from string
+        $this->atsigns = $this->extractAtsigns($input);
+        $this->atsign = "X";
+        if (isset($this->atsigns[0])) {
+            $this->atsign = $this->atsigns[0];
         }
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'url') {
-                $this->getUrl();
+            if ($input == 'atsign') {
+                $this->getAtsign();
                 return;
             }
 

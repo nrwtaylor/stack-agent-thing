@@ -43,7 +43,6 @@ class Amateurradioservice extends Agent
         $data_source = $this->resource_path . "vector/channels.txt";
 
         $file_flag = false;
-
         $data = file_get_contents($data_source);
         $file_flag = true;
 
@@ -122,14 +121,14 @@ class Amateurradioservice extends Agent
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "amateurradioservice";
+        //$to = $this->thing->from;
+        //$from = "amateurradioservice";
 
-        $this->makeSMS();
+        //$this->makeSMS();
         $this->makeChoices();
 
         $this->thing_report["info"] = "This is an operator with frequencies.";
@@ -144,7 +143,7 @@ class Amateurradioservice extends Agent
             $thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        return $this->thing_report;
+        //return $this->thing_report;
     }
 
     /**
@@ -155,7 +154,6 @@ class Amateurradioservice extends Agent
         if (!isset($this->response) or $this->response == null) {
             $this->response = "Not found.";
         }
-        //var_dump($this->response);
         $this->node_list = [
             "amateur radio service" => ["amateur radio service"],
         ];
@@ -197,16 +195,18 @@ class Amateurradioservice extends Agent
      */
     function doAmateurradioservice($text = null)
     {
+
+//        $url_agent = new Url($this->thing, "url");
+//        $text = $url_agent->stripUrls($text);
+
         $text = trim($text);
         // Yawn.
         $this->getVector();
         $data = $this->channel['vector'];
 
         $librex = new Librex($this->thing, "librex");
-
         $librex->librex = $data;
         $librex->getMatches($text, "CSV");
-
         $channel = "null";
         $first_match = reset($librex->matches);
 
@@ -215,7 +215,6 @@ class Amateurradioservice extends Agent
         }
 
         //        if ($this->agent_input == null) {
-
         $channel_text = $this->channelString($channel);
         if (!is_string($channel_text)) {
             $array = ['fizz', 'static', 'pop', 'chatter', 'hiss'];
@@ -225,12 +224,12 @@ class Amateurradioservice extends Agent
             $this->response = strtolower($v);
         }
         $this->response = $channel_text;
-
         if ($channel_text == null) {
             $c = new Callsign($this->thing, $this->agent_input);
+            $this->callsign = $c->callsign;
+
             $this->response = $c->response;
         }
-
         $this->message = $this->response;
     }
 
@@ -295,7 +294,9 @@ class Amateurradioservice extends Agent
     public function readSubject()
     {
         $input = $this->input;
-        //var_dump($this->input);
+        $url_agent = new Url($this->thing, "url");
+        $input = $url_agent->stripUrls($input);
+
         $strip_words = [
             "amateur radio service",
             "ham",
@@ -308,7 +309,6 @@ class Amateurradioservice extends Agent
         if ($this->notAmateurradioservice($input)) {
             throw new \Exception('Wrong agent.');
         }
-
         foreach ($strip_words as $i => $strip_word) {
             $whatIWant = $input;
             if (
@@ -331,7 +331,6 @@ class Amateurradioservice extends Agent
             $input = $whatIWant;
         }
 
-        //var_dump($input);
         $this->doAmateurradioservice($input);
         return false;
     }

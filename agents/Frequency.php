@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 // Recognizes and handles UUIDS.
@@ -19,64 +18,75 @@ error_reporting(-1);
 
 class Frequency extends Agent
 {
-
-
     /**
      *
      */
-    function init() {
-
+    function init()
+    {
         $this->agent_name = "FREQUENCY";
         //$this->multiplier = "MHz";
 
         $this->stack_state = $this->thing->container['stack']['state'];
         $this->short_name = $this->thing->container['stack']['short_name'];
 
-//        $this->created_at =  strtotime($this->thing->thing->created_at);
+        $this->thing->log(
+            'started running on Thing ' . date("Y-m-d H:i:s") . ''
+        );
 
-        $this->thing->log('started running on Thing ' . date("Y-m-d H:i:s") . '');
+        $this->node_list = ["frequency" => ["frequency", "snowflake"]];
 
-        $this->node_list = array("frequency"=>
-            array("frequency", "snowflake"));
+        $this->pattern = '|\b[0-9]{1,3}[" "]?[.]?[0-9]{1,4}\b|';
 
-        $this->pattern = '|[0-9]{1,3}[" "]?[.]?[0-9]{1,4}|';
-
-
-        $this->aliases = array("learning"=>array("good job"));
-
-        //        $this->makePNG();
+        $this->aliases = ["learning" => ["good job"]];
 
         $data_source = $this->resource_path . "ised/frequencies.url";
 
         $this->thing_report['help'] = "Recognizes frequencies.";
     }
 
-
     /**
      *
      */
-    function makeTable() {
-        if (!isset($this->channel['vector'])) {$this->getFrequencies();}
+    function makeTable()
+    {
+        if (!isset($this->channel['vector'])) {
+            $this->getFrequencies();
+        }
 
-if (!isset($this->channel['vector'])) {return;}
+        if (!isset($this->channel['vector'])) {
+            return;
+        }
 
         $data = $this->channel['vector'];
 
         $t = explode("\n", $data);
         $flag = false;
-        $band = array();
-        foreach ($t as $i=>$line) {
-
-
-            if (strpos($line, 'Canadian Table of Frequency Allocations — kHz') !== false) {
+        $band = [];
+        foreach ($t as $i => $line) {
+            if (
+                strpos(
+                    $line,
+                    'Canadian Table of Frequency Allocations — kHz'
+                ) !== false
+            ) {
                 $multiplier = "kHz";
             }
 
-            if (strpos($line, 'Canadian Table of Frequency Allocations — MHz') !== false) {
+            if (
+                strpos(
+                    $line,
+                    'Canadian Table of Frequency Allocations — MHz'
+                ) !== false
+            ) {
                 $multiplier = "MHz";
             }
 
-            if (strpos($line, 'Canadian Table of Frequency Allocations — GHz') !== false) {
+            if (
+                strpos(
+                    $line,
+                    'Canadian Table of Frequency Allocations — GHz'
+                ) !== false
+            ) {
                 $multiplier = "GHz";
             }
 
@@ -85,181 +95,197 @@ if (!isset($this->channel['vector'])) {return;}
             //}
 
             // Override pattern to specifically look for the frequency range.
-            $pattern = '|[0-9]{1,3}[" "]?[.]?[0-9]{1,4} - [0-9]{1,3}[" "]?[.]?[0-9]{1,4}|';
-
-            //$pattern = $this->pattern;
+            $pattern =
+                '|[0-9]{1,3}[" "]?[.]?[0-9]{1,4} - [0-9]{1,3}[" "]?[.]?[0-9]{1,4}|';
 
             preg_match_all($pattern, $line, $m);
             if (isset($m[0][0])) {
-
                 // Write the band information. Of the prior set of lines.
                 if (isset($frequency_range)) {
-                    $band[] = array("range"=>$frequency_range, "start"=>$start, "end"=>$end, "multiplier"=>$multiplier, "lines"=>$lines);
+                    $band[] = [
+                        "range" => $frequency_range,
+                        "start" => $start,
+                        "end" => $end,
+                        "multiplier" => $multiplier,
+                        "lines" => $lines,
+                    ];
                 }
                 $count = 0;
 
                 $frequency_range = trim($m[0][0]);
-                $lines = array();
+                $lines = [];
 
                 //$flag = true;
 
-
                 $a = explode("-", $frequency_range);
                 $start = (float) str_replace(" ", "", $a[0]);
-                $end = (float)$a[1];
+                $end = (float) $a[1];
 
                 $flag = true;
-
             }
 
             if ($flag) {
-
-                if (($count != 0) and (trim(strip_tags($line)) != "")) {
-
-                    if ( trim(strip_tags($line)) == "International footnotes") {
-                        $flag = false; break;
+                if ($count != 0 and trim(strip_tags($line)) != "") {
+                    if (trim(strip_tags($line)) == "International footnotes") {
+                        $flag = false;
+                        break;
                     }
-
 
                     $lines[] = trim(strip_tags($line));
                 }
                 $count += 1;
             }
-
         }
         $this->band = $band;
     }
 
-
     /**
      *
      */
-    function printFrequencies() {
+    function printFrequencies()
+    {
         $t = "";
-        foreach ($this->band as $i=>$frequency) {
+        foreach ($this->band as $i => $frequency) {
             $text = implode(" / ", $frequency["lines"]);
 
             $text = str_replace("end primary service", "", $text);
             $text = str_replace("primary service", "", $text);
 
-
-            $t .= $frequency["range"] . " " . $frequency["multiplier"] . " " . $text . "\n";
-
+            $t .=
+                $frequency["range"] .
+                " " .
+                $frequency["multiplier"] .
+                " " .
+                $text .
+                "\n";
         }
         echo $t;
     }
-
 
     /**
      *
      * @param unknown $frequency
      * @return unknown
      */
-    function frequencyString($frequency) {
-
+    function frequencyString($frequency)
+    {
         $text = implode(" / ", $frequency["lines"]);
         $text = str_replace("end primary service", "", $text);
         $text = str_replace("primary service", "", $text);
 
-
-        $text = $frequency["range"] . " " . $frequency["multiplier"] . " " . $text;
+        $text =
+            $frequency["range"] . " " . $frequency["multiplier"] . " " . $text;
 
         return $text;
-
     }
-
 
     /**
      *
      * @param unknown $text
      */
-    function findFrequency($text) {
+    function findFrequency($text)
+    {
+        $matches = [];
 
-$matches = array();
+        if (!isset($this->band)) {
+            $this->makeTable();
+        }
 
-        if (!isset($this->band)) {$this->makeTable();}
-
-// Still not set?
-if (!isset($this->band)) {return;}
+        // Still not set?
+        if (!isset($this->band)) {
+            return;
+        }
 
         $search_frequency = (float) $text;
 
-        foreach ($this->band as $i=>$band) {
+        foreach ($this->band as $i => $band) {
+            if (
+                isset($this->multiplier) and
+                $band['multiplier'] != $this->multiplier
+            ) {
+                continue;
+            }
 
-            if ((isset($this->multiplier)) and ($band['multiplier'] != $this->multiplier)) {continue;}
-
-            if (($search_frequency >= $band['start']) and ($search_frequency <= $band['end'])) {
+            if (
+                $search_frequency >= $band['start'] and
+                $search_frequency <= $band['end']
+            ) {
                 $matches[] = $band;
             }
         }
 
         $this->band_matches = $matches;
-
     }
-
 
     /**
      *
      */
-    function run() {
+    function run()
+    {
         $this->getFrequencies();
         $this->makeTable();
         $this->makeResponse();
         $this->makeSMS();
     }
 
-
     /**
      *
      * @param unknown $text (optional)
      */
-    function doFrequency($text = null) {
+    function doFrequency($text = null)
+    {
         $text = trim($text);
 
         $channel_text = "Not recognized.";
         $this->response = $channel_text;
         $this->message = $this->response;
-
     }
 
     /**
      *
      */
-    function getFrequencies() {
-
+    function getFrequencies()
+    {
         $data_source = $this->resource_path . "ised/frequencies.txt";
 
-if (!file_exists($data_source)) {return;}
+        if (!file_exists($data_source)) {
+            return;
+        }
 
         $file_flag = true;
 
         $data = @file_get_contents($data_source);
         if ($data === false) {
             $file_flag = false;
-            $this->thing->log( "Data source " . $data_source . " not accessible." );
+            $this->thing->log(
+                "Data source " . $data_source . " not accessible."
+            );
 
             // Handle quietly.
-if (!isset($this->link)) {$this->link = null;}
+            if (!isset($this->link)) {
+                $this->link = null;
+            }
             $data_source = trim($this->link);
 
             $data = @file_get_contents($data_source);
             if ($data === false) {
-                $this->thing->log( "Data source " . $data_source . " not accessible." );
+                $this->thing->log(
+                    "Data source " . $data_source . " not accessible."
+                );
                 // Handle quietly.
                 return;
             }
 
-
             $data_target = $this->resource_path . "ised/frequencies.txt";
 
             try {
-
                 if ($file_flag === false) {
                     @file_put_contents($data_target, $data, LOCK_EX);
 
                     //                    @file_put_contents($data_target, $data, FILE_APPEND | LOCK_EX);
-                    $this->thing->log("Data source " . $data_source . " created.");
-
+                    $this->thing->log(
+                        "Data source " . $data_source . " created."
+                    );
                 }
             } catch (Exception $e) {
                 // Handle quietly.
@@ -267,40 +293,35 @@ if (!isset($this->link)) {$this->link = null;}
         }
         $this->data = $data;
         $this->channel['vector'] = $data;
-
-
-
     }
-
 
     /**
      *
      * @param unknown $text
      * @return unknown
      */
-    function hasFrequency($text) {
-
-
+    function hasFrequency($text)
+    {
         $this->extractFrequencies($text);
-        if ((isset($this->frequencies)) and (count($this->frequencies) > 0)) {return true;}
+        if (isset($this->frequencies) and count($this->frequencies) > 0) {
+            return true;
+        }
         return false;
-
     }
-
 
     /**
      *
      * @param unknown $input
      * @return unknown
      */
-    function extractFrequencies($input) {
+    function extractFrequencies($input)
+    {
         if (!isset($this->frequencies)) {
-            $this->frequencies = array();
+            $this->frequencies = [];
         }
+        //$pattern = '|[0-9]{3}[\.][0-9]{3}|';
 
-        $pattern = "|[0-9]{3}.[0-9]{3}|";
         $pattern = $this->pattern;
-
         preg_match_all($pattern, $input, $m);
 
         $arr = $m[0];
@@ -309,24 +330,32 @@ if (!isset($this->link)) {$this->link = null;}
         return $arr;
     }
 
-
     /**
      *
      * @param unknown $input
      * @return unknown
      */
-    function extractFrequency($input) {
+    function extractFrequency($input)
+    {
         $frequencies = $this->extractFrequencies($input);
-        if (!(is_array($frequencies))) {return true;}
+        if (!is_array($frequencies)) {
+            return true;
+        }
 
-        if ((is_array($frequencies)) and (count($frequencies) == 1)) {
+        if (is_array($frequencies) and count($frequencies) == 1) {
             $this->frequency = $frequencies[0];
-            $this->thing->log('found a frequency (' . $this->frequency . ') in the text.');
+            $this->thing->log(
+                'found a frequency (' . $this->frequency . ') in the text.'
+            );
             return $this->frequency;
         }
 
-        if  ((is_array($frequencies)) and (count($frequencies) == 0)) {return false;}
-        if  ((is_array($frequencies)) and (count($frequencies) > 1)) {return true;}
+        if (is_array($frequencies) and count($frequencies) == 0) {
+            return false;
+        }
+        if (is_array($frequencies) and count($frequencies) > 1) {
+            return true;
+        }
 
         return true;
     }
@@ -336,32 +365,28 @@ if (!isset($this->link)) {$this->link = null;}
      * @param unknown $input
      * @return unknown
      */
-    function extractMultiplier($input) {
-        $multipliers = array("kHz", "MHz", "GHz");
+    function extractMultiplier($input)
+    {
+        $multipliers = ["kHz", "MHz", "GHz"];
 
         //        $frequencies = $this->extractFrequencies($input);
         //        if (!(is_array($frequencies))) {return true;}
 
         $flag = false;
         foreach ($multipliers as $multiplier) {
-
             if (stripos($input, $multiplier) !== false) {
                 $matches[] = $multiplier;
                 echo 'true';
             }
-
         }
 
-        if ( (isset($matches)) and (count($matches) == 1)) {
-
+        if (isset($matches) and count($matches) == 1) {
             $this->multiplier = $matches[0];
             return;
         }
 
         return true;
     }
-
-
 
     /**
      * function makeWeb() {
@@ -388,45 +413,41 @@ if (!isset($this->link)) {$this->link = null;}
      * $this->thing_report['web'] = $web;
      * }
      */
-    function set() {
-
-//        $this->thing->json->setField("settings");
-//        $this->thing->json->writeVariable(array("frequency",
-//                "received_at"),  $this->thing->json->time()
-//        );
+    function set()
+    {
+        //        $this->thing->json->setField("settings");
+        //        $this->thing->json->writeVariable(array("frequency",
+        //                "received_at"),  $this->thing->json->time()
+        //        );
 
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("frequency",
-                "refreshed_at"),  $this->thing->json->time()
+        $this->thing->json->writeVariable(
+            ["frequency", "refreshed_at"],
+            $this->thing->json->time()
         );
-
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
+    public function readSubject()
+    {
         $this->extractFrequency($this->input);
 
         $this->extractMultiplier($this->input);
 
-        if ((isset($this->frequency)) and ($this->frequency != null)) {
-
+        if (isset($this->frequency) and $this->frequency != null) {
             $this->response = "Frequency spotted.";
             $this->findFrequency($this->frequency);
 
-$t = "No band matches. ";
-if (isset($this->band_matches)) {
-            $t = "";
-            foreach ($this->band_matches as $i=>$band) {
-
-                $t .= $this->frequencyString($band) ." / ";
-
+            $t = "No band matches. ";
+            if (isset($this->band_matches)) {
+                $t = "";
+                foreach ($this->band_matches as $i => $band) {
+                    $t .= $this->frequencyString($band) . " / ";
+                }
             }
-}
 
             if (strpos(strtolower($t), "amateur")) {
                 $ars_thing = new Amateurradioservice($this->thing);
@@ -437,95 +458,94 @@ if (isset($this->band_matches)) {
                 return;
             }
 
-
             $this->response = $t;
 
             return;
-
         }
 
+        $input = $this->input;
+        $strip_words = ["frequency"];
 
-        $input= $this->input;
-        $strip_words = array("frequency");
-
-
-        foreach ($strip_words as $i=>$strip_word) {
-
+        foreach ($strip_words as $i => $strip_word) {
             $whatIWant = $input;
-            if (($pos = strpos(strtolower($input), $strip_word. " is")) !== FALSE) {
-                $whatIWant = substr(strtolower($input), $pos+strlen($strip_word . " is"));
-            } elseif (($pos = strpos(strtolower($input), $strip_word)) !== FALSE) {
-                $whatIWant = substr(strtolower($input), $pos+strlen($strip_word));
+            if (
+                ($pos = strpos(strtolower($input), $strip_word . " is")) !==
+                false
+            ) {
+                $whatIWant = substr(
+                    strtolower($input),
+                    $pos + strlen($strip_word . " is")
+                );
+            } elseif (
+                ($pos = strpos(strtolower($input), $strip_word)) !== false
+            ) {
+                $whatIWant = substr(
+                    strtolower($input),
+                    $pos + strlen($strip_word)
+                );
             }
 
             $input = $whatIWant;
         }
 
-
         $filtered_input = ltrim(strtolower($input), " ");
 
         $this->doFrequency($filtered_input);
 
-
-
-        $this->response = "Merp.";
-//        $this->thing_report['sms'] = "Merpity.";
+        $this->response = "Read frequency. ";
         return false;
-
-
     }
-
 
     /**
      *
      */
-    function makeResponse() {
-        if (isset($this->response)) {return;}
+    function makeResponse()
+    {
+        if (isset($this->response)) {
+            return;
+        }
         $this->response = "X";
-        if ((isset($this->frequencies)) and (count($this->frequencies) > 0 )) {
+        if (isset($this->frequencies) and count($this->frequencies) > 0) {
             $this->response = "";
-            foreach ($this->frequencies as $index=>$frequency) {
-
-                $this->response .= $frequency." ";
-
+            foreach ($this->frequencies as $index => $frequency) {
+                $this->response .= $frequency . " ";
             }
         }
-
     }
-
 
     /**
      *
      */
-    function makeSMS() {
-
+    function makeSMS()
+    {
         $this->sms_message = strtoupper($this->agent_name) . " | ";
         $this->sms_message .= $this->response;
         $this->sms_message .= ' | TEXT CHANNEL';
 
         $this->thing_report['sms'] = $this->sms_message;
-
     }
-
 
     /**
      *
      */
-    function makeChoices() {
-        $this->thing->choice->Create("frequency", $this->node_list, "frequency");
+    function makeChoices()
+    {
+        $this->thing->choice->Create(
+            "frequency",
+            $this->node_list,
+            "frequency"
+        );
 
         $choices = $this->thing->choice->makeLinks("frequency");
         $this->thing_report['choices'] = $choices;
         $this->choices = $choices;
     }
 
-
     /**
      *
      */
-    function makeImage() {
+    function makeImage()
+    {
         $this->image = null;
     }
-
-
 }
