@@ -182,8 +182,7 @@ class Similar extends Agent
 
         if (
             isset($findagent_thing->thing_report['things']) and
-            $findagent_thing->thing_report['things'] != true and
-            count($findagent_thing->thing_report['things']) > 1
+            (count($findagent_thing->thing_report['things']) > 1)
         ) {
             foreach ($findagent_thing->thing_report['things'] as $thing) {
                 foreach ($findagent_thing->thing_report['things'] as $thing2) {

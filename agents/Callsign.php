@@ -351,7 +351,6 @@ class Callsign extends Agent
         $w = $callsigns[0];
 
         $w = [$string];
-
         $this->callsigns = [];
 
         $url_agent = new Url($this->thing, "url");
@@ -922,7 +921,9 @@ class Callsign extends Agent
                 }
             }
         }
+
         $first_name = "X";
+
         if (isset($this->callsign['first_name'])) {
             $first_name = $this->callsign["first_name"];
         }
@@ -996,7 +997,6 @@ class Callsign extends Agent
                 ". ";
             return;
         }
-
-        $this->response = "No match found. ";
+        $this->response .= "No match found. ";
     }
 }

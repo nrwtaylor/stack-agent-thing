@@ -43,7 +43,6 @@ class Amateurradioservice extends Agent
         $data_source = $this->resource_path . "vector/channels.txt";
 
         $file_flag = false;
-
         $data = file_get_contents($data_source);
         $file_flag = true;
 
@@ -206,10 +205,8 @@ class Amateurradioservice extends Agent
         $data = $this->channel['vector'];
 
         $librex = new Librex($this->thing, "librex");
-
         $librex->librex = $data;
         $librex->getMatches($text, "CSV");
-
         $channel = "null";
         $first_match = reset($librex->matches);
 
@@ -229,6 +226,8 @@ class Amateurradioservice extends Agent
         $this->response = $channel_text;
         if ($channel_text == null) {
             $c = new Callsign($this->thing, $this->agent_input);
+            $this->callsign = $c->callsign;
+
             $this->response = $c->response;
         }
         $this->message = $this->response;
@@ -295,7 +294,6 @@ class Amateurradioservice extends Agent
     public function readSubject()
     {
         $input = $this->input;
-
         $url_agent = new Url($this->thing, "url");
         $input = $url_agent->stripUrls($input);
 
@@ -311,7 +309,6 @@ class Amateurradioservice extends Agent
         if ($this->notAmateurradioservice($input)) {
             throw new \Exception('Wrong agent.');
         }
-
         foreach ($strip_words as $i => $strip_word) {
             $whatIWant = $input;
             if (

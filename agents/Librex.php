@@ -69,7 +69,6 @@ class Librex extends Word
         $this->reading = $this->thing->json->readVariable( array("librex", "reading") );
     }
 
-
     /**
      *
      */
@@ -82,7 +81,6 @@ class Librex extends Word
 
         $this->thing_report['help'] = "Reads the short message for a librex reference.";
     }
-
 
     /**
      *
@@ -289,7 +287,7 @@ if ($contents == null) {
      * @return unknown
      */
     function getMatches($searchfor = null, $parser_name = "Match") {
-if (!isset($this->librex)) {$this->getLibrex($this->librex_name);}
+        if (!isset($this->librex)) {$this->getLibrex($this->librex_name);}
 
         $contents = $this->librex;
         $this->matches = array();
@@ -297,7 +295,6 @@ if (!isset($this->librex)) {$this->getLibrex($this->librex_name);}
         $line = strtok($contents, $separator);
 
         while ($line !== false) {
-
 //            $word = $this->parseMatch($line);
 $parse_function = "parse".ucfirst($parser_name);
             $word = $this->$parse_function($line);
@@ -314,8 +311,8 @@ $parse_function = "parse".ucfirst($parser_name);
         if ($searchfor == null) {return null;}
 $this->matches = array();
         // devstack add \b to Word
-        $pattern = preg_quote($searchfor, '/');
 
+        $pattern = preg_quote($searchfor, '/');
         // finalise the regular expression, matching the whole line
         //        $pattern = "/^.*". strtolower($pattern). ".*\$/m";
         $pattern = "/^.*\b". strtolower($pattern). "\b.*\$/m";

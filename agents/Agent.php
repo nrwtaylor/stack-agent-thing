@@ -1433,12 +1433,16 @@ if (!isset($this->created_at)) {$this->created_at = time();}
             case strtolower($this->agent_input) == "extract":
             case strtolower($this->agent_input) ==
                 strtolower($this->agent_name):
-                $this->input = strtolower($text);
+//                $this->input = strtolower($text);
+                $this->input = $text;
+
                 break;
             default:
-                $this->input = strtolower($this->agent_input);
-        }
+//                $this->input = strtolower($this->agent_input);
+                $this->input = $this->agent_input;
 
+        }
+/*
         if (!is_array($this->input)) {
             $whatIWant = $this->input;
             if (
@@ -1458,7 +1462,7 @@ if (!isset($this->created_at)) {$this->created_at = time();}
             }
             $this->input = trim($whatIWant);
         }
-
+*/
         $this->thing->log('read "' . $this->subject . '".');
 
         $this->readFrom();
@@ -1819,7 +1823,7 @@ throw new \Exception("Address not allowed.");
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
-
+/*
         $input = strtolower(
             $agent_input_text . " " . $this->to . " " . $this->subject
         );
@@ -1828,6 +1832,15 @@ throw new \Exception("Address not allowed.");
         } else {
             $input = strtolower($agent_input_text);
         }
+*/
+        $input = $agent_input_text . " " . $this->to . " " . $this->subject;
+
+        if ($this->agent_input == null) {
+            $input = $this->to . " " . $this->subject;
+        } else {
+            $input = $agent_input_text;
+        }
+
 
         //$input = strtolower($this->input);
 
@@ -1957,6 +1970,10 @@ throw new \Exception("Address not allowed.");
             return $this->thing_report;
         }
 
+        // Strip @ callsigns from input
+        $atsign_agent = new Atsign($this->thing, "atsign");
+        $input = $atsign_agent->stripAtsigns($input);
+
         // Basically if the agent input directly matches an agent name
         // Then run it.
 
@@ -1970,9 +1987,9 @@ throw new \Exception("Address not allowed.");
 
         $text = strtolower($text);
 
-        $arr = explode(' ', trim($text));
+        //$arr = explode(' ', trim($text));
 
-        $arr = explode('\%20', trim($text));
+        $arr = explode('\%20', trim(strtolower($text)));
 
         $agents = [];
         $onegrams = $this->getNgrams($text, $n = 1);
@@ -2594,8 +2611,10 @@ throw new \Exception("Address not allowed.");
                 return $this->thing_report;
             } else {
                 $ars_thing = new Amateurradioservice($this->thing);
-                $this->thing_report = $ars_thing->thing_report;
-                return $this->thing_report;
+                if ($ars_thing->callsign != null) {
+                    $this->thing_report = $ars_thing->thing_report;
+                    return $this->thing_report;
+                }
             }
         }
 

@@ -18,16 +18,12 @@ class Calendar extends Agent
 
     public function doCalendar()
     {
-
-foreach($this->ics_links as $ics_link) {
-
-//$file = $this->file;
-$file = $ics_link;
-        if (isset($file) and is_string($file)) {
-            $this->readCalendar($file);
+        foreach ($this->ics_links as $ics_link) {
+            $file = $ics_link;
+            if (isset($file) and is_string($file)) {
+                $this->readCalendar($file);
+            }
         }
-
-}
 
         if ($this->agent_input == null) {
             $this->calendar_message = $this->calendar_text; // mewsage?
@@ -42,10 +38,7 @@ $file = $ics_link;
 
         $this->thing_report["info"] = "This is a calendar.";
         $this->thing_report["help"] = "This is about seeing Calendar Events.";
-
-        //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
-        //$this->thing_report['txt'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
@@ -87,8 +80,9 @@ $file = $ics_link;
 
             $calendar_text = "";
             foreach ($this->events as $event) {
-
-                $runtime = $this->thing->human_time(strtotime($event->dtend) - strtotime($event->dtstart));
+                $runtime = $this->thing->human_time(
+                    strtotime($event->dtend) - strtotime($event->dtstart)
+                );
 
                 $calendar_text .=
                     $time_agent->textTime($event->dtstart) .
@@ -106,7 +100,9 @@ $file = $ics_link;
             if (mb_strlen($calendar_text) > 140) {
                 $calendar_text = "";
                 foreach ($this->events as $event) {
-                    $runtime = $this->thing->human_time(strtotime($event->dtend) - strtotime($event->dtstart));
+                    $runtime = $this->thing->human_time(
+                        strtotime($event->dtend) - strtotime($event->dtstart)
+                    );
 
                     $calendar_text .=
                         $time_agent->textTime($event->dtstart) .
@@ -159,12 +155,12 @@ $file = $ics_link;
         $this->thing_report['choices'] = $choices;
     }
 
-    public function eventCalendar($arr = null) {
+    public function eventCalendar($arr = null)
+    {
         // TODO Pass this through Event.
         // And then re-factor.
         $event = $arr;
         return $event;
-
     }
 
     public function readCalendar($file)
@@ -180,18 +176,16 @@ $file = $ics_link;
                 'skipRecurrence' => false, // Default value
             ]);
 
-            $this->response .= 'Read calendar. ';
-
-            // $ical->initFile('ICal.ics');
             // $ical->initUrl('https://raw.githubusercontent.com/u01jmg3/ics-parser/master/examples/ICal.ics>
         } catch (\Exception $e) {
-            $this->response .= "Could not read calendar. ";
+            $this->response .= "Could not read calendar " . $file . ". ";
             return true;
         }
 
         $events = $ical->eventsFromInterval('1 week');
-
-        if (!isset($this->events)) {$this->events = [];}
+        if (!isset($this->events)) {
+            $this->events = [];
+        }
 
         foreach ($events as $event) {
             $this->events[] = $this->eventCalendar($event);
@@ -199,7 +193,7 @@ $file = $ics_link;
 
         // Sort events list by start time.
         // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
-        usort($this->events,function($first,$second){
+        usort($this->events, function ($first, $second) {
             return strtotime($first->dtstart) > strtotime($second->dtstart);
         });
 
@@ -250,30 +244,42 @@ $file = $ics_link;
 
         $filtered_input = trim($filtered_input);
 
-        if (substr($filtered_input, -4) == '.ics') {
-            $this->file = $filtered_input;
-            $this->response .= "Saw file " . $this->file . ". ";
-            return;
+        $tokens = explode(" ", $filtered_input);
+        $ics_links = [];
+        foreach ($tokens as $i => $token) {
+            if (strtolower(substr($token, -4)) == '.ics') {
+                $ics_links[] = $token;
+                continue;
+            }
+
+            // See if Googlecalendar recognizes this.
+            $googlecalendar_agent = new Googlecalendar(
+                $this->thing,
+                "googlecalendar"
+            );
+            $ics_link = $googlecalendar_agent->icsGooglecalendar($token);
+            if ($ics_link !== true) {
+                $ics_links[] = $ics_link;
+                continue;
+            }
+
+            // Some ics links don't end in .ics
+            // TODO Test
+            if (strtolower(substr($token, 0,9)) == "webcal://") {
+                $ics_links[] = $token;
+                continue;
+            }
+
+            // And some don't have anything distinctive.
+            // https://www.officeholidays.com/ics/canada/british-columbia
+            // Can not rely on the link having ics in it.
+            // TODO Identify and store non ics links.
+            // For now add to the list to try and read it as a calendar.
+            $ics_links[] = $token;
+
         }
 
-$tokens = explode(" " ,$filtered_input);
-$ics_links = [];
-foreach($tokens as $i=>$token) {
-
-        // See if Googlecalendar recognizes this.
-        $googlecalendar_agent = new Googlecalendar(
-            $this->thing,
-            "googlecalendar"
-        );
-        $ics_link = $googlecalendar_agent->icsGooglecalendar($token);
-$ics_links[] = $ics_link;
-}
-$this->ics_links = $ics_links;
-
-//        if (is_string($ics_link)) {
-//            $this->file = $ics_link;
-//            return;
-//        }
+        $this->ics_links = array_unique($ics_links);
 
         return false;
     }

@@ -28,8 +28,6 @@ class Burst extends Agent
             $this->verbosity = $this->settings['verbosity'];
         }
 
-//        $this->start_time = $this->thing->elapsed_runtime();
-
         $this->test = "Development code"; // Always
 
         if ($this->verbosity >= 2) {
@@ -119,7 +117,6 @@ class Burst extends Agent
                 $this->agent_prefix . 'set Flag to ' . $this->flag
             );
         }
-        return;
     }
 
     /**
@@ -164,8 +161,7 @@ class Burst extends Agent
         // This will include simple 'train'
         // requests too.
         // Think about that.
-
-        $findagent = 'prod';
+        $findagent = 'dev';
         // prod 5,626 5,897 5,147
         // dev 3,575 5,082 7,746 7,038 6,690
         if ($findagent == 'prod') {
@@ -188,7 +184,6 @@ class Burst extends Agent
             if ((isset($t['things'])) and (is_array($t['things']))) {
                 $count = count($t['things']);
             }
-
             $this->thing->log(
                 $this->agent_prefix .
                     'found ' .
@@ -205,7 +200,7 @@ class Burst extends Agent
         $this->burstiness = 0;
         $this->flag = "green";
 
-if (!isset($t['things'][0]['created_at'])) {return true;}
+        if (!isset($t['things'][0]['created_at'])) {return true;}
 
         $created_at = $t['things'][0]['created_at'];
 
@@ -216,20 +211,24 @@ if (!isset($t['things'][0]['created_at'])) {return true;}
         $this->flag = "green";
 
         $this->matches = [];
+//        if (
+//            isset($findagent_thing->thing_report['things']) and
+//            $findagent_thing->thing_report['things'] != true and
+//            count($findagent_thing->thing_report['things']) > 1
+//        ) {
+
         if (
-            isset($findagent_thing->thing_report['things']) and
-            $findagent_thing->thing_report['things'] != true and
-            count($findagent_thing->thing_report['things']) > 1
+            isset($t['things']) and
+            (count($t['things']) > 1)
         ) {
+
             foreach ($t['things'] as $thing) {
                 $previous_created_at = $created_at;
                 $created_at = $thing['created_at'];
-
                 $age = strtotime($this->current_time) - strtotime($created_at);
 
                 $inter_arrival_time =
                     strtotime($previous_created_at) - strtotime($created_at);
-
                 if ($inter_arrival_time < $this->burst_horizon) {
                     $this->burst += 1;
                     // Set the age to the head of the series
@@ -309,8 +308,6 @@ if (!isset($t['things'][0]['created_at'])) {return true;}
         $this->thing->log(
             $this->agent_prefix . 'got a ' . strtoupper($this->flag) . ' FLAG.'
         );
-
-        return;
     }
 
     /**
