@@ -1246,7 +1246,17 @@ if (isset($this->signal_thing->uuid)) {
 
         $prior_uuid = null;
 
-        $pieces = explode(" ", strtolower($input));
+//        $pieces = explode(" ", strtolower($input));
+//        $input = strtolower($this->subject);
+
+        $ngram_agent = new Ngram($this->thing, "ngram");
+        $pieces = [];
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 3);
+        $pieces = array_merge($pieces, $arr);
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 2);
+        $pieces = array_merge($pieces, $arr);
+        $arr = $ngram_agent->getNgrams(strtolower($this->input), 1);
+        $pieces = array_merge($pieces, $arr);
 
         if (count($pieces) == 1) {
             if ($input == $this->keyword) {
@@ -1323,6 +1333,10 @@ if (isset($this->signal_thing->uuid)) {
                             return;
                         case 'green':
                             $this->changeSignal('green');
+                            return;
+
+                        case 'double yellow':
+                            $this->changeSignal('double yellow');
                             return;
 
                         case 'yellow':
