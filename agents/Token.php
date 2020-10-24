@@ -34,8 +34,12 @@ class Token extends Agent
 
     public function initTokens()
     {
+        $this->tokens_resource = null;
         $resource_name = 'token/tokens.php';
-        $this->tokens_resource = require $this->resource_path . $resource_name;
+        $uri = $this->resource_path. $resource_name;
+        if (file_exists($uri)) {
+            $this->tokens_resource = require $this->resource_path . $resource_name;
+        }
         //$this->verbosityChannel();
     }
 
