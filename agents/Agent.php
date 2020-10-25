@@ -2136,14 +2136,14 @@ throw new \Exception("Address not allowed.");
                 'Agent "Agent" created a Burst agent looking for burstiness.',
                 "DEBUG"
             );
-            $this->burst = new Burst($this->thing, 'read');
+            $this->burst = new Burst($this->thing, 'burst');
 
             $this->thing->log(
                 'Agent "Agent" created a Similar agent looking for incoming message repeats.',
                 "DEBUG"
             );
 
-            $this->similar = new Similar($this->thing, 'read');
+            $this->similar = new Similar($this->thing, 'similar');
             $similarness = $this->similar->similarness;
             $bursts = $this->burst->burst;
 

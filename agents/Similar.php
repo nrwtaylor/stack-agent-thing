@@ -8,6 +8,8 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// TODO - Do not update set on read.
+
 class Similar extends Agent
 {
     public $var = 'hello';
@@ -78,6 +80,41 @@ class Similar extends Agent
     public function run()
     {
         $this->getSimilar();
+    }
+
+    public function makeWeb()
+    {
+        $web = "";
+
+        $embedded = true;
+        if (!$embedded) {
+            //  $web = '<a href="' . $link . '">';
+            $web .=
+                '<img src= "' .
+                $this->web_prefix .
+                'thing/' .
+                $this->uuid .
+                '/number.png">';
+            //  $web .= "</a>";
+        } else {
+            //  $web = '<a href="' . $link . '">';
+            if (isset($this->image_embedded['similarity'])) {
+                $web .= $this->image_embedded['similarity'];
+                //   $web .= "</a>";
+                $web .= "Similarity Chart";
+                $web .= "<p>";
+            }
+            //   $web .= '<a href="' . $link . '">';
+            if (isset($this->image_embedded['similarness'])) {
+                $web .= $this->image_embedded['similarness'];
+                //   $web .= "</a>";
+                $web .= "Similarness Chart";
+                $web .= "<p>";
+            }
+        }
+
+        $this->web = $web;
+        $this->thing_report['web'] = $web;
     }
 
     function set($requested_flag = null)
@@ -157,7 +194,7 @@ class Similar extends Agent
         $t = $findagent_thing->thing_report;
 
         $count = 0;
-        if ((isset($t['things'])) and (is_array($t['things']))) {
+        if (isset($t['things']) and is_array($t['things'])) {
             $count = count($t['things']);
         }
 
@@ -182,7 +219,7 @@ class Similar extends Agent
 
         if (
             isset($findagent_thing->thing_report['things']) and
-            (count($findagent_thing->thing_report['things']) > 1)
+            count($findagent_thing->thing_report['things']) > 1
         ) {
             foreach ($findagent_thing->thing_report['things'] as $thing) {
                 foreach ($findagent_thing->thing_report['things'] as $thing2) {
@@ -214,8 +251,6 @@ class Similar extends Agent
                         );
                     }
                 }
-
-                //echo $thing['task'] . " " . $this->similiarity .  " " . $this->similarness . "<br>";
             }
         }
 
@@ -251,8 +286,6 @@ class Similar extends Agent
             "refreshed_at"
         );
 
-        //$this->thing->log($this->agent_prefix . 'got similar flag from db ' . strtoupper($this->previous_flag));
-
         // If it is a valid previous_state, then
         // load it into the current state variable.
         if (!$this->isFlag($this->previous_flag)) {
@@ -260,7 +293,6 @@ class Similar extends Agent
         } else {
             $this->flag = $this->default_flag;
         }
-
 
         if ($this->verbosity >= 2) {
             $this->thing->log(
@@ -270,7 +302,6 @@ class Similar extends Agent
                     ' FLAG.'
             );
         }
-
     }
 
     function selectChoice($choice = null)
@@ -303,7 +334,6 @@ class Similar extends Agent
 
     function makeChoices()
     {
-
         $this->thing->choice->Create(
             $this->keyword,
             $this->node_list,
@@ -363,9 +393,6 @@ class Similar extends Agent
         }
 
         $txt .= '/r';
-
-        //var_dump($this->matches);
-        //exit();
 
         foreach ($this->matches as $t) {
             $txt .= $t;
@@ -460,6 +487,10 @@ class Similar extends Agent
             return null;
         }
 
+        $this->historySimilar();
+        $this->chartSimilarity();
+        $this->chartSimilarness();
+
         if ($this->agent_input != null) {
             $this->requested_thing_name = $this->agent_input;
         }
@@ -508,7 +539,23 @@ class Similar extends Agent
 
         // If all else fails try the discriminator.
 
-        $this->requested_flag = $this->discriminateInput($haystack); // Run the discriminator.
+        $input_agent = new Input($this->thing, "input");
+        $discriminators = ['red', 'green'];
+        $input_agent->aliases['red'] = ['r', 'red', 'on'];
+        $input_agent->aliases['green'] = [
+            'g',
+            'grn',
+            'gren',
+            'green',
+            'gem',
+            'off',
+        ];
+
+        $this->requested_flag = $input_agent->discriminateInput(
+            $haystack,
+            $discriminators
+        );
+
         switch ($this->requested_flag) {
             case 'green':
                 $this->selectChoice('green');
@@ -525,91 +572,44 @@ class Similar extends Agent
         return false;
     }
 
-    function discriminateInput($input, $discriminators = null)
+    function historySimilar()
     {
-        //$input = "optout opt-out opt-out";
+        $variable_set = [
+            "similar" => ["similarness", "similarity", "refreshed_at"],
+        ];
+        $history_agent = new History($this->thing, "history");
+        $history_agent->variablesHistory($variable_set);
+        $this->similars_history = $history_agent->variables_history;
+    }
 
-        if ($discriminators == null) {
-            $discriminators = ['red', 'green'];
+    public function chartSimilarness()
+    {
+        if (!isset($this->similars_history)) {
+            $this->historySimilar();
         }
+        $chart_agent = new Chart($this->thing, "chart");
 
-        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        $aliases = [];
-
-        $aliases['red'] = ['r', 'red', 'on'];
-        $aliases['green'] = ['g', 'grn', 'gren', 'green', 'gem', 'off'];
-        //$aliases['reset'] = array('rst','reset','rest');
-        //$aliases['lap'] = array('lap','laps','lp');
-
-        $words = explode(" ", $input);
-
-        $count = [];
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                }
-
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                    }
-                }
-            }
-        }
-
-        $this->thing->log(
-            'Agent "Flag" has a total count of ' . $total_count . '.'
+        $variable_set = ['similarness' => null];
+        $image_embedded = $chart_agent->historyChart(
+            $this->similars_history,
+            $variable_set
         );
-        // Set total sum of all values to 1.
 
-        $normalized = [];
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
+        $this->image_embedded['similarness'] = $image_embedded;
+    }
+
+    public function chartSimilarity()
+    {
+        if (!isset($this->similars_history)) {
+            $this->historySimilar();
         }
 
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-
-        foreach ($normalized as $key => $value) {
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-        }
-
-        if ($delta >= $minimum_discrimination) {
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
+        $chart_agent = new Chart($this->thing, "chart");
+        $variable_set = ['similarity' => null];
+        $image_embedded = $chart_agent->historyChart(
+            $this->similars_history,
+            $variable_set
+        );
+        $this->image_embedded['similarity'] = $image_embedded;
     }
 }

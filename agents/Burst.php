@@ -21,6 +21,10 @@ class Burst extends Agent
      */
     function init()
     {
+        $this->variable_set = [
+            "burst" => ["burst", "burstiness", "refreshed_at"],
+        ];
+
         $this->keyword = "burst";
 
         $this->verbosity = 1;
@@ -56,11 +60,9 @@ class Burst extends Agent
 
         $this->node_list = ["green" => ["red" => ["green"]]];
 
-//        $this->current_time = $this->thing->json->time();
-
-
-//        $this->thing_report['log'] = $this->thing->log;
-
+        $this->event_horizon = 60 * 60 * 24;
+        $this->y_max_limit = null;
+        $this->y_min_limit = null;
     }
 
     /**
@@ -181,7 +183,7 @@ class Burst extends Agent
 
         if ($this->verbosity >= 2) {
             $count = 0;
-            if ((isset($t['things'])) and (is_array($t['things']))) {
+            if (isset($t['things']) and is_array($t['things'])) {
                 $count = count($t['things']);
             }
             $this->thing->log(
@@ -200,7 +202,9 @@ class Burst extends Agent
         $this->burstiness = 0;
         $this->flag = "green";
 
-        if (!isset($t['things'][0]['created_at'])) {return true;}
+        if (!isset($t['things'][0]['created_at'])) {
+            return true;
+        }
 
         $created_at = $t['things'][0]['created_at'];
 
@@ -211,17 +215,13 @@ class Burst extends Agent
         $this->flag = "green";
 
         $this->matches = [];
-//        if (
-//            isset($findagent_thing->thing_report['things']) and
-//            $findagent_thing->thing_report['things'] != true and
-//            count($findagent_thing->thing_report['things']) > 1
-//        ) {
+        //        if (
+        //            isset($findagent_thing->thing_report['things']) and
+        //            $findagent_thing->thing_report['things'] != true and
+        //            count($findagent_thing->thing_report['things']) > 1
+        //        ) {
 
-        if (
-            isset($t['things']) and
-            (count($t['things']) > 1)
-        ) {
-
+        if (isset($t['things']) and count($t['things']) > 1) {
             foreach ($t['things'] as $thing) {
                 $previous_created_at = $created_at;
                 $created_at = $thing['created_at'];
@@ -304,7 +304,6 @@ class Burst extends Agent
             $this->flag = $this->default_flag;
         }
 
-
         $this->thing->log(
             $this->agent_prefix . 'got a ' . strtoupper($this->flag) . ' FLAG.'
         );
@@ -348,8 +347,6 @@ class Burst extends Agent
      */
     function makeChoices()
     {
-        //        $this->thing->choice->Choose($this->state);
-        //        $this->thing->choice->save($this->keyword, $this->state);
 
         $this->thing->choice->Create(
             $this->keyword,
@@ -383,13 +380,6 @@ class Burst extends Agent
 
         $this->thing_report['email'] = $this->message;
 
-        //        $this->makePNG();
-        //        $this->makeChoices(); // Turn off because it is too slow.
-
-        //        $this->makeTXT();
-
-        //$respond = "all";
-        //if (($this->flag == "red") or ($respond == "all")) {
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -413,6 +403,34 @@ class Burst extends Agent
             $this->thing_report['help'] =
                 'FLAG RED. Recent burst(s) have been seen.';
         }
+    }
+
+    public function makeWeb()
+    {
+        $web = "";
+        $embedded = true;
+        if (!$embedded) {
+            $web .=
+                '<img src= "' .
+                $this->web_prefix .
+                'thing/' .
+                $this->uuid .
+                '/number.png">';
+        } else {
+            if (isset($this->image_embedded['burst'])) {
+                $web .= $this->image_embedded['burst'];
+                $web .= "Burst Chart";
+                $web .= "<p>";
+            }
+            if (isset($this->image_embedded['burstiness'])) {
+                $web .= $this->image_embedded['burstiness'];
+                $web .= "Burstiness Chart";
+                $web .= "<p>";
+            }
+        }
+
+        $this->web = $web;
+        $this->thing_report['web'] = $web;
     }
 
     /**
@@ -530,6 +548,10 @@ class Burst extends Agent
             return null;
         }
 
+        $this->historyBurst();
+        $this->chartBurst();
+        $this->chartBurstiness();
+
         if ($this->agent_input != null) {
             $this->requested_thing_name = $this->agent_input;
         }
@@ -582,7 +604,23 @@ class Burst extends Agent
 
         // If all else fails try the discriminator.
 
-        $this->requested_flag = $this->discriminateInput($haystack); // Run the discriminator.
+        $input_agent = new Input($this->thing, "input");
+        $discriminators = ['red', 'green'];
+        $input_agent->aliases['red'] = ['r', 'red', 'on'];
+        $input_agent->aliases['green'] = [
+            'g',
+            'grn',
+            'gren',
+            'green',
+            'gem',
+            'off',
+        ];
+
+        $this->requested_flag = $input_agent->discriminateInput(
+            $haystack,
+            $discriminators
+        ); // Run the discriminator.
+
         switch ($this->requested_flag) {
             case 'green':
                 $this->selectChoice('green');
@@ -599,97 +637,42 @@ class Burst extends Agent
         return false;
     }
 
-    /**
-     *
-     * @param unknown $input
-     * @param unknown $discriminators (optional)
-     * @return unknown
-     */
-    function discriminateInput($input, $discriminators = null)
+    function historyBurst()
     {
-        //$input = "optout opt-out opt-out";
+        $variable_set = ["burst" => ["burst", "burstiness", "refreshed_at"]];
+        $history_agent = new History($this->thing, "history");
+        $history_agent->variablesHistory($variable_set);
+        $this->bursts_history = $history_agent->variables_history;
+    }
 
-        if ($discriminators == null) {
-            $discriminators = ['red', 'green'];
+    public function chartBurst()
+    {
+        if (!isset($this->bursts_history)) {
+            $this->historyBurst();
         }
+        $chart_agent = new Chart($this->thing, "chart");
 
-        $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        $aliases = [];
-
-        $aliases['red'] = ['r', 'red', 'on'];
-        $aliases['green'] = ['g', 'grn', 'gren', 'green', 'gem', 'off'];
-        //$aliases['reset'] = array('rst','reset','rest');
-        //$aliases['lap'] = array('lap','laps','lp');
-
-        $words = explode(" ", $input);
-
-        $count = [];
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                }
-
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                    }
-                }
-            }
-        }
-
-        $this->thing->log(
-            'Agent "Flag" has a total count of ' . $total_count . '.'
+        $variable_set = ['burst' => null];
+        $image_embedded = $chart_agent->historyChart(
+            $this->bursts_history,
+            $variable_set
         );
-        // Set total sum of all values to 1.
 
-        $normalized = [];
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
+        $this->image_embedded['burst'] = $image_embedded;
+    }
+
+    public function chartBurstiness()
+    {
+        if (!isset($this->bursts_history)) {
+            $this->historyBurst();
         }
 
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-
-        foreach ($normalized as $key => $value) {
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-        }
-
-        if ($delta >= $minimum_discrimination) {
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
+        $chart_agent = new Chart($this->thing, "chart");
+        $variable_set = ['burstiness' => null];
+        $image_embedded = $chart_agent->historyChart(
+            $this->bursts_history,
+            $variable_set
+        );
+        $this->image_embedded['burstiness'] = $image_embedded;
     }
 }

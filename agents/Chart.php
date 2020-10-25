@@ -35,6 +35,9 @@ class Chart extends Agent
         $this->initChart();
         $this->getColours();
         $this->node_list = ["chart"];
+
+        $this->y_max_limit = null;
+        $this->y_min_limit = null;
     }
 
     /**
@@ -418,7 +421,6 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         }
 
         while ($y <= $y_max) {
-
             $plot_y =
                 10 +
                 $this->chart_height -
@@ -442,19 +444,18 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             $angle = 0;
             $pad = 0;
 
-if (file_exists($font)) {
-
-            imagettftext(
-                $this->image,
-                $size,
-                $angle,
-                10,
-                $plot_y - 1,
-                $this->grey,
-                $font,
-                $text
-            );
-}
+            if (file_exists($font)) {
+                imagettftext(
+                    $this->image,
+                    $size,
+                    $angle,
+                    10,
+                    $plot_y - 1,
+                    $this->grey,
+                    $font,
+                    $text
+                );
+            }
 
             $y = $y + $inc;
         }
@@ -714,5 +715,120 @@ if (file_exists($font)) {
         //if ($this->agent_input == "chart") {return null;}
         $this->readInstruction();
         $this->readText();
+    }
+
+    public function historyChart(
+        $variables_history = null,
+        $variables_set = null
+    ) {
+        if ($variables_history == null) {
+            return true;
+        }
+        if ($variables_set == null) {
+            return true;
+        }
+
+        if (is_array($variables_set)) {
+            $variable_name = key($variables_set);
+        }
+
+        if (is_string($variables_set)) {
+            $variable_name = $variables_set;
+        }
+
+        //        $t = "NUMBER CHART\n";
+        $points = [];
+
+        // Defaults needed.
+        $x_min = 1e99;
+        $x_max = -1e99;
+
+        $y_min = 1e99;
+        $y_max = -1e99;
+
+        foreach ($variables_history as $i => $number_object) {
+            $created_at = $number_object['created_at'];
+            $number = $number_object[$variable_name];
+            $points[$created_at] = $number;
+
+            if (!isset($x_min)) {
+                $x_min = $created_at;
+            }
+            if (!isset($x_max)) {
+                $x_max = $created_at;
+            }
+
+            if ($created_at < $x_min) {
+                $x_min = $created_at;
+            }
+            if ($created_at > $x_max) {
+                $x_max = $created_at;
+            }
+
+            if (!isset($y_min)) {
+                $y_min = $number;
+            }
+            if (!isset($y_max)) {
+                $y_max = $number;
+            }
+
+            if ($number < $y_min) {
+                $y_min = $number;
+            }
+            if ($number > $y_max) {
+                $y_max = $number;
+            }
+        }
+
+        $temp_chart_agent = new Chart(
+            $this->thing,
+            "chart " . $variable_name . " " . $this->from
+        );
+        $temp_chart_agent->points = $points;
+
+        $temp_chart_agent->x_min = $x_min;
+        $temp_chart_agent->x_max = $x_max;
+        $temp_chart_agent->x_max = strtotime($this->thing->time);
+
+        if ($this->y_min_limit != false or $this->y_min_limit != null) {
+            $y_min = $this->y_min_limit;
+        }
+        $temp_chart_agent->y_min = $y_min;
+
+        if ($this->y_max_limit != false or $this->y_max_limit != null) {
+            $y_max = $this->y_max_limit;
+        }
+        $temp_chart_agent->y_max = $y_max;
+
+        $y_spread = 100;
+        if (
+            $temp_chart_agent->y_min == false and
+            $temp_chart_agent->y_max === false
+        ) {
+            //
+        } elseif (
+            $temp_chart_agent->y_min == false and
+            is_numeric($temp_chart_agent->y_max)
+        ) {
+            $y_spread = $y_max;
+        } elseif (
+            $temp_chart_agent->y_max == false and
+            is_numeric($temp_chart_agent->y_min)
+        ) {
+            // test stack
+            $y_spread = abs($temp_chart_agent->y_min);
+        } else {
+            $y_spread = $temp_chart_agent->y_max - $temp_chart_agent->y_min;
+            //            if ($y_spread == 0) {$y_spread = 100;}
+        }
+        if ($y_spread == 0) {
+            $y_spread = 100;
+        }
+
+        $temp_chart_agent->y_spread = $y_spread;
+        $temp_chart_agent->drawGraph();
+
+        $temp_chart_agent->makePNG();
+        return $temp_chart_agent->image_embedded;
     }
 }
