@@ -182,10 +182,9 @@ class Alphanumeric extends Agent
         }
     }
 
-    function isAlphanumeric() {
-
-
-
+    function isAlphanumeric($text = null) {
+        if ($text == null) {return null;}
+        return ctype_alnum($text);
     }
 
     /**

@@ -257,6 +257,7 @@ class Calendar extends Agent
                 $this->thing,
                 "googlecalendar"
             );
+
             $ics_link = $googlecalendar_agent->icsGooglecalendar($token);
             if ($ics_link !== true) {
                 $ics_links[] = $ics_link;
@@ -268,6 +269,18 @@ class Calendar extends Agent
             if (strtolower(substr($token, 0,9)) == "webcal://") {
                 $ics_links[] = $token;
                 continue;
+            }
+
+            // Assume alphanumeric tokens are calls for @gmail addresses.
+            // For now.
+            // TODO: Explode Apple and Microsoft calendaring.
+            $alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
+            if ($alphanumeric_agent->isAlphanumeric($token)) {
+                $ics_link = $googlecalendar_agent->icsGooglecalendar($token . "@gmail.com");
+                if ($ics_link !== true) {
+                    $ics_links[] = $ics_link;
+                    continue;
+                }
             }
 
             // And some don't have anything distinctive.
