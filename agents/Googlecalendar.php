@@ -74,7 +74,9 @@ class Googlecalendar extends Agent
     public function icsGooglecalendar($text = null)
     {
         if ($text == null) {
-            if (!isset($this->file)) {return true;}
+            if (!isset($this->file)) {
+                return true;
+            }
 
             $text = $this->file;
         }
@@ -82,23 +84,14 @@ class Googlecalendar extends Agent
         $tokens = explode("@", $text);
 
         if (count($tokens) != 2) {
-            return true;
+            $tokens = explode("%40", $text);
+            if (count($tokens) != 2) {
+                return true;
+            }
         } // Invalid input.
-        $email_suffix = $tokens[1];
-
-        if ($email_suffix == "gmail.com") {
-            $email_address = urlencode($text);
-            $ics_url =
-                "https://calendar.google.com/calendar/ical/" .
-                $email_address .
-                "/public/basic.ics";
-            $this->addresses[] = $ics_url;
-            return $ics_url;
-        }
 
         // TODO Test
         if (filter_var($text, FILTER_VALIDATE_EMAIL)) {
-
             $email_address = urlencode($text);
             $ics_url =
                 "https://calendar.google.com/calendar/ical/" .
@@ -108,18 +101,36 @@ class Googlecalendar extends Agent
             return $ics_url;
         }
 
+        $text_test = mb_ereg_replace('%40', '@', $text);
+        // TODO Test
+        if (filter_var($text_test, FILTER_VALIDATE_EMAIL)) {
+            // Is already url encoded... probably.
+            $email_address = $text;
+            $ics_url =
+                "https://calendar.google.com/calendar/ical/" .
+                $email_address .
+                "/public/basic.ics";
+            $this->addresses[] = $ics_url;
+            return $ics_url;
+        }
 
         return false;
     }
 
     public function addressesGooglecalendar($text = null)
     {
-        $addresses = explode('cid=', $text);
-        array_shift($addresses);
-        if (count($addresses) == 0) {
-            return true;
+        if (stripos($text, "https://calendar.google.com/calendar/") !== false) {
+            $text = str_replace(['?cid=', '&cid='], '&cid=', $text);
+            $addresses = explode('&cid=', $text);
+
+            array_shift($addresses);
+            if (count($addresses) == 0) {
+                return true;
+            }
+            $this->addresses = array_merge($this->addresses, $addresses);
+            return $addresses;
         }
-        $this->addresses = array_merge($this->addresses, $addresses);
+        return false;
     }
 
     public function readSubject()
@@ -146,8 +157,9 @@ class Googlecalendar extends Agent
 
         $filtered_input = trim($filtered_input);
 
-//var_dump($filtered_input);
-if ($filtered_input == "") {return;}
+        if ($filtered_input == "") {
+            return;
+        }
 
         $this->file = $filtered_input;
 

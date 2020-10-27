@@ -227,8 +227,8 @@ class Similar extends Agent
                         continue;
                     }
 
-                    $subject = $thing['task'];
-                    $subject2 = $thing2['task'];
+                    $subject = mb_substr($thing['task'],0,255);
+                    $subject2 = mb_substr($thing2['task'],0,255);
                     //$l = levenshtein($subject, $this->subject);
                     $l = levenshtein($subject, $subject2);
 

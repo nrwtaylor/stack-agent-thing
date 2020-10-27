@@ -244,8 +244,15 @@ class Calendar extends Agent
 
         $filtered_input = trim($filtered_input);
 
+        //$filtered_input = 'https://calendar.google.com/calendar/u/0/render?cid=oldvectorradio%40gmail.com&cid=en-gb.canadian%23holiday%40group.v.calendar.google.com&cid=8rr8icnfsofufg57jvdrd5i7gg%40group.calendar.google.com&cid=vectorradio.ca_q49r7vdsfjo62nqe69togn6gfs%40group.calendar.google.com';
+
         $tokens = explode(" ", $filtered_input);
         $ics_links = [];
+        // See if Googlecalendar recognizes this.
+        $googlecalendar_agent = new Googlecalendar(
+            $this->thing,
+            "googlecalendar"
+        );
         foreach ($tokens as $i => $token) {
             if (strtolower(substr($token, -4)) == '.ics') {
                 $ics_links[] = $token;
@@ -253,12 +260,25 @@ class Calendar extends Agent
             }
 
             // See if Googlecalendar recognizes this.
-            $googlecalendar_agent = new Googlecalendar(
-                $this->thing,
-                "googlecalendar"
-            );
+
+            $addresses = $googlecalendar_agent->addressesGooglecalendar($token);
+
+            if ($addresses !== false) {
+                foreach ($addresses as $i => $address) {
+                    //var_dump($address);
+                    $ics_link = $googlecalendar_agent->icsGooglecalendar(
+                        $address
+                    );
+                    if ($ics_link !== true) {
+                        $ics_links[] = $ics_link;
+                    }
+                }
+
+                continue;
+            }
 
             $ics_link = $googlecalendar_agent->icsGooglecalendar($token);
+
             if ($ics_link !== true) {
                 $ics_links[] = $ics_link;
                 continue;
@@ -266,7 +286,7 @@ class Calendar extends Agent
 
             // Some ics links don't end in .ics
             // TODO Test
-            if (strtolower(substr($token, 0,9)) == "webcal://") {
+            if (strtolower(substr($token, 0, 9)) == "webcal://") {
                 $ics_links[] = $token;
                 continue;
             }
@@ -274,9 +294,14 @@ class Calendar extends Agent
             // Assume alphanumeric tokens are calls for @gmail addresses.
             // For now.
             // TODO: Explode Apple and Microsoft calendaring.
-            $alphanumeric_agent = new Alphanumeric($this->thing,"alphanumeric");
+            $alphanumeric_agent = new Alphanumeric(
+                $this->thing,
+                "alphanumeric"
+            );
             if ($alphanumeric_agent->isAlphanumeric($token)) {
-                $ics_link = $googlecalendar_agent->icsGooglecalendar($token . "@gmail.com");
+                $ics_link = $googlecalendar_agent->icsGooglecalendar(
+                    $token . "@gmail.com"
+                );
                 if ($ics_link !== true) {
                     $ics_links[] = $ics_link;
                     continue;
@@ -289,7 +314,6 @@ class Calendar extends Agent
             // TODO Identify and store non ics links.
             // For now add to the list to try and read it as a calendar.
             $ics_links[] = $token;
-
         }
 
         $this->ics_links = array_unique($ics_links);
