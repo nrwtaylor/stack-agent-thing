@@ -302,18 +302,6 @@ $variables = $thing->variables;
         }
         array_multisort($refreshed_at, SORT_DESC, $this->numbers_history);
 
-
-        /*
-            // Sort by length of phrase. Shortest first.
-            $traditional = array();
-            foreach ($this->numbers_history as $key => $row) {
-                $traditional[$key] = $row['timestamp'];
-            }
-            array_multisort($traditional, SORT_ASC, $this->numbers_history);
-
-$this->numbers_history = $traditional;
-*/
-
     }
 
 

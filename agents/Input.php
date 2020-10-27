@@ -329,7 +329,8 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
                     $count[$discriminator] = $count[$discriminator] + 1;
                     $total_count = $total_count + 1;
                 }
-
+//var_dump($discriminator);
+if (!isset($aliases[$discriminator])) {continue;}
                 foreach ($aliases[$discriminator] as $alias) {
                     if ($word == $alias) {
                         $count[$discriminator] = $count[$discriminator] + 1;

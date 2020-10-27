@@ -34,8 +34,13 @@ class Token extends Agent
 
     public function initTokens()
     {
+        $this->tokens_resource = null;
         $resource_name = 'token/tokens.php';
-        $this->tokens_resource = require $this->resource_path . $resource_name;
+        $uri = $this->resource_path . $resource_name;
+        if (file_exists($uri)) {
+            $this->tokens_resource = require $this->resource_path .
+                $resource_name;
+        }
         //$this->verbosityChannel();
     }
 
@@ -88,21 +93,21 @@ class Token extends Agent
     /**
      *
      */
-    public function respond()
+    public function respondResponse()
     {
         // Thing actions
 
         $this->thing->flagGreen();
 
-        $this->makeSMS();
+        //$this->makeSMS();
         $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
-        $this->makeWeb();
+        //$this->makeWeb();
 
-        $this->thing_report['thing'] = $this->thing->thing;
+        //$this->thing_report['thing'] = $this->thing->thing;
 
         // $this->thing_report['help'] = "This gets tokens from the datagram.";
     }
@@ -283,16 +288,17 @@ class Token extends Agent
     {
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
-        if ($this->agent_input == null) {
+        $input = $this->agent_input;
+        if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
         }
 
         if ($this->agent_input == "token") {
             $input = $this->subject;
-        } else {
-            $input = $this->agent_input;
+            //} else {
+            //    $input = $this->agent_input;
         }
-
+        //        $this->input = $input;
         $this->extractTokens();
 
         // dev not needed for now
@@ -303,24 +309,37 @@ class Token extends Agent
             $this->getToken($input);
         }
 
-        if ($input == 'red-token') {
-            $this->colourToken('red');
+        //if ($this->matchToken('red-token')) {
+        if (
+            stripos($input, 'red-token') !== false or
+            stripos($input, 'red token') !== false
+        ) {
+            //if ($input == 'red-token') {
+            $this->itemToken('red');
+            $this->response .= "Made a red token payment link. ";
         }
 
         if ($input == 'purple-token') {
-            $this->colourToken('purple');
+            $this->itemToken('purple');
         }
 
         if ($input == 'blue-token') {
-            $this->colourToken('blue');
+            $this->itemToken('blue');
         }
 
         if ($input == 'yellow-token') {
-            $this->colourToken('yellow');
+            $this->itemToken('yellow');
         }
 
         if ($input == 'green-token') {
-            $this->colourToken('green');
+            $this->itemToken('green');
+        }
+
+        if ((stripos($input, 'channel-token') !== false) or
+            (stripos($input, 'channel-token') !== false)) {
+            $this->itemToken('channel');
+            $this->response .= "Made a channel token payment link. ";
+            return;
         }
 
         $pieces = explode(" ", strtolower($input));
@@ -328,7 +347,7 @@ class Token extends Agent
         if (count($pieces) == 1) {
             if ($input == 'token') {
                 $this->getToken();
-                $this->response = "Last token retrieved.";
+                $this->response .= "Last token retrieved. ";
                 return;
             }
         }
@@ -361,33 +380,35 @@ class Token extends Agent
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         //$web .= $this->subject . "<br>";
 
-        $colours = ['red', 'blue', 'yellow', 'green'];
+        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
 
-        foreach ($colours as $colour) {
-            if ($this->subject == $colour . '-token') {
-                $this->colourToken($colour);
-                $web .= $this->web_token[$colour];
+        foreach ($items as $item) {
+            //if ($this->subject == $item . '-token') {
+            //if ($this->subject == $item . '-token') {
+            if ($this->matchToken($item . '-token')) {
+                $this->itemToken($item);
+                $web .= $this->web_token[$item];
             }
         }
 
-        /*
-        if (!isset($this->slugs[0])) {
-            $web .= "No slugs found<br>";
-        } else {
-            $web .= "First slug is ". $this->slugs[0] . "<br>";
-            $web .= "Extracted slugs are:<br>";
-        }
-        foreach ($this->slugs as $key=>$slug) {
-            $web .= $slug . "<br>";
-        }
-
-        if ($this->recognize_french == true) {
-            // devstack
-        }
-*/
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
+    }
+
+    public function matchToken($text = null)
+    {
+        $slug_agent = new Slug($this->thing, "slug");
+        $subject_slug = $slug_agent->getSlug($this->subject);
+
+        if ($this->subject == $text) {
+            return true;
+        }
+        if (stripos($subject_slug, $text) !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -395,20 +416,31 @@ class Token extends Agent
      */
     function makeSMS()
     {
+        $link_text = "";
+        if (isset($this->token_item['title'])) {
+            $slug_agent = new Slug($this->thing, "slug");
+            $slug = $slug_agent->getSlug($this->token_item['title']);
+            //if (($slug != "") and ($slug != null)) {
+            $link = $this->web_prefix . 'thing/' . $this->uuid . '/' . $slug;
+            $link_text = $link;
+        }
+
         $sms = "TOKEN";
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
         //}
-
+        $sms .= " | ";
         if (isset($this->token)) {
             $sms .= " | " . $this->token;
             //$this->sms_message .= 'devstack';
         }
+        $sms .= $link_text;
+        $sms .= " " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
-    public function colourToken($colour = null)
+    public function itemToken($colour = null)
     {
         if ($colour == null) {
             return true;
@@ -419,6 +451,7 @@ class Token extends Agent
         // Load token defintitions.
         $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
         $item_id = 'grey' . '-token';
+
         if (isset($this->tokens_resource[$colour . '-token'])) {
             $item_id = $colour . '-token';
             $item = $this->tokens_resource[$colour . '-token'];
@@ -430,6 +463,7 @@ class Token extends Agent
         $item_agent = new Item($this->thing, $item_id);
 
         $item = $item_agent->item;
+        $this->token_item = $item;
 
         $payment_agent = new Payment($this->thing, "payment");
 
@@ -442,6 +476,8 @@ class Token extends Agent
         $this->help = $help_text;
         $this->thing_report['help'] = $help_text;
         $this->thing_report['info'] = 'Generates tokens.';
+
+        //$this->response .= "Made " . $colour . " token. ";
 
         $this->web_token[$colour] = $web;
     }

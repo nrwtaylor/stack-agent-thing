@@ -123,10 +123,10 @@ class Item extends Agent
             return;
         }
 
-        $this->thing->db->setFrom($this->from);
+//        $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("variables");
-        $item = $this->thing->json->readVariable(["item", "item"]);
+        $item = $this->thing->json->readVariable(["item"]);
 
         if ($item === false) {
             $item = $this->default_item;
@@ -147,7 +147,7 @@ class Item extends Agent
 
         //        return array(array(), array(), array());
 
-        //}
+        //}/
         $text = trim($text);
 
         $items = [];
@@ -478,6 +478,7 @@ class Item extends Agent
 
     public function setItem($item = null)
     {
+        if ($this->agent_input == 'item') {return;}
         if ($item == null) {
             $item = $this->item;
         }
@@ -488,7 +489,17 @@ class Item extends Agent
         }
 
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["item", "item"], $item);
+        $this->thing->json->writeVariable(["item"], $item);
+
+        $this->thing->json->writeVariable(["items"], $this->items);
+
+        $time_string = $this->thing->json->time();
+        $this->thing->json->writeVariable(
+            ["item", "refreshed_at"],
+            $time_string
+        );
+
+
     }
 
     public function countItems($items = null)
@@ -711,6 +722,7 @@ class Item extends Agent
         }
 
         // And note the time.
+/*
         $this->thing->db->setFrom($this->from);
         $this->thing->json->setField("variables");
 
@@ -719,7 +731,7 @@ class Item extends Agent
             ["item", "refreshed_at"],
             $time_string
         );
-
+*/
         //$count = count($this->items);
 
         //$this->thing->json->writeVariable(array("item", "item"), $this->item);
@@ -770,6 +782,7 @@ class Item extends Agent
 
             return;
         }
+        if ($this->agent_input == 'item') {return;}
 
         if (is_string($this->agent_input) and $this->agent_input != "") {
             $this->thing->log("Found an string. Look up the item. Get. Set.");
