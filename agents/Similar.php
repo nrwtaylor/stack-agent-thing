@@ -217,6 +217,11 @@ class Similar extends Agent
 
         $this->matches = [];
 
+        if ($findagent_thing->thing_report['things'] === true) {
+            return true;
+        }
+
+
         if (
             isset($findagent_thing->thing_report['things']) and
             count($findagent_thing->thing_report['things']) > 1
