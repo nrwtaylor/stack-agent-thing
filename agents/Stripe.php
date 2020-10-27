@@ -739,8 +739,12 @@ class Stripe extends Agent
         }
 
         if (is_string($this->input)) {
-            //var_dump($this->input);
+            $slug_agent = new Slug($this->thing, "slug");
+            $input_slug = $slug_agent->getSlug($this->input);
+
             $this->item_id = $this->input;
+            $this->item_id = $input_slug;
+
         }
 
         $this->state = $this->last_state;
