@@ -1442,32 +1442,11 @@ if (!isset($this->created_at)) {$this->created_at = time();}
                 $this->input = $this->agent_input;
 
         }
-/*
-        if (!is_array($this->input)) {
-            $whatIWant = $this->input;
-            if (
-                ($pos = strpos(strtolower($this->input), "@ednabot")) !== false
-            ) {
-                $whatIWant = substr(
-                    strtolower($this->input),
-                    $pos + strlen("@ednabot")
-                );
-            } elseif (
-                ($pos = strpos(strtolower($this->input), "@ednabot")) !== false
-            ) {
-                $whatIWant = substr(
-                    strtolower($this->input),
-                    $pos + strlen("@ednabot")
-                );
-            }
-            $this->input = trim($whatIWant);
-        }
-*/
+
         $this->thing->log('read "' . $this->subject . '".');
 
         $this->readFrom();
 
-//if ((isset($this->do_not_respond)) and ($this->do_not_respond == true)) {return;}
         $this->readSubject();
         $this->thing->log('completed read.');
     }
@@ -1523,6 +1502,7 @@ throw new \Exception("Address not allowed.");
         if ($thing == null) {
             $thing = $this->thing;
         }
+
         // Do not call self.
         // devstack depthcount
         if (strtolower($this->agent_name) == strtolower($agent_class_name)) {
@@ -1618,7 +1598,7 @@ throw new \Exception("Address not allowed.");
                     -1,
                     strlen($postfix_variant)
                 );
-                if (in_array($agent_class_name, $agents_tested)) {
+                if (isset($agents_tested[$agent_class_name])) {
                     continue;
                 }
 
@@ -1628,7 +1608,10 @@ throw new \Exception("Address not allowed.");
                 // and looping, or a direct namespace check.
                 $filename = $this->agents_path . $agent_class_name . ".php";
                 if (file_exists($filename)) {
-                    $agents[] = $agent_class_name;
+                    $agent_package = [$agent_class_name=>null];
+//                    $agents[] = $agent_class_name;
+                    $agents[] = $agent_package;
+
                 }
 
                 // 2nd way
@@ -1638,10 +1621,13 @@ throw new \Exception("Address not allowed.");
                 // and looping, or a direct namespace check.
                 $filename = $this->agents_path . $agent_class_name . ".php";
                 if (file_exists($filename)) {
-                    $agents[] = $agent_class_name;
+                    $agent_package = [$agent_class_name=>null];
+//                    $agents[] = $agent_class_name;
+                    $agents[] = $agent_package;
+
                 }
 
-                $agents_tested[] = $agent_class_name;
+                $agents_tested[$agent_class_name] = true;
 
                 // 3rd way
                 $agent_class_name = strtoupper($keyword);
@@ -1650,7 +1636,10 @@ throw new \Exception("Address not allowed.");
                 // and looping, or a direct namespace check.
                 $filename = $this->agents_path . $agent_class_name . ".php";
                 if (file_exists($filename)) {
-                    $agents[] = $agent_class_name;
+                    $agent_package = [$agent_class_name=>null];
+//                    $agents[] = $agent_class_name;
+                    $agents[] = $agent_package;
+
                 }
             }
         }
@@ -1665,12 +1654,20 @@ throw new \Exception("Address not allowed.");
         }
 
         $responsive_agents = [];
-        foreach ($agents as $agent_class_name) {
+        foreach ($agents as $i=>$agent_package) {
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
             // Allow for doing something smarter here with
             // word position and Bayes.  Agent scoring
             // But for now call the first agent found and
             // see where that consistency takes this.
+
+            $agent_class_name = key($agent_package);
+
+            $agent_input = null;
+            if(isset($agent_package[$agent_class_name]['agent_input'])) {
+            $agent_input = $agent_package[$agent_class_name]['agent_input'];
+            }
+
 
             // Ignore Things for now 19 May 2018 NRWTaylor
             if ($agent_class_name == "Thing") {
@@ -1681,7 +1678,7 @@ throw new \Exception("Address not allowed.");
             if (count($agents) > 1 and $agent_class_name == "Email") {
                 continue;
             }
-            if ($this->getAgent($agent_class_name)) {
+            if ($this->getAgent($agent_class_name, $agent_input)) {
                 $score = 1;
                 $responsive_agents[] = [
                     "agent_name" => $agent_class_name,
@@ -1769,6 +1766,21 @@ throw new \Exception("Address not allowed.");
         }
     }
 
+    public function ngramsText($text = null) {
+
+        // See if there is an agent with the first workd
+        $arr = explode(' ', trim($text));
+        $agents = [];
+
+        $bigrams = $this->getNgrams($text, 2);
+        $trigrams = $this->getNgrams($text, 3);
+
+        $arr = array_merge($arr, $bigrams);
+        $arr = array_merge($arr, $trigrams);
+        return $arr;
+    }
+
+
     public function extractAgents($input)
     {
         $agent_input_text = $this->agent_input;
@@ -1776,30 +1788,61 @@ throw new \Exception("Address not allowed.");
             $agent_input_text = "";
         }
 
-        // See if there is an agent with the first workd
-        $arr = explode(' ', trim($input));
-        $agents = [];
+        $arr = $this->ngramsText($input);
 
-        $bigrams = $this->getNgrams($input, $n = 2);
-        $trigrams = $this->getNgrams($input, $n = 3);
-
-        $arr = array_merge($arr, $bigrams);
-        $arr = array_merge($arr, $trigrams);
         // Added this March 6, 2018.  Testing.
+
         if ($this->agent_input == null) {
             $arr[] = $this->to;
         } else {
-            $arr = explode(' ', $agent_input_text);
+            $arr = $this->ngramsText($agent_input_text);
+            //$arr = explode(' ', $agent_input_text);
         }
 
         // Does this agent have code.
         $this->validateAgents($arr);
 
+// TODO: Build a seperate function.
+// Is there a translation for this command.
+$librex_agent = new Librex($this->thing, "agent/agent");
+$text = "token";
+$this->hits = $librex_agent->getHits($text);
+
+foreach($this->hits as $i=>$hit) {
+
+$agent_hit = trim(explode(",",$hit)[0]);
+$agent_input_hit = trim(explode(",",$hit)[1]);
+
+// TODO: Consider capitalization format of agent/agent
+// For now use ucwords
+$agent_input_hit = ucwords($agent_input_hit);
+
+foreach($arr as $j=>$agent_candidate) {
+
+
+if ((str_replace("-","",$agent_hit)) == $agent_candidate) {
+
+//echo $agent_hit . " " . $agent_input_hit . "\n";
+
+$agent_package = [$agent_input_hit=>['agent_input'=>$agent_hit]];
+array_unshift($this->agents, $agent_package);
+
+}
+
+}
+
+}
+
+//$this->replacementsAgent($text);
+
+//array_unshift($this->agents, $agent_package);
+
+
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
 
         foreach ($this->responsive_agents as $i => $responsive_agent) {
-            // echo $responsive_agent['agent_name']. " " ;
+          // echo $responsive_agent['agent_name']. " " ;
         }
 
         return;
@@ -2483,10 +2526,10 @@ throw new \Exception("Address not allowed.");
             "OPTIMIZE"
         );
 
-
         $arr = $this->extractAgents($input);
 
         $this->input = $input;
+
 
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]['thing_report'];
@@ -3147,7 +3190,6 @@ throw new \Exception("Address not allowed.");
 
     function mylog($error, $errlvl)
     {
-        //        var_dump($error);
         //        echo $this->response;
         //        echo "\n";
         //        echo $this->thing->log;

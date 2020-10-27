@@ -263,7 +263,7 @@ class Stripe extends Agent
     function run()
     {
         // Make sure the Snippet code is being run.
-        $this->makeSnippet();
+        //       $this->makeSnippet();
 
         // Do something.
     }
@@ -272,8 +272,8 @@ class Stripe extends Agent
 
     public function makeWeb()
     {
-
         $item_web = "";
+        /*
         if ($this->item_id != 'default-token') {
             $item_agent = new Item($this->thing, $this->item_id);
             $item = $item_agent->item;
@@ -282,18 +282,16 @@ class Stripe extends Agent
             $item_web .= $item['description'] . " ";
             $item_web .= "</div>";
         }
-
+*/
         $web = "";
-        $web .= $item_web;
-
-
+        //        $web .= $item_web;
 
         $this->makeSnippet();
         $web .= $this->snippet;
 
-        if (isset($this->stripe_web)) {
-            $web .= "<div>" . $this->stripe_web . "</div>";
-        }
+        //       if (isset($this->stripe_web)) {
+        //           $web .= "<div>" . $this->stripe_web . "</div>";
+        //       }
 
         $this->web = $web;
         $this->thing_report['web'] = $web;
@@ -523,29 +521,23 @@ class Stripe extends Agent
 
         if ($command == 'stripe-cancel') {
             $this->stripe_web = "Sorry you decided not to pay.";
-        }
-
-        if ($command == 'stripe-success') {
-            $this->stripe_web = "Thanks for your payment.";
-        }
-    }
-
-    function stripeApi($text = null)
-    {
-        if ($this->state == "off") {
-            return true;
-        }
-        $keywords = $text;
-        $this->thing->log("did a Finding API search for " . $keywords . ".");
-    }
-
-    public function makeSnippet()
-    {
-        if (isset($this->thing_report['snippet'])) {
             return;
         }
 
-        //        $web = "Stripe Dev";
+        if ($command == 'stripe-success') {
+            $item_agent = new Item($this->thing, "item");
+            $item = $item_agent->item;
+            $this->stripe_web = "Thanks for your payment.";
+
+            if (isset($item['text'])) {
+                $this->stripe_web .= $item['text'];
+            }
+            if (isset($item['refreshed_at'])) {
+                $this->stripe_web .= $item['refreshed_at'];
+            }
+
+            return;
+        }
 
         $stripe_library_script =
             '<script src="https://js.stripe.com/v3/"></script>';
@@ -624,6 +616,27 @@ class Stripe extends Agent
         $snippet_postfix = '</span>';
         //$web .= $web_items;
         $web = $snippet_prefix . $web . $snippet_postfix;
+
+        $this->stripe_web = $web;
+    }
+
+    function stripeApi($text = null)
+    {
+        if ($this->state == "off") {
+            return true;
+        }
+        $keywords = $text;
+        $this->thing->log("did a Finding API search for " . $keywords . ".");
+    }
+
+    public function makeSnippet()
+    {
+        if (isset($this->thing_report['snippet'])) {
+            return;
+        }
+
+        $this->webStripe();
+        $web = $this->stripe_web;
 
         $this->snippet = $web;
         $this->thing_report['snippet'] = $web;
@@ -740,7 +753,10 @@ class Stripe extends Agent
             return;
         }
 
-        if ($this->subject == 's/ web stripe') {
+        if (
+            $this->subject == 's/ web stripe' or
+            $this->subject == 'stripe-success'
+        ) {
             $this->webStripe();
             return;
         }
@@ -762,7 +778,6 @@ class Stripe extends Agent
                 $this->response .= "Set up a connector to the Stripe API(s). ";
                 return;
             }
-
 
             if (count($pieces) == 1) {
                 if ($input == 'stripe') {

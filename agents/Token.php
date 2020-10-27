@@ -296,7 +296,6 @@ class Token extends Agent
         } else {
             $input = $this->agent_input;
         }
-
         $this->extractTokens();
 
         // dev not needed for now
@@ -308,24 +307,29 @@ class Token extends Agent
         }
 
         if ($input == 'red-token') {
-            $this->colourToken('red');
+            $this->itemToken('red');
         }
 
         if ($input == 'purple-token') {
-            $this->colourToken('purple');
+            $this->itemToken('purple');
         }
 
         if ($input == 'blue-token') {
-            $this->colourToken('blue');
+            $this->itemToken('blue');
         }
 
         if ($input == 'yellow-token') {
-            $this->colourToken('yellow');
+            $this->itemToken('yellow');
         }
 
         if ($input == 'green-token') {
-            $this->colourToken('green');
+            $this->itemToken('green');
         }
+
+        if ($input == 'channel-token') {
+            $this->itemToken('channel');
+        }
+
 
         $pieces = explode(" ", strtolower($input));
 
@@ -341,6 +345,7 @@ class Token extends Agent
 
         return $status;
     }
+
 
     /**
      *
@@ -365,30 +370,15 @@ class Token extends Agent
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         //$web .= $this->subject . "<br>";
 
-        $colours = ['red', 'blue', 'yellow', 'green'];
+        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
 
-        foreach ($colours as $colour) {
-            if ($this->subject == $colour . '-token') {
-                $this->colourToken($colour);
-                $web .= $this->web_token[$colour];
+        foreach ($items as $item) {
+            if ($this->subject == $item . '-token') {
+                $this->itemToken($item);
+                $web .= $this->web_token[$item];
             }
         }
 
-        /*
-        if (!isset($this->slugs[0])) {
-            $web .= "No slugs found<br>";
-        } else {
-            $web .= "First slug is ". $this->slugs[0] . "<br>";
-            $web .= "Extracted slugs are:<br>";
-        }
-        foreach ($this->slugs as $key=>$slug) {
-            $web .= $slug . "<br>";
-        }
-
-        if ($this->recognize_french == true) {
-            // devstack
-        }
-*/
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -412,7 +402,7 @@ class Token extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
-    public function colourToken($colour = null)
+    public function itemToken($colour = null)
     {
         if ($colour == null) {
             return true;
@@ -423,6 +413,7 @@ class Token extends Agent
         // Load token defintitions.
         $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
         $item_id = 'grey' . '-token';
+
         if (isset($this->tokens_resource[$colour . '-token'])) {
             $item_id = $colour . '-token';
             $item = $this->tokens_resource[$colour . '-token'];
