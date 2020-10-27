@@ -202,7 +202,7 @@ class Stripe extends Agent
 
         $item_id = $this->agent_input['params']['item'];
 
-        $item_agent = new Item($this->thing, $item_id);
+        $item_agent = new Item($thing, $item_id);
         $item = $item_agent->item;
 
         //$this->default_currency = 'cad';
@@ -262,9 +262,6 @@ class Stripe extends Agent
 
     function run()
     {
-        // Make sure the Snippet code is being run.
-        //       $this->makeSnippet();
-
         // Do something.
     }
 
@@ -530,11 +527,18 @@ class Stripe extends Agent
             $this->stripe_web = "Thanks for your payment.";
 
             if (isset($item['text'])) {
-                $this->stripe_web .= $item['text'];
+                $this->stripe_web .= " ";
+                $this->stripe_web .= "Enter this " . $item['text'] . " in your text channel. " ;
             }
             if (isset($item['refreshed_at'])) {
-                $this->stripe_web .= $item['refreshed_at'];
+                // $this->stripe_web .= $item['refreshed_at'];
+                $ago = $this->thing->human_time ( time() - strtotime($item['refreshed_at']) );
+                $this->stripe_web .= " ";
+                $this->stripe_web .= "Created " . $ago ." ago.";
             }
+
+            $nuuid_agent = new Nuuid($this->thing, "nuuid");
+            $this->stripe_web .= $nuuid_agent->html_image;
 
             return;
         }

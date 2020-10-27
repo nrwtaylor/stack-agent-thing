@@ -389,6 +389,16 @@ class Token extends Agent
      */
     function makeSMS()
     {
+
+$link_text = "";
+
+$slug_agent = new Slug($this->thing, "slug");
+$slug = $slug_agent->getSlug($this->token_item['title']);
+if (($slug != "") and ($slug != null)) {
+$link = $this->web_prefix . 'thing/'. $this->uuid . '/' . $slug;
+$link_text = $link;
+}
+
         $sms = "TOKEN";
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
@@ -398,6 +408,7 @@ class Token extends Agent
             $sms .= " | " . $this->token;
             //$this->sms_message .= 'devstack';
         }
+$sms .= $link_text . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -425,6 +436,8 @@ class Token extends Agent
         $item_agent = new Item($this->thing, $item_id);
 
         $item = $item_agent->item;
+
+        $this->token_item = $item;
 
         $payment_agent = new Payment($this->thing, "payment");
 
