@@ -1857,6 +1857,8 @@ array_unshift($this->agents, $agent_package);
      */
     public function readSubject()
     {
+//echo "merp 2020-10-07";
+//exit();
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;
