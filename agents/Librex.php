@@ -271,7 +271,11 @@ class Librex extends Word
         $this->librex_name = $librex_name;
 
 if ($contents == null) {
+$this->librex = null;
+if (file_exists($file)) {
         $this->librex = file_get_contents($file);
+}
+
 } else {
      $this->librex = $contents;
 }

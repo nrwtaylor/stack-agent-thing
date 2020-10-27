@@ -54,10 +54,12 @@ class Privacy extends Agent {
      */
     public function makeWeb() {
         $file = $GLOBALS['stack_path'] . 'resources/privacy/privacy.html';
-        $contents = file_get_contents($file);
+        $contents = "No privacy policy found.";
+        if (file_exists($file)) {
+            $contents = file_get_contents($file);
+        }
 
-$contents = str_replace('<email>', $this->email, $contents);
-
+        $contents = str_replace('<email>', $this->email, $contents);
         $this->thing_report['web'] = $contents;
     }
 
@@ -67,8 +69,11 @@ $contents = str_replace('<email>', $this->email, $contents);
      * @return unknown
      */
     public function makeSMS() {
-        $sms = "PRIVACY | " . $this->thing_report['sms'];
 
+        $sms = "No SMS response available.";
+        if (isset($this->thing_report['sms'])) {
+            $sms = "PRIVACY | " . $this->thing_report['sms'];
+        }
         $this->thing_report['sms'] = $sms;
         $this->sms_message = $sms;
         return $this->sms_message;
@@ -81,7 +86,11 @@ $contents = str_replace('<email>', $this->email, $contents);
      */
 
     public function makeEmail() {
-        $text = ($this->thing_report['email']);
+
+        $text = "No privacy policy found.";
+        if (isset($this->thing_report['email'])) {
+            $text = ($this->thing_report['email']);
+        }
         $shortcode_agent = new Shortcode($this->thing, "shortcode");
         $text = $shortcode_agent->filterShortcode($text);
 

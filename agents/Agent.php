@@ -611,8 +611,11 @@ echo "\n";
     {
         $text = strtolower($this->agent_name);
         $file = $this->resource_path . '/' . $text . '/' . $text . '.txt';
-        $contents = file_get_contents($file);
 
+        if (!file_exists($file)) {
+            return true;
+        }
+        $contents = file_get_contents($file);
         $handle = fopen($file, "r");
 
         $channels = [

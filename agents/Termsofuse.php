@@ -46,7 +46,10 @@ class Termsofuse extends Agent {
      */
     public function makeWeb() {
         $file = $GLOBALS['stack_path'] . 'resources/termsofuse/termsofuse.html';
-        $contents = file_get_contents($file);
+        $contents = "No Terms of Use found.";
+        if (file_exists($file)) {
+            $contents = file_get_contents($file);
+        }
         $this->thing_report['web'] = $contents;
     }
 
@@ -57,7 +60,10 @@ class Termsofuse extends Agent {
      */
     public function makeSMS() {
 
-        $text = ($this->thing_report['sms']);
+        $text = "No SMS response available.";
+        if (isset($this->thing_report['sms'])) {
+            $text = ($this->thing_report['sms']);
+        }
         $shortcode_agent = new Shortcode($this->thing, "shortcode");
         $text = $shortcode_agent->filterShortcode($text);
 
