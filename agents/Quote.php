@@ -220,7 +220,7 @@ class Quote extends Agent
 
     public function infoQuote($text = null)
     {
-        $t = $this->stripQuote($text) . "\n";
+        $t = $this->stripQuotes($text) . "\n";
 
         $r = str_replace(' 	', '/', $t);
 
@@ -495,12 +495,18 @@ class Quote extends Agent
         $this->thing_report['message'] = $message;
     }
 
+    public function stripQuotes($text) {
+        // https://stackoverflow.com/questions/9734758/remove-quotes-from-start-and-end-of-string-in-php/9734805
+        return preg_replace('/^(\'(.*)\'|"(.*)")$/', '$2$3', $text);
+    }
+
     public function stripQuote($text)
     {
-        $t = str_replace($this->quote, "", $text);
-        $t = str_replace('""', '', $t);
+        // TODO - Decide what stripping one quote does.
+        //$t = str_replace($this->quote, "", $text);
+        //$t = str_replace('""', '', $text);
 
-        return $t;
+        return $text;
     }
 
     function makeWeb()
@@ -516,7 +522,7 @@ class Quote extends Agent
         }
 
         if (isset($this->text)) {
-            $web .= "" . $this->stripQuote($this->text);
+            $web .= "" . $this->stripQuotes($this->text);
         }
 
         $web .= "<p>";
@@ -559,6 +565,8 @@ class Quote extends Agent
     public function readSubject()
     {
         $input = strtolower($this->input);
+
+        if ($input == "quote") {return;}
 
         $pieces = explode(" ", strtolower($input));
 

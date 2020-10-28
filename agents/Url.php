@@ -45,6 +45,25 @@ class Url extends Agent
         $this->thing_report['txt'] = "No text retrieved.";
     }
 
+    function cleanUrl($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        // Clean search engine provided link.
+        $tokens = explode("&url=", $text);
+        if (!isset($tokens[1])) {
+            return true;
+        }
+
+        $tokens = explode("&usg=", $tokens[1]);
+
+        $url = $tokens[0];
+
+        return $url;
+    }
+
     function makeWeb()
     {
         $this->getUrls();
@@ -230,6 +249,7 @@ class Url extends Agent
                 unset($urls[$i]);
             }
         }
+        $urls = array_values($urls);
         return $urls;
     }
 
@@ -253,28 +273,6 @@ class Url extends Agent
         if ($text == null) {
             return true;
         }
-
-        $text = str_replace('url is', '', $text);
-        $text = str_replace('url', '', $text);
-        $text = trim($text);
-        // https://stackoverflow.com/questions/36564293/extract-urls-from-a-string-using-php
-        $pattern =
-            '#\b(https://)?([^\s()<>]+)?(?:\([\w\d]+\)|([^[:punct:]\s]|/))#';
-
-        // https://stackoverflow.com/questions/6427530/regular-expression-pattern-to-match-url-with-or-without-http-www
-        $regex = '((https?|ftp)://)?';
-        $regex .= '([a-z0-9+!*(),;?&=$_.-]+(:[a-z0-9+!*(),;?&=$_.-]+)?@)?';
-        $regex .=
-            "([a-z0-9\-\.]*)\.(([a-z]{2,4})|([0-9]{1,3}\.([0-9]{1,3})\.([0-9]{1,3})))";
-        $regex .= '(:[0-9]{2,5})?';
-        $regex .= '(/([a-z0-9+$_%-]\.?)+)*/?';
-        $regex .= '(\?[a-z+&\$_.-][a-z0-9;:@&%=+/$_.-]*)?';
-        $regex .= '(#[a-z_.-][a-z0-9+$%_.-]*)?';
-
-        $pattern = "#" . $regex . "#";
-
-        $pattern =
-            '/^(http|https)?:\/\/|(www\.)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/';
 
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
@@ -346,14 +344,6 @@ class Url extends Agent
         $this->num_hits = 0;
 
         $input = $this->input;
-        /*
-        //$input = $this->assert($this->input);
-        $input = $this->subject;
-        if ((isset($this->agent_input)) and ($this->agent_input != "")) {
-            $input = $this->agent_input;
-        }
-*/
-        //$input = $this->assert($this->input);
 
         $string = $input;
         $str_pattern = 'url';
@@ -368,6 +358,8 @@ class Url extends Agent
                 strlen($str_pattern)
             );
         }
+        $quote_agent = new Quote($this->thing, "quote");
+        $filtered_input = $quote_agent->stripQuotes($filtered_input);
 
         $input_input = trim($filtered_input);
 
@@ -376,11 +368,10 @@ class Url extends Agent
             return;
         }
 
-        $this->url = $input;
-
         // Get urls from string
-        $this->urls = $this->extractUrls($input);
+        $this->urls = $this->extractUrls($input_input);
         $this->url = "X";
+
         if (isset($this->urls[0])) {
             $this->url = $this->urls[0];
         }
@@ -397,6 +388,16 @@ class Url extends Agent
                 return;
             }
         }
+
+        if (
+            stripos($input, "https://www.google.com/url?") !== false and
+            stripos($input, "clean") !== false
+        ) {
+            $this->url = $this->cleanUrl($this->url);
+            $this->url = urldecode($this->url);
+            return;
+        }
+
         return;
     }
 }
