@@ -476,8 +476,10 @@ class Quote extends Agent
 
         $this->message['text'] = $text;
 
-        $this->quote_text = trim($this->message['quote'], "//");
-
+        $this->quote_text = "No quote found.";
+        if (isset($this->message['quote'])) {
+            $this->quote_text = trim($this->message['quote'], "//");
+        }
         $this->text = trim($this->message['text'], "//");
 
         $this->short_message = "" . $this->quote_text . "\n";
