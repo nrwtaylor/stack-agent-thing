@@ -4,6 +4,13 @@ namespace Nrwtaylor\StackAgentThing;
 // TODO
 // http://www.lightandmatter.com/when/when.html
 // Determine stack when response.
+/*
+resources/when/when.txt example
+webcal://cantonbecker.com/astronomy-calendar/astrocal.ics
+https://www.officeholidays.com/ics/canada
+https://www.calendarlabs.com/ical-calendar/ics/39/Canada_Holidays.ics
+examplename
+*/
 
 class When extends Agent
 {
@@ -14,8 +21,8 @@ class When extends Agent
         $this->initWhen();
     }
 
-    public function initWhen() {
-
+    public function initWhen()
+    {
         $this->preferences_location = null;
         if (
             isset(
@@ -26,17 +33,46 @@ class When extends Agent
                 $this->thing->container['api']['when']['preferences_location'];
         }
 
-
         $this->calendar_location = null;
         if (
-            isset(
-                $this->thing->container['api']['when']['calendar_location']
-            )
+            isset($this->thing->container['api']['when']['calendar_location'])
         ) {
-            $this->calendar_location = 
+            $this->calendar_location =
                 $this->thing->container['api']['when']['calendar_location'];
         }
 
+        $this->calendar_list = null;
+        $file = $this->resource_path . 'when/when.txt';
+
+        if (file_exists($file)) {
+            $handle = fopen($file, "r");
+
+            if ($handle) {
+                while (($line = fgets($handle)) !== false) {
+                    if (substr($line, 0, 1) == "#") {
+                        continue;
+                    }
+
+                    $tokens = explode(",", $line);
+                    $ics_link = trim($line);
+                    $name = null;
+                    if (count($tokens) == 2) {
+                        $name = trim($tokens[0]);
+                        $ics_link = trim($tokens[1]);
+                    }
+
+                    //$ics_link = trim($line);
+                    $calendar = ["ics_link" => $ics_link, "name" => $name];
+                    $this->calendar_list[] = $calendar;
+                }
+                fclose($handle);
+            } else {
+                // error opening the file.
+            }
+        }
+
+        $this->calendar_agent = new Calendar($this->thing, "calendar");
+        $this->calendar_agent->span = 10;
         $this->calendar_contents = file_get_contents($this->calendar_location);
     }
 
@@ -45,11 +81,109 @@ class When extends Agent
         $this->doWhen();
     }
 
+    public function calendarWhen($text = null, $name = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+        //$this->calendar_agent->events = [];
+        $this->calendar_agent->readCalendar($text, $name);
+        //echo $text ." ";
+        //echo count($this->calendar_agent->events) . "\n";
+        return $this->calendar_agent->events;
+    }
+
+    public function dateWhen($text)
+    {
+        //https://stackoverflow.com/questions/2167916/convert-one-date-format-into-another-in-php
+        // Format the date as When expects it.
+        $date = new \DateTime($text);
+        $response = $date->format('Y M d');
+        return $response;
+    }
+
+    public function timeWhen($text)
+    {
+        $date = new \DateTime($text);
+        $response = $date->format('H:i');
+        return $response;
+    }
+    public function runtimeWhen($start, $end)
+    {
+        $runtime = strtotime($end) - strtotime($start);
+        if ($runtime == 0) {
+            return "";
+        }
+        if ($runtime < 0) {
+            return "";
+        } // Apparenly also a possibility :|
+
+        $runtime_text = $this->thing->human_time($runtime);
+
+        return $runtime_text;
+    }
+
+    public function textWhen($event)
+    {
+        $time_agent = new Time($this->thing, "time");
+
+        $runtime_text = $this->runtimeWhen($event->dtstart, $event->dtend);
+
+        if ($runtime_text != "") {
+            $runtime_text = '[' . $runtime_text . ']';
+        }
+
+        $summary_text = $event->summary;
+        if (
+            strtolower($event->summary) == "busy" or
+            strtolower($event->summary) == "available"
+        ) {
+            if (isset($event->calendar_name)) {
+                $summary_text = $event->summary . ' - ' . $event->calendar_name;
+            }
+        }
+
+        $when_text .=
+            $this->dateWhen($event->dtstart) .
+            ", " .
+            $this->timeWhen($event->dtstart) .
+            //" " .
+            //$this->runtimeWhen($event->dtstart, $event->dtend) .
+            " " .
+            $summary_text .
+            " " .
+            $runtime_text;
+        //" " .
+        //$event->description .
+        //" " .
+        //$event->location .
+        //var_dump($when_text);
+        return $when_text;
+    }
+
     public function doWhen()
     {
-        if (isset($this->file) and is_string($this->file)) {
-            $this->readWhen($this->file);
+        //        if (isset($this->file) and is_string($this->file)) {
+        $events = [];
+        foreach ($this->calendar_list as $i => $calendar) {
+            //$ics_link = $calendar['ics_link'];
+
+            $ics_links = $this->calendar_agent->icslinksCalendar(
+                $calendar['ics_link']
+            );
+            foreach ($ics_links as $j => $ics_link) {
+                $new_events = $this->calendarWhen($ics_link, $calendar['name']);
+                //$events = array_merge($events, $new_events);
+            }
         }
+
+        $events = $this->calendar_agent->events;
+
+        $txt = "";
+        foreach ($events as $i => $event) {
+            $txt .= $this->textWhen($event) . "\n";
+        }
+        $this->when_text = $txt;
 
         if ($this->agent_input == null) {
             $this->when_message = $this->when_text; // mewsage?
@@ -65,9 +199,7 @@ class When extends Agent
         $this->thing_report["info"] = "This is supportive of calendar.";
         $this->thing_report["help"] = "This is about seeing Events.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
-        //$this->thing_report['txt'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
@@ -103,17 +235,16 @@ class When extends Agent
 
     function makeSMS()
     {
-        $this->sms_message =
-            "WHEN " . $this->response;
+        $this->sms_message = "WHEN " . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
     }
 
-    public function makeTXT() {
-
+    public function makeTXT()
+    {
         $text = $this->calendar_contents;
+        $text .= $this->when_text;
         $this->txt = $text;
         $this->thing_report['txt'] = $text;
-
     }
 
     function makeChoices()
@@ -124,7 +255,9 @@ class When extends Agent
 
     public function readWhen($file)
     {
-        if ($file == "") {return true;}
+        if ($file == "") {
+            return true;
+        }
         $contents = file_get_contents($file);
         // TODO - Read When file.
     }

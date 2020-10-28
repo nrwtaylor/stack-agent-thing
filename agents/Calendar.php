@@ -9,6 +9,19 @@ class Calendar extends Agent
 
     function init()
     {
+        $this->default_span = 2; // Default value
+        $this->span = $this->default_span;
+        $this->default_timezone = 'UTC';
+
+        $this->googlecalendar_agent = new Googlecalendar(
+            $this->thing,
+            "googlecalendar"
+        );
+
+        $this->alphanumeric_agent = new Alphanumeric(
+            $this->thing,
+            "alphanumeric"
+        );
     }
 
     function run()
@@ -163,12 +176,12 @@ class Calendar extends Agent
         return $event;
     }
 
-    public function readCalendar($file)
+    public function readCalendar($file, $calendar_name = null)
     {
         try {
             $ical = new ICal($file, [
-                'defaultSpan' => 2, // Default value
-                'defaultTimeZone' => 'UTC',
+                'defaultSpan' => $this->default_span, // Default value
+                'defaultTimeZone' => $this->default_timezone,
                 'defaultWeekStart' => 'MO', // Default value
                 'disableCharacterReplacement' => false, // Default value
                 'filterDaysAfter' => null, // Default value
@@ -181,14 +194,17 @@ class Calendar extends Agent
             $this->response .= "Could not read calendar " . $file . ". ";
             return true;
         }
-
         $events = $ical->eventsFromInterval('1 week');
+        //var_dump($events);
         if (!isset($this->events)) {
             $this->events = [];
         }
 
         foreach ($events as $event) {
-            $this->events[] = $this->eventCalendar($event);
+            $e = $this->eventCalendar($event);
+            $e->calendar_name = $calendar_name;
+            //            $this->events[] = $this->eventCalendar($event);
+            $this->events[] = $e;
         }
 
         // Sort events list by start time.
@@ -216,8 +232,84 @@ class Calendar extends Agent
         $this->calendar_text = $calendar_text;
     }
 
+    public function icslinksCalendar($token)
+    {
+        if (strtolower(substr($token, -4)) == '.ics') {
+            $ics_links[] = $token;
+            return $ics_links;
+
+            //                continue;
+        }
+
+        // See if Googlecalendar recognizes this.
+
+        $addresses = $this->googlecalendar_agent->addressesGooglecalendar(
+            $token
+        );
+
+        if ($addresses !== false) {
+            foreach ($addresses as $i => $address) {
+                //var_dump($address);
+                $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
+                    $address
+                );
+                if ($ics_link !== true) {
+                    $ics_links[] = $ics_link;
+                }
+            }
+            return $ics_links;
+
+            //                continue;
+        }
+
+        $ics_link = $this->googlecalendar_agent->icsGooglecalendar($token);
+
+        if ($ics_link !== true) {
+            $ics_links[] = $ics_link;
+            //                continue;
+            return $ics_links;
+        }
+
+        // Some ics links don't end in .ics
+        // TODO Test
+        if (strtolower(substr($token, 0, 9)) == "webcal://") {
+            $ics_links[] = $token;
+            return $ics_links;
+
+            //                continue;
+        }
+
+        // Assume alphanumeric tokens are calls for @gmail addresses.
+        // For now.
+        // TODO: Explode Apple and Microsoft calendaring.
+        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
+        if ($alphanumeric_agent->isAlphanumeric($token)) {
+            $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
+                $token . "@gmail.com"
+            );
+            if ($ics_link !== true) {
+                $ics_links[] = $ics_link;
+                return $ics_links;
+
+                //                    continue;
+            }
+        }
+        $ics_links[] = $token;
+
+        // And some don't have anything distinctive.
+        // https://www.officeholidays.com/ics/canada/british-columbia
+        // Can not rely on the link having ics in it.
+        // TODO Identify and store non ics links.
+        // For now add to the list to try and read it as a calendar.
+        return $ics_links;
+    }
+
     public function readSubject()
     {
+        if (strtolower($this->agent_input) == 'calendar') {
+            return;
+        }
+
         $input = $this->subject;
         if (isset($this->agent_input) and $this->agent_input != "") {
             $input = $this->agent_input;
@@ -249,11 +341,12 @@ class Calendar extends Agent
         $tokens = explode(" ", $filtered_input);
         $ics_links = [];
         // See if Googlecalendar recognizes this.
-        $googlecalendar_agent = new Googlecalendar(
-            $this->thing,
-            "googlecalendar"
-        );
+        //        $this->googlecalendar_agent = new Googlecalendar(
+        //            $this->thing,
+        //            "googlecalendar"
+        //        );
         foreach ($tokens as $i => $token) {
+            /*
             if (strtolower(substr($token, -4)) == '.ics') {
                 $ics_links[] = $token;
                 continue;
@@ -313,7 +406,10 @@ class Calendar extends Agent
             // Can not rely on the link having ics in it.
             // TODO Identify and store non ics links.
             // For now add to the list to try and read it as a calendar.
-            $ics_links[] = $token;
+*/
+            $new_ics_links = $this->icslinksCalendar($token);
+            $ics_links = array_merge($ics_links, $new_ics_links);
+            // $ics_links[] = $token;
         }
 
         $this->ics_links = array_unique($ics_links);
