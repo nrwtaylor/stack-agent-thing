@@ -11,7 +11,13 @@ class Calendar extends Agent
     {
         $this->default_span = 2; // Default value
         $this->span = $this->default_span;
-        $this->default_timezone = 'UTC';
+        $this->default_time_zone = 'UTC';
+
+        $this->time_zone = $this->default_time_zone;
+        $time_agent = new Time($this->thing, "time");
+        if (is_string($time_agent->time_zone)) {
+            $this->time_zone = $time_agent->time_zone;
+        }
 
         $this->googlecalendar_agent = new Googlecalendar(
             $this->thing,
@@ -181,7 +187,7 @@ class Calendar extends Agent
         try {
             $ical = new ICal($file, [
                 'defaultSpan' => $this->default_span, // Default value
-                'defaultTimeZone' => $this->default_timezone,
+                'defaultTimeZone' => $this->time_zone,
                 'defaultWeekStart' => 'MO', // Default value
                 'disableCharacterReplacement' => false, // Default value
                 'filterDaysAfter' => null, // Default value

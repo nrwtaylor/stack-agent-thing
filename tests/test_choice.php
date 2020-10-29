@@ -48,8 +48,6 @@ if(!array_diff($choices, $expected_result) && !array_diff($expected_result, $cho
 
 	}
 
-
-
 echo "Test Load<br>";
 
 $choice_thing_uuid = $thing->choice->makeChoice("decision");

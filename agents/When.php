@@ -74,6 +74,10 @@ class When extends Agent
         $this->calendar_agent = new Calendar($this->thing, "calendar");
         $this->calendar_agent->span = 10;
         $this->calendar_contents = file_get_contents($this->calendar_location);
+
+        // Pull in the stack timezone.
+        $this->time_agent = new Time($this->thing, "time");
+        $this->time_zone = $this->time_agent->time_zone;
     }
 
     function run()
@@ -97,15 +101,23 @@ class When extends Agent
     {
         //https://stackoverflow.com/questions/2167916/convert-one-date-format-into-another-in-php
         // Format the date as When expects it.
+        // $date = new \DateTime($text, new \DateTimeZone($this->time_zone));
+        // Events from ICal parser should have timezone applied.
+        // TODO: Test
         $date = new \DateTime($text);
+
         $response = $date->format('Y M d');
         return $response;
     }
 
     public function timeWhen($text)
     {
+        // Events from ICal parser should have timezone applied.
+        // TODO: Test
         $date = new \DateTime($text);
+        //$date = new \DateTime($text, new \DateTimeZone($this->time_zone));
         $response = $date->format('H:i');
+
         return $response;
     }
     public function runtimeWhen($start, $end)
@@ -144,20 +156,16 @@ class When extends Agent
         }
 
         $when_text .=
-            $this->dateWhen($event->dtstart) .
+            $this->dateWhen($event->dtstart_tz) .
             ", " .
-            $this->timeWhen($event->dtstart) .
+            $this->timeWhen($event->dtstart_tz) .
             //" " .
             //$this->runtimeWhen($event->dtstart, $event->dtend) .
             " " .
             $summary_text .
             " " .
             $runtime_text;
-        //" " .
-        //$event->description .
-        //" " .
-        //$event->location .
-        //var_dump($when_text);
+
         return $when_text;
     }
 
@@ -190,6 +198,9 @@ class When extends Agent
         } else {
             $this->when_message = $this->agent_input;
         }
+
+        $count = count($this->calendar_agent->events);
+        $this->response .= "Got " . $count . " events. ";
     }
 
     public function respondResponse()
@@ -235,8 +246,14 @@ class When extends Agent
 
     function makeSMS()
     {
-        $this->sms_message = "WHEN " . $this->response;
-        $this->thing_report['sms'] = $this->sms_message;
+        $sms = "WHEN";
+        if ($this->response != "") {
+            $sms .= " | " . $this->response;
+        }
+        $sms .= "Text TXT. Or WEB.";
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     public function makeTXT()
