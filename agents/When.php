@@ -139,7 +139,7 @@ class When extends Agent
     {
         $time_agent = new Time($this->thing, "time");
 
-        $runtime_text = $this->runtimeWhen($event->dtstart, $event->dtend);
+        $runtime_text = $this->runtimeWhen($event->dtstart_tz, $event->dtend_tz);
 
         if ($runtime_text != "") {
             $runtime_text = '[' . $runtime_text . ']';
@@ -228,9 +228,9 @@ class When extends Agent
             foreach ($this->events as $event) {
                 $web .=
                     '<div>' .
-                    $time_agent->textTime($event->dtstart) .
+                    $time_agent->textTime($event->dtstart_tz) .
                     " " .
-                    $time_agent->textTime($event->dtend) .
+                    $time_agent->textTime($event->dtend_tz) .
                     " " .
                     $event->summary .
                     " " .

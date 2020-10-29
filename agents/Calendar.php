@@ -75,9 +75,9 @@ class Calendar extends Agent
             foreach ($this->events as $event) {
                 $web .=
                     '<div>' .
-                    $time_agent->textTime($event->dtstart) .
+                    $time_agent->textTime($event->dtstart_tz) .
                     " " .
-                    $time_agent->textTime($event->dtend) .
+                    $time_agent->textTime($event->dtend_tz) .
                     " " .
                     $event->summary .
                     " " .
@@ -100,11 +100,11 @@ class Calendar extends Agent
             $calendar_text = "";
             foreach ($this->events as $event) {
                 $runtime = $this->thing->human_time(
-                    strtotime($event->dtend) - strtotime($event->dtstart)
+                    strtotime($event->dtend_tz) - strtotime($event->dtstart_tz)
                 );
 
                 $calendar_text .=
-                    $time_agent->textTime($event->dtstart) .
+                    $time_agent->textTime($event->dtstart_tz) .
                     " " .
                     $runtime .
                     " " .
@@ -120,11 +120,11 @@ class Calendar extends Agent
                 $calendar_text = "";
                 foreach ($this->events as $event) {
                     $runtime = $this->thing->human_time(
-                        strtotime($event->dtend) - strtotime($event->dtstart)
+                        strtotime($event->dtend) - strtotime($event->dtstart_tz)
                     );
 
                     $calendar_text .=
-                        $time_agent->textTime($event->dtstart) .
+                        $time_agent->textTime($event->dtstart_tz) .
                         " " .
                         $runtime .
                         " " .
@@ -148,9 +148,9 @@ class Calendar extends Agent
             $calendar_text = "";
             foreach ($this->events as $event) {
                 $calendar_text .=
-                    $time_agent->textTime($event->dtstart) .
+                    $time_agent->textTime($event->dtstart_tz) .
                     " " .
-                    $time_agent->textTime($event->dtend) .
+                    $time_agent->textTime($event->dtend_tz) .
                     " " .
                     $event->summary .
                     " " .
@@ -216,7 +216,7 @@ class Calendar extends Agent
         // Sort events list by start time.
         // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
         usort($this->events, function ($first, $second) {
-            return strtotime($first->dtstart) > strtotime($second->dtstart);
+            return strtotime($first->dtstart_tz) > strtotime($second->dtstart_tz);
         });
 
         $time_agent = new Time($this->thing, "time");
@@ -226,9 +226,9 @@ class Calendar extends Agent
             $calendar_text .=
                 $event->summary .
                 " " .
-                $time_agent->textTime($event->dtstart) .
+                $time_agent->textTime($event->dtstart_tz) .
                 " " .
-                $time_agent->textTime($event->dtend) .
+                $time_agent->textTime($event->dtend_tz) .
                 " " .
                 $event->description .
                 " " .
