@@ -40,15 +40,34 @@ class Event extends Agent
         $this->test = "Development code"; // Always iterative.
     }
 
-    public function readEvent($text) {
+    public function readEvent($text= null) {
+
+        // TODO Read event and extract when, place and runtime.
+        if ($text == null) {return null;}
+
+        // When format
+        // date or config string, comma, text
+        $tokens = explode(",", $text);
+        if (count($tokens) == 2) {
+            // Possibly a when structured event.
+            $when_agent = new When($this->thing, "when");
+            $when = $when_agent->extractWhen($text);
+//            var_dump($when['date']);
+//            var_dump($when['time']);
+//            var_dump($when['description']);
+            $event = $when;
+            $event['location'] = null;
+            return $event;
+        }
 
         $this->place_agent = new Place($this->thing, "place");
         $this->at_agent = new At($this->thing, "at");
 
         $this->place_agent->extractPlace($text);
-var_dump($this->place_agent->place_names);
+//var_dump($this->place_agent->place_names);
+
         $this->at_agent->extractAt($text);
-var_dump($this->at_agent->day. " " . $this->at_agent->minute . " " . $this->at_agent->seconds);
+//var_dump($this->at_agent->day. " " . $this->at_agent->minute . " " . $this->at_agent->seconds);
 
     }
 

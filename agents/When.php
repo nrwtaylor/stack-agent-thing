@@ -169,6 +169,7 @@ class When extends Agent
         return $when_text;
     }
 
+
     public function doWhen()
     {
         //        if (isset($this->file) and is_string($this->file)) {
@@ -268,6 +269,28 @@ class When extends Agent
     {
         $choices = false;
         $this->thing_report['choices'] = $choices;
+    }
+
+    public function extractWhen($text) {
+
+        $text = str_replace("event","", strtolower($text));
+
+        $tokens = explode(",", $text);
+        if (count($tokens) == 2) {
+            $timedate = trim($tokens[0]);
+            $description = trim($tokens[1]);
+
+        }
+        //$this->when_date = $timedate;
+        //$this->when_time = $timedate;
+
+
+        $when_date = $this->dateWhen($timedate);
+        $when_time = $this->timeWhen($timedate);
+        $when = ['date'=>$when_date, 'time'=>$when_time, 'description'=>$description];
+
+        return $when;
+
     }
 
     public function readWhen($file)
