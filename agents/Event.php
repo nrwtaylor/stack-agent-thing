@@ -10,6 +10,8 @@ ini_set("allow_url_fopen", 1);
 class Event extends Agent
 {
     // This is an event.
+    // TODO
+    // Recognize text with a place and a time. (And optionally a runtime).
 
     public $var = 'hello';
 
@@ -36,6 +38,32 @@ class Event extends Agent
         $this->verbosity = 1;
 
         $this->test = "Development code"; // Always iterative.
+    }
+
+    public function readEvent($text) {
+
+        $this->place_agent = new Place($this->thing, "place");
+        $this->at_agent = new At($this->thing, "at");
+
+        $this->place_agent->extractPlace($text);
+var_dump($this->place_agent->place_names);
+        $this->at_agent->extractAt($text);
+var_dump($this->at_agent->day. " " . $this->at_agent->minute . " " . $this->at_agent->seconds);
+
+    }
+
+    public function placetimeEvent($event) {
+
+    }
+
+    public function textEvent($event) {
+
+    }
+
+    public function loadEvents() {
+
+        // Events
+
     }
 
     function set()
@@ -797,13 +825,13 @@ $web .= "<br>";
 
         $this->thing_report['web'] = $web;
     }
-
+/*
     function readEvent()
     {
         $this->thing->log("read");
 
     }
-
+*/
     function addEvent()
     {
         $this->get();
@@ -1036,6 +1064,8 @@ $web .= "<br>";
 */
 
 $input = $this->input;
+
+$this->readEvent($input);
 
         // Haystack doesn't work well here because we want to run the extraction on the cleanest signal.
         // Think about this.
