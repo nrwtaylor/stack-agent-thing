@@ -277,6 +277,9 @@ class Url extends Agent
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
+        $pattern =
+            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
+
         preg_match_all($pattern, $text, $match);
         if (!isset($urls)) {
             $urls = [];
@@ -286,6 +289,17 @@ class Url extends Agent
         $urls = array_unique($urls);
         // Deal with spaces
         $urls = $this->filterUrls($urls);
+
+        // TODO: Test.
+        foreach ($urls as $i=>$url) {
+
+            if (stripos($url, "&lt;") !== false) {
+
+                $tokens = explode("&lt;", $url);
+                $urls[$i] = rtrim($tokens[1],"&gt");
+            }
+
+        }
 
         return $urls;
     }
