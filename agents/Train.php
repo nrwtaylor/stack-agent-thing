@@ -462,8 +462,6 @@ class Train extends Agent
         // This will include simple 'train'
         // requests too.
         // Think about that.
-        //require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        //$findagent_thing = new Findagent($this->thing, 'train');
 
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to
@@ -935,7 +933,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
             "Dahjeeling Express", "Flying Scotsman", "Gilmore Special", "Rocky Mountaineer",
             "Atlantic","Alouette","The Ambassador","Atlantic Express","Atlantic Limited");
 
-        //require_once '/var/www/html/stackr.ca/agents/alias.php';
         $this->alias_thing = new \Nrwtaylor\StackAgentThing\Alias($this->train_thing, 'alias');
 
         $this->alias = $this->alias_thing->alias;

@@ -606,7 +606,7 @@ class Modo extends Agent
 
         // Load as new event things onto stack
         $thing = new Thing(null);
-        $thing->Create("modo@stackr.ca", "cars", "s/ cars modo " . $modo_id);
+        $thing->Create("modo" . $this->mail_postfix, "cars", "s/ cars modo " . $modo_id);
 
         // make sure the right fields are directly given
         //        new Event($thing, "event is ". $event['name']);

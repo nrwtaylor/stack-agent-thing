@@ -260,7 +260,7 @@ $data_source = "https://api.meetup.com/find/upcoming_events?&sign=true&photo-hos
 
         // Load as new event things onto stack
         $thing = new Thing(null);
-        $thing->Create("meetup@stackr.ca","events", "s/ event meetup " . $eventful_id);
+        $thing->Create("meetup".$this->mail_postfix,"events", "s/ event meetup " . $eventful_id);
 
         // make sure the right fields are directly given
         new Event($thing, "event is ". $event['name']);

@@ -64,7 +64,7 @@ class Shuffleall {
 
         // Getting memory error from db looking
         // up balance for null
-        if ($this->from == "null@stackr.ca") {
+        if ($this->from == "null". $this->mail_postfix) {
             $this->sms_message = "Shuffle All requires an identity.";
 
             return;

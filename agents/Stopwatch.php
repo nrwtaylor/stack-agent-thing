@@ -159,8 +159,6 @@ exit();
         // Read the elapsed time ie 'look at stopwatch'.
 
         // See if a stopwatch record exists.
-        //require_once '/var/www/html/stackr.ca/agents/findagent.php';
-        //$findagent_thing = new FindAgent($this->thing, 'stopwatch');
 
         $things = $this->getThings('stopwatch');
 

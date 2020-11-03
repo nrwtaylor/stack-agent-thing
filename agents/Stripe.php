@@ -185,7 +185,10 @@ class Stripe extends Agent
 
         // Give the success call it's own UUID.
         $thing = new Thing(null);
-        $thing->Create($this->from, "stripe", "stripe-success");
+
+        $to = $this->from;
+        $to = "stripe" . $this->mail_postfix;
+        $thing->Create($to, "stripe", "stripe-success");
         //$thing->associate($this->thing->uuid);
         //$token_agent = new Tokenlimiter($thing, "channel");
 

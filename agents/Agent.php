@@ -1971,13 +1971,39 @@ class Agent
         // See if the string has a pointer to a channel nuuid.
 
         $nuuid = new Nuuid($this->thing, "nuuid");
-        $nuuid->extractNuuid($input);
+        $n = $nuuid->extractNuuid($input);
+
+        // See if this matches a stripe token
+        if ($n != false) {
+            $temp_email = $this->thing->db->from;
+            $this->thing->db->from = "stripe" . $this->mail_postfix;
+
+            $t = $this->thing->db->nuuidSearch($n);
+            $t = $t['things'];
+
+            if (count($t) >= 1) {
+                // At least one valid four character token found.
+                // This is close enought to authorize stack service.
+
+                // Loop through the returned tokens and see which are stripe success tokens.
+                foreach ($t as $t_uuid => $t_thing) {
+                    if ($t_thing['task'] == "stripe-success") {
+                        $success_agent = new Success(
+                            $this->thing,
+                            "channel token recognized"
+                        );
+                        $this->thing_report = $success_agent->thing_report;
+                        return;
+                    }
+                }
+            }
+            // Reset the database email address
+            $this->thing->db->from = $temp_email;
+        }
 
         if (isset($nuuid->nuuid_uuid) and is_string($nuuid->nuuid_uuid)) {
             $thing = new Thing($nuuid->nuuid_uuid);
-
             $f = trim(str_replace($nuuid->nuuid_uuid, "", $input));
-
             $agent = new Agent($thing, $f);
             $this->thing_report = $agent->thing_report;
             return;
