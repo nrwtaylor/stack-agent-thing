@@ -541,6 +541,8 @@ class Stripe extends Agent
 
             $nuuid_agent = new Nuuid($this->thing, "nuuid");
             $this->stripe_web .= $nuuid_agent->html_image;
+            $this->stripe_web .= "<p>";
+            $this->stripe_web .= $this->uuid;
 
             return;
         }
