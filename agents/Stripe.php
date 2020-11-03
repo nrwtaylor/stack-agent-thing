@@ -532,20 +532,31 @@ class Stripe extends Agent
             $this->stripe_web = "Thanks for your payment.";
 
             if (isset($item['text'])) {
+                $token_text = "";
+                if (strtolower($item['title']) == 'channel token') {
+                    $token_text = " " . $this->thing->nuuid;
+                }
                 $this->stripe_web .= " ";
-                $this->stripe_web .= "Enter this " . $item['text'] . " in your text channel. " ;
+                $this->stripe_web .=
+                    "Enter the " .
+                    $item['text'] .
+                    $token_text .
+                    " in your text channel. ";
             }
             if (isset($item['refreshed_at'])) {
                 // $this->stripe_web .= $item['refreshed_at'];
-                $ago = $this->thing->human_time ( time() - strtotime($item['refreshed_at']) );
+                $ago = $this->thing->human_time(
+                    time() - strtotime($item['refreshed_at'])
+                );
                 $this->stripe_web .= " ";
-                $this->stripe_web .= "Created " . $ago ." ago.";
+                $this->stripe_web .= "Created " . $ago . " ago.";
             }
 
-            $nuuid_agent = new Nuuid($this->thing, "nuuid");
-            $this->stripe_web .= $nuuid_agent->html_image;
-            $this->stripe_web .= "<p>";
-            $this->stripe_web .= $this->uuid;
+            if (strtolower($item['title']) == 'channel token') {
+                $nuuid_agent = new Nuuid($this->thing, "nuuid");
+                $this->stripe_web .= $nuuid_agent->html_image;
+                $this->stripe_web .= "<p>";
+            }
 
             return;
         }
@@ -751,7 +762,6 @@ class Stripe extends Agent
 
             $this->item_id = $this->input;
             $this->item_id = $input_slug;
-
         }
 
         $this->state = $this->last_state;
