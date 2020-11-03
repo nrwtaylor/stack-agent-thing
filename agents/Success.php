@@ -50,7 +50,7 @@ class Success extends Agent
     function makeSMS()
     {
         $this->node_list = array("success" => array("success"));
-        $sms = $this->success_message;
+        $sms = "SUCCESS | " . $this->success_message;
 
         $this->sms_message = "" . $sms;
         $this->thing_report['sms'] = $sms;

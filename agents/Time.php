@@ -32,9 +32,32 @@ class Time extends Agent {
         $this->thing_report["info"] = "This connects to an authorative time server.";
         $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
 
-        $this->time_zone = 'America/Vancouver';
+        $this->initTime();
+        //$this->time_zone = 'America/Vancouver';
     }
 
+
+    function initTime() {
+
+        $this->default_time_zone = 'America/Vancouver';
+        if (isset($this->thing->container['api']['time'])) {
+            if (
+                isset(
+                    $this->thing->container['api']['time'][
+                        'default_time_zone'
+                    ]
+                )
+            ) {
+                $this->default_time_zone =
+                    $this->thing->container['api']['time'][
+                        'default_time_zone'
+                    ];
+            }
+        }
+
+        $this->time_zone = $this->default_time_zone;
+
+    }
 
     /**
      *
@@ -94,6 +117,19 @@ class Time extends Agent {
 
     }
 
+    public function timestampTime($datum = null) {
+        if ($datum == null) {
+            if (!isset($this->datum)) {
+                return true;
+            }
+            $datum = $this->datum;
+        }
+        //$time_stamp = "X";
+        //if (!isset($this->datum)) {$this->doTime();}
+        $time_stamp = $datum->format('d/m/Y, H:i:s');
+        return $time_stamp;
+    }
+
     function doTime($text = null) {
         $datum = null;
 
@@ -140,24 +176,24 @@ class Time extends Agent {
      * @return unknown
      */
     public function extractTimezone($text = null) {
-
         if (($text == null) or ($text == "")) {return true;}
+
+        $text = str_replace("time","",$text);
+        $text = trim(str_replace("stamp","",$text));
+
         $OptionsArray = timezone_identifiers_list();
 
         $matches = array();
 
         // Devstack. Librex.
         foreach ($OptionsArray as $i=>$timezone_id) {
-
             if ( (stripos($timezone_id, $text) !== false) or (stripos($timezone_id, str_replace(" ","_",$text)) !== false) ) {
                 $matches[] = $timezone_id;
             }
         }
-
         $match = false;
         if ((isset($matches)) and (count($matches) == 1)) {$match = $matches[0];} else {
             $this->response .= "Could not resolve the timezone. ";}
-
         return $match;
 
     }
@@ -183,3 +219,4 @@ class Time extends Agent {
 
 
 }
+

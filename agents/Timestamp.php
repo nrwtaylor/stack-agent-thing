@@ -35,8 +35,19 @@ class Timestamp extends Agent
 
         $this->timestamp_prefix = "";
 
-        $this->makeTimestamp();
+//        $this->makeTimestamp();
     }
+
+    function timezoneTimestamp($text = null) {
+
+
+    }
+
+function run() {
+        $this->makeTimestamp();
+
+
+}
 
     function makeTimestamp($input = null)
     {
@@ -54,6 +65,21 @@ class Timestamp extends Agent
         $t = strtotime($input_time);
 
         $this->timestamp = $this->current_time;
+
+        $time_agent = new Time($this->thing, "time");
+
+        $time_zone = $time_agent->extractTimezone($this->input);
+
+if (($time_zone  !== false) and ($time_zone !== true)) {
+        $time_agent->time_zone = $time_zone;
+}
+        $this->response .= "Returns the current " . $time_agent->time_zone . " timestamp.";
+
+        $time_agent->doTime();
+
+        $this->default_time_zone = $time_agent->default_time_zone;
+        $this->time_zone = $time_zone;
+        $this->timestamp = $time_agent->timestampTime();
 
         return $this->timestamp;
     }
@@ -126,9 +152,19 @@ class Timestamp extends Agent
             $timestamp = $this->timestamp;
         }
 
-        $m .= $timestamp . "<br>";
+//        $m .= $timestamp;
 
-        $m .= $this->response;
+if ($this->default_time_zone != $this->time_zone) {
+
+        $timestamp .= " " . $this->time_zone;
+
+}
+$timestamp .= "<br>";
+
+        $m .= $timestamp;
+
+
+//        $m .= $this->response;
 
         $this->web_message = $m;
         $this->thing_report['web'] = $m;
@@ -144,6 +180,14 @@ class Timestamp extends Agent
         if ($this->micro_time_flag === true) {
             $timestamp = $this->timestamp;
         }
+
+
+if ($this->default_time_zone != $this->time_zone) {
+
+        $timestamp .= " " . $this->time_zone;
+
+}
+
 
         $sms_message .= " | " . $timestamp;
 
@@ -189,17 +233,29 @@ class Timestamp extends Agent
 
     public function readSubject()
     {
-        $this->response .= "Returns the current timestamp.";
+        //$this->response .= "Returns the current timestamp.";
 
         if ($this->agent_input == "test") {
             $this->test();
             return;
         }
 
+        $input = $this->agent_input;
+        if ($this->agent_input == null or $this->agent_input == "") {
+            $input = $this->subject;
+        }
+
+        if ($this->agent_input == "timestamp") {
+            $input = $this->subject;
+            //} else {
+            //    $input = $this->agent_input;
+        }
+
+
+        $this->input = $input;
         $this->num_hits = 0;
-
         $keywords = $this->keywords;
-
+/*
         if ($this->agent_input != null) {
             // If agent input has been provided then
             // ignore the subject.
@@ -208,8 +264,9 @@ class Timestamp extends Agent
         } else {
             $input = strtolower($this->subject);
         }
-
-        $prior_uuid = null;
+        $this->input = $input;
+*/ 
+       $prior_uuid = null;
 
         if ($this->agent_input == "extract") {
             return;
@@ -232,8 +289,8 @@ class Timestamp extends Agent
             }
         }
 
-        if ($this->timestamp == "X") {
-        }
+//        if ($this->timestamp == "X") {
+//        }
 
         return "Message not understood";
         return false;

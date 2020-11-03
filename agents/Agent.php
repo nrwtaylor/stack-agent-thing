@@ -142,18 +142,17 @@ class Agent
 
         $this->init();
         $this->get();
-try {
-        $this->read();
+        try {
+            $this->read();
 
-        $this->run();
+            $this->run();
 
-        $this->make();
+            $this->make();
 
-        // This is where we deal with insufficient space to serialize the variabes to the stack.
-        //if (!isset($this->signal_thing)) {return true;}
-//        try {
+            // This is where we deal with insufficient space to serialize the variabes to the stack.
+            //if (!isset($this->signal_thing)) {return true;}
+            //        try {
             $this->set();
-
         } catch (\OverflowException $t) {
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
@@ -168,7 +167,6 @@ try {
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
-
             $this->thing_report['sms'] = $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -180,17 +178,16 @@ try {
                     $t->getTraceAsString()
             );
 
-echo $t->getLine(). "---".$t->getFile() . $t->getMessage();
-echo "\n";
+            echo $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            echo "\n";
 
             //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
             //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
             $this->thing->log("caught throwable.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
-
-echo $t->getLine(). "---".$t->getFile() . $t->getMessage();
-echo "\n";
+            echo $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            echo "\n";
 
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -373,9 +370,8 @@ echo "\n";
         $this->makeSMS();
         $this->makeWeb();
 
-
         // Explore adding in INFO and HELP to web response.
-        $dev_agents = ["response", "help", "info", "sms","message"];
+        $dev_agents = ["response", "help", "info", "sms", "message"];
         $prod_agents = ["response", "help", "info"];
 
         $agents = $dev_agents;
@@ -749,7 +745,7 @@ echo "\n";
      */
     public function getMeta($thing = null)
     {
-/*
+        /*
         if ($thing == null) {
             $thing = $this->thing;
         }
@@ -783,7 +779,6 @@ echo "\n";
         }
 */
 
-
         if ($thing == null) {
             $thing = $this->thing;
         }
@@ -812,12 +807,19 @@ echo "\n";
         if (isset($this->thing->thing->created_at)) {
             $this->created_at = strtotime($this->thing->thing->created_at);
         }
-if (!isset($this->to)) {$this->to = "null";}
-if (!isset($this->from)) {$this->from = "null";}
-if (!isset($this->subject)) {$this->subject = "merp";}
-//if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
-if (!isset($this->created_at)) {$this->created_at = time();}
-
+        if (!isset($this->to)) {
+            $this->to = "null";
+        }
+        if (!isset($this->from)) {
+            $this->from = "null";
+        }
+        if (!isset($this->subject)) {
+            $this->subject = "merp";
+        }
+        //if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
+        if (!isset($this->created_at)) {
+            $this->created_at = time();
+        }
     }
 
     public function currentAgent()
@@ -1436,14 +1438,13 @@ if (!isset($this->created_at)) {$this->created_at = time();}
             case strtolower($this->agent_input) == "extract":
             case strtolower($this->agent_input) ==
                 strtolower($this->agent_name):
-//                $this->input = strtolower($text);
+                //                $this->input = strtolower($text);
                 $this->input = $text;
 
                 break;
             default:
-//                $this->input = strtolower($this->agent_input);
+                //                $this->input = strtolower($this->agent_input);
                 $this->input = $this->agent_input;
-
         }
 
         $this->thing->log('read "' . $this->subject . '".');
@@ -1461,16 +1462,13 @@ if (!isset($this->created_at)) {$this->created_at = time();}
             $from = text;
         }
 
-
         $deny_agent = new Deny($this->thing, "deny");
-        
+
         if ($deny_agent->isDeny() === true) {
-
-$this->do_not_respond = true;
-//return;
-throw new \Exception("Address not allowed.");
-
-}
+            $this->do_not_respond = true;
+            //return;
+            throw new \Exception("Address not allowed.");
+        }
 
         // Get uuid from incoming datagram.
         // Devstack
@@ -1611,10 +1609,9 @@ throw new \Exception("Address not allowed.");
                 // and looping, or a direct namespace check.
                 $filename = $this->agents_path . $agent_class_name . ".php";
                 if (file_exists($filename)) {
-                    $agent_package = [$agent_class_name=>null];
-//                    $agents[] = $agent_class_name;
+                    $agent_package = [$agent_class_name => null];
+                    //                    $agents[] = $agent_class_name;
                     $agents[] = $agent_package;
-
                 }
 
                 // 2nd way
@@ -1624,10 +1621,9 @@ throw new \Exception("Address not allowed.");
                 // and looping, or a direct namespace check.
                 $filename = $this->agents_path . $agent_class_name . ".php";
                 if (file_exists($filename)) {
-                    $agent_package = [$agent_class_name=>null];
-//                    $agents[] = $agent_class_name;
+                    $agent_package = [$agent_class_name => null];
+                    //                    $agents[] = $agent_class_name;
                     $agents[] = $agent_package;
-
                 }
 
                 $agents_tested[$agent_class_name] = true;
@@ -1639,10 +1635,9 @@ throw new \Exception("Address not allowed.");
                 // and looping, or a direct namespace check.
                 $filename = $this->agents_path . $agent_class_name . ".php";
                 if (file_exists($filename)) {
-                    $agent_package = [$agent_class_name=>null];
-//                    $agents[] = $agent_class_name;
+                    $agent_package = [$agent_class_name => null];
+                    //                    $agents[] = $agent_class_name;
                     $agents[] = $agent_package;
-
                 }
             }
         }
@@ -1657,7 +1652,7 @@ throw new \Exception("Address not allowed.");
         }
 
         $responsive_agents = [];
-        foreach ($agents as $i=>$agent_package) {
+        foreach ($agents as $i => $agent_package) {
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
             // Allow for doing something smarter here with
             // word position and Bayes.  Agent scoring
@@ -1667,10 +1662,9 @@ throw new \Exception("Address not allowed.");
             $agent_class_name = key($agent_package);
 
             $agent_input = null;
-            if(isset($agent_package[$agent_class_name]['agent_input'])) {
-            $agent_input = $agent_package[$agent_class_name]['agent_input'];
+            if (isset($agent_package[$agent_class_name]['agent_input'])) {
+                $agent_input = $agent_package[$agent_class_name]['agent_input'];
             }
-
 
             // Ignore Things for now 19 May 2018 NRWTaylor
             if ($agent_class_name == "Thing") {
@@ -1769,8 +1763,8 @@ throw new \Exception("Address not allowed.");
         }
     }
 
-    public function ngramsText($text = null) {
-
+    public function ngramsText($text = null)
+    {
         // See if there is an agent with the first workd
         $arr = explode(' ', trim($text));
         $agents = [];
@@ -1782,7 +1776,6 @@ throw new \Exception("Address not allowed.");
         $arr = array_merge($arr, $trigrams);
         return $arr;
     }
-
 
     public function extractAgents($input)
     {
@@ -1805,47 +1798,53 @@ throw new \Exception("Address not allowed.");
         // Does this agent have code.
         $this->validateAgents($arr);
 
-// TODO: Build a seperate function.
-// Is there a translation for this command.
-$librex_agent = new Librex($this->thing, "agent/agent");
-$text = "token";
-$this->hits = $librex_agent->getHits($text);
+        $uuid_agent = new Uuid($this->thing, "uuid");
+        //$t = $uuid_agent->stripUuids($input);
+        // TODO: Build a seperate function.
+        // Is there a translation for this command.
+        $librex_agent = new Librex($this->thing, "agent/agent");
 
-foreach($this->hits as $i=>$hit) {
+        $text = trim(str_replace("agent", "", $input));
+        $text = trim(str_replace("thing", "", $text));
 
-$agent_hit = trim(explode(",",$hit)[0]);
-$agent_input_hit = trim(explode(",",$hit)[1]);
+        $slug_agent = new Slug($this->thing, "slug");
+        $text = $slug_agent->getSlug($text);
 
-// TODO: Consider capitalization format of agent/agent
-// For now use ucwords
-$agent_input_hit = ucwords($agent_input_hit);
+        $uuids = $uuid_agent->extractUuids($text);
+        foreach ($uuids as $i => $uuid) {
+            $text = trim(str_replace($uuid, "", $text));
+        }
+        $text = trim($text, "-");
 
-foreach($arr as $j=>$agent_candidate) {
+        $this->hits = $librex_agent->getHits($text);
 
+        if ($this->hits != null) {
+            foreach ($this->hits as $i => $hit) {
+                $agent_hit = trim(explode(",", $hit)[0]);
+                $agent_input_hit = trim(explode(",", $hit)[1]);
 
-if ((str_replace("-","",$agent_hit)) == $agent_candidate) {
+                // TODO: Consider capitalization format of agent/agent
+                // For now use ucwords
+                $agent_input_hit = ucwords($agent_input_hit);
 
-//echo $agent_hit . " " . $agent_input_hit . "\n";
+                foreach ($arr as $j => $agent_candidate) {
+                    if (str_replace("-", "", $agent_hit) == $agent_candidate) {
+                        //echo $agent_hit . " " . $agent_input_hit . "\n";
 
-$agent_package = [$agent_input_hit=>['agent_input'=>$agent_hit]];
-array_unshift($this->agents, $agent_package);
-
-}
-
-}
-
-}
-
-//$this->replacementsAgent($text);
-
-//array_unshift($this->agents, $agent_package);
-
+                        $agent_package = [
+                            $agent_input_hit => ['agent_input' => $agent_hit],
+                        ];
+                        array_unshift($this->agents, $agent_package);
+                    }
+                }
+            }
+        }
 
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
 
         foreach ($this->responsive_agents as $i => $responsive_agent) {
-          // echo $responsive_agent['agent_name']. " " ;
+            // echo $responsive_agent['agent_name']. " " ;
         }
 
         return;
@@ -1857,8 +1856,6 @@ array_unshift($this->agents, $agent_package);
      */
     public function readSubject()
     {
-//echo "merp 2020-10-07";
-//exit();
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;
@@ -1871,7 +1868,7 @@ array_unshift($this->agents, $agent_package);
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
-/*
+        /*
         $input = strtolower(
             $agent_input_text . " " . $this->to . " " . $this->subject
         );
@@ -1888,7 +1885,6 @@ array_unshift($this->agents, $agent_package);
         } else {
             $input = $agent_input_text;
         }
-
 
         //$input = strtolower($this->input);
 
@@ -1987,7 +1983,6 @@ array_unshift($this->agents, $agent_package);
             return;
         }
 
-
         $uuid = new Uuid($this->thing, "uuid");
         $uuid = $uuid->extractUuid($input);
 
@@ -1996,6 +1991,18 @@ array_unshift($this->agents, $agent_package);
 
             if ($thing->thing != false) {
                 $f = trim(str_replace($uuid, "", $input));
+
+                // TODO: Test
+                // TODO: Explore shorter token recognition.
+                if ($thing->subject == "stripe-success") {
+                    $success_agent = new Success(
+                        $thing,
+                        "channel token recognized"
+                    );
+                    $this->thing_report = $success_agent->thing_report;
+                    return;
+                }
+
                 if ($f == "" or $f == 'agent') {
                     $agent = new Uuid($thing, $f);
                     $this->thing_report = $agent->thing_report;
@@ -2304,7 +2311,7 @@ array_unshift($this->agents, $agent_package);
         $emoji_thing = new Emoji($this->thing, "emoji");
         $this->thing_report = $emoji_thing->thing_report;
         if ($emoji_thing->hasEmoji() === true) {
-        //if ((isset($emoji_thing->emojis)) and ($emoji_thing->emojis != [])) {
+            //if ((isset($emoji_thing->emojis)) and ($emoji_thing->emojis != [])) {
             // Emoji found.
             $input = $emoji_thing->translated_input;
         }
@@ -2510,7 +2517,6 @@ array_unshift($this->agents, $agent_package);
             }
         }
 
-
         // Temporarily alias robots
         if (strpos($input, 'robots') !== false) {
             $this->thing->log(
@@ -2530,11 +2536,8 @@ array_unshift($this->agents, $agent_package);
                 'ms.',
             "OPTIMIZE"
         );
-
         $arr = $this->extractAgents($input);
-
         $this->input = $input;
-
 
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]['thing_report'];
@@ -2633,12 +2636,13 @@ array_unshift($this->agents, $agent_package);
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag
         ) {
-
             $frequency_thing = new Frequency($this->thing);
 
-            if ((isset($frequency_thing->band_matches)) or
-                stripos($input, 'frequency')) {
-            //if ($frequency_thing->response != "") {
+            if (
+                isset($frequency_thing->band_matches) or
+                stripos($input, 'frequency')
+            ) {
+                //if ($frequency_thing->response != "") {
                 //            $ars_thing = new Amateurradioservice($this->thing);
                 $this->thing_report = $frequency_thing->thing_report;
                 return $this->thing_report;
@@ -2980,7 +2984,6 @@ array_unshift($this->agents, $agent_package);
                 }
         }
 
-
         // So if it falls through to here ... then we are really struggling.
 
         // This is going to be the most generic form of matching.
@@ -3019,13 +3022,11 @@ array_unshift($this->agents, $agent_package);
             //exit();
         }
 
-
         // Most useful thing is to acknowledge the url.
         if (count($urls) > 0) {
             $this->thing_report = $url->thing_report;
             return $this->thing_report;
         }
-
 
         return $this->thing_report;
 
@@ -3039,7 +3040,6 @@ array_unshift($this->agents, $agent_package);
         //            $this->thing_report = $chatbot->thing_report;
         //            return $this->thing_report;
         //        }
-
 
         $this->thing->log(
             '<pre> Agent "Agent" created a Redpanda agent.</pre>',

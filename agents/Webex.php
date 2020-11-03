@@ -85,7 +85,11 @@ class Webex extends Agent
             " " .
             $this->host_url;
 
+        $telephone_numbers_text = implode(" ", $this->telephone_numbers);
+
+
         $sms .= $sms_text . " ";
+        $sms .= $telephone_numbers_text . " ";
         $sms .= $this->response;
 
         $this->sms_message = $sms;
@@ -126,7 +130,6 @@ class Webex extends Agent
         if (file_exists($file)) {
             $text = file_get_contents($file);
         }
-
         $this->access_code = $this->accesscodeWebex($text);
         $this->password = $this->passwordWebex($text);
 
@@ -213,6 +216,7 @@ class Webex extends Agent
             $this->thing,
             "telephonenumber"
         );
+
         $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
             $text
         );
