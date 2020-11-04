@@ -155,7 +155,7 @@ class When extends Agent
             }
         }
 
-        $when_text .=
+        $when_text =
             $this->dateWhen($event->dtstart_tz) .
             ", " .
             $this->timeWhen($event->dtstart_tz) .
