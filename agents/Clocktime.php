@@ -144,40 +144,6 @@ class Clocktime
         return;
     }
 
-/*
-    function getVariable($variable_name = null, $variable = null) {
-
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
-
     function getRunat()
     {
 
@@ -229,6 +195,17 @@ class Clocktime
                     if ($this->hour > 12) {$this->hour = "X";}
               }
             }
+
+$pattern = '/\b([0-1]?[0-9]|2[0-3]):[0-5][0-9]\b/';
+
+// TODO Recognize non-colon seperator
+
+preg_match_all($pattern, $input, $m);
+if (count($m[0]) == 1) {
+    $t= explode(":",$m[0][0]);
+    $this->minute = $t[1];
+    $this->hour = $t[0];
+}
 
             // Test for non-recognized edge case
             if (strpos($input, '0000') !== false) {

@@ -162,6 +162,7 @@ class Year extends Agent
      */
     public function makeChoices()
     {
+/*
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
@@ -176,7 +177,8 @@ class Year extends Agent
                 'ms.',
             "OPTIMIZE"
         );
-
+*/
+        $this->choices = false;
         $this->thing_report['choices'] = $this->choices;
     }
 
@@ -221,7 +223,7 @@ class Year extends Agent
         $this->thing_report['message'] = $message;
     }
 
-    public function latticeYear()
+    public function deprecate_latticeYear()
     {
         $lattice_agent = new Lattice($this->thing, "lattice");
 
@@ -307,6 +309,8 @@ class Year extends Agent
      */
     public function initYear()
     {
+        $this->number_agent = new Number($this->thing, "number");
+/*
         if (!isset($this->max)) {
             $this->max = 12;
         }
@@ -316,16 +320,17 @@ class Year extends Agent
         if (!isset($this->lattice_size)) {
             $this->lattice_size = 15;
         }
+*/
+        //$this->initLattice($this->max);
+        //$this->initSegment();
 
-        $this->initLattice($this->max);
-        $this->initSegment();
-
-        $this->setProbability();
-        $this->setRules();
+        //$this->setProbability();
+        //$this->setRules();
     }
 
     public function run()
     {
+/*
         $this->binaryYear($this->decimal_year);
 
         $this->year_points = [];
@@ -348,12 +353,13 @@ class Year extends Agent
                 break;
             }
         }
+*/
     }
 
     /**
      *
      */
-    public function decimalUuid()
+    public function deprecate_decimalUuid()
     {
         $hex = str_replace("-", "", $this->uuid);
 
@@ -841,7 +847,7 @@ class Year extends Agent
     /**
      *
      */
-    public function initLattice()
+    public function deprecate_initLattice()
     {
         $this->thing->log(
             $this->agent_prefix . 'initialized the lattice.',
@@ -1363,11 +1369,11 @@ class Year extends Agent
             'year of our lord',
         ];
 
-        $number_agent = new Number($this->thing, "number");
+        //$number_agent = new Number($this->thing, "number");
 
         foreach ($year_indicators as $year_indicator) {
             if (stripos($text, $year_indicator) !== false) {
-                $number = $number_agent->extractNumber($text);
+                $number = $this->number_agent->extractNumber($text);
                 return $number;
             }
         }
@@ -1433,15 +1439,20 @@ class Year extends Agent
         if ($text == null or $text == "") {
             return true;
         }
-        $ngram_agent = new Ngram($this->thing, "ngram");
+
+if (!isset($this->ngram_agent)) {
+        $this->ngram_agent = new Ngram($this->thing, "ngram");
+}
         $tokens = [];
         foreach (range(0, 4, 1) as $i) {
-            $new_grams = $ngram_agent->getNgrams($text, $i);
+            $new_grams = $this->ngram_agent->extractNgrams($text, $i);
             $tokens = array_merge($tokens, $new_grams);
         }
 
         foreach ($tokens as $i => $token) {
+            if ($token == "") {continue;}
             $response = $this->isYear($token);
+            if ($response === false) {continue;}
 
             if (is_numeric($response)) {
                 // Check if a day has been mis-categorized as a year.
@@ -1456,18 +1467,24 @@ class Year extends Agent
                 $years[] = $year;
             }
         }
-
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-values-from-a-multi-dimensional-array-in-php
         $serialized = array_map('serialize', $years);
         $unique = array_unique($serialized);
         $years = array_intersect_key($years, $unique);
-
         return $years;
     }
 
-    public function extractYear($text = null)
-    {
+    public function extractYear($text = null) {
+        if ($text == null) {
+            return true;
+        }
+        $year = false;
+
+        if (!isset($this->years)) {$years = $this->extractYears($text);}
+        if (count($years) == 1) {$year = $years[0];}
+        return $year;
+
     }
 
     /**
@@ -1476,9 +1493,20 @@ class Year extends Agent
     public function readSubject()
     {
         $this->type = "wedge";
-        $input = strtolower($this->subject);
+//$input = $this->agent_input;
+        $input = $this->agent_input;
+        if ($this->agent_input == "" or $this->agent_input == null) {
+            $input = $this->subject;
+        }
+
+        if ($this->agent_input == "year") {
+            return;
+        }
+
 
         $this->years = $this->extractYears($input);
+        $year = $this->extractYear($input);
+        if ($year != false) {$this->year = $year['year'];$this->era = $year['era'];}
 
         $pieces = explode(" ", strtolower($input));
 

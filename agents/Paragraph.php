@@ -279,7 +279,7 @@ class Paragraph extends Word
     public function readSubject()
     {
         //        $this->translated_input = $this->wordsEmoji($this->subject);
-
+/*
         if ($this->agent_input == null) {
             $input = strtolower($this->subject);
         } else {
@@ -289,6 +289,18 @@ class Paragraph extends Word
                 return;
             }
         }
+*/
+        $input = $this->agent_input;
+        if ($this->agent_input == "" or $this->agent_input == null) {
+            $input = $this->subject;
+        }
+
+        if ($this->agent_input == "paragraph") {
+            return;
+            //$input = $this->subject;
+        }
+
+
 
         // test
         $this->resource_path_paragraphs =

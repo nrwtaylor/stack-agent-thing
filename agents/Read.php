@@ -35,7 +35,6 @@ class Read extends Agent
     function run()
     {
         // Now have this->link potentially from reading subject
-
         $this->matched_sentences = [];
 
         $this->robot_agent = new Robot($this->thing, $this->link);
@@ -81,6 +80,7 @@ class Read extends Agent
                         $this->robot_agent->scheme . '://' . $this->link;
                 } else {
                     return true;
+
                 }
                 // Populate $this->contents
                 $this->getUrl($this->link);
@@ -129,6 +129,9 @@ class Read extends Agent
                     }
                 }
         }
+
+        // Test
+        $this->do_not_cache = false; // False = allow caching
     }
 
     function copyrightRead($html)
@@ -430,21 +433,39 @@ class Read extends Agent
     function cacheRead()
     {
         if ($this->do_not_cache === true) {
+            $this->response .= "Saw do not cache instruction. ";
             return;
         }
 
-        $this->response .= "Cached contents. ";
+        // File cache
+        //if ($uri == null) {$uri = $this->link;} // Has uuid
+        if ($uri == null) {
+            $uri = $this->url;
+        } // Semi-unique
+
+        // TODO Cache as msg0;
+        // TOD Memcache cache
+        $slug_agent = new Slug($this->thing, "slug");
+        $uri_slug = $slug_agent->getSlug($uri);
+        $file = $this->resource_path . 'read/' . $uri_slug;
+
+        file_put_contents($file, $this->contents);
+
+        // Stack cache
+        $this->response .= "Cached contents in file system. ";
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["read"], $this->contents);
+        $this->response .= "Cached contents in stack. ";
     }
 
     function get()
     {
         $this->state = $this->variables_agent->getVariable("state");
         $this->link = $this->variables_agent->getVariable("link");
+
         $this->refreshed_at = $this->variables_agent->getVariables(
             "refreshed_at"
         );
@@ -501,7 +522,6 @@ class Read extends Agent
         set_error_handler(function () {
             /* ignore errors */
         });
-
         $data = @file_get_contents($data_source, false, $context);
 
         restore_error_handler();
@@ -510,21 +530,24 @@ class Read extends Agent
             $this->response .= "No datasource found. ";
             return true;
         }
-
         if (isset($http_response_header[0])) {
             $response_string = $http_response_header[0];
         } else {
+
+
+            if (stripos($data_source,"txt") !== false) {$this->contents = $data; return;}
+
             $this->thing->log('No response code header found.');
             return true;
         }
+
         $parts = explode(' ', $response_string);
         $response_code = null;
         if (isset($parts[1])) {
             $response_code = $parts[1];
         }
         $this->response_code = $response_code;
-        $allowed_response_codes = [301, 302, 200];
-
+        $allowed_response_codes = [301, 302, 200, 307];
         if (
             $data == false or
             !in_array($response_code, $allowed_response_codes)
@@ -550,6 +573,20 @@ class Read extends Agent
             }
         }
         return true;
+    }
+
+    public function googleRead($url = null)
+    {
+        // https://docs.google.com/
+
+        if ($url == null) {
+            return true;
+        }
+
+        // TODO /edit > /export?format=pdf
+        // TODO /edit > /export?format=txt
+
+        return str_replace("/edit", "/export?format=txt", $url);
     }
 
     public function makeChoices()
@@ -601,7 +638,6 @@ class Read extends Agent
 
         if (isset($this->urls) and $this->urls == true) {
         } else {
-            //var_dump($this->urls);
         }
 
         $web .= "<p><b>URLs read</b><br>";
@@ -697,8 +733,17 @@ class Read extends Agent
     {
         //$input = null;
 
-        if ($input == null) {
-            $input = $this->assert($this->input);
+        //if ($input == null) {
+        //    $input = $this->assert($this->input);
+        //}
+
+        $input = $this->agent_input;
+        if ($this->agent_input == "" or $this->agent_input == null) {
+            $input = $this->subject;
+        }
+
+        if ($this->agent_input == "read") {
+            $input = $this->subject;
         }
 
         $pieces = explode(" ", strtolower($input));
@@ -743,9 +788,15 @@ class Read extends Agent
 
         $url_agent = new Url($this->thing, "url");
 
-        $this->url = $url_agent->extractUrl($input);
+        $url = $url_agent->extractUrl($input);
 
+
+        $url = $this->googleRead($url);
+        $this->url = $url;
         $this->link = $this->url;
+
+        // TODO /edit > /export?format=pdf
+        // TODO /edit > /export?format=txt
 
         $input = str_replace($this->url, "", $input);
         $this->search_phrase = trim(strtolower($input));

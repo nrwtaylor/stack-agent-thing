@@ -41,7 +41,9 @@ class Agent
             $this->agent_input = $input;
         }
         if (is_string($input)) {
-            $this->agent_input = strtolower($input);
+            //$this->agent_input = strtolower($input);
+            // TODO Variable configured case sensitive strings 3 November 2020.
+            $this->agent_input = $input;
         }
 
         $this->getName();

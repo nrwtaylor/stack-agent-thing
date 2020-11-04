@@ -52,7 +52,7 @@ public function set() {
 
 //        if ($this->agent_input == null) {$this->respond();}
 
-        if (count($this->ngrams) != 0) {
+        if ((isset($this->ngrams)) and (count($this->ngrams) != 0)) {
             $this->ngram = $this->ngrams[0];
             $this->thing->log($this->agent_prefix . 'completed with a reading of ' . $this->ngram . '.');
 
@@ -91,16 +91,15 @@ public function set() {
      * @param unknown $message (optional)
      */
     function getWords($message=null) {
+
         //        $agent = new \Nrwtaylor\Stackr\Word($this->thing,$this->subject);
         if ($message == null) {$message = $this->subject;}
-        $agent = new Word($this->thing, "word");
+if (!isset($this->word_agent)) {
+        $this->word_agent = new Word($this->thing, "word");
+}
 
-
-        $agent->extractWords($message);
-
-        $this->words = $agent->words;
-
-
+        $this->word_agent->extractWords($message);
+        $this->words = $this->word_agent->words;
     }
 
 
@@ -112,7 +111,7 @@ public function set() {
      * @param unknown $n     (optional)
      * @return unknown
      */
-    function extractNgrams($input = null, $n = 3) {
+    function wordNgrams($input = null, $n = 3) {
 
         if (!isset($this->ngrams)) {$this->ngrams = array();}
         if (!isset($this->words)) {$this->getWords($input);}
@@ -142,6 +141,27 @@ public function set() {
             array_push($this->ngrams, ...$ngrams);
         }
         //        array_merge($this->ngrams, $ngram);
+        return $ngrams;
+    }
+
+    public function extractNgrams($input, $n = 3)
+    {
+        if (is_array($input)) {
+            return true;
+        }
+        $words = explode(' ', $input);
+        $ngrams = array();
+
+        foreach ($words as $key => $value) {
+            if ($key < count($words) - ($n - 1)) {
+                $ngram = "";
+                for ($i = 0; $i < $n; $i++) {
+                    $ngram .= " " . $words[$key + $i];
+                }
+                $ngrams[] = trim($ngram);
+            }
+        }
+        $this->ngrams = $ngrams;
         return $ngrams;
     }
 
@@ -328,6 +348,7 @@ $line = $line[$field];
             $input = $this->agent_input;
         }
 
+        if ($input == "ngram") {return;}
 
         $keywords = array('ngram', 'n-gram');
         $pieces = explode(" ", strtolower($input));
