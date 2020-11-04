@@ -1461,12 +1461,14 @@ class Agent
     {
         $from = $this->from;
         if ($text != null) {
-            $from = text;
+            $from = $text;
         }
 
-        $deny_agent = new Deny($this->thing, "deny");
+        if (!isset($this->thing->deny_agent)) {
+            $this->thing->deny_agent = new Deny($this->thing, "deny");
+        }
 
-        if ($deny_agent->isDeny() === true) {
+        if ($this->thing->deny_agent->isDeny() === true) {
             $this->do_not_respond = true;
             //return;
             throw new \Exception("Address not allowed.");
@@ -1480,7 +1482,6 @@ class Agent
 
         if (isset($uuid) and is_string($uuid)) {
             $thing = new Thing($uuid);
-
             if ($thing->thing != false) {
                 //$this->thing = $thing->thing;
                 $agent = new Agent($thing->thing);
@@ -1844,9 +1845,8 @@ class Agent
 
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
-
         foreach ($this->responsive_agents as $i => $responsive_agent) {
-            // echo $responsive_agent['agent_name']. " " ;
+             //echo $responsive_agent['agent_name']. " " ;
         }
 
         return;

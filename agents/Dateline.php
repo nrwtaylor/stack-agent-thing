@@ -106,7 +106,7 @@ class Dateline extends Agent
     public function doDateline()
     {
         if ($this->agent_input == null) {
-            $array = ['miao', 'miaou', 'hiss', 'prrr', 'grrr'];
+            $array = ['where are you?'];
             $k = array_rand($array);
             $v = $array[$k];
 
@@ -124,7 +124,7 @@ class Dateline extends Agent
 
     function getNegativetime()
     {
-        $agent = new Negativetime($this->thing, "dateline");
+        $agent = new  Negativetime($this->thing, "dateline");
         $this->negative_time = $agent->negative_time; //negative time is asking
     }
 

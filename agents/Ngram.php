@@ -41,14 +41,14 @@ public function get() {
             $this->thing->json->writeVariable( array("ngram", "refreshed_at"), $time_string );
         }
 
-        $this->reading = $this->thing->json->readVariable( array("ngram", "reading") );
+        //$this->reading = $this->thing->json->readVariable( array("ngram", "reading") );
 
 
 }
 
 public function set() {
 
-        $this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
+        //$this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
 
 //        if ($this->agent_input == null) {$this->respond();}
 
@@ -182,40 +182,19 @@ if (!isset($this->word_agent)) {
 
         $this->cost = 100;
 
-        // Thing stuff
-
-
         $this->thing->flagGreen();
 
-        // Compose email
-
-        //  $status = false;//
-        //  $this->response = false;
-
-        //  $this->thing->log( "this reading:" . $this->reading );
-
-
-
-
-        // Make SMS
- //       $this->makeSMS();
- //       $this->thing_report['sms'] = $this->sms_message;
-
-        // Make message
         $this->thing_report['message'] = $this->sms_message;
-
-        // Make email
- //       $this->makeEmail();
 
         $this->thing_report['email'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->reading = count($this->words);
-        $this->thing->json->writeVariable(array("word", "reading"), $this->reading);
+        //$this->reading = count($this->words);
+        //$this->thing->json->writeVariable(array("word", "reading"), $this->reading);
 
-        return $this->thing_report;
+        //return $this->thing_report;
     }
 
 

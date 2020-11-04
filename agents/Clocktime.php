@@ -8,37 +8,15 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Clocktime 
+class Clocktime extends Agent
 {
 
     public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init() 
     {
-        $this->start_time = microtime(true);
-
-        //if ($agent_input == null) {$agent_input = "";}
-
-        $this->agent_input = $agent_input;
-
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->agent_name = "clocktime";
-        $this->agent_prefix = 'Agent "Clocktime" ';
 
         $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.',"INFORMATION");
-
-        // I'm not sure quite what the node_list means yet
-        // in the context of headcodes.
-        // At the moment it seems to be the headcode routing.
-        // Which is leading to me to question whether "is"
-        // or "Place" is the next Agent to code up.  I think
-        // it will be "Is" because you have to define what 
-        // a "Place [is]".
- //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
- //       $this->thing->choice->load('headcode');
 
         $this->keywords = array('now','next', 'accept', 'clear', 'drop','add','new');
 
@@ -46,16 +24,6 @@ class Clocktime
         // Unless you learn headcodes after typing SYNTAX.
 
         $this->current_time = $this->thing->json->time();
-
-		$this->test= "Development code"; // Always iterative.
-
-        // Non-nominal
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        // Potentially nominal
-        $this->subject = $thing->subject;
-        // Treat as nominal
-        $this->from = $thing->from;
 
         // Agent variables
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
@@ -67,23 +35,23 @@ class Clocktime
         //$this->subject = "Let's meet at 10:00";
 
         // Read the subject to determine intent.
-		$this->readSubject();
+//		$this->readSubject();
 
         // Generate a response based on that intent.
         // I think properly capitalized.
         //$this->set();
 
-        if ($this->agent_input == null) {
-		    $this->Respond();
-        }
+//        if ($this->agent_input == null) {
+//		    $this->Respond();
+//        }
 
-        $this->set();
+//        $this->set();
 
-        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
+//        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
 
-        $this->thing_report['log'] = $this->thing->log;
+//        $this->thing_report['log'] = $this->thing->log;
 
-		return;
+//		return;
     }
 
     function makeClocktime($input = null)
@@ -196,15 +164,24 @@ class Clocktime
               }
             }
 
-$pattern = '/\b([0-1]?[0-9]|2[0-3]):[0-5][0-9]\b/';
+
+$pattern = '/([0-1]?[0-9]|2[0-3])[:][0-5][0-9]/';
 
 // TODO Recognize non-colon seperator
+// TODO Recognize seconds
 
 preg_match_all($pattern, $input, $m);
-if (count($m[0]) == 1) {
+
+if (count($m[0]) != 0) {
+
+// TODO Recognize multiple times in a string
+//var_dump($input);
+//var_dump($m[0]);
+
     $t= explode(":",$m[0][0]);
     $this->minute = $t[1];
     $this->hour = $t[0];
+
 }
 
             // Test for non-recognized edge case
@@ -219,11 +196,11 @@ if (count($m[0]) == 1) {
         return array($this->hour, $this->minute);
     }
 
-    function read()
-    {
+//    function read()
+//    {
 //        $this->thing->log("read");
-        return;
-    }
+//        return;
+//    }
 
     function makeTXT() {
         $txt = $this->sms_message;
@@ -267,7 +244,7 @@ if (count($m[0]) == 1) {
         $this->thing_report['sms'] = $sms_message;
     }
 
-	private function Respond()
+	public function respondResponse()
     {
 		// Thing actions
 
@@ -275,8 +252,8 @@ if (count($m[0]) == 1) {
 
 		// Generate email response.
 
-		$to = $this->thing->from;
-		$from = "clocktime";
+		//$to = $this->thing->from;
+		//$from = "clocktime";
 
 
 		//$choices = $this->thing->choice->makeLinks($this->state);
@@ -285,7 +262,7 @@ if (count($m[0]) == 1) {
 
         //$this->makeTXT();
 
-        $this->makeSMS();
+        //$this->makeSMS();
 
 	    $this->thing_report['email'] = $this->sms_message;
 		$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -297,8 +274,8 @@ if (count($m[0]) == 1) {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
 
-        $this->makeTXT();
-        $this->makeweb();
+        //$this->makeTXT();
+        //$this->makeweb();
 
         $this->thing_report['help'] = 'This is a clocktime.  Extracting clock times from strings.';
 
@@ -320,12 +297,26 @@ if (count($m[0]) == 1) {
 
     public function readSubject()
     {
-        if ($this->agent_input == "test") {$this->test(); return;}
+        $input = strtolower($this->subject);
+        if ($this->agent_input != null) {
+            $input = $this->agent_input;
+        }
+
+        if ($input == "clocktime") {
+            return;
+        }
+        if ($input == "clocktime  test") {
+            $this->test();
+        }
+
+
+
+        //if ($this->agent_input == "test") {$this->test(); return;}
 
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
-
+/*
         if ($this->agent_input != null) {
             // If agent input has been provided then
             // ignore the subject.
@@ -335,7 +326,7 @@ if (count($m[0]) == 1) {
         } else {
             $input = strtolower($this->subject);
         }
-
+*/
         $prior_uuid = null;
 
         // Is there a clocktime in the provided datagram
@@ -347,7 +338,7 @@ if (count($m[0]) == 1) {
 
      if (count($pieces) == 1) {
             if ($input == 'clocktime') {
-                $this->get();
+//                $this->get();
                 $this->response = "Last 'clocktime' retrieved.";
                 return;
             }
@@ -372,7 +363,7 @@ if (count($m[0]) == 1) {
         }
 
         if (($this->minute == "X") and ($this->hour == "X")) {
-            $this->get();
+//            $this->get();
             $this->response = "Last clocktime retrieved.";
         }
 /*

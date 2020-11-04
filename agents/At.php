@@ -239,7 +239,7 @@ class At extends Agent
     function extractAt($input = null)
     {
         $this->parsed_date = date_parse($input);
-
+//var_dump($this->parsed_date);
         $month = $this->parsed_date['month'];
         $this->month = $month;
 
@@ -250,7 +250,6 @@ class At extends Agent
         $this->day_number = $day_number;
 
         $day_code = $this->extractDay($input);
-
         $day = "X";
         $allowed_day_codes = [
             'Z',
@@ -272,6 +271,20 @@ class At extends Agent
             $this->extractNumbers($input);
         }
         $this->extractNumbers($input);
+
+// handle June 2000.
+// parse_date will give a day_number of 1 for this string.
+if ($this->day_number == 1) {
+$flag = false;
+foreach($this->numbers as $i=>$number) {
+
+if ($number == $this->day_number) {$flag = true; break;}
+
+}
+
+if ($flag == false) {$this->day_number = false;}
+}
+
 
         if (isset($this->numbers) and count($this->numbers) == 0) {
         } elseif (count($this->numbers) == 1) {
@@ -325,14 +338,13 @@ class At extends Agent
         $this->hour = $hour;
 
 // TODO Refactor code above and directly below.
- $clocktime_agent = new Clocktime($this->thing,"clocktime");
+$clocktime_agent = new Clocktime($this->thing,"clocktime");
 $t = $clocktime_agent->extractClocktime($input);
 if ($t == null) {$this->minute = false; $this->hour = false;} else {
 
 // TODO
 $this->hour = $t[0];
 $this->minute = $t[1];
-//var_dump($t);
 
 
 }
@@ -351,13 +363,10 @@ $this->minute = $t[1];
             $this->year = $year;
         }
 
+
         // Resolve the situtation where minutes:hours is resolved as the year.
-
-        if (($this->hour.$this->minute == $this->year) and ($this->year!==false)) {
-
-// TODO: Dev case "1919 19:19"
-
-//var_dump($this->year);
+        if (($this->hour.str_pad($this->minute,2,"0",STR_PAD_LEFT) == $this->year) and ($this->year!==false)) {
+// TODO: Dev case "1919 19:19" and similar
 $this->minute = false;
 $this->hour = false;
         }
@@ -434,16 +443,17 @@ $this->hour = false;
      */
     function extractDay($input = null)
     {
+// TODO Refactor as Day class.
         $day = "X";
         $day_evidence = [];
         $days = [
-            "MON" => ["mon", "monday", "M"],
-            "TUE" => ["tue", "tuesday", "Tu"],
-            "WED" => ["wed", "wednesday", "W", "wday"],
-            "THU" => ["thur", "thursday", "Th", "Thu"],
-            "FRI" => ["fri", "friday", "F", "Fr"],
-            "SAT" => ["sat", "saturday", "Sa"],
-            "SUN" => ["sun", "sunday", "Su"],
+            "MON" => ["monday", "mon", "M"],
+            "TUE" => ["tuesday", "tue", "Tu"],
+            "WED" => ["wednesday", "wed", "wday", "W"],
+            "THU" => ["thursday", "thur", "Thu", "Th"],
+            "FRI" => ["friday", "fri", "Fr","F"],
+            "SAT" => ["saturday", "sat", "Sa"],
+            "SUN" => ["sunday", "sun", "Su"],
         ];
 
         foreach ($days as $i => $day) {
@@ -462,6 +472,16 @@ $this->hour = false;
                 if (
                     strpos(strtolower($input), strtolower($day_name)) !== false
                 ) {
+
+if (strpos(strtolower($input), strtolower($day_name . " ")) == false) {
+continue;
+}
+
+if (strpos(strtolower($input), strtolower(" ".$day_name)) == false) {
+continue;
+}
+
+
                     //      $day_evidence[] = $day_name;
                     $day = $key;
                     $day_evidence[$key][] = $day_name;
@@ -546,10 +566,6 @@ $this->hour = false;
         // TODO: Consider three days all with same score
         // TODO: Consider two days wth non-zero scores.
         return false;
-
-        //        $this->thing->log("found day " . $day . ".");
-
-        //        return $day;
     }
 
     /**

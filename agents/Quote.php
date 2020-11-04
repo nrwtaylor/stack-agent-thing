@@ -538,6 +538,7 @@ class Quote extends Agent
 
         $web .= "<p>";
         $web .= "Message Metadata - ";
+if (isset($this->thing->thing->created_at)) {
 
         $web .=
             $this->inject .
@@ -545,7 +546,7 @@ class Quote extends Agent
             $this->thing->nuuid .
             " - " .
             $this->thing->thing->created_at;
-
+}
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";
 
@@ -554,11 +555,12 @@ class Quote extends Agent
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
+if (isset($this->thing->thing->created_at)) {
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );
         $web .= "Quote question was created about " . $ago . " ago. ";
-
+}
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
