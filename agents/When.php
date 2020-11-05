@@ -104,6 +104,7 @@ class When extends Agent
         // $date = new \DateTime($text, new \DateTimeZone($this->time_zone));
         // Events from ICal parser should have timezone applied.
         // TODO: Test
+
         $date = new \DateTime($text);
 
         $response = $date->format('Y M d');
@@ -139,6 +140,10 @@ class When extends Agent
     {
         $time_agent = new Time($this->thing, "time");
 
+
+        $timestamp = $this->calendar_agent->textCalendar($event, ['timestamp']);
+$timestamp =trim($timestamp);
+
         $runtime_text = $this->runtimeWhen($event->dtstart_tz, $event->dtend_tz);
 
         if ($runtime_text != "") {
@@ -156,9 +161,12 @@ class When extends Agent
         }
 
         $when_text =
-            $this->dateWhen($event->dtstart_tz) .
+            $this->dateWhen($timestamp) .
             ", " .
-            $this->timeWhen($event->dtstart_tz) .
+            $this->timeWhen($timestamp) .
+//            $this->dateWhen($event->dtstart_tz) .
+//            ", " .
+//            $this->timeWhen($event->dtstart_tz) .
             //" " .
             //$this->runtimeWhen($event->dtstart, $event->dtend) .
             " " .
@@ -172,17 +180,14 @@ class When extends Agent
 
     public function doWhen()
     {
-        //        if (isset($this->file) and is_string($this->file)) {
         $events = [];
         foreach ($this->calendar_list as $i => $calendar) {
-            //$ics_link = $calendar['ics_link'];
 
             $ics_links = $this->calendar_agent->icslinksCalendar(
                 $calendar['ics_link']
             );
             foreach ($ics_links as $j => $ics_link) {
                 $new_events = $this->calendarWhen($ics_link, $calendar['name']);
-                //$events = array_merge($events, $new_events);
             }
         }
 
@@ -190,6 +195,7 @@ class When extends Agent
 
         $txt = "";
         foreach ($events as $i => $event) {
+
             $txt .= $this->textWhen($event) . "\n";
         }
         $this->when_text = $txt;
@@ -223,7 +229,7 @@ class When extends Agent
     {
         $time_agent = new Time($this->thing, "time");
 
-        $web = '</div>No calendar information available from when.</div>';
+        $web = '<div>No web output. Check the TXT channel.</div>';
         if (isset($this->events)) {
             $web = "";
             foreach ($this->events as $event) {
@@ -312,12 +318,12 @@ class When extends Agent
         if ($input == 'when') {
             $input = $this->subject;
         }
-
+/*
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $string = $input;
         $str_pattern = 'when';
         $str_replacement = '';
-
+//var_dump($input);
         if (strpos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
             $filtered_input = substr_replace(
@@ -331,6 +337,7 @@ class When extends Agent
         $filtered_input = trim($filtered_input);
 
         $this->file = $filtered_input;
+*/
         return false;
     }
 }

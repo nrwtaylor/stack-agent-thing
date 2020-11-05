@@ -14,9 +14,10 @@ class Calendar extends Agent
         $this->default_time_zone = 'UTC';
 
         $this->time_zone = $this->default_time_zone;
-        $time_agent = new Time($this->thing, "time");
-        if (is_string($time_agent->time_zone)) {
-            $this->time_zone = $time_agent->time_zone;
+
+        $this->time_agent = new Time($this->thing, "time");
+        if (is_string($this->time_agent->time_zone)) {
+            $this->time_zone = $this->time_agent->time_zone;
         }
 
         $this->googlecalendar_agent = new Googlecalendar(
@@ -37,15 +38,17 @@ class Calendar extends Agent
 
     public function doCalendar()
     {
-        foreach ($this->ics_links as $ics_link) {
-            $file = $ics_link;
-            if (isset($file) and is_string($file)) {
-                $this->readCalendar($file);
+        if (isset($this->ics_links)) {
+            foreach ($this->ics_links as $ics_link) {
+                $file = $ics_link;
+                if (isset($file) and is_string($file) and $file !== "") {
+                    $this->readCalendar($file);
+                }
             }
         }
 
         if ($this->agent_input == null) {
-            $this->calendar_message = $this->calendar_text; // mewsage?
+            $this->calendar_message = $this->calendar_text;
         } else {
             $this->calendar_message = $this->agent_input;
         }
@@ -73,22 +76,80 @@ class Calendar extends Agent
         if (isset($this->events)) {
             $web = "";
             foreach ($this->events as $event) {
+                $timestamp = $this->textCalendar($event, ['timestamp']);
+
                 $web .=
                     '<div>' .
-                    $time_agent->textTime($event->dtstart_tz) .
-                    " " .
-                    $time_agent->textTime($event->dtend_tz) .
+                    '<div>' .
+                    $time_agent->textTime($timestamp) .
                     " " .
                     $event->summary .
-                    " " .
+                    ' [' .
+                    $event->runtime .
+                    '] ' .
+                    '</div><div>' .
                     $event->description .
-                    " " .
+                    "</div><div>" .
                     $event->location .
-                    "</div>";
+                    "</div></div>";
             }
         }
+
+        $this->thing_report['info'] =
+            "Times are " . $this->time_zone . ". Click refresh to update.";
+
         $this->web = $web;
         $this->thing_report['web'] = $this->web;
+    }
+
+    public function textCalendar($event, $parameters = null)
+    {
+        if ($parameters == null) {
+            $parameters = [
+                'timestamp',
+                'timezone',
+                'runtime',
+                'summary',
+                'description',
+                'location',
+            ];
+        }
+
+        $event_runtime = $this->thing->human_time(
+            strtotime($event->dtend_tz) - strtotime($event->dtstart_tz)
+        );
+
+        $start_time = $event->dtstart;
+        $event_calendar = $event->calendar_name;
+        $event_timezone = $event->calendar_timezone;
+
+        // Send the start time with the known event timezone.
+        // Create a datum object.
+        $datum = $this->time_agent->datumTime($event->dtstart, $event_timezone);
+
+        // Get a timestamp of the datum.
+        // In the specified timezone.
+        // The timestamp is a text string which strtotime will recognize.
+        // FALSE (default) - Do not include timezone string in the returned timestamp text.
+        // TRUE - Include timezone of time in returned timestamp.
+        $timestamp = $this->time_agent->timestampTime(
+            $datum,
+            $this->time_agent->time_zone
+        );
+
+        $event->timestamp = $timestamp;
+        $event->timezone = $event_timezone;
+        $event->runtime = $event_runtime;
+
+        $calendar_text = "";
+        foreach ($parameters as $i => $parameter) {
+            if (isset($event->{$parameter})) {
+                $calendar_text .= $event->{$parameter};
+            } else {
+                $calendar_text .= $parameter;
+            }
+        }
+        return $calendar_text;
     }
 
     function makeSMS()
@@ -99,44 +160,42 @@ class Calendar extends Agent
 
             $calendar_text = "";
             foreach ($this->events as $event) {
-                $runtime = $this->thing->human_time(
-                    strtotime($event->dtend_tz) - strtotime($event->dtstart_tz)
-                );
-
                 $calendar_text .=
-                    $time_agent->textTime($event->dtstart_tz) .
-                    " " .
-                    $runtime .
-                    " " .
-                    $event->summary .
-                    " " .
-                    $event->description .
-                    " " .
-                    $event->location .
-                    "\n";
+                    $this->textCalendar($event, [
+                        'timestamp',
+                        'runtime',
+                        'summary',
+                        'description',
+                        'location',
+                    ]) . "\n";
             }
 
             if (mb_strlen($calendar_text) > 140) {
                 $calendar_text = "";
                 foreach ($this->events as $event) {
-                    $runtime = $this->thing->human_time(
-                        strtotime($event->dtend) - strtotime($event->dtstart_tz)
-                    );
-
                     $calendar_text .=
-                        $time_agent->textTime($event->dtstart_tz) .
-                        " " .
-                        $runtime .
-                        " " .
-                        $event->summary .
-                        "\n";
+                        $this->textCalendar($event, [
+                            'timestamp',
+                            ' ',
+                            //                           'timezone',
+                            //                           ' ',
+                            'summary',
+                            ' [',
+                            'runtime',
+                            ']',
+                        ]) . "\n";
                 }
             }
         }
 
         $this->node_list = ["calendar" => ["calendar", "dog"]];
         $this->sms_message =
-            "CALENDAR\n" . $calendar_text . "" . $this->response;
+            "CALENDAR " .
+            $this->time_agent->time_zone .
+            "\n" .
+            $calendar_text .
+            "" .
+            $this->response;
         $this->thing_report['sms'] = $this->sms_message;
     }
 
@@ -148,20 +207,26 @@ class Calendar extends Agent
             $calendar_text = "";
             foreach ($this->events as $event) {
                 $calendar_text .=
-                    $time_agent->textTime($event->dtstart_tz) .
-                    " " .
-                    $time_agent->textTime($event->dtend_tz) .
-                    " " .
-                    $event->summary .
-                    " " .
-                    $event->description .
-                    " " .
-                    $event->location .
-                    "\n ";
+                    $this->textCalendar($event, [
+                        'timestamp',
+                        ' ',
+                        //                          'timezone',
+                        //                          ' ',
+                        'summary',
+                        ' [',
+                        'runtime',
+                        ']',
+                    ]) . "\n";
             }
         }
         //$this->node_list = ["calendar" => ["calendar", "dog"]];
-        $txt = "CALENDAR\n\n" . $calendar_text . "\n\n" . $this->response;
+        $txt =
+            "CALENDAR " .
+            $this->time_zone .
+            "\n\n" .
+            $calendar_text .
+            "\n\n" .
+            $this->response;
 
         $this->txt = $txt;
         $this->thing_report['txt'] = $txt;
@@ -185,6 +250,9 @@ class Calendar extends Agent
     public function readCalendar($file, $calendar_name = null)
     {
         try {
+            // ICal is noisy at the WARNING and NOTICE level.
+            // TODO ?
+            $old_level = error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
             $ical = new ICal($file, [
                 'defaultSpan' => $this->default_span, // Default value
                 'defaultTimeZone' => $this->time_zone,
@@ -194,6 +262,8 @@ class Calendar extends Agent
                 'filterDaysBefore' => null, // Default value
                 'skipRecurrence' => false, // Default value
             ]);
+            error_reporting($old_level);
+            // Test with the GitHub provided ics file.
 
             // $ical->initUrl('https://raw.githubusercontent.com/u01jmg3/ics-parser/master/examples/ICal.ics>
         } catch (\Exception $e) {
@@ -201,14 +271,17 @@ class Calendar extends Agent
             return true;
         }
         $events = $ical->eventsFromInterval('1 week');
-        //var_dump($events);
+
         if (!isset($this->events)) {
             $this->events = [];
         }
 
+        $calendar_timezone = $ical->calendarTimeZone();
+
         foreach ($events as $event) {
             $e = $this->eventCalendar($event);
             $e->calendar_name = $calendar_name;
+            $e->calendar_timezone = $calendar_timezone;
             //            $this->events[] = $this->eventCalendar($event);
             $this->events[] = $e;
         }
@@ -216,7 +289,8 @@ class Calendar extends Agent
         // Sort events list by start time.
         // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
         usort($this->events, function ($first, $second) {
-            return strtotime($first->dtstart_tz) > strtotime($second->dtstart_tz);
+            return strtotime($first->dtstart_tz) >
+                strtotime($second->dtstart_tz);
         });
 
         $time_agent = new Time($this->thing, "time");
@@ -226,9 +300,9 @@ class Calendar extends Agent
             $calendar_text .=
                 $event->summary .
                 " " .
-                $time_agent->textTime($event->dtstart_tz) .
+                $time_agent->textTime($event->dtstart) .
                 " " .
-                $time_agent->textTime($event->dtend_tz) .
+                $time_agent->textTime($event->dtend) .
                 " " .
                 $event->description .
                 " " .
@@ -243,8 +317,6 @@ class Calendar extends Agent
         if (strtolower(substr($token, -4)) == '.ics') {
             $ics_links[] = $token;
             return $ics_links;
-
-            //                continue;
         }
 
         // See if Googlecalendar recognizes this.
@@ -255,7 +327,6 @@ class Calendar extends Agent
 
         if ($addresses !== false) {
             foreach ($addresses as $i => $address) {
-                //var_dump($address);
                 $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
                     $address
                 );
@@ -264,15 +335,12 @@ class Calendar extends Agent
                 }
             }
             return $ics_links;
-
-            //                continue;
         }
 
         $ics_link = $this->googlecalendar_agent->icsGooglecalendar($token);
 
         if ($ics_link !== true) {
             $ics_links[] = $ics_link;
-            //                continue;
             return $ics_links;
         }
 
@@ -281,13 +349,11 @@ class Calendar extends Agent
         if (strtolower(substr($token, 0, 9)) == "webcal://") {
             $ics_links[] = $token;
             return $ics_links;
-
-            //                continue;
         }
 
         // Assume alphanumeric tokens are calls for @gmail addresses.
         // For now.
-        // TODO: Explode Apple and Microsoft calendaring.
+        // TODO: Explore Apple and Microsoft calendaring.
         $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
         if ($alphanumeric_agent->isAlphanumeric($token)) {
             $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
@@ -296,8 +362,6 @@ class Calendar extends Agent
             if ($ics_link !== true) {
                 $ics_links[] = $ics_link;
                 return $ics_links;
-
-                //                    continue;
             }
         }
         $ics_links[] = $token;
@@ -342,80 +406,12 @@ class Calendar extends Agent
 
         $filtered_input = trim($filtered_input);
 
-        //$filtered_input = 'https://calendar.google.com/calendar/u/0/render?cid=oldvectorradio%40gmail.com&cid=en-gb.canadian%23holiday%40group.v.calendar.google.com&cid=8rr8icnfsofufg57jvdrd5i7gg%40group.calendar.google.com&cid=vectorradio.ca_q49r7vdsfjo62nqe69togn6gfs%40group.calendar.google.com';
-
         $tokens = explode(" ", $filtered_input);
         $ics_links = [];
-        // See if Googlecalendar recognizes this.
-        //        $this->googlecalendar_agent = new Googlecalendar(
-        //            $this->thing,
-        //            "googlecalendar"
-        //        );
+
         foreach ($tokens as $i => $token) {
-            /*
-            if (strtolower(substr($token, -4)) == '.ics') {
-                $ics_links[] = $token;
-                continue;
-            }
-
-            // See if Googlecalendar recognizes this.
-
-            $addresses = $googlecalendar_agent->addressesGooglecalendar($token);
-
-            if ($addresses !== false) {
-                foreach ($addresses as $i => $address) {
-                    //var_dump($address);
-                    $ics_link = $googlecalendar_agent->icsGooglecalendar(
-                        $address
-                    );
-                    if ($ics_link !== true) {
-                        $ics_links[] = $ics_link;
-                    }
-                }
-
-                continue;
-            }
-
-            $ics_link = $googlecalendar_agent->icsGooglecalendar($token);
-
-            if ($ics_link !== true) {
-                $ics_links[] = $ics_link;
-                continue;
-            }
-
-            // Some ics links don't end in .ics
-            // TODO Test
-            if (strtolower(substr($token, 0, 9)) == "webcal://") {
-                $ics_links[] = $token;
-                continue;
-            }
-
-            // Assume alphanumeric tokens are calls for @gmail addresses.
-            // For now.
-            // TODO: Explode Apple and Microsoft calendaring.
-            $alphanumeric_agent = new Alphanumeric(
-                $this->thing,
-                "alphanumeric"
-            );
-            if ($alphanumeric_agent->isAlphanumeric($token)) {
-                $ics_link = $googlecalendar_agent->icsGooglecalendar(
-                    $token . "@gmail.com"
-                );
-                if ($ics_link !== true) {
-                    $ics_links[] = $ics_link;
-                    continue;
-                }
-            }
-
-            // And some don't have anything distinctive.
-            // https://www.officeholidays.com/ics/canada/british-columbia
-            // Can not rely on the link having ics in it.
-            // TODO Identify and store non ics links.
-            // For now add to the list to try and read it as a calendar.
-*/
             $new_ics_links = $this->icslinksCalendar($token);
             $ics_links = array_merge($ics_links, $new_ics_links);
-            // $ics_links[] = $token;
         }
 
         $this->ics_links = array_unique($ics_links);

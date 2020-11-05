@@ -35,19 +35,17 @@ class Timestamp extends Agent
 
         $this->timestamp_prefix = "";
 
-//        $this->makeTimestamp();
+        //        $this->makeTimestamp();
     }
 
-    function timezoneTimestamp($text = null) {
-
-
+    function timezoneTimestamp($text = null)
+    {
     }
 
-function run() {
+    function run()
+    {
         $this->makeTimestamp();
-
-
-}
+    }
 
     function makeTimestamp($input = null)
     {
@@ -70,10 +68,11 @@ function run() {
 
         $time_zone = $time_agent->extractTimezone($this->input);
 
-if (($time_zone  !== false) and ($time_zone !== true)) {
-        $time_agent->time_zone = $time_zone;
-}
-        $this->response .= "Returns the current " . $time_agent->time_zone . " timestamp.";
+        if ($time_zone !== false and $time_zone !== true) {
+            $time_agent->time_zone = $time_zone;
+        }
+        $this->response .=
+            "Returns the current " . $time_agent->time_zone . " timestamp.";
 
         $time_agent->doTime();
 
@@ -152,19 +151,16 @@ if (($time_zone  !== false) and ($time_zone !== true)) {
             $timestamp = $this->timestamp;
         }
 
-//        $m .= $timestamp;
+        //        $m .= $timestamp;
 
-if ($this->default_time_zone != $this->time_zone) {
-
-        $timestamp .= " " . $this->time_zone;
-
-}
-$timestamp .= "<br>";
+        if ($this->default_time_zone != $this->time_zone) {
+            $timestamp .= " " . $this->time_zone;
+        }
+        $timestamp .= "<br>";
 
         $m .= $timestamp;
 
-
-//        $m .= $this->response;
+        //        $m .= $this->response;
 
         $this->web_message = $m;
         $this->thing_report['web'] = $m;
@@ -174,20 +170,18 @@ $timestamp .= "<br>";
     {
         $sms_message = "TIMESTAMP";
 
-        $parts = explode(" ", $this->timestamp);
+        //$parts = explode(" ", $this->timestamp);
 
-        $timestamp = $parts[0] . " " . $parts[1];
+        //$timestamp = $parts[0] . " " . $parts[1];
+        $timestamp = trim($this->timestamp);
+
         if ($this->micro_time_flag === true) {
             $timestamp = $this->timestamp;
         }
 
-
-if ($this->default_time_zone != $this->time_zone) {
-
-        $timestamp .= " " . $this->time_zone;
-
-}
-
+        if ($this->default_time_zone != $this->time_zone) {
+            $timestamp .= " " . $this->time_zone;
+        }
 
         $sms_message .= " | " . $timestamp;
 
@@ -203,7 +197,6 @@ if ($this->default_time_zone != $this->time_zone) {
 
         // Generate email response.
 
-        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
         $this->thing_report['choices'] = $choices;
 
@@ -251,22 +244,11 @@ if ($this->default_time_zone != $this->time_zone) {
             //    $input = $this->agent_input;
         }
 
-
         $this->input = $input;
         $this->num_hits = 0;
         $keywords = $this->keywords;
-/*
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->subject);
-        }
-        $this->input = $input;
-*/ 
-       $prior_uuid = null;
+
+        $prior_uuid = null;
 
         if ($this->agent_input == "extract") {
             return;
@@ -289,10 +271,6 @@ if ($this->default_time_zone != $this->time_zone) {
             }
         }
 
-//        if ($this->timestamp == "X") {
-//        }
-
         return "Message not understood";
-        return false;
     }
 }
