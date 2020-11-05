@@ -2,14 +2,23 @@
 namespace Nrwtaylor\StackAgentThing;
 
 // TODO
-// http://www.lightandmatter.com/when/when.html
 // Determine stack when response.
+
+/**
+Integration with "when" - http://www.lightandmatter.com/when/when.html
+cd ~/.when
+nano preferences
+prefilter = agent --channel=txt --meta=off when
+**/
+
 /*
+Some sample resources
 resources/when/when.txt example
 webcal://cantonbecker.com/astronomy-calendar/astrocal.ics
 https://www.officeholidays.com/ics/canada
 https://www.calendarlabs.com/ical-calendar/ics/39/Canada_Holidays.ics
 examplename
+/home/bob/basic.ics
 */
 
 class When extends Agent
@@ -142,7 +151,7 @@ class When extends Agent
 
 
         $timestamp = $this->calendar_agent->textCalendar($event, ['timestamp']);
-$timestamp =trim($timestamp);
+        $timestamp =trim($timestamp);
 
         $runtime_text = $this->runtimeWhen($event->dtstart_tz, $event->dtend_tz);
 
@@ -164,11 +173,6 @@ $timestamp =trim($timestamp);
             $this->dateWhen($timestamp) .
             ", " .
             $this->timeWhen($timestamp) .
-//            $this->dateWhen($event->dtstart_tz) .
-//            ", " .
-//            $this->timeWhen($event->dtstart_tz) .
-            //" " .
-            //$this->runtimeWhen($event->dtstart, $event->dtend) .
             " " .
             $summary_text .
             " " .
@@ -201,7 +205,7 @@ $timestamp =trim($timestamp);
         $this->when_text = $txt;
 
         if ($this->agent_input == null) {
-            $this->when_message = $this->when_text; // mewsage?
+            $this->when_message = $this->when_text;
         } else {
             $this->when_message = $this->agent_input;
         }
@@ -318,12 +322,15 @@ $timestamp =trim($timestamp);
         if ($input == 'when') {
             $input = $this->subject;
         }
+
 /*
+        // TODO - Read command line provided resource.
+        // Pipe via Calendar.
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $string = $input;
         $str_pattern = 'when';
         $str_replacement = '';
-//var_dump($input);
+
         if (strpos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
             $filtered_input = substr_replace(
@@ -334,10 +341,11 @@ $timestamp =trim($timestamp);
             );
         }
 
-        $filtered_input = trim($filtered_input);
-
-        $this->file = $filtered_input;
+        if (isset($filtered_input)) {
+            $filtered_input = trim($filtered_input);
+            $this->file = $filtered_input;
+        }
 */
-        return false;
+        return;
     }
 }

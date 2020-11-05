@@ -131,7 +131,7 @@ class Time extends Agent
         $tz = $datum->getTimezone();
         $timezone = $tz->getName();
 
-        $time_stamp = $datum->format('d M Y, H:i:s') . " ";
+        $time_stamp = $datum->format('Y-m-d H:i:s') . " ";
         if ($flag_timezone === true) {
             $timestamp .= $timezone;
         }
