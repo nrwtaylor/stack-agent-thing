@@ -22,6 +22,7 @@ echo "Your Home directory: $HOME"
 echo "Your Entry: $1"
 echo "Option used: $SERVERNAME"
 
+#Check for profile file
 if [ -f "$HOME/.profile" ] ; then
   echo ".profile exists"
 elif [ -f "$HOME/.bash_profile" ] ; then
@@ -30,9 +31,11 @@ elif [ -f "$HOME/.bash_login" ] ; then
   echo ".bash_login exists"
 fi
 
+#Add path to profile file
 echo "Change Profile"
 cat <<ADDTEXT1 >> ~/.profile
 if [ -d "/var/www/$SERVERNAME" ]; then
   export PATH="/var/www/$SERVERNAME:\$PATH"
 fi
 ADDTEXT1
+source $HOME/.profile
