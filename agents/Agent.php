@@ -106,6 +106,10 @@ class Agent
 
         $this->agent_version = 'redpanda';
 
+        // TODO
+
+        //$this->time_agent = new Time($this->thing,"time");
+        //$this->current_time = $this->time_agent->time;
         $this->current_time = $this->thing->time();
 
         $this->num_hits = 0;
@@ -344,6 +348,37 @@ class Agent
         }
 
         return $variables_array;
+    }
+
+    public function memoryAgent($text = null) {
+
+            //$agent_class_name = "Dateline";
+$agent_class_name = $text;
+            $agent_name = strtolower($agent_class_name);
+
+            $slug_agent = new Slug($this->thing, "slug");
+            $slug = $slug_agent->getSlug(
+                $agent_name . "-" . $this->from
+            );
+
+
+                $agent_namespace_name =
+                    '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+
+                ${$agent . '_agent'} = new $agent_namespace_name($this->thing, $agent_name);
+
+                ${$agent_name} = ${$agent . '_agent'}->{'get' .
+                    $agent_class_name}();
+                ${$agent_name}['retrieved_at'] = $this->current_time;
+
+                $this->memory->set($slug, ${$agent_name});
+
+                $this->response .= "Got {$agent_name}. ";
+
+
+        return ${$agent_name};
+
+
     }
 
     public function readAgent($text = null)
@@ -678,6 +713,41 @@ class Agent
             return true;
         }
     }
+
+    // Plan to deprecate getMemcached terminology.
+    public function getMemory($text = null)
+    {
+//        if (isset($this->memory)) {
+//            return;
+//        }
+
+        // Null?
+        // $this->mem_cached = null;
+        // Fail to stack php memory code if Memcached is not availble.
+if (!isset($this->memory)) {
+        try {
+            $this->memory = new \Memcached(); //point 2.
+            $this->memory->addServer("127.0.0.1", 11211);
+        } catch (\Throwable $t) {
+            // Failto
+            $this->memory = new Memory($this->thing, "memory");
+            //restore_error_handler();
+            $this->thing->log(
+                'caught memcached throwable. made memory',
+                "WARNING"
+            );
+            return;
+        } catch (\Error $ex) {
+            $this->thing->log('caught memcached error.', "WARNING");
+            return true;
+        }
+}
+
+        $memory = $this->memory->get($text);
+        return $memory;
+    }
+
+
 
     /**
      *

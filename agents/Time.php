@@ -32,6 +32,9 @@ class Time extends Agent
         $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
 
         $this->initTime();
+
+        //$this->time = $this->thing->time();
+        //$this->time = time();
         //$this->time_zone = 'America/Vancouver';
     }
 
@@ -182,9 +185,21 @@ class Time extends Agent
 
     function datumTime($text = null, $time_zone = "UTC")
     {
-        if ($text == null) {
-            return true;
-        }
+
+if ($text == null) {return true;}
+
+// If not datum is provided.
+// Check for a zull flug.
+$zulu_flag = null;
+if (strtolower(substr($text, -1)) == 'z') {
+    $zulu_flag = "Z";
+}
+
+if (($zulu_flag == "Z") and ($time_zone == null)) {
+
+$time_zone = "UTC";
+
+}
 
         $datum = null;
         $timevalue = $text;
@@ -241,6 +256,7 @@ class Time extends Agent
      */
     public function readSubject()
     {
+        if ($this->agent_input == "time") {return;}
         $this->filtered_input = $this->assert($this->input, "time");
 
         if ($this->filtered_input != "") {

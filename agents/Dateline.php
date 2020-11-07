@@ -47,13 +47,48 @@ class Dateline extends Agent
         foreach ($paragraphs as $i => $paragraph) {
             $dateline = $this->extractDateline($paragraph);
             if ($dateline == false) {continue;}
-            echo $dateline['dateline'] . "\n" . $dateline['line'] . "\n";
+            $this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
 
         }
     }
 
+    public function getDateline() {
+
+//        if (!is_string($this->test_url)) {
+//            return false;
+//        }
+
+        $url = $this->test_url;
+        $read_agent = new Read($this->thing, $url);
+
+        $paragraph_agent = new Paragraph($this->thing, $read_agent->contents);
+
+        $paragraphs = $paragraph_agent->paragraphs;
+
+        $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
+
+        foreach ($paragraphs as $i => $paragraph) {
+
+            $dateline = $this->extractDateline($paragraph);
+
+            if ($dateline == false) {continue;}
+            if ($dateline['line'] == " ") {continue;}
+            $this->thing->log($dateline['dateline'] . "\n" . $dateline['line'] . "\n");
+            break;
+        }
+        return $dateline;
+
+    }
+
     public function extractDateline($text = null)
     {
+
+        if ($text === false) {return false;}
+        if ($text === "") {return false;}
+        if ($text === " ") {return false;}
+        if ($text === true) {return false;}
+        if ($text === null) {return false;}
+
         //$url_agent = new Url($this->thing,"url");
         $text = $this->url_agent->stripUrls($text);
         $paragraph = $text;

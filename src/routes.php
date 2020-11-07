@@ -921,6 +921,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     "php" => 'text/plain',
                     "log" => 'text/plain',
                     "json" => 'application/json',
+                    "ics" => 'text/calendar',
                 ];
 
                 if ($uuid == null) {
@@ -974,7 +975,10 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 if (!isset($agent->thing_report[strtolower($ext_name)])) {
                     //var_dump($ext_name);
                     //echo "meep";
-                    exit();
+// TODO: TEST
+//                    exit();
+                    return $response->withStatus(404);
+
                 }
 
                 $content = $agent->thing_report[strtolower($ext_name)];

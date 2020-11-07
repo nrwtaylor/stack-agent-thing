@@ -103,7 +103,7 @@ class When extends Agent
         $this->calendar_agent->readCalendar($text, $name);
         //echo $text ." ";
         //echo count($this->calendar_agent->events) . "\n";
-        return $this->calendar_agent->events;
+        return $this->calendar_agent->calendar->events;
     }
 
     public function dateWhen($text)
@@ -195,7 +195,7 @@ class When extends Agent
             }
         }
 
-        $events = $this->calendar_agent->events;
+        $events = $this->calendar_agent->calendar->events;
 
         $txt = "";
         foreach ($events as $i => $event) {
@@ -210,7 +210,7 @@ class When extends Agent
             $this->when_message = $this->agent_input;
         }
 
-        $count = count($this->calendar_agent->events);
+        $count = count($this->calendar_agent->calendar->events);
         $this->response .= "Got " . $count . " events. ";
     }
 
