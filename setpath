@@ -25,17 +25,20 @@ echo "Option used: $SERVERNAME"
 #Check for profile file
 if [ -f "$HOME/.profile" ] ; then
   echo ".profile exists"
+  Path_File=.profile
 elif [ -f "$HOME/.bash_profile" ] ; then
   echo ".bash_profile exists"
+  Path_File=.bash_profile
 elif [ -f "$HOME/.bash_login" ] ; then
   echo ".bash_login exists"
+  Path_File=.bash_login
 fi
 
 #Add path to profile file
-echo "Change Profile"
-cat <<ADDTEXT1 >> ~/.profile
+echo "Change Profile: $Path_File"
+cat <<ADDTEXT1 >> $HOME/$Path_File
 if [ -d "/var/www/$SERVERNAME" ]; then
   export PATH="/var/www/$SERVERNAME:\$PATH"
 fi
 ADDTEXT1
-source $HOME/.profile
+source $HOME/$Path_File
