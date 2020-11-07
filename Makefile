@@ -229,6 +229,9 @@ configuration:
 # sudo nano /etc/sysctl.conf
 # fs.file-max = 65535
 
+path: ## Add the stack to your path
+	./setpath $(SERVERNAME)
+
 test: ## Test agent works
 	cd /var/www/$(SERVERNAME); \
 	./agent roll; \

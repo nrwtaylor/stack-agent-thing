@@ -1,0 +1,38 @@
+#!/bin/bash
+
+
+SERVER_DEFAULT=stackr.test
+
+if [ "$#" -eq 0 ] ; then
+  SERVERNAME=$SERVER_DEFAULT
+fi
+
+if [ "$#" -gt 1 ] ; then
+  echo "Usage: $0 ServerName"
+  echo $1 $2 $3
+  exit 0  
+fi
+
+if [ "$#" -eq 1 ] ; then
+  SERVERNAME=$1
+fi
+
+echo "Default: $SERVER_DEFAULT"
+echo "Your Home directory: $HOME"
+echo "Your Entry: $1"
+echo "Option used: $SERVERNAME"
+
+if [ -f "$HOME/.profile" ] ; then
+  echo ".profile exists"
+elif [ -f "$HOME/.bash_profile" ] ; then
+  echo ".bash_profile exists"
+elif [ -f "$HOME/.bash_login" ] ; then
+  echo ".bash_login exists"
+fi
+
+echo "Change Profile"
+cat <<ADDTEXT1 >> ~/.profile
+if [ -d "/var/www/$SERVERNAME" ]; then
+  export PATH="/var/www/$SERVERNAME:\$PATH"
+fi
+ADDTEXT1
