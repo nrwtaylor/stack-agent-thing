@@ -16,9 +16,12 @@ class Microtime extends Agent
     public function init()
     {
         $this->node_list = ["microtime" => ["microtime"]];
+        $this->time_agent = new Time($this->thing, "time");
+        $this->time_zone = $this->time_agent->time_zone;
+
     }
 
-    public function textMicrotime($timestamp)
+    public function deprecate_textMicrotime($timestamp)
     {
         $t = explode(".", $timestamp);
 
@@ -35,18 +38,23 @@ class Microtime extends Agent
         if (is_numeric($text)) {
             return true;
         }
-
         if ($text == null) {
-            $text = $this->thing->microtime();
+            $text = $this->getMicrotime();
+            //$text = $this->thing->microtime();
         }
 
-        $t = explode(' ', $text);
-        //var_dump($t);
-        $non_micro = $t[0] . " " . $t[1];
-        $micro = $t[2];
-        $timestamp = (float) strtotime($non_micro) + $micro;
+        $t = explode('.', $text);
 
+        $non_micro = $t[0];
+        $micro = $t[1];
+
+        $non_micro_text = strtotime($non_micro);
+        $timestamp = $non_micro_text .".". substr(str_replace("0.","",$micro),0,6);
         return $timestamp;
+    }
+
+    public function timestampMicrotime($text) {
+        return text;
     }
 
     public function isMicrotime($state = null)
@@ -63,8 +71,6 @@ class Microtime extends Agent
             $this->current_time
         );
 
-        //$this->thing->setVariable("refreshed_at", $this->current_time);
-        //        $this->thing->setVariable("timestamp", $this->timestamp);
     }
 
     public function get()
@@ -96,7 +102,7 @@ class Microtime extends Agent
 
         if ($timestamp_string == false) {
             $this->thing->json->setField("variables");
-            $timestamp_string = $this->thing->microtime();
+            $timestamp_string = $this->getMicrotime();
             $this->thing->json->writeVariable(
                 ["microtime", "timestamp"],
                 $timestamp_string
@@ -104,6 +110,28 @@ class Microtime extends Agent
         }
 
         $this->timestamp = $timestamp_string;
+    }
+
+    public function getMicrotime() {
+        // Get the microtime signal from the Thing.
+        // Process it to the desired microtime timestring.
+
+        $timestamp_string = $this->thing->microtime();
+
+        $t = explode(' ', $timestamp_string);
+
+        $non_micro = $t[0] . " " . $t[1];
+        $micro = $t[2];
+
+// TODO Make timezone aware.
+// See Time.
+//        $this->datum = $this->time_agent->doTime($non_micro); //non_micro
+//        $non_micro_text = $this->time_agent->timestampTime($this->datum);
+        $non_micro_text = $non_micro;
+
+        $timestamp_string = trim($non_micro_text) .".". substr(str_replace("0.","",$micro),0,6);
+
+        return $timestamp_string;
     }
 
     public function respondResponse()
@@ -132,12 +160,16 @@ class Microtime extends Agent
     {
         $sms = "MICROTIME " . "\n";
 
+        // Parsers may not recognize
+        // 2020-11-05 18:45:49.70520700
+        // So display as with six digits of precision.
+        // 2020-11-05 18:45:49 0.705207
+
         $sms .= $this->timestamp . "\n";
         $sms .= $this->epochtimeMicrotime($this->timestamp) . "\n";
-        $sms .= trim($this->short_message) . "\n";
+//        $sms .= trim($this->short_message) . "\n";
 
-        $sms .= "TEXT WEB";
-        // $this->response;
+//        $sms .= "TEXT WEB";
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -152,7 +184,6 @@ class Microtime extends Agent
         $this->short_message = "" . $this->text . "\n";
 
         if ($this->text == "X") {
-            //$this->response = $this->number . " " . $this->unit . ".";
             $this->response = "No message to pass.";
         }
     }
@@ -177,24 +208,16 @@ class Microtime extends Agent
             $web .= "" . $this->timestamp;
         }
 
-//        $web .= "<p>";
-
-//        $web .= "Message Metadata - ";
-
-//        $web .= $this->thing->nuuid . " - " . $this->thing->thing->created_at;
-
-//        $web .= "<br>";
-
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
-//        $ago = $this->thing->human_time(
-//            time() - strtotime($this->thing->thing->created_at)
-//        );
-//        $web .= "Microtime timestamp was created about " . $ago . " ago. ";
-
-//        $web .= "<br>";
-
+        if (isset($this->thing->thing->created_at)) {
+            $ago = $this->thing->human_time(
+                time() - strtotime($this->thing->thing->created_at)
+            );
+        $web .= "Microtime timestamp was created about " . $ago . " ago. ";
+        $web .= "<br>";
+        }
         $this->thing_report['web'] = $web;
     }
 

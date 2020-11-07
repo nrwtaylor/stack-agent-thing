@@ -29,16 +29,23 @@ class Calendar extends Agent
             $this->thing,
             "alphanumeric"
         );
+
+        $this->calendar = new \stdClass();
+        if (!isset($this->calendar->events)) {
+            $this->calendar->events = null;
+        }
     }
 
     function run()
     {
         $this->doCalendar();
+        $this->makeIcal();
     }
 
     public function doCalendar()
     {
-        if (isset($this->ics_links)) {
+        if (isset($this->ics_links) and count($this > ics_links) != 0) {
+            $this->response .= "Saw at least one calendar link. ";
             foreach ($this->ics_links as $ics_link) {
                 $file = $ics_link;
                 if (isset($file) and is_string($file) and $file !== "") {
@@ -47,10 +54,18 @@ class Calendar extends Agent
             }
         }
 
+        if (isset($this->calendar)) {
+            $this->calendar_text = $calendar['line'];
+        }
+
         if ($this->agent_input == null) {
             $this->calendar_message = $this->calendar_text;
         } else {
             $this->calendar_message = $this->agent_input;
+        }
+
+        if ($this->agent_input == 'calendar') {
+            $this->calendar_text = $calendar['line'];
         }
     }
 
@@ -73,9 +88,9 @@ class Calendar extends Agent
         $time_agent = new Time($this->thing, "time");
 
         $web = '</div>No calendar information available.</div>';
-        if (isset($this->events)) {
+        if (isset($this->calendar->events)) {
             $web = "";
-            foreach ($this->events as $event) {
+            foreach ($this->calendar->events as $event) {
                 $timestamp = $this->textCalendar($event, ['timestamp']);
 
                 $web .=
@@ -104,15 +119,17 @@ class Calendar extends Agent
 
     public function textCalendar($event, $parameters = null)
     {
+        $default_parameters = [
+            'timestamp',
+            'timezone',
+            'runtime',
+            'summary',
+            'description',
+            'location',
+        ];
+
         if ($parameters == null) {
-            $parameters = [
-                'timestamp',
-                'timezone',
-                'runtime',
-                'summary',
-                'description',
-                'location',
-            ];
+            $parameters = $default_parameters;
         }
 
         $event_runtime = $this->thing->human_time(
@@ -143,6 +160,11 @@ class Calendar extends Agent
 
         $calendar_text = "";
         foreach ($parameters as $i => $parameter) {
+            if (in_array($parameter, $default_parameters)) {
+                if ($event->{$parameter} == null) {
+                    continue;
+                }
+            }
             if (isset($event->{$parameter})) {
                 $calendar_text .= $event->{$parameter};
             } else {
@@ -152,27 +174,142 @@ class Calendar extends Agent
         return $calendar_text;
     }
 
+    public function makeIcal()
+    {
+        $version = "X";
+        $calendar_name = "X";
+        $timezone = $this->time_zone;
+
+        $arr = [
+            'dtstart' => 'start_at',
+            'dtend' => "end_at",
+            'dtstamp',
+            'uid',
+            'created',
+            'description',
+            'lastmodified',
+            'location',
+            'sequence',
+            'status',
+            'summary',
+            'transp',
+        ];
+
+        $c = "BEGIN:VCALENDAR" . "\n";
+        $c .=
+            "PRODID:-//Stackr Interactive Ltd//Calendar " .
+            $version .
+            "//EN" .
+            "\n";
+        $c .= "VERSION:2.0" . "\n";
+        $c .= "CALSCALE:GREGORIAN" . "\n";
+        $c .= "METHOD:PUBLIC" . "\n";
+        $c .= "X-WR-CALNAME:" . $calendar_name . "\n";
+        $c .= "X-WR-TIMEONE:" . $timezone . "\n";
+
+        if (isset($this->calendar->events)) {
+            foreach ($this->calendar->events as $event) {
+                $c .= "BEGIN:VEVENT" . "\n";
+                /*
+                foreach ($arr as $key => $variable) {
+var_dump($key);
+var_dump($variable);  
+                  $t = "";
+                    if (isset($event->{$key})) {
+                        if (isset($variable)) {
+                            $t = $event->{$variable};
+                        } else {
+                            $t = $event->{$key};
+                        }
+                        $c .= strtoupper($key) . ":" . $t . "\n";
+                    }
+                    continue;
+
+                    $c .= "DTSTAMP:" . $dtstamp . "\n";
+                }
+*/
+
+                $c .= "DTSTART:" . $event->start_at . "\n";
+                $c .= "DTEND:" . $event->end_at . "\n";
+
+                $dtstamp = "";
+                if (isset($event->dtstamp)) {
+                    $dtstamp = $event->dtstamp;
+                }
+                $c .= "DTSTAMP:" . $dtstamp . "\n";
+
+                $uid = "";
+                if (isset($event->uid)) {
+                    $uid = $event->uid;
+                }
+                $c .= "UID:" . $uid . "\n";
+
+                $created = "";
+                if (isset($event->created)) {
+                    $created = $event->created;
+                }
+                $c .= "CREATED:" . $created . "\n";
+
+                $description = "";
+                if (isset($event->description)) {
+                    $description = $event->description;
+                }
+                $c .= "DESCRIPTION:" . $description . "\n";
+
+                $lastmodified = "";
+                if (isset($event->lastmodified)) {
+                    $lastmodified = $event->lastmodified;
+                }
+                $c .= "LAST-MODIFIED:" . $lastmodified . "\n";
+
+                $location = "";
+                if (isset($event->location)) {
+                    $location = $event->location;
+                }
+                $c .= "LOCATION:" . "\n";
+
+                $c .= "SEQUENCE:0" . "\n";
+                $c .= "STATUS:CONFIRMED" . "\n";
+                $c .= "SUMMARY:" . $event->summary . "\n";
+                $c .= "TRANSP:OPAQUE" . "\n";
+
+                $c .= "END:EVENT" . "\n";
+            }
+
+            $c .= "END:VCALENDAR";
+        }
+
+        $this->ical = $c;
+        $this->thing_report['ical'] = $c;
+    }
+
     function makeSMS()
     {
         $calendar_text = "";
-        if (isset($this->events)) {
+
+        if (isset($this->calendar->events)) {
             $time_agent = new Time($this->thing, "time");
 
             $calendar_text = "";
-            foreach ($this->events as $event) {
+            foreach ($this->calendar->events as $event) {
                 $calendar_text .=
                     $this->textCalendar($event, [
                         'timestamp',
-                        'runtime',
+                        ' ',
                         'summary',
-                        'description',
-                        'location',
+                        ' ',
+                        '[',
+                        'runtime',
+                        ']',
+                        //                        "\n",
+                        //                        'description',' ',"\n",
+                        //                        'location',
                     ]) . "\n";
             }
 
             if (mb_strlen($calendar_text) > 140) {
                 $calendar_text = "";
-                foreach ($this->events as $event) {
+                foreach ($this->calendar->events as $event) {
                     $calendar_text .=
                         $this->textCalendar($event, [
                             'timestamp',
@@ -203,9 +340,9 @@ class Calendar extends Agent
     {
         $time_agent = new Time($this->thing, "time");
         $calendar_text = "No calendar information available.";
-        if (isset($this->events)) {
+        if (isset($this->calendar_events)) {
             $calendar_text = "";
-            foreach ($this->events as $event) {
+            foreach ($this->calendar_events as $event) {
                 $calendar_text .=
                     $this->textCalendar($event, [
                         'timestamp',
@@ -272,43 +409,43 @@ class Calendar extends Agent
         }
         $events = $ical->eventsFromInterval('1 week');
 
-        if (!isset($this->events)) {
-            $this->events = [];
-        }
-
         $calendar_timezone = $ical->calendarTimeZone();
 
         foreach ($events as $event) {
             $e = $this->eventCalendar($event);
+
+            $e->start_at = $e->dtstart;
+            $e->end_at = $e->dtend;
+
             $e->calendar_name = $calendar_name;
             $e->calendar_timezone = $calendar_timezone;
-            //            $this->events[] = $this->eventCalendar($event);
-            $this->events[] = $e;
+
+            $this->calendar->events[] = $e;
         }
 
         // Sort events list by start time.
         // https://stackoverflow.com/questions/4282413/sort-array-of-objects-by-object-fields
-        usort($this->events, function ($first, $second) {
-            return strtotime($first->dtstart_tz) >
-                strtotime($second->dtstart_tz);
+        usort($this->calendar->events, function ($first, $second) {
+            return strtotime($first->start_at) > strtotime($second->end_at);
         });
 
         $time_agent = new Time($this->thing, "time");
 
         $calendar_text = "";
-        foreach ($this->events as $event) {
+        foreach ($this->calendar->events as $event) {
             $calendar_text .=
                 $event->summary .
                 " " .
-                $time_agent->textTime($event->dtstart) .
+                $time_agent->textTime($event->start_at) .
                 " " .
-                $time_agent->textTime($event->dtend) .
+                $time_agent->textTime($event->end_at) .
                 " " .
                 $event->description .
                 " " .
                 $event->location .
                 " / ";
         }
+
         $this->calendar_text = $calendar_text;
     }
 
@@ -385,10 +522,82 @@ class Calendar extends Agent
             $input = $this->agent_input;
         }
 
-        if ($input == 'calendar') {
-            $input = $this->subject;
+        if ($this->agent_input == 'dateline') {
+            $dateline = $this->memoryAgent('Dateline');
         }
 
+        if ($input == 'calendar') {
+            $agent_class_name = "Dateline";
+
+            // Start of ? code
+            // This is a generalised piece of code.
+            // It creates a unique key from the hashed from address and the agent name.
+            // Then it gets either a cached version of the agent variable.
+            // Or if 'too' old, calls for a more recent agent variable.
+
+            // TODO Refactor to Agent.
+
+            $agent_name = strtolower($agent_class_name);
+
+            $slug_agent = new Slug($this->thing, "slug");
+            $slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
+
+            $memory = $this->getMemory($slug);
+
+            if ($memory == false) {
+                $memory = $this->memoryAgent('Dateline');
+                $this->response .= "No memory found. Got first memory. ";
+            }
+
+            $age =
+                strtotime($this->current_time) -
+                strtotime($memory['retrieved_at']);
+
+            if ($age <= 60) {
+                // If younger than 60 seconds use response in memory.
+                $this->response .=
+                    "Saw an " .
+                    $agent_name .
+                    " channel memory from " .
+                    $this->thing->human_time($age) .
+                    " ago. ";
+            }
+            if ($age > 60) {
+                // TODO: Schedule offline request for dateline update.
+                // Work to worker, Thing  and Database?
+                /*
+
+//$from_hash = hash('sha256', $this->from);
+//var_dump($this->from);
+
+
+                $datagram = [
+                    "to" => $this->from,
+                    "from" => "calendar",
+                    "subject" => "s/ " . "dateline",
+                    "agent_input" => "dateline"
+                ];
+                $this->thing->spawn($datagram);
+                $this->response .= "Requested a dateline update. ";
+*/
+                //                $memory = $this->getMemory($slug);
+
+                $memory = $this->memoryAgent('Dateline');
+
+                $this->response .= "Got a dateline update. ";
+            }
+
+            //            $this->{$agent_name} = ${$agent_name};
+            // End of ? code
+
+            $dateline = $memory;
+
+            $e->dtstart = $this->current_time;
+            $e->dtend = $e->dtstart;
+            $e->summary = $dateline['line'];
+
+            $this->calendar->events[] = $e;
+        }
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $string = $input;
         $str_pattern = 'calendar';
