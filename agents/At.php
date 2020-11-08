@@ -372,9 +372,26 @@ $this->hour = false;
         }
 
 
+$this->timezone = $this->extractTimezone($input);
+
+$this->calendar_agent = new Calendar($this->thing,"calendar");
+$this->calendar_name = $this->calendar_agent->extractCalendar($input);
 
     }
 
+function extractTimezone($input) {
+
+// Identifiy UTC.
+$timezone = false;
+if (stripos($input,'utc') !== false) {
+
+$timezone = "UTC";
+
+}
+
+return $timezone;
+
+}
     /**
      *
      * @param unknown $input (optional)

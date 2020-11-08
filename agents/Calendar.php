@@ -3,12 +3,25 @@ namespace Nrwtaylor\StackAgentThing;
 
 use ICal\ICal;
 
+// John Grogg (?) has built a nice ICal parser.
+// Call it here (and only here) so the stack can read ICS.
+
 class Calendar extends Agent
 {
     public $var = 'hello';
 
     function init()
     {
+
+        $this->default_calendar_token = null;
+
+        // So I could call
+        if (isset($this->thing->container['stack']['calendar'])) {
+            $this->default_calendar_token = $this->thing->container['stack']['calendar'];
+        }
+
+
+
         $this->default_span = 2; // Default value
         $this->span = $this->default_span;
         $this->default_time_zone = 'UTC';
@@ -42,21 +55,58 @@ class Calendar extends Agent
         $this->makeIcal();
     }
 
+public function extractCalendar($input) {
+
+    // Identifiy UTC.
+    $calendar = "Gregorian";
+
+    if (stripos($input,'julian') !== false) {
+
+        $calendar = "julian";
+
+    }
+
+    if (stripos(str_replace(".","",$input),'BP') !== false) {
+        $calendar = "BP";
+
+    }
+
+
+    return $calendar;
+
+}
+
+
     public function doCalendar()
     {
+        $calendar_count = 0;
         if (isset($this->ics_links) and count($this > ics_links) != 0) {
-            $this->response .= "Saw at least one calendar link. ";
+
             foreach ($this->ics_links as $ics_link) {
+
+                if ($ics_link === true) {continue;}
+                if (strtolower($ics_link) === 'x') {continue;}
+                if (strtolower($ics_link) === 'z') {continue;}
+                if ($ics_link === null) {continue;}
+                if ($ics_link === false) {continue;}
+
+
+
                 $file = $ics_link;
                 if (isset($file) and is_string($file) and $file !== "") {
-                    $this->readCalendar($file);
+                    $response = $this->readCalendar($file);
+                    if ($response != true) {$calendar_count += 1;}
+
                 }
             }
         }
 
-        if (isset($this->calendar)) {
-            $this->calendar_text = $calendar['line'];
-        }
+        $this->response .= "Read " . $calendar_count . " calendar(s). ";
+
+
+//        if (isset($this->calendar)) {
+//            $this->calendar_text = $calendar['line'];
+//        }
 
         if ($this->agent_input == null) {
             $this->calendar_message = $this->calendar_text;
@@ -64,9 +114,9 @@ class Calendar extends Agent
             $this->calendar_message = $this->agent_input;
         }
 
-        if ($this->agent_input == 'calendar') {
-            $this->calendar_text = $calendar['line'];
-        }
+//        if ($this->agent_input == 'calendar') {
+//            $this->calendar_text = $calendar['line'];
+//        }
     }
 
     public function respondResponse()
@@ -119,6 +169,14 @@ class Calendar extends Agent
 
     public function textCalendar($event, $parameters = null)
     {
+//    public function icsCalendar($event, $parameters = null) {
+
+        return $this->icsCalendar($event, $parameters);
+
+    }
+
+    public function icsCalendar($event, $parameters = null) {
+
         $default_parameters = [
             'timestamp',
             'timezone',
@@ -527,76 +585,21 @@ var_dump($variable);
         }
 
         if ($input == 'calendar') {
-            $agent_class_name = "Dateline";
+//$token = 'nrwtaylor';
+$token = $this->default_calendar_token;
+            $new_ics_links = $this->icslinksCalendar($token);
 
-            // Start of ? code
-            // This is a generalised piece of code.
-            // It creates a unique key from the hashed from address and the agent name.
-            // Then it gets either a cached version of the agent variable.
-            // Or if 'too' old, calls for a more recent agent variable.
+        $this->ics_links = $new_ics_links;
 
-            // TODO Refactor to Agent.
-
-            $agent_name = strtolower($agent_class_name);
-
-            $slug_agent = new Slug($this->thing, "slug");
-            $slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
-
-            $memory = $this->getMemory($slug);
-
-            if ($memory == false) {
-                $memory = $this->memoryAgent('Dateline');
-                $this->response .= "No memory found. Got first memory. ";
-            }
-
-            $age =
-                strtotime($this->current_time) -
-                strtotime($memory['retrieved_at']);
-
-            if ($age <= 60) {
-                // If younger than 60 seconds use response in memory.
-                $this->response .=
-                    "Saw an " .
-                    $agent_name .
-                    " channel memory from " .
-                    $this->thing->human_time($age) .
-                    " ago. ";
-            }
-            if ($age > 60) {
-                // TODO: Schedule offline request for dateline update.
-                // Work to worker, Thing  and Database?
-                /*
-
-//$from_hash = hash('sha256', $this->from);
-//var_dump($this->from);
-
-
-                $datagram = [
-                    "to" => $this->from,
-                    "from" => "calendar",
-                    "subject" => "s/ " . "dateline",
-                    "agent_input" => "dateline"
-                ];
-                $this->thing->spawn($datagram);
-                $this->response .= "Requested a dateline update. ";
-*/
-                //                $memory = $this->getMemory($slug);
-
-                $memory = $this->memoryAgent('Dateline');
-
-                $this->response .= "Got a dateline update. ";
-            }
-
-            //            $this->{$agent_name} = ${$agent_name};
-            // End of ? code
-
-            $dateline = $memory;
-
+/*
             $e->dtstart = $this->current_time;
             $e->dtend = $e->dtstart;
             $e->summary = $dateline['line'];
 
             $this->calendar->events[] = $e;
+*/
+
+        return;
         }
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $string = $input;
