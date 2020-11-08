@@ -37,8 +37,15 @@ fi
 #Add path to profile file
 echo "Change Profile: $Path_File"
 cat <<ADDTEXT1 >> $HOME/$Path_File
+
+# Add Stackr Interactive Tool path
 if [ -d "/var/www/$SERVERNAME" ]; then
   export PATH="/var/www/$SERVERNAME:\$PATH"
 fi
 ADDTEXT1
 source $HOME/$Path_File
+echo "Remember to source your $Path_File"
+echo "> source $HOME/$Path_File"
+echo "Or start a new shell session"
+
+

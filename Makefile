@@ -146,6 +146,9 @@ agent: ## Add commandline shell interface to call the stack
 	sed -i 's/"pass" => "<private>"/"pass" => "$(MYSQLPASSWORD)"/' settings.php; \
 	# next not working -- create sed script to group all commands?
 	sed -i 's/\'web_prefix\' => \'<not set>\'/\'web_prefix\' => \'http:\/\/localhost:8000\/\'/' settings.php
+
+path: ## Add the stack to your path
+	./setpath $(SERVERNAME)
 	
 #agent:  $(AGENT_LOCATION)/agent ## Add commandline shell interface to call Stackr
 #ifneq ("$(wildcard $(AGENT_LOCATION))","")	
@@ -228,9 +231,6 @@ debug: ## Install enhanced debugging environment (dev optional?)
 configuration: 
 # sudo nano /etc/sysctl.conf
 # fs.file-max = 65535
-
-path: ## Add the stack to your path
-	./setpath $(SERVERNAME)
 
 test: ## Test agent works
 	cd /var/www/$(SERVERNAME); \
