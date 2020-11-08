@@ -923,7 +923,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     "json" => 'application/json',
                     "ics" => 'text/calendar',
                 ];
-
+/*
                 if ($uuid == null) {
 
                     $response->write(false);
@@ -935,18 +935,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                         );
                     }
                 }
-
-                if ($web_thing->thing == false) {
-                    $datagram['thing'] = false;
-                    $datagram['thing_report'] = false;
-
-                    return $this->renderer->render(
-                        $response,
-                        'thing.phtml',
-                        $datagram
-                    );
-                }
-
+*/
                 // See if the extension name is one of these.
 
                 $found = false;
@@ -960,14 +949,17 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     return $response->withStatus(404);
                 }
 
-                //if ($ext_name == 'json') {
-                //    return $response->withStatus(404);
-                //}
+    // OK - Done all we can.
+    // So now need to create a Thing.
+
+        $web_thing->db = new Database($web_thing->uuid,"null");
 
                 try {
                     $agent_namespace_name =
                         '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+
                     $agent = new $agent_namespace_name($web_thing, $agent_name);
+
                 } catch (Exception $e) {
                     //echo 'Caught exception: ',  $e->getMessage(), "\n";
                     return $response->withStatus(404);
