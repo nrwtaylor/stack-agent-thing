@@ -925,6 +925,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 ];
 
                 if ($uuid == null) {
+
                     $response->write(false);
 
                     if (isset($content_types[$ext_name])) {
@@ -1001,7 +1002,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                         $content_types[$ext_name]
                     );
                 }
-
                 $response->write($content);
                 return $response->withHeader(
                     'Content-Type',

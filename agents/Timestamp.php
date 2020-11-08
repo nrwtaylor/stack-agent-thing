@@ -44,10 +44,54 @@ class Timestamp extends Agent
 
     function run()
     {
-        $this->makeTimestamp();
+if (strtolower($this->input) == "zulu") {
+        $this->zuluTimestamp();
+        return;
+}
+    $this->utcTimestamp();
     }
 
-    function makeTimestamp($input = null)
+function zuluTimestamp($input = null) {
+
+        if ($input == null) {
+            $input_time = $this->current_time;
+        } else {
+            $input_time = $input;
+        }
+
+        if (strtoupper($input) == "X") {
+            $this->timestamp = "X";
+            return $this->timestamp;
+        }
+
+        $t = strtotime($input_time);
+
+        $this->timestamp = $this->current_time;
+
+        $time_agent = new Time($this->thing, "time");
+
+$time_zone = "UTC";
+        if ($time_zone !== false and $time_zone !== true) {
+            $time_agent->time_zone = $time_zone;
+        }
+        $this->response .=
+            "Returns the current " . $time_agent->time_zone . " timestamp.";
+
+        $time_agent->doTime();
+
+        $this->default_time_zone = $time_agent->default_time_zone;
+        $this->time_zone = $time_zone;
+        $timestamp = $time_agent->timestampTime();
+$timestamp = substr_replace($timestamp,"T",10,1);
+$timestamp = substr_replace($timestamp,"Z",19,1);
+
+$this->timestamp = $timestamp;
+        return $this->timestamp;
+
+
+}
+
+    function utcTimestamp($input = null)
     {
         if ($input == null) {
             $input_time = $this->current_time;
@@ -160,8 +204,6 @@ class Timestamp extends Agent
 
         $m .= $timestamp;
 
-        //        $m .= $this->response;
-
         $this->web_message = $m;
         $this->thing_report['web'] = $m;
     }
@@ -170,16 +212,14 @@ class Timestamp extends Agent
     {
         $sms_message = "TIMESTAMP";
 
-        //$parts = explode(" ", $this->timestamp);
-
-        //$timestamp = $parts[0] . " " . $parts[1];
         $timestamp = trim($this->timestamp);
 
         if ($this->micro_time_flag === true) {
             $timestamp = $this->timestamp;
         }
 
-        if ($this->default_time_zone != $this->time_zone) {
+        if (($this->default_time_zone != $this->time_zone) and 
+            (strtolower($this->input) != "zulu")) {
             $timestamp .= " " . $this->time_zone;
         }
 

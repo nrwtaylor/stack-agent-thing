@@ -49,7 +49,27 @@ class Dateline extends Agent
                 continue;
             }
             $this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
+            echo $dateline['dateline'] . "\n" . $dateline['line'] ."\n";
         }
+    }
+
+    public function paragraphsDateline()
+    {
+        $start_time = time();
+        $url = $this->test_url;
+        $read_agent = new Read($this->thing, $url);
+
+        $run_time = time() - $start_time;
+
+        $paragraph_agent = new Paragraph($this->thing, $read_agent->contents);
+
+        $paragraphs = $paragraph_agent->paragraphs;
+        $run_time = time() - $start_time;
+
+        $this->response .=
+            "Dateline source took " . $run_time . " seconds to get. ";
+
+        return $paragraphs;
     }
 
     public function getDateline($text = null)
@@ -62,30 +82,20 @@ class Dateline extends Agent
         // Read the specificed url. And get the first dateline.
         // Dateline being  timestamp + text.
         // Time this part/
+
+        if (!isset($this->paragraphs)) {
+            $this->paragraphs = $this->paragraphsDateline();
+        }
         $start_time = time();
-        $url = $this->test_url;
-        $read_agent = new Read($this->thing, $url);
-
-        $run_time = time() - $start_time;
-        $this->response .= "Dateline source took " . $run_time . " seconds to get. ";
-
-        $start_time = time();
-
-        $paragraph_agent = new Paragraph($this->thing, $read_agent->contents);
-
-        $paragraphs = $paragraph_agent->paragraphs;
 
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
-        foreach ($paragraphs as $i => $paragraph) {
+        foreach ($this->paragraphs as $i => $paragraph) {
             $dateline = $this->extractDateline($paragraph);
+            if ($this->isDateline($dateline) === false) {
+                continue;
+            }
 
-            if ($dateline == false) {
-                continue;
-            }
-            if ($dateline['line'] == " ") {
-                continue;
-            }
             $this->thing->log(
                 $dateline['dateline'] . "\n" . $dateline['line'] . "\n"
             );
@@ -93,8 +103,57 @@ class Dateline extends Agent
         }
         $run_time = time() - $start_time;
         $this->thing->log(" getDateline " . $run_time);
-        $this->response .= "Took another " . $run_time . " seconds to find a dateline. ";
+        $this->response .= "Got a dateline [" . $run_time . " seconds]. ";
+
+        $dateline['retrieved_at'] = $this->current_time;
+
         return $dateline;
+    }
+
+    public function isDateline($dateline = null)
+    {
+        if ($dateline === false) {
+            return false;
+        }
+
+        if (!isset($dateline['line'])) {
+            return false;
+        }
+
+        $text = $dateline['line'];
+
+        if (ctype_space($text) === true) {
+            return false;
+        }
+        $run_time = time() - $start_time;
+
+        // Because that is not a 'dateline'.
+        // A dateline should have UTC in.
+        // At least on this stack.
+        // At least for now.
+        $tokens = explode("UTC", $text);
+
+        if (!isset($tokens[1])) {
+            return false;
+        }
+
+        if (count($tokens) == 1 and $tokens[0] == "") {
+            return false;
+        }
+
+        if (ctype_space($tokens[1]) === true) {
+            return false;
+        }
+        if ($tokens[1] === "") {
+            return false;
+        }
+
+        $time_tokens = explode(" ", $tokens[0]);
+        if (strtolower($time_tokens[0]) == "timestamp") {
+            return true;
+        }
+
+        return false;
     }
 
     public function extractDateline($text = null)
@@ -210,9 +269,6 @@ class Dateline extends Agent
             $timezone = "Z";
         }
 
-        //        $text = $year ."-" . $dateline['month'] . $dateline['day_number'] . 'T'.
-        //        $dateline['hour'] .":".$dateline['minute'].":". $second . $timezone;
-
         $text =
             $year .
             "-" .
@@ -327,7 +383,7 @@ class Dateline extends Agent
         $this->thing_report['choices'] = $choices;
     }
 
-    public function questionDateline()
+    public function questionDateline($text = null)
     {
         $agent_class_name = "Dateline";
 
@@ -342,21 +398,18 @@ class Dateline extends Agent
         $agent_name = strtolower($agent_class_name);
 
         $slug_agent = new Slug($this->thing, "slug");
-        $slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
+
+        //$slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
+        $slug = $slug_agent->getSlug($agent_name . "-" . "test");
 
         $memory = $this->getMemory($slug);
-
-        if ($memory == false) {
-            $memory = $this->memoryAgent('Dateline');
-            $this->response .= "No memory found. Got first memory. ";
-        }
 
         $age =
             strtotime($this->current_time) - strtotime($memory['retrieved_at']);
 
         // How old can the dateline be before needing another check?
         $dateline_horizon = 60;
-        if ($age <= $dateline_horizon) {
+        if ($age <= $dateline_horizon and $this->isDateline($memory)) {
             // If younger than 60 seconds use response in memory.
             $this->response .=
                 "Saw an " .
@@ -364,31 +417,29 @@ class Dateline extends Agent
                 " channel memory from " .
                 $this->thing->human_time($age) .
                 " ago. ";
+
+            $this->dateline = $memory;
+            return $memory;
         }
+
+        if (!$this->isDateline($memory)) {
+            $memory = $this->getDateline($text);
+            $this->setMemory($slug, $memory);
+        }
+
         if ($age > $dateline_horizon) {
-            // TODO: Schedule offline request for dateline update.
-            // Work to worker, Thing  and Database?
-            /*
 
-//$from_hash = hash('sha256', $this->from);
-//var_dump($this->from);
+            $datagram = [
+                "to" => $this->from,
+                "from" => "dateline",
+                "subject" => "dateline update",
+                //                    "subject" => "s/ " . "dateline",
+                "agent_input" => "dateline",
+            ];
+            $this->thing->spawn($datagram);
+            $this->response .= "Requested a dateline update. ";
 
-
-                $datagram = [
-                    "to" => $this->from,
-                    "from" => "calendar",
-                    "subject" => "s/ " . "dateline",
-                    "agent_input" => "dateline"
-                ];
-                $this->thing->spawn($datagram);
-                $this->response .= "Requested a dateline update. ";
-*/
-            //                $memory = $this->getMemory($slug);
-            $memory = $this->getDateline($slug);
-            //                $memory = $this->memoryAgent('Dateline');
-
-            $this->response .= "Got a dateline update. ";
-            $age = 0;
+//            $age = 0;
         }
 
         $dateline = $memory;
@@ -402,14 +453,20 @@ class Dateline extends Agent
         if ($this->agent_input != null) {
             $input = $this->agent_input;
         }
-
         if ($input == "dateline") {
-            //$dateline = $this->memoryAgent('Dateline');
-
             $this->questionDateline();
-
             return;
         }
+
+        if ($input == "dateline update") {
+            $slug = "dateline-test";
+            $memory = $this->getDateline($input);
+
+            $this->setMemory($slug, $memory);
+            $this->dateline = $memory;
+            return;
+        }
+
         if ($input == "dateline test") {
             $this->test();
         }
