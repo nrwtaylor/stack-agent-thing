@@ -1928,7 +1928,7 @@ if (!isset($this->memory)) {
                 $agent_input_hit = ucwords($agent_input_hit);
 
                 foreach ($arr as $j => $agent_candidate) {
-                    if (str_replace("-", "", $agent_hit) == $agent_candidate) {
+                    if (strtolower(str_replace("-", "", $agent_hit)) == strtolower($agent_candidate)) {
                         //echo $agent_hit . " " . $agent_input_hit . "\n";
 
                         $agent_package = [

@@ -22,7 +22,9 @@ error_reporting(-1);
 $app->group('/api', function () use ($app) {
     // This is the whitefox API.  Accessible at api/whitefox/
     $app->group('/whitefox', function () use ($app) {
-
+if (isset($app->getContainer()->get('settings')['api']['stripe'][
+                'webhook'
+            ])) {
         $app->post($app->getContainer()->get('settings')['api']['stripe'][
                 'webhook'
             ],
@@ -67,7 +69,7 @@ $app->group('/api', function () use ($app) {
 
 
         });
-
+}
     });
 
     // Introducing redpanda
@@ -184,7 +186,11 @@ $app->group('/api', function () use ($app) {
             return $response->withHeader('HTTP/1.0 200 OK')->withStatus(200);
         });
 
-        // Operational end-point for NEXMO
+        // Operational end-point for GEARMAN
+if (isset($app->getContainer()->get('settings')['api']['stripe'][
+                'webhook'
+            ])) {
+
         $app->get(
             $app->getContainer()->get('settings')['api']['gearman']['webhook'],
             function ($request, $response, $args) {
@@ -208,7 +214,7 @@ $app->group('/api', function () use ($app) {
                 //                ->withStatus(200);
             }
         );
-
+}
         // Operational end-point for Microsoft
         $app->post(
             $app->getContainer()->get('settings')['api']['microsoft'][
