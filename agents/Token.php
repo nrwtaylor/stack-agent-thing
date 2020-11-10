@@ -41,6 +41,15 @@ class Token extends Agent
             $this->tokens_resource = require $this->resource_path .
                 $resource_name;
         }
+
+        $resource_name = 'item/items.php';
+        $uri = $this->resource_path . $resource_name;
+        if (file_exists($uri)) {
+            $this->items_resource = require $this->resource_path .
+                $resource_name;
+        }
+
+
         //$this->verbosityChannel();
     }
 
@@ -309,36 +318,20 @@ class Token extends Agent
             $this->getToken($input);
         }
 
+        // Get the recognized tokens.
+        foreach($this->tokens_resource as $token_slug=>$token) {
+
+        $token_text = str_replace("-", " ", $token_slug);
+        $token_name = str_replace("-token","", $token_slug);
         //if ($this->matchToken('red-token')) {
-        if (
-            stripos($input, 'red-token') !== false or
-            stripos($input, 'red token') !== false
-        ) {
-            //if ($input == 'red-token') {
-            $this->itemToken('red');
-            $this->response .= "Made a red token payment link. ";
-        }
-
-        if ($input == 'purple-token') {
-            $this->itemToken('purple');
-        }
-
-        if ($input == 'blue-token') {
-            $this->itemToken('blue');
-        }
-
-        if ($input == 'yellow-token') {
-            $this->itemToken('yellow');
-        }
-
-        if ($input == 'green-token') {
-            $this->itemToken('green');
-        }
-
-        if ((stripos($input, 'channel-token') !== false) or
-            (stripos($input, 'channel-token') !== false)) {
-            $this->itemToken('channel');
-            $this->response .= "Made a channel token payment link. ";
+            if (
+                stripos($input, $token_slug) !== false or
+                stripos($input, $token_text) !== false
+            ) {
+                //if ($input == 'red-token') {
+                $this->itemToken($token_name);
+                $this->response .= "Made a " . $token_name. " token payment link. ";
+            }
             return;
         }
 
@@ -366,23 +359,14 @@ class Token extends Agent
 
         $this->node_list = ["number" => ["number", "thing"]];
         $web = "";
-        /*
-        $web = '<a href="' . $link . '">';
-        $web .=
-            '<img src= "' .
-            $this->web_prefix .
-            'thing/' .
-            $this->uuid .
-            '/uuid.png">';
-        $web .= "</a>";
-*/
+
         $web .= "<br>";
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
-        //$web .= $this->subject . "<br>";
 
-        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
+//        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
 
-        foreach ($items as $item) {
+        foreach ($this->items_resource as $item=>$m) {
+            $item = str_replace("-token","",$item);
             //if ($this->subject == $item . '-token') {
             //if ($this->subject == $item . '-token') {
             if ($this->matchToken($item . '-token')) {
