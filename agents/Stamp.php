@@ -47,48 +47,29 @@ class Stamp extends Agent
 
     function run()
     {
-/*
-if (strtolower($this->input) == "zulu") {
-        $this->zuluStamp();
-        return;
-}
-    $utcstamp = $this->utcStamp();
-*/
-//$this->makeStamp();
     }
 
-    function makeStamp() {
+    function makeStamp()
+    {
+        $stamp = "";
+        $stamps = ['zulu', 'nuuid', 'utc', 'time', 'uuid'];
 
-$stamp = "";
-$stamps = ['zulu','nuuid','utc','time','uuid'];
+        foreach ($stamps as $stamp_name) {
+            ${$stamp_name . '_stamp'} = "";
+            if (stripos($this->input, $stamp_name) !== false) {
+                ${$stamp_name . "_stamp"} = $this->{$stamp_name . "Stamp"}();
+            }
 
-foreach($stamps as $stamp_name) {
-
-
-//var_dump($stamp_name);
-        ${$stamp_name. '_stamp'} = "";
-        if (stripos($this->input, $stamp_name) !== false) {
-            ${$stamp_name. "_stamp"} = $this->{$stamp_name."Stamp"}();
+            $stamp .= ${$stamp_name . "_stamp"} . " ";
         }
 
-//var_dump(${$stamp_name. "_stamp"});
+        // Build stamp
 
-$stamp .= ${$stamp_name. "_stamp"} ." ";
-
-
-}
-
-// Build stamp
-
-
-$this->stamp = $stamp;
-
-        $utcstamp = $this->utcStamp();
-
+        $this->stamp = trim($stamp);
     }
 
-function zuluStamp($input = null) {
-
+    function zuluStamp($input = null)
+    {
         $time_agent = new Time($this->thing, "time");
 
         $time_zone = "UTC";
@@ -103,38 +84,32 @@ function zuluStamp($input = null) {
         $this->default_time_zone = $time_agent->default_time_zone;
         $this->time_zone = $time_zone;
         $zulustamp = $time_agent->timestampTime();
-$zulustamp = substr_replace($zulustamp,"T",10,1);
-$zulustamp = substr_replace($zulustamp,"Z",19,1);
+        $zulustamp = substr_replace($zulustamp, "T", 10, 1);
+        $zulustamp = substr_replace($zulustamp, "Z", 19, 1);
 
         return $zulustamp;
+    }
 
-
-}
-
-function nuuidStamp($input = null) {
-
+    function nuuidStamp($input = null)
+    {
         $nuuid_agent = new Nuuid($this->thing, "nuuid");
-        return $nuuid_agent->thing->nuuid;;
+        return $nuuid_agent->thing->nuuid;
+    }
 
-}
-
-function uuidStamp($input = null) {
-
+    function uuidStamp($input = null)
+    {
         $uuid_agent = new Uuid($this->thing, "uuid");
-        return $uuid_agent->thing->uuid;;
+        return $uuid_agent->thing->uuid;
+    }
 
-}
-
-
-function utcStamp($input = null) {
-
-    return $this->zuluStamp($input);
-
-}
+    function utcStamp($input = null)
+    {
+        return $this->zuluStamp($input);
+    }
 
     function timeStamp($input = null)
     {
-/*
+        /*
         if ($input == null) {
             $input_time = $this->current_time;
         } else {
@@ -166,13 +141,12 @@ function utcStamp($input = null) {
         $this->time_zone = $time_zone;
         $timestamp = $time_agent->timestampTime();
 
-
-        if (($this->default_time_zone != $this->time_zone) and 
-            (strtolower($this->input) != "zulu")) {
+        if (
+            $this->default_time_zone != $this->time_zone and
+            strtolower($this->input) != "zulu"
+        ) {
             $timestamp .= " " . $this->time_zone;
         }
-
-
 
         return $timestamp;
     }
@@ -268,7 +242,7 @@ function utcStamp($input = null) {
             $stamp = $this->timestamp;
         }
 
-/*
+        /*
         if (($this->default_time_zone != $this->time_zone) and 
             (strtolower($this->input) != "zulu")) {
             $stamp .= " " . $this->time_zone;
@@ -353,16 +327,14 @@ function utcStamp($input = null) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case 'milli':
-$this->uuidStamp();
+                            $this->uuidStamp();
 
                         case 'nuuid':
-$this->uuidStamp();
+                            $this->uuidStamp();
 
-case 'time':
+                        case 'time':
                         case 'milli':
-$this->timeStamp();
-
-
+                            $this->timeStamp();
 
                         case 'micro':
                         case 'ms':
