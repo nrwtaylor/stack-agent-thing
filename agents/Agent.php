@@ -393,6 +393,23 @@ class Agent
      */
     public function make()
     {
+
+        // Call the classes make function.
+        try {
+        $this->{'make' . $this->agent_class_name}();
+        } catch (\Throwable $t) {
+            $this->thing->log(
+                'caught make ' . $this->agent_class_name . ' throwable.',
+                "WARNING"
+            );
+            //return;
+        } catch (\Error $ex) {
+            $this->thing->log(
+                'caught make ' . $this->agent_class_name . ' error.',
+                "WARNING"
+            );
+        }
+
         // So ... don't call yourself.
         // Don't do a make on yourself.
         $this->thing->log("start make.");
@@ -407,6 +424,7 @@ class Agent
         $this->makePNGs();
         $this->makeSMS();
         $this->makeWeb();
+        $this->makeJson();
 
         // Explore adding in INFO and HELP to web response.
         $dev_agents = ["response", "help", "info", "sms", "message"];
@@ -638,6 +656,19 @@ class Agent
         }
     }
 
+
+    public function makeJson() {
+
+
+if (!isset($this->thing_report['json'])) {
+
+$this->thing_report['json'] = null;
+
+}
+        
+
+    }
+
     /**
      *
      */
@@ -782,6 +813,8 @@ if (!isset($this->memory)) {
     public function getName()
     {
         $this->agent_name = explode("\\", strtolower(get_class($this)))[2];
+
+        $this->agent_class_name = explode("\\", get_class($this))[2];
     }
 
     function debug()

@@ -47,33 +47,51 @@ class Stamp extends Agent
 
     function run()
     {
+/*
 if (strtolower($this->input) == "zulu") {
         $this->zuluStamp();
         return;
 }
-    $this->utcStamp();
+    $utcstamp = $this->utcStamp();
+*/
+//$this->makeStamp();
+    }
+
+    function makeStamp() {
+
+$stamp = "";
+$stamps = ['zulu','nuuid','utc','time','uuid'];
+
+foreach($stamps as $stamp_name) {
+
+
+//var_dump($stamp_name);
+        ${$stamp_name. '_stamp'} = "";
+        if (stripos($this->input, $stamp_name) !== false) {
+            ${$stamp_name. "_stamp"} = $this->{$stamp_name."Stamp"}();
+        }
+
+//var_dump(${$stamp_name. "_stamp"});
+
+$stamp .= ${$stamp_name. "_stamp"} ." ";
+
+
+}
+
+// Build stamp
+
+
+$this->stamp = $stamp;
+
+        $utcstamp = $this->utcStamp();
+
     }
 
 function zuluStamp($input = null) {
 
-        if ($input == null) {
-            $input_time = $this->current_time;
-        } else {
-            $input_time = $input;
-        }
-
-        if (strtoupper($input) == "X") {
-            $this->stamp = "X";
-            return $this->stamp;
-        }
-
-        $t = strtotime($input_time);
-
-        $this->stamp = $this->current_time;
-
         $time_agent = new Time($this->thing, "time");
 
-$time_zone = "UTC";
+        $time_zone = "UTC";
         if ($time_zone !== false and $time_zone !== true) {
             $time_agent->time_zone = $time_zone;
         }
@@ -85,17 +103,38 @@ $time_zone = "UTC";
         $this->default_time_zone = $time_agent->default_time_zone;
         $this->time_zone = $time_zone;
         $zulustamp = $time_agent->timestampTime();
-$zulustamp = substr_replace($timestamp,"T",10,1);
-$zulustamp = substr_replace($timestamp,"Z",19,1);
+$zulustamp = substr_replace($zulustamp,"T",10,1);
+$zulustamp = substr_replace($zulustamp,"Z",19,1);
 
-//$this->timestamp = $timestamp;
         return $zulustamp;
 
 
 }
 
-    function utcStamp($input = null)
+function nuuidStamp($input = null) {
+
+        $nuuid_agent = new Nuuid($this->thing, "nuuid");
+        return $nuuid_agent->thing->nuuid;;
+
+}
+
+function uuidStamp($input = null) {
+
+        $uuid_agent = new Uuid($this->thing, "uuid");
+        return $uuid_agent->thing->uuid;;
+
+}
+
+
+function utcStamp($input = null) {
+
+    return $this->zuluStamp($input);
+
+}
+
+    function timeStamp($input = null)
     {
+/*
         if ($input == null) {
             $input_time = $this->current_time;
         } else {
@@ -108,7 +147,7 @@ $zulustamp = substr_replace($timestamp,"Z",19,1);
         }
 
         $t = strtotime($input_time);
-
+*/
         $timestamp = $this->current_time;
 
         $time_agent = new Time($this->thing, "time");
@@ -125,9 +164,17 @@ $zulustamp = substr_replace($timestamp,"Z",19,1);
 
         $this->default_time_zone = $time_agent->default_time_zone;
         $this->time_zone = $time_zone;
-        $utcstamp = $time_agent->timestampTime();
+        $timestamp = $time_agent->timestampTime();
 
-        return $utcstamp;
+
+        if (($this->default_time_zone != $this->time_zone) and 
+            (strtolower($this->input) != "zulu")) {
+            $timestamp .= " " . $this->time_zone;
+        }
+
+
+
+        return $timestamp;
     }
 
     function test()
@@ -221,11 +268,12 @@ $zulustamp = substr_replace($timestamp,"Z",19,1);
             $stamp = $this->timestamp;
         }
 
+/*
         if (($this->default_time_zone != $this->time_zone) and 
             (strtolower($this->input) != "zulu")) {
             $stamp .= " " . $this->time_zone;
         }
-
+*/
         $sms_message .= " | " . $stamp;
 
         $this->sms_message = $sms_message;
