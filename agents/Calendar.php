@@ -133,6 +133,17 @@ public function extractCalendar($input) {
         return $this->thing_report;
     }
 
+    public function makeJson()
+    {
+        if (!isset($this->calendar->events)) {
+            $this->doCalendar();
+        }
+
+        $json = $this->calendar->events;
+
+        $this->thing_report['json'] = $json;
+    }
+
     function makeWeb()
     {
         $time_agent = new Time($this->thing, "time");

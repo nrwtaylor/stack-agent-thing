@@ -28,7 +28,8 @@ array(
 "task"=>$thing->task,
 "created_at"=>$thing->created_at
 ),
-"thing_report"=>array("sms"=>$agent_thing->thing_report['sms'])
+"thing_report"=>array("sms"=>$agent_thing->thing_report['sms'],
+"json"=>$agent_thing->thing_report['json'])
 )
 ));
 

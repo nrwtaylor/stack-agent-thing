@@ -2104,7 +2104,6 @@ if (!isset($this->memory)) {
 
         $nuuid = new Nuuid($this->thing, "nuuid");
         $n = $nuuid->extractNuuid($input);
-
         // See if this matches a stripe token
         if ($n != false) {
             $temp_email = $this->thing->db->from;

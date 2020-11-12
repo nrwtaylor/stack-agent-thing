@@ -115,6 +115,22 @@ class Roll extends Agent
         $this->thing_report['choices'] = $choices;
     }
 
+    public function makeJson()
+    {
+        if (!isset($this->roll)) {
+        }
+
+        $r = [];
+        foreach ($this->thing_report['pngs'] as $name=>$image_string) {
+            $alt_text = $this->images[$name]['alt_text'];
+            $r[] = $alt_text;
+        }
+
+        $json = [$this->roll,$r];
+
+        $this->thing_report['json'] = $json;
+    }
+
 
     /**
      *

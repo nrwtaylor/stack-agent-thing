@@ -22,6 +22,8 @@ class Token extends Agent
     {
         $this->node_list = ["token" => ["token"]];
 
+        $this->item_minimum_price = 0.79; // Start here.
+
         //$this->getSlug("123414sdfas asdfsad 234234 *&*dfg") ;
         $this->state = "X";
         if (isset($this->settings['state'])) {
@@ -365,13 +367,22 @@ class Token extends Agent
 
 //        $items = ['red', 'blue', 'yellow', 'green', 'channel'];
 
-        foreach ($this->items_resource as $item=>$m) {
-            $item = str_replace("-token","",$item);
+        foreach ($this->items_resource as $item_slug=>$item) {
+            $item_slug = str_replace("-token","",$item_slug);
             //if ($this->subject == $item . '-token') {
             //if ($this->subject == $item . '-token') {
-            if ($this->matchToken($item . '-token')) {
-                $this->itemToken($item);
-                $web .= $this->web_token[$item];
+            if ($this->matchToken($item_slug . '-token')) {
+                // Check for some conditions which are problematic.
+                if (!isset($item['price'])) {$web .= "<div>Unpriced item retrieved.</div>"; continue;}
+                if ($item['price'] <= $this->item_minimum_price) {
+                    $this->freeToken($item_slug);
+                    $web .= $this->web_token[$item_slug]; 
+                    continue;
+                }
+
+                //
+                $this->itemToken($item_slug);
+                $web .= $this->web_token[$item_slug];
             }
         }
 
@@ -465,6 +476,51 @@ class Token extends Agent
 
         $this->web_token[$colour] = $web;
     }
+
+    public function freeToken($colour = null)
+    {
+        if ($colour == null) {
+            return true;
+        }
+
+        $item = null;
+
+        // Load token defintitions.
+        $item = ['text' => ucwords($colour) . ' Token', 'price' => '1'];
+        $item_id = 'grey' . '-token';
+
+        if (isset($this->tokens_resource[$colour . '-token'])) {
+            $item_id = $colour . '-token';
+            $item = $this->tokens_resource[$colour . '-token'];
+        }
+
+        // TODO: Check item creation
+        // TODO: Build out consistent buttoning
+
+        $item_agent = new Item($this->thing, $item_id);
+
+        $item = $item_agent->item;
+        $this->token_item = $item;
+
+        $payment_agent = new Payment($this->thing, "payment");
+        $payment_agent->makeSnippet();
+        $web = $payment_agent->snippet;
+
+        $button_agent = new Button($this->thing, "button");
+        $button_agent->makeSnippet();
+        $web = $button_agent->snippet;
+
+        $help_text = "Support us.";
+
+        $this->help = $help_text;
+        $this->thing_report['help'] = $help_text;
+        $this->thing_report['info'] = 'Generates tokens.';
+
+        //$this->response .= "Made " . $colour . " token. ";
+
+        $this->web_token[$colour] = $web;
+    }
+
 
     /**
      *

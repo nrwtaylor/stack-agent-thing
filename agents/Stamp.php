@@ -37,8 +37,6 @@ class Stamp extends Agent
         $this->state = null; // to avoid error messages
 
         $this->stamp_prefix = "";
-
-        //        $this->makeTimestamp();
     }
 
     function timezonestamp($text = null)
@@ -51,21 +49,59 @@ class Stamp extends Agent
 
     function makeStamp()
     {
-        $stamp = "";
-        $stamps = ['zulu', 'nuuid', 'utc', 'time', 'uuid'];
+        $stamp_text = "";
+        $stamps = ['juliett','zulu', 'nuuid', 'utc', 'time', 'uuid'];
 
+        usort($stamps, function ($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
+
+        $stripped_input = $this->input;
+        $found_stamps = [];
         foreach ($stamps as $stamp_name) {
-            ${$stamp_name . '_stamp'} = "";
-            if (stripos($this->input, $stamp_name) !== false) {
-                ${$stamp_name . "_stamp"} = $this->{$stamp_name . "Stamp"}();
-            }
+            $score = stripos($this->input, $stamp_name);
+            if ($score !== false) {
+                foreach ($stamps as $check_stamp_name) {
+                    if (
+                        stripos($check_stamp_name, $stamp_name) !== false and
+                        $stamp_name != $check_stamp_name
+                    ) {
+                        continue 2;
+                    }
+                }
 
-            $stamp .= ${$stamp_name . "_stamp"} . " ";
+                $stamp = ['score' => $score];
+
+                $found_stamps[$stamp_name] = $stamp;
+                $stripped_input = trim(
+                    str_replace($stamp_name, " ", $stripped_input)
+                );
+            }
+        }
+
+        $stripped_input = preg_replace(
+            ['/\s{2,}/', '/[\t\n]/'],
+            ' ',
+            $stripped_input
+        );
+
+        $score = array_column($found_stamps, 'score');
+        array_multisort($score, SORT_ASC, $found_stamps);
+
+        foreach ($found_stamps as $stamp_name => $stamp) {
+            ${$stamp_name . "_stamp"} = $this->{$stamp_name . "Stamp"}();
+
+            $stamp_text .= ${$stamp_name . "_stamp"} . " ";
         }
 
         // Build stamp
-
-        $this->stamp = trim($stamp);
+        // Tidy up stamp. Remove double spaces.
+        $stamp_txt = preg_replace(
+            ['/\s{2,}/', '/[\t\n]/'],
+            ' ',
+            $stripped_input
+        );
+        $this->stamp = trim($stamp_text);
     }
 
     function zuluStamp($input = null)
@@ -89,6 +125,26 @@ class Stamp extends Agent
 
         return $zulustamp;
     }
+
+    function juliettStamp($input = null)
+    {
+//https://en.wikipedia.org/wiki/List_of_military_time_zones
+        $time_agent = new Time($this->thing, "time");
+
+        $this->response .=
+            "Returns the observer's local time - " . $time_agent->time_zone . ". ";
+
+        $time_agent->doTime();
+
+        $this->default_time_zone = $time_agent->default_time_zone;
+        $this->time_zone = $time_zone;
+        $juliettstamp = $time_agent->timestampTime();
+        $juliettstamp = substr_replace($juliettstamp, "T", 10, 1);
+        $juliettstamp = substr_replace($juliettstamp, "J", 19, 1);
+
+        return $juliettstamp;
+    }
+
 
     function nuuidStamp($input = null)
     {
@@ -214,14 +270,20 @@ class Stamp extends Agent
 
         $parts = explode(" ", $this->stamp);
 
+        if ((!isset($parts[1])) and ($parts[0] == "")) {
+            $stamp = "Empty";
+        }
+
+        if ((isset($parts[0])) and (isset($parts[1])) ) {
         $stamp = $parts[0] . " " . $parts[1];
         if ($this->micro_time_flag === true) {
             $stamp = $this->stamp;
         }
+        }
 
         //        $m .= $timestamp;
 
-        if ($this->default_time_zone != $this->time_zone) {
+        if ((isset($this->time_zone)) and ($this->default_time_zone != $this->time_zone)) {
             $stamp .= " " . $this->time_zone;
         }
         $stamp .= "<br>";
