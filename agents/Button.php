@@ -13,8 +13,11 @@ class Button extends Agent
 
     function init()
     {
-        $this->test_slack_button = require $this->resource_path .
-            'button/test-button.php';
+        $this->test_slack_button = null;
+        if (file_exists($this->resource_path . 'button/test-button.php')) {
+            $this->test_slack_button = require $this->resource_path .
+                'button/test-button.php';
+        }
         $this->agent_name = "button";
         $this->keyword = "button";
         $this->test = "Development code"; // Always
