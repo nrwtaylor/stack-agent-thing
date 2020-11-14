@@ -88,6 +88,9 @@ class Stamp extends Agent
         $score = array_column($found_stamps, 'score');
         array_multisort($score, SORT_ASC, $found_stamps);
 
+        // If no stamps matched, return default nuuid zulu.
+        if ($found_stamps == []) {$found_stamps = ['nuuid'=>['score'=>1], 'zulu'=>['score'=>1]];}
+
         foreach ($found_stamps as $stamp_name => $stamp) {
             ${$stamp_name . "_stamp"} = $this->{$stamp_name . "Stamp"}();
 
@@ -128,7 +131,7 @@ class Stamp extends Agent
 
     function juliettStamp($input = null)
     {
-//https://en.wikipedia.org/wiki/List_of_military_time_zones
+        //https://en.wikipedia.org/wiki/List_of_military_time_zones
         $time_agent = new Time($this->thing, "time");
 
         $this->response .=
@@ -136,8 +139,6 @@ class Stamp extends Agent
 
         $time_agent->doTime();
 
-        $this->default_time_zone = $time_agent->default_time_zone;
-        $this->time_zone = $time_zone;
         $juliettstamp = $time_agent->timestampTime();
         $juliettstamp = substr_replace($juliettstamp, "T", 10, 1);
         $juliettstamp = substr_replace($juliettstamp, "J", 19, 1);
@@ -160,25 +161,12 @@ class Stamp extends Agent
 
     function utcStamp($input = null)
     {
+        // Synonym. Alias.
         return $this->zuluStamp($input);
     }
 
     function timeStamp($input = null)
     {
-        /*
-        if ($input == null) {
-            $input_time = $this->current_time;
-        } else {
-            $input_time = $input;
-        }
-
-        if (strtoupper($input) == "X") {
-            $utcstamp = "X";
-            return $utcstamp;
-        }
-
-        $t = strtotime($input_time);
-*/
         $timestamp = $this->current_time;
 
         $time_agent = new Time($this->thing, "time");
@@ -262,6 +250,7 @@ class Stamp extends Agent
 
     public function makeWeb()
     {
+        $stamp = "";
         if (!isset($this->response)) {
             $this->response = "meep";
         }
@@ -271,13 +260,13 @@ class Stamp extends Agent
         $parts = explode(" ", $this->stamp);
 
         if ((!isset($parts[1])) and ($parts[0] == "")) {
-            $stamp = "Empty";
+            $stamp .= "Empty";
         }
 
         if ((isset($parts[0])) and (isset($parts[1])) ) {
         $stamp = $parts[0] . " " . $parts[1];
         if ($this->micro_time_flag === true) {
-            $stamp = $this->stamp;
+            $stamp .= $this->stamp;
         }
         }
 

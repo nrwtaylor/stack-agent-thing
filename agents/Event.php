@@ -38,12 +38,65 @@ class Event extends Agent
         $this->verbosity = 1;
 
         $this->test = "Development code"; // Always iterative.
+        //        $this->initEvent();
     }
 
-    public function readEvent($text= null) {
+    public function currentEvent()
+    {
+        // If we know the context we can pull in a useful event.
+        // For example. current.
+        if (
+            stripos($this->subject . " " . $this->agent_input, 'current') !==
+            false
+        ) {
+            // Saw the word current somewhere.
+            $dateline_agent = new Dateline(
+                $this->thing,
+                "dateline " . $this->subject . " " . $this->agent_input
+            );
 
+            $timestamp_agent = new Timestamp($this->thing, "timestamp");
+            $start_time = time();
+            $paragraphs = $dateline_agent->paragraphsDateline();
+            $this->response .=
+                "Got some useful paragraphs (" .
+                $this->thing->human_time(time() - $start_time) .
+                ") .";
+            //exit();
+            foreach ($paragraphs as $i => $paragraph) {
+                $tokens = explode(" ", $paragraph);
+                if (count($tokens) == 1) {
+                    continue;
+                }
+
+                if ($paragraph == "") {
+                    continue;
+                }
+
+                if ($timestamp_agent->hasTimestamp($paragraph) === false) {
+                    continue;
+                }
+
+                $time_stamp = $timestamp_agent->extractTimestamp($paragraph);
+
+                $filtered_paragraph = str_replace($time_stamp, "", $paragraph);
+                $tokens = explode(" ", $filtered_paragraph);
+                if (count($tokens) == 0) {
+                    continue;
+                }
+
+                $this->makeEvent(null, $paragraph);
+                break;
+            }
+        }
+    }
+
+    public function readEvent($text = null)
+    {
         // TODO Read event and extract when, place and runtime.
-        if ($text == null) {return null;}
+        if ($text == null) {
+            return null;
+        }
 
         // When format
         // date or config string, comma, text
@@ -52,9 +105,7 @@ class Event extends Agent
             // Possibly a when structured event.
             $when_agent = new When($this->thing, "when");
             $when = $when_agent->extractWhen($text);
-//            var_dump($when['date']);
-//            var_dump($when['time']);
-//            var_dump($when['description']);
+
             $event = $when;
             $event['location'] = null;
             return $event;
@@ -64,25 +115,21 @@ class Event extends Agent
         $this->at_agent = new At($this->thing, "at");
 
         $this->place_agent->extractPlace($text);
-//var_dump($this->place_agent->place_names);
 
         $this->at_agent->extractAt($text);
-//var_dump($this->at_agent->day. " " . $this->at_agent->minute . " " . $this->at_agent->seconds);
-
     }
 
-    public function placetimeEvent($event) {
-
+    public function placetimeEvent($event)
+    {
     }
 
-    public function textEvent($event) {
-
+    public function textEvent($event)
+    {
     }
 
-    public function loadEvents() {
-
+    public function loadEvents()
+    {
         // Events
-
     }
 
     function set()
@@ -241,19 +288,13 @@ class Event extends Agent
 
         $count = count($things);
         $this->thing->log(
-            'Agent "Event" found ' .
-                count($things) .
-                " event Things."
+            'Agent "Event" found ' . count($things) . " event Things."
         );
-
 
         if (!$this->is_positive_integer($count)) {
             // No places found
         } else {
-            foreach (
-                array_reverse($things)
-                as $thing
-            ) {
+            foreach (array_reverse($things) as $thing) {
                 $uuid = $thing->uuid;
                 $variables = $thing->variables;
                 if (isset($variables['event'])) {
@@ -394,7 +435,6 @@ foreach($filtered_places as $key=>$filtered_place) {
         $this->old_events = $this->events;
         $this->events = [];
         foreach ($this->old_events as $key => $row) {
-            //var_dump( strtotime($row['refreshed_at']) );
             if (strtotime($row['refreshed_at']) != false) {
                 $this->events[] = $row;
             }
@@ -485,7 +525,6 @@ foreach($filtered_places as $key=>$filtered_place) {
         //if (isset($this->minutes)) {return;}
 
         $agent = new Runtime($this->thing, "runtime");
-        //var_dump($agent->runtime);
 
         //$this->minutes = $agent->minutes;
         $this->minutes = $agent->runtime;
@@ -844,7 +883,7 @@ $web .= "<br>";
 
         $this->thing_report['web'] = $web;
     }
-/*
+    /*
     function readEvent()
     {
         $this->thing->log("read");
@@ -971,7 +1010,6 @@ $web .= "<br>";
         //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " ";
 
-        //var_dump($this->event_name);
         $sms_message .= $this->event_name;
 
         $event_code_text = "X";
@@ -1069,7 +1107,7 @@ $web .= "<br>";
     {
         $this->response = null;
         $this->num_hits = 0;
-/*
+        /*
         switch (true) {
             case $this->agent_input == "extract":
                 $input = strtolower($this->from . " " . $this->subject);
@@ -1082,10 +1120,14 @@ $web .= "<br>";
         }
 */
 
-$input = $this->input;
+        $input = $this->input;
 
-$this->readEvent($input);
+        $this->readEvent($input);
 
+        if (stripos($input, "current") !== false) {
+            $b = $this->currentEvent();
+            return;
+        }
         // Haystack doesn't work well here because we want to run the extraction on the cleanest signal.
         // Think about this.
         //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
@@ -1277,11 +1319,6 @@ $this->readEvent($input);
         // might have extracted information in these variables.
 
         // $uuids, $head_codes, $this->run_at, $this->run_time
-        //var_dump($this->last_event_code);
-        //var_dump($this->last_event_name);
-        //echo "<bR>";
-        //var_dump($this->event_code);
-        //var_dump($this->event_name);
 
         if ($this->event_code != null) {
             $this->getEvent($this->event_code);
@@ -1363,7 +1400,7 @@ $this->readEvent($input);
             return;
         }
 
-        $this->read();
+        //$this->read();
 
         return "Message not understood";
 

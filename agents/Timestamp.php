@@ -33,10 +33,6 @@ class Timestamp extends Agent
         $this->state = null; // to avoid error messages
 
         $this->timestamp_prefix = "";
-
-        $stamp_agent = new Stamp($this->thing, $this->agent_input);
-        $this->thing_report = $stamp_agent->thing_report;
-        //        $this->makeTimestamp();
     }
 
     function test()
@@ -59,8 +55,9 @@ class Timestamp extends Agent
                 break;
             }
             $this->extractTimestamp($line);
-
-            $line . "<br>" . "timestamp " . $this->timestamp . "<br>" . "<br>";
+            if ((isset($this->timestamp)) and ($this->timestamp != null)) {
+                $line . "<br>" . "timestamp " . $this->timestamp . "<br>" . "<br>";
+            }
         }
     }
 
@@ -72,8 +69,127 @@ class Timestamp extends Agent
     {
     }
 
-    function extractTimestamp($input = null)
+    function validTimestamp(string $date, string $format = 'Y-m-d'): bool
     {
+        $dateObj = \DateTime::createFromFormat($format, $date);
+        return $dateObj && $dateObj->format($format) == $date;
+    }
+
+    public function hasTimestamp($text = null)
+    {
+        $timestamp = $this->extractTimestamp($text);
+
+        if (is_string($timestamp) === true) {return true;}
+        if ($timestamp === true) {return true;}
+
+        return false;
+    }
+
+    public function isTimestamp($text = null)
+    {
+        if ($text == null or $text == "") {
+            return false;
+        }
+        // Apparently strtotime reads "zulu" as current time?
+        // Return true. Because this is not a timestamp we can meaningfully extract time from.
+        if (strtolower($text) == "zulu") {
+            return false;
+        }
+
+        if ($this->validTimestamp($text, "Y-m-d\TH:i:s\J") === true) {
+            return true;
+        }
+        if ($this->validTimestamp($text, "Y-m-d\TH:i:s\Z") === true) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function extractTimestamp($text = null)
+    {
+        $tokens = explode(" ", $text);
+        foreach ($tokens as $i => $token) {
+            if ($this->isTimestamp($token) === true) {
+                return $token;
+            }
+
+            if ($this->validTimestamp($token, "Y-m-d") === true) {
+                return $token;
+            }
+
+            if (isset($tokens[$i + 1])) {
+                if (
+                    $this->validTimestamp(
+                        $token . " " . $tokens[$i + 1],
+                        "Y-m-d h:i:s"
+                    ) === true
+                ) {
+                    return $token . " " . $tokens[$i + 1];
+                }
+            }
+
+            if (isset($tokens[$i + 2])) {
+                if (
+                    $this->validTimestamp(
+                        $token . " " . $tokens[$i + 1] . " " . $tokens[$i + 2],
+                        "Y m d"
+                    ) === true
+                ) {
+                    return $token .
+                        " " .
+                        $tokens[$i + 1] .
+                        " " .
+                        $tokens[$i + 2];
+                }
+            }
+
+            if (isset($tokens[$i + 2])) {
+                if (
+                    $this->validTimestamp(
+                        $token . " " . $tokens[$i + 1] . " " . $tokens[$i + 2],
+                        "F j, Y"
+                    ) === true
+                ) {
+                    return $token .
+                        " " .
+                        $tokens[$i + 1] .
+                        " " .
+                        $tokens[$i + 2];
+                }
+            }
+
+            if (isset($tokens[$i + 2])) {
+                if (
+                    $this->validTimestamp(
+                        $token . " " . $tokens[$i + 1] . " " . $tokens[$i + 2],
+                        "F j Y"
+                    ) === true
+                ) {
+                    return $token .
+                        " " .
+                        $tokens[$i + 1] .
+                        " " .
+                        $tokens[$i + 2];
+                }
+            }
+
+            if (isset($tokens[$i + 2])) {
+                if (
+                    $this->validTimestamp(
+                        $token . " " . $tokens[$i + 1] . " " . $tokens[$i + 2],
+                        "j F Y"
+                    ) === true
+                ) {
+                    return $token .
+                        " " .
+                        $tokens[$i + 1] .
+                        " " .
+                        $tokens[$i + 2];
+                }
+            }
+        }
+return false;
         // Get the clock time.
         // Then date
         $this->timestamp = "X";
@@ -123,5 +239,52 @@ class Timestamp extends Agent
 
     public function read($text = null)
     {
+        $this->readSubject();
+    }
+
+    public function findTimestamp($text = null)
+    {
+        //        if (strtotime($text) == false) {return true;}
+
+        // Apparently strtotime reads "zulu" as 1605193914;
+        //        if (strtolower($text) == "zulu") {return true;}
+        $this->timestamp = $text;
+    }
+
+    public function makeSMS()
+    {
+        if (isset($this->thing_report['sms'])) {
+            return;
+        }
+
+        $sms = "TIMESTAMP | " . $this->timestamp;
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
+    }
+
+    public function readSubject()
+    {
+        if ($this->agent_input == "test") {
+            $this->test();
+            return;
+        }
+
+        $input = $this->agent_input;
+        if ($this->agent_input == null or $this->agent_input == "") {
+            $input = $this->subject;
+        }
+
+        if ($this->agent_input == "timestamp") {
+            $input = $this->subject;
+        }
+
+        if ($this->isTimestamp($input)) {
+            $this->findTimestamp($input);
+            return;
+        }
+
+        $stamp_agent = new Stamp($this->thing, $input);
+        $this->thing_report = $stamp_agent->thing_report;
     }
 }

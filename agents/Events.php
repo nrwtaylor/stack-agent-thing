@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Events
+class Events extends Agent
 {
     // An exercise in augemented virtual collaboration. With water.
     // But a Thing needs to know what minding the gap is.
@@ -9,60 +9,26 @@ class Events
     // Lots of work needed here.
     // Need to decide how to process events.
 
-	public $var = 'hello';
+    public $var = 'hello';
 
     // This will provide a splosh - a unit of energy converted into a sploshed unit of distance.
     // This is useful for SPLOSH because it is the first step in provided the distance travelled down a path.
     // When provided with a random time interval series of energy inputs.
 
     // See getEnergy() for dev
-
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        // Precise timing
-        $this->start_time = $thing->elapsed_runtime();
 
-        $this->agent_input = $agent_input;
-		$this->thing = $thing;
+        $this->default_calendar_token = null;
 
-        $this->thing_report['thing'] = $thing;
-        $this->agent_name = "events";
+        // So I could call
+        if (isset($this->thing->container['stack']['calendar'])) {
+            $this->default_calendar_token = $this->thing->container['stack']['calendar'];
+        }
 
-		$this->retain_for = 24; // Retain for at least 24 hours.
-
-        $this->uuid = $thing->uuid;
-      	$this->to = $thing->to;
-       	$this->from = $thing->from;
-       	$this->subject = $thing->subject;
-		$this->sqlresponse = null;
-
+        $this->retain_for = 24; // Retain for at least 24 hours.
         $this->state = "dev";
 
-		$this->thing->log( 'running on Thing ' . $this->thing->nuuid . '.');
-		$this->thing->log( 'received this Thing "' . $this->subject . '"');
-        $this->thing->log( 'received this Agent Input "' . $this->subject . '"');
-
-        // Get some stuff from the stack which will be helpful.
-        // Until SPLOSH gets its own.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-        $this->current_time = $this->thing->time();
-
-        $this->get(); // load in last known position variables for current player
-
-		$this->readSubject();
-
-		$this->respond();
-
-        $this->set();
-
-		$this->thing->log( 'completed.');
-
-
-		return;
     }
 
     // Add in code for setting the current distance travelled.
@@ -72,14 +38,19 @@ class Events
         $this->thing->json->setField("variables");
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("events", "refreshed_at"), $time_string );
-
+        $this->thing->json->writeVariable(
+            ["events", "refreshed_at"],
+            $time_string
+        );
     }
 
     function get()
     {
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("events", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "events",
+            "refreshed_at",
+        ]);
 
         //$micro_timestamp = $this->thing->json->readVariable( array("splosh", "timestamp") );
 
@@ -87,68 +58,69 @@ class Events
         // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("events", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["events", "refreshed_at"],
+                $time_string
+            );
         }
-
     }
 
-// -----------------------
+    // -----------------------
 
     public function getClocktime()
     {
         $this->clocktime = new Clocktime($this->thing, "clocktime");
     }
 
-	private function respond()
+    public function respondResponse()
     {
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		// This should be the code to handle non-matching responses.
+        // This should be the code to handle non-matching responses.
 
-		$to = $this->thing->from;
-		$from = "events";
+//        $to = $this->thing->from;
+//        $from = "events";
 
-        $this->makeMessage();
-        $this->makeSms();
+//        $this->makeMessage();
+//        $this->makeSMS();
 
         $this->thingreportEvents();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-		    $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
-		return $this->thing_report;
-	}
+        return $this->thing_report;
+    }
 
-    public function eventString($event) 
+    public function eventString($event)
     {
         $event_date = date_parse($event['runat']);
         $month_number = $event_date['month'];
         $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
 
         $simple_date_text = $month_name . " " . $event_date['day'];
-        $event_string = ""  . $simple_date_text;
-        $event_string .= " "  . $event['event'];
+        $event_string = "" . $simple_date_text;
+        $event_string .= " " . $event['event'];
 
         $runat = new Runat($this->thing, "extract " . $event['runat']);
 
-        $event_string .= " "  . $runat->day;
-        $event_string .= " "  . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
-        $event_string .= ":"  . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
+        $event_string .= " " . $runat->day;
+        $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
+        $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
 
-        $run_time = new Runtime($this->thing, "extract " .$event['runtime']);
+        $run_time = new Runtime($this->thing, "extract " . $event['runtime']);
 
         if ($event['runtime'] != "X") {
             $event_string .= " " . $this->thing->human_time($run_time->minutes);
         }
 
-        $event_string .= " "  . $event['place'];
+        $event_string .= " " . $event['place'];
         return $event_string;
     }
-
 
     function thingreportEvents()
     {
@@ -161,66 +133,95 @@ class Events
     private function eventsDo()
     {
         // What does this do?
-
     }
 
     public function doEvents()
     {
-        $this->earliest_event_string = "None of the events apis found anything. Which is weird, because there has to be something on.";
+        $this->earliest_event_string =
+            "None of the events apis found anything. Which is weird, because there has to be something on.";
 
         // What is Events.
         $keywords = $this->search_words;
 
-        $this->events = array();
+        $this->events = [];
 
-        $this->eventful = new Eventful($this->thing, "eventful ". $keywords);
+        $calendar_agent = new Calendar($this->thing, "calendar");
+        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar($this->default_calendar_token);
+
+        $calendar_agent->doCalendar();
+
+        //$this->calendar = new Calendar($this->thing, "calendar " . $keywords);
+        if (isset($calendar_agent->calendar->events)) {
+            $this->response .= "Counted " . count($calendar_agent->calendar->events) . " Calendar events. ";
+            // TODO Process returned calendar events.
+            //foreach ($calendar_agent->calendar->events as &$event) {
+            //    $event['source'] = "calendar";
+            //}
+
+            //$this->events = array_merge($this->events, $this->calendar->events);
+        }
+
+
+
+        $this->eventful = new Eventful($this->thing, "eventful " . $keywords);
         if (isset($this->eventful->events)) {
-foreach($this->eventful->events as &$event) {
-    $event['source'] = "eventful";
-}
+            foreach ($this->eventful->events as &$event) {
+                $event['source'] = "eventful";
+            }
 
             $this->events = array_merge($this->events, $this->eventful->events);
         }
 
-        $this->meetup = new Meetup($this->thing, "meetup ". $keywords);
+        $this->meetup = new Meetup($this->thing, "meetup " . $keywords);
 
         if (isset($this->meetup->events)) {
-foreach($this->meetup->events as &$event) {
-    $event['source'] = "meetup";
-}
+            foreach ($this->meetup->events as &$event) {
+                $event['source'] = "meetup";
+            }
             $this->events = array_merge($this->events, $this->meetup->events);
         }
 
-            $this->brownpapertickets = new Brownpapertickets($this->thing, "brownpapertickets ". $keywords);
+        $this->brownpapertickets = new Brownpapertickets(
+            $this->thing,
+            "brownpapertickets " . $keywords
+        );
 
-        if ((isset($this->brownpapertickets->events)) and ($this->brownpapertickets->events != true)) {
+        if (
+            isset($this->brownpapertickets->events) and
+            $this->brownpapertickets->events != true
+        ) {
+            foreach ($this->brownpapertickets->events as &$event) {
+                $event['source'] = "brownpapertickets";
+            }
 
-foreach($this->brownpapertickets->events as &$event) {
-    $event['source'] = "brownpapertickets";
-}
-
-            $this->events = array_merge($this->events, $this->brownpapertickets->events);
+            $this->events = array_merge(
+                $this->events,
+                $this->brownpapertickets->events
+            );
         }
 
-        $this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
+        $this->ticketmaster = new Ticketmaster(
+            $this->thing,
+            "ticketmaster " . $keywords
+        );
 
         if (isset($this->ticketmaster->events)) {
+            foreach ($this->ticketmaster->events as &$event) {
+                $event['source'] = "ticketmaster";
+            }
 
-foreach($this->ticketmaster->events as &$event) {
-    $event['source'] = "ticketmaster";
-}
-
-
-            $this->events = array_merge($this->events, $this->ticketmaster->events);
+            $this->events = array_merge(
+                $this->events,
+                $this->ticketmaster->events
+            );
         }
 
         $this->available_events_count = count($this->events);
 
         $this->thing->log("start sort");
 
-        $runat = array();
-        foreach ($this->events as $key => $row)
-        {
+        $runat = [];
+        foreach ($this->events as $key => $row) {
             $runat[$key] = $row['runat'];
         }
         array_multisort($runat, SORT_ASC, $this->events);
@@ -228,62 +229,66 @@ foreach($this->ticketmaster->events as &$event) {
 
         //$this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
 
+        //exit();
 
-
-
-//exit();
-
-        foreach($this->events as $eventful_id=>$event) {
-
+        foreach ($this->events as $eventful_id => $event) {
             $event_name = $event['event'];
             $event_time = $event['runat'];
             $event_place = $event['place']; // Doesn't presume the Rio
 
-            $time_to_event =  strtotime($event_time) - strtotime($this->current_time) ;
+            $time_to_event =
+                strtotime($event_time) - strtotime($this->current_time);
             if (!isset($time_to_earliest_event)) {
-               $time_to_earliest_event = $time_to_event;
-               $event_string = $this->eventful->eventString($event);
-               $this->earliest_event_string = $this->thing->human_time($time_to_earliest_event) . " until " . $event_string . ".";
-
+                $time_to_earliest_event = $time_to_event;
+                $event_string = $this->eventful->eventString($event);
+                $this->earliest_event_string =
+                    $this->thing->human_time($time_to_earliest_event) .
+                    " until " .
+                    $event_string .
+                    ".";
             } else {
                 $this->response = "Got the current Events.";
                 if ($time_to_earliest_event > $time_to_event) {
-
                     $time_to_earliest_event = $time_to_event;
-//                    $earliest_event_name = $event_name;
-//                    $earliest_event_time = $event_time;
-//                    $earliest_event_place = $event_place;
+                    //                    $earliest_event_name = $event_name;
+                    //                    $earliest_event_time = $event_time;
+                    //                    $earliest_event_place = $event_place;
                     $event_string = $this->eventful->eventString($event);
 
-                    $this->earliest_event_string = $this->thing->human_time($time_to_earliest_event) . " until " . $event_string . ".";
-
+                    $this->earliest_event_string =
+                        $this->thing->human_time($time_to_earliest_event) .
+                        " until " .
+                        $event_string .
+                        ".";
 
                     if ($time_to_event < 0) {
-                        $this->earliest_event_string = "About to happen. Happening. Or just happened. " . $event_string . ".";
+                        $this->earliest_event_string =
+                            "About to happen. Happening. Or just happened. " .
+                            $event_string .
+                            ".";
                     }
 
                     $this->response = "Got the next event.";
 
-                    $this->runat = new Runat($this->thing, "runat " . $event_time);
-
+                    $this->runat = new Runat(
+                        $this->thing,
+                        "runat " . $event_time
+                    );
 
                     if ($this->runat->isToday($event_time)) {
                         $this->response = "Got today's event.";
                     }
+                }
             }
-            }
-                    
-
         }
 
-
-  //      $this->response = "Got the next Geekenders.";
+        //      $this->response = "Got the next Geekenders.";
     }
 
-	public function readSubject()
+    public function readSubject()
     {
-		$this->response = "Heard Events.";
-		$this->keyword = "events";
+        $this->response = "Heard Events.";
+        $this->keyword = "events";
 
         if ($this->agent_input != null) {
             $input = strtolower($this->agent_input);
@@ -292,40 +297,35 @@ foreach($this->ticketmaster->events as &$event) {
         }
 
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "events is")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("events is")); 
-        } elseif (($pos = strpos(strtolower($input), "events")) !== FALSE) { 
-            $whatIWant = substr(strtolower($input), $pos+strlen("events")); 
+        if (($pos = strpos(strtolower($input), "events is")) !== false) {
+            $whatIWant = substr(strtolower($input), $pos + strlen("events is"));
+        } elseif (($pos = strpos(strtolower($input), "events")) !== false) {
+            $whatIWant = substr(strtolower($input), $pos + strlen("events"));
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
 
-    if ($filtered_input != "") {
-        $this->search_words = $filtered_input;
-        $this->response = "Asked Events about " . $this->search_words . " events";
-        //return false;
-    }
-
-
+        if ($filtered_input != "") {
+            $this->search_words = $filtered_input;
+            $this->response =
+                "Asked Events about " . $this->search_words . " events";
+            //return false;
+        }
 
         $this->doEvents();
 
-
-
-
-		return $this->response;
-	}
+        return $this->response;
+    }
 
     public function makeMessage()
     {
         $message = $this->eventful->message;
 
-
         $this->message = $this->earliest_event_string; //. ".";
         $this->thing_report['message'] = $message;
     }
 
-    public function makeSms()
+    public function makeSMS()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/events';
 
@@ -345,34 +345,29 @@ foreach($this->ticketmaster->events as &$event) {
 
         $html .= "<p>";
 
-
         $html .= '<br>Events watcher says , "';
-        $html .= $this->sms_message. '"';
+        $html .= $this->sms_message . '"';
 
         $html .= "<p>";
-        foreach($this->events as $id=>$event) {
+        foreach ($this->events as $id => $event) {
+            $event_html = $this->eventString($event);
 
-                $event_html = $this->eventString($event);
+            $link = $event['link'];
 
-                $link = $event['link'];
+            // https://stackoverflow.com/questions/8591623/checking-if-a-url-has-http-at-the-beginning-inserting-if-not
+            $parsed = parse_url($link);
+            if (empty($parsed['scheme'])) {
+                $link = 'http://' . ltrim($link, '/');
+            }
 
-// https://stackoverflow.com/questions/8591623/checking-if-a-url-has-http-at-the-beginning-inserting-if-not
-$parsed = parse_url($link);
-if (empty($parsed['scheme'])) {
-    $link = 'http://' . ltrim($link, '/');
-}
+            $html_link = '<a href="' . $link . '">';
+            $html_link .= $event['source'];
+            $html_link .= "</a>";
 
-                $html_link = '<a href="' . $link . '">';
-                $html_link .= $event['source'];
-                $html_link .= "</a>";
-
-                $html .= "<p>" . $event_html . " " . $html_link;
+            $html .= "<p>" . $event_html . " " . $html_link;
         }
 
         $this->web_message = $html;
         $this->thing_report['web'] = $html;
     }
-
 }
-
-?>

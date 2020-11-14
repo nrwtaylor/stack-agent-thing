@@ -2100,6 +2100,24 @@ if (!isset($this->memory)) {
 
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
 
+        // Is it a timestamp?
+        $time_tokens = explode(" ", $input);
+
+
+        $timestamp_agent = new Timestamp($this->thing, "timestamp");
+
+        if ($time_tokens[0] == 'agent') {array_shift($time_tokens);}
+        foreach($time_tokens as $time_token) {
+
+            if ($timestamp_agent->isTimestamp($time_token) === true) {
+
+                if (count($time_tokens) ==1) {
+                    $this->thing_report = $timestamp_agent->thing_report;
+                    return;
+                }
+            }
+        }
+
         // See if the string has a pointer to a channel nuuid.
 
         $nuuid = new Nuuid($this->thing, "nuuid");

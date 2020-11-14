@@ -80,7 +80,7 @@ public function extractCalendar($input) {
     public function doCalendar()
     {
         $calendar_count = 0;
-        if (isset($this->ics_links) and count($this > ics_links) != 0) {
+        if (isset($this->ics_links) and count($this->ics_links) != 0) {
 
             foreach ($this->ics_links as $ics_link) {
 
@@ -596,11 +596,10 @@ var_dump($variable);
         }
 
         if ($input == 'calendar') {
-//$token = 'nrwtaylor';
-$token = $this->default_calendar_token;
+            $token = $this->default_calendar_token;
             $new_ics_links = $this->icslinksCalendar($token);
 
-        $this->ics_links = $new_ics_links;
+            $this->ics_links = $new_ics_links;
 
 /*
             $e->dtstart = $this->current_time;
