@@ -1012,6 +1012,25 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             $channel = new Channel($thing, "web");
 
+            // TODO
+            // TODO Get closest event to this timestamp.
+            $timestamp_agent = new Timestamp($thing,"timestamp");
+            if ($timestamp_agent->isTimestamp($command)) {
+                $agent = new Timestamp($thing, "timestamp");
+
+                $datagram = [];
+                $datagram['thing'] = $thing;
+                $datagram['thing_report'] = $agent->thing_report;
+
+                return $this->renderer->render(
+                    $response,
+                    'thing.phtml',
+                    $datagram
+                );
+            }
+
+
+
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
