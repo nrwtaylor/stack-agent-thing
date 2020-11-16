@@ -45,7 +45,7 @@ class Calendar extends Agent
 
         $this->calendar = new \stdClass();
         if (!isset($this->calendar->events)) {
-            $this->calendar->events = null;
+            $this->calendar->events = [];
         }
     }
 
@@ -109,6 +109,7 @@ public function extractCalendar($input) {
 //        }
 
         if ($this->agent_input == null) {
+            if (!isset($this->calendar_text)) {$this->calendar_text = 'No calendar text found. ';}
             $this->calendar_message = $this->calendar_text;
         } else {
             $this->calendar_message = $this->agent_input;
@@ -468,6 +469,10 @@ var_dump($variable);
                 'filterDaysBefore' => null, // Default value
                 'skipRecurrence' => false, // Default value
             ]);
+
+            $events = $ical->eventsFromInterval('1 week');
+            $calendar_timezone = $ical->calendarTimeZone();
+
             error_reporting($old_level);
             // Test with the GitHub provided ics file.
 
@@ -476,9 +481,8 @@ var_dump($variable);
             $this->response .= "Could not read calendar " . $file . ". ";
             return true;
         }
-        $events = $ical->eventsFromInterval('1 week');
-
-        $calendar_timezone = $ical->calendarTimeZone();
+        //$events = $ical->eventsFromInterval('1 week');
+        //$calendar_timezone = $ical->calendarTimeZone();
 
         foreach ($events as $event) {
             $e = $this->eventCalendar($event);

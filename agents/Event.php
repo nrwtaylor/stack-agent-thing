@@ -165,6 +165,18 @@ class Event extends Agent
         );
         $event->setVariable("event_name", $this->event_name);
         $event->setVariable("refreshed_at", $this->refreshed_at);
+
+        $event = new \stdClass();
+        $event->events = $this->events;
+        $event->refreshed_at = $this->current_time;
+
+        /*
+        $uuid = $this->uuid;
+        $uuid = "merp";
+
+        $this->setMemory("event-".$uuid, $event);
+        */
+
     }
 
     function lastEvent()
@@ -490,6 +502,13 @@ foreach($filtered_places as $key=>$filtered_place) {
 
     public function get($event_code = null)
     {
+        /*
+        // dev
+        $uuid = 'merp';
+        $event = $this->getMemory("event-".$uuid);
+        var_dump($event);
+        */
+
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
         if ($event_code == null) {
