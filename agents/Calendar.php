@@ -12,15 +12,13 @@ class Calendar extends Agent
 
     function init()
     {
-
         $this->default_calendar_token = null;
 
         // So I could call
         if (isset($this->thing->container['stack']['calendar'])) {
-            $this->default_calendar_token = $this->thing->container['stack']['calendar'];
+            $this->default_calendar_token =
+                $this->thing->container['stack']['calendar'];
         }
-
-
 
         $this->default_span = 2; // Default value
         $this->span = $this->default_span;
@@ -43,6 +41,8 @@ class Calendar extends Agent
             "alphanumeric"
         );
 
+        $this->calendar_unique_events = false;
+
         $this->calendar = new \stdClass();
         if (!isset($this->calendar->events)) {
             $this->calendar->events = [];
@@ -55,69 +55,73 @@ class Calendar extends Agent
         $this->makeIcal();
     }
 
-public function extractCalendar($input) {
+    public function extractCalendar($input)
+    {
+        // Identifiy UTC.
+        $calendar = "Gregorian";
 
-    // Identifiy UTC.
-    $calendar = "Gregorian";
+        if (stripos($input, 'julian') !== false) {
+            $calendar = "julian";
+        }
 
-    if (stripos($input,'julian') !== false) {
+        if (stripos(str_replace(".", "", $input), 'BP') !== false) {
+            $calendar = "BP";
+        }
 
-        $calendar = "julian";
-
+        return $calendar;
     }
-
-    if (stripos(str_replace(".","",$input),'BP') !== false) {
-        $calendar = "BP";
-
-    }
-
-
-    return $calendar;
-
-}
-
 
     public function doCalendar()
     {
         $calendar_count = 0;
         if (isset($this->ics_links) and count($this->ics_links) != 0) {
-
             foreach ($this->ics_links as $ics_link) {
-
-                if ($ics_link === true) {continue;}
-                if (strtolower($ics_link) === 'x') {continue;}
-                if (strtolower($ics_link) === 'z') {continue;}
-                if ($ics_link === null) {continue;}
-                if ($ics_link === false) {continue;}
-
-
+                if ($ics_link === true) {
+                    continue;
+                }
+                if (strtolower($ics_link) === 'x') {
+                    continue;
+                }
+                if (strtolower($ics_link) === 'z') {
+                    continue;
+                }
+                if ($ics_link === null) {
+                    continue;
+                }
+                if ($ics_link === false) {
+                    continue;
+                }
 
                 $file = $ics_link;
                 if (isset($file) and is_string($file) and $file !== "") {
                     $response = $this->readCalendar($file);
-                    if ($response != true) {$calendar_count += 1;}
-
+                    if ($response != true) {
+                        $calendar_count += 1;
+                    }
                 }
             }
         }
 
-        $this->response .= "Read " . $calendar_count . " calendar(s). ";
+        if ($calendar_count != 0) {
+            $this->response .= "Read " . $calendar_count . " calendar(s). ";
+        }
 
-
-//        if (isset($this->calendar)) {
-//            $this->calendar_text = $calendar['line'];
-//        }
+        //        if (isset($this->calendar)) {
+        //            $this->calendar_text = $calendar['line'];
+        //        }
 
         if ($this->agent_input == null) {
-            if (!isset($this->calendar_text)) {$this->calendar_text = 'No calendar text found. ';}
+            if (!isset($this->calendar_text)) {
+                $this->calendar_text = 'No calendar text found. ';
+            }
             $this->calendar_message = $this->calendar_text;
         } else {
             $this->calendar_message = $this->agent_input;
         }
 
-//        if ($this->agent_input == 'calendar') {
-//            $this->calendar_text = $calendar['line'];
-//        }
+        //        if ($this->agent_input == 'calendar') {
+        //            $this->calendar_text = $calendar['line'];
+        //        }
     }
 
     public function respondResponse()
@@ -181,14 +185,13 @@ public function extractCalendar($input) {
 
     public function textCalendar($event, $parameters = null)
     {
-//    public function icsCalendar($event, $parameters = null) {
+        //    public function icsCalendar($event, $parameters = null) {
 
         return $this->icsCalendar($event, $parameters);
-
     }
 
-    public function icsCalendar($event, $parameters = null) {
-
+    public function icsCalendar($event, $parameters = null)
+    {
         $default_parameters = [
             'timestamp',
             'timezone',
@@ -396,14 +399,17 @@ var_dump($variable);
         }
 
         $this->node_list = ["calendar" => ["calendar", "dog"]];
-        $this->sms_message =
+
+        $sms =
             "CALENDAR " .
             $this->time_agent->time_zone .
             "\n" .
             $calendar_text .
             "" .
             $this->response;
-        $this->thing_report['sms'] = $this->sms_message;
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     function makeTXT()
@@ -448,19 +454,35 @@ var_dump($variable);
 
     public function eventCalendar($arr = null)
     {
+        //var_dump($arr->uid_array);
         // TODO Pass this through Event.
         // And then re-factor.
         $event = $arr;
         return $event;
     }
 
-    public function readCalendar($file, $calendar_name = null)
+    public function readCalendar($calendar_uri, $calendar_name = null)
     {
+        //    set_error_handler([$this, 'calendar_warning_handler'], E_WARNING | E_NOTICE);
+        //  restore_error_handler();
+
+        //var_dump($calendar_uri);
+
+        $this->calendar_unique_events === false;
+
         try {
             // ICal is noisy at the WARNING and NOTICE level.
             // TODO ?
-            $old_level = error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
-            $ical = new ICal($file, [
+
+            set_error_handler(
+                [$this, 'calendar_warning_handler'],
+                E_WARNING | E_NOTICE
+            );
+
+            // This is ignored because of the custom error handler in Agent.php
+            // So use a custom error handler in this agent to handle WARNINGs and NOTICEs from the library.
+            // $old_level = error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+            $this->ical = new ICal($calendar_uri, [
                 'defaultSpan' => $this->default_span, // Default value
                 'defaultTimeZone' => $this->time_zone,
                 'defaultWeekStart' => 'MO', // Default value
@@ -470,20 +492,31 @@ var_dump($variable);
                 'skipRecurrence' => false, // Default value
             ]);
 
-            $events = $ical->eventsFromInterval('1 week');
-            $calendar_timezone = $ical->calendarTimeZone();
+            $events = $this->ical->eventsFromInterval('1 week');
+            $calendar_timezone = $this->ical->calendarTimeZone();
+            restore_error_handler();
 
-            error_reporting($old_level);
+            // See note above.
+            // error_reporting($old_level);
             // Test with the GitHub provided ics file.
 
             // $ical->initUrl('https://raw.githubusercontent.com/u01jmg3/ics-parser/master/examples/ICal.ics>
         } catch (\Exception $e) {
-            $this->response .= "Could not read calendar " . $file . ". ";
+            $this->response .=
+                "Could not read calendar " . $calendar_uri . ". ";
             return true;
         }
+
+        if ($this->calendar_unique_events === true) {
+            $this->thing->log(
+                "Saw an event in " .
+                    $calendar_uri .
+                    " without a unique reference."
+            );
+        }
+
         //$events = $ical->eventsFromInterval('1 week');
         //$calendar_timezone = $ical->calendarTimeZone();
-
         foreach ($events as $event) {
             $e = $this->eventCalendar($event);
 
@@ -535,7 +568,7 @@ var_dump($variable);
             $token
         );
 
-        if ($addresses !== false) {
+        if ($addresses !== false and $addresses !== true) {
             foreach ($addresses as $i => $address) {
                 $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
                     $address
@@ -605,7 +638,7 @@ var_dump($variable);
 
             $this->ics_links = $new_ics_links;
 
-/*
+            /*
             $e->dtstart = $this->current_time;
             $e->dtend = $e->dtstart;
             $e->summary = $dateline['line'];
@@ -613,7 +646,7 @@ var_dump($variable);
             $this->calendar->events[] = $e;
 */
 
-        return;
+            return;
         }
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $string = $input;
@@ -643,5 +676,58 @@ var_dump($variable);
         $this->ics_links = array_unique($ics_links);
 
         return false;
+    }
+
+    function calendar_warning_handler(
+        $errno,
+        $errstr,
+        $errfile,
+        $errline,
+        $errContext
+    ) {
+        //throw new \Exception('Class not found.');
+        //trigger_error("Fatal error", E_USER_ERROR);
+        $this->thing->log($errno);
+        $this->thing->log($errstr);
+
+        $console =
+            "Calendar warning seen. " .
+            $errline .
+            " " .
+            $errfile .
+            " " .
+            $errno .
+            " " .
+            $errstr .
+            ". ";
+
+        // Attempt to extract a useful reference to the problematic calendar.
+        $calendar_name = "X";
+        if (isset($this->ical->cal['VCALENDAR']['X-WR-CALNAME'])) {
+            $calendar_name = $this->ical->cal['VCALENDAR']['X-WR-CALNAME'];
+        }
+
+        if (isset($errContext->filename)) {
+            $calendar_name = $errContext->filename;
+        }
+
+        // Some big problem reading the calendar endpoint.
+        if ($errno == 2) {
+            throw new \Exception("Could not read calendar.");
+        }
+
+        if ($errno == 8) {
+            // Flag that not all events have a unique id.
+            // Might be useful later.
+            $this->calendar_unique_events = true;
+            return;
+        }
+
+        if ($this->stack_engine_state != 'prod') {
+            echo $console . "\n";
+            $this->response .=
+                "Unexpected calendar warning seen. " . $errstr . ". ";
+        }
+        // do something
     }
 }

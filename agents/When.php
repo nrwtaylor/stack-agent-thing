@@ -100,9 +100,17 @@ class When extends Agent
             return true;
         }
         //$this->calendar_agent->events = [];
+
+        // Reset the calendar agent response.
+        $this->calendar_agent->response = "";
+        // Reset the calendar unique events watch.
+        // This variable indicates whether all the events in the calendar have a unique identity.
+        $this->calendar_unique_events = false;
+
         $this->calendar_agent->readCalendar($text, $name);
-        //echo $text ." ";
-        //echo count($this->calendar_agent->events) . "\n";
+
+        $this->response .= $this->calendar_agent->response;
+
         return $this->calendar_agent->calendar->events;
     }
 
@@ -149,11 +157,13 @@ class When extends Agent
     {
         $time_agent = new Time($this->thing, "time");
 
-
         $timestamp = $this->calendar_agent->textCalendar($event, ['timestamp']);
-        $timestamp =trim($timestamp);
+        $timestamp = trim($timestamp);
 
-        $runtime_text = $this->runtimeWhen($event->dtstart_tz, $event->dtend_tz);
+        $runtime_text = $this->runtimeWhen(
+            $event->dtstart_tz,
+            $event->dtend_tz
+        );
 
         if ($runtime_text != "") {
             $runtime_text = '[' . $runtime_text . ']';
@@ -181,12 +191,10 @@ class When extends Agent
         return $when_text;
     }
 
-
     public function doWhen()
     {
         $events = [];
         foreach ($this->calendar_list as $i => $calendar) {
-
             $ics_links = $this->calendar_agent->icslinksCalendar(
                 $calendar['ics_link']
             );
@@ -199,7 +207,6 @@ class When extends Agent
 
         $txt = "";
         foreach ($events as $i => $event) {
-
             $txt .= $this->textWhen($event) . "\n";
         }
         $this->when_text = $txt;
@@ -281,26 +288,27 @@ class When extends Agent
         $this->thing_report['choices'] = $choices;
     }
 
-    public function extractWhen($text) {
-
-        $text = str_replace("event","", strtolower($text));
+    public function extractWhen($text)
+    {
+        $text = str_replace("event", "", strtolower($text));
 
         $tokens = explode(",", $text);
         if (count($tokens) == 2) {
             $timedate = trim($tokens[0]);
             $description = trim($tokens[1]);
-
         }
         //$this->when_date = $timedate;
         //$this->when_time = $timedate;
 
-
         $when_date = $this->dateWhen($timedate);
         $when_time = $this->timeWhen($timedate);
-        $when = ['date'=>$when_date, 'time'=>$when_time, 'description'=>$description];
+        $when = [
+            'date' => $when_date,
+            'time' => $when_time,
+            'description' => $description,
+        ];
 
         return $when;
-
     }
 
     public function readWhen($file)
@@ -323,7 +331,7 @@ class When extends Agent
             $input = $this->subject;
         }
 
-/*
+        /*
         // TODO - Read command line provided resource.
         // Pipe via Calendar.
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
