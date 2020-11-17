@@ -5,31 +5,25 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Persistence
+class Persistence extends Agent
 {
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        $this->agent_input = $agent_input;
+        $this->persist_for = $this->thing->container['stack']['persist_for'];
+        $this->aliases = ["destroy" => ["delete"]];
+    }
 
-        // Given a "thing".  Instantiate a class to identify and create the
-        // most appropriate agent to respond to it.
-        $this->thing = $thing;
-        $this->thing_report['thing'] = $thing;
+    public function set()
+    {
+        $this->thing->json->setField("variables");
+        $this->thing->json->writeVariable(
+            ["persistence", "persist_to"],
+            $this->thing->json->time($this->persist_to)
+        );
+    }
 
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->stack_state = $thing->container['stack']['state'];
-        $this->short_name = $thing->container['stack']['short_name'];
-        $this->persist_for = $thing->container['stack']['persist_for'];
-
-        // Create some short-cuts.
-        $this->uuid = $thing->uuid;
-        $this->nuuid = $thing->nuuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
+    public function run()
+    {
         // Before doing anything else
         $this->thing->json->setField("variables");
         $this->remember_status = $this->thing->json->readVariable([
@@ -43,12 +37,11 @@ class Persistence
             );
             //$this->setRemember();
         } else {
-
-// TODO Refactor all this agent in new style
-$this->created_at = null;
-if (isset($thing->thing->created_at)) {
-            $this->created_at = strtotime($thing->thing->created_at);
-}
+            // TODO Refactor all this agent in new style
+            $this->created_at = null;
+            if (isset($thing->thing->created_at)) {
+                $this->created_at = strtotime($thing->thing->created_at);
+            }
             $dteStart = time();
 
             // Provide for translation to stack time unit
@@ -83,31 +76,14 @@ if (isset($thing->thing->created_at)) {
 
             $this->time_remaining = $this->persist_to - $this->refreshed_at;
         }
-
-        $this->thing->log(
-            '<pre> Agent "Persistence" started running on Thing ' .
-                date("Y-m-d H:i:s") .
-                '</pre>'
-        );
-        $this->node_list = ["start" => ["useful", "useful?"]];
-
-        $this->aliases = ["destroy" => ["delete"]];
-
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["persistence", "persist_to"],
-            $this->thing->json->time($this->persist_to)
-        );
-
-        if ($this->agent_input == null) {
-            $this->respond();
-        }
-
-        return;
     }
 
-    public function respond()
+    public function respondResponse()
     {
+        if ($this->agent_input != null) {
+            return;
+        }
+
         // Thing actions
 
         $this->thing->json->setField("variables");
@@ -197,5 +173,3 @@ if (isset($thing->thing->created_at)) {
         return $status;
     }
 }
-
-?>

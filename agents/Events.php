@@ -65,6 +65,64 @@ class Events extends Agent
         }
     }
 
+    public function currentEvents()
+    {
+        $events = [];
+        // If we know the context we can pull in a useful event.
+        // For example. current.
+        $event_agent = new Event($this->thing, "event");
+        if (
+            stripos($this->subject . " " . $this->agent_input, 'current') !==
+            false
+        ) {
+            // Saw the word current somewhere.
+            $dateline_agent = new Dateline(
+                $this->thing,
+                "dateline " . $this->subject . " " . $this->agent_input
+            );
+
+            $timestamp_agent = new Timestamp($this->thing, "timestamp");
+            $start_time = time();
+            $paragraphs = $dateline_agent->paragraphsDateline();
+            $this->response .=
+                "Got some useful paragraphs (" .
+                $this->thing->human_time(time() - $start_time) .
+                ") .";
+            //exit();
+            foreach ($paragraphs as $i => $paragraph) {
+                $tokens = explode(" ", $paragraph);
+                if (count($tokens) == 1) {
+                    continue;
+                }
+
+                if ($paragraph == "") {
+                    continue;
+                }
+
+                if ($timestamp_agent->hasTimestamp($paragraph) === false) {
+                    continue;
+                }
+
+                $time_stamp = $timestamp_agent->extractTimestamp($paragraph);
+
+                $filtered_paragraph = str_replace($time_stamp, "", $paragraph);
+                $tokens = explode(" ", $filtered_paragraph);
+                if (count($tokens) == 0) {
+                    continue;
+                }
+
+                $event = $event_agent->parseEvent($paragraph);
+
+                $events[] = $event;
+            }
+        }
+
+        $this->setMemory("events", $events);
+
+        return $events;
+    }
+
+
     // -----------------------
 
     public function getClocktime()
@@ -76,24 +134,12 @@ class Events extends Agent
     {
         $this->thing->flagGreen();
 
-        // This should be the code to handle non-matching responses.
-
-//        $to = $this->thing->from;
-//        $from = "events";
-
-//        $this->makeMessage();
-//        $this->makeSMS();
-
         $this->thingreportEvents();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-
-//        $this->makeWeb();
-
-        return $this->thing_report;
     }
 
     public function eventString($event)
@@ -228,7 +274,6 @@ class Events extends Agent
         $this->thing->log("end sort");
 
         //$this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
-
         //exit();
 
         foreach ($this->events as $eventful_id => $event) {
@@ -296,6 +341,8 @@ class Events extends Agent
             $input = strtolower($this->subject);
         }
 
+        if ($input == "events") {return;}
+
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), "events is")) !== false) {
             $whatIWant = substr(strtolower($input), $pos + strlen("events is"));
@@ -349,8 +396,11 @@ class Events extends Agent
         $html .= $this->sms_message . '"';
 
         $html .= "<p>";
+
+        $event_agent = new Event($this->thing, "event");
         foreach ($this->events as $id => $event) {
-            $event_html = $this->eventString($event);
+//            $event_html = $this->eventString($event);
+            $event_html = $event_agent->textEvent($event);
 
             $link = $event['link'];
 

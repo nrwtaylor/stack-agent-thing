@@ -358,9 +358,12 @@ $this->minute = $t[1];
 
         $this->year = false;
         $year = $this->year_agent->extractYear($input);
-        $year = $year['year']; // Discard era information.
-        if ($this->isInput($year)) {
-            $this->year = $year;
+        $year_text = "X";
+        if ($year !== false) {
+        $year_text = $year['year']; // Discard era information.
+        }
+        if ($this->isInput($year_text)) {
+            $this->year = $year_text;
         }
 
 
@@ -473,7 +476,7 @@ return $timezone;
             "SUN" => ["sunday", "sun", "Su"],
         ];
 
-        foreach ($days as $i => $day) {
+        foreach ($days as $i => $day_null) {
             $day_evidence[$i] = [];
         }
 
@@ -507,6 +510,7 @@ continue;
                 }
             }
         }
+
         $this->parsed_date = date_parse($input);
         if (
             $this->parsed_date['year'] != false and

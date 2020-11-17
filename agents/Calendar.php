@@ -16,8 +16,20 @@ class Calendar extends Agent
 
         // So I could call
         if (isset($this->thing->container['stack']['calendar'])) {
+            if (is_string($this->thing->container['stack']['calendar'])) {
             $this->default_calendar_token =
                 $this->thing->container['stack']['calendar'];
+            $this->default_calendar_tokens = [$this->default_calendar_token];
+            }
+
+            if (is_array($this->thing->container['stack']['calendar'])) {
+            $this->default_calendar_tokens =
+                $this->thing->container['stack']['calendar'];
+            $this->default_calendar_token = $this->default_calendar_tokens[0];
+            } 
+
+
+
         }
 
         $this->default_span = 2; // Default value
@@ -633,10 +645,20 @@ var_dump($variable);
         }
 
         if ($input == 'calendar') {
-            $token = $this->default_calendar_token;
-            $new_ics_links = $this->icslinksCalendar($token);
+            $tokens = $this->default_calendar_tokens;
+            //$new_ics_links = $this->icslinksCalendar($token);
 
-            $this->ics_links = $new_ics_links;
+
+            $ics_links = [];
+
+            foreach ($tokens as $i => $token) {
+                $new_ics_links = $this->icslinksCalendar($token);
+                $ics_links = array_merge($ics_links, $new_ics_links);
+            }
+
+            $this->ics_links = array_unique($ics_links);
+
+            //$this->ics_links = $new_ics_links;
 
             /*
             $e->dtstart = $this->current_time;
@@ -649,6 +671,7 @@ var_dump($variable);
             return;
         }
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
+        $filterd_input = $input;
         $string = $input;
         $str_pattern = 'calendar';
         $str_replacement = '';

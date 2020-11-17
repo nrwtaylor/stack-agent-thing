@@ -66,12 +66,16 @@ class Findagent extends Agent
 
         // Search for a reference within the variables field to the agent.
 
-        $thingreport = $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->variableSearch(
-            null,
-            $name,
-            $this->horizon
-        );
+        $things = [];
+        if (isset($this->thing->db)) {
+            $thingreport = $this->thing->db->setUser($this->from);
+            $thingreport = $this->thing->db->variableSearch(
+                null,
+                $name,
+                $this->horizon
+            );
+            $things = $thingreport['things'];
+        }
 
         $run_time = $this->thing->elapsed_runtime() - $ref_time;
         $this->thing->log('db call ran for ' . $run_time . 'ms.', "OPTIMIZE");
@@ -79,7 +83,7 @@ class Findagent extends Agent
         $groups = [];
         $agent_things = [];
 
-        foreach ($thingreport['things'] as $thing_obj) {
+        foreach ($things as $thing_obj) {
             if ($id == null) {
                 // No id matching, just grab thing
                 $agent_things[] = $thing_obj;

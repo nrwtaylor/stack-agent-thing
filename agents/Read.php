@@ -430,7 +430,7 @@ class Read extends Agent
         $this->refreshed_at = $this->current_time;
     }
 
-    function cacheRead()
+    function cacheRead($uri = null)
     {
         if ($this->do_not_cache === true) {
             $this->response .= "Saw do not cache instruction. ";

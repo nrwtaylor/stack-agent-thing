@@ -1016,7 +1016,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             // TODO Get closest event to this timestamp.
             $timestamp_agent = new Timestamp($thing,"timestamp");
             if ($timestamp_agent->isTimestamp($command)) {
-                $agent = new Timestamp($thing, "timestamp");
+                $agent = new Event($thing, $command);
 
                 $datagram = [];
                 $datagram['thing'] = $thing;

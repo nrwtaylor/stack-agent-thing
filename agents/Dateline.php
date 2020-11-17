@@ -221,6 +221,8 @@ class Dateline extends Agent
 
     public function timestampDateline($dateline)
     {
+        if ($dateline == null) {return true;}
+        if ($dateline == false) {return true;}
         $arr = [
             'year' => 'XXXX',
             'month' => 'XX',
@@ -357,9 +359,9 @@ class Dateline extends Agent
         }
 
         $sms .= $timestamp_text . " ";
-
         // See if there is a dateline with a UTC timestamp.
-        if (stripos($this->dateline['line'], " utc ") !== false) {
+        if (($this->dateline !== false) and
+             (stripos($this->dateline['line'], " utc ") !== false)) {
             $tokens = explode(" UTC ", $this->dateline['line']);
 
             $text_token = $tokens[1];

@@ -35,10 +35,21 @@ class Event extends Agent
         $this->default_alias = "Thing";
         $this->current_time = $this->thing->json->time();
 
+        $this->max_index = 0;
+
         $this->verbosity = 1;
 
         $this->test = "Development code"; // Always iterative.
         //        $this->initEvent();
+
+        $this->day = "X";
+        $this->hour = "X";
+        $this->minute = "X";
+        $this->minutes = "X";
+        $this->event_code = "X";
+        $this->refreshed_at = "X";
+
+
     }
 
     public function currentEvent()
@@ -125,6 +136,28 @@ class Event extends Agent
 
     public function textEvent($event)
     {
+        $event_date = date_parse($event['runat']);
+        $month_number = $event_date['month'];
+        $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
+
+        $simple_date_text = $month_name . " " . $event_date['day'];
+        $event_string = "" . $simple_date_text;
+        $event_string .= " " . $event['event'];
+
+        $runat = new Runat($this->thing, "extract " . $event['runat']);
+
+        $event_string .= " " . $runat->day;
+        $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
+        $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
+
+        $run_time = new Runtime($this->thing, "extract " . $event['runtime']);
+
+        if ($event['runtime'] != "X") {
+            $event_string .= " " . $this->thing->human_time($run_time->minutes);
+        }
+
+        $event_string .= " " . $event['place'];
+        return $event_string;
     }
 
     public function loadEvents()
@@ -167,6 +200,12 @@ class Event extends Agent
         $event->setVariable("refreshed_at", $this->refreshed_at);
 
         $event = new \stdClass();
+
+        if (!isset($this->events)) {
+            $this->events = [];
+        }
+
+
         $event->events = $this->events;
         $event->refreshed_at = $this->current_time;
 
@@ -235,7 +274,25 @@ class Event extends Agent
 
     function getEvent($selector = null)
     {
-        foreach ($this->events as $event) {
+        // TODO Get event by timestamp selector.
+        $timestamp_agent = new Timestamp($this->thing, "timestamp");
+        if ($timestamp_agent->isTimestamp($selector)) {
+            $this->response .= "Timestamp selector provided. ";
+        }
+        // devstack
+        // TODO Time based selector extraction
+
+        $events = $this->getMemory("events");
+        if ((isset($this->events)) and ($this->events != null)) {
+            $events = $this->events;
+        }
+
+        if ($events === false) {
+            $events_agent = new Events($this->thing, "events");
+            $events = $events_agent->currentEvents();
+        }
+
+        foreach ($events as $event) {
             // Match the first matching place
             if ($selector == null or $selector == "") {
                 $this->refreshed_at = $this->last_refreshed_at; // This is resetting the count.
@@ -297,7 +354,7 @@ class Event extends Agent
 
         // See if an event  record exists.
         $things = $this->getThings('event');
-
+if ($things == null) {return false;}
         $count = count($things);
         $this->thing->log(
             'Agent "Event" found ' . count($things) . " event Things."
@@ -611,9 +668,24 @@ foreach($filtered_places as $key=>$filtered_place) {
         return $event_code;
     }
 
+    function parseEvent($text) {
+
+        $event = [];
+        $event['dateline'] = $text;
+        $event['refreshed_at'] = $this->current_time;
+
+        return $event;
+
+    }
+
     function eventExists($event_candidate)
     {
-        foreach ($this->events as $event) {
+
+        $events = [];
+        if (isset($this->events)) {
+            $events = $this->events;
+        }
+        foreach ($events as $event) {
             $event_code = strtolower($event['code']);
             $event_name = strtolower($event['name']);
 
@@ -634,8 +706,13 @@ foreach($filtered_places as $key=>$filtered_place) {
             return true;
         }
 
+        $events = [];
+        if (isset($this->events)) {
+            $events = $this->events;
+        }
+
         // See if the code or name already exists
-        foreach ($this->events as $event) {
+        foreach ($events as $event) {
             if (
                 $event_code == $event['code'] or
                 $event_name == $event['name']
@@ -666,10 +743,17 @@ foreach($filtered_places as $key=>$filtered_place) {
             $runtime = new Runtime($this->thing, "extract");
             $runat = new Runat($this->thing, "extract");
 
-            $this->minutes = $runtime->minutes;
+            $minutes = "X";
+            if (isset($runtime->minutes)) {
+            $minutes = $runtime->minutes;
+            }
+            $this->minutes = $minutes;
+
             $this->day = $runat->day;
             $this->hour = $runat->hour;
             $this->minute = $runat->minute;
+
+
 
             $this->index = $this->max_index + 1;
             $this->max_index = $this->index;
@@ -1139,9 +1223,24 @@ $web .= "<br>";
         }
 */
 
-        $input = $this->input;
+        //$input = $this->input;
+        $input = $this->agent_input;
+        if (($this->agent_input == null) or ($this->agent_input == "")) {
+            $input = $this->subject;
+
+        }
+        if ($input == "event") {
+            return;
+        }
 
         $this->readEvent($input);
+
+        $timestamp_agent = new Timestamp($this->thing, "timestamp");
+        if ($timestamp_agent->isTimestamp($input)) {
+            $this->getEvent($input);
+            return;
+
+        }
 
         if (stripos($input, "current") !== false) {
             $b = $this->currentEvent();
@@ -1418,8 +1517,6 @@ $web .= "<br>";
             $this->set();
             return;
         }
-
-        //$this->read();
 
         return "Message not understood";
 

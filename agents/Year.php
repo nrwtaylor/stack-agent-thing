@@ -126,7 +126,8 @@ class Year extends Agent
      */
     public function timestampYear($t = null)
     {
-        $s = $this->thing->thing->created_at;
+
+//        $s = $this->thing->thing->created_at;
 
         if (!isset($this->retain_to)) {
             $text = "X";
@@ -173,7 +174,11 @@ class Year extends Agent
     {
         $sms = "YEAR | ";
 
-        foreach ($this->years as $i => $year) {
+        $years = [];
+        if (isset($this->years)) {$years = $this->years;}
+
+        $year_text = "";
+        foreach ($years as $i => $year) {
             $year_text .= $year['year'] . " " . $year['era'] . " ";
         }
         $sms .= $year_text;
@@ -801,13 +806,13 @@ class Year extends Agent
         ];
 
         $matched_eras = [];
-        foreach ($eras as $era => $error_indicators) {
+        foreach ($eras as $era => $era_indicators) {
             if (stripos($text, $era) !== false) {
                 $matched_eras[] = $era;
                 continue;
                 //return $era;
             }
-
+            if ($era_indicators === null) {continue;}
             foreach ($era_indicators as $era_indicator) {
                 if (stripos($text, $era_indicator) !== false) {
                     $matched_eras[] = $era;

@@ -87,11 +87,14 @@ class Chart extends Agent
 
         $this->identity = "null" . $this->mail_postfix;
         // We will probably want a getThings at some point.
-        $this->thing->db->setFrom($this->identity);
-        $thing_report = $this->thing->db->agentSearch($agent_name, 99);
+        $things = false;
+        if (isset($this->thing->db)) {
 
-        $things = $thing_report['things'];
+            $this->thing->db->setFrom($this->identity);
+            $thing_report = $this->thing->db->agentSearch($agent_name, 99);
 
+            $things = $thing_report['things'];
+        }
         if ($things == false) {
             return;
         }
