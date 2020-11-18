@@ -206,9 +206,14 @@ $events_variable['request_flag'] = false;
         $this->events = [];
 
         $calendar_agent = new Calendar($this->thing, "calendar");
-        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
-            $this->default_calendar_token
-        );
+//        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
+//            $this->default_calendar_token
+//        );
+
+//        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
+//            $calendar_agent->default_calendar_token
+//        );
+
 
         $calendar_agent->doCalendar();
 
@@ -354,7 +359,7 @@ $events_variable['request_flag'] = false;
         $events_variable = $this->getMemory("events");
 
         $age = 1e9;
-
+if ($events_variable !== false) {
         if (isset($events_variable['refreshed_at'])) {
             $age =
                 strtotime($this->current_time) -
@@ -374,6 +379,8 @@ $events_variable['request_flag'] = false;
         if (isset($events_variable['cache_request_flag'])) {
             $cache_request_flag = $events_variable['cache_request_flag'];
         }
+}
+
         $this->events_cache_request_flag = $cache_request_flag;
         if ($age > 60 and $cache_request_flag !== true) {
             //if (($events === false) or ($events == []) or (!isset($events['refreshed_at']>

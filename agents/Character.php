@@ -23,58 +23,11 @@ class Character extends Agent
     //function __construct(Thing $thing) {
     public function init()
     {
-        //echo "meep";
-        //exit();
-
-        //function __construct($arguments) {
-
-        //echo $arguments;
-        //var_dump($arguments);
-        //  $defaults = array(
-        //    'uuid' => Uuid::uuid4(),
-        //    'from' => NULL,
-        // 'to' => NULL,
-        // 'subject' => NULL,
-        // 'sqlresponse' => NULL
-        //  );
-
-        //  $arguments = array_merge($defaults, $arguments);
-
-        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
-        //    $this->thing = $thing;
         $this->character_thing = $this->thing;
-        //     $this->agent_name = 'character';
-
-        //   $this->thing_report = array('thing' => $this->thing->thing);
-
-        // So I could call
-        //     if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
-
-        //     $this->api_key = $this->thing->container['api']['translink'];
 
         $this->retain_for = 48; // Retain for at least 48 hours.
 
-        //     $this->uuid = $thing->uuid;
-        //   $this->to = $thing->to;
-        // $this->from = $thing->from;
-        //       $this->subject = strtolower($thing->subject);
-
-        //     $this->sqlresponse = null;
-
-        // Allow for a new state tree to be introduced here.
-        //   $this->node_list = array("start"=>array("useful", "useful?"));
-
-        //    $this->thing->log( 'running on Thing ' . $this->uuid . '');
-        //     $this->thing->log( 'received this Thing "' . $this->subject .  '"');
-
-        //        $this->charactersGet();
-
-        // If this return true then no existing characters found.
-
-        //        $this->getCharacter(); // Should load up current
-
-        //        $this->readSubject();
+        $this->node_list = ['character'];
 
         if ($this->response == true) {
             $this->thing_report['info'] = 'No character response created.';
@@ -88,19 +41,11 @@ class Character extends Agent
 
             return $this->thing_report;
         }
-
-        //$this->thing_report = $this->respond();
-
-        //        $this->characterSet();
-
-        $this->thing->log('<pre> Agent "Character" completed</pre>');
-
-        $this->thing_report['log'] = $this->thing->log;
     }
 
     public function get()
     {
-        $this->charactersGet();
+        //$this->getCharacters();
 
         // If this return true then no existing characters found.
 
@@ -191,7 +136,7 @@ class Character extends Agent
      *
      * @return unknown
      */
-    function charactersGet()
+    function getCharacters()
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
@@ -232,12 +177,29 @@ class Character extends Agent
             $this->characters = [];
             $this->seen_characters = [];
             foreach ($things as $thing) {
-                $thing = new Thing($thing['uuid']);
+//var_dump($thing);
+  //              $variables = $thing->variables;
 
-                $this->character_uuid = $thing->uuid;
 
-                $thing->json->setField("variables");
-                $this->name = $thing->json->readVariable(["character", "name"]);
+                $uuid = $thing['uuid'];
+
+                $variables_json = $thing['variables'];
+                $variables = $this->thing->json->jsontoArray($variables_json);
+
+
+
+                //$thing = new Thing($thing['uuid']);
+
+                //$this->character_uuid = $thing->uuid;
+                $this->character_uuid = $uuid;
+
+
+            $this->name = "X";
+            if (isset($variables['character']['name'])) {
+                $this->name = $variables["character"]['name'];
+            }
+
+
 
                 if (in_array($this->name, $this->seen_characters)) {
                     continue;
@@ -245,30 +207,42 @@ class Character extends Agent
                     $this->seen_characters[] = $this->name;
                 }
 
-                $this->strength = $thing->json->readVariable([
-                    "character",
-                    "strength",
-                ]);
-                $this->dexterity = $thing->json->readVariable([
-                    "character",
-                    "dexterity",
-                ]);
-                $this->constitution = $thing->json->readVariable([
-                    "character",
-                    "constitution",
-                ]);
-                $this->intelligence = $thing->json->readVariable([
-                    "character",
-                    "intelligence",
-                ]);
-                $this->wisdom = $thing->json->readVariable([
-                    "character",
-                    "wisdom",
-                ]);
-                $this->charisma = $thing->json->readVariable([
-                    "character",
-                    "charisma",
-                ]);
+          //      $this->strength = $thing->json->readVariable([
+            //        "character",
+              //      "strength",
+                //]);
+
+
+            $this->strength = "X";
+            if (isset($variables['character']['strength'])) {
+                $this->strength = $variables["character"]['strength'];
+            }
+
+            $this->dexterity = "X";
+            if (isset($variables['character']['dexterity'])) {
+                $this->dexterity = $variables["character"]['dexterity'];
+            }
+
+            $this->constitution = "X";
+            if (isset($variables['character']['constitution'])) {
+                $this->constitution = $variables["character"]['constitution'];
+            }
+
+            $this->intelligence = "X";
+            if (isset($variables['character']['intelligence'])) {
+                $this->intelligence = $variables["character"]['intelligence'];
+            }
+
+            $this->wisdom = "X";
+            if (isset($variables['character']['wisdom'])) {
+                $this->wisdom = $variables["character"]['wisdom'];
+            }
+
+            $this->charisma = "X";
+            if (isset($variables['character']['charisma'])) {
+                $this->charisma = $variables["character"]['charisma'];
+            }
+
 
                 $character = [
                     "name" => $this->name,
@@ -351,8 +325,6 @@ class Character extends Agent
         $this->sms_message .= "CHA " . $this->charisma . ' | ';
 
         $this->sms_message .= "TEXT HELP";
-
-        return;
     }
 
     /**
@@ -411,8 +383,6 @@ class Character extends Agent
         $this->sms_message .= '<qualifier> CHARACTER <command> | ';
 
         $this->sms_message .= "TEXT [ CHARACTER REPORT | HELP ]";
-
-        return;
     }
 
     /**
@@ -429,8 +399,6 @@ class Character extends Agent
         $this->sms_message .= "The character age is " . $this->age . ' | ';
 
         $this->sms_message .= "TEXT [ CHARACTER REPORT | HELP ]";
-
-        return;
     }
 
     /**
@@ -449,8 +417,6 @@ class Character extends Agent
         $this->sms_message .= " | ";
 
         $this->sms_message .= "TEXT [ NEW RANDOM CHARACTER | WHATIS ]";
-
-        return;
     }
 
     // -----------------------
@@ -824,6 +790,9 @@ class Character extends Agent
             '<pre> Agent "Character" called getCharacter()</pre>'
         );
 
+        if (!isset($this->characters)) {$this->getCharacters();}
+
+
         if ($search_name == null) {
             if (count($this->characters) == 0) {
                 return true;
@@ -876,7 +845,7 @@ class Character extends Agent
         // This is an internal function.  Doesn't set sms/message.  That
         // is the job of the character<command> functions.
 
-        if (!found_flag) {
+        if (!$found_flag) {
             //                      $this->sms_message .= "";
             //                      $this->sms_message .= " | No character found.";
             //                $this->thingreport['characters'] = false;
@@ -907,8 +876,6 @@ class Character extends Agent
                 implode(" ", $characters) .
                 '</pre>'
         );
-
-        return;
     }
 
     /**
@@ -943,6 +910,24 @@ class Character extends Agent
     {
     }
 
+    // TODO
+    public function extractCharacters($text = null) {
+
+if (!isset($this->characters)) {
+
+        $this->getCharacters();
+
+
+}
+
+    }
+    // TODO
+    public function extractCharacter($text = null) {
+
+        $this->extractCharacters($text);
+
+    }
+
     /**
      *
      * @return unknown
@@ -953,7 +938,14 @@ class Character extends Agent
 
         $this->num_hits = 0;
 
-        $input = strtolower($this->subject);
+        //$input = strtolower($this->subject);
+        $input = $this->input;
+
+        if (strtolower($input) == "character") {return;}
+
+//        $this->getCharacters();
+        $this->extractCharacter($input);
+
         $pieces = explode(" ", strtolower($input));
 
         $this->characterList();

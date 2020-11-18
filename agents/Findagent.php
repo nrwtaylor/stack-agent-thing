@@ -62,6 +62,7 @@ class Findagent extends Agent
 
     function findAgent($name = null, $id = null)
     {
+        $this->thing->log("findAgent called " . "name " .$name . " id " . $id . ".");
         $ref_time = $this->thing->elapsed_runtime();
 
         // Search for a reference within the variables field to the agent.
@@ -82,7 +83,7 @@ class Findagent extends Agent
 
         $groups = [];
         $agent_things = [];
-
+        $this->thing->log('Scanning ' . count($things) . ' Things.');
         foreach ($things as $thing_obj) {
             if ($id == null) {
                 // No id matching, just grab thing
@@ -115,16 +116,17 @@ class Findagent extends Agent
         }
 
         if (count($agent_things) == 0) {
-            $this->sms_message .= "";
-            $this->sms_message .= " | No agent thing found.";
+            $this->response .= "No agent thing found.";
+            //$this->sms_message .= "";
+            //$this->sms_message .= " | No agent thing found.";
             $this->thing_report['things'] = true;
         } else {
             $this->agent_thing_id = $agent_things[0];
-            $this->sms_message .=
+            //$this->sms_message .=
                 ' | This is the "Find Agent" function.  Commands: none.';
             $this->thing_report['things'] = $agent_things;
         }
-
+        $this->thing->log("findAgent call done.");
         return $this->thing_report['things'];
     }
 
@@ -135,6 +137,7 @@ class Findagent extends Agent
 
     public function respondResponse()
     {
+/*
         if ($this->response == true) {
             $this->thing_report['info'] = 'No matching agent found.';
             $this->thing_report['help'] = 'This is the "Find Group".';
@@ -159,7 +162,7 @@ class Findagent extends Agent
 
             $this->thing_report['log'] = $this->thing->log;
         }
-
+*/
         // Thing actions
         $this->thing->flagGreen();
 
@@ -211,9 +214,7 @@ class Findagent extends Agent
 
     public function readSubject()
     {
-        $this->response = null;
+        //$this->response = null;
         $this->num_hits = 0;
-
-        return "Null";
     }
 }

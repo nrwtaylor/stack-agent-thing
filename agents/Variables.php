@@ -10,6 +10,8 @@ set_error_handler(function(int $number, string $message) {
 });
 */
 
+// TODO: Rebuild. Faster.
+
 class Variables
 {
     // So Variables manages a set of variables.
@@ -156,7 +158,7 @@ $this->response = "";
     function setVariables()
     {
 if (!isset($this->thing->db)) {
-
+$this->thing->log("Could not write to stack.");
 $this->response .= "Could not write to stack. ";
 return;
 

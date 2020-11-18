@@ -7,6 +7,8 @@ class Dateline extends Agent
 
     function init()
     {
+        $this->dateline_horizon = 60;
+
         $this->at_agent = new At($this->thing, "at");
 
         $this->test_url = null;
@@ -49,7 +51,7 @@ class Dateline extends Agent
                 continue;
             }
             $this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
-            echo $dateline['dateline'] . "\n" . $dateline['line'] ."\n";
+            echo $dateline['dateline'] . "\n" . $dateline['line'] . "\n";
         }
     }
 
@@ -125,7 +127,7 @@ class Dateline extends Agent
         if (ctype_space($text) === true) {
             return false;
         }
-        $run_time = time() - $start_time;
+        //        $run_time = time() - $start_time;
 
         // Because that is not a 'dateline'.
         // A dateline should have UTC in.
@@ -221,8 +223,12 @@ class Dateline extends Agent
 
     public function timestampDateline($dateline)
     {
-        if ($dateline == null) {return true;}
-        if ($dateline == false) {return true;}
+        if ($dateline == null) {
+            return true;
+        }
+        if ($dateline == false) {
+            return true;
+        }
         $arr = [
             'year' => 'XXXX',
             'month' => 'XX',
@@ -233,6 +239,10 @@ class Dateline extends Agent
         ];
         foreach ($arr as $component => $default_text) {
             ${$component} = $default_text;
+
+            if (!isset($dateline[$component])) {
+                $dateline[$component] = $arr[$component];
+            }
 
             if ($dateline[$component] === null) {
                 continue;
@@ -360,8 +370,10 @@ class Dateline extends Agent
 
         $sms .= $timestamp_text . " ";
         // See if there is a dateline with a UTC timestamp.
-        if (($this->dateline !== false) and
-             (stripos($this->dateline['line'], " utc ") !== false)) {
+        if (
+            $this->dateline !== false and
+            stripos($this->dateline['line'], " utc ") !== false
+        ) {
             $tokens = explode(" UTC ", $this->dateline['line']);
 
             $text_token = $tokens[1];
@@ -387,6 +399,8 @@ class Dateline extends Agent
 
     public function questionDateline($text = null)
     {
+        $dateline_horizon = $this->dateline_horizon;
+
         $agent_class_name = "Dateline";
 
         // Start of ? code
@@ -405,32 +419,32 @@ class Dateline extends Agent
         $slug = $slug_agent->getSlug($agent_name . "-" . "test");
 
         $memory = $this->getMemory($slug);
+        $age = 1e9;
+        if ($memory != false and $memory != true) {
+            $age =
+                strtotime($this->current_time) -
+                strtotime($memory['retrieved_at']);
 
-        $age =
-            strtotime($this->current_time) - strtotime($memory['retrieved_at']);
+            // How old can the dateline be before needing another check?
+            if ($age <= $dateline_horizon and $this->isDateline($memory)) {
+                // If younger than 60 seconds use response in memory.
+                $this->response .=
+                    "Saw an " .
+                    $agent_name .
+                    " channel memory from " .
+                    $this->thing->human_time($age) .
+                    " ago. ";
 
-        // How old can the dateline be before needing another check?
-        $dateline_horizon = 60;
-        if ($age <= $dateline_horizon and $this->isDateline($memory)) {
-            // If younger than 60 seconds use response in memory.
-            $this->response .=
-                "Saw an " .
-                $agent_name .
-                " channel memory from " .
-                $this->thing->human_time($age) .
-                " ago. ";
+                $this->dateline = $memory;
+                return $memory;
+            }
 
-            $this->dateline = $memory;
-            return $memory;
+            if (!$this->isDateline($memory)) {
+                $memory = $this->getDateline($text);
+                $this->setMemory($slug, $memory);
+            }
         }
-
-        if (!$this->isDateline($memory)) {
-            $memory = $this->getDateline($text);
-            $this->setMemory($slug, $memory);
-        }
-
         if ($age > $dateline_horizon) {
-
             $datagram = [
                 "to" => $this->from,
                 "from" => "dateline",
@@ -441,7 +455,7 @@ class Dateline extends Agent
             $this->thing->spawn($datagram);
             $this->response .= "Requested a dateline update. ";
 
-//            $age = 0;
+            //            $age = 0;
         }
 
         $dateline = $memory;

@@ -213,8 +213,8 @@ return false;
         $choices = false;
         $this->thing_report['choices'] = $choices;
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        //$this->thing_report['email'] = $this->sms_message;
+        //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -237,10 +237,10 @@ return false;
         }
     }
 
-    public function read($text = null)
-    {
-        $this->readSubject();
-    }
+//    public function read($text = null)
+//    {
+//        $this->readSubject();
+//    }
 
     public function findTimestamp($text = null)
     {

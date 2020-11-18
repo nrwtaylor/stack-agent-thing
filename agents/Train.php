@@ -447,7 +447,7 @@ class Train extends Agent
         }
         // devstack.
         // No need to load up all the trains yet.
-        return;
+//        return;
         // Loads current block into $this->block_thing
 
         $match = false;
@@ -659,6 +659,7 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
             $this->trains[] = $train;
         }
+
 
         //var_dump($this->trains);
     }
@@ -1979,10 +1980,28 @@ $txt = "";
         $txt .= " " . str_pad($this->head_code, 4, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad($this->alias, 10, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad($this->flag, 6, " ", STR_PAD_LEFT);
-        $txt .= " " . str_pad($this->day, 4, " ", STR_PAD_LEFT);
 
-        $txt .= " " . str_pad($this->run_at, 6, " ", STR_PAD_LEFT);
-        $txt .= " " . str_pad($this->end_at, 6, " ", STR_PAD_LEFT);
+$day = "X";
+if (isset($this->day)) {
+$day = $this->day;
+}
+        $txt .= " " . str_pad($day, 4, " ", STR_PAD_LEFT);
+
+$run_at = "X";
+if (isset($this->run_at)) {
+$run_at = $this->run_at;
+}
+
+
+        $txt .= " " . str_pad($run_at, 6, " ", STR_PAD_LEFT);
+
+$end_at = "X";
+if (isset($this->end_at)) {
+$end_at = $this->end_at;
+}
+
+
+        $txt .= " " . str_pad($end_at, 6, " ", STR_PAD_LEFT);
 
         $txt .= " " . str_pad($this->runtime, 8, " ", STR_PAD_LEFT);
 
@@ -2062,7 +2081,10 @@ $txt = "";
 
             $txt .= $flag_text;
 
+$day = "X";
+if (isset($train['run_at'])) {
             $day = strtoupper(substr($this->trainDay($train['run_at']), 0, 3));
+}
 
             $txt .= " " . str_pad($day, 4, " ", STR_PAD_LEFT);
 
@@ -2081,10 +2103,19 @@ $txt = "";
 
             $txt .= $run_at_text;
 
+
+$train_time_end_at = "X";
+if  (isset($train['end_at'])) {
+
+$train_time_end_at =$train['end_at'];
+}
+
+
+
             $txt .=
                 " " .
                 str_pad(
-                    $this->trainTime($train['end_at']),
+                    $this->trainTime($train_time_end_at),
                     6,
                     " ",
                     STR_PAD_LEFT

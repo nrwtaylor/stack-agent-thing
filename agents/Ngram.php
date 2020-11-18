@@ -322,9 +322,11 @@ $line = $line[$field];
      * @return unknown
      */
     public function readSubject() {
-        $input = strtolower($this->subject);
-        if ($this->agent_input != null) {
-            $input = $this->agent_input;
+        //$input = strtolower($this->subject);
+
+        $input = $this->agent_input;
+        if (($this->agent_input == null) or ($this->agent_input =="")) {
+            $input = $this->subject;
         }
 
         if ($input == "ngram") {return;}

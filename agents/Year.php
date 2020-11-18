@@ -942,7 +942,7 @@ class Year extends Agent
             $input = $this->subject;
         }
 
-        if ($this->agent_input == "year") {
+        if ($input == "year") {
             return;
         }
 

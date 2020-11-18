@@ -176,7 +176,7 @@ class Robot extends Agent
         );
 
         $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->counter . "."
+            $this->agent_prefix . 'has been loaded ' . $this->counter . " time(s)."
         );
 
         $this->counter = $this->counter + 1;

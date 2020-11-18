@@ -762,6 +762,18 @@ continue;
         $this->num_hits = 0;
 
         $input = $this->input;
+        $input = $this->agent_input;
+        if (($this->agent_input == null) or ($this->agent_input == "")) {
+            $input = $this->subject;
+        }
+
+        if ($input == "at") {
+            //            $this->extractRunat($filtered_input);
+            return;
+        }
+
+
+
         $filtered_input = $this->assert($input, "at");
         $keywords = $this->keywords;
         if (strpos($filtered_input, "reset") !== false) {
@@ -771,10 +783,10 @@ continue;
             return;
         }
         //        $this->extractRunat($this->input);
-        if ($this->input == "at") {
-            //            $this->extractRunat($filtered_input);
-            return;
-        }
+//        if ($this->input == "at") {
+//            //            $this->extractRunat($filtered_input);
+//            return;
+//        }
 
         $alpha_agent = new Alpha($this->thing, "alpha");
 

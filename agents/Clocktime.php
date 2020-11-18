@@ -32,26 +32,6 @@ class Clocktime extends Agent
 
         $this->clocktime = new Variables($this->thing, "variables clocktime " . $this->from);
 
-        //$this->subject = "Let's meet at 10:00";
-
-        // Read the subject to determine intent.
-//		$this->readSubject();
-
-        // Generate a response based on that intent.
-        // I think properly capitalized.
-        //$this->set();
-
-//        if ($this->agent_input == null) {
-//		    $this->Respond();
-//        }
-
-//        $this->set();
-
-//        $this->thing->log( $this->agent_prefix .' ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.' );
-
-//        $this->thing_report['log'] = $this->thing->log;
-
-//		return;
     }
 
     function makeClocktime($input = null)
@@ -132,7 +112,8 @@ class Clocktime extends Agent
         $this->hour = $this->clocktime->getVariable("hour");
         $this->minute = $this->clocktime->getVariable("minute");
 
-        return;
+        $this->thing->log("got hour " . $this->hour . " minute " . $this->minute.".");
+
     }
 
     function extractClocktime($input = null) 
@@ -196,22 +177,11 @@ if (count($m[0]) != 0) {
         return array($this->hour, $this->minute);
     }
 
-//    function read()
-//    {
-//        $this->thing->log("read");
-//        return;
-//    }
-
     function makeTXT() {
         $txt = $this->sms_message;
 
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
-
-
-
-
-
     }
 
     public function makeWeb() {
@@ -229,8 +199,6 @@ if (count($m[0]) != 0) {
         $this->web_message = $m;
         $this->thing_report['web'] = $m;
     }
-
-
 
     public function makeSMS()
     {
@@ -250,19 +218,9 @@ if (count($m[0]) != 0) {
 
 		$this->thing->flagGreen();
 
-		// Generate email response.
-
-		//$to = $this->thing->from;
-		//$from = "clocktime";
-
-
 		//$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
 		$this->thing_report['choices'] = $choices;
-
-        //$this->makeTXT();
-
-        //$this->makeSMS();
 
 	    $this->thing_report['email'] = $this->sms_message;
 		$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -274,13 +232,7 @@ if (count($m[0]) != 0) {
             $this->thing_report['info'] = 'Agent input was "' . $this->agent_input . '".' ;
         }
 
-        //$this->makeTXT();
-        //$this->makeweb();
-
         $this->thing_report['help'] = 'This is a clocktime.  Extracting clock times from strings.';
-
-		return;
-
 	}
 
     function isData($variable)
@@ -305,7 +257,7 @@ if (count($m[0]) != 0) {
         if ($input == "clocktime") {
             return;
         }
-        if ($input == "clocktime  test") {
+        if ($input == "clocktime test") {
             $this->test();
         }
 
@@ -316,17 +268,7 @@ if (count($m[0]) != 0) {
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
-/*
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
 
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->subject);
-        }
-*/
         $prior_uuid = null;
 
         // Is there a clocktime in the provided datagram

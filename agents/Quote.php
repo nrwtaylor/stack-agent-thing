@@ -32,8 +32,6 @@ class Quote extends Agent
 
         $this->setMode($this->default_mode);
 
-        $this->character = new Character($this->thing, "character is X");
-
         $this->qr_code_state = "off";
 
         // Get the remaining persistence of the message.
@@ -47,21 +45,19 @@ class Quote extends Agent
         );
     }
 
-    function isQuote($state = null)
+    function isQuote($text = null)
     {
-        if ($state == null) {
-            if (!isset($this->state)) {
-                $this->state = "easy";
-            }
+        // It is a quote if it has nested pairs of quotes.
+        // The first test could be whether there is an odd number of some quote symbols.
 
-            $state = $this->state;
-        }
+        $quote_count = substr_count($text, '"') . substr_count($text ,"'");
+if($quote_count%2) {
 
-        if ($state == "easy" or $state == "hard") {
-            return false;
-        }
+    return true;
 
-        return true;
+}
+
+return false;
     }
 
     function set($requested_state = null)
@@ -79,7 +75,7 @@ class Quote extends Agent
         );
 
         $this->thing->log(
-            $this->agent_prefix . 'set Radio Relay to ' . $this->state,
+            'set Quote to ' . $this->state .'.',
             "INFORMATION"
         );
     }

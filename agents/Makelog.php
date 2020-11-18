@@ -56,10 +56,28 @@ class Makelog
     	// routes passes image_name to make png as $input
         $this->agent_thing = new Agent($thing, $input);
 
-        $text = str_replace("<br>", "\n", ($this->agent_thing->thing->log));
-        $text = str_replace("\n ", "\n", $text);
+        //$text = str_replace("<br>", "\n", ($this->agent_thing->thing->log));
+        //$text = str_replace("\n ", "\n", $text);
+        $log_text = "";
+        $lines = explode("<br>", $this->agent_thing->thing->log);
+        foreach($lines as $i=>$line) {
 
-        $this->text = $text;
+            // Apply some filters.
+            // If you see one of these in the log line. Ignore it.
+            $subtract_tokens = ['make','"Agent"'];
+            foreach($subtract_tokens as $subtract_token) {
+                if (stripos($line,$subtract_token) !== false) {
+                    continue 2;}
+                }
+
+            //$text = str_replace("<br>", "\n", $line);
+            //$log_text .= str_replace("\n ", "\n", $text);
+                $log_text .= $line ."\n";
+        }
+
+        $text = $log_text;
+
+        $this->text = $log_text;
 
         $this->getRuntimes();
 
