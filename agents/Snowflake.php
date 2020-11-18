@@ -1708,9 +1708,12 @@ return;
 
             $pdf->SetFont('Helvetica', '', 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
+
+
+            $i = 0;
             $dev = false;
             if ($dev == true) {
-                $i = 0;
+                //$i = 0;
                 $j = 0;
                 $word_agent = new Word($this->thing, "word");
                 foreach ($tokens as $token) {

@@ -48,8 +48,6 @@ class Event extends Agent
         $this->minutes = "X";
         $this->event_code = "X";
         $this->refreshed_at = "X";
-
-
     }
 
     public function currentEvent()
@@ -136,27 +134,54 @@ class Event extends Agent
 
     public function textEvent($event)
     {
-        $event_date = date_parse($event['runat']);
-        $month_number = $event_date['month'];
-        $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
+        $event_string = "No at found. ";
+        if (isset($event['runat'])) {
+            $event_date = date_parse($event['runat']);
 
-        $simple_date_text = $month_name . " " . $event_date['day'];
-        $event_string = "" . $simple_date_text;
-        $event_string .= " " . $event['event'];
+            $month_number = $event_date['month'];
+            $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
 
-        $runat = new Runat($this->thing, "extract " . $event['runat']);
-
-        $event_string .= " " . $runat->day;
-        $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
-        $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
-
-        $run_time = new Runtime($this->thing, "extract " . $event['runtime']);
-
-        if ($event['runtime'] != "X") {
-            $event_string .= " " . $this->thing->human_time($run_time->minutes);
+            $simple_date_text = $month_name . " " . $event_date['day'];
+            $event_string = "" . $simple_date_text;
         }
 
-        $event_string .= " " . $event['place'];
+        if (isset($event['event'])) {
+            $event_string .= " " . $event['event'];
+        }
+
+        if (isset($event['runat'])) {
+            //$runat = new Runat($this->thing, "extract " . $event['runat']);
+            $runat = new Runat($this->thing, "runat");
+
+            $runat->extractRunat($event['runat']);
+
+            $event_string .= " " . $runat->day;
+            $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
+            $event_string .=
+                ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
+        }
+
+        if (isset($event['runtime'])) {
+//            $run_time = new Runtime(
+//                $this->thing,
+//                "extract " . $event['runtime']
+//            );
+
+            $run_time = new Runtime(
+                $this->thing,
+                "runtime"
+            );
+            $run_time->extractRuntime($event['runtime']);
+
+            if ($event['runtime'] != "X") {
+                $event_string .=
+                    " " . $this->thing->human_time($run_time->minutes);
+            }
+        }
+        if (isset($event['place'])) {
+            $event_string .= " " . $event['place'];
+        }
+
         return $event_string;
     }
 
@@ -205,7 +230,6 @@ class Event extends Agent
             $this->events = [];
         }
 
-
         $event->events = $this->events;
         $event->refreshed_at = $this->current_time;
 
@@ -215,7 +239,6 @@ class Event extends Agent
 
         $this->setMemory("event-".$uuid, $event);
         */
-
     }
 
     function lastEvent()
@@ -274,25 +297,44 @@ class Event extends Agent
 
     function getEvent($selector = null)
     {
+        $this->response .= "Called getEvent with " . $selector . ". ";
         // TODO Get event by timestamp selector.
         $timestamp_agent = new Timestamp($this->thing, "timestamp");
         if ($timestamp_agent->isTimestamp($selector)) {
             $this->response .= "Timestamp selector provided. ";
         }
-        // devstack
-        // TODO Time based selector extraction
-
-        $events = $this->getMemory("events");
-        if ((isset($this->events)) and ($this->events != null)) {
-            $events = $this->events;
+        $events_agent = new Events($this->thing, "events");
+        $events = $events_agent->events;
+        $this->response .= $events_agent->response;
+        if (isset($events_agent->events_cache_age)) {
+            $this->events_cache_age = $events_agent->events_cache_age;
         }
 
-        if ($events === false) {
-            $events_agent = new Events($this->thing, "events");
-            $events = $events_agent->currentEvents();
+        if (isset($events_agent->events_cache_request_flag)) {
+            $this->events_cache_request_flag =
+                $events_agent->events_cache_request_flag;
         }
+
+        //var_dump("events");
+        //var_dump($events);
+        $this->response .= "Counted " . count($events) . " events. ";
 
         foreach ($events as $event) {
+            if ($timestamp_agent->isTimestamp($selector)) {
+                //   var_dump($event);
+                if (isset($event['dateline'])) {
+                    $t = $timestamp_agent->extractTimestamp($event['dateline']);
+                    $time_distance = (strtotime($selector) - strtotime($t));
+                    if ($time_distance < 0) {continue;}
+                    if (
+                        !isset($min_time_distance) or
+                        $time_distance < $min_time_distance
+                    ) {
+                        $min_time_distance = $time_distance;
+                        $best_event = $event;
+                    }
+                }
+            }
             // Match the first matching place
             if ($selector == null or $selector == "") {
                 $this->refreshed_at = $this->last_refreshed_at; // This is resetting the count.
@@ -343,6 +385,9 @@ class Event extends Agent
             }
         }
 
+        if (isset($best_event)) {
+            $this->best_event = $best_event;
+        }
         return true;
     }
 
@@ -354,7 +399,9 @@ class Event extends Agent
 
         // See if an event  record exists.
         $things = $this->getThings('event');
-if ($things == null) {return false;}
+        if ($things == null) {
+            return false;
+        }
         $count = count($things);
         $this->thing->log(
             'Agent "Event" found ' . count($things) . " event Things."
@@ -668,19 +715,20 @@ foreach($filtered_places as $key=>$filtered_place) {
         return $event_code;
     }
 
-    function parseEvent($text) {
-
+    function parseEvent($text)
+    {
         $event = [];
         $event['dateline'] = $text;
         $event['refreshed_at'] = $this->current_time;
 
-        return $event;
+        $event['name'] = $text;
+        $event['code'] = "1212";
 
+        return $event;
     }
 
     function eventExists($event_candidate)
     {
-
         $events = [];
         if (isset($this->events)) {
             $events = $this->events;
@@ -745,15 +793,13 @@ foreach($filtered_places as $key=>$filtered_place) {
 
             $minutes = "X";
             if (isset($runtime->minutes)) {
-            $minutes = $runtime->minutes;
+                $minutes = $runtime->minutes;
             }
             $this->minutes = $minutes;
 
             $this->day = $runat->day;
             $this->hour = $runat->hour;
             $this->minute = $runat->minute;
-
-
 
             $this->index = $this->max_index + 1;
             $this->max_index = $this->index;
@@ -943,6 +989,13 @@ $web .= "<br>";
         $web .= "</a>";
         $web .= "<br>";
 */
+        if (isset($this->best_event)) {
+            $web .= "<br>Nearest event found.";
+            $web .= "<br>" . $this->best_event['name'];
+            //var_dump($this->best_event);
+            $web .= "<p>";
+        }
+
         $web .= "<br>event_name is " . $this->event_name . "";
         $web .= "<br>event_code is " . $this->event_code . "";
 
@@ -984,15 +1037,22 @@ $web .= "<br>";
 
         $web .= "<br>";
 
+        if (isset($this->events_cache_age)) {
+            $web .= "<p>" . "Cache age is " . $this->events_cache_age . "s. ";
+        }
+
+        if (
+            isset($this->events_cache_request_flag) and
+            $this->events_cache_request_flag === true
+        ) {
+            $web .= "<p>" . "Cache request flag is TRUE. ";
+        } else {
+            $web .= "<p>" . "Cache request flag is NOT SET or NOT TRUE. ";
+        }
+
         $this->thing_report['web'] = $web;
     }
-    /*
-    function readEvent()
-    {
-        $this->thing->log("read");
 
-    }
-*/
     function addEvent()
     {
         $this->get();
@@ -1208,7 +1268,7 @@ $web .= "<br>";
 
     public function readSubject()
     {
-        $this->response = null;
+        //$this->response = null;
         $this->num_hits = 0;
         /*
         switch (true) {
@@ -1225,9 +1285,8 @@ $web .= "<br>";
 
         //$input = $this->input;
         $input = $this->agent_input;
-        if (($this->agent_input == null) or ($this->agent_input == "")) {
+        if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
-
         }
         if ($input == "event") {
             return;
@@ -1239,7 +1298,6 @@ $web .= "<br>";
         if ($timestamp_agent->isTimestamp($input)) {
             $this->getEvent($input);
             return;
-
         }
 
         if (stripos($input, "current") !== false) {
@@ -1280,29 +1338,7 @@ $web .= "<br>";
             'refreshed_at'
         );
 
-        //var_dump($this->last_place->thing['uuid']);
-        //exit();
-        //echo "last_event_name<br>";
-        //var_dump($this->last_event_name);
-        //var_dump($this->last_event_code);
-        //echo "<br>";
-
-        //echo "event<br>";
-        //var_dump($this->event_name);
-        //var_dump($this->event_code);
-        //echo "<br>";
-
-        //exit();
-        // If at this point we get false/false, then the default Place has not been created.
-        //        if ( ($this->place_code == false) and ($this->place_name == false) ) {
-        //            $this->makePlace($this->default_place_code, $this->default_place_name);
-        //        }
-
-        //$this->get();
-
-        //exit();
         $pieces = explode(" ", strtolower($input));
-
         $prior_uuid = null;
 
         // Is there a place in the provided datagram
@@ -1318,27 +1354,10 @@ $web .= "<br>";
                 $this->getRunat();
                 $this->getRuntime();
 
-                //$this->getRunat();
-                //$this->getRuntime();
-                $this->response = "Last 'event' retrieved.";
+                $this->response .= "Last 'event' retrieved.";
                 return;
             }
         }
-
-        // So this is really the 'sms' section
-        // Keyword
-        /*
-        if (count($pieces) == 1) {
-
-            if ($input == 'place') {
-
-                
-                $this->read();
-                return;
-            }
-
-        }
-*/
 
         foreach ($pieces as $key => $piece) {
             foreach ($this->keywords as $command) {
@@ -1361,20 +1380,14 @@ $web .= "<br>";
                         case 'event':
                             $this->assertEvent(strtolower($input));
 
-                            //$this->refvar_dump($this->minute);
-                            //reshed_at = $this->thing->time();
                             $this->getRunat();
                             $this->getRuntime();
-                            //var_dump($this->day);
-                            //var_dump($this->hour);
-                            //var_dump($this->minute);
-                            //exit();
 
                             if (empty($this->event_name)) {
                                 $this->event_name = "X";
                             }
 
-                            $this->response =
+                            $this->response .=
                                 'Asserted Event and found ' .
                                 strtoupper($this->event_name) .
                                 ".";
@@ -1447,7 +1460,8 @@ $web .= "<br>";
                     ".",
                 "INFORMATION"
             );
-            $this->response = $this->event_code . " used to retrieve an Event.";
+            $this->response .=
+                $this->event_code . " used to retrieve an Event.";
 
             return;
         }
@@ -1462,7 +1476,7 @@ $web .= "<br>";
                     ".",
                 "INFORMATION"
             );
-            $this->response = strtoupper($this->event_name) . " retrieved.";
+            $this->response .= strtoupper($this->event_name) . " retrieved.";
             $this->assertEvent($this->event_name);
             return;
         }
@@ -1476,7 +1490,7 @@ $web .= "<br>";
                     ".",
                 "INFORMATION"
             );
-            $this->response =
+            $this->response .=
                 "Last event " .
                 $this->last_event_code .
                 " used to retrieve an Event.";
@@ -1492,7 +1506,7 @@ $web .= "<br>";
         if (!$this->getEvent(strtolower($event))) {
             // Event was found
             // And loaded
-            $this->response = $event . " used to retrieve an Event.";
+            $this->response .= $event . " used to retrieve an Event.";
 
             return;
         }
@@ -1506,7 +1520,7 @@ $web .= "<br>";
             "INFORMATION"
         );
 
-        $this->response = "Made an Event called " . $event . ".";
+        $this->response .= "Made an Event called " . $event . ".";
         return;
         $this->last_event_code = $this->last_event->getVariable('event_code');
 

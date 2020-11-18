@@ -127,6 +127,10 @@ function call_agent_function($job)
         echo $t->thing_report['sms'] . "\n";
     }
 
+    if (isset($t->thing_report['response'])) {
+        echo "response " . $t->thing_report['response'] . "\n";
+    }
+
     // Gearman can't pass a raw image variable
     // Needs to be base64 encoded first
     // Devstask PNG (to convert $image to PNG)

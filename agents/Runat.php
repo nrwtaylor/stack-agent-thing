@@ -27,10 +27,6 @@ class Runat extends Agent
         $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
         $this->test = "Development code"; // Always iterative.
 
-
-
-
-
         $this->runat = new Variables(
             $this->thing,
             "variables runat " . $this->from
@@ -324,17 +320,16 @@ class Runat extends Agent
         //        return array($this->day, $this->hour, $this->minute);
     }
 
-    public function timeRunat($text = null) {
+    public function timeRunat($text = null)
+    {
+        $time_string = $text;
+        if ($text == null) {
+            $time_string = $this->day . " " . $this->hour . ":" . $this->minute;
+        }
 
-       $time_string = $text;
-       if ($text == null) {
-          $time_string = $this->day . " " . $this->hour .":". $this->minute;
-       }
+        $this->time = strtotime($time_string);
 
-       $this->time = strtotime($time_string);
-
-       return $this->time;
-
+        return $this->time;
     }
 
     /**
@@ -509,9 +504,9 @@ class Runat extends Agent
 
         $day_text = $day;
 
-        $sms_message .= " " .strtoupper($this->head_code) .  " ";
+        $sms_message .= " " . strtoupper($this->head_code) . " ";
         $sms_message .=
-            "| ".
+            "| " .
             " day " .
             $day_text .
             " hour " .
@@ -572,7 +567,8 @@ class Runat extends Agent
 
         //$this->makeTXT();
 
-        $this->thing_report['help'] = 'Try RUNAT NOW. RUNAT MON 10:40. Or RUNAT RESET.';
+        $this->thing_report['help'] =
+            'Try RUNAT NOW. RUNAT MON 10:40. Or RUNAT RESET.';
     }
 
     /**
@@ -627,7 +623,17 @@ class Runat extends Agent
         // $this->response = null;
         $this->num_hits = 0;
 
-        $input = $this->input;
+        //        $input = $this->input;
+        $input = $this->agent_input;
+        if ($this->agent_input == null or $this->agent_input == "") {
+            $input = $this->subject;
+        }
+
+        if ($input == "runat") {
+            //            $this->extractRunat($filtered_input);
+            return;
+        }
+
         $filtered_input = $this->assert($input);
         $this->response .= "Reading " . $filtered_input . ". ";
 
@@ -641,16 +647,14 @@ class Runat extends Agent
 
         if (strpos($filtered_input, "now") !== false) {
             $this->extractRunat($this->current_time);
-return;
-        }
-
-        //        $this->extractRunat($this->input);
-        if ($this->input == "runat") {
-//            $this->extractRunat($filtered_input);
             return;
         }
 
-
+        //        $this->extractRunat($this->input);
+        //        if ($this->input == "runat") {
+        //            $this->extractRunat($filtered_input);
+        //            return;
+        //        }
 
         //        if (strpos($this->agent_input, "runat") !== false) {
 

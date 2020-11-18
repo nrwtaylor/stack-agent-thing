@@ -3,32 +3,24 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Events extends Agent
 {
-    // An exercise in augemented virtual collaboration. With water.
-    // But a Thing needs to know what minding the gap is.
 
     // Lots of work needed here.
     // Need to decide how to process events.
 
     public $var = 'hello';
 
-    // This will provide a splosh - a unit of energy converted into a sploshed unit of distance.
-    // This is useful for SPLOSH because it is the first step in provided the distance travelled down a path.
-    // When provided with a random time interval series of energy inputs.
-
-    // See getEnergy() for dev
     function init()
     {
-
         $this->default_calendar_token = null;
 
         // So I could call
         if (isset($this->thing->container['stack']['calendar'])) {
-            $this->default_calendar_token = $this->thing->container['stack']['calendar'];
+            $this->default_calendar_token =
+                $this->thing->container['stack']['calendar'];
         }
 
         $this->retain_for = 24; // Retain for at least 24 hours.
         $this->state = "dev";
-
     }
 
     // Add in code for setting the current distance travelled.
@@ -67,6 +59,20 @@ class Events extends Agent
 
     public function currentEvents()
     {
+        /*
+        $events_variable = ['text'=>time(),'refreshed_at'=>$this->current_time,'events'=>[]];
+
+$events_variable['request_flag'] = false;
+
+
+        $this->setMemory("events",$events_variable);
+
+
+
+        $events = $events_variable['events'];
+
+        return $events;
+*/
         $events = [];
         // If we know the context we can pull in a useful event.
         // For example. current.
@@ -117,11 +123,19 @@ class Events extends Agent
             }
         }
 
-        $this->setMemory("events", $events);
+        $events_variable = [
+            'cache_request_flag' => false,
+            'text' => time(),
+            'refreshed_at' => $this->current_time,
+            'events' => $events,
+        ];
+
+        $this->setMemory("events", $events_variable);
+
+        //$this->setMemory("events", $events);
 
         return $events;
     }
-
 
     // -----------------------
 
@@ -142,7 +156,7 @@ class Events extends Agent
         }
     }
 
-    public function eventString($event)
+    public function deprecate_eventString($event)
     {
         $event_date = date_parse($event['runat']);
         $month_number = $event_date['month'];
@@ -192,13 +206,18 @@ class Events extends Agent
         $this->events = [];
 
         $calendar_agent = new Calendar($this->thing, "calendar");
-        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar($this->default_calendar_token);
+        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
+            $this->default_calendar_token
+        );
 
         $calendar_agent->doCalendar();
 
         //$this->calendar = new Calendar($this->thing, "calendar " . $keywords);
         if (isset($calendar_agent->calendar->events)) {
-            $this->response .= "Counted " . count($calendar_agent->calendar->events) . " Calendar events. ";
+            $this->response .=
+                "Counted " .
+                count($calendar_agent->calendar->events) .
+                " Calendar events. ";
             // TODO Process returned calendar events.
             //foreach ($calendar_agent->calendar->events as &$event) {
             //    $event['source'] = "calendar";
@@ -206,8 +225,6 @@ class Events extends Agent
 
             //$this->events = array_merge($this->events, $this->calendar->events);
         }
-
-
 
         $this->eventful = new Eventful($this->thing, "eventful " . $keywords);
         if (isset($this->eventful->events)) {
@@ -292,7 +309,7 @@ class Events extends Agent
                     $event_string .
                     ".";
             } else {
-                $this->response = "Got the current Events.";
+                $this->response .= "Got the current Events.";
                 if ($time_to_earliest_event > $time_to_event) {
                     $time_to_earliest_event = $time_to_event;
                     //                    $earliest_event_name = $event_name;
@@ -313,7 +330,7 @@ class Events extends Agent
                             ".";
                     }
 
-                    $this->response = "Got the next event.";
+                    $this->response .= "Got the next event. ";
 
                     $this->runat = new Runat(
                         $this->thing,
@@ -321,7 +338,7 @@ class Events extends Agent
                     );
 
                     if ($this->runat->isToday($event_time)) {
-                        $this->response = "Got today's event.";
+                        $this->response .= "Got today's event. ";
                     }
                 }
             }
@@ -330,9 +347,66 @@ class Events extends Agent
         //      $this->response = "Got the next Geekenders.";
     }
 
+    public function getEvents()
+    {
+        $this->response .= "Get events. ";
+
+        $events_variable = $this->getMemory("events");
+
+        $age = 1e9;
+
+        if (isset($events_variable['refreshed_at'])) {
+            $age =
+                strtotime($this->current_time) -
+                strtotime($events_variable['refreshed_at']);
+            $this->response .= "Age is " . $age . "s. ";
+            $this->events_cache_age = $age;
+        }
+
+        //var_dump($events_variable);
+        //$refreshed_at = $events['refreshed_at'];
+        $events = $events_variable['events'];
+        if (isset($this->events) and $this->events != null) {
+            $events = array_merge($this->events, $events);
+        }
+
+        $cache_request_flag = false;
+        if (isset($events_variable['cache_request_flag'])) {
+            $cache_request_flag = $events_variable['cache_request_flag'];
+        }
+        $this->events_cache_request_flag = $cache_request_flag;
+        if ($age > 60 and $cache_request_flag !== true) {
+            //if (($events === false) or ($events == []) or (!isset($events['refreshed_at']>
+
+            // How old is the cached item.
+            $datagram = [
+                "to" => "null" . $this->mail_postfix,
+                "from" => "events",
+                "subject" => "current events",
+                "agent_input" => "current events",
+            ];
+
+            $this->thing->spawn($datagram);
+
+            //tets
+            //$events_agent = new Events($this->thing, "current events");
+
+            //$events = $events_agent->currentEvents();
+
+            $events_variable = $this->getMemory("events");
+
+            $events_variable['cache_request_flag'] = true;
+            $this->setMemory("events", $events_variable);
+
+            $events = array_merge($events_variable['events'], $events);
+        }
+        //var_dump($events['events']);
+        return $events;
+    }
+
     public function readSubject()
     {
-        $this->response = "Heard Events.";
+        $this->response .= "Heard Events. ";
         $this->keyword = "events";
 
         if ($this->agent_input != null) {
@@ -341,7 +415,33 @@ class Events extends Agent
             $input = strtolower($this->subject);
         }
 
-        if ($input == "events") {return;}
+        if ($input == "events") {
+            $this->events = $this->getEvents();
+            return;
+        }
+
+        if ($input == "current events") {
+            //var_dump("called current_events");
+            $this->events = $this->currentEvents();
+            return;
+        }
+
+        if (
+            stripos(
+                $this->subject . " " . $this->agent_input,
+                'reset cache'
+            ) !== false
+        ) {
+            //        if ($input == "reset cache") {
+            //var_dump("reset cache");
+            $events_variable = $this->getMemory("events");
+
+            $events_variable['cache_request_flag'] = false;
+
+            $this->setMemory("events", $events_variable);
+
+            return;
+        }
 
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), "events is")) !== false) {
@@ -354,21 +454,28 @@ class Events extends Agent
 
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            $this->response =
-                "Asked Events about " . $this->search_words . " events";
+            $this->response .=
+                "Asked Events about " . $this->search_words . " events. ";
             //return false;
         }
 
         $this->doEvents();
 
-        return $this->response;
+        //return $this->response;
     }
 
     public function makeMessage()
     {
-        $message = $this->eventful->message;
+        $message = "No message.";
+        if (isset($this->eventful->message)) {
+            $message = $this->eventful->message;
+        }
 
-        $this->message = $this->earliest_event_string; //. ".";
+        $this->message = $message;
+        if (isset($this->earliest_event_string)) {
+            $this->message = $this->earliest_event_string; //. ".";
+        }
+
         $this->thing_report['message'] = $message;
     }
 
@@ -377,7 +484,11 @@ class Events extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/events';
 
         $sms = "EVENTS ";
-        $sms .= " | " . $this->earliest_event_string;
+
+        if (isset($this->earliest_event_string)) {
+            $sms .= " | " . $this->earliest_event_string;
+        }
+
         $sms .= " | " . $this->response;
 
         $this->sms_message = $sms;
@@ -396,25 +507,46 @@ class Events extends Agent
         $html .= $this->sms_message . '"';
 
         $html .= "<p>";
+        if (isset($this->events)) {
+            $event_agent = new Event($this->thing, "event");
+            foreach ($this->events as $id => $event) {
+                //            $event_html = $this->eventString($event);
+                $event_html = $event_agent->textEvent($event);
+                if (isset($event['link'])) {
+                    $link = $event['link'];
 
-        $event_agent = new Event($this->thing, "event");
-        foreach ($this->events as $id => $event) {
-//            $event_html = $this->eventString($event);
-            $event_html = $event_agent->textEvent($event);
+                    // https://stackoverflow.com/questions/8591623/checking-if-a-url-has-http-at-the-beginning-inserting-if-not
+                    $parsed = parse_url($link);
+                    if (empty($parsed['scheme'])) {
+                        $link = 'http://' . ltrim($link, '/');
+                    }
 
-            $link = $event['link'];
+                    $html_link = '<a href="' . $link . '">';
+                    $event_source = "Unknown source.";
+                    if (isset($event['source'])) {
+                        $event_source = $event['source'];
+                    }
+                    $html_link .= $event_source;
 
-            // https://stackoverflow.com/questions/8591623/checking-if-a-url-has-http-at-the-beginning-inserting-if-not
-            $parsed = parse_url($link);
-            if (empty($parsed['scheme'])) {
-                $link = 'http://' . ltrim($link, '/');
+                    $html_link .= "</a>";
+
+                    $html .= "<p>" . $event_html . " " . $html_link;
+                } else {
+                    $html .= "<p>" . "No link found";
+                }
             }
+        }
+        if (isset($this->events_cache_age)) {
+            $html .= "<p>" . "Cache age is " . $this->events_cache_age . "s. ";
+        }
 
-            $html_link = '<a href="' . $link . '">';
-            $html_link .= $event['source'];
-            $html_link .= "</a>";
-
-            $html .= "<p>" . $event_html . " " . $html_link;
+        if (
+            isset($this->events_cache_request_flag) and
+            $this->events_cache_request_flag === true
+        ) {
+            $html .= "<p>" . "Cache request flag is TRUE. ";
+        } else {
+            $html .= "<p>" . "Cache request flag is NOT SET or NOT TRUE. ";
         }
 
         $this->web_message = $html;
