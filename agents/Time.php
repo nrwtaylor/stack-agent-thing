@@ -168,7 +168,6 @@ class Time extends Agent
                 $m .= "The local meridian/mean/solar(?) time is ";
                 $m .= $this->lmtTime();
                 $m .= ". This is a developmental stack service. Validate before use.";
-                $m .= ".";
             }
         }
 
