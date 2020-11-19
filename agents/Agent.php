@@ -230,6 +230,13 @@ class Agent
         }
     }
 
+// TODO DEV?
+/*
+    public function __get($x) {
+        var_dump($x);
+        var_dump("hug");
+    }
+*/
     /**
      *
      */

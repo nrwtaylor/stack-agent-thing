@@ -29,6 +29,9 @@ class Stamp extends Agent
         ];
         $this->current_time = $this->thing->json->microtime();
 
+
+        $this->default_stamp = "X";
+
         // Default is not to show end user microtime.
         $this->micro_time_flag = false;
 
@@ -257,7 +260,15 @@ class Stamp extends Agent
 
         $m = '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
 
-        $parts = explode(" ", $this->stamp);
+
+        $stamp = $this->default_stamp;
+        if (isset($this->stamp)) {
+            $stamp = $this->stamp;
+        }
+
+
+
+        $parts = explode(" ", $stamp);
 
         if ((!isset($parts[1])) and ($parts[0] == "")) {
             $stamp .= "Empty";
@@ -287,7 +298,9 @@ class Stamp extends Agent
     {
         $sms_message = "STAMP";
 
-        $stamp = trim($this->stamp);
+
+        $stamp = "X";
+        if (isset($this->stamp)) {$stamp = trim($this->stamp);}
 
         if ($this->micro_time_flag === true) {
             $stamp = $this->timestamp;

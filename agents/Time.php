@@ -113,6 +113,7 @@ class Time extends Agent
         return $new_date_format;
     }
 
+    // TODO Replace with call to datumTime() ?
     public function timestampTime(
         $datum = null,
         $time_zone = null,
@@ -148,17 +149,27 @@ class Time extends Agent
         }
         $m = "Could not get a time.";
         if ($this->isDateValid($text)) {
-            $datum = $this->datumTime($text);
-            $this->text = $datum->format('H:i');
             $m = "Time check from stack server " . $this->web_prefix . ". ";
-            $m .=
-                "In the timezone " .
-                $this->time_zone .
-                ", it is " .
-                $datum->format('l') .
-                " " .
-                $datum->format('d/m/Y, H:i:s') .
-                ". ";
+
+            $datum = $this->datumTime($text);
+            if ($datum !== false) {
+                $this->text = $datum->format('H:i');
+                $m .=
+                    "In the timezone " .
+                    $this->time_zone .
+                    ", it is " .
+                    $datum->format('l') .
+                    " " .
+                    $datum->format('d/m/Y, H:i:s') .
+                    ". ";
+            }
+
+            if ($datum === false) {
+                $m .= "The local meridian/mean/solar(?) time is ";
+                $m .= $this->lmtTime();
+                $m .= ". This is a developmental stack service. Validate before use.";
+                $m .= ".";
+            }
         }
 
         $this->response .= $m;
@@ -183,23 +194,127 @@ class Time extends Agent
         return $timevalue;
     }
 
+    public function lmtTime($text = null)
+    {
+        // So. This function exists.
+        // https://www.php.net/manual/en/function.date-sun-info.php
+
+        // Given a Unix timestamp (epoch time)
+        // Convert that to a Local Meridian Time.
+        // If you know the latitude and longitude in degrees.
+
+        // TODO: Test
+
+        $longitude_agent = new Longitude($this->thing, "longitude");
+        $longitude = $longitude_agent->longitude;
+
+        $latitude_agent = new Latitude($this->thing, "latitude");
+        $latitude = $latitude_agent->latitude;
+
+        //$latitude = 49.2827;
+
+        $timestamp_epoch = time();
+        if ($text != null) {
+            $timestamp_epoch = strtotime($text);
+        }
+
+        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
+
+        $transit_epoch = $solar_array['transit'];
+
+        $offset = $timestamp_epoch - $transit_epoch; // seconds
+
+        // So at the specific provided epoch time.
+        // Which was now.
+
+        // Noon offset in decimal hours.
+        $x = 12 * 60 * 60 + $offset;
+
+        // Use gmdate to get an hour minute seconds text stamp.
+        $t = gmdate("H:i:s", $x); // How many H:i:s solar noon was ago.
+
+        // So local meridian time would be.
+
+        $text = "XXXX-XX-XXT" . $t . " LMT";
+
+        // Really. So we need to engage with latitude and longitude?
+
+        // The latitude and longitude is a function of the current position.
+        // Of the vessel.
+
+        // They are independantly observed on a spere(oid/ish). Geoid?
+        // One is a function of the number of minutes offset you are from a meridian.
+
+        // And longitude is an observation of the inclination.
+        // Of the spinny axis against the solar(/local galaxy)?
+
+        // So. An observation of latitude tells you how many minutes.
+        // You are ahead or behind the meridian.
+
+        // 123.1207° W
+
+        // This tells me I am ahead/behind the meridian by 123.1207 minutes
+        // Of longitude. Appearently there is a factor of four.
+
+        // Which gets me to 492.8428 minutes of time.
+
+        // 8.20804667 hours of time.
+
+        return $text;
+
+        // TODO
+
+        // And then I look up in the sky and measure the inclination.
+        // Of something obvious. Polaris?
+
+        // And do that in a lot of fixed places.
+
+        // Look for the convergence. Measure against that.
+
+        // Recognize is wobbles (a bit/a lot)?
+
+        // 49.2827° N
+
+        // So channel based observation and storage of latitude and longitude.
+        // https://www.google.com/search?&q=latitude+vancouver
+
+        // Easy search for a human.
+        // Trickier for a robot. Maybe.
+    }
+
     function datumTime($text = null, $time_zone = "UTC")
     {
+        // Recognize and understand local meridian.
+        // PHP documentation for timezones does not look to recognize this.
 
-if ($text == null) {return true;}
+        // So set a datum false.
 
-// If not datum is provided.
-// Check for a zull flug.
-$zulu_flag = null;
-if (strtolower(substr($text, -1)) == 'z') {
-    $zulu_flag = "Z";
-}
+        if (strtolower($time_zone) == "lmt") {
+            $this->lmtTime($text);
 
-if (($zulu_flag == "Z") and ($time_zone == null)) {
+            $this->datum = false; // Signal no external datum found.
+            return $this->datum;
+        }
 
-$time_zone = "UTC";
+        if ($text == null) {
+            return true;
+        }
 
-}
+        // If not datum is provided.
+        // Check for a zull flug.
+        $zulu_flag = null;
+        if (strtolower(substr($text, -1)) == 'z') {
+            $zulu_flag = "Z";
+        }
+
+        if ($zulu_flag == "Z" and $time_zone == null) {
+            $time_zone = "UTC";
+        }
+
+        if ($this->time_zone == "lmt") {
+            $this->datum = false;
+            return $this->datum;
+        }
 
         $datum = null;
         $timevalue = $text;
@@ -223,6 +338,10 @@ $time_zone = "UTC";
     {
         if ($text == null or $text == "") {
             return true;
+        }
+
+        if (stripos($text, "lmt") !== false) {
+            return "lmt";
         }
 
         $text = str_replace("time", "", $text);
@@ -256,7 +375,12 @@ $time_zone = "UTC";
      */
     public function readSubject()
     {
-        if ($this->agent_input == "time") {return;}
+        //$input = $this->input;
+        //if (stripos($input, "lmt") !== false) {$this->timezone="lmt";}
+
+        if ($this->agent_input == "time") {
+            return;
+        }
         $this->filtered_input = $this->assert($this->input, "time");
 
         if ($this->filtered_input != "") {
