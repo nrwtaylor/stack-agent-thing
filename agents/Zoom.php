@@ -1,6 +1,6 @@
 <?php
 /**
- * Webex.php
+ * Zoom.php
  *
  * @package default
  */
@@ -13,7 +13,7 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Webex extends Agent
+class Zoom extends Agent
 {
     public $var = 'hello';
 
@@ -27,19 +27,19 @@ class Webex extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "WEBEX is a tool for hosting audio-visual conferences.";
+            "ZOOM is a tool for hosting audio-visual conferences.";
         $this->thing_report["help"] = 'Click on the image for a PDF.';
 
-        $this->node_list = ["webex" => ["webex", "uuid"]];
+        $this->node_list = ["zoom" => ["zoom", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
-        $this->initWebex();
+        $this->initZoom();
     }
 
     public function set()
     {
-        $this->setWebex();
+        $this->setZoom();
     }
 
     /**
@@ -74,7 +74,7 @@ class Webex extends Agent
      */
     public function makeSMS()
     {
-        $sms = "WEBEX | ";
+        $sms = "ZOOM | ";
 
         $sms_text =
             $this->password .
@@ -85,8 +85,11 @@ class Webex extends Agent
             " " .
             $this->host_url;
 
-        $telephone_numbers_text = implode(" ", $this->telephone_numbers);
+        $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
 
+        $urls_text = implode(" ", $this->urls);
+
+        $sms .= $urls_text . " ";
         $sms .= $sms_text . " ";
         $sms .= $telephone_numbers_text . " ";
         $sms .= $this->response;
@@ -103,7 +106,7 @@ class Webex extends Agent
      *
      */
 
-    public function setWebex()
+    public function setZoom()
     {
     }
 
@@ -111,31 +114,32 @@ class Webex extends Agent
      *
      * @return unknown
      */
-    public function getWebex()
+    public function getZoom()
     {
     }
 
     /**
      *
      */
-    public function initWebex()
+    public function initZoom()
     {
     }
 
-    public function readWebex($text = null)
+    public function readZoom($text = null)
     {
-        $file = $this->resource_path . 'call/call-test' . '.txt';
+        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
         if (file_exists($file)) {
             $text = file_get_contents($file);
         }
-        $this->access_code = $this->accesscodeWebex($text);
-        $this->password = $this->passwordWebex($text);
+        $this->access_code = $this->accesscodeZoom($text);
+        $this->password = $this->passwordZoom($text);
 
-        $this->url = $this->urlWebex($text);
-        $this->host_url = $this->hosturlWebex($text);
+        $this->url = $this->urlZoom($text);
+        $this->urls = $this->urlsZoom($text);
+        $this->host_url = $this->hosturlZoom($text);
 
-        $this->telephone_numbers = $this->telephonenumberWebex($text);
+        $this->telephone_numbers = $this->telephonenumberZoom($text);
     }
 
     public function run()
@@ -147,12 +151,15 @@ class Webex extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/webex.pdf';
-        $this->node_list = ["webex" => ["webex"]];
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/zoom.pdf';
+        $this->node_list = ["zoom" => ["zoom"]];
         $web = "";
-        $web .= '<a href="' . $link . '">';
-        $web .= $this->html_image;
-        $web .= "</a>";
+
+        if (isset($this->html_image)) {
+            $web .= '<a href="' . $link . '">';
+            $web .= $this->html_image;
+            $web .= "</a>";
+        }
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -162,7 +169,7 @@ class Webex extends Agent
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "webex",
+            "zoom",
             "refreshed_at",
         ]);
 
@@ -170,19 +177,19 @@ class Webex extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["webex", "refreshed_at"],
+                ["zoom", "refreshed_at"],
                 $time_string
             );
         }
     }
 
-    public function urlWebex($text = null)
+    public function urlZoom($text = null)
     {
         $url_agent = new Url($this->thing, "url");
         $urls = $url_agent->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-            if (stripos($url, 'j.php?MTID') !== false) {
+            if (stripos($url, '.zoom.us/') !== false) {
                 // Match first instance.
                 return $url;
             }
@@ -191,8 +198,30 @@ class Webex extends Agent
         return false;
     }
 
-    public function hosturlWebex($text = null)
+    public function urlsZoom($text = null)
     {
+        $url_agent = new Url($this->thing, "url");
+        $urls = $url_agent->extractUrls($text);
+
+        foreach ($urls as $i => $url) {
+            if (stripos($url, '.zoom.us/') !== false) {
+                // Match first instance.
+                continue;
+            }
+            unset($urls[$i]);
+        }
+        if (count($urls) != 0) {
+            return $urls;
+        }
+
+        return false;
+    }
+
+    public function hosturlZoom($text = null)
+    {
+        // Undefined at this time.
+        return true;
+
         $url_agent = new Url($this->thing, "url");
         $urls = $url_agent->extractUrls($text);
 
@@ -207,7 +236,7 @@ class Webex extends Agent
         return end($urls);
     }
 
-    public function telephonenumberWebex($text = null)
+    public function telephonenumberZoom($text = null)
     {
         // TODO: devstack Telephonenumber
 
@@ -222,7 +251,7 @@ class Webex extends Agent
         return $telephone_numbers;
     }
 
-    public function accesscodeWebex($text = null)
+    public function accesscodeZoom($text = null)
     {
         // 124 456 5678
 
@@ -247,7 +276,7 @@ class Webex extends Agent
         return false;
     }
 
-    public function passwordWebex($text)
+    public function passwordZoom($text)
     {
         // 11 character string. Alphunumeric.
         // 124 456 5678
@@ -270,7 +299,6 @@ class Webex extends Agent
         if (!isset($passwords)) {
             $passwords = [];
         }
-        //var_dump($match[0]);
         $passwords = array_merge($passwords, $match[0]);
         $passwords = array_unique($passwords);
 
@@ -298,9 +326,9 @@ class Webex extends Agent
      * @return unknown
      */
 
-    public function isWebex($text)
+    public function isZoom($text)
     {
-        // Contains word webex?
+        // Contains word zoom?
         return false;
     }
 
@@ -308,18 +336,18 @@ class Webex extends Agent
     {
         $input = strtolower($this->subject);
 
-        $this->readWebex($input);
+        $this->readZoom($input);
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'webex') {
-                $this->getWebex();
+            if ($input == 'zoom') {
+                $this->getZoom();
                 return;
             }
         }
 
-        $this->getWebex();
+        $this->getZoom();
 
         return;
     }

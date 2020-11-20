@@ -75,8 +75,10 @@ class Call extends Agent
     public function makeSMS()
     {
         $sms = "CALL | ";
+        $sms .= $this->message . "\n";
+        $sms .= $this->response;
 
-        $this->sms_message = $sms; 
+        $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
@@ -88,9 +90,9 @@ class Call extends Agent
      *
      */
 
-
-    public function setCall() {}
-
+    public function setCall()
+    {
+    }
 
     /**
      *
@@ -119,9 +121,12 @@ class Call extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/call.pdf';
         $this->node_list = ["call" => ["call"]];
         $web = "";
-        $web .= '<a href="' . $link . '">';
-        $web .= $this->html_image;
-        $web .= "</a>";
+        if (isset($this->html_image)) {
+            $web .= '<a href="' . $link . '">';
+            $web .= $this->html_image;
+            $web .= "</a>";
+        }
+
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -145,31 +150,116 @@ class Call extends Agent
         }
     }
 
-
     // TODO: Test extraction of telephone numbers
-    public function readCall($text = null) {
-        $file = $this->resource_path . 'call/call-test'.'.txt';
+    public function readCall($text = null)
+    {
+        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
         if (file_exists($file)) {
-
             $text = file_get_contents($file);
-
         }
 
         $url_agent = new Url($this->thing, "url");
 
         $this->urls = $url_agent->extractUrls($text);
 
-        $telephonenumber_agent = new Telephonenumber($this->thing, "telephonenumber");
-//var_dump($text);
-        $this->telephone_numbers = $telephonenumber_agent->extractTelephonenumbers($text);
+        $telephonenumber_agent = new Telephonenumber(
+            $this->thing,
+            "telephonenumber"
+        );
+        $this->telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+            $text
+        );
 
-//var_dump($this->telephone_numbers);
-//var_dump($this->urls);
-
-        return;
     }
 
+    public function whenCalls($text = null)
+    {
+        $when_agent = new When($this->thing, "when");
+        $calls = [];
+        foreach ($when_agent->calendar_agent->calendar->events as $event) {
+
+            $haystack =
+                $event->summary .
+                " " .
+                $event->description .
+                " " .
+                $this->location;
+
+            if (stripos($haystack, "zoom") !== false) {
+                $zoom_agent = new Zoom($this->thing, "zoom");
+
+                $event->password = $zoom_agent->password;
+                $event->access_code = $zoom_agent->access_code;
+                $event->url = $zoom_agent->url;
+                $event->urls = $zoom_agent->urls;
+                $event->host_url = $zoom_agent->host_url;
+
+                $event->telephone_numbers = $zoom_agent->telephone_numbers;
+
+                $calls[] = $event;
+                //$this->response .= "Saw a zoom meeting. ";
+                continue;
+            }
+
+            if (stripos($haystack, "webex") !== false) {
+                $webex_agent = new Webex($this->thing, "webex");
+
+                $event->password = $webex_agent->password;
+                $event->access_code = $webex_agent->access_code;
+                $event->url = $webex_agent->url;
+                $event->host_url = $webex_agent->host_url;
+
+                $event->telephone_numbers = $webex_agent->telephone_numbers;
+
+                $calls[] = $event;
+                continue;
+            }
+        }
+
+        return $calls;
+    }
+
+    public function makeCall()
+    {
+        $call_text = "";
+
+        $when_agent = new When($this->thing, "when");
+        if (isset($this->calls)) {
+            foreach ($this->calls as $event) {
+                $t .= $when_agent->textWhen($event) . " ";
+                //$t .= $event->summary . " ";
+                //$t .=$event->dtstart . " ";
+
+                $t .= $event->password . " ";
+                if (isset($event->access_code)) {
+                    $t .= $event->access_code . " ";
+                }
+                if (isset($event->meeting_id)) {
+                    $t .= $event->meeting_id . " ";
+                }
+
+                $t .= implode(" ", $event->urls) . " ";
+                $t .= $event->host_url;
+
+                $t .= implode(" / ", $event->telephone_numbers);
+                $call_text .= $t . "\n";
+
+                // Only take the first now.
+
+                break;
+            }
+        }
+        $this->message = $call_text;
+
+    }
+
+    public function nextCall($text = null)
+    {
+        $this->response .= "Saw a request for the next call. ";
+        $response = $this->whenCalls($text);
+        return $response;
+    }
     /**
      *
      * @return unknown
@@ -186,16 +276,22 @@ class Call extends Agent
         //$input = strtolower($this->subject);
         $input = $this->subject;
         if (isset($this->agent_input)) {
-            if (strtolower($this->agent_input) == 'call') {return;}
+            if (strtolower($this->agent_input) == 'call') {
+                return;
+            }
             if (!$this->thing->isEmpty($this->agent_input)) {
                 $input = $this->agent_input;
             }
-
         }
 
         $this->input = $input;
 
         $this->readCall($input);
+
+        if (strtolower($input) == "next call") {
+            $this->calls = $this->nextCall($input);
+            return;
+        }
 
         $pieces = explode(" ", strtolower($input));
 
