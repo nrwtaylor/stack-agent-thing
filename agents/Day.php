@@ -101,19 +101,19 @@ class Day extends Agent
         $this->timestamp_epoch = $timestamp_epoch;
 
         $arr = [
-            "astronomical twilight begin",
-            "nautical twilight begin",
-            "civil twilight begin",
-            "sunrise",
-            "transit",
-            "sunset",
-            "civil twilight end",
-            "nautical twilight end",
-            "astronomical twilight end",
+            "astronomical twilight begin"=>"astronomical twilight",
+            "nautical twilight begin"=>"nautical twilight",
+            "civil twilight begin"=>"civil twilight",
+            "sunrise"=>"day",
+            "transit"=>"day",
+            "sunset"=>"civil twilight",
+            "civil twilight end"=>"nautical twilight",
+            "nautical twilight end"=>"astronomical twilight",
+            "astronomical twilight end"=>"night",
         ];
         $message = "";
         $count = 0;
-        foreach ($arr as $period) {
+        foreach ($arr as $period=>$epoch) {
             $datum = $this->twilightDay($period);
             if ($count == 0) {
                 $message .= $period . " " . $datum->format("Y/m/d G:i:s") . " ";
@@ -121,11 +121,26 @@ class Day extends Agent
                 $message .= $period . " " . $datum->format("G:i:s") . " ";
             }
             $count += 1;
+
+            $variable_text = str_replace(" ", "_", $period);
+
+//var_dump($timestamp_epoch);
+//var_dump($this->solar_array[$variable_text]);
+
+            if ($this->solar_array[$variable_text] < $timestamp_epoch) {
+                $time_of_day = $period;
+            }
         }
+
+        //foreach($arr as $i=>$arr) {
+        //}
+        //var_dump($time_of_day);
+        $day_time = $arr[$time_of_day];
+
         $tz = $datum->getTimezone();
         $message .= $tz->getName();
 
-        $this->message = $message;
+        $this->message = strtoupper($day_time) . " " . $message;
     }
 
     public function twilightDay($text)
@@ -254,7 +269,7 @@ class Day extends Agent
      */
     public function makeSMS()
     {
-        $sms = "DAY | ";
+        $sms = "DAY";
 
         $days = [];
         if (isset($this->days)) {
@@ -264,8 +279,8 @@ class Day extends Agent
         $day_text = "No day found.";
         if (isset($this->day)) {
             $day_text = $this->day;
+            $sms .= " | " . $day_text;
         }
-        $sms .= $day_text;
 
         $sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
