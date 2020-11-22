@@ -8,21 +8,24 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-echo "Worker whitefox 8 September 2020\n";
+//register_shutdown_function('shutdown');
+
+
+
+echo "Worker whitefox 20 November 2020\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 $worker->addServer();
 $uuid = null;
 $name = "call_agent";
 $task = "Nrwtaylor\StackAgentThing\call_agent_function";
-//$worker->addFunction(
-//    $name,
-//    $task,
-//    $uuid
-//);
-
 
 $worker->addFunction($name, function() use($task) {
+         // set_error_handler(
+         //       'worker_fatal_handler',
+         //       E_FATAL
+         //   );
+
      try {
          $result = call_user_func_array($task, func_get_args());
      } catch(\Exception $e) {
@@ -31,37 +34,27 @@ $worker->addFunction($name, function() use($task) {
          // Send exception to Exceptional so it can be logged with details
          Exceptional::handle_exception($e, FALSE);
      }
+
+        //    restore_error_handler();
 
      return $result;
 },$uuid);
-
-/*
-$worker->addFunction($name, function() use($task) {
-     try {
-         $result = call_user_func_array($task, func_get_args());
-     } catch(\Exception $e) {
-         $result = GEARMAN_WORK_EXCEPTION;
-         echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
-         // Send exception to Exceptional so it can be logged with details
-         Exceptional::handle_exception($e, FALSE);
-     }
-
-     return $result;
-});
-*/
 
 // This would limit the length of any one worker.
 // This is handled by supervisor
 //$worker->setTimeout(1000);
 
 while ($worker->work()) {
-    echo "\nWaiting for a job\n";
+//    echo "\nWaiting for a job\n";
 
-//      if ($worker->returnCode() != GEARMAN_SUCCESS)
-//      {
-//        echo "return_code: " . $worker->returnCode() . "\n";
-//      }
-//        echo "\nGearman return code " . $worker->returnCode() . "\n";
+      if ($worker->returnCode() != GEARMAN_SUCCESS)
+      {
+        echo "worker unsuccessful [" . $worker->returnCode() . "]\n";
+      } 
+
+    echo "\n";
+    echo "worker waiting for a job\n";
+
 
 }
 
@@ -90,10 +83,10 @@ function call_agent_function($job)
         echo "Thing is false";
         //return true;
     }
-    echo "worker nuuid " . $thing->nuuid . "\n";
-    echo "worker uuid " . $thing->uuid . "\n";
+    echo "thing nuuid " . $thing->nuuid . "\n";
+    echo "thing uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
-    echo "job timestamp " . $thing->thing->created_at . "\n";
+    echo "thing timestamp " . $thing->thing->created_at . "\n";
 
     echo "agent input" . $agent_input . "\n";
 
@@ -146,7 +139,7 @@ function call_agent_function($job)
 
     echo "worker ran for " .
         number_format($thing->elapsed_runtime() - $start_time) .
-        "ms\n\n";
+        "ms\n";
 
     $json = json_encode(
         $t->thing_report,
@@ -156,4 +149,18 @@ function call_agent_function($job)
     return $json;
 
 }
+
+    function worker_fatal_handler(
+        $errno,
+        $errstr,
+        $errfile,
+        $errline,
+        $errContext
+    ) {
+        //throw new \Exception('Class not found.');
+        //trigger_error("Fatal error", E_USER_ERROR);
+        var_dump($errno);
+        var_dump($errstr);
+    }
+
 ?>
