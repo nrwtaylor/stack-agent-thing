@@ -7,7 +7,7 @@ class Longitude extends Agent
 
     function init()
     {
-        $this->default_longitude = 0;
+        $this->default_longitude = false;
 
 
         if (isset($this->thing->container['stack']['longitude'])) {
