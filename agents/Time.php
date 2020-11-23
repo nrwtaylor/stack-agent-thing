@@ -205,6 +205,10 @@ class Time extends Agent
         // TODO: Test
 
         $longitude_agent = new Longitude($this->thing, "longitude");
+
+	// Cannot calculate local time without knowing longitude.
+	if ($longitude_agent->longitude === false) {return true;}
+
         $longitude = $longitude_agent->longitude;
 
         $latitude_agent = new Latitude($this->thing, "latitude");
