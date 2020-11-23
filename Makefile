@@ -168,6 +168,10 @@ resources: ## Set up resources for the stack
 	@echo "===== Setting up resources ==============="
 	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/resources /var/www/$(SERVERNAME)/resources/
 
+settings: ## Set up your local settings
+	@echo "===== Setting up settings ==============="; \
+	echo "Still working on that."
+
 gearman: ## Install Gearman
 	@echo "===== Installing Gearman ==============="
 	sudo add-apt-repository ppa:ondrej/php -y && \
