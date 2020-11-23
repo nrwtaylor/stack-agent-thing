@@ -37,6 +37,9 @@ class Resource extends Agent
             'there',
         ];
 
+        $this->default_resource_name = "X";
+
+
         if (
             isset(
                 $this->thing->container['api']['resource'][
