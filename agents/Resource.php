@@ -37,14 +37,33 @@ class Resource extends Agent
             'there',
         ];
 
-        $this->default_resource_name =
-            $this->thing->container['api']['resource']['default_resource_name'];
-        $this->default_resource_quantity =
-            $this->thing->container['api']['resource'][
-                'default_resource_quantity'
-            ];
+        if (
+            isset(
+                $this->thing->container['api']['resource'][
+                    'default_resource_name'
+                ]
+            )
+        ) {
+            $this->default_resource_name =
+                $this->thing->container['api']['resource'][
+                    'default_resource_name'
+                ];
+        }
 
         $this->default_resource_quantity = "Z";
+
+        if (
+            isset(
+                $this->thing->container['api']['resource'][
+                    'default_resource_quantity'
+                ]
+            )
+        ) {
+            $this->default_resource_quantity =
+                $this->thing->container['api']['resource'][
+                    'default_resource_quantity'
+                ];
+        }
 
         $this->default_alias = "Thing";
 
@@ -307,7 +326,9 @@ class Resource extends Agent
 
         $things = $this->getThings('resource');
 
-        if (!is_array($things)) {return;}
+        if (!is_array($things)) {
+            return;
+        }
 
         //        $findagent_thing = new Findagent($this->thing, 'resource');
 
@@ -484,7 +505,9 @@ class Resource extends Agent
             $this->resource_thing = $this->thing;
 
             $this->response .=
-                "Made new resource : " . strtoupper($this->resource_name) . ". ";
+                "Made new resource : " .
+                strtoupper($this->resource_name) .
+                ". ";
         }
 
         $this->thing->log('found a Resource and pointed to it.');
