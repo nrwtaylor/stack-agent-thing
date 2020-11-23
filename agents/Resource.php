@@ -271,7 +271,7 @@ class Resource extends Agent
             ];
 
             // Not sure about using BC place code to identify resource
-            // Decided id is better
+            // Decided id is a better generalizaion.
             $this->resources[$name][$id] = $resource;
         }
     }
