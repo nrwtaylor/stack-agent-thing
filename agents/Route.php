@@ -25,11 +25,27 @@ class Route extends Agent
         // Agent variables
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
 
+        $this->thing->json->setField("variables");
+        $this->head_code = $this->thing->json->readVariable([
+            "headcode",
+            "head_code",
+        ]);
+
+        $flag_variable_name = "_" . $this->head_code;
+
+        // Get the current Identities flag
+        $this->variables = new Variables(
+            $this->thing,
+            "variables route" . $flag_variable_name . " " . $this->from
+        );
+
+
+/*
         $this->variables = new Variables(
             $this->thing,
             "variables route " . $this->from
         );
-
+*/
         $this->state = null; // to avoid error messages
     }
 
@@ -73,6 +89,8 @@ class Route extends Agent
             $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['route'])) {
+                if (!$this->isRoute($variables['route'])) {continue;}
+                if (!isset($variables['route']['refreshed_at'])) {continue;}
                 //$head_code = $variables['route']['head_code'];
                 //$route = $variables['route']['route'];
 
@@ -80,21 +98,32 @@ class Route extends Agent
                 $this->routes[] = $variables['route'];
             }
         }
+
+        $refreshed_at = [];
+        foreach ($this->routes as $key => $row) {
+            $refreshed_at[$key] = $row['refreshed_at'];
+        }
+        array_multisort($refreshed_at, SORT_DESC, $this->routes);
+
+
         return $this->routes;
     }
 
     function getRoute($selector = null)
     {
-        $this->route = "Place";
+        //$this->route = "Place";
 
         if (!isset($this->routes)) {
             $this->getRoutes();
         }
 
         foreach ($this->routes as $key => $route) {
-            //var_dump( $key);
-            //echo $route['route'];;
         }
+
+if (count($this->routes) !=0) {
+        $this->route = $this->routes[0];
+}
+
     }
 
     function get($route = null)
@@ -131,7 +160,7 @@ class Route extends Agent
 
         if (!isset($this->route)) {
             $this->route = $this->variables->getVariable('route');
-            $this->head_code = $this->variables->getVariable('head_code');
+            //$this->head_code = $this->variables->getVariable('head_code');
         }
 
         $this->getRoute();
@@ -244,9 +273,14 @@ class Route extends Agent
             return false;
         }
 
+        //if (!isset($route['refreshed_at'])) {return false;}
+
+
         if (isset($route['places'])) {
             return true;
         }
+
+
 
         return false;
     }
@@ -268,6 +302,8 @@ class Route extends Agent
             return true;
         }
 
+        if (!is_array($route['places'])) {return true;}
+
         $text = implode(' > ', $route['places']);
         $text = ucwords($text);
         return $text;
@@ -276,7 +312,7 @@ class Route extends Agent
     public function makeSMS()
     {
         $sms =
-            "ROUTE " . $this->textRoute($this->route) . " " . $this->response;
+            "ROUTE " .$this->head_code ." " . $this->textRoute($this->route) . " " . $this->response;
 
         //        $sms_message .= " | headcode " . strtoupper($this->head_code);
         //        $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
@@ -345,12 +381,11 @@ class Route extends Agent
         $input = $this->input;
 
         // Is there a headcode in the provided datagram
-        $headcode = new Headcode($this->thing, "extract");
-        if (isset($headcode->head_code)) {
-            $this->head_code = $headcode->head_code;
-        }
-        //if (!isset($this->head_code)) {$this->route = "Place";}
-        //var_dump($this->head_code);
+        //$headcode = new Headcode($this->thing, "extract");
+        //if (isset($headcode->head_code)) {
+        //    $this->head_code = $headcode->head_code;
+        //}
+
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;
@@ -371,7 +406,9 @@ class Route extends Agent
             $this->recognizeRoute($route);
 
             $this->route = $route;
+            $this->response .= "Saw and extracted a route. ";
         }
+
 
         $pieces = explode(" ", strtolower($input));
 
@@ -379,7 +416,7 @@ class Route extends Agent
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'route') {
-                $this->readRoute();
+                //$this->readRoute();
                 return;
             }
         }
