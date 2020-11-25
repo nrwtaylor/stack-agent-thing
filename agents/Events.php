@@ -359,7 +359,9 @@ $events_variable['request_flag'] = false;
         $events_variable = $this->getMemory("events");
 
         $age = 1e9;
+$cache_request_flag = false;
 if ($events_variable !== false) {
+
         if (isset($events_variable['refreshed_at'])) {
             $age =
                 strtotime($this->current_time) -

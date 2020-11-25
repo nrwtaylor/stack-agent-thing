@@ -71,7 +71,7 @@ class Event extends Agent
                 "Got some useful paragraphs (" .
                 $this->thing->human_time(time() - $start_time) .
                 ") .";
-            //exit();
+
             foreach ($paragraphs as $i => $paragraph) {
                 $tokens = explode(" ", $paragraph);
                 if (count($tokens) == 1) {
@@ -315,8 +315,6 @@ class Event extends Agent
                 $events_agent->events_cache_request_flag;
         }
 
-        //var_dump("events");
-        //var_dump($events);
         $this->response .= "Counted " . count($events) . " events. ";
 
         foreach ($events as $event) {
@@ -478,7 +476,6 @@ class Event extends Agent
                     ];
                     $this->eventcode_list[] = $event_code;
                     $this->eventname_list[] = $event_name;
-                    //                  }
                 }
             }
         }
@@ -968,27 +965,6 @@ foreach($filtered_places as $key=>$filtered_place) {
         $web .=
             "This agent manages a uniquely numbered live event via text message.<br>";
 
-        /*
-        $web .= '<a href="' . $link . '">';
-
-// Get aan html image if there is one if (!isset($this->html_image)) {
-if (!isset($this->html_image)) {
-    if (function_exists("makePNG")) {
-        $this->makePNG();
-    } else {
-        $this->html_image = true;
-    }
-}
-
-//$this->makePNG();
-        $web .= $this->html_image;
-
-
-$web .= "<br>";
-
-        $web .= "</a>";
-        $web .= "<br>";
-*/
         if (isset($this->best_event)) {
             $web .= "<br>Nearest event found.";
             $web .= "<br>" . $this->best_event['name'];
@@ -998,6 +974,10 @@ $web .= "<br>";
 
         $web .= "<br>event_name is " . $this->event_name . "";
         $web .= "<br>event_code is " . $this->event_code . "";
+
+
+        $web .= "<br>" . $this->last_event_code;
+        $web .= "<br>" . $this->last_event_name; 
 
         $web .= "<br>run_time is " . $this->minutes . " minutes";
         $web .=
@@ -1234,11 +1214,11 @@ $web .= "<br>";
         $this->thing->flagGreen();
 
         // Allow for indexing.
-        if (!isset($this->index)) {
-            $index = "0";
-        } else {
-            $index = $this->index; //
-        }
+        //if (!isset($this->index)) {
+        //    $index = "0";
+        //} else {
+        //    $index = $this->index; //
+        //}
 
         $this->makeChoices();
 
@@ -1254,7 +1234,7 @@ $web .= "<br>";
         }
 
         $this->thing_report['help'] =
-            'This is a Place.  The union of a code and a name.';
+            'This is a Event.  Somthing which happens someplace and sometime.';
     }
 
     function isData($variable)
@@ -1268,26 +1248,14 @@ $web .= "<br>";
 
     public function readSubject()
     {
-        //$this->response = null;
         $this->num_hits = 0;
-        /*
-        switch (true) {
-            case $this->agent_input == "extract":
-                $input = strtolower($this->from . " " . $this->subject);
-                break;
-            case $this->agent_input != null:
-                $input = strtolower($this->agent_input);
-                break;
-            case true:
-                $input = strtolower($this->from . " " . $this->subject);
-        }
-*/
 
         //$input = $this->input;
         $input = $this->agent_input;
         if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
         }
+
         if ($input == "event") {
             return;
         }
@@ -1321,12 +1289,6 @@ $web .= "<br>";
             echo $this->event_name;
             return;
         }
-
-        //echo "extracted<br>";
-        //var_dump($this->event_name);
-        //var_dump($this->event_code);
-        //echo "<br>";
-        // Return the current place
 
         $this->last_event = new Variables(
             $this->thing,
@@ -1440,16 +1402,6 @@ $web .= "<br>";
             }
         }
 
-        // If at this point we get false/false, then the default Place has not been created.
-        //        if ( ($this->place_code == false) and ($this->place_name == false) ) {
-        //            $this->makePlace($this->default_place_code, $this->default_place_name);
-        //        }
-
-        // Check whether headcode saw a run_at and/or run_time
-        // Intent at this point is less clear.  But headcode
-        // might have extracted information in these variables.
-
-        // $uuids, $head_codes, $this->run_at, $this->run_time
 
         if ($this->event_code != null) {
             $this->getEvent($this->event_code);

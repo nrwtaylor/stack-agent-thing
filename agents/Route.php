@@ -14,7 +14,6 @@ class Route extends Agent
 
     function init()
     {
-
         $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
 
         $this->default_route = "Place";
@@ -32,11 +31,24 @@ class Route extends Agent
         );
 
         $this->state = null; // to avoid error messages
+    }
 
+    public function setRoute($route = null)
+    {
+        $route = null;
+        if (isset($this->route)) {
+            $route = $this->route;
+        }
+
+        $route['refreshed_at'] = $this->current_time;
+
+        $this->thing->json->writeVariable(["route"], $route);
     }
 
     function set()
     {
+        $this->setRoute();
+
         //$this->route ="meep";
         $this->variables->setVariable("route", $this->route);
         $this->variables->setVariable("head_code", $this->head_code);
@@ -57,12 +69,8 @@ class Route extends Agent
 
             $uuid = $thing_object['uuid'];
 
-//            $thing = new Thing($uuid);
-//            $variables = $thing->account['stack']->json->array_data;
-
-                $variables_json = $thing_object['variables'];
-                $variables = $this->thing->json->jsontoArray($variables_json);
-
+            $variables_json = $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['route'])) {
                 //$head_code = $variables['route']['head_code'];
@@ -72,7 +80,6 @@ class Route extends Agent
                 $this->routes[] = $variables['route'];
             }
         }
-
         return $this->routes;
     }
 
@@ -100,6 +107,28 @@ class Route extends Agent
         // 10. Because starting at the beginning is probably a mistake.
         // if you need 0Z00 ... you really need it.
 
+        // Take a look at this thing for IChing variables.
+
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+            "route",
+            "refreshed_at",
+        ]);
+
+        // And if there is no IChing timestamp create one now.
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+                ["route", "refreshed_at"],
+                $time_string
+            );
+        }
+
+        $this->thing->json->setField("variables");
+        $this->route = $this->thing->json->readVariable(["route"]);
+
         if (!isset($this->route)) {
             $this->route = $this->variables->getVariable('route');
             $this->head_code = $this->variables->getVariable('head_code');
@@ -108,27 +137,12 @@ class Route extends Agent
         $this->getRoute();
     }
 
-    function dropRoute()
-    {
-        $this->thing->log($this->agent_prefix . "was asked to drop a route.");
-
-        return;
-        // If it comes back false we will pick that up with an unset headcode thing.
-
-        if (isset($this->headcode_thing)) {
-            $this->headcode_thing->Forget();
-            $this->headcode_thing = null;
-        }
-
-        $this->get();
-    }
-
     function makeRoute($head_code = null)
     {
-        $this->route = "Place";
+        //$this->route = "Place";
     }
 
-    function headcodeTime($input = null)
+    function deprecate_headcodeTime($input = null)
     {
         if ($input == null) {
             $input_time = $this->current_time;
@@ -156,10 +170,10 @@ class Route extends Agent
         return $headcode_time;
     }
 
-    function read($text = null)
-    {
-        $this->thing->log("read");
-    }
+    //function read($text = null)
+    //{
+    //    $this->thing->log("read");
+    //}
 
     function addHeadcode()
     {
@@ -169,12 +183,13 @@ class Route extends Agent
     function makeTXT()
     {
         $txt = "Test \n";
-        foreach ($this->routes as $variable) {
+        foreach ($this->routes as $i => $route) {
             //$txt .= $variable['head_code'] . " | " . $variable['route'];
 
-            if (isset($varibale['route'])) {
-                $txt .= $variable['route'];
+            if (!isset($route['places'])) {
+                continue;
             }
+            $txt .= $this->textRoute($route);
             $txt .= "\n";
         }
 
@@ -187,28 +202,6 @@ class Route extends Agent
 
         $this->thing->flagGreen();
 
-        // Generate email response.
-
-        $to = $this->thing->from;
-        $from = "route";
-
-        //$choices = $this->thing->choice->makeLinks($this->state);
-        $choices = false;
-        $this->thing_report['choices'] = $choices;
-
-//        $this->makeTXT();
-/*
-        $sms_message = "ROUTE " . ucwords($this->route);
-
-        //        $sms_message .= " | headcode " . strtoupper($this->head_code);
-        $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
-        $sms_message .=
-            " | ~rtime " .
-            number_format($this->thing->elapsed_runtime()) .
-            "ms";
-
-        $this->thing_report['sms'] = $sms_message;
-*/
         $this->thing_report['email'] = $this->thing_report['sms'];
         $this->thing_report['message'] = $this->thing_report['sms']; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
@@ -222,28 +215,78 @@ class Route extends Agent
         }
 
         $this->thing_report['help'] = 'This is a route.';
-
-        //echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
-        //echo $message;
-
-        return;
     }
 
-public function makeSMS() {
+    public function makeChoices()
+    {
+        $choices = false;
+        $this->thing_report['choices'] = $choices;
+    }
 
-        $sms_message = "ROUTE " . ucwords($this->route);
+    public function placesRoute($text = null)
+    {
+        $tokens = array_map('trim', explode('>', $text));
+
+        $places = [];
+        foreach ($tokens as $i => $token) {
+            $places[] = $token;
+        }
+
+        return $places;
+    }
+
+    public function isRoute($route = null)
+    {
+        if ($route == null) {
+            return false;
+        }
+        if ($route == []) {
+            return false;
+        }
+
+        if (isset($route['places'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function readRoute($text = null)
+    {
+        $places = $this->placesRoute($text);
+
+        $route = ['places' => $places];
+        return $route;
+    }
+
+    public function textRoute($route = null)
+    {
+        if ($route == null) {
+            return true;
+        }
+        if ($this->isRoute($route) === false) {
+            return true;
+        }
+
+        $text = implode(' > ', $route['places']);
+        $text = ucwords($text);
+        return $text;
+    }
+
+    public function makeSMS()
+    {
+        $sms =
+            "ROUTE " . $this->textRoute($this->route) . " " . $this->response;
 
         //        $sms_message .= " | headcode " . strtoupper($this->head_code);
-//        $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
-//        $sms_message .=
-//            " | ~rtime " .
-//            number_format($this->thing->elapsed_runtime()) .
-//            "ms";
-
-        $this->thing_report['sms'] = $sms_message;
-
-
-}
+        //        $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
+        //        $sms_message .=
+        //            " | ~rtime " .
+        //            number_format($this->thing->elapsed_runtime()) .
+        //            "ms";
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
+    }
 
     function isData($variable)
     {
@@ -254,18 +297,51 @@ public function makeSMS() {
         }
     }
 
+    // TODO
+    public function nextRoute()
+    {
+        $this->response .= "Request for the next route seen. ";
+    }
+
+    // TODO
+    public function dropRoute()
+    {
+        $this->response .= "Request to drop route seen. ";
+    }
+
+    // TODO
+    public function addRoute()
+    {
+        $this->response .= "Request to add route seen. ";
+    }
+
+    public function recognizeRoute($route)
+    {
+        if ($this->isRoute($route) === false) {
+            return false;
+        }
+
+        if (!isset($this->routes)) {
+            $this->getRoutes();
+        }
+
+        foreach ($this->routes as $i => $known_route) {
+            if ($this->isRoute($known_route) === false) {
+                continue;
+            }
+            if ($known_route['places'] === $route['places']) {
+                $this->response .= "Recognized route. ";
+                return $this->routes[$i];
+            }
+        }
+
+        $this->response .= "New route seen. ";
+
+        return false;
+    }
+
     public function readSubject()
     {
-        /*
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->from . " " . $this->subject);
-        }
-*/
         $input = $this->input;
 
         // Is there a headcode in the provided datagram
@@ -275,13 +351,27 @@ public function makeSMS() {
         }
         //if (!isset($this->head_code)) {$this->route = "Place";}
         //var_dump($this->head_code);
-
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;
         }
 
-        $this->get();
+        if ($input == "route") {
+            return;
+        }
+
+        $pos = stripos($input, "route");
+        if ($pos === 0) {
+            $input = trim(substr_replace($input, "", 0, strlen('route')));
+        }
+
+        $route = $this->readRoute($input);
+
+        if ($this->isRoute($route) === true) {
+            $this->recognizeRoute($route);
+
+            $this->route = $route;
+        }
 
         $pieces = explode(" ", strtolower($input));
 
@@ -289,7 +379,7 @@ public function makeSMS() {
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'route') {
-                $this->read();
+                $this->readRoute();
                 return;
             }
         }
@@ -300,18 +390,15 @@ public function makeSMS() {
                     switch ($piece) {
                         case 'next':
                             $this->thing->log("read subject nextheadcode");
-                            $this->nextheadcode();
+                            $this->nextRoute();
                             break;
 
                         case 'drop':
-                            //     //$this->thing->log("read subject nextheadcode");
-                            $this->dropheadcode();
+                            $this->dropRoute();
                             break;
 
                         case 'add':
-                            //     //$this->thing->log("read subject nextheadcode");
-                            //$this->makeheadcode();
-                            $this->get();
+                            $this->addRoute();
                             break;
 
                         default:
@@ -320,16 +407,5 @@ public function makeSMS() {
                 }
             }
         }
-
-        if ($this->isData($this->route)) {
-            $this->set();
-            return;
-        }
-
-        $this->read();
-
-        return "Message not understood";
-
-        return false;
     }
 }
