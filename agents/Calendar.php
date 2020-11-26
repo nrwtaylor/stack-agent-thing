@@ -504,7 +504,7 @@ var_dump($variable);
                 'skipRecurrence' => false, // Default value
             ]);
 
-            $events = $this->ical->eventsFromInterval('1 week');
+            $events = $this->ical->eventsFromInterval('6 weeks');
             $calendar_timezone = $this->ical->calendarTimeZone();
             restore_error_handler();
 

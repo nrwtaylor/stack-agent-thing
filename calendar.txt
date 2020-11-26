@@ -1,0 +1,48 @@
+<b>Calendar Agent</b><br><p><div><div>11/25 19:05 VE7RVF Net - Nightly new topic [45 minutes] </div><div>Net Controller - TBA
+Topic - TBA</div><div>145.450 MHz -600</div></div><div><div>11/25 19:30 Richmond Emergency Communications Team Net [30 minutes] </div><div>Ch.412 440.900 +5 MHz tn 79.7</div><div>VA7RER 440.900 MHz, T79.7 Hz</div></div><div><div>11/25 20:00 VECTOR Radio Net - VE7TEL, 446.100 MHz [1 hour] </div><div>Primary Net - Channel 2 - 145.170 MHz -600 No Tone
+Secondary Net - Channel 430 - 446.100 MHz
+
+Check http://VECTORradio.ca/calendar for the most up to date information</div><div></div></div><div><div>11/26 19:00 SSB Net [1 hour] </div><div>SIngle Side Band Net http://ve7scc.org/local-area-nets/</div><div>144.2255 MHz USB</div></div><div><div>11/26 19:05 VE7RVF Net - Nightly new topic [45 minutes] </div><div>Net Controller - TBA
+Topic - TBA</div><div>145.450 MHz -600</div></div><div><div>11/26 20:00 VE7RBY Net [1 hour] </div><div>Weekly Radio Net - from Burnaby
+http://ve7scc.org/local-area-nets/</div><div>VE7RBY 145.350 MHz TN=127.3</div></div><div><div>11/27 19:05 VE7RVF Net - Nightly new topic [45 minutes] </div><div>Net Controller - TBA
+Topic - TBA</div><div>145.450 MHz -600</div></div><div><div>11/28 19:05 VE7RVF Net - Nightly new topic [45 minutes] </div><div>Net Controller - TBA
+Topic - TBA</div><div>145.450 MHz -600</div></div><div><div>11/29 10:00 Trans Canada Net [1 hour] </div><div>Trans Canada Net starts at 10AM Pacific on the following repeaters:
+VE7NZ 224.920 -1.6, Coquitlam, Westwood Plateau PL114.8
+VE7NZ 440.0125 +5.0, Coquitlam PL114.8
+VA7NFR 440.100 +5.0, Aldergrove PL114.8
+VE7PTF 440.425 +5.0, Maple Ridge Thornhill PL114.8 TEMP OFF NETWORK
+​VA7PTF 440.350 +5.0, , North Vancouver PL114.8
+VE7NFR 927.9875 -25.0, Maple Ridge PL114.8
+VE7NWR 145.390 -600, FM, New Westminster PL100.0</div><div></div></div><div><div>11/29 19:05 VE7RVF Net - Nightly new topic [45 minutes] </div><div>Net Controller - TBA
+Topic - TBA</div><div>145.450 MHz -600</div></div><div><div>11/29 19:30 -.-. .--  CW Practice Net [30 minutes] </div><div>VE7RBY</div><div></div></div><div><div>11/30 19:05 VE7RVF Net - Nightly new topic [45 minutes] </div><div>Net Controller - TBA
+Topic - TBA</div><div>145.450 MHz -600</div></div><div><div>12/01 19:00 NSARC Net - VE7RNS [1 hour] </div><div>http://ve7scc.org/local-area-nets/</div><div>Ch.9 147.260 MHz +600</div></div><div><div>12/01 19:00 Richmond Net - VE7RMD [1 hour] </div><div>http://ve7scc.org/local-area-nets/</div><div>Ch.24 147.1400 +600 Tn79.7</div></div><p><p><b>RESPONSE</b><p>Could not read calendar https://calendar.google.com/calendar/ical/description%40gmail.com/public/basic.ics. Read 1 calendar(s). <p><b>INFO</b><p>Times are America/Vancouver. Click refresh to update.<p><b>SMS</b><p>CALENDAR America/Vancouver
+2020-11-25 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-25 19:30:00  Richmond Emergency Communications Team Net [30 minutes]
+2020-11-25 20:00:00  VECTOR Radio Net - VE7TEL, 446.100 MHz [1 hour]
+2020-11-26 19:00:00  SSB Net [1 hour]
+2020-11-26 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-26 20:00:00  VE7RBY Net [1 hour]
+2020-11-27 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-28 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-29 10:00:00  Trans Canada Net [1 hour]
+2020-11-29 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-29 19:30:00  -.-. .--  CW Practice Net [30 minutes]
+2020-11-30 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-12-01 19:00:00  NSARC Net - VE7RNS [1 hour]
+2020-12-01 19:00:00  Richmond Net - VE7RMD [1 hour]
+Could not read calendar https://calendar.google.com/calendar/ical/description%40gmail.com/public/basic.ics. Read 1 calendar(s). <p><p><p><b>HELP</b><p>This is about seeing Calendar Events.<p><b>MESSAGE</b><p>CALENDAR America/Vancouver
+2020-11-25 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-25 19:30:00  Richmond Emergency Communications Team Net [30 minutes]
+2020-11-25 20:00:00  VECTOR Radio Net - VE7TEL, 446.100 MHz [1 hour]
+2020-11-26 19:00:00  SSB Net [1 hour]
+2020-11-26 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-26 20:00:00  VE7RBY Net [1 hour]
+2020-11-27 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-28 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-29 10:00:00  Trans Canada Net [1 hour]
+2020-11-29 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-11-29 19:30:00  -.-. .--  CW Practice Net [30 minutes]
+2020-11-30 19:05:00  VE7RVF Net - Nightly new topic [45 minutes]
+2020-12-01 19:00:00  NSARC Net - VE7RNS [1 hour]
+2020-12-01 19:00:00  Richmond Net - VE7RMD [1 hour]
+Could not read calendar https://calendar.google.com/calendar/ical/description%40gmail.com/public/basic.ics. Read 1 calendar(s). <p>
