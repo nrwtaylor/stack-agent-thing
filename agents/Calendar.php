@@ -32,7 +32,7 @@ class Calendar extends Agent
 
         }
 
-        $this->default_interval = '1 week';
+        $this->default_interval = '6 week';
 
         if (isset($this->thing->container['api']['calendar'])) {
 
