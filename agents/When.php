@@ -51,6 +51,22 @@ class When extends Agent
         }
 
         $this->calendar_list = null;
+
+
+        $this->more_flag = 'off';
+        if (isset($this->thing->container['api']['when'])) {
+            if (
+                isset(
+                    $this->thing->container['api']['when']['more']
+                )
+            ) {
+                $this->more_flag =
+                    $this->thing->container['api']['when']['more'];
+            }
+        }
+
+
+
         $file = $this->resource_path . 'when/when.txt';
 
         if (file_exists($file)) {
@@ -88,6 +104,7 @@ class When extends Agent
         $this->time_agent = new Time($this->thing, "time");
         $this->time_zone = $this->time_agent->time_zone;
     }
+
 
     function run()
     {

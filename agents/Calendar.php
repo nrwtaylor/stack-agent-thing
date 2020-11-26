@@ -32,6 +32,21 @@ class Calendar extends Agent
 
         }
 
+        $this->default_interval = '1 week';
+
+        if (isset($this->thing->container['api']['calendar'])) {
+
+            if (isset($this->thing->container['api']['calendar']['default_interval'])) {
+                $this->default_interval = $this->thing->container['api']['calendar']['default_interval'];
+            }
+
+        }
+
+        // Looks in private/settings.php
+        // Then it should resources/calendar
+        // User setting?
+        // If all else fails... ?
+
         $this->default_span = 2; // Default value
         $this->span = $this->default_span;
         $this->default_time_zone = 'UTC';
@@ -504,7 +519,10 @@ var_dump($variable);
                 'skipRecurrence' => false, // Default value
             ]);
 
-            $events = $this->ical->eventsFromInterval('6 weeks');
+            //$events = $this->ical->eventsFromInterval('6 weeks');
+
+            //$this->default_interval = '10 weeks';
+            $events = $this->ical->eventsFromInterval($this->default_interval);
             $calendar_timezone = $this->ical->calendarTimeZone();
             restore_error_handler();
 
