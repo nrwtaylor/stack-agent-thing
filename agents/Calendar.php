@@ -129,6 +129,19 @@ class Calendar extends Agent
             }
         }
 
+//foreach($this->calendar->events as $i=>$event) {
+
+
+//}
+
+
+        usort($this->calendar->events, function ($first, $second) {
+            return strtotime($first->start_at) > strtotime($second->end_at);
+        });
+
+
+
+
         if ($calendar_count != 0) {
             $this->response .= "Read " . $calendar_count . " calendar(s). ";
         }
@@ -443,9 +456,9 @@ var_dump($variable);
     {
         $time_agent = new Time($this->thing, "time");
         $calendar_text = "No calendar information available.";
-        if (isset($this->calendar_events)) {
+        if (isset($this->calendar->events)) {
             $calendar_text = "";
-            foreach ($this->calendar_events as $event) {
+            foreach ($this->calendar->events as $event) {
                 $calendar_text .=
                     $this->textCalendar($event, [
                         'timestamp',
