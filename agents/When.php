@@ -205,9 +205,34 @@ class When extends Agent
 
         $events = $this->calendar_agent->calendar->events;
 
+
+//$call_agent = new Call($this->thing, "call");
+//$frequency_agent = new Frequency($this->thing, "frequency");
         $txt = "";
         foreach ($events as $i => $event) {
-            $txt .= $this->textWhen($event) . "\n";
+
+
+//var_dump($event->description);
+//$call = $call_agent->extractCall($event->description);
+//$frequency = $frequency_agent->extractFrequency($event->description);
+            $description = strip_tags($event->description);
+            $when_description = html_entity_decode($description);
+
+//$when_description = str_replace([':',';','>','<','/'], ' ',$when_description);
+            $when_description = str_replace(["\n","\t","\r"], ' ',$when_description);
+
+            $troublesome_tokens = [''];
+
+            foreach($troublesome_tokens as $j=>$troublesome_token) {
+                if (stripos($when_description,$troublesome_token)) {$when_description = "Not readable.";}
+                break;
+            }
+
+            if ($this->description_flag != 'on') {
+                $when_description = "";
+            }
+            $txt .= $this->textWhen($event) . $when_description . "\n";
+
         }
         $this->when_text = $txt;
 
@@ -331,6 +356,12 @@ class When extends Agent
             $input = $this->subject;
         }
 
+        $this->description_flag = "off";
+        if (stripos($input,"description") !== false) {
+            $this->description_flag = "on";
+        }
+
+
         /*
         // TODO - Read command line provided resource.
         // Pipe via Calendar.
@@ -354,6 +385,5 @@ class When extends Agent
             $this->file = $filtered_input;
         }
 */
-        return;
     }
 }
