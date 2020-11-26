@@ -1032,7 +1032,10 @@ class Headcode
             if (isset($headcode['route'])) {
                 $route = $headcode['route'];
                 if (is_array($headcode['route'])) {
-                    $route = implode(">", $headcode['route']);
+                    $route = "X";
+                    if (isset($headcode['route']['places'])) {
+                    $route = implode(">", $headcode['route']['places']);
+                    }
                 }
                 $txt .= " " . str_pad($route, 9, " ", STR_PAD_LEFT);
             }

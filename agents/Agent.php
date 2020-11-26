@@ -2105,6 +2105,14 @@ if (!isset($this->memory)) {
             return;
         }
 
+        // ignore agent at the start
+        $pos = stripos($input, "agent");
+        if ($pos === 0) {
+            $input = trim(substr_replace($input, "", 0, strlen('agent')));
+        }
+
+
+
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
 
         // Is it a timestamp?
@@ -2686,6 +2694,7 @@ if (!isset($this->memory)) {
                 // But what if there is an active agent with the request?
 
                 $tokens = explode(" ", $input);
+
                 if (count($tokens) == 1) {
                     $this->thing->log(
                         'Agent "Agent" found a headcode in address.',

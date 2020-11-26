@@ -23,7 +23,6 @@ class Route extends Agent
         $this->test = "Development code"; // Always iterative.
 
         // Agent variables
-        $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
 
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
@@ -39,13 +38,6 @@ class Route extends Agent
             "variables route" . $flag_variable_name . " " . $this->from
         );
 
-
-/*
-        $this->variables = new Variables(
-            $this->thing,
-            "variables route " . $this->from
-        );
-*/
         $this->state = null; // to avoid error messages
     }
 
@@ -123,20 +115,10 @@ class Route extends Agent
 if (count($this->routes) !=0) {
         $this->route = $this->routes[0];
 }
-
     }
 
     function get($route = null)
     {
-        // This is a request to get the headcode from the Thing
-        // and if that doesn't work then from the Stack.
-
-        // 0. light engine with or without break vans.
-        // Z. Always has been a special.
-        // 10. Because starting at the beginning is probably a mistake.
-        // if you need 0Z00 ... you really need it.
-
-        // Take a look at this thing for IChing variables.
 
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
@@ -155,15 +137,17 @@ if (count($this->routes) !=0) {
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->route = $this->thing->json->readVariable(["route"]);
+        //$this->thing->json->setField("variables");
+        //$this->route = $this->thing->json->readVariable(["route"]);
 
         if (!isset($this->route)) {
             $this->route = $this->variables->getVariable('route');
             //$this->head_code = $this->variables->getVariable('head_code');
         }
 
-        $this->getRoute();
+        //$this->getRoute();
+
+
     }
 
     function makeRoute($head_code = null)
@@ -199,11 +183,6 @@ if (count($this->routes) !=0) {
         return $headcode_time;
     }
 
-    //function read($text = null)
-    //{
-    //    $this->thing->log("read");
-    //}
-
     function addHeadcode()
     {
         $this->get();
@@ -211,6 +190,8 @@ if (count($this->routes) !=0) {
 
     function makeTXT()
     {
+        if (!isset($this->routes)) {$this->getRoutes();}
+
         $txt = "Test \n";
         foreach ($this->routes as $i => $route) {
             //$txt .= $variable['head_code'] . " | " . $variable['route'];
@@ -266,6 +247,7 @@ if (count($this->routes) !=0) {
 
     public function isRoute($route = null)
     {
+        // Basic validation of route.
         if ($route == null) {
             return false;
         }
@@ -273,14 +255,9 @@ if (count($this->routes) !=0) {
             return false;
         }
 
-        //if (!isset($route['refreshed_at'])) {return false;}
-
-
         if (isset($route['places'])) {
             return true;
         }
-
-
 
         return false;
     }
@@ -312,14 +289,8 @@ if (count($this->routes) !=0) {
     public function makeSMS()
     {
         $sms =
-            "ROUTE " .$this->head_code ." " . $this->textRoute($this->route) . " " . $this->response;
+            "ROUTE " .strtoupper($this->head_code) ." " . $this->textRoute($this->route) . " " . $this->response;
 
-        //        $sms_message .= " | headcode " . strtoupper($this->head_code);
-        //        $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
-        //        $sms_message .=
-        //            " | ~rtime " .
-        //            number_format($this->thing->elapsed_runtime()) .
-        //            "ms";
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -380,18 +351,13 @@ if (count($this->routes) !=0) {
     {
         $input = $this->input;
 
-        // Is there a headcode in the provided datagram
-        //$headcode = new Headcode($this->thing, "extract");
-        //if (isset($headcode->head_code)) {
-        //    $this->head_code = $headcode->head_code;
-        //}
-
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;
         }
 
         if ($input == "route") {
+            $this->response .= "Saw a request for the current route. ";
             return;
         }
 
@@ -439,7 +405,6 @@ if (count($this->routes) !=0) {
                             break;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }
