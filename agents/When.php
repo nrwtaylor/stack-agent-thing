@@ -21,6 +21,19 @@ examplename
 /home/bob/basic.ics
 */
 
+/*
+private/settings.php
+            'when' => [
+                'preferences_location'=>'/home/edna/.when/calendar',
+                'calendar_location'=>'/home/edna/.when/calendar',
+                'more'=>'on'
+            ],
+
+
+
+*/
+
+
 class When extends Agent
 {
     public $var = 'hello';
@@ -228,6 +241,8 @@ class When extends Agent
         $txt = "";
         foreach ($events as $i => $event) {
 
+$when_description = $this->descriptionWhen($event);
+/*
 
 //var_dump($event->description);
 //$call = $call_agent->extractCall($event->description);
@@ -244,10 +259,12 @@ class When extends Agent
                 if (stripos($when_description,$troublesome_token)) {$when_description = "Not readable.";}
                 break;
             }
-
+*/
             if ($this->description_flag != 'on') {
                 $when_description = "";
             }
+            $when_description = " " . $when_description;
+
             $txt .= $this->textWhen($event) . $when_description . "\n";
 
         }
@@ -261,6 +278,35 @@ class When extends Agent
 
         $count = count($this->calendar_agent->calendar->events);
         $this->response .= "Got " . $count . " events. ";
+    }
+
+    public function descriptionWhen($event) {
+
+$text = $event->description;
+//var_dump($event->description);
+//$call = $call_agent->extractCall($event->description);
+//$frequency = $frequency_agent->extractFrequency($event->description);
+            $description = strip_tags($text);
+            $when_description = html_entity_decode($description);
+
+//$when_description = str_replace([':',';','>','<','/'], ' ',$when_description);
+            $when_description = str_replace(["\n","\t","\r"], ' ',$when_description);
+
+            $troublesome_tokens = [''];
+
+            foreach($troublesome_tokens as $j=>$troublesome_token) {
+                if (stripos($when_description,$troublesome_token)) {$when_description = "Not readable.";}
+                break;
+            }
+
+            // Strip html tags.
+            $when_description = strip_tags(str_replace("<", " <",$when_description));
+
+
+//            }
+        return $when_description;
+
+
     }
 
     public function respondResponse()
