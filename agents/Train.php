@@ -410,6 +410,10 @@ class Train extends Agent
         $this->consist_agent = $this->getAgent('Consist', 'consist');
         $this->consist = $this->consist_agent->consist;
 
+        $this->route_agent = $this->getAgent('Route', 'route');
+        $this->route = implode(' > ',$this->route_agent->route['places']);
+
+
         // devstack
         $this->runat_agent = $this->getAgent('Runat', 'runat');
         if (!isset($this->runat)) {
@@ -1641,7 +1645,9 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
     function getRoute()
     {
         $this->route_thing = new Route($this->train_thing, "route");
-        $this->route = $this->route_thing->route;
+        $this->route = implode(' > ',$this->route_thing->route['places']);
+//        $this->route = new \stdClass();
+
         //
         //        $this->route = "X";
         return $this->route;
@@ -2008,6 +2014,7 @@ $end_at = $this->end_at;
         $txt .= " " . str_pad($this->available, 6, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad($this->quantity, 9, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad($this->consist, 6, " ", STR_PAD_LEFT);
+
         $txt .= " " . str_pad($this->route, 6, " ", STR_PAD_LEFT);
 
         $txt .= "\n";
@@ -2407,6 +2414,7 @@ $txt .= $table_text;
         $test_message .= '<br>flag ' . strtoupper($this->flag) . '';
 
         $this->getRoute();
+        //$route_text = implode( ' > ', $this->route['places']);
         $test_message .= '<br>route ' . $this->route;
 
         $this->getConsist();
@@ -2476,7 +2484,10 @@ $txt .= $table_text;
         $test_message .= "<br>Train Variables";
         $test_message .= '<br>state ' . $this->state . '';
         $test_message .= '<br>flag ' . strtoupper($this->flag) . '';
+
+        //$route_text = implode( ' > ', $this->route['places']);
         $test_message .= '<br>route ' . $this->route;
+        //$test_message .= '<br>route ' . $this->route;
         $test_message .= '<br>consist ' . $this->consist;
 
         if (isset($this->jobs)) {
@@ -2578,7 +2589,8 @@ $txt .= $table_text;
             $sms_message .= " | " . $available_text;
         }
 
-        if ($this->verbosity > 2) {
+//        if ($this->verbosity > 2) {
+/*
             if (!isset($this->route)) {
                 $route = "X";
             } else {
@@ -2586,14 +2598,15 @@ $txt .= $table_text;
             }
 
             if (!isset($this->consist)) {
-                $route = "Z";
+                $consist = "Z";
             } else {
-                $route = $this->consist;
+                $consist = $this->consist;
             }
 
             $route_description =
-                $route . " [" . $this->consist . "] " . $this->runtime;
+                $route . " [" . $consist . "] " . $this->runtime;
             $sms_message .= " | " . $route_description;
+*/
             //     $sms_message .=
             //         " | nuuid " .
             //            $sms_message .=
@@ -2601,9 +2614,9 @@ $txt .= $table_text;
             //          substr($this->variables_agent->variables_thing->uuid, 0, 4);
             //   substr($this->variables_agent->variables_thing->uuid, 0, 4);
 
-            $sms_message .=
-                " | nuuid " . substr($this->train_thing->uuid, 0, 4);
-        }
+//            $sms_message .=
+//                " | nuuid " . substr($this->train_thing->uuid, 0, 4);
+//        }
 
         if ($this->verbosity > 5) {
             $sms_message .=

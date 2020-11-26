@@ -47,7 +47,6 @@ class Route extends Agent
         if (isset($this->route)) {
             $route = $this->route;
         }
-
         $route['refreshed_at'] = $this->current_time;
 
         $this->thing->json->writeVariable(["route"], $route);
@@ -350,13 +349,15 @@ if (count($this->routes) !=0) {
     public function readSubject()
     {
         $input = $this->input;
-
+//var_dump($input);
+//var_dump($this->agent_input);
+//var_dump($this->subject);
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;
         }
 
-        if ($input == "route") {
+        if (($input == "route") or ($this->agent_input == "route")) {
             $this->response .= "Saw a request for the current route. ";
             return;
         }
