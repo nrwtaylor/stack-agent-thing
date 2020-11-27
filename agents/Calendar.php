@@ -17,29 +17,36 @@ class Calendar extends Agent
         // So I could call
         if (isset($this->thing->container['stack']['calendar'])) {
             if (is_string($this->thing->container['stack']['calendar'])) {
-            $this->default_calendar_token =
-                $this->thing->container['stack']['calendar'];
-            $this->default_calendar_tokens = [$this->default_calendar_token];
+                $this->default_calendar_token =
+                    $this->thing->container['stack']['calendar'];
+                $this->default_calendar_tokens = [
+                    $this->default_calendar_token,
+                ];
             }
 
             if (is_array($this->thing->container['stack']['calendar'])) {
-            $this->default_calendar_tokens =
-                $this->thing->container['stack']['calendar'];
-            $this->default_calendar_token = $this->default_calendar_tokens[0];
-            } 
-
-
-
+                $this->default_calendar_tokens =
+                    $this->thing->container['stack']['calendar'];
+                $this->default_calendar_token =
+                    $this->default_calendar_tokens[0];
+            }
         }
 
         $this->default_interval = '1 week';
 
         if (isset($this->thing->container['api']['calendar'])) {
-
-            if (isset($this->thing->container['api']['calendar']['default_interval'])) {
-                $this->default_interval = $this->thing->container['api']['calendar']['default_interval'];
+            if (
+                isset(
+                    $this->thing->container['api']['calendar'][
+                        'default_interval'
+                    ]
+                )
+            ) {
+                $this->default_interval =
+                    $this->thing->container['api']['calendar'][
+                        'default_interval'
+                    ];
             }
-
         }
 
         // Looks in private/settings.php
@@ -80,6 +87,49 @@ class Calendar extends Agent
     {
         $this->doCalendar();
         $this->makeIcal();
+    }
+
+    public function descriptionCalendar($event)
+    {
+        $text = $event->description;
+
+        // TODO read for call details.
+        //$call = $call_agent->extractCall($event->description);
+        //$frequency = $frequency_agent->extractFrequency($event->description);
+
+        $description = strip_tags($text);
+        $when_description = html_entity_decode($description);
+
+        $when_description = str_replace(
+            ["\n", "\t", "\r"],
+            ' ',
+            $when_description
+        );
+
+        $troublesome_tokens = [''];
+
+        foreach ($troublesome_tokens as $j => $troublesome_token) {
+            if (stripos($when_description, $troublesome_token)) {
+                $when_description = "Not readable.";
+            }
+            break;
+        }
+
+        // Strip html tags.
+        $when_description = strip_tags(
+            str_replace("<", " <", $when_description)
+        );
+
+        // Strip repeating spaces.
+        $when_description = preg_replace('/\s+/', ' ', $when_description);
+        // Strip repeating periods.
+        $when_description = preg_replace(
+            "/([.])\\1+/",
+            "$1",
+            $when_description
+        );
+
+        return $when_description;
     }
 
     public function extractCalendar($input)
@@ -129,18 +179,13 @@ class Calendar extends Agent
             }
         }
 
-//foreach($this->calendar->events as $i=>$event) {
+        //foreach($this->calendar->events as $i=>$event) {
 
-
-//}
-
+        //}
 
         usort($this->calendar->events, function ($first, $second) {
             return strtotime($first->start_at) > strtotime($second->end_at);
         });
-
-
-
 
         if ($calendar_count != 0) {
             $this->response .= "Read " . $calendar_count . " calendar(s). ";
@@ -273,17 +318,39 @@ class Calendar extends Agent
 
         $calendar_text = "";
         foreach ($parameters as $i => $parameter) {
+            // Allow settings to be passed with a parameter.
+            // And recognize non-parameters ie text formatting.
+            $setting = null;
+            $parameter_tokens = explode(' ', $parameter, 2);
+
+            if (in_array($parameter_tokens[0], $default_parameters)) {
+                $parameter = $parameter_tokens[0];
+
+                if (isset($parameter_tokens[1])) {
+                    $setting = $parameter_tokens[1];
+                }
+            }
+
             if (in_array($parameter, $default_parameters)) {
                 if ($event->{$parameter} == null) {
                     continue;
                 }
             }
             if (isset($event->{$parameter})) {
-                $calendar_text .= $event->{$parameter};
+                $t = $event->{$parameter};
+                // Allow for request based timestamp formatting
+                if ($parameter == 'timestamp') {
+                    if ($setting !== null) {
+                        $t = date($setting, strtotime($t));
+                    }
+                }
+
+                $calendar_text .= $t;
             } else {
                 $calendar_text .= $parameter;
             }
         }
+
         return $calendar_text;
     }
 
@@ -407,7 +474,7 @@ var_dump($variable);
             foreach ($this->calendar->events as $event) {
                 $calendar_text .=
                     $this->textCalendar($event, [
-                        'timestamp',
+                        'timestamp Y-m-d H:i',
                         ' ',
                         'summary',
                         ' ',
@@ -425,7 +492,7 @@ var_dump($variable);
                 foreach ($this->calendar->events as $event) {
                     $calendar_text .=
                         $this->textCalendar($event, [
-                            'timestamp',
+                            'timestamp Y-m-d H:i',
                             ' ',
                             //                           'timezone',
                             //                           ' ',
@@ -459,9 +526,16 @@ var_dump($variable);
         if (isset($this->calendar->events)) {
             $calendar_text = "";
             foreach ($this->calendar->events as $event) {
-                $calendar_text .=
+                $description_seperator = ' - ';
+                $description = 'description';
+                if ($this->description_flag != 'on') {
+                    $description_seperator = '';
+                    $description = '';
+                }
+
+                $t =
                     $this->textCalendar($event, [
-                        'timestamp',
+                        'timestamp Y-m-d H:i',
                         ' ',
                         //                          'timezone',
                         //                          ' ',
@@ -469,7 +543,11 @@ var_dump($variable);
                         ' [',
                         'runtime',
                         ']',
+                        $description_seperator,
+                        $description,
                     ]) . "\n";
+
+                $calendar_text .= $t;
             }
         }
         //$this->node_list = ["calendar" => ["calendar", "dog"]];
@@ -566,6 +644,11 @@ var_dump($variable);
 
             $e->calendar_name = $calendar_name;
             $e->calendar_timezone = $calendar_timezone;
+
+            // Tidy up description.
+
+            $description = $this->descriptionCalendar($event);
+            $e->description = $description;
 
             $this->calendar->events[] = $e;
         }
@@ -673,10 +756,24 @@ var_dump($variable);
             $dateline = $this->memoryAgent('Dateline');
         }
 
+        $this->description_flag = "off";
+        if (stripos($input, "description") !== false) {
+            $pos = strpos($input, 'description');
+            if ($pos !== false) {
+                $input = substr_replace(
+                    $input,
+                    ' ',
+                    $pos,
+                    strlen('description')
+                );
+            }
+
+            $this->description_flag = "on";
+        }
+
         if ($input == 'calendar') {
             $tokens = $this->default_calendar_tokens;
             //$new_ics_links = $this->icslinksCalendar($token);
-
 
             $ics_links = [];
 

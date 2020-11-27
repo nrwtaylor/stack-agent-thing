@@ -407,11 +407,13 @@ class Train extends Agent
         $this->resource_agent = $this->getAgent('Resource', 'resource');
         $this->resource = $this->resource_agent->resource_name;
 
-        $this->consist_agent = $this->getAgent('Consist', 'consist');
-        $this->consist = $this->consist_agent->consist;
+        //$this->getConsist();
+        //$this->consist_agent = $this->getAgent('Consist', 'consist');
+        //$this->consist = implode('',$this->consist_agent->consist['vehicles']);
 
-        $this->route_agent = $this->getAgent('Route', 'route');
-        $this->route = implode(' > ',$this->route_agent->route['places']);
+        //$this->getRoute();
+        //$this->route_agent = $this->getAgent('Route', 'route');
+        //$this->route = implode(' > ',$this->route_agent->route['places']);
 
 
         // devstack
@@ -1024,10 +1026,10 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
         //        $this->getAlias();
 
-        if ($this->verbosity > 2) {
-            $this->getRoute();
-            $this->getConsist();
-        }
+        //if ($this->verbosity > 2) {
+            //$this->getRoute();
+            //$this->getConsist();
+        //}
 
         $this->state = "stopped";
 
@@ -1576,116 +1578,25 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
     function getConsist()
     {
-        $this->consist = "X";
+        $this->consist_agent = new Consist($this->train_thing, "consist");
+
+        if ($this->consist_agent->consist !== false) {
+            $this->consist = implode('',$this->consist_agent->consist['vehicles']);
+        }
+
+        if (!isset($this->consist)) {$this->consist = "X";}
+
         return $this->consist;
-
-        if (!isset($this->headcode_thing)) {
-            $this->getHeadcode();
-        }
-
-        $consist = $this->headcode_thing->consist;
-
-        $this->consist_thing = new Consist($this->train_thing, 'consist');
-        $this->consist = $this->consist_thing->variable;
-
-        // $this->consist = "Nn";
-        // $consist = "X";
-
-        if (!isset($this->consist)) {
-            $this->consist = $consist;
-            return $this->consist;
-        }
-
-        // First see if the planned consist appears in the headcode
-        // consist.
-
-        if (strstr($consist, $this->consist)) {
-            // Then "Nn" appears in the headcode consist.
-            $this->consist = $consist;
-            return $this->consist;
-        }
-
-        // So "Nn" doesn't appear in the consist.
-
-        if (strstr($consist, "Z")) {
-            // Then "Z" appears in the headcode consist.
-            $t = "";
-            $match = false;
-            foreach (str_split($consist, 1) as $l) {
-                if ($l == "Z" and $match == false) {
-                    $t = $t . $this->consist . "Z";
-                    $match = true;
-                } else {
-                    $t = $t . $l;
-                }
-            }
-            $this->consist = $t;
-            return $this->consist;
-        }
-
-        if (strstr($consist, "X")) {
-            // Then "Z" appears in the headcode consist.
-            $t = "";
-            $match = false;
-            foreach (str_split($consist, 1) as $l) {
-                if ($l == "X" and $match == false) {
-                    $t = $t . $this->consist . "X";
-                    $match = true;
-                } else {
-                    $t = $t . $l;
-                }
-            }
-            $this->consist = $t;
-            return $this->consist;
-        }
-
-        return true; // Consist is not compatable with headcode.
     }
 
     function getRoute()
     {
-        $this->route_thing = new Route($this->train_thing, "route");
-        $this->route = implode(' > ',$this->route_thing->route['places']);
-//        $this->route = new \stdClass();
-
-        //
-        //        $this->route = "X";
-        return $this->route;
-
-        if (!isset($this->headcode_thing)) {
-            $this->getHeadcode();
+        $this->route_agent = new Route($this->train_thing, "route");
+        if ($this->route_agent->route !== false) {
+            $this->route = implode(' > ',$this->route_agent->route['places']);
         }
+        if (!isset($this->route)) {$this->route = "X";}
 
-        $route = $this->train_thing->route; //which is runtime
-
-        //      $this->route = "Eton>Triumph";
-        //$route = "Eton>Gilmore>Hastings>Triumph";
-
-        if (!isset($this->route)) {
-            $this->route = $route;
-            return $this->route;
-        }
-
-        // First see if the planned consist appears in the headcode
-        // consist.
-
-        $train_places = explode(">", $this->route);
-        $head_code_places = explode(">", $route);
-        $valid = true;
-
-        foreach ($train_places as $train_place) {
-            $match = false;
-            foreach ($head_code_places as $head_code_place) {
-                if ($train_place == $head_code_place) {
-                    $match = true;
-                }
-            }
-            if ($match == false) {
-                $this->route = true;
-                return $this->route;
-            }
-        }
-        $this->route = $route;
         return $this->route;
     }
 
@@ -2337,7 +2248,8 @@ $txt .= $table_text;
                     continue;
                 }
 
-                if (strtolower($agent_name) == 'consist') {
+                if ((strtolower($agent_name) == 'consist') or 
+(strtolower($agent_name) == 'route')) {
                     $capitalize_flag = false;
                 }
 
@@ -2532,6 +2444,8 @@ $txt .= $table_text;
 
     public function makeSMS()
     {
+            $this->getRoute();
+            $this->getConsist();
         //$sms = "TRAIN";
         //$this->sms_message = $sms;
         //$this->thing_report['sms'] = $sms;

@@ -120,7 +120,6 @@ class When extends Agent
         if ($text == null) {
             return true;
         }
-        //$this->calendar_agent->events = [];
 
         // Reset the calendar agent response.
         $this->calendar_agent->response = "";
@@ -230,25 +229,8 @@ class When extends Agent
         //$frequency_agent = new Frequency($this->thing, "frequency");
         $txt = "";
         foreach ($events as $i => $event) {
-            $when_description = $this->descriptionWhen($event);
-            /*
+            $when_description = $this->calendar_agent->descriptionCalendar($event);
 
-//var_dump($event->description);
-//$call = $call_agent->extractCall($event->description);
-//$frequency = $frequency_agent->extractFrequency($event->description);
-            $description = strip_tags($event->description);
-            $when_description = html_entity_decode($description);
-
-//$when_description = str_replace([':',';','>','<','/'], ' ',$when_description);
-            $when_description = str_replace(["\n","\t","\r"], ' ',$when_description);
-
-            $troublesome_tokens = [''];
-
-            foreach($troublesome_tokens as $j=>$troublesome_token) {
-                if (stripos($when_description,$troublesome_token)) {$when_description = "Not readable.";}
-                break;
-            }
-*/
             if ($this->description_flag != 'on') {
                 $when_description = "";
             }
@@ -266,49 +248,6 @@ class When extends Agent
 
         $count = count($this->calendar_agent->calendar->events);
         $this->response .= "Got " . $count . " events. ";
-    }
-
-    public function descriptionWhen($event)
-    {
-        $text = $event->description;
-
-        // TODO read for call details.
-        //$call = $call_agent->extractCall($event->description);
-        //$frequency = $frequency_agent->extractFrequency($event->description);
-
-        $description = strip_tags($text);
-        $when_description = html_entity_decode($description);
-
-        $when_description = str_replace(
-            ["\n", "\t", "\r"],
-            ' ',
-            $when_description
-        );
-
-        $troublesome_tokens = [''];
-
-        foreach ($troublesome_tokens as $j => $troublesome_token) {
-            if (stripos($when_description, $troublesome_token)) {
-                $when_description = "Not readable.";
-            }
-            break;
-        }
-
-        // Strip html tags.
-        $when_description = strip_tags(
-            str_replace("<", " <", $when_description)
-        );
-
-        // Strip repeating spaces.
-        $when_description = preg_replace('/\s+/', ' ', $when_description);
-        // Strip repeating periods.
-        $when_description = preg_replace(
-            "/([.])\\1+/",
-            "$1",
-            $when_description
-        );
-
-        return $when_description;
     }
 
     public function respondResponse()
