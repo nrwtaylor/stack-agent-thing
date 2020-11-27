@@ -33,7 +33,6 @@ private/settings.php
 
 */
 
-
 class When extends Agent
 {
     public $var = 'hello';
@@ -65,20 +64,13 @@ class When extends Agent
 
         $this->calendar_list = null;
 
-
         $this->more_flag = 'off';
         if (isset($this->thing->container['api']['when'])) {
-            if (
-                isset(
-                    $this->thing->container['api']['when']['more']
-                )
-            ) {
+            if (isset($this->thing->container['api']['when']['more'])) {
                 $this->more_flag =
                     $this->thing->container['api']['when']['more'];
             }
         }
-
-
 
         $file = $this->resource_path . 'when/when.txt';
 
@@ -118,7 +110,6 @@ class When extends Agent
         $this->time_zone = $this->time_agent->time_zone;
     }
 
-
     function run()
     {
         $this->doWhen();
@@ -129,7 +120,6 @@ class When extends Agent
         if ($text == null) {
             return true;
         }
-        //$this->calendar_agent->events = [];
 
         // Reset the calendar agent response.
         $this->calendar_agent->response = "";
@@ -235,38 +225,18 @@ class When extends Agent
 
         $events = $this->calendar_agent->calendar->events;
 
-
-//$call_agent = new Call($this->thing, "call");
-//$frequency_agent = new Frequency($this->thing, "frequency");
+        //$call_agent = new Call($this->thing, "call");
+        //$frequency_agent = new Frequency($this->thing, "frequency");
         $txt = "";
         foreach ($events as $i => $event) {
+            $when_description = $this->calendar_agent->descriptionCalendar($event);
 
-$when_description = $this->descriptionWhen($event);
-/*
-
-//var_dump($event->description);
-//$call = $call_agent->extractCall($event->description);
-//$frequency = $frequency_agent->extractFrequency($event->description);
-            $description = strip_tags($event->description);
-            $when_description = html_entity_decode($description);
-
-//$when_description = str_replace([':',';','>','<','/'], ' ',$when_description);
-            $when_description = str_replace(["\n","\t","\r"], ' ',$when_description);
-
-            $troublesome_tokens = [''];
-
-            foreach($troublesome_tokens as $j=>$troublesome_token) {
-                if (stripos($when_description,$troublesome_token)) {$when_description = "Not readable.";}
-                break;
-            }
-*/
             if ($this->description_flag != 'on') {
                 $when_description = "";
             }
             $when_description = " " . $when_description;
 
             $txt .= $this->textWhen($event) . $when_description . "\n";
-
         }
         $this->when_text = $txt;
 
@@ -278,35 +248,6 @@ $when_description = $this->descriptionWhen($event);
 
         $count = count($this->calendar_agent->calendar->events);
         $this->response .= "Got " . $count . " events. ";
-    }
-
-    public function descriptionWhen($event) {
-
-$text = $event->description;
-//var_dump($event->description);
-//$call = $call_agent->extractCall($event->description);
-//$frequency = $frequency_agent->extractFrequency($event->description);
-            $description = strip_tags($text);
-            $when_description = html_entity_decode($description);
-
-//$when_description = str_replace([':',';','>','<','/'], ' ',$when_description);
-            $when_description = str_replace(["\n","\t","\r"], ' ',$when_description);
-
-            $troublesome_tokens = [''];
-
-            foreach($troublesome_tokens as $j=>$troublesome_token) {
-                if (stripos($when_description,$troublesome_token)) {$when_description = "Not readable.";}
-                break;
-            }
-
-            // Strip html tags.
-            $when_description = strip_tags(str_replace("<", " <",$when_description));
-
-
-//            }
-        return $when_description;
-
-
     }
 
     public function respondResponse()
@@ -420,10 +361,9 @@ $text = $event->description;
         }
 
         $this->description_flag = "off";
-        if (stripos($input,"description") !== false) {
+        if (stripos($input, "description") !== false) {
             $this->description_flag = "on";
         }
-
 
         /*
         // TODO - Read command line provided resource.

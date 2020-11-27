@@ -1,101 +1,29 @@
 <?php
-/**
- * Consist.php
- *
- * @package default
- */
-
 namespace Nrwtaylor\StackAgentThing;
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
+// devstack lots of work here
+
 class Consist extends Agent
 {
-    // This is a consist.
-
-    // It looks like Xaaabc.
-    // Where X is the engine.
-    // And a, b and c are rolling stock things.
-
     public $var = 'hello';
 
-    /**
-     *
-     * @param Thing   $thing
-     * @param unknown $agent_input (optional)
-     */
-    //    function __construct(Thing $thing, $agent_input = null) {
-    public function init()
+    function init()
     {
-        // I'm not sure quite what the node_list means yet
-        // in the context of Consists.
-        // At the moment it seems to be the Consist routing.
-        // Which is leading to me to question whether "is"
-        // or "Place" is the next Agent to code up.  I think
-        // it will be "Is" because you have to define what
-        // a "Place [is]".
-        $this->node_list = [
-            "consist" => ["add" => ["drop", "add"], "drop"],
-            "drop",
-        ];
-        $this->thing->choice->load('Consist');
+        $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
 
-        $this->keywords = ['consist', 'clear', 'drop', 'add', 'load', 'is'];
+        $this->default_consist = "NX";
 
-        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
-
-        $this->default_variable = "0Z10";
         $this->default_alias = "Thing";
-
-        $this->current_time = $this->thing->json->time();
-
-        //        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-        $this->agents_path = $GLOBALS['stack_path'] . 'agents/';
-        $this->agents_path =
-            $GLOBALS['stack_path'] .
-            'vendor/nrwtaylor/stack-agent-thing/agents/';
 
         $this->test = "Development code"; // Always iterative.
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/consist';
-    }
+        // Agent variables
 
-    /**
-     *
-     */
-    function set()
-    {
-        // A Consist has some remaining amount of resource and
-        // an indication where to start.
-
-        // This makes sure that
-        if (!isset($this->consist_thing)) {
-            $this->consist_thing = $this->thing;
-        }
-
-        $this->variables_agent->setVariable("consist", $this->consist);
-        $this->variables_agent->setVariable(
-            "refreshed_at",
-            $this->current_time
-        );
-
-        $this->consist_thing->json->setField("variables");
-        $this->consist_thing->json->writeVariable(
-            ["consist", "consist"],
-            $this->consist
-        );
-        $this->consist_thing->json->writeVariable(
-            ["consist", "refreshed_at"],
-            $this->current_time
-        );
-    }
-
-    public function get()
-    {
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
             "headcode",
@@ -105,317 +33,176 @@ class Consist extends Agent
         $flag_variable_name = "_" . $this->head_code;
 
         // Get the current Identities flag
-        //        $this->flag = new Variables(
-        //            $this->thing,
-        //            "variables flag" . $flag_variable_name . " " . $this->from
-        //        );
-
-        /*
-        $this->variables_agent = new Variables(
-            $this->thing,
-            "variables alias " . $this->from
-        );
-*/
-
-        $this->variables_agent = new Variables(
+        $this->variables = new Variables(
             $this->thing,
             "variables consist" . $flag_variable_name . " " . $this->from
         );
 
-        $this->consist = $this->variables_agent->getVariable("consist");
-
-        //$this->getConsists('consist');
+        $this->state = null; // to avoid error messages
     }
 
-    /**
-     *
-     * @param unknown $variable (optional)
-     * @return unknown
-     */
-    function getConsists($variable = null)
+    public function setConsist($consist = null)
     {
-        // Loads current Consist into $this->Consist_thing
+        $consist = null;
+        if (isset($this->consist)) {
+            $consist = $this->consist;
+        }
+        $consist['refreshed_at'] = $this->current_time;
 
-        $match = false;
+        $this->thing->json->writeVariable(["consist"], $consist);
+    }
 
-        $variable = $this->getVariable('consist', $variable);
+    function set()
+    {
+        $this->setConsist();
 
-        $consist_things = [];
+        $this->variables->setVariable("consist", $this->consist);
+        $this->variables->setVariable("head_code", $this->head_code);
+        $this->variables->setVariable("refreshed_at", $this->current_time);
+    }
 
-        // This pulls up a list of other Consist Things.
-        // We need the newest Consist as that is most likely to be relevant to
-        // what we are doing.
+    function getConsists()
+    {
+        $this->consists = [];
+        // See if a consist record exists.
+        $findagent_thing = new Findagent($this->thing, 'consist');
 
-        $things = $this->getThings('consist');
+        foreach (
+            array_reverse($findagent_thing->thing_report['things'])
+            as $thing_object
+        ) {
+            // While timing is an issue of concern
 
-        $this->thing->log(
-            'Agent "Consist" found ' . count($things) . " Consist Things."
-        );
+            $uuid = $thing_object['uuid'];
 
-        $this->current_variable = null;
-
-        foreach (array_reverse($things) as $thing) {
-            $subject = $thing->subject;
-            $variables = $thing->variables;
-            $created_at = $thing->created_at;
+            $variables_json = $thing_object['variables'];
+            $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (isset($variables['consist'])) {
-                $consist = "X";
+                if (!$this->isConsist($variables['consist'])) {continue;}
+                if (!isset($variables['consist']['refreshed_at'])) {continue;}
 
-                if (isset($variables['consist']['consist'])) {
-                    $consist = $variables['consist']['consist'];
-                }
-                if (isset($variables['consist']['refreshed_at'])) {
-                    $refreshed_at = $variables['consist']['refreshed_at'];
-                }
-            }
-
-            if ($refreshed_at == false) {
-                // Things is list sorted by date.  So this is the oldest Thing.
-                // with a 'keyword' record.
-                continue;
-            } else {
-                $thing_object = new Thing($thing->uuid);
-
-                $thing_object->consist = $consist;
-                $this->useConsist($thing_object);
-                return false;
+                $this->consists[] = $variables['consist'];
             }
         }
 
-        $this->makeConsist();
-
-        return false;
-    }
-
-    /**
-     *
-     */
-    function dropConsist()
-    {
-        $this->thing->log($this->agent_prefix . "was asked to drop a Consist.");
-
-        // If it comes back false we will pick that up with an unset Consist thing.
-
-        if (isset($this->consist_thing)) {
-            $this->consist_thing->Forget();
-            $this->consist_thing = null;
+        $refreshed_at = [];
+        foreach ($this->consists as $key => $row) {
+            $refreshed_at[$key] = $row['refreshed_at'];
         }
+        array_multisort($refreshed_at, SORT_DESC, $this->consists);
 
-        $this->get();
-    }
-
-    /**
-     *
-     * @param unknown $thing
-     * @return unknown
-     */
-    function useConsist($thing)
-    {
-        $this->consist_thing = $thing;
-
-        // Core elements of a Consist
-        $this->consist = $thing->consist;
-
-        return false;
-    }
-
-    /**
-     *
-     * @param unknown $variable (optional)
-     */
-    function makeConsist($variable = null)
-    {
-        $variable = $this->getVariable('consist', $variable);
-
-        $this->thing->log(
-            'Agent "Consist" will make a Consist for ' . $variable . "."
-        );
-
-        // Check that the shift is okay for making Consists.
-
-        // Otherwise we needs to make trains to run in the Consist.
-
-        $this->thing->log(
-            $this->agent_prefix . "is going to run this for the default engine."
-        );
-
-        $this->current_variable = $variable;
-        $this->consist = $variable;
-
-        //            $this->consist_thing = $this->thing;
-
-        // Write the variables to the db.
-        $this->set();
-
-        //$this->Consist_thing = $this->thing;
-
-        $this->thing->log('Agent "Consist" found Consist and pointed to it.');
-    }
-
-    /**
-     *
-     * @param unknown $input
-     * @return unknown
-     */
-    function extractAlpha($input)
-    {
-        $words = explode(" ", $input);
-
-        $arr = [];
-
-        foreach ($words as $word) {
-            if (ctype_alpha($word)) {
-                $arr[] = $word;
-            }
-        }
-
-        return $arr;
-    }
-
-    /**
-     *
-     * @param unknown $input
-     * @return unknown
-     */
-    function extractConsists($input)
-    {
-        //        $input = "Train is NbbbX";
-
-        if (!isset($this->consists)) {
-            $this->consists = [];
-        }
-
-        //        $pattern = "|^[A-Z0-9]{3}(?:List)?$|";
-
-        $pattern = "|^[A-Z]*[A-Z]$|";
-        $pattern = "|\w*[A-Z]\w*|";
-        //Explanation:
-        //^        : Start anchor
-        //[A-Z0-9] : Char class to match any one of the uppercase letter or digit
-        //{3}      : Quantifier for previous sub-regex
-        //(?:List) : A literal 'List' enclosed in non-capturing parenthesis
-        //?        : To make the 'List' optional
-        //$        : End anchor
-        //echo $input;
-
-        preg_match_all($pattern, $input, $m);
-
-        $possible_consists = $m[0];
-
-        if (
-            count($possible_consists) >= 1 and
-            $possible_consists[0] == "Consist"
-        ) {
-            array_shift($possible_consists);
-        }
-
-        $consists = [];
-        // Then tweak selection?
-        foreach ($possible_consists as $possible_consist) {
-            $consists[] = $possible_consist;
-            //       $requested_locomotives =
-            //       $requested_rollingstock =
-        }
-
-        $this->consists = $consists;
 
         return $this->consists;
-
-        //        return $arr;
     }
 
-    /**
-     *
-     * @param unknown $input
-     * @return unknown
-     */
-    function readConsist($input)
+    function getConsist($selector = null)
     {
-        $this->headcode_agent = new Headcode($this->thing, $input);
-        $headcodes = $this->headcode_agent->getHeadcodes();
 
-        $consist = [];
-        foreach ($headcodes as $i => $headcode) {
-            if ($headcode['head_code'] == $this->headcode_agent->head_code) {
-                $consist[] = $headcode;
-            }
+        if (!isset($this->consists)) {
+            $this->getConsists();
         }
-        // http://www.greatwestern.org.uk/stockcode.htm
-        $this->consist_stock = [
-            "engine",
-            "carriage",
-            "wagon",
-            "caboose",
-            "break van",
-            "brake van",
-            "coal wagon",
-            "toad",
-            "dogfish",
-        ];
 
-        $this->consist_string = "";
-        $this->consist_array = $consist;
-        foreach ($consist as $item) {
-            foreach ($this->consist_stock as $j => $stock_name) {
-                if (strpos($item[0], $stock_name) !== false) {
-                    $this->consist_string .= " " . $item[0];
-                }
-            }
+        foreach ($this->consists as $key => $consist) {
         }
-        return;
-        $consists = $this->extractConsists($input);
 
-        if (count($consists) == 1) {
-            $this->consist = $consists[0];
-            $this->thing->log(
-                'Agent "Consist" found a Consist (' .
-                    $this->consist .
-                    ') in the text.'
+if (count($this->consists) !=0) {
+        $this->consist = $this->consists[0];
+}
+    }
+
+    function get($consist = null)
+    {
+
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+            "consist",
+            "refreshed_at",
+        ]);
+
+        // And if there is no IChing timestamp create one now.
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+                ["consist", "refreshed_at"],
+                $time_string
             );
-
-            //echo $this->consist;
-            //exit();
-            return $this->consist;
         }
 
-        if (count($consists) == 0) {
-            return false;
-        }
-        if (count($consists) > 1) {
-            return true;
+
+        if (!isset($this->consist)) {
+            $this->consist = $this->variables->getVariable('consist');
+            //$this->head_code = $this->variables->getVariable('head_code');
         }
 
-        return true;
+
+
     }
 
-    /**
-     *
-     */
-    function addConsist()
+    function makeConsist($head_code = null)
     {
-        $this->makeConsist();
-        $this->get();
-        return;
     }
 
-    /**
-     *
-     */
+    function deprecate_headcodeTime($input = null)
+    {
+        if ($input == null) {
+            $input_time = $this->current_time;
+        } else {
+            $input_time = $input;
+        }
+
+        if ($input == "x") {
+            $headcode_time = "x";
+            return $headcode_time;
+        }
+
+        $t = strtotime($input_time);
+
+        //echo $t->format("Y-m-d H:i:s");
+        $this->hour = date("H", $t);
+        $this->minute = date("i", $t);
+
+        $headcode_time = $this->hour . $this->minute;
+
+        if ($input == null) {
+            $this->headcode_time = $headcode_time;
+        }
+
+        return $headcode_time;
+    }
+
+    function addHeadcode()
+    {
+        $this->get();
+    }
+
+    function makeTXT()
+    {
+        if (!isset($this->consists)) {$this->getConsists();}
+
+        $txt = "Test \n";
+        foreach ($this->consists as $i => $consist) {
+
+            if (!isset($consist['vehicles'])) {
+                continue;
+            }
+            $txt .= $this->textConsist($consist);
+            $txt .= "\n";
+        }
+
+        $this->thing_report['txt'] = $txt;
+    }
+
     public function respondResponse()
     {
+        // Thing actions
+
         $this->thing->flagGreen();
 
-        $this->thing_report['choices'] = false;
-
-        if (!isset($this->index)) {
-            $index = "0";
-        } else {
-            $index = $this->index;
-        }
-
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report['email'] = $this->thing_report['sms'];
+        $this->thing_report['message'] = $this->thing_report['sms']; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -426,37 +213,76 @@ class Consist extends Agent
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        $this->thing_report['help'] = 'Try CONSIST IS Rkkk.';
+        $this->thing_report['help'] = 'This is a consist.';
+    }
+
+    public function makeChoices()
+    {
+        $choices = false;
+        $this->thing_report['choices'] = $choices;
+    }
+
+    public function vehiclesConsist($text = null)
+    {
+        //$tokens = array_map('trim', explode('>', $text));
+        $tokens = mb_str_split($text);
+        $vehicles = [];
+        foreach ($tokens as $i => $token) {
+            $vehicles[] = $token;
+        }
+
+        return $vehicles;
+    }
+
+    public function isConsist($consist = null)
+    {
+        // Basic validation of consist.
+        if ($consist == null) {
+            return false;
+        }
+        if ($consist == []) {
+            return false;
+        }
+
+        if (isset($consist['vehicles'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function readConsist($text = null)
+    {
+        $vehicles = $this->vehiclesConsist($text);
+
+        $consist = ['vehicles' => $vehicles];
+        return $consist;
+    }
+
+    public function textConsist($consist = null)
+    {
+        if ($consist == null) {
+            return true;
+        }
+        if ($this->isConsist($consist) === false) {
+            return true;
+        }
+
+        if (!is_array($consist['vehicles'])) {return true;}
+
+        $text = implode('', $consist['vehicles']);
+        return $text;
     }
 
     public function makeSMS()
     {
-        if (!isset($this->consist) or $this->consist == null) {
-            $consist = "X";
-        }
-
-        if (isset($this->consist)) {
-            $consist = $this->consist;
-        }
-
-        $sms = "CONSIST ";
-        $sms .= strtoupper($this->headcode_agent->head_code);
-        $sms .= " " . $consist;
-        //$sms .= " " . $this->link;
-
-        if (trim($this->consist_string) != "") {
-            $sms .= " Consists of " . trim($this->consist_string);
-        }
+        $sms =
+            "CONSIST " .strtoupper($this->head_code) ." " . $this->textConsist($this->consist) . " " . $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
 
-    /**
-     *
-     * @param unknown $variable
-     * @return unknown
-     */
     function isData($variable)
     {
         if ($variable !== false and $variable !== true and $variable != null) {
@@ -466,31 +292,79 @@ class Consist extends Agent
         }
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    public function readSubject()
+    // TODO
+    public function nextConsist()
     {
-        $this->response = null;
-        $this->num_hits = 0;
+        $this->response .= "Request for the next consist seen. ";
+    }
 
-        $keywords = $this->keywords;
+    // TODO
+    public function dropConsist()
+    {
+        $this->response .= "Request to drop consist seen. ";
+    }
 
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            //$input = strtolower($this->agent_input);
-            $input = $this->agent_input;
-        } else {
-            // $input = strtolower($this->subject);
-            $input = $this->subject;
+    // TODO
+    public function addConsist()
+    {
+        $this->response .= "Request to add consist seen. ";
+    }
+
+    public function recognizeConsist($consist)
+    {
+        if ($this->isConsist($consist) === false) {
+            return false;
         }
 
-        $prior_uuid = null;
+        if (!isset($this->consists)) {
+            $this->getConsists();
+        }
 
-        $this->readConsist($this->subject);
+        foreach ($this->consists as $i => $known_consist) {
+            if ($this->isConsist($known_consist) === false) {
+                continue;
+            }
+            if ($known_consist['vehicles'] === $consist['vehicles']) {
+                $this->response .= "Recognized consist. ";
+                return $this->consists[$i];
+            }
+        }
+
+        $this->response .= "New consist seen. ";
+
+        return false;
+    }
+
+    public function readSubject()
+    {
+        $input = $this->input;
+//var_dump($input);
+//var_dump($this->agent_input);
+//var_dump($this->subject);
+        // Bail at this point if only a headcode check is needed.
+        if ($this->agent_input == "extract") {
+            return;
+        }
+
+        if (($input == "consist") or ($this->agent_input == "consist")) {
+            $this->response .= "Saw a request for the current consist. ";
+            return;
+        }
+
+        $pos = stripos($input, "consist");
+        if ($pos === 0) {
+            $input = trim(substr_replace($input, "", 0, strlen('consist')));
+        }
+
+        $consist = $this->readConsist($input);
+
+        if ($this->isConsist($consist) === true) {
+            $this->recognizeConsist($consist);
+
+            $this->consist = $consist;
+            $this->response .= "Saw and extracted a consist. ";
+        }
+
 
         $pieces = explode(" ", strtolower($input));
 
@@ -498,77 +372,31 @@ class Consist extends Agent
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'consist') {
-                //echo "readsubject Consist";
-                $this->readConsist($input);
                 return;
             }
-
-            // Drop through
         }
 
-        // Extract runat signal
-        $matches = 0;
-
-        /*
-    if ((isset($this->run_time)) and (isset($this->run_at))) {
-        // Good chance with both these set that asking for a new
-        // Consist to be created, or to override existing Consist.
-        $this->thing->log('Agent "Consist" found a run time.');
-
-        $this->nextConsist();
-        return;
-    }
-*/
         foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
+            foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'accept':
-                            $this->acceptThing();
-                            break;
-                        case 'is':
-                        case '=':
-                            if ($this->isData($this->consist)) {
-                                $this->consist = $this->assert(
-                                    $input,
-                                    "consist",
-                                    false
-                                );
-
-                                $this->makeConsist($this->consist);
-                                return;
-                            }
-
-                        case 'clear':
-                            $this->clearThing();
+                        case 'next':
+                            $this->thing->log("read subject nextheadcode");
+                            $this->nextConsist();
                             break;
 
                         case 'drop':
-                            //     //$this->thing->log("read subject nextConsist");
                             $this->dropConsist();
                             break;
 
                         case 'add':
-                            //     //$this->thing->log("read subject nextConsist");
-                            $this->makeConsist();
+                            $this->addConsist();
                             break;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }
         }
-
-        if ($this->isData($this->consist)) {
-            $this->makeConsist($this->consist);
-            return;
-        }
-
-        $this->readConsist($input);
-
-        return "Message not understood";
-
-        return false;
     }
 }
