@@ -80,6 +80,9 @@ class Day extends Agent
             "SAT" => ["saturday", "sat", "Sa"],
             "SUN" => ["sunday", "sun", "Su"],
         ];
+
+        $this->default_prime_meridian_offset = 0;
+        $this->default_julian_correlation['mesoamerican'] = 584283; //GMT
     }
 
     public function runDay($text = null)
@@ -90,7 +93,7 @@ class Day extends Agent
         if ($longitude_agent->longitude === false) {
             $this->response .= "Longitude not known. ";
             return true;
-	}
+        }
 
         $longitude = $longitude_agent->longitude;
 
@@ -108,19 +111,19 @@ class Day extends Agent
         $this->timestamp_epoch = $timestamp_epoch;
 
         $arr = [
-            "astronomical twilight begin"=>"astronomical twilight",
-            "nautical twilight begin"=>"nautical twilight",
-            "civil twilight begin"=>"civil twilight",
-            "sunrise"=>"day",
-            "transit"=>"day",
-            "sunset"=>"civil twilight",
-            "civil twilight end"=>"nautical twilight",
-            "nautical twilight end"=>"astronomical twilight",
-            "astronomical twilight end"=>"night",
+            "astronomical twilight begin" => "astronomical twilight",
+            "nautical twilight begin" => "nautical twilight",
+            "civil twilight begin" => "civil twilight",
+            "sunrise" => "day",
+            "transit" => "day",
+            "sunset" => "civil twilight",
+            "civil twilight end" => "nautical twilight",
+            "nautical twilight end" => "astronomical twilight",
+            "astronomical twilight end" => "night",
         ];
         $message = "";
         $count = 0;
-        foreach ($arr as $period=>$epoch) {
+        foreach ($arr as $period => $epoch) {
             $datum = $this->twilightDay($period);
             if ($count == 0) {
                 $message .= $period . " " . $datum->format("Y/m/d G:i:s") . " ";
@@ -131,17 +134,11 @@ class Day extends Agent
 
             $variable_text = str_replace(" ", "_", $period);
 
-//var_dump($timestamp_epoch);
-//var_dump($this->solar_array[$variable_text]);
-
             if ($this->solar_array[$variable_text] < $timestamp_epoch) {
                 $time_of_day = $period;
             }
         }
 
-        //foreach($arr as $i=>$arr) {
-        //}
-        //var_dump($time_of_day);
         $day_time = $arr[$time_of_day];
 
         $tz = $datum->getTimezone();
@@ -271,12 +268,271 @@ class Day extends Agent
         $this->thing_report['choices'] = $this->choices;
     }
 
+    public function mesoamericanDay()
+    {
+    }
+
+    public function calendarroundDay()
+    {
+        // TODO
+        // https://en.wikipedia.org/wiki/Maya_calendar#Calendar_Round
+
+        $days = [
+            'Imix' => 20,
+            'Ik' => 20,
+            'Akbal' => 20,
+            'Kan' => 20,
+            'Chicchan' => 20,
+            'Cimi' => 20,
+            'Manik' => 20,
+            'Lamat' => 20,
+            'Muluc' => 20,
+            'Oc' => 20,
+            'Chuen' => 20,
+            'Eb' => 20,
+            'Ben' => 20,
+            'Ix' => 20,
+            'Men' => 20,
+            'Cib' => 20,
+            'Caban' => 20,
+            'Etznab' => 20,
+            'Cauac' => 20,
+            'Ahau' => 20,
+        ];
+
+        $months = [
+            'Pop' => $days,
+            "Wo'" => $days,
+            'Sip' => $days,
+            "Sotz'" => $days,
+            'Sek' => $days,
+            'Xul' => $days,
+            "Yaxk'in" => $days,
+            'Mol' => $days,
+            "Ch'en" => $days,
+            'Yax' => $days,
+            'Sak' => $days,
+            'Keh' => $days,
+            'Mak' => $days,
+            "K'ank'in" => $days,
+            'Muwan' => $days,
+            'Pax' => $days,
+            "K'ayab" => $days,
+            "Kumk'u" => $days,
+            "Wayeb'" => 5,
+        ];
+
+        $rounds = ['round' => $months];
+
+        $wheels = $rounds;
+        $counts = $this->wheelsDay($wheels, true);
+
+        $text = "[Calendar round TODO.]";
+
+        return $text;
+    }
+
+    public function longcountDay()
+    {
+        // As best as I can tell.
+        // TODO - Include reference. See Calendar.
+
+        $wheels = [
+            'baktun' => 20,
+            'katun' => 20,
+            'tun' => 20,
+            'uinal' => 18,
+            'kin' => 20,
+        ];
+
+        $counts = $this->wheelsDay($wheels);
+
+        $text = implode(".", $counts);
+
+        $prime_meridian_offset = $this->default_prime_meridian_offset;
+
+        if ($prime_meridian_offset == 0) {
+            $text .= " at Prime Meridian";
+        }
+
+        return $text;
+    }
+
+    public function wheelCount($number, $wheels)
+    {
+        $remainder = $number;
+        foreach ($wheels as $wheel_name => $wheel) {
+            $wheel_modulo = $wheel;
+            if (is_array($wheel)) {
+                $a = $this->wheelCount($number, $wheel);
+                $wheel_modulo = count($a);
+            }
+
+            $seen_wheel = false;
+            $factor = 1;
+            foreach ($wheels as $inner_wheel_name => $inner_wheel) {
+                $inner_wheel_modulo = $inner_wheel;
+                if (is_array($inner_wheel)) {
+                    $a = $this->wheelCount($number, $inner_wheel);
+                    $inner_wheel_modulo = count($a);
+                    //$inner_wheel_modulo = count($inner_wheel);
+                }
+
+                if ($inner_wheel_name != $wheel_name and $seen_wheel == false) {
+                    continue;
+                }
+
+                if ($seen_wheel == false) {
+                    $seen_wheel = true;
+                    continue;
+                }
+
+                $factor = $factor * $inner_wheel_modulo;
+            }
+
+            $whole_parts = intval($remainder / $factor);
+
+            if ($whole_parts == 0) {
+                $long_count[$wheel_name] = 0;
+                continue;
+            }
+
+            $long_count[$wheel_name] = $whole_parts;
+
+            $remainder = $remainder - $whole_parts * $factor;
+        }
+
+        return $long_count;
+    }
+
+    public function wheelsDay($wheels = null, $label = false)
+    {
+        // TODO. Currently out by one kin.
+        // Review.
+
+        if ($wheels == null) {
+            return true;
+        }
+
+        $julian_day_number = $this->julianDay();
+
+        // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
+        // https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar
+        //$gmt_julian_day_number = 584283;
+
+        $gmt_julian_day_number =
+            $this->default_julian_correlation['mesoamerican'];
+
+        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+
+        //$gmt_plus_two_julian_day_number = $gmt_julian_day_number + 2;
+
+        $long_count_day_number = $days_since_correlation;
+
+        $remainder = $long_count_day_number;
+
+        $long_count = $this->wheelCount($remainder, $wheels);
+        return $long_count;
+        // https://latitude.to/articles-by-country/mx/mexico/975/tenochtitlan
+        // 19.80782 -96.91595
+
+        //        $prime_meridian_offset = $this->default_prime_meridian_offset;
+/*
+        $long_count = [];
+
+        foreach ($wheels as $wheel_name => $wheel) {
+            $wheel_modulo = $wheel;
+            if (is_array($wheel)) {
+                $wheel_modulo = count($wheel);
+            }
+
+            $seen_wheel = false;
+            $factor = 1;
+            foreach ($wheels as $inner_wheel_name => $inner_wheel) {
+                $inner_wheel_modulo = $inner_wheel;
+                if (is_array($inner_wheel)) {
+                    $inner_wheel_modulo = count($inner_wheel);
+                }
+
+                echo "inner wheel name " .
+                    $inner_wheel_name .
+                    " modulo " .
+                    $inner_wheel_modulo .
+                    "\n";
+
+                if ($inner_wheel_name != $wheel_name and $seen_wheel == false) {
+                    continue;
+                }
+
+                if ($seen_wheel == false) {
+                    $seen_wheel = true;
+                    continue;
+                }
+                // $seen_wheel = true;
+
+                //echo $inner_wheel_modulo . " " ;
+                $factor = $factor * $inner_wheel_modulo;
+            }
+
+            echo "factor " . $factor . "\n";
+            $whole_parts = intval($remainder / $factor);
+
+            if ($whole_parts == 0) {
+                $long_count[$wheel_name] = 0;
+                continue;
+            }
+
+            $long_count[$wheel_name] = $whole_parts;
+
+            $remainder = $remainder - $whole_parts * $factor;
+        }
+*/
+
+        /*
+if ($label == true) {
+foreach($long_count as $name=>$count) {
+
+echo $name . " " . $count . "\n";
+
+}
+
+*/
+        return $long_count;
+
+        $text = implode(".", $long_count);
+
+        if ($prime_meridian_offset == 0) {
+            $text .= " at Prime Meridian";
+        }
+        return $text;
+    }
+
     /**
      *
      */
     public function makeSMS()
     {
         $sms = "DAY";
+
+        if (isset($this->julian_flag) and $this->julian_flag == 'on') {
+            $julian_day_number = $this->julianDay();
+            $sms .= " JD " . $julian_day_number;
+        }
+
+        if (
+            isset($this->mesoamerican_flag) and
+            $this->mesoamerican_flag == 'on'
+        ) {
+            $long_count_day = $this->longcountDay();
+
+            $calendar_round_day = $this->calendarroundDay();
+            $sms .=
+                " MESOAMERICAN " .
+                $long_count_day .
+                " " .
+                $calendar_round_day .
+                " ";
+        }
 
         $days = [];
         if (isset($this->days)) {
@@ -397,6 +653,40 @@ class Day extends Agent
     function rgbcolor($r, $g, $b)
     {
         $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
+    }
+
+    public function julianDay($text = null)
+    {
+        $time_agent = new Time($this->thing, "time");
+        $time_string = $time_agent->getTime($text);
+
+        $dateValue = strtotime($time_string);
+        // Expect a UTC Zulu time.
+
+        $year = date("Y", $dateValue);
+        $month = date("m", $dateValue);
+        $day = date("d", $dateValue);
+
+        // See PHP Manual.
+        // While there is juliantojd that is for converting julian dates to a day numbet.
+        // There is a high-likelyhood we are in the second Gregorian era.
+
+        // TODO - Recognize eras.
+
+        // Code from PHP Manual comment for generating decimal julian day.
+        $julianDate = gregoriantojd($month, $day, $year);
+        //correct for half-day offset
+        $dayfrac = date('G') / 24 - 0.5;
+        if ($dayfrac < 0) {
+            $dayfrac += 1;
+        }
+
+        //now set the fraction of a day
+        $frac = $dayfrac + (date('i') + date('s') / 60) / 60 / 24;
+
+        $julianDate = $julianDate + $frac;
+
+        return $julianDate;
     }
 
     /**
@@ -660,7 +950,7 @@ class Day extends Agent
         //$x_pt =  230;
         //$y_pt = 230;
 
-        foreach (range(0, 24-1, 1) as $i) {
+        foreach (range(0, 24 - 1, 1) as $i) {
             $x_pt = $size * cos($angle * $i + $init_angle);
             $y_pt = $size * sin($angle * $i + $init_angle);
             /*
@@ -1105,6 +1395,18 @@ class Day extends Agent
                 $this->response .= "Made a day. ";
                 return;
             }
+        }
+
+        if (stripos($input, 'julian') !== false) {
+            $this->julian_flag = 'on';
+        }
+
+        if (stripos($input, str_replace('-', ' ', 'long count')) !== false) {
+            $this->mesoamerican_flag = 'on';
+        }
+
+        if (stripos($input, 'maya') !== false) {
+            $this->mesoamerican_flag = 'on';
         }
 
         $input_agent = new Input($this->thing, "input");

@@ -382,6 +382,8 @@ class Calendar extends Agent
             "//EN" .
             "\n";
         $c .= "VERSION:2.0" . "\n";
+
+// https://www.kanzaki.com/docs/ical/calscale.html
         $c .= "CALSCALE:GREGORIAN" . "\n";
         $c .= "METHOD:PUBLIC" . "\n";
         $c .= "X-WR-CALNAME:" . $calendar_name . "\n";
@@ -797,7 +799,7 @@ var_dump($variable);
             return;
         }
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
-        $filterd_input = $input;
+        $filtered_input = $input;
         $string = $input;
         $str_pattern = 'calendar';
         $str_replacement = '';
@@ -827,6 +829,8 @@ var_dump($variable);
         return false;
     }
 
+    // ICal is a little noisy.
+    // So create a custom warning handler here to response appropriately.
     function calendar_warning_handler(
         $errno,
         $errstr,
