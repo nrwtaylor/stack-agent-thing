@@ -144,7 +144,11 @@ class Day extends Agent
         $tz = $datum->getTimezone();
         $message .= $tz->getName();
 
-        $this->message = strtoupper($day_time) . " " . $message;
+        if (isset($this->twilight_flag) and $this->twilight_flag == 'on') {
+            $this->message = strtoupper($day_time) . " " . $message;
+        } else {
+            $this->message = strtoupper($day_time);
+        }
     }
 
     public function twilightDay($text)
@@ -274,60 +278,124 @@ class Day extends Agent
 
     public function calendarroundDay()
     {
-        // TODO
-        // https://en.wikipedia.org/wiki/Maya_calendar#Calendar_Round
+        $tzolkin = $this->tzolkinDay();
+        $haab = $this->haabDay();
+        $lord_of_the_night = $this->lordofthenightDay();
+
+        return $tzolkin . " " . $haab . " " . $lord_of_the_night;
+    }
+
+    public function tzolkinDay()
+    {
+        $julian_day_number = $this->julianDay();
+
+        // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
+        // https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar
+        //$gmt_julian_day_number = 584283;
+
+        $gmt_julian_day_number =
+            $this->default_julian_correlation['mesoamerican'];
+
+        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+
+        // https://sudonull.com/post/158842-Ancient-Mayan-calendar-how-to-calculate-the-date
+        $t1 = ($days_since_correlation + 19) % 20;
+        $t2 = (($days_since_correlation + 3) % 13) + 1;
 
         $days = [
-            'Imix' => 20,
-            'Ik' => 20,
-            'Akbal' => 20,
-            'Kan' => 20,
-            'Chicchan' => 20,
-            'Cimi' => 20,
-            'Manik' => 20,
-            'Lamat' => 20,
-            'Muluc' => 20,
-            'Oc' => 20,
-            'Chuen' => 20,
-            'Eb' => 20,
-            'Ben' => 20,
-            'Ix' => 20,
-            'Men' => 20,
-            'Cib' => 20,
-            'Caban' => 20,
-            'Etznab' => 20,
-            'Cauac' => 20,
-            'Ahau' => 20,
+            'Imix',
+            'Ik',
+            'Akbal',
+            'Kan',
+            'Chicchan',
+            'Cimi',
+            'Manik',
+            'Lamat',
+            'Muluc',
+            'Oc',
+            'Chuen',
+            'Eb',
+            'Ben',
+            'Ix',
+            'Men',
+            'Cib',
+            'Caban',
+            'Etznab',
+            'Cauac',
+            'Ahau',
         ];
+
+        $t1_text = $days[$t1];
+        return $t2 . " " . $t1_text;
+    }
+
+    public function lordofthenightDay()
+    {
+        $julian_day_number = $this->julianDay();
+
+        // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
+        // https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar
+        //$gmt_julian_day_number = 584283;
+
+        $gmt_julian_day_number =
+            $this->default_julian_correlation['mesoamerican'];
+
+        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
+
+        $g = (($days_since_correlation + 8) % 9) + 1;
+
+        return 'G' . $g;
+    }
+
+    public function haabDay()
+    {
+        $julian_day_number = $this->julianDay();
+
+        // Today, 5 December 2020 (UTC), in the Long Count is 13.0.8.1.6 (using GMT correlation).
+        // https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar
+        //$gmt_julian_day_number = 584283;
+
+        $gmt_julian_day_number =
+            $this->default_julian_correlation['mesoamerican'];
+
+        $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
 
         $months = [
-            'Pop' => $days,
-            "Wo'" => $days,
-            'Sip' => $days,
-            "Sotz'" => $days,
-            'Sek' => $days,
-            'Xul' => $days,
-            "Yaxk'in" => $days,
-            'Mol' => $days,
-            "Ch'en" => $days,
-            'Yax' => $days,
-            'Sak' => $days,
-            'Keh' => $days,
-            'Mak' => $days,
-            "K'ank'in" => $days,
-            'Muwan' => $days,
-            'Pax' => $days,
-            "K'ayab" => $days,
-            "Kumk'u" => $days,
-            "Wayeb'" => 5,
+            'Pop',
+            "Wo'",
+            'Sip',
+            "Sotz'",
+            'Sek',
+            'Xul',
+            "Yaxk'in",
+            'Mol',
+            "Ch'en",
+            'Yax',
+            'Sak',
+            'Keh',
+            'Mak',
+            "K'ank'in",
+            'Muwan',
+            'Pax',
+            "K'ayab",
+            "Kumk'u",
+            "Wayeb'",
         ];
 
-        $rounds = ['round' => $months];
+        // integer, value = divmod(integer, base)
+        // H1, H2 = divmod((M + 348) % 365, 20)
+        // h1 quotient
+        // h2 remainder
 
-        $wheels = $rounds;
-        $counts = $this->wheelsDay($wheels, true);
+        // https://keisan.casio.com/exec/system/1345696485
+        $n = ($days_since_correlation + 348) % 365;
 
-        $text = "[Calendar round TODO.]";
+        $h1 = $quotient = (int) ($n / 20);
+        $h2 = $remainder = $n % 20;
+
+        $h1_text = $months[$h1];
+
+        $text = $h1_text . " " . $h2;
 
         return $text;
     }
@@ -433,78 +501,6 @@ class Day extends Agent
 
         $long_count = $this->wheelCount($remainder, $wheels);
         return $long_count;
-        // https://latitude.to/articles-by-country/mx/mexico/975/tenochtitlan
-        // 19.80782 -96.91595
-
-        //        $prime_meridian_offset = $this->default_prime_meridian_offset;
-/*
-        $long_count = [];
-
-        foreach ($wheels as $wheel_name => $wheel) {
-            $wheel_modulo = $wheel;
-            if (is_array($wheel)) {
-                $wheel_modulo = count($wheel);
-            }
-
-            $seen_wheel = false;
-            $factor = 1;
-            foreach ($wheels as $inner_wheel_name => $inner_wheel) {
-                $inner_wheel_modulo = $inner_wheel;
-                if (is_array($inner_wheel)) {
-                    $inner_wheel_modulo = count($inner_wheel);
-                }
-
-                echo "inner wheel name " .
-                    $inner_wheel_name .
-                    " modulo " .
-                    $inner_wheel_modulo .
-                    "\n";
-
-                if ($inner_wheel_name != $wheel_name and $seen_wheel == false) {
-                    continue;
-                }
-
-                if ($seen_wheel == false) {
-                    $seen_wheel = true;
-                    continue;
-                }
-                // $seen_wheel = true;
-
-                //echo $inner_wheel_modulo . " " ;
-                $factor = $factor * $inner_wheel_modulo;
-            }
-
-            echo "factor " . $factor . "\n";
-            $whole_parts = intval($remainder / $factor);
-
-            if ($whole_parts == 0) {
-                $long_count[$wheel_name] = 0;
-                continue;
-            }
-
-            $long_count[$wheel_name] = $whole_parts;
-
-            $remainder = $remainder - $whole_parts * $factor;
-        }
-*/
-
-        /*
-if ($label == true) {
-foreach($long_count as $name=>$count) {
-
-echo $name . " " . $count . "\n";
-
-}
-
-*/
-        return $long_count;
-
-        $text = implode(".", $long_count);
-
-        if ($prime_meridian_offset == 0) {
-            $text .= " at Prime Meridian";
-        }
-        return $text;
     }
 
     /**
@@ -849,14 +845,7 @@ echo $name . " " . $count . "\n";
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
 
-        //        $this->thing_report['png'] = $image;
-
-        //        $this->PNG = $this->image;
         $this->PNG = $imagedata;
-        //imagedestroy($this->image);
-        //        $this->thing_report['png'] = $imagedata;
-
-        //        $this->PNG_data = "data:image/png;base64,'.base64_encode($imagedata).'";
 
         return $response;
 
@@ -1407,6 +1396,21 @@ echo $name . " " . $count . "\n";
 
         if (stripos($input, 'maya') !== false) {
             $this->mesoamerican_flag = 'on';
+        }
+
+        $twilight_indicators = [
+            'twilight',
+            'dawn',
+            'sunset',
+            'sunrise',
+            'transit',
+            'noon',
+        ];
+
+        foreach ($twilight_indicators as $twilight_indicator) {
+            if (stripos($input, $twilight_indicator) !== false) {
+                $this->twilight_flag = 'on';
+            }
         }
 
         $input_agent = new Input($this->thing, "input");
