@@ -58,8 +58,6 @@ class Day extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->initDay();
-
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
 
@@ -83,6 +81,78 @@ class Day extends Agent
 
         $this->default_prime_meridian_offset = 0;
         $this->default_julian_correlation['mesoamerican'] = 584283; //GMT
+
+        $this->initDay();
+
+    }
+
+    public function initDay() {
+
+        $this->long_count_rounds = [
+            'baktun' => 20,
+            'katun' => 20,
+            'tun' => 20,
+            'uinal' => 18,
+            'kin' => 20,
+        ];
+
+// Tzolk'in Calendar
+
+// http://dylansung.tripod.com/sapienti/maya/maya.htm
+// https://mayaarchaeologist.co.uk/2016/12/31/maya-calendar-system/#2
+// https://en.wikipedia.org/wiki/Tzolk%CA%BCin
+// Count of days
+
+// First item in array is the wikipedia,
+// 'Associated natural phenomena or meaning.
+
+// Index is the wikipedia Day Name.
+
+        $this->tzolkin_days = [
+            'Imix' =>['Waterlily', 'Crocodile','Alligator','Birth','Water','Wine', 'Sea Dragon'],
+            'Ik'=>['Wind','Breath','Life force','Air','Life'],
+            'Akbal'=>['Darkness','Night', 'Early dawn'],
+            'Kan'=>['Net','Sacrifice','Sky'],
+            'Chicchan'=>['Cosmological snake','Snake'],
+            'Cimi'=>['Death'],
+            'Manik'=>['Deer'],
+            'Lamat'=>['Venus','Star','Ripe','Ripeness','Maize seeds'],
+            'Muluc'=>['Jade','Water', 'Offering','Moon'],
+            'Oc'=>['Dog'],
+            'Chuen'=>['Howler monkey','Ancestor'],
+            'Eb'=>['Rain','Tooth/Jaw'],
+            'Ben'=>['Green/young maize', 'Seed', 'Maize'],
+            'Ix'=>['Jaguar'],
+            'Men'=>['Eagle'],
+            'Cib'=>['Wax', 'Candle'],
+            'Caban'=>['Earth'],
+            'Etznab'=>['Flint','Obsidian'],
+            'Cauac'=>['Rain storm','Storm'],
+            'Ahau'=>['Lord','Ruler','Sun'],
+        ];
+
+        $this->haab_months = [
+            'Pop'=>['mat'],
+            "Wo'"=>["black conjunction"],
+            'Sip'=>["red conjunction"],
+            "Sotz'"=>["bat"],
+            'Sek'=>["death"],
+            'Xul'=>["dog"],
+            "Yaxk'in"=>["new sun"],
+            'Mol'=>["water"],
+            "Ch'en"=>["black storm"],
+            'Yax'=>["green storm"],
+            'Sak'=>["white storm"],
+            'Keh'=>["red storm"],
+            'Mak'=>["enclosed"],
+            "K'ank'in"=>["yellow sun"],
+            'Muwan'=>["owl"],
+            'Pax'=>["planting time"],
+            "K'ayab"=>["turtle"],
+            "Kumk'u"=>["granary"],
+            "Wayeb'"=>["five unlucky days"],
+        ];
+
     }
 
     public function runDay($text = null)
@@ -144,7 +214,7 @@ class Day extends Agent
         $tz = $datum->getTimezone();
         $message .= $tz->getName();
 
-        if (isset($this->twilight_flag) and $this->twilight_flag == 'on') {
+        if (isset($this->day_twilight_flag) and $this->day_twilight_flag == 'on') {
             $this->message = strtoupper($day_time) . " " . $message;
         } else {
             $this->message = strtoupper($day_time);
@@ -302,31 +372,19 @@ class Day extends Agent
         $t1 = ($days_since_correlation + 19) % 20;
         $t2 = (($days_since_correlation + 3) % 13) + 1;
 
-        $days = [
-            'Imix',
-            'Ik',
-            'Akbal',
-            'Kan',
-            'Chicchan',
-            'Cimi',
-            'Manik',
-            'Lamat',
-            'Muluc',
-            'Oc',
-            'Chuen',
-            'Eb',
-            'Ben',
-            'Ix',
-            'Men',
-            'Cib',
-            'Caban',
-            'Etznab',
-            'Cauac',
-            'Ahau',
-        ];
+        $days = $this->tzolkin_days;
 
-        $t1_text = $days[$t1];
-        return $t2 . " " . $t1_text;
+        $numbered_days = array_keys($days);
+
+        $t1_text = $numbered_days[$t1];
+
+
+        if (isset($this->day_translate_flag) and $this->day_translate_flag == 'on') {
+            $t1_text = ucwords($days[$t1_text][0]);
+        } 
+
+
+        return $t1_text . " " . $t2;
     }
 
     public function lordofthenightDay()
@@ -360,27 +418,7 @@ class Day extends Agent
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
 
-        $months = [
-            'Pop',
-            "Wo'",
-            'Sip',
-            "Sotz'",
-            'Sek',
-            'Xul',
-            "Yaxk'in",
-            'Mol',
-            "Ch'en",
-            'Yax',
-            'Sak',
-            'Keh',
-            'Mak',
-            "K'ank'in",
-            'Muwan',
-            'Pax',
-            "K'ayab",
-            "Kumk'u",
-            "Wayeb'",
-        ];
+        $months = $this->haab_months;
 
         // integer, value = divmod(integer, base)
         // H1, H2 = divmod((M + 348) % 365, 20)
@@ -393,7 +431,14 @@ class Day extends Agent
         $h1 = $quotient = (int) ($n / 20);
         $h2 = $remainder = $n % 20;
 
-        $h1_text = $months[$h1];
+        $numbered_months = array_keys($months);
+
+
+        $h1_text = $numbered_months[$h1];
+
+        if (isset($this->day_translate_flag) and $this->day_translate_flag == 'on') {
+            $h1_text = ucwords($months[$h1_text][0]);
+        }
 
         $text = $h1_text . " " . $h2;
 
@@ -405,13 +450,7 @@ class Day extends Agent
         // As best as I can tell.
         // TODO - Include reference. See Calendar.
 
-        $wheels = [
-            'baktun' => 20,
-            'katun' => 20,
-            'tun' => 20,
-            'uinal' => 18,
-            'kin' => 20,
-        ];
+        $wheels = $this->long_count_rounds;
 
         $counts = $this->wheelsDay($wheels);
 
@@ -510,14 +549,14 @@ class Day extends Agent
     {
         $sms = "DAY";
 
-        if (isset($this->julian_flag) and $this->julian_flag == 'on') {
+        if (isset($this->day_julian_flag) and $this->day_julian_flag == 'on') {
             $julian_day_number = $this->julianDay();
             $sms .= " JD " . $julian_day_number;
         }
 
         if (
-            isset($this->mesoamerican_flag) and
-            $this->mesoamerican_flag == 'on'
+            isset($this->day_mesoamerican_flag) and
+            $this->day_mesoamerican_flag == 'on'
         ) {
             $long_count_day = $this->longcountDay();
 
@@ -527,7 +566,7 @@ class Day extends Agent
                 $long_count_day .
                 " " .
                 $calendar_round_day .
-                " ";
+                "";
         }
 
         $days = [];
@@ -602,7 +641,7 @@ class Day extends Agent
     /**
      *
      */
-    public function initDay()
+    public function deprecate_initDay()
     {
         $this->number_agent = new Number($this->thing, "number");
     }
@@ -1197,23 +1236,6 @@ class Day extends Agent
         $days = array_intersect_key($days, $unique);
         return $days;
     }
-    /*
-    public function extractDay($text = null)
-    {
-        if ($text == null) {
-            return true;
-        }
-        $day = false;
-
-        if (!isset($this->days)) {
-            $days = $this->extractDays($text);
-        }
-        if (count($days) == 1) {
-            $day = $days[0];
-        }
-        return $day;
-    }
-*/
 
     function extractDay($input = null)
     {
@@ -1386,32 +1408,21 @@ class Day extends Agent
             }
         }
 
-        if (stripos($input, 'julian') !== false) {
-            $this->julian_flag = 'on';
-        }
-
-        if (stripos($input, str_replace('-', ' ', 'long count')) !== false) {
-            $this->mesoamerican_flag = 'on';
-        }
-
-        if (stripos($input, 'maya') !== false) {
-            $this->mesoamerican_flag = 'on';
-        }
-
-        $twilight_indicators = [
-            'twilight',
-            'dawn',
-            'sunset',
-            'sunrise',
-            'transit',
-            'noon',
+        $indicators = [
+            'translate'=>['translate','english','anglic'],
+            'julian'=>['julian'],
+            'mesoamerican'=>['maya'],
+            'twilight' => [
+                'twilight',
+                'dawn',
+                'sunset',
+                'sunrise',
+                'transit',
+                'noon',
+            ],
         ];
 
-        foreach ($twilight_indicators as $twilight_indicator) {
-            if (stripos($input, $twilight_indicator) !== false) {
-                $this->twilight_flag = 'on';
-            }
-        }
+        $this->flagAgent($indicators, $input);
 
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
