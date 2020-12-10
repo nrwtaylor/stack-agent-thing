@@ -1,6 +1,6 @@
 <?php
 /**
- * Round.php
+ * Slice.php
  *
  * @package default
  */
@@ -17,7 +17,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Round extends Agent
+class Slice extends Agent
 {
     public $var = 'hello';
 
@@ -28,18 +28,18 @@ class Round extends Agent
      */
     public function init()
     {
+        $this->default_slices = 5;
         $this->test = "Development code";
 
-        $this->thing_report["info"] = "A ROUND is a repeating pattern.";
+        $this->thing_report["info"] =
+            "A SLICE is a repeating pattern of seasons.";
         $this->thing_report["help"] = 'Click on the image for a PDF.';
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
 
-        $this->node_list = [
-            "round" => ["tzol\'kin", "haab", "day", "round", "week"],
-        ];
+        $this->node_list = ["slice" => ["slice", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
@@ -56,9 +56,7 @@ class Round extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->default_rounds = [7];
-
-        $this->initRound();
+        $this->initSlice();
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
@@ -74,7 +72,29 @@ class Round extends Agent
 
     public function set()
     {
-        $this->setRound();
+        $this->setSlice();
+    }
+
+    /**
+     *
+     * @param unknown $text (optional)
+     */
+    function getQuickresponse($text = null)
+    {
+        if ($text == null) {
+            $text = $this->web_prefix;
+        }
+        $agent = new Qr($this->thing, $text);
+        $this->quick_response_png = $agent->PNG_embed;
+    }
+
+    /**
+     *
+     */
+    public function getNuuid()
+    {
+        $agent = new Nuuid($this->thing, "nuuid");
+        $this->nuuid_png = $agent->PNG_embed;
     }
 
     /**
@@ -83,7 +103,7 @@ class Round extends Agent
      */
     function getWhatis($input)
     {
-        $whatis = "round";
+        $whatis = "slice";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
             $whatIWant = substr(
@@ -102,6 +122,27 @@ class Round extends Agent
 
     /**
      *
+     * @param unknown $t (optional)
+     * @return unknown
+     */
+    public function timestampSlice($t = null)
+    {
+
+//        $s = $this->thing->thing->created_at;
+
+        if (!isset($this->retain_to)) {
+            $text = "X";
+        } else {
+            $t = $this->retain_to;
+            $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
+            //$text = "CLICK FOR PDF";
+        }
+        $this->timestamp = $text;
+        return $this->timestamp;
+    }
+
+    /**
+     *
      * @return unknown
      */
     public function respondResponse()
@@ -114,6 +155,8 @@ class Round extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
+
+        return $this->thing_report;
     }
 
     /**
@@ -130,9 +173,17 @@ class Round extends Agent
      */
     public function makeSMS()
     {
-        //        $cell = $this->lattice[0][0][0];
-        $sms = "ROUND | ";
-        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/round";
+        $sms = "SLICE | ";
+
+        //$slices = [];
+        //if (isset($this->slices)) {$slices = $this->slices;}
+
+        $slice_text = "Slices " . $this->slices. ". ";
+        //foreach ($slices as $i => $slice) {
+        //    $slice_text .= $slice['slice'] . " " . $slice['wide_slice'] . " ";
+        //}
+        $sms .= $slice_text;
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/slice";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -143,20 +194,20 @@ class Round extends Agent
      */
     public function makeMessage()
     {
-        $message = "Made a round for you.<br>";
+        $message = "Made a slice for you.<br>";
 
         $uuid = $this->uuid;
 
         $message .=
             "Keep on stacking.\n\n<p>" .
             $this->web_prefix .
-            "thing/$uuid/round.png\n \n\n<br> ";
+            "thing/$uuid/slice.png\n \n\n<br> ";
         $message .=
             '<img src="' .
             $this->web_prefix .
             'thing/' .
             $uuid .
-            '/round.png" alt="round" height="92" width="92">';
+            '/slice.png" alt="slice" height="92" width="92">';
 
         $this->thing_report['message'] = $message;
     }
@@ -164,40 +215,39 @@ class Round extends Agent
     /**
      *
      */
-    public function setRound()
+    public function setSlice()
     {
+        return;
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["round", "rounds"], $this->rounds);
+        $this->thing->json->writeVariable(
+            ["slice", "decimal"],
+            $this->decimal_slice
+        );
+
+        $this->thing->log(
+            $this->agent_prefix .
+                ' saved decimal slice ' .
+                $this->decimal_slice .
+                '.',
+            "INFORMATION"
+        );
     }
 
     /**
      *
      * @return unknown
      */
-    // TODO
-    public function getRound()
+    public function getSlice()
     {
-        $this->thing->json->setField("variables");
-        $rounds = $this->thing->json->readVariable(["round", "rounds"]);
-
-        if ($rounds == false) {
-            $this->thing->log(
-                $this->agent_prefix . ' did not find rounds.',
-                "INFORMATION"
-            );
-            // No round saved.  Return.
-            return true;
-        }
+        return;
     }
 
     /**
      *
      */
-    public function initRound()
+    public function initSlice()
     {
-        if (!isset($this->size)) {
-            $this->size = 3.7;
-        }
+        $this->number_agent = new Number($this->thing, "number");
     }
 
     public function run()
@@ -209,8 +259,8 @@ class Round extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/round.pdf';
-        $this->node_list = ["round" => ["week"]];
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/slice.pdf';
+        $this->node_list = ["slice" => ["slice"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
@@ -225,7 +275,7 @@ class Round extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a ROUND';
+        $txt = 'This is a SLICE';
         $txt .= "\n";
 
         $this->thing_report['txt'] = $txt;
@@ -264,6 +314,12 @@ class Round extends Agent
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+        // For Vancouver Pride 2018
+
+        // https://en.wikipedia.org/wiki/Rainbow_flag
+        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
+        // https://www.schemecolor.com/lgbt-flag-colors.php
 
         $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
         $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
@@ -330,8 +386,11 @@ class Round extends Agent
         );
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
+        //if (isset($this->text_color)) {
+        //    $textcolor = $this->text_color;
+        //}
 
-        $this->drawRounds();
+        $this->drawSlice();
 
         // Write the string at the top left
         $border = 30;
@@ -341,7 +400,7 @@ class Round extends Agent
 
         // devstack add path
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-        $text = "A round in slices...";
+        $text = "A slice in slices...";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
@@ -385,63 +444,113 @@ class Round extends Agent
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="round"/>';
+            '"alt="slice"/>';
 
         $this->html_image =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="round"/>';
+            '"alt="slice"/>';
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
+
+        //        $this->thing_report['png'] = $image;
+
+        //        $this->PNG = $this->image;
         $this->PNG = $imagedata;
+        //imagedestroy($this->image);
+        //        $this->thing_report['png'] = $imagedata;
+
+        //        $this->PNG_data = "data:image/png;base64,'.base64_encode($imagedata).'";
 
         return $response;
 
-        //        $this->PNG = $image;
-        //        $this->thing_report['png'] = $image;
+        $this->PNG = $image;
+        $this->thing_report['png'] = $image;
 
-        //        return;
+        return;
     }
 
-    public function drawRounds()
+    public function drawSlice($type = null)
     {
-        $border = 100;
-        $size = 1000 - $border;
-
-        $round_width = $size / (count($this->rounds) + 1);
-
-        foreach ($this->rounds as $i => $round) {
-            $next_size = $size - $round_width;
-            if ($i == count($this->rounds) - 1) {
-                $next_size = 0;
-            }
-
-            $this->drawRound($round, $size, $next_size);
-            $size = $next_size;
-        }
-    }
-
-    /*
-     *
-     */
-
-    public function drawRound(
-        $n = 7,
-        $size = null,
-        $next_size = null,
-        $type = null
-    ) {
         if ($type == null) {
             $type = $this->type;
         }
-        $this->wedgeRound($n, $size, $next_size);
+/*
+        if ($type == "wedge") {
+
+        $number_of_months = 12;
+        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+
+        $this->round_agent = new Round($this->thing, "round ".$number_of_months);
+        $this->image = $this->round_agent->image;
+
+            return;
+        }
+*/
+
+//        $number_of_months = 12;
+//        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+
+
+        $this->drawSlices($this->slices);
     }
 
-    public function wedgeRound($n = 7, $size = null, $next_size)
+    public function drawSlices($n)
     {
+        $size = null;
         if ($size == null) {
             $size = $this->size;
         }
+        $border = 100;
+        $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        $number_of_months = $n;
+
+
+        $width_slice = ($canvas_size_x - 2 * $border) / $number_of_months;
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        // devstack rotation not yet implemented
+        if (!isset($this->angle)) {
+            $this->angle = 0;
+        }
+
+        foreach (range(0, $number_of_months, 1) as $i) {
+            imageline(
+                $this->image,
+                $width_slice * $i,
+                0,
+                $width_slice * $i,
+                $canvas_size_y,
+                $this->black
+            );
+        }
+    }
+
+    public function wedgeSlice($n)
+    {
+        $number_of_months = $n;
+
+
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
 
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
@@ -459,16 +568,16 @@ class Round extends Agent
         if (!isset($this->angle)) {
             $this->angle = 0;
         }
-        if ($n > 1) {
-            $init_angle = (-1 * pi()) / 2;
-            $angle = (2 * 3.14159) / $n;
-            //$x_pt =  230;
-            //$y_pt = 230;
 
-            foreach (range(0, $n - 1, 1) as $i) {
-                $x_pt = $size * cos($angle * $i + $init_angle);
-                $y_pt = $size * sin($angle * $i + $init_angle);
-                /*
+        $init_angle = (-1 * pi()) / 2;
+        $angle = (2 * 3.14159) / $number_of_months;
+        //$x_pt =  230;
+        //$y_pt = 230;
+
+        foreach (range(0, $number_of_months - 1, 1) as $i) {
+            $x_pt = $size * cos($angle * $i + $init_angle);
+            $y_pt = $size * sin($angle * $i + $init_angle);
+            /*
             imageline(
                 $this->image,
                 $center_x + $x_pt,
@@ -478,19 +587,16 @@ class Round extends Agent
                 $this->black
             );
 */
-                $next_x_pt = $next_size * cos($angle * $i + $init_angle);
-                $next_y_pt = $next_size * sin($angle * $i + $init_angle);
-
-                imageline(
-                    $this->image,
-                    $center_x + $next_x_pt,
-                    $center_y + $next_y_pt,
-                    $center_x + $x_pt,
-                    $center_y + $y_pt,
-                    $this->black
-                );
-            }
+            imageline(
+                $this->image,
+                $center_x,
+                $center_y,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $this->black
+            );
         }
+
         imagearc(
             $this->image,
             $center_x,
@@ -507,7 +613,7 @@ class Round extends Agent
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "round",
+            "slice",
             "refreshed_at",
         ]);
 
@@ -515,7 +621,7 @@ class Round extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["round", "refreshed_at"],
+                ["slice", "refreshed_at"],
                 $time_string
             );
         }
@@ -540,7 +646,23 @@ class Round extends Agent
 
             $pdf->addPage($s['orientation'], $s);
             $pdf->useTemplate($tplidx1);
+            /*
+            if (isset($this->hextile_PNG)) {
+                $top_x = -6;
+                $top_y = 11;
 
+                $pdf->Image(
+                    $this->hextile_PNG,
+                    $top_x,
+                    $top_y,
+                    -300,
+                    -300,
+                    'PNG'
+                );
+            }
+*/
+            $this->getNuuid();
+            //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
             $pdf->Image($this->PNG_embed, 7, 30, 200, 200, 'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
@@ -579,7 +701,12 @@ class Round extends Agent
             $pdf->SetFont('Helvetica', '', 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/round';
+            $link = $this->web_prefix . 'thing/' . $this->uuid . '/slice';
+
+            $this->getQuickresponse($link);
+            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
+
+            //$pdf->Link(175,5,30,30, $link);
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -614,9 +741,9 @@ class Round extends Agent
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
             // Good until?
-            //$text = $this->timestampRound();
-            //$pdf->SetXY(175, 35);
-            //$pdf->MultiCell(30, $line_height, $text, 0, "L");
+            $text = $this->timestampSlice();
+            $pdf->SetXY(175, 35);
+            $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
@@ -627,6 +754,11 @@ class Round extends Agent
         return $this->thing_report['pdf'];
     }
 
+    public function isSlice($text)
+    {
+        return null;
+    }
+
     /**
      *
      */
@@ -634,30 +766,37 @@ class Round extends Agent
     {
         $this->type = "wedge";
 
-// $input = strtolower($this->subject);
         $input = $this->input;
 
-        $number_agent = new Number($this->thing, "number");
-        $t = $number_agent->extractNumbers($input);
-
-        if ($t == []) {
-            $t = $this->default_rounds;
+        if ($input == "slice") {
+            return;
         }
 
-        $this->rounds = $t;
-        $this->response .=
-            "Saw a request to make a round with these parameters: " .
-            implode(" ", $this->rounds) .
-            ". ";
+        $number_agent = new Number($this->thing, "number");
+        $numbers = $number_agent->extractNumbers($input);
 
+        // Take first number found.
+        $this->slices = $numbers[0];
+
+        if ($numbers == []) {
+            $this->slices = $this->default_slices;
+        }
         $pieces = explode(" ", strtolower($input));
 
+        $this->calendar_type = null;
+        if ((stripos($input, '13')!==false) or
+            (stripos($input,'thirteen month')!==false)){
+            $this->calendar_type = '13 month';
+            $this->slices = 13;
+            $this->response .= "Saw a request for a thirteen month calendar. ";
+        }
+
         if (count($pieces) == 1) {
-            if ($input == 'round') {
-                $this->getRound();
+            if ($input == 'slice') {
+                $this->getSlice();
 
                 $this->size = 4;
-                $this->response .= "Made a round. Which will pass. ";
+                $this->response .= "Made a slice. ";
                 return;
             }
         }
@@ -665,13 +804,14 @@ class Round extends Agent
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
         $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
+
         $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;
         }
 
-        $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
+        $keywords = ["slice"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -682,6 +822,7 @@ class Round extends Agent
             }
         }
 
-        $this->getRound();
+        $this->getSlice();
+        return;
     }
 }

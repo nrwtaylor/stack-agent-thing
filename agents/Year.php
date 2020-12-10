@@ -474,12 +474,22 @@ class Year extends Agent
         if ($type == null) {
             $type = $this->type;
         }
+
+        $number_of_months = 12;
+        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
         if ($type == "wedge") {
-            $this->wedgeYear();
+
+            $this->round_agent = new Round($this->thing, "round ".$number_of_months);
+            $this->image = $this->round_agent->image;
             return;
         }
 
-        $this->sliceYear();
+//        $number_of_months = 12;
+//        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+        $this->slice_agent = new Slice($this->thing, "slice " . $number_of_months);
+        $this->image = $this->slice_agent->image;
     }
 
     public function sliceYear()
@@ -998,6 +1008,7 @@ class Year extends Agent
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
         $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
+
         $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {

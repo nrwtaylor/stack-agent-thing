@@ -123,6 +123,7 @@ class Week extends Agent
      * @param unknown $t (optional)
      * @return unknown
      */
+
     public function timestampWeek($t = null)
     {
         $s = $this->thing->thing->created_at;
@@ -152,8 +153,6 @@ class Week extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-
-        return $this->thing_report;
     }
 
     /**
@@ -184,7 +183,7 @@ class Week extends Agent
      */
     public function makeSMS()
     {
-        $cell = $this->lattice[0][0][0];
+    //    $cell = $this->lattice[0][0][0];
         $sms = "WEEK | ";
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/week";
         $sms .= " | " . $this->response;
@@ -197,7 +196,7 @@ class Week extends Agent
      */
     public function makeMessage()
     {
-        $message = "Stackr made a week for you.<br>";
+        $message = "Made a week for you.<br>";
 
         $uuid = $this->uuid;
 
@@ -215,85 +214,17 @@ class Week extends Agent
         $this->thing_report['message'] = $message;
     }
 
-    public function latticeWeek()
-    {
-        $lattice_agent = new Lattice($this->thing, "lattice");
-
-        $lattice_agent->initLattice();
-
-        $lattice_agent->font_size = 16;
-
-        $lattice_agent->max = 12;
-        $lattice_agent->size = 120;
-        $lattice_agent->lattice_size = 40;
-        $lattice_agent->angle = -pi() / 2;
-
-        $lattice_agent->center_x = 400;
-        $lattice_agent->center_y = 550;
-
-        //$lattice_agent->angle = 0;
-
-        $lattice_agent->canvas_size_x = 2550;
-        $lattice_agent->canvas_size_y = 2860;
-
-        //        $lattice_agent->initLattice();
-
-        $lattice_agent->q_centre = 8;
-        $lattice_agent->r_centre = 8;
-        $lattice_agent->s_centre = 8;
-
-        //$lattice_agent->drawLattice(10,10,10,25,0);
-
-        $lattice_agent->makePNG();
-
-        $this->hextile_PNG = $lattice_agent->PNG_embed;
-    }
-
     /**
      *
      */
     public function setWeek()
     {
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["week", "decimal"],
-            $this->decimal_week
-        );
+        //$this->thing->json->writeVariable(
+        //    ["week", "decimal"],
+        //    $this->decimal_week
+        //);
 
-        $this->thing->log(
-            $this->agent_prefix .
-                ' saved decimal week ' .
-                $this->decimal_week .
-                '.',
-            "INFORMATION"
-        );
-    }
-
-    /**
-     *
-     * @return unknown
-     */
-    public function getWeek()
-    {
-        $this->thing->json->setField("variables");
-        $this->decimal_week = $this->thing->json->readVariable([
-            "week",
-            "decimal",
-        ]);
-
-        if ($this->decimal_week == false) {
-            $this->thing->log(
-                $this->agent_prefix . ' did not find a decimal week.',
-                "INFORMATION"
-            );
-            // No week saved.  Return.
-            return true;
-        }
-
-        $this->thing->log(
-            'loaded decimal week ' . $this->decimal_week . '.',
-            "INFORMATION"
-        );
     }
 
     /**
@@ -307,90 +238,10 @@ class Week extends Agent
         if (!isset($this->size)) {
             $this->size = 3.7;
         }
-        if (!isset($this->lattice_size)) {
-            $this->lattice_size = 15;
-        }
-
-        $this->initLattice($this->max);
-        $this->initSegment();
-
-        $this->setProbability();
-        $this->setRules();
     }
 
     public function run()
     {
-        $this->binaryWeek($this->decimal_week);
-
-        $this->week_points = [];
-        $index = 0;
-
-        foreach ($this->point_list as $point) {
-            list($q, $r, $s) = $point;
-            $value = rand(0, 1);
-
-            if ($this->binary_week[$index] == 1) {
-                $value = ["name" => null, "state" => 'on', "value" => 1];
-            } else {
-                $value = ["name" => null, "state" => 'off', "value" => 0];
-            }
-
-            $this->lattice[$q][$r][$s] = $value;
-            $this->week_points[] = $this->binary_week[$index];
-            $index += 1;
-            if ($index >= strlen($this->binary_week)) {
-                break;
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public function decimalUuid()
-    {
-        $hex = str_replace("-", "", $this->uuid);
-
-        $dec = 0;
-        $len = strlen($hex);
-        for ($i = 1; $i <= $len; $i++) {
-            $dec = bcadd(
-                $dec,
-                bcmul(
-                    strval(hexdec($hex[$i - 1])),
-                    bcpow('16', strval($len - $i))
-                )
-            );
-        }
-
-        $this->decimal_week = $dec;
-
-        return;
-    }
-
-    /**
-     *
-     */
-    public function binaryUuid()
-    {
-        $hex = str_replace("-", "", $this->uuid);
-
-        $bin = 0;
-        $len = strlen($hex);
-        for ($i = 1; $i <= $len; $i++) {
-            $dec = bcadd(
-                $dec,
-                bcmul(
-                    strval(hex2bin($hex[$i - 1])),
-                    bcpow('16', strval($len - $i))
-                )
-            );
-        }
-
-        $this->thing->log(
-            ' loaded decimal week ' . $this->decimal_week . '.',
-            "INFORMATION"
-        );
     }
 
     /**
@@ -416,55 +267,6 @@ class Week extends Agent
     {
         $txt = 'This is a WEEK';
         $txt .= "\n";
-        $txt .= count($this->lattice) . ' cells retrieved.';
-
-        $txt .= "\n";
-        $txt .= str_pad("COORD (Q,R,S)", 15, ' ', STR_PAD_LEFT);
-        $txt .= " " . str_pad("NAME", 10, " ", STR_PAD_LEFT);
-        $txt .= " " . str_pad("STATE", 10, " ", STR_PAD_RIGHT);
-        $txt .= " " . str_pad("VALUE", 10, " ", STR_PAD_LEFT);
-
-        $txt .= " " . str_pad("COORD (X,Y)", 6, " ", STR_PAD_LEFT);
-
-        $txt .= "\n";
-        $txt .= "\n";
-
-        // Centre framed on 0,0,0
-        $q_array = [-2, -1, 0, 1, 2];
-        $r_array = [-2, -1, 0, 1, 2];
-        $s_array = [-2, -1, 0, 1, 2];
-
-        // Run the lattice update/display loops
-        foreach ($this->point_list as $point) {
-            //    foreach($r_array as $r){
-            //        foreach($s_array as $s){
-            list($q, $r, $s) = $point;
-
-            //$cell = $this->lattice[$q][$r][$s];
-            $cell = $this->getCell($q, $r, $s);
-
-            $txt .=
-                " " .
-                str_pad(
-                    "(" . $q . "," . $r . "," . $s . ")",
-                    15,
-                    " ",
-                    STR_PAD_LEFT
-                );
-
-            $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
-            $txt .= " " . str_pad($cell['state'], 10, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
-
-            //$txt .= " " . str_pad($cell['neighbours'], 10, ' ', STR_PAD_LEFT);
-            //$txt .= " " . str_pad($cell['p_melt'], 10, " ", STR_PAD_LEFT);
-            //$txt .= " " . str_pad($cell['p_freeze'], 10, " " , STR_PAD_RIGHT);
-
-            $txt .= "\n";
-
-            //}
-            // }
-        }
 
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
@@ -502,12 +304,6 @@ class Week extends Agent
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
-
-        // For Vancouver Pride 2018
-
-        // https://en.wikipedia.org/wiki/Rainbow_flag
-        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
-        // https://www.schemecolor.com/lgbt-flag-colors.php
 
         $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
         $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
@@ -658,520 +454,22 @@ class Week extends Agent
         return;
     }
 
-    /**
-     *            $this->agent_prefix .
-     */
-    public function drawTriangle()
-    {
-        $pta = [0, 0];
-        $ptb = [sqrt(20), 1];
-        $ptc = [20, 0];
-
-        imageline($image, 20, 20, 280, 280, $black);
-        imageline($image, 20, 20, 20, 280, $black);
-        imageline($image, 20, 280, 280, 280, $black);
-    }
-
-    /**
-     *
-     * @param unknown $center_x
-     * @param unknown $center_y
-     * @param unknown $x
-     * @param unknown $y
-     * @param unknown $i
-     * @return unknown
-     */
-    public function hex_corner($center_x, $center_y, $x, $y, $i)
-    {
-        // So this takes a centre co-ordinate
-        // and projects a point $size away from it at angle $i.
-
-        $PI = 3.14159;
-        $angle_deg = 60 * $i + 30;
-        $angle_rad = ($PI / 180) * $angle_deg;
-
-        return [
-            $center_x + $x * cos($angle_rad) - sin($angle_rad) * $y,
-            $center_y + $x * sin($angle_rad) + cos($angle_rad) * $y,
-        ];
-    }
-
-    /**
-     *
-     */
-    public function setProbability()
-    {
-        $type = 'preset';
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'using probability set "' .
-                strtoupper($type) .
-                '".',
-            "DEBUG"
-        );
-
-        switch ($type) {
-            case 'preset':
-                $this->p_freeze = [
-                    1,
-                    0.2,
-                    0.1,
-                    0,
-                    0.2,
-                    0.1,
-                    0.1,
-                    0,
-                    0.1,
-                    0.1,
-                    1,
-                    1,
-                    0,
-                ];
-                $this->p_melt = [
-                    0,
-                    0.7,
-                    0.5,
-                    0.5,
-                    0,
-                    0,
-                    0,
-                    0.3,
-                    0.5,
-                    0,
-                    0.2,
-                    0.1,
-                    0,
-                ];
-                break;
-            case 'random':
-                $this->p_melt = [];
-                $this->p_freeze = [];
-                foreach (range(1, 13) as $t) {
-                    $this->p_melt[$t] = rand(0, 1000) / 1000;
-                    $this->p_freeze[$t] = rand(0, 1000) / 1000;
-                }
-                break;
-            case 'uuid':
-                $s = $this->uuid;
-                $s = strtolower(str_replace("-", "", $s));
-
-                foreach (range(0, strlen($s), 2) as $i) {
-                    $melt = $this->hextodec($s[$i]);
-                    $freeze = $this->hextodec($s[$i + 1]);
-                    $this->p_melt[$i / 2] = $melt / 15;
-                    $this->p_freeze[$i / 2] = $freeze / 15;
-                }
-                break;
-        }
-    }
-
-    /**
-     *
-     */
-    public function setRules()
-    {
-        $this->rules = [];
-        $this->rules[0][0][0][0][0][1] = 1;
-        $this->rules[0][0][0][0][1][1] = 2;
-        $this->rules[0][0][0][1][0][1] = 3;
-        $this->rules[0][0][0][1][1][1] = 4;
-        $this->rules[0][0][1][0][0][1] = 5;
-        $this->rules[0][0][1][0][1][1] = 6;
-        $this->rules[0][0][1][1][0][1] = 7;
-        $this->rules[0][0][1][1][1][1] = 8;
-        $this->rules[0][1][0][1][0][1] = 9;
-        $this->rules[0][1][0][1][1][1] = 10;
-        $this->rules[0][1][1][0][1][1] = 11;
-        $this->rules[0][1][1][1][1][1] = 12;
-        $this->rules[1][1][1][1][1][1] = 13;
-    }
-
-    /**
-     *
-     * @param unknown $s
-     * @return unknown
-     */
-    public function getProb($s)
-    {
-        foreach (range(0, 5) as $i) {
-            $a = $i % 6;
-            $b = ($i + 1) % 6;
-            $c = ($i + 2) % 6;
-            $d = ($i + 3) % 6;
-            $e = ($i + 4) % 6;
-            $f = ($i + 5) % 6;
-
-            if (
-                isset(
-                    $this->rules[$s[$a]][$s[$b]][$s[$c]][$s[$d]][$s[$e]][$s[$f]]
-                ) or
-                isset(
-                    $this->rules[$s[$f]][$s[$e]][$s[$d]][$s[$c]][$s[$b]][$s[$a]]
-                )
-            ) {
-                $n =
-                    $this->rules[$s[$a]][$s[$b]][$s[$c]][$s[$d]][$s[$e]][
-                        $s[$f]
-                    ];
-                break;
-            } else {
-                $n = rand(3, 8);
-                //                $n = 13;
-            }
-        }
-        //echo " p = " .$n
-
-        // So we are supposed to use rule N for
-        // finding the probability of melting
-        // and freezing to the cell.
-
-        $p_melt = $this->p_melt[$n - 1];
-        $p_freeze = $this->p_freeze[$n - 1];
-
-        return [$n, $p_melt, $p_freeze];
-    }
-
-    /**
-     *
-     */
-    public function initLattice()
-    {
-        $this->thing->log(
-            $this->agent_prefix . 'initialized the lattice.',
-            "INFORMATION"
-        );
-
-        //        $this->lattice_size = $n;
-        $n = $this->lattice_size;
-        //$this->lattice_size = $n;
-
-        $this->lattice = [];
-
-        $value = ["name" => null, "state" => null, "value" => 0];
-
-        foreach (range(-$n, $n) as $q) {
-            foreach (range(-$n, $n) as $r) {
-                foreach (range(-$n, $n) as $s) {
-                    //foreach($point_list as $point) {
-                    //    list($q,$r,$s) = $point;
-                    $this->lattice[$q][$r][$s] = $value;
-                    //array($q=>array($r=>array($s=>$value)));
-                }
-            }
-        }
-
-        //$this->lattice[-1][0][0] = array("name"=>"seed", "state"=>"on", "value"=>.5);
-        $this->lattice[0][0][0] = [
-            "name" => "seed",
-            "state" => "on",
-            "value" => 0.5,
-        ];
-        //$this->lattice[1][-2][1] = array("name"=>"seed", "state"=>"on", "value"=>.5);
-    }
-
-    /**
-     *
-     * @param unknown $q
-     * @param unknown $r
-     * @param unknown $s
-     * @return unknown
-     */
-    public function getCell($q, $r, $s)
-    {
-        // $cell = true;
-
-        if (
-            $q > $this->lattice_size or
-            $q < -$this->lattice_size or
-            $r > $this->lattice_size or
-            $r < -$this->lattice_size or
-            $s > $this->lattice_size or
-            $s < -$this->lattice_size
-        ) {
-            $cell = ['name' => 'boundary', 'state' => 'off', 'value' => 0]; // red?
-        } else {
-            if (isset($this->lattice[$q][$r][$s])) {
-                $cell = $this->lattice[$q][$r][$s];
-            } else {
-                // Flag an error;
-                $cell = ['name' => "bork", 'state' => 'off', 'value' => true];
-            }
-        }
-
-        return $cell;
-    }
-
-    /**
-     *
-     * @param unknown $q
-     * @param unknown $r
-     * @param unknown $s
-     */
-    public function updateCell($q, $r, $s)
-    {
-        // Process the cell;
-        // Because CA is 3D spreadsheets.
-        //$q_array= array(-1,1);
-        //$r_array= array(-1,1);
-        //$s_array= array(-1,1);
-
-        //$cell_value = 0;
-
-        // Build a list of the state of the surrounding cells.
-
-        $cell = $this->getCell($q, $r, $s);
-
-        $states = [];
-        $i = 0;
-        foreach (range(-1, 1, 2) as $q_offset) {
-            foreach (range(-1, 1, 2) as $r_offset) {
-                foreach (range(-1, 1, 2) as $s_offset) {
-                    $neighbour_cell = $this->getCell(
-                        $q + $q_offset,
-                        $r + $r_offset,
-                        $s + $s_offset
-                    );
-
-                    if ($neighbour_cell['state'] == 'on') {
-                        $states[$i] = 1;
-                    } else {
-                        $states[$i] = 0;
-                    }
-                    $i += 1;
-                }
-            }
-        }
-
-        // Perform some calculation here on $states,
-        // to determine what state the current cell should be in.
-        list($n, $p_melt, $p_freeze) = $this->getProb($states);
-
-        $cell['neighbours'] =
-            $states[0] .
-            ' ' .
-            $states[1] .
-            ' ' .
-            $states[2] .
-            ' ' .
-            $states[3] .
-            $states[4] .
-            ' ' .
-            $states[5];
-
-        $cell['p_melt'] = $p_melt;
-        $cell['p_frozen'] = $p_freeze;
-
-        if ($p_melt < $p_freeze) {
-            $cell['state'] = 'on';
-        } else {
-            $cell['state'] = 'off';
-        }
-
-        //if (rand(0,10)/10 > .3) {
-        //    $cell['state'] ='off';
-        //} else {
-        //    $cell['state'] = 'on';
-        //}
-
-        // Then set lattice value
-        $this->lattice[$q][$r][$s] = $cell;
-    }
-
-    /**
-     *
-     * @return unknown
-     */
-    public function decimalWeek()
-    {
-        $s = "";
-        foreach ($this->week_points as $point) {
-            $s .= $point;
-        }
-        $this->decimal_week = bindec($s);
-        return $this->decimal_week;
-    }
-
-    /**
-     *
-     * @param unknown $dec
-     * @return unknown
-     */
-    public function binaryWeek($dec)
-    {
-        if ($dec == null) {
-            $dec = $this->decimal_week;
-        }
-
-        $Input = $dec;
-        $Output = '';
-        if (preg_match("/^\d+$/", $Input)) {
-            while ($Input != '0') {
-                $Output .= chr(48 + ($Input[strlen($Input) - 1] % 2));
-                $Input = bcdiv($Input, '2');
-            }
-            $Output = strrev($Output);
-        }
-
-        $this->binary_week = $Output;
-        return $this->binary_week;
-    }
-
-    /**
-     *
-     */
-    public function initSegment()
-    {
-        $this->thing->log(
-            $this->agent_prefix . 'initialized the segment.',
-            "INFORMATION"
-        );
-
-        $this->point_list = [];
-
-        foreach (range(0, $this->max) as $a) {
-            foreach (range(0, $a - 3) as $b) {
-                if (!($a - $b > $a)) {
-                    //echo $a-$b . " " .-$a . " " .$b . "---" . ( ($a-$b) > $a) . "<br>";
-                    $this->point_list[] = [$a - $b, -$a, $b];
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public function updateWeek()
-    {
-        $this->thing->log(
-            $this->agent_prefix . 'updated the week.',
-            "INFORMATION"
-        );
-
-        foreach ($this->point_list as $point) {
-            list($q, $r, $s) = $point;
-            $this->updateCell($q, $r, $s);
-        }
-    }
-
     public function drawWeek($type = null)
     {
         if ($type == null) {
             $type = $this->type;
         }
+
+        $number = 7;
+
         if ($type == "wedge") {
-            $this->wedgeWeek();
+            $this->round_agent = new Round($this->thing, "round ".$number);
+            $this->image = $this->round_agent->image;
             return;
         }
 
-        $this->sliceWeek();
-    }
-
-    public function sliceWeek()
-    {
-        $size = null;
-        if ($size == null) {
-            $size = $this->size;
-        }
-        $border = 100;
-        $size = 1000 - $border;
-
-        if (isset($this->canvas_size_x)) {
-            $canvas_size_x = $this->canvas_size_x;
-            $canvas_size_y = $this->canvas_size_y;
-        } else {
-            $canvas_size_x = $this->default_canvas_size_x;
-            $canvas_size_y = $this->default_canvas_size_y;
-        }
-
-        $width_slice = ($canvas_size_x - 2 * $border) / 7;
-
-        // Draw out the state
-        $center_x = $canvas_size_x / 2;
-        $center_y = $canvas_size_y / 2;
-
-        // devstack rotation not yet implemented
-        if (!isset($this->angle)) {
-            $this->angle = 0;
-        }
-
-        foreach (range(0, 7, 1) as $i) {
-            imageline(
-                $this->image,
-                $width_slice * $i,
-                0,
-                $width_slice * $i,
-                $canvas_size_y,
-                $this->black
-            );
-        }
-    }
-
-    public function wedgeWeek()
-    {
-        $size = null;
-        if ($size == null) {
-            $size = $this->size;
-        }
-        $border = 100;
-        $size = 1000 - $border;
-
-        if (isset($this->canvas_size_x)) {
-            $canvas_size_x = $this->canvas_size_x;
-            $canvas_size_y = $this->canvas_size_y;
-        } else {
-            $canvas_size_x = $this->default_canvas_size_x;
-            $canvas_size_y = $this->default_canvas_size_y;
-        }
-
-        // Draw out the state
-        $center_x = $canvas_size_x / 2;
-        $center_y = $canvas_size_y / 2;
-
-        // devstack rotation not yet implemented
-        if (!isset($this->angle)) {
-            $this->angle = 0;
-        }
-
-        $init_angle = (-1 * pi()) / 2;
-        $angle = (2 * 3.14159) / 7;
-        //$x_pt =  230;
-        //$y_pt = 230;
-
-        foreach (range(0, 6, 1) as $i) {
-            $x_pt = $size * cos($angle * $i + $init_angle);
-            $y_pt = $size * sin($angle * $i + $init_angle);
-            /*
-            imageline(
-                $this->image,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $this->black
-            );
-*/
-            imageline(
-                $this->image,
-                $center_x,
-                $center_y,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $this->black
-            );
-        }
-
-        imagearc(
-            $this->image,
-            $center_x,
-            $center_y,
-            2 * $size,
-            2 * $size,
-            0,
-            360,
-            $this->black
-        );
+        $this->slice_agent = new Slice($this->thing, "slice " . $number);
+        $this->image = $this->slice_agent->image;
     }
 
     public function get()
@@ -1191,6 +489,8 @@ class Week extends Agent
             );
         }
     }
+
+    public function getWeek() {}
 
     /**
      *
@@ -1328,24 +628,10 @@ class Week extends Agent
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
-
         if (count($pieces) == 1) {
             if ($input == 'week') {
                 $this->getWeek();
-
-                if (
-                    !isset($this->decimal_week) or
-                    $this->decimal_week == null
-                ) {
-                    $this->decimal_week = rand(1, rand(1, 10) * 1e11);
-                }
-
-                $this->binaryWeek($this->decimal_week);
-                $p = strlen($this->binary_week);
-
-                $this->max = 13;
                 $this->size = 4;
-                $this->lattice_size = 40;
                 $this->response .= "Made a week. Which will pass. ";
                 return;
             }
@@ -1360,116 +646,11 @@ class Week extends Agent
             $this->type = $type;
         }
 
-        $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
+        $keywords = ["week", "day"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'pride':
-                            $this->node_list = [
-                                "week" => ["pride", "week"],
-                            ];
-
-                            // Mock-up multi-event
-                            $this->events = [];
-
-                            $event = new Event(
-                                $this->thing,
-                                "vancouver pride 2018"
-                            );
-                            $this->events[] = $event;
-
-                            $this->flag = new Flag($this->thing, "flag");
-
-                            $this->getWeek();
-
-                            if (
-                                !isset($this->decimal_week) or
-                                $this->decimal_week == null
-                            ) {
-                                $this->decimal_week = rand(
-                                    1,
-                                    rand(1, 10) * 1e11
-                                );
-                            }
-
-                            $this->binaryWeek($this->decimal_week);
-                            $p = strlen($this->binary_week);
-
-                            $this->max = 13;
-                            $this->size = 6.5;
-                            $this->lattice_size = 40;
-
-                            $this->canvas_size_x = 164 * 1.5;
-                            $this->canvas_size_y = 164 * 1.5;
-
-                            $this->response .=
-                                "Made a vancouver pride 2018 week.  It is going to melt.";
-                            return;
-
-                        case 'flag':
-                            $this->node_list = [
-                                "week" => ["flag", "week"],
-                            ];
-
-                            $this->getWeek();
-
-                            $this->flag = new Flag($this->thing, "flag");
-
-                            if (
-                                !isset($this->decimal_week) or
-                                $this->decimal_week == null
-                            ) {
-                                $this->decimal_week = rand(
-                                    1,
-                                    rand(1, 10) * 1e11
-                                );
-                            }
-
-                            $this->binaryWeek($this->decimal_week);
-                            $p = strlen($this->binary_week);
-
-                            $this->max = 13;
-                            $this->size = 4;
-                            $this->lattice_size = 40;
-
-                            $this->canvas_size_x = 164 * 1;
-                            $this->canvas_size_y = 164 * 1;
-
-                            $this->response .=
-                                "Made a " . $this->flag->state . " week. ";
-                            return;
-
-                        case 'uuid':
-                            $this->max = sqrt(128) + 6;
-                            //$this->max = 24;
-
-                            $this->size = 2.5;
-                            $this->lattice_size = 40;
-                            $this->decimalUuid();
-                            $this->response .= "Saw request for a UUID week. ";
-                            return;
-
-                        case 'hex':
-                            $this->latticeWeek();
-                            $this->response .= "Saw request for hexes. ";
-                            break;
-
-                        case 'iterate':
-                            $this->thing->log(
-                                $this->agent_prefix .
-                                    'received a command to update the week.',
-                                "INFORMATION"
-                            );
-                            $this->updateWeek();
-                            $this->response .=
-                                "Saw request to iterate the week. ";
-                            return;
-
-                        case 'on':
-                            //$this->setFlag('green');
-                            //break;
-                            $this->response .= "Heard on. ";
 
                         default:
                     }
@@ -1479,31 +660,8 @@ class Week extends Agent
 
         $this->getWeek();
 
-        if (!isset($this->decimal_week) or $this->decimal_week == null) {
-            $this->decimal_week = rand(1, rand(1, 10) * 1e11);
-        }
-
-        $this->binaryWeek($this->decimal_week);
-        $p = strlen($this->binary_week);
-
-        $this->max = 13;
         $this->size = 4;
-        $this->lattice_size = 40;
 
         $this->response .= "Made a binary week. ";
-        return;
-
-        if (strpos($input, 'uuid') !== false) {
-            //    $this->uuidWeek();
-        }
-
-        if ($this->agent_input == "week iterate") {
-            $this->thing->log(
-                'received a command to update the week.',
-                "INFORMATION"
-            );
-            $this->updateWeek();
-            return;
-        }
     }
 }
