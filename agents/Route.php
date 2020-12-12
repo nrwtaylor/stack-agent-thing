@@ -271,14 +271,15 @@ if (count($this->routes) !=0) {
 
     public function textRoute($route = null)
     {
+	$text = "X";
         if ($route == null) {
-            return true;
+            return $text;
         }
         if ($this->isRoute($route) === false) {
-            return true;
+            return $text;
         }
 
-        if (!is_array($route['places'])) {return true;}
+        if (!is_array($route['places'])) {return $text;}
 
         $text = implode(' > ', $route['places']);
         $text = ucwords($text);

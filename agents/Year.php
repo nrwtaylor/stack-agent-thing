@@ -474,12 +474,22 @@ class Year extends Agent
         if ($type == null) {
             $type = $this->type;
         }
+
+        $number_of_months = 12;
+        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
         if ($type == "wedge") {
-            $this->wedgeYear();
+
+            $this->round_agent = new Round($this->thing, "round ".$number_of_months);
+            $this->image = $this->round_agent->image;
             return;
         }
 
-        $this->sliceYear();
+//        $number_of_months = 12;
+//        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+        $this->slice_agent = new Slice($this->thing, "slice " . $number_of_months);
+        $this->image = $this->slice_agent->image;
     }
 
     public function sliceYear()
@@ -499,7 +509,12 @@ class Year extends Agent
             $canvas_size_y = $this->default_canvas_size_y;
         }
 
-        $width_slice = ($canvas_size_x - 2 * $border) / 12;
+        $number_of_months = 12;
+        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+
+
+        $width_slice = ($canvas_size_x - 2 * $border) / $number_of_months;
 
         // Draw out the state
         $center_x = $canvas_size_x / 2;
@@ -510,7 +525,7 @@ class Year extends Agent
             $this->angle = 0;
         }
 
-        foreach (range(0, 12, 1) as $i) {
+        foreach (range(0, $number_of_months, 1) as $i) {
             imageline(
                 $this->image,
                 $width_slice * $i,
@@ -524,6 +539,10 @@ class Year extends Agent
 
     public function wedgeYear()
     {
+        $number_of_months = 12;
+        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+
         $size = null;
         if ($size == null) {
             $size = $this->size;
@@ -549,11 +568,11 @@ class Year extends Agent
         }
 
         $init_angle = (-1 * pi()) / 2;
-        $angle = (2 * 3.14159) / 12;
+        $angle = (2 * 3.14159) / $number_of_months;
         //$x_pt =  230;
         //$y_pt = 230;
 
-        foreach (range(0, 11, 1) as $i) {
+        foreach (range(0, $number_of_months - 1, 1) as $i) {
             $x_pt = $size * cos($angle * $i + $init_angle);
             $y_pt = $size * sin($angle * $i + $init_angle);
             /*
@@ -921,6 +940,8 @@ class Year extends Agent
         }
         $year = false;
 
+        if ($this->years == []) {return false;}
+
         if (!isset($this->years)) {
             $years = $this->extractYears($text);
         }
@@ -955,6 +976,13 @@ class Year extends Agent
 
         $pieces = explode(" ", strtolower($input));
 
+        $this->calendar_type = null;
+        if ((stripos($input, '13')!==false) or
+            (stripos($input,'thirteen month')!==false)){
+            $this->calendar_type = '13 month';
+            $this->response .= "Saw a request for a thirteen month calendar. ";
+        }
+
         if (count($pieces) == 1) {
             if ($input == 'year') {
                 $this->getYear();
@@ -980,6 +1008,7 @@ class Year extends Agent
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
         $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
+
         $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {

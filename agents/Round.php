@@ -1,6 +1,6 @@
 <?php
 /**
- * Week.php
+ * Round.php
  *
  * @package default
  */
@@ -17,7 +17,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Week extends Agent
+class Round extends Agent
 {
     public $var = 'hello';
 
@@ -30,14 +30,16 @@ class Week extends Agent
     {
         $this->test = "Development code";
 
-        $this->thing_report["info"] = "A WEEK is a repeating pattern of days.";
+        $this->thing_report["info"] = "A ROUND is a repeating pattern.";
         $this->thing_report["help"] = 'Click on the image for a PDF.';
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
 
-        $this->node_list = ["week" => ["week", "uuid"]];
+        $this->node_list = [
+            "round" => ["tzol\'kin", "haab", "day", "round", "week"],
+        ];
 
         $this->current_time = $this->thing->json->time();
 
@@ -54,7 +56,9 @@ class Week extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->initWeek();
+        $this->default_rounds = [7];
+
+        $this->initRound();
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
@@ -70,29 +74,7 @@ class Week extends Agent
 
     public function set()
     {
-        $this->setWeek();
-    }
-
-    /**
-     *
-     * @param unknown $text (optional)
-     */
-    function getQuickresponse($text = null)
-    {
-        if ($text == null) {
-            $text = $this->web_prefix;
-        }
-        $agent = new Qr($this->thing, $text);
-        $this->quick_response_png = $agent->PNG_embed;
-    }
-
-    /**
-     *
-     */
-    public function getNuuid()
-    {
-        $agent = new Nuuid($this->thing, "nuuid");
-        $this->nuuid_png = $agent->PNG_embed;
+        $this->setRound();
     }
 
     /**
@@ -101,7 +83,7 @@ class Week extends Agent
      */
     function getWhatis($input)
     {
-        $whatis = "week";
+        $whatis = "round";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
             $whatIWant = substr(
@@ -116,27 +98,6 @@ class Week extends Agent
         $filtered_input = ltrim($whatIWant, " ");
 
         $this->whatis = $filtered_input;
-    }
-
-    /**
-     *
-     * @param unknown $t (optional)
-     * @return unknown
-     */
-
-    public function timestampWeek($t = null)
-    {
-        $s = $this->thing->thing->created_at;
-
-        if (!isset($this->retain_to)) {
-            $text = "X";
-        } else {
-            $t = $this->retain_to;
-            $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
-            //$text = "CLICK FOR PDF";
-        }
-        $this->timestamp = $text;
-        return $this->timestamp;
     }
 
     /**
@@ -160,21 +121,7 @@ class Week extends Agent
      */
     public function makeChoices()
     {
-        $this->thing->choice->Create(
-            $this->agent_name,
-            $this->node_list,
-            "week"
-        );
-
-        $this->choices = $this->thing->choice->makeLinks('week');
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed makeLinks. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
+        $this->choices = false;
         $this->thing_report['choices'] = $this->choices;
     }
 
@@ -183,9 +130,9 @@ class Week extends Agent
      */
     public function makeSMS()
     {
-    //    $cell = $this->lattice[0][0][0];
-        $sms = "WEEK | ";
-        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/week";
+        //        $cell = $this->lattice[0][0][0];
+        $sms = "ROUND | ";
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/round";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -196,20 +143,20 @@ class Week extends Agent
      */
     public function makeMessage()
     {
-        $message = "Made a week for you.<br>";
+        $message = "Made a round for you.<br>";
 
         $uuid = $this->uuid;
 
         $message .=
             "Keep on stacking.\n\n<p>" .
             $this->web_prefix .
-            "thing/$uuid/week.png\n \n\n<br> ";
+            "thing/$uuid/round.png\n \n\n<br> ";
         $message .=
             '<img src="' .
             $this->web_prefix .
             'thing/' .
             $uuid .
-            '/week.png" alt="week" height="92" width="92">';
+            '/round.png" alt="round" height="92" width="92">';
 
         $this->thing_report['message'] = $message;
     }
@@ -217,24 +164,37 @@ class Week extends Agent
     /**
      *
      */
-    public function setWeek()
+    public function setRound()
     {
         $this->thing->json->setField("variables");
-        //$this->thing->json->writeVariable(
-        //    ["week", "decimal"],
-        //    $this->decimal_week
-        //);
+        $this->thing->json->writeVariable(["round", "rounds"], $this->rounds);
+    }
 
+    /**
+     *
+     * @return unknown
+     */
+    // TODO
+    public function getRound()
+    {
+        $this->thing->json->setField("variables");
+        $rounds = $this->thing->json->readVariable(["round", "rounds"]);
+
+        if ($rounds == false) {
+            $this->thing->log(
+                $this->agent_prefix . ' did not find rounds.',
+                "INFORMATION"
+            );
+            // No round saved.  Return.
+            return true;
+        }
     }
 
     /**
      *
      */
-    public function initWeek()
+    public function initRound()
     {
-        if (!isset($this->max)) {
-            $this->max = 12;
-        }
         if (!isset($this->size)) {
             $this->size = 3.7;
         }
@@ -249,8 +209,8 @@ class Week extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/week.pdf';
-        $this->node_list = ["week" => ["week"]];
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/round.pdf';
+        $this->node_list = ["round" => ["week"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
@@ -265,7 +225,7 @@ class Week extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a WEEK';
+        $txt = 'This is a ROUND';
         $txt .= "\n";
 
         $this->thing_report['txt'] = $txt;
@@ -370,11 +330,8 @@ class Week extends Agent
         );
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        //if (isset($this->text_color)) {
-        //    $textcolor = $this->text_color;
-        //}
 
-        $this->drawWeek();
+        $this->drawRounds();
 
         // Write the string at the top left
         $border = 30;
@@ -384,7 +341,7 @@ class Week extends Agent
 
         // devstack add path
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-        $text = "A week in slices...";
+        $text = "A round in slices...";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
@@ -428,55 +385,129 @@ class Week extends Agent
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="week"/>';
+            '"alt="round"/>';
 
         $this->html_image =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="week"/>';
+            '"alt="round"/>';
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
-
-        //        $this->thing_report['png'] = $image;
-
-        //        $this->PNG = $this->image;
         $this->PNG = $imagedata;
-        //imagedestroy($this->image);
-        //        $this->thing_report['png'] = $imagedata;
-
-        //        $this->PNG_data = "data:image/png;base64,'.base64_encode($imagedata).'";
 
         return $response;
 
-        $this->PNG = $image;
-        $this->thing_report['png'] = $image;
+        //        $this->PNG = $image;
+        //        $this->thing_report['png'] = $image;
 
-        return;
+        //        return;
     }
 
-    public function drawWeek($type = null)
+    public function drawRounds()
     {
+        $border = 100;
+        $size = 1000 - $border;
+
+        $round_width = $size / (count($this->rounds) + 1);
+
+        foreach ($this->rounds as $i => $round) {
+            $next_size = $size - $round_width;
+            if ($i == count($this->rounds) - 1) {
+                $next_size = 0;
+            }
+
+            $this->drawRound($round, $size, $next_size);
+            $size = $next_size;
+        }
+    }
+
+    /*
+     *
+     */
+
+    public function drawRound(
+        $n = 7,
+        $size = null,
+        $next_size = null,
+        $type = null
+    ) {
         if ($type == null) {
             $type = $this->type;
         }
+        $this->wedgeRound($n, $size, $next_size);
+    }
 
-        $number = 7;
-
-        if ($type == "wedge") {
-            $this->round_agent = new Round($this->thing, "round ".$number);
-            $this->image = $this->round_agent->image;
-            return;
+    public function wedgeRound($n = 7, $size = null, $next_size)
+    {
+        if ($size == null) {
+            $size = $this->size;
         }
 
-        $this->slice_agent = new Slice($this->thing, "slice " . $number);
-        $this->image = $this->slice_agent->image;
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        // devstack rotation not yet implemented
+        if (!isset($this->angle)) {
+            $this->angle = 0;
+        }
+        if ($n > 1) {
+            $init_angle = (-1 * pi()) / 2;
+            $angle = (2 * 3.14159) / $n;
+            //$x_pt =  230;
+            //$y_pt = 230;
+
+            foreach (range(0, $n - 1, 1) as $i) {
+                $x_pt = $size * cos($angle * $i + $init_angle);
+                $y_pt = $size * sin($angle * $i + $init_angle);
+                /*
+            imageline(
+                $this->image,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $this->black
+            );
+*/
+                $next_x_pt = $next_size * cos($angle * $i + $init_angle);
+                $next_y_pt = $next_size * sin($angle * $i + $init_angle);
+
+                imageline(
+                    $this->image,
+                    $center_x + $next_x_pt,
+                    $center_y + $next_y_pt,
+                    $center_x + $x_pt,
+                    $center_y + $y_pt,
+                    $this->black
+                );
+            }
+        }
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            0,
+            360,
+            $this->black
+        );
     }
 
     public function get()
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "week",
+            "round",
             "refreshed_at",
         ]);
 
@@ -484,13 +515,11 @@ class Week extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["week", "refreshed_at"],
+                ["round", "refreshed_at"],
                 $time_string
             );
         }
     }
-
-    public function getWeek() {}
 
     /**
      *
@@ -511,23 +540,7 @@ class Week extends Agent
 
             $pdf->addPage($s['orientation'], $s);
             $pdf->useTemplate($tplidx1);
-            /*
-            if (isset($this->hextile_PNG)) {
-                $top_x = -6;
-                $top_y = 11;
 
-                $pdf->Image(
-                    $this->hextile_PNG,
-                    $top_x,
-                    $top_y,
-                    -300,
-                    -300,
-                    'PNG'
-                );
-            }
-*/
-            $this->getNuuid();
-            //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
             $pdf->Image($this->PNG_embed, 7, 30, 200, 200, 'PNG');
 
             $pdf->SetTextColor(0, 0, 0);
@@ -566,12 +579,7 @@ class Week extends Agent
             $pdf->SetFont('Helvetica', '', 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/week';
-
-            $this->getQuickresponse($link);
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
-
-            //$pdf->Link(175,5,30,30, $link);
+            $link = $this->web_prefix . 'thing/' . $this->uuid . '/round';
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -606,9 +614,9 @@ class Week extends Agent
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
             // Good until?
-            $text = $this->timestampWeek();
-            $pdf->SetXY(175, 35);
-            $pdf->MultiCell(30, $line_height, $text, 0, "L");
+            //$text = $this->timestampRound();
+            //$pdf->SetXY(175, 35);
+            //$pdf->MultiCell(30, $line_height, $text, 0, "L");
 
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
@@ -625,14 +633,31 @@ class Week extends Agent
     public function readSubject()
     {
         $this->type = "wedge";
-        $input = strtolower($this->subject);
+
+// $input = strtolower($this->subject);
+        $input = $this->input;
+
+        $number_agent = new Number($this->thing, "number");
+        $t = $number_agent->extractNumbers($input);
+
+        if ($t == []) {
+            $t = $this->default_rounds;
+        }
+
+        $this->rounds = $t;
+        $this->response .=
+            "Saw a request to make a round with these parameters: " .
+            implode(" ", $this->rounds) .
+            ". ";
 
         $pieces = explode(" ", strtolower($input));
+
         if (count($pieces) == 1) {
-            if ($input == 'week') {
-                $this->getWeek();
+            if ($input == 'round') {
+                $this->getRound();
+
                 $this->size = 4;
-                $this->response .= "Made a week. Which will pass. ";
+                $this->response .= "Made a round. Which will pass. ";
                 return;
             }
         }
@@ -646,22 +671,17 @@ class Week extends Agent
             $this->type = $type;
         }
 
-        $keywords = ["week", "day"];
+        $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-
                         default:
                     }
                 }
             }
         }
 
-        $this->getWeek();
-
-        $this->size = 4;
-
-        $this->response .= "Made a binary week. ";
+        $this->getRound();
     }
 }

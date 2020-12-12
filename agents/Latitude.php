@@ -7,8 +7,7 @@ class Latitude extends Agent
 
     function init()
     {
-        $this->default_latitude = 0;
-
+        $this->default_latitude = false;
 
         if (isset($this->thing->container['stack']['latitude'])) {
                 $this->default_latitude =
@@ -16,8 +15,6 @@ class Latitude extends Agent
         }
 
         $this->latitude = $this->default_latitude;
-
-
 
     }
 
@@ -33,7 +30,13 @@ class Latitude extends Agent
             $k = array_rand($array);
             $v = $array[$k];
 
-            $response = strtolower($v) . ".";
+            if ($this->latitude === false) {
+                $response = "No latitude available. ";
+            }
+
+            if ($this->latitude !== false) {
+                $response = "Latitude is " . $this->latitude .". ";
+            }
 
             $this->message = $response; // mewsage?
         } else {
@@ -70,8 +73,11 @@ class Latitude extends Agent
     function makeSMS()
     {
         $this->node_list = array("latitude" => array("longitude", "time"));
-        $this->sms_message = "LATITUDE | " . $this->message;
-        $this->thing_report['sms'] = $this->sms_message;
+
+        $sms = "LATITUDE | " . $this->message . " " . $this->response;
+
+        $this->sms_message = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     function makeChoices()

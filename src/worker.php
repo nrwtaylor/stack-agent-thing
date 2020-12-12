@@ -12,7 +12,7 @@ error_reporting(-1);
 
 
 
-echo "Worker whitefox 20 November 2020\n";
+echo "Worker whitefox 1 December 2020\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 $worker->addServer();
@@ -86,11 +86,29 @@ function call_agent_function($job)
     echo "thing nuuid " . $thing->nuuid . "\n";
     echo "thing uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
-    echo "thing timestamp " . $thing->thing->created_at . "\n";
+    
+    $age = true;
+    if (isset($thing->thing->created_at)) {
+        echo "thing timestamp " . $thing->thing->created_at . "\n";
+        $age = strtotime($start_time) - strtotime($thing->thing->created_at);
+ 
+    }
 
-    echo "agent input" . $agent_input . "\n";
+    $agent_input_text = "?";
+    if (is_string($agent_input)) {
+        $agent_input_text = $agent_input;
+    }
+    echo "agent input " . $agent_input_text . "\n";
+
 
     $do_not_respond = false;
+
+    // Exploring here to see how long it has been waiting.
+    // I don't see a call to get the task age from Gearman.
+    // So this will show the age a a uuid retrieved from the stack.
+    // Or that a new thing was created.
+    echo "thing age is " . $thing->human_time($age) ." ago.\n";
+
     if (isset($arr['body']['messageId'])) {
         $message_id = $arr['body']['messageId'];
 

@@ -114,7 +114,6 @@ class Channel extends Agent
             default:
                 break;
         }
-
         $this->thing_report['message'] = $this->sms_message;
 
         if ($this->agent_input == null) {
@@ -150,7 +149,6 @@ class Channel extends Agent
         foreach ($channel_resource as $descriptor => $description) {
             $this->{$descriptor} = $description;
         }
-
         $this->channel = $channel_name;
     }
 

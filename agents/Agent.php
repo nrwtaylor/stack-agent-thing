@@ -357,6 +357,25 @@ class Agent
         return $variables_array;
     }
 
+    // Read the provided text and create a set of flags.
+    public function flagAgent($indicators = null, $input = null) {
+
+        foreach($indicators as $flag_name=>$flag_indicators) {
+            foreach ($flag_indicators as $flag_indicator) {
+                $f = $this->agent_name . "_"  .$flag_name . "_flag";
+
+                if (stripos($input, $flag_indicator) !== false) {
+                    $this->{$f} = 'on';
+                }
+
+                if (stripos($input, str_replace('-', ' ', $flag_indicator)) !== false) {
+                    $this->{$f} = 'on';
+                }
+            }
+        }
+    }
+
+
     public function memoryAgent($text = null) {
 
             //$agent_class_name = "Dateline";

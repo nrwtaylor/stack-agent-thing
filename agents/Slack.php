@@ -244,8 +244,10 @@ exit();
 		$this->user = $this->getUser();
 		$this->text = $this->getText();
 //var_dump($this->body);
+$this->response_url = null;
+if (isset($this->body['response_url'])) {
 		$this->response_url = $this->body['response_url'];
-
+}
 		return;
 	}
 
@@ -501,7 +503,6 @@ curl_setopt($slack_call, CURLOPT_HTTPHEADER, array(
 
     function chat_postMessage($to, $message = null)
     {
-
         //$this->thing->json->setField("message1");
         //$this->thing->json->writeVariable( array("test") , $to . $message  );
 
@@ -515,6 +516,7 @@ curl_setopt($slack_call, CURLOPT_HTTPHEADER, array(
 
         if ( !is_array($message) ) {
             $message = "postMessage not an array";
+            return true;
         }
 
 
@@ -912,7 +914,7 @@ $array =
         $button = true;
         $max_buttons = 1;
         $buttons_count = 0;
-		if ((isset($this->choices)) and ($button == true)) {
+		if ((isset($this->choices)) and (isset($this->choices['words'])) and ($button == true)) {
 			$actions= null;
 
 			foreach ($this->choices['words'] as $word) {

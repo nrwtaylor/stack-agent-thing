@@ -261,14 +261,15 @@ if (count($this->consists) !=0) {
 
     public function textConsist($consist = null)
     {
+	$text = "X";
         if ($consist == null) {
-            return true;
+            return $text;
         }
         if ($this->isConsist($consist) === false) {
-            return true;
+            return $text;
         }
 
-        if (!is_array($consist['vehicles'])) {return true;}
+        if (!is_array($consist['vehicles'])) {return $text;}
 
         $text = implode('', $consist['vehicles']);
         return $text;

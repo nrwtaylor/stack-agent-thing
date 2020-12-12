@@ -2357,7 +2357,7 @@ $txt .= $table_text;
         //$test_message .= "<br>" . $this->thing_report['choices']['button']; //words link button
 
         $test_message .=
-            '<p>Agent "Train" is responding to your web view of data gram subject "' .
+            '<p>Agent "Train" is responding to your web view of datagram subject "' .
             $this->subject .
             '", ';
         $test_message .=

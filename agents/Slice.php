@@ -1,6 +1,6 @@
 <?php
 /**
- * Week.php
+ * Slice.php
  *
  * @package default
  */
@@ -17,7 +17,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Week extends Agent
+class Slice extends Agent
 {
     public $var = 'hello';
 
@@ -28,16 +28,18 @@ class Week extends Agent
      */
     public function init()
     {
+        $this->default_slices = 5;
         $this->test = "Development code";
 
-        $this->thing_report["info"] = "A WEEK is a repeating pattern of days.";
+        $this->thing_report["info"] =
+            "A SLICE is a repeating pattern of seasons.";
         $this->thing_report["help"] = 'Click on the image for a PDF.';
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
 
-        $this->node_list = ["week" => ["week", "uuid"]];
+        $this->node_list = ["slice" => ["slice", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
@@ -54,7 +56,7 @@ class Week extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->initWeek();
+        $this->initSlice();
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
@@ -70,7 +72,7 @@ class Week extends Agent
 
     public function set()
     {
-        $this->setWeek();
+        $this->setSlice();
     }
 
     /**
@@ -101,7 +103,7 @@ class Week extends Agent
      */
     function getWhatis($input)
     {
-        $whatis = "week";
+        $whatis = "slice";
         $whatIWant = $input;
         if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
             $whatIWant = substr(
@@ -123,10 +125,10 @@ class Week extends Agent
      * @param unknown $t (optional)
      * @return unknown
      */
-
-    public function timestampWeek($t = null)
+    public function timestampSlice($t = null)
     {
-        $s = $this->thing->thing->created_at;
+
+//        $s = $this->thing->thing->created_at;
 
         if (!isset($this->retain_to)) {
             $text = "X";
@@ -153,6 +155,8 @@ class Week extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
+
+        return $this->thing_report;
     }
 
     /**
@@ -160,21 +164,7 @@ class Week extends Agent
      */
     public function makeChoices()
     {
-        $this->thing->choice->Create(
-            $this->agent_name,
-            $this->node_list,
-            "week"
-        );
-
-        $this->choices = $this->thing->choice->makeLinks('week');
-        $this->thing->log(
-            $this->agent_prefix .
-                'completed makeLinks. Timestamp = ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
+        $this->choices = false;
         $this->thing_report['choices'] = $this->choices;
     }
 
@@ -183,9 +173,17 @@ class Week extends Agent
      */
     public function makeSMS()
     {
-    //    $cell = $this->lattice[0][0][0];
-        $sms = "WEEK | ";
-        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/week";
+        $sms = "SLICE | ";
+
+        //$slices = [];
+        //if (isset($this->slices)) {$slices = $this->slices;}
+
+        $slice_text = "Slices " . $this->slices. ". ";
+        //foreach ($slices as $i => $slice) {
+        //    $slice_text .= $slice['slice'] . " " . $slice['wide_slice'] . " ";
+        //}
+        $sms .= $slice_text;
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/slice";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -196,20 +194,20 @@ class Week extends Agent
      */
     public function makeMessage()
     {
-        $message = "Made a week for you.<br>";
+        $message = "Made a slice for you.<br>";
 
         $uuid = $this->uuid;
 
         $message .=
             "Keep on stacking.\n\n<p>" .
             $this->web_prefix .
-            "thing/$uuid/week.png\n \n\n<br> ";
+            "thing/$uuid/slice.png\n \n\n<br> ";
         $message .=
             '<img src="' .
             $this->web_prefix .
             'thing/' .
             $uuid .
-            '/week.png" alt="week" height="92" width="92">';
+            '/slice.png" alt="slice" height="92" width="92">';
 
         $this->thing_report['message'] = $message;
     }
@@ -217,27 +215,39 @@ class Week extends Agent
     /**
      *
      */
-    public function setWeek()
+    public function setSlice()
     {
+        return;
         $this->thing->json->setField("variables");
-        //$this->thing->json->writeVariable(
-        //    ["week", "decimal"],
-        //    $this->decimal_week
-        //);
+        $this->thing->json->writeVariable(
+            ["slice", "decimal"],
+            $this->decimal_slice
+        );
 
+        $this->thing->log(
+            $this->agent_prefix .
+                ' saved decimal slice ' .
+                $this->decimal_slice .
+                '.',
+            "INFORMATION"
+        );
+    }
+
+    /**
+     *
+     * @return unknown
+     */
+    public function getSlice()
+    {
+        return;
     }
 
     /**
      *
      */
-    public function initWeek()
+    public function initSlice()
     {
-        if (!isset($this->max)) {
-            $this->max = 12;
-        }
-        if (!isset($this->size)) {
-            $this->size = 3.7;
-        }
+        $this->number_agent = new Number($this->thing, "number");
     }
 
     public function run()
@@ -249,8 +259,8 @@ class Week extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/week.pdf';
-        $this->node_list = ["week" => ["week"]];
+        $link = $this->web_prefix . 'thing/' . $this->uuid . '/slice.pdf';
+        $this->node_list = ["slice" => ["slice"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
@@ -265,7 +275,7 @@ class Week extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a WEEK';
+        $txt = 'This is a SLICE';
         $txt .= "\n";
 
         $this->thing_report['txt'] = $txt;
@@ -304,6 +314,12 @@ class Week extends Agent
         $this->red = imagecolorallocate($this->image, 255, 0, 0);
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+
+        // For Vancouver Pride 2018
+
+        // https://en.wikipedia.org/wiki/Rainbow_flag
+        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
+        // https://www.schemecolor.com/lgbt-flag-colors.php
 
         $this->electric_red = imagecolorallocate($this->image, 231, 0, 0);
         $this->dark_orange = imagecolorallocate($this->image, 255, 140, 0);
@@ -374,7 +390,7 @@ class Week extends Agent
         //    $textcolor = $this->text_color;
         //}
 
-        $this->drawWeek();
+        $this->drawSlice();
 
         // Write the string at the top left
         $border = 30;
@@ -384,7 +400,7 @@ class Week extends Agent
 
         // devstack add path
         $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
-        $text = "A week in slices...";
+        $text = "A slice in slices...";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
@@ -428,12 +444,12 @@ class Week extends Agent
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="week"/>';
+            '"alt="slice"/>';
 
         $this->html_image =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="week"/>';
+            '"alt="slice"/>';
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
 
@@ -454,29 +470,150 @@ class Week extends Agent
         return;
     }
 
-    public function drawWeek($type = null)
+    public function drawSlice($type = null)
     {
         if ($type == null) {
             $type = $this->type;
         }
-
-        $number = 7;
-
+/*
         if ($type == "wedge") {
-            $this->round_agent = new Round($this->thing, "round ".$number);
-            $this->image = $this->round_agent->image;
+
+        $number_of_months = 12;
+        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+
+        $this->round_agent = new Round($this->thing, "round ".$number_of_months);
+        $this->image = $this->round_agent->image;
+
             return;
         }
+*/
 
-        $this->slice_agent = new Slice($this->thing, "slice " . $number);
-        $this->image = $this->slice_agent->image;
+//        $number_of_months = 12;
+//        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+
+
+
+        $this->drawSlices($this->slices);
+    }
+
+    public function drawSlices($n)
+    {
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        $number_of_months = $n;
+
+
+        $width_slice = ($canvas_size_x - 2 * $border) / $number_of_months;
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        // devstack rotation not yet implemented
+        if (!isset($this->angle)) {
+            $this->angle = 0;
+        }
+
+        foreach (range(0, $number_of_months, 1) as $i) {
+            imageline(
+                $this->image,
+                $width_slice * $i,
+                0,
+                $width_slice * $i,
+                $canvas_size_y,
+                $this->black
+            );
+        }
+    }
+
+    public function wedgeSlice($n)
+    {
+        $number_of_months = $n;
+
+
+        $size = null;
+        if ($size == null) {
+            $size = $this->size;
+        }
+        $border = 100;
+        $size = 1000 - $border;
+
+        if (isset($this->canvas_size_x)) {
+            $canvas_size_x = $this->canvas_size_x;
+            $canvas_size_y = $this->canvas_size_y;
+        } else {
+            $canvas_size_x = $this->default_canvas_size_x;
+            $canvas_size_y = $this->default_canvas_size_y;
+        }
+
+        // Draw out the state
+        $center_x = $canvas_size_x / 2;
+        $center_y = $canvas_size_y / 2;
+
+        // devstack rotation not yet implemented
+        if (!isset($this->angle)) {
+            $this->angle = 0;
+        }
+
+        $init_angle = (-1 * pi()) / 2;
+        $angle = (2 * 3.14159) / $number_of_months;
+        //$x_pt =  230;
+        //$y_pt = 230;
+
+        foreach (range(0, $number_of_months - 1, 1) as $i) {
+            $x_pt = $size * cos($angle * $i + $init_angle);
+            $y_pt = $size * sin($angle * $i + $init_angle);
+            /*
+            imageline(
+                $this->image,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $this->black
+            );
+*/
+            imageline(
+                $this->image,
+                $center_x,
+                $center_y,
+                $center_x + $x_pt,
+                $center_y + $y_pt,
+                $this->black
+            );
+        }
+
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            0,
+            360,
+            $this->black
+        );
     }
 
     public function get()
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "week",
+            "slice",
             "refreshed_at",
         ]);
 
@@ -484,13 +621,11 @@ class Week extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["week", "refreshed_at"],
+                ["slice", "refreshed_at"],
                 $time_string
             );
         }
     }
-
-    public function getWeek() {}
 
     /**
      *
@@ -566,7 +701,7 @@ class Week extends Agent
             $pdf->SetFont('Helvetica', '', 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/week';
+            $link = $this->web_prefix . 'thing/' . $this->uuid . '/slice';
 
             $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
@@ -606,7 +741,7 @@ class Week extends Agent
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
             // Good until?
-            $text = $this->timestampWeek();
+            $text = $this->timestampSlice();
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
@@ -619,20 +754,49 @@ class Week extends Agent
         return $this->thing_report['pdf'];
     }
 
+    public function isSlice($text)
+    {
+        return null;
+    }
+
     /**
      *
      */
     public function readSubject()
     {
         $this->type = "wedge";
-        $input = strtolower($this->subject);
 
+        $input = $this->input;
+
+        if ($input == "slice") {
+            return;
+        }
+
+        $number_agent = new Number($this->thing, "number");
+        $numbers = $number_agent->extractNumbers($input);
+
+        // Take first number found.
+        $this->slices = $numbers[0];
+
+        if ($numbers == []) {
+            $this->slices = $this->default_slices;
+        }
         $pieces = explode(" ", strtolower($input));
+
+        $this->calendar_type = null;
+        if ((stripos($input, '13')!==false) or
+            (stripos($input,'thirteen month')!==false)){
+            $this->calendar_type = '13 month';
+            $this->slices = 13;
+            $this->response .= "Saw a request for a thirteen month calendar. ";
+        }
+
         if (count($pieces) == 1) {
-            if ($input == 'week') {
-                $this->getWeek();
+            if ($input == 'slice') {
+                $this->getSlice();
+
                 $this->size = 4;
-                $this->response .= "Made a week. Which will pass. ";
+                $this->response .= "Made a slice. ";
                 return;
             }
         }
@@ -640,28 +804,25 @@ class Week extends Agent
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
         $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
+
         $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;
         }
 
-        $keywords = ["week", "day"];
+        $keywords = ["slice"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-
                         default:
                     }
                 }
             }
         }
 
-        $this->getWeek();
-
-        $this->size = 4;
-
-        $this->response .= "Made a binary week. ";
+        $this->getSlice();
+        return;
     }
 }
