@@ -460,10 +460,11 @@ $variables = $thing->variables;
     function extractNumber($text = null) {
         $this->number = false; // No numbers.
         if ((!isset($this->numbers)) or ($text != null)) {$this->extractNumbers($text);}
-
         if (isset($this->numbers[0])) {
             $this->number = $this->numbers[0];
+	    return $this->number;
         }
+	return null;
     }
 
 
