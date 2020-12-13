@@ -58,24 +58,11 @@ $this->bottomless_pits = array("1","2");
 //$this->bottomless_pit_name = "Little Mountain";
 
 $this->node_list = $this->bottomless_pits;
-//var_dump($this->bottomless_pits);
 
 
         $info = 'The "Bottomless Pits" agent creates and manages some bottomless pits.';
 		$info .= 'You can explore Bottomless Pits by falling into them looking for a WUMPUS.';
 
-//        $this->cave = $this->thing->choice->load($this->primary_place);
-        //$this->thing->choice->Choose($this->state);
-        //$this->state = $this->thing->choice->load('hive');
-        //$choices = $this->thing->choice->makeLinks($this->state);
-        //$this->choices = $choices;
-        //$this->thing_report['choices'] = $choices ;
-//var_dump($this->cave);
-//        $this->thing->choice->Create($this->primary_place, $this->caves, $this->cave);
-//        $this->thing->choice->Choose($this->cave);
-
-//        $choices = $this->thing->choice->makeLinks($this->cave);
-//var_dump ($choices);
         $this->getCave();
     }
 
