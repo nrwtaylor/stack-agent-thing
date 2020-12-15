@@ -168,7 +168,10 @@ class Sun extends Agent
         //var_dump($equinoxes);
 
         // Minimum is winter solstice (northern hemisphere).
-        // Maximum is summer solstice (northern hemisphere).
+        // Maximum is summer solstice  (northern hemisphere).
+        $this->winter_solstices = $maximums;
+        $this->summer_solstices = $minimums;
+        $this->equinoxes = $equinoxes;
         $this->sun_message = $this->response;
 
         return $text;
@@ -228,6 +231,17 @@ class Sun extends Agent
 
     public function linksSun()
     {
+    }
+
+    public function makeSnippet() {
+
+
+    }
+
+    public function makeWeb() {
+
+        $this->thing_report['web'] = $this->snippet;
+
     }
 
     /**

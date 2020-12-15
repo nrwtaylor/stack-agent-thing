@@ -5,7 +5,6 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -39,53 +38,80 @@ class CHS extends Agent
 
     public $var = 'hello';
 
-
     /**
      *
      */
-    function init() {
+    function init()
+    {
         $this->keyword = "environment";
 
         $this->agent_prefix = 'Agent "Weather" ';
 
-        $this->keywords = array('water', 'level', 'tide', 'tides',
-            'height', 'prediction', 'metocean', 'tides', 'nautical');
+        $this->keywords = [
+            'water',
+            'level',
+            'tide',
+            'tides',
+            'height',
+            'prediction',
+            'metocean',
+            'tides',
+            'nautical',
+        ];
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "weather" . " " . $this->from);
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables " . "weather" . " " . $this->from
+        );
 
         $this->default_station_name = "Vancouver";
 
         // Loads in Weather variables.
 
-        if ($this->verbosity == false) {$this->verbosity = 2;}
-
+        if ($this->verbosity == false) {
+            $this->verbosity = 2;
+        }
         // Create the SoapClient instance
-        $url         = "https://ws-shc.qc.dfo-mpo.gc.ca/predictions" . "?wsdl";
-        $this->client     = new \SoapClient($url, array("trace" => 1, "exception" => 0));
+        $url = "https://ws-shc.qc.dfo-mpo.gc.ca/predictions" . "?wsdl";
 
+        if (!extension_loaded('soap')) {
+            $this->response .= "Tide connector not available. ";
+            // Do things
+        }
+
+        try {
+            $this->client = new \SoapClient($url);
+            // $this->client     = new \SoapClient($url, array("trace" => 1, "exception" => 0));
+        } catch (SoapFault $sf) {
+            $this->response .= "Could not get tides. ";
+        } catch (Throwable $t) {
+            $this->response .= "Could not get tides. ";
+        } catch (Exception $e) {
+            $this->response .= "Could not get tides. ";
+        }
         $this->getWeather();
     }
-
 
     /**
      *
      */
-    function run() {
+    function run()
+    {
         $this->doCHS($this->input);
     }
 
-    function getTimezone() {
+    function getTimezone()
+    {
         // Eventually call the timezone agent.
         $this->time_zone = "America/Vancouver";
-
     }
 
     /**
      *
      * @param unknown $text
      */
-    function doCHS($text) {
-
+    function doCHS($text)
+    {
         // No state awareness.
         //        if (!isset($this->state)) {$this->state = $this->default_state;}
         //        $this->getState();
@@ -93,86 +119,99 @@ class CHS extends Agent
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
 
-        foreach ($ngram_agent->ngrams as $index=>$ngram) {
+        foreach ($ngram_agent->ngrams as $index => $ngram) {
             switch ($ngram) {
-            case "list":
-                $t = "Available stations are ";
-                foreach ($this->stations as $name => $prediction) {
-                    $t .= $name . " / ";
-                }
-                $this->response .= $t;
-                break;
+                case "list":
+                    $t = "Available stations are ";
+                    foreach ($this->stations as $name => $prediction) {
+                        $t .= $name . " / ";
+                    }
+                    $this->response .= $t;
+                    break;
 
-            default:
+                default:
             }
         }
     }
 
-
     /**
      *
      */
-    function set() {
+    function set()
+    {
         $this->variables_agent->setVariable("state", $this->state);
 
         $this->variables_agent->setVariable("verbosity", $this->verbosity);
 
-        if (!isset($this->current_conditions)) {$this->current_conditions = null;}
-        if (!isset($this->forecast_conditions)) {$this->forecast_conditions = null;}
+        if (!isset($this->current_conditions)) {
+            $this->current_conditions = null;
+        }
+        if (!isset($this->forecast_conditions)) {
+            $this->forecast_conditions = null;
+        }
 
-        $this->variables_agent->setVariable("current_conditions", $this->current_conditions);
-        $this->variables_agent->setVariable("forecast_conditions", $this->forecast_conditions);
+        $this->variables_agent->setVariable(
+            "current_conditions",
+            $this->current_conditions
+        );
+        $this->variables_agent->setVariable(
+            "forecast_conditions",
+            $this->forecast_conditions
+        );
 
-        $this->variables_agent->setVariable("refreshed_at", $this->current_time);
+        $this->variables_agent->setVariable(
+            "refreshed_at",
+            $this->current_time
+        );
 
         $this->refreshed_at = $this->current_time;
     }
 
-
     /**
      *
      */
-    function get() {
-        $this->state = $this->variables_agent->getVariable("state")  ;
+    function get()
+    {
+        $this->state = $this->variables_agent->getVariable("state");
 
-        $this->last_current_conditions = $this->variables_agent->getVariable("current_conditions")  ;
-        $this->last_forecast_conditions = $this->variables_agent->getVariable("forecast_conditions")  ;
+        $this->last_current_conditions = $this->variables_agent->getVariable(
+            "current_conditions"
+        );
+        $this->last_forecast_conditions = $this->variables_agent->getVariable(
+            "forecast_conditions"
+        );
 
-        $this->last_refreshed_at = $this->variables_agent->getVariables("refreshed_at");
+        $this->last_refreshed_at = $this->variables_agent->getVariables(
+            "refreshed_at"
+        );
 
-        $this->verbosity = $this->variables_agent->getVariable("verbosity")  ;
+        $this->verbosity = $this->variables_agent->getVariable("verbosity");
     }
 
-
     /**
      *
      */
-    function getWeather() {
-$this->getTimezone();
-        $this->predictions = array();
-        $this->stations = array();
-//var_dump($this->current_time);
-                $dt = new \DateTime($this->current_time, new \DateTimeZone("UTC"));
+    function getWeather()
+    {
+        $this->getTimezone();
+        $this->predictions = [];
+        $this->stations = [];
 
-//                $dt->setTimezone(new \DateTimeZone($this->time_zone));
+        $dt = new \DateTime($this->current_time, new \DateTimeZone("UTC"));
 
-//                $d = date('H:i', strtotime($prediction["date"]));
-//                $d = $dt->format('H:i');
-//                $date = $dt->format('Y/m/d');
+        $now = $dt->format('Y-m-d H:i:s');
 
-
-
-//        $now = date("Y-m-d H:i:s");
-$now = $dt->format('Y-m-d H:i:s');
-
-        //        $date = "2018-03-30"; // for testing
-        //        $date = $today;
-
-        $start_time = date('Y-m-d H:i:s', strtotime('-12 hour', strtotime($now)));
-        $end_time = date('Y-m-d H:i:s', strtotime('+48 hour +30 minutes', strtotime($now)));
+        $start_time = date(
+            'Y-m-d H:i:s',
+            strtotime('-12 hour', strtotime($now))
+        );
+        $end_time = date(
+            'Y-m-d H:i:s',
+            strtotime('+48 hour +30 minutes', strtotime($now))
+        );
 
         // Area around Vancouver.
-        $lat = 49.30;
+        $lat = 49.3;
         $long = -122.86;
 
         $units = "m";
@@ -184,10 +223,24 @@ $now = $dt->format('Y-m-d H:i:s');
         // $m = $client->search("hilo", 47.5, 47.7, -61.6, -61.4, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
 
         //        $m = $this->client->search("hilo", $lat - $size, $lat + $size, $long - $size, $long + $size, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
-        $m = $this->client->search("hilo", $lat - $size, $lat + $size, $long - $size, $long + $size, 0.0, 0.0, $start_time, $end_time, 1, 500, true, "", "asc");
 
-        foreach ($m->data as $key=>$item) {
-
+        $m = $this->client->search(
+            "hilo",
+            $lat - $size,
+            $lat + $size,
+            $long - $size,
+            $long + $size,
+            0.0,
+            0.0,
+            $start_time,
+            $end_time,
+            1,
+            500,
+            true,
+            "",
+            "asc"
+        );
+        foreach ($m->data as $key => $item) {
             //echo "station" . $value->metadata[0]->value . " ";
             //echo $value->metadata[1]->value . "";
 
@@ -209,7 +262,14 @@ $now = $dt->format('Y-m-d H:i:s');
             $id = $item->metadata[0]->value;
             $value = $item->value;
 
-            $prediction = array("date"=>$date, "name"=>$name, "id"=>$id, "value"=>$value , "units"=>$units, "item"=>$item);
+            $prediction = [
+                "date" => $date,
+                "name" => $name,
+                "id" => $id,
+                "value" => $value,
+                "units" => $units,
+                "item" => $item,
+            ];
             $this->predictions[] = $prediction;
 
             $this->stations[$name][] = $prediction;
@@ -218,17 +278,17 @@ $now = $dt->format('Y-m-d H:i:s');
         $this->refreshed_at = $this->current_time;
     }
 
-
     /**
      *
      */
-    function getTemperature() {
+    function getTemperature()
+    {
         // devstack not finished
-        if (!isset($this->conditions)) {$this->getWeather();}
+        if (!isset($this->conditions)) {
+            $this->getWeather();
+        }
         $this->current_temperature = -1;
-
     }
-
 
     /**
      *
@@ -236,7 +296,8 @@ $now = $dt->format('Y-m-d H:i:s');
      * @param unknown $haystack
      * @return unknown
      */
-    function match_all($needles, $haystack) {
+    function match_all($needles, $haystack)
+    {
         if (empty($needles)) {
             return false;
         }
@@ -249,12 +310,11 @@ $now = $dt->format('Y-m-d H:i:s');
         return true;
     }
 
-
     /**
      *
      */
-    public function respond() {
-
+    public function respond()
+    {
         // Thing actions
         $this->thing->flagGreen();
         // Generate email response.
@@ -274,84 +334,78 @@ $now = $dt->format('Y-m-d H:i:s');
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
         $this->makeWeb();
 
         $this->thing_report['help'] = 'This reads a web resource.';
-        return;
     }
-
 
     /**
      *
      */
-    public function makeWeb() {
-
+    public function makeWeb()
+    {
         $this->getTimezone();
         $web = "<b>CHS Agent</b>";
         $web .= "<p>";
 
-        foreach ($this->predictions as $key=>$prediction) {
+        foreach ($this->predictions as $key => $prediction) {
+            $dt = new \DateTime($prediction['date'], new \DateTimeZone("UTC"));
 
+            $dt->setTimezone(new \DateTimeZone($this->time_zone));
 
-                $dt = new \DateTime($prediction['date'], new \DateTimeZone("UTC"));
+            //                $d = date('H:i', strtotime($prediction["date"]));
+            //                $d = $dt->format('H:i');
+            //                $date = $dt->format('Y/m/d');
 
-                $dt->setTimezone(new \DateTimeZone($this->time_zone));
+            //        $now = date("Y-m-d H:i:s");
+            $prediction_datetime = $dt->format('Y-m-d H:i:s');
 
-//                $d = date('H:i', strtotime($prediction["date"]));
-//                $d = $dt->format('H:i');
-//                $date = $dt->format('Y/m/d');
-
-
-
-//        $now = date("Y-m-d H:i:s");
-$prediction_datetime = $dt->format('Y-m-d H:i:s');
-
-
-//            $web .= $prediction['date'] . " ";
+            //            $web .= $prediction['date'] . " ";
             $web .= $prediction_datetime . " ";
 
-
             $web .= $prediction['id'] . " ";
-            $web .= $prediction['name']. " ";
+            $web .= $prediction['name'] . " ";
             $web .= $prediction['value'] . " " . $prediction['units'];
             $web .= "<br>";
-
         }
-
 
         $web .= "<p>";
         //        $web .= "current conditions are " . $this->current_conditions . "<br>";
-        $web .= "forecast conditions becoming " . $this->forecast_conditions . "<br>";
+        $web .=
+            "forecast conditions becoming " .
+            $this->forecast_conditions .
+            "<br>";
 
         //        $web .= "data from " . $this->link . "<br>";
         $web .= "source is CHS" . "<br>";
 
         $web .= "<p>Timezone " . $this->time_zone . ".";
 
+        $web .= "<br>";
 
-        $web .="<br>";
+        $ago = $this->thing->human_time(
+            time() - strtotime($this->refreshed_at)
+        );
 
-        $ago = $this->thing->human_time ( time() - strtotime($this->refreshed_at) );
-
-        $web .= "CHS feed last queried " . $ago .  " ago.<br>";
+        $web .= "CHS feed last queried " . $ago . " ago.<br>";
 
         //$this->sms_message = $sms_message;
         $this->thing_report['web'] = $web;
-
     }
-
 
     /**
      *
      */
-    public function makeSms() {
+    public function makeSms()
+    {
+        $this->getTimezone();
 
-$this->getTimezone();
-
-        if (!isset($this->forecast_conditions)) {$this->forecast_conditions = "";}
+        if (!isset($this->forecast_conditions)) {
+            $this->forecast_conditions = "";
+        }
 
         $sms_message = "TIDES | " . null;
 
@@ -361,56 +415,52 @@ $this->getTimezone();
 
         $prediction_text = "";
         if ($this->response == "") {
-            $predictions =  $this->stations[$this->station_name];
+            $predictions = $this->stations[$this->station_name];
 
-            $i=0;
-            foreach ($predictions as $index=>$prediction) {
+            $i = 0;
+            foreach ($predictions as $index => $prediction) {
                 //$prediction = $predictions[0];
 
+                //                $tz = $this->time_zone;
 
-
-//                $tz = $this->time_zone; 
-
-//                $dt = new \DateTime($tmestamp, new \DateTimeZone("UTC"));
-                $dt = new \DateTime($prediction["date"], new \DateTimeZone("UTC"));
+                //                $dt = new \DateTime($tmestamp, new \DateTimeZone("UTC"));
+                $dt = new \DateTime(
+                    $prediction["date"],
+                    new \DateTimeZone("UTC")
+                );
 
                 $dt->setTimezone(new \DateTimeZone($this->time_zone));
 
-//                $d = date('H:i', strtotime($prediction["date"]));
+                //                $d = date('H:i', strtotime($prediction["date"]));
                 $d = $dt->format('H:i');
                 $date = $dt->format('Y/m/d');
 
-
-//                $date = date('Y/m/d H:i', strtotime($prediction["date"]));
-
-
-
                 if ($i == 0) {
-                    //   $d = date('Y/m/d H:i',strtotime($prediction["date"]));
                     $d = $dt->format('Y/m/d H:i');
 
                     $old_date = $date;
                 }
 
-                //echo $date . " " . $old_date ."\n";
-
-                if ($old_date!=$date) {
+                if ($old_date != $date) {
                     //   $d = date('m/d H:i',strtotime($prediction["date"]));
                     $d = $dt->format('m/d H:i');
                 }
 
-                $i+=1;
+                $i += 1;
 
-
-                $prediction_text .= $d . " " . $prediction["value"]  . $prediction["units"]. " ";
+                $prediction_text .=
+                    $d .
+                    " " .
+                    $prediction["value"] .
+                    $prediction["units"] .
+                    " ";
 
                 $old_date = $date;
 
-                if ($i >= 6) {break;}
-
+                if ($i >= 6) {
+                    break;
+                }
             }
-
-
         }
 
         $sms_message .= trim($prediction_text);
@@ -418,19 +468,20 @@ $this->getTimezone();
         $sms_message .= $this->forecast_conditions . " ";
         $sms_message .= trim($this->response);
         //        $sms_message .= " | link " . $this->link;
-        $sms_message .= "| Licensed by Canadian Hydrographic Service. Experimental. Not for navigation. Times " . $this->time_zone . ".";
+        $sms_message .=
+            "| Licensed by Canadian Hydrographic Service. Experimental. Not for navigation. Times " .
+            $this->time_zone .
+            ".";
 
         $this->sms_message = $sms_message;
         $this->thing_report['sms'] = $sms_message;
-
-
     }
-
 
     /**
      *
      */
-    public function makeMessage() {
+    public function makeMessage()
+    {
         $message = "Tides are " . null . ".";
         $message .= " " . "Licensed by Canadian Hydrographic Service.";
 
@@ -438,26 +489,26 @@ $this->getTimezone();
         $this->thing_report['message'] = $message;
     }
 
-
     /**
      *
      * @param unknown $input (optional)
      * @return unknown
      */
-    public function extractNumber($input = null) {
-        if ($input == null) {$input = $this->subject;}
+    public function extractNumber($input = null)
+    {
+        if ($input == null) {
+            $input = $this->subject;
+        }
 
         $pieces = explode(" ", strtolower($input));
 
         // Extract number
         $matches = 0;
-        foreach ($pieces as $key=>$piece) {
-
+        foreach ($pieces as $key => $piece) {
             if (is_numeric($piece)) {
                 $number = $piece;
                 $matches += 1;
             }
-
         }
 
         if ($matches == 1) {
@@ -472,12 +523,11 @@ $this->getTimezone();
         return $this->number;
     }
 
-
     /**
      *
      */
-    public function getStation() {
-
+    public function getStation()
+    {
         //$ngrams = new Ngram($this->thing,"ngram");
         //$ngrams->extractNgrams($this->input);
         //var_dump($ngrams->ngrams);
@@ -485,13 +535,12 @@ $this->getTimezone();
         $this->station_name = $this->default_station_name;
 
         foreach ($this->stations as $station_name => $prediction) {
-
-            if (strpos(strtolower($this->input), strtolower($station_name)) != false) {
-
+            if (
+                strpos(strtolower($this->input), strtolower($station_name)) !=
+                false
+            ) {
                 $station_names[] = $station_name;
-
             }
-
         }
 
         if (isset($station_names[0])) {
@@ -501,28 +550,27 @@ $this->getTimezone();
 
         // Otherwise try harder to find a match.
         foreach ($this->stations as $name => $prediction) {
-
-
-
             $score = levenshtein($this->filtered_input, $name);
-            if (!isset($min)) {$min = $score; $selected_name = $name;}
+            if (!isset($min)) {
+                $min = $score;
+                $selected_name = $name;
+            }
 
-            if ($score < $min) {$selected_name = $name; $min = $score;}
+            if ($score < $min) {
+                $selected_name = $name;
+                $min = $score;
+            }
 
             $this->station_name = $selected_name;
-
         }
-
-
-
     }
-
 
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
+    public function readSubject()
+    {
         $this->response = null;
         $this->num_hits = 0;
 
@@ -530,33 +578,30 @@ $this->getTimezone();
         $keywords = $this->keywords;
 
         if ($this->agent_input != null) {
-
             // If agent input has been provided then
             // ignore the subject.
             // Might need to review this.
             $input = strtolower($this->agent_input);
-
         } else {
             $input = strtolower($this->subject);
         }
 
         $this->input = $input;
         $keywords = $this->keywords;
-        usort($keywords, function($a, $b) {
-                return strlen($b) <=> strlen($a);
-            });
+        usort($keywords, function ($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
 
         $this->filter_input = $this->input;
         foreach ($keywords as $keyword) {
-
             $this->filtered_input = str_replace($keyword, "", $this->input);
             //$this->filtered_input = str_replace("chs", "", $this->filtered_input);
-
         }
         $this->filtered_input = str_replace("  ", "", $this->filtered_input);
         $this->filtered_input = trim($this->filtered_input);
 
-        $haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
+        $haystack =
+            $this->agent_input . " " . $this->from . " " . $this->subject;
 
         //  $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
 
@@ -567,88 +612,41 @@ $this->getTimezone();
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-
             if ($input == 'weather') {
-
                 //echo "readsubject block";
                 //$this->read();
                 $this->response = "Did nothing.";
                 return;
-
             }
 
             // Drop through
             // return "Request not understood";
-
         }
 
         $this->getStation();
-        /*
-$ngrams = new Ngram($this->thing,"ngram");
-$ngrams->extractNgrams($this->input);
-var_dump($ngrams->ngrams);
 
-$this->station_name = $this->default_station_name;
-
-                foreach($this->stations as $station_name => $prediction) {
-
-if(strpos(strtolower($this->input), strtolower($station_name)) != false) {
-
-$station_names[] = $station_name;
-
-}
-
-                }
-
-$this->station_name = $station_names[0];
-var_dump($this->station_name);
-exit();
-
-                foreach($this->stations as $name => $prediction) {
-
-
-
-$score = levenshtein($this->filtered_input, $name);
-if (!isset($min)) {$min = $score; $selected_name = $name;}
-
-if ($score < $min) {$selected_name = $name; $min = $score;}
-
-$this->station_name = $selected_name;
-
-                }
-*/
-
-
-
-
-        foreach ($pieces as $key=>$piece) {
+        foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
-
                     switch ($piece) {
-                    case 'verbosity':
-                    case 'mode':
-                        $number = $this->extractNumber();
-                        if (is_numeric($number)) {
-                            $this->verbosity = $number;
-                            $this->set();
-                        }
-                        return;
+                        case 'verbosity':
+                        case 'mode':
+                            $number = $this->extractNumber();
+                            if (is_numeric($number)) {
+                                $this->verbosity = $number;
+                                $this->set();
+                            }
+                            return;
 
-                    default:
+                        default:
                         //$this->read();
                         //echo 'default';
-
                     }
                 }
             }
         }
 
-
         return "Message not understood";
         return false;
     }
-
-
 }
-
