@@ -668,9 +668,8 @@ if (file_exists($file)) {
         $this->getProwords($this->librex_name, $filtered_input);
 
         $ngram = new Ngram($this->thing, "ngram");
-        $ngram->extractNgrams($filtered_input, 3);
-
-        $search_phrases = $ngram->ngrams;
+        $ngrams = $ngram->extractNgrams($filtered_input, 3);
+        $search_phrases = $ngrams;
 
         usort($search_phrases, function ($a, $b) {
             return strlen($b) <=> strlen($a);

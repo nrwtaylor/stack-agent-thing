@@ -152,15 +152,22 @@ if (!isset($this->word_agent)) {
         $words = explode(' ', $input);
         $ngrams = array();
 
-        foreach ($words as $key => $value) {
-            if ($key < count($words) - ($n - 1)) {
-                $ngram = "";
-                for ($i = 0; $i < $n; $i++) {
-                    $ngram .= " " . $words[$key + $i];
+        $num = $n;
+        foreach(range(1,$n,1) as $num) {
+            foreach ($words as $key => $value) {
+
+                if  ($key < (count($words) - ($num - 1))) {
+                    $ngram = "";
+                    for ($i = 0; $i < $num; $i++) {
+                        $ngram .= " " . $words[$key + $i];
+                    }
+                    $ngrams[] = trim($ngram);
                 }
-                $ngrams[] = trim($ngram);
             }
         }
+        $ngrams = array_unique($ngrams);
+
+
         $this->ngrams = $ngrams;
         return $ngrams;
     }
