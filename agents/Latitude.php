@@ -14,9 +14,30 @@ class Latitude extends Agent
                     $this->thing->container['stack']['latitude'];
         }
 
-        $this->latitude = $this->default_latitude;
+    }
+
+    function get() {
+
+        $this->latitude_agent = new Variables($this->thing, "variables latitude " . $this->from);
+
+        $latitude = $this->latitude_agent->getVariable("latitude");
+
+        if (is_numeric($latitude)) {
+            $this->latitude = $latitude;
+        } else {
+            $this->latitude = $this->default_latitude;
+        }
+
+        $this->refreshed_at = $this->latitude_agent->getVariable("refreshed_at");
+    }
+
+    function set() {
+
+        $this->latitude_agent->setVariable("latitude", $this->latitude);
+        $this->latitude_agent->setVariable("refreshed_at", $this->current_time);
 
     }
+
 
     function run()
     {
@@ -30,27 +51,19 @@ class Latitude extends Agent
             $k = array_rand($array);
             $v = $array[$k];
 
-            if ($this->latitude === false) {
+            if (!is_numeric($this->latitude)) {
                 $response = "No latitude available. ";
             }
 
-            if ($this->latitude !== false) {
-                $response = "Latitude is " . $this->latitude .". ";
-            }
+//            if ($this->latitude !== false) {
+//                $response = "Latitude is " . $this->latitude .". ";
+//            }
 
             $this->message = $response; // mewsage?
         } else {
             $this->message = $this->agent_input;
         }
     }
-
-    function getNegativetime()
-    {
-        $agent = new Negativetime($this->thing, "cat");
-        $this->negative_time = $agent->negative_time; //negative time is asking
-    }
-
-    // -----------------------
 
     public function respondResponse()
     {
@@ -74,7 +87,10 @@ class Latitude extends Agent
     {
         $this->node_list = array("latitude" => array("longitude", "time"));
 
-        $sms = "LATITUDE | " . $this->message . " " . $this->response;
+        $latitude_text = "";
+        if (is_numeric($this->latitude)) {$latitude_text = $this->latitude . " ";}
+
+        $sms = "LATITUDE ". $latitude_text . "| " . $this->message . " " . $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -86,8 +102,36 @@ class Latitude extends Agent
         $this->thing_report['choices'] = $choices;
     }
 
+    public function extractLatitude($text = null) {
+
+        if ($text == null) {return true;}
+
+        $tokens = explode(" ",trim($text));
+        $latitudes = [];
+
+        foreach ($tokens as $i=>$token) {
+            $sign = +1;
+            $last_character = strtolower(substr(trim($text), -1));
+            $text_token = $token;
+            if (($last_character == "n") or ($last_character == "s")) {
+
+                if ($last_character == "n") {$sign = +1;}
+                if ($last_character == "s") {$sign = -1;}
+                $text_token = mb_substr($token, 0, -1);
+            }
+
+            if (is_numeric($text_token)) {$latitudes[] = $sign * $text_token;}
+
+        }
+        if (count($latitudes) == 1) {$this->latitude = $latitudes[0];}
+
+    }
+
+
     public function readSubject()
     {
+        $input = $this->input;
+        $this->extractLatitude($input);
         return false;
     }
 }

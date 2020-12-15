@@ -5,6 +5,9 @@
  * @package default
  */
 
+// TODO
+//
+
 namespace Nrwtaylor\StackAgentThing;
 
 ini_set('display_startup_errors', 1);
@@ -16,12 +19,6 @@ class Input extends Agent
     public $var = 'hello';
 
     /**
-     *
-     * @param Thing   $thing
-     * @param unknown $text  (optional)
-     */
-
-    /**
      * function __construct(Thing $thing, $text = null) {
      */
     function init()
@@ -30,33 +27,11 @@ class Input extends Agent
         $this->input_agent = null;
     }
 
-    // -----------------------
-
-    function assertIs($input)
-    {
-        $this->input_agent = null;
-        $agent_name = "input";
-        $whatIWant = $input;
-        if (
-            ($pos = strpos(strtolower($input), $agent_name . " is")) !== false
-        ) {
-            $whatIWant = substr(
-                strtolower($input),
-                $pos + strlen($agent_name . " is")
-            );
-        } elseif (($pos = strpos(strtolower($input), $agent_name)) !== false) {
-            $whatIWant = substr(strtolower($input), $pos + strlen($agent_name));
-        }
-
-        $filtered_input = ltrim(strtolower($whatIWant), " ");
-        $this->input_agent = $filtered_input;
-    }
-
     /**
      *
      * @param unknown $text (optional)
      */
-    function doInput($text = null)
+    function readInput($text = null)
     {
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
@@ -64,74 +39,68 @@ class Input extends Agent
         foreach ($ngram_agent->ngrams as $index => $ngram) {
             switch ($ngram) {
                 case "break":
-                    $this->input_agent = null;
+                    //    $this->input_agent = null;
+                    $this->dropInput();
                     $this->response = "Break. ";
                     return;
 
                 case "input":
+                    $this->addInput($text);
                     $input_agent = $this->input_agent;
-                    $this->input_agent = null;
-                    //$this->assertIs($this->input);
                     $input_agent_text = $input_agent . " is expecting input. ";
 
-                    if ($input_agent == false) {
-                        $input_agent_text = "No input expected. ";
-                    }
-                    $this->input_agent = $input_agent;
                     $this->response .= $input_agent_text;
-                    return;
+                    return null;
 
                 default:
             }
         }
+        $filtered_text = $this->assert($text);
+        //if ($filtered_text == null) {return;}
 
-        $this->assertIs($this->input);
+        //        $this->input = $filtered_text;
+        return $filtered_text;
+
         $this->response .=
             "Said that input response is expected to the current agent. ";
-
     }
-
 
     /**
      *
      */
     public function get()
     {
-        $this->variables_agent = new Variables(
+        $this->variables_input = new Variables(
             $this->thing,
             "variables " . "input " . $this->from
         );
 
-        //        $input = new Variables($this->thing, "variables basket " . $this->from);
+        $input_agent = $this->variables_input->getVariable("agent");
+        if ($input_agent !== false) {
+            $this->input_agent = $input_agent;
+        }
 
-        $this->input_agent = $this->variables_agent->getVariable("agent");
-        $this->refreshed_at = $this->variables_agent->getVariable(
+        $this->input_state = $this->variables_input->getVariable("state");
+        $this->input_options = $this->variables_input->getVariable("options");
+        $this->input_uuid = $this->variables_input->getVariable("uuid");
+
+        $this->refreshed_at = $this->variables_input->getVariable(
             "refreshed_at"
         );
-
     }
 
     /**
      *
      * @param unknown $input_flag (optional)
      */
-    function set($input_agent = null)
+    function set()
     {
-        $this->respond();
-        if ($input_agent == null) {
-            $input_agent = $this->input_agent;
-        }
-        if (!isset($this->variables_agent)) {
-            $this->get();
-        }
-        //$this->variables_agent->setVariable("value_destroyed", $this->value_destroyed);
+        $this->variables_input->setVariable("agent", $this->input_agent);
+        $this->variables_input->setVariable("state", $this->input_state);
+        $this->variables_input->setVariable("options", $this->input_options);
+        $this->variables_input->setVariable("uuid", $this->input_uuid);
 
-        //$this->variables_agent->setVariable("things_destroyed", $this->things_destroyed);
-
-        //$this->thing->setVariable("damage_cost", $this->damage_cost);
-
-        $this->variables_agent->setVariable("agent", $input_agent);
-        $this->variables_agent->setVariable(
+        $this->variables_input->setVariable(
             "refreshed_at",
             $this->current_time
         );
@@ -149,20 +118,22 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
         $this->thing_report['web'] = $web;
     }
 
+    public function makeMessage()
+    {
+        $message = "input agent " . $this->input_agent . " ";
+        $message .= "input state " . $this->input_state . " ";
+        $message .= "input_options " . $this->input_options . " ";
+        $message .= "uuid " . $this->input_uuid . " ";
+        $message .= "input " . $this->input;
+        $this->message = $message;
+    }
+
     /**
      *
      */
     function makeSMS()
     {
-        //    if ($this->state == true) {
-        //        $sms = "INPUT | ?";
-        //    }
-
-        //    if ($this->state == false) {
-        //        $sms = "INPUT | " . $this->subject;
-
-        //    }
-        $sms = "INPUT | " . $this->response;
+        $sms = "INPUT | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -171,14 +142,9 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         $this->thing->flagGreen();
-
-        $to = $this->thing->from;
-        $from = "input";
-
-        $this->makeSMS();
 
         $choices = false;
 
@@ -194,7 +160,6 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-        return $this->thing_report;
     }
 
     /**
@@ -203,24 +168,18 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
      */
     public function readSubject()
     {
-        $this->doInput($this->input);
-        //$input = strtolower($this->subject);
-        //$this->getInput();
+        $input = $this->input;
+        $filtered_input = $this->readInput($input);
+        if ($filtered_input == null) {
+            return;
+        }
 
+        if ($this->agent_input !== "input") {
+            $this->agentInput($this->agent_input);
+        }
+        $this->addInput($this->subject);
         return false;
     }
-
-    /**
-     *
-     * @return unknown
-     */
-    //public function readInstruction() {
-
-    //$input = strtolower($this->subject);
-    //    $this->getInput();
-
-    //    return false;
-    //}
 
     /**
      *
@@ -270,11 +229,11 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
 
         if ($input_uuid == null) {
             // This is input
-            $this->variables_agent = new Variables(
-                $thing,
-                "variables " . "input " . $this->from
-            );
-            $this->variables_agent->setVariable("uuid", $this->uuid);
+            //    $this->variables_input = new Variables(
+            //        $thing,
+            //        "variables " . "input " . $this->from
+            //    );
+            //    $this->variables_input->setVariable("uuid", $this->uuid);
 
             $this->state = false;
         } else {
@@ -329,8 +288,10 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
                     $count[$discriminator] = $count[$discriminator] + 1;
                     $total_count = $total_count + 1;
                 }
-//var_dump($discriminator);
-if (!isset($aliases[$discriminator])) {continue;}
+
+                if (!isset($aliases[$discriminator])) {
+                    continue;
+                }
                 foreach ($aliases[$discriminator] as $alias) {
                     if ($word == $alias) {
                         $count[$discriminator] = $count[$discriminator] + 1;
@@ -371,5 +332,65 @@ if (!isset($aliases[$discriminator])) {continue;}
         }
 
         return true;
+    }
+
+    // TODO
+
+    public function textInput($text = null)
+    {
+        if ($text != null) {
+            $this->input_text = $text;
+        }
+        $this->response .= "input_text " . $this->input_text . ". ";
+        return $this->input_text;
+    }
+
+    public function agentInput($text = null)
+    {
+        if ($text != null) {
+            $this->input_agent = $text;
+        }
+        $this->response .= "input_agent " . $this->input_agent . ". ";
+        return $this->input_agent;
+    }
+
+    public function stateInput($text = null)
+    {
+        if ($text != null) {
+            $this->input_state = $text;
+        }
+
+        $this->response .= "input_state " . $this->input_state . ". ";
+
+        return $this->input_state;
+    }
+
+    public function uuidInput($text = null)
+    {
+        if ($text != null) {
+            $this->uuid_input = $text;
+        }
+        $this->response .= "input_uuid " . $this->uuid_input . ". ";
+
+        //      $this->variables_input->setVariable("uuid", $this->uuid);
+        return $this->uuid_input;
+    }
+
+    public function addInput($text = null, $agent = null)
+    {
+        $this->textInput($text);
+        if ($agent != null) {
+            $this->agentInput($agent);
+        }
+        $this->stateInput("anticipate");
+        $this->set();
+    }
+
+    public function dropInput($text = null)
+    {
+        $this->textInput(null);
+        $this->agentInput(null);
+        $this->stateInput("default");
+        $this->set();
     }
 }

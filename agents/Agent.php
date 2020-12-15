@@ -230,8 +230,8 @@ class Agent
         }
     }
 
-// TODO DEV?
-/*
+    // TODO DEV?
+    /*
     public function __get($x) {
         var_dump($x);
         var_dump("hug");
@@ -358,54 +358,51 @@ class Agent
     }
 
     // Read the provided text and create a set of flags.
-    public function flagAgent($indicators = null, $input = null) {
-
-        foreach($indicators as $flag_name=>$flag_indicators) {
+    public function flagAgent($indicators = null, $input = null)
+    {
+        foreach ($indicators as $flag_name => $flag_indicators) {
             foreach ($flag_indicators as $flag_indicator) {
-                $f = $this->agent_name . "_"  .$flag_name . "_flag";
+                $f = $this->agent_name . "_" . $flag_name . "_flag";
 
                 if (stripos($input, $flag_indicator) !== false) {
                     $this->{$f} = 'on';
                 }
 
-                if (stripos($input, str_replace('-', ' ', $flag_indicator)) !== false) {
+                if (
+                    stripos($input, str_replace('-', ' ', $flag_indicator)) !==
+                    false
+                ) {
                     $this->{$f} = 'on';
                 }
             }
         }
     }
 
+    public function memoryAgent($text = null)
+    {
+        //$agent_class_name = "Dateline";
+        $agent_class_name = $text;
+        $agent_name = strtolower($agent_class_name);
 
-    public function memoryAgent($text = null) {
+        $slug_agent = new Slug($this->thing, "slug");
+        $slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
 
-            //$agent_class_name = "Dateline";
-            $agent_class_name = $text;
-            $agent_name = strtolower($agent_class_name);
+        $agent_namespace_name =
+            '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
 
-            $slug_agent = new Slug($this->thing, "slug");
-            $slug = $slug_agent->getSlug(
-                $agent_name . "-" . $this->from
-            );
+        ${$agent . '_agent'} = new $agent_namespace_name(
+            $this->thing,
+            $agent_name
+        );
 
+        ${$agent_name} = ${$agent . '_agent'}->{'get' . $agent_class_name}();
+        ${$agent_name}['retrieved_at'] = $this->current_time;
 
-                $agent_namespace_name =
-                    '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+        $this->memory->set($slug, ${$agent_name});
 
-
-                ${$agent . '_agent'} = new $agent_namespace_name($this->thing, $agent_name);
-
-                ${$agent_name} = ${$agent . '_agent'}->{'get' .
-                    $agent_class_name}();
-                ${$agent_name}['retrieved_at'] = $this->current_time;
-
-                $this->memory->set($slug, ${$agent_name});
-
-                $this->response .= "Got {$agent_name}. ";
-
+        $this->response .= "Got {$agent_name}. ";
 
         return ${$agent_name};
-
-
     }
 
     public function readAgent($text = null)
@@ -419,10 +416,9 @@ class Agent
      */
     public function make()
     {
-
         // Call the classes make function.
         try {
-        $this->{'make' . $this->agent_class_name}();
+            $this->{'make' . $this->agent_class_name}();
         } catch (\Throwable $t) {
             $this->thing->log(
                 'caught make ' . $this->agent_class_name . ' throwable.',
@@ -442,6 +438,7 @@ class Agent
         $this->makeAgent();
 
         $this->makeResponse();
+        $this->makeInput();
         //$this->makeChoices();
         $this->makeMessage();
         $this->makeChart();
@@ -682,17 +679,11 @@ class Agent
         }
     }
 
-
-    public function makeJson() {
-
-
-if (!isset($this->thing_report['json'])) {
-
-$this->thing_report['json'] = null;
-
-}
-        
-
+    public function makeJson()
+    {
+        if (!isset($this->thing_report['json'])) {
+            $this->thing_report['json'] = null;
+        }
     }
 
     /**
@@ -775,31 +766,31 @@ $this->thing_report['json'] = null;
     // Plan to deprecate getMemcached terminology.
     public function getMemory($text = null)
     {
-//        if (isset($this->memory)) {
-//            return;
-//        }
+        //        if (isset($this->memory)) {
+        //            return;
+        //        }
 
         // Null?
         // $this->mem_cached = null;
         // Fail to stack php memory code if Memcached is not availble.
-if (!isset($this->memory)) {
-        try {
-            $this->memory = new \Memcached(); //point 2.
-            $this->memory->addServer("127.0.0.1", 11211);
-        } catch (\Throwable $t) {
-            // Failto
-            $this->memory = new Memory($this->thing, "memory");
-            //restore_error_handler();
-            $this->thing->log(
-                'caught memcached throwable. made memory',
-                "WARNING"
-            );
-            return;
-        } catch (\Error $ex) {
-            $this->thing->log('caught memcached error.', "WARNING");
-            return true;
+        if (!isset($this->memory)) {
+            try {
+                $this->memory = new \Memcached(); //point 2.
+                $this->memory->addServer("127.0.0.1", 11211);
+            } catch (\Throwable $t) {
+                // Failto
+                $this->memory = new Memory($this->thing, "memory");
+                //restore_error_handler();
+                $this->thing->log(
+                    'caught memcached throwable. made memory',
+                    "WARNING"
+                );
+                return;
+            } catch (\Error $ex) {
+                $this->thing->log('caught memcached error.', "WARNING");
+                return true;
+            }
         }
-}
 
         $memory = $this->memory->get($text);
         return $memory;
@@ -808,30 +799,28 @@ if (!isset($this->memory)) {
     // Plan to deprecate getMemcached terminology.
     public function setMemory($text = null, $variable = null)
     {
-if (!isset($this->memory)) {
-        try {
-            $this->memory = new \Memcached(); //point 2.
-            $this->memory->addServer("127.0.0.1", 11211);
-        } catch (\Throwable $t) {
-            // Failto
-            $this->memory = new Memory($this->thing, "memory");
-            //restore_error_handler();
-            $this->thing->log(
-                'caught memcached throwable. made memory',
-                "WARNING"
-            );
-            return;
-        } catch (\Error $ex) {
-            $this->thing->log('caught memcached error.', "WARNING");
-            return true;
+        if (!isset($this->memory)) {
+            try {
+                $this->memory = new \Memcached(); //point 2.
+                $this->memory->addServer("127.0.0.1", 11211);
+            } catch (\Throwable $t) {
+                // Failto
+                $this->memory = new Memory($this->thing, "memory");
+                //restore_error_handler();
+                $this->thing->log(
+                    'caught memcached throwable. made memory',
+                    "WARNING"
+                );
+                return;
+            } catch (\Error $ex) {
+                $this->thing->log('caught memcached error.', "WARNING");
+                return true;
+            }
         }
-}
 
         $memory = $this->memory->set($text, $variable);
         return $memory;
     }
-
-
 
     /**
      *
@@ -1182,6 +1171,10 @@ if (!isset($this->memory)) {
                     $message_thing->thing_report['info'];
             }
         }
+    }
+
+    public function makeInput()
+    {
     }
 
     /**
@@ -1987,7 +1980,10 @@ if (!isset($this->memory)) {
                 $agent_input_hit = ucwords($agent_input_hit);
 
                 foreach ($arr as $j => $agent_candidate) {
-                    if (strtolower(str_replace("-", "", $agent_hit)) == strtolower($agent_candidate)) {
+                    if (
+                        strtolower(str_replace("-", "", $agent_hit)) ==
+                        strtolower($agent_candidate)
+                    ) {
                         //echo $agent_hit . " " . $agent_input_hit . "\n";
 
                         $agent_package = [
@@ -2002,7 +1998,7 @@ if (!isset($this->memory)) {
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
-             //echo $responsive_agent['agent_name']. " " ;
+            //echo $responsive_agent['agent_name']. " " ;
         }
 
         return;
@@ -2130,22 +2126,19 @@ if (!isset($this->memory)) {
             $input = trim(substr_replace($input, "", 0, strlen('agent')));
         }
 
-
-
         $dispatcher_agent = new Dispatcher($this->thing, 'dispatcher');
 
         // Is it a timestamp?
         $time_tokens = explode(" ", $input);
 
-
         $timestamp_agent = new Timestamp($this->thing, "timestamp");
 
-        if ($time_tokens[0] == 'agent') {array_shift($time_tokens);}
-        foreach($time_tokens as $time_token) {
-
+        if ($time_tokens[0] == 'agent') {
+            array_shift($time_tokens);
+        }
+        foreach ($time_tokens as $time_token) {
             if ($timestamp_agent->isTimestamp($time_token) === true) {
-
-                if (count($time_tokens) ==1) {
+                if (count($time_tokens) == 1) {
                     $this->thing_report = $timestamp_agent->thing_report;
                     return;
                 }
@@ -2697,6 +2690,29 @@ if (!isset($this->memory)) {
 
         // Remove reference to thing.
         //$input = str_replace("thing","",$input);
+
+        // dev
+        // Check whether input is expected.
+        // Or not.
+
+        $input_agent = new Input($this->thing, "input");
+        $input_state = $input_agent->stateInput();
+        if ($input_agent->stateInput() == 'anticipate') {
+            $this->response .= "Input anticipated. ";
+
+            $agent_class_name = $input_agent->agentInput();
+
+            $this->response .= "Saw " . $agent_class_name . ". ";
+
+            $agent = $this->getAgent($agent_class_name, 'input');
+
+            if ($agent !== false) {
+                $this->thing_report = $agent->thing_report;
+                $input_agent->dropInput();
+
+                return $this->thing_report;
+            }
+        }
 
         $headcode = new Headcode($this->thing, "extract");
         $headcode->extractHeadcodes($input);
