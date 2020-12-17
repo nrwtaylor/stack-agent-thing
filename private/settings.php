@@ -31,6 +31,8 @@ return [
         ],
 
         'stack' => [
+            'latitude' => '<not set>',
+            'longitude' => '<not set>',
             'word' => '<not set>',
             'short_name' => '<not set>',
             'entity_name' => '<not set',
