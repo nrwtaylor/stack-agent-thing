@@ -38,7 +38,7 @@ class Nautilus extends Agent
         $command_line = null;
 
         $this->node_list = [
-            "nautilus" => ["tzol\'kin", "haab", "day", "nautilus", "week"],
+            "nautilus" => ["nautilus", "nautilii"],
         ];
 
         $this->current_time = $this->thing->json->time();
@@ -56,7 +56,7 @@ class Nautilus extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->default_nautilii = [7];
+        $this->default_nautilii = [1];
 
         $this->initNautilus();
 
@@ -420,77 +420,6 @@ class Nautilus extends Agent
         }
     }
 
-    /*
-     *
-     */
-
-
-    public function deprecate_drawNautilus(
-        $n = 7,
-        $size = null,
-        $next_size = null,
-        $type = null
-    ) {
-        if ($type == null) {
-            $type = $this->type;
-        }
-        $this->wedgeNautilus($n, $size, $next_size);
-    }
-
-    public function wedgeNautilus($n = 7, $size = null, $next_size)
-    {
-        if ($size == null) {
-            $size = $this->size;
-        }
-
-        if (isset($this->canvas_size_x)) {
-            $canvas_size_x = $this->canvas_size_x;
-            $canvas_size_y = $this->canvas_size_y;
-        } else {
-            $canvas_size_x = $this->default_canvas_size_x;
-            $canvas_size_y = $this->default_canvas_size_y;
-        }
-
-        // Draw out the state
-        $center_x = $canvas_size_x / 2;
-        $center_y = $canvas_size_y / 2;
-
-        // devstack rotation not yet implemented
-        if (!isset($this->angle)) {
-            $this->angle = 0;
-        }
-        if ($n > 1) {
-            $init_angle = (-1 * pi()) / 2;
-            $angle = (2 * 3.14159) / $n;
-
-            foreach (range(0, $n - 1, 1) as $i) {
-                $x_pt = $size * cos($angle * $i + $init_angle);
-                $y_pt = $size * sin($angle * $i + $init_angle);
-                $next_x_pt = $next_size * cos($angle * $i + $init_angle);
-                $next_y_pt = $next_size * sin($angle * $i + $init_angle);
-
-                imageline(
-                    $this->image,
-                    $center_x + $next_x_pt,
-                    $center_y + $next_y_pt,
-                    $center_x + $x_pt,
-                    $center_y + $y_pt,
-                    $this->black
-                );
-            }
-        }
-        imagearc(
-            $this->image,
-            $center_x,
-            $center_y,
-            2 * $size,
-            2 * $size,
-            0,
-            360,
-            $this->black
-        );
-    }
-
     public function drawNautilus($n = 7, $size = null, $next_size)
     {
         if ($size == null) {
@@ -513,28 +442,28 @@ class Nautilus extends Agent
         if (!isset($this->angle)) {
             $this->angle = 0;
         }
-$size = 50;
-$next_x_pt = 0;
-$next_y_pt = $size;
-$n = 1000;
+
+        $size = 50;
+        $next_x_pt = 0;
+        $next_y_pt = $size;
+        $x_path_old = 0;
+        $y_path_old = 0;
+        $n = 1000;
+
         if ($n > 1) {
+
 //            $init_angle = (-1 * pi()) / 2;
 //            $angle = (2 * 3.14159) / $n;
 
+            $coords = [];
             foreach (range(0, $n - 1, 1) as $i) {
   
-//                $x_pt = $size * cos($angle * $i);
-//                $y_pt = $size * sin($angle * $i);
+                $radial_angle = atan(($next_y_pt-0)/($next_x_pt-0));
 
-//$radial_angle = atan(($next_y_pt-$y_pt)/($next_x_pt-$x_pt));
-$radial_angle = atan(($next_y_pt-0)/($next_x_pt-0));
-
-//if ($radial_angle < 0) {$radial_angle += 2*pi();}
-
-if (($next_x_pt<0) and ($next_y_pt<0)) {$sign = +1;}
-if (($next_x_pt<0) and ($next_y_pt>0)) {$sign = +1;}
-if (($next_x_pt>0) and ($next_y_pt<0)) {$sign = -1;}
-if (($next_x_pt>0) and ($next_y_pt>0)) {$sign = -1;}
+                if (($next_x_pt<0) and ($next_y_pt<0)) {$sign = +1;}
+                if (($next_x_pt<0) and ($next_y_pt>0)) {$sign = +1;}
+                if (($next_x_pt>0) and ($next_y_pt<0)) {$sign = -1;}
+                if (($next_x_pt>0) and ($next_y_pt>0)) {$sign = -1;}
 
 /*
                 imageline(
@@ -547,21 +476,65 @@ if (($next_x_pt>0) and ($next_y_pt>0)) {$sign = -1;}
                 );
 */
 
-
                 $x_pt = $next_x_pt;
                 $y_pt = $next_y_pt;
-
-//if ($n/2 == intval($n/2)) {$sign = -1;}
 
                 $next_x_pt = $x_pt + $size * cos(($radial_angle)+$sign*pi()/2);
                 $next_y_pt = $y_pt + $size * sin(($radial_angle)+$sign*pi()/2);
 
-//$normal_angle = atan(($next_x_pt-$x_pt)/($next_y_pt-$y_pt));
+                // Check for intersection on path
+                $x_path = 0;
+                $y_path = 0;
+                $intersection_point = true;
+                foreach(array_reverse($coords) as $j=>$coord) {
 
-//                $inner_x_pt = $next_x_pt + $size * cos(($normal_angle)+$sign*pi()/2);
-//                $inner_y_pt = $next_y_pt + $size * sin(($normal_angle)+$sign*pi()/2);
-$inner_x_pt = 0;
-$inner_y_pt = 0;
+                    if (!isset($coords[$j-1])) {continue;}
+                    $x_path_old = array_reverse($coords)[$j-1]['x'];
+                    $y_path_old = array_reverse($coords)[$j-1]['y'];
+
+                    $x_path = $coord['x'];
+                    $y_path = $coord['y'];
+
+                    $intersection_point = $this->intersectLine(
+                        [
+                        ['x'=>$x_path_old,'y'=>$y_path_old],
+                        ['x'=>$x_path,'y'=>$y_path]],
+                        [['x'=>0,'y'=>0],
+                        ['x'=>$next_x_pt,'y'=>$next_y_pt]]);
+
+// Plot the spiral path from saved coords
+/*
+                imageline(
+                    $this->image,
+                    $center_x + $x_path_old,
+                    $center_y + $y_path_old,
+                    $center_x + $x_path,
+                    $center_y + $y_path,
+                    $this->red
+                );
+*/
+
+/*
+                imageline(
+                    $this->image,
+                    $center_x + 0,
+                    $center_y + 0,
+                    $center_x + $next_x_pt,
+                    $center_y + $next_y_pt,
+                    $this->green
+                );
+*/
+
+
+
+
+                    if ($intersection_point !== true) {break;}
+                }
+
+                //$inner_x_pt = 0;
+                //$inner_y_pt = 0;
+
+                $coords[] = ["x"=>$next_x_pt,"y"=>$next_y_pt];
 
                 imageline(
                     $this->image,
@@ -572,35 +545,30 @@ $inner_y_pt = 0;
                     $this->black
                 );
 
-$project_x = ($x_pt - $inner_x_pt) *0.9;
-$project_y = ($y_pt - $inner_y_pt) *0.9;
 
-                imageline(
-                    $this->image,
-                    $center_x + $project_x,
-                    $center_y + $project_y,
-//                    $center_x + $inner_x_pt,
-//                    $center_y + $inner_y_pt,
-                    $center_x + $x_pt,
-                    $center_y + $y_pt,
-                    $this->black
-                );
+                if ($intersection_point !== true) {
 
+                    imageline(
+                        $this->image,
+                        $center_x + $intersection_point['x'],
+                        $center_y + $intersection_point['y'],
+                        $center_x + $next_x_pt,
+                        $center_y + $next_y_pt,
+                        $this->black
+                    );
+                } else {
 
+                    imageline(
+                        $this->image,
+                        $center_x + 0,
+                        $center_y + 0,
+                        $center_x + $next_x_pt,
+                        $center_y + $next_y_pt,
+                        $this->black
+                    );
+                }
             }
         }
-/*
-        imagearc(
-            $this->image,
-            $center_x,
-            $center_y,
-            2 * $size,
-            2 * $size,
-            0,
-            360,
-            $this->black
-        );
-*/
     }
 
 
@@ -622,6 +590,38 @@ $project_y = ($y_pt - $inner_y_pt) *0.9;
                 $time_string
             );
         }
+    }
+
+
+    // https://rosettacode.org/wiki/Find_the_intersection_of_two_lines#Python
+    public function intersectLine($line1,$line2) {
+
+        $Ax1 = $line1[0]['x'];
+        $Ay1 = $line1[0]['y'];
+        $Ax2 = $line1[1]['x'];
+        $Ay2 = $line1[1]['y'];
+
+        $Bx1 = $line2[0]['x'];
+        $By1 = $line2[0]['y'];
+        $Bx2 = $line2[1]['x'];
+        $By2 = $line2[1]['y'];
+
+//    """ returns a (x, y) tuple or None if there is no intersection """
+        $d = ($By2 - $By1) * ($Ax2 - $Ax1) - ($Bx2 - $Bx1) * ($Ay2 - $Ay1);
+        if ($d != 0) {
+            $uA = (($Bx2 - $Bx1) * ($Ay1 - $By1) - ($By2 - $By1) * ($Ax1 - $Bx1)) / $d;
+            $uB = (($Ax2 - $Ax1) * ($Ay1 - $By1) - ($Ay2 - $Ay1) * ($Ax1 - $Bx1)) / $d;
+        } else {
+            return true;
+        }
+
+        if (!( ( (0 <= $uA) and ($uA  <= 1) ) and ( (0 <= $uB) and ($uB <= 1) ) )) {
+            return true;
+        }
+        $x = $Ax1 + $uA * ($Ax2 - $Ax1);
+        $y = $Ay1 + $uA * ($Ay2 - $Ay1);
+
+        return ['x'=>$x, 'y'=>$y];
     }
 
     /**
@@ -737,7 +737,6 @@ $project_y = ($y_pt - $inner_y_pt) *0.9;
     {
         $this->type = "wedge";
 
-// $input = strtolower($this->subject);
         $input = $this->input;
 
         $number_agent = new Number($this->thing, "number");
