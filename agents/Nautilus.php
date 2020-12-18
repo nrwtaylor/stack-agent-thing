@@ -17,6 +17,8 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
+// TODO: Respond to fourth parameter. Init start angle.
+
 class Nautilus extends Agent
 {
     public $var = 'hello';
@@ -56,12 +58,13 @@ class Nautilus extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->default_nautilii = [1];
+        // length, segments, growth angle, (start angle)
+        $this->default_nautilii = [38, 200, 5];
 
         $this->initNautilus();
 
         $this->draw_center = false;
-        $this->draw_outline = false; //Draw hexagon line
+        $this->draw_outline = false;
 
         $this->canvas_size_x = $this->default_canvas_size_x;
         $this->canvas_size_y = $this->default_canvas_size_y;
@@ -130,7 +133,6 @@ class Nautilus extends Agent
      */
     public function makeSMS()
     {
-        //        $cell = $this->lattice[0][0][0];
         $sms = "NAUTILUS | ";
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/nautilus";
         $sms .= " | " . $this->response;
@@ -167,7 +169,10 @@ class Nautilus extends Agent
     public function setNautilus()
     {
         $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["nautilus", "nautilii"], $this->nautilii);
+        $this->thing->json->writeVariable(
+            ["nautilus", "nautilii"],
+            $this->nautilii
+        );
     }
 
     /**
@@ -196,7 +201,7 @@ class Nautilus extends Agent
     public function initNautilus()
     {
         if (!isset($this->size)) {
-            $this->size = 3.7;
+            $this->size = 50;
         }
     }
 
@@ -241,6 +246,8 @@ class Nautilus extends Agent
     {
         $this->rgb = imagecolorallocate($this->image, $r, $g, $b);
     }
+
+    // TODO: Factor out as seperate common class to multiple agents.
 
     /**
      *
@@ -395,33 +402,55 @@ class Nautilus extends Agent
         $this->PNG = $imagedata;
 
         return $response;
-
-        //        $this->PNG = $image;
-        //        $this->thing_report['png'] = $image;
-
-        //        return;
     }
 
     public function drawNautilii()
     {
-        $border = 100;
-        $size = 1000 - $border;
+//        $border = 100;
+//        $size = 1000 - $border;
 
-        $nautilus_width = $size / (count($this->nautilii) + 1);
+//        $nautilus_width = $size / (count($this->nautilii) + 1);
+//        $nautilus = 1000;
 
-        foreach ($this->nautilii as $i => $nautilus) {
-            $next_size = $size - $nautilus_width;
-            if ($i == count($this->nautilii) - 1) {
-                $next_size = 0;
-            }
-
-            $this->drawNautilus($nautilus, $size, $next_size);
-            $size = $next_size;
+        $size = 50;
+        if (isset($this->nautilii[0])) {
+            $size = $this->nautilii[0];
         }
+
+        $segments = 50;
+        if (isset($this->nautilii[1])) {
+            $segments = $this->nautilii[1];
+        }
+
+        $mu_degrees = 0;
+        if (isset($this->nautilii[2])) {
+            $mu_degrees = $this->nautilii[2];
+        }
+
+        $init_degrees = 0;
+        if (isset($this->nautilii[3])) {
+            $init_degrees = $this->nautilii[3];
+        }
+
+        $this->drawNautilus($segments, $size, $mu_degrees, $init_degrees);
     }
 
-    public function drawNautilus($n = 7, $size = null, $next_size)
-    {
+    public function drawNautilus(
+        $n = 7,
+        $size = null,
+        $mu_degrees = null,
+        $init_degrees = null
+    ) {
+        if ($mu_degrees == null) {
+            $mu_degrees = 0;
+        }
+        $mu_radians = ($mu_degrees / 360) * 2 * pi();
+
+        if ($init_degrees == null) {
+            $init_degrees = 0;
+        }
+        $init_radians = ($init_degrees / 360) * 2 * pi();
+        //var_dump($init_radians);
         if ($size == null) {
             $size = $this->size;
         }
@@ -443,29 +472,43 @@ class Nautilus extends Agent
             $this->angle = 0;
         }
 
-        $size = 50;
+        //$size = 50;
         $next_x_pt = 0;
         $next_y_pt = $size;
         $x_path_old = 0;
         $y_path_old = 0;
-        $n = 1000;
 
         if ($n > 1) {
-
-//            $init_angle = (-1 * pi()) / 2;
-//            $angle = (2 * 3.14159) / $n;
+            //            $init_angle = (-1 * pi()) / 2;
+            //            $angle = (2 * 3.14159) / $n;
 
             $coords = [];
-            foreach (range(0, $n - 1, 1) as $i) {
-  
-                $radial_angle = atan(($next_y_pt-0)/($next_x_pt-0));
+            foreach (range(0, $n, 1) as $i) {
+                if ($next_x_pt - 0 == 0) {
+                    $radial_angle = 0;
+                } else {
+                    $radial_angle = atan(($next_y_pt - 0) / ($next_x_pt - 0));
+                }
 
-                if (($next_x_pt<0) and ($next_y_pt<0)) {$sign = +1;}
-                if (($next_x_pt<0) and ($next_y_pt>0)) {$sign = +1;}
-                if (($next_x_pt>0) and ($next_y_pt<0)) {$sign = -1;}
-                if (($next_x_pt>0) and ($next_y_pt>0)) {$sign = -1;}
+                //if ($i == 0) {$radial_angle = $init_radians;}
 
-/*
+                $radial_angle = $radial_angle + $mu_radians;
+
+                $sign = 1;
+                if ($next_x_pt < 0 and $next_y_pt < 0) {
+                    $sign = +1;
+                }
+                if ($next_x_pt < 0 and $next_y_pt > 0) {
+                    $sign = +1;
+                }
+                if ($next_x_pt > 0 and $next_y_pt < 0) {
+                    $sign = -1;
+                }
+                if ($next_x_pt > 0 and $next_y_pt > 0) {
+                    $sign = -1;
+                }
+
+                /*
                 imageline(
                     $this->image,
                     $center_x ,
@@ -479,31 +522,38 @@ class Nautilus extends Agent
                 $x_pt = $next_x_pt;
                 $y_pt = $next_y_pt;
 
-                $next_x_pt = $x_pt + $size * cos(($radial_angle)+$sign*pi()/2);
-                $next_y_pt = $y_pt + $size * sin(($radial_angle)+$sign*pi()/2);
+                $next_x_pt =
+                    $x_pt + $size * cos($radial_angle + $sign * (pi() / 2));
+                $next_y_pt =
+                    $y_pt + $size * sin($radial_angle + $sign * (pi() / 2));
 
                 // Check for intersection on path
                 $x_path = 0;
                 $y_path = 0;
                 $intersection_point = true;
-                foreach(array_reverse($coords) as $j=>$coord) {
-
-                    if (!isset($coords[$j-1])) {continue;}
-                    $x_path_old = array_reverse($coords)[$j-1]['x'];
-                    $y_path_old = array_reverse($coords)[$j-1]['y'];
+                foreach (array_reverse($coords) as $j => $coord) {
+                    if (!isset($coords[$j - 1])) {
+                        continue;
+                    }
+                    $x_path_old = array_reverse($coords)[$j - 1]['x'];
+                    $y_path_old = array_reverse($coords)[$j - 1]['y'];
 
                     $x_path = $coord['x'];
                     $y_path = $coord['y'];
 
                     $intersection_point = $this->intersectLine(
                         [
-                        ['x'=>$x_path_old,'y'=>$y_path_old],
-                        ['x'=>$x_path,'y'=>$y_path]],
-                        [['x'=>0,'y'=>0],
-                        ['x'=>$next_x_pt,'y'=>$next_y_pt]]);
+                            ['x' => $x_path_old, 'y' => $y_path_old],
+                            ['x' => $x_path, 'y' => $y_path],
+                        ],
+                        [
+                            ['x' => 0, 'y' => 0],
+                            ['x' => $next_x_pt, 'y' => $next_y_pt],
+                        ]
+                    );
 
-// Plot the spiral path from saved coords
-/*
+                    // Plot the spiral path from saved coords
+                    /*
                 imageline(
                     $this->image,
                     $center_x + $x_path_old,
@@ -514,7 +564,7 @@ class Nautilus extends Agent
                 );
 */
 
-/*
+                    /*
                 imageline(
                     $this->image,
                     $center_x + 0,
@@ -525,16 +575,15 @@ class Nautilus extends Agent
                 );
 */
 
-
-
-
-                    if ($intersection_point !== true) {break;}
+                    if ($intersection_point !== true) {
+                        break;
+                    }
                 }
 
                 //$inner_x_pt = 0;
                 //$inner_y_pt = 0;
 
-                $coords[] = ["x"=>$next_x_pt,"y"=>$next_y_pt];
+                $coords[] = ["x" => $next_x_pt, "y" => $next_y_pt];
 
                 imageline(
                     $this->image,
@@ -545,9 +594,7 @@ class Nautilus extends Agent
                     $this->black
                 );
 
-
                 if ($intersection_point !== true) {
-
                     imageline(
                         $this->image,
                         $center_x + $intersection_point['x'],
@@ -557,7 +604,6 @@ class Nautilus extends Agent
                         $this->black
                     );
                 } else {
-
                     imageline(
                         $this->image,
                         $center_x + 0,
@@ -570,9 +616,6 @@ class Nautilus extends Agent
             }
         }
     }
-
-
-
 
     public function get()
     {
@@ -592,10 +635,9 @@ class Nautilus extends Agent
         }
     }
 
-
     // https://rosettacode.org/wiki/Find_the_intersection_of_two_lines#Python
-    public function intersectLine($line1,$line2) {
-
+    public function intersectLine($line1, $line2)
+    {
         $Ax1 = $line1[0]['x'];
         $Ay1 = $line1[0]['y'];
         $Ax2 = $line1[1]['x'];
@@ -606,22 +648,28 @@ class Nautilus extends Agent
         $Bx2 = $line2[1]['x'];
         $By2 = $line2[1]['y'];
 
-//    """ returns a (x, y) tuple or None if there is no intersection """
+        //    """ returns a (x, y) tuple or None if there is no intersection """
         $d = ($By2 - $By1) * ($Ax2 - $Ax1) - ($Bx2 - $Bx1) * ($Ay2 - $Ay1);
         if ($d != 0) {
-            $uA = (($Bx2 - $Bx1) * ($Ay1 - $By1) - ($By2 - $By1) * ($Ax1 - $Bx1)) / $d;
-            $uB = (($Ax2 - $Ax1) * ($Ay1 - $By1) - ($Ay2 - $Ay1) * ($Ax1 - $Bx1)) / $d;
+            $uA =
+                (($Bx2 - $Bx1) * ($Ay1 - $By1) -
+                    ($By2 - $By1) * ($Ax1 - $Bx1)) /
+                $d;
+            $uB =
+                (($Ax2 - $Ax1) * ($Ay1 - $By1) -
+                    ($Ay2 - $Ay1) * ($Ax1 - $Bx1)) /
+                $d;
         } else {
             return true;
         }
 
-        if (!( ( (0 <= $uA) and ($uA  <= 1) ) and ( (0 <= $uB) and ($uB <= 1) ) )) {
+        if (!(0 <= $uA and $uA <= 1 and (0 <= $uB and $uB <= 1))) {
             return true;
         }
         $x = $Ax1 + $uA * ($Ax2 - $Ax1);
         $y = $Ay1 + $uA * ($Ay2 - $Ay1);
 
-        return ['x'=>$x, 'y'=>$y];
+        return ['x' => $x, 'y' => $y];
     }
 
     /**
@@ -759,21 +807,21 @@ class Nautilus extends Agent
                 $this->getNautilus();
 
                 $this->size = 4;
-                $this->response .= "Made a nautilus. Which will pass. ";
+                $this->response .= "Made a nautilus pattern. ";
                 return;
             }
         }
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['wedge', 'slice'];
-        $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
-        $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
+        $discriminators = ['nautilus', 'nautilii'];
+        $input_agent->aliases['nautilus'] = ['spiral', 'wheel'];
+        $input_agent->aliases['nautilii'] = ['spirals', 'wheels', 'nautiluses'];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;
         }
 
-        $keywords = ["uuid", "iterate", "pride", "flag", "hex"];
+        $keywords = ["pattern"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
