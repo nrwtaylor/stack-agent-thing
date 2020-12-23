@@ -1,6 +1,6 @@
 {
     "name": "nrwtaylor/stack-agent-thing",
-    "version": "0.1.3",
+    "version": "0.2.2",
     "description": "Stack Agent Thing framework",
     "require": {
         "slim/slim": "^3.0",

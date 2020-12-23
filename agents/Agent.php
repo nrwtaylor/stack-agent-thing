@@ -1841,7 +1841,6 @@ class Agent
 
         // For now just take the first match.
         // This allows for sophication in resolving multi agent responses.
-
         $this->responsive_agents = $responsive_agents;
     }
 

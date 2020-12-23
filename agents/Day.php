@@ -226,6 +226,7 @@ class Day extends Agent
         } else {
             $this->message = strtoupper($day_time);
         }
+        $this->day_time = $day_time;
     }
 
     public function twilightDay($text)
