@@ -30,6 +30,27 @@ class Read extends Agent
         $this->do_not_catalogue = false;
 
         $this->read_horizon = 6 * 60 * 60; // 6 hours
+
+        $this->initRead();
+    }
+
+    public function initRead()
+    {
+        // Settings this to false allows the stack
+        // to read any file on the file system.
+
+        // Default to true ie do not allow local read.
+
+        $this->do_not_read_filename = true; // true do not read.
+
+        if (
+            isset(
+                $this->thing->container['api']['read']['do_not_read_filename']
+            )
+        ) {
+            $this->do_not_read_filename =
+                $this->thing->container['api']['read']['do_not_read_filename'];
+        }
     }
 
     function run()
@@ -37,17 +58,28 @@ class Read extends Agent
         // Now have this->link potentially from reading subject
         $this->matched_sentences = [];
 
-        $this->robot_agent = new Robot($this->thing, $this->link);
+        $read_allowed = false;
+        if (
+            substr($this->link, 0, 4) === "http" or
+            substr($this->link, 0, 5) === "https"
+        ) {
+            $this->robot_agent = new Robot($this->thing, $this->link);
 
-        $robot_allowed = $this->robot_agent->robots_allowed(
-            $this->link,
-            $this->robot_agent->user_agent_short
-        );
+            $robot_allowed = $this->robot_agent->robots_allowed(
+                $this->link,
+                $this->robot_agent->user_agent_short
+            );
+            $read_allowed = $robot_allowed;
+            if ($robot_allowed === false) {
+                $this->response .= "Robot not allowed. ";
+            }
+        } else {
+            $read_allowed = true;
+        }
 
-        switch ($robot_allowed) {
+        switch ($read_allowed) {
             case false:
-                $this->response .=
-                    "Robot not allowed. " . $this->robot_agent->response;
+                $this->response .= "Read not allowed. ";
                 $this->do_not_cache = true;
                 $this->do_not_index = true;
                 break;
@@ -58,17 +90,9 @@ class Read extends Agent
                 $this->do_not_index = true;
                 break;
             case true:
-                // if (
-                //     $this->robot_agent->robots_allowed(
-                //         $this->link,
-                //         $this->robot_agent->user_agent_short
-                //     )
-                // ) {
                 $this->do_not_index = false;
-                $this->response .=
-                    "Robot " .
-                    $this->robot_agent->user_agent_short .
-                    " may read. ";
+
+                $this->response .= "Read allowed. ";
 
                 if (
                     substr($this->link, 0, 4) === "http" or
@@ -79,8 +103,10 @@ class Read extends Agent
                     $this->link =
                         $this->robot_agent->scheme . '://' . $this->link;
                 } else {
-                    return true;
-
+                    $this->response .= "Local file? ";
+                    if ($this->do_not_read_filename === true) {
+                        return true;
+                    }
                 }
                 // Populate $this->contents
                 $this->getUrl($this->link);
@@ -449,6 +475,10 @@ class Read extends Agent
         $uri_slug = $slug_agent->getSlug($uri);
         $file = $this->resource_path . 'read/' . $uri_slug;
 
+        if (!isset($this->contents) or $this->contents === null) {
+            $this->response .= "No contents found. ";
+            return;
+        }
         file_put_contents($file, $this->contents);
 
         // Stack cache
@@ -508,22 +538,22 @@ class Read extends Agent
             $this->response .=
                 "Last read " . $this->thing->human_time($last_seen) . " ago. ";
         }
+        $context = null;
+        if (isset($this->robot_agent)) {
+            $options = [
+                'http' => [
+                    'method' => "GET",
+                    'header' =>
+                        "User-Agent: " . $this->robot_agent->useragent . "\r\n",
+                ],
+            ];
 
-        $options = [
-            'http' => [
-                'method' => "GET",
-                'header' =>
-                    "User-Agent: " . $this->robot_agent->useragent . "\r\n",
-            ],
-        ];
-
-        $context = stream_context_create($options);
-
+            $context = stream_context_create($options);
+        }
         set_error_handler(function () {
             /* ignore errors */
         });
-        $data = @file_get_contents($data_source, false, $context);
-
+        $data = file_get_contents($data_source, false, $context);
         restore_error_handler();
 
         if ($data === false) {
@@ -533,9 +563,10 @@ class Read extends Agent
         if (isset($http_response_header[0])) {
             $response_string = $http_response_header[0];
         } else {
-
-
-            if (stripos($data_source,"txt") !== false) {$this->contents = $data; return;}
+            if (stripos($data_source, "txt") !== false) {
+                $this->contents = $data;
+                return;
+            }
 
             $this->thing->log('No response code header found.');
             return true;
@@ -790,9 +821,16 @@ class Read extends Agent
 
         $url = $url_agent->extractUrl($input);
 
-
         $url = $this->googleRead($url);
-        $this->url = $url;
+
+        $filename = "/" . $url;
+        if ($filename == $input) {
+            $this->url = $filename;
+        } else {
+            $this->url = $url;
+        }
+
+        //       $this->url = $url;
         $this->link = $this->url;
 
         // TODO /edit > /export?format=pdf

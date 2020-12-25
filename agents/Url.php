@@ -287,9 +287,9 @@ class Url extends Agent
 
         $urls = array_merge($urls, $match[0]);
         $urls = array_unique($urls);
+
         // Deal with spaces
         $urls = $this->filterUrls($urls);
-
         // TODO: Test.
         foreach ($urls as $i=>$url) {
 
@@ -389,7 +389,6 @@ class Url extends Agent
         if (isset($this->urls[0])) {
             $this->url = $this->urls[0];
         }
-
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
