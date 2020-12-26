@@ -20,9 +20,9 @@ class Interlink extends Agent
             include($file);
             $this->interlinks = $interlinks;
             $this->response .= "Loaded interlink file. ";
-    //        foreach($this->interlinks as $uuid=>$interlink) {
-    //        }
         }
+
+        $this->initInterlink();
 
     }
 
@@ -30,6 +30,12 @@ class Interlink extends Agent
     {
         $this->slug_agent = new Slug($this->thing, "slug");
         $this->ngram_agent = new Ngram($this->thing, "ngram");
+
+        $this->word_agent = new Word($this->thing, "word");
+        $this->word_agent->ewolWords();
+
+        $this->brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
+
     }
 
     public function run()
@@ -120,6 +126,7 @@ class Interlink extends Agent
 
         $paragraphs = $paragraph_agent->paragraphs;
         $interlinks = [];
+        $slug_list = [];
         foreach ($paragraphs as $i => $paragraph) {
             // Ignore empty paragraphs.
             $paragraph = trim($paragraph);
@@ -132,22 +139,38 @@ class Interlink extends Agent
             //$ngrams = $ngram_agent->getNgrams($paragraph, 3);
             $interlinks[$uuid] = [
                 'text' => $paragraph,
-                'slug_list' => $paragraph_slugs,
             ];
+            $slug_list[$uuid] = $paragraph_slugs;
         }
 
         // Make a list of uuids for each slug.
         // Make an array of slugs
+
+        $prior_uuid = null;
+        foreach ($interlinks as $uuid => $interlink) {
+            $interlinks[$uuid]['prior_uuid'] = $prior_uuid;
+            $prior_uuid = $uuid;
+        }
+
+        $posterior_uuid = null;
+        foreach (array_reverse($interlinks) as $uuid => $interlink) {
+            $interlinks[$uuid]['posterior_uuid'] = $posterior_uuid;
+            $posterior_uuid = $uuid;
+        }
+
+
+
+
         $slugs = [];
         foreach ($interlinks as $uuid => $interlink) {
-            if ($interlink['slug_list'] == []) {
+            if ($slug_list[$uuid] ==[]) {
                 continue;
             }
 
-            foreach ($interlink['slug_list'] as $i => $slug) {
-                if ($slug == "") {
-                    continue;
-                }
+            foreach ($slug_list[$uuid] as $i => $slug) {
+
+                if ($this->isInterlink($slug) === false) {continue;}
+
 
                 if (!isset($slugs[$slug][$uuid])) {
                     $slugs[$slug][$uuid] = 0;
@@ -157,8 +180,8 @@ class Interlink extends Agent
         }
 
         foreach ($interlinks as $uuid => $interlink) {
-            foreach ($interlink['slug_list'] as $i => $slug) {
-                if (!isset($slugs[$slug])) {continue;}  
+            foreach ($slug_list[$uuid] as $i => $slug) {
+                if (!isset($slugs[$slug])) {continue;}
 
                 $count = count($slugs[$slug]);
 
@@ -166,21 +189,55 @@ class Interlink extends Agent
                     continue;
                 }
 
+                unset($slugs[$slug][$uuid]);
                 $interlinks[$uuid]['slugs'][$slug] = $slugs[$slug];
             }
         }
 
-        //$this->txtInterlinks($interlinks);
-// For development.
-//        $this->echoInterlinks($interlinks);
         $this->saveInterlinks($interlinks);
-        return $this->interlinks;
+        return $interlinks;
     }
 
     public function echoInterlinks($interlinks) {
         if (!isset($this->txt)) {$this->txtInterlinks($interlinks);}
         echo $this->txt;
     }
+
+    public function isInterlink($text) {
+
+        if ($text == "") {
+            return false;
+        }
+
+        if (isset($this->word_agent->ewol_dictionary[$text])) {
+            return false; 
+        }
+
+        $tags = $this->brilltagger_agent->tag($text);
+//var_dump($tags);
+        $tokens = explode("-",$text);
+        if (isset($tokens[0])) {
+
+            if ($tokens[0] == "and") {return false;}
+            if (end($tokens) == "and") {return false;}
+            if (mb_strlen($tokens[0]) == 1) {return false;}
+
+            if ($tokens[0] == "the") {return false;}
+            if (end($tokens) == "the") {return false;}
+
+            if ($tokens[0] == "of") {return false;}
+            if (end($tokens) == "of") {return false;}
+
+
+
+            if ($tokens[0] == "a") {return false;}
+            if (end($tokens) == "a") {return false;}
+
+        }
+
+        return true;
+    }
+
 
     public function txtInterlinks($interlinks)
     {
@@ -205,6 +262,11 @@ class Interlink extends Agent
     public function makeTXT() {
 
         $this->thing_report['txt'] = $this->txt;
+
+    }
+
+    public function memoryInterlinks($interlinks) {
+
 
     }
 
