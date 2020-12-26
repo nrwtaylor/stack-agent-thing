@@ -5,21 +5,34 @@ class Interlink extends Agent
 {
     public $var = 'hello';
 
-    function init()
+    public function init()
     {
+
+        $this->path = null;
+        if (isset($this->thing->container['stack']['path'])) {
+            $this->path = $this->thing->container['stack']['path'];
+        }
+
+        $file = $this->path . 'test.php';
+
+        if (file_exists($file)) {
+
+            include($file);
+            $this->interlinks = $interlinks;
+            $this->response .= "Loaded interlink file. ";
+    //        foreach($this->interlinks as $uuid=>$interlink) {
+    //        }
+        }
+
     }
 
     public function initInterlink()
     {
-        //if (!isset($this->slug_agent)) {
         $this->slug_agent = new Slug($this->thing, "slug");
-        //}
-        //if (!isset($this->ngram_agent)) {
         $this->ngram_agent = new Ngram($this->thing, "ngram");
-        //}
     }
 
-    function run()
+    public function run()
     {
         $this->runInterlink();
     }
@@ -41,8 +54,6 @@ class Interlink extends Agent
         }
 
         $slugs = [];
-        //$ngrams = $this->ngram_agent->getNgrams($text, 3);
-        //$ngrams = $this->getNgrams($text, 3);
 
         $arr = explode('\%20', trim(strtolower($text)));
 
@@ -71,7 +82,32 @@ class Interlink extends Agent
         return $slugs;
     }
 
-    public function runInterlink()
+    public function runInterlink() {
+        if ($this->interlink_make_flag === true) {
+            $this->interlinks = $this->makeInterlink();
+            $this->response .= "Built new interlink file. ";
+        }
+
+        $this->txtInterlinks($this->interlinks);
+
+
+        if ($this->agent_input == null) {
+            $response = "Interlinker.";
+
+            $this->interlink_message = $response; // mewsage?
+        } else {
+            $this->interlink_message = $this->agent_input;
+        }
+
+    }
+
+    public function makeWeb() {
+        $web = "";
+        $this->thing_report['web'] = $web;
+
+    }
+
+    public function makeInterlink()
     {
         $filename =
             "/home/nick/codebase/stackr-resources/calendar/calendar.txt";
@@ -112,9 +148,6 @@ class Interlink extends Agent
                 if ($slug == "") {
                     continue;
                 }
-                //if (!isset($slug)) {
-                //    $slugs[$slug];
-                //}
 
                 if (!isset($slugs[$slug][$uuid])) {
                     $slugs[$slug][$uuid] = 0;
@@ -137,18 +170,11 @@ class Interlink extends Agent
             }
         }
 
-        $this->txtInterlinks($interlinks);
+        //$this->txtInterlinks($interlinks);
 // For development.
 //        $this->echoInterlinks($interlinks);
         $this->saveInterlinks($interlinks);
-
-        if ($this->agent_input == null) {
-            $response = "N/A.";
-
-            $this->interlink_message = $response; // mewsage?
-        } else {
-            $this->interlink_message = $this->agent_input;
-        }
+        return $this->interlinks;
     }
 
     public function echoInterlinks($interlinks) {
@@ -184,13 +210,11 @@ class Interlink extends Agent
 
     public function saveInterlinks($interlinks)
     {
-        $path = null;
-        if (isset($this->thing->container['stack']['path'])) {
-            $path = $this->thing->container['stack']['path'];
-        }
 
         // TODO - Save a readable require file.
-        file_put_contents($path . 'test.php', print_r($interlinks, true));
+        $file = $this->path . 'test.php';
+        file_put_contents($file, "<?php\n\$interlinks = ".var_export($interlinks, true).";\n?>");
+
     }
 
     public function respondResponse()
@@ -203,15 +227,17 @@ class Interlink extends Agent
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
+        if ($this->agent_input == null) {
 
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $thing_report['info'] = $message_thing->thing_report['info'];
+        }
     }
 
     function makeSMS()
     {
         $this->node_list = ["interlink" => ["interlink"]];
-        $sms = "INTERLINK | " . $this->interlink_message;
+        $sms = "INTERLINK | " . $this->interlink_message . " " . $this->response;
         $this->sms_message = "" . $sms;
         $this->thing_report['sms'] = $sms;
     }
@@ -224,5 +250,12 @@ class Interlink extends Agent
 
     public function readSubject()
     {
+        $input = $this->input;
+
+        $this->interlink_make_flag = false;
+        if (stripos($input, "make") !== false) {
+        $this->interlink_make_flag = true;
+        }
+
     }
 }
