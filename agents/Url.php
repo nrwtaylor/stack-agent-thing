@@ -214,6 +214,19 @@ class Url extends Agent
         $this->urls = $urls;
     }
 
+    public function restoreUrl($text)
+    {
+        $urls = $this->extractUrls($text);
+
+        foreach ($urls as $i => $url) {
+            $link = '<a href="' . $url . '">' . $url . '</a>';
+            $text = str_replace($url, $link, $text);
+        }
+
+        $restored_text = $text;
+        return $restored_text;
+    }
+
     public function filterUrls($urls = null)
     {
         if (!is_array($urls)) {
@@ -288,17 +301,28 @@ class Url extends Agent
         $urls = array_merge($urls, $match[0]);
         $urls = array_unique($urls);
 
+        // TEST
+        foreach ($urls as $i => $url) {
+            if (strtotime($url) !== false) {
+                unset($urls[$i]);
+                continue;
+                //var_dump($url); var_dump(strtotime($url));
+            }
+
+            if (is_numeric(str_replace(".", "", $url))) {
+                unset($urls[$i]);
+                continue;
+            }
+        }
+
         // Deal with spaces
         $urls = $this->filterUrls($urls);
         // TODO: Test.
-        foreach ($urls as $i=>$url) {
-
+        foreach ($urls as $i => $url) {
             if (stripos($url, "&lt;") !== false) {
-
                 $tokens = explode("&lt;", $url);
-                $urls[$i] = rtrim($tokens[1],"&gt");
+                $urls[$i] = rtrim($tokens[1], "&gt");
             }
-
         }
 
         return $urls;

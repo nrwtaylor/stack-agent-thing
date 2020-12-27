@@ -30,9 +30,6 @@ class Uuid extends Agent
             "Makes a universally unique identifier. Try NUUID.";
 
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
-//if (isset($this->thing->thing->created_at)) {
-//        $this->created_at = strtotime($this->thing->thing->created_at);
-//}
     }
 
     /**
@@ -193,7 +190,6 @@ class Uuid extends Agent
             $this->thing->log(
                 'found a uuid (' . $this->uuid . ') in the text.'
             );
-            //$this->response .= "Extracted a UUID. ";
             return $this->uuid;
         }
 
@@ -278,20 +274,6 @@ class Uuid extends Agent
     {
         $input = $this->input;
         $this->extractUuid($input);
-        /*
-        foreach ($this->uuids as $i => $uuid) {
-            $t = new Thing($uuid);
-            if ($t->thing !== false) {
-                if ($t->from == hash('sha256', $this->from)) {
-                    $this->response .= 'Channel ' . $uuid . '. ';
-                } else {
-                    $this->response .= 'Recognized ' . $uuid . '. ';
-                }
-            } else {
-                $this->response .= 'Did not recognize ' . $uuid . '. ';
-            }
-        }
-*/
 
         if ($this->uuids == []) {
             $this->response .= "Got uuid " . $this->uuid . ". ";

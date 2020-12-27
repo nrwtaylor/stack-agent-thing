@@ -127,18 +127,22 @@ class Interlink extends Agent
         $paragraphs = $paragraph_agent->paragraphs;
         $interlinks = [];
         $slug_list = [];
+        $index = 0;
         foreach ($paragraphs as $i => $paragraph) {
             // Ignore empty paragraphs.
             $paragraph = trim($paragraph);
             if ($paragraph == "") {
                 continue;
             }
+
+            $index += 1;
             $uuid = $this->thing->getUUid();
 
             $paragraph_slugs = $this->slugsInterlink($paragraph);
             //$ngrams = $ngram_agent->getNgrams($paragraph, 3);
             $interlinks[$uuid] = [
                 'text' => $paragraph,
+                'index'=> $index,
             ];
             $slug_list[$uuid] = $paragraph_slugs;
         }
@@ -146,6 +150,7 @@ class Interlink extends Agent
         // Make a list of uuids for each slug.
         // Make an array of slugs
 
+        // Make references to paragraph before and after.
         $prior_uuid = null;
         foreach ($interlinks as $uuid => $interlink) {
             $interlinks[$uuid]['prior_uuid'] = $prior_uuid;
@@ -158,9 +163,6 @@ class Interlink extends Agent
             $posterior_uuid = $uuid;
         }
 
-
-
-
         $slugs = [];
         foreach ($interlinks as $uuid => $interlink) {
             if ($slug_list[$uuid] ==[]) {
@@ -172,11 +174,12 @@ class Interlink extends Agent
                 if ($this->isInterlink($slug) === false) {continue;}
 
 
-                if (!isset($slugs[$slug][$uuid])) {
-                    $slugs[$slug][$uuid] = 0;
+                if (!isset($slugs[$slug][$uuid]['count'])) {
+                    $slugs[$slug][$uuid]['count'] = 0;
                 }
-                $slugs[$slug][$uuid] += 1;
+                $slugs[$slug][$uuid]['count'] += 1;
             }
+
         }
 
         foreach ($interlinks as $uuid => $interlink) {
@@ -193,6 +196,23 @@ class Interlink extends Agent
                 $interlinks[$uuid]['slugs'][$slug] = $slugs[$slug];
             }
         }
+
+        foreach ($interlinks as $uuid=>$interlink) {
+            if (!isset($interlink['slugs'])) {continue;}
+            foreach($interlink['slugs'] as $slug=>$slug_uuids) {
+                foreach($slug_uuids as $i=>$slug_uuid) {
+                //echo $uuid ." " . $i . "\n";
+                $distance = $interlinks[$uuid]['index'] - $interlinks[$i]['index'];
+                //echo $distance ."\n";
+
+                $interlinks[$uuid]['slugs'][$slug][$i]['distance'] = $distance;
+                }
+
+            }
+
+
+        }
+
 
         $this->saveInterlinks($interlinks);
         return $interlinks;

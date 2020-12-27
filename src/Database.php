@@ -505,7 +505,6 @@ return true;
             $sth->bindParam("uuid", $this->uuid);
             $sth->execute();
             $thing = $sth->fetchObject();
-
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -516,8 +515,20 @@ return true;
                 //            $t = new Thing(null);
                 //            $t->Create("stack", "error", 'Get ' . $e->getCode());
             }
-
             $thing = false;
+        }
+
+        if ($thing === false) {
+            $t = $this->getMemory($this->uuid);
+            if ($t !== false) {
+                $thing = new Thing(null);
+                $thing->created_at = null;
+                $thing->nom_to = null;
+                $thing->nom_from = null;
+                $thing->task = "empty task";
+                $thing->variables = json_encode($t, true);
+                $thing->settings = null;
+            }
         }
 
         $sth = null;
@@ -528,13 +539,47 @@ return true;
                 'Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing ' .
                 $this->web_prefix .
                 'api/thing/<32 characters>.',
-            'help' => 'Check your junk/spam folder.'
+            'help' => 'Check your junk/spam folder.',
         ];
 
         $this->test();
 
         return $thingreport;
     }
+
+    // Plan to deprecate getMemcached terminology.
+    public function getMemory($text = null)
+    {
+        //        if (isset($this->memory)) {
+        //            return;
+        //        }
+
+        // Null?
+        // $this->mem_cached = null;
+        // Fail to stack php memory code if Memcached is not availble.
+        if (!isset($this->memory)) {
+            try {
+                $this->memory = new \Memcached(); //point 2.
+                $this->memory->addServer("127.0.0.1", 11211);
+            } catch (\Throwable $t) {
+                // Failto
+                $this->memory = new Memory($this->thing, "memory");
+                //restore_error_handler();
+                $this->thing->log(
+                    'caught memcached throwable. made memory',
+                    "WARNING"
+                );
+                return;
+            } catch (\Error $ex) {
+                $this->thing->log('caught memcached error.', "WARNING");
+                return true;
+            }
+        }
+
+        $memory = $this->memory->get($text);
+        return $memory;
+    }
+
 
     /**
      *

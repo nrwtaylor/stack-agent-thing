@@ -940,7 +940,7 @@ class Year extends Agent
         }
         $year = false;
 
-        if ($this->years == []) {return false;}
+        if ((isset($this->years)) and ($this->years == [])) {return false;}
 
         if (!isset($this->years)) {
             $years = $this->extractYears($text);
