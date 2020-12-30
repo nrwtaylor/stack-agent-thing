@@ -1443,7 +1443,7 @@ class Agent
      * @param unknown $n     (optional)
      * @return unknown
      */
-    private function getNgrams($input, $n = 3)
+    public function getNgrams($input, $n = 3)
     {
         $words = explode(' ', $input);
         $ngrams = [];
