@@ -91,11 +91,15 @@ class Travelogue extends Agent
                 }
             }
             foreach ($arr as $uuid => $slugs) {
+                $web .= '<div style="margin-bottom: 16px">';
                 $link = $this->linkTravelogue($uuid, "link");
                 $web .= $link . " ";
-
+//$t = $this->slugtextTravelogue($slugs);
                 $t = implode(" ", $slugs);
-                $web .= $this->interlinkTravelogue($uuid)['text'] . "<br>";
+                $web .= " [". $t . "] ";
+$text = $this->interlinkTravelogue($uuid)['text'];
+$text = $url_agent->restoreUrl($text);
+                $web .= $text . "</div>";
             }
             $web .= "</div>";
         }
@@ -142,7 +146,24 @@ class Travelogue extends Agent
             $text .
             '</a>';
     }
+/*
+    public function slugtextTravelogue($slugs) {
 
+usort($slugs, function ($a, $b) { return (strlen($a) <=> strlen($b)); });
+foreach($slugs as $i=>$slug) {
+
+
+    $a = array_filter($slugs, function($el) use ($slug) {
+        return ( strpos($el, $slug) !== false );
+    });
+if (count($a) > 1)) {unset($slugs[$i]);}
+}
+                $t = implode(" ", $slugs);
+
+return $t;
+
+    }
+*/
     public function interlinkTravelogue($uuid)
     {
         $interlink = $this->getMemory($uuid);
