@@ -29,7 +29,6 @@ class Stamp extends Agent
         ];
         $this->current_time = $this->thing->json->microtime();
 
-
         $this->default_stamp = "X";
 
         // Default is not to show end user microtime.
@@ -53,7 +52,7 @@ class Stamp extends Agent
     function makeStamp()
     {
         $stamp_text = "";
-        $stamps = ['juliett','zulu', 'nuuid', 'utc', 'time', 'uuid'];
+        $stamps = ['juliett', 'zulu', 'nuuid', 'utc', 'time', 'uuid'];
 
         usort($stamps, function ($a, $b) {
             return strlen($b) <=> strlen($a);
@@ -61,24 +60,34 @@ class Stamp extends Agent
 
         $stripped_input = $this->input;
         $found_stamps = [];
+
+        $tokens = explode(" ", $this->input);
         foreach ($stamps as $stamp_name) {
-            $score = stripos($this->input, $stamp_name);
-            if ($score !== false) {
-                foreach ($stamps as $check_stamp_name) {
-                    if (
-                        stripos($check_stamp_name, $stamp_name) !== false and
-                        $stamp_name != $check_stamp_name
-                    ) {
-                        continue 2;
-                    }
+            foreach ($tokens as $i => $token) {
+                //$score = stripos($this->input, $stamp_name);
+                $score = false;
+                if (strtolower($token) == strtolower($stamp_name)) {
+                    //echo  $token . " " . $stamp_name ."\n";
+
+                    $score = count($tokens) - $i + 1;
                 }
+                if ($score !== false) {
+                    //               foreach ($stamps as $check_stamp_name) {
+                    //                    if (
+                    //                        stripos($check_stamp_name, $stamp_name) !== false and
+                    //                        $stamp_name != $check_stamp_name
+                    //                    ) {
+                    //                        continue 2;
+                    //                   }
+                    //                }
 
-                $stamp = ['score' => $score];
+                    $stamp = ['score' => $score];
 
-                $found_stamps[$stamp_name] = $stamp;
-                $stripped_input = trim(
-                    str_replace($stamp_name, " ", $stripped_input)
-                );
+                    $found_stamps[$stamp_name] = $stamp;
+                    $stripped_input = trim(
+                        str_replace($stamp_name, " ", $stripped_input)
+                    );
+                }
             }
         }
 
@@ -89,10 +98,15 @@ class Stamp extends Agent
         );
 
         $score = array_column($found_stamps, 'score');
-        array_multisort($score, SORT_ASC, $found_stamps);
+        array_multisort($score, SORT_DESC, $found_stamps);
 
         // If no stamps matched, return default nuuid zulu.
-        if ($found_stamps == []) {$found_stamps = ['nuuid'=>['score'=>1], 'zulu'=>['score'=>1]];}
+        if ($found_stamps == []) {
+            $found_stamps = [
+                'nuuid' => ['score' => 1],
+                'zulu' => ['score' => 1],
+            ];
+        }
 
         foreach ($found_stamps as $stamp_name => $stamp) {
             ${$stamp_name . "_stamp"} = $this->{$stamp_name . "Stamp"}();
@@ -138,7 +152,9 @@ class Stamp extends Agent
         $time_agent = new Time($this->thing, "time");
 
         $this->response .=
-            "Returns the observer's local time - " . $time_agent->time_zone . ". ";
+            "Returns the observer's local time - " .
+            $time_agent->time_zone .
+            ". ";
 
         $time_agent->doTime();
 
@@ -148,7 +164,6 @@ class Stamp extends Agent
 
         return $juliettstamp;
     }
-
 
     function nuuidStamp($input = null)
     {
@@ -260,30 +275,30 @@ class Stamp extends Agent
 
         $m = '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
 
-
         $stamp = $this->default_stamp;
         if (isset($this->stamp)) {
             $stamp = $this->stamp;
         }
 
-
-
         $parts = explode(" ", $stamp);
 
-        if ((!isset($parts[1])) and ($parts[0] == "")) {
+        if (!isset($parts[1]) and $parts[0] == "") {
             $stamp .= "Empty";
         }
 
-        if ((isset($parts[0])) and (isset($parts[1])) ) {
-        $stamp = $parts[0] . " " . $parts[1];
-        if ($this->micro_time_flag === true) {
-            $stamp .= $this->stamp;
-        }
+        if (isset($parts[0]) and isset($parts[1])) {
+            $stamp = $parts[0] . " " . $parts[1];
+            if ($this->micro_time_flag === true) {
+                $stamp .= $this->stamp;
+            }
         }
 
         //        $m .= $timestamp;
 
-        if ((isset($this->time_zone)) and ($this->default_time_zone != $this->time_zone)) {
+        if (
+            isset($this->time_zone) and
+            $this->default_time_zone != $this->time_zone
+        ) {
             $stamp .= " " . $this->time_zone;
         }
         $stamp .= "<br>";
@@ -298,9 +313,10 @@ class Stamp extends Agent
     {
         $sms_message = "STAMP";
 
-
         $stamp = "X";
-        if (isset($this->stamp)) {$stamp = trim($this->stamp);}
+        if (isset($this->stamp)) {
+            $stamp = trim($this->stamp);
+        }
 
         if ($this->micro_time_flag === true) {
             $stamp = $this->timestamp;

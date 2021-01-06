@@ -213,6 +213,15 @@ class Interlink extends Agent
 
         }
 
+        // Extract time
+if (true === false) {
+        $dateline_agent = new Dateline($this->thing,"dateline");
+        foreach ($interlinks as $uuid=>$interlink) {
+            $dateline = $dateline_agent->extractDateline($interlink['text']);
+            $interlinks[$uuid]['dateline'] = $dateline;
+        }
+}
+
 
         $this->saveInterlinks($interlinks);
         return $interlinks;
