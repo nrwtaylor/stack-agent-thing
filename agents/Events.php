@@ -372,10 +372,13 @@ if ($events_variable !== false) {
 
         //var_dump($events_variable);
         //$refreshed_at = $events['refreshed_at'];
+$events = [];
+if (isset($events_variable['events'])) {
         $events = $events_variable['events'];
         if (isset($this->events) and $this->events != null) {
             $events = array_merge($this->events, $events);
         }
+}
 
         $cache_request_flag = false;
         if (isset($events_variable['cache_request_flag'])) {

@@ -1829,6 +1829,7 @@ class Agent
             }
             if ($this->getAgent($agent_class_name, $agent_input)) {
                 $score = 1;
+                $score = $this->scoreAgent($agent_class_name);
                 $responsive_agents[] = [
                     "agent_name" => $agent_class_name,
                     "thing_report" => $this->thing_report,
@@ -1838,10 +1839,30 @@ class Agent
                 //return $this->thing_report;
             }
         }
+        // Use length of matched agent name as proxy for match closeness.
+        // If more than one word.
+        //$responsive_agents = $this->responsive_agents;
+        usort($responsive_agents, function ($a, $b) {
+            return -1 * ($a['score'] - $b['score']);
+        });
 
         // For now just take the first match.
         // This allows for sophication in resolving multi agent responses.
         $this->responsive_agents = $responsive_agents;
+    }
+
+    public function scoreAgent($text)
+    {
+        $pieces = explode(" ", $text);
+
+        $num_pieces = count($pieces);
+        //foreach($pieces as $i=>$piece) {
+
+        $score = strlen($text) * pow(10, $num_pieces);
+
+        //}
+
+        return $score;
     }
 
     /**
