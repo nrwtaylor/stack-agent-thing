@@ -27,7 +27,7 @@ lamp:  ## Install LAMP stack
 	@echo "===== Installing LAMP stack ==============="
 	sudo apt --assume-yes install apache2
 	-sudo apt --assume-yes install mysql-server
-	sudo apt --assume-yes install php7.2 libapache2-mod-php php-mysql
+	sudo apt --assume-yes install php7.4 libapache2-mod-php php-mysql
 	sudo apt --assume-yes install php-curl php-json php-cgi
 # check the default state in apache2.conf
 	sudo sed -i 's/^KeepAlive Off/KeepAlive On/g' /etc/apache2/apache2.conf
