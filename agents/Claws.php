@@ -78,8 +78,24 @@ class Claws extends Agent
     public function readSubject()
     {
         $input = $this->input;
-        $filtered_input = $this->assert($input);
+//        $filtered_input = $this->assert($input);
+//        $this->filenameClaws($filtered_input);
+
+        $string = $input;
+        $str_pattern = 'claws';
+        $str_replacement = '';
+        $filtered_input = $input;
+        if (strpos($string, $str_pattern) !== false) {
+            $occurrence = strpos($string, $str_pattern);
+            $filtered_input = substr_replace(
+                $string,
+                $str_replacement,
+                strpos($string, $str_pattern),
+                strlen($str_pattern)
+            );
+        }
         $this->filenameClaws($filtered_input);
+
 
 var_dump($this->filename);
 
