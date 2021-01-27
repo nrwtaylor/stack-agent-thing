@@ -71,8 +71,8 @@ class Claws extends Agent
 
     public function filenameClaws($text = null) {
        if ($text == null) {return true;}
-
-       $this->filename = $text;
+       $filename = trim($text, '"');
+       $this->filename = $filename;
     }
 
     public function readSubject()
@@ -87,6 +87,13 @@ $text = null;
 if (is_string($this->filename)) {
         $text = file_get_contents($this->filename);
 }
+
+// See what we get from Call.
+
+//$call_agent = new Call($this->thing, "call");
+
+
+
 
 var_dump($text);
 
