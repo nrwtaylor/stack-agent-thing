@@ -72,7 +72,16 @@ class Claws extends Agent
     public function filenameClaws($text = null) {
        if ($text == null) {return true;}
        $filename = trim($text, '"');
-       $this->filename = $filename;
+     //  $this->filename = $filename;
+       if ((is_string($filename)) and (file_exists($filename))) {
+        $text = file_get_contents($filename);
+       }
+       return $text;
+    }
+
+    public function readClaws($text = null)
+    {
+        var_dump($text);
     }
 
     public function readSubject()
@@ -94,24 +103,26 @@ class Claws extends Agent
                 strlen($str_pattern)
             );
         }
-        $this->filenameClaws($filtered_input);
+        $tokens=explode(" ",$filtered_input);
+        foreach($tokens as $i=>$token) {
+          $filename=trim($token);
+//        $filtered_input=trim($filtered_input);
+// Delegating contents to agents for processing
+          $contents = $this->filenameClaws($filename);
+          $url_agent = new Url($this->thing, "url");
+          $t = $url_agent->extractUrls($contents);
+        var_dump($t);
+        }
 
-
-var_dump($this->filename);
-
-$text = null;
-if (is_string($this->filename)) {
-        $text = file_get_contents($this->filename);
-}
-
+// get an MH reader to clean up the format
 // See what we get from Call.
-
 //$call_agent = new Call($this->thing, "call");
 
-
-
-
-var_dump($text);
+// desired actions - priority and focuses
+// 1. insert with conference link into when calendar
+// 2. take conference link to forward it in an email (?)
+// 3. clickable action to connect to conference link (?)
+// 4. include subject of original email
 
         return false;
     }
