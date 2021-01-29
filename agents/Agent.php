@@ -244,7 +244,7 @@ class Agent
         And add a generic useAgent call if there is no useAgent method in the class.
        */
 
-       $pieces = preg_split('/(?=[A-Z])/',$agent_function);
+       $pieces = preg_split('/(?=[A-Z])/',$agent_function,2);
 
        $agent_class_name = "Agent";
        if (isset($pieces[1])) {$agent_class_name = $pieces[1];}
@@ -278,6 +278,10 @@ class Agent
 
        $agent_namespace_names[] = $agent_namespace_name;
 
+       $agent_namespace_names[] =
+                '\\Nrwtaylor\\StackAgentThing\\' . strtoupper($agent_class_name);
+
+
        // Try plural and singular variants of agent name.
        if ((substr($agent_namespace_name, -2)) == 'es') {
            $agent_namespace_names[] = rtrim($agent_namespace_name, 'es');
@@ -289,7 +293,7 @@ class Agent
        }
 
        foreach($agent_namespace_names as $i=>$agent_namespace_name_variant) {
-
+var_dump($agent_namespace_name_variant);
            if(method_exists($agent_namespace_name_variant, $function_name))
            {
      	       $agent_handler = new $agent_namespace_name_variant($this->thing, $agent_input);

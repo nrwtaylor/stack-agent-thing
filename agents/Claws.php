@@ -146,7 +146,8 @@ $line = "test item";
           $mh_agent = new MH($this->thing, "mh");
           $contents = $mh_agent->textMH($contents);
 
-$meta = $mh_agent->metaMH($contents);
+//$meta = $mh_agent->metaMH($contents);
+$meta = $this->metaMH($contents);
 var_dump("Claws metaMH response");
 var_dump($meta);
 
