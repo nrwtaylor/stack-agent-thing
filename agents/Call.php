@@ -153,23 +153,70 @@ class Call extends Agent
     // TODO: Test extraction of telephone numbers
     public function readCall($text = null)
     {
-        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
+        $service="X";
+        $password="X";
+        $access_code="X";
+        $url="X";
+        $urls=[];
+        $host_url="X";
+        $telephone_numbers = [];
 
-        if (file_exists($file)) {
-            $text = file_get_contents($file);
-        }
+//        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
+
+//        if (file_exists($file)) {
+//            $text = file_get_contents($file);
+//        }
 
         $url_agent = new Url($this->thing, "url");
 
-        $this->urls = $url_agent->extractUrls($text);
+        $urls = $url_agent->extractUrls($text);
 
         $telephonenumber_agent = new Telephonenumber(
             $this->thing,
             "telephonenumber"
         );
-        $this->telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
             $text
         );
+
+// refactor as select case.
+
+            if (stripos($text, "zoom") !== false) {
+                $zoom_agent = new Zoom($this->thing, "zoom");
+		$zoom_agent->readZoom($text);
+                $service = 'zoom';
+                $password = $zoom_agent->password;
+                $access_code = $zoom_agent->access_code;
+                $url = $zoom_agent->url;
+                $urls = $zoom_agent->urls;
+                $host_url = $zoom_agent->host_url;
+
+                $telephone_numbers = $zoom_agent->telephone_numbers;
+
+            }
+
+            if (stripos($text, "webex") !== false) {
+                $service = 'webex';
+                $webex_agent = new Webex($this->thing, "webex");
+                $webex_agent->readWebex($text);
+
+                $password = $webex_agent->password;
+                $access_code = $webex_agent->access_code;
+                $url = $webex_agent->url;
+                $host_url = $webex_agent->host_url;
+
+                $telephone_numbers = $webex_agent->telephone_numbers;
+
+            }
+                $call = ['service'=>$service,
+'password'=>$password,
+"access_code"=>$access_code,
+"url"=>$url,
+"urls"=>$urls,
+"host_url"=>$host_url,
+"telephone_numbers"=>$telephone_numbers];
+
+return $call;
 
     }
 

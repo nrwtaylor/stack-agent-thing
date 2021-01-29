@@ -124,11 +124,11 @@ class Webex extends Agent
 
     public function readWebex($text = null)
     {
-        $file = $this->resource_path . 'call/call-test' . '.txt';
+ //       $file = $this->resource_path . 'call/call-test' . '.txt';
 
-        if (file_exists($file)) {
-            $text = file_get_contents($file);
-        }
+ //       if (file_exists($file)) {
+ //           $text = file_get_contents($file);
+ //       }
         $this->access_code = $this->accesscodeWebex($text);
         $this->password = $this->passwordWebex($text);
 

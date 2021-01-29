@@ -81,14 +81,42 @@ class Claws extends Agent
 
     public function readClaws($text = null)
     {
+        var_dump("Claws readClaws");
         var_dump($text);
+    }
+
+    public function whenClaws() {
+
+if ($this->claws_when_flag != "on") {return;}
+
+// Code to write When calendar line item goes here.
+
+// Build entry for when calendar
+$line = "test item";
+
+
+        $this->writeWhen($line);
+        $this->response .= "Wrote item to When calendar file. ";
+
     }
 
     public function readSubject()
     {
+
         $input = $this->input;
+
+// Note for dev.
+// Try this as $this->assert($input, false).
+
 //        $filtered_input = $this->assert($input);
 //        $this->filenameClaws($filtered_input);
+
+        // Recognize if the instruction has "when" in it.
+        // Set a flag so that we can later create a calendar item if needed.
+        $indicators = [
+            'when'=>['when']
+        ];
+        $this->flagAgent($indicators, $input);
 
         $string = $input;
         $str_pattern = 'claws';
@@ -103,15 +131,41 @@ class Claws extends Agent
                 strlen($str_pattern)
             );
         }
+
+// See note above to re-factor above.
+
         $tokens=explode(" ",$filtered_input);
         foreach($tokens as $i=>$token) {
           $filename=trim($token);
-//        $filtered_input=trim($filtered_input);
+
 // Delegating contents to agents for processing
           $contents = $this->filenameClaws($filename);
+
+// Pass contents through MH routine to remove trailing =
+
+          $mh_agent = new MH($this->thing, "mh");
+          $contents = $mh_agent->textMH($contents);
+
+$meta = $mh_agent->metaMH($contents);
+var_dump("Claws metaMH response");
+var_dump($meta);
+
+$call = $this->readCall($contents);
+var_dump("Claws readCall response");
+var_dump($call);
+// Test output.
+
+// dev Handle non-snake case agent names (all caps).
+//$contents = $this->textMH($contents);
+
+
           $url_agent = new Url($this->thing, "url");
           $t = $url_agent->extractUrls($contents);
-        var_dump($t);
+
+// Try replacing with this.
+// $t = $this->extractUrls($contents);
+var_dump("Claws extractUrls response");
+var_dump($t);
         }
 
 // get an MH reader to clean up the format

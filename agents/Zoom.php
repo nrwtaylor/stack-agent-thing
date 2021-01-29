@@ -127,11 +127,11 @@ class Zoom extends Agent
 
     public function readZoom($text = null)
     {
-        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
+//        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
-        if (file_exists($file)) {
-            $text = file_get_contents($file);
-        }
+//        if (file_exists($file)) {
+//            $text = file_get_contents($file);
+//        }
         $this->access_code = $this->accesscodeZoom($text);
         $this->password = $this->passwordZoom($text);
 

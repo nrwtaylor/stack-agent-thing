@@ -349,6 +349,14 @@ class When extends Agent
         // TODO - Read When file.
     }
 
+    public function writeWhen($line, $file = null) {
+
+       if ($file == null) {$file = $this->calendar_location;}
+       file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
+
+    }
+
+
     public function readSubject()
     {
         $input = $this->subject;
