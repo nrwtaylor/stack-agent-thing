@@ -207,6 +207,7 @@ class At extends Agent
      * @param unknown $input
      * @return unknown
      */
+/*
     function isInput($input)
     {
         if ($input === false) {
@@ -230,7 +231,7 @@ class At extends Agent
 
         return true;
     }
-
+*/
     /**
      *
      * @param unknown $input (optional)

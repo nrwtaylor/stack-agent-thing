@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
  * Agent.php
  *
@@ -232,8 +232,9 @@ class Agent
     }
 
     // TODO DEV?
-    public function __call($agent_function, $args) {
-       /*
+    public function __call($agent_function, $args)
+    {
+        /*
         Generalize this pattern from agents.
         $agent_handler = new $agent_namespace_name($this->thing, $agent_input);
         $response = $agent_handler->functionAgent($text);
@@ -244,90 +245,104 @@ class Agent
         And add a generic useAgent call if there is no useAgent method in the class.
        */
 
-       $pieces = preg_split('/(?=[A-Z])/',$agent_function,2);
+        $pieces = preg_split('/(?=[A-Z])/', $agent_function, 2);
 
-       $agent_class_name = "Agent";
-       if (isset($pieces[1])) {$agent_class_name = $pieces[1];}
+        $agent_class_name = "Agent";
+        if (isset($pieces[1])) {
+            $agent_class_name = $pieces[1];
+        }
 
-       $agent_name = strtolower($agent_class_name);
+        $agent_name = strtolower($agent_class_name);
 
-       // Get the first "bit" of the function name.
-       // ie use from useHook.
-       $function_primitive_name = "use";
-       if (isset($pieces[0])) {$function_primitive_name = $pieces[0];}
+        // Get the first "bit" of the function name.
+        // ie use from useHook.
+        $function_primitive_name = "use";
+        if (isset($pieces[0])) {
+            $function_primitive_name = $pieces[0];
+        }
 
+        if ($agent_name == $this->agent_name) {
+            return false;
+        }
 
-       if ($agent_name == $this->agent_name) {
-           return false;
-       }
+        // Looking for the function in the namespace functionAgent.
+        $function_name = $agent_function;
 
-       // Looking for the function in the namespace functionAgent.
-       $function_name = $agent_function;
+        //echo $agent_class_name . " " . $function_name . " __call called.\n";
 
-       //echo $agent_class_name . " " . $function_name . " __call called.\n";
+        // Allow for customizing this later.
+        $agent_input = $agent_name;
 
-       // Allow for customizing this later.
-       $agent_input = $agent_name;
+        // Namespaced class.
+        $agent_namespace_name =
+            '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
 
-       // Namespaced class.
-       $agent_namespace_name =
-                '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+        // See if the method exists within the function.
+        // Call it if we find it.
 
-       // See if the method exists within the function. 
-       // Call it if we find it.
+        $agent_namespace_names[] = $agent_namespace_name;
 
-       $agent_namespace_names[] = $agent_namespace_name;
+        $agent_namespace_names[] =
+            '\\Nrwtaylor\\StackAgentThing\\' . strtoupper($agent_class_name);
 
-       $agent_namespace_names[] =
-                '\\Nrwtaylor\\StackAgentThing\\' . strtoupper($agent_class_name);
+        // Try plural and singular variants of agent name.
+        if (substr($agent_namespace_name, -2) == 'es') {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, 'es');
+        } elseif (substr($agent_namespace_name, -1) == 's') {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, 's');
+        } else {
+            $agent_namespace_names[] = $agent_namespace_name . "s";
+            $agent_namespace_names[] = $agent_namespace_name . "es";
+        }
 
+        foreach (
+            $agent_namespace_names
+            as $i => $agent_namespace_name_variant
+        ) {
+            if (method_exists($agent_namespace_name_variant, $function_name)) {
+                $agent_handler = new $agent_namespace_name_variant(
+                    $this->thing,
+                    $agent_input
+                );
 
-       // Try plural and singular variants of agent name.
-       if ((substr($agent_namespace_name, -2)) == 'es') {
-           $agent_namespace_names[] = rtrim($agent_namespace_name, 'es');
-       } else if ((substr($agent_namespace_name, -1)) == 's') {
-           $agent_namespace_names[] = rtrim($agent_namespace_name, 's');
-       } else {
-           $agent_namespace_names[] = $agent_namespace_name . "s";
-           $agent_namespace_names[] = $agent_namespace_name . "es";
-       }
+                $response = $agent_handler->{$function_name}(...$args);
+                return $response;
+            }
+        }
 
-       foreach($agent_namespace_names as $i=>$agent_namespace_name_variant) {
-var_dump($agent_namespace_name_variant);
-           if(method_exists($agent_namespace_name_variant, $function_name))
-           {
-     	       $agent_handler = new $agent_namespace_name_variant($this->thing, $agent_input);
+        // No functionAgent found in the namespace.
+        if (class_exists($agent_namespace_name)) {
+            // No functionAgent found in the namespace.
+            // ie flerpMerp
 
-               $response = $agent_handler->{$function_name}(...$args);
-               return $response;
-           }
-       }
+            if ($function_primitive_name == "use") {
+                // But we did see a request for the use function.
 
-       // No functionAgent found in the namespace.
-       if (class_exists($agent_namespace_name)) {
+                // Consider this as a starting point for all agents.
+                $agent_handler = new $agent_namespace_name(
+                    $this->thing,
+                    $agent_input . implode(" ", $args)
+                );
+                $agent_handler->init();
+                $agent_handler->read(...$args);
+                $agent_handler->run();
 
-           // No functionAgent found in the namespace.
-           // ie flerpMerp
+                $variable = null;
+                if (isset($agent_handler->$agent_name)) {
+                    $variable = $agent_handler->$agent_name;
+                }
 
-           if ($function_primitive_name == "use") {
-               // But we did see a request for the use function.
+                return [$variable, $agent_handler];
+            }
+        }
 
-               // Consider this as a starting point for all agents.
-               $agent_handler = new $agent_namespace_name($this->thing, $agent_input . implode(" ",$args));
-               $agent_handler->init();
-               $agent_handler->read(...$args);
-               $agent_handler->run();
-
-               $variable = null;
-               if (isset($agent_handler->$agent_name)) {$variable = $agent_handler->$agent_name;}
-
-               return [$variable, $agent_handler];
-           }
-
-       }
-
-       throw new \Exception("Agent (" . $this->agent_name. ") called for a non-existent functionAgent [" . $agent_function . "]. ");
-
+        throw new \Exception(
+            "Agent (" .
+                $this->agent_name .
+                ") called for a non-existent functionAgent [" .
+                $agent_function .
+                "]. "
+        );
     }
 
     /**
@@ -954,6 +969,7 @@ var_dump($agent_namespace_name_variant);
         if ($agent == null) {
             $agent = $this->agent_name;
         }
+/*
         $whatIWant = $input;
 
         $pos = strpos(strtolower($input), $agent);
@@ -970,6 +986,22 @@ var_dump($agent_namespace_name_variant);
             }
         }
         $filtered_input = trim($whatIWant, " ");
+*/
+
+        $string = $input;
+        $str_pattern = $agent;
+        $str_replacement = '';
+        $filtered_input = $input;
+        if (strpos($string, $str_pattern) !== false) {
+            $occurrence = strpos($string, $str_pattern);
+            $filtered_input = substr_replace(
+                $string,
+                $str_replacement,
+                strpos($string, $str_pattern),
+                strlen($str_pattern)
+            );
+        }
+        $filtered_input = trim($filtered_input);
 
         if ($flag_lowercase === true) {
             $filtered_input = strtolower($filtered_input);

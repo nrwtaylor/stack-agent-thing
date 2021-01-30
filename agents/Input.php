@@ -181,6 +181,31 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
         return false;
     }
 
+    function isInput($input)
+    {
+        if ($input === false) {
+            return false;
+        }
+
+        if ($input === null) {
+            return false;
+        }
+
+        if (strtolower($input) == strtolower("X")) {
+            return false;
+        }
+
+        if (is_numeric($input)) {
+            return true;
+        }
+        if ($input == 0) {
+            return true;
+        }
+
+        return true;
+    }
+
+
     /**
      *
      * @return unknown

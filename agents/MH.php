@@ -48,13 +48,23 @@ class MH extends Agent
     }
 
     public function metaMH($text = null) {
+       if ($text == null) {return;}
 
        // Test and dev.
        // Extract subject line
-
-       return "TODO Extract subject line - see MH.php";
-
+       $this->subject = $this->subjectMH($text);
+       $this->meta = ["subject"=>$this->subject];
     }
+
+    public function subjectMH($text = null) {
+       if ($text == null) {return;}
+
+       // Test and dev.
+       // Extract subject line
+       $subject = "TODO Extract subject line - see MH.php";
+       return $subject;
+    }
+
 
     public function textMH($text = null) {
 
@@ -63,15 +73,24 @@ class MH extends Agent
        // Test and dev.
 
        $lines = preg_split("/\r\n|\n|\r/", $text);
+
        $new_lines = [];
        foreach($lines as $i=>$line) {
-           $new_line = trim(" =");
+           $new_line = rtrim($line," =");
            $new_lines[] = $new_line;
 
        }
 
        $contents = implode("\n", $new_lines);
+
        return $contents;
+    }
+
+    public function readMH($text = null) {
+      if ($text == null) {return;}
+
+      $this->meta = $this->metaMH($text);
+      $this->contents = $this->textMH($text);
     }
 
     function makeSMS()
@@ -90,6 +109,8 @@ class MH extends Agent
 
     public function readSubject()
     {
+        $input = $this->input;
+        $this->readMH($input);
         return false;
     }
 }

@@ -178,6 +178,9 @@ class Dateline extends Agent
 
         //$url_agent = new Url($this->thing,"url");
         $text = $this->url_agent->stripUrls($text);
+
+        $text = $this->stripTelephonenumbers($text, " ");
+
         $paragraph = $text;
 
         // Todo extract calendar.
