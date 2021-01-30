@@ -417,12 +417,12 @@ class Dateline extends Agent
         $agent_name = strtolower($agent_class_name);
 
         $slug_agent = new Slug($this->thing, "slug");
-
         //$slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
         $slug = $slug_agent->getSlug($agent_name . "-" . "test");
 
         $memory = $this->getMemory($slug);
         $age = 1e9;
+
         if ($memory != false and $memory != true) {
             $age =
                 strtotime($this->current_time) -

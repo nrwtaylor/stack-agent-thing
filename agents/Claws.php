@@ -4,10 +4,10 @@ namespace Nrwtaylor\StackAgentThing;
 /*
 tests
 
+agent claws
+agent claws when
 agent claws --channel=txt "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt"
-agent claws --channel=txt "/var/www/stackr.test/resources/call/call-test.txt"
-
-
+agent claws --channel=txt "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"
 
 */
 
@@ -22,6 +22,18 @@ class Claws extends Agent
     function run()
     {
         $this->doClaws();
+    }
+
+    function claws() {
+
+
+    }
+
+    function test()
+    {
+
+if ($this->claws_test_flag != "on") {return;}
+$this->response .= "No test performed. ";
     }
 
     public function doClaws()
@@ -119,6 +131,8 @@ class Claws extends Agent
         $count = count($this->claws_items);
 
         $sms = "CLAWS | " . "Read " . $count . " items. See TXT response.";
+	$sms .= " ";
+	$sms .= $this->response;
 
         $this->thing_report['sms'] = $sms;
         $this->sms_message = $sms;
@@ -170,7 +184,18 @@ class Claws extends Agent
 
         $datelines = [];
         // Read every line for a date.
+
+	$count = 0;
+//var_dump("paragraphs");
+//var_dump($paragraphs);
         foreach ($paragraphs as $i => $paragraph) {
+if ($paragraph == "") {continue;}
+
+            // Segmentation if this continues past count 2.
+            // 3f55 29 January 2021
+            $count += 1;
+            if ($count > 3) {break;}
+
             $containsDigit = preg_match('/\d/', $paragraph);
             if ($containsDigit == false) {
                 continue;
@@ -211,6 +236,7 @@ class Claws extends Agent
         // Set a flag so that we can later create a calendar item if needed.
         $indicators = [
             'when' => ['when'],
+            'test' => ['test'],
         ];
         $this->flagAgent($indicators, strtolower($input));
 
@@ -259,7 +285,7 @@ class Claws extends Agent
             //var_dump($call);
 
             $dateline = $this->extractAt($subject);
-            var_dump("Claws readSubject");
+            //var_dump("Claws readSubject");
             //var_dump("TODO - Read at in subject. See Claws");
             //var_dump($at);
 

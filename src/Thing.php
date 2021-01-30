@@ -98,6 +98,11 @@ class Thing
         $this->web_prefix = $this->container['stack']['web_prefix'];
         $this->engine_state = $this->container['stack']['engine_state'];
 
+	$this->logging_level = "off";
+        if (isset($this->container['stack']['logging_level'])) {
+		$this->logging_level = $this->container['stack']['logging_level'];
+	}
+
         //set_error_handler(array($this, "exception_error_handler"));
 
         try {
@@ -255,11 +260,31 @@ class Thing
 
     function spawn($datagram = null)
     {
+
+// "Failed to set exception option."
+// Try to catch.
+
         $client = new \GearmanClient();
+
+$arr = (array)$client;
+if (!$arr) {
+        $this->log("spawn. Job queue not available.");
+    // do stuff
+//echo "thing spawn " . debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,2)[1]['function'];
+
+        $dbt=debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,2);
+        $caller = isset($dbt[1]['function']) ? $dbt[1]['function'] : null;
+//echo "thing spawn alternate " . $caller;
+return true;
+}
+
         $client->addServer();
         $arr = json_encode($datagram);
 
         $client->doLowBackground("call_agent", $arr);
+
+
+
     }
 
     function getUUid()
@@ -929,6 +954,7 @@ class Thing
 
         if ($logging_level == null) {
             $logging_level = "WARNING";
+            if (isset($this->logging_level)) {$logging_level = $this->logging_level;}
         }
 
         //get the calling class
@@ -977,7 +1003,7 @@ class Thing
             default:
             //echo "i is not equal to 0, 1 or 2";
         }
-        if (isset($this->engine_state) and $this->engine_state == "test") {
+        if (isset($this->engine_state) and strtolower($this->logging_level) != "off") {
             echo $t . "\n";
         }
         $this->log_last = $t;

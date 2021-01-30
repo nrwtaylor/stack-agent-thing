@@ -67,9 +67,12 @@ class Route extends Agent
         $this->routes = [];
         // See if a route record exists.
         $findagent_thing = new Findagent($this->thing, 'route');
+	$routes = $findagent_thing->thing_report['things'];
+
+if ($routes == true) {return;}
 
         foreach (
-            array_reverse($findagent_thing->thing_report['things'])
+            array_reverse($routes)
             as $thing_object
         ) {
             // While timing is an issue of concern

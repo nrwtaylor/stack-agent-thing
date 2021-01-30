@@ -479,6 +479,10 @@ class Train extends Agent
         //$things = $findagent_thing->thing_report['things'];
         $things = $this->getThings('train');
 
+if ($things == null) {return;}
+
+        var_dump($things);
+
         $this->thing->log('found ' . count($things) . " Train Agent Things.");
 
         foreach ($things as $uuid => $train_thing) {

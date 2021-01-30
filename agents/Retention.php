@@ -27,6 +27,13 @@ class Retention extends Agent
             );
             //$this->setRemember();
         } else {
+
+$this->retain_to = true; // True - not possible to retain record.
+$this->age = false;
+// Check if the thing has creation meta.
+// If not, can not persist.
+
+if ($this->thing->thing !== false) {
             $this->created_at = strtotime($this->thing->thing->created_at);
 
             $dteStart = $this->created_at;
@@ -74,6 +81,7 @@ class Retention extends Agent
                 $this->persist_to = "X";
                 //echo $age . " / " . $this->retain_for['amount'] . $this->retain_for['unit'];
             }
+}
         }
 
         $this->thing->log(

@@ -66,9 +66,11 @@ class Consist extends Agent
         $this->consists = [];
         // See if a consist record exists.
         $findagent_thing = new Findagent($this->thing, 'consist');
+$consists = $findagent_thing->thing_report['things'];
+if ($consists == true) {return;}
 
         foreach (
-            array_reverse($findagent_thing->thing_report['things'])
+            array_reverse($consists)
             as $thing_object
         ) {
             // While timing is an issue of concern

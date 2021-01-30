@@ -1,6 +1,13 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+/*
+
+$/var/www/stackr.test
+$composer require johngrogg/ics-parser
+
+*/
+
 use ICal\ICal;
 
 // John Grogg (?) has built a nice ICal parser.

@@ -358,7 +358,6 @@ class Tokenlimiter {
 
             switch ($this->subject) {
             case "token create":
-                //echo "spawn";
                 $this->create();
                 break;
             case "token store":
@@ -369,7 +368,6 @@ class Tokenlimiter {
 
                 break;
             default:
-                //    echo "not found => spawn()";
                 $this->create();
             }
 
@@ -386,8 +384,6 @@ class Tokenlimiter {
 
         switch ($this->state) {
         case "token create":
-            //echo "spawn";
-            //$this->spawn();
             break;
         case "token store":
             //$this->kill();
