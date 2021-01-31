@@ -246,7 +246,7 @@ class Year extends Agent
      */
     public function initYear()
     {
-        $this->number_agent = new Number($this->thing, "number");
+        //$this->number_agent = new Number($this->thing, "number");
     }
 
     public function run()
@@ -805,7 +805,9 @@ class Year extends Agent
 
         foreach ($year_indicators as $year_indicator) {
             if (stripos($text, $year_indicator) !== false) {
-                $number = $this->number_agent->extractNumber($text);
+                //$number = $this->number_agent->extractNumber($text);
+                $number = $this->extractNumber($text);
+
                 return $number;
             }
         }
@@ -872,13 +874,15 @@ class Year extends Agent
             return true;
         }
 
-        if (!isset($this->ngram_agent)) {
-            $this->ngram_agent = new Ngram($this->thing, "ngram");
-        }
+       // if (!isset($this->thing->ngram_handler)) {
+       //     $this->thing->ngram_handler = new Ngram($this->thing, "ngram");
+       // }
 
         $tokens = [];
         foreach (range(0, 4, 1) as $i) {
-            $new_grams = $this->ngram_agent->extractNgrams($text, $i);
+            $new_grams = $this->extractNgrams($text, $i);
+
+//            $new_grams = $this->thing->ngram_handler->extractNgrams($text, $i);
             $tokens = array_merge($tokens, $new_grams);
         }
         foreach ($tokens as $i => $token) {
@@ -904,11 +908,13 @@ class Year extends Agent
 
                 // It is a number.
                 // But is it a number inside of a telephone number.
-                $telephone_number_agent = new Telephonenumber(
-                    $this->thing,
-                    "telephonenumber"
-                );
-                $t = $telephone_number_agent->extractTelephonenumbers($text);
+ //               $telephone_number_agent = new Telephonenumber(
+   //                 $this->thing,
+     //               "telephonenumber"
+       //         );
+//                $t = $telephone_number_agent->extractTelephonenumbers($text);
+                $t = $this->extractTelephonenumbers($text);
+
                 //var_dump($t);
                 foreach ($t as $j => $telephone_number) {
                     if (

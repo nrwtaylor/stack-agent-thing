@@ -1017,7 +1017,17 @@ return true;
         }
 
         //get the calling class
-        $trace = debug_backtrace();
+
+// Causing a segmentation fault?
+//    72.1589   76828520
+//   -> debug_backtrace() /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php:1020
+
+// Adjusted PHP7.4 CLI dev memory limit. Test
+
+//        $trace = debug_backtrace();
+//        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $trace = debug_backtrace(false,2);
+
         // Get the class that is asking for who awoke it
         $class_name = "X";
         if (isset($trace[1]['class'])) {
@@ -1025,6 +1035,8 @@ return true;
             $class_name_array = explode("\\", $class_namespace);
             $class_name = end($class_name_array);
         }
+
+//$class_name = "X";
         //$t = strip_tags($text);
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 

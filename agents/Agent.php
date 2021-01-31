@@ -708,6 +708,12 @@ class Agent
                 $this->thing->refresh_at = false;
             } // false = request again now.
 
+            $created_at = false;
+            if (isset($this->thing->created_at)) {
+                $created_at = $this->thing->created_at;
+            } // false = request again now.
+
+
             $thing_report = $this->thing_report;
 
             //unset($thing_report['thing']['thing']);
@@ -717,7 +723,7 @@ class Agent
                 'from' => $this->thing->from,
                 'subject' => $this->thing->subject,
                 //'agent_input'=>$thing_report['thing']->agent_input,
-                'created_at' => $this->thing->thing->created_at,
+                'created_at' => $created_at,
                 'refresh_at' => $this->thing->refresh_at,
             ];
 

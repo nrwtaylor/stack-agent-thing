@@ -33,6 +33,10 @@ class Claws extends Agent
         if ($this->claws_test_flag != "on") {
             return;
         }
+
+//        $this->input = 'claws "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"';
+//        $this->readSubject();
+
         $this->response .= "No test performed. ";
     }
 

@@ -37,7 +37,7 @@ class At extends Agent
     function initAt()
     {
         // Going to need a little help.
-        $this->year_agent = new Year($this->thing, "year");
+        //$this->year_agent = new Year($this->thing, "year");
         //$this->day_agent = new Day($this->thing, "day");
     }
 
@@ -339,8 +339,12 @@ if ($flag == false) {$this->day_number = false;}
         $this->hour = $hour;
 
 // TODO Refactor code above and directly below.
-$clocktime_agent = new Clocktime($this->thing,"clocktime");
-$t = $clocktime_agent->extractClocktime($input);
+//$clocktime_agent = new Clocktime($this->thing,"clocktime");
+//$t = $clocktime_agent->extractClocktime($input);
+
+$t = $this->extractClocktime($input);
+
+
 if ($t == null) {$this->minute = false; $this->hour = false;} else {
 
 // TODO
@@ -358,7 +362,8 @@ $this->minute = $t[1];
         }
 
         $this->year = false;
-        $year = $this->year_agent->extractYear($input);
+        //$year = $this->year_agent->extractYear($input);
+        $year = $this->extractYear($input);
         $year_text = "X";
         if ($year !== false) {
         $year_text = $year['year']; // Discard era information.
@@ -378,8 +383,10 @@ $this->hour = false;
 
 $this->timezone = $this->extractTimezone($input);
 
-$this->calendar_agent = new Calendar($this->thing,"calendar");
-$this->calendar_name = $this->calendar_agent->extractCalendar($input);
+//$this->calendar_agent = new Calendar($this->thing,"calendar");
+//$this->calendar_name = $this->calendar_agent->extractCalendar($input);
+
+$this->extractCalendar($input);
 
     }
 
@@ -790,9 +797,9 @@ continue;
 //            return;
 //        }
 
-        $alpha_agent = new Alpha($this->thing, "alpha");
-
-        if ($alpha_agent->isAlpha($filtered_input) === true) {
+//        $alpha_agent = new Alpha($this->thing, "alpha");
+//        if ($alpha_agent->isAlpha($filtered_input) === true) {
+        if ($this->isAlpha($filtered_input) === true) {
             $this->tag = $filtered_input . "at";
             // reload with new at tag.
             $this->get();

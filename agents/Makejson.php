@@ -38,6 +38,11 @@ array(
             $thing->refresh_at = false;
         } // false = request again now.
 
+        $created_at = false;
+        if (isset($thing->created_at)) {
+            $created_at = $thing->created_at;
+        } // false = unknown creation date.
+
         $thing_report = $agent_thing->thing_report;
         unset($thing_report['log']);
 
@@ -48,7 +53,7 @@ array(
             'from' => $thing->from,
             'subject' => $thing->subject,
             //'agent_input'=>$thing_report['thing']->agent_input,
-            'created_at' => $thing->thing->created_at,
+            'created_at' => $created_at,
             'refresh_at' => $thing->refresh_at,
         ];
 

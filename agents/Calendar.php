@@ -227,7 +227,7 @@ class Calendar extends Agent
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
 
-        return $this->thing_report;
+        //return $this->thing_report;
     }
 
     public function makeJson()
@@ -732,8 +732,10 @@ var_dump($variable);
         // Assume alphanumeric tokens are calls for @gmail addresses.
         // For now.
         // TODO: Explore Apple and Microsoft calendaring.
-        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
-        if ($alphanumeric_agent->isAlphanumeric($token)) {
+//        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
+//        if ($alphanumeric_agent->isAlphanumeric($token)) {
+        if ($this->isAlphanumeric($token)) {
+
             $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
                 $token . "@gmail.com"
             );

@@ -16,7 +16,7 @@ class Dateline extends Agent
             $this->test_url =
                 $this->thing->container['api']['dateline']['test_url'];
         }
-        $this->url_agent = new Url($this->thing, "url");
+        //$this->url_agent = new Url($this->thing, "url");
     }
 
     function run()
@@ -46,12 +46,13 @@ class Dateline extends Agent
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($paragraphs as $i => $paragraph) {
+            if (trim($paragraph) == "") {continue;}
             $dateline = $this->extractDateline($paragraph);
             if ($dateline == false) {
                 continue;
             }
             $this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
-            echo $dateline['dateline'] . "\n" . $dateline['line'] . "\n";
+            $this->thing->console($dateline['dateline'] . "\n" . $dateline['line'] . "\n");
         }
     }
 
@@ -177,7 +178,9 @@ class Dateline extends Agent
         }
 
         //$url_agent = new Url($this->thing,"url");
-        $text = $this->url_agent->stripUrls($text);
+//        $text = $this->url_agent->stripUrls($text);
+        $text = $this->stripUrls($text);
+
 
         $text = $this->stripTelephonenumbers($text, " ");
 
@@ -332,13 +335,13 @@ class Dateline extends Agent
             $this->dateline_message = $this->agent_input;
         }
     }
-
+/*
     function getNegativetime()
     {
         $agent = new Negativetime($this->thing, "dateline");
         $this->negative_time = $agent->negative_time; //negative time is asking
     }
-
+*/
     public function respondResponse()
     {
         $this->thing->flagGreen();
@@ -418,9 +421,11 @@ class Dateline extends Agent
         $agent_name = strtolower($agent_class_name);
 
         $this->thing->log("questionDateline instantiate slug Thing");
-        $slug_agent = new Slug($this->thing, "slug");
-        //$slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
-        $slug = $slug_agent->getSlug($agent_name . "-" . "test");
+//        $slug_agent = new Slug($this->thing, "slug");
+//        $slug = $slug_agent->getSlug($agent_name . "-" . "test");
+
+        $slug = $this->getSlug($agent_name . "-" . "test");
+
 
         $this->thing->log("questionDateline call getMemory");
         $memory = $this->getMemory($slug);

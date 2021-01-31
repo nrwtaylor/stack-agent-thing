@@ -104,8 +104,9 @@ public function run() {}
         $this->max_index = 0;
 
         $match = 0;
-
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+        $things = $findagent_thing->thing_report['things'];
+        if ($things === true) {return;}
+        foreach ($things as $block_thing) {
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];

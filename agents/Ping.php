@@ -65,7 +65,7 @@ class Ping extends Agent
         $this->thing_report['keyword'] = 'pingback';
         $this->thing_report['help'] = 'Checks if the stack is there.';
 
-        return $this->thing_report;
+        //return $this->thing_report;
 
     }
 

@@ -396,8 +396,14 @@ class Url extends Agent
                 strlen($str_pattern)
             );
         }
-        $quote_agent = new Quote($this->thing, "quote");
-        $filtered_input = $quote_agent->stripQuotes($filtered_input);
+
+        if (!isset($this->thing->quote_handler)) {
+            $this->thing->quote_handler = new Quote($this->thing, "quote");
+        }
+        $filtered_input = $this->thing->quote_handler->stripQuotes($filtered_input);
+
+//        $filtered_input = $this->stripQuotes($filtered_input);
+
 
         $input_input = trim($filtered_input);
 

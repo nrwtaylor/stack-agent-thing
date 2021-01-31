@@ -57,7 +57,7 @@ class Call extends Agent
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        return $this->thing_report;
+        //return $this->thing_report;
     }
 
     /**
@@ -167,10 +167,12 @@ class Call extends Agent
 //            $text = file_get_contents($file);
 //        }
 
-        $url_agent = new Url($this->thing, "url");
+//        $url_agent = new Url($this->thing, "url");
 
-        $urls = $url_agent->extractUrls($text);
+//        $urls = $url_agent->extractUrls($text);
 
+        $urls = $this->extractUrls($text);
+/*
         $telephonenumber_agent = new Telephonenumber(
             $this->thing,
             "telephonenumber"
@@ -178,12 +180,17 @@ class Call extends Agent
         $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
             $text
         );
+*/
+        $telephone_numbers = $this->extractTelephonenumbers(
+            $text
+        );
+
 
 // refactor as select case.
 
             if (stripos($text, "zoom") !== false) {
                 $zoom_agent = new Zoom($this->thing, "zoom");
-		$zoom_agent->readZoom($text);
+		        $zoom_agent->readZoom($text);
                 $service = 'zoom';
                 $password = $zoom_agent->password;
                 $access_code = $zoom_agent->access_code;
@@ -223,6 +230,10 @@ return $call;
     public function whenCalls($text = null)
     {
         $when_agent = new When($this->thing, "when");
+
+        $zoom_agent = new Zoom($this->thing, "zoom");
+        $webex_agent = new Webex($this->thing, "webex");
+
         $calls = [];
         foreach ($when_agent->calendar_agent->calendar->events as $event) {
 
@@ -234,7 +245,7 @@ return $call;
                 $this->location;
 
             if (stripos($haystack, "zoom") !== false) {
-                $zoom_agent = new Zoom($this->thing, "zoom");
+//                $zoom_agent = new Zoom($this->thing, "zoom");
 
                 $event->password = $zoom_agent->password;
                 $event->access_code = $zoom_agent->access_code;
@@ -250,7 +261,7 @@ return $call;
             }
 
             if (stripos($haystack, "webex") !== false) {
-                $webex_agent = new Webex($this->thing, "webex");
+//                $webex_agent = new Webex($this->thing, "webex");
 
                 $event->password = $webex_agent->password;
                 $event->access_code = $webex_agent->access_code;
