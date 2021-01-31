@@ -68,7 +68,7 @@ class At extends Agent
         $this->at->setVariable("hour", $this->hour);
         $this->at->setVariable("minute", $this->minute);
 
-        $this->printAt("set");
+        $this->thing->console("set At");
 
         $this->thing->log(
             $this->agent_prefix .
@@ -114,7 +114,7 @@ class At extends Agent
             $this->minute = $minute;
         }
 
-        $this->printAt("get");
+        $this->thing->console("At get");
     }
 
     function getAt()
@@ -729,6 +729,7 @@ continue;
      *
      * @param unknown $text (optional)
      */
+/*
     function printAt($text = null)
     {
         return;
@@ -752,7 +753,7 @@ continue;
 
         echo $day . " " . $hour . " " . $minute . "\n";
     }
-
+*/
     /**
      *
      * @return unknown

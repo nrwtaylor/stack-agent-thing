@@ -78,9 +78,12 @@ class Thought extends Agent
 
         $this->makeChoices();
 
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $sms_message = "Blank.";
+        if (isset($this->sms_message)) {$sms_message = $this->sms_message;}
+
+        $this->thing_report['message'] = $sms_message;
+        $this->thing_report['email'] = $sms_message;
+//        $this->thing_report['sms'] = $sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -96,6 +99,9 @@ class Thought extends Agent
     function thought()
     {
         // Get a reminder stochastically.
+
+        // TODO Refactor with a call to Reminder agent.
+
         $thingreport = $this->thing->db->reminder(
             $this->from,
             ['s/', 'stack record'],

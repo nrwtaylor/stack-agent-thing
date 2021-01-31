@@ -443,7 +443,10 @@ class Ant extends Agent
 
             switch ($this->subject) {
                 case "spawn":
+                    $this->thing->log("spawn Thing");
                     $this->spawn();
+                    $this->thing->log("spawned Thing");
+
                     $place = new Place($this->thing, "hive");
                     $this->response .= "Spawned an Ant at Hive. ";
                     break;
@@ -480,7 +483,10 @@ class Ant extends Agent
                 default:
                     $this->response .= "Ant spawned. ";
                     // echo "not found => spawn()";
+                    $this->thing->log("spawn Thing default");
                     $this->spawn();
+                    $this->thing->log("spawned Thing");
+
             }
         }
 

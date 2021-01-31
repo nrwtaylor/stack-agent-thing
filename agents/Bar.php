@@ -247,7 +247,11 @@ class Bar extends Agent
         $t = $this->thing->db->agentSearch("bar", 99);
 
         $this->ticks_history = array();
-        foreach ($t['things'] as $thing_object) {
+	$things = $t['things'];
+
+        if ($things === false) {return;}
+
+        foreach ($things as $thing_object) {
             $variables_json = $thing_object['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
             if (isset($variables['bar'])) {
@@ -276,9 +280,12 @@ class Bar extends Agent
         $this->thing->db->setFrom("null" . $this->mail_postfix);
 
         $t = $this->thing->db->agentSearch("cron", 99);
+	$things = $t['things'];
+
+        if ($things === false) {return;}
 
         $this->ticks_history = array();
-        foreach ($t['things'] as $thing_object) {
+        foreach ($things as $thing_object) {
             $variables_json = $thing_object['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
 

@@ -151,9 +151,16 @@ $this->margin_bottom = 10;
         $this->chart_height = $this->height - 20;
 
         $num_points = count($this->tubs);
-        $column_width = $this->width / $num_points;
-
+	$column_width = 1;
+        if ($num_points !== 0) {
+            $column_width = $this->width / $num_points;
+	}
         $i = 0;
+
+	$x_min = 0;
+	$x_max = 1;
+	$y_min = 0;
+	$y_max = 1;
 
         foreach ($this->tubs as $x => $y) {
 
@@ -399,8 +406,12 @@ foreach(array(-1,0,1) as $j1=>$y0) {
 
         $things = $thingreport['thing'];
 
-        // Get the earliest from the current data set
+if (!isset($this->points)) {$this->points = [];}
         $this->earliest_seen_population = false;
+
+if ($things === false) {return;}
+
+        // Get the earliest from the current data set
         foreach ($things as $thing) {
             $created_at = strtotime($thing['created_at']);
             $bin_sum = 0;
@@ -432,6 +443,7 @@ foreach(array(-1,0,1) as $j1=>$y0) {
         if (isset($this->tubs)) {
             return;
         }
+
         $count = null;
         if (is_array($this->points)) {
             $count = count($this->points);
@@ -459,6 +471,27 @@ foreach(array(-1,0,1) as $j1=>$y0) {
             "decades" => 60 * 60 * 60 * 24 * 365,
             "centuries" => 60 * 60 * 60 * 24 * 365 * 100,
         ];
+
+        if ($this->points == []) {
+
+        $this->x_max = 1;
+        $this->x_min = 0;
+
+        $this->y_max = 1;
+        $this->y_min = 0;
+
+        $this->y_spread = $this->y_max - $this->y_min;
+        $this->x_spread = $this->x_max - $this->x_min;
+
+        $this->num_tubs = 1;
+
+        // Clear array
+        $this->tubs = [];
+
+
+return;
+}
+
 
         foreach ($this->points as $key => $point) {
             if (!isset($x_min)) {
@@ -538,6 +571,12 @@ foreach(array(-1,0,1) as $j1=>$y0) {
         $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
 
         $things = $thingreport['thing'];
+$this->mean = false;
+$this->age_oldest = false;
+$this->total_things = 0;
+$this->sum = false;
+$this->sample_count = false;
+if ($things === false) {return;}
 
         // Get the earliest from the current data set
 

@@ -598,7 +598,9 @@ class Job extends Agent
                     "subject" => "s/ " . $job['text'],
                 ];
 
+		$this->thing->log("spawn Thing");
                 $this->thing->spawn($datagram);
+		$this->thing->log("spawned " . $job['text']);
                 $this->response .= "Spawned " . $job['text'] . ". ";
 
                 return;

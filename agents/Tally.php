@@ -298,7 +298,7 @@ class Tally
         return;
     }
 
-    function addVariable($variable = null, $amount)
+    function addVariable($variable = null, $amount = null)
     {
         $this->{$variable . "_overflow_flag"} = false;
 

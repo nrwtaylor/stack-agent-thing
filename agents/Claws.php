@@ -51,16 +51,10 @@ $this->response .= "No test performed. ";
         }
     }
 
-    function getNegativetime()
-    {
-        $agent = new Negativetime($this->thing, "claws");
-        $this->negative_time = $agent->negative_time; //negative time is asking
-    }
-
-    // -----------------------
 
     public function respondResponse()
     {
+	$this->makeClaws();
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -126,6 +120,12 @@ $this->response .= "No test performed. ";
         $this->response .= "Wrote item to When calendar file. ";
     }
 
+    public function makeClaws() {
+
+       $this->thing_report['claws'] = "Custom report for Claws. Test.";
+
+    }
+
     public function makeSMS()
     {
         $count = count($this->claws_items);
@@ -186,15 +186,16 @@ $this->response .= "No test performed. ";
         // Read every line for a date.
 
 	$count = 0;
-//var_dump("paragraphs");
-//var_dump($paragraphs);
+
         foreach ($paragraphs as $i => $paragraph) {
-if ($paragraph == "") {continue;}
+
+            // Don't waste time on empty paragraphs.
+            if (trim($paragraph) == "") {continue;}
 
             // Segmentation if this continues past count 2.
             // 3f55 29 January 2021
             $count += 1;
-            if ($count > 3) {break;}
+            //if ($count > 3) {break;}
 
             $containsDigit = preg_match('/\d/', $paragraph);
             if ($containsDigit == false) {

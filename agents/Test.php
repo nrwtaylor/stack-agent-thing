@@ -161,7 +161,10 @@ class Test extends Agent
 
     public function getTests()
     {
+	$this->tests = [];
         $things = $this->getThings('test');
+
+	if ($things === null) {return;}
 
         // Sort things by created at.
         $created_at = [];

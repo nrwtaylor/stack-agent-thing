@@ -214,10 +214,15 @@ class Bus extends Agent {
      *
      * @return unknown
      */
-    function getLink() {
-        $things = new Findagent($this->thing, 'thing');
-        $this->history = array();
-        foreach ($things->thing_report['things'] as $thing) {
+    function getLink($variable = null) {
+        $findagent_handler = new Findagent($this->thing, 'thing');
+        $this->history = [];
+
+        $things = $findagent_handler->thing_report['things'];
+
+        if ($things === true) {return;}
+
+        foreach ($things as $thing) {
 
             $this->thing->log($thing['task'] . " " . $thing['nom_to'] . " " . $thing['nom_from']);
 

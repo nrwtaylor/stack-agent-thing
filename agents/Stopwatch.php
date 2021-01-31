@@ -27,19 +27,19 @@ class Stopwatch extends Agent
 
 $this->thingStopwatch();
 
-var_dump("bar");
-var_dump($this->stopwatch_thing->choice->current_node);
+//var_dump("bar");
+//var_dump($this->stopwatch_thing->choice->current_node);
 
-
-var_dump("foo");
+if (!isset($this->stopwatch_thing)) {$this->stopwatch_thing = $this->thing;}
+//var_dump("foo");
                 $this->stopwatch_thing->choice->Choose('running');
-var_dump($this->stopwatch_thing->choice->current_node);
+//var_dump($this->stopwatch_thing->choice->current_node);
 
                 $this->stopwatch_thing->choice->Choose('stopped');
-var_dump($this->stopwatch_thing->choice->current_node);
+//var_dump($this->stopwatch_thing->choice->current_node);
 
 
-exit();
+//exit();
         // Get the remaining persistence of the message.
         $agent = new Persistence($this->stopwatch_thing, "persistence 60 minutes");
         $this->time_remaining = $agent->time_remaining;
@@ -162,6 +162,8 @@ exit();
 
         $things = $this->getThings('stopwatch');
 
+if ($things === null) {return;}
+
         foreach (
             // array_reverse($findagent_thing->thing_report['things'])
             array_reverse($things)
@@ -241,6 +243,10 @@ exit();
     public function priorStopwatch()
     {
         $things = $this->getThings('stopwatch');
+
+if ($things === null) {
+$this->prior_thing = new Thing(null);
+return;}
 
         foreach (array_reverse($things) as $uuid => $thing) {
             if ($uuid == $this->uuid) {
@@ -358,7 +364,13 @@ return;
             $sms .= $this->statistics_text . "\n";
         }
 
-        $sms .= trim($this->short_message) . "\n";
+        $short_message_text = "No message available.";
+        if (isset($this->short_message)) {
+            $short_message_text = $this->short_message;
+        }
+
+
+        $sms .= trim($short_message_text) . "\n";
 
         if ((is_string($this->response)) and ($this->response != "")) {
             $sms .= $this->response . "\n";
@@ -373,7 +385,12 @@ return;
 
     function makeMessage()
     {
-        $message = $this->short_message . "<br>";
+        $short_message_text = "No message available.";
+        if (isset($this->short_message)) {
+            $short_message_text = $this->short_message;
+        }
+
+        $message = $short_message_text . "<br>";
         $uuid = $this->uuid;
         $message .=
             "<p>" . $this->web_prefix . "thing/$uuid/stopwatch\n \n\n<br> ";
@@ -421,12 +438,19 @@ return;
         $web .= "Message Metadata - ";
         //        $web .= "<p>";
 
+        $created_at_text = "X";
+        if (isset($this->stopwatch_thing->thing->created_at)) {
+
+            $created_at_text = $this->stopwatch_thing->thing->created_at;
+        }
+
+
         $web .=
             $this->inject .
             " - " .
             $this->stopwatch_thing->nuuid .
             " - " .
-            $this->stopwatch_thing->thing->created_at;
+            $created_at_text;
 
         $togo = $this->stopwatch_thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";
@@ -809,6 +833,12 @@ var_dump($this->stopwatch_thing->choice->current_node);
 
     function readStopwatch($variable = null)
     {
+
+        if (!isset($this->response_time)) {
+            $this->response .= "No response time available. ";
+            return;
+        }
+
         $this->response .= "Looked at stopwatch. " . $this->response_time;
 
         return;

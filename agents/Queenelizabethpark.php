@@ -625,7 +625,10 @@ if (stripos($this->response, 'join us') !== false) {
 
                     case 'teleport';
                     case 'spawn':
+                        $this->thing->log("spawn Thing");
                         $this->spawn();
+                        $this->thing->log("spawned Thing");
+
                         $this->response .= "Spawn. ";
                         break;
                    }

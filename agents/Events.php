@@ -410,6 +410,8 @@ if (isset($events_variable['events'])) {
             $events_variable['cache_request_flag'] = true;
             $this->setMemory("events", $events_variable);
 
+            if (!isset($events)) {$events = [];}
+
             $events = array_merge($events_variable['events'], $events);
         }
         //var_dump($events['events']);

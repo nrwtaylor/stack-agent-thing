@@ -314,7 +314,7 @@ if (isset($this->thing->db)) {
         $this->setVariable("next_uuid", $thing->uuid);
     }
 
-    function addVariable($variable = null, $amount)
+    function addVariable($variable = null, $amount = null)
     {
         $this->{$variable . "_overflow_flag"} = false;
 
@@ -337,7 +337,7 @@ if (isset($this->thing->db)) {
 
             $this->thing->log('Variable overflow.', "ERROR");
             $this->function_message = "Variable overflow";
-            // THIS IS WEHERE THE OWRK IS nrewtaylor 1635 18 Oct 2017
+            // THIS IS WHERE THE WORK IS nrwtaylor 1635 18 Oct 2017
 
             // And in this case flag as true.
             $this->$variable = 1;
@@ -457,7 +457,7 @@ return true;
         return $this->variables_thing->$variable;
     }
 
-    function setVariable($variable = null, $value)
+    function setVariable($variable = null, $value = null)
     {
 if (!isset($this->thing->db)) {
 return true;

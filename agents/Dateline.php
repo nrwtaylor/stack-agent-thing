@@ -402,6 +402,7 @@ class Dateline extends Agent
 
     public function questionDateline($text = null)
     {
+        $this->thing->log("questionDateline start");
         $dateline_horizon = $this->dateline_horizon;
 
         $agent_class_name = "Dateline";
@@ -416,14 +417,20 @@ class Dateline extends Agent
 
         $agent_name = strtolower($agent_class_name);
 
+        $this->thing->log("questionDateline instantiate slug Thing");
         $slug_agent = new Slug($this->thing, "slug");
         //$slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
         $slug = $slug_agent->getSlug($agent_name . "-" . "test");
 
+        $this->thing->log("questionDateline call getMemory");
         $memory = $this->getMemory($slug);
         $age = 1e9;
 
+        $this->thing->log("questionDateline got memory");
+
         if ($memory != false and $memory != true) {
+            $this->thing->log("questionDateline found a memory");
+
             $age =
                 strtotime($this->current_time) -
                 strtotime($memory['retrieved_at']);
@@ -439,15 +446,21 @@ class Dateline extends Agent
                     " ago. ";
 
                 $this->dateline = $memory;
+                $this->thing->log("questionDateline return memory");
+
                 return $memory;
             }
 
             if (!$this->isDateline($memory)) {
+                $this->thing->log("did not see a memory");
+
                 $memory = $this->getDateline($text);
                 $this->setMemory($slug, $memory);
             }
         }
         if ($age > $dateline_horizon) {
+            $this->thing->log("questionDateline saw the memory was too old");
+
             $datagram = [
                 "to" => $this->from,
                 "from" => "dateline",
@@ -455,15 +468,23 @@ class Dateline extends Agent
                 //                    "subject" => "s/ " . "dateline",
                 "agent_input" => "dateline",
             ];
-            $this->thing->spawn($datagram);
-            $this->response .= "Requested a dateline update. ";
 
+            $response = $this->thing->spawn($datagram);
+            if ($response === true) {
+               $this->response .= "Request for dateline update unsuccessful. ";
+               $this->thing->log("Spawn request failed.");
+            } else {
+               $this->response .= "Requested a dateline update. ";
+               $this->thing->log("Requested thing spawn.");
+            }
             //            $age = 0;
         }
 
         $dateline = $memory;
 
         $this->dateline = $dateline;
+        $this->thing->log("questionDateline complete");
+
     }
 
     public function readSubject()

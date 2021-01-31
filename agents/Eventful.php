@@ -107,6 +107,7 @@ class Eventful extends Agent
             $sort_order;
 
         $data = @file_get_contents($data_source);
+
         if ($data == false) {
             $this->response = "Could not ask Eventful. ";
             //            $this->available_events_count = 0;

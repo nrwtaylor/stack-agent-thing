@@ -27,7 +27,10 @@ class Hyphenate extends Agent
         $this->stack_state = $this->thing->container['stack']['state'];
         $this->short_name = $this->thing->container['stack']['short_name'];
 
-        $this->created_at = strtotime($this->thing->thing->created_at);
+        $this->created_at = false;
+        if (isset($this->thing->thing->created_at)) {
+           $this->created_at = strtotime($this->thing->thing->created_at);
+        }
 
         $this->thing->log(
             'started running on Thing ' . date("Y-m-d H:i:s") . ''

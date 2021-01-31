@@ -130,7 +130,7 @@ foreach ($definitions as $id=>$definition) {
         return false;
     }
 
-    function getLink($ref)
+    function getLink($ref = null)
     {
         // Give it the message returned from the API service
 
@@ -189,11 +189,15 @@ foreach ($definitions as $id=>$definition) {
     public function makeSMS()
     {
         $sms = "BING";
-        if ($this->search_words != null) {
-            $sms .= " " . strtoupper($this->search_words);
-        }
+ 
 
+        if ((isset($this->search_words)) and ($this->search_words != null)) {
+            $sms .= " " . strtoupper($this->search_words);
+	}
         $sms .= " | ";
+
+
+if (isset($this->definitions_count)) {
 
         switch ($this->definitions_count) {
             case 0:
@@ -208,8 +212,9 @@ foreach ($definitions as $id=>$definition) {
                     $sms .= " / " . $definition;
                 }
         }
-
-        $sms .= " | " . $this->response;
+        $sms .= " | ";
+}
+        $sms .= $this->response;
 
         // Really need to refactor this double :/
         $this->sms_message = $sms;
@@ -220,6 +225,8 @@ foreach ($definitions as $id=>$definition) {
     {
         $message = "Bing";
 
+$message = "No definition count found.";
+if (isset($this->definitions_count)) {
         switch ($this->definitions_count) {
             case 0:
                 $message .= " did not find any definitions.";
@@ -233,6 +240,7 @@ foreach ($definitions as $id=>$definition) {
                     $message .= " / " . $definition;
                 }
         }
+}
 
         // Really need to refactor this double :/
 

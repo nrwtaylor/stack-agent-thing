@@ -39,6 +39,11 @@ class PERCS extends Agent
             $this->thing,
             "variables percs " . $this->from
         );
+
+        $this->created_at = false;
+        if (isset($this->thing->thing->created_at)) {
+            $this->created_at = $this->thing->thing->created_at;
+        }
     }
 
     function isPERCS($state = null)
@@ -699,9 +704,14 @@ return;
         $web .= "<br>";
         $web .= "<p>";
 
-        $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
-        );
+	$ago = "X";
+        $created_at_text = "X";
+        if (isset($this->thing->thing->created_at)) {
+            $ago = $this->thing->human_time(
+                time() - strtotime($this->thing->thing->created_at)
+            );
+            $created_at_text = $this->thing->thing->created_at;
+        }
 
         $web .= "Inject was created about " . $ago . " ago.";
         $web .= "<p>";
@@ -709,7 +719,7 @@ return;
             "Inject " .
             $this->thing->nuuid .
             " generated at " .
-            $this->thing->thing->created_at .
+            $created_at_text .
             "\n";
 
         $togo = $this->thing->human_time($this->time_remaining);
@@ -877,7 +887,7 @@ return;
 
     public function makePDF()
     {
-        $txt = $this->thing_report['txt'];
+//        $txt = $this->thing_report['txt'];
 
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
@@ -898,7 +908,7 @@ return;
 
         $pdf->SetTextColor(0, 0, 0);
 
-        $text = "Inject generated at " . $this->thing->thing->created_at . ".";
+        $text = "Inject generated at " . $this->created_at . ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
 

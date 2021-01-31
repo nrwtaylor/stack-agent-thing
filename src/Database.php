@@ -118,6 +118,9 @@ class Database
 
         $c['db'] = function ($c) {
             $db = $c['settings']['db'];
+
+        //try {
+
             $pdo = new PDO(
                 "mysql:host=" . $db['host'] . ";dbname=" . $db['dbname'],
                 $db['user'],
@@ -126,6 +129,13 @@ class Database
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             return $pdo;
+/*
+        } catch (\Throwable $t) {
+            //throw new \Exception('Database not available.');
+        } catch (\Exception $e) {
+            //throw new \Exception('Database not available.');
+        }
+*/
         };
 
         $c['stack'] = function ($c) {

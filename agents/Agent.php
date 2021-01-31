@@ -300,12 +300,23 @@ class Agent
             as $i => $agent_namespace_name_variant
         ) {
             if (method_exists($agent_namespace_name_variant, $function_name)) {
+/*
                 $agent_handler = new $agent_namespace_name_variant(
                     $this->thing,
                     $agent_input
                 );
-
                 $response = $agent_handler->{$function_name}(...$args);
+*/
+
+		// Test optimize by only initiating once.
+		if (!isset($this->{$agent_name . "_handler"})) {
+                    $this->{$agent_name. "_handler"} = new $agent_namespace_name_variant(
+                        $this->thing,
+                        $agent_input
+                    );
+                }
+
+                $response = $this->{$agent_name . "_handler"}->{$function_name}(...$args);
                 return $response;
             }
         }
@@ -491,8 +502,11 @@ class Agent
         $agent_class_name = $text;
         $agent_name = strtolower($agent_class_name);
 
-        $slug_agent = new Slug($this->thing, "slug");
-        $slug = $slug_agent->getSlug($agent_name . "-" . $this->from);
+        if (!isset($this->slug_handler)) {
+            $this->slug_handler = new Slug($this->thing, "slug");
+        }
+
+        $slug = $this->slug_handler->getSlug($agent_name . "-" . $this->from);
 
         $agent_namespace_name =
             '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;

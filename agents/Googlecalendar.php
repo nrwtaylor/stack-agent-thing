@@ -17,10 +17,17 @@ class Googlecalendar extends Agent
     public function doGooglecalendar()
     {
         if ($this->agent_input == null) {
-            $this->calendar_message = $this->calendar_text; // mewsage?
+            if (isset($this->calendar_text)) {
+               $this->calendar_message = $this->calendar_text; // mewsage?
+            }
         } else {
             $this->calendar_message = $this->agent_input;
         }
+
+        if (!isset($this->calendar_message)) {
+            $this->calendar_message = "No calendar message.";
+        }
+
     }
 
     public function respondResponse()
@@ -145,6 +152,7 @@ class Googlecalendar extends Agent
         $str_pattern = 'googlecalendar';
         $str_replacement = '';
 
+        $filtered_input = "";
         if (strpos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
             $filtered_input = substr_replace(

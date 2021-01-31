@@ -38,6 +38,8 @@ class Help extends Agent
         $this->node_list = ['help' => ['help', 'info']];
 
         $this->namespace = "\\Nrwtaylor\\StackAgentThing\\";
+
+	$this->default_agent_name = "agent";
     }
 
     function run()
@@ -121,8 +123,11 @@ class Help extends Agent
     {
         if (!isset($this->help)) {$this->makeHelp();}
 
+	$prior_agent_text = $this->default_agent_name;
+	if (isset($this->prior_agent)) {$prior_agent_text = $this->prior_agent;}
+
         $this->sms_message =
-            "HELP | " . ucwords($this->prior_agent) . " | " . $this->help;
+            "HELP | " . ucwords($prior_agent_text) . " | " . $this->help;
         //$this->sms_message .= " | TEXT INFO";
         $this->thing_report['sms'] = $this->sms_message;
     }
@@ -165,17 +170,19 @@ class Help extends Agent
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
 
+	$things = $findagent_thing->thing_report['things'];
+
+        if ($things === true) {return;}
+
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to
         // what we are doing.
-
-        //$this->thing->log('Agent "Block" found ' . count($findagent_thing->thing_report['things']) ." Block Things.");
 
         $this->max_index = 0;
 
         $match = 0;
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+        foreach ($things as $block_thing) {
             if ($block_thing['nom_to'] != "usermanager") {
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];
@@ -184,6 +191,8 @@ class Help extends Agent
                 }
             }
         }
+
+        // TODO refactor without new Thing call.
 
         $previous_thing = new Thing($block_thing['uuid']);
         $this->prior_thing = $previous_thing;
@@ -237,10 +246,15 @@ class Help extends Agent
         //        $web .= "</a>";
 
         //        $web .= "<br>";
+
+        $prior_agent_text = $this->default_agent_name;
+        if (isset($this->prior_agent)) {$prior_agent_text = $this->prior_agent;}
+
+
         $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
         $web .=
             'The last agent to run was the ' .
-            ucwords($this->prior_agent) .
+            ucwords($prior_agent_text) .
             ' Agent.<br>';
 
         $web .= "<br>";
