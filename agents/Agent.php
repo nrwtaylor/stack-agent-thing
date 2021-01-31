@@ -309,14 +309,14 @@ class Agent
 */
 
 		// Test optimize by only initiating once.
-		if (!isset($this->{$agent_name . "_handler"})) {
-                    $this->{$agent_name. "_handler"} = new $agent_namespace_name_variant(
+		if (!isset($this->thing->{$agent_name . "_handler"})) {
+                    $this->thing->{$agent_name. "_handler"} = new $agent_namespace_name_variant(
                         $this->thing,
                         $agent_input
                     );
                 }
 
-                $response = $this->{$agent_name . "_handler"}->{$function_name}(...$args);
+                $response = $this->thing->{$agent_name . "_handler"}->{$function_name}(...$args);
                 return $response;
             }
         }

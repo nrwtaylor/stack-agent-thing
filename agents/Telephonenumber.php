@@ -158,17 +158,23 @@ class Telephonenumber extends Agent
     {
         $telephone_numbers = [];
 
-        $findagent_thing = new Findagent($this->thing, 'telephonenumber');
+        if (!isset($this->thing->findagent_handler)) {
+            $this->thing->findagent_handler = new Findagent($this->thing, 'telephonenumber');
+        }
 
-        if (!is_array($findagent_thing->thing_report['things'])) {
+        $things = $this->thing->findagent_handler->thing_report['things'];
+        if ($things === true) {return;}
+
+        if (!is_array($things)) {
             return;
         }
 
-        $count = count($findagent_thing->thing_report['things']);
+        $this->thing->log("Getting telephone numbers from stack", "DEBUG");
+        $count = count($things);
 
         if ($count > 0) {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
+                array_reverse($things)
                 as $thing_object
             ) {
                 $uuid = $thing_object['uuid'];

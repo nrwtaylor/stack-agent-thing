@@ -88,8 +88,6 @@ class Clocktime extends Agent
         $this->clocktime->setVariable("minute", $this->minute);
 
         $this->thing->log( $this->agent_prefix .' saved '  . $this->hour . " " . $this->minute . ".", "DEBUG" );
-
-        return;
     }
 
     function getRunat()

@@ -62,7 +62,7 @@ class Findagent extends Agent
 
     function findAgent($name = null, $id = null)
     {
-        $this->thing->log("findAgent called " . "name " .$name . " id " . $id . ".");
+        $this->thing->log("findAgent called " . "name " .$name . " id " . $id . ".", "DEBUG");
         $ref_time = $this->thing->elapsed_runtime();
 
         // Search for a reference within the variables field to the agent.
@@ -79,7 +79,7 @@ class Findagent extends Agent
         }
 
         $run_time = $this->thing->elapsed_runtime() - $ref_time;
-        $this->thing->log('db call ran for ' . $run_time . 'ms.', "OPTIMIZE");
+        $this->thing->log('findAgent db call for ' . $name . ' took ' . $run_time . 'ms.', "OPTIMIZE");
 
         $groups = [];
         $agent_things = [];
@@ -126,7 +126,7 @@ class Findagent extends Agent
                 ' | This is the "Find Agent" function.  Commands: none.';
             $this->thing_report['things'] = $agent_things;
         }
-        $this->thing->log("findAgent call done.");
+        $this->thing->log("findAgent call done.","DEBUG");
         return $this->thing_report['things'];
     }
 
@@ -137,32 +137,6 @@ class Findagent extends Agent
 
     public function respondResponse()
     {
-/*
-        if ($this->response == true) {
-            $this->thing_report['info'] = 'No matching agent found.';
-            $this->thing_report['help'] = 'This is the "Find Group".';
-            $this->thing_report['num_hits'] = $this->num_hits;
-
-            if ($this->verbosity >= 2) {
-                $this->thing->log(
-                    'returned ' .
-                        count($this->thing_report['things']) .
-                        ' Things.',
-                    "DEBUG"
-                );
-            }
-            $this->thing->log(
-                'ran for ' .
-                    number_format(
-                        $this->thing->elapsed_runtime() - $this->start_time
-                    ) .
-                    'ms.',
-                "OPTIMIZE"
-            );
-
-            $this->thing_report['log'] = $this->thing->log;
-        }
-*/
         // Thing actions
         $this->thing->flagGreen();
 
