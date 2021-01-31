@@ -29,6 +29,10 @@ class Hypocorism extends Agent
 
         $this->node_list = ["start"];
         $info = 'Recognizes diminuitive name forms. ';
+
+        $this->thing->refresh_at = $this->thing->time(time() + 2*24*60*60); // Never refresh.
+
+
     }
 
     /**

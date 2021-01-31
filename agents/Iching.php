@@ -33,6 +33,9 @@ class IChing extends Agent
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $this->node_list = ["iching" => ["iching", "snowflake"]];
+
+        $this->thing->refresh_at = null; // Never refresh.
+
     }
 
     /**

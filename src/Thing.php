@@ -115,6 +115,11 @@ class Thing
                 $this->console_output = $this->container['stack']['console_output'];
         }
 
+        $this->logging_console = 'off';
+        if (isset($this->container['stack']['logging_console'])) {
+                $this->logging_console = $this->container['stack']['logging_console'];
+        }
+
 
 	$this->logging_level_default = "off";
         if (isset($this->container['stack']['logging_level_default'])) {
@@ -1062,8 +1067,9 @@ return true;
             //echo "i is not equal to 0, 1 or 2";
         }
 
-        $this->console ($t . " [" . $logging_level . "]" . "\n");
-
+        if ((isset($this->logging_console)) and ($this->logging_console == 'on')) {
+            $this->console ($t . " [" . $logging_level . "]" . "\n");
+        }
         $this->log_last = $t;
     }
 

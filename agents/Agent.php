@@ -300,7 +300,7 @@ class Agent
             as $i => $agent_namespace_name_variant
         ) {
             if (method_exists($agent_namespace_name_variant, $function_name)) {
-/*
+                /*
                 $agent_handler = new $agent_namespace_name_variant(
                     $this->thing,
                     $agent_input
@@ -308,15 +308,17 @@ class Agent
                 $response = $agent_handler->{$function_name}(...$args);
 */
 
-		// Test optimize by only initiating once.
-		if (!isset($this->thing->{$agent_name . "_handler"})) {
-                    $this->thing->{$agent_name. "_handler"} = new $agent_namespace_name_variant(
+                // Test optimize by only initiating once.
+                if (!isset($this->thing->{$agent_name . "_handler"})) {
+                    $this->thing->{$agent_name .
+                        "_handler"} = new $agent_namespace_name_variant(
                         $this->thing,
                         $agent_input
                     );
                 }
 
-                $response = $this->thing->{$agent_name . "_handler"}->{$function_name}(...$args);
+                $response = $this->thing->{$agent_name .
+                    "_handler"}->{$function_name}(...$args);
                 return $response;
             }
         }
@@ -568,6 +570,7 @@ class Agent
         $this->makePNGs();
         $this->makeSMS();
         $this->makeWeb();
+
         $this->makeJson();
 
         // Explore adding in INFO and HELP to web response.
@@ -693,6 +696,38 @@ class Agent
                 }
             }
         }
+
+        if (
+            strtolower($this->agent_name) == 'agent' and
+            isset($this->thing_report)
+        ) {
+            $variable_name = "thing-report-" . $this->uuid;
+            //var_dump($variable_name);
+
+            if (!isset($this->thing->refresh_at)) {
+                $this->thing->refresh_at = false;
+            } // false = request again now.
+
+            $thing_report = $this->thing_report;
+
+            //unset($thing_report['thing']['thing']);
+            $t = [
+                'uuid' => $this->thing->uuid,
+                'to' => $this->thing->to,
+                'from' => $this->thing->from,
+                'subject' => $this->thing->subject,
+                //'agent_input'=>$thing_report['thing']->agent_input,
+                'created_at' => $this->thing->thing->created_at,
+                'refresh_at' => $this->thing->refresh_at,
+            ];
+
+            $thing_report['thing'] = $t;
+            $this->setMemory($variable_name, $thing_report);
+
+            //$variable_name = "thing-json-" . $this->uuid;
+            //$this->setMemory($variable_name, $thing_report);
+        }
+
         $this->thing->log("completed make.");
     }
 
@@ -983,7 +1018,7 @@ class Agent
         if ($agent == null) {
             $agent = $this->agent_name;
         }
-/*
+        /*
         $whatIWant = $input;
 
         $pos = strpos(strtolower($input), $agent);

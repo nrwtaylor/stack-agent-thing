@@ -24,16 +24,16 @@ class Claws extends Agent
         $this->doClaws();
     }
 
-    function claws() {
-
-
+    function claws()
+    {
     }
 
     function test()
     {
-
-if ($this->claws_test_flag != "on") {return;}
-$this->response .= "No test performed. ";
+        if ($this->claws_test_flag != "on") {
+            return;
+        }
+        $this->response .= "No test performed. ";
     }
 
     public function doClaws()
@@ -51,10 +51,9 @@ $this->response .= "No test performed. ";
         }
     }
 
-
     public function respondResponse()
     {
-	$this->makeClaws();
+        $this->makeClaws();
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -120,10 +119,9 @@ $this->response .= "No test performed. ";
         $this->response .= "Wrote item to When calendar file. ";
     }
 
-    public function makeClaws() {
-
-       $this->thing_report['claws'] = "Custom report for Claws. Test.";
-
+    public function makeClaws()
+    {
+        $this->thing_report['claws'] = "Custom report for Claws. Test.";
     }
 
     public function makeSMS()
@@ -131,8 +129,8 @@ $this->response .= "No test performed. ";
         $count = count($this->claws_items);
 
         $sms = "CLAWS | " . "Read " . $count . " items. See TXT response.";
-	$sms .= " ";
-	$sms .= $this->response;
+        $sms .= " ";
+        $sms .= $this->response;
 
         $this->thing_report['sms'] = $sms;
         $this->sms_message = $sms;
@@ -185,12 +183,13 @@ $this->response .= "No test performed. ";
         $datelines = [];
         // Read every line for a date.
 
-	$count = 0;
+        $count = 0;
 
         foreach ($paragraphs as $i => $paragraph) {
-
             // Don't waste time on empty paragraphs.
-            if (trim($paragraph) == "") {continue;}
+            if (trim($paragraph) == "") {
+                continue;
+            }
 
             // Segmentation if this continues past count 2.
             // 3f55 29 January 2021
@@ -241,7 +240,7 @@ $this->response .= "No test performed. ";
         ];
         $this->flagAgent($indicators, strtolower($input));
 
-//        $filtered_input = $this->assert($input, false);
+        //        $filtered_input = $this->assert($input, false);
         //var_dump($filtered_input);
         //exit();
 

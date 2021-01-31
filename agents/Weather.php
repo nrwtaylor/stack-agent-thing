@@ -60,6 +60,9 @@ class Weather extends Agent
         // https://www.weather.gc.ca/city/pages/bc-74_metric_e.html
         $link = str_replace("/rss/city/", "/city/pages/", $this->xml_link);
         $this->link = str_replace("_e.xml", "_metric_e.html", $link);
+
+        $this->thing->refresh_at = $this->thing->time(time() + 5*60); // Refresh after 5 minutes.
+
     }
 
     public function makeLink()

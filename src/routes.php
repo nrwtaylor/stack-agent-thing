@@ -6,9 +6,9 @@
  */
 
 namespace Nrwtaylor\StackAgentThing;
-// (c) 2020 Stackr Interactive Ltd
+// (c) 2021 Stackr Interactive Ltd
 
-// whitefox 16 September 2020
+// whitefox 31 January 2021
 
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
@@ -17,59 +17,67 @@ error_reporting(-1);
 //ini_set("max_execution_time",1 ); //s
 //ini_set("max_input_time", 2); //s
 //set_time_limit(2);
-
 // API group
+
 $app->group('/api', function () use ($app) {
     // This is the whitefox API.  Accessible at api/whitefox/
     $app->group('/whitefox', function () use ($app) {
-if (isset($app->getContainer()->get('settings')['api']['stripe'][
-                'webhook'
-            ])) {
-        $app->post($app->getContainer()->get('settings')['api']['stripe'][
-                'webhook'
-            ],
+        if (
+            isset(
+                $app->getContainer()->get('settings')['api']['stripe'][
+                    'webhook'
+                ]
+            )
+        ) {
+            $app->post(
+                $app->getContainer()->get('settings')['api']['stripe'][
+                    'webhook'
+                ],
 
-            function ($request, $response, $args) {
+                function ($request, $response, $args) {
+                    $credential_set = $this->get('settings')['api']['stripe'][
+                        'credential_set'
+                    ];
 
-            $credential_set = $this->get('settings')['api']['stripe']['credential_set'];
+                    $secret_key = $this->get('settings')['api']['stripe'][
+                        $credential_set
+                    ]['secret_key'];
 
-       $secret_key =
-            $this->get('settings')['api']['stripe'][$credential_set]['secret_key'];
+                    \Stripe\Stripe::setApiKey($secret_key);
 
-            \Stripe\Stripe::setApiKey($secret_key);
+                    $thing = new Thing(null);
+                    $thing->Create("stripe", "routes", "s/ web stripe");
 
-            $thing = new Thing(null);
-            $thing->Create("stripe", "routes", "s/ web stripe");
+                    $body = $request->getParsedBody();
+                    $getParam = $request->getQueryParams();
+                    //$threadKey = $getParam('threadKey');
+                    $params_json = $getParam;
+                    $args_json = $args;
 
-                $body = $request->getParsedBody();
-                $getParam = $request->getQueryParams();
-                //$threadKey = $getParam('threadKey');
-                $params_json = $getParam;
-                $args_json = $args;
+                    //$uri = $request->getUri();
+                    //$method = $uri->getQuery();
+                    //$threadKey = $app->request()->params('threadKey');
+                    //$threadKey = $request->params('');
+                    //$data = json_decode($request->getBody()) ?: $request->params();
+                    //$data = json_decode( $app->request->getBody() ) ?: $app->request->p>
+                    $data = [
+                        "params" => $params_json,
+                        "args" => $args_json,
+                        "body" => $body,
+                        "merp" => "merp",
+                    ];
 
-                //$uri = $request->getUri();
-                //$method = $uri->getQuery();
-                //$threadKey = $app->request()->params('threadKey');
-                //$threadKey = $request->params('');
-                //$data = json_decode($request->getBody()) ?: $request->params();
-                //$data = json_decode( $app->request->getBody() ) ?: $app->request->p>
-                $data = [
-                    "params" => $params_json,
-                    "args" => $args_json,
-                    "body" => $body,
-                    "merp"=>"merp"
-                ];
+                    //$data = ["test"=>"merp"];
+                    //$data = "stripe";
+                    $stripe_agent = new Stripe($thing, $data);
+                    $session = $stripe_agent->checkoutStripe();
 
-//$data = ["test"=>"merp"];
-//$data = "stripe";
-            $stripe_agent = new Stripe($thing, $data);
-            $session = $stripe_agent->checkoutStripe();
-
-            return $response->withJson([ 'id' => $session->id ])->withStatus(200);
-
-
-        });
-}
+                    return $response
+                        ->withJson(['id' => $session->id])
+                        ->withStatus(200);
+                }
+            );
+        }
     });
 
     // Introducing redpanda
@@ -187,34 +195,39 @@ if (isset($app->getContainer()->get('settings')['api']['stripe'][
         });
 
         // Operational end-point for GEARMAN
-if (isset($app->getContainer()->get('settings')['api']['stripe'][
-                'webhook'
-            ])) {
+        if (
+            isset(
+                $app->getContainer()->get('settings')['api']['stripe'][
+                    'webhook'
+                ]
+            )
+        ) {
+            $app->get(
+                $app->getContainer()->get('settings')['api']['gearman'][
+                    'webhook'
+                ],
+                function ($request, $response, $args) {
+                    $body = $request->getParsedBody();
 
-        $app->get(
-            $app->getContainer()->get('settings')['api']['gearman']['webhook'],
-            function ($request, $response, $args) {
-                $body = $request->getParsedBody();
+                    //echo "meep";
+                    //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
+                    $arr = json_encode([
+                        "to" => "web@stackr.ca",
+                        "from" => "snowflake",
+                        "subject" => "snowflake",
+                    ]);
 
-                //echo "meep";
-                //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
-                $arr = json_encode([
-                    "to" => "web@stackr.ca",
-                    "from" => "snowflake",
-                    "subject" => "snowflake",
-                ]);
+                    $client = new \GearmanClient();
+                    $client->addServer();
 
-                $client = new \GearmanClient();
-                $client->addServer();
+                    $client->doHighBackground("call_agent", $arr);
 
-                $client->doHighBackground("call_agent", $arr);
-
-                return;
-                // $response->withHeader('HTTP/1.0 200 OK')
-                //                ->withStatus(200);
-            }
-        );
-}
+                    return;
+                    // $response->withHeader('HTTP/1.0 200 OK')
+                    //                ->withStatus(200);
+                }
+            );
+        }
         // Operational end-point for Microsoft
         $app->post(
             $app->getContainer()->get('settings')['api']['microsoft'][
@@ -763,7 +776,6 @@ if (isset($app->getContainer()->get('settings')['api']['stripe'][
 
 // Route handler for everything after the /
 $app->get('[/{params:.*}]', function ($request, $response, $args) {
-
     //    ini_set("max_input_time", 2); //s
     //set_time_limit(2);
 
@@ -902,7 +914,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             break;
 
         case strpos($last, ".") !== false:
-
             // File request of some sort
 
             // Unless it is a number and a number
@@ -916,6 +927,23 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             if (!$is_number) {
                 $agent_name = $t[0];
                 $ext_name = $t[1];
+
+                if ($ext_name === "json") {
+                    $thing_report = cacheRoute($uuid);
+
+                    if ($thing_report !== false) {
+                        unset($thing_report['log']);
+
+                        //               if ($json != false) {
+                        $json = json_encode($thing_report, true);
+                        $response->write($json);
+                        return $response->withHeader(
+                            'Content-Type',
+                            'application/json'
+                        );
+                    }
+                }
+
                 $agent_class_name = 'Make' . strtolower($ext_name);
 
                 $web_thing = new Thing($uuid);
@@ -929,19 +957,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     "json" => 'application/json',
                     "ics" => 'text/calendar',
                 ];
-/*
-                if ($uuid == null) {
 
-                    $response->write(false);
-
-                    if (isset($content_types[$ext_name])) {
-                        return $response->withHeader(
-                            'Content-Type',
-                            $content_types[$ext_name]
-                        );
-                    }
-                }
-*/
                 // See if the extension name is one of these.
 
                 $found = false;
@@ -955,17 +971,16 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     return $response->withStatus(404);
                 }
 
-    // OK - Done all we can.
-    // So now need to create a Thing.
+                // OK - Done all we can.
+                // So now need to create a Thing.
 
-        $web_thing->db = new Database($web_thing->uuid,"null");
+                $web_thing->db = new Database($web_thing->uuid, "null");
 
                 try {
                     $agent_namespace_name =
                         '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
 
                     $agent = new $agent_namespace_name($web_thing, $agent_name);
-
                 } catch (Exception $e) {
                     //echo 'Caught exception: ',  $e->getMessage(), "\n";
                     return $response->withStatus(404);
@@ -974,10 +989,9 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 if (!isset($agent->thing_report[strtolower($ext_name)])) {
                     //var_dump($ext_name);
                     //echo "meep";
-// TODO: TEST
-//                    exit();
+                    // TODO: TEST
+                    //                    exit();
                     return $response->withStatus(404);
-
                 }
 
                 $content = $agent->thing_report[strtolower($ext_name)];
@@ -1014,7 +1028,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             // TODO
             // TODO Get closest event to this timestamp.
-            $timestamp_agent = new Timestamp($thing,"timestamp");
+            $timestamp_agent = new Timestamp($thing, "timestamp");
             if ($timestamp_agent->isTimestamp($command)) {
                 $agent = new Event($thing, $command);
 
@@ -1028,8 +1042,6 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $datagram
                 );
             }
-
-
 
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
@@ -1095,6 +1107,22 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             if (isset($compression_thing->filtered_input)) {
                 // Compressions found.
                 $filtered_command = $compression_thing->filtered_input;
+            }
+
+            // See if there is a thing report in the memory
+            //            $key = "thing-report-" . $uuid;
+
+            $thing_report = cacheRoute($uuid);
+
+            if ($thing_report !== false) {
+                $datagram = [];
+                $datagram['thing'] = false;
+                $datagram['thing_report'] = $thing_report;
+                return $this->renderer->render(
+                    $response,
+                    'thing.phtml',
+                    $datagram
+                );
             }
 
             $agent = new Agent($thing, $filtered_command);
@@ -1183,3 +1211,44 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             return $this->renderer->render($response, 'thing.phtml', $datagram);
     }
 });
+
+function cacheRoute($uuid)
+{
+    $key = "thing-report-" . $uuid;
+
+    try {
+        $mem_cached = new \Memcached(); //point 2.
+        $mem_cached->addServer("127.0.0.1", 11211);
+
+        $thing_report = $mem_cached->get($key);
+
+        $expired = false;
+        if (
+            isset($thing_report['thing']['refresh_at']) and
+            $thing_report['thing']['refresh_at'] !== false
+        ) {
+            if (time() - strtotime($thing_report['thing']['refresh_at']) > 0) {
+                $expired = true;
+            }
+        }
+
+        if (
+            isset($thing_report['thing']['refresh_at']) and
+            $thing_report['thing']['refresh_at'] === false
+        ) {
+            $expired = true;
+        }
+
+        if (!isset($thing_report['thing']['refresh_at'])) {
+            $expired = true;
+        }
+
+        if ($thing_report != false and $expired === false) {
+            return $thing_report;
+        }
+    } catch (\Throwable $t) {
+    } catch (\Error $ex) {
+    }
+
+    return false;
+}

@@ -90,6 +90,9 @@ class CHS extends Agent
             $this->response .= "Could not get tides. ";
         }
         $this->getWeather();
+
+        $this->thing->refresh_at = $this->thing->time(time() + 5*60); // Refresh after 5 minutes.
+
     }
 
     /**
