@@ -94,7 +94,7 @@ public function run() {}
     /**
      *
      * @return unknown
-     */
+v     */
     function getLink($variable = null)
     {
         $block_things = [];
@@ -127,7 +127,7 @@ public function run() {}
 
         $link_uuid_text = "<not set>";
         if (isset($this->link_uuid)) {
-            $link_uuid_text = $this-link_uuid;
+            $link_uuid_text = $this->link_uuid;
         }
 
         $link =
