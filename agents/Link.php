@@ -125,8 +125,13 @@ public function run() {}
             $agent_name = $text;
         }
 
+        $link_uuid_text = "<not set>";
+        if (isset($this->link_uuid)) {
+            $link_uuid_text = $this-link_uuid;
+        }
+
         $link =
-            $this->web_prefix . 'thing/' . $this->link_uuid . '/' . $agent_name;
+            $this->web_prefix . 'thing/' . $link_uuid_text . '/' . $agent_name;
         return $link;
     }
 

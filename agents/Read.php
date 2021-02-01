@@ -52,21 +52,34 @@ class Read extends Agent
                 $this->thing->container['api']['read']['do_not_read_filename'];
         }
     }
-
     function run()
     {
+        //$this->urlRead($this->link);
+    }
+
+    function urlRead($link = null)
+    {
+        if ($link === null) {
+            return true;
+        }
+
+        // Pass through google doc reader url rewriter.
+        $link = $this->googleRead($link);
+
+        //var_dump($this->link);
+        //    function run()
+
+        //$link = $this->link;
+
         // Now have this->link potentially from reading subject
         $this->matched_sentences = [];
 
         $read_allowed = false;
-        if (
-            substr($this->link, 0, 4) === "http" or
-            substr($this->link, 0, 5) === "https"
-        ) {
-            $this->robot_agent = new Robot($this->thing, $this->link);
+        if (substr($link, 0, 4) === "http" or substr($link, 0, 5) === "https") {
+            $this->robot_agent = new Robot($this->thing, $link);
 
             $robot_allowed = $this->robot_agent->robots_allowed(
-                $this->link,
+                $link,
                 $this->robot_agent->user_agent_short
             );
             $read_allowed = $robot_allowed;
@@ -95,13 +108,12 @@ class Read extends Agent
                 $this->response .= "Read allowed. ";
 
                 if (
-                    substr($this->link, 0, 4) === "http" or
-                    substr($this->link, 0, 5) === "https"
+                    substr($link, 0, 4) === "http" or
+                    substr($link, 0, 5) === "https"
                 ) {
                     // Okay.
                 } elseif (isset($this->robot_agent->scheme)) {
-                    $this->link =
-                        $this->robot_agent->scheme . '://' . $this->link;
+                    $link = $this->robot_agent->scheme . '://' . $link;
                 } else {
                     $this->response .= "Local file? ";
                     if ($this->do_not_read_filename === true) {
@@ -109,7 +121,7 @@ class Read extends Agent
                     }
                 }
                 // Populate $this->contents
-                $this->getUrl($this->link);
+                $this->getUrl($link);
 
                 $this->metaRead($this->contents);
                 if ($this->noindexRead($this->contents)) {
@@ -135,8 +147,11 @@ class Read extends Agent
                 //}
 
                 // Get all the URLs in the page.
-                $url_agent = new Url($this->thing, "url");
-                $this->urls = $url_agent->extractUrls($this->contents);
+                //                $url_agent = new Url($this->thing, "url");
+                //                $this->urls = $url_agent->extractUrls($this->contents);
+
+                $this->extractUrls($this->contents);
+
                 $text = strip_tags($this->contents);
                 // Remove multiple spaces
                 $text = preg_replace('/\s+/', ' ', $text);
@@ -149,9 +164,13 @@ class Read extends Agent
                 //$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
                 $this->sentences = preg_split($pattern, $text);
 
-                foreach ($this->sentences as $i => $sentence) {
-                    if (stripos($sentence, $this->search_phrase) !== false) {
-                        $this->matched_sentences[] = $sentence;
+                if (isset($this->search_phrase)) {
+                    foreach ($this->sentences as $i => $sentence) {
+                        if (
+                            stripos($sentence, $this->search_phrase) !== false
+                        ) {
+                            $this->matched_sentences[] = $sentence;
+                        }
                     }
                 }
         }
@@ -511,11 +530,11 @@ class Read extends Agent
             $url = $this->link;
         }
 
-        $data_source = $this->link;
-
+        //$data_source = $this->link;
+        $data_source = $url;
         // Has this been read recently?
         foreach ($this->reads_list as $i => $read) {
-            if ("http://" . $read['url'] == $this->link) {
+            if ("http://" . $read['url'] == $url) {
                 if (!isset($last_seen)) {
                     $last_seen = $read['age'];
                 }
@@ -524,7 +543,7 @@ class Read extends Agent
                 }
             }
 
-            if ("https://" . $read['url'] == $this->link) {
+            if ("https://" . $read['url'] == $url) {
                 if (!isset($last_seen)) {
                     $last_seen = $read['age'];
                 }
@@ -696,6 +715,7 @@ class Read extends Agent
                 $web .= '<a href="' . $link . '">' . $link . '</a>' . '<br>';
             }
 
+            $this->sentencesRead();
             $sentence = $this->sentences[0];
 
             $word_agent = new Word($this->thing, "word");
@@ -775,51 +795,23 @@ class Read extends Agent
 
         if ($this->agent_input == "read") {
             $input = $this->subject;
+            //            return;
         }
 
         $pieces = explode(" ", strtolower($input));
 
-        foreach ($pieces as $key => $piece) {
-            foreach ($this->keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
-                        case 'last':
-                            // devstack
-                            $this->getPrior();
-                            $task = $this->prior_thing['thing']->task;
-                            $uuid = $this->prior_thing['thing']->uuid;
-                            $nom_from = $this->prior_thing['thing']->nom_from;
-                            $nom_to = $this->prior_thing['thing']->nom_to;
-                            $created_at =
-                                $this->prior_thing['thing']->created_at;
-
-                            $input = $task;
-                            if (!isset($this->recursion_count)) {
-                                $this->recursion_count = 0;
-                            }
-
-                            if ($this->recursion_count < 2) {
-                                $this->recursion_count += 1;
-                                $this->readSubject($input);
-                            }
-
-                            if ($this->recursion_count == 1) {
-                                $this->response .= 'Read "' . $input . '" ';
-                            } else {
-                                $this->response .=
-                                    'Then read "' . $input . '" ';
-                            }
-                    }
-                }
+        // Just a read.
+        if (count($pieces) == 1) {
+            if ($input == 'read') {
+                return;
             }
         }
 
-        //$this->response = null;
         $this->num_hits = 0;
 
-        $url_agent = new Url($this->thing, "url");
-
-        $url = $url_agent->extractUrl($input);
+        //        $url_agent = new Url($this->thing, "url");
+        //        $url = $url_agent->extractUrl($input);
+        $url = $this->extractUrl($input);
 
         $url = $this->googleRead($url);
 
@@ -839,16 +831,21 @@ class Read extends Agent
         $input = str_replace($this->url, "", $input);
         $this->search_phrase = trim(strtolower($input));
 
-        $pieces = explode(" ", strtolower($input));
+        $this->urlRead($this->link);
 
-        if (count($pieces) == 1) {
-            if ($input == 'read') {
-                return;
-            }
-        }
+        //        $input = str_replace($this->url, "", $input);
+        //        $this->search_phrase = trim(strtolower($input));
 
-        return "Message not understood";
+        //        $pieces = explode(" ", strtolower($input));
 
-        return false;
+        //        if (count($pieces) == 1) {
+        //            if ($input == 'read') {
+        //                return;
+        //            }
+        //        }
+
+        //        return "Message not understood";
+
+        //        return false;
     }
 }

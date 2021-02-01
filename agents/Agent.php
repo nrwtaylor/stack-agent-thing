@@ -504,11 +504,13 @@ class Agent
         $agent_class_name = $text;
         $agent_name = strtolower($agent_class_name);
 
-        if (!isset($this->slug_handler)) {
-            $this->slug_handler = new Slug($this->thing, "slug");
-        }
+//        if (!isset($this->slug_handler)) {
+//            $this->slug_handler = new Slug($this->thing, "slug");
+//        }
+//        $slug = $this->slug_handler->getSlug($agent_name . "-" . $this->from);
 
-        $slug = $this->slug_handler->getSlug($agent_name . "-" . $this->from);
+        $slug = $this->getSlug($agent_name . "-" . $this->from);
+
 
         $agent_namespace_name =
             '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
@@ -2078,6 +2080,10 @@ class Agent
 
             // Added agent_class_name to avoid double call.
             // 24 May 2020
+
+            // dev refactor to call already instantiated class - if exists
+            // ie $this->thing->{$agent_class_name."_handler"}
+
             $agent = new $agent_namespace_name($this->thing, $agent_class_name);
 
             return true;
@@ -2592,19 +2598,24 @@ class Agent
                 'Agent "Agent" created a Burst agent looking for burstiness.',
                 "DEBUG"
             );
-            $this->burst = new Burst($this->thing, 'burst');
 
+            if (!isset($this->thing->burst_handler)) {
+                $this->thing->burst_handler = new Burst($this->thing, 'burst');
+            }
             $this->thing->log(
                 'Agent "Agent" created a Similar agent looking for incoming message repeats.',
                 "DEBUG"
             );
 
-            $this->similar = new Similar($this->thing, 'similar');
-            $similarness = $this->similar->similarness;
-            $bursts = $this->burst->burst;
+            if (!isset($this->thing->similar_handler)) {
+                $this->thing->similar_handler = new Similar($this->thing, 'similar');
+            }
 
-            $burstiness = $this->burst->burstiness;
-            $similarities = $this->similar->similarity;
+            $similarness = $this->thing->similar_handler->similarness;
+            $bursts = $this->thing->burst_handler->burst;
+
+            $burstiness = $this->thing->burst_handler->burstiness;
+            $similarities = $this->thing->similar_handler->similarity;
 
             $elapsed = $this->thing->elapsed_runtime();
 
@@ -2613,7 +2624,7 @@ class Agent
 
             $burst_age =
                 strtotime($this->current_time) -
-                strtotime($this->burst->burst_time);
+                strtotime($this->thing->burst_handler->burst_time);
             if ($burst_age < 0) {
                 $burst_age = 0;
             }
@@ -2863,8 +2874,10 @@ class Agent
 
         $this->thing->log('Agent "Agent" looking for URL in input.');
         // Is Identity Context?
-        $url = new Url($this->thing, "url");
-        $urls = $url->extractUrls($input);
+        //$url = new Url($this->thing, "url");
+        //$urls = $url->extractUrls($input);
+
+        $urls = $this->extractUrls($input);
 
         if ($urls !== true and (isset($urls) and count($urls) > 0)) {
             $this->thing->log(

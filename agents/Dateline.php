@@ -9,14 +9,14 @@ class Dateline extends Agent
     {
         $this->dateline_horizon = 60;
 
-        $this->at_agent = new At($this->thing, "at");
-
+        if (!isset($this->thing->at_agent)) {
+            $this->thing->at_agent = new At($this->thing, "at");
+        }
         $this->test_url = null;
         if (isset($this->thing->container['api']['dateline']['test_url'])) {
             $this->test_url =
                 $this->thing->container['api']['dateline']['test_url'];
         }
-        //$this->url_agent = new Url($this->thing, "url");
     }
 
     function run()
@@ -26,22 +26,23 @@ class Dateline extends Agent
 
     public function get()
     {
-        //$this->test();
-        //$this->extractDateline();
     }
 
     public function test()
     {
+        $this->thing->console("Dateline test start.\n");
+
         if (!is_string($this->test_url)) {
+            $this->thing->console("Test URL not found.\n");
             return false;
         }
 
         $url = $this->test_url;
-        $read_agent = new Read($this->thing, $url);
 
-        $paragraph_agent = new Paragraph($this->thing, $read_agent->contents);
+        $contents = $this->urlDateline($url);
+        $paragraphs = $this->paragraphsDateline($contents);
 
-        $paragraphs = $paragraph_agent->paragraphs;
+        $this->thing->console("Retrieved test contents.\n");
 
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
@@ -51,43 +52,62 @@ class Dateline extends Agent
             if ($dateline == false) {
                 continue;
             }
-            $this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
-            $this->thing->console($dateline['dateline'] . "\n" . $dateline['line'] . "\n");
+            //$this->thing->log($dateline['dateline'] . "\n" . $dateline['line']);
+            $this->thing->console($dateline['dateline'] . "\n");
+            $this->thing->console($dateline['line'] . "\n");
+            $this->thing->console($this->timestampDateline($dateline) . "\n");
+            $this->thing->console("\n");
         }
+
+        $this->response .= "Read " . $i . " paragraphs. ";
+
+        $this->thing->console("Dateline test completed.\n");
     }
 
-    public function paragraphsDateline()
-    {
+    public function urlDateline($url) {
+
+$this->thing->console("urlDateline read start.\n");
+
         $start_time = time();
-        $url = $this->test_url;
+
         $read_agent = new Read($this->thing, $url);
+        $contents = $read_agent->contents;
+
+// dev refactor
+//       $contents = $this->urlRead($url);
 
         $run_time = time() - $start_time;
 
-        $paragraph_agent = new Paragraph($this->thing, $read_agent->contents);
-
-        $paragraphs = $paragraph_agent->paragraphs;
-        $run_time = time() - $start_time;
 
         $this->response .=
             "Dateline source took " . $run_time . " seconds to get. ";
 
+
+$this->thing->console("urlDateline read complete.\n");
+
+        return $contents;
+
+    }
+
+    public function paragraphsDateline($contents)
+    {
+        $paragraphs = $this->extractParagraphs($contents);
         return $paragraphs;
     }
 
     public function getDateline($text = null)
     {
+        if ($text == null) {return true;}
         //        if (!is_string($this->test_url)) {
         //            return false;
         //        }
 
-        // Ignore text for now.
         // Read the specificed url. And get the first dateline.
         // Dateline being  timestamp + text.
         // Time this part/
 
         if (!isset($this->paragraphs)) {
-            $this->paragraphs = $this->paragraphsDateline();
+            $this->paragraphs = $this->paragraphsDateline($text);
         }
         $start_time = time();
 
@@ -177,12 +197,12 @@ class Dateline extends Agent
             return false;
         }
 
-        //$url_agent = new Url($this->thing,"url");
-//        $text = $this->url_agent->stripUrls($text);
-        $text = $this->stripUrls($text);
+        // Urls and Telephone numbers are not dates.
+        // Remove them to make the date extractors work easier.
 
-
-        $text = $this->stripTelephonenumbers($text, " ");
+        // refactor this to At.
+        //$text = $this->stripUrls($text);
+        //$text = $this->stripTelephonenumbers($text, " ");
 
         $paragraph = $text;
 
@@ -201,13 +221,13 @@ class Dateline extends Agent
         if ($paragraph == "") {
             return false;
         }
-        $t = $this->at_agent->extractAt($paragraph);
+        $t = $this->thing->at_agent->extractAt($paragraph);
 
         $flag = false;
         $date = [];
 
         foreach ($arr as $component) {
-            $this->{$component} = $this->at_agent->{$component};
+            $this->{$component} = $this->thing->at_agent->{$component};
 
             if ($this->{$component} !== false) {
                 $flag = true;
@@ -335,13 +355,7 @@ class Dateline extends Agent
             $this->dateline_message = $this->agent_input;
         }
     }
-/*
-    function getNegativetime()
-    {
-        $agent = new Negativetime($this->thing, "dateline");
-        $this->negative_time = $agent->negative_time; //negative time is asking
-    }
-*/
+
     public function respondResponse()
     {
         $this->thing->flagGreen();
@@ -357,7 +371,7 @@ class Dateline extends Agent
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
 
-        return $this->thing_report;
+       // return $this->thing_report;
     }
 
     function makeSMS()
@@ -367,6 +381,7 @@ class Dateline extends Agent
         $sms = "DATELINE ";
         // . $this->dateline_message;
 
+if (isset($this->dateline)) {
         $dateline_timestamp = $this->timestampDateline($this->dateline);
 
         $timestamp_text = "undated";
@@ -375,6 +390,7 @@ class Dateline extends Agent
         }
 
         $sms .= $timestamp_text . " ";
+
         // See if there is a dateline with a UTC timestamp.
         if (
             $this->dateline !== false and
@@ -389,7 +405,7 @@ class Dateline extends Agent
                 $sms .= "| " . $text_token . " ";
             }
         }
-
+}
         $sms .= $this->response;
 
         $this->sms_message = "" . $sms;
@@ -421,8 +437,6 @@ class Dateline extends Agent
         $agent_name = strtolower($agent_class_name);
 
         $this->thing->log("questionDateline instantiate slug Thing");
-//        $slug_agent = new Slug($this->thing, "slug");
-//        $slug = $slug_agent->getSlug($agent_name . "-" . "test");
 
         $slug = $this->getSlug($agent_name . "-" . "test");
 
@@ -514,6 +528,7 @@ class Dateline extends Agent
 
         if ($input == "dateline test") {
             $this->test();
+            return;
         }
 
         $this->dateline = $this->extractDateline($input);

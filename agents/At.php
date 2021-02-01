@@ -68,7 +68,7 @@ class At extends Agent
         $this->at->setVariable("hour", $this->hour);
         $this->at->setVariable("minute", $this->minute);
 
-        $this->thing->console("set At");
+        $this->thing->console("At set completed.\n");
 
         $this->thing->log(
             $this->agent_prefix .
@@ -114,7 +114,7 @@ class At extends Agent
             $this->minute = $minute;
         }
 
-        $this->thing->console("At get");
+        $this->thing->console("At get completed.\n");
     }
 
     function getAt()
@@ -171,7 +171,8 @@ class At extends Agent
      *
      * @param unknown $input (optional)
      */
-    function extractNumbers($input = null)
+
+    function numbersAt($input = null)
     {
         if ($input == null) {
             $input = $this->input;
@@ -179,8 +180,8 @@ class At extends Agent
 
         $this->numbers = [];
 
-        $agent = new Number($this->thing, "number " . $input);
-        $numbers = $agent->numbers;
+        $numbers = $this->extractNumbers($input);
+
         if (count($numbers) > 0) {
             $this->numbers = $numbers;
         }
@@ -195,7 +196,7 @@ class At extends Agent
         $this->number = "X";
 
         if (!isset($this->numbers)) {
-            $this->extractNumbers($input);
+            $this->numbersAt($input);
         }
         if (count($this->numbers) == 1) {
             $this->number = $this->numbers[0];
@@ -207,7 +208,7 @@ class At extends Agent
      * @param unknown $input
      * @return unknown
      */
-/*
+    /*
     function isInput($input)
     {
         if ($input === false) {
@@ -239,8 +240,12 @@ class At extends Agent
      */
     function extractAt($input = null)
     {
+        // Remove non dates.
+        $input = $this->stripUrls($input);
+        $input = $this->stripTelephonenumbers($input, " ");
+
         $this->parsed_date = date_parse($input);
-//var_dump($this->parsed_date);
+        //var_dump($this->parsed_date);
         $month = $this->parsed_date['month'];
         $this->month = $month;
 
@@ -269,28 +274,29 @@ class At extends Agent
 
         // See what numbers are in the input
         if (!isset($this->numbers)) {
-            $this->extractNumbers($input);
+            $this->numbersAt($input);
         }
-        $this->extractNumbers($input);
+        $this->numbersAt($input);
 
-// handle June 2000.
-// parse_date will give a day_number of 1 for this string.
-if ($this->day_number == 1) {
-$flag = false;
-foreach($this->numbers as $i=>$number) {
+        // handle June 2000.
+        // parse_date will give a day_number of 1 for this string.
+        if ($this->day_number == 1) {
+            $flag = false;
+            foreach ($this->numbers as $i => $number) {
+                if ($number == $this->day_number) {
+                    $flag = true;
+                    break;
+                }
+            }
 
-if ($number == $this->day_number) {$flag = true; break;}
-
-}
-
-if ($flag == false) {$this->day_number = false;}
-}
-
+            if ($flag == false) {
+                $this->day_number = false;
+            }
+        }
 
         if (isset($this->numbers) and count($this->numbers) == 0) {
         } elseif (count($this->numbers) == 1) {
             if (strlen($this->numbers[0]) == 4) {
-
                 if ($minute == 0 and $hour == 0) {
                     $minute = substr($this->numbers[0], 2, 2);
                     $hour = substr($this->numbers[0], 0, 2);
@@ -317,17 +323,16 @@ if ($flag == false) {$this->day_number = false;}
                 }
             } else {
                 if ($this->isInput($minute)) {
-            //        if(($minute<0) and ($minute>=60)) {
-            //            $minute = false;
-            //        }
+                    //        if(($minute<0) and ($minute>=60)) {
+                    //            $minute = false;
+                    //        }
                     $this->minute = $minute;
                 }
                 if ($this->isInput($hour)) {
-            //        if(($hour<0) and ($hour>=24)) {
-            //            $hour = false;
-            //        }
-//                    $this->hour = $hour;
-
+                    //        if(($hour<0) and ($hour>=24)) {
+                    //            $hour = false;
+                    //        }
+                    //                    $this->hour = $hour;
 
                     $this->hour = $hour % 24;
                 }
@@ -338,23 +343,20 @@ if ($flag == false) {$this->day_number = false;}
         $this->minute = $minute;
         $this->hour = $hour;
 
-// TODO Refactor code above and directly below.
-//$clocktime_agent = new Clocktime($this->thing,"clocktime");
-//$t = $clocktime_agent->extractClocktime($input);
+        // TODO Refactor code above and directly below.
+        //$clocktime_agent = new Clocktime($this->thing,"clocktime");
+        //$t = $clocktime_agent->extractClocktime($input);
 
-$t = $this->extractClocktime($input);
+        $t = $this->extractClocktime($input);
 
-
-if ($t == null) {$this->minute = false; $this->hour = false;} else {
-
-// TODO
-$this->hour = $t[0];
-$this->minute = $t[1];
-
-
-}
-
-
+        if ($t == null) {
+            $this->minute = false;
+            $this->hour = false;
+        } else {
+            // TODO
+            $this->hour = $t[0];
+            $this->minute = $t[1];
+        }
 
         $this->day = false;
         if ($this->isInput($day)) {
@@ -366,43 +368,38 @@ $this->minute = $t[1];
         $year = $this->extractYear($input);
         $year_text = "X";
         if ($year !== false) {
-        $year_text = $year['year']; // Discard era information.
+            $year_text = $year['year']; // Discard era information.
         }
         if ($this->isInput($year_text)) {
             $this->year = $year_text;
         }
 
-
         // Resolve the situtation where minutes:hours is resolved as the year.
-        if (($this->hour.str_pad($this->minute,2,"0",STR_PAD_LEFT) == $this->year) and ($this->year!==false)) {
-// TODO: Dev case "1919 19:19" and similar
-$this->minute = false;
-$this->hour = false;
+        if (
+            $this->hour . str_pad($this->minute, 2, "0", STR_PAD_LEFT) ==
+                $this->year and
+            $this->year !== false
+        ) {
+            // TODO: Dev case "1919 19:19" and similar
+            $this->minute = false;
+            $this->hour = false;
         }
 
+        $this->timezone = $this->extractTimezone($input);
 
-$this->timezone = $this->extractTimezone($input);
-
-//$this->calendar_agent = new Calendar($this->thing,"calendar");
-//$this->calendar_name = $this->calendar_agent->extractCalendar($input);
-
-$this->extractCalendar($input);
-
+        $this->extractCalendar($input);
     }
 
-function extractTimezone($input) {
+    function extractTimezone($input)
+    {
+        // Identifiy UTC.
+        $timezone = false;
+        if (stripos($input, 'utc') !== false) {
+            $timezone = "UTC";
+        }
 
-// Identifiy UTC.
-$timezone = false;
-if (stripos($input,'utc') !== false) {
-
-$timezone = "UTC";
-
-}
-
-return $timezone;
-
-}
+        return $timezone;
+    }
     /**
      *
      * @param unknown $input (optional)
@@ -471,7 +468,7 @@ return $timezone;
      */
     function extractDay($input = null)
     {
-// TODO Refactor as Day class.
+        // TODO Refactor as Day class.
         $day = "X";
         $day_evidence = [];
         $days = [
@@ -479,7 +476,7 @@ return $timezone;
             "TUE" => ["tuesday", "tue", "Tu"],
             "WED" => ["wednesday", "wed", "wday", "W"],
             "THU" => ["thursday", "thur", "Thu", "Th"],
-            "FRI" => ["friday", "fri", "Fr","F"],
+            "FRI" => ["friday", "fri", "Fr", "F"],
             "SAT" => ["saturday", "sat", "Sa"],
             "SUN" => ["sunday", "sun", "Su"],
         ];
@@ -500,15 +497,23 @@ return $timezone;
                 if (
                     strpos(strtolower($input), strtolower($day_name)) !== false
                 ) {
+                    if (
+                        strpos(
+                            strtolower($input),
+                            strtolower($day_name . " ")
+                        ) == false
+                    ) {
+                        continue;
+                    }
 
-if (strpos(strtolower($input), strtolower($day_name . " ")) == false) {
-continue;
-}
-
-if (strpos(strtolower($input), strtolower(" ".$day_name)) == false) {
-continue;
-}
-
+                    if (
+                        strpos(
+                            strtolower($input),
+                            strtolower(" " . $day_name)
+                        ) == false
+                    ) {
+                        continue;
+                    }
 
                     //      $day_evidence[] = $day_name;
                     $day = $key;
@@ -585,7 +590,6 @@ continue;
         if (count($scores) == 0) {
             return false;
         }
-
 
         if (count($scores) == 1) {
             return array_key_first($scores);
@@ -736,7 +740,7 @@ continue;
      *
      * @param unknown $text (optional)
      */
-/*
+    /*
     function printAt($text = null)
     {
         return;
@@ -772,7 +776,7 @@ continue;
 
         $input = $this->input;
         $input = $this->agent_input;
-        if (($this->agent_input == null) or ($this->agent_input == "")) {
+        if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
         }
 
@@ -780,8 +784,6 @@ continue;
             //            $this->extractRunat($filtered_input);
             return;
         }
-
-
 
         $filtered_input = $this->assert($input, "at");
         $keywords = $this->keywords;
@@ -792,13 +794,11 @@ continue;
             return;
         }
         //        $this->extractRunat($this->input);
-//        if ($this->input == "at") {
-//            //            $this->extractRunat($filtered_input);
-//            return;
-//        }
+        //        if ($this->input == "at") {
+        //            //            $this->extractRunat($filtered_input);
+        //            return;
+        //        }
 
-//        $alpha_agent = new Alpha($this->thing, "alpha");
-//        if ($alpha_agent->isAlpha($filtered_input) === true) {
         if ($this->isAlpha($filtered_input) === true) {
             $this->tag = $filtered_input . "at";
             // reload with new at tag.
