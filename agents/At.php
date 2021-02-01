@@ -387,7 +387,8 @@ class At extends Agent
 
         $this->timezone = $this->extractTimezone($input);
 
-        $this->extractCalendar($input);
+        // TODO - Gregorian?
+        //$this->extractCalendar($input);
     }
 
     function extractTimezone($input)
