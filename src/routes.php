@@ -1049,7 +1049,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             //echo $thing->uuid;
 
             if ($thing->thing == false) {
-                if ($uuid != null) {
+                if ($uuid === null) {
                     $datagram = [];
                     $datagram['thing'] = false;
                     $datagram['thing_report'] = false;
@@ -1124,6 +1124,22 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $datagram
                 );
             }
+
+/*
+            if ($thing->thing == false) {
+                if ($uuid != null) {
+                    $datagram = [];
+                    $datagram['thing'] = false;
+                    $datagram['thing_report'] = false;
+
+                    return $this->renderer->render(
+                        $response,
+                        'thing.phtml',
+                        $datagram
+                    );
+                }
+            }
+*/
 
             $agent = new Agent($thing, $filtered_command);
 

@@ -107,6 +107,19 @@ class Call extends Agent
      */
     public function initCall()
     {
+        if (!isset($this->thing->when_handler)) {
+            $this->thing->when_handler = new When($this->thing, "when");
+        }
+
+
+        // Load conference call service handlers.
+        if (!isset($this->thing->zoom_handler)) {
+            $this->thing->zoom_handler = new Zoom($this->thing, "zoom");
+        }
+
+        if (!isset($this->thing->webex_handler)) {
+            $this->thing->webex_handler = new Webex($this->thing, "webex");
+        }
     }
 
     public function run()
@@ -189,30 +202,30 @@ class Call extends Agent
 // refactor as select case.
 
             if (stripos($text, "zoom") !== false) {
-                $zoom_agent = new Zoom($this->thing, "zoom");
-		        $zoom_agent->readZoom($text);
+                //$zoom_agent = new Zoom($this->thing, "zoom");
+		        $this->thing->zoom_handler->readZoom($text);
                 $service = 'zoom';
-                $password = $zoom_agent->password;
-                $access_code = $zoom_agent->access_code;
-                $url = $zoom_agent->url;
-                $urls = $zoom_agent->urls;
-                $host_url = $zoom_agent->host_url;
+                $password = $this->thing->zoom_handler->password;
+                $access_code = $this->thing->zoom_handler->access_code;
+                $url = $this->thing->zoom_handler->url;
+                $urls = $this->thing->zoom_handler->urls;
+                $host_url = $this->thing->zoom_handler->host_url;
 
-                $telephone_numbers = $zoom_agent->telephone_numbers;
+                $telephone_numbers = $this->thing->zoom_handler->telephone_numbers;
 
             }
 
             if (stripos($text, "webex") !== false) {
                 $service = 'webex';
-                $webex_agent = new Webex($this->thing, "webex");
-                $webex_agent->readWebex($text);
+                //$webex_agent = new Webex($this->thing, "webex");
+                $this->thing->webex_handler->readWebex($text);
 
-                $password = $webex_agent->password;
-                $access_code = $webex_agent->access_code;
-                $url = $webex_agent->url;
-                $host_url = $webex_agent->host_url;
+                $password = $this->thing->webex_handler->password;
+                $access_code = $this->thing->webex_handler->access_code;
+                $url = $this->thing->webex_handler->url;
+                $host_url = $this->thing->webex_handler->host_url;
 
-                $telephone_numbers = $webex_agent->telephone_numbers;
+                $telephone_numbers = $this->thing->webex_handler->telephone_numbers;
 
             }
                 $call = ['service'=>$service,
@@ -229,13 +242,13 @@ return $call;
 
     public function whenCalls($text = null)
     {
-        $when_agent = new When($this->thing, "when");
+        //$when_agent = new When($this->thing, "when");
 
-        $zoom_agent = new Zoom($this->thing, "zoom");
-        $webex_agent = new Webex($this->thing, "webex");
+        //$zoom_agent = new Zoom($this->thing, "zoom");
+        //$webex_agent = new Webex($this->thing, "webex");
 
         $calls = [];
-        foreach ($when_agent->calendar_agent->calendar->events as $event) {
+        foreach ($this->thing->when_handler->calendar_agent->calendar->events as $event) {
 
             $haystack =
                 $event->summary .
@@ -247,13 +260,13 @@ return $call;
             if (stripos($haystack, "zoom") !== false) {
 //                $zoom_agent = new Zoom($this->thing, "zoom");
 
-                $event->password = $zoom_agent->password;
-                $event->access_code = $zoom_agent->access_code;
-                $event->url = $zoom_agent->url;
-                $event->urls = $zoom_agent->urls;
-                $event->host_url = $zoom_agent->host_url;
+                $event->password = $this->thing->zoom_handler->password;
+                $event->access_code = $this->thing->zoom_handler->access_code;
+                $event->url = $this->thing->zoom_handler->url;
+                $event->urls = $this->thing->zoom_handler->urls;
+                $event->host_url = $this->thing->zoom_handler->host_url;
 
-                $event->telephone_numbers = $zoom_agent->telephone_numbers;
+                $event->telephone_numbers = $this->thing->zoom_handler->telephone_numbers;
 
                 $calls[] = $event;
                 //$this->response .= "Saw a zoom meeting. ";
@@ -263,12 +276,12 @@ return $call;
             if (stripos($haystack, "webex") !== false) {
 //                $webex_agent = new Webex($this->thing, "webex");
 
-                $event->password = $webex_agent->password;
-                $event->access_code = $webex_agent->access_code;
-                $event->url = $webex_agent->url;
-                $event->host_url = $webex_agent->host_url;
+                $event->password = $this->thing->webex_handler->password;
+                $event->access_code = $this->thing->webex_handler->access_code;
+                $event->url = $this->thing->webex_handler->url;
+                $event->host_url = $this->thing->webex_handler->host_url;
 
-                $event->telephone_numbers = $webex_agent->telephone_numbers;
+                $event->telephone_numbers = $this->thing->webex_handler->telephone_numbers;
 
                 $calls[] = $event;
                 continue;
@@ -282,10 +295,10 @@ return $call;
     {
         $call_text = "";
 
-        $when_agent = new When($this->thing, "when");
+        //$when_agent = new When($this->thing, "when");
         if (isset($this->calls)) {
             foreach ($this->calls as $event) {
-                $t .= $when_agent->textWhen($event) . " ";
+                $t .= $this->thing->when_handler->textWhen($event) . " ";
                 //$t .= $event->summary . " ";
                 //$t .=$event->dtstart . " ";
 

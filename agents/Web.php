@@ -256,7 +256,6 @@ class Web extends Agent
         // See if a stack record exists.
 
         $things = $this->getThings('thing');
-
         if ($things == null) {return $this->link_uuid;}
 
         $this->max_index = 0;
@@ -333,7 +332,6 @@ class Web extends Agent
                 "/" .
                 strtolower($this->prior_agent);
         }
-
         return $this->link_uuid;
     }
 

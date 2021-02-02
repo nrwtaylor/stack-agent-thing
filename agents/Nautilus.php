@@ -51,6 +51,8 @@ class Nautilus extends Agent
         $this->default_canvas_size_x = 2000;
         $this->default_canvas_size_y = 2000;
 
+        $this->thing->refresh_at = $this->thing->time(time() + 2*24*60*60); // Never refresh.
+
         $agent = new Retention($this->thing, "retention");
         $this->retain_to = $agent->retain_to;
 

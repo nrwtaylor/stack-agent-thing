@@ -67,20 +67,20 @@ class Calendar extends Agent
 
         $this->time_zone = $this->default_time_zone;
 
-        $this->time_agent = new Time($this->thing, "time");
-        if (is_string($this->time_agent->time_zone)) {
-            $this->time_zone = $this->time_agent->time_zone;
+        $this->thing->time_handler = new Time($this->thing, "time");
+        if (is_string($this->thing->time_handler->time_zone)) {
+            $this->time_zone = $this->thing->time_handler->time_zone;
         }
 
-        $this->googlecalendar_agent = new Googlecalendar(
-            $this->thing,
-            "googlecalendar"
-        );
+        //        $this->googlecalendar_agent = new Googlecalendar(
+        //            $this->thing,
+        //            "googlecalendar"
+        //        );
 
-        $this->alphanumeric_agent = new Alphanumeric(
-            $this->thing,
-            "alphanumeric"
-        );
+        //        $this->alphanumeric_agent = new Alphanumeric(
+        //            $this->thing,
+        //            "alphanumeric"
+        //        );
 
         $this->calendar_unique_events = false;
 
@@ -92,8 +92,8 @@ class Calendar extends Agent
 
     function run()
     {
-        $this->doCalendar();
-        $this->makeIcal();
+        //        $this->doCalendar();
+        //        $this->makeIcal();
     }
 
     public function descriptionCalendar($event)
@@ -218,6 +218,9 @@ class Calendar extends Agent
 
     public function respondResponse()
     {
+        //        $this->doCalendar();
+        $this->makeIcal();
+
         $this->thing->flagGreen();
 
         $this->thing_report["info"] = "This is a calendar.";
@@ -232,9 +235,9 @@ class Calendar extends Agent
 
     public function makeJson()
     {
-        if (!isset($this->calendar->events)) {
-            $this->doCalendar();
-        }
+        //        if (!isset($this->calendar->events)) {
+        //            $this->doCalendar();
+        //        }
 
         $json = $this->calendar->events;
 
@@ -243,7 +246,7 @@ class Calendar extends Agent
 
     function makeWeb()
     {
-        $time_agent = new Time($this->thing, "time");
+        //$time_agent = new Time($this->thing, "time");
 
         $web = '</div>No calendar information available.</div>';
         if (isset($this->calendar->events)) {
@@ -254,7 +257,7 @@ class Calendar extends Agent
                 $web .=
                     '<div>' .
                     '<div>' .
-                    $time_agent->textTime($timestamp) .
+                    $this->thing->time_handler->textTime($timestamp) .
                     " " .
                     $event->summary .
                     ' [' .
@@ -307,16 +310,19 @@ class Calendar extends Agent
 
         // Send the start time with the known event timezone.
         // Create a datum object.
-        $datum = $this->time_agent->datumTime($event->dtstart, $event_timezone);
+        $datum = $this->thing->time_handler->datumTime(
+            $event->dtstart,
+            $event_timezone
+        );
 
         // Get a timestamp of the datum.
         // In the specified timezone.
         // The timestamp is a text string which strtotime will recognize.
         // FALSE (default) - Do not include timezone string in the returned timestamp text.
         // TRUE - Include timezone of time in returned timestamp.
-        $timestamp = $this->time_agent->timestampTime(
+        $timestamp = $this->thing->time_handler->timestampTime(
             $datum,
-            $this->time_agent->time_zone
+            $this->thing->time_handler->time_zone
         );
 
         $event->timestamp = $timestamp;
@@ -390,7 +396,7 @@ class Calendar extends Agent
             "\n";
         $c .= "VERSION:2.0" . "\n";
 
-// https://www.kanzaki.com/docs/ical/calscale.html
+        // https://www.kanzaki.com/docs/ical/calscale.html
         $c .= "CALSCALE:GREGORIAN" . "\n";
         $c .= "METHOD:PUBLIC" . "\n";
         $c .= "X-WR-CALNAME:" . $calendar_name . "\n";
@@ -477,7 +483,7 @@ var_dump($variable);
         $calendar_text = "";
 
         if (isset($this->calendar->events)) {
-            $time_agent = new Time($this->thing, "time");
+            //$time_agent = new Time($this->thing, "time");
 
             $calendar_text = "";
             foreach ($this->calendar->events as $event) {
@@ -518,7 +524,7 @@ var_dump($variable);
 
         $sms =
             "CALENDAR " .
-            $this->time_agent->time_zone .
+            $this->thing->time_handler->time_zone .
             "\n" .
             $calendar_text .
             "" .
@@ -530,7 +536,7 @@ var_dump($variable);
 
     function makeTXT()
     {
-        $time_agent = new Time($this->thing, "time");
+        //$time_agent = new Time($this->thing, "time");
         $calendar_text = "No calendar information available.";
         if (isset($this->calendar->events)) {
             $calendar_text = "";
@@ -619,6 +625,11 @@ var_dump($variable);
                 'skipRecurrence' => false, // Default value
             ]);
 
+            $this->thing->log(
+                "Calendar readCalendar ICal created for " . $calendar_uri,
+                "INFORMATION"
+            );
+
             //$events = $this->ical->eventsFromInterval('6 weeks');
 
             //$this->default_interval = '10 weeks';
@@ -670,16 +681,16 @@ var_dump($variable);
             return strtotime($first->start_at) > strtotime($second->end_at);
         });
 
-        $time_agent = new Time($this->thing, "time");
+        //$time_agent = new Time($this->thing, "time");
 
         $calendar_text = "";
         foreach ($this->calendar->events as $event) {
             $calendar_text .=
                 $event->summary .
                 " " .
-                $time_agent->textTime($event->start_at) .
+                $this->thing->time_handler->textTime($event->start_at) .
                 " " .
-                $time_agent->textTime($event->end_at) .
+                $this->thing->time_handler->textTime($event->end_at) .
                 " " .
                 $event->description .
                 " " .
@@ -699,15 +710,11 @@ var_dump($variable);
 
         // See if Googlecalendar recognizes this.
 
-        $addresses = $this->googlecalendar_agent->addressesGooglecalendar(
-            $token
-        );
+        $addresses = $this->addressesGooglecalendar($token);
 
         if ($addresses !== false and $addresses !== true) {
             foreach ($addresses as $i => $address) {
-                $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
-                    $address
-                );
+                $ics_link = $this->icsGooglecalendar($address);
                 if ($ics_link !== true) {
                     $ics_links[] = $ics_link;
                 }
@@ -715,7 +722,7 @@ var_dump($variable);
             return $ics_links;
         }
 
-        $ics_link = $this->googlecalendar_agent->icsGooglecalendar($token);
+        $ics_link = $this->icsGooglecalendar($token);
 
         if ($ics_link !== true) {
             $ics_links[] = $ics_link;
@@ -732,13 +739,10 @@ var_dump($variable);
         // Assume alphanumeric tokens are calls for @gmail addresses.
         // For now.
         // TODO: Explore Apple and Microsoft calendaring.
-//        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
-//        if ($alphanumeric_agent->isAlphanumeric($token)) {
+        //        $alphanumeric_agent = new Alphanumeric($this->thing, "alphanumeric");
+        //        if ($alphanumeric_agent->isAlphanumeric($token)) {
         if ($this->isAlphanumeric($token)) {
-
-            $ics_link = $this->googlecalendar_agent->icsGooglecalendar(
-                $token . "@gmail.com"
-            );
+            $ics_link = $this->icsGooglecalendar($token . "@gmail.com");
             if ($ics_link !== true) {
                 $ics_links[] = $ics_link;
                 return $ics_links;
@@ -806,6 +810,7 @@ var_dump($variable);
 
             $this->calendar->events[] = $e;
 */
+            $this->doCalendar();
 
             return;
         }
@@ -836,6 +841,7 @@ var_dump($variable);
         }
 
         $this->ics_links = array_unique($ics_links);
+        $this->doCalendar();
 
         return false;
     }

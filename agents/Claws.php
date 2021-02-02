@@ -108,6 +108,15 @@ class Claws extends Agent
         var_dump($text);
     }
 
+/*
+
+Code to update when (lightandmatter / ben crowell) calendar.
+Start by appending file and relying on user to
+manually duplicates.
+
+dev - Detect duplicates.
+
+*/
     public function whenClaws()
     {
         if ($this->claws_when_flag != "on") {
@@ -119,7 +128,7 @@ class Claws extends Agent
         // Build entry for when calendar
         $line = "test item";
 
-        $this->writeWhen($line);
+        $this->updateWhen($line);
         $this->response .= "Wrote item to When calendar file. ";
     }
 
@@ -294,8 +303,8 @@ class Claws extends Agent
             //var_dump($at);
 
             $subject_at_score = 0;
-            if ($at != null) {
-                $subject_at_score = $this->scoreAt($at, "meeting");
+            if ($dateline != null) {
+                $subject_at_score = $this->scoreAt($dateline, "meeting");
             }
 
             // TODO - Check if the subject has a well qualified date time.
@@ -314,6 +323,7 @@ class Claws extends Agent
                 'call' => $call,
                 'dateline' => $dateline,
             ];
+
         }
 
         // get an MH reader to clean up the format
@@ -322,6 +332,13 @@ class Claws extends Agent
 
         // desired actions - priority and focuses
         // 1. insert with conference link into when calendar
+
+//        foreach ($this->claws_items as $i=>$claws_item) {
+//           $timestamp = $this->timestampDateline($claws_item['dateline']);
+
+//           $this->whenClaws($timestamp . " , " . $subject . " [" . implode(" ", $claws_item['call']) . "] ");
+//        }
+
         // 2. take conference link to forward it in an email (?)
         // 3. clickable action to connect to conference link (?)
         // 4. include subject of original email

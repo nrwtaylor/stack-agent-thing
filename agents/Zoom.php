@@ -57,7 +57,7 @@ class Zoom extends Agent
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        return $this->thing_report;
+//        return $this->thing_report;
     }
 
     /**
@@ -196,8 +196,11 @@ class Zoom extends Agent
 
     public function urlZoom($text = null)
     {
-        $url_agent = new Url($this->thing, "url");
-        $urls = $url_agent->extractUrls($text);
+        //$url_agent = new Url($this->thing, "url");
+        //$urls = $url_agent->extractUrls($text);
+
+        $urls = $this->extractUrls($text);
+
 
         foreach ($urls as $i => $url) {
             if (stripos($url, '.zoom.us/') !== false) {
@@ -211,8 +214,11 @@ class Zoom extends Agent
 
     public function urlsZoom($text = null)
     {
-        $url_agent = new Url($this->thing, "url");
-        $urls = $url_agent->extractUrls($text);
+//        $url_agent = new Url($this->thing, "url");
+//        $urls = $url_agent->extractUrls($text);
+
+        $urls = $this->extractUrls($text);
+
 
         foreach ($urls as $i => $url) {
             if (stripos($url, '.zoom.us/') !== false) {
@@ -233,8 +239,11 @@ class Zoom extends Agent
         // Undefined at this time.
         return true;
 
-        $url_agent = new Url($this->thing, "url");
-        $urls = $url_agent->extractUrls($text);
+//        $url_agent = new Url($this->thing, "url");
+//        $urls = $url_agent->extractUrls($text);
+
+        $urls = $this->extractUrls($text);
+
 
         foreach ($urls as $i => $url) {
             if (stripos($url, 'j.php?MTID') !== false) {
@@ -251,14 +260,19 @@ class Zoom extends Agent
     {
         // TODO: devstack Telephonenumber
 
-        $telephonenumber_agent = new Telephonenumber(
-            $this->thing,
-            "telephonenumber"
-        );
+//        $telephonenumber_agent = new Telephonenumber(
+//            $this->thing,
+//            "telephonenumber"
+//        );
 
-        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+//        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+//            $text
+//        );
+        $telephone_numbers = $this->extractTelephonenumbers(
             $text
         );
+
+
         return $telephone_numbers;
     }
 

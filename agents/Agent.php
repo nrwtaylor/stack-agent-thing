@@ -244,7 +244,6 @@ class Agent
 
         And add a generic useAgent call if there is no useAgent method in the class.
        */
-
         $pieces = preg_split('/(?=[A-Z])/', $agent_function, 2);
 
         $agent_class_name = "Agent";
@@ -261,6 +260,7 @@ class Agent
             $function_primitive_name = $pieces[0];
         }
 
+        $this->thing->log("Check if " . $agent_name . " == " . $this->agent_name);
         if ($agent_name == $this->agent_name) {
             return false;
         }
@@ -672,10 +672,8 @@ class Agent
             $this->web_state = $this->thing->web_agent->state;
         }
 
-        //        if ($this->agent_name != "url" and !isset($this->thing->url_agent)) {
-        //            $this->thing->url_agent = new Url($this->thing);
-        //        }
 
+        // Check the web agent to see whether urls should be appended the sms response.
         $web_state = "off";
         if (isset($this->web_state)) {
             $web_state = $this->web_state;
@@ -2877,10 +2875,10 @@ class Agent
 
         $this->thing->log('Agent "Agent" looking for URL in input.');
         // Is Identity Context?
-        //$url = new Url($this->thing, "url");
-        //$urls = $url->extractUrls($input);
+        $url = new Url($this->thing, "url");
+        $urls = $url->extractUrls($input);
 
-        $urls = $this->extractUrls($input);
+        //$urls = $this->extractUrls($input);
 
         if ($urls !== true and (isset($urls) and count($urls) > 0)) {
             $this->thing->log(

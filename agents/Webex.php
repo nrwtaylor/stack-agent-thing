@@ -57,7 +57,7 @@ class Webex extends Agent
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
 
-        return $this->thing_report;
+//        return $this->thing_report;
     }
 
     /**
@@ -150,9 +150,11 @@ class Webex extends Agent
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/webex.pdf';
         $this->node_list = ["webex" => ["webex"]];
         $web = "";
+if (isset($this->html_image)) {
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
+}
         $web .= "<br>";
 
         $this->thing_report['web'] = $web;
@@ -178,8 +180,10 @@ class Webex extends Agent
 
     public function urlWebex($text = null)
     {
-        $url_agent = new Url($this->thing, "url");
-        $urls = $url_agent->extractUrls($text);
+//        $url_agent = new Url($this->thing, "url");
+//        $urls = $url_agent->extractUrls($text);
+
+        $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
             if (stripos($url, 'j.php?MTID') !== false) {
@@ -193,8 +197,10 @@ class Webex extends Agent
 
     public function hosturlWebex($text = null)
     {
-        $url_agent = new Url($this->thing, "url");
-        $urls = $url_agent->extractUrls($text);
+//        $url_agent = new Url($this->thing, "url");
+//        $urls = $url_agent->extractUrls($text);
+
+        $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
             if (stripos($url, 'j.php?MTID') !== false) {
@@ -211,14 +217,19 @@ class Webex extends Agent
     {
         // TODO: devstack Telephonenumber
 
-        $telephonenumber_agent = new Telephonenumber(
-            $this->thing,
-            "telephonenumber"
-        );
+//        $telephonenumber_agent = new Telephonenumber(
+//            $this->thing,
+//            "telephonenumber"
+//        );
 
-        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+//        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+//            $text
+//        );
+
+        $telephone_numbers = $this->extractTelephonenumbers(
             $text
         );
+
         return $telephone_numbers;
     }
 

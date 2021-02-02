@@ -68,7 +68,7 @@ class At extends Agent
         $this->at->setVariable("hour", $this->hour);
         $this->at->setVariable("minute", $this->minute);
 
-        $this->thing->console("At set completed.\n");
+        $this->thing->log("At set completed.","DEBUG");
 
         $this->thing->log(
             $this->agent_prefix .
@@ -114,7 +114,7 @@ class At extends Agent
             $this->minute = $minute;
         }
 
-        $this->thing->console("At get completed.\n");
+        $this->thing->log("At get completed.", "DEBUG");
     }
 
     function getAt()

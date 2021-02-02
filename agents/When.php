@@ -117,18 +117,24 @@ class When extends Agent
             }
         }
 
-        $this->calendar_agent = new Calendar($this->thing, "calendar");
-        $this->calendar_agent->span = 10;
+if (!isset($this->thing->calendar_handler)) {
+        $this->thing->calendar_handler = new Calendar($this->thing, "calendar");
+}
+        $this->thing->calendar_handler->span = 10;
         $this->calendar_contents = file_get_contents($this->calendar_location);
 
         // Pull in the stack timezone.
-        $this->time_agent = new Time($this->thing, "time");
-        $this->time_zone = $this->time_agent->time_zone;
+
+if (!isset($this->thing->time_handler)) {
+        $this->thing->time_handler = new Time($this->thing, "time");
+}
+        $this->time_zone = $this->thing->time_handler->time_zone;
+$this->thing->log("When init completed");
     }
 
     function run()
     {
-        $this->doWhen();
+//        $this->doWhen();
     }
 
     public function calendarWhen($text = null, $name = null)
@@ -139,16 +145,17 @@ class When extends Agent
         }
 
         // Reset the calendar agent response.
-        $this->calendar_agent->response = "";
+        $this->thing->calendar_handler->response = "";
         // Reset the calendar unique events watch.
         // This variable indicates whether all the events in the calendar have a unique identity.
         $this->calendar_unique_events = false;
 
-        $this->calendar_agent->readCalendar($text, $name);
+$this->thing->log("When calendarWhen call readCalendar", "DEBUG");
+        $this->thing->calendar_handler->readCalendar($text, $name);
+$this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
+        $this->response .= $this->thing->calendar_handler->response;
 
-        $this->response .= $this->calendar_agent->response;
-
-        return $this->calendar_agent->calendar->events;
+        return $this->thing->calendar_handler->calendar->events;
     }
 
     public function dateWhen($text)
@@ -192,9 +199,9 @@ class When extends Agent
 
     public function textWhen($event)
     {
-        $time_agent = new Time($this->thing, "time");
+        //$time_agent = new Time($this->thing, "time");
 
-        $timestamp = $this->calendar_agent->textCalendar($event, ['timestamp']);
+        $timestamp = $this->thing->calendar_handler->textCalendar($event, ['timestamp']);
         $timestamp = trim($timestamp);
 
         $runtime_text = $this->runtimeWhen(
@@ -230,9 +237,10 @@ class When extends Agent
 
     public function doWhen()
     {
+$this->thing->log("doWhen called");
         $events = [];
         foreach ($this->calendar_list as $i => $calendar) {
-            $ics_links = $this->calendar_agent->icslinksCalendar(
+            $ics_links = $this->thing->calendar_handler->icslinksCalendar(
                 $calendar['ics_link']
             );
             foreach ($ics_links as $j => $ics_link) {
@@ -240,13 +248,13 @@ class When extends Agent
             }
         }
 
-        $events = $this->calendar_agent->calendar->events;
+        $events = $this->thing->calendar_handler->calendar->events;
 
         //$call_agent = new Call($this->thing, "call");
         //$frequency_agent = new Frequency($this->thing, "frequency");
         $txt = "";
         foreach ($events as $i => $event) {
-            $when_description = $this->calendar_agent->descriptionCalendar(
+            $when_description = $this->thing->calendar_handler->descriptionCalendar(
                 $event
             );
 
@@ -265,7 +273,7 @@ class When extends Agent
             $this->when_message = $this->agent_input;
         }
 
-        $count = count($this->calendar_agent->calendar->events);
+        $count = count($this->thing->calendar_handler->calendar->events);
         $this->response .= "Got " . $count . " events. ";
     }
 
@@ -286,7 +294,7 @@ class When extends Agent
 
     function makeWeb()
     {
-        $time_agent = new Time($this->thing, "time");
+        //$time_agent = new Time($this->thing, "time");
 
         $web = '<div>No web output. Check the TXT channel.</div>';
         if (isset($this->events)) {
@@ -294,9 +302,9 @@ class When extends Agent
             foreach ($this->events as $event) {
                 $web .=
                     '<div>' .
-                    $time_agent->textTime($event->dtstart_tz) .
+                    $this->thing->time_handler->textTime($event->dtstart_tz) .
                     " " .
-                    $time_agent->textTime($event->dtend_tz) .
+                    $this->thing->time_handler->textTime($event->dtend_tz) .
                     " " .
                     $event->summary .
                     " " .
@@ -325,7 +333,9 @@ class When extends Agent
     public function makeTXT()
     {
         $text = $this->calendar_contents;
+if (isset($this->when_text)) {
         $text .= $this->when_text;
+}
         $this->txt = $text;
         $this->thing_report['txt'] = $text;
     }
@@ -481,7 +491,7 @@ The date has to be in year-month-day format, but you can either spell
 
         foreach ($tokens as $i => $token) {
             $token = trim($token);
-            $this->thing->console( "token " . $token . " ");
+            $this->thing->log( "token " . $token . " ","INFORMATION");
 
             if (
                 substr($token, 0, 2) === "!("
@@ -527,7 +537,7 @@ The date has to be in year-month-day format, but you can either spell
         // TODO - Read When file.
     }
 
-    public function writeWhen($line, $file = null)
+    public function updateWhen($line, $file = null)
     {
         if ($file == null) {
             $file = $this->calendar_location;
@@ -545,6 +555,8 @@ The date has to be in year-month-day format, but you can either spell
         if ($input == 'when') {
             $input = $this->subject;
         }
+
+        if ($this->agent_input === "when") {return;}
 
         $this->description_flag = "off";
         if (stripos($input, "description") !== false) {
@@ -571,9 +583,16 @@ The date has to be in year-month-day format, but you can either spell
 
         $filtered_input = trim($filtered_input);
 
-        if ($filtered_input == '') {return;}
+
+        if ($filtered_input == '') {
+        $this->doWhen();
+
+return;}
 
         $this->readWhen($filtered_input);
+        $this->doWhen();
+
+
 
     }
 }

@@ -47,7 +47,9 @@ class Dateline extends Agent
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($paragraphs as $i => $paragraph) {
-            if (trim($paragraph) == "") {continue;}
+            if (trim($paragraph) == "") {
+                continue;
+            }
             $dateline = $this->extractDateline($paragraph);
             if ($dateline == false) {
                 continue;
@@ -64,29 +66,26 @@ class Dateline extends Agent
         $this->thing->console("Dateline test completed.\n");
     }
 
-    public function urlDateline($url) {
-
-$this->thing->console("urlDateline read start.\n");
+    public function urlDateline($url)
+    {
+        $this->thing->console("urlDateline read start.\n");
 
         $start_time = time();
 
         $read_agent = new Read($this->thing, $url);
         $contents = $read_agent->contents;
 
-// dev refactor
-//       $contents = $this->urlRead($url);
+        // dev refactor
+        //       $contents = $this->urlRead($url);
 
         $run_time = time() - $start_time;
-
 
         $this->response .=
             "Dateline source took " . $run_time . " seconds to get. ";
 
-
-$this->thing->console("urlDateline read complete.\n");
+        $this->thing->console("urlDateline read complete.\n");
 
         return $contents;
-
     }
 
     public function paragraphsDateline($contents)
@@ -97,7 +96,9 @@ $this->thing->console("urlDateline read complete.\n");
 
     public function getDateline($text = null)
     {
-        if ($text == null) {return true;}
+        if ($text == null) {
+            return true;
+        }
         //        if (!is_string($this->test_url)) {
         //            return false;
         //        }
@@ -371,7 +372,7 @@ $this->thing->console("urlDateline read complete.\n");
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
 
-       // return $this->thing_report;
+        // return $this->thing_report;
     }
 
     function makeSMS()
@@ -381,31 +382,31 @@ $this->thing->console("urlDateline read complete.\n");
         $sms = "DATELINE ";
         // . $this->dateline_message;
 
-if (isset($this->dateline)) {
-        $dateline_timestamp = $this->timestampDateline($this->dateline);
+        if (isset($this->dateline)) {
+            $dateline_timestamp = $this->timestampDateline($this->dateline);
 
-        $timestamp_text = "undated";
-        if (is_string($dateline_timestamp)) {
-            $timestamp_text = $dateline_timestamp;
-        }
+            $timestamp_text = "undated";
+            if (is_string($dateline_timestamp)) {
+                $timestamp_text = $dateline_timestamp;
+            }
 
-        $sms .= $timestamp_text . " ";
+            $sms .= $timestamp_text . " ";
 
-        // See if there is a dateline with a UTC timestamp.
-        if (
-            $this->dateline !== false and
-            stripos($this->dateline['line'], " utc ") !== false
-        ) {
-            $tokens = explode(" UTC ", $this->dateline['line']);
+            // See if there is a dateline with a UTC timestamp.
+            if (
+                $this->dateline !== false and
+                stripos($this->dateline['line'], " utc ") !== false
+            ) {
+                $tokens = explode(" UTC ", $this->dateline['line']);
 
-            $text_token = $tokens[1];
-            $time_tokens = explode(" ", $tokens[0]);
+                $text_token = $tokens[1];
+                $time_tokens = explode(" ", $tokens[0]);
 
-            if (strtolower($time_tokens[0]) === 'timestamp') {
-                $sms .= "| " . $text_token . " ";
+                if (strtolower($time_tokens[0]) === 'timestamp') {
+                    $sms .= "| " . $text_token . " ";
+                }
             }
         }
-}
         $sms .= $this->response;
 
         $this->sms_message = "" . $sms;
@@ -439,7 +440,6 @@ if (isset($this->dateline)) {
         $this->thing->log("questionDateline instantiate slug Thing");
 
         $slug = $this->getSlug($agent_name . "-" . "test");
-
 
         $this->thing->log("questionDateline call getMemory");
         $memory = $this->getMemory($slug);
@@ -490,11 +490,11 @@ if (isset($this->dateline)) {
 
             $response = $this->thing->spawn($datagram);
             if ($response === true) {
-               $this->response .= "Request for dateline update unsuccessful. ";
-               $this->thing->log("Spawn request failed.");
+                $this->response .= "Request for dateline update unsuccessful. ";
+                $this->thing->log("Spawn request failed.");
             } else {
-               $this->response .= "Requested a dateline update. ";
-               $this->thing->log("Requested thing spawn.");
+                $this->response .= "Requested a dateline update. ";
+                $this->thing->log("Requested thing spawn.");
             }
             //            $age = 0;
         }
@@ -503,7 +503,6 @@ if (isset($this->dateline)) {
 
         $this->dateline = $dateline;
         $this->thing->log("questionDateline complete");
-
     }
 
     public function readSubject()

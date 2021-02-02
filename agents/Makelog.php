@@ -42,6 +42,8 @@ class Makelog
 
     	if ($input == null) {
 	    	$footer .= "Agent 'make log' says 'Nothing received'";//
+        } elseif (is_array($input)) {
+            $footer .= "Agent 'make log' says array received.";
 	    } else {
 		    $footer .= "Agent 'make log' says '" . $input . "' received.";
 	    }
@@ -164,6 +166,8 @@ $this->thing_report['snippet'] = "Merp.";
             preg_match_all('/[0-9,]+/',$line,$matches);
             $numbers = $matches[0];
 
+            if (!isset($words[1])) {continue;}
+
             if (strtolower($words[1]) == "thing") {continue;}
 
             $agent_name = $words[2];
@@ -181,7 +185,7 @@ $this->thing_report['snippet'] = "Merp.";
             }
 
 
-            if ($agent_name != $previous_agent_name) {
+            if ((!isset($previous_agent_name)) or ($agent_name != $previous_agent_name)) {
                 if (!isset($run_for)) {$run_for = "X";}
                 $this->agent_sequence[] = array("agent_name"=>$agent_name, "run_for"=>$run_for);
             }

@@ -13,8 +13,6 @@ use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 // For testing.
 // See https://jolicode.com/blog/find-segfaults-in-php-like-a-boss
 
-
-
 class Thing
 {
     public $var = 'hello';
@@ -23,12 +21,11 @@ class Thing
 
     function __construct($uuid, $test_message = null)
     {
-//declare(ticks=1);
+        //declare(ticks=1);
 
-//$resource_path = "/var/www/stackr.test/resources/debug";
-//require $resource_path . '/HardCoreDebugLogger.php';
-//\HardCoreDebugLogger::register();
-
+        //$resource_path = "/var/www/stackr.test/resources/debug";
+        //require $resource_path . '/HardCoreDebugLogger.php';
+        //\HardCoreDebugLogger::register();
 
         // Now at 0.0.10
 
@@ -112,29 +109,30 @@ class Thing
 
         $this->console_output = 'on';
         if (isset($this->container['stack']['console_output'])) {
-                $this->console_output = $this->container['stack']['console_output'];
+            $this->console_output = $this->container['stack']['console_output'];
         }
 
         $this->logging_console = 'off';
         if (isset($this->container['stack']['logging_console'])) {
-                $this->logging_console = $this->container['stack']['logging_console'];
+            $this->logging_console =
+                $this->container['stack']['logging_console'];
         }
 
-
-	$this->logging_level_default = "off";
+        $this->logging_level_default = "off";
         if (isset($this->container['stack']['logging_level_default'])) {
-		$this->logging_level_default = $this->container['stack']['logging_level_default'];
-	}
+            $this->logging_level_default =
+                $this->container['stack']['logging_level_default'];
+        }
 
         $this->logging_level_trigger = "off";
         if (isset($this->container['stack']['logging_level_trigger'])) {
-                $this->logging_level_trigger = $this->container['stack']['logging_level_trigger'];
+            $this->logging_level_trigger =
+                $this->container['stack']['logging_level_trigger'];
         }
-
 
         $this->queue_handler = "none";
         if (isset($this->container['stack']['queue_handler'])) {
-                $this->queue_handler = $this->container['stack']['queue_handler'];
+            $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
         //set_error_handler(array($this, "exception_error_handler"));
@@ -294,37 +292,32 @@ class Thing
 
     function spawn($datagram = null)
     {
+        if (strtolower($this->queue_handler) != "gearman") {
+            $this->log("No queue handler recognized");
+            return true;
+        }
 
-if (strtolower($this->queue_handler) != "gearman") {
-
-$this->log("No queue handler recognized");
-return true;
-
-}
-
-// "Failed to set exception option."
-// Try to catch.
+        // "Failed to set exception option."
+        // Try to catch.
 
         $client = new \GearmanClient();
 
-$arr = (array)$client;
-if (!$arr) {
-        $this->log("spawn. Job queue not available.");
-    // do stuff
+        $arr = (array) $client;
+        if (!$arr) {
+            $this->log("spawn. Job queue not available.");
+            // do stuff
 
-        $dbt=debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,2);
-        $caller = isset($dbt[1]['function']) ? $dbt[1]['function'] : null;
-//$this->log("spawn backtrace " . $caller);
-return true;
-}
+            $dbt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+            $caller = isset($dbt[1]['function']) ? $dbt[1]['function'] : null;
+            //$this->log("spawn backtrace " . $caller);
+            return true;
+        }
 
         $client->addServer();
         $arr = json_encode($datagram);
 
         $client->doLowBackground("call_agent", $arr);
         $this->log("spawned a Thing.");
-
-
     }
 
     function getUUid()
@@ -343,7 +336,6 @@ return true;
 
     function Create($from = null, $to = "", $subject = "")
     {
-
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
@@ -403,15 +395,12 @@ return true;
         $query = $this->db->Create($subject, $to); // 3s
         $this->log("Create. Database create call completed.");
 
-
         $this->to = $to;
         $this->from = $from;
         $this->subject = $subject;
 
-// test 9383 30 January 2021
+        // test 9383 30 January 2021
         $this->created_at = time();
-
-
 
         if ($query == true) {
             // will return true if successfull else it will return false
@@ -983,18 +972,22 @@ return true;
         return false;
     }
 
-    public function console($text = null)        //$this->c_output = "off";
+    public function console($text = null)
+    {
+        //$this->c_output = "off";
         //if (isset($this->container['stack']['console_output'])) {
         //        $this->console_output = $this->container['stack']['console_output'];
         //}
 
- {
-       if (!isset($this->console_output)) {return;}
-       if ($this->console_output != 'on') {return;}
+        if (!isset($this->console_output)) {
+            return;
+        }
+        if ($this->console_output != 'on') {
+            return;
+        }
 
-       echo $text;
+        echo $text;
     }
-
 
     function log($text = null, $logging_level = null)
     {
@@ -1011,22 +1004,22 @@ return true;
         if ($logging_level == null) {
             $logging_level = "INFORMATION";
             if (isset($this->logging_level_default)) {
-               $logging_level = $this->logging_level_default; // If message isn't specific - assume WARNING
+                $logging_level = $this->logging_level_default; // If message isn't specific - assume WARNING
             }
             //if (isset($this->logging_level)) {$logging_level = $this->logging_level;}
         }
 
         //get the calling class
 
-// Causing a segmentation fault?
-//    72.1589   76828520
-//   -> debug_backtrace() /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php:1020
+        // Causing a segmentation fault?
+        //    72.1589   76828520
+        //   -> debug_backtrace() /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php:1020
 
-// Adjusted PHP7.4 CLI dev memory limit. Test
+        // Adjusted PHP7.4 CLI dev memory limit. Test
 
-//        $trace = debug_backtrace();
-//        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $trace = debug_backtrace(false,2);
+        //        $trace = debug_backtrace();
+        //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
@@ -1036,8 +1029,6 @@ return true;
             $class_name = end($class_name_array);
         }
 
-//$class_name = "X";
-        //$t = strip_tags($text);
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
@@ -1056,31 +1047,27 @@ return true;
 
         $this->log .= $t . " [" . $logging_level . "]" . "<br>";
 
-        switch ($logging_level) {
-            case "OPTIMIZE":
-//                $this->log .= $t . "[" . $logging_level . "]" . "<br>";
-                break;
-            case "FATAL":
-//                $this->log .= $t . "[" . $logging_level . "]" . "<br>";
-                break;
-            case "ERROR":
-//                $this->log .= $t . "[" . $logging_level . "]" . "<br>";
-                break;
-            case "WARNING":
-//                $this->log .= $t . "[" . $logging_level . "]" . "<br>";
-                break;
-            case "INFORMATION":
-//                $this->log .= $t . "[" . $logging_level . "]" . "<br>";
-                break;
-            case "DEBUG":
-//                $this->log .= $t . "[" . $logging_level . "]" . "<br>";
-                break;
-            default:
-            //echo "i is not equal to 0, 1 or 2";
-        }
-
-        if ((isset($this->logging_console)) and ($this->logging_console == 'on')) {
-            $this->console ($t . " [" . $logging_level . "]" . "\n");
+        if (isset($this->logging_console)) {
+            switch (strtoupper($this->logging_console)) {
+                case "ON":
+                    $this->console($t . " [" . $logging_level . "]" . "\n");
+                    break;
+                case "OPTIMIZE":
+                case "FATAL":
+                case "ERROR":
+                case "WARNING":
+                case "INFORMATION":
+                case "DEBUG":
+                    if (
+                        strtoupper($logging_level) ===
+                        strtoupper($this->logging_console)
+                    ) {
+                        $this->console($t . " [" . $logging_level . "]" . "\n");
+                        break;
+                    }
+                default:
+                //echo "i is not equal to 0, 1 or 2";
+            }
         }
         $this->log_last = $t;
     }
