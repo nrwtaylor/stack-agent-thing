@@ -514,8 +514,10 @@ class Stripe extends Agent
 
     public function webStripe()
     {
-        $url = "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
-
+$url = "<not available>";
+if (isset($_SERVER['HTTP_HOST'])) {
+       $url = "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+}
         $escaped_url = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
         $tokens = explode("/", $escaped_url);
 

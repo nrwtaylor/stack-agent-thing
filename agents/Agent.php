@@ -1236,7 +1236,10 @@ class Agent
         $match = 0;
         $link_uuids = [];
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+	$things = $findagent_thing->thing_report['things'];
+        if ($things === true) {return;}
+
+        foreach ($things as $block_thing) {
             $this->thing->log(
                 $block_thing['task'] .
                     " " .

@@ -40,6 +40,8 @@ class Balance extends Agent
 
         $start_time = time();
 
+if ($things===false) {return;}
+
         foreach (array_reverse($things) as $thing_object) {
             $uuid = $thing_object['uuid'];
 
@@ -93,7 +95,12 @@ class Balance extends Agent
     public function makeSMS()
     {
         $this->sms_message = "BALANCE | ";
+if (isset($this->stack_balance)) {
         $this->sms_message .= number_format($this->stack_balance) . ' units';
+} else {
+	$this->sms_message .= "Balance not available.";
+
+}
         //$this->sms_message .= " ";
         //$this->sms_message .= number_format( $this->thing_balance ) . ' units' ;
         $this->sms_message .= ' | TEXT AGE';

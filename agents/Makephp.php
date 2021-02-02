@@ -12,7 +12,7 @@ class Makephp
 
     function __construct(Thing $thing, $input = null)
     {
-	    $this->input = $input;
+        $this->input = $input;
 
         $class_name = ucwords($input);
 
@@ -23,9 +23,10 @@ class Makephp
         $this->email = $thing->container['stack']['email'];
 
         $stack_state = $thing->container['stack']['state'];
-
-        $file = @file_get_contents(__DIR__ . '/../agents/'. $class_name . '.php');
-
+	$file = false;
+	if ($class_name !== "") {
+           $file = @file_get_contents(__DIR__ . '/../agents/'. $class_name . '.php');
+	}
         if($file=== FALSE) { // handle error here... }
             $file = "Agent 'make php' says " .ucwords($input) . " is not a recognized Agent on this Stack.";
         }

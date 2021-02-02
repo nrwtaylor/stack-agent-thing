@@ -494,12 +494,17 @@ $text = ucfirst($text);
         $web .= "Message Metadata - ";
         //        $web .= "<p>";
 
+	$created_at_text = "";
+	if (isset($this->thing->thing->created_at)) {
+	    $created_at_text = $this->thing->thing->created_at;
+	}
+
         $web .=
             $this->inject .
             " - " .
             $this->thing->nuuid .
             " - " .
-            $this->thing->thing->created_at;
+            $created_at_text;
 
         //        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
 
@@ -516,7 +521,7 @@ $text = ucfirst($text);
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
         $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
+            time() - strtotime($created_at_text)
         );
         $web .= "Trivia question was created about " . $ago . " ago. ";
 

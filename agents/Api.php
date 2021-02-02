@@ -5,38 +5,46 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Api {
+class Api extends Agent
+{
+    public $var = 'hello';
 
-	function __construct(Thing $thing)
+    public function init()
     {
-		$this->thing_report['thing'] = false;
 
-		if ($thing->thing != true) {
 
-            $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $thing->uuid .  '');
-  	        $this->thing_report['info'] = 'Tried to run Web on a null Thing.';
-			$this->thing_report['help'] = "That isn't going to work";
+//class Api {
 
-            return $this->thing_report;
-		}
+//	function __construct(Thing $thing)
+//    {
+//		$this->thing_report['thing'] = false;
 
-		$this->thing = $thing;
-		$this->agent_name = 'api';
-        $this->agent_prefix = 'Agent "api" ';
-		$this->agent_version = 'redpanda';
+//		if ($thing->thing != true) {
 
+//            $this->thing->log ( 'Agent "Web" ran on a null Thing ' .  $thing->uuid .  '');
+//  	        $this->thing_report['info'] = 'Tried to run Web on a null Thing.';
+//			$this->thing_report['help'] = "That isn't going to work";
+
+//            return $this->thing_report;
+//		}
+
+//		$this->thing = $thing;
+//		$this->agent_name = 'api';
+//        $this->agent_prefix = 'Agent "api" ';
+//		$this->agent_version = 'redpanda';
+//
 		$this->thing_report = array('thing' => $this->thing->thing);
 
 		// So I could call
-		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
+//		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 		// I think.
 		// Instead.
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
+//        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+//        $this->word = $thing->container['stack']['word'];
+//        $this->email = $thing->container['stack']['email'];
 
 
 		$this->node_list = array('start a'=>
@@ -44,15 +52,15 @@ class Api {
 				'start b'=>array('helpful','helpful?')
 					);
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 
-		$this->sqlresponse = null;
+//		$this->sqlresponse = null;
 
-		$this->thing->log ( '<pre> Agent "Api" running on Thing ' .  $this->uuid . '</pre>' );
-		$this->thing->log ( '<pre> Agent "Api" received this Thing "' .  $this->subject .  '"</pre>' );
+//		$this->thing->log ( '<pre> Agent "Api" running on Thing ' .  $this->uuid . '</pre>' );
+//		$this->thing->log ( '<pre> Agent "Api" received this Thing "' .  $this->subject .  '"</pre>' );
 
 //$this->node_list = array("feedback"=>array("useful"=>array("credit 100","credit 250")), "not helpful"=>array("wrong place", "wrong time"),"feedback2"=>array("awesome","not so awesome"));	
 
@@ -61,22 +69,22 @@ class Api {
 
         $this->getLink();
 
-		$this->readSubject();
-		$this->respond(); // Return $this->thing_report;
+//		$this->readSubject();
+//		$this->respond(); // Return $this->thing_report;
 
 
-		$this->thing->log( '<pre> Agent "Api" completed</pre>' );
+//		$this->thing->log( '<pre> Agent "Api" completed</pre>' );
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime()) . 'ms.', "OPTIMIZE" );
 
-        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
-        $this->thing_report['log'] = $this->thing->log;
+//        $this->thing_report['etime'] = number_format($this->thing->elapsed_runtime());
+//        $this->thing_report['log'] = $this->thing->log;
 
 
-		return;
+//		return;
 	}
 
-	public function respond()
+	public function respondResponse()
     {
 		// Thing actions
 
@@ -85,7 +93,11 @@ class Api {
         $web_thing->Create($this->from, $this->agent_name, 's/ record web view');
 
 		//$this->sms_message = "WEB | " . $this->web_prefix . "thing/" . $this->link_uuid;
-        $this->sms_message = "API | " . $this->web_prefix . "api/redpanda/thing/" . $this->link_uuid;
+$link = "<not set>";
+if (isset($this->link_uuid)) {
+    $link = $this->web_prefix . "api/redpanda/thing/" . $this->link_uuid;
+}
+        $this->sms_message = "API | " . $link;
 
 		$this->sms_message .= " | TEXT WHATIS";
 		$this->thing_report['sms'] = $this->sms_message;
@@ -116,7 +128,11 @@ class Api {
 		$this->thing_report['info'] = 'This is the api agent.';
 		$this->thing_report['help'] = 'This agent creates a web link to the API.';
 
-        $this->thing->log ( '<pre> Agent "Web" credited 25 to the Thing account.  Balance is now ' .  $this->thing->account['thing']->balance['amount'] . '</pre>');
+        $amount_text = "not available.";
+        if (isset($this->thing->account)) {
+            $amount_text = $this->thing->account['thing']->balance['amount'];
+        }
+        $this->thing->log ( '<pre> Agent "Web" credited 25 to the Thing account.  Balance is now ' .  $amount_text . '</pre>');
 
 		$message_thing = new Message($this->thing, $this->thing_report);
 
@@ -129,7 +145,7 @@ class Api {
 
 		return $this->thing_report;
 	}
-    function getLink() {
+    function getLink($variable = null) {
 
         $block_things = array();
         // See if a block record exists.
@@ -145,6 +161,9 @@ class Api {
         $this->max_index =0;
 
         $match = 0;
+
+$things = $findagent_thing->thing_report['things'];
+if ($things == true) {return;}
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
 
@@ -185,13 +204,15 @@ class Api {
 		$this->defaultButtons();
 
 		$status = true;
-		return $status;		
+		return $status;
 	}
 
     function makeWeb() {
 
-        $link = $this->web_prefix . 'api/redpanda/thing/' . $this->link_uuid;
-
+        $link = null;
+	if (isset($this->link_uuid)) {
+            $link = $this->web_prefix . 'api/redpanda/thing/' . $this->link_uuid;
+         }
       $this->node_list = array("api"=>array("iching", "roll"));
         // Make buttons
         $this->thing->choice->Create($this->agent_name, $this->node_list, "api");
@@ -243,9 +264,4 @@ class Api {
 		return;
 	}
 
-
-
 }
-
-
-?>

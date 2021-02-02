@@ -36,6 +36,9 @@ class Input extends Agent
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
 
+        if ((!isset($ngram_agent->ngrams)) or ($ngram_agent->ngrams == null)) {return;}
+
+
         foreach ($ngram_agent->ngrams as $index => $ngram) {
             switch ($ngram) {
                 case "break":

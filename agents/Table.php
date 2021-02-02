@@ -76,7 +76,9 @@ class Table extends Agent
     public function makeTXT($table = null)
     {
         if ($table == null) {
-            $table = $this->table;
+            if (isset($this->table)) {
+                $table = $this->table;
+            }
         }
 
         $t = $this->textTable($table);
@@ -89,9 +91,13 @@ class Table extends Agent
     {
         $key = key($variable);
         $value = $variable[$key];
+
+// TODO review
+        if (is_int($value)) {return true;}
+
         $width = $value[key($value)];
 
-        $t .= " " . str_pad($key, $value, " ", STR_PAD_LEFT);
+        $t = " " . str_pad($key, $value, " ", STR_PAD_LEFT);
 
         return $t;
     }
@@ -146,10 +152,14 @@ class Table extends Agent
         $t = "";
         $t .= $this->headerTable();
         $t .= "\n";
-        foreach ($this->data as $row_id => $variable) {
-            $t .= $this->rowTable($row_id);
-            $t .= "\n";
-        }
+
+        if ($this->data != null) {
+            foreach ($this->data as $row_id => $variable) {
+                $t .= $this->rowTable($row_id);
+                $t .= "\n";
+            }
+	}
+
         return $t;
     }
 }

@@ -85,7 +85,18 @@ $this->resource_path_cache = $GLOBALS['stack_path'] . 'vendor/vanderlee/syllable
      */
     function makeSms() {
 
-        $this->thing_report['sms'] = "SYLLABLES | " . $this->text . " | count " . $this->syllable_count;
+        $text = "No response.";
+        if (isset($this->text)) {
+            $text = $this->text;
+        }
+
+        $syllable_count = "None seen.";
+        if (isset($this->syllable_count)) {
+            $syllable_count = $this->syllable_count;
+        }
+
+
+        $this->thing_report['sms'] = "SYLLABLES | " . $text . " | count " . $syllable_count;
 
     }
 
@@ -100,6 +111,9 @@ $this->resource_path_cache = $GLOBALS['stack_path'] . 'vendor/vanderlee/syllable
 
         if (strtolower($input) == "syllables") {
             $this->getTask();
+
+            if (!isset($this->link_task)) {return;}
+
             $this->doSyllables($this->link_task);
             return;
         }

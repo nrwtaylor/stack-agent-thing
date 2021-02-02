@@ -82,17 +82,28 @@ class Zoom extends Agent
             $this->access_code .
             " " .
             $this->url .
-            " " .
-            $this->host_url;
-
+            " ";
+        if ($this->host_url !== true) {
+	    $sms_text =
+                $this->host_url;
+	}
         $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
 
-        $urls_text = implode(" ", $this->urls);
-
-        $sms .= $urls_text . " ";
+        if ($this->urls !== false) {
+            $urls_text = implode(" ", $this->urls);
+            $sms .= $urls_text . " ";
+        }
         $sms .= $sms_text . " ";
         $sms .= $telephone_numbers_text . " ";
-        $sms .= $this->response;
+
+	$sms = trim($sms) . " ";
+
+        $response_text = "No response.";
+        if ($this->response != "") {
+            $response_text = $this->response;
+        }
+
+        $sms .= $response_text;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;

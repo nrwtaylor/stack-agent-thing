@@ -75,7 +75,7 @@ class Nonnom extends Agent
             return;
         }
 
-        $agent = new \Nrwtaylor\Stackr\Word($this->thing, $message);
+        $agent = new Word($this->thing, $message);
         $this->words = $agent->words;
     }
 
