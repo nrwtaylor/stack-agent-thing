@@ -9,6 +9,8 @@ agent claws when
 agent claws --channel=txt "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt"
 agent claws --channel=txt "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"
 
+1009  1013  858
+
 */
 
 class Claws extends Agent
@@ -286,6 +288,12 @@ dev - Detect duplicates.
 
             //$meta = $mh_agent->metaMH($contents);
             $subject = $this->subjectMH($contents);
+
+            $body = $this->bodyMH($contents);
+
+// TODO dev readEmail to properly extract text body.
+//var_dump($body);
+
             //var_dump("Claws metaMH response");
             //var_dump($subject);
 

@@ -59,12 +59,81 @@ class MH extends Agent
     public function subjectMH($text = null) {
        if ($text == null) {return;}
 
+       $this->datagram = $this->readEmail($text);
+
+       if (isset($this->datagram['subject'])) {return $this->datagram['subject'];}
+
+
        // Test and dev.
        // Extract subject line
        $subject = "TODO Extract subject line - see MH.php";
        return $subject;
     }
 
+    public function bodyMH($text = null) {
+
+$datagram = $this->readEmail($text);
+
+       $this->datagram = $this->readEmail($text);
+       if (isset($this->datagram['text'])) {return $this->datagram['text'];}
+
+    }
+
+// Move email.
+// refactor 
+    public function readEmail($text = null) {
+
+$email = $text;
+
+// Test this code from Emailhandler.php
+// refactor
+
+//Parse "subject"
+$subject1 = explode ("\nSubject: ", $email);
+
+if (!isset($subject1[1])) {return true;}
+
+$subject2 = explode ("\n", $subject1[1]);
+$subject = $subject2[0];
+
+//Parse "to"
+$to1 = explode ("\nTo: ", $email);
+$to2 = explode ("\n", $to1[1]);
+$to = str_replace ('>', '', str_replace('<', '', $to2[0]));
+
+$message1 = explode ("\n\n", $email);
+
+$start = count ($message1) - 3;
+
+if ($start < 1)
+{
+    $start = 1;
+}
+
+//Parse "message"
+$message2 = explode ("\n\n", $message1[$start]);
+$message = $message2[0];
+
+//Parse "from"
+$from1 = explode ("\nFrom: ", $email);
+$from2 = explode ("\n", $from1[1]);
+
+
+if(strpos ($from2[0], '<') !== false)
+{
+    $from3 = explode ('<', $from2[0]);
+    $from4 = explode ('>', $from3[1]);
+    $from = $from4[0];
+}
+else
+{
+    $from = $from2[0];
+}
+
+$datagram=['to'=>$to, 'from'=>$from, 'subject'=>$subject, 'text'=>$message];
+return $datagram;
+
+    }
 
     public function textMH($text = null) {
 
@@ -89,8 +158,11 @@ class MH extends Agent
     public function readMH($text = null) {
       if ($text == null) {return;}
 
+      $this->datagram = $this->readEmail($text);
+
       $this->meta = $this->metaMH($text);
       $this->contents = $this->textMH($text);
+
     }
 
     function makeSMS()
@@ -110,7 +182,6 @@ class MH extends Agent
     public function readSubject()
     {
         $input = $this->input;
-        $this->readMH($input);
         return false;
     }
 }
