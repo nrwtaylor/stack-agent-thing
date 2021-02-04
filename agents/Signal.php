@@ -1012,7 +1012,7 @@ if (isset($this->signal_thing->uuid)) {
         $width = imagesx($this->image);
         $height = imagesy($this->image);
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $font = null; //
 

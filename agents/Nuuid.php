@@ -234,8 +234,8 @@ class Nuuid extends Agent
 
         $width = imagesx($this->image);
         $height = imagesy($this->image);
-        $font = $this->font;
-        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
+
         if (file_exists($font)) {
             $text = $this->thing->nuuid;
 

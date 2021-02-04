@@ -341,8 +341,7 @@ $j = $this->tubs_max - $i;
             $y_label_offset = 16;
             $plot_y = $this->height - $y_label_offset;
 
-            $font =
-                $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+            $font = $this->font;
 
             $text = "x";
 

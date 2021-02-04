@@ -701,7 +701,7 @@ class Charley extends Agent
         $radius = (1.165 * ($width - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "ROCKY";
 

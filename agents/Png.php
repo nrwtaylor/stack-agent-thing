@@ -5,23 +5,24 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Png {
+class Png extends Agent {
 
 	public $var = 'hello';
 
-    function __construct(Thing $thing, $agent_input = null)
+    function init() 
+//    function __construct(Thing $thing, $agent_input = null)
     {
-        $this->start_time = $thing->elapsed_runtime(); 
+  //      $this->start_time = $thing->elapsed_runtime(); 
 
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
 
-		$this->agent_name = "png";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
+//		$this->agent_name = "png";
+  //      $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+	//	$this->test= "Development code";
 
-		$this->thing = $thing;
+//		$this->thing = $thing;
 
-        $this->thing_report['thing']  = $thing;
+  //      $this->thing_report['thing']  = $thing;
 
 
         // Set default text for the image
@@ -29,51 +30,51 @@ class Png {
 
         $command_line = null;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = strtolower($thing->subject);
+ //       $this->uuid = $thing->uuid;
+   //     $this->to = $thing->to;
+     //   $this->from = $thing->from;
+       // $this->subject = strtolower($thing->subject);
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
+  //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+    //    $this->word = $thing->container['stack']['word'];
+      //  $this->email = $thing->container['stack']['email'];
 
         $this->node_list = array("png"=>array("png", "roll"));
 
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
-        $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
+//        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
+  //      $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
 
 
         $this->current_time = $this->thing->time();
 
-        $this->readSubject();
+//        $this->readSubject();
 
-        $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+//        $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
 
         // If it is an agent request for png only generate png (for speed)
         if ($this->agent_input == "png") {
             $this->makePNG();
         } else {
-            $this->respond();
+            $this->respondResponse();
         }
 
-        $this->thing->log($this->agent_prefix . ' set response. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+//        $this->thing->log($this->agent_prefix . ' set response. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
+//        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
-        $this->thing_report['log'] = $this->thing->log;
+//        $this->thing_report['log'] = $this->thing->log;
 
-		return;
+//		return;
 
 	}
 
 // -----------------------
 
-	private function respond()
+	public function respondResponse()
     {
 		$this->thing->flagGreen();
 
@@ -119,9 +120,6 @@ class Png {
 
     function makeChoices ()
     {
-//        $this->thing->choice->Choose($this->state);
-//        $this->thing->choice->save($this->keyword, $this->state);
-
         $this->thing->choice->Create($this->agent_name, $this->node_list, "png");
 
         $choices = $this->thing->choice->makeLinks('png');
@@ -215,7 +213,7 @@ class Png {
         $this->height = $height;
 
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
 if (file_exists($font)) {
 
@@ -350,14 +348,14 @@ $text = $this->text;
         imageline($image, 20, 280, 280, 280, $black);
     }
 
-    function read()
+    function read($variable = null)
     {
         $this->get();
-        return $this->state;
+        //return $this->state;
     }
 
 	public function readSubject()
     {
-		return;
+		//return;
     }
 }

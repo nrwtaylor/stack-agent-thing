@@ -1182,10 +1182,8 @@ function show_status($done, $total, $size=30) {
         $this->height = 1000;
         $this->width = 1000;
 
-        $this->font = '/home/nick/Downloads/fonts/Lato-Regular.ttf';
-        //$this->font = '/home/nick/KeepCalm-Medium.ttf';
-//        $this->font = 'fonts/CODE Bold.otf';
-
+        //$this->font = '/home/nick/Downloads/fonts/Lato-Regular.ttf';
+        $this->font = $this->default_font;
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
@@ -1209,8 +1207,6 @@ function show_status($done, $total, $size=30) {
 //$this->font = '/home/nick/Downloads/fonts/Lato-Regular.ttf';
 
 
-
-//$this->font = '/home/nick/KeepCalm-Medium.ttf';
 
 $text = "test";
 // Add some shadow to the text
@@ -1404,8 +1400,6 @@ $pad = 0;
 
         $x = $this->cell_width * $column_index + $this->x_origin + $x_tweak;
         $y = $this->cell_height * $row_index + $this->cell_height + $this->y_origin + $y_tweak;
-
-//$font = '/home/nick/KeepCalm-Medium.ttf';
 
 
         imagettftext($this->image, $size, $angle, $x, $y, $colour, $this->font, $text);

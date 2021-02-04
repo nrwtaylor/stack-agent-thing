@@ -60,14 +60,6 @@ class Snowflake extends Agent
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
 
-        if (
-            isset($this->thing->container['stack']['font'])
-        ) {
-            $this->font =
-                $this->thing->container['stack']['font'];
-        }
-
-
         $this->thing->log(
             $this->agent_prefix .
                 'completed getSnowflake. Timestamp = ' .
@@ -630,8 +622,7 @@ return;
         $radius = ($r * ($canvas_size_x - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->font;
-        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         $text = "test";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -1662,7 +1653,7 @@ return;
 
             $pdf->SetFont('Helvetica', '', 10);
 
-            $file = $this->resource_path . 'snowflake/bubble.pdf';
+            $file = $this->default_pdf_page_template;
             if (file_exists($file)) {
                 $pdf->setSourceFile($file);
 

@@ -1076,7 +1076,7 @@ if (file_exists($file)) {
             $white
         );
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);

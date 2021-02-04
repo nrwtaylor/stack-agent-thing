@@ -3,99 +3,43 @@ namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 
-class Latencygraph
+class Latencygraph extends Agent
 {
     // Latencygraph shows the stack latency history.
 
-	function __construct(Thing $thing, $agent_command = null)
+    public function init()
     {
-        $this->start_time = $thing->elapsed_runtime();
 
-        // Setup Thing
-        $this->thing = $thing;
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
-        // Setup Agent
-        $this->agent = strtolower(get_class());
-        $this->agent_prefix = 'Agent "' . ucfirst($this->agent) . '" ';
-
-        // Setup logging
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        if ($agent_command == null) {
-            $this->thing->log( 'Agent "Latencygraph" did not find an agent command.' );
-        }
-
-        $this->agent_command = $agent_command;
-
-        $this->nom_input = $agent_command . " " . $this->from . " " . $this->subject;
+        $this->nom_input = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $this->ignore_empty = true;
 
         $this->height = 200;
         $this->width = 300;
 
-
-        $this->readInput();
-
-        $this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . $this->identity . "." );
-
-
 		// So I could call
 		if ($this->thing->container['stack']['state'] == 'dev') {$this->test = true;}
 		// I think.
 		// Instead.
 
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
-
         $this->current_time = $this->thing->json->time();
 
 		$this->node_list = array("latencygraph");
 
-		$this->thing->log( '<pre> ' .$this->agent_prefix . ' running on Thing ' .  $this->thing->nuuid .  ' </pre>','INFORMATION' );
-
-        //$split_time = $this->thing->elapsed_runtime();
-        $this->getData();
-        //$this->thing->log('Agent "Latencygraph" getData ran for ' . number_format($this->thing->elapsed_runtime()- $split_time)."ms.", "OPTIMIZE");
-
-        if ($agent_command == null) {
-		    $this->Respond();
-        }
-
-        $this->thing->log('Agent "Latencygraph" ran for ' . number_format($this->thing->elapsed_runtime()-$this->start_time)."ms.", "OPTIMIZE");
-
-        $this->thing_report['log'] = $this->thing->log;
-		return;
 	}
-
-
-
-
 
     function set()
     {
 
         $this->thing->json->setField("variables");
-
-
-        return;
     }
 
-/*
+
     function get()
     {
-        return;
+        $this->getData();
     }
-*/
+
     function getData()
     {
         $split_time = $this->thing->elapsed_runtime();
@@ -155,7 +99,7 @@ class Latencygraph
     }
 
 
-	public function Respond() {
+	public function respondResponse() {
 
 		// Develop the various messages for each channel.
 
@@ -166,7 +110,6 @@ class Latencygraph
 
         $this->makeSMS();
 		$this->thing_report['thing'] = $this->thing->thing;
-//		$this->thing_report['sms'] = $this->sms_message;
 
         $this->makePNG();
 
@@ -199,7 +142,7 @@ class Latencygraph
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
 
-if (!isset($this->points)) {return true;}
+        if (!isset($this->points)) {return true;}
 
         $num_points = count($this->points);
         $column_width = $this->width / $num_points;
@@ -320,7 +263,7 @@ if (!isset($this->points)) {return true;}
                 300-10, $plot_y,
                 $this->black);
 
-            $font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+            $font = $this->default_font;
 
             $text = $y;
 
@@ -367,7 +310,7 @@ if (!isset($this->points)) {return true;}
         $border = 30;
         $radius = 1.165 * (125 - 2 * $border) / 3;
 
-        $font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+        $font =$this->default_font;
 
         $text = "test";
         // Add some shadow to the text
@@ -444,7 +387,7 @@ if (!isset($this->points)) {return true;}
 
     public function readInstruction()
     {
-        if($this->agent_command == null) {
+        if($this->agent_input == null) {
             $this->defaultCommand();
             return;
         }
@@ -467,5 +410,11 @@ if (!isset($this->points)) {return true;}
     {
         $this->readInstruction();
         $this->readText();
+    }
+
+    public function readSubject() {
+
+        $this->readInput();
+
     }
 }

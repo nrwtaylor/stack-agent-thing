@@ -570,7 +570,7 @@ function comb ($n, $elems) {
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
-        $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
+        $pdf->setSourceFile($this->default_pdf_page_template);
         $pdf->SetFont('Helvetica','',10);
 
         $tplidx1 = $pdf->importPage(3, '/MediaBox');  

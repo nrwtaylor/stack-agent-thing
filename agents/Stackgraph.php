@@ -399,8 +399,7 @@ class Stackgraph extends Agent
                 $this->black
             );
 
-            $font =
-                $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+            $font = $this->default_font;
 
             $text = number_format($y);
             // Add some shadow to the text
@@ -473,7 +472,7 @@ class Stackgraph extends Agent
         $border = 30;
         $radius = (1.165 * (125 - 2 * $border)) / 3;
 
-        $font = $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $text = "test";
         // Add some shadow to the text

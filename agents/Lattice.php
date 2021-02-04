@@ -393,7 +393,7 @@ class Lattice extends Agent
         $radius = ($r * ($this->canvas_size_x - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         $text = "test";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -493,7 +493,7 @@ class Lattice extends Agent
         list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         //        $text = "test";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -565,7 +565,7 @@ class Lattice extends Agent
         list($x_pt, $y_pt) = $this->hextopixel($q, $r, $s, $size);
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         //        $text = "test";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -1375,7 +1375,7 @@ rgb
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
 
-            $pdf->setSourceFile($this->resource_path . 'snowflake/bubble.pdf');
+            $pdf->setSourceFile($this->default_pdf_page_template);
             $pdf->SetFont('Helvetica', '', 10);
 
             $tplidx1 = $pdf->importPage(1, '/MediaBox');

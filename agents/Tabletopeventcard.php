@@ -521,7 +521,7 @@ class Tabletopeventcard extends Agent
         $radius = (1.165 * ($width - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
 
         $text = strtoupper($this->nom);
 

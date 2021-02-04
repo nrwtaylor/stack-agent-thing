@@ -438,8 +438,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
                 $this->black
             );
 
-            $font =
-                $GLOBALS['stack_path'] . 'resources/roll/KeepCalm-Medium.ttf';
+            $font = $this->font;
 
             $text = $y;
 

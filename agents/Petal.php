@@ -5,34 +5,34 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-require_once '/var/www/html/stackr.ca/agents/message.php';
+//require_once '/var/www/html/stackr.ca/agents/message.php';
 
-class Petal {
+class Petal extends Agent {
 
 	public $var = 'hello';
 
+    function init() {
+//    function __construct(Thing $thing, $agent_input = null) {
 
-    function __construct(Thing $thing, $agent_input = null) {
+//        $this->agent_input = $agent_input;
+//        $this->start_time = microtime(true);
 
-        $this->agent_input = $agent_input;
-        $this->start_time = microtime(true);
-
-		$this->agent_name = "petal";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-		$this->test= "Development code";
+//		$this->agent_name = "petal";
+//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" '/;
+//		$this->test= "Development code";
 
 //      This is how old roll.php is.
 //		$thingy = $thing->thing;
-		$this->thing = $thing;
+//		$this->thing = $thing;
 
-         $this->thing_report  = array("thing"=>$this->thing->thing);
+//         $this->thing_report  = array("thing"=>$this->thing->thing);
 
         $command_line = null;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 
         $this->node_list = array("roll"=>array("roll d20"));
 
@@ -43,8 +43,8 @@ class Petal {
 				$command_line .
 		                $this->agent_input;
 
-        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
-        $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
+//        $this->thing->log($this->agent_prefix . 'running on Thing '. $this->thing->nuuid . '.', "INFORMATION");
+ //       $this->thing->log($this->agent_prefix . 'received this Thing "'.  $this->subject . '".', "DEBUG");
 
 
         $this->current_time = $this->thing->json->time();
@@ -75,34 +75,40 @@ class Petal {
 //        if ( ($this->roll == false) or ($this->result == false) ) {
 
 
-            $this->readSubject();
+//            $this->readSubject();
 
 
-            $this->thing->json->writeVariable( array("petal", "roll"), $this->roll );
-            $this->thing->json->writeVariable( array("petal", "result"), $this->result );
+//            $this->thing->json->writeVariable( array("petal", "roll"), $this->roll );
+ //           $this->thing->json->writeVariable( array("petal", "result"), $this->result );
 
-            $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+//            $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
 //        }
 
 
 
-        if ($this->agent_input == null) {$this->setSignals();}
+//        if ($this->agent_input == null) {$this->setSignals();}
 
-        $this->thing->log($this->agent_prefix . ' set response. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+  //      $this->thing->log($this->agent_prefix . ' set response. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
 
-        $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
+    //    $this->thing->log( $this->agent_prefix .'ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.', "OPTIMIZE" );
 
-        $this->thing_report['log'] = $this->thing->log;
+      //  $this->thing_report['log'] = $this->thing->log;
 
-		return;
+//		return;
 
 	}
 
+    public function set() {
+            $this->thing->json->writeVariable( array("petal", "roll"), $this->roll );
+            $this->thing->json->writeVariable( array("petal", "result"), $this->result );
 
+            $this->thing->log($this->agent_prefix . ' completed read. Timestamp ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE") ;
+
+    }
 
 // -----------------------
 
-	private function setSignals() {
+	private function respondResponse() {
 
 		$this->thing->flagGreen();
 
@@ -350,7 +356,7 @@ if ($number>99) {return;}
 //$number = ($this->result[0]);
 //var_dump($number);
 //exit();
-$font = '/var/www/html/stackr.ca/resources/roll/KeepCalm-Medium.ttf';
+$font = $this->default_font;
 $text = $number;
 // Add some shadow to the text
 //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);

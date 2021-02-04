@@ -212,7 +212,7 @@ $image_width = 125;
 //        $this->ImageRectangleWithRoundedCorners($image, 6,6, $image_width-6, $image_height-6, 12-6, $white);
 
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
 
         // Add some shadow to the text

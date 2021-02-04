@@ -153,7 +153,7 @@ class Word extends Agent
         $radius = ($r * ($canvas_size_x - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $size = 26;
 

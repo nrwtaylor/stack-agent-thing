@@ -509,8 +509,7 @@ class Picanic extends Agent
         $radius = (1.165 * ($width - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->font;
-        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $text = strtoupper($this->nom);
 

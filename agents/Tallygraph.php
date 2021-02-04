@@ -503,7 +503,7 @@ return;
                     $this->black);
 
 
-            $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+            $font = $this->default_font; 
 
             $text = $y;
             // Add some shadow to the text
@@ -559,7 +559,7 @@ return;
         $border = 30;
         $radius = 1.165 * (125 - 2 * $border) / 3;
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $text = "test";
 

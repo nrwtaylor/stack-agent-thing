@@ -633,8 +633,7 @@ class ICS213 extends Agent
 
 
         // devstack add path
-        //$font = $this->resource_path . '/var/www/html/stackr.test/resources/roll/KeepCalm-Medium.ttf';
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "INJET";
         $text = $this->message['text'];
@@ -649,7 +648,7 @@ class ICS213 extends Agent
 
         $size = 72;
         $angle = 0;
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         $text= $this->text;
 
         $bbox = imagettfbbox ($size, $angle, $font, $text); 

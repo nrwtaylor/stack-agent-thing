@@ -189,7 +189,7 @@ class Job extends Agent
         //$this->ImageRectangleWithRoundedCorners($image, 0,0, $image_width, $image_height, 12, $black);
         //$this->ImageRectangleWithRoundedCorners($image, 6,6, $image_width-6, $image_height-6, 12-6, $white);
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
@@ -416,7 +416,8 @@ class Job extends Agent
      */
     public function makePDF()
     {
-        $file = $this->resource_path . 'snowflake/bubble.pdf';
+        $file = $this->default_pdf_page_template;
+
         if (!file_exists($file)) {return true;}
 
         try {

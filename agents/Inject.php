@@ -701,8 +701,7 @@ class Inject extends Agent
 
 
         // devstack add path
-        $font = $this->font;
-        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "INJET";
         $text = $this->message['text'];

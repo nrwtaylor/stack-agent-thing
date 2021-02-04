@@ -436,7 +436,7 @@ class Bar extends Agent
 
         $textcolor = $this->black;
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $size = 10;
         $angle = 0;

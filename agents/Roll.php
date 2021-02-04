@@ -346,7 +346,7 @@ class Roll extends Agent
                 imageline($image, $ptc_x, $ptc_y, $pta_x, $pta_y, $black);
             }
 
-            $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+            $font = $this->default_font;
 
             $text = $number;
 

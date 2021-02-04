@@ -390,8 +390,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
             );
         }
 
-        //$font = $GLOBALS['stack'] . 'vendor/nrwtaylor/stack-agent-thing/resources/roll/KeepCalm-Medium.ttf';
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->default_font;
 
         $this->drawIcosahedron();
 
