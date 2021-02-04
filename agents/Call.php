@@ -200,7 +200,6 @@ class Call extends Agent
 
 
 // refactor as select case.
-
             if (stripos($text, "zoom") !== false) {
                 //$zoom_agent = new Zoom($this->thing, "zoom");
 		        $this->thing->zoom_handler->readZoom($text);

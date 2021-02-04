@@ -36,8 +36,8 @@ class Claws extends Agent
             return;
         }
 
-//        $this->input = 'claws "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"';
-//        $this->readSubject();
+        //        $this->input = 'claws "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"';
+        //        $this->readSubject();
 
         $this->response .= "No test performed. ";
     }
@@ -110,7 +110,7 @@ class Claws extends Agent
         var_dump($text);
     }
 
-/*
+    /*
 
 Code to update when (lightandmatter / ben crowell) calendar.
 Start by appending file and relying on user to
@@ -153,13 +153,27 @@ dev - Detect duplicates.
 
     public function makeTXT()
     {
+
         $txt = "CLAWS\n";
         foreach ($this->claws_items as $i => $claws_item) {
+
+        $password_text = "No password found.";
+        if (($claws_item['call']['password'] === null) or ($claws_item['call']['password'] === false)) {
+        } else {
+            $password_text = $claws_item['call']['password'];
+        }
+
+        $access_code_text = "No access code found.";
+        if (($claws_item['call']['access_code'] === null) or ($claws_item['call']['access_code'] === false)) {
+        } else {
+            $access_code_text = $claws_item['call']['access_code'];
+        }
+
             $text_claws =
-                $claws_item['call']['password'] .
-                " " .
-                $claws_item['call']['access_code'] .
-                " " .
+                $password_text .
+                " / " .
+                $access_code_text .
+                " / " .
                 $claws_item['call']['url'] .
                 "\n";
             $text_claws .= $claws_item['subject'] . "\n";
@@ -291,8 +305,8 @@ dev - Detect duplicates.
 
             $body = $this->bodyMH($contents);
 
-// TODO dev readEmail to properly extract text body.
-//var_dump($body);
+            // TODO dev readEmail to properly extract text body.
+            //var_dump($body);
 
             //var_dump("Claws metaMH response");
             //var_dump($subject);
@@ -331,7 +345,6 @@ dev - Detect duplicates.
                 'call' => $call,
                 'dateline' => $dateline,
             ];
-
         }
 
         // get an MH reader to clean up the format
@@ -341,11 +354,11 @@ dev - Detect duplicates.
         // desired actions - priority and focuses
         // 1. insert with conference link into when calendar
 
-//        foreach ($this->claws_items as $i=>$claws_item) {
-//           $timestamp = $this->timestampDateline($claws_item['dateline']);
+        //        foreach ($this->claws_items as $i=>$claws_item) {
+        //           $timestamp = $this->timestampDateline($claws_item['dateline']);
 
-//           $this->whenClaws($timestamp . " , " . $subject . " [" . implode(" ", $claws_item['call']) . "] ");
-//        }
+        //           $this->whenClaws($timestamp . " , " . $subject . " [" . implode(" ", $claws_item['call']) . "] ");
+        //        }
 
         // 2. take conference link to forward it in an email (?)
         // 3. clickable action to connect to conference link (?)

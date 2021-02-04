@@ -56,8 +56,6 @@ class Zoom extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-
-//        return $this->thing_report;
     }
 
     /**
@@ -96,7 +94,7 @@ class Zoom extends Agent
         $sms .= $sms_text . " ";
         $sms .= $telephone_numbers_text . " ";
 
-	$sms = trim($sms) . " ";
+        $sms = trim($sms) . " ";
 
         $response_text = "No response.";
         if ($this->response != "") {
@@ -283,8 +281,7 @@ class Zoom extends Agent
         if ($text == null) {
             return true;
         }
-
-        $pattern = '/\b\d{3} \d{3} \d{4}/i';
+        $pattern = '/\b\d{3} \d{4} \d{4}/i';
 
         preg_match_all($pattern, $text, $match);
         if (!isset($access_codes)) {
@@ -310,7 +307,9 @@ class Zoom extends Agent
             return true;
         }
 
-        $pattern = '/\b[a-zA-Z0-9]{11}\b/i';
+//        $pattern = '/\b[a-zA-Z0-9]{11}\b/i';
+        $pattern = '/\b\d{6}\b/i';
+
 
         //TODO: Develop regex pattern to match at least one number and one alpha.
         //$pattern = '/\b^(?=.*\d)(?=.*[a-zA-Z]).{11}$\b/';
@@ -326,18 +325,6 @@ class Zoom extends Agent
         }
         $passwords = array_merge($passwords, $match[0]);
         $passwords = array_unique($passwords);
-
-        // See TODO above.
-        // For now do this.
-        foreach ($passwords as $i => $password) {
-            if (
-                preg_match('/[A-Za-z]/', $password) &&
-                preg_match('/[0-9]/', $password)
-            ) {
-            } else {
-                unset($passwords[$i]);
-            }
-        }
 
         if (count($passwords) == 1) {
             return $passwords[0];
