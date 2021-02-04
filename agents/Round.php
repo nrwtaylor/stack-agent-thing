@@ -348,7 +348,7 @@ class Round extends Agent
         $radius = ($r * ($canvas_size_x - 2 * $border)) / 3;
 
         // devstack add path
-        $this->font = $font;
+        $font = $this->font;
         //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "A round in slices...";
         // Add some shadow to the text
