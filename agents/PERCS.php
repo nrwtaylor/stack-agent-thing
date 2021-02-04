@@ -44,6 +44,15 @@ class PERCS extends Agent
         if (isset($this->thing->thing->created_at)) {
             $this->created_at = $this->thing->thing->created_at;
         }
+
+        if (
+            isset($this->thing->container['stack']['font'])
+        ) {
+            $this->font =
+                $this->thing->container['stack']['font'];
+        }
+
+
     }
 
     function isPERCS($state = null)
@@ -775,7 +784,8 @@ return;
         $radius = (1.165 * (164 - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
+        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "INJET";
         $text = $this->message['text'];

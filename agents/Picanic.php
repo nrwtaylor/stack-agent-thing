@@ -29,6 +29,14 @@ class Picanic extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
+        if (
+            isset($this->thing->container['stack']['font'])
+        ) {
+            $this->font =
+                $this->thing->container['stack']['font'];
+        }
+
+
         $this->initPicanic();
     }
 
@@ -501,7 +509,8 @@ class Picanic extends Agent
         $radius = (1.165 * ($width - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
+        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
         $text = strtoupper($this->nom);
 

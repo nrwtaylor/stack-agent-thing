@@ -67,6 +67,15 @@ class Year extends Agent
             $this->default_canvas_size_x,
             $this->default_canvas_size_y
         );
+
+        if (
+            isset($this->thing->container['stack']['font'])
+        ) {
+            $this->font =
+                $this->thing->container['stack']['font'];
+        }
+
+
     }
 
     public function set()
@@ -398,7 +407,8 @@ class Year extends Agent
         $radius = ($r * ($canvas_size_x - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
+        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "A year in slices...";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);

@@ -170,6 +170,7 @@ class Headcode
         }
 
         $this->thing_report['response'] = $this->response;
+
     }
 
     function set()

@@ -31,6 +31,14 @@ class Inject extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
+        if (
+            isset($this->thing->container['stack']['font'])
+        ) {
+            $this->font =
+                $this->thing->container['stack']['font'];
+        }
+
+
         $this->variable = new Variables($this->thing, "variables inject " . $this->from);
 	}
 
@@ -693,7 +701,8 @@ class Inject extends Agent
 
 
         // devstack add path
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
+        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "INJET";
         $text = $this->message['text'];

@@ -39,6 +39,15 @@ class Nuuid extends Agent
                 $time_string
             );
         }
+
+        if (
+            isset($this->thing->container['stack']['font'])
+        ) {
+            $this->font =
+                $this->thing->container['stack']['font'];
+        }
+
+
     }
 
     /**
@@ -225,8 +234,8 @@ class Nuuid extends Agent
 
         $width = imagesx($this->image);
         $height = imagesy($this->image);
-
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
+        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
         if (file_exists($font)) {
             $text = $this->thing->nuuid;
 

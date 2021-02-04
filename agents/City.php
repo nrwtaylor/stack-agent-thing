@@ -54,6 +54,15 @@ class City extends Agent
             "variables city " . $this->from
         );
         $this->city_code = $this->railway_city->getVariable("city_code");
+
+        if (
+            isset($this->thing->container['stack']['font'])
+        ) {
+            $this->font =
+                $this->thing->container['stack']['font'];
+        }
+
+
     }
 
     function set()
@@ -833,7 +842,8 @@ class City extends Agent
         $width = imagesx($image);
         $height = imagesy($image);
 
-        $font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
+        $font = $this->font;
+        //$font = $this->resource_path . 'roll/KeepCalm-Medium.ttf';
 
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
