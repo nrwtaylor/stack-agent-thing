@@ -208,25 +208,29 @@ $text = "merp";
         $i = 0;
         $remaining = $pairs;
         $flag_end = false;
+        $logic_text = "";
         while ($flag_end !== true) {
             foreach ($pairs as $key => $value) {
                 //if (!isset($remaining[$key])) {$remaining[$key] = $pairs[$key];}
                 $distribution = rand(1, $d);
 
+                if ($remaining[$key] === 0) {continue;}
+
                 if ($distribution > $remaining[$key]) {
                     $distribution = $remaining[$key];
-                    $remaining[$key] = 0;
-                } else {
-                    $remaining[$key] = $remaining[$key] - $distribution;
                 }
 
                 if ($remaining_distribution < $distribution) {
                     $distribution = $remaining_distribution;
-                    $remaining_distribution = 0;
-                } else {
-                    $remaining_distribution =
-                        $remaining_distribution - $distribution;
                 }
+
+                $remaining[$key] = $remaining[$key] - $distribution;
+                $remaining_distribution =
+                    $remaining_distribution - $distribution;
+
+                $logic_text .= "Took " . $distribution . " from " . $key . ". ";
+                $logic_text .= $remaining_distribution . " left. ";
+
 
                 // No distribution made. End.
                 if (
@@ -234,6 +238,8 @@ $text = "merp";
                         $remaining_distribution or
                     $remaining_distribution === 0
                 ) {
+                    $logic_text .= "Cannot distribute more. ";
+                    $logic_text .= $remaining_distribution . " undistributed. ";
                     $flag_end = true;
                     break;
                 }
@@ -241,7 +247,8 @@ $text = "merp";
                 $previous_remaining_distribution = $remaining_distribution;
             }
         }
-
+echo $logic_text;
+echo "\n";
         return $remaining;
     }
 
