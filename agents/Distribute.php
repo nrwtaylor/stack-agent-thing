@@ -186,10 +186,10 @@ $text = "merp";
     function set()
     {
         if ($this->last_result == false) {
-            $this->thing->json->writeVariable(
-                ["distribute", "result"],
-                $this->result
-            );
+//            $this->thing->json->writeVariable(
+//                ["distribute", "result"],
+//                $this->result
+//            );
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',
@@ -210,8 +210,13 @@ $text = "merp";
         $flag_end = false;
         $logic_text = "";
         while ($flag_end !== true) {
-            foreach ($pairs as $key => $value) {
-                //if (!isset($remaining[$key])) {$remaining[$key] = $pairs[$key];}
+
+            // Pick a random key value pair.
+
+            $key = array_rand($pairs);
+            $value = $pairs[$key];
+
+            // Use the provided dice to generate a hit on the selected pair.
                 $distribution = rand(1, $d);
 
                 if ($remaining[$key] === 0) {continue;}
@@ -232,6 +237,7 @@ $text = "merp";
                 $logic_text .= $remaining_distribution . " left. ";
 
 
+// Repeat until not able to distribute more.
                 // No distribution made. End.
                 if (
                     $previous_remaining_distribution ===
@@ -245,10 +251,9 @@ $text = "merp";
                 }
 
                 $previous_remaining_distribution = $remaining_distribution;
-            }
         }
-echo $logic_text;
-echo "\n";
+
+        $this->logic_text = $logic_text;
         return $remaining;
     }
 
@@ -301,11 +306,10 @@ echo "\n";
             }
         }
 	$this->available = $sum;
-echo "pairs " . $this->textDistribute($pairs) . "\n";
-        $remaining = $this->randomDistribute($this->amount, $pairs, $this->d);
-echo "remaining " . $this->textDistribute($remaining) ."\n";
-        $text = "";
 
+        $remaining = $this->randomDistribute($this->amount, $pairs, $this->d);
+
+        $text = "";
 	$remaining_tokens = 0;
         foreach ($remaining as $key => $value) {
 	    $remaining_tokens += $value;
@@ -314,9 +318,10 @@ echo "remaining " . $this->textDistribute($remaining) ."\n";
         $this->distribute_message = $this->available . " tokens seen. " .
             "Asked to distribute " . $this->amount . " tokens. " . $remaining_tokens. " tokens undistributed. Remaining amounts are " . $this->textDistribute($remaining). ". ";
 
-        $this->tokens = $tokens;
+//        $this->tokens = $tokens;
 
-        $count = count($tokens);
-        $this->result = rand(1, $count);
+//        $count = count($tokens);
+//        $this->result = rand(1, $count);
+
     }
 }
