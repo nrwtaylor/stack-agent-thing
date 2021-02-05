@@ -164,7 +164,7 @@ class Tabletopeventcard extends Agent
             return;
         }
         $path = $this->resource_path;
-        $card_deck = "/deck/tabletop-vector-edition2.txt";
+        $card_deck = "deck/tabletop-vector-edition2.txt";
 
         // Load in the picnic items.
         $file = $this->resource_path . $card_deck;
@@ -521,8 +521,7 @@ class Tabletopeventcard extends Agent
         $radius = (1.165 * ($width - 2 * $border)) / 3;
 
         // devstack add path
-        $font = $this->font;
-
+        $font = $this->default_font;
         $text = strtoupper($this->nom);
 
         $size = 72;
