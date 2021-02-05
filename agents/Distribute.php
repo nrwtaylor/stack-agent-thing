@@ -114,8 +114,8 @@ class Distribute extends Agent
         );
         $choices = $this->thing->choice->makeLinks('web');
 
-        $text = $this->textDistribute($this->result);
-
+        //$text = $this->textDistribute($this->result);
+$text = "merp";
         if ($text === true) {
             $web = "Did not distribute.<br>";
         } else {
@@ -157,15 +157,16 @@ class Distribute extends Agent
         $this->thing_report['sms'] = $sms;
     }
 
-    public function textDistribute($distribute = null)
+    public function textDistribute($distribution = null)
     {
-        if ($distribute == null) {
+        if ($distribution == null) {
             return true;
         }
-
-        $this->token = $this->tokens[$distribute - 1];
-
-        $text = $this->token;
+        $text = "";
+        foreach($distribution as $key=>$value) {
+            $text .= $key ." " . $value ." ";
+        }
+        $text = trim($text);
         return $text;
     }
 
@@ -281,24 +282,30 @@ class Distribute extends Agent
 
         $pairs = [];
         $n = 0;
+	$sum = 0;
         foreach ($tokens as $i => $token) {
             if ($i / 2 === intval($i / 2)) {
                 $key = $token;
             } else {
                 $value = $token;
+		$sum = $sum + $value;
                 $pairs[$key] = $value;
                 $n += 1;
             }
         }
-
+	$this->available = $sum;
+echo "pairs " . $this->textDistribute($pairs) . "\n";
         $remaining = $this->randomDistribute($this->amount, $pairs, $this->d);
-
+echo "remaining " . $this->textDistribute($remaining) ."\n";
         $text = "";
+
+	$remaining_tokens = 0;
         foreach ($remaining as $key => $value) {
-            $text .= $remaining[$key] . "/" . $pairs[$key] . " " . $key . " ";
+	    $remaining_tokens += $value;
         }
-        $this->distribute_message =
-            "Distributed " . $this->amount . " tokens. Remaining amounts are " . $text . ". ";
+
+        $this->distribute_message = $this->available . " tokens seen. " .
+            "Asked to distribute " . $this->amount . " tokens. " . $remaining_tokens. " tokens undistributed. Remaining amounts are " . $this->textDistribute($remaining). ". ";
 
         $this->tokens = $tokens;
 
