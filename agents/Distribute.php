@@ -27,8 +27,9 @@ class Distribute extends Agent
 
         $this->node_list = ["distribute" => ["distribute"]];
 
-        $this->thing_report["info"] = "This distributes a token.";
-        $this->thing_report['help'] = 'Try DISTRIBUTE ROBERT DAVID MARK.';
+        $this->thing_report["info"] = "This distributes tokens.";
+        $this->thing_report['help'] = 'Try DISTRIBUTE 4 d1 Kitsilano 10 Strathcona 9 Marpole 20';
+.';
     }
 
     /**
