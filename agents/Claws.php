@@ -315,7 +315,8 @@ dev - Detect duplicates.
             // Tested on Webex.
             // Needs further service development.
             // Prioritize Zoom dev test.
-            $call = $this->readCall($contents);
+//var_dump($body);
+            $call = $this->readCall($body);
             //var_dump("Claws readCall response");
             //var_dump($call);
 

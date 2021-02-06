@@ -253,13 +253,22 @@ class Email
 
         //        $this->email_message = false;
         $this->makeEmail();
-
+        $received_at = time();
+        
+        
+        
+//        var_dump($this->thing->thing);
+if (($this->thing->thing === true) or ($this->thing->thing === false)) {
+} else {
         $received_at = strtotime($this->thing->thing->created_at);
+}
         $time_ago = time() - $received_at;
 
         /////
 
         $this->thing_report['info'] = 'Agent "Email" did not send an email.';
+
+if (isset($this->thing->account)){
 
         if ($this->thing->account['stack']->balance['amount'] >= $this->cost) {
             //$this->sendSms($to, $test_message);
@@ -314,7 +323,7 @@ class Email
                 " less than " .
                 $this->cost;
         }
-
+}
         //$this->thing_report = array('thing' => $this->thing->thing, 'choices' => false, 'info' => 'This is a sms sender.','help' => 'Ants.  Lots of ants.');
 
         //$this->thing_report['choices'] = false;

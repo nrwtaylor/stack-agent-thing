@@ -64,7 +64,9 @@ class MH extends Agent
             return;
         }
 
-        if (!isset($this->datagram)) {$this->datagram = $this->readEmail($text);}
+        if (!isset($this->datagram)) {
+            $this->datagram = $this->readEmail($text);
+        }
 
         if (isset($this->datagram['subject'])) {
             return $this->datagram['subject'];
@@ -79,7 +81,6 @@ class MH extends Agent
     public function bodyMH($text = null)
     {
         if (isset($this->datagram['text'])) {
-
             return $this->datagram['text'];
         }
     }
@@ -95,9 +96,17 @@ class MH extends Agent
         $lines = preg_split("/\r\n|\n|\r/", $text);
 
         $new_lines = [];
+        $temp_line = "";
         foreach ($lines as $i => $line) {
-            $new_line = rtrim($line, " =");
-            $new_lines[] = $new_line;
+            if (substr($line, -1) === "=") {
+                $filtered_line = rtrim($line, "=");
+                $temp_line .= $filtered_line;
+            }
+
+            if (substr($line, -1) !== "=") {
+                $new_lines[] = $temp_line . $line;
+                $temp_line = "";
+            }
         }
 
         $contents = implode("\n", $new_lines);

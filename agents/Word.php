@@ -296,7 +296,7 @@ class Word extends Agent
         //if ($this->wordpress_path_to !== false) {
         //    require_once $this->wordpress_path_to. 'wp-load.php';
         if (
-            $this->ewol_dictionary = $this->mem_cached->get(
+            $this->ewol_dictionary = $this->getMemory(
                 'agent-ewol-dictionary'
             )
         ) {
@@ -473,13 +473,19 @@ class Word extends Agent
             $max_number = 7;
         }
 
+// TODO recognize false ewol_dictionary
+// Review isset below.
+$word = true;
+if ($this->ewol_dictionary !== false) {
         while (true) {
             $this->ewolWords();
+            //var_dump($this->ewol_dictionary);
             $word = array_rand($this->ewol_dictionary);
             if (strlen($word) >= $min_number and strlen($word) <= $max_number) {
                 break;
             }
         }
+}
         $this->word = $word;
         return $word;
     }
