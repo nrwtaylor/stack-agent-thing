@@ -9,13 +9,13 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Tabletopeventcard extends Agent
+class Tabletopsitecard extends Agent
 {
     public $var = 'hello';
 
     public function init()
     {
-        $this->node_list = ["tabletop event card" => ["tabletop event card"]];
+        $this->node_list = ["tabletop site card" => ["tabletop site card"]];
 
         $this->unit = "POINTS";
 
@@ -29,7 +29,7 @@ class Tabletopeventcard extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->initTabletopEventCard();
+        $this->initTabletopSiteCard();
     }
 
     public function run()
@@ -40,7 +40,7 @@ class Tabletopeventcard extends Agent
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "tabletopeventcard",
+            "tabletopsitecard",
             "refreshed_at",
         ]);
 
@@ -48,7 +48,7 @@ class Tabletopeventcard extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["tabletopeventcard", "refreshed_at"],
+                ["tabletopsitecard", "refreshed_at"],
                 $time_string
             );
         }
@@ -57,14 +57,14 @@ class Tabletopeventcard extends Agent
 
         $this->thing->json->setField("variables");
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["tabletopeventcard", "nom"])
+            $this->thing->json->readVariable(["tabletopsitecard", "nom"])
         );
         $this->number = $this->thing->json->readVariable([
-            "tabletopeventcard",
+            "tabletopsitecard",
             "number",
         ]);
         $this->suit = $this->thing->json->readVariable([
-            "tabletopeventcard",
+            "tabletopsitecard",
             "suit",
         ]);
 
@@ -73,7 +73,7 @@ class Tabletopeventcard extends Agent
 
         $this->variables = new Variables(
             $this->thing,
-            "variables tabletopeventcard " . $this->from
+            "variables tabletopsitecard " . $this->from
         );
 
         $ants_max = $this->variables->getVariable("ants_max");
@@ -87,7 +87,7 @@ class Tabletopeventcard extends Agent
         $this->variables->setVariable("ants_max", $this->ants_max);
     }
 
-    function initTabletopEventCard()
+    function initTabletopSiteCard()
     {
         // devstack
         if (!isset($this->channel_count)) {
@@ -123,16 +123,16 @@ class Tabletopeventcard extends Agent
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
-            "tabletop event card"
+            "tabletop site card"
         );
-        $this->choices = $this->thing->choice->makeLinks('tabletop event card');
+        $this->choices = $this->thing->choice->makeLinks('tabletop site card');
 
         $this->thing_report['choices'] = $this->choices;
     }
 
     function makeSMS()
     {
-        $sms = "TABLETOP EVENT CARD\n";
+        $sms = "TABLETOP SITE CARD\n";
         $sms .= $this->traffic;
         //$sms .= $this->ants_max . " maximum allowed Ants.\n";
         $sms .= $this->response;
@@ -164,7 +164,7 @@ class Tabletopeventcard extends Agent
             return;
         }
         $path = $this->resource_path;
-        $card_deck = "deck/tabletop-vector-edition2.txt";
+        $card_deck = "deck/tabletop-vector-edition2-sitecards.txt";
 
         // Load in the picnic items.
         $file = $this->resource_path . $card_deck;
@@ -357,7 +357,7 @@ class Tabletopeventcard extends Agent
         $message .=
             "<p>" .
             $this->web_prefix .
-            "thing/$uuid/tabletop-event-card\n \n\n<br> ";
+            "thing/$uuid/tabletop-site-card\n \n\n<br> ";
 
         $this->thing_report['message'] = $message;
     }
@@ -378,15 +378,15 @@ class Tabletopeventcard extends Agent
     public function makeWeb()
     {
         $link =
-            $this->web_prefix . 'thing/' . $this->uuid . '/tabletop-event-card';
+            $this->web_prefix . 'thing/' . $this->uuid . '/tabletop-site-card';
 
-        $this->node_list = ["tabletop-event-card" => []];
+        $this->node_list = ["tabletop-site-card" => []];
 
         if (!isset($this->html_image)) {
             $this->makePNG();
         }
 
-        $web = "<b>Tabletop Event Card Agent</b>";
+        $web = "<b>Tabletop Site Card Agent</b>";
         $web .= "<p>";
 
         $web .= '<a href="' . $link . '">' . $this->html_image . "</a>";
@@ -430,7 +430,7 @@ class Tabletopeventcard extends Agent
 
     public function makeTXT()
     {
-        $txt = "Traffic for TABLETOP EVENT CARD.\n";
+        $txt = "Traffic for TABLETOP SITE CARD.\n";
         $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
         $txt .= "\n";
 
@@ -602,7 +602,7 @@ class Tabletopeventcard extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        $alt_text = 'tabletop event token';
+        $alt_text = 'tabletop site token';
         if (isset($this->thing_report['alt_text'])) {
             $alt_text = $this->thing_report['alt_text'];
         }
@@ -635,15 +635,15 @@ class Tabletopeventcard extends Agent
             $this->readSubject();
 
             $this->thing->json->writeVariable(
-                ["tabletop-event-card", "nom"],
+                ["tabletop-site-card", "nom"],
                 $this->nom
             );
             $this->thing->json->writeVariable(
-                ["tabletop-event-card", "number"],
+                ["tabletop-site-card", "number"],
                 $this->number
             );
             $this->thing->json->writeVariable(
-                ["tabletop-event-card", "suit"],
+                ["tabletop-site-card", "suit"],
                 $this->suit
             );
 
@@ -663,14 +663,14 @@ class Tabletopeventcard extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'tabletopeventcard') {
+            if ($input == 'tabletopsitecard') {
                 //$this->getCard();
 
                 return;
             }
 
             if (count($pieces) == 3) {
-                if ($input == 'tabletop event card') {
+                if ($input == 'tabletop site card') {
                     //$this->getCard();
 
                     return;
@@ -678,7 +678,7 @@ class Tabletopeventcard extends Agent
             }
         }
 
-        $keywords = ["reset", "tabletop", "event", "card"];
+        $keywords = ["reset", "tabletop", "site", "card"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
