@@ -411,7 +411,7 @@ if (isset($events_variable['events'])) {
             $this->setMemory("events", $events_variable);
 
             if (!isset($events)) {$events = [];}
-if (!isset($events_variable['events'])) {
+if (isset($events_variable['events'])) {
             $events = array_merge($events_variable['events'], $events);
 }
         }
