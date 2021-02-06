@@ -24,7 +24,7 @@ class Portmanteau extends Agent
      */
     function getWords($text = null, $words_flag = true)
     {
-
+        $words = [];
         $portmanteau = str_replace(" ","",$text);
         if ($words_flag == true) {
 
@@ -42,15 +42,10 @@ class Portmanteau extends Agent
 
                 }
 
-//                $text = $remaining_word;
-//            }
-
-//            $this->words = $words;
             $portmanteau = implode("", $words);
         }
 
 
-        //$this->words = str_replace(" ", "", $
         $this->portmanteau = $portmanteau;
 
         return $portmanteau;
@@ -74,7 +69,10 @@ class Portmanteau extends Agent
      */
     function makeSMS()
     {
-        $this->sms_message = "PORTMANTEAU | " . $this->portmanteau;
+        $portmanteau_text = "No portmanteau found.";
+        if ($this->portmanteau !== "") {$portmanteau_text = $this->portmanteau;}
+
+        $this->sms_message = "PORTMANTEAU | " . $portmanteau_text;
 
         $this->thing_report['sms'] = $this->sms_message;
     }

@@ -366,6 +366,8 @@ class Nautilus extends Agent
         $size = 20;
         $angle = 0;
 
+        if (file_exists($font)) {
+
         $bbox = imagettfbbox($size, $angle, $font, $text);
         $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
         $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
@@ -376,6 +378,7 @@ class Nautilus extends Agent
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
         extract($bbox, EXTR_PREFIX_ALL, 'bb');
+}
         //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
@@ -689,6 +692,11 @@ class Nautilus extends Agent
      */
     public function makePDF()
     {
+        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
         $this->getWhatis($this->subject);
         try {
             // initiate FPDI

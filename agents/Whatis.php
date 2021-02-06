@@ -81,8 +81,13 @@ class Whatis extends Agent {
 
     public function makePDF()
     {
+        $file = $GLOBALS['stack_path'] . '/resources/whatis/whatis.pdf';
+        if (!file_exists($file)) {
+            $this->thing_report['pdf'] = null;
+            return $this->thing_report['pdf'];
+        }
         // The PDF source is in original.pdf
-        $image = file_get_contents($GLOBALS['stack_path'] . '/resources/whatis/whatis.pdf');
+        $image = file_get_contents($file);
 
         $this->thing_report['pdf'] = $image;
 

@@ -157,25 +157,8 @@ dev - Detect duplicates.
         $txt = "CLAWS\n";
         foreach ($this->claws_items as $i => $claws_item) {
 
-        $password_text = "No password found.";
-        if (($claws_item['call']['password'] === null) or ($claws_item['call']['password'] === false)) {
-        } else {
-            $password_text = $claws_item['call']['password'];
-        }
+            $text_claws = $this->textCall($claws_item['call']);
 
-        $access_code_text = "No access code found.";
-        if (($claws_item['call']['access_code'] === null) or ($claws_item['call']['access_code'] === false)) {
-        } else {
-            $access_code_text = $claws_item['call']['access_code'];
-        }
-
-            $text_claws =
-                $password_text .
-                " / " .
-                $access_code_text .
-                " / " .
-                $claws_item['call']['url'] .
-                "\n";
             $text_claws .= $claws_item['subject'] . "\n";
             $text_claws .= $claws_item['dateline']['line'] . "\n";
             $text_claws .=
@@ -315,12 +298,12 @@ dev - Detect duplicates.
             // Tested on Webex.
             // Needs further service development.
             // Prioritize Zoom dev test.
-//var_dump($body);
+
             $call = $this->readCall($body);
             //var_dump("Claws readCall response");
             //var_dump($call);
 
-            $dateline = $this->extractAt($subject);
+            $dateline = $this->extractAt($body);
             //var_dump("Claws readSubject");
             //var_dump("TODO - Read at in subject. See Claws");
             //var_dump($at);
@@ -335,7 +318,7 @@ dev - Detect duplicates.
             // dev assess whether date time is "adequate"
             if ($subject_at_score <= 4) {
                 // Otherwise ... see if there is a better date time in the combined contents.
-                $datelines = $this->datelinesCall($subject . "\n" . $contents);
+                $datelines = $this->datelinesCall($subject . "\n" . $body);
                 // Pick best dateline.
 
                 $dateline = $datelines[0];

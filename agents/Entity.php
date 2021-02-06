@@ -723,6 +723,8 @@ class Entity extends Agent
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
         $sizes_allowed = array(72, 36, 24, 18, 12, 6);
 
+        if (file_exists($font)) {
+
         foreach ($sizes_allowed as $size) {
             $angle = 0;
             $bbox = imagettfbbox($size, $angle, $font, $text);
@@ -741,6 +743,7 @@ class Entity extends Agent
 
         $pad = 0;
         imagettftext($image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $text);
+}
         //imagestring($image, 2, $image_width-75, 10, $text, $textcolor);
         imagestring($image, 2, $image_width-45, 10, $this->entity->nuuid, $textcolor);
 
@@ -893,9 +896,12 @@ class Entity extends Agent
 
         $this->makeSMS();
 
-        $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
-        $test_message .= '<br>entity state: ' . $this->state . '<br>';
+        $test_message = "";
+        if (isset($choices['link'])) {
+            $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
+        }
 
+        $test_message .= '<br>entity state: ' . $this->state . '<br>';
         $test_message .= '<br>' . $this->sms_message;
 
         $this->thing_report['email'] = $this->sms_message;

@@ -416,6 +416,11 @@ class Job extends Agent
      */
     public function makePDF()
     {
+        if ($this->default_pdf_page_template === null) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf']; 
+        }
+
         $file = $this->default_pdf_page_template;
 
         if (!file_exists($file)) {return true;}

@@ -719,6 +719,7 @@ class ACP125G extends Agent
 
         // devstack add path
         $font = $this->default_font;
+if (file_exists($font)) {
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "INJET";
         $text = $this->message['text'];
@@ -749,7 +750,7 @@ class ACP125G extends Agent
         $size = 10;
 
         imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height*4/5, $textcolor, $font, $this->message['station_origin']);
-
+}
 
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
@@ -787,6 +788,13 @@ class ACP125G extends Agent
 
     public function makePDF()
     {
+        $file = $this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf';
+        if (!file_exists($file)) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         $txt = $this->thing_report['txt'];
 
         // initiate FPDI

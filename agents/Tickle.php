@@ -426,6 +426,11 @@ return $html_table;
 
     public function makePDF()
     {
+        if ($this->default_pdf_page_template === null) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf']; 
+        }
+
         $txt = $this->thing_report['txt'];
         //$txt = explode($txt , "\n");
         // initiate FPDI

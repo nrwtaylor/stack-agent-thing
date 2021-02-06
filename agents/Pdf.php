@@ -12,7 +12,7 @@ class Pdf extends Agent
     {
 		if ($this->thing->thing != true) {
 
-            $this->thing->log ( 'Agent "Pdf" ran on a null Thing ' .  $thing->uuid .  '.');
+            $this->thing->log ( 'Agent "Pdf" ran on a null Thing.');
   	        $this->thing_report['info'] = 'Tried to run Pdf on a null Thing.';
 			$this->thing_report['help'] = "That isn't going to work";
 
@@ -115,14 +115,16 @@ class Pdf extends Agent
         $block_things = array();
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, 'thing');
+        $things = $findagent_thing->thing_report['things'];
 
+        if ($things === true) {return true;}
         $this->max_index =0;
 
         $match = 0;
 
         $link_uuids = array();
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+        foreach ($things as $block_thing) {
 
             $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
 

@@ -536,6 +536,11 @@ if (file_exists($font)) {
      */
     public function makePDF()
     {
+        if ($this->default_pdf_page_template === null) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf']; 
+        }
+
         $this->getWhatis($this->subject);
         try {
             // initiate FPDI

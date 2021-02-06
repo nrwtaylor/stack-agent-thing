@@ -122,6 +122,45 @@ class Call extends Agent
         }
     }
 
+    public function textCall($call = null) {
+
+        $password_text = "No password found.";
+        if (($call['password'] === null) or ($call['password'] === false) or 
+$call['password'] === "X"
+) {
+        } else {
+            $password_text = $call['password'];
+        }
+
+        $access_code_text = "No access code found.";
+        if (($call['access_code'] === null) or ($call['access_code'] === false) or 
+($call['access_code'] === "X")
+) {
+        } else {
+            $access_code_text = $call['access_code'];
+        }
+
+        $access_url_text = "No access url found.";
+        if (($call['url'] === null) or ($call['url'] === false) or 
+($call['url'] === "X")
+) {
+        } else {
+            $access_url_text = $call['url'];
+        }
+
+
+            $text_call =
+                $password_text .
+                " / " .
+                $access_code_text .
+                " / " .
+                $access_url_text .
+                "\n";
+
+        return $text_call;
+
+    }
+
     public function run()
     {
     }

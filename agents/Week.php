@@ -498,6 +498,11 @@ class Week extends Agent
      */
     public function makePDF()
     {
+        if ($this->default_pdf_page_template === null) {
+            $this->thing_report['pdf'] = null;
+            return;
+        }
+
         $this->getWhatis($this->subject);
         try {
             // initiate FPDI

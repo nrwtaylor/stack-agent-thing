@@ -783,6 +783,8 @@ class Rocky extends Agent
 
         // devstack add path
         $font = $this->default_font;
+if (file_exists($font)) {
+
         $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
         $text = "ROCKY";
         $text = $this->message['text'];
@@ -846,7 +848,7 @@ class Rocky extends Agent
             $font,
             $this->message['station_origin']
         );
-
+}
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
@@ -888,6 +890,13 @@ class Rocky extends Agent
 
     public function makePDF()
     {
+	$file = $this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf';
+
+        if ($file === null) {
+            $this->thing_report['pdf'] = false;
+            return;
+        }
+
         if ($this->num_words > 25) {
             return;
         }
@@ -897,9 +906,7 @@ class Rocky extends Agent
         $pdf = new Fpdi\Fpdi();
 
         // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
-        $pdf->setSourceFile(
-            $this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf'
-        );
+        $pdf->setSourceFile($file);
         $pdf->SetFont('Helvetica', '', 10);
 
         $tplidx1 = $pdf->importPage(1, '/MediaBox');

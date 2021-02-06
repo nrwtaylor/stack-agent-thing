@@ -846,7 +846,7 @@ class Day extends Agent
         $size = $canvas_size_x - 90;
         $size = 20;
         $angle = 0;
-
+if (file_exists($font)) {
         $bbox = imagettfbbox($size, $angle, $font, $text);
         $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
         $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
@@ -861,6 +861,7 @@ class Day extends Agent
         $width = imagesx($this->image);
         $height = imagesy($this->image);
         $pad = 0;
+}
         //        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->black, $font, $text);
 
         //imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
@@ -1045,6 +1046,11 @@ class Day extends Agent
      */
     public function makePDF()
     {
+        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
         $this->getWhatis($this->subject);
         try {
             // initiate FPDI

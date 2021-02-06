@@ -126,7 +126,6 @@ var_dump($this->current_time);
             $array = array('Negative time is the time after a Bell.  It is a measure of the total advance on the bell.');
             $k = array_rand($array);
             $neg = $array[$k];
-
             if ($this->negative_time < 0) {
                 $response = "NEGATIVE TIME | " . "-" .$this->thing->human_time( $this->negative_time / -1)." since ";
             } else {
