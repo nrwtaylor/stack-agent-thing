@@ -1006,6 +1006,12 @@ $font_size = 6;
 
     public function makePDF()
     {
+        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();

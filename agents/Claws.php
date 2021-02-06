@@ -222,6 +222,12 @@ dev - Detect duplicates.
             $datelines[] = $dateline;
         }
 
+        // TODO extract dates over multiple paragraphs
+
+        foreach($datelines as $i=>$dateline) {
+        //    var_dump($dateline);
+        }
+
         // Sort by best to worst match.
         // Subject to how defined the date is.
         // Expect it to be missing stuff. Like year.

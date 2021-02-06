@@ -416,9 +416,9 @@ class Job extends Agent
      */
     public function makePDF()
     {
-        if ($this->default_pdf_page_template === null) {
+        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
             $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf']; 
+            return $this->thing_report['pdf'];
         }
 
         $file = $this->default_pdf_page_template;

@@ -739,12 +739,19 @@ class Wumpus extends Agent
      */
     public function makePDF()
     {
+        $file = $this->resource_path . 'wumpus/wumpus.pdf';
+        if (($file === null) or (!file_exists($file))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         $txt = $this->thing_report['sms'];
 
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
-        $pdf->setSourceFile($this->resource_path . 'wumpus/wumpus.pdf');
+        $pdf->setSourceFile($file);
 
         $pdf->SetFont('Helvetica', '', 10);
 

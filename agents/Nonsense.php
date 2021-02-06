@@ -347,6 +347,12 @@ class Nonsense extends Agent
 
     public function makePDF()
     {
+        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         $txt = $this->thing_report['txt'];
         //$txt = explode($txt , "\n");
         // initiate FPDI

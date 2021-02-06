@@ -711,6 +711,14 @@ class ICS213 extends Agent
 
     public function makePDF()
     {
+
+        $file = $this->resource_path . 'ics/ics213.pdf';
+        if (($file === null) or (!file_exists($file))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         $txt = $this->thing_report['txt'];
 
         // initiate FPDI
@@ -718,7 +726,7 @@ class ICS213 extends Agent
 
 
         // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
-        $pdf->setSourceFile($this->resource_path . 'ics/ics213.pdf');
+        $pdf->setSourceFile($file);
         $pdf->SetFont('Helvetica','',10);
 
         $tplidx1 = $pdf->importPage(1, '/MediaBox');

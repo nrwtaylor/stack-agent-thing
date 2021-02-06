@@ -419,6 +419,13 @@ if (stripos($this->response, 'join us') !== false) {
      * @return unknown
      */
     public function makePDF() {
+        $file = $this->resource_path . 'wumpus/wumpus.pdf';
+        if (($file === null) or (!file_exists($file))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         $txt = $this->thing_report['sms'];
 
         // initiate FPDI
@@ -427,7 +434,7 @@ if (stripos($this->response, 'join us') !== false) {
 
         // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
         //       $pdf->setSourceFile($this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf');
-        $pdf->setSourceFile($this->resource_path . 'wumpus/wumpus.pdf');
+        $pdf->setSourceFile($file);
 
         $pdf->SetFont('Helvetica', '', 10);
 

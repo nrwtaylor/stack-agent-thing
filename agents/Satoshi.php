@@ -88,9 +88,16 @@ class Satoshi extends Agent
 
     public function makePDF()
     {
+        $file = $this->resource_path . 'satoshi/satoshi.pdf';
+        if (($file === null) or (!file_exists($file))) {
+            $this->thing_report['pdf'] = false;
+            return $this->thing_report['pdf'];
+        }
+
+
         $pdf = new Fpdi\Fpdi();
 
-        $pdf->setSourceFile($this->resource_path . 'satoshi/satoshi.pdf');
+        $pdf->setSourceFile($file);
 
         $tplidx1 = $pdf->importPage(1, '/MediaBox');
         $pdf->addPage();
