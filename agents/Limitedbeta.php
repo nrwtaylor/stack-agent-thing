@@ -69,6 +69,8 @@ class LimitedBeta extends Agent {
      */
     public function isLimitedbeta($input = null) {
 
+        if ($input === null) {return false;}
+
         $input_address = trim($input);
         $input_address_array = explode("@", $input_address);
         $input_prefix = $input_address_array[0];
@@ -76,6 +78,8 @@ class LimitedBeta extends Agent {
 
         // Check address against the beta list
         $file = $this->resource_path . 'limitedbeta/limitedbeta.txt';
+
+        if (file_exists($file)) {
 
         //        $contents = file_get_contents($file);
 
@@ -105,7 +109,7 @@ class LimitedBeta extends Agent {
         } else {
             // error opening the file.
         }
-
+        }
         return false;
     }
 
