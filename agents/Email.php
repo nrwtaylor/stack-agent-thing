@@ -184,17 +184,26 @@ class Email
 
         $subject = $message->getHeaderValue('Subject');
 
+	$fromName = null;
+	$fromEmail = null;
+
         $from = $message->getHeader('From');
+
+if ($from !== null) {
         $fromName = $from->getName();
         $fromEmail = $from->getEmail();
+}
+
+        $toName = null;
 
         $to = $message->getHeader('To');
         $toEmails = [];
+if ($to !== null) {
         foreach ($to->getAddresses() as $addr) {
             $toName = $to->getName();
             $toEmails[] = $to->getEmail();
         }
-
+}
         //$to = null;
 
         //echo $message
@@ -211,8 +220,10 @@ class Email
 
         $body = $email_text . "\n" . $email_html_text;
 
+	$toEmail = null;
+	if (isset($toEmails[0])) {$toEmail = $toEmails[0];}
         $datagram = [
-            'to' => $toEmails[0],
+            'to' => $toEmail,
             'from' => $from,
             'subject' => $subject,
             'text' => $body,
