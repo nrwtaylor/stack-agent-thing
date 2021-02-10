@@ -245,8 +245,12 @@ return $t;
     function makeSMS()
     {
         $this->node_list = ["travelogue" => ["travelogue"]];
+$link = "";
+//$link = $this->web_prefix . 'thing/' . $uuid . '/travelogue';
+
+
         $sms =
-            "TRAVELOGUE | " . $this->travelogue_message . " " . $this->response;
+            "TRAVELOGUE | " . $this->travelogue_message . " " . $this->response. " " . $link;
         $this->sms_message = "" . $sms;
         $this->thing_report['sms'] = $sms;
     }
