@@ -74,6 +74,12 @@ class LimitedBeta extends Agent {
         $input_address = trim($input);
         $input_address_array = explode("@", $input_address);
         $input_prefix = $input_address_array[0];
+
+        // No @ email address provided?
+        if (!isset($input_address_array[1])) {
+            return false;
+        }
+
         $input_postfix = $input_address_array[1];
 
         // Check address against the beta list

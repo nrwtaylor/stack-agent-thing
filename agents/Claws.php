@@ -60,6 +60,7 @@ class Claws extends Agent
     public function respondResponse()
     {
         $this->makeClaws();
+        $this->makeUrl();
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -133,6 +134,30 @@ dev - Detect duplicates.
         $this->updateWhen($line);
         $this->response .= "Wrote item to When calendar file. ";
     }
+
+    // for testing.
+    // Might be better as Link but try Url first.
+    public function makeUrl()
+    {
+        // Only use the first claws item.
+        // Error if given more than one?
+        if (!isset($this->claws_items[0])) {return true;}
+        $claws_item = $this->claws_items[0];
+
+        $url = "No URL.";
+        if (isset($claws_item['call']['url'])) {$url = $claws_item['call']['url'];}
+//var_dump($claws_item);
+        if ($claws_item['call']['service'] === 'zoom') {
+            $password = $claws_item['call']['password'];
+            $access_code = $claws_item['call']['access_code'];
+            $access_code = str_replace(" ","", $access_code);
+            $url = "zoommtg://ca01web.zoom.us/join?action=join&confno=". $access_code . "&pwd=" . $password;
+        }
+
+        $this->thing_report['url'] = $url;
+        $this->url_message = $url;
+    }
+
 
     public function makeClaws()
     {
