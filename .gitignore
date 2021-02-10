@@ -6,3 +6,4 @@ dev_
 vendor
 composer.lock
 resources
+*.gz

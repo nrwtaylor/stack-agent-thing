@@ -239,6 +239,10 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
     {
 $this->thing->log("doWhen called");
         $events = [];
+        if ($this->calendar_list === NULL) {
+            $this->response.="No calendars found. ";
+            return true;
+        }
         foreach ($this->calendar_list as $i => $calendar) {
             $ics_links = $this->thing->calendar_handler->icslinksCalendar(
                 $calendar['ics_link']
