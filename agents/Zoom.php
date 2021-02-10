@@ -205,6 +205,11 @@ class Zoom extends Agent
                 // Match first instance.
                 return $url;
             }
+            if (stripos($url, '/zoom.us/') !== false) {
+                // Match first instance.
+                return $url;
+            }
+            
         }
 
         return false;
@@ -220,6 +225,10 @@ class Zoom extends Agent
 
         foreach ($urls as $i => $url) {
             if (stripos($url, '.zoom.us/') !== false) {
+                // Match first instance.
+                continue;
+            }
+            if (stripos($url, '/zoom.us/') !== false) {
                 // Match first instance.
                 continue;
             }
@@ -289,6 +298,19 @@ class Zoom extends Agent
         }
 
         $access_codes = array_merge($access_codes, $match[0]);
+// Todo: recognize 10 digit codes?
+// Disambiguate against telephone numbers.
+/*            
+        $pattern = '/\b\d{3} \d{3} \d{4}/i';
+
+        preg_match_all($pattern, $text, $match);
+        if (!isset($access_codes)) {
+            $access_codes = [];
+        }
+
+        $access_codes = array_merge($access_codes, $match[0]);
+*/
+
         $access_codes = array_unique($access_codes);
 
         if (count($access_codes) == 1) {

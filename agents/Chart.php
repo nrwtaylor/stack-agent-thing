@@ -438,7 +438,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
                 $this->black
             );
 
-            $font = $this->font;
+            $font = $this->default_font;
 
             $text = $y;
 

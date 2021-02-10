@@ -61,6 +61,7 @@ class Claws extends Agent
     {
         $this->makeClaws();
         $this->makeUrl();
+        $this->makeZoommtg();
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -148,16 +149,45 @@ dev - Detect duplicates.
         if (isset($claws_item['call']['url'])) {$url = $claws_item['call']['url'];}
 //var_dump($claws_item);
         if ($claws_item['call']['service'] === 'zoom') {
-            $password = $claws_item['call']['password'];
-            $access_code = $claws_item['call']['access_code'];
-            $access_code = str_replace(" ","", $access_code);
-            $url = "zoommtg://ca01web.zoom.us/join?action=join&confno=". $access_code . "&pwd=" . $password;
+ $text = $claws_item['call']['url'];
+
+$text = str_replace("/j/", "/join?action=join&confno=", $text);
+$text = str_replace("?pwd=", "&pwd=", $text);
+$text = str_replace("https://", "zoommtg://", $text);
+
+$url = $text;
         }
 
         $this->thing_report['url'] = $url;
         $this->url_message = $url;
     }
 
+// agent --channel=zoommtg --meta=off claws "/home/jsae/Mail/Vector/39654" | xargs xdg-open
+
+
+   public function makeZoommtg()
+    {
+        // Only use the first claws item.
+        // Error if given more than one?
+        if (!isset($this->claws_items[0])) {return true;}
+        $claws_item = $this->claws_items[0];
+
+        $url = "No URL.";
+        if (isset($claws_item['call']['url'])) {$url = $claws_item['call']['url'];}
+//var_dump($claws_item);
+        if ($claws_item['call']['service'] === 'zoom') {
+ $text = $claws_item['call']['url'];
+
+$text = str_replace("/j/", "/join?action=join&confno=", $text);
+$text = str_replace("?pwd=", "&pwd=", $text);
+$text = str_replace("https://", "zoommtg://", $text);
+
+$url = $text;
+        }
+
+        $this->thing_report['zoommtg'] = $url;
+        $this->zoommtg_message = $url;
+    }
 
     public function makeClaws()
     {
