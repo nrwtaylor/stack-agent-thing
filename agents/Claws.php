@@ -15,7 +15,7 @@ agent claws --channel=txt "/var/www/stackr.test/resources/call/call-test-CapiTal
 
 class Claws extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -45,7 +45,7 @@ class Claws extends Agent
     public function doClaws()
     {
         if ($this->agent_input == null) {
-            $array = ['miao', 'miaou', 'hiss', 'prrr', 'grrr'];
+            $array = ["miao", "miaou", "hiss", "prrr", "grrr"];
             $k = array_rand($array);
             $v = $array[$k];
 
@@ -68,10 +68,10 @@ class Claws extends Agent
             "This is a claws keeping an eye on how late this Thing is.";
         $this->thing_report["help"] = "This is about being inscrutable.";
 
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeChoices()
@@ -142,23 +142,16 @@ dev - Detect duplicates.
     {
         // Only use the first claws item.
         // Error if given more than one?
-        if (!isset($this->claws_items[0])) {return true;}
+        if (!isset($this->claws_items[0])) {
+            return true;
+        }
         $claws_item = $this->claws_items[0];
 
         $url = "No URL.";
+
         if (isset($claws_item['call']['url'])) {$url = $claws_item['call']['url'];}
-//var_dump($claws_item);
-        if ($claws_item['call']['service'] === 'zoom') {
- $text = $claws_item['call']['url'];
 
-$text = str_replace("/j/", "/join?action=join&confno=", $text);
-$text = str_replace("?pwd=", "&pwd=", $text);
-$text = str_replace("https://", "zoommtg://", $text);
-
-$url = $text;
-        }
-
-        $this->thing_report['url'] = $url;
+        $this->thing_report["url"] = $url;
         $this->url_message = $url;
     }
 
@@ -191,7 +184,7 @@ $url = $text;
 
     public function makeClaws()
     {
-        $this->thing_report['claws'] = "Custom report for Claws. Test.";
+        $this->thing_report["claws"] = "Custom report for Claws. Test.";
     }
 
     public function makeSMS()
@@ -202,28 +195,26 @@ $url = $text;
         $sms .= " ";
         $sms .= $this->response;
 
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
         $this->sms_message = $sms;
     }
 
     public function makeTXT()
     {
-
         $txt = "CLAWS\n";
         foreach ($this->claws_items as $i => $claws_item) {
+            $text_claws = $this->textCall($claws_item["call"]);
 
-            $text_claws = $this->textCall($claws_item['call']);
-
-            $text_claws .= $claws_item['subject'] . "\n";
-            $text_claws .= $claws_item['dateline']['line'] . "\n";
+            $text_claws .= $claws_item["subject"] . "\n";
+            $text_claws .= $claws_item["dateline"]["line"] . "\n";
             $text_claws .=
-                $this->timestampDateline($claws_item['dateline']) . "\n";
+                $this->timestampDateline($claws_item["dateline"]) . "\n";
 
             $txt .= $text_claws . "\n";
         }
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -232,7 +223,7 @@ $url = $text;
         // Multiple dimensions.
         // Here we care about do we have enough to know when a meeting is.
 
-        $context = 'meeting';
+        $context = "meeting";
 
         $score = 10 - $this->falsesCount($dateline);
 
@@ -263,7 +254,7 @@ $url = $text;
             $count += 1;
             //if ($count > 3) {break;}
 
-            $containsDigit = preg_match('/\d/', $paragraph);
+            $containsDigit = preg_match("/\d/", $paragraph);
             if ($containsDigit == false) {
                 continue;
             } // No digit. So no date. Reasonable?
@@ -273,14 +264,14 @@ $url = $text;
                 continue;
             }
 
-            $dateline['score'] = $this->scoreAt($dateline, "meeting");
+            $dateline["score"] = $this->scoreAt($dateline, "meeting");
             $datelines[] = $dateline;
         }
 
         // TODO extract dates over multiple paragraphs
 
-        foreach($datelines as $i=>$dateline) {
-        //    var_dump($dateline);
+        foreach ($datelines as $i => $dateline) {
+            //    var_dump($dateline);
         }
 
         // Sort by best to worst match.
@@ -289,7 +280,7 @@ $url = $text;
         // And to perform poorly if all we get is "Details for the call Thursday night".
 
         usort($datelines, function ($a, $b) {
-            return $a['score'] < $b['score'];
+            return $a["score"] < $b["score"];
         });
 
         return $datelines;
@@ -308,8 +299,8 @@ $url = $text;
         // Recognize if the instruction has "when" in it.
         // Set a flag so that we can later create a calendar item if needed.
         $indicators = [
-            'when' => ['when'],
-            'test' => ['test'],
+            "when" => ["when"],
+            "test" => ["test"],
         ];
         $this->flagAgent($indicators, strtolower($input));
 
@@ -318,8 +309,8 @@ $url = $text;
         //exit();
 
         $string = $input;
-        $str_pattern = 'claws';
-        $str_replacement = '';
+        $str_pattern = "claws";
+        $str_replacement = "";
         $filtered_input = $input;
         if (strpos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
@@ -336,6 +327,7 @@ $url = $text;
 
         $this->claws_items = [];
         $tokens = explode(" ", $filtered_input);
+
         foreach ($tokens as $i => $token) {
             $filename = trim($token);
 
@@ -343,52 +335,84 @@ $url = $text;
             $contents = $this->loadClaws($filename);
 
             // Pass contents through MH routine to remove trailing =
-
-            //$meta = $mh_agent->metaMH($contents);
-            $subject = $this->subjectMH($contents);
-
-            $body = $this->bodyMH($contents);
-
-            // TODO dev readEmail to properly extract text body.
-            //var_dump($body);
-
-            //var_dump("Claws metaMH response");
-            //var_dump($subject);
+            //$subject = $this->subjectMH($contents);
+            //$body = $this->bodyMH($contents);
 
             // Pass contents to call to extract conference details.
             // Tested on Webex.
             // Needs further service development.
             // Prioritize Zoom dev test.
-
-            $call = $this->readCall($body);
+            //$call = $this->readCall($body);
             //var_dump("Claws readCall response");
             //var_dump($call);
+            $parts = $this->attachmentsEmail($contents);
 
-            $dateline = $this->extractAt($body);
-            //var_dump("Claws readSubject");
-            //var_dump("TODO - Read at in subject. See Claws");
-            //var_dump($at);
+            $events = [];
 
-            $subject_at_score = 0;
-            if ($dateline != null) {
-                $subject_at_score = $this->scoreAt($dateline, "meeting");
+            foreach ($parts as $i => $part) {
+                if ($part["content_type"] === "text/calendar") {
+                    $event = $this->eventCalendar($part);
+                    $uid = $event->uid;
+                    if ($event->uid === null) {$uid = $this->thing->getUuid();}
+                    $events[$uid] = $event;
+                }
             }
+            $calendar_events_count = count($events);
+            if ($calendar_events_count == 1) {
+                // Found exactly one calendar event.
+                var_dump($event->summary);
+                var_dump($event->description);
+                var_dump($event->start_at);
+                var_dump($event->end_at);
 
-            // TODO - Check if the subject has a well qualified date time.
-            // dev start with a simple score of missing information.
-            // dev assess whether date time is "adequate"
-            if ($subject_at_score <= 4) {
-                // Otherwise ... see if there is a better date time in the combined contents.
-                $datelines = $this->datelinesCall($subject . "\n" . $body);
-                // Pick best dateline.
+//var_dump($event->dtstart_array[0]['TZID']);
+//$tz = $event->dtstart_array[0]['TZID'];
+$timezone = $event->calendar_timezone;
+var_dump($timezone);
 
-                $dateline = $datelines[0];
+$subject = $event->summary;
+
+//                $dateline = $this->extractAt($event->start_at . " " . $timezone);
+                $dateline = $this->extractAt($event->start_at);
+var_dump($event->start_at);
+var_dump($dateline);
+var_dump("TODO Build iCal date extraction.");
+
+                $dateline['line'] = $event->summary;
+                $call = $this->readCall($event->description);
+            } else {
+            $subject = $this->subjectMH($contents);
+            $body = $this->bodyMH($contents);
+
+                $call = $this->readCall($body);
+
+                // Try to figure out date from body text.
+
+                $dateline = $this->extractAt($body);
+                //var_dump("Claws readSubject");
+                //var_dump("TODO - Read at in subject. See Claws");
+                //var_dump($at);
+
+                $subject_at_score = 0;
+                if ($dateline != null) {
+                    $subject_at_score = $this->scoreAt($dateline, "meeting");
+                }
+
+                // TODO - Check if the subject has a well qualified date time.
+                // dev start with a simple score of missing information.
+                // dev assess whether date time is "adequate"
+                if ($subject_at_score <= 4) {
+                    // Otherwise ... see if there is a better date time in the combined contents.
+                    $datelines = $this->datelinesCall($subject . "\n" . $body);
+                    // Pick best dateline.
+
+                    $dateline = $datelines[0];
+                }
             }
-
             $this->claws_items[] = [
-                'subject' => $subject,
-                'call' => $call,
-                'dateline' => $dateline,
+                "subject" => $subject,
+                "call" => $call,
+                "dateline" => $dateline,
             ];
         }
 

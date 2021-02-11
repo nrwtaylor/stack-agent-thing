@@ -263,6 +263,7 @@ class Dateline extends Agent
             'hour' => 'XX',
             'minute' => 'XX',
             'second' => 'XX',
+            'timezone' => 'X'
         ];
         foreach ($arr as $component => $default_text) {
             ${$component} = $default_text;

@@ -132,7 +132,7 @@ $call['password'] === "X"
             $password_text = $call['password'];
         }
 
-        $access_code_text = "No access code found.";
+        $access_code_text = "No access code/room found.";
         if (($call['access_code'] === null) or ($call['access_code'] === false) or 
 ($call['access_code'] === "X")
 ) {

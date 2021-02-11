@@ -176,6 +176,69 @@ class Email
         return;
     }
 
+    public function attachmentsEmail($text) {
+// Pull the message in again.
+//var_dump($text);
+$parser = new MailMimeParser();
+
+// parse() returns a Message
+$message = $parser->parse($text);
+
+        $subject = $message->getHeaderValue('Subject');
+var_dump($subject);
+
+
+        $parts = $message->getAllParts();
+foreach($parts as $i=>$part) {
+
+$content_type = $part->getHeaderValue(HeaderConsts::CONTENT_TYPE); // e.g. "text/plain"
+/*
+echo $part->getHeaderParameter(                         // value of "charset" part
+    'content-type',
+    'charset'
+);
+*/
+$content= $part->getContent();  
+
+if (!isset($this->parts)) {$this->parts = [];}
+$this->parts[] = array('content_type'=>$content_type,
+'content'=>$content);
+
+}
+
+return $this->parts;
+
+// Example from docs. But getParts looks more generic.
+// test
+
+//        $message = Message::from($text);
+
+$att = $message->getAttachmentPart(0);
+echo $att->getContentType();
+echo $att->getContent();
+
+$atts = $message->getAllAttachmentParts();
+foreach ($atts as $ind => $part) {
+    $filename = $part->getHeaderParameter(
+        'Content-Type',
+        'name',
+        $part->getHeaderParameter(
+             'Content-Disposition',
+             'filename',
+             '__unknown_file_name_' . $ind
+        )
+    );
+
+//    $out = fopen('/path/to/dir/' . $filename, 'w');
+    $str = $part->getBinaryContentResourceHandle();
+
+//    stream_copy_to_stream($str, $out);
+//    fclose($str);
+//    fclose($out);
+}
+
+    }
+
     public function readEmail($text = null)
     {
         // https://github.com/zbateson/mail-mime-parser
@@ -188,7 +251,6 @@ class Email
 	$fromEmail = null;
 
         $from = $message->getHeader('From');
-
 if ($from !== null) {
         $fromName = $from->getName();
         $fromEmail = $from->getEmail();
@@ -229,6 +291,8 @@ if ($to !== null) {
             'text' => $body,
         ];
 
+$this->attachmentsEmail($text);
+
         return $datagram;
     }
 
@@ -265,10 +329,7 @@ if ($to !== null) {
         //        $this->email_message = false;
         $this->makeEmail();
         $received_at = time();
-        
-        
-        
-//        var_dump($this->thing->thing);
+
 if (($this->thing->thing === true) or ($this->thing->thing === false)) {
 } else {
         $received_at = strtotime($this->thing->thing->created_at);

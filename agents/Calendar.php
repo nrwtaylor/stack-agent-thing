@@ -15,43 +15,43 @@ use ICal\ICal;
 
 class Calendar extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->default_calendar_token = null;
 
         // So I could call
-        if (isset($this->thing->container['stack']['calendar'])) {
-            if (is_string($this->thing->container['stack']['calendar'])) {
+        if (isset($this->thing->container["stack"]["calendar"])) {
+            if (is_string($this->thing->container["stack"]["calendar"])) {
                 $this->default_calendar_token =
-                    $this->thing->container['stack']['calendar'];
+                    $this->thing->container["stack"]["calendar"];
                 $this->default_calendar_tokens = [
                     $this->default_calendar_token,
                 ];
             }
 
-            if (is_array($this->thing->container['stack']['calendar'])) {
+            if (is_array($this->thing->container["stack"]["calendar"])) {
                 $this->default_calendar_tokens =
-                    $this->thing->container['stack']['calendar'];
+                    $this->thing->container["stack"]["calendar"];
                 $this->default_calendar_token =
                     $this->default_calendar_tokens[0];
             }
         }
 
-        $this->default_interval = '6 week';
+        $this->default_interval = "6 week";
 
-        if (isset($this->thing->container['api']['calendar'])) {
+        if (isset($this->thing->container["api"]["calendar"])) {
             if (
                 isset(
-                    $this->thing->container['api']['calendar'][
-                        'default_interval'
+                    $this->thing->container["api"]["calendar"][
+                        "default_interval"
                     ]
                 )
             ) {
                 $this->default_interval =
-                    $this->thing->container['api']['calendar'][
-                        'default_interval'
+                    $this->thing->container["api"]["calendar"][
+                        "default_interval"
                     ];
             }
         }
@@ -63,7 +63,7 @@ class Calendar extends Agent
 
         $this->default_span = 2; // Default value
         $this->span = $this->default_span;
-        $this->default_time_zone = 'UTC';
+        $this->default_time_zone = "UTC";
 
         $this->time_zone = $this->default_time_zone;
 
@@ -109,11 +109,11 @@ class Calendar extends Agent
 
         $when_description = str_replace(
             ["\n", "\t", "\r"],
-            ' ',
+            " ",
             $when_description
         );
 
-        $troublesome_tokens = [''];
+        $troublesome_tokens = [""];
 
         foreach ($troublesome_tokens as $j => $troublesome_token) {
             if (stripos($when_description, $troublesome_token)) {
@@ -128,7 +128,7 @@ class Calendar extends Agent
         );
 
         // Strip repeating spaces.
-        $when_description = preg_replace('/\s+/', ' ', $when_description);
+        $when_description = preg_replace("/\s+/", " ", $when_description);
         // Strip repeating periods.
         $when_description = preg_replace(
             "/([.])\\1+/",
@@ -144,11 +144,11 @@ class Calendar extends Agent
         // Identifiy UTC.
         $calendar = "Gregorian";
 
-        if (stripos($input, 'julian') !== false) {
+        if (stripos($input, "julian") !== false) {
             $calendar = "julian";
         }
 
-        if (stripos(str_replace(".", "", $input), 'BP') !== false) {
+        if (stripos(str_replace(".", "", $input), "BP") !== false) {
             $calendar = "BP";
         }
 
@@ -163,10 +163,10 @@ class Calendar extends Agent
                 if ($ics_link === true) {
                     continue;
                 }
-                if (strtolower($ics_link) === 'x') {
+                if (strtolower($ics_link) === "x") {
                     continue;
                 }
-                if (strtolower($ics_link) === 'z') {
+                if (strtolower($ics_link) === "z") {
                     continue;
                 }
                 if ($ics_link === null) {
@@ -204,7 +204,7 @@ class Calendar extends Agent
 
         if ($this->agent_input == null) {
             if (!isset($this->calendar_text)) {
-                $this->calendar_text = 'No calendar text found. ';
+                $this->calendar_text = "No calendar text found. ";
             }
             $this->calendar_message = $this->calendar_text;
         } else {
@@ -225,45 +225,41 @@ class Calendar extends Agent
 
         $this->thing_report["info"] = "This is a calendar.";
         $this->thing_report["help"] = "This is about seeing Calendar Events.";
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
         //return $this->thing_report;
     }
 
     public function makeJson()
     {
-        //        if (!isset($this->calendar->events)) {
-        //            $this->doCalendar();
-        //        }
-
         $json = $this->calendar->events;
 
-        $this->thing_report['json'] = $json;
+        $this->thing_report["json"] = $json;
     }
 
     function makeWeb()
     {
         //$time_agent = new Time($this->thing, "time");
 
-        $web = '</div>No calendar information available.</div>';
+        $web = "</div>No calendar information available.</div>";
         if (isset($this->calendar->events)) {
             $web = "";
             foreach ($this->calendar->events as $event) {
-                $timestamp = $this->textCalendar($event, ['timestamp']);
+                $timestamp = $this->textCalendar($event, ["timestamp"]);
 
                 $web .=
-                    '<div>' .
-                    '<div>' .
+                    "<div>" .
+                    "<div>" .
                     $this->thing->time_handler->textTime($timestamp) .
                     " " .
                     $event->summary .
-                    ' [' .
+                    " [" .
                     $event->runtime .
-                    '] ' .
-                    '</div><div>' .
+                    "] " .
+                    "</div><div>" .
                     $event->description .
                     "</div><div>" .
                     $event->location .
@@ -271,29 +267,27 @@ class Calendar extends Agent
             }
         }
 
-        $this->thing_report['info'] =
+        $this->thing_report["info"] =
             "Times are " . $this->time_zone . ". Click refresh to update.";
 
         $this->web = $web;
-        $this->thing_report['web'] = $this->web;
+        $this->thing_report["web"] = $this->web;
     }
 
     public function textCalendar($event, $parameters = null)
     {
-        //    public function icsCalendar($event, $parameters = null) {
-
         return $this->icsCalendar($event, $parameters);
     }
 
     public function icsCalendar($event, $parameters = null)
     {
         $default_parameters = [
-            'timestamp',
-            'timezone',
-            'runtime',
-            'summary',
-            'description',
-            'location',
+            "timestamp",
+            "timezone",
+            "runtime",
+            "summary",
+            "description",
+            "location",
         ];
 
         if ($parameters == null) {
@@ -334,7 +328,7 @@ class Calendar extends Agent
             // Allow settings to be passed with a parameter.
             // And recognize non-parameters ie text formatting.
             $setting = null;
-            $parameter_tokens = explode(' ', $parameter, 2);
+            $parameter_tokens = explode(" ", $parameter, 2);
 
             if (in_array($parameter_tokens[0], $default_parameters)) {
                 $parameter = $parameter_tokens[0];
@@ -352,7 +346,7 @@ class Calendar extends Agent
             if (isset($event->{$parameter})) {
                 $t = $event->{$parameter};
                 // Allow for request based timestamp formatting
-                if ($parameter == 'timestamp') {
+                if ($parameter == "timestamp") {
                     if ($setting !== null) {
                         $t = date($setting, strtotime($t));
                     }
@@ -363,7 +357,6 @@ class Calendar extends Agent
                 $calendar_text .= $parameter;
             }
         }
-
         return $calendar_text;
     }
 
@@ -374,18 +367,18 @@ class Calendar extends Agent
         $timezone = $this->time_zone;
 
         $arr = [
-            'dtstart' => 'start_at',
-            'dtend' => "end_at",
-            'dtstamp',
-            'uid',
-            'created',
-            'description',
-            'lastmodified',
-            'location',
-            'sequence',
-            'status',
-            'summary',
-            'transp',
+            "dtstart" => "start_at",
+            "dtend" => "end_at",
+            "dtstamp",
+            "uid",
+            "created",
+            "description",
+            "lastmodified",
+            "location",
+            "sequence",
+            "status",
+            "summary",
+            "transp",
         ];
 
         $c = "BEGIN:VCALENDAR" . "\n";
@@ -475,7 +468,7 @@ var_dump($variable);
         }
 
         $this->ical = $c;
-        $this->thing_report['ical'] = $c;
+        $this->thing_report["ical"] = $c;
     }
 
     function makeSMS()
@@ -489,13 +482,13 @@ var_dump($variable);
             foreach ($this->calendar->events as $event) {
                 $calendar_text .=
                     $this->textCalendar($event, [
-                        'timestamp Y-m-d H:i',
-                        ' ',
-                        'summary',
-                        ' ',
-                        '[',
-                        'runtime',
-                        ']',
+                        "timestamp Y-m-d H:i",
+                        " ",
+                        "summary",
+                        " ",
+                        "[",
+                        "runtime",
+                        "]",
                         //                        "\n",
                         //                        'description',' ',"\n",
                         //                        'location',
@@ -507,14 +500,14 @@ var_dump($variable);
                 foreach ($this->calendar->events as $event) {
                     $calendar_text .=
                         $this->textCalendar($event, [
-                            'timestamp Y-m-d H:i',
-                            ' ',
+                            "timestamp Y-m-d H:i",
+                            " ",
                             //                           'timezone',
                             //                           ' ',
-                            'summary',
-                            ' [',
-                            'runtime',
-                            ']',
+                            "summary",
+                            " [",
+                            "runtime",
+                            "]",
                         ]) . "\n";
                 }
             }
@@ -531,7 +524,7 @@ var_dump($variable);
             $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeTXT()
@@ -541,23 +534,23 @@ var_dump($variable);
         if (isset($this->calendar->events)) {
             $calendar_text = "";
             foreach ($this->calendar->events as $event) {
-                $description_seperator = ' - ';
-                $description = 'description';
-                if ($this->description_flag != 'on') {
-                    $description_seperator = '';
-                    $description = '';
+                $description_seperator = " - ";
+                $description = "description";
+                if ($this->description_flag != "on") {
+                    $description_seperator = "";
+                    $description = "";
                 }
 
                 $t =
                     $this->textCalendar($event, [
-                        'timestamp Y-m-d H:i',
-                        ' ',
+                        "timestamp Y-m-d H:i",
+                        " ",
                         //                          'timezone',
                         //                          ' ',
-                        'summary',
-                        ' [',
-                        'runtime',
-                        ']',
+                        "summary",
+                        " [",
+                        "runtime",
+                        "]",
                         $description_seperator,
                         $description,
                     ]) . "\n";
@@ -575,22 +568,102 @@ var_dump($variable);
             $this->response;
 
         $this->txt = $txt;
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "calendar");
-        $choices = $this->thing->choice->makeLinks('calendar');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "calendar");
+        $choices = $this->thing->choice->makeLinks("calendar");
+        $this->thing_report["choices"] = $choices;
     }
 
-    public function eventCalendar($arr = null)
+    public function eventCalendar($text = null)
     {
-        //var_dump($arr->uid_array);
-        // TODO Pass this through Event.
-        // And then re-factor.
-        $event = $arr;
+//        $this->calendar_unique_events === false;
+
+        try {
+            // ICal is noisy at the WARNING and NOTICE level.
+            // TODO ?
+
+            set_error_handler(
+                [$this, "calendar_warning_handler"],
+                E_WARNING | E_NOTICE
+            );
+
+            // This is ignored because of the custom error handler in Agent.php
+            // So use a custom error handler in this agent to handle WARNINGs and NOTICEs from the library.
+            // $old_level = error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+
+            // Pass text to ICAl.
+
+            $this->ical = new ICal($text, [
+                "defaultSpan" => $this->default_span, // Default value
+                "defaultTimeZone" => $this->time_zone,
+                "defaultWeekStart" => "MO", // Default value
+                "disableCharacterReplacement" => false, // Default value
+                "filterDaysAfter" => null, // Default value
+                "filterDaysBefore" => null, // Default value
+                "skipRecurrence" => false, // Default value
+            ]);
+            $calendar_timezone = $this->ical->calendarTimeZone();
+            restore_error_handler();
+
+            // See note above.
+            // error_reporting($old_level);
+            // Test with the GitHub provided ics file.
+
+        } catch (\Exception $e) {
+            $this->response .= "Could not read event. ";
+            return true;
+        }
+        $events = $this->ical->events();
+
+        if (count($events) > 1) {
+            $this->response .= "More than one event provided. ";
+            return true;
+        }
+
+        $event = $events[0];
+
+        $e = $event;
+
+//        $e->start_at = $e->dtstart;
+
+$t = $this->ical->iCalDateWithTimeZone((array) $e,'dtstart',\DateTime::ATOM);
+$e->start_at =$t;
+
+//public function iCalDateToDateTime($icalDate)
+
+//        $e->end_at = $e->dtend;
+$t = $this->ical->iCalDateWithTimeZone((array) $e,'dtend',\DateTime::ATOM);
+$e->end_at =$t;
+
+
+        //            $e->calendar_name = $calendar_name;
+        $e->calendar_timezone = $calendar_timezone;
+
+        // Tidy up description.
+
+        $description = $this->descriptionCalendar($event);
+        $e->description = $description;
+
+        $event = $e;
+
+        $calendar_text = "";
+
+        $calendar_text .=
+            $event->summary .
+            " " .
+            $this->thing->time_handler->textTime($event->start_at) .
+            " " .
+            $this->thing->time_handler->textTime($event->end_at) .
+            " " .
+            $event->description .
+            " " .
+            $event->location .
+            " / ";
+
         return $event;
     }
 
@@ -608,7 +681,7 @@ var_dump($variable);
             // TODO ?
 
             set_error_handler(
-                [$this, 'calendar_warning_handler'],
+                [$this, "calendar_warning_handler"],
                 E_WARNING | E_NOTICE
             );
 
@@ -616,13 +689,13 @@ var_dump($variable);
             // So use a custom error handler in this agent to handle WARNINGs and NOTICEs from the library.
             // $old_level = error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
             $this->ical = new ICal($calendar_uri, [
-                'defaultSpan' => $this->default_span, // Default value
-                'defaultTimeZone' => $this->time_zone,
-                'defaultWeekStart' => 'MO', // Default value
-                'disableCharacterReplacement' => false, // Default value
-                'filterDaysAfter' => null, // Default value
-                'filterDaysBefore' => null, // Default value
-                'skipRecurrence' => false, // Default value
+                "defaultSpan" => $this->default_span, // Default value
+                "defaultTimeZone" => $this->time_zone,
+                "defaultWeekStart" => "MO", // Default value
+                "disableCharacterReplacement" => false, // Default value
+                "filterDaysAfter" => null, // Default value
+                "filterDaysBefore" => null, // Default value
+                "skipRecurrence" => false, // Default value
             ]);
 
             $this->thing->log(
@@ -703,7 +776,7 @@ var_dump($variable);
 
     public function icslinksCalendar($token)
     {
-        if (strtolower(substr($token, -4)) == '.ics') {
+        if (strtolower(substr($token, -4)) == ".ics") {
             $ics_links[] = $token;
             return $ics_links;
         }
@@ -760,7 +833,7 @@ var_dump($variable);
 
     public function readSubject()
     {
-        if (strtolower($this->agent_input) == 'calendar') {
+        if (strtolower($this->agent_input) == "calendar") {
             return;
         }
 
@@ -769,26 +842,26 @@ var_dump($variable);
             $input = $this->agent_input;
         }
 
-        if ($this->agent_input == 'dateline') {
-            $dateline = $this->memoryAgent('Dateline');
+        if ($this->agent_input == "dateline") {
+            $dateline = $this->memoryAgent("Dateline");
         }
 
         $this->description_flag = "off";
         if (stripos($input, "description") !== false) {
-            $pos = strpos($input, 'description');
+            $pos = strpos($input, "description");
             if ($pos !== false) {
                 $input = substr_replace(
                     $input,
-                    ' ',
+                    " ",
                     $pos,
-                    strlen('description')
+                    strlen("description")
                 );
             }
 
             $this->description_flag = "on";
         }
 
-        if ($input == 'calendar') {
+        if ($input == "calendar") {
             $tokens = $this->default_calendar_tokens;
             //$new_ics_links = $this->icslinksCalendar($token);
 
@@ -817,8 +890,8 @@ var_dump($variable);
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $filtered_input = $input;
         $string = $input;
-        $str_pattern = 'calendar';
-        $str_replacement = '';
+        $str_pattern = "calendar";
+        $str_replacement = "";
 
         if (stripos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
@@ -873,8 +946,8 @@ var_dump($variable);
 
         // Attempt to extract a useful reference to the problematic calendar.
         $calendar_name = "X";
-        if (isset($this->ical->cal['VCALENDAR']['X-WR-CALNAME'])) {
-            $calendar_name = $this->ical->cal['VCALENDAR']['X-WR-CALNAME'];
+        if (isset($this->ical->cal["VCALENDAR"]["X-WR-CALNAME"])) {
+            $calendar_name = $this->ical->cal["VCALENDAR"]["X-WR-CALNAME"];
         }
 
         if (isset($errContext->filename)) {
@@ -893,7 +966,7 @@ var_dump($variable);
             return;
         }
 
-        if ($this->stack_engine_state != 'prod') {
+        if ($this->stack_engine_state != "prod") {
             echo $console . "\n";
             $this->response .=
                 "Unexpected calendar warning seen. " . $errstr . ". ";

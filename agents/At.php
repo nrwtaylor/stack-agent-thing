@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -18,7 +18,7 @@ class At extends Agent
     // devstack backlog
     // recognize runat finishat stopat closeat startat as agents pointing to At.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -27,7 +27,7 @@ class At extends Agent
      */
     function init()
     {
-        $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
+        $this->keywords = ["next", "accept", "clear", "drop", "add", "new"];
         $this->test = "Development code"; // Always iterative.
 
         $this->tag = "at";
@@ -68,11 +68,11 @@ class At extends Agent
         $this->at->setVariable("hour", $this->hour);
         $this->at->setVariable("minute", $this->minute);
 
-        $this->thing->log("At set completed.","DEBUG");
+        $this->thing->log("At set completed.", "DEBUG");
 
         $this->thing->log(
             $this->agent_prefix .
-                ' saved ' .
+                " saved " .
                 $this->day .
                 " " .
                 $this->hour .
@@ -246,27 +246,27 @@ class At extends Agent
 
         $this->parsed_date = date_parse($input);
         //var_dump($this->parsed_date);
-        $month = $this->parsed_date['month'];
+        $month = $this->parsed_date["month"];
         $this->month = $month;
 
-        $minute = $this->parsed_date['minute'];
-        $hour = $this->parsed_date['hour'];
+        $minute = $this->parsed_date["minute"];
+        $hour = $this->parsed_date["hour"];
 
-        $day_number = $this->parsed_date['day'];
+        $day_number = $this->parsed_date["day"];
         $this->day_number = $day_number;
 
         $day_code = $this->extractDay($input);
         $day = "X";
         $allowed_day_codes = [
-            'Z',
-            'X',
-            'MON',
-            'TUE',
-            'WED',
-            'THU',
-            'FRI',
-            'SAT',
-            'SUN',
+            "Z",
+            "X",
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI",
+            "SAT",
+            "SUN",
         ];
         if (in_array(strtoupper($day_code), $allowed_day_codes) === true) {
             $day = strtoupper($day_code);
@@ -368,7 +368,7 @@ class At extends Agent
         $year = $this->extractYear($input);
         $year_text = "X";
         if ($year !== false) {
-            $year_text = $year['year']; // Discard era information.
+            $year_text = $year["year"]; // Discard era information.
         }
         if ($this->isInput($year_text)) {
             $this->year = $year_text;
@@ -395,9 +395,16 @@ class At extends Agent
     {
         // Identifiy UTC.
         $timezone = false;
-        if (stripos($input, 'utc') !== false) {
+        if (stripos($input, "utc") !== false) {
             $timezone = "UTC";
         }
+
+        if (stripos($input, "pacific standard time") !== false) {
+            $timezone = "PST";
+        }
+// https://stackoverflow.com/questions/5362628/how-to-get-the-names-and-abbreviations-of-a-time-zone-in-php
+//var_dump(timezone_abbreviations_list());
+//$x = date_parse($input);
 
         return $timezone;
     }
@@ -434,7 +441,7 @@ class At extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'stop':
+                        case "stop":
                             if ($key + 1 > count($pieces)) {
                                 //echo "last word is stop";
                                 $this->stop = false;
@@ -448,10 +455,10 @@ class At extends Agent
                             }
                             break;
 
-                        case 'am':
+                        case "am":
                             break;
 
-                        case 'pm':
+                        case "pm":
                             $this->hour = $this->hour + 12;
                             break;
 
@@ -527,16 +534,16 @@ class At extends Agent
 
         $this->parsed_date = date_parse($input);
         if (
-            $this->parsed_date['year'] != false and
-            $this->parsed_date['month'] != false and
-            $this->parsed_date['day'] != false
+            $this->parsed_date["year"] != false and
+            $this->parsed_date["month"] != false and
+            $this->parsed_date["day"] != false
         ) {
             $date_string =
-                $this->parsed_date['year'] .
+                $this->parsed_date["year"] .
                 "/" .
-                $this->parsed_date['month'] .
+                $this->parsed_date["month"] .
                 "/" .
-                $this->parsed_date['day'];
+                $this->parsed_date["day"];
 
             $unixTimestamp = strtotime($date_string);
             $p_day = strtoupper(date("D", $unixTimestamp));
@@ -609,7 +616,7 @@ class At extends Agent
     {
         $txt = $this->sms_message;
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -640,12 +647,12 @@ class At extends Agent
         //if ($minute == null) {$minute = "X";}
 
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
-        if ($hour == 'X') {
+        if ($hour == "X") {
             $hour_text = "XX";
         }
 
         $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
-        if ($minute == 'X') {
+        if ($minute == "X") {
             $minute_text = "XX";
         }
 
@@ -693,7 +700,7 @@ class At extends Agent
         //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
-        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
     }
 
     /**
@@ -706,21 +713,21 @@ class At extends Agent
         $this->thing->flagGreen();
 
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
 
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         } else {
-            $this->thing_report['info'] =
+            $this->thing_report["info"] =
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        $this->thing_report['help'] = 'This is a headcode.';
+        $this->thing_report["help"] = "This is a headcode.";
     }
 
     /**

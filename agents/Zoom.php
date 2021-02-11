@@ -9,13 +9,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Zoom extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -28,7 +28,7 @@ class Zoom extends Agent
 
         $this->thing_report["info"] =
             "ZOOM is a tool for hosting audio-visual conferences.";
-        $this->thing_report["help"] = 'Click on the image for a PDF.';
+        $this->thing_report["help"] = "Click on the image for a PDF.";
 
         $this->node_list = ["zoom" => ["zoom", "uuid"]];
 
@@ -54,7 +54,7 @@ class Zoom extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -64,7 +64,7 @@ class Zoom extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     /**
@@ -75,16 +75,10 @@ class Zoom extends Agent
         $sms = "ZOOM | ";
 
         $sms_text =
-            $this->password .
-            " " .
-            $this->access_code .
-            " " .
-            $this->url .
-            " ";
+            $this->password . " " . $this->access_code . " " . $this->url . " ";
         if ($this->host_url !== true) {
-	    $sms_text =
-                $this->host_url;
-	}
+            $sms_text = $this->host_url;
+        }
         $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
 
         if ($this->urls !== false) {
@@ -104,7 +98,7 @@ class Zoom extends Agent
         $sms .= $response_text;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -136,14 +130,13 @@ class Zoom extends Agent
 
     public function readZoom($text = null)
     {
-//        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
+        //        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
-//        if (file_exists($file)) {
-//            $text = file_get_contents($file);
-//        }
+        //        if (file_exists($file)) {
+        //            $text = file_get_contents($file);
+        //        }
         $this->access_code = $this->accesscodeZoom($text);
         $this->password = $this->passwordZoom($text);
-
         $this->url = $this->urlZoom($text);
         $this->urls = $this->urlsZoom($text);
         $this->host_url = $this->hosturlZoom($text);
@@ -160,7 +153,7 @@ class Zoom extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/zoom.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/zoom.pdf";
         $this->node_list = ["zoom" => ["zoom"]];
         $web = "";
 
@@ -171,7 +164,7 @@ class Zoom extends Agent
         }
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function get()
@@ -194,22 +187,17 @@ class Zoom extends Agent
 
     public function urlZoom($text = null)
     {
-        //$url_agent = new Url($this->thing, "url");
-        //$urls = $url_agent->extractUrls($text);
-
         $urls = $this->extractUrls($text);
 
-
         foreach ($urls as $i => $url) {
-            if (stripos($url, '.zoom.us/') !== false) {
+            if (stripos($url, ".zoom.us/") !== false) {
                 // Match first instance.
                 return $url;
             }
-            if (stripos($url, '/zoom.us/') !== false) {
+            if (stripos($url, "/zoom.us/") !== false) {
                 // Match first instance.
                 return $url;
             }
-            
         }
 
         return false;
@@ -217,18 +205,17 @@ class Zoom extends Agent
 
     public function urlsZoom($text = null)
     {
-//        $url_agent = new Url($this->thing, "url");
-//        $urls = $url_agent->extractUrls($text);
+        //        $url_agent = new Url($this->thing, "url");
+        //        $urls = $url_agent->extractUrls($text);
 
         $urls = $this->extractUrls($text);
 
-
         foreach ($urls as $i => $url) {
-            if (stripos($url, '.zoom.us/') !== false) {
+            if (stripos($url, ".zoom.us/") !== false) {
                 // Match first instance.
                 continue;
             }
-            if (stripos($url, '/zoom.us/') !== false) {
+            if (stripos($url, "/zoom.us/") !== false) {
                 // Match first instance.
                 continue;
             }
@@ -246,14 +233,13 @@ class Zoom extends Agent
         // Undefined at this time.
         return true;
 
-//        $url_agent = new Url($this->thing, "url");
-//        $urls = $url_agent->extractUrls($text);
+        //        $url_agent = new Url($this->thing, "url");
+        //        $urls = $url_agent->extractUrls($text);
 
         $urls = $this->extractUrls($text);
 
-
         foreach ($urls as $i => $url) {
-            if (stripos($url, 'j.php?MTID') !== false) {
+            if (stripos($url, "j.php?MTID") !== false) {
                 continue;
             }
             unset($urls[$i]);
@@ -267,18 +253,15 @@ class Zoom extends Agent
     {
         // TODO: devstack Telephonenumber
 
-//        $telephonenumber_agent = new Telephonenumber(
-//            $this->thing,
-//            "telephonenumber"
-//        );
+        //        $telephonenumber_agent = new Telephonenumber(
+        //            $this->thing,
+        //            "telephonenumber"
+        //        );
 
-//        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
-//            $text
-//        );
-        $telephone_numbers = $this->extractTelephonenumbers(
-            $text
-        );
-
+        //        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+        //            $text
+        //        );
+        $telephone_numbers = $this->extractTelephonenumbers($text);
 
         return $telephone_numbers;
     }
@@ -290,7 +273,9 @@ class Zoom extends Agent
         if ($text == null) {
             return true;
         }
-        $pattern = '/\b\d{3} \d{4} \d{4}/i';
+        //         $pattern = "/\b\d{6}\b/i";
+
+        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
 
         preg_match_all($pattern, $text, $match);
         if (!isset($access_codes)) {
@@ -298,10 +283,11 @@ class Zoom extends Agent
         }
 
         $access_codes = array_merge($access_codes, $match[0]);
-// Todo: recognize 10 digit codes?
-// Disambiguate against telephone numbers.
-/*            
-        $pattern = '/\b\d{3} \d{3} \d{4}/i';
+
+        // Todo: recognize 10 digit codes?
+        // Disambiguate against telephone numbers.
+
+        $pattern = "/\b\d{3} \d{3} \d{4}\b/i";
 
         preg_match_all($pattern, $text, $match);
         if (!isset($access_codes)) {
@@ -309,12 +295,25 @@ class Zoom extends Agent
         }
 
         $access_codes = array_merge($access_codes, $match[0]);
-*/
 
         $access_codes = array_unique($access_codes);
 
-        if (count($access_codes) == 1) {
-            return $access_codes[0];
+        // Extract urls and see which codes are also in Url.
+        $urls = $this->extractUrls($text);
+
+        $validated_access_codes = [];
+        foreach ($access_codes as $i => $access_code) {
+            $filtered_access_code = str_replace(" ", "", $access_code);
+
+            foreach ($urls as $j => $url) {
+                if (strpos($url, $filtered_access_code) !== false) {
+                    $validated_access_codes[] = $access_code;
+                }
+            }
+        }
+
+        if (count($validated_access_codes) == 1) {
+            return $validated_access_codes[0];
         }
 
         return false;
@@ -329,9 +328,8 @@ class Zoom extends Agent
             return true;
         }
 
-//        $pattern = '/\b[a-zA-Z0-9]{11}\b/i';
-        $pattern = '/\b\d{6}\b/i';
-
+        //        $pattern = '/\b[a-zA-Z0-9]{11}\b/i';
+        $pattern = "/\b\d{6}\b/i";
 
         //TODO: Develop regex pattern to match at least one number and one alpha.
         //$pattern = '/\b^(?=.*\d)(?=.*[a-zA-Z]).{11}$\b/';
@@ -375,7 +373,7 @@ class Zoom extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'zoom') {
+            if ($input == "zoom") {
                 $this->getZoom();
                 return;
             }
