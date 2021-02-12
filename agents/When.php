@@ -435,11 +435,7 @@ w=fri & !(m=dec & d=25) , poker game
         if ($date === true) {
             $this->response .= "No When interpretation available. ";
         }
-        //var_dump("When parameters");
-        //var_dump($this->parameters);
 
-        //var_dump($date);
-        //var_dump($description);
         $this->response .= "No When interpretation available. ";
         $this->response .= "Used stack date extractor. ";
         $this->response .= "Saw ". $dateline['dateline'] . " " .$description . ". ";
