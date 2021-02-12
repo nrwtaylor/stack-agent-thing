@@ -732,7 +732,10 @@ $e->end_at =$t;
         //$events = $ical->eventsFromInterval('1 week');
         //$calendar_timezone = $ical->calendarTimeZone();
         foreach ($events as $event) {
-            $e = $this->eventCalendar($event);
+            // TODO - Recognize event structure.
+            // For now assume it is Grogg object.
+//            $e = $this->eventCalendar($event);
+            $e = $event;
 
             $e->start_at = $e->dtstart;
             $e->end_at = $e->dtend;
