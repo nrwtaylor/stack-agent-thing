@@ -9,8 +9,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -19,7 +19,7 @@ ini_set("allow_url_fopen", 1);
 
 class Year extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -32,9 +32,9 @@ class Year extends Agent
 
         $this->thing_report["info"] =
             "A YEAR is a repeating pattern of seasons.";
-        $this->thing_report["help"] = 'Click on the image for a PDF.';
+        $this->thing_report["help"] = "Click on the image for a PDF.";
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $command_line = null;
 
@@ -43,7 +43,7 @@ class Year extends Agent
         $this->current_time = $this->thing->json->time();
 
         // Get some stuff from the stack which will be helpful.
-        $this->entity_name = $this->thing->container['stack']['entity_name'];
+        $this->entity_name = $this->thing->container["stack"]["entity_name"];
 
         $this->default_canvas_size_x = 2000;
         $this->default_canvas_size_y = 2000;
@@ -68,14 +68,9 @@ class Year extends Agent
             $this->default_canvas_size_y
         );
 
-        if (
-            isset($this->thing->container['stack']['font'])
-        ) {
-            $this->font =
-                $this->thing->container['stack']['font'];
+        if (isset($this->thing->container["stack"]["font"])) {
+            $this->font = $this->thing->container["stack"]["font"];
         }
-
-
     }
 
     public function set()
@@ -135,14 +130,13 @@ class Year extends Agent
      */
     public function timestampYear($t = null)
     {
-
-//        $s = $this->thing->thing->created_at;
+        //        $s = $this->thing->thing->created_at;
 
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {
             $t = $this->retain_to;
-            $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
+            $text = "GOOD UNTIL " . strtoupper(date("Y M d D H:i", $t));
             //$text = "CLICK FOR PDF";
         }
         $this->timestamp = $text;
@@ -161,7 +155,7 @@ class Year extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         return $this->thing_report;
@@ -173,7 +167,7 @@ class Year extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     /**
@@ -184,17 +178,19 @@ class Year extends Agent
         $sms = "YEAR | ";
 
         $years = [];
-        if (isset($this->years)) {$years = $this->years;}
+        if (isset($this->years)) {
+            $years = $this->years;
+        }
 
         $year_text = "";
         foreach ($years as $i => $year) {
-            $year_text .= $year['year'] . " " . $year['era'] . " ";
+            $year_text .= $year["year"] . " " . $year["era"] . " ";
         }
         $sms .= $year_text;
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/year";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -213,11 +209,11 @@ class Year extends Agent
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
             '/year.png" alt="year" height="92" width="92">';
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     /**
@@ -234,9 +230,9 @@ class Year extends Agent
 
         $this->thing->log(
             $this->agent_prefix .
-                ' saved decimal year ' .
+                " saved decimal year " .
                 $this->decimal_year .
-                '.',
+                ".",
             "INFORMATION"
         );
     }
@@ -267,7 +263,7 @@ class Year extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/year.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/year.pdf";
         $this->node_list = ["year" => ["year"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
@@ -275,7 +271,7 @@ class Year extends Agent
         $web .= "</a>";
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -283,10 +279,10 @@ class Year extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a YEAR';
+        $txt = "This is a YEAR";
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -415,18 +411,18 @@ class Year extends Agent
         $size = $canvas_size_x - 90;
         $size = 20;
         $angle = 0;
-if (file_exists($font)) {
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-}
+        if (file_exists($font)) {
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
+        }
         //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
@@ -447,7 +443,7 @@ if (file_exists($font)) {
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
@@ -474,7 +470,7 @@ if (file_exists($font)) {
         return $response;
 
         $this->PNG = $image;
-        $this->thing_report['png'] = $image;
+        $this->thing_report["png"] = $image;
 
         return;
     }
@@ -486,19 +482,26 @@ if (file_exists($font)) {
         }
 
         $number_of_months = 12;
-        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+        if ($this->calendar_type = "13 month") {
+            $number_of_months = 13;
+        }
 
         if ($type == "wedge") {
-
-            $this->round_agent = new Round($this->thing, "round ".$number_of_months);
+            $this->round_agent = new Round(
+                $this->thing,
+                "round " . $number_of_months
+            );
             $this->image = $this->round_agent->image;
             return;
         }
 
-//        $number_of_months = 12;
-//        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
+        //        $number_of_months = 12;
+        //        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
 
-        $this->slice_agent = new Slice($this->thing, "slice " . $number_of_months);
+        $this->slice_agent = new Slice(
+            $this->thing,
+            "slice " . $number_of_months
+        );
         $this->image = $this->slice_agent->image;
     }
 
@@ -520,9 +523,9 @@ if (file_exists($font)) {
         }
 
         $number_of_months = 12;
-        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
-
-
+        if ($this->calendar_type = "13 month") {
+            $number_of_months = 13;
+        }
 
         $width_slice = ($canvas_size_x - 2 * $border) / $number_of_months;
 
@@ -550,8 +553,9 @@ if (file_exists($font)) {
     public function wedgeYear()
     {
         $number_of_months = 12;
-        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
-
+        if ($this->calendar_type = "13 month") {
+            $number_of_months = 13;
+        }
 
         $size = null;
         if ($size == null) {
@@ -642,10 +646,9 @@ if (file_exists($font)) {
     public function makePDF()
     {
         if ($this->default_pdf_page_template === null) {
-            $this->thing_report['pdf'] = null;
+            $this->thing_report["pdf"] = null;
             return;
         }
-
 
         $this->getWhatis($this->subject);
         try {
@@ -653,12 +656,12 @@ if (file_exists($font)) {
             $pdf = new Fpdi\Fpdi();
 
             $pdf->setSourceFile($this->default_pdf_page_template);
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $tplidx1 = $pdf->importPage(1, "/MediaBox");
             $s = $pdf->getTemplatesize($tplidx1);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
             /*
             if (isset($this->hextile_PNG)) {
@@ -677,12 +680,12 @@ if (file_exists($font)) {
 */
             $this->getNuuid();
             //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, 'PNG');
+            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
 
-            $pdf->SetFont('Helvetica', '', 26);
+            $pdf->SetFont("Helvetica", "", 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
 
             $pdf->SetXY(140, 7);
@@ -700,25 +703,25 @@ if (file_exists($font)) {
                     $top_y,
                     -300,
                     -300,
-                    'PNG'
+                    "PNG"
                 );
             }
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
 
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/year';
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/year";
 
             $this->getQuickresponse($link);
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
+            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
 
             //$pdf->Link(175,5,30,30, $link);
 
@@ -728,7 +731,7 @@ if (file_exists($font)) {
 
             $line_height = 4;
 
-            $t = $this->thing_report['sms'];
+            $t = $this->thing_report["sms"];
 
             $t = str_replace(" | ", "\n", $t);
 
@@ -759,13 +762,13 @@ if (file_exists($font)) {
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
-            $image = $pdf->Output('', 'S');
-            $this->thing_report['pdf'] = $image;
+            $image = $pdf->Output("", "S");
+            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            echo "Caught exception: ", $e->getMessage(), "\n";
         }
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     public function isYear($text)
@@ -789,7 +792,7 @@ if (file_exists($font)) {
         }
 
         $this->parsed_date = date_parse($text);
-        $year = $this->parsed_date['year'];
+        $year = $this->parsed_date["year"];
 
         if ($year !== false) {
             return $year;
@@ -803,18 +806,18 @@ if (file_exists($font)) {
         // BC, BCE, CE come after the year
         // AD comes before the year (but recognize common practice)
         $year_indicators = [
-            'bc',
-            'b.c.',
-            'ad',
-            'a.d.',
-            'ce',
-            'c.e.',
-            'anno domini',
-            'bce',
-            'b.c.e',
-            'julian',
-            'carbon',
-            'year of our lord',
+            "bc",
+            "b.c.",
+            "ad",
+            "a.d.",
+            "ce",
+            "c.e.",
+            "anno domini",
+            "bce",
+            "b.c.e",
+            "julian",
+            "carbon",
+            "year of our lord",
         ];
 
         //$number_agent = new Number($this->thing, "number");
@@ -834,12 +837,12 @@ if (file_exists($font)) {
     public function eraYear($text)
     {
         $eras = [
-            'bce' => ['bce', 'b.c.e'],
-            'bc' => ['bc', 'b.c.'],
-            'ad' => ['a.d.', 'anno domini', 'year of our lord'],
-            'ce' => ['ce', 'c.e.'],
-            'julian' => null,
-            'carbon' => null,
+            "bce" => ["bce", "b.c.e"],
+            "bc" => ["bc", "b.c."],
+            "ad" => ["a.d.", "anno domini", "year of our lord"],
+            "ce" => ["ce", "c.e."],
+            "julian" => null,
+            "carbon" => null,
         ];
 
         $matched_eras = [];
@@ -849,7 +852,9 @@ if (file_exists($font)) {
                 continue;
                 //return $era;
             }
-            if ($era_indicators === null) {continue;}
+            if ($era_indicators === null) {
+                continue;
+            }
             foreach ($era_indicators as $era_indicator) {
                 if (stripos($text, $era_indicator) !== false) {
                     $matched_eras[] = $era;
@@ -890,15 +895,15 @@ if (file_exists($font)) {
             return true;
         }
 
-       // if (!isset($this->thing->ngram_handler)) {
-       //     $this->thing->ngram_handler = new Ngram($this->thing, "ngram");
-       // }
+        // if (!isset($this->thing->ngram_handler)) {
+        //     $this->thing->ngram_handler = new Ngram($this->thing, "ngram");
+        // }
 
         $tokens = [];
         foreach (range(0, 4, 1) as $i) {
             $new_grams = $this->extractNgrams($text, $i);
 
-//            $new_grams = $this->thing->ngram_handler->extractNgrams($text, $i);
+            //            $new_grams = $this->thing->ngram_handler->extractNgrams($text, $i);
             $tokens = array_merge($tokens, $new_grams);
         }
         foreach ($tokens as $i => $token) {
@@ -917,21 +922,21 @@ if (file_exists($font)) {
             if (is_integer($response)) {
                 // Check if a day has been mis-categorized as a year.
                 $this->parsed_date = date_parse($text);
-                $day = $this->parsed_date['day'];
+                $day = $this->parsed_date["day"];
                 if ($response == $day) {
                     continue;
                 }
-
                 // It is a number.
                 // But is it a number inside of a telephone number.
- //               $telephone_number_agent = new Telephonenumber(
-   //                 $this->thing,
-     //               "telephonenumber"
-       //         );
-//                $t = $telephone_number_agent->extractTelephonenumbers($text);
                 $t = $this->extractTelephonenumbers($text);
 
-                //var_dump($t);
+// Or a 3 3 4 pattern.
+
+//        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
+
+//        preg_match_all($pattern, $text, $match);
+//        $t = array_merge($t, $match[0]);
+
                 foreach ($t as $j => $telephone_number) {
                     if (
                         stripos($telephone_number, strval($response)) !== false
@@ -942,17 +947,35 @@ if (file_exists($font)) {
                 $year_text = strval($response);
 
                 $era = $this->eraYear($text);
-                $year = ['year' => $year_text, "era" => $era];
+                $year = ["year" => $year_text, "era" => $era];
                 $years[] = $year;
             }
         }
 
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-values-from-a-multi-dimensional-array-in-php
-        $serialized = array_map('serialize', $years);
+        $serialized = array_map("serialize", $years);
         $unique = array_unique($serialized);
+
         $years = array_intersect_key($years, $unique);
-        return $years;
+
+        // Check if the year appears as a distinct token.
+        $filtered_years = [];
+        foreach ($tokens as $i => $token) {
+            foreach ($years as $j => $year) {
+                if ($year["year"] === $token) {
+                    $filtered_years[] = $year;
+                }
+            }
+        }
+
+        // Remove duplicates.
+        // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-value>
+        $serialized = array_map("serialize", $filtered_years);
+        $unique = array_unique($serialized);
+
+        $filtered_years = array_intersect_key($filtered_years, $unique);
+        return $filtered_years;
     }
 
     public function extractYear($text = null)
@@ -962,7 +985,9 @@ if (file_exists($font)) {
         }
         $year = false;
 
-        if ((isset($this->years)) and ($this->years == [])) {return false;}
+        if (isset($this->years) and $this->years == []) {
+            return false;
+        }
 
         if (!isset($this->years)) {
             $years = $this->extractYears($text);
@@ -992,21 +1017,23 @@ if (file_exists($font)) {
         $this->years = $this->extractYears($input);
         $year = $this->extractYear($input);
         if ($year != false) {
-            $this->year = $year['year'];
-            $this->era = $year['era'];
+            $this->year = $year["year"];
+            $this->era = $year["era"];
         }
 
         $pieces = explode(" ", strtolower($input));
 
         $this->calendar_type = null;
-        if ((stripos($input, '13')!==false) or
-            (stripos($input,'thirteen month')!==false)){
-            $this->calendar_type = '13 month';
+        if (
+            stripos($input, "13") !== false or
+            stripos($input, "thirteen month") !== false
+        ) {
+            $this->calendar_type = "13 month";
             $this->response .= "Saw a request for a thirteen month calendar. ";
         }
 
         if (count($pieces) == 1) {
-            if ($input == 'year') {
+            if ($input == "year") {
                 $this->getYear();
 
                 if (
@@ -1028,10 +1055,10 @@ if (file_exists($font)) {
         }
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['wedge', 'slice'];
-        $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
+        $discriminators = ["wedge", "slice"];
+        $input_agent->aliases["wedge"] = ["pizza", "wheel", "wedge"];
 
-        $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
+        $input_agent->aliases["slice"] = ["slice", "column", "columns"];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;

@@ -242,11 +242,22 @@ class At extends Agent
     {
         // Remove non dates.
         $input = $this->stripUrls($input);
+
+// Remove access codes (3 4 4)
+
+        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
+        preg_match_all($pattern, $input, $match);
+        $t = $match[0];
+
+foreach($t as $i=>$access_code) {
+$input = str_replace($access_code, " ",$input);
+}
+
+
         $input = $this->stripTelephonenumbers($input, " ");
 
         $this->parsed_date = date_parse($input);
 
-        //var_dump($this->parsed_date);
         $month = $this->parsed_date["month"];
         $this->month = $month;
 
@@ -366,7 +377,9 @@ class At extends Agent
 
         $this->year = false;
         //$year = $this->year_agent->extractYear($input);
+
         $year = $this->extractYear($input);
+
         $year_text = "X";
         if ($year !== false) {
             $year_text = $year["year"]; // Discard era information.
@@ -387,7 +400,6 @@ class At extends Agent
         }
 
         $this->timezone = $this->extractTimezone($input);
-
         // TODO - Gregorian?
         //$this->extractCalendar($input);
     }

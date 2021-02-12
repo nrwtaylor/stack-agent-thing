@@ -275,7 +275,16 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $email_text = $message->getTextContent();
         $email_html = $message->getHtmlContent();
-        $email_html_text = strip_tags($email_html);
+
+// Strip tags
+//        $email_html_text = strip_tags($email_html);
+
+// https://stackoverflow.com/questions/12824899/strip-tags-replace-tags-by-space-rather-than-deleting-them
+$string      = $email_html;
+$spaceString = str_replace( '<', ' <',$string );
+$doubleSpace = strip_tags( $spaceString );
+$singleSpace = str_replace( '  ', ' ', $doubleSpace );
+$email_html_text = $singleSpace;
 
         //$body = $email_html;
         //if ($email_html === null) {$body = $email_text;}

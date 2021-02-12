@@ -266,6 +266,7 @@ class Zoom extends Agent
         return $telephone_numbers;
     }
 
+    // This is the room number.
     public function accesscodeZoom($text = null)
     {
         // 124 456 5678
@@ -293,10 +294,14 @@ class Zoom extends Agent
         if (!isset($access_codes)) {
             $access_codes = [];
         }
-
         $access_codes = array_merge($access_codes, $match[0]);
 
         $access_codes = array_unique($access_codes);
+
+        // No access codes found.
+        if (count($access_codes) === 0) {
+            return false;
+        }
 
         // Extract urls and see which codes are also in Url.
         $urls = $this->extractUrls($text);
@@ -308,6 +313,34 @@ class Zoom extends Agent
             foreach ($urls as $j => $url) {
                 if (strpos($url, $filtered_access_code) !== false) {
                     $validated_access_codes[] = $access_code;
+                }
+            }
+        }
+
+        if (count($validated_access_codes) == 1) {
+            return $validated_access_codes[0];
+        }
+
+        // Okay this is getting harder.
+        // Now read and see if any of the access codes
+        // is preceeded by the two alpha tokens meeting id.
+
+        // AND with the words meeting id preceeding the access code.
+        $ngrams = $this->extractNgrams($text, 5);
+
+        $validated_access_codes = [];
+        foreach ($access_codes as $i => $access_code) {
+            foreach ($ngrams as $j => $ngram) {
+                if (
+                    strpos($ngram, $access_code) !== false and
+                    stripos($ngram, "meeting id") !== false
+                ) {
+                    if (
+                        strpos($text, $access_code) >
+                        stripos($text, "meeting id")
+                    ) {
+                        $validated_access_codes[] = $access_code;
+                    }
                 }
             }
         }

@@ -100,7 +100,6 @@ class Claws extends Agent
         if (is_string($filename)) {
             $mh_contents = file_get_contents($filename);
             $contents = $this->textMH($mh_contents);
-
             return $contents;
         }
         return true;
@@ -382,9 +381,7 @@ dev - Detect duplicates.
             } else {
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
-
                 $call = $this->readCall($body);
-
                 // Try to figure out date from body text.
 
                 $dateline = $this->extractAt($body);
@@ -428,7 +425,7 @@ dev - Detect duplicates.
         // 2. take conference link to forward it in an email (?)
         // 3. clickable action to connect to conference link (?)
         // 4. include subject of original email
-
         return false;
     }
 }
+
