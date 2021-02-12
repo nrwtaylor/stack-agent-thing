@@ -170,7 +170,7 @@ class ACP125G extends Agent
         return $this->bank;
     }
 
-	public function respond()
+	public function respondResponse()
     {
 
         $this->getResponse();
@@ -180,9 +180,9 @@ class ACP125G extends Agent
 		$to = $this->thing->from;
 		$from = "acp125g";
 
-        $this->makePNG();
+        //$this->makePNG();
 
-        $this->makeSMS();
+        //$this->makeSMS();
 
         $this->makeMessage();
         // $this->makeTXT();
@@ -193,10 +193,10 @@ class ACP125G extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'] ;
-        $this->makeWeb();
+        //$this->makeWeb();
 
-        $this->makeTXT();
-        $this->makePDF();
+        //$this->makeTXT();
+        //$this->makePDF();
 	}
 
     function makeChoices ()
@@ -222,6 +222,7 @@ class ACP125G extends Agent
 
     function makeACP125G($message = null)
     {
+        if ($message === null) {return true;}
         if (!isset($message['station_destination'])) {$message['station_destination']="X";}
 
         $sms = "ACP 125(G) " . $this->inject . " > \n";
@@ -658,8 +659,8 @@ class ACP125G extends Agent
         $web .= "<br>";
         $web .= "<p>";
 
+if (isset($this->thing->thing->created_at)) {
         $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
-
         $web .= "Inject was created about ". $ago . " ago.";
         $web .= "<p>";
         $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
@@ -668,6 +669,7 @@ class ACP125G extends Agent
         $web .= " and will expire in " . $togo. ".<br>";
 
         $web .= "<br>";
+}
         $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
 
         $web .= "<br>";
@@ -815,9 +817,11 @@ if (file_exists($font)) {
 
         $pdf->SetTextColor(0,0,0);
 
+if (isset($this->thing->thing->created_at)) {
         $text = "Inject generated at " . $this->thing->thing->created_at. ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
+}
 
 
             $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\acp125g');

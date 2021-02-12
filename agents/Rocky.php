@@ -217,7 +217,7 @@ class Rocky extends Agent
         return $this->bank;
     }
 
-    public function respond()
+    public function respondResponse()
     {
         $this->getResponse();
 
@@ -227,11 +227,11 @@ class Rocky extends Agent
         $from = "rocky";
         $this->makeACP125G();
 
-        $this->makePNG();
+        //$this->makePNG();
 
-        $this->makeSMS();
+        //$this->makeSMS();
 
-        $this->makeMessage();
+        //$this->makeMessage();
         // $this->makeTXT();
         $this->makeChoices();
 
@@ -240,10 +240,10 @@ class Rocky extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-        $this->makeWeb();
+        //$this->makeWeb();
 
-        $this->makeTXT();
-        $this->makePDF();
+        //$this->makeTXT();
+        //$this->makePDF();
     }
 
     function makeChoices()
@@ -580,7 +580,11 @@ class Rocky extends Agent
         $this->message['check'] = $arr[3];
         $this->message['place_filed'] = $arr[4];
         $this->message['time_filed'] = $arr[5];
-        $this->message['date_filed'] = $arr[6];
+
+        $this->message['date_filed'] = "X";
+        if (isset($arr[6])) {
+            $this->message['date_filed'] = $arr[6];
+        }
     }
 
     function makeMessage()
@@ -657,7 +661,6 @@ class Rocky extends Agent
 
         $web .= "ACP 125(G) inject - ";
         //        $web .= "<p>";
-
         $this->makeACP125G($this->message);
         //        $web .= nl2br($this->acp125g->thing_report['acp125g']);
 
@@ -701,28 +704,27 @@ class Rocky extends Agent
         $web .=
             $this->inject .
             " - " .
-            $this->thing->nuuid .
+            $this->thing->nuuid;
+if (isset($this->thing->thing->created_at)) {
+        $web .=
             " - " .
             $this->thing->thing->created_at;
 
-        //        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
-
-        //        $web .= "Inject was created about ". $ago . " ago.";
-        //        $web .= "<p>";
-        //        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
-
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";
-
+}
         $web .= "<br>";
 
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
+if (isset($this->thing->thing->created_at)) {
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );
         $web .= "Inject was created about " . $ago . " ago. ";
+}
+
 
         $web .=
             "This proof-of-concept inject is hosted by the " .
@@ -919,9 +921,11 @@ if (file_exists($font)) {
 
         $pdf->SetTextColor(0, 0, 0);
 
+if (isset($this->thing->thing->created_at)) {
         $text = "Inject generated at " . $this->thing->thing->created_at . ".";
         $pdf->SetXY(130, 10);
         $pdf->Write(0, $text);
+}
 
         $this->getQuickresponse(
             $this->web_prefix . 'thing\\' . $this->uuid . '\\rocky'
