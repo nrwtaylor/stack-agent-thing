@@ -149,36 +149,41 @@ dev - Detect duplicates.
 
         $url = "No URL.";
 
-        if (isset($claws_item['call']['url'])) {$url = $claws_item['call']['url'];}
+        if (isset($claws_item["call"]["url"])) {
+            $url = $claws_item["call"]["url"];
+        }
 
         $this->thing_report["url"] = $url;
         $this->url_message = $url;
     }
 
-// agent --channel=zoommtg --meta=off claws "/home/jsae/Mail/Vector/39654" | xargs xdg-open
+    // agent --channel=zoommtg --meta=off claws "/home/jsae/Mail/Vector/39654" | xargs xdg-open
 
-
-   public function makeZoommtg()
+    public function makeZoommtg()
     {
         // Only use the first claws item.
         // Error if given more than one?
-        if (!isset($this->claws_items[0])) {return true;}
+        if (!isset($this->claws_items[0])) {
+            return true;
+        }
         $claws_item = $this->claws_items[0];
 
         $url = "No URL.";
-        if (isset($claws_item['call']['url'])) {$url = $claws_item['call']['url'];}
-//var_dump($claws_item);
-        if ($claws_item['call']['service'] === 'zoom') {
- $text = $claws_item['call']['url'];
-
-$text = str_replace("/j/", "/join?action=join&confno=", $text);
-$text = str_replace("?pwd=", "&pwd=", $text);
-$text = str_replace("https://", "zoommtg://", $text);
-
-$url = $text;
+        if (isset($claws_item["call"]["url"])) {
+            $url = $claws_item["call"]["url"];
         }
 
-        $this->thing_report['zoommtg'] = $url;
+        if ($claws_item["call"]["service"] === "zoom") {
+            $text = $claws_item["call"]["url"];
+
+            $text = str_replace("/j/", "/join?action=join&confno=", $text);
+            $text = str_replace("?pwd=", "&pwd=", $text);
+            $text = str_replace("https://", "zoommtg://", $text);
+
+            $url = $text;
+        }
+
+        $this->thing_report["zoommtg"] = $url;
         $this->zoommtg_message = $url;
     }
 
@@ -353,45 +358,36 @@ $url = $text;
                 if ($part["content_type"] === "text/calendar") {
                     $event = $this->eventCalendar($part);
                     $uid = $event->uid;
-                    if ($event->uid === null) {$uid = $this->thing->getUuid();}
+                    if ($event->uid === null) {
+                        $uid = $this->thing->getUuid();
+                    }
                     $events[$uid] = $event;
                 }
             }
             $calendar_events_count = count($events);
             if ($calendar_events_count == 1) {
                 // Found exactly one calendar event.
-                var_dump($event->summary);
-                var_dump($event->description);
-                var_dump($event->start_at);
-                var_dump($event->end_at);
+                $timezone = $event->calendar_timezone;
 
-//var_dump($event->dtstart_array[0]['TZID']);
-//$tz = $event->dtstart_array[0]['TZID'];
-$timezone = $event->calendar_timezone;
-var_dump($timezone);
-
-$subject = $event->summary;
-
-//                $dateline = $this->extractAt($event->start_at . " " . $timezone);
+                $subject = $event->summary;
                 $dateline = $this->extractAt($event->start_at);
-var_dump($event->start_at);
-var_dump($dateline);
-var_dump("TODO Build iCal date extraction.");
 
-                $dateline['line'] = $event->summary;
+                // TODO - Consider datelineCall.
+                // dev
+                $datelines = $this->datelinesCall($event->start_at);
+                $dateline = $datelines[0];
+
+                $dateline["line"] = $event->summary;
                 $call = $this->readCall($event->description);
             } else {
-            $subject = $this->subjectMH($contents);
-            $body = $this->bodyMH($contents);
+                $subject = $this->subjectMH($contents);
+                $body = $this->bodyMH($contents);
 
                 $call = $this->readCall($body);
 
                 // Try to figure out date from body text.
 
                 $dateline = $this->extractAt($body);
-                //var_dump("Claws readSubject");
-                //var_dump("TODO - Read at in subject. See Claws");
-                //var_dump($at);
 
                 $subject_at_score = 0;
                 if ($dateline != null) {
