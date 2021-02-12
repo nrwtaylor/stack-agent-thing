@@ -120,6 +120,11 @@ class Call extends Agent
         if (!isset($this->thing->webex_handler)) {
             $this->thing->webex_handler = new Webex($this->thing, "webex");
         }
+
+        if (!isset($this->thing->gotomeeting_handler)) {
+            $this->thing->gotomeeting_handler = new Gotomeeting($this->thing, "gotomeeting");
+        }
+
     }
 
     public function textCall($call = null) {
@@ -266,6 +271,21 @@ $call['password'] === "X"
                 $telephone_numbers = $this->thing->webex_handler->telephone_numbers;
 
             }
+
+            if (stripos($text, "gotomeeting") !== false) {
+                        $this->thing->gotomeeting_handler->readGotomeeting($text);
+                $service = 'gotomeeting';
+                $password = $this->thing->gotomeeting_handler->password;
+                $access_code = $this->thing->gotomeeting_handler->access_code;
+                $url = $this->thing->gotomeeting_handler->url;
+                $urls = $this->thing->gotomeeting_handler->urls;
+                $host_url = $this->thing->gotomeeting_handler->host_url;
+
+                $telephone_numbers = $this->thing->gotomeeting_handler->telephone_numbers;
+
+            }
+
+
                 $call = ['service'=>$service,
 'password'=>$password,
 "access_code"=>$access_code,
