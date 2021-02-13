@@ -9,13 +9,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Webex extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -28,7 +28,7 @@ class Webex extends Agent
 
         $this->thing_report["info"] =
             "WEBEX is a tool for hosting audio-visual conferences.";
-        $this->thing_report["help"] = 'Click on the image for a PDF.';
+        $this->thing_report["help"] = "Click on the image for a PDF.";
 
         $this->node_list = ["webex" => ["webex", "uuid"]];
 
@@ -54,10 +54,10 @@ class Webex extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-//        return $this->thing_report;
+        //        return $this->thing_report;
     }
 
     /**
@@ -66,7 +66,7 @@ class Webex extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     /**
@@ -92,7 +92,7 @@ class Webex extends Agent
         $sms .= $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -124,11 +124,11 @@ class Webex extends Agent
 
     public function readWebex($text = null)
     {
- //       $file = $this->resource_path . 'call/call-test' . '.txt';
+        //       $file = $this->resource_path . 'call/call-test' . '.txt';
 
- //       if (file_exists($file)) {
- //           $text = file_get_contents($file);
- //       }
+        //       if (file_exists($file)) {
+        //           $text = file_get_contents($file);
+        //       }
         $this->access_code = $this->accesscodeWebex($text);
         $this->password = $this->passwordWebex($text);
 
@@ -147,17 +147,17 @@ class Webex extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/webex.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/webex.pdf";
         $this->node_list = ["webex" => ["webex"]];
         $web = "";
-if (isset($this->html_image)) {
-        $web .= '<a href="' . $link . '">';
-        $web .= $this->html_image;
-        $web .= "</a>";
-}
+        if (isset($this->html_image)) {
+            $web .= '<a href="' . $link . '">';
+            $web .= $this->html_image;
+            $web .= "</a>";
+        }
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function get()
@@ -180,14 +180,20 @@ if (isset($this->html_image)) {
 
     public function urlWebex($text = null)
     {
-//        $url_agent = new Url($this->thing, "url");
-//        $urls = $url_agent->extractUrls($text);
+        //        $url_agent = new Url($this->thing, "url");
+        //        $urls = $url_agent->extractUrls($text);
 
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-            if (stripos($url, 'j.php?MTID') !== false) {
+            if (stripos($url, ".php?MTID") !== false) {
                 // Match first instance.
+                return $url;
+            }
+        }
+
+        foreach ($urls as $i => $url) {
+            if (stripos($url, ".webex.com") !== false) {
                 return $url;
             }
         }
@@ -197,15 +203,20 @@ if (isset($this->html_image)) {
 
     public function hosturlWebex($text = null)
     {
-//        $url_agent = new Url($this->thing, "url");
-//        $urls = $url_agent->extractUrls($text);
+        //        $url_agent = new Url($this->thing, "url");
+        //        $urls = $url_agent->extractUrls($text);
 
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-            if (stripos($url, 'j.php?MTID') !== false) {
+            if (stripos($url, ".php?MTID") !== false) {
                 continue;
             }
+
+            if (stripos($url, ".webex.com") !== false) {
+                continue;
+            }
+
             unset($urls[$i]);
         }
 
@@ -217,18 +228,16 @@ if (isset($this->html_image)) {
     {
         // TODO: devstack Telephonenumber
 
-//        $telephonenumber_agent = new Telephonenumber(
-//            $this->thing,
-//            "telephonenumber"
-//        );
+        //        $telephonenumber_agent = new Telephonenumber(
+        //            $this->thing,
+        //            "telephonenumber"
+        //        );
 
-//        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
-//            $text
-//        );
+        //        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
+        //            $text
+        //        );
 
-        $telephone_numbers = $this->extractTelephonenumbers(
-            $text
-        );
+        $telephone_numbers = $this->extractTelephonenumbers($text);
 
         return $telephone_numbers;
     }
@@ -241,7 +250,7 @@ if (isset($this->html_image)) {
             return true;
         }
 
-        $pattern = '/\b\d{3} \d{3} \d{4}/i';
+        $pattern = "/\b\d{3} \d{3} \d{4}/i";
 
         preg_match_all($pattern, $text, $match);
         if (!isset($access_codes)) {
@@ -267,7 +276,7 @@ if (isset($this->html_image)) {
             return true;
         }
 
-        $pattern = '/\b[a-zA-Z0-9]{11}\b/i';
+        $pattern = "/\b[a-zA-Z0-9]{11}\b/i";
 
         //TODO: Develop regex pattern to match at least one number and one alpha.
         //$pattern = '/\b^(?=.*\d)(?=.*[a-zA-Z]).{11}$\b/';
@@ -289,8 +298,8 @@ if (isset($this->html_image)) {
         // For now do this.
         foreach ($passwords as $i => $password) {
             if (
-                preg_match('/[A-Za-z]/', $password) &&
-                preg_match('/[0-9]/', $password)
+                preg_match("/[A-Za-z]/", $password) &&
+                preg_match("/[0-9]/", $password)
             ) {
             } else {
                 unset($passwords[$i]);
@@ -301,6 +310,61 @@ if (isset($this->html_image)) {
             return $passwords[0];
         }
 
+        // That strategy didn't work.
+        // Try seeing if there is a paragraph with the word 'password'.
+
+        // And then see if there is a strange token.
+
+        $selected_paragraphs = [];
+        $paragraph_agent = new Paragraph($this->thing, $text);
+        $paragraphs = $paragraph_agent->paragraphs;
+        foreach ($paragraphs as $i => $paragraph) {
+            if (stripos($paragraph, "password") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
+            }
+
+            if (stripos($paragraph, "passwd") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
+            }
+
+            if (stripos($paragraph, "pword") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
+            }
+
+            if (stripos($paragraph, "pwd") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
+            }
+        }
+        $possible_passwords = [];
+        //$this->thing->punctuation_handler = new Punctuation($this->thing, "punctuation");
+        $this->thing->word_handler = new Word($this->thing, "word");
+        foreach ($selected_paragraphs as $i => $paragraph) {
+            $strip_nbsp = str_replace("&nbsp", " ", $paragraph);
+
+            $tokens = explode(" ", $strip_nbsp);
+            foreach ($tokens as $i => $token) {
+                $stripped_token = trim(
+                    $this->thing->word_handler->stripPunctuation($token)
+                );
+                $t = strtolower($stripped_token);
+                if ($t === "") {
+                    continue;
+                }
+                $t = $this->isWord($t);
+                if ($t === false) {
+                    $possible_passwords[] = $stripped_token;
+                }
+            }
+            //$this->thing->word_handler->extractWords($paragraph);
+        }
+        $possible_passwords = array_unique($possible_passwords);
+        if (count($possible_passwords) === 1) {
+            return $possible_passwords[0];
+        }
         return false;
     }
 
@@ -324,7 +388,7 @@ if (isset($this->html_image)) {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'webex') {
+            if ($input == "webex") {
                 $this->getWebex();
                 return;
             }

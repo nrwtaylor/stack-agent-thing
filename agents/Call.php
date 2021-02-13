@@ -262,7 +262,6 @@ $call['password'] === "X"
                 $service = 'webex';
                 //$webex_agent = new Webex($this->thing, "webex");
                 $this->thing->webex_handler->readWebex($text);
-
                 $password = $this->thing->webex_handler->password;
                 $access_code = $this->thing->webex_handler->access_code;
                 $url = $this->thing->webex_handler->url;

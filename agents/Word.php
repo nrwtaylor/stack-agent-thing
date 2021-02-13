@@ -16,21 +16,21 @@ class Word extends Agent
      */
     function init()
     {
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
         $this->resource_path_words =
-            $GLOBALS['stack_path'] . 'resources/words/';
+            $GLOBALS["stack_path"] . "resources/words/";
 
-        $this->resource_path_ewol = $GLOBALS['stack_path'] . 'resources/ewol/';
+        $this->resource_path_ewol = $GLOBALS["stack_path"] . "resources/ewol/";
         $this->keywords = [];
 
         $this->wordpress_path_to = false;
 
-        if (isset($this->thing->container['api']['wordpress']['path_to'])) {
+        if (isset($this->thing->container["api"]["wordpress"]["path_to"])) {
             $this->wordpress_path_to =
-                $this->thing->container['api']['wordpress']['path_to'];
+                $this->thing->container["api"]["wordpress"]["path_to"];
         }
 
-        $this->thing_report['help'] =
+        $this->thing_report["help"] =
             "Screens against a list of over four hundred thousand words.";
         $this->getMemcached();
     }
@@ -42,12 +42,12 @@ class Word extends Agent
         if ((isset($this->words) and count($this->words)) != 0) {
             $this->thing->log(
                 $this->agent_prefix .
-                    'completed with a reading of ' .
+                    "completed with a reading of " .
                     $this->word .
-                    '.'
+                    "."
             );
         } else {
-            $this->thing->log($this->agent_prefix . 'did not find words.');
+            $this->thing->log($this->agent_prefix . "did not find words.");
         }
     }
 
@@ -173,7 +173,7 @@ class Word extends Agent
         $bbox["height"] =
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        extract($bbox, EXTR_PREFIX_ALL, "bb");
         //check width of the image
         //        $width = imagesx($this->image);
         //        $height = imagesy($this->image);
@@ -236,7 +236,7 @@ class Word extends Agent
             // Return dictionary entry.
             $value = $this->stripPunctuation($value);
 
-            $text = $this->findWord('list', $value);
+            $text = $this->findWord("list", $value);
 
             if ($text != false) {
                 //   echo "word is " . $text . "\n";
@@ -296,9 +296,7 @@ class Word extends Agent
         //if ($this->wordpress_path_to !== false) {
         //    require_once $this->wordpress_path_to. 'wp-load.php';
         if (
-            $this->ewol_dictionary = $this->getMemory(
-                'agent-ewol-dictionary'
-            )
+            $this->ewol_dictionary = $this->getMemory("agent-ewol-dictionary")
         ) {
             $this->thing->log("loaded ewol dictionary from memory.");
             return;
@@ -307,7 +305,7 @@ class Word extends Agent
 
         $contents = "";
         foreach (range("A", "Z") as $v) {
-            $file = $this->resource_path_ewol . $v . ' Words.txt';
+            $file = $this->resource_path_ewol . $v . " Words.txt";
             $c = false;
             if (file_exists($file)) {
                 $c = @file_get_contents($file);
@@ -328,7 +326,7 @@ class Word extends Agent
 
         if ($this->wordpress_path_to !== false) {
             $this->mem_cached->set(
-                'agent-ewol-dictionary',
+                "agent-ewol-dictionary",
                 $this->ewol_dictionary
             );
         }
@@ -348,11 +346,11 @@ class Word extends Agent
         switch ($librex) {
             case null:
             // Drop through
-            case 'list':
+            case "list":
                 if (ctype_alpha($searchfor)) {
                     $s = strtolower($searchfor);
                     $value = $this->mem_cached->get(
-                        'agent-words-stack-' . strtolower($s)
+                        "agent-words-stack-" . strtolower($s)
                     );
                     if ($value == true) {
                         $this->thing->log("Found word in words-stack.");
@@ -364,10 +362,10 @@ class Word extends Agent
                     $contents = $this->words_list;
                     break;
                 }
-                $file = $this->resource_path_words . 'words.txt';
+                $file = $this->resource_path_words . "words.txt";
 
                 //$this->getMemcached();
-                if ($contents = $this->mem_cached->get('agent-words-list')) {
+                if ($contents = $this->mem_cached->get("agent-words-list")) {
                     $this->words_list = $contents;
                     $this->thing->log("loaded words from memory.");
 
@@ -380,13 +378,13 @@ class Word extends Agent
                 if (file_exists($file)) {
                     $contents = file_get_contents($file);
                 }
-                $this->mem_cached->set('agent-words-list', $contents);
+                $this->mem_cached->set("agent-words-list", $contents);
 
                 $this->thing->log("loaded words from text file.");
 
                 $this->words_list = $contents;
                 break;
-            case 'ewol':
+            case "ewol":
                 $searchfor = strtolower($searchfor);
                 if (isset($this->ewol_list)) {
                     $contents = $this->ewol_list;
@@ -394,7 +392,7 @@ class Word extends Agent
                 }
                 $contents = "";
                 foreach (range("A", "Z") as $v) {
-                    $file = $this->resource_path_ewol . $v . ' Words.txt';
+                    $file = $this->resource_path_ewol . $v . " Words.txt";
                     if (file_exists($file)) {
                         $contents .= file_get_contents($file);
                     }
@@ -402,20 +400,20 @@ class Word extends Agent
                 $this->ewol_list = $contents;
                 break;
 
-            case 'mordok':
+            case "mordok":
                 if (isset($this->mordok_list)) {
                     $contents = $this->mordok_list;
                     break;
                 }
 
-                $file = $this->resource_path_words . 'mordok.txt';
+                $file = $this->resource_path_words . "mordok.txt";
                 $contents = "";
                 if ($file_exists($file)) {
                     $contents = file_get_contents($file);
                 }
                 $this->mordok_list = $contents;
                 break;
-            case 'context':
+            case "context":
                 if (isset($this->context_list)) {
                     $contents = $this->context_list;
                     break;
@@ -427,20 +425,18 @@ class Word extends Agent
                 $this->context_list = $contents;
                 break;
 
-            case 'emotion':
+            case "emotion":
                 break;
             default:
-                $file = $this->resource_path_words . 'words.txt';
+                $file = $this->resource_path_words . "words.txt";
         }
         $pattern = "|\b($searchfor)\b|";
-
         // search, and store all matching occurences in $matches
         if (preg_match_all($pattern, $contents, $matches)) {
             $m = $matches[0][0];
-
             if (ctype_alpha($m)) {
                 $this->mem_cached->set(
-                    'agent-words-stack-' . strtolower($m),
+                    "agent-words-stack-" . strtolower($m),
                     true
                 );
             }
@@ -473,19 +469,22 @@ class Word extends Agent
             $max_number = 7;
         }
 
-// TODO recognize false ewol_dictionary
-// Review isset below.
-$word = true;
-if ($this->ewol_dictionary !== false) {
-        while (true) {
-            $this->ewolWords();
-            //var_dump($this->ewol_dictionary);
-            $word = array_rand($this->ewol_dictionary);
-            if (strlen($word) >= $min_number and strlen($word) <= $max_number) {
-                break;
+        // TODO recognize false ewol_dictionary
+        // Review isset below.
+        $word = true;
+        if ($this->ewol_dictionary !== false) {
+            while (true) {
+                $this->ewolWords();
+                //var_dump($this->ewol_dictionary);
+                $word = array_rand($this->ewol_dictionary);
+                if (
+                    strlen($word) >= $min_number and
+                    strlen($word) <= $max_number
+                ) {
+                    break;
+                }
             }
         }
-}
         $this->word = $word;
         return $word;
     }
@@ -498,12 +497,12 @@ if ($this->ewol_dictionary !== false) {
 
         //   if ($this->wordpress_path_to !== false) {
 
-        if ($this->contents = $this->mem_cached->get('agent-word-contents')) {
+        if ($this->contents = $this->mem_cached->get("agent-word-contents")) {
             return $this->contents;
         }
         //   }
 
-        $file = $this->resource_path_words . 'words.txt';
+        $file = $this->resource_path_words . "words.txt";
         $contents = "";
         if (file_exists($file)) {
             $contents = file_get_contents($file);
@@ -511,15 +510,37 @@ if ($this->ewol_dictionary !== false) {
 
         $this->contents = $contents;
         //   if ($this->wordpress_path_to !== false) {
-        $this->mem_cached->set('agent-word-contents', $this->contents);
+        $this->mem_cached->set("agent-word-contents", $this->contents);
         //   }
     }
 
     function isWord($input)
     {
+        $value = $this->stripPunctuation($input);
+
+        $text = $this->findWord("list", $value);
+
+        if ($text != false) {
+            return true;
+        }
+
+        $text = $this->findWord("list", strtoupper($value));
+
+        if ($text != false) {
+            return true;
+        }
+
+        $text = $this->findWord("list", ucwords($value));
+
+        if ($text != false) {
+            return true;
+        }
+
+        return false;
+
         if (!isset($this->contents)) {
             //$this->getContents();
-            $file = $this->resource_path_words . 'words.txt';
+            $file = $this->resource_path_words . "words.txt";
 
             $contents = "";
             if (file_exists($file)) {
@@ -529,7 +550,7 @@ if ($this->ewol_dictionary !== false) {
             $this->contents = $contents;
         }
 
-        $pattern = '|\b(' . $input . ')\b|';
+        $pattern = "|\b(" . $input . ")\b|";
 
         // search, and store all matching occurences in $matches
 
@@ -573,7 +594,7 @@ if ($this->ewol_dictionary !== false) {
      */
     function nearestWord($input)
     {
-        $file = $this->resource_path_words . 'words.txt';
+        $file = $this->resource_path_words . "words.txt";
 
         $contents = "";
         if (file_exists($file)) {
@@ -636,18 +657,18 @@ if ($this->ewol_dictionary !== false) {
 
         // Make SMS
         $this->makeSMS();
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
 
         // Make message
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         // Make email
         $this->makeEmail();
 
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
         $this->reading = null;
         if (isset($this->words)) {
@@ -725,14 +746,14 @@ if ($this->ewol_dictionary !== false) {
             $input = strtolower($this->agent_input);
         }
 
-        $keywords = ['word', 'random'];
+        $keywords = ["word", "random"];
         $pieces = explode(" ", strtolower($input));
 
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'random':
+                        case "random":
                             $number_agent = new Number($this->thing, "number");
                             $number_agent->extractNumber($input);
 
@@ -742,11 +763,11 @@ if ($this->ewol_dictionary !== false) {
                             }
                         //return;
 
-                        case 'word':
-                            $prefix = 'word';
+                        case "word":
+                            $prefix = "word";
                             $words = preg_replace(
-                                '/^' . preg_quote($prefix, '/') . '/',
-                                '',
+                                "/^" . preg_quote($prefix, "/") . "/",
+                                "",
                                 $input
                             );
                             $words = ltrim($words);
