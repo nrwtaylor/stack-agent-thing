@@ -951,13 +951,14 @@ class Year extends Agent
                 $years[] = $year;
             }
         }
-
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-values-from-a-multi-dimensional-array-in-php
         $serialized = array_map("serialize", $years);
         $unique = array_unique($serialized);
 
         $years = array_intersect_key($years, $unique);
+
+        if (count($years) === 1) {return $years;}
 
         // Check if the year appears as a distinct token.
         $filtered_years = [];
@@ -992,6 +993,7 @@ class Year extends Agent
         if (!isset($this->years)) {
             $years = $this->extractYears($text);
         }
+
         if (count($years) == 1) {
             $year = $years[0];
         }
