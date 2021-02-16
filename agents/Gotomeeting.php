@@ -183,12 +183,18 @@ class Gotomeeting extends Agent
     public function urlGotomeeting($text = null)
     {
         $urls = $this->extractUrls($text);
-
         foreach ($urls as $i => $url) {
             if (stripos($url, ".gotomeeting.com/") !== false) {
                 // Match first instance.
                 return $url;
             }
+
+            if (stripos($url, ".gotowebinar.com/") !== false) {
+                // Match first instance.
+                return $url;
+            }
+
+
 /*
             if (stripos($url, "/zoom.us/") !== false) {
                 // Match first instance.
@@ -212,6 +218,12 @@ class Gotomeeting extends Agent
                 // Match first instance.
                 continue;
             }
+
+            if (stripos($url, ".gotowebinar.com/") !== false) {
+                // Match first instance.
+                continue;
+            }
+
 /*
             if (stripos($url, "/zoom.us/") !== false) {
                 // Match first instance.
@@ -389,6 +401,18 @@ class Gotomeeting extends Agent
 
     public function isGotomeeting($text)
     {
+            if (stripos($text, "gotomeeting") !== false) {
+                // Match first instance.
+                return true;
+            }
+
+            if (stripos($text, "gotowebinar") !== false) {
+                // Match first instance.
+                return true;
+            }
+
+
+
         // Contains word gotomeeting?
         return false;
     }

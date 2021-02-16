@@ -344,22 +344,6 @@ class Test extends Agent
             if (!isset($test['refreshed_at'])) {
                 continue;
             }
-            /*
-            $text =
-                $test['refreshed_at'] .
-                " " .
-                $test['text'] .
-                " " .
-                $test['response'];
-*/
-            //echo "merp";
-            //exit();
-            //var_dump($thing->uuid);
-            //var_dump($thing->nuuid);
-            //foreach ($thing as $i=>$j) {
-            //var_dump($i);
-            //}
-            //exit();
 
             $link =
                 $this->web_prefix .
@@ -395,9 +379,7 @@ class Test extends Agent
                     $u = $t[1];
                     $t = explode('/ No response. ', $u);
                     $text = $t[0];
-                    //var_dump($text);
-                    //    exit();
-                    //    $text = "merp";
+
                     $web .= "<th>" . $text . "</th>";
                 }
             } else {

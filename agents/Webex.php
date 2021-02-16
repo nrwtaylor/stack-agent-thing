@@ -375,6 +375,9 @@ class Webex extends Agent
 
     public function isWebex($text)
     {
+        if (stripos($text, "webex") !== false) {
+            return true;
+        }
         // Contains word webex?
         return false;
     }

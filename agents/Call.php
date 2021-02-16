@@ -9,13 +9,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Call extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -28,7 +28,7 @@ class Call extends Agent
 
         $this->thing_report["info"] =
             "CALL is a tool for understanding audio-visual conference related text.";
-        $this->thing_report["help"] = 'Text CALL <text>.';
+        $this->thing_report["help"] = "Text CALL <text>.";
 
         $this->node_list = ["call" => ["call", "uuid"]];
 
@@ -54,7 +54,7 @@ class Call extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         //return $this->thing_report;
@@ -66,7 +66,7 @@ class Call extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     /**
@@ -79,7 +79,7 @@ class Call extends Agent
         $sms .= $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -107,63 +107,52 @@ class Call extends Agent
      */
     public function initCall()
     {
-        if (!isset($this->thing->when_handler)) {
-            $this->thing->when_handler = new When($this->thing, "when");
-        }
 
-
-        // Load conference call service handlers.
-        if (!isset($this->thing->zoom_handler)) {
-            $this->thing->zoom_handler = new Zoom($this->thing, "zoom");
-        }
-
-        if (!isset($this->thing->webex_handler)) {
-            $this->thing->webex_handler = new Webex($this->thing, "webex");
-        }
-
-        if (!isset($this->thing->gotomeeting_handler)) {
-            $this->thing->gotomeeting_handler = new Gotomeeting($this->thing, "gotomeeting");
-        }
+        $this->recognized_services = ['zoom','webex','gotomeeting','mailchimp'];
 
     }
 
-    public function textCall($call = null) {
-
+    public function textCall($call = null)
+    {
         $password_text = "No password found.";
-        if (($call['password'] === null) or ($call['password'] === false) or 
-$call['password'] === "X"
-) {
+        if (
+            $call["password"] === null or
+            $call["password"] === false or
+            $call["password"] === "X"
+        ) {
         } else {
-            $password_text = $call['password'];
+            $password_text = $call["password"];
         }
 
         $access_code_text = "No access code/room found.";
-        if (($call['access_code'] === null) or ($call['access_code'] === false) or 
-($call['access_code'] === "X")
-) {
+        if (
+            $call["access_code"] === null or
+            $call["access_code"] === false or
+            $call["access_code"] === "X"
+        ) {
         } else {
-            $access_code_text = $call['access_code'];
+            $access_code_text = $call["access_code"];
         }
 
         $access_url_text = "No access url found.";
-        if (($call['url'] === null) or ($call['url'] === false) or 
-($call['url'] === "X")
-) {
+        if (
+            $call["url"] === null or
+            $call["url"] === false or
+            $call["url"] === "X"
+        ) {
         } else {
-            $access_url_text = $call['url'];
+            $access_url_text = $call["url"];
         }
 
-
-            $text_call =
-                $password_text .
-                " / " .
-                $access_code_text .
-                " / " .
-                $access_url_text .
-                "\n";
+        $text_call =
+            $password_text .
+            " / " .
+            $access_code_text .
+            " / " .
+            $access_url_text .
+            "\n";
 
         return $text_call;
-
     }
 
     public function run()
@@ -175,7 +164,7 @@ $call['password'] === "X"
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/call.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/call.pdf";
         $this->node_list = ["call" => ["call"]];
         $web = "";
         if (isset($this->html_image)) {
@@ -186,7 +175,7 @@ $call['password'] === "X"
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function get()
@@ -210,103 +199,58 @@ $call['password'] === "X"
     // TODO: Test extraction of telephone numbers
     public function readCall($text = null)
     {
-        $service="X";
-        $password="X";
-        $access_code="X";
-        $url="X";
-        $urls=[];
-        $host_url="X";
+        $service = "X";
+        $password = "X";
+        $access_code = "X";
+        $url = "X";
+        $urls = [];
+        $host_url = "X";
         $telephone_numbers = [];
 
-//        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
-
-//        if (file_exists($file)) {
-//            $text = file_get_contents($file);
-//        }
-
-//        $url_agent = new Url($this->thing, "url");
-
-//        $urls = $url_agent->extractUrls($text);
-
         $urls = $this->extractUrls($text);
-/*
-        $telephonenumber_agent = new Telephonenumber(
-            $this->thing,
-            "telephonenumber"
-        );
-        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
-            $text
-        );
-*/
-        $telephone_numbers = $this->extractTelephonenumbers(
-            $text
-        );
+        $telephone_numbers = $this->extractTelephonenumbers($text);
 
+	$services = ['zoom','webex','gotomeeting','mailchimp'];
+        foreach($this->recognized_services as $i=>$service) {
 
-// refactor as select case.
-            if (stripos($text, "zoom") !== false) {
-                //$zoom_agent = new Zoom($this->thing, "zoom");
-		        $this->thing->zoom_handler->readZoom($text);
-                $service = 'zoom';
-                $password = $this->thing->zoom_handler->password;
-                $access_code = $this->thing->zoom_handler->access_code;
-                $url = $this->thing->zoom_handler->url;
-                $urls = $this->thing->zoom_handler->urls;
-                $host_url = $this->thing->zoom_handler->host_url;
+	   $is_service_flag = $this->{"is" . ucwords($service)}($text);
+$count = 0;
+        if ($is_service_flag) { // True service matches
+$count += 1;
+if ($count > 1) {continue;} // Take first matching service.
 
-                $telephone_numbers = $this->thing->zoom_handler->telephone_numbers;
+            $this->thing->{$service . "_handler"}->{"read".ucwords($service)}($text);
 
-            }
+            $password = $this->thing->{$service . "_handler"}->password;
+            $access_code = $this->thing->{$service . "_handler"}->access_code;
+            $url = $this->thing->{$service . "_handler"}->url;
+            $urls = $this->thing->{$service . "_handler"}->urls;
+            $host_url = $this->thing->{$service . "_handler"}->host_url;
+            $telephone_numbers = $this->thing->{$service . "_handler"}->telephone_numbers;
+        }
 
-            if (stripos($text, "webex") !== false) {
-                $service = 'webex';
-                //$webex_agent = new Webex($this->thing, "webex");
-                $this->thing->webex_handler->readWebex($text);
-                $password = $this->thing->webex_handler->password;
-                $access_code = $this->thing->webex_handler->access_code;
-                $url = $this->thing->webex_handler->url;
-                $host_url = $this->thing->webex_handler->host_url;
+        }
 
-                $telephone_numbers = $this->thing->webex_handler->telephone_numbers;
+        $call = [
+            "service" => $service,
+            "password" => $password,
+            "access_code" => $access_code,
+            "url" => $url,
+            "urls" => $urls,
+            "host_url" => $host_url,
+            "telephone_numbers" => $telephone_numbers,
+        ];
 
-            }
-
-            if (stripos($text, "gotomeeting") !== false) {
-                        $this->thing->gotomeeting_handler->readGotomeeting($text);
-                $service = 'gotomeeting';
-                $password = $this->thing->gotomeeting_handler->password;
-                $access_code = $this->thing->gotomeeting_handler->access_code;
-                $url = $this->thing->gotomeeting_handler->url;
-                $urls = $this->thing->gotomeeting_handler->urls;
-                $host_url = $this->thing->gotomeeting_handler->host_url;
-
-                $telephone_numbers = $this->thing->gotomeeting_handler->telephone_numbers;
-
-            }
-
-
-                $call = ['service'=>$service,
-'password'=>$password,
-"access_code"=>$access_code,
-"url"=>$url,
-"urls"=>$urls,
-"host_url"=>$host_url,
-"telephone_numbers"=>$telephone_numbers];
-
-return $call;
-
+        return $call;
     }
 
     public function whenCalls($text = null)
     {
-        //$when_agent = new When($this->thing, "when");
-
-        //$zoom_agent = new Zoom($this->thing, "zoom");
-        //$webex_agent = new Webex($this->thing, "webex");
-
         $calls = [];
-        foreach ($this->thing->when_handler->calendar_agent->calendar->events as $event) {
-
+        foreach (
+            $this->thing->when_handler->calendar_agent->calendar->events
+            as $event
+        ) {
             $haystack =
                 $event->summary .
                 " " .
@@ -315,7 +259,7 @@ return $call;
                 $this->location;
 
             if (stripos($haystack, "zoom") !== false) {
-//                $zoom_agent = new Zoom($this->thing, "zoom");
+                //                $zoom_agent = new Zoom($this->thing, "zoom");
 
                 $event->password = $this->thing->zoom_handler->password;
                 $event->access_code = $this->thing->zoom_handler->access_code;
@@ -323,7 +267,8 @@ return $call;
                 $event->urls = $this->thing->zoom_handler->urls;
                 $event->host_url = $this->thing->zoom_handler->host_url;
 
-                $event->telephone_numbers = $this->thing->zoom_handler->telephone_numbers;
+                $event->telephone_numbers =
+                    $this->thing->zoom_handler->telephone_numbers;
 
                 $calls[] = $event;
                 //$this->response .= "Saw a zoom meeting. ";
@@ -331,14 +276,15 @@ return $call;
             }
 
             if (stripos($haystack, "webex") !== false) {
-//                $webex_agent = new Webex($this->thing, "webex");
+                //                $webex_agent = new Webex($this->thing, "webex");
 
                 $event->password = $this->thing->webex_handler->password;
                 $event->access_code = $this->thing->webex_handler->access_code;
                 $event->url = $this->thing->webex_handler->url;
                 $event->host_url = $this->thing->webex_handler->host_url;
 
-                $event->telephone_numbers = $this->thing->webex_handler->telephone_numbers;
+                $event->telephone_numbers =
+                    $this->thing->webex_handler->telephone_numbers;
 
                 $calls[] = $event;
                 continue;
@@ -379,7 +325,6 @@ return $call;
             }
         }
         $this->message = $call_text;
-
     }
 
     public function nextCall($text = null)
@@ -404,7 +349,7 @@ return $call;
         //$input = strtolower($this->subject);
         $input = $this->subject;
         if (isset($this->agent_input)) {
-            if (strtolower($this->agent_input) == 'call') {
+            if (strtolower($this->agent_input) == "call") {
                 return;
             }
             if (!$this->thing->isEmpty($this->agent_input)) {
@@ -424,7 +369,7 @@ return $call;
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'call') {
+            if ($input == "call") {
                 $this->getCall();
                 return;
             }

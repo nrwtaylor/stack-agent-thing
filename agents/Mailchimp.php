@@ -1,19 +1,17 @@
 <?php
 /**
- * Zoom.php
+ * Mailchimp.php
  *
  * @package default
  */
 
 namespace Nrwtaylor\StackAgentThing;
 
-//use QR_Code\QR_Code;
-
 ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
 
-class Zoom extends Agent
+class Mailchimp extends Agent
 {
     public $var = "hello";
 
@@ -27,19 +25,19 @@ class Zoom extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "ZOOM is a tool for hosting audio-visual conferences.";
+            "MAILCHIMP is a tool for managing mass email.";
         $this->thing_report["help"] = "Click on the image for a PDF.";
 
-        $this->node_list = ["zoom" => ["zoom", "uuid"]];
+        $this->node_list = ["mailchimp" => ["mailchimp", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
-        $this->initZoom();
+        $this->initMailchimp();
     }
 
     public function set()
     {
-        $this->setZoom();
+        $this->setMailchimp();
     }
 
     /**
@@ -72,14 +70,19 @@ class Zoom extends Agent
      */
     public function makeSMS()
     {
-        $sms = "ZOOM | ";
+        $sms = "MAILCHIMP | ";
 
         $sms_text =
             $this->password . " " . $this->access_code . " " . $this->url . " ";
         if ($this->host_url !== true) {
             $sms_text = $this->host_url;
         }
-        $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
+
+        $telephone_numbers_text = "None available.";
+        if ($this->thing->isData($this->telephone_numbers)) {
+            $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
+
+        }
 
         if ($this->urls !== false) {
             $urls_text = implode(" ", $this->urls);
@@ -109,7 +112,7 @@ class Zoom extends Agent
      *
      */
 
-    public function setZoom()
+    public function setMailchimp()
     {
     }
 
@@ -117,31 +120,26 @@ class Zoom extends Agent
      *
      * @return unknown
      */
-    public function getZoom()
+    public function getMailchimp()
     {
     }
 
     /**
      *
      */
-    public function initZoom()
+    public function initMailchimp()
     {
     }
 
-    public function readZoom($text = null)
+    public function readMailchimp($text = null)
     {
-        //        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
+        $this->access_code = $this->accesscodeMailchimp($text);
+        $this->password = $this->passwordMailchimp($text);
+        $this->url = $this->urlMailchimp($text);
+        $this->urls = $this->urlsMailchimp($text);
+        $this->host_url = $this->hosturlMailchimp($text);
 
-        //        if (file_exists($file)) {
-        //            $text = file_get_contents($file);
-        //        }
-        $this->access_code = $this->accesscodeZoom($text);
-        $this->password = $this->passwordZoom($text);
-        $this->url = $this->urlZoom($text);
-        $this->urls = $this->urlsZoom($text);
-        $this->host_url = $this->hosturlZoom($text);
-
-        $this->telephone_numbers = $this->telephonenumberZoom($text);
+        $this->telephone_numbers = $this->telephonenumberMailchimp($text);
     }
 
     public function run()
@@ -153,8 +151,8 @@ class Zoom extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/zoom.pdf";
-        $this->node_list = ["zoom" => ["zoom"]];
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/mailchimp.pdf";
+        $this->node_list = ["mailchimp" => ["mailchimp"]];
         $web = "";
 
         if (isset($this->html_image)) {
@@ -171,7 +169,7 @@ class Zoom extends Agent
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "zoom",
+            "mailchimp",
             "refreshed_at",
         ]);
 
@@ -179,31 +177,33 @@ class Zoom extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["zoom", "refreshed_at"],
+                ["mailchimp", "refreshed_at"],
                 $time_string
             );
         }
     }
 
-    public function urlZoom($text = null)
+    public function urlMailchimp($text = null)
     {
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-            if (stripos($url, ".zoom.us/") !== false) {
+            if (stripos($url, ".mailchimp.com/") !== false) {
                 // Match first instance.
                 return $url;
             }
-            if (stripos($url, "/zoom.us/") !== false) {
+/*
+            if (stripos($url, "/mailchimp.com/") !== false) {
                 // Match first instance.
                 return $url;
             }
+*/
         }
 
         return false;
     }
 
-    public function urlsZoom($text = null)
+    public function urlsMailchimp($text = null)
     {
         //        $url_agent = new Url($this->thing, "url");
         //        $urls = $url_agent->extractUrls($text);
@@ -211,14 +211,16 @@ class Zoom extends Agent
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-            if (stripos($url, ".zoom.us/") !== false) {
+            if (stripos($url, ".mailchimp.com/") !== false) {
                 // Match first instance.
                 continue;
             }
+/*
             if (stripos($url, "/zoom.us/") !== false) {
                 // Match first instance.
                 continue;
             }
+*/
             unset($urls[$i]);
         }
         if (count($urls) != 0) {
@@ -228,10 +230,10 @@ class Zoom extends Agent
         return false;
     }
 
-    public function hosturlZoom($text = null)
+    public function hosturlMailchimp($text = null)
     {
         // Undefined at this time.
-        return true;
+        return false;
 
         //        $url_agent = new Url($this->thing, "url");
         //        $urls = $url_agent->extractUrls($text);
@@ -249,8 +251,12 @@ class Zoom extends Agent
         return end($urls);
     }
 
-    public function telephonenumberZoom($text = null)
+    public function telephonenumberMailchimp($text = null)
     {
+        // No useful numbers expected.
+        // Undefined at this time.
+        return true;
+
         // TODO: devstack Telephonenumber
 
         //        $telephonenumber_agent = new Telephonenumber(
@@ -267,8 +273,12 @@ class Zoom extends Agent
     }
 
     // This is the room number.
-    public function accesscodeZoom($text = null)
+    public function accesscodeMailchimp($text = null)
     {
+        // No useful numbers expected.
+        // Undefined at this time.
+        return false;
+
         // 124 456 5678
 
         if ($text == null) {
@@ -276,24 +286,13 @@ class Zoom extends Agent
         }
         //         $pattern = "/\b\d{6}\b/i";
 
-        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
+        $pattern = "/\b\d{3}[\-]\d{3}[\-]\d{3}\b/i";
 
         preg_match_all($pattern, $text, $match);
         if (!isset($access_codes)) {
             $access_codes = [];
         }
 
-        $access_codes = array_merge($access_codes, $match[0]);
-
-        // Todo: recognize 10 digit codes?
-        // Disambiguate against telephone numbers.
-
-        $pattern = "/\b\d{3} \d{3} \d{4}\b/i";
-
-        preg_match_all($pattern, $text, $match);
-        if (!isset($access_codes)) {
-            $access_codes = [];
-        }
         $access_codes = array_merge($access_codes, $match[0]);
 
         $access_codes = array_unique($access_codes);
@@ -302,6 +301,11 @@ class Zoom extends Agent
         if (count($access_codes) === 0) {
             return false;
         }
+
+        if (count($access_codes) == 1) {
+            return $access_codes[0];
+        }
+
 
         // Extract urls and see which codes are also in Url.
         $urls = $this->extractUrls($text);
@@ -352,8 +356,13 @@ class Zoom extends Agent
         return false;
     }
 
-    public function passwordZoom($text)
+    public function passwordMailchimp($text)
     {
+        // TODO - Check if mailchimp has passwords.
+        // No useful numbers expected.
+        // Undefined at this time.
+        return false;
+
         // 11 character string. Alphunumeric.
         // 124 456 5678
 
@@ -391,12 +400,13 @@ class Zoom extends Agent
      * @return unknown
      */
 
-    public function isZoom($text)
+    public function isMailchimp($text)
     {
-        if (stripos($text, "zoom") !== false) {
+        if (stripos($text, "mailchimp") !== false) {
             return true;
         }
-        // Contains word zoom?
+
+        // Contains word mailchimp?
         return false;
     }
 
@@ -404,18 +414,18 @@ class Zoom extends Agent
     {
         $input = strtolower($this->subject);
 
-        $this->readZoom($input);
+        $this->readMailchimp($input);
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == "zoom") {
-                $this->getZoom();
+            if ($input == "mailchimp") {
+                $this->getMailchimp();
                 return;
             }
         }
 
-        $this->getZoom();
+        $this->getMailchimp();
 
         return;
     }

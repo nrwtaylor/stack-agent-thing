@@ -572,8 +572,6 @@ class Word extends Agent
 
         $input = str_replace(["\r", "\n"], "", $input);
 
-        //if ($input == "trumpet") {echo "merp";exit();}
-
         foreach ($words as $key => $word) {
             //$word = trim($word);
 
