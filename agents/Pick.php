@@ -70,6 +70,7 @@ class Pick extends Agent
         $this->thing->flagGreen();
 
         $this->makeChoices();
+        $this->makeTag();
 
         $this->thing_report["info"] = "This picks a token.";
         if (!isset($this->thing_report['help'])) {
@@ -174,6 +175,12 @@ class Pick extends Agent
         $this->thing_report['message'] = $message;
     }
 
+    public function makeTag()
+    {
+
+       $this->thing_report['tag'] = $this->token;
+    }
+
     /**
      *
      */
@@ -214,7 +221,7 @@ class Pick extends Agent
             $this->result = $this->last_result;
         }
 
-        $filtered_input = $this->assert($input);
+        $filtered_input = $this->assert($input, 'pick', false);
 
 // devstack
 // Brilltagger
