@@ -6,8 +6,15 @@ ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
+/*
+ https://tools.ietf.org/html/rfc1436
 
-// https://tools.ietf.org/html/rfc1436
+3.9 "the user display string should be kept under 70 characters in
+length
+
+*/
+
+// TODO Retrieve file resources.
 
 class Gopher extends Agent
 {
@@ -28,55 +35,7 @@ class Gopher extends Agent
 
         $words = str_replace(" ", "+", $words);
 
-        $xml = $this->getText($words);
-
-        $verses = $xml->search->result->verses->verse;
-
-        if ($verses == null) {
-            $sms_message = "GOPHER";
-            $sms_message .= " | No matching verse found for " . $words . ".";
-            $sms_message .= " | MESSAGE 'GOPHER words'";
-            $this->sms_message = $sms_message;
-            return;
-        }
-        $arr[] = [];
-        $sms_messages = [];
-        foreach ($verses as $key => $verse) {
-            $id = (string) $verse->id;
-            $id = strip_tags($id);
-
-            $text = (string) $verse->text;
-            $text = strip_tags($text);
-
-            $copyright = (string) $verse->copyright;
-
-            $text = preg_replace("#^\d+#", "", $text);
-
-            $text = preg_replace('/^[a-zA-Z]+$/', "", $text);
-
-            // Remove line breaks
-            $text = preg_replace("/\r|\n/", " ", $text);
-
-            $message = $id . " | " . $text;
-
-            $sms_message = "GOPHER";
-            $sms_message .= " | " . $message;
-            $sms_message .= " | MESSAGE 'GOPHER words'";
-
-            $arr[] = ["id" => $id, "verse" => $text, "message" => $message];
-            $sms_messages[] = $sms_message;
-        }
-
-        $k = array_rand($sms_messages);
-        $this->sms_message = $sms_messages[$k];
-        //        $this->sms_message = "testtest";
-
-        $k = array_rand($arr);
-
-        $this->sms_message = "GOPHER";
-        $this->sms_message .= " | " . $arr[$k]["message"];
-
-        $this->sms_message .= " | text source Gopher datafeed";
+        $xml = $this->getText($this->url);
     }
 
     public function typeGopher($item_type)
@@ -123,6 +82,8 @@ class Gopher extends Agent
 
     function infoGopher()
     {
+        // https://www.youtube.com/watch?v=dNY9RscP-lI
+
         $this->sms_message = "GOPHER";
 
         $this->sms_message .= " | ";
@@ -162,6 +123,8 @@ class Gopher extends Agent
 
     public function getVerse($url)
     {
+        $url = addslashes($url);
+        //$url = urlencode($url);
         // Set up cURL
         $ch = curl_init();
         // Set the URL
@@ -182,13 +145,13 @@ class Gopher extends Agent
         return $response;
     }
 
-    public function getText($keywords = null)
+    public function getText($url)
     {
-        if ($keywords == null) {
+        if ($url === null) {
+            return true;
         }
 
         // devstack. endpoint has changed.
-        $url = "gopher://gopher.quux.org/";
 
         $response = $this->getVerse($url);
         $burrows = $this->readGopher($response);
@@ -202,6 +165,7 @@ class Gopher extends Agent
         }
         $burrows = [];
         $lines = explode("\n", $text);
+
         foreach ($lines as $i => $line) {
             $burrow = $this->parseGopher($line);
             $burrows[] = $burrow;
@@ -212,13 +176,26 @@ class Gopher extends Agent
 
     public function parseGopher($text)
     {
+        /*
+DirEntity ::= Type User_Name Tab Selector Tab Host Tab Port CR-LF
+*/
+
         $type = substr($text, 0, 1);
         $str1 = substr($text, 1);
         $comp = preg_split("/[\t]/", $str1);
 
+        if (!isset($comp[1])) {
+            return true;
+        }
+
         $burrow["type"] = $type;
         $burrow["type_description"] = $this->typeGopher($type);
-        $burrow = array_merge($burrow, $comp);
+        $burrow["user_name"] = $comp[0];
+        $burrow["selector"] = $comp[1];
+        $burrow["host"] = $comp[2];
+        $burrow["port"] = $comp[3];
+        $burrow["line"] = $str1;
+        //        $burrow = array_merge($burrow, $comp);
         return $burrow;
     }
 
@@ -226,17 +203,15 @@ class Gopher extends Agent
     {
         $txt = "";
         foreach ($this->burrows as $i => $burrow) {
-            $txt .= $burrow["type_description"] . "\n";
-            $element_count = 0;
-            $flag = true;
-            while ($flag) {
-                if (isset($burrow[$element_count])) {
-                    $txt .= " " . $burrow[$element_count];
-                    $element_count += 1;
-                    continue;
-                }
-                $flag = false;
+            if ($burrow === true) {
+                continue;
             }
+            $txt .= $burrow["type_description"] . "\n";
+
+            $txt .= $burrow["user_name"] . " ";
+            $txt .= $burrow["selector"] . " ";
+            $txt .= $burrow["host"] . " ";
+            $txt .= $burrow["port"];
             $txt .= "\n";
         }
 
@@ -276,6 +251,14 @@ class Gopher extends Agent
         $keywords = ["gopher"];
 
         //$input = strtolower($this->subject);
+
+        $filtered_input = $this->assert($this->input, "gopher", false);
+
+        $url = $filtered_input;
+
+        if ($url !== false) {
+            $this->url = $url;
+        }
 
         $prior_uuid = null;
 
