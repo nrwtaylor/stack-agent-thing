@@ -38,6 +38,8 @@ class Block extends Agent
 
         $this->current_time = $this->thing->json->time();
 
+        $this->shift_state = "off";
+        $this->max_index = 0;
         $this->test = "Development code"; // Always
     }
 
@@ -115,13 +117,17 @@ class Block extends Agent
         // See if a block record exists.
         $findagent_thing = new Findagent($this->thing, 'block');
 
+$things = $findagent_thing->thing_report['things'];
+
+if ($things === true) {return true;}
+
         // This pulls up a list of other Block Things.
         // We need the newest block as that is most likely to be relevant to
         // what we are doing.
 
         $this->thing->log(
             'found ' .
-                count($findagent_thing->thing_report['things']) .
+                count($things) .
                 " Block Things."
         );
 
@@ -277,20 +283,44 @@ class Block extends Agent
 
     function makeBlock($run_at = null, $quantity = null, $available = null)
     {
-        if ($quantity == null and $this->quantity == null) {
+        $shift_state = $this->shift_state;
+
+	$quantity_default = 105;
+        if (($quantity === null) and (isset($this->quantity))) {
+          $quantity_default = $this->quantity;
+        }
+        if (!$this->thing->isData($quantity)) {$quantity = $quantity_default;}
+
+        $available_default = 105;
+        if (($available === null) and (isset($this->available))) {
+          $available_default = $this->available;
+        }
+        if (!$this->thing->isData($available)) {$available = $available_default;}
+
+/*
+        if (isset($this->quantity) and $quantity == null and $this->quantity == null) {
             $quantity = 105;
         }
 
-        if ($quantity != null and $this->quantity != null) {
+        if (isset($this->quantity) and $quantity != null and $this->quantity != null) {
             //$quantity = $this->quantity;
         }
 
-        if ($available == null and $this->available == null) {
+        if (isset($this->available) and $available == null and $this->available == null) {
             $available = 100;
-        } elseif ($this->available != null) {
+        } elseif (isset($this->quantity) and ($this->available != null)) {
             $available = $this->available;
         }
+*/
 
+        $run_at_default = $this->current_time;
+        if (($run_at === null) and (isset($this->run_at))) {
+          $run_at_default = $this->run_at;
+
+        }
+        if (!$this->thing->isData($run_at)) {$run_at = $run_at_default;}
+
+/*
         if ($run_at == null and $this->run_at == null) {
             $run_at = $this->current_time;
         }
@@ -302,7 +332,7 @@ class Block extends Agent
         if ($run_at == null) {
             $run_at = $this->current_time;
         }
-
+*/
         $this->thing->log(
             'will make a Block with ' .
                 $this->blockTime($run_at) .
@@ -313,7 +343,7 @@ class Block extends Agent
                 "."
         );
 
-        $shift_override == true;
+        $shift_override = true;
 
         if (
             $shift_state == "off" or
@@ -454,7 +484,7 @@ class Block extends Agent
         $this->thing->log("read");
 
         //        $this->get();
-        return $this->available;
+//        return $this->available;
     }
 
     function addBlock()

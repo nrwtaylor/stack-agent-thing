@@ -498,10 +498,28 @@ class Read extends Agent
             $this->response .= "No contents found. ";
             return;
         }
-        file_put_contents($file, $this->contents);
 
-        // Stack cache
-        $this->response .= "Cached contents in file system. ";
+try {
+$response = @file_put_contents($file, $this->contents);
+if ($response !== false) {        $this->response .= "Cached contents in file system. ";}
+
+if ($response === false) { $this->response .= "Could not write read cache. ";}
+
+        } catch (\OverflowException $t) {
+            $this->response .=
+                "Could not write read cache. ";
+            // Executed only in PHP 7, will not match in PHP 5
+        } catch (\Throwable $t) {
+            $this->response .=
+                "Could not write read cache. ";
+        } catch (\Exception $e) {
+            $this->response .=
+                "Could not write read cache. ";
+        }
+
+
+
+
 
         $this->thing->db->setFrom($this->from);
 

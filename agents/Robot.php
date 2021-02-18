@@ -40,13 +40,18 @@ class Robot extends Agent
                 $this->thing->container['api']['robot']['user_agent_long'];
             ini_set('user_agent', $user_agent_long);
             $this->user_agent_long = $user_agent_long;
+        } else {
+            $this->response .= "No long user agent setting seen. ";
         }
+
 
         if (
             isset($this->thing->container['api']['robot']['user_agent_short'])
         ) {
             $this->user_agent_short =
                 $this->thing->container['api']['robot']['user_agent_short'];
+        } else {
+            $this->response .= "No short user agent setting seen. ";
         }
 
         $this->node_list = ["start" => ["acknowledge"]];
