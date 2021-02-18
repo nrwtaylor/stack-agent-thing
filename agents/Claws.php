@@ -209,13 +209,22 @@ dev - Detect duplicates.
         foreach ($this->claws_items as $i => $claws_item) {
             $text_claws = $this->textCall($claws_item["call"]);
 
-// URL is available like this.
-// $text_claws .= "xx".$claws_item["call"]['url']."xx"."\n";
+            // URL is available like this.
+            // $text_claws .= "xx".$claws_item["call"]['url']."xx"."\n";
 
             $text_claws .= $claws_item["subject"] . "\n";
-            $text_claws .= $claws_item["dateline"]["line"] . "\n";
-            $text_claws .=
-                $this->timestampDateline($claws_item["dateline"]) . "\n";
+
+            $line_text = "No line found.";
+            if (
+                $claws_item["dateline"] !== null and
+                isset($claws_item["dateline"]["line"])
+            ) {
+                $line_text = $claws_item["dateline"]["line"];
+
+                $text_claws .= $line_text . "\n";
+                $text_claws .=
+                    $this->timestampDateline($claws_item["dateline"]) . "\n";
+            }
 
             $txt .= $text_claws . "\n";
         }
@@ -398,8 +407,9 @@ dev - Detect duplicates.
                     // Otherwise ... see if there is a better date time in the combined contents.
                     $datelines = $this->datelinesCall($subject . "\n" . $body);
                     // Pick best dateline.
-
-                    $dateline = $datelines[0];
+                    if (isset($datelines[0])) {
+                        $dateline = $datelines[0];
+                    }
                 }
             }
             $this->claws_items[] = [
@@ -428,4 +438,3 @@ dev - Detect duplicates.
         return false;
     }
 }
-

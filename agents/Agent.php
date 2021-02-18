@@ -95,7 +95,6 @@ class Agent
             $this->default_font =
                 $this->thing->container['stack']['font'];
         }
-
         $this->default_pdf_page_template = null;
         if (
             isset($this->thing->container['stack']['pdf_page_template'])
