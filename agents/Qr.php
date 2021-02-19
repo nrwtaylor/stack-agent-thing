@@ -167,8 +167,6 @@ class Qr extends Agent
             $codeText = $this->agent_input;
         }
 
-var_dump($codeText);
-
         $this->thing->log("start qrcode");
         $qrCode = new QrCode($codeText);
         $image = $qrCode->writeString();

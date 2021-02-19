@@ -321,6 +321,10 @@ $this->margin_bottom = 10;
         //echo $y . " ". $y_max;
         //exit();
         //        while ($i <= $i_max) {
+
+        $font = $this->default_font;
+
+
         foreach ($this->tubs as $m => $n) {
 if ($i > $this->tubs_max) {break;}
 
@@ -341,7 +345,10 @@ $j = $this->tubs_max - $i;
             $y_label_offset = 16;
             $plot_y = $this->height - $y_label_offset;
 
-            $font = $this->font;
+//            $font = $this->font;
+
+
+
 
             $text = "x";
 
@@ -355,6 +362,8 @@ $j = $this->tubs_max - $i;
 
 foreach(array(-1,0,1) as $i1=>$x0) {
 foreach(array(-1,0,1) as $j1=>$y0) {
+        if (file_exists($font)) {
+
             imagettftext(
                 $this->image,
                 $size,
@@ -367,8 +376,10 @@ foreach(array(-1,0,1) as $j1=>$y0) {
             );
 }
 }
+}
 
 
+        if (file_exists($font)) {
 
             imagettftext(
                 $this->image,
@@ -380,7 +391,7 @@ foreach(array(-1,0,1) as $j1=>$y0) {
                 $font,
                 $m
             );
-
+}
             $i = $i + 1;
         }
 
