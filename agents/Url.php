@@ -218,6 +218,8 @@ class Url extends Agent
     {
         $urls = $this->extractUrls($text);
 
+        if ($urls === true) {return $text;}
+
         foreach ($urls as $i => $url) {
             $link = '<a href="' . $url . '">' . $url . '</a>';
             $text = str_replace($url, $link, $text);
