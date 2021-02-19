@@ -319,7 +319,6 @@ class Token extends Agent
         if (!isset($this->token) or $this->token == false) {
             $this->getToken($input);
         }
-
         // Get the recognized tokens.
         foreach($this->tokens_resource as $token_slug=>$token) {
 
@@ -333,8 +332,10 @@ class Token extends Agent
                 //if ($input == 'red-token') {
                 $this->itemToken($token_name);
                 $this->response .= "Made a " . $token_name. " token payment link. ";
+$this->score = strlen($input);
+return;
             }
-            return;
+       //     return;
         }
 
         $pieces = explode(" ", strtolower($input));
