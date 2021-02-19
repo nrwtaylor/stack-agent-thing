@@ -39,6 +39,8 @@ class ACP125G extends Agent
         }
 
         $this->variable = new Variables($this->thing, "variables acp125g " . $this->from);
+
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/acp125g';
 	}
 
     function isACP125G($state = null)
@@ -120,9 +122,13 @@ class ACP125G extends Agent
 
     function getQuickresponse($text = null)
     {
-        if ($text == null) {$text = $this->web_prefix;}
-        $agent = new Qr($this->thing, $text);
-        $this->quick_response_png = $agent->PNG_embed;
+//        if ($text == null) {$text = $this->web_prefix;}
+//        $agent = new Qr($this->thing, $text);
+//        $this->quick_response_png = $agent->PNG_embed;
+        $this->qr_agent = new Qr($this->thing, $this->link);
+        $this->quick_response_png = $this->qr_agent->PNG_embed;
+        $this->html_image = $this->qr_agent->html_image;
+
     }
 
 

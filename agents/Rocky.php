@@ -34,6 +34,9 @@ class Rocky extends Agent
             $this->thing,
             "variables rocky " . $this->from
         );
+
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky';
+
     }
 
     function isRocky($state = null)
@@ -145,8 +148,13 @@ class Rocky extends Agent
         if ($text == null) {
             $text = $this->web_prefix;
         }
-        $agent = new Qr($this->thing, $text);
-        $this->quick_response_png = $agent->PNG_embed;
+//        $agent = new Qr($this->thing, $text);
+//        $this->quick_response_png = $agent->PNG_embed;
+
+        $this->qr_agent = new Qr($this->thing, $this->link);
+        $this->quick_response_png = $this->qr_agent->PNG_embed;
+        $this->html_image = $this->qr_agent->html_image;
+
     }
 
     function setState($state)
@@ -461,7 +469,7 @@ class Rocky extends Agent
             $this->inject = $this->bank . "-" . $this->num;
         } else {
             $arr = explode("-", $this->inject);
-//var_dump($arr);
+
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }

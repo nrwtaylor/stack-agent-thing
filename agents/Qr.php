@@ -166,9 +166,9 @@ class Qr extends Agent
         } else {
             $codeText = $this->agent_input;
         }
-//        if (ob_get_contents()) {
-//            ob_clean();
-//        }
+
+var_dump($codeText);
+
         $this->thing->log("start qrcode");
         $qrCode = new QrCode($codeText);
         $image = $qrCode->writeString();
