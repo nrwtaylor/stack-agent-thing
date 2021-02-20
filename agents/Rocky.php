@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -11,7 +11,7 @@ ini_set("allow_url_fopen", 1);
 
 class Rocky extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
@@ -35,8 +35,7 @@ class Rocky extends Agent
             "variables rocky " . $this->from
         );
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky';
-
+        $this->link = $this->web_prefix . "thing/" . $this->uuid . "/rocky";
     }
 
     function isRocky($state = null)
@@ -69,7 +68,7 @@ class Rocky extends Agent
         $this->rocky->setVariable("refreshed_at", $this->current_time);
 
         $this->thing->log(
-            $this->agent_prefix . 'set Rocky to ' . $this->state,
+            $this->agent_prefix . "set Rocky to " . $this->state,
             "INFORMATION"
         );
     }
@@ -81,7 +80,7 @@ class Rocky extends Agent
         $this->refreshed_at = $this->rocky->getVariable("refreshed_at");
 
         $this->thing->log(
-            $this->agent_prefix . 'got from db ' . $this->previous_state,
+            $this->agent_prefix . "got from db " . $this->previous_state,
             "INFORMATION"
         );
 
@@ -105,9 +104,9 @@ class Rocky extends Agent
 
         $this->thing->log(
             $this->agent_prefix .
-                'got a ' .
+                "got a " .
                 strtoupper($this->state) .
-                ' FLAG.',
+                " FLAG.",
             "INFORMATION"
         );
 
@@ -148,13 +147,12 @@ class Rocky extends Agent
         if ($text == null) {
             $text = $this->web_prefix;
         }
-//        $agent = new Qr($this->thing, $text);
-//        $this->quick_response_png = $agent->PNG_embed;
+        //        $agent = new Qr($this->thing, $text);
+        //        $this->quick_response_png = $agent->PNG_embed;
 
         $this->qr_agent = new Qr($this->thing, $this->link);
         $this->quick_response_png = $this->qr_agent->PNG_embed;
         $this->html_image = $this->qr_agent->html_image;
-
     }
 
     function setState($state)
@@ -244,10 +242,10 @@ class Rocky extends Agent
         $this->makeChoices();
 
         $this->thing_report["info"] = "This creates an exercise message.";
-        $this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
+        $this->thing_report["help"] = "Try CHARLEY. Or NONSENSE.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
         //$this->makeWeb();
 
         //$this->makeTXT();
@@ -261,9 +259,9 @@ class Rocky extends Agent
             $this->node_list,
             "rocky"
         );
-        $this->choices = $this->thing->choice->makeLinks('rocky');
+        $this->choices = $this->thing->choice->makeLinks("rocky");
 
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     function makeSMS()
@@ -277,7 +275,7 @@ class Rocky extends Agent
         // $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeACP125G()
@@ -300,7 +298,7 @@ class Rocky extends Agent
         }
 
         // Load in the cast. And roles.
-        $file = $this->resource_path . '/vector/members.txt';
+        $file = $this->resource_path . "/vector/members.txt";
         $contents = file_get_contents($file);
         $handle = fopen($file, "r");
 
@@ -313,16 +311,16 @@ class Rocky extends Agent
                 $member_sms = trim($arr[1]);
 
                 if ($this->from == $member_sms) {
-                    $this->member['call_sign'] = $member_call_sign;
-                    $this->member['sms'] = $member_sms;
+                    $this->member["call_sign"] = $member_call_sign;
+                    $this->member["sms"] = $member_sms;
                     return;
                 }
             }
         }
 
-        if (!isset($this->member['call_sign'])) {
-            $this->member['call_sign'] = "ROCKY";
-            $this->member['sms'] = "(XXX) XXX-XXXX";
+        if (!isset($this->member["call_sign"])) {
+            $this->member["call_sign"] = "ROCKY";
+            $this->member["sms"] = "(XXX) XXX-XXXX";
         }
     }
 
@@ -475,6 +473,90 @@ class Rocky extends Agent
         }
     }
 
+    function librexRocky()
+    {
+        $word = $this->randomWord(6);
+        $this->thing->wikipedia_handler = new Wikipedia(
+            $this->thing,
+            "wikipedia"
+        );
+        $this->thing->wikipedia_handler->apiWikipedia($word);
+        $m = $this->thing->wikipedia_handler->text;
+
+        // TODO refactor
+        // TODO Build null/random addressing routines.
+        // TODO Depunctuate generated text stream.
+
+        $text = $m;
+
+        $meta = null;
+        $name_to = null;
+        $position_to = null;
+        $organization_to = null;
+        $number_to = null;
+        $text = $m;
+        $name_from = null;
+        $position_from = null;
+        $organization_from = null;
+        $number_from = null;
+
+        // Do this for now.
+        $message_array = [
+            "number" => null,
+            "precedence" => null,
+            "hx" => null, // Not used?
+            "station_origin" => null,
+            "check" => null,
+            "place_filed" => null,
+            "time_filed" => null,
+            "date_filed" => "X",
+            "meta" => $meta,
+            "name_to" => $name_to,
+            "position_to" => $position_to,
+            "organization_to" => $organization_to,
+            "number_to" => $number_to,
+            "text" => $text,
+            "name_from" => $name_from,
+            "position_from" => $position_from,
+            "organization_from" => $organization_from,
+            "number_from" => $number_from,
+        ];
+        $this->num_words = 25;
+        $this->filename = null;
+        $this->title = "random librex wikiepedia";
+        $this->author = "none";
+        $this->date = null;
+        $this->version = null;
+        $this->text = $text;
+        $unit = "X";
+        $this->short_message =
+            "TO " .
+            $name_to .
+            ", " .
+            $position_to .
+            " [" .
+            $organization_to .
+            "]" .
+            "\nFROM " .
+            $name_from .
+            ", " .
+            $position_from .
+            " [" .
+            $organization_from .
+            "]" .
+            "\n" .
+            "" .
+            $text .
+            "\n" .
+            $number_from .
+            " " .
+            $unit .
+            "";
+
+        $this->message = $message_array;
+        $this->messages[0] = $message_array;
+    }
+
     function getMessage()
     {
         $this->getInject();
@@ -483,22 +565,22 @@ class Rocky extends Agent
 
         $this->message = $this->messages[$this->num];
 
-        $this->meta = trim($this->message['meta'], "//");
+        $this->meta = trim($this->message["meta"], "//");
 
-        $this->name_to = $this->message['name_to'];
-        $this->position_to = $this->message['position_to'];
-        $this->organization_to = $this->message['organization_to'];
-        $this->number_to = trim($this->message['number_to'], "//");
+        $this->name_to = $this->message["name_to"];
+        $this->position_to = $this->message["position_to"];
+        $this->organization_to = $this->message["organization_to"];
+        $this->number_to = trim($this->message["number_to"], "//");
 
-        $this->text = trim($this->message['text'], "//");
+        $this->text = trim($this->message["text"], "//");
 
         $this->words = explode(" ", $this->text);
         $this->num_words = count($this->words);
 
-        $this->name_from = $this->message['name_from'];
-        $this->position_from = $this->message['position_from'];
-        $this->organization_from = $this->message['organization_from'];
-        $this->number_from = $this->message['number_from'];
+        $this->name_from = $this->message["name_from"];
+        $this->position_from = $this->message["position_from"];
+        $this->organization_from = $this->message["organization_from"];
+        $this->number_from = $this->message["number_from"];
 
         /*
         $this->short_message = $this->meta . "\n" .
@@ -581,17 +663,17 @@ class Rocky extends Agent
         }
 
         $arr = explode("/", $this->meta);
-        $this->message['number'] = $arr[0];
-        $this->message['precedence'] = $arr[1];
-        $this->message['hx'] = null; // Not used?
-        $this->message['station_origin'] = $arr[2];
-        $this->message['check'] = $arr[3];
-        $this->message['place_filed'] = $arr[4];
-        $this->message['time_filed'] = $arr[5];
+        $this->message["number"] = $arr[0];
+        $this->message["precedence"] = $arr[1];
+        $this->message["hx"] = null; // Not used?
+        $this->message["station_origin"] = $arr[2];
+        $this->message["check"] = $arr[3];
+        $this->message["place_filed"] = $arr[4];
+        $this->message["time_filed"] = $arr[5];
 
-        $this->message['date_filed'] = "X";
+        $this->message["date_filed"] = "X";
         if (isset($arr[6])) {
-            $this->message['date_filed'] = $arr[6];
+            $this->message["date_filed"] = $arr[6];
         }
     }
 
@@ -600,7 +682,7 @@ class Rocky extends Agent
         $message = $this->short_message . "<br>";
         $uuid = $this->uuid;
         $message .= "<p>" . $this->web_prefix . "thing/$uuid/rocky\n \n\n<br> ";
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     function getBar()
@@ -618,7 +700,7 @@ class Rocky extends Agent
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/rocky";
 
         if (!isset($this->html_image)) {
             $this->makePNG();
@@ -672,7 +754,7 @@ class Rocky extends Agent
         $this->makeACP125G($this->message);
         //        $web .= nl2br($this->acp125g->thing_report['acp125g']);
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky.txt';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/rocky.txt";
         $web .= '<a href="' . $link . '">' . $link . "</a>";
         $web .= "<br>";
         //        $web .= "<p>";
@@ -691,7 +773,7 @@ class Rocky extends Agent
         if ($this->num_words > 25) {
             $web .= "No PERCS pdf available. Message > 25 words.<br><p>";
         } else {
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/rocky.pdf';
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/rocky.pdf";
             $web .= '<a href="' . $link . '">' . $link . "</a>";
             $web .= "<br>";
             $web .= "<p>";
@@ -709,30 +791,24 @@ class Rocky extends Agent
         $web .= "Inject Metadata - ";
         //        $web .= "<p>";
 
-        $web .=
-            $this->inject .
-            " - " .
-            $this->thing->nuuid;
-if (isset($this->thing->thing->created_at)) {
-        $web .=
-            " - " .
-            $this->thing->thing->created_at;
+        $web .= $this->inject . " - " . $this->thing->nuuid;
+        if (isset($this->thing->thing->created_at)) {
+            $web .= " - " . $this->thing->thing->created_at;
 
-        $togo = $this->thing->human_time($this->time_remaining);
-        $web .= " - " . $togo . " remaining.<br>";
-}
+            $togo = $this->thing->human_time($this->time_remaining);
+            $web .= " - " . $togo . " remaining.<br>";
+        }
         $web .= "<br>";
 
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
-if (isset($this->thing->thing->created_at)) {
-        $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
-        );
-        $web .= "Inject was created about " . $ago . " ago. ";
-}
-
+        if (isset($this->thing->thing->created_at)) {
+            $ago = $this->thing->human_time(
+                time() - strtotime($this->thing->thing->created_at)
+            );
+            $web .= "Inject was created about " . $ago . " ago. ";
+        }
 
         $web .=
             "This proof-of-concept inject is hosted by the " .
@@ -743,7 +819,7 @@ if (isset($this->thing->thing->created_at)) {
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     function makeTXT()
@@ -752,7 +828,7 @@ if (isset($this->thing->thing->created_at)) {
 
         if ($this->mode == "relay") {
             $txt .= "Relay this message.\n";
-            $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
+            $txt .= "Duplicate messages may exist. Can you de-duplicate?";
         }
 
         if ($this->mode == "origin") {
@@ -761,11 +837,11 @@ if (isset($this->thing->thing->created_at)) {
 
         $txt .= "\n";
 
-        $txt .= $this->acp125g->thing_report['acp125g'];
+        $txt .= $this->acp125g->thing_report["acp125g"];
 
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -793,72 +869,71 @@ if (isset($this->thing->thing->created_at)) {
 
         // devstack add path
         $font = $this->default_font;
-if (file_exists($font)) {
+        if (file_exists($font)) {
+            $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
+            $text = "ROCKY";
+            $text = $this->message["text"];
 
-        $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
-        $text = "ROCKY";
-        $text = $this->message['text'];
+            if (!isset($this->bar)) {
+                $this->getBar();
+            }
 
-        if (!isset($this->bar)) {
-            $this->getBar();
+            $bar_count = $this->bar->bar_count;
+
+            // Add some shadow to the text
+
+            imagettftext(
+                $this->image,
+                40,
+                0,
+                0 - $this->bar->bar_count * 5,
+                75,
+                $this->grey,
+                $font,
+                $text
+            );
+
+            $size = 72;
+            $angle = 0;
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
+            //check width of the image
+            $width = imagesx($this->image);
+            $height = imagesy($this->image);
+            $pad = 0;
+
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + $bb_height / 2,
+                $textcolor,
+                $font,
+                $this->message["station_origin"]
+            );
+
+            $size = 10;
+
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + ($bb_height * 4) / 5,
+                $textcolor,
+                $font,
+                $this->message["station_origin"]
+            );
         }
-
-        $bar_count = $this->bar->bar_count;
-
-        // Add some shadow to the text
-
-        imagettftext(
-            $this->image,
-            40,
-            0,
-            0 - $this->bar->bar_count * 5,
-            75,
-            $this->grey,
-            $font,
-            $text
-        );
-
-        $size = 72;
-        $angle = 0;
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-        //check width of the image
-        $width = imagesx($this->image);
-        $height = imagesy($this->image);
-        $pad = 0;
-
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + $bb_height / 2,
-            $textcolor,
-            $font,
-            $this->message['station_origin']
-        );
-
-        $size = 10;
-
-        imagettftext(
-            $this->image,
-            $size,
-            $angle,
-            $width / 2 - $bb_width / 2,
-            $height / 2 + ($bb_height * 4) / 5,
-            $textcolor,
-            $font,
-            $this->message['station_origin']
-        );
-}
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
@@ -873,7 +948,7 @@ if (file_exists($font)) {
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
         $response =
             '<img src="data:image/png;base64,' .
@@ -900,75 +975,76 @@ if (file_exists($font)) {
 
     public function makePDF()
     {
-	$file = $this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf';
+        $file = $this->resource_path . "percs/PERCS_Message_Form_Ver1.4.pdf";
 
         if ($file === null) {
-            $this->thing_report['pdf'] = false;
+            $this->thing_report["pdf"] = false;
             return;
         }
 
         if ($this->num_words > 25) {
             return;
         }
-        $txt = $this->thing_report['txt'];
+        $txt = $this->thing_report["txt"];
 
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
         // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
         $pdf->setSourceFile($file);
-        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetFont("Helvetica", "", 10);
 
-        $tplidx1 = $pdf->importPage(1, '/MediaBox');
+        $tplidx1 = $pdf->importPage(1, "/MediaBox");
 
         $s = $pdf->getTemplatesize($tplidx1);
 
-        $pdf->addPage($s['orientation'], $s);
+        $pdf->addPage($s["orientation"], $s);
         // $pdf->useTemplate($tplidx1,0,0,215);
         $pdf->useTemplate($tplidx1);
 
         $pdf->SetTextColor(0, 0, 0);
 
-if (isset($this->thing->thing->created_at)) {
-        $text = "Inject generated at " . $this->thing->thing->created_at . ".";
-        $pdf->SetXY(130, 10);
-        $pdf->Write(0, $text);
-}
+        if (isset($this->thing->thing->created_at)) {
+            $text =
+                "Inject generated at " . $this->thing->thing->created_at . ".";
+            $pdf->SetXY(130, 10);
+            $pdf->Write(0, $text);
+        }
 
         $this->getQuickresponse(
-            $this->web_prefix . 'thing\\' . $this->uuid . '\\rocky'
+            $this->web_prefix . "thing\\" . $this->uuid . '\\rocky'
         );
-        $pdf->Image($this->quick_response_png, 199, 2, 10, 10, 'PNG');
+        $pdf->Image($this->quick_response_png, 199, 2, 10, 10, "PNG");
 
         //$pdf->SetXY(15, 20);
         //$pdf->Write(0, $this->message['text']);
 
         if ($this->mode == "relay") {
             $pdf->SetXY(8, 50);
-            $pdf->Write(0, $this->message['number']);
+            $pdf->Write(0, $this->message["number"]);
 
             $pdf->SetXY(50, 40);
-            $pdf->Write(0, $this->message['hx']);
+            $pdf->Write(0, $this->message["hx"]);
 
             $pdf->SetXY(80, 50);
-            $pdf->Write(0, $this->message['station_origin']);
+            $pdf->Write(0, $this->message["station_origin"]);
 
             $pdf->SetXY(112, 50);
-            $pdf->Write(0, $this->message['check']);
+            $pdf->Write(0, $this->message["check"]);
 
             $pdf->SetXY(123, 50);
-            $pdf->Write(0, $this->message['place_filed']);
+            $pdf->Write(0, $this->message["place_filed"]);
 
             $pdf->SetXY(166, 50);
-            $pdf->Write(0, $this->message['time_filed']);
+            $pdf->Write(0, $this->message["time_filed"]);
 
             $pdf->SetXY(181, 50);
-            $pdf->Write(0, $this->message['date_filed']);
+            $pdf->Write(0, $this->message["date_filed"]);
         }
 
-        switch (strtolower($this->message['precedence'])) {
-            case 'r':
-            case 'routine':
+        switch (strtolower($this->message["precedence"])) {
+            case "r":
+            case "routine":
                 $pdf->SetXY(24, 52.5);
                 $pdf->Write(0, "X");
                 break;
@@ -991,22 +1067,22 @@ if (isset($this->thing->thing->created_at)) {
         }
 
         $pdf->SetXY(30, 76);
-        $pdf->Write(0, strtoupper($this->message['name_to']));
+        $pdf->Write(0, strtoupper($this->message["name_to"]));
 
         $pdf->SetXY(30, 76 + 10);
-        $pdf->Write(0, strtoupper($this->message['position_to']));
+        $pdf->Write(0, strtoupper($this->message["position_to"]));
 
         $pdf->SetXY(30, 76 + 21);
-        $pdf->Write(0, strtoupper($this->message['organization_to']));
+        $pdf->Write(0, strtoupper($this->message["organization_to"]));
 
         $pdf->SetXY(60 + 44, 168);
-        $pdf->Write(0, strtoupper($this->message['name_from']));
+        $pdf->Write(0, strtoupper($this->message["name_from"]));
 
         $pdf->SetXY(60 + 44, 168 + 10);
-        $pdf->Write(0, strtoupper($this->message['position_from']));
+        $pdf->Write(0, strtoupper($this->message["position_from"]));
 
         $pdf->SetXY(60 + 44, 168 + 21);
-        $pdf->Write(0, strtoupper($this->message['organization_from']));
+        $pdf->Write(0, strtoupper($this->message["organization_from"]));
 
         //$pdf->SetXY(30, 40);
         //$pdf->Write(0, $this->message['precedence']);
@@ -1057,11 +1133,11 @@ if (isset($this->thing->thing->created_at)) {
                 $row += 1;
             }
         }
-        $image = $pdf->Output('', 'S');
+        $image = $pdf->Output("", "S");
 
-        $this->thing_report['pdf'] = $image;
+        $this->thing_report["pdf"] = $image;
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     public function readSubject()
@@ -1075,7 +1151,7 @@ if (isset($this->thing->thing->created_at)) {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'rocky') {
+            if ($input == "rocky") {
                 $this->getMessage();
 
                 if (!isset($this->index) or $this->index == null) {
@@ -1086,6 +1162,7 @@ if (isset($this->thing->thing->created_at)) {
         }
 
         $keywords = [
+            "librex",
             "hard",
             "16ln",
             "easy",
@@ -1103,9 +1180,18 @@ if (isset($this->thing->thing->created_at)) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'hard':
-                        case 'easy':
-                        case '16ln':
+                        case "librex":
+                            $this->librexRocky();
+                            $this->response .=
+                                "Picked a random word and got librex (wikipedia) text. ";
+                            $this->score = strlen("rocky librex");
+                            $this->setState("n/a");
+                            $this->setBank("librex wikipedia");
+                            return;
+
+                        case "hard":
+                        case "easy":
+                        case "16ln":
                             $this->setState($piece);
                             $this->setBank($piece);
 
@@ -1117,27 +1203,27 @@ if (isset($this->thing->thing->created_at)) {
 
                             return;
 
-                        case 'origin':
-                        case 'source':
+                        case "origin":
+                        case "source":
                             $this->response .= " Set mode to origin.";
-                            $this->setMode('origin');
+                            $this->setMode("origin");
                             $this->getMessage();
                             return;
-                        case 'relay':
+                        case "relay":
                             $this->response .= " Set mode to relay.";
-                            $this->setMode('relay');
+                            $this->setMode("relay");
                             $this->getMessage();
                             return;
 
-                        case 'hey':
+                        case "hey":
                             $this->getMember();
                             $this->response =
                                 "Hey " .
-                                strtoupper($this->member['call_sign']) .
+                                strtoupper($this->member["call_sign"]) .
                                 ".";
 
                             return;
-                        case 'on':
+                        case "on":
                         default:
                     }
                 }

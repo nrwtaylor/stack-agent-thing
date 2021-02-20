@@ -459,7 +459,9 @@ class Word extends Agent
             $this->ewolWords();
             //return true;
         }
-        if ($length === null or $length === false) {
+
+        if ($number === null or $number === false) {
+//        if ($length === null or $length === false) {
             $min_number = 3;
             $max_number = $number;
             if ($number == false) {
@@ -768,7 +770,6 @@ class Word extends Agent
                             );
 
                             $word = $this->randomWord(
-                                $number_agent->number,
                                 $length
                             );
 
