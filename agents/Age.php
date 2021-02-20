@@ -46,7 +46,6 @@ class Age extends Chart
             "age",
             "refreshed_at",
         ]);
-
     }
     public function set()
     {
@@ -294,7 +293,6 @@ class Age extends Chart
 
     public function drawLabels($tubs = null)
     {
-
         $y_min = 0;
         $x_min = 0;
         $i_max = $this->tubs_max;
@@ -493,12 +491,23 @@ class Age extends Chart
             }
         }
 
-        $this->x_max = $x_max;
-        $this->x_min = $x_min;
+        $this->x_max = 1;
+        if (isset($x_max)) {
+            $this->x_max = $x_max;
+        }
+        $this->x_min = 0;
+        if (isset($x_min)) {
+            $this->x_min = $x_min;
+        }
 
-        $this->y_max = $y_max;
-        $this->y_min = $y_min;
-
+        $this->y_max = 1;
+        if (isset($y_max)) {
+            $this->y_max = $y_max;
+        }
+        $this->y_min = 1;
+        if (isset($y_min)) {
+            $this->y_min = $y_min;
+        }
         $this->y_spread = $this->y_max - $this->y_min;
         $this->x_spread = $this->x_max - $this->x_min;
 
@@ -508,7 +517,6 @@ class Age extends Chart
         $this->tubs = [];
 
         foreach ($this->points as $key => $point) {
-
             $x = time() - $point["age"];
 
             $tub_boundary_name = explode(" ", $this->thing->human_time($x))[1];
@@ -679,7 +687,7 @@ class Age extends Chart
 
         $this->thing->json->setField("variables");
 
-//        $this->thing_report["thing"] = $this->thing->thing;
+        //        $this->thing_report["thing"] = $this->thing->thing;
         $this->thing_report["email"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
