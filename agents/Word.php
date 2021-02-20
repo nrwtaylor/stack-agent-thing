@@ -453,34 +453,42 @@ class Word extends Agent
      *
      * @param unknown $number (optional)
      */
-    function randomWord($number = null)
+    function randomWord($number = null, $length = null)
     {
         if (!isset($this->ewol_dictionary)) {
             $this->ewolWords();
             //return true;
         }
-
-        $min_number = 3;
-        $max_number = $number;
-        if ($number == false) {
-            $max_number = 7;
-        }
-        if ($number == null) {
-            $max_number = 7;
+        if ($length === null or $length === false) {
+            $min_number = 3;
+            $max_number = $number;
+            if ($number == false) {
+                $max_number = 7;
+            }
+            if ($number == null) {
+                $max_number = 7;
+            }
+        } else {
+            $min_number = $length;
+            $max_number = $length;
         }
 
         // TODO recognize false ewol_dictionary
         // Review isset below.
         $word = true;
         if ($this->ewol_dictionary !== false) {
+            $start_time = time();
             while (true) {
                 $this->ewolWords();
-                //var_dump($this->ewol_dictionary);
+
                 $word = array_rand($this->ewol_dictionary);
                 if (
                     strlen($word) >= $min_number and
                     strlen($word) <= $max_number
                 ) {
+                    break;
+                }
+                if (time() - $start_time > 2) {
                     break;
                 }
             }
@@ -557,8 +565,6 @@ class Word extends Agent
         // Suppress warning of preg_match fail.
         if (preg_match_all($pattern, $this->contents, $matches)) {
             $m = $matches[0][0];
-            //var_dump($m);
-            //exit();
             return true;
             return $m;
         } else {
@@ -731,18 +737,7 @@ class Word extends Agent
      */
     public function readSubject()
     {
-        //if ($this->input == "word") {
-
-        //return;
-        //}
-
-        //        $this->translated_input = $this->wordsEmoji($this->subject);
-
-        if ($this->agent_input == null) {
-            $input = strtolower($this->subject);
-        } else {
-            $input = strtolower($this->agent_input);
-        }
+        $input = $this->assert($this->input, "word", false);
 
         $keywords = ["word", "random"];
         $pieces = explode(" ", strtolower($input));
@@ -752,37 +747,49 @@ class Word extends Agent
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case "random":
+                            // Ignore 'random' if it comes after the word command.
+                            $random_word_position = stripos(
+                                $this->input,
+                                "random"
+                            );
+                            $word_position = stripos($this->input, "word");
+                            if ($random_word_position > $word_position) {
+                                $this->score = strlen("word random");
+
+                                break;
+                            }
+
                             $number_agent = new Number($this->thing, "number");
                             $number_agent->extractNumber($input);
 
-                            $this->randomWord($number_agent->number);
-                            if ($this->word != null) {
-                                return;
-                            }
-                        //return;
-
-                        case "word":
-                            $prefix = "word";
-                            $words = preg_replace(
-                                "/^" . preg_quote($prefix, "/") . "/",
-                                "",
-                                $input
+                            $length = $number_agent->number;
+                            $this->score = strlen(
+                                "word random " . $number_agent->number
                             );
-                            $words = ltrim($words);
-                            $this->search_words = $words;
-                            $this->extractWords($words);
 
+                            $word = $this->randomWord(
+                                $number_agent->number,
+                                $length
+                            );
+
+                            $this->words[0] = $word;
                             if ($this->word != null) {
                                 return;
                             }
-                        //return;
-
                         default:
 
                         //echo 'default';
                     }
                 }
             }
+        }
+
+        $words = $input;
+        $this->search_words = $words;
+        $this->extractWords($words);
+
+        if ($this->word != null) {
+            return;
         }
 
         if (isset($this->search_words)) {
