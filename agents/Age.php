@@ -7,7 +7,7 @@
 
 namespace Nrwtaylor\StackAgentThing;
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set("display_errors", 1);
 
 class Age extends Chart
 {
@@ -15,59 +15,48 @@ class Age extends Chart
      *
      * @param Thing   $thing
      */
-    function __construct(Thing $thing)
+    //    function __construct(Thing $thing)
+    function init()
     {
-        $this->thing = $thing;
-
-        // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {
-            $this->test = true;
-        }
-        // I think.
-        // Instead.
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-
         $this->height = 200;
         $this->width = 300;
 
-        $this->series = ['age'];
-
-        //$this->sqlresponse = null;
+        $this->series = ["age"];
 
         $this->node_list = ["start"];
 
         $this->thing->log(
-            '<pre> Agent "Age" running on Thing ' . $this->uuid . ' </pre>'
+            '<pre> Agent "Age" running on Thing ' . $this->uuid . " </pre>"
         );
 
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
+        $this->mail_postfix = $this->thing->container["stack"]["mail_postfix"];
+        $this->web_prefix = $this->thing->container["stack"]["web_prefix"];
 
         $this->current_time = $this->thing->json->time();
 
         $this->tubs_max = 8;
-$this->y_origin = 10;
-$this->margin_bottom = 10;
+        $this->y_origin = 10;
+        $this->margin_bottom = 10;
+    }
+
+    public function get()
+    {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "age",
             "refreshed_at",
         ]);
 
-        if ($time_string == false) {
-            // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
-        }
+    }
+    public function set()
+    {
+    }
 
+    public function countAge()
+    {
         $this->thing->db->setFrom($this->from);
-        $thing_report = $this->thing->db->agentSearch('age', 3);
-        $things = $thing_report['things'];
+        $thing_report = $this->thing->db->agentSearch("age", 3);
+        $things = $thing_report["things"];
 
         $this->sms_message = "";
         $reset = false;
@@ -77,34 +66,34 @@ $this->margin_bottom = 10;
             $this->resetCounts();
         } else {
             foreach ($things as $thing) {
-                $uuid = $thing['uuid'];
+                $uuid = $thing["uuid"];
 
-                $variables_json = $thing['variables'];
+                $variables_json = $thing["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-                if (isset($variables['age']['mean'])) {
-                    $this->age = $variables['age']['mean'];
+                if (isset($variables["age"]["mean"])) {
+                    $this->age = $variables["age"]["mean"];
                 }
-                if (isset($variables['age']['count'])) {
-                    $this->count = $variables['age']['count'];
+                if (isset($variables["age"]["count"])) {
+                    $this->count = $variables["age"]["count"];
                 }
-                if (isset($variables['age']['sum'])) {
-                    $this->sum = floatval($variables['age']['sum']);
+                if (isset($variables["age"]["sum"])) {
+                    $this->sum = floatval($variables["age"]["sum"]);
                 }
-                if (isset($variables['age']['sum_squared'])) {
+                if (isset($variables["age"]["sum_squared"])) {
                     $this->sum_squared = floatval(
-                        $variables['age']['sum_squared']
+                        $variables["age"]["sum_squared"]
                     );
                 }
-                if (isset($variables['age']['sum_squared_difference'])) {
+                if (isset($variables["age"]["sum_squared_difference"])) {
                     $this->sum_squared_difference = floatval(
-                        $variables['age']['sum_squared_difference']
+                        $variables["age"]["sum_squared_difference"]
                     );
                 }
 
-                if (isset($variables['age']['earliest'])) {
+                if (isset($variables["age"]["earliest"])) {
                     $this->earliest_known = strtotime(
-                        $variables['age']['earliest']
+                        $variables["age"]["earliest"]
                     );
                 }
 
@@ -128,9 +117,6 @@ $this->margin_bottom = 10;
                 $this->resetCounts();
             }
         }
-
-        $this->readSubject();
-        $this->respond();
     }
 
     /**
@@ -145,25 +131,22 @@ $this->margin_bottom = 10;
         $this->red = $chart_agent->red;
         $this->grey = $chart_agent->grey;
 
-        $this->tubAge();
-
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
 
         $num_points = count($this->tubs);
-	$column_width = 1;
+        $column_width = 1;
         if ($num_points !== 0) {
             $column_width = $this->width / $num_points;
-	}
+        }
         $i = 0;
 
-	$x_min = 0;
-	$x_max = 1;
-	$y_min = 0;
-	$y_max = 1;
+        $x_min = 0;
+        $x_max = 1;
+        $y_min = 0;
+        $y_max = 1;
 
         foreach ($this->tubs as $x => $y) {
-
             if ($y == null or $y == 0) {
                 continue;
             }
@@ -190,7 +173,7 @@ $this->margin_bottom = 10;
                 $y_max = $y;
             }
             $x_min = 0;
-            //if ($x < $x_min) {$x_min = $x;}
+
             if ($x > $x_max) {
                 $x_max = $x;
             }
@@ -213,14 +196,13 @@ $this->margin_bottom = 10;
         $this->y_spread = $this->y_max - $this->y_min;
 
         $i = 0;
-        //$i_max = count($this->tubs);
-        //$i_max = count($this->tub_boundaries);
+
         $i_max = $this->tubs_max;
-        //    $this->tubAge();
 
         foreach ($this->tubs as $tub_name => $tub_quantity) {
-
-            if ($i > $this->tubs_max) {break;}
+            if ($i > $this->tubs_max) {
+                break;
+            }
 
             $elapsed_time = $tub_quantity;
             $refreshed_at = $this->tub_boundaries[$tub_name];
@@ -228,8 +210,8 @@ $this->margin_bottom = 10;
             $y =
                 $this->y_origin +
                 $this->chart_height -
-                (($elapsed_time - $this->y_min) / $this->y_spread) * $this->chart_height;
-
+                (($elapsed_time - $this->y_min) / $this->y_spread) *
+                    $this->chart_height;
 
             $j = $this->tubs_max - $i;
             $x = 50 + ($j / $this->tubs_max) * ($this->chart_width - 50);
@@ -312,43 +294,28 @@ $this->margin_bottom = 10;
 
     public function drawLabels($tubs = null)
     {
-        //$y = $this->roundUpToAny($y_min, $inc);
 
         $y_min = 0;
         $x_min = 0;
         $i_max = $this->tubs_max;
         $i = 0;
-        //echo $y . " ". $y_max;
-        //exit();
-        //        while ($i <= $i_max) {
-
-        $font = $this->default_font;
-
 
         foreach ($this->tubs as $m => $n) {
-if ($i > $this->tubs_max) {break;}
+            if ($i > $this->tubs_max) {
+                break;
+            }
 
-
-
-      //      $plot_x =
-      //          0 +
-      //          $this->chart_width -
-      //          ($i / $this->tubs_max) * ($this->chart_width - 50);
-
-$j = $this->tubs_max - $i;
+            $j = $this->tubs_max - $i;
 
             $plot_x = 50 + ($j / $this->tubs_max) * ($this->chart_width - 50);
             $plot_x = $this->chart_width - $plot_x + 50;
 
             $x_label_offset = 5;
-            $plot_x = $plot_x +$x_label_offset;
+            $plot_x = $plot_x + $x_label_offset;
             $y_label_offset = 16;
             $plot_y = $this->height - $y_label_offset;
 
-//            $font = $this->font;
-
-
-
+            $font = $this->default_font;
 
             $text = "x";
 
@@ -357,46 +324,39 @@ $j = $this->tubs_max - $i;
             $pad = 0;
 
             $colour = $this->black;
-            // $colour = $this->grey;
-            // if ($n > 2 * $this->preferred_step) {$colour = $this->white;}
 
-foreach(array(-1,0,1) as $i1=>$x0) {
-foreach(array(-1,0,1) as $j1=>$y0) {
-        if (file_exists($font)) {
+            foreach ([-1, 0, 1] as $i1 => $x0) {
+                foreach ([-1, 0, 1] as $j1 => $y0) {
+                    if (file_exists($font)) {
+                        imagettftext(
+                            $this->image,
+                            $size,
+                            $angle,
+                            $plot_x + $x0,
+                            $plot_y + $y0,
+                            $this->white,
+                            $font,
+                            $m
+                        );
+                    }
+                }
+            }
 
-            imagettftext(
-                $this->image,
-                $size,
-                $angle,
-                $plot_x+$x0,
-                $plot_y+$y0,
-                $this->white,
-                $font,
-                $m
-            );
-}
-}
-}
-
-
-        if (file_exists($font)) {
-
-            imagettftext(
-                $this->image,
-                $size,
-                $angle,
-                $plot_x,
-                $plot_y,
-                $colour,
-                $font,
-                $m
-            );
-}
+            if (file_exists($font)) {
+                imagettftext(
+                    $this->image,
+                    $size,
+                    $angle,
+                    $plot_x,
+                    $plot_y,
+                    $colour,
+                    $font,
+                    $m
+                );
+            }
             $i = $i + 1;
         }
-
     }
-
 
     /**
      *
@@ -412,18 +372,22 @@ foreach(array(-1,0,1) as $j1=>$y0) {
     {
         // Get all users records
         $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
+        $thingreport = $this->thing->db->userSearch(""); // Designed to accept null as $this->uuid.
 
-        $things = $thingreport['thing'];
+        $things = $thingreport["thing"];
 
-if (!isset($this->points)) {$this->points = [];}
+        if (!isset($this->points)) {
+            $this->points = [];
+        }
         $this->earliest_seen_population = false;
 
-if ($things === false) {return;}
+        if ($things === false) {
+            return;
+        }
 
         // Get the earliest from the current data set
         foreach ($things as $thing) {
-            $created_at = strtotime($thing['created_at']);
+            $created_at = strtotime($thing["created_at"]);
             $bin_sum = 0;
 
             $this->points[] = ["age" => $created_at, "bin_sum" => $bin_sum];
@@ -435,13 +399,14 @@ if ($things === false) {return;}
      */
     function resetCounts()
     {
+        $this->age = null;
         $this->count = 0;
         $this->sum = 0;
         $this->sum_squared = 0;
         $this->sum_squared_difference = 0;
 
         $this->age_thing = new Thing(null);
-        $this->age_thing->Create($this->from, 'age', 's/ user age');
+        $this->age_thing->Create($this->from, "age", "s/ user age");
         $this->age_thing->flagGreen();
     }
 
@@ -483,53 +448,48 @@ if ($things === false) {return;}
         ];
 
         if ($this->points == []) {
+            $this->x_max = 1;
+            $this->x_min = 0;
 
-        $this->x_max = 1;
-        $this->x_min = 0;
+            $this->y_max = 1;
+            $this->y_min = 0;
 
-        $this->y_max = 1;
-        $this->y_min = 0;
+            $this->y_spread = $this->y_max - $this->y_min;
+            $this->x_spread = $this->x_max - $this->x_min;
 
-        $this->y_spread = $this->y_max - $this->y_min;
-        $this->x_spread = $this->x_max - $this->x_min;
+            $this->num_tubs = 1;
 
-        $this->num_tubs = 1;
-
-        // Clear array
-        $this->tubs = [];
-
-
-return;
-}
-
+            // Clear array
+            $this->tubs = [];
+        }
 
         foreach ($this->points as $key => $point) {
             if (!isset($x_min)) {
-                $x_min = $point['age'];
+                $x_min = $point["age"];
             }
             if (!isset($x_max)) {
-                $x_max = $point['age'];
+                $x_max = $point["age"];
             }
 
-            if ($point['age'] < $x_min) {
-                $x_min = $point['age'];
+            if ($point["age"] < $x_min) {
+                $x_min = $point["age"];
             }
-            if ($point['age'] > $x_max) {
-                $x_max = $point['age'];
+            if ($point["age"] > $x_max) {
+                $x_max = $point["age"];
             }
 
             if (!isset($y_min)) {
-                $y_min = $point['bin_sum'];
+                $y_min = $point["bin_sum"];
             }
             if (!isset($y_max)) {
-                $y_max = $point['bin_sum'];
+                $y_max = $point["bin_sum"];
             }
 
-            if ($point['bin_sum'] < $y_min) {
-                $y_min = $point['bin_sum'];
+            if ($point["bin_sum"] < $y_min) {
+                $y_min = $point["bin_sum"];
             }
-            if ($point['bin_sum'] > $y_max) {
-                $y_max = $point['bin_sum'];
+            if ($point["bin_sum"] > $y_max) {
+                $y_max = $point["bin_sum"];
             }
         }
 
@@ -548,9 +508,8 @@ return;
         $this->tubs = [];
 
         foreach ($this->points as $key => $point) {
-            //$spread = the distance between youngest and oldest age
 
-            $x = time() - $point['age'];
+            $x = time() - $point["age"];
 
             $tub_boundary_name = explode(" ", $this->thing->human_time($x))[1];
 
@@ -560,7 +519,6 @@ return;
             }
             $this->tubs[$tub_boundary_name] += 1;
         }
-
         foreach ($this->tubs as $tub_name => $quantity) {
         }
     }
@@ -577,22 +535,25 @@ return;
         // And sums of differences of squares.
 
         // Get all users records
-        $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
 
-        $things = $thingreport['thing'];
-$this->mean = false;
-$this->age_oldest = false;
-$this->total_things = 0;
-$this->sum = false;
-$this->sample_count = false;
-if ($things === false) {return;}
+        $this->thing->db->setUser($this->from);
+        $thingreport = $this->thing->db->userSearch(""); // Designed to accept null as $this->uuid.
+
+        $things = $thingreport["thing"];
+        $this->mean = false;
+        $this->age_oldest = false;
+        $this->total_things = 0;
+        $this->sum = false;
+        $this->sample_count = false;
+        if ($things === false) {
+            return;
+        }
 
         // Get the earliest from the current data set
 
         $this->earliest_seen_population = false;
         foreach ($things as $thing) {
-            $created_at = strtotime($thing['created_at']);
+            $created_at = strtotime($thing["created_at"]);
             if (
                 $created_at < $this->earliest_seen_population or
                 $this->earliest_seen_population == false
@@ -618,7 +579,7 @@ if ($things === false) {return;}
         shuffle($things);
         while ($this->total_things > 0) {
             $thing = array_pop($things);
-            $created_at = strtotime($thing['created_at']);
+            $created_at = strtotime($thing["created_at"]);
 
             if (
                 $created_at < $this->earliest_seen_sample or
@@ -711,26 +672,17 @@ if ($things === false) {return;}
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         // Develop the various messages for each channel.
         $this->thing->flagGreen();
 
         $this->thing->json->setField("variables");
 
-        $this->makePNG();
-
-        $this->thing_report['thing'] = $this->thing->thing;
-        $this->makeSms();
-        $this->makeWeb();
-
-        $this->makeTXT();
-
-        // While we work on this
-        $this->thing_report['email'] = $this->sms_message;
+//        $this->thing_report["thing"] = $this->thing->thing;
+        $this->thing_report["email"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        return $this->thing_report;
     }
 
     /**
@@ -738,31 +690,25 @@ if ($things === false) {return;}
      */
     function makeTXT()
     {
-        $txt = 'This is a CHART. ';
+        $txt = "This is a CHART. ";
         $txt .= "\n";
 
-        $this->tubAge();
-
         foreach ($this->tubs as $x => $y) {
-
-            $txt .= str_pad($x, 7, ' ', STR_PAD_LEFT);
+            $txt .= str_pad($x, 7, " ", STR_PAD_LEFT);
             $txt .= " ";
 
-            $txt .= str_pad($y, 7, ' ', STR_PAD_LEFT);
+            $txt .= str_pad($y, 7, " ", STR_PAD_LEFT);
             $txt .= "\n";
-
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
-
-        //exit();
     }
 
     /**
      *
      */
-    public function makeSms()
+    public function makeSMS()
     {
         $this->sms_message =
             "AGE = " .
@@ -799,10 +745,10 @@ if ($things === false) {return;}
                 " | ";
         }
 
-        $this->sms_message .= 'TEXT BALANCE';
+        $this->sms_message .= "TEXT BALANCE";
 
-        $this->thing_report['thing'] = $this->thing->thing;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["thing"] = $this->thing->thing;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     /**
@@ -812,8 +758,10 @@ if ($things === false) {return;}
     {
         // This is a stack generated image
         // Eventually responsive to perspective context
+        $this->countAge();
         $this->stackAge();
         $this->getData();
+        $this->tubAge();
     }
 
     /**
@@ -823,7 +771,7 @@ if ($things === false) {return;}
     {
         //$this->getData();
         $this->drawGraph();
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/age';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/age";
 
         $head = '
             <td>
@@ -844,17 +792,17 @@ if ($things === false) {return;}
         $web .= "<b>Agent Age</b>";
 
         $web .= "<p>";
-        $web .= '<table>';
-        $web .= '<th>'.'age' . "</th><th>" . 'Things' . "</th>";
+        $web .= "<table>";
+        $web .= "<th>" . "age" . "</th><th>" . "Things" . "</th>";
         foreach ($this->tubs as $tub_name => $tub_quantity) {
-            $web .= '<tr>';
-            $web .= '<th>'.$tub_name . "</th><th>" . $tub_quantity . "</th>";
+            $web .= "<tr>";
+            $web .= "<th>" . $tub_name . "</th><th>" . $tub_quantity . "</th>";
             $web .= "</tr>";
         }
 
-            $web .= '<th>'.'Total' . "</th><th>" . $this->total_things . "</th>";
+        $web .= "<th>" . "Total" . "</th><th>" . $this->total_things . "</th>";
 
-        $web .= '</table>';
+        $web .= "</table>";
         $web .= "<p>";
 
         $web .= "This shows the age spread of the ";
@@ -869,12 +817,13 @@ if ($things === false) {return;}
             " old. ";
 
         $web .= "<p>";
-        $web .= 'You can send the text command "FORGET TODAY". Or "FORGET MONTH". Or "FORGET MINUTES". This will forget Things of the specified age.';
+        $web .=
+            'You can send the text command "FORGET TODAY". Or "FORGET MONTH". Or "FORGET MINUTES". This will forget Things of the specified age.';
         $web .= "<p>";
         $web .= "The privacy engine continually removes Things by algorithm.";
 
         $web .= "<br><br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 }
