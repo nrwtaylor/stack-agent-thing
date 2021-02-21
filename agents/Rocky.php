@@ -475,30 +475,36 @@ class Rocky extends Agent
 
     function librexRocky()
     {
-//$start_time = time();
-//while(true) {
-        $word = $this->randomWord(6);
-        $this->thing->wikipedia_handler = new Wikipedia(
-            $this->thing,
-            "wikipedia"
-        );
-        $this->thing->wikipedia_handler->apiWikipedia($word);
-        $m = $this->thing->wikipedia_handler->text;
-//if (time() - $start_time) > 2 {$text = "No text generated."; break;}
-//if ( $this->hasOffensive($m) === false ) {break;}
-//}
+        $start_time = time();
+        while (true) {
+            $word = $this->randomWord(6);
+            $this->thing->wikipedia_handler = new Wikipedia(
+                $this->thing,
+                "wikipedia"
+            );
+            $this->thing->wikipedia_handler->apiWikipedia($word);
+            $raw_text = $this->thing->wikipedia_handler->text;
+            if ($this->hasOffensive($raw_text) === false) {
+                break;
+            }
+            if (time() - $start_time > 2) {
+                $raw_text =
+                    "There was a problem. Something was found. But it was not appropriate. Try again.";
+                break;
+            }
+        }
         // TODO refactor
         // TODO Build null/random addressing routines.
         // TODO Depunctuate generated text stream.
 
-        $text = $m;
+        $text = $raw_text;
 
         $meta = null;
         $name_to = null;
         $position_to = null;
         $organization_to = null;
         $number_to = null;
-        $text = $m;
+        //$text = $m;
         $name_from = null;
         $position_from = null;
         $organization_from = null;

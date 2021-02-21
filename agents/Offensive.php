@@ -19,6 +19,8 @@ class Offensive extends Agent
         $this->thing->offensive_librex_handler->getLibrex(
             "offensive/bad-words"
         );
+
+        $this->offensive_words = $this->thing->offensive_librex_handler->linesLibrex();
     }
 
     function run()
@@ -76,16 +78,72 @@ class Offensive extends Agent
             return false;
         }
 
+        // First. Are any tokens a direct match with the offensive librex.
+        if ($this->tokensOffensive($text) === true) {
+            return true;
+        }
+
+        $tokens = explode(" ", $text);
+
+        $squish_text = str_replace(" ", "", $text);
+        $flag_offensive = false;
+        foreach ($this->offensive_words as $i => $offensive_word) {
+            if (stripos($squish_text, $offensive_word) !== false) {
+                echo $offensive_word . "\n";
+
+                // Found embedded offensiveness.
+                $flag_offensive = true;
+            }
+        }
+
+        if ($flag_offensive === false) {
+            return false;
+        }
+
+        // Okay so maybe there is something offensive.
+        // But check whether it is a "real" word like hello.
+        foreach ($tokens as $j => $token) {
+            $flag_offensive = false;
+            foreach ($this->offensive_words as $i => $offensive_word) {
+                if (stripos($token, $offensive_word) !== false) {
+                    echo $offensive_word . "\n";
+
+                    // Found embedded offensiveness.
+                    $is = $this->isWord($token);
+                    if ($is === true) {
+                    } else {
+                        $flag_offensive = true;
+                        break;
+                    }
+                }
+            }
+
+            return $flag_offensive;
+        }
+    }
+
+    public function tokensOffensive($text)
+    {
         $tokens = explode(" ", $text);
         foreach ($tokens as $i => $token) {
             $this->thing->offensive_librex_handler->matchesLibrex($token);
             $matches = $this->thing->offensive_librex_handler->matches;
-
             if (count($matches) > 0) {
                 return true;
             }
-            return false;
         }
+        return false;
+    }
+
+    public function wordOffensive($word)
+    {
+        $this->thing->offensive_librex_handler->matchesLibrex($word);
+        $matches = $this->thing->offensive_librex_handler->matches;
+
+        if (count($matches) > 0) {
+            return true;
+        }
+        return false;
     }
 
     public function isOffensive($text = null)

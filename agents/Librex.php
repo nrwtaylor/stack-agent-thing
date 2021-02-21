@@ -351,6 +351,26 @@ $this->matches = array();
         return $m;
     }
 
+    public function linesLibrex() {
+
+if (!isset($this->librex)) {$this->getLibrex($this->librex_name);}
+
+        $contents = $this->librex;
+        $this->lines = array();
+        $separator = "\r\n";
+        $line = strtok($contents, $separator);
+
+        while ($line !== false) {
+
+            $this->lines[] = $line;
+
+            $line = strtok( $separator );
+        }
+        return $this->lines;
+
+
+    }
+
     /**
      *
      * @param unknown $librex_name
@@ -385,6 +405,7 @@ if ((stripos($line, $searchfor) !== false) or (stripos($searchfor, $line) !== fa
         }
         return $this->hits;
     }
+
 
 
     /**
