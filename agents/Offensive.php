@@ -1,6 +1,13 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+/*
+
+A tricky one.
+Please help.
+
+*/
+
 class Offensive extends Agent
 {
     public $var = 'hello';
@@ -89,7 +96,6 @@ class Offensive extends Agent
         $flag_offensive = false;
         foreach ($this->offensive_words as $i => $offensive_word) {
             if (stripos($squish_text, $offensive_word) !== false) {
-                echo $offensive_word . "\n";
 
                 // Found embedded offensiveness.
                 $flag_offensive = true;
@@ -106,7 +112,6 @@ class Offensive extends Agent
             $flag_offensive = false;
             foreach ($this->offensive_words as $i => $offensive_word) {
                 if (stripos($token, $offensive_word) !== false) {
-                    echo $offensive_word . "\n";
 
                     // Found embedded offensiveness.
                     $is = $this->isWord($token);
