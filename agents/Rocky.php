@@ -475,6 +475,8 @@ class Rocky extends Agent
 
     function librexRocky()
     {
+//$start_time = time();
+//while(true) {
         $word = $this->randomWord(6);
         $this->thing->wikipedia_handler = new Wikipedia(
             $this->thing,
@@ -482,7 +484,9 @@ class Rocky extends Agent
         );
         $this->thing->wikipedia_handler->apiWikipedia($word);
         $m = $this->thing->wikipedia_handler->text;
-
+//if (time() - $start_time) > 2 {$text = "No text generated."; break;}
+//if ( $this->hasOffensive($m) === false ) {break;}
+//}
         // TODO refactor
         // TODO Build null/random addressing routines.
         // TODO Depunctuate generated text stream.

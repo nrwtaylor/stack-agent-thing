@@ -284,6 +284,11 @@ if (file_exists($file)) {
     }
 
 
+    function matchesLibrex($searchfor = null, $parser_name = "Match") {
+       return $this->getMatches($searchfor, $parser_name);
+    }
+
+
     /**
      *
      * @param unknown $librex_name
