@@ -345,14 +345,27 @@ class ACP125G extends Agent
         }
     }
 
-    function saveMessage($resource = null, $bank = null) {
+    function saveACP125G($message, $resource = null, $bank = null) {
 
        // TODO Write ACP125G format message to text file.
+        $resource = "/rocky/messages";
+        $bank = "rocky-librex-wikipedia-test";
+        $filename = $resource . "-" . $bank . ".txt";
+
+        $file = $this->resource_path . $filename;
+var_dump($file);
+
+        file_put_contents($file, $message, FILE_APPEND | LOCK_EX);
 
     }
 
     function loadMessages() {
        $this->getMessages();
+    }
+
+    function linesACP125G($message) {
+       $lines =[];
+var_dump($message);
     }
 
     function getMessages()

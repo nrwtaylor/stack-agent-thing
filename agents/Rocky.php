@@ -604,6 +604,9 @@ $person_from = $this->name_list[array_rand($this->name_list)];
             $unit .
             "";
 
+$acp125g_lines = $this->linesACP125G($message_array);
+$this->saveACP125G($acp125g_lines, "rocky/messages", "rocky-librex-wikipedia-test");
+
         $this->message = $message_array;
         $this->messages[0] = $message_array;
     }
