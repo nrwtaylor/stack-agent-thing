@@ -345,6 +345,16 @@ class ACP125G extends Agent
         }
     }
 
+    function saveMessage($resource = null, $bank = null) {
+
+       // TODO Write ACP125G format message to text file.
+
+    }
+
+    function loadMessages() {
+       $this->getMessages();
+    }
+
     function getMessages()
     {
         if (isset($this->messages)) {return;}

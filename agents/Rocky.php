@@ -495,17 +495,58 @@ class Rocky extends Agent
         }
         // TODO refactor
         // TODO Build null/random addressing routines.
-        // TODO Depunctuate generated text stream.
-
+        // TODO Persist librex generated message and addresses.
         $text = $raw_text;
 
+$parts = explode(".", $raw_text);
+$text = trim($parts[0] . ".");
+
+$text = $this->filterAlphanumeric($text);
+    //    $this->extractAlphanumeric();
+
+$this->thing->punctuation_handler = new Punctuation($this->thing, "punctuation");
+$text = $this->thing->punctuation_handler->stripPunctuation($text," ");
+$text = preg_replace('/\s+/', ' ',$text);
+$text = strtoupper($text);
+
+// Generate addressing.
+
+$this->thing->charley_handler = new Charley($this->thing, "charley");
+$this->thing->charley_handler->getCast();
+$this->cast = $this->thing->charley_handler->cast;
+
+$to = $this->cast[array_rand($this->cast)];
+
+$person_to = $to['name'];
+$position_to = $to['role'];
+
+$from = $this->cast[array_rand($this->cast)];
+$person_from = $from['name'];
+$position_from = $from['role'];
+
+
+//["name" => $name, "role" => $role];
+/*
+$this->name_list = $this->thing->charley_handler->name_list;
+$person_to = $this->name_list[array_rand($this->name_list)];
+$person_from = $this->name_list[array_rand($this->name_list)];
+*/
+
+//var_dump($person_to);
+//var_dump($person_from);
+
+//$t = $this->nameCharley();
+//var_dump($t);
+
+// TODO Refactor as seperate function.
+
         $meta = null;
-        $name_to = null;
+        $name_to = $person_to;
         $position_to = null;
         $organization_to = null;
         $number_to = null;
         //$text = $m;
-        $name_from = null;
+        $name_from = $person_from;
         $position_from = null;
         $organization_from = null;
         $number_from = null;
@@ -533,7 +574,7 @@ class Rocky extends Agent
         ];
         $this->num_words = 25;
         $this->filename = null;
-        $this->title = "random librex wikiepedia";
+        $this->title = "random librex wikipedia";
         $this->author = "none";
         $this->date = null;
         $this->version = null;

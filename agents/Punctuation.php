@@ -91,8 +91,8 @@ class Punctuation extends Agent
                 // Not a word so very likely punctuation
                 // in some way
 
-                $gram_nonnom = $this->nonnomify($gram);
-                $message .= " " . $gram_nonnom;
+//                $gram_nonnom = $this->nonnomify($gram);
+//                $message .= " " . $gram_nonnom;
                 $this->punctuations[] = $gram;
             } else {
                 $message .= " " . $gram;
@@ -237,7 +237,7 @@ class Punctuation extends Agent
                 $this->sms_message = "PUNCTUATION IS ";
             }
 
-            $this->sms_message .= implode(" ", $this->punctuation);
+            $this->sms_message .= implode(" ", $this->punctuations);
 
             return;
         }

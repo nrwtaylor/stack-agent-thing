@@ -259,11 +259,12 @@ class Charley extends Agent
         $input = $this->charlies;
 
         // Pick a random Charles.
+$charley_index = 0;
+if (isset($this->thing->thing->created_at)) {
         $created_at = strtotime($this->thing->thing->created_at);
-
         // $charley_index = $this->refreshed_at % count($input);
         $charley_index = $created_at % count($input);
-
+}
         $this->charley = ucwords($input[$charley_index]);
 
         if (isset($this->name_list[$role])) {
@@ -589,11 +590,13 @@ class Charley extends Agent
         //$web .= "<p>";
         //$received_at = strtotime($this->thing->thing->created_at);
         //FUEL.var_dump($this->thing->thing->created_at);
+
+if (isset($this->thing->thing->created_at)) {
         $ago = $this->thing->human_time(
             time() - strtotime($this->thing->thing->created_at)
         );
         $web .= "This inject was created about " . $ago . " ago. ";
-
+}
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
