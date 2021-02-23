@@ -233,12 +233,6 @@ class Rocky extends Agent
         $from = "rocky";
         $this->makeACP125G();
 
-        //$this->makePNG();
-
-        //$this->makeSMS();
-
-        //$this->makeMessage();
-        // $this->makeTXT();
         $this->makeChoices();
 
         $this->thing_report["info"] = "This creates an exercise message.";
@@ -246,10 +240,6 @@ class Rocky extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report["info"] = $message_thing->thing_report["info"];
-        //$this->makeWeb();
-
-        //$this->makeTXT();
-        //$this->makePDF();
     }
 
     function makeChoices()
@@ -459,7 +449,6 @@ class Rocky extends Agent
             $this->num = array_rand($this->messages);
             $this->inject = $this->bank . "-" . $this->num;
         }
-
         if ($this->inject == null) {
             // Pick a random message
             $this->num = array_rand($this->messages);
@@ -498,47 +487,43 @@ class Rocky extends Agent
         // TODO Persist librex generated message and addresses.
         $text = $raw_text;
 
-$parts = explode(".", $raw_text);
-$text = trim($parts[0] . ".");
+        $parts = explode(".", $raw_text);
+        $text = trim($parts[0] . ".");
 
-$text = $this->filterAlphanumeric($text);
-    //    $this->extractAlphanumeric();
+        $text = $this->filterAlphanumeric($text);
+        //    $this->extractAlphanumeric();
 
-$this->thing->punctuation_handler = new Punctuation($this->thing, "punctuation");
-$text = $this->thing->punctuation_handler->stripPunctuation($text," ");
-$text = preg_replace('/\s+/', ' ',$text);
-$text = strtoupper($text);
+        $this->thing->punctuation_handler = new Punctuation(
+            $this->thing,
+            "punctuation"
+        );
+        $text = $this->thing->punctuation_handler->stripPunctuation($text, " ");
+        $text = preg_replace("/\s+/", " ", $text);
+        $text = strtoupper($text);
 
-// Generate addressing.
+        // Generate addressing.
 
-$this->thing->charley_handler = new Charley($this->thing, "charley");
-$this->thing->charley_handler->getCast();
-$this->cast = $this->thing->charley_handler->cast;
+        $this->thing->charley_handler = new Charley($this->thing, "charley");
+        $this->thing->charley_handler->getCast();
+        $this->cast = $this->thing->charley_handler->cast;
 
-$to = $this->cast[array_rand($this->cast)];
+        $to = $this->cast[array_rand($this->cast)];
 
-$person_to = $to['name'];
-$position_to = $to['role'];
+        $person_to = $to["name"];
+        $position_to = $to["role"];
 
-$from = $this->cast[array_rand($this->cast)];
-$person_from = $from['name'];
-$position_from = $from['role'];
+        $from = $this->cast[array_rand($this->cast)];
+        $person_from = $from["name"];
+        $position_from = $from["role"];
 
-
-//["name" => $name, "role" => $role];
-/*
+        //["name" => $name, "role" => $role];
+        /*
 $this->name_list = $this->thing->charley_handler->name_list;
 $person_to = $this->name_list[array_rand($this->name_list)];
 $person_from = $this->name_list[array_rand($this->name_list)];
 */
 
-//var_dump($person_to);
-//var_dump($person_from);
-
-//$t = $this->nameCharley();
-//var_dump($t);
-
-// TODO Refactor as seperate function.
+        // TODO Refactor as seperate function.
 
         $meta = null;
         $name_to = $person_to;
@@ -604,8 +589,15 @@ $person_from = $this->name_list[array_rand($this->name_list)];
             $unit .
             "";
 
-$acp125g_lines = $this->linesACP125G($message_array);
-$this->saveACP125G($acp125g_lines, "rocky/messages", "rocky-librex-wikipedia-test");
+        // Write message to file for recall.
+        $acp125g_lines = $this->linesACP125G($message_array);
+        $message = implode("\n", $acp125g_lines);
+        $message .= "\n---\n";
+        $this->saveACP125G(
+            $message,
+            "rocky/messages",
+            "rocky-librex-wikipedia-test"
+        );
 
         $this->message = $message_array;
         $this->messages[0] = $message_array;
@@ -618,6 +610,12 @@ $this->saveACP125G($acp125g_lines, "rocky/messages", "rocky-librex-wikipedia-tes
         $this->getMessages();
 
         $this->message = $this->messages[$this->num];
+
+        // If meta is not set,
+        // Then probably 16ln format needing parsing.
+        if (!isset($this->message["meta"])) {
+            $this->message = $this->parseACP125G($this->message);
+        }
 
         $this->meta = trim($this->message["meta"], "//");
 
@@ -635,16 +633,6 @@ $this->saveACP125G($acp125g_lines, "rocky/messages", "rocky-librex-wikipedia-tes
         $this->position_from = $this->message["position_from"];
         $this->organization_from = $this->message["organization_from"];
         $this->number_from = $this->message["number_from"];
-
-        /*
-        $this->short_message = $this->meta . "\n" .
-             $this->name_to . ", " . $this->position_to . ", " .
-             $this->organization_to.", " . $this->number_to. ". " . "\n" .
-             $this->text ." " . "\n" .
-             $this->name_from . ", " .
-             $this->position_from . ", " . $this->organization_from . ", " .
-             $this->number_from. ".";
-*/
 
         $name_to = ucwords($this->name_to);
         $position_to = ucwords($this->position_to);
@@ -811,14 +799,6 @@ $this->saveACP125G($acp125g_lines, "rocky/messages", "rocky-librex-wikipedia-tes
         $link = $this->web_prefix . "thing/" . $this->uuid . "/rocky.txt";
         $web .= '<a href="' . $link . '">' . $link . "</a>";
         $web .= "<br>";
-        //        $web .= "<p>";
-
-        //        $web .= "<p>";
-
-        //        $web .= "SMS inject";
-        //        $web .= "<p>";
-
-        //        $web .= nl2br($this->short_message);
 
         $web .= "<p>";
         $web .= "PDF inject - ";
@@ -843,7 +823,6 @@ $this->saveACP125G($acp125g_lines, "rocky/messages", "rocky-librex-wikipedia-tes
 
         $web .= "<p>";
         $web .= "Inject Metadata - ";
-        //        $web .= "<p>";
 
         $web .= $this->inject . " - " . $this->thing->nuuid;
         if (isset($this->thing->thing->created_at)) {
