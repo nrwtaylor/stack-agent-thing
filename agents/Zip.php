@@ -151,7 +151,6 @@ $this->link = trim($text);
         $this->thing_report['sms'] = $m;
     }
 
-
     /**
      *
      */
