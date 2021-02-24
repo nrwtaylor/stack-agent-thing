@@ -364,7 +364,10 @@ dev - Detect duplicates.
 
             foreach ($parts as $i => $part) {
                 if ($part["content_type"] === "text/calendar") {
+
+
                     $event = $this->eventCalendar($part);
+
                     $uid = $event->uid;
                     if ($event->uid === null) {
                         $uid = $this->thing->getUuid();

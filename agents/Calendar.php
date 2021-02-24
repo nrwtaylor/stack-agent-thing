@@ -104,9 +104,16 @@ class Calendar extends Agent
         //$call = $call_agent->extractCall($event->description);
         //$frequency = $frequency_agent->extractFrequency($event->description);
 
-        $description = strip_tags($text);
-        $when_description = html_entity_decode($description);
 
+// TODO: Test with tag stripping and html_entity_decoding turned off.
+// 
+$preprocess_text = false;
+if ($preprocess_text === true) {
+    $description = strip_tags($text);
+    $when_description = html_entity_decode($description);
+} else {
+    $when_description = $text;
+}
         $when_description = str_replace(
             ["\n", "\t", "\r"],
             " ",
@@ -135,7 +142,7 @@ class Calendar extends Agent
             "$1",
             $when_description
         );
-
+var_dump($when_description);
         return $when_description;
     }
 
