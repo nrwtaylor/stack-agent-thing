@@ -26,7 +26,8 @@ class Douglas extends Agent
 
         $this->thing_report["info"] =
             "DOUGLAS is a tool for managing message generation.";
-        $this->thing_report["help"] = "Click on the image for a PDF.";
+        $this->thing_report["help"] =
+            "Click on the ZIP link for a package of PDFs.";
 
         $this->node_list = ["douglas" => ["douglas", "uuid"]];
 
@@ -57,18 +58,21 @@ class Douglas extends Agent
         }
     }
 
-    public function rockyDouglas()
+    public function rockyDouglas($uuid = null)
     {
-        $thing = new Thing(null);
-        $thing->Create("merp", "merp", "rocky");
+        $thing = new Thing($uuid);
+        if ($uuid === null) {
+            $thing->Create("merp", "merp", "rocky");
+        }
         $agent = new Rocky($thing, "rocky");
 
         if (!isset($agent->thing_report["pdf"])) {
             return true;
         }
 
-$this->thing->associate($thing->uuid);
-
+        if ($uuid === null) {
+            $this->thing->associate($thing->uuid);
+        }
         return [$thing->nuuid, $agent->thing_report["pdf"]];
     }
 
@@ -102,37 +106,43 @@ $this->thing->associate($thing->uuid);
             return ["error" => $msg];
         }
 
-        $this->response .= "Building zip file. ";
+        if (
+            isset($this->association_uuids) and
+            count($this->association_uuids) > 0
+        ) {
+            foreach ($this->association_uuids as $i => $association_uuid) {
+                [$nuuid, $pdf_string] = $this->rockyDouglas($association_uuid);
+                $zip->addFromString("rocky_" . $nuuid . ".pdf", $pdf_string);
+            }
+        } else {
+            $sheet_count = 1;
+            if (isset($this->sheet_count)) {
+                $sheet_count = $this->sheet_count;
+            }
 
-        $sheet_count = 1;
-        if (isset($this->sheet_count)) {
-            $sheet_count = $this->sheet_count;
+            $this->response .= "Made " . $sheet_count . " sheets. ";
+            foreach (range(1, $sheet_count) as $i) {
+                [$nuuid, $pdf_string] = $this->rockyDouglas();
+                $zip->addFromString("rocky_" . $nuuid . ".pdf", $pdf_string);
+            }
         }
-        $this->response .= "Made " . $sheet_count . " sheets. ";
-        foreach (range(1, $sheet_count) as $i) {
-            [$nuuid, $pdf_string] = $this->rockyDouglas();
-            $zip->addFromString("rocky_" . $nuuid . ".pdf", $pdf_string);
-        }
+
         $zip->close();
+
+        $this->response .= "Built ZIP file. ";
 
         //        header("Content-type: application/zip");
         //        header('Content-Disposition: attachment; filename="download.zip"');
-        //        $contents = file_get_contents($filename);
-        //        file_put_contents(
-        //            "/var/www/stackr.test/resources/douglas/test5.zip",
-        //            $contents
-        //        );
-        //    }
 
         $contents = @file_get_contents($filename);
         $this->contents_zip = $contents;
-        $response = @file_put_contents(
-            "/var/www/stackr.test/resources/douglas/test5.zip",
-            $contents
-        );
-        if ($response === false) {
-            $this->response .= "Could not save ZIP file. ";
-        }
+        //        $response = @file_put_contents(
+        //            "/var/www/stackr.test/resources/douglas/test5.zip",
+        //            $contents
+        //        );
+        //        if ($response === false) {
+        //            $this->response .= "Could not save ZIP file. ";
+        //        }
     }
 
     public function makeZip()
@@ -176,6 +186,14 @@ $this->thing->associate($thing->uuid);
 
     public function setDouglas()
     {
+        $sheet_count = null;
+        if (isset($this->sheet_count)) {
+            $sheet_count = $sheet_count;
+        }
+        $sheet_count = $this->thing->json->writeVariable(
+            ["douglas", "sheet_count"],
+            $sheet_count
+        );
     }
 
     /**
@@ -214,30 +232,36 @@ $this->thing->associate($thing->uuid);
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.pdf";
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
         $this->node_list = ["douglas" => ["douglas"]];
         $web = "";
+        $web .=
+            "ZIP file with " .
+            $this->sheet_count .
+            " randomly generated sheets.<br>";
 
-        if (isset($this->html_image)) {
-            $web .= '<a href="' . $link . '">';
-            $web .= $this->html_image;
-            $web .= "</a>";
-        }
+        $web .= '<a href="' . $link . '">';
+        $web .= $link;
+        $web .= "</a>";
         $web .= "<br>";
 
-/*
-        $items = json_decode($this->thing->thing->associations);
- foreach($items as $i=>$value) { 
-    $web .= "xcv";
-}
-*/
+        $web .= "<p>";
+        $web .= "Individual radiograms.<br>";
+        foreach ($this->association_uuids as $i => $uuid) {
+            $rocky_link = $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
 
+            $web .= '<a href="' . $rocky_link . '">';
+            $web .= $rocky_link;
+            $web .= "</a><br>";
+        }
 
         $this->thing_report["web"] = $web;
     }
 
     public function get()
     {
+        //echo "associations" . $this->thing->associations ."\n";
+
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "douglas",
@@ -252,6 +276,20 @@ $this->thing->associate($thing->uuid);
                 $time_string
             );
         }
+
+        $sheet_count = $this->thing->json->readVariable([
+            "douglas",
+            "sheet_count",
+        ]);
+        $this->sheet_count = $sheet_count;
+
+        $associations = json_decode($this->thing->thing->associations, true);
+        //var_dump($associations);
+        if ($associations === null) {
+            return;
+        }
+        $association_uuids = $associations['agent'];
+        $this->association_uuids = $association_uuids;
     }
 
     public function isDouglas($text)
@@ -263,7 +301,6 @@ $this->thing->associate($thing->uuid);
         // Contains word douglas?
         return false;
     }
-
 
     public function readSubject()
     {
@@ -278,7 +315,7 @@ $this->thing->associate($thing->uuid);
         }
 
         $l = $this->web_prefix . "thing/" . $this->thing->uuid . "/douglas.zip";
-        var_dump($l);
+
         //        $input = strtolower($this->subject);
 
         //        $this->readDouglas($input);
