@@ -208,6 +208,7 @@ dev - Detect duplicates.
         $txt = "CLAWS\n";
         foreach ($this->claws_items as $i => $claws_item) {
             $text_claws = $this->textCall($claws_item["call"]);
+            $call = $claws_item["call"];
 
             // URL is available like this.
             // $text_claws .= "xx".$claws_item["call"]['url']."xx"."\n";
@@ -224,6 +225,16 @@ dev - Detect duplicates.
                 $text_claws .= $line_text . "\n";
                 $text_claws .=
                     $this->timestampDateline($claws_item["dateline"]) . "\n";
+            }
+
+            $call = $claws_item["call"];
+
+            if (
+                $call["password"] !== "X" and
+                $call["access_code"] !== "X" and
+                $call["url"] !== "X"
+            ) {
+                $txt .= "FOUND MEETING DETAILS\n";
             }
 
             $txt .= $text_claws . "\n";
@@ -364,8 +375,6 @@ dev - Detect duplicates.
 
             foreach ($parts as $i => $part) {
                 if ($part["content_type"] === "text/calendar") {
-
-
                     $event = $this->eventCalendar($part);
 
                     $uid = $event->uid;
