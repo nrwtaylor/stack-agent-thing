@@ -10,8 +10,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 // whitefox 31 January 2021
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 //ini_set("max_execution_time",1 ); //s
@@ -19,29 +19,29 @@ error_reporting(-1);
 //set_time_limit(2);
 // API group
 
-$app->group('/api', function () use ($app) {
+$app->group("/api", function () use ($app) {
     // This is the whitefox API.  Accessible at api/whitefox/
-    $app->group('/whitefox', function () use ($app) {
+    $app->group("/whitefox", function () use ($app) {
         if (
             isset(
-                $app->getContainer()->get('settings')['api']['stripe'][
-                    'webhook'
+                $app->getContainer()->get("settings")["api"]["stripe"][
+                    "webhook"
                 ]
             )
         ) {
             $app->post(
-                $app->getContainer()->get('settings')['api']['stripe'][
-                    'webhook'
+                $app->getContainer()->get("settings")["api"]["stripe"][
+                    "webhook"
                 ],
 
                 function ($request, $response, $args) {
-                    $credential_set = $this->get('settings')['api']['stripe'][
-                        'credential_set'
+                    $credential_set = $this->get("settings")["api"]["stripe"][
+                        "credential_set"
                     ];
 
-                    $secret_key = $this->get('settings')['api']['stripe'][
+                    $secret_key = $this->get("settings")["api"]["stripe"][
                         $credential_set
-                    ]['secret_key'];
+                    ]["secret_key"];
 
                     \Stripe\Stripe::setApiKey($secret_key);
 
@@ -73,7 +73,7 @@ $app->group('/api', function () use ($app) {
                     $session = $stripe_agent->checkoutStripe();
 
                     return $response
-                        ->withJson(['id' => $session->id])
+                        ->withJson(["id" => $session->id])
                         ->withStatus(200);
                 }
             );
@@ -81,130 +81,140 @@ $app->group('/api', function () use ($app) {
     });
 
     // Introducing redpanda
-    $app->group('/redpanda', function () use ($app) {
+    $app->group("/redpanda", function () use ($app) {
         // Developmental google calendar end-point
-        $app->get('/googlecalendar', function ($request, $response, $args) {
+        $app->get("/googlecalendar", function ($request, $response, $args) {
             // Allows direct creation of Things from the URI line
             // created as <from> web@<mail_postfix>.
 
             $getParam = $request->getQueryParams();
-            $code = $getParam['code']; // is equal to http://stackoverflow.com
+            $code = $getParam["code"]; // is equal to http://stackoverflow.com
 
-            $state = $getParam['state']; // is equal to http://stackoverflow.com
+            $state = $getParam["state"]; // is equal to http://stackoverflow.com
 
             $thing = new Thing($state); // State contains uuid
             //$thing->Create("google@<mail_postfix>", "null", $code);
 
             $google_agent = new GoogleCalendar($thing, [
-                'code' => $code,
-                'state' => $state,
+                "code" => $code,
+                "state" => $state,
             ]);
 
             return $this->renderer->render(
                 $response,
-                'thing.phtml',
+                "thing.phtml",
                 $google_agent->thing_report
             );
         });
 
-        $app->post(
-            $app->getContainer()->get('settings')['api']['google'][
-                'google hangouts'
-            ]['webhook'],
-            function ($request, $response, $args) {
-                $body = $request->getParsedBody();
-                $getParam = $request->getQueryParams();
-                //$threadKey = $getParam('threadKey');
-                $params_json = $getParam;
-                $args_json = $args;
+        if (
+            isset(
+                $app->getContainer()->get("settings")["api"]["google"][
+                    "google hangouts"
+                ]["webhook"]
+            )
+        ) {
+            $app->post(
+                $app->getContainer()->get("settings")["api"]["google"][
+                    "google hangouts"
+                ]["webhook"],
 
-                //$uri = $request->getUri();
-                //$method = $uri->getQuery();
-                //$threadKey = $app->request()->params('threadKey');
-                //$threadKey = $request->params('');
-                //$data = json_decode($request->getBody()) ?: $request->params();
-                //$data = json_decode( $app->request->getBody() ) ?: $app->request->params();
-                $data = [
-                    "params" => $params_json,
-                    "args" => $arg_json,
-                    "body" => $body,
-                ];
-                //$data = $body;
-                ignore_user_abort(true);
-                set_time_limit(0);
+                function ($request, $response, $args) {
+                    $body = $request->getParsedBody();
+                    $getParam = $request->getQueryParams();
+                    //$threadKey = $getParam('threadKey');
+                    $params_json = $getParam;
+                    $args_json = $args;
 
-                ob_start();
+                    //$uri = $request->getUri();
+                    //$method = $uri->getQuery();
+                    //$threadKey = $app->request()->params('threadKey');
+                    //$threadKey = $request->params('');
+                    //$data = json_decode($request->getBody()) ?: $request->params();
+                    //$data = json_decode( $app->request->getBody() ) ?: $app->request->params();
+                    $data = [
+                        "params" => $params_json,
+                        "args" => $arg_json,
+                        "body" => $body,
+                    ];
+                    //$data = $body;
+                    ignore_user_abort(true);
+                    set_time_limit(0);
 
-                $prod = true;
-                if ($prod == true) {
-                    $serverProtocol = filter_input(
-                        INPUT_SERVER,
-                        'SERVER_PROTOCOL',
-                        FILTER_SANITIZE_STRING
-                    );
-                    header($serverProtocol . ' 200 OK');
-                    // Disable compression (in case content length is compressed).
-                    header('Content-Encoding: none');
-                    header('Content-Length: ' . ob_get_length());
+                    ob_start();
 
-                    // Close the connection.
-                    header('Connection: close');
-                } else {
-                    header('HTTP/1.0 200 OK');
-                    header("Content-Type: application/json");
-                    header('Content-Length: ' . ob_get_length());
+                    $prod = true;
+                    if ($prod == true) {
+                        $serverProtocol = filter_input(
+                            INPUT_SERVER,
+                            "SERVER_PROTOCOL",
+                            FILTER_SANITIZE_STRING
+                        );
+                        header($serverProtocol . " 200 OK");
+                        // Disable compression (in case content length is compressed).
+                        header("Content-Encoding: none");
+                        header("Content-Length: " . ob_get_length());
+
+                        // Close the connection.
+                        header("Connection: close");
+                    } else {
+                        header("HTTP/1.0 200 OK");
+                        header("Content-Type: application/json");
+                        header("Content-Length: " . ob_get_length());
+                    }
+
+                    ob_end_flush();
+                    ob_flush();
+                    flush();
+
+                    $input = json_encode($body);
+                    $thing = new Thing(null);
+
+                    $nom_to = "null";
+                    $sender_id = "null";
+                    $test_text = "s/ google hangouts";
+
+                    $thing->Create($sender_id, $nom_to, $test_text);
+
+                    $channel = new Channel($thing, "hangoutschat");
+                    $agent = new Googlehangouts($thing, $data);
+
+                    //                $agent = new Googlehangouts($thing, array($body, $threadKey));
+                    //                $agent = new Agent($thing);
+
+                    $thing->flagRed();
+                    $response_text = "foo";
+                    return $this->response
+                        ->write($response_text)
+                        ->withStatus(200);
+                    //  }
+                    //            }
+
+                    return;
                 }
-
-                ob_end_flush();
-                ob_flush();
-                flush();
-
-                $input = json_encode($body);
-                $thing = new Thing(null);
-
-                $nom_to = "null";
-                $sender_id = "null";
-                $test_text = "s/ google hangouts";
-
-                $thing->Create($sender_id, $nom_to, $test_text);
-
-                $channel = new Channel($thing, "hangoutschat");
-                $agent = new Googlehangouts($thing, $data);
-
-                //                $agent = new Googlehangouts($thing, array($body, $threadKey));
-                //                $agent = new Agent($thing);
-
-                $thing->flagRed();
-                $response_text = "foo";
-                return $this->response->write($response_text)->withStatus(200);
-                //  }
-                //            }
-
-                return;
-            }
-        );
-
+            );
+        }
         // Non-operational SMS end-point.
-        $app->post('/sms', function ($request, $response, $args) {
-            return $response->withHeader('HTTP/1.0 200 OK')->withStatus(200);
+        $app->post("/sms", function ($request, $response, $args) {
+            return $response->withHeader("HTTP/1.0 200 OK")->withStatus(200);
         });
 
         // Null end-point.  For testing against.
-        $app->post('/null', function ($request, $response, $args) {
-            return $response->withHeader('HTTP/1.0 200 OK')->withStatus(200);
+        $app->post("/null", function ($request, $response, $args) {
+            return $response->withHeader("HTTP/1.0 200 OK")->withStatus(200);
         });
 
         // Operational end-point for GEARMAN
         if (
             isset(
-                $app->getContainer()->get('settings')['api']['stripe'][
-                    'webhook'
+                $app->getContainer()->get("settings")["api"]["stripe"][
+                    "webhook"
                 ]
             )
         ) {
             $app->get(
-                $app->getContainer()->get('settings')['api']['gearman'][
-                    'webhook'
+                $app->getContainer()->get("settings")["api"]["gearman"][
+                    "webhook"
                 ],
                 function ($request, $response, $args) {
                     $body = $request->getParsedBody();
@@ -230,8 +240,8 @@ $app->group('/api', function () use ($app) {
         }
         // Operational end-point for Microsoft
         $app->post(
-            $app->getContainer()->get('settings')['api']['microsoft'][
-                'webhook'
+            $app->getContainer()->get("settings")["api"]["microsoft"][
+                "webhook"
             ],
             function ($request, $response, $args) {
                 //        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
@@ -248,20 +258,20 @@ $app->group('/api', function () use ($app) {
                 if ($prod == true) {
                     $serverProtocol = filter_input(
                         INPUT_SERVER,
-                        'SERVER_PROTOCOL',
+                        "SERVER_PROTOCOL",
                         FILTER_SANITIZE_STRING
                     );
-                    header($serverProtocol . ' 200 OK');
+                    header($serverProtocol . " 200 OK");
                     // Disable compression (in case content length is compressed).
-                    header('Content-Encoding: none');
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Encoding: none");
+                    header("Content-Length: " . ob_get_length());
 
                     // Close the connection.
-                    header('Connection: close');
+                    header("Connection: close");
                 } else {
-                    header('HTTP/1.0 200 OK');
+                    header("HTTP/1.0 200 OK");
                     header("Content-Type: application/json");
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Length: " . ob_get_length());
                 }
 
                 ob_end_flush();
@@ -282,12 +292,12 @@ $app->group('/api', function () use ($app) {
                 $queue = false;
                 // Flag Red so that the agent handler picks it up.
                 if ($queue) {
-                    $to = $body['conversation']['id'];
+                    $to = $body["conversation"]["id"];
 
                     $arr = json_encode([
                         "to" => $to,
-                        "from" => $body['from']['id'],
-                        "subject" => $body['text'],
+                        "from" => $body["from"]["id"],
+                        "subject" => $body["text"],
                     ]);
 
                     $client = new \GearmanClient();
@@ -298,9 +308,9 @@ $app->group('/api', function () use ($app) {
                 } else {
                     $microsoft_thing = new Thing(null);
                     $microsoft_thing->Create(
-                        $body['conversation']['id'],
-                        $body['from']['id'],
-                        $body['text']
+                        $body["conversation"]["id"],
+                        $body["from"]["id"],
+                        $body["text"]
                     );
 
                     $m = new Microsoft($microsoft_thing, $body);
@@ -309,18 +319,18 @@ $app->group('/api', function () use ($app) {
                 }
 
                 $message = "Stackr received a message from ";
-                $message .= $body['msisdn'] . " to " . $body['to'];
-                $message .= " which said " . $body['text'] . ".";
+                $message .= $body["msisdn"] . " to " . $body["to"];
+                $message .= " which said " . $body["text"] . ".";
 
                 return $response
-                    ->withHeader('HTTP/1.0 200 OK')
+                    ->withHeader("HTTP/1.0 200 OK")
                     ->withStatus(200);
             }
         );
 
         // Operational end-point for NEXMO
         $app->post(
-            $app->getContainer()->get('settings')['api']['nexmo']['webhook'],
+            $app->getContainer()->get("settings")["api"]["nexmo"]["webhook"],
             function ($request, $response, $args) {
                 $body = $request->getParsedBody();
 
@@ -333,27 +343,27 @@ $app->group('/api', function () use ($app) {
                 if ($prod == true) {
                     $serverProtocol = filter_input(
                         INPUT_SERVER,
-                        'SERVER_PROTOCOL',
+                        "SERVER_PROTOCOL",
                         FILTER_SANITIZE_STRING
                     );
-                    header($serverProtocol . ' 200 OK');
+                    header($serverProtocol . " 200 OK");
                     // Disable compression (in case content length is compressed).
-                    header('Content-Encoding: none');
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Encoding: none");
+                    header("Content-Length: " . ob_get_length());
 
                     // Close the connection.
-                    header('Connection: close');
+                    header("Connection: close");
                 } else {
-                    header('HTTP/1.0 200 OK');
+                    header("HTTP/1.0 200 OK");
                     header("Content-Type: application/json");
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Length: " . ob_get_length());
                 }
 
                 ob_end_flush();
                 ob_flush();
                 flush();
 
-                $message_id = $body['messageId'];
+                $message_id = $body["messageId"];
 
                 $inject_text = "";
 
@@ -362,9 +372,9 @@ $app->group('/api', function () use ($app) {
                 // Flag Red so that the agent handler picks it up.
                 if ($queue) {
                     $arr = json_encode([
-                        "to" => $body['msisdn'],
-                        "from" => $body['to'],
-                        "subject" => $body['text'] . $inject_text,
+                        "to" => $body["msisdn"],
+                        "from" => $body["to"],
+                        "subject" => $body["text"] . $inject_text,
                         "body" => $body,
                     ]);
 
@@ -375,9 +385,9 @@ $app->group('/api', function () use ($app) {
                 } else {
                     $sms_thing = new Thing(null);
                     $sms_thing->Create(
-                        $body['msisdn'],
-                        $body['to'],
-                        $body['text']
+                        $body["msisdn"],
+                        $body["to"],
+                        $body["text"]
                     );
 
                     $channel = new Channel($sms_thing, "sms");
@@ -386,17 +396,17 @@ $app->group('/api', function () use ($app) {
                 }
 
                 $message = "Stackr received a message from ";
-                $message .= $body['msisdn'] . " to " . $body['to'];
-                $message .= " which said " . $body['text'] . ".";
+                $message .= $body["msisdn"] . " to " . $body["to"];
+                $message .= " which said " . $body["text"] . ".";
 
                 return $response
-                    ->withHeader('HTTP/1.0 200 OK')
+                    ->withHeader("HTTP/1.0 200 OK")
                     ->withStatus(200);
             }
         );
 
         $app->post(
-            $app->getContainer()->get('settings')['api']['slack']['webhook'],
+            $app->getContainer()->get("settings")["api"]["slack"]["webhook"],
             function ($request, $response, $args) {
                 ob_start();
 
@@ -404,20 +414,20 @@ $app->group('/api', function () use ($app) {
                 if ($prod == true) {
                     $serverProtocol = filter_input(
                         INPUT_SERVER,
-                        'SERVER_PROTOCOL',
+                        "SERVER_PROTOCOL",
                         FILTER_SANITIZE_STRING
                     );
-                    header($serverProtocol . ' 200 OK');
+                    header($serverProtocol . " 200 OK");
                     // Disable compression (in case content length is compressed).
-                    header('Content-Encoding: none');
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Encoding: none");
+                    header("Content-Length: " . ob_get_length());
 
                     // Close the connection.
-                    header('Connection: close');
+                    header("Connection: close");
                 } else {
-                    header('HTTP/1.0 200 OK');
+                    header("HTTP/1.0 200 OK");
                     header("Content-Type: application/json");
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Length: " . ob_get_length());
                 }
 
                 ob_end_flush();
@@ -437,21 +447,21 @@ $app->group('/api', function () use ($app) {
                 // Check if this is a webhook verification
                 //https://api.slack.com/events/url_verification
                 if (
-                    isset($body['type']) and
-                    $body['type'] == 'url_verification'
+                    isset($body["type"]) and
+                    $body["type"] == "url_verification"
                 ) {
-                    $challenge = $body['challenge'];
-                    $slack_thing->Create($sender_id, $page_id, $body['type']);
+                    $challenge = $body["challenge"];
+                    $slack_thing->Create($sender_id, $page_id, $body["type"]);
 
                     $body = $response->getBody();
                     $body->write($challenge);
 
                     return $response
-                        ->withHeader('HTTP/1.0 200 OK')
+                        ->withHeader("HTTP/1.0 200 OK")
                         ->withStatus(200);
                 }
 
-                $verify_token = 'hellomordok';
+                $verify_token = "hellomordok";
 
                 // https://gist.github.com/stefanzweifel/04be27486517cd7d3422
                 $query = $request->getQueryParams();
@@ -461,14 +471,14 @@ $app->group('/api', function () use ($app) {
 
                 echo "Slack says it's good to remind you that the button is doing something. ";
 
-                if (isset($body['event'])) {
+                if (isset($body["event"])) {
                     echo "An event was received";
-                    if ($body['event']['type'] == "message") {
+                    if ($body["event"]["type"] == "message") {
                         echo "and identified as a message";
-                        $nom_to = $body['api_app_id'];
-                        $sender_id = $body['event']['user'];
+                        $nom_to = $body["api_app_id"];
+                        $sender_id = $body["event"]["user"];
 
-                        $test_text = $body['event']['text'];
+                        $test_text = $body["event"]["text"];
 
                         $test_text = ltrim(
                             str_replace("<@U6N5VCYDT>", "", $test_text)
@@ -491,13 +501,13 @@ $app->group('/api', function () use ($app) {
 
                 // So it is not a message event?
                 // Perhaps it is a command.
-                if (isset($body['command'])) {
+                if (isset($body["command"])) {
                     echo "Command accepted. ";
                     //$sender_id = $body['user_id'] . "-" . $body['channel_id'];
-                    $sender_id = $body['user_id'];
+                    $sender_id = $body["user_id"];
 
                     $page_id = "mordok";
-                    $text = $body['text'];
+                    $text = $body["text"];
 
                     $slack_thing->Create($sender_id, $page_id, $text);
 
@@ -516,7 +526,7 @@ $app->group('/api', function () use ($app) {
                         ->withStatus(200);
                 }
 
-                if (isset($body['payload'])) {
+                if (isset($body["payload"])) {
                     echo "Slack datagram transmitted.";
                     //$sender_id = $body['user_id'];
                     $sender_id = "not extracted";
@@ -553,11 +563,11 @@ $app->group('/api', function () use ($app) {
         );
 
         $app->post(
-            $app->getContainer()->get('settings')['api']['facebook']['webhook'],
+            $app->getContainer()->get("settings")["api"]["facebook"]["webhook"],
             function ($request, $response, $args) {
                 $body = $request->getParsedBody();
 
-                $verify_token = '<private>'; //
+                $verify_token = "<private>"; //
 
                 // Page access token
                 // Access Token
@@ -565,11 +575,11 @@ $app->group('/api', function () use ($app) {
                 $query = $request->getQueryParams();
                 $body = $response->getBody();
                 if (
-                    isset($query['hub_verify_token']) &&
-                    isset($query['hub_challenge']) &&
-                    $query['hub_verify_token'] === $verify_token
+                    isset($query["hub_verify_token"]) &&
+                    isset($query["hub_challenge"]) &&
+                    $query["hub_verify_token"] === $verify_token
                 ) {
-                    $body->write($query['hub_challenge']);
+                    $body->write($query["hub_challenge"]);
                 }
 
                 $raw_input = file_get_contents("php://input");
@@ -577,25 +587,25 @@ $app->group('/api', function () use ($app) {
                 $input = $message;
 
                 // Page ID of Facebook page which is sending message
-                $page_id = $message['entry'][0]['id'];
+                $page_id = $message["entry"][0]["id"];
 
                 // User Scope ID of sender.
                 $sender_id =
-                    $message['entry'][0]['messaging'][0]['sender']['id'];
+                    $message["entry"][0]["messaging"][0]["sender"]["id"];
                 // Get Message text if available
                 $text = isset(
-                    $message['entry'][0]['messaging'][0]['message']['text']
+                    $message["entry"][0]["messaging"][0]["message"]["text"]
                 )
-                    ? $message['entry'][0]['messaging'][0]['message']['text']
-                    : '';
+                    ? $message["entry"][0]["messaging"][0]["message"]["text"]
+                    : "";
                 // Get Postback payload if available
                 $postback = isset(
-                    $message['entry'][0]['messaging'][0]['postback']['payload']
+                    $message["entry"][0]["messaging"][0]["postback"]["payload"]
                 )
-                    ? $message['entry'][0]['messaging'][0]['postback'][
-                        'payload'
+                    ? $message["entry"][0]["messaging"][0]["postback"][
+                        "payload"
                     ]
-                    : '';
+                    : "";
 
                 if ($text) {
                     // Return a 200 OK to facebook as quickly as possible.
@@ -603,9 +613,9 @@ $app->group('/api', function () use ($app) {
                     ignore_user_abort(true);
                     set_time_limit(0);
                     ob_start();
-                    header('HTTP/1.0 200 OK');
+                    header("HTTP/1.0 200 OK");
                     header("Content-Type: application/json");
-                    header('Content-Length: ' . ob_get_length());
+                    header("Content-Length: " . ob_get_length());
                     ob_end_flush();
                     ob_flush();
                     flush();
@@ -636,13 +646,13 @@ $app->group('/api', function () use ($app) {
                 }
 
                 return $response
-                    ->withHeader('HTTP/1.0 200 OK')
+                    ->withHeader("HTTP/1.0 200 OK")
                     ->withStatus(200);
             }
         );
 
         // api/redpanda
-        $app->get('/to/{to}/subject/{subject}', function (
+        $app->get("/to/{to}/subject/{subject}", function (
             $request,
             $response,
             $args
@@ -650,31 +660,31 @@ $app->group('/api', function () use ($app) {
             // Allows direct creation of Things from the URI line
             // created as <from> web@<mail_postfix>.
 
-            $to = $args['to'];
-            $subject = $args['subject'];
+            $to = $args["to"];
+            $subject = $args["subject"];
 
             $thing = new Thing(null);
             $thing->Create("web@stackr.ca", $to, $subject);
 
             // Create with a stack value to reflect user generated/provided input.
             $thingreport = [
-                'thing' => $thing->thing,
-                'info' => 'This is a GET connector to create new Things.  It does not extract any
+                "thing" => $thing->thing,
+                "info" => 'This is a GET connector to create new Things.  It does not extract any
 				other information from the datagram.  And only uses the text in the URI provided.',
-                'help' =>
-                    'Also try ' .
-                    'thing/<34 char>/to/<agent name>/subject/<998 characters>',
-                'whatisthis' =>
-                    'This is the API creation endpoint for submitting to-subject pairs to this stack',
+                "help" =>
+                    "Also try " .
+                    "thing/<34 char>/to/<agent name>/subject/<998 characters>",
+                "whatisthis" =>
+                    "This is the API creation endpoint for submitting to-subject pairs to this stack",
             ];
 
             return $this->response->withJson($thingreport);
         });
 
         // api/redpanda
-        $app->group('/thing/{uuid}', function () use ($app) {
-            $app->get('', function ($request, $response, $args) {
-                $uuid = $args['uuid'];
+        $app->group("/thing/{uuid}", function () use ($app) {
+            $app->get("", function ($request, $response, $args) {
+                $uuid = $args["uuid"];
                 $thing = new Thing($uuid);
                 //$j = json_decode ($thing->thing);
 
@@ -706,50 +716,50 @@ $app->group('/api', function () use ($app) {
                 // Just display the thing.
 
                 $web_prefix =
-                    (isset($_SERVER['HTTPS']) ? "https" : "http") .
+                    (isset($_SERVER["HTTPS"]) ? "https" : "http") .
                     "://$_SERVER[HTTP_HOST]/";
                 //$web_prefix = "";
 
                 $thingreport = [
-                    'thing' => $t,
-                    'info' =>
-                        'Turns out Stackr has an imperfect and forgetful memory - ' .
+                    "thing" => $t,
+                    "info" =>
+                        "Turns out Stackr has an imperfect and forgetful memory - " .
                         $web_prefix .
-                        'privacy.',
-                    'help' => 'Check your junk/spam folder.',
-                    'devstack' => 'Expect false when no record.',
-                    'whatisthis' =>
-                        'This is the redpanda API thing JSON end-point.',
+                        "privacy.",
+                    "help" => "Check your junk/spam folder.",
+                    "devstack" => "Expect false when no record.",
+                    "whatisthis" =>
+                        "This is the redpanda API thing JSON end-point.",
                 ];
 
                 return $this->response->withJson($thingreport);
             });
 
             // api/redpanda
-            $app->get('/forget', function ($request, $response, $args) {
-                $uuid = $args['uuid'];
+            $app->get("/forget", function ($request, $response, $args) {
+                $uuid = $args["uuid"];
                 $thing = new Thing($uuid);
                 $thing->Forget();
 
                 $thingreport = [
-                    'thing' => false,
-                    'info' => 'That thing was forgotten.',
-                    'help' => 'The SQL record was deleted',
-                    'devstack' => 'true to indicate an error',
-                    'whatisthis' =>
-                        'You have just deleted the db record for this Thing',
+                    "thing" => false,
+                    "info" => "That thing was forgotten.",
+                    "help" => "The SQL record was deleted",
+                    "devstack" => "true to indicate an error",
+                    "whatisthis" =>
+                        "You have just deleted the db record for this Thing",
                 ];
 
                 return $this->response->withJson($thingreport);
             });
         });
 
-        $app->group('/{subject}', function () use ($app) {
-            $app->get('', function ($request, $response, $args) {
+        $app->group("/{subject}", function () use ($app) {
+            $app->get("", function ($request, $response, $args) {
                 // Allows direct creation of Things from the URI line
                 // created as <from> web@stackr.ca.
                 $to = "agent";
-                $subject = $args['subject'];
+                $subject = $args["subject"];
 
                 $thing = new Thing(null);
                 $thing->Create("web@stackr.ca", $to, $subject);
@@ -760,12 +770,12 @@ $app->group('/api', function () use ($app) {
                 $thing->thing->nom_from = "Z";
 
                 $thingreport = [
-                    'thing' => $thing->thing,
-                    'info' => 'This is a GET connector to message Agent.  It does not extract any
+                    "thing" => $thing->thing,
+                    "info" => 'This is a GET connector to message Agent.  It does not extract any
                     other information from the datagram.  And only uses the text in the URI provided.',
-                    'help' => 'api/redpanda/<998 characters>',
-                    'whatisthis' =>
-                        'This is the API endpoint for submitting a message to Agent.',
+                    "help" => "api/redpanda/<998 characters>",
+                    "whatisthis" =>
+                        "This is the API endpoint for submitting a message to Agent.",
                 ];
 
                 return $this->response->withJson($thingreport);
@@ -775,13 +785,13 @@ $app->group('/api', function () use ($app) {
 });
 
 // Route handler for everything after the /
-$app->get('[/{params:.*}]', function ($request, $response, $args) {
+$app->get("[/{params:.*}]", function ($request, $response, $args) {
     //    ini_set("max_input_time", 2); //s
     //set_time_limit(2);
 
     //ini_set("max_execution_time",1 ); //s
     //$actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-    $actual_link = $_SERVER['REQUEST_URI'];
+    $actual_link = $_SERVER["REQUEST_URI"];
 
     $datagram = [];
 
@@ -789,11 +799,11 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
     //  $params = $args['params'];
 
-    $thing_report['start_time'] = microtime(true);
+    $thing_report["start_time"] = microtime(true);
 
     // Add any post ? mark text to the command
     $input_array = $request->getParams();
-    $input = implode(' ', $input_array);
+    $input = implode(" ", $input_array);
     if ($input != "") {
         $input = " " . $input;
     }
@@ -807,23 +817,23 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
     //var_dump($command);
     //exit();
-    if (substr($command, 0, 15) == 'googleauthorize') {
+    if (substr($command, 0, 15) == "googleauthorize") {
         $thing = new Thing(null);
         $thing->Create("web", "routes", "s/ web googleauthorize");
         $googleauthorize_agent = new Googleauthorize($thing);
 
         $thing_report = $googleauthorize_agent->thing_report;
-        $thing_report['requested_channel'] = 'thing';
+        $thing_report["requested_channel"] = "thing";
 
-        $thing_report['etime'] = number_format($thing->elapsed_runtime());
-        $thing_report['request'] = $thing->subject;
+        $thing_report["etime"] = number_format($thing->elapsed_runtime());
+        $thing_report["request"] = $thing->subject;
 
         $thing->flagGreen();
 
         $bleep = [];
-        $bleep['thing_report'] = $thing_report;
+        $bleep["thing_report"] = $thing_report;
 
-        return $this->renderer->render($response, 'thing.phtml', $bleep);
+        return $this->renderer->render($response, "thing.phtml", $bleep);
     }
     // extract uuid
     // See if there is a UUID in the web address, and
@@ -853,12 +863,12 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
         case $command == "stackr.ca": //prod
 
         case $command == "/":
-            $thing_report['choices'] = ["Privacy", "Thing"];
+            $thing_report["choices"] = ["Privacy", "Thing"];
 
-            $datagram['thing_report'] = $thing_report;
-            $datagram['args'] = $args;
+            $datagram["thing_report"] = $thing_report;
+            $datagram["args"] = $args;
 
-            return $this->renderer->render($response, 'index.phtml', $datagram);
+            return $this->renderer->render($response, "index.phtml", $datagram);
             break;
 
         case $command == "privacy":
@@ -869,17 +879,17 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             $privacy_agent = new Privacy($thing);
 
             $thing_report = $privacy_agent->thing_report;
-            $thing_report['requested_channel'] = 'thing';
+            $thing_report["requested_channel"] = "thing";
 
-            $thing_report['etime'] = number_format($thing->elapsed_runtime());
-            $thing_report['request'] = $thing->subject;
+            $thing_report["etime"] = number_format($thing->elapsed_runtime());
+            $thing_report["request"] = $thing->subject;
 
             $thing->flagGreen();
 
             $bleep = [];
-            $bleep['thing_report'] = $thing_report;
+            $bleep["thing_report"] = $thing_report;
 
-            return $this->renderer->render($response, 'thing.phtml', $bleep);
+            return $this->renderer->render($response, "thing.phtml", $bleep);
             break;
 
         case $command == "robots.txt":
@@ -888,9 +898,9 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             $robot_agent = new Robot($thing);
 
-            $content = $robot_agent->thing_report['txt'];
+            $content = $robot_agent->thing_report["txt"];
             $response->write($content);
-            return $response->withHeader('Content-Type', 'text/plain');
+            return $response->withHeader("Content-Type", "text/plain");
             break;
         case $command == "termsofuse":
         case $command == "terms-of-use":
@@ -900,17 +910,17 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             $agent = new Termsofuse($thing);
 
             $thing_report = $agent->thing_report;
-            $thing_report['requested_channel'] = 'thing';
+            $thing_report["requested_channel"] = "thing";
 
-            $thing_report['etime'] = number_format($thing->elapsed_runtime());
-            $thing_report['request'] = $thing->subject;
+            $thing_report["etime"] = number_format($thing->elapsed_runtime());
+            $thing_report["request"] = $thing->subject;
 
             $thing->flagGreen();
 
             $bleep = [];
-            $bleep['thing_report'] = $thing_report;
+            $bleep["thing_report"] = $thing_report;
 
-            return $this->renderer->render($response, 'thing.phtml', $bleep);
+            return $this->renderer->render($response, "thing.phtml", $bleep);
             break;
 
         case strpos($last, ".") !== false:
@@ -932,30 +942,30 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                     $thing_report = cacheRoute($uuid);
 
                     if ($thing_report !== false) {
-                        unset($thing_report['log']);
+                        unset($thing_report["log"]);
 
                         //               if ($json != false) {
                         $json = json_encode($thing_report, true);
                         $response->write($json);
                         return $response->withHeader(
-                            'Content-Type',
-                            'application/json'
+                            "Content-Type",
+                            "application/json"
                         );
                     }
                 }
 
-                $agent_class_name = 'Make' . strtolower($ext_name);
+                $agent_class_name = "Make" . strtolower($ext_name);
 
                 $web_thing = new Thing($uuid);
 
                 $content_types = [
-                    "pdf" => 'application/pdf',
-                    "png" => 'image/png',
-                    "txt" => 'text/plain',
-                    "php" => 'text/plain',
-                    "log" => 'text/plain',
-                    "json" => 'application/json',
-                    "ics" => 'text/calendar',
+                    "pdf" => "application/pdf",
+                    "png" => "image/png",
+                    "txt" => "text/plain",
+                    "php" => "text/plain",
+                    "log" => "text/plain",
+                    "json" => "application/json",
+                    "ics" => "text/calendar",
                 ];
 
                 // See if the extension name is one of these.
@@ -978,7 +988,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
                 try {
                     $agent_namespace_name =
-                        '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+                        "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
                     $agent = new $agent_namespace_name($web_thing, $agent_name);
                 } catch (Exception $e) {
@@ -1010,13 +1020,13 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 if ($content === false or $content == null) {
                     $response->write(false);
                     return $response->withHeader(
-                        'Content-Type',
+                        "Content-Type",
                         $content_types[$ext_name]
                     );
                 }
                 $response->write($content);
                 return $response->withHeader(
-                    'Content-Type',
+                    "Content-Type",
                     $content_types[$ext_name]
                 );
             }
@@ -1033,12 +1043,12 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 $agent = new Event($thing, $command);
 
                 $datagram = [];
-                $datagram['thing'] = $thing;
-                $datagram['thing_report'] = $agent->thing_report;
+                $datagram["thing"] = $thing;
+                $datagram["thing_report"] = $agent->thing_report;
 
                 return $this->renderer->render(
                     $response,
-                    'thing.phtml',
+                    "thing.phtml",
                     $datagram
                 );
             }
@@ -1051,12 +1061,12 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             if ($thing->thing == false) {
                 if ($uuid === null) {
                     $datagram = [];
-                    $datagram['thing'] = false;
-                    $datagram['thing_report'] = false;
+                    $datagram["thing"] = false;
+                    $datagram["thing_report"] = false;
 
                     return $this->renderer->render(
                         $response,
-                        'thing.phtml',
+                        "thing.phtml",
                         $datagram
                     );
                 }
@@ -1068,24 +1078,24 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             if ($uuid == null) {
                 if (isset($slug->state) and $slug->state == "off") {
                     $datagram = [];
-                    $datagram['thing'] = false;
-                    $datagram['thing_report'] = false;
+                    $datagram["thing"] = false;
+                    $datagram["thing_report"] = false;
 
                     return $this->renderer->render(
                         $response,
-                        'thing.phtml',
+                        "thing.phtml",
                         $datagram
                     );
                 }
 
                 if (isset($slug) and !$slug->isSlug($command)) {
                     $datagram = [];
-                    $datagram['thing'] = false;
-                    $datagram['thing_report'] = false;
+                    $datagram["thing"] = false;
+                    $datagram["thing_report"] = false;
 
                     return $this->renderer->render(
                         $response,
-                        'thing.phtml',
+                        "thing.phtml",
                         $datagram
                     );
                 }
@@ -1116,16 +1126,16 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             if ($thing_report !== false) {
                 $datagram = [];
-                $datagram['thing'] = false;
-                $datagram['thing_report'] = $thing_report;
+                $datagram["thing"] = false;
+                $datagram["thing_report"] = $thing_report;
                 return $this->renderer->render(
                     $response,
-                    'thing.phtml',
+                    "thing.phtml",
                     $datagram
                 );
             }
 
-/*
+            /*
             if ($thing->thing == false) {
                 if ($uuid != null) {
                     $datagram = [];
@@ -1145,18 +1155,18 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             $thing_report = $agent->thing_report;
 
-            $thing_report['filename'] = $last;
-            $thing_report['request'] = $thing->subject;
+            $thing_report["filename"] = $last;
+            $thing_report["request"] = $thing->subject;
 
-            $arr = explode(' ', trim($command));
+            $arr = explode(" ", trim($command));
             $channel = $arr[0];
 
             switch ($channel) {
                 case "thing":
                     //    if ($channel == "thing") {
-                    if (isset($thing_report['web'])) {
+                    if (isset($thing_report["web"])) {
                         $channel = "web";
-                    } elseif (isset($thing_report['sms'])) {
+                    } elseif (isset($thing_report["sms"])) {
                         $channel = "sms";
                     } else {
                         $channel = "sms";
@@ -1168,21 +1178,21 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
                     //                $makeemail_agent = new Makeemail($thing, $thing_report['message']);
                     $this->email_message = $makeemail_agent->email_message;
-                    $thing_report['email'] = $makeemail_agent->email_message;
+                    $thing_report["email"] = $makeemail_agent->email_message;
                     break;
                 default:
                     //var_dump($channel);
                     //var_dump($thing_report['sms']);
-                    if (isset($thing_report['web'])) {
+                    if (isset($thing_report["web"])) {
                         $channel = "web";
-                    } elseif (isset($thing_report['sms'])) {
+                    } elseif (isset($thing_report["sms"])) {
                         $channel = "sms";
                     } else {
                         $channel = "sms";
                     }
             }
 
-            $thing_report['requested_channel'] = $channel;
+            $thing_report["requested_channel"] = $channel;
 
             // Recognize this as a Thing being channeled to agent.
             // and describe as a Thing request
@@ -1191,14 +1201,14 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
                 strpos($command, "agent") !== false and
                 strpos($command, "thing") !== false
             ) {
-                $thing_report['requested_channel'] = "thing";
+                $thing_report["requested_channel"] = "thing";
 
                 $datagram = [];
-                $datagram['thing'] = false;
-                $datagram['thing_report'] = false;
+                $datagram["thing"] = false;
+                $datagram["thing_report"] = false;
                 return $this->renderer->render(
                     $response,
-                    'thing.phtml',
+                    "thing.phtml",
                     $datagram
                 );
             }
@@ -1210,7 +1220,7 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
 
             // Report overflow
             if ($thing->json->size_overflow > 0) {
-                $thing_report['response'] =
+                $thing_report["response"] =
                     "Thing overflow: " .
                     $thing->json->size_overflow .
                     " characters not saved.";
@@ -1223,8 +1233,8 @@ $app->get('[/{params:.*}]', function ($request, $response, $args) {
             // <web_prefix>api/redpanda/<uuid>
             //ie <web_prefix>api/redpanda/839887dd-0772-4ee3-aa53-82b40da89ac0
             $datagram = [];
-            $datagram['thing_report'] = $thing_report;
-            return $this->renderer->render($response, 'thing.phtml', $datagram);
+            $datagram["thing_report"] = $thing_report;
+            return $this->renderer->render($response, "thing.phtml", $datagram);
     }
 });
 
@@ -1240,22 +1250,22 @@ function cacheRoute($uuid)
 
         $expired = false;
         if (
-            isset($thing_report['thing']['refresh_at']) and
-            $thing_report['thing']['refresh_at'] !== false
+            isset($thing_report["thing"]["refresh_at"]) and
+            $thing_report["thing"]["refresh_at"] !== false
         ) {
-            if (time() - strtotime($thing_report['thing']['refresh_at']) > 0) {
+            if (time() - strtotime($thing_report["thing"]["refresh_at"]) > 0) {
                 $expired = true;
             }
         }
 
         if (
-            isset($thing_report['thing']['refresh_at']) and
-            $thing_report['thing']['refresh_at'] === false
+            isset($thing_report["thing"]["refresh_at"]) and
+            $thing_report["thing"]["refresh_at"] === false
         ) {
             $expired = true;
         }
 
-        if (!isset($thing_report['thing']['refresh_at'])) {
+        if (!isset($thing_report["thing"]["refresh_at"])) {
             $expired = true;
         }
 
