@@ -207,7 +207,7 @@ $app->group("/api", function () use ($app) {
         // Operational end-point for GEARMAN
         if (
             isset(
-                $app->getContainer()->get("settings")["api"]["stripe"][
+                $app->getContainer()->get("settings")["api"]["gearman"][
                     "webhook"
                 ]
             )
@@ -239,418 +239,464 @@ $app->group("/api", function () use ($app) {
             );
         }
         // Operational end-point for Microsoft
-        $app->post(
-            $app->getContainer()->get("settings")["api"]["microsoft"][
-                "webhook"
-            ],
-            function ($request, $response, $args) {
-                //        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
-                $body = $request->getParsedBody();
+        if (
+            isset(
+                $app->getContainer()->get("settings")["api"]["microsoft"][
+                    "webhook"
+                ]
+            )
+        ) {
+            $app->post(
+                $app->getContainer()->get("settings")["api"]["microsoft"][
+                    "webhook"
+                ],
+                function ($request, $response, $args) {
+                    //        $app->post('/webhook_microsoft_fn5yozm', function ($request, $response, $args)  {
+                    $body = $request->getParsedBody();
 
-                //$body = $response->getBody();
+                    //$body = $response->getBody();
 
-                ignore_user_abort(true);
-                set_time_limit(0);
+                    ignore_user_abort(true);
+                    set_time_limit(0);
 
-                ob_start();
+                    ob_start();
 
-                $prod = true;
-                if ($prod == true) {
-                    $serverProtocol = filter_input(
-                        INPUT_SERVER,
-                        "SERVER_PROTOCOL",
-                        FILTER_SANITIZE_STRING
-                    );
-                    header($serverProtocol . " 200 OK");
-                    // Disable compression (in case content length is compressed).
-                    header("Content-Encoding: none");
-                    header("Content-Length: " . ob_get_length());
+                    $prod = true;
+                    if ($prod == true) {
+                        $serverProtocol = filter_input(
+                            INPUT_SERVER,
+                            "SERVER_PROTOCOL",
+                            FILTER_SANITIZE_STRING
+                        );
+                        header($serverProtocol . " 200 OK");
+                        // Disable compression (in case content length is compressed).
+                        header("Content-Encoding: none");
+                        header("Content-Length: " . ob_get_length());
 
-                    // Close the connection.
-                    header("Connection: close");
-                } else {
-                    header("HTTP/1.0 200 OK");
-                    header("Content-Type: application/json");
-                    header("Content-Length: " . ob_get_length());
-                }
+                        // Close the connection.
+                        header("Connection: close");
+                    } else {
+                        header("HTTP/1.0 200 OK");
+                        header("Content-Type: application/json");
+                        header("Content-Length: " . ob_get_length());
+                    }
 
-                ob_end_flush();
-                ob_flush();
-                flush();
+                    ob_end_flush();
+                    ob_flush();
+                    flush();
 
-                //            $microsoft_thing = new Thing(null);
-                //            $microsoft_thing->Create( $body['conversation']['id'], $body['from']['id'], $body['text'] );
+                    //            $microsoft_thing = new Thing(null);
+                    //            $microsoft_thing->Create( $body['conversation']['id'], $body['from']['id'], $body['text'] );
 
-                //        $microsoft_thing->db->setFrom($microsoft_thing->from);
+                    //        $microsoft_thing->db->setFrom($microsoft_thing->from);
 
-                //        $microsoft_thing->json->setField("message0");
-                //        $microsoft_thing->json->writeVariable( array("edna") , $body  );
+                    //        $microsoft_thing->json->setField("message0");
+                    //        $microsoft_thing->json->writeVariable( array("edna") , $body  );
 
-                //            return $response->withHeader('HTTP/1.0 200 OK')
-                //                ->withStatus(200);
+                    //            return $response->withHeader('HTTP/1.0 200 OK')
+                    //                ->withStatus(200);
 
-                $queue = false;
-                // Flag Red so that the agent handler picks it up.
-                if ($queue) {
-                    $to = $body["conversation"]["id"];
+                    $queue = false;
+                    // Flag Red so that the agent handler picks it up.
+                    if ($queue) {
+                        $to = $body["conversation"]["id"];
 
-                    $arr = json_encode([
-                        "to" => $to,
-                        "from" => $body["from"]["id"],
-                        "subject" => $body["text"],
-                    ]);
+                        $arr = json_encode([
+                            "to" => $to,
+                            "from" => $body["from"]["id"],
+                            "subject" => $body["text"],
+                        ]);
 
-                    $client = new \GearmanClient();
-                    $client->addServer();
+                        $client = new \GearmanClient();
+                        $client->addServer();
 
-                    $client->doNormal("call_agent", $arr);
-                    //$client->doHighBackground("call_agent", $arr);
-                } else {
-                    $microsoft_thing = new Thing(null);
-                    $microsoft_thing->Create(
-                        $body["conversation"]["id"],
-                        $body["from"]["id"],
-                        $body["text"]
-                    );
+                        $client->doNormal("call_agent", $arr);
+                        //$client->doHighBackground("call_agent", $arr);
+                    } else {
+                        $microsoft_thing = new Thing(null);
+                        $microsoft_thing->Create(
+                            $body["conversation"]["id"],
+                            $body["from"]["id"],
+                            $body["text"]
+                        );
 
-                    $m = new Microsoft($microsoft_thing, $body);
+                        $m = new Microsoft($microsoft_thing, $body);
 
-                    $agent = new Agent($microsoft_thing);
-                }
+                        $agent = new Agent($microsoft_thing);
+                    }
 
-                $message = "Stackr received a message from ";
-                $message .= $body["msisdn"] . " to " . $body["to"];
-                $message .= " which said " . $body["text"] . ".";
-
-                return $response
-                    ->withHeader("HTTP/1.0 200 OK")
-                    ->withStatus(200);
-            }
-        );
-
-        // Operational end-point for NEXMO
-        $app->post(
-            $app->getContainer()->get("settings")["api"]["nexmo"]["webhook"],
-            function ($request, $response, $args) {
-                $body = $request->getParsedBody();
-
-                ignore_user_abort(true);
-                set_time_limit(0);
-
-                ob_start();
-
-                $prod = true;
-                if ($prod == true) {
-                    $serverProtocol = filter_input(
-                        INPUT_SERVER,
-                        "SERVER_PROTOCOL",
-                        FILTER_SANITIZE_STRING
-                    );
-                    header($serverProtocol . " 200 OK");
-                    // Disable compression (in case content length is compressed).
-                    header("Content-Encoding: none");
-                    header("Content-Length: " . ob_get_length());
-
-                    // Close the connection.
-                    header("Connection: close");
-                } else {
-                    header("HTTP/1.0 200 OK");
-                    header("Content-Type: application/json");
-                    header("Content-Length: " . ob_get_length());
-                }
-
-                ob_end_flush();
-                ob_flush();
-                flush();
-
-                $message_id = $body["messageId"];
-
-                $inject_text = "";
-
-                $queue = true;
-
-                // Flag Red so that the agent handler picks it up.
-                if ($queue) {
-                    $arr = json_encode([
-                        "to" => $body["msisdn"],
-                        "from" => $body["to"],
-                        "subject" => $body["text"] . $inject_text,
-                        "body" => $body,
-                    ]);
-
-                    $client = new \GearmanClient();
-                    $client->addServer();
-                    $client->doNormal("call_agent", $arr);
-                    //$client->doHighBackground("call_agent", $arr);
-                } else {
-                    $sms_thing = new Thing(null);
-                    $sms_thing->Create(
-                        $body["msisdn"],
-                        $body["to"],
-                        $body["text"]
-                    );
-
-                    $channel = new Channel($sms_thing, "sms");
-
-                    $agent = new Agent($sms_thing);
-                }
-
-                $message = "Stackr received a message from ";
-                $message .= $body["msisdn"] . " to " . $body["to"];
-                $message .= " which said " . $body["text"] . ".";
-
-                return $response
-                    ->withHeader("HTTP/1.0 200 OK")
-                    ->withStatus(200);
-            }
-        );
-
-        $app->post(
-            $app->getContainer()->get("settings")["api"]["slack"]["webhook"],
-            function ($request, $response, $args) {
-                ob_start();
-
-                $prod = true;
-                if ($prod == true) {
-                    $serverProtocol = filter_input(
-                        INPUT_SERVER,
-                        "SERVER_PROTOCOL",
-                        FILTER_SANITIZE_STRING
-                    );
-                    header($serverProtocol . " 200 OK");
-                    // Disable compression (in case content length is compressed).
-                    header("Content-Encoding: none");
-                    header("Content-Length: " . ob_get_length());
-
-                    // Close the connection.
-                    header("Connection: close");
-                } else {
-                    header("HTTP/1.0 200 OK");
-                    header("Content-Type: application/json");
-                    header("Content-Length: " . ob_get_length());
-                }
-
-                ob_end_flush();
-                ob_flush();
-                flush();
-
-                // Create an empty Thing
-                $slack_thing = new Thing(null);
-                //$channel = new Channel($slack_thing,"slack");
-
-                //$channel = new Channel($slack_thing, "slack");
-                // Retrieve the body of the request
-                $body = $request->getParsedBody();
-
-                //                $channel = new Channel($slack_thing,"slack");
-
-                // Check if this is a webhook verification
-                //https://api.slack.com/events/url_verification
-                if (
-                    isset($body["type"]) and
-                    $body["type"] == "url_verification"
-                ) {
-                    $challenge = $body["challenge"];
-                    $slack_thing->Create($sender_id, $page_id, $body["type"]);
-
-                    $body = $response->getBody();
-                    $body->write($challenge);
+                    $message = "Stackr received a message from ";
+                    $message .= $body["msisdn"] . " to " . $body["to"];
+                    $message .= " which said " . $body["text"] . ".";
 
                     return $response
                         ->withHeader("HTTP/1.0 200 OK")
                         ->withStatus(200);
                 }
+            );
+        }
+        // Operational end-point for NEXMO
+        if (
+            isset(
+                $app->getContainer()->get("settings")["api"]["nexmo"]["webhook"]
+            )
+        ) {
+            $app->post(
+                $app->getContainer()->get("settings")["api"]["nexmo"][
+                    "webhook"
+                ],
+                function ($request, $response, $args) {
+                    $body = $request->getParsedBody();
 
-                $verify_token = "hellomordok";
-
-                // https://gist.github.com/stefanzweifel/04be27486517cd7d3422
-                $query = $request->getQueryParams();
-                //$body = $response->getBody();
-
-                $input = json_decode(file_get_contents("php://input"), true);
-
-                echo "Slack says it's good to remind you that the button is doing something. ";
-
-                if (isset($body["event"])) {
-                    echo "An event was received";
-                    if ($body["event"]["type"] == "message") {
-                        echo "and identified as a message";
-                        $nom_to = $body["api_app_id"];
-                        $sender_id = $body["event"]["user"];
-
-                        $test_text = $body["event"]["text"];
-
-                        $test_text = ltrim(
-                            str_replace("<@U6N5VCYDT>", "", $test_text)
-                        );
-                        $slack_thing->Create($sender_id, $nom_to, $test_text);
-
-                        $channel = new Channel($slack_thing, "slack");
-
-                        $slack_agent = new Slack($slack_thing, $body);
-
-                        $slack_agent = new Agent($slack_thing);
-
-                        $slack_thing->flagRed();
-                        $response_text = "foo";
-                        return $this->response
-                            ->write($response_text)
-                            ->withStatus(200);
-                    }
-                }
-
-                // So it is not a message event?
-                // Perhaps it is a command.
-                if (isset($body["command"])) {
-                    echo "Command accepted. ";
-                    //$sender_id = $body['user_id'] . "-" . $body['channel_id'];
-                    $sender_id = $body["user_id"];
-
-                    $page_id = "mordok";
-                    $text = $body["text"];
-
-                    $slack_thing->Create($sender_id, $page_id, $text);
-
-                    $slack_agent = new Slack($slack_thing, $body);
-                    $channel = new Channel($slack_thing, "slack");
-                    //$slack_agent = new Agent($slack_thing, $body);
-
-                    //$slack_agent = new Slack($slack_thing);
-                    $slack_agent = new Agent($slack_thing);
-
-                    $slack_thing->flagRed();
-                    $response_text = "";
-
-                    return $this->response
-                        ->write($response_text)
-                        ->withStatus(200);
-                }
-
-                if (isset($body["payload"])) {
-                    echo "Slack datagram transmitted.";
-                    //$sender_id = $body['user_id'];
-                    $sender_id = "not extracted";
-                    $page_id = "mordok";
-                    $text = "s/ button press"; //$body['text'];
-                    $slack_thing->Create($sender_id, $page_id, $text);
-
-                    $slack_agent = new Slack($slack_thing, $body);
-                    $slack_thing->flagRed();
-
-                    $response_text = "";
-
-                    return $this->response
-                        ->write($response_text)
-                        ->withStatus(200);
-                }
-
-                foreach ($body as $key => $value) {
-                    $t = $t . " " . $key;
-                }
-
-                $test_text = $t;
-                //$test_text = $body['event']['text'];
-                ob_start();
-                var_dump($body);
-                $test_text = ob_get_clean();
-
-                //$test_text="ht";
-                $sender_id = "not extracted";
-                $page_id = "not extracted";
-
-                $slack_thing->Create($sender_id, $page_id, $test_text);
-            }
-        );
-
-        $app->post(
-            $app->getContainer()->get("settings")["api"]["facebook"]["webhook"],
-            function ($request, $response, $args) {
-                $body = $request->getParsedBody();
-
-                $verify_token = "<private>"; //
-
-                // Page access token
-                // Access Token
-
-                $query = $request->getQueryParams();
-                $body = $response->getBody();
-                if (
-                    isset($query["hub_verify_token"]) &&
-                    isset($query["hub_challenge"]) &&
-                    $query["hub_verify_token"] === $verify_token
-                ) {
-                    $body->write($query["hub_challenge"]);
-                }
-
-                $raw_input = file_get_contents("php://input");
-                $message = json_decode($raw_input, true);
-                $input = $message;
-
-                // Page ID of Facebook page which is sending message
-                $page_id = $message["entry"][0]["id"];
-
-                // User Scope ID of sender.
-                $sender_id =
-                    $message["entry"][0]["messaging"][0]["sender"]["id"];
-                // Get Message text if available
-                $text = isset(
-                    $message["entry"][0]["messaging"][0]["message"]["text"]
-                )
-                    ? $message["entry"][0]["messaging"][0]["message"]["text"]
-                    : "";
-                // Get Postback payload if available
-                $postback = isset(
-                    $message["entry"][0]["messaging"][0]["postback"]["payload"]
-                )
-                    ? $message["entry"][0]["messaging"][0]["postback"][
-                        "payload"
-                    ]
-                    : "";
-
-                if ($text) {
-                    // Return a 200 OK to facebook as quickly as possible.
-                    // If not messenger resends the same message.
                     ignore_user_abort(true);
                     set_time_limit(0);
+
                     ob_start();
-                    header("HTTP/1.0 200 OK");
-                    header("Content-Type: application/json");
-                    header("Content-Length: " . ob_get_length());
+
+                    $prod = true;
+                    if ($prod == true) {
+                        $serverProtocol = filter_input(
+                            INPUT_SERVER,
+                            "SERVER_PROTOCOL",
+                            FILTER_SANITIZE_STRING
+                        );
+                        header($serverProtocol . " 200 OK");
+                        // Disable compression (in case content length is compressed).
+                        header("Content-Encoding: none");
+                        header("Content-Length: " . ob_get_length());
+
+                        // Close the connection.
+                        header("Connection: close");
+                    } else {
+                        header("HTTP/1.0 200 OK");
+                        header("Content-Type: application/json");
+                        header("Content-Length: " . ob_get_length());
+                    }
+
                     ob_end_flush();
                     ob_flush();
                     flush();
 
+                    $message_id = $body["messageId"];
+
+                    $inject_text = "";
+
                     $queue = true;
+
+                    // Flag Red so that the agent handler picks it up.
                     if ($queue) {
                         $arr = json_encode([
-                            "to" => $sender_id,
-                            "from" => $page_id,
-                            "subject" => $text,
+                            "to" => $body["msisdn"],
+                            "from" => $body["to"],
+                            "subject" => $body["text"] . $inject_text,
+                            "body" => $body,
                         ]);
+
                         $client = new \GearmanClient();
                         $client->addServer();
-                        //$client->addServer("10.0.0.24");
-                        //$client->addServer("10.0.0.25");
-                        //$client->doNormal("call_agent", $arr);
-                        $client->doHighBackground("call_agent", $arr);
+                        $client->doNormal("call_agent", $arr);
+                        //$client->doHighBackground("call_agent", $arr);
                     } else {
-                        $fb_thing->flagGreen(); // Avoid the que handler picking it up.
+                        $sms_thing = new Thing(null);
+                        $sms_thing->Create(
+                            $body["msisdn"],
+                            $body["to"],
+                            $body["text"]
+                        );
 
-                        // So when this is turned on it ends up receiving multipl
-                        // FB messages and creating multiple similar responses
-                        // to reply to.
-                        // Need to understand what FB is doing.
+                        $channel = new Channel($sms_thing, "sms");
 
-                        $agent = new Agent($fb_thing);
+                        $agent = new Agent($sms_thing);
                     }
+
+                    $message = "Stackr received a message from ";
+                    $message .= $body["msisdn"] . " to " . $body["to"];
+                    $message .= " which said " . $body["text"] . ".";
+
+                    return $response
+                        ->withHeader("HTTP/1.0 200 OK")
+                        ->withStatus(200);
                 }
+            );
+        }
 
-                return $response
-                    ->withHeader("HTTP/1.0 200 OK")
-                    ->withStatus(200);
-            }
-        );
+        if (
+            isset(
+                $app->getContainer()->get("settings")["api"]["slack"]["webhook"]
+            )
+        ) {
+            $app->post(
+                $app->getContainer()->get("settings")["api"]["slack"][
+                    "webhook"
+                ],
+                function ($request, $response, $args) {
+                    ob_start();
 
+                    $prod = true;
+                    if ($prod == true) {
+                        $serverProtocol = filter_input(
+                            INPUT_SERVER,
+                            "SERVER_PROTOCOL",
+                            FILTER_SANITIZE_STRING
+                        );
+                        header($serverProtocol . " 200 OK");
+                        // Disable compression (in case content length is compressed).
+                        header("Content-Encoding: none");
+                        header("Content-Length: " . ob_get_length());
+
+                        // Close the connection.
+                        header("Connection: close");
+                    } else {
+                        header("HTTP/1.0 200 OK");
+                        header("Content-Type: application/json");
+                        header("Content-Length: " . ob_get_length());
+                    }
+
+                    ob_end_flush();
+                    ob_flush();
+                    flush();
+
+                    // Create an empty Thing
+                    $slack_thing = new Thing(null);
+                    //$channel = new Channel($slack_thing,"slack");
+
+                    //$channel = new Channel($slack_thing, "slack");
+                    // Retrieve the body of the request
+                    $body = $request->getParsedBody();
+
+                    //                $channel = new Channel($slack_thing,"slack");
+
+                    // Check if this is a webhook verification
+                    //https://api.slack.com/events/url_verification
+                    if (
+                        isset($body["type"]) and
+                        $body["type"] == "url_verification"
+                    ) {
+                        $challenge = $body["challenge"];
+                        $slack_thing->Create(
+                            $sender_id,
+                            $page_id,
+                            $body["type"]
+                        );
+
+                        $body = $response->getBody();
+                        $body->write($challenge);
+
+                        return $response
+                            ->withHeader("HTTP/1.0 200 OK")
+                            ->withStatus(200);
+                    }
+
+                    $verify_token = "hellomordok";
+
+                    // https://gist.github.com/stefanzweifel/04be27486517cd7d3422
+                    $query = $request->getQueryParams();
+                    //$body = $response->getBody();
+
+                    $input = json_decode(
+                        file_get_contents("php://input"),
+                        true
+                    );
+
+                    echo "Slack says it's good to remind you that the button is doing something. ";
+
+                    if (isset($body["event"])) {
+                        echo "An event was received";
+                        if ($body["event"]["type"] == "message") {
+                            echo "and identified as a message";
+                            $nom_to = $body["api_app_id"];
+                            $sender_id = $body["event"]["user"];
+
+                            $test_text = $body["event"]["text"];
+
+                            $test_text = ltrim(
+                                str_replace("<@U6N5VCYDT>", "", $test_text)
+                            );
+                            $slack_thing->Create(
+                                $sender_id,
+                                $nom_to,
+                                $test_text
+                            );
+
+                            $channel = new Channel($slack_thing, "slack");
+
+                            $slack_agent = new Slack($slack_thing, $body);
+
+                            $slack_agent = new Agent($slack_thing);
+
+                            $slack_thing->flagRed();
+                            $response_text = "foo";
+                            return $this->response
+                                ->write($response_text)
+                                ->withStatus(200);
+                        }
+                    }
+
+                    // So it is not a message event?
+                    // Perhaps it is a command.
+                    if (isset($body["command"])) {
+                        echo "Command accepted. ";
+                        //$sender_id = $body['user_id'] . "-" . $body['channel_id'];
+                        $sender_id = $body["user_id"];
+
+                        $page_id = "mordok";
+                        $text = $body["text"];
+
+                        $slack_thing->Create($sender_id, $page_id, $text);
+
+                        $slack_agent = new Slack($slack_thing, $body);
+                        $channel = new Channel($slack_thing, "slack");
+                        //$slack_agent = new Agent($slack_thing, $body);
+
+                        //$slack_agent = new Slack($slack_thing);
+                        $slack_agent = new Agent($slack_thing);
+
+                        $slack_thing->flagRed();
+                        $response_text = "";
+
+                        return $this->response
+                            ->write($response_text)
+                            ->withStatus(200);
+                    }
+
+                    if (isset($body["payload"])) {
+                        echo "Slack datagram transmitted.";
+                        //$sender_id = $body['user_id'];
+                        $sender_id = "not extracted";
+                        $page_id = "mordok";
+                        $text = "s/ button press"; //$body['text'];
+                        $slack_thing->Create($sender_id, $page_id, $text);
+
+                        $slack_agent = new Slack($slack_thing, $body);
+                        $slack_thing->flagRed();
+
+                        $response_text = "";
+
+                        return $this->response
+                            ->write($response_text)
+                            ->withStatus(200);
+                    }
+
+                    foreach ($body as $key => $value) {
+                        $t = $t . " " . $key;
+                    }
+
+                    $test_text = $t;
+                    //$test_text = $body['event']['text'];
+                    ob_start();
+                    var_dump($body);
+                    $test_text = ob_get_clean();
+
+                    //$test_text="ht";
+                    $sender_id = "not extracted";
+                    $page_id = "not extracted";
+
+                    $slack_thing->Create($sender_id, $page_id, $test_text);
+                }
+            );
+        }
+        if (
+            isset(
+                $app->getContainer()->get("settings")["api"]["facebook"][
+                    "webhook"
+                ]
+            )
+        ) {
+            $app->post(
+                $app->getContainer()->get("settings")["api"]["facebook"][
+                    "webhook"
+                ],
+                function ($request, $response, $args) {
+                    $body = $request->getParsedBody();
+
+                    $verify_token = "<private>"; //
+
+                    // Page access token
+                    // Access Token
+
+                    $query = $request->getQueryParams();
+                    $body = $response->getBody();
+                    if (
+                        isset($query["hub_verify_token"]) &&
+                        isset($query["hub_challenge"]) &&
+                        $query["hub_verify_token"] === $verify_token
+                    ) {
+                        $body->write($query["hub_challenge"]);
+                    }
+
+                    $raw_input = file_get_contents("php://input");
+                    $message = json_decode($raw_input, true);
+                    $input = $message;
+
+                    // Page ID of Facebook page which is sending message
+                    $page_id = $message["entry"][0]["id"];
+
+                    // User Scope ID of sender.
+                    $sender_id =
+                        $message["entry"][0]["messaging"][0]["sender"]["id"];
+                    // Get Message text if available
+                    $text = isset(
+                        $message["entry"][0]["messaging"][0]["message"]["text"]
+                    )
+                        ? $message["entry"][0]["messaging"][0]["message"][
+                            "text"
+                        ]
+                        : "";
+                    // Get Postback payload if available
+                    $postback = isset(
+                        $message["entry"][0]["messaging"][0]["postback"][
+                            "payload"
+                        ]
+                    )
+                        ? $message["entry"][0]["messaging"][0]["postback"][
+                            "payload"
+                        ]
+                        : "";
+
+                    if ($text) {
+                        // Return a 200 OK to facebook as quickly as possible.
+                        // If not messenger resends the same message.
+                        ignore_user_abort(true);
+                        set_time_limit(0);
+                        ob_start();
+                        header("HTTP/1.0 200 OK");
+                        header("Content-Type: application/json");
+                        header("Content-Length: " . ob_get_length());
+                        ob_end_flush();
+                        ob_flush();
+                        flush();
+
+                        $queue = true;
+                        if ($queue) {
+                            $arr = json_encode([
+                                "to" => $sender_id,
+                                "from" => $page_id,
+                                "subject" => $text,
+                            ]);
+                            $client = new \GearmanClient();
+                            $client->addServer();
+                            //$client->addServer("10.0.0.24");
+                            //$client->addServer("10.0.0.25");
+                            //$client->doNormal("call_agent", $arr);
+                            $client->doHighBackground("call_agent", $arr);
+                        } else {
+                            $fb_thing->flagGreen(); // Avoid the que handler picking it up.
+
+                            // So when this is turned on it ends up receiving multipl
+                            // FB messages and creating multiple similar responses
+                            // to reply to.
+                            // Need to understand what FB is doing.
+
+                            $agent = new Agent($fb_thing);
+                        }
+                    }
+
+                    return $response
+                        ->withHeader("HTTP/1.0 200 OK")
+                        ->withStatus(200);
+                }
+            );
+        }
         // api/redpanda
         $app->get("/to/{to}/subject/{subject}", function (
             $request,
@@ -966,6 +1012,7 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                     "log" => "text/plain",
                     "json" => "application/json",
                     "ics" => "text/calendar",
+                    "zip" => "application/zip",
                 ];
 
                 // See if the extension name is one of these.
@@ -1010,8 +1057,6 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                     //} else {
                     $content = base64_decode($content);
                 }
-                //return FALSE;
-                //}
 
                 // Assume that image is base64 encoded.
                 // Non base64 encoding doesn't pass through Gearman
