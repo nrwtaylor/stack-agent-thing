@@ -67,6 +67,8 @@ class Douglas extends Agent
             return true;
         }
 
+$this->thing->associate($thing->uuid);
+
         return [$thing->nuuid, $agent->thing_report["pdf"]];
     }
 
@@ -223,6 +225,14 @@ class Douglas extends Agent
         }
         $web .= "<br>";
 
+/*
+        $items = json_decode($this->thing->thing->associations);
+ foreach($items as $i=>$value) { 
+    $web .= "xcv";
+}
+*/
+
+
         $this->thing_report["web"] = $web;
     }
 
@@ -253,6 +263,7 @@ class Douglas extends Agent
         // Contains word douglas?
         return false;
     }
+
 
     public function readSubject()
     {
