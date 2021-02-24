@@ -49,6 +49,7 @@ class Douglas extends Agent
         $this->thing->flagGreen();
 
         $this->makeChoices();
+        $this->makeZip();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -112,15 +113,30 @@ class Douglas extends Agent
         }
         $zip->close();
 
-        header("Content-type: application/zip");
-        header('Content-Disposition: attachment; filename="download.zip"');
-        $contents = file_get_contents($filename);
-        file_put_contents(
+        //        header("Content-type: application/zip");
+        //        header('Content-Disposition: attachment; filename="download.zip"');
+        //        $contents = file_get_contents($filename);
+        //        file_put_contents(
+        //            "/var/www/stackr.test/resources/douglas/test5.zip",
+        //            $contents
+        //        );
+        //    }
+
+        $contents = @file_get_contents($filename);
+        $this->contents_zip = $contents;
+        $response = @file_put_contents(
             "/var/www/stackr.test/resources/douglas/test5.zip",
             $contents
         );
+        if ($response === false) {
+            $this->response .= "Could not save ZIP file. ";
+        }
     }
 
+    public function makeZip()
+    {
+        $this->thing_report["zip"] = $this->contents_zip;
+    }
     /**
      *
      */
@@ -249,6 +265,12 @@ class Douglas extends Agent
         if (is_int($number) and $number >= 1) {
             $this->sheet_count = $number;
         }
+
+        $l = $this->web_prefix . "thing/" . $this->thing->uuid . "/douglas.zip";
+        var_dump($l);
+        //        $input = strtolower($this->subject);
+
+        //        $this->readDouglas($input);
 
         $pieces = explode(" ", strtolower($input));
         $this->zipDouglas();
