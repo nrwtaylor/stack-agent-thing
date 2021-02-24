@@ -104,16 +104,15 @@ class Calendar extends Agent
         //$call = $call_agent->extractCall($event->description);
         //$frequency = $frequency_agent->extractFrequency($event->description);
 
-
-// TODO: Test with tag stripping and html_entity_decoding turned off.
-// 
-$preprocess_text = false;
-if ($preprocess_text === true) {
-    $description = strip_tags($text);
-    $when_description = html_entity_decode($description);
-} else {
-    $when_description = $text;
-}
+        // TODO: Test with tag stripping and html_entity_decoding turned off.
+        //
+        $preprocess_text = false;
+        if ($preprocess_text === true) {
+            $description = strip_tags($text);
+            $when_description = html_entity_decode($description);
+        } else {
+            $when_description = $text;
+        }
         $when_description = str_replace(
             ["\n", "\t", "\r"],
             " ",
@@ -142,7 +141,6 @@ if ($preprocess_text === true) {
             "$1",
             $when_description
         );
-var_dump($when_description);
         return $when_description;
     }
 
@@ -405,24 +403,6 @@ var_dump($when_description);
         if (isset($this->calendar->events)) {
             foreach ($this->calendar->events as $event) {
                 $c .= "BEGIN:VEVENT" . "\n";
-                /*
-                foreach ($arr as $key => $variable) {
-var_dump($key);
-var_dump($variable);  
-                  $t = "";
-                    if (isset($event->{$key})) {
-                        if (isset($variable)) {
-                            $t = $event->{$variable};
-                        } else {
-                            $t = $event->{$key};
-                        }
-                        $c .= strtoupper($key) . ":" . $t . "\n";
-                    }
-                    continue;
-
-                    $c .= "DTSTAMP:" . $dtstamp . "\n";
-                }
-*/
 
                 $c .= "DTSTART:" . $event->start_at . "\n";
                 $c .= "DTEND:" . $event->end_at . "\n";
@@ -587,7 +567,7 @@ var_dump($variable);
 
     public function eventCalendar($text = null)
     {
-//        $this->calendar_unique_events === false;
+        //        $this->calendar_unique_events === false;
 
         try {
             // ICal is noisy at the WARNING and NOTICE level.
@@ -619,7 +599,6 @@ var_dump($variable);
             // See note above.
             // error_reporting($old_level);
             // Test with the GitHub provided ics file.
-
         } catch (\Exception $e) {
             $this->response .= "Could not read event. ";
             return true;
@@ -635,17 +614,24 @@ var_dump($variable);
 
         $e = $event;
 
-//        $e->start_at = $e->dtstart;
+        //        $e->start_at = $e->dtstart;
 
-$t = $this->ical->iCalDateWithTimeZone((array) $e,'dtstart',\DateTime::ATOM);
-$e->start_at =$t;
+        $t = $this->ical->iCalDateWithTimeZone(
+            (array) $e,
+            "dtstart",
+            \DateTime::ATOM
+        );
+        $e->start_at = $t;
 
-//public function iCalDateToDateTime($icalDate)
+        //public function iCalDateToDateTime($icalDate)
 
-//        $e->end_at = $e->dtend;
-$t = $this->ical->iCalDateWithTimeZone((array) $e,'dtend',\DateTime::ATOM);
-$e->end_at =$t;
-
+        //        $e->end_at = $e->dtend;
+        $t = $this->ical->iCalDateWithTimeZone(
+            (array) $e,
+            "dtend",
+            \DateTime::ATOM
+        );
+        $e->end_at = $t;
 
         //            $e->calendar_name = $calendar_name;
         $e->calendar_timezone = $calendar_timezone;
@@ -676,11 +662,6 @@ $e->end_at =$t;
 
     public function readCalendar($calendar_uri, $calendar_name = null)
     {
-        //    set_error_handler([$this, 'calendar_warning_handler'], E_WARNING | E_NOTICE);
-        //  restore_error_handler();
-
-        //var_dump($calendar_uri);
-
         $this->calendar_unique_events === false;
 
         try {
@@ -741,7 +722,7 @@ $e->end_at =$t;
         foreach ($events as $event) {
             // TODO - Recognize event structure.
             // For now assume it is Grogg object.
-//            $e = $this->eventCalendar($event);
+            //            $e = $this->eventCalendar($event);
             $e = $event;
 
             $e->start_at = $e->dtstart;

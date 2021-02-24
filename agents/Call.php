@@ -107,9 +107,12 @@ class Call extends Agent
      */
     public function initCall()
     {
-
-        $this->recognized_services = ['zoom','webex','gotomeeting','mailchimp'];
-
+        $this->recognized_services = [
+            "zoom",
+            "webex",
+            "gotomeeting",
+            "mailchimp",
+        ];
     }
 
     public function textCall($call = null)
@@ -210,25 +213,31 @@ class Call extends Agent
         $urls = $this->extractUrls($text);
         $telephone_numbers = $this->extractTelephonenumbers($text);
 
-	$services = ['zoom','webex','gotomeeting','mailchimp'];
-        foreach($this->recognized_services as $i=>$service) {
+        $services = ["zoom", "webex", "gotomeeting", "mailchimp"];
+        foreach ($this->recognized_services as $i => $service) {
+            $is_service_flag = $this->{"is" . ucwords($service)}($text);
+            $count = 0;
+            if ($is_service_flag) {
+                // True service matches
+                $count += 1;
+                if ($count > 1) {
+                    continue;
+                } // Take first matching service.
 
-	   $is_service_flag = $this->{"is" . ucwords($service)}($text);
-$count = 0;
-        if ($is_service_flag) { // True service matches
-$count += 1;
-if ($count > 1) {continue;} // Take first matching service.
+                $this->thing->{$service . "_handler"}->{"read" .
+                    ucwords($service)}($text);
 
-            $this->thing->{$service . "_handler"}->{"read".ucwords($service)}($text);
-
-            $password = $this->thing->{$service . "_handler"}->password;
-            $access_code = $this->thing->{$service . "_handler"}->access_code;
-            $url = $this->thing->{$service . "_handler"}->url;
-            $urls = $this->thing->{$service . "_handler"}->urls;
-            $host_url = $this->thing->{$service . "_handler"}->host_url;
-            $telephone_numbers = $this->thing->{$service . "_handler"}->telephone_numbers;
-        }
-
+                $password = $this->thing->{$service . "_handler"}->password;
+                $access_code =
+                    $this->thing->{$service . "_handler"}->access_code;
+                $url = $this->thing->{$service . "_handler"}->url;
+                $urls = isset($this->thing->{$service . "_handler"}->urls)
+                    ? $this->thing->{$service . "_handler"}->urls
+                    : [];
+                $host_url = $this->thing->{$service . "_handler"}->host_url;
+                $telephone_numbers =
+                    $this->thing->{$service . "_handler"}->telephone_numbers;
+            }
         }
 
         $call = [

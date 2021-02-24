@@ -271,7 +271,6 @@ class Webex extends Agent
     {
         // 11 character string. Alphunumeric.
         // 124 456 5678
-
         if ($text == null) {
             return true;
         }
@@ -296,18 +295,19 @@ class Webex extends Agent
 
         // See TODO above.
         // For now do this.
+        $found_passwords = [];
         foreach ($passwords as $i => $password) {
             if (
                 preg_match("/[A-Za-z]/", $password) &&
                 preg_match("/[0-9]/", $password)
             ) {
+                $found_passwords[] = $password;
             } else {
-                unset($passwords[$i]);
+                //                unset($passwords[$i]);
             }
         }
-
-        if (count($passwords) == 1) {
-            return $passwords[0];
+        if (count($found_passwords) == 1) {
+            return $found_passwords[0];
         }
 
         // That strategy didn't work.
