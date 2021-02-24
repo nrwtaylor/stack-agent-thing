@@ -8,6 +8,7 @@ mpm-child-cnxns=10000
 YOUR_EMAIL=myaddress@example.com
 MYSQLPASSWORD=Stack_1user
 AGENT_LOCATION=../agent
+TODAY := $(shell date +"%Y%m%d")
 #WEB_PREFIX=http:\/\/localhost:8000\/ 
 #LOCAL_PORT=8000
 
@@ -134,7 +135,12 @@ memcached: ## Install MemCache Daemon
 	sudo apt-get update; sudo apt-get install memcached; \
 	sudo apt-get install -y php-memcached
 
+.PHONY: agent
 agent: ## Add commandline shell interface to call the stack
+ifneq ("$(wildcard /var/www/$(SERVERNAME)/agent)","")
+	@echo "agent exists"
+	mv /var/www/$(SERVERNAME)/agent /var/www/$(SERVERNAME)/agent.$(TODAY)
+endif
 	cd /var/www/$(SERVERNAME); \
 	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/agent; \
 	sudo touch agent; \
@@ -145,7 +151,7 @@ agent: ## Add commandline shell interface to call the stack
 	sed -i 's/"user" => "<private>"/"user" => "stackuser"/' settings.php; \
 	sed -i 's/"pass" => "<private>"/"pass" => "$(MYSQLPASSWORD)"/' settings.php; \
 	# next not working -- create sed script to group all commands?
-	sed -i 's/\'web_prefix\' => \'<not set>\'/\'web_prefix\' => \'http:\/\/localhost:8000\/\'/' settings.php
+#	sed -i 's/\'web_prefix\' => \'<not set>\'/\'web_prefix\' => \'http:\/\/localhost:8000\/\'/' settings.php
 
 path: ## Add the stack to your path
 	./setpath $(SERVERNAME)
