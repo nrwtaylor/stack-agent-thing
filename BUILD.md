@@ -489,6 +489,7 @@ add to supervisord section
 minfds = 10000
 ```
 --
+
 Helpful
 http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.html
 
@@ -503,6 +504,7 @@ extension=gearman.so
 (No apparent effect)
 
 ---
+
 Running multiple supervisor workers  
 http://nileshzemase.blogspot.ca/2013/07/gearman-and-supervisor-to-run-multiple.html
 
@@ -657,6 +659,7 @@ After restarting MySQL it was finally obeying the setting:
 mysql> show variables like 'max_connections';
 ```
 --
+
 `my.cnf` - change this to avoid long queries every so often
 ```
 #
@@ -723,6 +726,7 @@ sudo postfix status
             trigger_error("Invalid flow control mode specified", E_USER_ERROR);
 ```
 ---
+
 ### Configure nano
 
 Set `nano` to 4 space indenting
