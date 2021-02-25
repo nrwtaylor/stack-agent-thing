@@ -8,7 +8,10 @@ Which finds you here.
 
 ## 2. Install LAMP stack.
 
-Curated instructions here. Stop at configuration. Use the Install Packages Separately.
+LAMP (PHP version)
+: Linux + Apache + MySQL + PHP
+
+Curated instructions at link below. Stop at configuration. Use the Install Packages Separately.
 https://www.linode.com/docs/web-servers/lamp/install-lamp-stack-on-ubuntu-18-04/
 
 ## 3. MySQL
