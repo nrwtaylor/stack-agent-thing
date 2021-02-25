@@ -65,8 +65,8 @@ class Claws extends Agent
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
-            "This is a claws keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
+            "This is a tool for making decisions about your MH email messages.";
+        $this->thing_report["help"] = "Try CLAWS <file name>.";
 
         $this->thing_report["message"] = $this->sms_message;
 

@@ -10,7 +10,8 @@ MYSQLPASSWORD=Stack_1user
 AGENT_LOCATION=../agent
 TODAY := $(shell date +"%Y%m%d")
 #WEB_PREFIX=http:\/\/localhost:8000\/ 
-#LOCAL_PORT=8000
+LOCAL_PORT=8000
+#ADD_APACHE_PORT=$(shell bash -c 'read -p "Add port to Apache? (y|n)" key; echo $$key')
 
 .PHONY: help
 help: ## Show this help
@@ -104,7 +105,7 @@ php7-4: ## Set up PHP extensions - bleeding edge
 	sudo apt-get --assume-yes install -f php-fpm
 	sudo service apache2 restart
 
-apachefiling: ## Create and assemble filing for Apache2 server
+apachefiling: ## Create and assemble filing for Agent and Apache2 server
 	@echo "===== Creating filesystem for Apache2 server ==============="
 ifneq ("$(wildcard /var/www/$(SERVERNAME))","")
 	@echo "exists"
@@ -128,6 +129,15 @@ else
 	wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/private/settings.php --output-document=/var/www/$(SERVERNAME)/private/settings.php; 
 endif
 	# sudo cp -r . /var/www/$(SERVERNAME)
+
+webserver: ## Set up web server Public Folder and Port
+	@if [ -d /var/www/$(SERVERNAME)/public ] ; then  sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/ ; fi
+#	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/templates/;
+	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)/public; \
+	sudo chmod -R 774 /var/www/$(SERVERNAME)/public;  
+	read -p "Add port to Apache? (y|n)" key; echo $$key ; \
+	if [ "$$key" = "y" ] ; then sudo sed -i 's/Listen 80$$/Listen 80\nListen $(LOCAL_PORT)\n/' /etc/apache2/ports.conf ; fi
+	# TODO: make sure only adds port once - check exists
 
 
 memcached: ## Install MemCache Daemon
