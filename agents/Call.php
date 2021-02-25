@@ -223,7 +223,6 @@ class Call extends Agent
                 if ($count > 1) {
                     continue;
                 } // Take first matching service.
-
                 $this->thing->{$service . "_handler"}->{"read" .
                     ucwords($service)}($text);
 
@@ -240,6 +239,11 @@ class Call extends Agent
             }
         }
 
+        // No URL? Try a general search for a
+        // paragraph with join a webinar and a url in it.
+        if ($url === false) {
+            $url = $this->urlWebinar($text);
+        }
         $call = [
             "service" => $service,
             "password" => $password,
@@ -367,7 +371,6 @@ class Call extends Agent
         }
 
         $this->input = $input;
-
         $this->readCall($input);
 
         if (strtolower($input) == "next call") {

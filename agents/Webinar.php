@@ -1,6 +1,6 @@
 <?php
 /**
- * Webex.php
+ * Webinar.php
  *
  * @package default
  */
@@ -13,7 +13,7 @@ ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
 
-class Webex extends Agent
+class Webinar extends Agent
 {
     public $var = "hello";
 
@@ -27,19 +27,19 @@ class Webex extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "WEBEX is a tool for hosting audio-visual conferences.";
-        $this->thing_report["help"] = "Click on the image for a PDF.";
+            "WEBINAR is a tool for hosting audio-visual conferences.";
+        $this->thing_report["help"] = "No user response.";
 
-        $this->node_list = ["webex" => ["webex", "uuid"]];
+        $this->node_list = ["webinar" => ["webinar", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
-        $this->initWebex();
+        $this->initWebinar();
     }
 
     public function set()
     {
-        $this->setWebex();
+        $this->setWebinar();
     }
 
     /**
@@ -56,8 +56,6 @@ class Webex extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-
-        //        return $this->thing_report;
     }
 
     /**
@@ -74,7 +72,7 @@ class Webex extends Agent
      */
     public function makeSMS()
     {
-        $sms = "WEBEX | ";
+        $sms = "WEBINAR | ";
 
         $sms_text =
             $this->password .
@@ -103,7 +101,7 @@ class Webex extends Agent
      *
      */
 
-    public function setWebex()
+    public function setWebinar()
     {
     }
 
@@ -111,31 +109,26 @@ class Webex extends Agent
      *
      * @return unknown
      */
-    public function getWebex()
+    public function getWebinar()
     {
     }
 
     /**
      *
      */
-    public function initWebex()
+    public function initWebinar()
     {
     }
 
-    public function readWebex($text = null)
+    public function readWebinar($text = null)
     {
-        //       $file = $this->resource_path . 'call/call-test' . '.txt';
+        $this->access_code = $this->accesscodeWebinar($text);
+        $this->password = $this->passwordWebinar($text);
 
-        //       if (file_exists($file)) {
-        //           $text = file_get_contents($file);
-        //       }
-        $this->access_code = $this->accesscodeWebex($text);
-        $this->password = $this->passwordWebex($text);
+        $this->url = $this->urlWebinar($text);
+        $this->host_url = $this->hosturlWebinar($text);
 
-        $this->url = $this->urlWebex($text);
-        $this->host_url = $this->hosturlWebex($text);
-
-        $this->telephone_numbers = $this->telephonenumberWebex($text);
+        $this->telephone_numbers = $this->telephonenumberWebinar($text);
     }
 
     public function run()
@@ -147,8 +140,8 @@ class Webex extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/webex.pdf";
-        $this->node_list = ["webex" => ["webex"]];
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/webinar.pdf";
+        $this->node_list = ["webinar" => ["webinar"]];
         $web = "";
         if (isset($this->html_image)) {
             $web .= '<a href="' . $link . '">';
@@ -164,7 +157,7 @@ class Webex extends Agent
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "webex",
+            "webinar",
             "refreshed_at",
         ]);
 
@@ -172,147 +165,66 @@ class Webex extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["webex", "refreshed_at"],
+                ["webinar", "refreshed_at"],
                 $time_string
             );
         }
     }
 
-    public function urlWebex($text = null)
+    public function urlWebinar($text = null)
     {
-        //        $url_agent = new Url($this->thing, "url");
-        //        $urls = $url_agent->extractUrls($text);
-        $urls = $this->extractUrls($text);
-        foreach ($urls as $i => $url) {
-            if (stripos($url, ".php?MTID") !== false) {
-                // Match first instance.
-                return $url;
-            }
-        }
 
-        foreach ($urls as $i => $url) {
-            if (stripos($url, ".webex.com") !== false) {
-                return $url;
+        $selected_paragraphs = [];
+        $paragraph_agent = new Paragraph($this->thing, $text);
+        $paragraphs = $paragraph_agent->paragraphs;
+        foreach ($paragraphs as $i => $paragraph) {
+            if (stripos($paragraph, "join the webinar") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
             }
+
+            if (stripos($paragraph, "join webinar") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
+            }
+
+            if (stripos($paragraph, "webinar link") !== false) {
+                $selected_paragraphs[] = $paragraph;
+                continue;
+            }
+
+
         }
+$urls = [];
+foreach($selected_paragraphs as $s=>$paragraph) {
+
+$urls = array_merge($this->extractUrls($paragraph), $urls);
+$urls = array_unique($urls);
+}
+
+if (count($urls) === 1) {$url = $urls[0]; return $url;}
 
         return false;
     }
 
-    public function hosturlWebex($text = null)
+    public function hosturlWebinar($text = null)
     {
-        //        $url_agent = new Url($this->thing, "url");
-        //        $urls = $url_agent->extractUrls($text);
-
-        $urls = $this->extractUrls($text);
-
-        foreach ($urls as $i => $url) {
-            if (stripos($url, ".php?MTID") !== false) {
-                continue;
-            }
-
-            if (stripos($url, ".webex.com") !== false) {
-                continue;
-            }
-
-            unset($urls[$i]);
-        }
-
-        // Match last instance.
-        return end($urls);
+        return false;
     }
 
-    public function telephonenumberWebex($text = null)
+    public function telephonenumberWebinar($text = null)
     {
-        // TODO: devstack Telephonenumber
-
-        //        $telephonenumber_agent = new Telephonenumber(
-        //            $this->thing,
-        //            "telephonenumber"
-        //        );
-
-        //        $telephone_numbers = $telephonenumber_agent->extractTelephonenumbers(
-        //            $text
-        //        );
-
         $telephone_numbers = $this->extractTelephonenumbers($text);
-
         return $telephone_numbers;
     }
 
-    public function accesscodeWebex($text = null)
+    public function accesscodeWebinar($text = null)
     {
-        // 124 456 5678
-
-        if ($text == null) {
-            return true;
-        }
-
-        $pattern = "/\b\d{3} \d{3} \d{4}/i";
-
-        preg_match_all($pattern, $text, $match);
-        if (!isset($access_codes)) {
-            $access_codes = [];
-        }
-
-        $access_codes = array_merge($access_codes, $match[0]);
-        $access_codes = array_unique($access_codes);
-
-        if (count($access_codes) == 1) {
-            return $access_codes[0];
-        }
-
         return false;
     }
 
-    public function passwordWebex($text)
+    public function passwordWebinar($text)
     {
-        // 11 character string. Alphunumeric.
-        // 124 456 5678
-        if ($text == null) {
-            return true;
-        }
-
-        $pattern = "/\b[a-zA-Z0-9]{11}\b/i";
-
-        //TODO: Develop regex pattern to match at least one number and one alpha.
-        //$pattern = '/\b^(?=.*\d)(?=.*[a-zA-Z]).{11}$\b/';
-        //$pattern = '/^.*(?=.{11})(?=.*\d)(?=.*[a-zA-Z]).*$/';
-        //$pattern = '/\b^(?=.*\d)(?=.*[a-zA-Z])[a-zA-Z0-9]{11}$\b/';
-        //$pattern = '^((?=.*\d)(?=.*[A-Z])(?=.*\W).{11,11})$';
-
-        //$pattern = '/\b^(?=.*\d)(?=.*[a-zA-Z])[a-zA-Z0-9]{11}$\b/i';
-
-        preg_match_all($pattern, $text, $match);
-        if (!isset($passwords)) {
-            $passwords = [];
-        }
-
-        $passwords = array_merge($passwords, $match[0]);
-        $passwords = array_unique($passwords);
-
-        // See TODO above.
-        // For now do this.
-        $found_passwords = [];
-        foreach ($passwords as $i => $password) {
-            if (
-                preg_match("/[A-Za-z]/", $password) &&
-                preg_match("/[0-9]/", $password)
-            ) {
-                $found_passwords[] = $password;
-            } else {
-                //                unset($passwords[$i]);
-            }
-        }
-        if (count($found_passwords) == 1) {
-            return $found_passwords[0];
-        }
-
-        // That strategy didn't work.
-        // Try seeing if there is a paragraph with the word 'password'.
-
-        // And then see if there is a strange token.
-
         $selected_paragraphs = [];
         $paragraph_agent = new Paragraph($this->thing, $text);
         $paragraphs = $paragraph_agent->paragraphs;
@@ -371,30 +283,30 @@ class Webex extends Agent
      * @return unknown
      */
 
-    public function isWebex($text)
+    public function isWebinar($text)
     {
-        if (stripos($text, "webex") !== false) {
+        if (stripos($text, "webinar") !== false) {
             return true;
         }
-        // Contains word webex?
+        // Contains word webinar?
         return false;
     }
 
     public function readSubject()
     {
         $input = strtolower($this->subject);
-        $this->readWebex($input);
+        $this->readWebinar($input);
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == "webex") {
-                $this->getWebex();
+            if ($input == "webinar") {
+                $this->getWebinar();
                 return;
             }
         }
 
-        $this->getWebex();
+        $this->getWebinar();
 
         return;
     }

@@ -190,6 +190,12 @@ class Zoom extends Agent
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
+
+            if ($url === "https://zoom.us/") {
+               continue;
+            }
+
+
             if (stripos($url, ".zoom.us/") !== false) {
                 // Match first instance.
                 return $url;
