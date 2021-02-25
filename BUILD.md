@@ -13,7 +13,7 @@ Which finds you here.
 
 [1]: https://www.qwant.com/?q=lamp+stack
 
-Curated instructions at link below. Stop at configuration. Use the Install Packages Separately.
+Curated instructions at link below. Stop at configuration. Use the Install Packages Separately.  
 https://www.linode.com/docs/web-servers/lamp/install-lamp-stack-on-ubuntu-18-04/
 
 ## 3. MySQL
@@ -61,20 +61,21 @@ mysql> DESC stack;
 +--------------+---------------+------+-----+-------------------+-------+
 ```
 Useful commands.
-```
+```mysql
 USE stack_db;
 pager less -SFX;
 SELECT * FROM stack ORDER BY created_at DESC limit 99;
 DELETE FROM stack WHERE nom_from='null@<mail_postfix>' and nom_to='choice' and created_at < NOW() - INTERVAL 1 WEEK;
 DELETE FROM stack WHERE nom_from='null@stackr.ca' and created_at < NOW() - INTERVAL 1 WEEK;
-
+```
 Configure my.cnf
+```
 innodb_buffer_pool_size=1G
 ```
 
 ## 3. Setup PHP
 3 cont. Install PHP extensions
-```
+```shell
 sudo apt-get update
 sudo apt-get install php-mbstring
 sudo apt-get install php7.2-xml
@@ -89,12 +90,12 @@ sudo apt-get install php7.4-zip
 sudo service apache2 restart
 ```
 ## 4. Setup Apache 2
-```
+```shell
 mkdir /var/www/stackr.test
 cd /var/www/stackr.test
 ```
 https://stackoverflow.com/questions/22390001/runtimeexception-vendor-does-not-exist-and-could-not-be-created/43513522#43513522
-```
+```shell
 sudo usermod -a -G www-data `whoami`
 
 sudo chown root:root /var/www
@@ -103,25 +104,25 @@ sudo chmod 755 /var/www/
 sudo chown -R www-data:www-data /var/www/stackr.test
 sudo chmod -R 774 /var/www/stackr.test
 ```
-More on folder permissions.
+More on folder permissions.  
 https://askubuntu.com/questions/767504/permissions-problems-with-var-www-html-and-my-own-home-directory-for-a-website
-```
+```shell
 wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/composer.json
 sudo apt install composer
 composer install
 ```
 Load in template public and private configuration files.
-```
+```shell
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/public /var/www/stackr.test/
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/private /var/www/stackr.test/
 ```
 Load in resources under /resources.
-```
+```shell
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/resources /var/www/stackr.test/
 ```
 
 > Can stop here if there is no need to serve stack web requests.
-```
+```shell
 cd /etc/apache2/sites-available
 sudo nano 000-default.conf
 ```
@@ -142,11 +143,11 @@ sudo nano 000-default.conf
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
-```
+```shell
 sudo service apache2 restart
 ```
 No changes to apache2.conf
-```
+```shell
 sudo nano stackr.test.conf
 ```
 ```
@@ -187,7 +188,7 @@ sudo nano stackr.test.conf
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
-```
+```shell
 sudo a2ensite stackr.test.conf
 ```
 Copy .htaccess from public to /var/www/stackr.test/public
@@ -204,27 +205,27 @@ RewriteRule ^ %1 [L,NE,R=302]
 RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
 ```
 Set public/.htaccess permissions and ownership
-```
+```shell
 sudo chown www-data:www-data .htaccess
 chmod 644 .htaccess
 ```
 And set public/index.php permissions and ownership
-```
+```shell
 sudo chown www-data:www-data index.php
 sudo chmod 644 index.php
 ```
 You may get an error about Invalid command: RewriteEngine.
 So you need.
-```
+```shell
 sudo a2enmod rewrite
 ```
 Which apparently is the same as:
-```
+```shell
 ? ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
 ```
 
 May not need this.
-```
+```shell
 install mod_rewrite module
 
 systemctl restart apache2
@@ -235,13 +236,13 @@ sudo service apache2 reload
 ## 6. Build resources
 
 The resources folder contains custom resources for this stack.
-```
+```shell
 mkdir resources
 ```
 Add in agent resources as available.
 
 ## 7. Verify localhost serving to local-wide TCP/IP
-```
+```shell
 php -S localhost:8080 -t public public/index.php
 ```
 ## 8. Verify Ping, Latency
@@ -253,7 +254,7 @@ php -S localhost:8080 -t public public/index.php
 ## 10. Install Gearman.
 
 ---
-```
+```shell
 sudo nano vendor/nrwtaylor/stack-agent-thing/src/worker.php
 ```
 Update require path.
@@ -264,14 +265,14 @@ Update require path.
 Install Gearman
 http://gearman.org/
 
-gearmand-1.1.18.tar.gz
-https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gz
+- gearmand-1.1.18.tar.gz
+- https://github.com/gearman/gearmand/releases/download/1.1.18/gearmand-1.1.18.tar.gz
 
 ---
 
 ## 10 (cont.) More on installing Gearman
 https://gist.github.com/himelnagrana/9758209
-```
+```shell
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install gcc autoconf bison flex libtool make libboost-all-dev libcurl4-openssl-dev curl libevent-dev uuid-dev
@@ -286,7 +287,7 @@ sudo apt-get install gperf
 sudo make
 ```
 this takes a while and throws a lot of output
-```
+```shell
 sudo make install
 sudo apt-get install gearman-job-server
 
@@ -296,11 +297,11 @@ sudo nano /etc/php5/conf.d/gearman.ini
 ```
 [and then write extension=gearman.so as content of the file, save it and close it]
 
-```
+```shell
 sudo service apache2 restart
 ```
 perhaps just
-```
+```shell
 sudo apt-get install php-gearman
 ```
 Test with gearman scripts
@@ -308,17 +309,17 @@ Test with gearman scripts
 --
  Lots of gearman stuff follows because gearman is tricky to get up and running.
 --
-```
+```shell
 sudo apt install gearman-tools
 ```
 --
 
 Needed 
-```
+```shell
 apt-get install gperf
 ```
 Then ./configure etc.
-```
+```shell
 sudo pecl channel-update pecl.php.net
 ```
 --
@@ -494,8 +495,9 @@ http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.
 Change php/ini
 /etc/php7.1/apache2 and
 /etc/php/7.1/cli$ php.ini
+```
 extension=gearman.so
-
+```
 (No apparent effect)
 
 ---
@@ -590,7 +592,7 @@ Once ticking, you'll see a cron tick every 60s in the database.
 ### Install MYSQL
 
 #### Problem #1
-Increase Max connections
+Increase Max connections  
 https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-foo/
 ```shell
 sudo nano /etc/mysql/mysqld.cnf
@@ -598,7 +600,7 @@ sudo nano /etc/mysql/mysqld.cnf
 ```
 max_connection = 1000
 ```
-Posted on June 13, 2017 by peter
+**Posted on June 13, 2017 by peter**
 MySQL max_connections limited to 214 on Ubuntu Foo
 
 After moving a server to a new machine with Ubuntu 16.10 I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
@@ -623,8 +625,10 @@ mysql> show variables like 'max_connections';
 1 row in set (0.01 sec)
 ```
 Wait, what?! A look into the error log gave the same result:
-```
+```shell
 # grep max_connections /var/log/mysql/error.log
+```
+```
 2017-06-14T01:23:29.804684Z 0 [Warning] Changed limits: max_connections: 214 (requested 8000)
 ```
 Something is off here and ye olde oracle Google has quite some hits on that topic. And the problem lies with the maximum allowed number of open files. You can’t have more connections, than open files. Makes sense. Some people suggest to solve it using /etc/security/limits.conf to fix it. Which is not so simple on Ubuntu anymore, because you have to first enable pam_limits.so. And even then it doesn’t work, because since Ubuntu is using systemd (15.04 if I am not mistaken) this configuration is only valid for user sessions and not services/demons.
@@ -788,7 +792,7 @@ sudo apt-get install php-mbstring
 13 (cont). Get composer dependencies
 
 composer.json
-```
+```json
 {
     "name": "test project",
     "description": "A PHP project to test my package",
@@ -814,7 +818,7 @@ composer.json
 
 ## 15. Syllables
 
-Use the vanderlee composer package.
+**Use the vanderlee composer package.**
 You will need to get the .tex file which has Thomas Kroll's name on it.
 Otherwise was you will get these errors.
 ```
