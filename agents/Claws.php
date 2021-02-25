@@ -237,7 +237,7 @@ dev - Detect duplicates.
                 $txt .= "FOUND MEETING DETAILS\n";
             }
 
-            $txt .= $text_claws . "\n";
+            $txt .= $this->textHtml($text_claws) . "\n";
         }
         $txt .= "\n";
 
@@ -295,7 +295,6 @@ dev - Detect duplicates.
         // TODO extract dates over multiple paragraphs
 
         foreach ($datelines as $i => $dateline) {
-            //    var_dump($dateline);
         }
 
         // Sort by best to worst match.
@@ -327,10 +326,6 @@ dev - Detect duplicates.
             "test" => ["test"],
         ];
         $this->flagAgent($indicators, strtolower($input));
-
-        //        $filtered_input = $this->assert($input, false);
-        //var_dump($filtered_input);
-        //exit();
 
         $string = $input;
         $str_pattern = "claws";
@@ -382,6 +377,7 @@ dev - Detect duplicates.
                 }
             }
             $calendar_events_count = count($events);
+
             if ($calendar_events_count == 1) {
                 // Found exactly one calendar event.
                 $timezone = $event->calendar_timezone;
@@ -399,6 +395,17 @@ dev - Detect duplicates.
             } else {
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
+
+//test
+// Add Returns back in.
+/*
+$body = str_replace("=0D=0A","\n\n",$body);
+//$body = $this->textHtml($body);
+$pattern = '/[=][A-Z0-9]{1}[0-9{1]/';
+$replacement = ' ';
+$body =  preg_replace($pattern, $replacement, $body);
+*/
+
                 $call = $this->readCall($body);
                 // Try to figure out date from body text.
 

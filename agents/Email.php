@@ -243,6 +243,10 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
     {
         // https://github.com/zbateson/mail-mime-parser
 
+// test 
+//$text = str_replace('Content-Type: multipart/alternative',
+//'Content-Type: multipart/mixed',$text);
+
         $message = Message::from($text);
 
         $subject = $message->getHeaderValue("Subject");
@@ -290,6 +294,16 @@ $email_html_text = $singleSpace;
         //if ($email_html === null) {$body = $email_text;}
 
         $body = $email_text . "\n" . $email_html_text;
+
+// ZBateson library can sometimes come back null.
+// With multipart.
+// https://github.com/zbateson/mail-mime-parser/issues/29
+// Test for this and use text as body if so.
+
+if (($email_text == null) and ($email_html == null)) {
+    $body = $text;
+}
+
 
         $toEmail = null;
         if (isset($toEmails[0])) {

@@ -173,7 +173,6 @@ class Webinar extends Agent
 
     public function urlWebinar($text = null)
     {
-
         $selected_paragraphs = [];
         $paragraph_agent = new Paragraph($this->thing, $text);
         $paragraphs = $paragraph_agent->paragraphs;
@@ -201,7 +200,6 @@ foreach($selected_paragraphs as $s=>$paragraph) {
 $urls = array_merge($this->extractUrls($paragraph), $urls);
 $urls = array_unique($urls);
 }
-
 if (count($urls) === 1) {$url = $urls[0]; return $url;}
 
         return false;
