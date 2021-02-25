@@ -4,12 +4,14 @@ These are the current build instructions as of October 2019.
 
 ## 1. Install Ubuntu latest.
 
-Which finds you here.
+Which finds you here. 
 
 ## 2. Install LAMP stack.
 
-LAMP (PHP version)
+[LAMP (PHP version)][1]
 : Linux + Apache + MySQL + PHP
+
+[1]: https://www.qwant.com/?q=lamp+stack
 
 Curated instructions at link below. Stop at configuration. Use the Install Packages Separately.
 https://www.linode.com/docs/web-servers/lamp/install-lamp-stack-on-ubuntu-18-04/
@@ -303,13 +305,13 @@ sudo apt-get install php-gearman
 ```
 Test with gearman scripts
 
--
+--
  Lots of gearman stuff follows because gearman is tricky to get up and running.
--
+--
 ```
 sudo apt install gearman-tools
 ```
--
+--
 
 Needed 
 ```
@@ -319,99 +321,99 @@ Then ./configure etc.
 ```
 sudo pecl channel-update pecl.php.net
 ```
--
+--
 https://hasin.me/2013/10/30/installing-gearmand-libgearman-and-pecl-gearman-from-source/
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 wget https://launchpad.net/gearmand/1.2/1.1.11/+download/gearmand-1.1.11.tar.gz
 tar -zxvf gearmand-1.1.11.tar.gz
 cd gearmand-1.1.11
 ./configure
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 ### Failure 1:
 At this step, configure stopped showing the following error
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 configure: error: cannot find Boost headers version >= 1.39.0
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 To fix this, I had to install “libboost-all-dev” by following command
-[sourcecode language=”shell”]
-```
+<!--sourcecode language=”shell”-->
+```shell
 apt-get install libboost-all-dev
 ```
-[/sourcecode]
+<!--/sourcecode-->
 
 And I tried to compile gearman and it failed again
 
 ### Failure 2:
 At this step, configure stopped showing that it cannot find gperf. That’s fine – I have installed gperf and tried to configure gearman again
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]--->
+```shell
 apt-get install gperf
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 ### Failure 3:
 Now it failed again, showing that libevent is missing. Hmm! Had to fix it anyway
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 apt-get install libevent-dev
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 ### Failure 4:
 Heck! Another failure. Now it’s showing that it can’t find libuuid. This part was a little tricky to solve, but finally fixed with the following package
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 apt-get install uuid-dev
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 Let’s configure again. And sweet that the configure script ran smoothly. Let’s compile using make
 
 ### Failure 5:
 Grrr! At this point the make script failed with a bunch of text, where the following lines were at the top
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 libgearman/backtrace.cc: In function ‘void custom_backtrace()’:
 libgearman/backtrace.cc:64:6: sorry, unimplemented: Graphite loop optimizations can only be used if the libcloog-ppl0 package is installed
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 So it cannot find a library named libcloog-ppl. Let’s fix this problem by
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 apt-get install libcloog-ppl-dev
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 Now I’ve tried to run the make script, and it was good. So i also ran make install to complete the installation.
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 make
 make install
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 Now gearmand and libgearman both are installed. So I tried to install pecl-gearman with the following extension and voila! it worked. No more missing libgearman anymore.
 
-[sourcecode language=”shell”]
-```
+<!--[sourcecode language=”shell”]-->
+```shell
 pecl install gearman
 ```
-[/sourcecode]
+<!--[/sourcecode]-->
 
 Now all I had to do is add the line “extension=gearman.so” in my php.ini .
 
@@ -421,10 +423,11 @@ I really wanted to say “What’s wrong with this chicken” after gearman was 
 
 Enjoy!
 
--
+--
 
 https://www.techearl.com/php/installing-gearman-module-for-php7-on-ubuntu
-```
+
+```shell
 apt-get install php-dev #phpize not in ubuntu standard
 
 cd /tmp/
@@ -442,23 +445,23 @@ sudo phpenmod -v ALL -s ALL gearman
 
 ### Another way the gearman install can go awry.
 
-PHP Startup: Unable to load dynamic library 'gearman.so'
+PHP Startup: Unable to load dynamic library 'gearman.so'  
 https://stackoverflow.com/questions/36423929/gearman-is-missing-from-your-system
 
 
 ## 10 (cont.) Installing Supervisor for Gearman
 
-Install Supervisor
+Install Supervisor  
 http://masnun.com/2011/11/02/gearman-php-and-supervisor-processing-background-jobs-with-sanity.html
 
 
-```
+```shell
 #sudo apt-get install python-setuptools
 #sudo easy_install supervisor
 ```
 https://code.tutsplus.com/tutorials/making-things-faster-with-gearman-and-supervisor--cms-29337
 
-```
+```shell
 sudo apt-get install supervisor
 sudo nano /etc/supervisor/conf.d/supervisor.conf
 ```
@@ -470,7 +473,8 @@ autostart=true
 autorestart=false
 numprocs=3
 process_name=gearman-worker-%(process_num)s
-
+```
+```shell
 sudo supervisorctl reload
 ```
 --
@@ -495,20 +499,20 @@ extension=gearman.so
 (No apparent effect)
 
 ---
-Running multiple supervisor workers
+Running multiple supervisor workers  
 http://nileshzemase.blogspot.ca/2013/07/gearman-and-supervisor-to-run-multiple.html
 
 -- 
 
 Remove Namespace from worker.php file[check?]
-```
+```shell
 sudo apt-get install php7.1-fpm
 ```
 --
 
 
 http://www.hostingadvice.com/how-to/install-gearman-ubuntu-14-04/
-```
+```shell
 sudo apt-get install software-properties-common
 sudo add-apt-repository ppa:gearman-developers/ppa
 sudo apt-get update
@@ -518,17 +522,17 @@ sudo apt-get upgrade
 ```
 
 ## 11. Set-up cron
-```
+```shell
 sudo crontab -e
 ```
 ```
 * * * * * cd /var/www/stackr.test && /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php >/dev/null 2>&1
 ```
-```
+```shell
 sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 ```
 Correct require line for the current environment.
-```
+```shell
 sudo nano /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Tick.php
 ```
 Remove forward slash from /Gearman in line 62.
@@ -541,7 +545,7 @@ Remove forward slash from /Gearman in line 62.
 
 Add template files ... there are sample index, thing (and eventually email)
 templates in there.
-```
+```shell
 cd /var/www/stackr.test
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stackr/templates templates
 ```
@@ -556,14 +560,14 @@ Add resource files
 
 Copy in resource files ... there are sample resource files for 
 some of the agents provided.
-```
+```shell
 cd /var/www/stackr.test  
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stackr/resources resources
 ```
 
 --- 
 Get the Clock ticking
-```
+```shell
 sudo crontab -e
 ```
 Copy and paste this in as the last line.
@@ -573,12 +577,12 @@ Copy and paste this in as the last line.
 
 Watch the database for Cron things.
 And then check the error logs :/
-```
+```shell
 grep CRON /var/log/syslog
 ```
 If you run into trouble, test this bit out.  For the correct absolute paths.
 Test this bit
-```
+```shell
 /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 ```
 Once ticking, you'll see a cron tick every 60s in the database.
@@ -588,8 +592,10 @@ Once ticking, you'll see a cron tick every 60s in the database.
 #### Problem #1
 Increase Max connections
 https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-foo/
-```
+```shell
 sudo nano /etc/mysql/mysqld.cnf
+```
+```
 max_connection = 1000
 ```
 Posted on June 13, 2017 by peter
@@ -600,8 +606,10 @@ After moving a server to a new machine with Ubuntu 16.10 I received some strange
 postfix/cleanup[30475]: warning: connect to mysql server 127.0.0.1: Too many connections
 ```
 Oops, did I forgot to up max_connections during the migration:
-```
+```shell
 # grep max_connections /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+```
 max_connections = 8000
 ```
 Nope, I didn’t. Did we all of a sudden have a surge in clients accessing the database. Let me check and ask MySQL, and the process list looked fine. But something was off. So let’s check the value in the SQL server itself:
@@ -622,11 +630,11 @@ Wait, what?! A look into the error log gave the same result:
 Something is off here and ye olde oracle Google has quite some hits on that topic. And the problem lies with the maximum allowed number of open files. You can’t have more connections, than open files. Makes sense. Some people suggest to solve it using /etc/security/limits.conf to fix it. Which is not so simple on Ubuntu anymore, because you have to first enable pam_limits.so. And even then it doesn’t work, because since Ubuntu is using systemd (15.04 if I am not mistaken) this configuration is only valid for user sessions and not services/demons.
 
 So let’s solve it using systemd’s settings to allow for more connections/open files. First you have to copy the configuration file, so that you can make the changes we need:
-```
+```shell
 cp /lib/systemd/system/mysql.service /etc/systemd/system/
 ```
 Append the following lines to the new file using vi (or whatever editor you want to use):
-```
+```shell
 vi /etc/systemd/system/mysql.service
 ```
 ```
@@ -635,14 +643,14 @@ LimitMEMLOCK=infinity
 ```
 
 Reload systemd:
-```
+```shell
 systemctl daemon-reload
 ```
 After restarting MySQL it was finally obeying the setting:
 ```
 mysql> show variables like 'max_connections';
 ```
--
+--
 my.cnf - change this to avoid long queries every so often
 ```
 #
@@ -660,7 +668,7 @@ query_cache_type = 0
 ### INSTALL POSTFIX
 
 Test connection with.
-```
+```shell
 sudo apt-get install mailutils
 echo "test winlink message 2" | mailx -s 'TEST whiskey india november lima india november kilo' < example email address >
 
@@ -668,7 +676,7 @@ sudo apt-get update
 sudo DEBIAN-PRIORITY=low apt-get install postfix
 sudo dpkg-reconfigure postfix
 ```
-```
+```shell
 cd /etc/postfix
 sudo nano master.cf
 ```
@@ -678,14 +686,14 @@ mytransportname   unix  -       n       n       -       -       pipe
   ${nexthop} ${user}
 ```
 To check status
-```
+```shell
 sudo postfix status
 ```
 
 ---
 
 ### Fix PhpSerial
-```
+```php
         //https://www.phpclasses.org/discuss/package/3679/thread/13/
         //    "custom"   => "-brkint -icrnl -imaxbel -opost -isig -icanon -iexten -echo",
         // "custom" => "ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke raw",
@@ -712,7 +720,7 @@ sudo postfix status
 ### Configure nano
 
 Set nano to 4 space indenting
-```
+```shell
 sudo nano /etc/nanorc (others?)
 ```
 ```
@@ -722,17 +730,17 @@ Convert typed tabs to spaces.
 ```
 set tabstospaces
 ```
--
+--
 Why is the ibdata1 file continuously growing in MySQL
 
 https://www.percona.com/blog/2013/08/20/why-is-the-ibdata1-file-continuously-growing-in-mysql/
 
  The only way is to start the database with fresh ibdata1. To do that you would need to take a full logical backup with mysqldump. Then stop MySQL and remove all the databases, ib_logfile* and ibdata* files. When you start MySQL again it will create a new fresh shared tablespace. Then, recover the logical dump.
-```
+```shell
 mysqldump project_stack_dev_db -u root -p | gzip -c | ssh nick@ash "cat > /home/nick/snapshots/project_stack_dev_db_snapshot_2019-21-01.sql"
 ```
 Which created at 31 Mb file.
-```
+```shell
 sudo apt install ncdu
 ```
 And work through removing files.
@@ -740,7 +748,7 @@ And work through removing files.
 #
 
 ### Enable Soap
-```
+```shell
 # /etc/php5/apache2/php.ini
 # sudo apt-get install php7.3-soap
 ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
@@ -752,17 +760,17 @@ Check phpinfo.
 /etc/php/7.2/apache2/php.ini
 ```
 uncomment ;extension=soap
-```
+```shell
 sudo apt-get install php7.2-soap
 sudo service apache2 restart
 ```
 ### Install bcmath extension
-```
+```shell
 #sudo apt install yu
 #yum install php-bcmath
 ```
 https://ourcodeworld.com/articles/read/679/how-to-solve-the-requested-php-extension-bcmath-is-missing-from-your-system-when-installing-a-library-via-composer-in-ubuntu-16-04
-```
+```shell
 sudo apt install php7.3-bcmath
 ```
 
@@ -771,7 +779,7 @@ sudo apt install php7.3-bcmath
 Some stuff to get the stack whirring.
 
 For the mb string functions
-```
+```shell
 sudo apt-get install php-mbstring
 ```
 
@@ -809,20 +817,21 @@ composer.json
 Use the vanderlee composer package.
 You will need to get the .tex file which has Thomas Kroll's name on it.
 Otherwise was you will get these errors.
-
+```
 APACHE > PHP Warning:  file(/var/www/html/stackr.ca/vendor/vanderlee/syllable/languages/hyph-en-ca.tex): failed to open stream: No such file or directory in /var/www/stackr.test/vendor/vanderlee/syllable/src/Source/File.php on line 59
+```
 
 ## 16. Memcached (optional)
-```
+```shell
 sudo apt-get update
 sudo apt-get install memcached
 ```
 Memcached will speed up agents which call on it to store large text lookup files locally.
-```
+```shell
 sudo apt-get install -y php-memcached
 ```
--
-```
+--
+```shell
 sudo apt-get update
 sudo apt-get install php-fpm
 ```
