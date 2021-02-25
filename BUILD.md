@@ -262,7 +262,7 @@ Update require path.
 
 ---
 
-Install Gearman
+### Install Gearman
 http://gearman.org/
 
 - gearmand-1.1.18.tar.gz
@@ -270,7 +270,7 @@ http://gearman.org/
 
 ---
 
-## 10 (cont.) More on installing Gearman
+### 10 (cont.) More on installing Gearman
 https://gist.github.com/himelnagrana/9758209
 ```shell
 sudo apt-get update
@@ -307,7 +307,9 @@ sudo apt-get install php-gearman
 Test with gearman scripts
 
 --
- Lots of gearman stuff follows because gearman is tricky to get up and running.
+
+Lots of gearman stuff follows because gearman is tricky to get up and running.
+
 --
 ```shell
 sudo apt install gearman-tools
@@ -659,7 +661,7 @@ mysql> show variables like 'max_connections';
 ```
 #
 # * Query Cache Configuration
-#
+#/
 query_cache_limit   = 1M
 # 19 June 2018 query_cache_size        = 16M
 query_cache_size        = 0
