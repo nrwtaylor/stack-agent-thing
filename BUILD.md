@@ -262,7 +262,7 @@ Update require path.
 
 ---
 
-Install Gearman
+### Install Gearman
 http://gearman.org/
 
 - gearmand-1.1.18.tar.gz
@@ -270,7 +270,7 @@ http://gearman.org/
 
 ---
 
-## 10 (cont.) More on installing Gearman
+### 10 (cont.) More on installing Gearman
 https://gist.github.com/himelnagrana/9758209
 ```shell
 sudo apt-get update
@@ -307,7 +307,9 @@ sudo apt-get install php-gearman
 Test with gearman scripts
 
 --
- Lots of gearman stuff follows because gearman is tricky to get up and running.
+
+Lots of gearman stuff follows because gearman is tricky to get up and running.
+
 --
 ```shell
 sudo apt install gearman-tools
@@ -323,6 +325,7 @@ Then `./configure` etc.
 sudo pecl channel-update pecl.php.net
 ```
 --
+
 https://hasin.me/2013/10/30/installing-gearmand-libgearman-and-pecl-gearman-from-source/
 
 <!--[sourcecode language=”shell”]-->
@@ -487,6 +490,7 @@ add to supervisord section
 minfds = 10000
 ```
 --
+
 Helpful
 http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.html
 
@@ -501,6 +505,7 @@ extension=gearman.so
 (No apparent effect)
 
 ---
+
 Running multiple supervisor workers  
 http://nileshzemase.blogspot.ca/2013/07/gearman-and-supervisor-to-run-multiple.html
 
@@ -600,10 +605,10 @@ sudo nano /etc/mysql/mysqld.cnf
 ```
 max_connection = 1000
 ```
-**Posted on June 13, 2017 by peter**
-MySQL max_connections limited to 214 on Ubuntu Foo
+**Posted on June 13, 2017 by peter**  
+> MySQL max_connections limited to 214 on Ubuntu Foo
 
-After moving a server to a new machine with Ubuntu 16.10 I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
+After moving a server to a new machine with Ubuntu 16.10, I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
 ```
 postfix/cleanup[30475]: warning: connect to mysql server 127.0.0.1: Too many connections
 ```
@@ -655,11 +660,12 @@ After restarting MySQL it was finally obeying the setting:
 mysql> show variables like 'max_connections';
 ```
 --
+
 `my.cnf` - change this to avoid long queries every so often
 ```
 #
 # * Query Cache Configuration
-#
+#/
 query_cache_limit   = 1M
 # 19 June 2018 query_cache_size        = 16M
 query_cache_size        = 0
@@ -721,6 +727,7 @@ sudo postfix status
             trigger_error("Invalid flow control mode specified", E_USER_ERROR);
 ```
 ---
+
 ### Configure nano
 
 Set `nano` to 4 space indenting
@@ -735,6 +742,7 @@ Convert typed tabs to spaces.
 set tabstospaces
 ```
 --
+
 Why is the `ibdata1` file continuously growing in MySQL
 
 https://www.percona.com/blog/2013/08/20/why-is-the-ibdata1-file-continuously-growing-in-mysql/
@@ -818,7 +826,7 @@ sudo apt-get install php-mbstring
 
 ## 15. Syllables
 
-**Use the vanderlee composer package.**
+**Use the vanderlee composer package.**  
 You will need to get the .tex file which has Thomas Kroll's name on it.
 Otherwise was you will get these errors.
 ```
