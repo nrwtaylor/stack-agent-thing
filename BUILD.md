@@ -605,9 +605,9 @@ sudo nano /etc/mysql/mysqld.cnf
 max_connection = 1000
 ```
 **Posted on June 13, 2017 by peter**  
-MySQL max_connections limited to 214 on Ubuntu Foo
+> MySQL max_connections limited to 214 on Ubuntu Foo
 
-After moving a server to a new machine with Ubuntu 16.10 I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
+After moving a server to a new machine with Ubuntu 16.10, I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
 ```
 postfix/cleanup[30475]: warning: connect to mysql server 127.0.0.1: Too many connections
 ```
