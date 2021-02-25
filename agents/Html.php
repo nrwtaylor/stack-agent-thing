@@ -70,6 +70,10 @@ $text =  html_entity_decode($detagged);
 //$text = str_replace("=0A"," ",$text);
 //$text = str_replace("=0D"," ",$text);
 
+$breaks = array("<p>","</p>","<br />","<br>","<br/>","<br />","&lt;br /&gt;","&lt;br/&gt;","&lt;br&gt;");
+    $text = str_ireplace($breaks, "\r\n", $text); 
+
+
 $text = preg_replace('/\s+/', ' ',$text);
 
 return $text;

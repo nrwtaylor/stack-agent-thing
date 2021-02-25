@@ -243,9 +243,9 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
     {
         // https://github.com/zbateson/mail-mime-parser
 
-// test 
-//$text = str_replace('Content-Type: multipart/alternative',
-//'Content-Type: multipart/mixed',$text);
+        // test
+        //$text = str_replace('Content-Type: multipart/alternative',
+        //'Content-Type: multipart/mixed',$text);
 
         $message = Message::from($text);
 
@@ -276,34 +276,34 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         //    ->getHeader(HeaderConsts::CC)                      // also AddressHeader
         //    ->getAddresses()[0]                                // AddressPart
         //    ->getEmail();                                      // user@example.com
-
         $email_text = $message->getTextContent();
         $email_html = $message->getHtmlContent();
 
-// Strip tags
-//        $email_html_text = strip_tags($email_html);
+        // Strip tags
+        //        $email_html_text = strip_tags($email_html);
 
-// https://stackoverflow.com/questions/12824899/strip-tags-replace-tags-by-space-rather-than-deleting-them
-$string      = $email_html;
-$spaceString = str_replace( '<', ' <',$string );
-$doubleSpace = strip_tags( $spaceString );
-$singleSpace = str_replace( '  ', ' ', $doubleSpace );
-$email_html_text = $singleSpace;
+        // https://stackoverflow.com/questions/12824899/strip-tags-replace-tags-by-space-rather-than-deleting-them
+        $string = $email_html;
+        $spaceString = str_replace("<", " <", $string);
+        $doubleSpace = strip_tags($spaceString);
+        $singleSpace = str_replace("  ", " ", $doubleSpace);
+        $email_html_text = $singleSpace;
 
         //$body = $email_html;
         //if ($email_html === null) {$body = $email_text;}
 
         $body = $email_text . "\n" . $email_html_text;
 
-// ZBateson library can sometimes come back null.
-// With multipart.
-// https://github.com/zbateson/mail-mime-parser/issues/29
-// Test for this and use text as body if so.
+        // ZBateson library can sometimes come back null.
+        // With multipart.
+        // https://github.com/zbateson/mail-mime-parser/issues/29
+        // Test for this and use text as body if so.
 
-if (($email_text == null) and ($email_html == null)) {
-    $body = $text;
-}
-
+        if ($email_text == null and $email_html == null) {
+            $html_handler = new Html($this->thing, "html");
+            //    $body = $html_handler->textHtml($text);
+            $body = $this->bodyEmail($text);
+        }
 
         $toEmail = null;
         if (isset($toEmails[0])) {
@@ -319,6 +319,54 @@ if (($email_text == null) and ($email_html == null)) {
         $this->attachmentsEmail($text);
 
         return $datagram;
+    }
+
+    function bodyEmail($text)
+    {
+        [$to, $from, $subject, $message] = $this->parseEmail($text);
+        return $message;
+    }
+
+    // Basic parser.
+    // https://stackoverflow.com/questions/12896/parsing-raw-email-in-php
+    function parseEmail($text)
+    {
+        // handle email
+        $lines = explode("\n", $text);
+
+        // empty vars
+        $from = "";
+        $subject = "";
+        $headers = "";
+        $message = "";
+        $splittingheaders = true;
+        for ($i = 0; $i < count($lines); $i++) {
+            if ($splittingheaders) {
+                // this is a header
+                $headers .= $lines[$i] . "\n";
+
+                // look out for special headers
+                if (preg_match("/^Subject: (.*)/", $lines[$i], $matches)) {
+                    $subject = $matches[1];
+                }
+                if (preg_match("/^From: (.*)/", $lines[$i], $matches)) {
+                    $from = $matches[1];
+                }
+                if (preg_match("/^To: (.*)/", $lines[$i], $matches)) {
+                    $to = $matches[1];
+                }
+            } else {
+                // not a header, but message
+                $message .= $lines[$i] . "\n";
+            }
+
+            if (trim($lines[$i]) == "") {
+                // empty line, header section has ended
+                $splittingheaders = false;
+            }
+        }
+
+        return [$to, $from, $subject, $message];
     }
 
     /**

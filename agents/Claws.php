@@ -237,7 +237,9 @@ dev - Detect duplicates.
                 $txt .= "FOUND MEETING DETAILS\n";
             }
 
-            $txt .= $this->textHtml($text_claws) . "\n";
+//            $txt .= $this->textHtml($text_claws) . "\n";
+            $txt .= $text_claws . "\n";
+
         }
         $txt .= "\n";
 
@@ -396,15 +398,6 @@ dev - Detect duplicates.
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
 
-//test
-// Add Returns back in.
-/*
-$body = str_replace("=0D=0A","\n\n",$body);
-//$body = $this->textHtml($body);
-$pattern = '/[=][A-Z0-9]{1}[0-9{1]/';
-$replacement = ' ';
-$body =  preg_replace($pattern, $replacement, $body);
-*/
 
                 $call = $this->readCall($body);
                 // Try to figure out date from body text.

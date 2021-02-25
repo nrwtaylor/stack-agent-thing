@@ -90,6 +90,8 @@ class MH extends Agent
         if ($text == null) {
             return;
         }
+$text = quoted_printable_decode($text);
+return $text;
 
         // Test and dev.
 
