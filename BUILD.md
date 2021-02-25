@@ -213,7 +213,7 @@ So you need.
 ```
 sudo a2enmod rewrite
 ```
-# Which apparently is the same as:
+Which apparently is the same as:
 ```
 ? ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
 ```
@@ -301,7 +301,7 @@ sudo apt-get install php-gearman
 Test with gearman scripts
 
 -
- Lots of gearman stuff folows because gearman is tricky to get up and running.
+ Lots of gearman stuff follows because gearman is tricky to get up and running.
 -
 ```
 sudo apt install gearman-tools
@@ -328,7 +328,7 @@ cd gearmand-1.1.11
 ```
 [/sourcecode]
 
-Failure 1:
+### Failure 1:
 At this step, configure stopped showing the following error
 
 [sourcecode language=”shell”]
@@ -346,7 +346,7 @@ apt-get install libboost-all-dev
 
 And I tried to compile gearman and it failed again
 
-Failure 2:
+### Failure 2:
 At this step, configure stopped showing that it cannot find gperf. That’s fine – I have installed gperf and tried to configure gearman again
 
 [sourcecode language=”shell”]
@@ -355,7 +355,7 @@ apt-get install gperf
 ```
 [/sourcecode]
 
-Failure 3:
+### Failure 3:
 Now it failed again, showing that libevent is missing. Hmm! Had to fix it anyway
 
 [sourcecode language=”shell”]
@@ -364,7 +364,7 @@ apt-get install libevent-dev
 ```
 [/sourcecode]
 
-Failure 4:
+### Failure 4:
 Heck! Another failure. Now it’s showing that it can’t find libuuid. This part was a little tricky to solve, but finally fixed with the following package
 
 [sourcecode language=”shell”]
@@ -375,7 +375,7 @@ apt-get install uuid-dev
 
 Let’s configure again. And sweet that the configure script ran smoothly. Let’s compile using make
 
-Failure 5:
+### Failure 5:
 Grrr! At this point the make script failed with a bunch of text, where the following lines were at the top
 
 [sourcecode language=”shell”]
@@ -419,6 +419,7 @@ I really wanted to say “What’s wrong with this chicken” after gearman was 
 Enjoy!
 
 -
+
 https://www.techearl.com/php/installing-gearman-module-for-php7-on-ubuntu
 ```
 apt-get install php-dev #phpize not in ubuntu standard
@@ -436,7 +437,7 @@ sudo phpenmod -v ALL -s ALL gearman
 ```
 ---
 
-Another way the gearman install can go awry.
+### Another way the gearman install can go awry.
 
 PHP Startup: Unable to load dynamic library 'gearman.so'
 https://stackoverflow.com/questions/36423929/gearman-is-missing-from-your-system
@@ -469,7 +470,7 @@ process_name=gearman-worker-%(process_num)s
 
 sudo supervisorctl reload
 ```
--
+--
 
 http://supervisord.org/configuration.html#supervisord-section-values
 ```
@@ -477,7 +478,7 @@ supervisord.conf
 add to supervisord section
 minfds = 10000
 ```
--
+--
 Helpful
 http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.html
 
@@ -494,13 +495,13 @@ extension=gearman.so
 Running multiple supervisor workers
 http://nileshzemase.blogspot.ca/2013/07/gearman-and-supervisor-to-run-multiple.html
 
-- 
+-- 
 
 Remove Namespace from worker.php file[check?]
 ```
 sudo apt-get install php7.1-fpm
 ```
--
+--
 
 
 http://www.hostingadvice.com/how-to/install-gearman-ubuntu-14-04/
@@ -579,9 +580,9 @@ Test this bit
 ```
 Once ticking, you'll see a cron tick every 60s in the database.
 
-Install MYSQL
+### Install MYSQL
 
-Problem #1
+#### Problem #1
 Increase Max connections
 https://www.rfc3092.net/2017/06/mysql-max_connections-limited-to-214-on-ubuntu-foo/
 ```
@@ -653,7 +654,7 @@ query_cache_type = 0
 
 ---
 
-INSTALL POSTFIX
+### INSTALL POSTFIX
 
 Test connection with.
 ```
@@ -680,7 +681,7 @@ sudo postfix status
 
 ---
 
-Fix PhpSerial
+### Fix PhpSerial
 ```
         //https://www.phpclasses.org/discuss/package/3679/thread/13/
         //    "custom"   => "-brkint -icrnl -imaxbel -opost -isig -icanon -iexten -echo",
@@ -705,7 +706,7 @@ Fix PhpSerial
             trigger_error("Invalid flow control mode specified", E_USER_ERROR);
 ```
 ---
-Configure nano
+### Configure nano
 
 Set nano to 4 space indenting
 ```
@@ -735,7 +736,7 @@ And work through removing files.
 
 #
 
-Enable Soap
+### Enable Soap
 ```
 # /etc/php5/apache2/php.ini
 # sudo apt-get install php7.3-soap
@@ -752,7 +753,7 @@ uncomment ;extension=soap
 sudo apt-get install php7.2-soap
 sudo service apache2 restart
 ```
-Install bcmath extension
+### Install bcmath extension
 ```
 #sudo apt install yu
 #yum install php-bcmath
