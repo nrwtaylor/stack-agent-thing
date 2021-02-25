@@ -13,7 +13,7 @@ ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
 
-class Webex extends Agent
+class Webinar extends Agent
 {
     public $var = "hello";
 
@@ -27,19 +27,19 @@ class Webex extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "WEBEX is a tool for hosting audio-visual conferences.";
+            "WEBINARis a tool for hosting audio-visual conferences.";
         $this->thing_report["help"] = "Click on the image for a PDF.";
 
-        $this->node_list = ["webex" => ["webex", "uuid"]];
+        $this->node_list = ["webinar" => ["webinar", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
-        $this->initWebex();
+        $this->initWebinar();
     }
 
     public function set()
     {
-        $this->setWebex();
+        $this->setWebinar();
     }
 
     /**
@@ -74,7 +74,7 @@ class Webex extends Agent
      */
     public function makeSMS()
     {
-        $sms = "WEBEX | ";
+        $sms = "WEBINAR | ";
 
         $sms_text =
             $this->password .
@@ -103,7 +103,7 @@ class Webex extends Agent
      *
      */
 
-    public function setWebex()
+    public function setWebinar()
     {
     }
 
@@ -111,31 +111,31 @@ class Webex extends Agent
      *
      * @return unknown
      */
-    public function getWebex()
+    public function getWebinar()
     {
     }
 
     /**
      *
      */
-    public function initWebex()
+    public function initWebinar()
     {
     }
 
-    public function readWebex($text = null)
+    public function readWebinar($text = null)
     {
         //       $file = $this->resource_path . 'call/call-test' . '.txt';
 
         //       if (file_exists($file)) {
         //           $text = file_get_contents($file);
         //       }
-        $this->access_code = $this->accesscodeWebex($text);
-        $this->password = $this->passwordWebex($text);
+        $this->access_code = $this->accesscodeWebinar($text);
+        $this->password = $this->passwordWebinar($text);
 
-        $this->url = $this->urlWebex($text);
-        $this->host_url = $this->hosturlWebex($text);
+        $this->url = $this->urlWebinar($text);
+        $this->host_url = $this->hosturlWebinar($text);
 
-        $this->telephone_numbers = $this->telephonenumberWebex($text);
+        $this->telephone_numbers = $this->telephonenumberWebinar($text);
     }
 
     public function run()
@@ -147,8 +147,8 @@ class Webex extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/webex.pdf";
-        $this->node_list = ["webex" => ["webex"]];
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/webinar.pdf";
+        $this->node_list = ["webinar" => ["webex"]];
         $web = "";
         if (isset($this->html_image)) {
             $web .= '<a href="' . $link . '">';

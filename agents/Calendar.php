@@ -101,18 +101,19 @@ class Calendar extends Agent
         $text = $event->description;
 
         // TODO read for call details.
-        //$call = $call_agent->extractCall($event->description);
-        //$frequency = $frequency_agent->extractFrequency($event->description);
 
         // TODO: Test with tag stripping and html_entity_decoding turned off.
         //
+
         $preprocess_text = false;
         if ($preprocess_text === true) {
             $description = strip_tags($text);
             $when_description = html_entity_decode($description);
         } else {
-            $when_description = $text;
+            $when_description = html_entity_decode($text);
+//$when_description = $text;
         }
+
         $when_description = str_replace(
             ["\n", "\t", "\r"],
             " ",
@@ -128,10 +129,23 @@ class Calendar extends Agent
             break;
         }
 
+// Protect URLS wrapped in <> from tag stripping.
+/*
+$urls = $this->extractUrls($when_description);
         // Strip html tags.
-        $when_description = strip_tags(
+foreach($urls as $u=>$url) {
+
+$when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
+
+}
+        // Strip html tags.
+
+       $when_description = strip_tags(
             str_replace("<", " <", $when_description)
         );
+*/
+
+$when_description = $this->stripHtml($when_description);
 
         // Strip repeating spaces.
         $when_description = preg_replace("/\s+/", " ", $when_description);
@@ -567,8 +581,6 @@ class Calendar extends Agent
 
     public function eventCalendar($text = null)
     {
-        //        $this->calendar_unique_events === false;
-
         try {
             // ICal is noisy at the WARNING and NOTICE level.
             // TODO ?

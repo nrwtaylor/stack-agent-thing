@@ -1,4 +1,4 @@
-(c) 2018-2019. NRW Taylor
+(c) 2018-2021. NRW Taylor
 
 These are the current build instructions as of October 2019.
 
@@ -79,6 +79,7 @@ sudo apt install php7.0-gd
 (ignore php7.0 module already enabled, not enabling PHP 7.2)
 sudo apt-get install php7.2-gd
 sudo apt-get install php-curl
+sudo apt-get install php7.4-zip
 sudo service apache2 restart
 
 4. Setup Apache 2
@@ -177,6 +178,9 @@ sudo nano stackr.test.conf
 
 sudo a2ensite stackr.test.conf
 
+# Copy .htaccess from public to /var/www/stackr.test/public
+# Set permissions
+
 .htaccess in var/www/stackr.test
 
 RewriteEngine On
@@ -187,11 +191,24 @@ RewriteRule ^ %1 [L,NE,R=302]
 
 RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
 
-install mod_rewrite module
-sudo a2enmod rewrite
-systemctl restart apache2
+# Set public/.htaccess permissions and ownership
+sudo chown www-data:www-data .htaccess
+chmod 644 .htaccess
 
+# And set public/index.php permissions and ownership
+sudo chown www-data:www-data index.php
+sudo chmod 644 index.php
+
+# You may get an error about Invalid command: RewriteEngine.
+# So you need.
+sudo a2enmod rewrite
+# Which apparently is the same as:
 ? ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+
+# May not need this.
+install mod_rewrite module
+
+systemctl restart apache2
 
 sudo service apache2 reload
 
