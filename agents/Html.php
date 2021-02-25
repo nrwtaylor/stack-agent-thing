@@ -62,7 +62,18 @@ class Html extends Agent
         $choices = $this->thing->choice->makeLinks("html");
         $this->thing_report["choices"] = $choices;
     }
+  
+    function textHtml($html) {
 
+$detagged = $this->stripHtml($html);
+$text =  html_entity_decode($detagged);
+//$text = str_replace("=0A"," ",$text);
+//$text = str_replace("=0D"," ",$text);
+
+$text = preg_replace('/\s+/', ' ',$text);
+
+return $text;
+}
     // test
     function stripHtml($html)
     {
@@ -74,10 +85,10 @@ $html = str_replace("<".$url.">", " ".$url." ",$html);
 
 }
 
-
         $stripped_html = strip_tags(
             str_replace("<", " <", $html)
         );
+
 return $stripped_html;
 
         $dom = new \DOMDocument();

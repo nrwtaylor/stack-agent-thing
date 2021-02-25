@@ -238,10 +238,9 @@ class Call extends Agent
                     $this->thing->{$service . "_handler"}->telephone_numbers;
             }
         }
-
         // No URL? Try a general search for a
         // paragraph with join a webinar and a url in it.
-        if ($url === false) {
+        if (($url === false) or ($url == "X")) {
             $url = $this->urlWebinar($text);
         }
         $call = [
