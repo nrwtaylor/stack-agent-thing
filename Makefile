@@ -11,7 +11,7 @@ AGENT_LOCATION=../agent
 TODAY := $(shell date +"%Y%m%d")
 #WEB_PREFIX=http:\/\/localhost:8000\/ 
 LOCAL_PORT=8000
-ADD_APACHE_PORT=$(shell bash -c 'read -p "Add port to Apache? (y|n)" key; echo $$key')
+#ADD_APACHE_PORT=$(shell bash -c 'read -p "Add port to Apache? (y|n)" key; echo $$key')
 
 .PHONY: help
 help: ## Show this help
@@ -131,14 +131,14 @@ endif
 	# sudo cp -r . /var/www/$(SERVERNAME)
 
 webserver: ## Set up web server Public Folder and Port
-	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/; \
+	@if [ -d /var/www/$(SERVERNAME)/public ] ; then  sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/ ; fi
 #	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/templates/;
 	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)/public; \
 	sudo chmod -R 774 /var/www/$(SERVERNAME)/public;  
-ifeq ("$(ADD_APACHE_PORT)","y")
-	sudo sed -i 's/Listen 80$$/Listen 80\nListen $(LOCAL_PORT)\n/' /etc/apache2/ports.conf
+	read -p "Add port to Apache? (y|n)" key; echo $$key ; \
+	if [ "$$key" = "y" ] ; then sudo sed -i 's/Listen 80$$/Listen 80\nListen $(LOCAL_PORT)\n/' /etc/apache2/ports.conf ; fi
 	# TODO: make sure only adds port once - check exists
-endif
+
 
 memcached: ## Install MemCache Daemon
 	@echo "===== Installing MemCache Daemon =============="
