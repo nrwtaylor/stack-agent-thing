@@ -325,6 +325,7 @@ Then `./configure` etc.
 sudo pecl channel-update pecl.php.net
 ```
 --
+
 https://hasin.me/2013/10/30/installing-gearmand-libgearman-and-pecl-gearman-from-source/
 
 <!--[sourcecode language=”shell”]-->
@@ -741,6 +742,7 @@ Convert typed tabs to spaces.
 set tabstospaces
 ```
 --
+
 Why is the `ibdata1` file continuously growing in MySQL
 
 https://www.percona.com/blog/2013/08/20/why-is-the-ibdata1-file-continuously-growing-in-mysql/
