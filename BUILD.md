@@ -68,7 +68,7 @@ SELECT * FROM stack ORDER BY created_at DESC limit 99;
 DELETE FROM stack WHERE nom_from='null@<mail_postfix>' and nom_to='choice' and created_at < NOW() - INTERVAL 1 WEEK;
 DELETE FROM stack WHERE nom_from='null@stackr.ca' and created_at < NOW() - INTERVAL 1 WEEK;
 ```
-Configure my.cnf
+Configure `my.cnf`
 ```
 innodb_buffer_pool_size=1G
 ```
@@ -116,7 +116,7 @@ Load in template public and private configuration files.
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/public /var/www/stackr.test/
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/private /var/www/stackr.test/
 ```
-Load in resources under /resources.
+Load in resources under `/var/www/stackr.test/resources`.
 ```shell
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/resources /var/www/stackr.test/
 ```
@@ -146,7 +146,7 @@ sudo nano 000-default.conf
 ```shell
 sudo service apache2 restart
 ```
-No changes to apache2.conf
+No changes to `apache2.conf`
 ```shell
 sudo nano stackr.test.conf
 ```
@@ -191,10 +191,10 @@ sudo nano stackr.test.conf
 ```shell
 sudo a2ensite stackr.test.conf
 ```
-Copy .htaccess from public to /var/www/stackr.test/public
+Copy `.htaccess` from `public` to `/var/www/stackr.test/public`
 Set permissions
 
-.htaccess in var/www/stackr.test
+`.htaccess` in `var/www/stackr.test`
 ```
 RewriteEngine On
 RewriteBase /My-Project/
@@ -204,17 +204,17 @@ RewriteRule ^ %1 [L,NE,R=302]
 
 RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
 ```
-Set public/.htaccess permissions and ownership
+Set `public/.htaccess` permissions and ownership
 ```shell
 sudo chown www-data:www-data .htaccess
 chmod 644 .htaccess
 ```
-And set public/index.php permissions and ownership
+And set `public/index.php` permissions and ownership
 ```shell
 sudo chown www-data:www-data index.php
 sudo chmod 644 index.php
 ```
-You may get an error about Invalid command: RewriteEngine.
+You may get an error about `Invalid command: RewriteEngine`.
 So you need.
 ```shell
 sudo a2enmod rewrite
@@ -295,7 +295,7 @@ sudo apt-get install php-pear
 sudo pecl install gearman
 sudo nano /etc/php5/conf.d/gearman.ini 
 ```
-[and then write extension=gearman.so as content of the file, save it and close it]
+and then write `extension=gearman.so` as content of the file, save it and close it
 
 ```shell
 sudo service apache2 restart
@@ -318,7 +318,7 @@ Needed
 ```shell
 apt-get install gperf
 ```
-Then ./configure etc.
+Then `./configure` etc.
 ```shell
 sudo pecl channel-update pecl.php.net
 ```
@@ -343,7 +343,7 @@ configure: error: cannot find Boost headers version >= 1.39.0
 ```
 <!--[/sourcecode]-->
 
-To fix this, I had to install “libboost-all-dev” by following command
+To fix this, I had to install `libboost-all-dev` by following command
 <!--sourcecode language=”shell”-->
 ```shell
 apt-get install libboost-all-dev
@@ -362,7 +362,7 @@ apt-get install gperf
 <!--[/sourcecode]-->
 
 ### Failure 3:
-Now it failed again, showing that libevent is missing. Hmm! Had to fix it anyway
+Now it failed again, showing that `libevent` is missing. Hmm! Had to fix it anyway
 
 <!--[sourcecode language=”shell”]-->
 ```shell
@@ -371,7 +371,7 @@ apt-get install libevent-dev
 <!--[/sourcecode]-->
 
 ### Failure 4:
-Heck! Another failure. Now it’s showing that it can’t find libuuid. This part was a little tricky to solve, but finally fixed with the following package
+Heck! Another failure. Now it’s showing that it can’t find `libuuid`. This part was a little tricky to solve, but finally fixed with the following package
 
 <!--[sourcecode language=”shell”]-->
 ```shell
@@ -379,7 +379,7 @@ apt-get install uuid-dev
 ```
 <!--[/sourcecode]-->
 
-Let’s configure again. And sweet that the configure script ran smoothly. Let’s compile using make
+Let’s configure again. And sweet that the configure script ran smoothly. Let’s compile using `make`
 
 ### Failure 5:
 Grrr! At this point the make script failed with a bunch of text, where the following lines were at the top
@@ -391,7 +391,7 @@ libgearman/backtrace.cc:64:6: sorry, unimplemented: Graphite loop optimizations 
 ```
 <!--[/sourcecode]-->
 
-So it cannot find a library named libcloog-ppl. Let’s fix this problem by
+So it cannot find a library named `libcloog-ppl`. Let’s fix this problem by
 
 <!--[sourcecode language=”shell”]-->
 ```shell
@@ -399,7 +399,7 @@ apt-get install libcloog-ppl-dev
 ```
 <!--[/sourcecode]-->
 
-Now I’ve tried to run the make script, and it was good. So i also ran make install to complete the installation.
+Now I’ve tried to run the make script, and it was good. So i also ran `make install` to complete the installation.
 
 <!--[sourcecode language=”shell”]-->
 ```shell
@@ -408,7 +408,7 @@ make install
 ```
 <!--[/sourcecode]-->
 
-Now gearmand and libgearman both are installed. So I tried to install pecl-gearman with the following extension and voila! it worked. No more missing libgearman anymore.
+Now gearmand and libgearman both are installed. So I tried to install `pecl-gearman` with the following extension and voila! it worked. No more missing libgearman anymore.
 
 <!--[sourcecode language=”shell”]-->
 ```shell
@@ -416,7 +416,7 @@ pecl install gearman
 ```
 <!--[/sourcecode]-->
 
-Now all I had to do is add the line “extension=gearman.so” in my php.ini .
+Now all I had to do is add the line `extension=gearman.so` in my `php.ini`.
 
 The process was tedious and boring and took me more time than writing this article. If you have seen “Despicable Me 2” when Lucy and Gru went to ElMacho’s restaurant and were attacked by that crazy chicken and finally Lucy exclaimed “What’s wrong with that chicken!”
 
@@ -446,7 +446,7 @@ sudo phpenmod -v ALL -s ALL gearman
 
 ### Another way the gearman install can go awry.
 
-PHP Startup: Unable to load dynamic library 'gearman.so'  
+`PHP Startup: Unable to load dynamic library 'gearman.so'`  
 https://stackoverflow.com/questions/36423929/gearman-is-missing-from-your-system
 
 
@@ -492,9 +492,9 @@ http://nileshzemase.blogspot.com/2013/07/gearman-and-supervisor-to-run-multiple.
 
 ---
 
-Change php/ini
-/etc/php7.1/apache2 and
-/etc/php/7.1/cli$ php.ini
+Change `php/ini`  
+`/etc/php7.1/apache2` and  
+`/etc/php/7.1/cli$ php.ini`
 ```
 extension=gearman.so
 ```
@@ -506,7 +506,7 @@ http://nileshzemase.blogspot.ca/2013/07/gearman-and-supervisor-to-run-multiple.h
 
 -- 
 
-Remove Namespace from worker.php file[check?]
+Remove Namespace from `worker.php` file[check?]
 ```shell
 sudo apt-get install php7.1-fpm
 ```
@@ -552,8 +552,8 @@ cd /var/www/stackr.test
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stackr/templates templates
 ```
 Or make your own.
-Thing takes the $thing_report and display it.
-Index is a standalone non db page.  With no thing access
+`Thing` takes the `$thing_report` and displays it.
+`Index` is a standalone non db page.  With no `thing` access
 
 
 ---
@@ -587,7 +587,7 @@ Test this bit
 ```shell
 /usr/bin/php -q /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/agents/Cron.php
 ```
-Once ticking, you'll see a cron tick every 60s in the database.
+Once ticking, you'll see a `cron` tick every 60s in the database.
 
 ### Install MYSQL
 
@@ -607,7 +607,7 @@ After moving a server to a new machine with Ubuntu 16.10 I received some strange
 ```
 postfix/cleanup[30475]: warning: connect to mysql server 127.0.0.1: Too many connections
 ```
-Oops, did I forgot to up max_connections during the migration:
+Oops, did I forgot to up `max_connections` during the migration:
 ```shell
 # grep max_connections /etc/mysql/mysql.conf.d/mysqld.cnf
 ```
@@ -631,13 +631,13 @@ Wait, what?! A look into the error log gave the same result:
 ```
 2017-06-14T01:23:29.804684Z 0 [Warning] Changed limits: max_connections: 214 (requested 8000)
 ```
-Something is off here and ye olde oracle Google has quite some hits on that topic. And the problem lies with the maximum allowed number of open files. You can’t have more connections, than open files. Makes sense. Some people suggest to solve it using /etc/security/limits.conf to fix it. Which is not so simple on Ubuntu anymore, because you have to first enable pam_limits.so. And even then it doesn’t work, because since Ubuntu is using systemd (15.04 if I am not mistaken) this configuration is only valid for user sessions and not services/demons.
+Something is off here and ye olde oracle Google has quite some hits on that topic. And the problem lies with the maximum allowed number of open files. You can’t have more connections, than open files. Makes sense. Some people suggest to solve it using `/etc/security/limits.conf` to fix it. Which is not so simple on Ubuntu anymore, because you have to first enable `pam_limits.so`. And even then it doesn’t work, because since Ubuntu is using systemd (15.04 if I am not mistaken) this configuration is only valid for user sessions and not services/demons.
 
 So let’s solve it using systemd’s settings to allow for more connections/open files. First you have to copy the configuration file, so that you can make the changes we need:
 ```shell
 cp /lib/systemd/system/mysql.service /etc/systemd/system/
 ```
-Append the following lines to the new file using vi (or whatever editor you want to use):
+Append the following lines to the new file using `vi` (or whatever editor you want to use):
 ```shell
 vi /etc/systemd/system/mysql.service
 ```
@@ -646,7 +646,7 @@ LimitNOFILE=infinity
 LimitMEMLOCK=infinity
 ```
 
-Reload systemd:
+Reload `systemd`:
 ```shell
 systemctl daemon-reload
 ```
@@ -655,7 +655,7 @@ After restarting MySQL it was finally obeying the setting:
 mysql> show variables like 'max_connections';
 ```
 --
-my.cnf - change this to avoid long queries every so often
+`my.cnf` - change this to avoid long queries every so often
 ```
 #
 # * Query Cache Configuration
@@ -723,7 +723,7 @@ sudo postfix status
 ---
 ### Configure nano
 
-Set nano to 4 space indenting
+Set `nano` to 4 space indenting
 ```shell
 sudo nano /etc/nanorc (others?)
 ```
@@ -735,11 +735,11 @@ Convert typed tabs to spaces.
 set tabstospaces
 ```
 --
-Why is the ibdata1 file continuously growing in MySQL
+Why is the `ibdata1` file continuously growing in MySQL
 
 https://www.percona.com/blog/2013/08/20/why-is-the-ibdata1-file-continuously-growing-in-mysql/
 
- The only way is to start the database with fresh ibdata1. To do that you would need to take a full logical backup with mysqldump. Then stop MySQL and remove all the databases, ib_logfile* and ibdata* files. When you start MySQL again it will create a new fresh shared tablespace. Then, recover the logical dump.
+ The only way is to start the database with fresh `ibdata1`. To do that you would need to take a full logical backup with `mysqldump`. Then stop MySQL and remove all the databases, `ib_logfile`* and `ibdata`* files. When you start MySQL again it will create a new fresh shared tablespace. Then, recover the logical dump.
 ```shell
 mysqldump project_stack_dev_db -u root -p | gzip -c | ssh nick@ash "cat > /home/nick/snapshots/project_stack_dev_db_snapshot_2019-21-01.sql"
 ```
@@ -759,11 +759,11 @@ ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite
 # /etc/php/7.3/apache/php.ini
 # uncomment ;extension=soap
 ```
-Check phpinfo.
+Check `phpinfo`.
 ```
 /etc/php/7.2/apache2/php.ini
 ```
-uncomment ;extension=soap
+uncomment `;extension=soap`
 ```shell
 sudo apt-get install php7.2-soap
 sudo service apache2 restart
@@ -791,7 +791,7 @@ sudo apt-get install php-mbstring
 ## 13. install composer
 13 (cont). Get composer dependencies
 
-composer.json
+**composer.json**
 ```json
 {
     "name": "test project",
