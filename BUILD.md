@@ -604,7 +604,7 @@ sudo nano /etc/mysql/mysqld.cnf
 ```
 max_connection = 1000
 ```
-**Posted on June 13, 2017 by peter**
+**Posted on June 13, 2017 by peter**  
 MySQL max_connections limited to 214 on Ubuntu Foo
 
 After moving a server to a new machine with Ubuntu 16.10 I received some strange Postfix SMTP errors. Which turned out to be a connection issue to the MySQL server:
@@ -824,7 +824,7 @@ sudo apt-get install php-mbstring
 
 ## 15. Syllables
 
-**Use the vanderlee composer package.**
+**Use the vanderlee composer package.**  
 You will need to get the .tex file which has Thomas Kroll's name on it.
 Otherwise was you will get these errors.
 ```
