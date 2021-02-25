@@ -239,7 +239,7 @@ class Rocky extends Agent
         $this->thing_report["help"] = "Try CHARLEY. Or NONSENSE.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report["info"] = $message_thing->thing_report["info"];
+        $this->thing_report['info'] = $message_thing->thing_report['info'];
     }
 
     function makeChoices()
