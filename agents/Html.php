@@ -62,38 +62,45 @@ class Html extends Agent
         $choices = $this->thing->choice->makeLinks("html");
         $this->thing_report["choices"] = $choices;
     }
-  
-    function textHtml($html) {
 
-$detagged = $this->stripHtml($html);
-$text =  html_entity_decode($detagged);
-//$text = str_replace("=0A"," ",$text);
-//$text = str_replace("=0D"," ",$text);
+    function textHtml($html)
+    {
+        $detagged = $this->stripHtml($html);
+        $text = html_entity_decode($detagged);
+        //$text = str_replace("=0A"," ",$text);
+        //$text = str_replace("=0D"," ",$text);
 
-$breaks = array("<p>","</p>","<br />","<br>","<br/>","<br />","&lt;br /&gt;","&lt;br/&gt;","&lt;br&gt;");
-    $text = str_ireplace($breaks, "\r\n", $text); 
+        $breaks = [
+            "<p>",
+            "</p>",
+            "<br />",
+            "<br>",
+            "<br/>",
+            "<br />",
+            "&lt;br /&gt;",
+            "&lt;br/&gt;",
+            "&lt;br&gt;",
+        ];
+        $text = str_ireplace($breaks, "\r\n", $text);
 
+        $text = preg_replace("/\s+/", " ", $text);
 
-$text = preg_replace('/\s+/', ' ',$text);
-
-return $text;
-}
+        return $text;
+    }
     // test
     function stripHtml($html)
     {
-$urls = $this->extractUrls($html);
+        $urls = $this->extractUrls($html);
         // Strip html tags.
-foreach($urls as $u=>$url) {
+        if (count($urls) > 0) {
+            foreach ($urls as $u => $url) {
+                $html = str_replace("<" . $url . ">", " " . $url . " ", $html);
+            }
+        }
 
-$html = str_replace("<".$url.">", " ".$url." ",$html);
+        $stripped_html = strip_tags(str_replace("<", " <", $html));
 
-}
-
-        $stripped_html = strip_tags(
-            str_replace("<", " <", $html)
-        );
-
-return $stripped_html;
+        return $stripped_html;
 
         $dom = new \DOMDocument();
         $dom->loadHTML($html);

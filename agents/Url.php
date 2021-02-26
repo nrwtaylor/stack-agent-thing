@@ -331,6 +331,10 @@ class Url extends Agent
         return $urls;
     }
 
+    public function isUrl($text) {
+       return $this->hasUrl($text);
+    }
+
     public function hasUrl($text = null)
     {
         $urls = $this->extractUrls($text);

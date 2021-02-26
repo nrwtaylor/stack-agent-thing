@@ -335,6 +335,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         $lines = explode("\n", $text);
 
         // empty vars
+        $to = "";
         $from = "";
         $subject = "";
         $headers = "";

@@ -230,21 +230,46 @@ dev - Detect duplicates.
             $call = $claws_item["call"];
 
             if (
-                $call["password"] !== "X" and
-                $call["access_code"] !== "X" and
-                $call["url"] !== "X"
+                $this->isThing($call["password"]) and
+                $this->isThing($call["access_code"]) and
+                $this->isUrl($call["url"])
             ) {
                 $txt .= "FOUND MEETING DETAILS\n";
             }
 
-//            $txt .= $this->textHtml($text_claws) . "\n";
-            $txt .= $text_claws . "\n";
+            if ($this->isUrl($call["url"])) {
+                $txt .= "FOUND URL\n";
+            }
 
+            //            $txt .= $this->textHtml($text_claws) . "\n";
+            $txt .= $text_claws . "\n";
         }
         $txt .= "\n";
 
         $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
+    }
+
+    // For testing
+    // is it not null, true, false, X, Z, ""
+    public function isThing($text)
+    {
+        if ($text == null) {
+            return false;
+        }
+        if ($text === true) {
+            return false;
+        }
+        if ($text == "") {
+            return false;
+        }
+        if (strtoupper($text) == "Z") {
+            return false;
+        }
+        if (strtoupper($text) == "X") {
+            return false;
+        }
+        return true;
     }
 
     public function scoreAt($dateline)
@@ -397,7 +422,6 @@ dev - Detect duplicates.
             } else {
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
-
 
                 $call = $this->readCall($body);
                 // Try to figure out date from body text.
