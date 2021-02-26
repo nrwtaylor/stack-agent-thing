@@ -16,11 +16,21 @@ class Word extends Agent
      */
     function init()
     {
-        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
-        $this->resource_path_words =
-            $GLOBALS["stack_path"] . "resources/words/";
+//var_dump($this->resource_path);
+//        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
+//var_dump($GLOBALS['stack_path']);
+//        $this->resource_path_words =
+//            $GLOBALS["stack_path"] . "resources/words/";
 
-        $this->resource_path_ewol = $GLOBALS["stack_path"] . "resources/ewol/";
+        $this->resource_path_words =
+            $this->resource_path . "words/";
+
+
+//var_dump($this->resource_path_words);
+//         $this->resource_path_ewol = $GLOBALS["stack_path"] . "resources/ewol/";
+$this->resource_path_ewol = $this->resource_path . "ewol/";
+
+
         $this->keywords = [];
 
         $this->wordpress_path_to = false;

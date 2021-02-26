@@ -36,8 +36,8 @@ class Html extends Agent
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
-            "This is a html keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
+            "This agent handles HTML.";
+        $this->thing_report["help"] = "This is about recognizing and processing HTML.";
 
         //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report["message"] = $this->sms_message;
@@ -92,7 +92,7 @@ class Html extends Agent
     {
         $urls = $this->extractUrls($html);
         // Strip html tags.
-        if (count($urls) > 0) {
+        if (is_array($urls)) {
             foreach ($urls as $u => $url) {
                 $html = str_replace("<" . $url . ">", " " . $url . " ", $html);
             }
