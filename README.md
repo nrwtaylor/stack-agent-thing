@@ -105,3 +105,7 @@ Credits
 * Rob Allen for Slim
 * Jeff Atwood and Joel Spolsky for Stack Overflow
 * Alan Turing for On Computable Numbers
+
+Dev
+===
+https://stack-agent-thing.slack.com/archives/C01PT2V6B8U Slack invitation
