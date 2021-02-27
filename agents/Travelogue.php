@@ -7,11 +7,6 @@ class Travelogue extends Agent
 
     public function init()
     {
-        //        $this->path = null;
-        //        if (isset($this->thing->container['stack']['path'])) {
-        //            $this->path = $this->thing->container['stack']['path'];
-        //        }
-
         $this->file_name = $this->resource_path . "interlink/test.php";
 
         $this->initTravelogue();
@@ -19,41 +14,68 @@ class Travelogue extends Agent
 
     public function initTravelogue()
     {
+    	$this->thing_report['help'] = 'Try INTERLINK interlink/test.php. Or INTERLINK <uuid>.';
+        $this->thing_report['info'] = 'Navigates a set of UUIDs with prior and posterior links.';
+
     }
 
     public function run()
     {
-        $this->runTravelogue();
     }
 
     public function test()
     {
     }
 
-    public function runTravelogue()
+    public function readTravelogue($travelogue = null)
     {
-        $interlink = $this->interlink;
-
-        if ($interlink === false) {
-            $uuid = array_key_first($this->interlinks);
-            $interlink = $this->interlinks[$uuid];
+        if ($travelogue == null) {
         }
 
-        $this->text = $interlink["text"];
-        $this->prior_uuid = $interlink["prior_uuid"];
-        $this->posterior_uuid = $interlink["posterior_uuid"];
+        $this->text = null;
+        $this->prior_uuid = null;
+        $this->posterior_uuid = null;
+        $this->slugs = [];
 
-        $this->slugs = false;
-        if (isset($interlink["slugs"])) {
-            $this->slugs = $interlink["slugs"];
+        if (!$this->isTravelogue($travelogue)) {
+            return true;
         }
+
+        $this->text = $travelogue["text"];
+        $this->prior_uuid = $travelogue["prior_uuid"];
+        $this->posterior_uuid = $travelogue["posterior_uuid"];
+
+        $this->slugs = [];
+        if (isset($travelogue["slugs"])) {
+            $this->slugs = $travelogue["slugs"];
+        }
+
         if ($this->agent_input == null) {
-            $response = "Travelogue.";
-
-            $this->travelogue_message = $response; // mewsage?
+            $this->travelogue_message = "Read travelogue.";
         } else {
             $this->travelogue_message = $this->agent_input;
         }
+    }
+
+    public function isTravelogue($travelogue)
+    {
+        if (!isset($travelogue["text"])) {
+            return false;
+        }
+        if (!isset($travelogue["prior_uuid"])) {
+            return false;
+        }
+
+        if (
+            !isset($travelogue["posterior_uuid"]) and
+            $travelogue["posterior_uuid"] == null
+        ) {
+            $this->response .= "Did not see a posterior reference . ";
+            return true;
+        }
+
+        $this->response .= "Saw a travelogue. ";
+        return true;
     }
 
     public function makeMessage()
@@ -153,24 +175,7 @@ class Travelogue extends Agent
             $text .
             "</a>";
     }
-    /*
-    public function slugtextTravelogue($slugs) {
 
-usort($slugs, function ($a, $b) { return (strlen($a) <=> strlen($b)); });
-foreach($slugs as $i=>$slug) {
-
-
-    $a = array_filter($slugs, function($el) use ($slug) {
-        return ( strpos($el, $slug) !== false );
-    });
-if (count($a) > 1)) {unset($slugs[$i]);}
-}
-                $t = implode(" ", $slugs);
-
-return $t;
-
-    }
-*/
     public function interlinkTravelogue($uuid)
     {
         $interlink = $this->getMemory($uuid);
@@ -227,6 +232,18 @@ return $t;
         $this->txt = $txt;
     }
 
+    public function makeLink()
+    {
+        $uuid = $this->travelogue_uuid;
+
+        if ($this->travelogue_uuid === false) {
+            $uuid = $this->prior_uuid;
+        }
+
+        $this->link = $this->web_prefix . "thing/" . $uuid . "/travelogue";
+        $this->thing_report["link"] = $this->link;
+    }
+
     public function makeTXT()
     {
         $this->txtTravelogue();
@@ -236,10 +253,6 @@ return $t;
     public function respondResponse()
     {
         $this->thing->flagGreen();
-
-        $this->thing_report["info"] =
-            "This navigates interlinks between blocks of text.";
-        $this->thing_report["help"] = "This is about links between things.";
 
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
@@ -253,7 +266,6 @@ return $t;
     {
         $this->node_list = ["travelogue" => ["travelogue"]];
         $link = "";
-        //$link = $this->web_prefix . 'thing/' . $uuid . '/travelogue';
 
         $sms =
             "TRAVELOGUE | " .
@@ -274,45 +286,17 @@ return $t;
 
     public function readSubject()
     {
-        $input = $this->input;
-
+        $input = $this->assert($this->input, "travelogue", false);
         $uuid_agent = new Uuid($this->thing, "uuid");
         $this->travelogue_uuid = $uuid_agent->extractUuid($input);
 
-        if ($this->travelogue_uuid == false) {
-            $this->travelogue_uuid = $this->uuid;
+        if (!isset($this->thing->created_at)) {
+            $input = $this->thing->uuid;
         }
+        $t = $this->loadResource($input);
 
-        $t = $this->getMemory($this->travelogue_uuid);
-        if ($t === false) {
-            //            $file = $this->path . 'test.php';
-            $file = $this->file_name;
-
-            if (file_exists($file)) {
-                include $file;
-
-                $this->interlinks = $interlinks;
-                $this->response .= "Loaded interlink file. ";
-
-                foreach ($this->interlinks as $uuid => $interlink) {
-                    $this->setMemory($uuid, $interlink);
-                    /*
-if ($uuid == $this->travelogue_uuid) {
-var_dump("foobar");
-var_dump($uuid);
-exit();
-}
-*/
-                }
-            } else {
-                $this->response .= "Not able to load interlink file. ";
-            }
-            if ($this->travelogue_uuid === false) {
-                $this->travelogue_uuid = array_key_first($interlinks);
-            }
-
-            $t = $this->getMemory($this->travelogue_uuid);
-        }
-        $this->interlink = $t;
+        // Expect a single travelogue entry back.
+        // Try reading it.
+        $this->readTravelogue($t);
     }
 }

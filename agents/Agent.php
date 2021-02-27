@@ -370,6 +370,16 @@ class Agent
         );
     }
 
+// dev exploration
+/*
+public function __set($name, $value) {
+//	if ((stripos($name, "prior_thing")) and (!isset($this->$$name))) {
+//		throw new \Exception($name.' thing does not exist');
+//	}
+
+}
+*/
+
     /**
      *
      */
@@ -448,6 +458,11 @@ class Agent
         }
 
         return $things;
+    }
+
+    public function isThing($thing) {
+        if ($thing === null) {return false;}
+        return true;
     }
 
     public function getVariables($agent_name = null)
@@ -2261,16 +2276,7 @@ class Agent
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
-        /*
-        $input = strtolower(
-            $agent_input_text . " " . $this->to . " " . $this->subject
-        );
-        if ($this->agent_input == null) {
-            $input = strtolower($this->to . " " . $this->subject);
-        } else {
-            $input = strtolower($agent_input_text);
-        }
-*/
+
         $input = $agent_input_text . " " . $this->to . " " . $this->subject;
 
         if ($this->agent_input == null) {
@@ -2278,8 +2284,6 @@ class Agent
         } else {
             $input = $agent_input_text;
         }
-
-        //$input = strtolower($this->input);
 
         // Recognize and ignore stack commands.
         // Devstack
@@ -2430,7 +2434,13 @@ class Agent
         if (isset($uuid) and is_string($uuid)) {
             $thing = new Thing($uuid);
 
-            if ($thing->thing != false) {
+// dev
+// Recognize null things created in a non-persistent environment.
+//var_dump($thing->task);
+// var_dump($thing->created_at);
+//             if  ($thing->thing != false) {
+
+            if ( ($thing->thing != false) and (isset($thing->created_at)) ) {
                 $f = trim(str_replace($uuid, "", $input));
 
                 // TODO: Test

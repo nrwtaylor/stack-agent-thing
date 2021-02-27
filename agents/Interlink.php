@@ -1,6 +1,13 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+/*
+
+BASELINE. BASELINE. BASELINK.
+INTERLINKED.
+
+*/
+
 class Interlink extends Agent
 {
     public $var = "hello";
@@ -12,7 +19,12 @@ class Interlink extends Agent
             $this->path = $this->thing->container["stack"]["path"];
         }
 
-        $this->file_name = $this->resource_path . "interlink/test.php";
+        // Name of interlink file to write.
+        // dev take filename as input from file_source.
+
+        // Gutenberg reference
+        // $this->file_name = $this->resource_path . "interlink/0602911.php";
+        $this->file_name = $this->resource_path . "interlink/calendar.php";
 
         if (file_exists($this->file_name)) {
             include $this->file_name;
@@ -25,6 +37,14 @@ class Interlink extends Agent
 
     public function initInterlink()
     {
+        // dev accept file_source as input
+
+        // test on calendar.txt
+
+        $this->file_source =
+            "/home/nick/codebase/stackr-resources/calendar/calendar.txt";
+        //$this->file_source = $this->resource_path . "book/0602911.txt";
+
         $this->slug_agent = new Slug($this->thing, "slug");
         $this->ngram_agent = new Ngram($this->thing, "ngram");
 
@@ -36,7 +56,6 @@ class Interlink extends Agent
 
     public function run()
     {
-        $this->runInterlink();
     }
 
     public function test()
@@ -84,9 +103,9 @@ class Interlink extends Agent
         return $slugs;
     }
 
-    public function runInterlink()
+    public function readInterlink()
     {
-        if (($this->interlink_make_flag === true) or (!isset($this->interlink))) {
+        if ($this->interlink_make_flag === true or !isset($this->interlink)) {
             $this->interlinks = $this->makeInterlink();
             $this->response .= "Built new interlink file. ";
         }
@@ -96,7 +115,7 @@ class Interlink extends Agent
         if ($this->agent_input == null) {
             $response = "Interlinker.";
 
-            $this->interlink_message = $response; // mewsage?
+            $this->interlink_message = $response;
         } else {
             $this->interlink_message = $this->agent_input;
         }
@@ -110,8 +129,12 @@ class Interlink extends Agent
 
     public function makeInterlink()
     {
-        $filename =
-            "/home/nick/codebase/stackr-resources/calendar/calendar.txt";
+        if (!isset($this->file_source)) {
+            $this->response .= "No file source seen. ";
+        }
+
+        $filename = $this->file_source;
+
         $p = new Contents($this->thing, $filename);
 
         $uuid_agent = new Uuid($this->thing, "uuid");
@@ -357,10 +380,14 @@ class Interlink extends Agent
     public function readSubject()
     {
         $input = $this->input;
+        $input = $this->assert($input, "interlink", false);
 
         $this->interlink_make_flag = false;
         if (stripos($input, "make") !== false) {
             $this->interlink_make_flag = true;
         }
-    }
+
+        $this->readInterlink();
+
+  }
 }
