@@ -13,6 +13,16 @@ use ICal\ICal;
 // John Grogg (?) has built a nice ICal parser.
 // Call it here (and only here) so the stack can read ICS.
 
+/*
+settings.php
+        'stack' => [
+...
+        'calendar'=>['bob@example.com','mark@example.com'],
+...
+]
+
+*/
+
 class Calendar extends Agent
 {
     public $var = "hello";
@@ -20,7 +30,7 @@ class Calendar extends Agent
     function init()
     {
         $this->default_calendar_token = null;
-
+        $this->default_calendar_tokens = [];
         // So I could call
         if (isset($this->thing->container["stack"]["calendar"])) {
             if (is_string($this->thing->container["stack"]["calendar"])) {
@@ -111,7 +121,7 @@ class Calendar extends Agent
             $when_description = html_entity_decode($description);
         } else {
             $when_description = html_entity_decode($text);
-//$when_description = $text;
+            //$when_description = $text;
         }
 
         $when_description = str_replace(
@@ -129,8 +139,8 @@ class Calendar extends Agent
             break;
         }
 
-// Protect URLS wrapped in <> from tag stripping.
-/*
+        // Protect URLS wrapped in <> from tag stripping.
+        /*
 $urls = $this->extractUrls($when_description);
         // Strip html tags.
 foreach($urls as $u=>$url) {
@@ -145,7 +155,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         );
 */
 
-$when_description = $this->stripHtml($when_description);
+        $when_description = $this->stripHtml($when_description);
 
         // Strip repeating spaces.
         $when_description = preg_replace("/\s+/", " ", $when_description);
@@ -865,10 +875,10 @@ $when_description = $this->stripHtml($when_description);
         }
 
         if ($input == "calendar") {
+            $ics_links = [];
+
             $tokens = $this->default_calendar_tokens;
             //$new_ics_links = $this->icslinksCalendar($token);
-
-            $ics_links = [];
 
             foreach ($tokens as $i => $token) {
                 $new_ics_links = $this->icslinksCalendar($token);
