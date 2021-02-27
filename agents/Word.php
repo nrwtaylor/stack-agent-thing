@@ -117,6 +117,7 @@ $this->resource_path_ewol = $this->resource_path . "ewol/";
      * @param unknown $replace_with (optional)
      * @return unknown
      */
+
     public function stripPunctuation($input, $replace_with = " ")
     {
         $unpunctuated = preg_replace(
