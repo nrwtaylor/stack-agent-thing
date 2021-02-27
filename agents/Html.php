@@ -39,14 +39,11 @@ class Html extends Agent
             "This agent handles HTML.";
         $this->thing_report["help"] = "This is about recognizing and processing HTML.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report["info"] = $message_thing->thing_report["info"];
-
-        return $this->thing_report;
     }
 
     function makeSMS()
@@ -67,8 +64,6 @@ class Html extends Agent
     {
         $detagged = $this->stripHtml($html);
         $text = html_entity_decode($detagged);
-        //$text = str_replace("=0A"," ",$text);
-        //$text = str_replace("=0D"," ",$text);
 
         $breaks = [
             "<p>",
@@ -85,6 +80,8 @@ class Html extends Agent
 
         $text = preg_replace("/\s+/", " ", $text);
 
+        // Deal with &nbsp etc
+        //$text = htmlspecialchars_decode($text)
         return $text;
     }
     // test

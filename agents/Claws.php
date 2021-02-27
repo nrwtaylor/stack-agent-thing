@@ -241,8 +241,11 @@ dev - Detect duplicates.
                 $txt .= "FOUND URL\n";
             }
 
-            //            $txt .= $this->textHtml($text_claws) . "\n";
-            $txt .= $text_claws . "\n";
+            $txt .= $this->textHtml($text_claws) . "\n";
+
+            // Tidy up text display.
+//            $txt = html_entity_decode($text_claws). "\n";
+ //           $txt .= $text_claws . "\n";
         }
         $txt .= "\n";
 

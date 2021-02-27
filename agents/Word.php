@@ -16,20 +16,12 @@ class Word extends Agent
      */
     function init()
     {
-//var_dump($this->resource_path);
-//        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
-//var_dump($GLOBALS['stack_path']);
-//        $this->resource_path_words =
-//            $GLOBALS["stack_path"] . "resources/words/";
 
         $this->resource_path_words =
             $this->resource_path . "words/";
 
 
-//var_dump($this->resource_path_words);
-//         $this->resource_path_ewol = $GLOBALS["stack_path"] . "resources/ewol/";
-$this->resource_path_ewol = $this->resource_path . "ewol/";
-
+        $this->resource_path_ewol = $this->resource_path . "ewol/";
 
         $this->keywords = [];
 
@@ -261,9 +253,6 @@ $this->resource_path_ewol = $this->resource_path . "ewol/";
         if (count($this->words) != 0) {
             $this->word = $this->words[0];
         } else {
-            //            $text = $this->nearestWord($value);
-            //echo $text;
-            //exit();
             $this->word = null;
         }
 
@@ -301,11 +290,6 @@ $this->resource_path_ewol = $this->resource_path . "ewol/";
 
         $this->thing->log("ewolWords.");
 
-        //if (!isset($this->mem_cached)) {
-        //    $this->getMemcached();
-        //}
-        //if ($this->wordpress_path_to !== false) {
-        //    require_once $this->wordpress_path_to. 'wp-load.php';
         if (
             $this->ewol_dictionary = $this->getMemory("agent-ewol-dictionary")
         ) {
