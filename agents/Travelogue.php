@@ -136,6 +136,8 @@ class Travelogue extends Agent
         $interlink_prior = $this->interlinkTravelogue($this->prior_uuid);
         if ($interlink_prior !== false) {
             $web .= "<div>";
+          $web .= "<b>PREVIOUS</b><p>";
+
             $web .=
                 $this->linkTravelogue($this->prior_uuid, "previous") .
                 " " .
@@ -150,6 +152,8 @@ class Travelogue extends Agent
         if ($interlink_posterior !== false) {
             $web .= "<p>";
             $web .= "<div>";
+          $web .= "<b>NEXT</b><p>";
+
             $web .=
                 $this->linkTravelogue($this->posterior_uuid, "next") .
                 " " .
@@ -240,6 +244,10 @@ class Travelogue extends Agent
             $uuid = $this->prior_uuid;
         }
 
+        if ($this->prior_uuid == null) {
+            $uuid = $this->uuid;
+        }
+
         $this->link = $this->web_prefix . "thing/" . $uuid . "/travelogue";
         $this->thing_report["link"] = $this->link;
     }
@@ -267,9 +275,14 @@ class Travelogue extends Agent
         $this->node_list = ["travelogue" => ["travelogue"]];
         $link = "";
 
+        $travelogue_message = "No travelogue seen.";
+        if (isset($this->travelogue_message)) {
+            $travelogue_message = $this->travelogue_message;
+        }
+
         $sms =
             "TRAVELOGUE | " .
-            $this->travelogue_message .
+            $travelogue_message .
             " " .
             $this->response .
             " " .
