@@ -111,6 +111,17 @@ wget https://raw.githubusercontent.com/nrwtaylor/stack-agent-thing/master/compos
 sudo apt install composer
 composer install
 ```
+
+More recently tested this way. You may need to manually create a vendor folder, and give that folder permissions for composer to access.
+
+```shell
+composer config minimum-stability dev
+cd /var/www
+sudo git clone https://github.com/nrwtaylor/agent.git stackr.test
+composer install
+```
+
+
 Load in template public and private configuration files.
 ```shell
 cp -r /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/public /var/www/stackr.test/
