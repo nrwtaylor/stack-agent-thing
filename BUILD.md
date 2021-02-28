@@ -112,7 +112,7 @@ sudo apt install composer
 composer install
 ```
 
-More recently tested this way. You may need to manually create a vendor folder, and give that folder permissions for composer to access.
+More recently tested this way. You may need to manually create a `vendor` folder, and give that folder permissions for `composer` to access.
 
 ```shell
 composer config minimum-stability dev
@@ -257,8 +257,14 @@ Add in agent resources as available.
 php -S localhost:8080 -t public public/index.php
 ```
 ## 8. Verify Ping, Latency
-## 9. Verify Roll PNG
 
+In `/var/www/stackr.test/`:
+```shell
+./agent ping
+./agent latency
+```
+
+## 9. Verify Roll PNG
 
 
 
