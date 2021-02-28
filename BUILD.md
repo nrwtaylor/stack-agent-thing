@@ -112,7 +112,7 @@ sudo apt install composer
 composer install
 ```
 
-More recently tested this way. You may need to manually create a vendor folder, and give that folder permissions for composer to access.
+More recently tested this way. You may need to manually create a `vendor` folder, and give that folder permissions for `composer` to access.
 
 ```shell
 composer config minimum-stability dev
