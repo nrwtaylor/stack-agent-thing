@@ -107,7 +107,7 @@ php7-4: ## Set up PHP extensions - bleeding edge
 
 apachefiling: ## Create and assemble filing for Agent and Apache2 server
 	@echo "===== Creating filesystem for Apache2 server ==============="
-ifneq ("$(wildcard /var/www/$(SERVERNAME))","")
+ifneq ("$(wildcard /var/www/$(SERVERNAME)/private)","")
 	@echo "exists"
 else 
 	echo "does not"; \
@@ -234,9 +234,12 @@ tailoring: ## Set your servername in system files
 
 clean: ## Clean up the web folders and settings
 	@echo "===== Cleaning up: removing web folders and settings ==============="
-	rm -Rvf /var/www/$(SERVERNAME)
-	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf
-	
+	read -p "Ready to erase all files in /var/www/stackr.test? (y|n)" cleaning; echo $$cleaning ; \
+	if [ "$$cleaning" = "n" ] ; then \
+	echo "phew"; else \
+	rm -Rvf /var/www/$(SERVERNAME) ; \
+	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf; fi
+
 #	rm -f /etc/apache2/sites-available/000-default.conf
 #	rm -f apache settings for SERVERNAME
 # perhaps also:  mysql? php?
