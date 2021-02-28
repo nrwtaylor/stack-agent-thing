@@ -149,7 +149,6 @@ if (isset($this->link_uuid)) {
 
         $block_things = array();
         // See if a block record exists.
-        //require_once '/var/www/html/stackr.ca/agents/findagent.php';
         $findagent_thing = new Findagent($this->thing, 'thing');
 
         // This pulls up a list of other Block Things.
@@ -180,13 +179,6 @@ if ($things == true) {return;}
 
             $variables_json= $block_thing['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
-
-
-        //require_once '/var/www/html/stackr.ca/agents/variables.php';
-
-        //$previous_thing = new Thing($block_thing['uuid']);
-
-        //$this->agent = new Variables($message_thing, "variables message " . $this->from);
 
 
         if (!isset($variables['message']['agent'])) {
