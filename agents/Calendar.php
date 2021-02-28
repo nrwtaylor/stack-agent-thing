@@ -37,15 +37,19 @@ class Calendar extends Agent
                 $this->default_calendar_token =
                     $this->thing->container["stack"]["calendar"];
                 $this->default_calendar_tokens = [
-                    $this->default_calendar_token
+                    $this->default_calendar_token,
                 ];
             }
 
             if (is_array($this->thing->container["stack"]["calendar"])) {
                 $this->default_calendar_tokens =
                     $this->thing->container["stack"]["calendar"];
-                $this->default_calendar_token =
-                    $this->default_calendar_tokens[0];
+                if ($this->default_calendar_tokens == []) {
+                    $this->default_calendar_token = null;
+                } else {
+                    $this->default_calendar_token =
+                        $this->default_calendar_tokens[0];
+                }
             }
         }
 

@@ -15,10 +15,10 @@ class Petal extends Agent
         $this->node_list = ["petal" => ["petal"]];
 
         $this->haystack =
-            $this->thing->uuid .
-            $this->thing->to .
-            $this->thing->subject .
-            $this->thing->agent_input;
+            $this->uuid .
+            $this->to .
+            $this->subject .
+            $this->agent_input;
 
         $this->current_time = $this->thing->json->time();
     }
@@ -50,13 +50,6 @@ class Petal extends Agent
         $this->thing->json->writeVariable(["petal", "roll"], $this->roll);
         $this->thing->json->writeVariable(["petal", "result"], $this->result);
 
-        $this->thing->log(
-            $this->agent_prefix .
-                " completed read. Timestamp " .
-                number_format($this->thing->elapsed_runtime()) .
-                "ms.",
-            "OPTIMIZE"
-        );
     }
 
     public function respondResponse()
@@ -65,19 +58,15 @@ class Petal extends Agent
 
         // This should be the code to handle non-matching responses.
 
-        $from = "roll";
-        $roll = -1;
-
-        $this->sms_message = "ROLL | ";
+        //$this->sms_message = "ROLL | ";
 
         $choices = false;
-
         $this->makeChoices();
 
-        $this->thing_report["info"] = "This rolls a dice.  See 
-				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
+        $this->thing_report["info"] = "This will draw a petal. One day.";
+
         $this->thing_report["help"] =
-            "This is about dice with more than 6 sides.";
+            "This is about evenutally drawing a flower.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report["info"] = $message_thing->thing_report["info"];
@@ -104,9 +93,9 @@ class Petal extends Agent
             $this->result == "Invalid input" or
             $this->result == null
         ) {
-            $sms = "ROLL | Request not processed. Check syntax.";
+            $sms = "PETAL | Request not processed. Check syntax.";
         } else {
-            $sms = "ROLL | ";
+            $sms = "PETAL | ";
             //var_dump($this->result);
             foreach ($this->result as $k => $v) {
                 foreach ($v as $key => $value) {
@@ -151,20 +140,10 @@ class Petal extends Agent
 
     public function makePNG()
     {
-        // here DB request or some processing
-        //        $codeText = "thing:".$this->state;
-        //echo count($this->result);
-        //exit();
-
-        //$this->drawHexagon();
-        //exit();
-
-        //var_dump($this->result);
         if (count($this->result) != 2) {
             return;
         }
-        //var_dump($this->result);
-        //exit();
+
         $number = $this->result[1]["roll"];
 
         $this->image = imagecreatetruecolor(125, 125);
@@ -179,9 +158,7 @@ class Petal extends Agent
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
-        $this->drawSnowflake(56, 64);
-        //echo "meep";
-        //exit();
+        $this->drawPetal(56, 64);
 
         $number = $this->result[0]["d6"];
         // Create a 55x30 image
@@ -206,23 +183,10 @@ class Petal extends Agent
             return;
         }
 
-        //if ($this->roll == "d8") {
-
-        //$this->drawSnowflake();
-
-        //$number = ($this->result[0]);
-        //var_dump($number);
-        //exit();
         $font = $this->default_font;
-
-
-        $font = $this->default_font;
-
-
 
         $text = $number;
         // Add some shadow to the text
-        //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
         $size = 72;
         $angle = 0;
@@ -243,13 +207,6 @@ class Petal extends Agent
         $width = imagesx($this->image);
         $height = imagesy($this->image);
         $pad = 0;
-        //imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
-
-        //     imagestring($this->image, 2, 100, 0, $this->roll, $textcolor);
-
-        // Save the image
-        //header('Content-Type: image/png');
-        //imagepng($im);
 
         ob_start();
         imagepng($this->image);
@@ -258,13 +215,10 @@ class Petal extends Agent
 
         $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
             '"alt="hexagram"/>';
-
-        //        $this->thing_report['png'] = $image;
 
         imagedestroy($this->image);
 
@@ -298,7 +252,7 @@ class Petal extends Agent
         ];
     }
 
-    function drawSnowflake($n, $p)
+    function drawPetal($n, $p)
     {
         $this->step_length = 20;
         $this->points = [
@@ -312,8 +266,6 @@ class Petal extends Agent
         foreach ($arr as &$value) {
             list($x, $y) = $this->hex_corner(60, 60, 30, $value);
 
-            //              $this->iterateSnowflake();
-
             if (isset($x_new)) {
                 imageline($this->image, 60, 60, $x, $y, $this->black);
             }
@@ -322,7 +274,7 @@ class Petal extends Agent
         }
     }
 
-    function iterateSnowflake()
+    function iteratePetal()
     {
         $step_length = 20;
         echo "<pre>";
@@ -345,7 +297,7 @@ class Petal extends Agent
         }
     }
 
-    function getRoll($input)
+    function getPetal($input)
     {
         if (!isset($this->rolls)) {
             $this->rolls = $this->extractRolls($input);
@@ -413,7 +365,7 @@ $input = $this->assert($this->input, "petal", false);
             $input
         );
 
-        $this->getRoll($input);
+        $this->getPetal($input);
 
         if ($this->roll == false) {
             $this->roll = "d6";
