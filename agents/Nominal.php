@@ -81,6 +81,9 @@ class Nominal extends Agent
         // We need the newest Nominal as that is most likely to be relevant to
         // what we are doing.
 
+$things = $findagent_thing->thing_report['things'];
+
+
         $this->thing->log(
             'Agent "Nominal" found ' .
                 count($findagent_thing->thing_report['things']) .
@@ -107,8 +110,9 @@ class Nominal extends Agent
             }
         }
 
+
         foreach (
-            array_reverse($findagent_thing->thing_report['things'])
+            array_reverse($things)
             as $nominal_thing
         ) {
             $thing = new Thing($nominal_thing['uuid']);

@@ -160,16 +160,12 @@ class Agent
         $this->init();
         $this->get();
         try {
+
             $this->read();
-
             $this->run();
-
             $this->make();
-
-            // This is where we deal with insufficient space to serialize the variabes to the stack.
-            //if (!isset($this->signal_thing)) {return true;}
-            //        try {
             $this->set();
+
         } catch (\OverflowException $t) {
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
@@ -273,6 +269,7 @@ class Agent
         $this->thing->log(
             "Check if " . $agent_name . " == " . $this->agent_name
         );
+
         if ($agent_name == $this->agent_name) {
             return false;
         }

@@ -39,6 +39,13 @@ class Word extends Agent
 
     function set()
     {
+        $this->reading = null;
+        if (isset($this->words)) {
+            $this->reading = count($this->words);
+        }
+//        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
+
+
         $this->thing->json->writeVariable(["word", "reading"], $this->reading);
 
         if ((isset($this->words) and count($this->words)) != 0) {
@@ -219,9 +226,6 @@ class Word extends Agent
         }
         $this->thing->log('called extractWords on "' . $string . '".', "DEBUG");
 
-        //echo "\n";
-        //                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
-        //echo $string . "\n";
         $string = strtolower($string);
         preg_match_all(
             '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){2,}/',
@@ -230,8 +234,6 @@ class Word extends Agent
         );
         //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 )
         $w = $words[0];
-
-        //echo implode("_",$w) . "\n";
 
         $this->notwords = [];
         $this->words = [];
@@ -452,11 +454,9 @@ class Word extends Agent
     {
         if (!isset($this->ewol_dictionary)) {
             $this->ewolWords();
-            //return true;
         }
 
         if ($number === null or $number === false) {
-//        if ($length === null or $length === false) {
             $min_number = 3;
             $max_number = $number;
             if ($number == false) {
@@ -500,12 +500,9 @@ class Word extends Agent
             return $this->contents;
         }
 
-        //   if ($this->wordpress_path_to !== false) {
-
         if ($this->contents = $this->mem_cached->get("agent-word-contents")) {
             return $this->contents;
         }
-        //   }
 
         $file = $this->resource_path_words . "words.txt";
         $contents = "";
@@ -544,7 +541,6 @@ class Word extends Agent
         return false;
 
         if (!isset($this->contents)) {
-            //$this->getContents();
             $file = $this->resource_path_words . "words.txt";
 
             $contents = "";
@@ -571,17 +567,14 @@ class Word extends Agent
         return;
 
         $words = explode("\n", $this->contents);
-        //$input = trim($input);
 
         $input = str_replace(["\r", "\n"], "", $input);
 
         foreach ($words as $key => $word) {
-            //$word = trim($word);
 
             $word = str_replace(["\r", "\n"], "", $word);
 
             if (strcasecmp($input, $word) == 0) {
-                //        if ( strtolower($input) == strtolower($word) ) {
                 return true;
             }
         }
@@ -609,7 +602,6 @@ class Word extends Agent
 
         foreach ($words as $key => $word) {
             $nearness = levenshtein($input, $word);
-            //$nearness = similar_text($word, $input);
 
             if ($nearness < $nearness_min) {
                 $word_list = [];
@@ -624,7 +616,6 @@ class Word extends Agent
         $word = false;
 
         foreach ($word_list as $key => $word) {
-            //$nearness = levenshtein($input, $word);
             $nearness = similar_text($word, $input);
 
             if ($nearness > $nearness_max) {
@@ -649,7 +640,7 @@ class Word extends Agent
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         $this->cost = 100;
 
@@ -657,27 +648,18 @@ class Word extends Agent
         $this->thing->flagGreen();
 
         // Make SMS
-        $this->makeSMS();
         $this->thing_report["sms"] = $this->sms_message;
 
         // Make message
         $this->thing_report["message"] = $this->sms_message;
 
-        // Make email
-        $this->makeEmail();
 
         $this->thing_report["email"] = $this->sms_message;
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-        $this->reading = null;
-        if (isset($this->words)) {
-            $this->reading = count($this->words);
-        }
-        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
 
-        return $this->thing_report;
     }
 
     /**
@@ -694,7 +676,6 @@ class Word extends Agent
                     $this->sms_message = "WORD | no words found";
                 }
 
-                //            $this->sms_message = "WORD | no words found";
                 return;
             }
 
