@@ -110,7 +110,7 @@ class Petal extends Agent
                 }
             }
 
-            $sms = "ROLL = " . $roll . " | ";
+            $sms = "PETAL = " . $roll . " | ";
             $sms .= $temp_sms_message;
             $sms .= "| TEXT ?";
         }

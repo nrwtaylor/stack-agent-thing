@@ -36,9 +36,6 @@ class Claws extends Agent
             return;
         }
 
-        //        $this->input = 'claws "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"';
-        //        $this->readSubject();
-
         $this->response .= "No test performed. ";
     }
 

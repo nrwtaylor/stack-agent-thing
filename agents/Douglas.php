@@ -96,7 +96,6 @@ class Douglas extends Agent
         $filename = $stream["uri"];
 
         $result_code = $zip->open($filename, \ZipArchive::CREATE);
-        //ls$result_code = $zip->open('/var/www/stackr.test/resources/douglas/test2.zip', \ZipArchive::CREATE);
 
         if ($result_code !== true) {
             $msg = isset($ZIP_ERROR[$result_code])
@@ -136,13 +135,6 @@ class Douglas extends Agent
 
         $contents = @file_get_contents($filename);
         $this->contents_zip = $contents;
-        //        $response = @file_put_contents(
-        //            "/var/www/stackr.test/resources/douglas/test5.zip",
-        //            $contents
-        //        );
-        //        if ($response === false) {
-        //            $this->response .= "Could not save ZIP file. ";
-        //        }
     }
 
     public function makeZip()

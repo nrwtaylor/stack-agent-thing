@@ -2,6 +2,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 /*
+This agent uses the Grogg ICS parser.
 
 $/var/www/stackr.test
 $composer require johngrogg/ics-parser
