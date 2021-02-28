@@ -206,7 +206,30 @@ class Dictionary extends Agent
         $this->thing_report['message'] = $this->message;
     }
 
-    public function extractNumber($input = null)
+    public function loadDictionary($file_names) {
+
+        if (is_string($file_names)) {$file_names = [$file_names];}
+
+        foreach($file_names as $j=>$file_name) {
+
+        $librex_handler = new Librex($this->thing, "librex");
+        $librex_handler->getLibrex($file_name);
+        $librex_handler->linesLibrex();
+
+        foreach($librex_handler->lines as $i=>$line) {
+            $dictionary = $this->getSlug($file_name);
+            $slug = $this->getSlug($line);
+            $arr = $this->getMemory( $slug );
+
+            if ($arr == null) {$arr = [];}
+
+            $this->setMemory( $slug, array_merge([$dictionary=>true], $arr) );
+        }
+        }
+
+    }
+
+    public function deprecate_extractNumber($input = null)
     {
         if ($input == null) {
             $input = $this->subject;

@@ -7,12 +7,10 @@ class Punctuation extends Agent
     {
         $this->start_time = microtime(true);
         $this->start_time = $this->thing->elapsed_runtime();
-
-        $this->keywords = [];
     }
 
-    public function set() {
-
+    public function set()
+    {
         $this->reading = count($this->punctuations);
 
         $this->thing->json->writeVariable(
@@ -20,26 +18,24 @@ class Punctuation extends Agent
             $this->reading
         );
 
-       if (count($this->punctuations) != 0) {
+        if (count($this->punctuations) != 0) {
             $this->punctuation = $this->punctuations[0];
             $this->thing->log(
                 $this->agent_prefix .
-                    'completed with a reading of ' .
+                    "completed with a reading of " .
                     $this->reading .
-                    '.'
+                    "."
             );
         } else {
             $this->punctuation = null;
             $this->thing->log(
-                $this->agent_prefix . 'did not find punctuation makrs.'
+                $this->agent_prefix . "did not find punctuation makrs."
             );
         }
-
-
     }
 
-    public function get() {
-
+    public function get()
+    {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "punctuation",
@@ -59,75 +55,31 @@ class Punctuation extends Agent
             "punctuation",
             "reading",
         ]);
-
     }
 
     function extractPunctuations($input, $min_length = 3)
     {
-        //if ($input == null) {$input = $this->subject;}
-        if (!isset($this->punctuations)) {
-            $this->punctuations = [];
-        }
-//        if (!isset($this->words)) {
-//            $this->getWords();
-//        }
-
-//        $words = $this->words;
-
-        $words = $this->extractWords($input);
-
-        $punctuations = [];
-
-        $grams = explode(" ", $input);
-        $message = "";
-
-        foreach ($grams as $key => $gram) {
-            $gram_filtered = $this->stripPunctuation($gram, "");
-
-            if ($this->isWord($gram_filtered) == false) {
-                // Not a word so very likely punctuation
-                // in some way
-
-//                $gram_nonnom = $this->nonnomify($gram);
-//                $message .= " " . $gram_nonnom;
-                $this->punctuations[] = $gram;
-            } else {
-                $message .= " " . $gram;
-            }
-        }
-
-        $message = ltrim($message);
-
-        $this->message = $message;
-
-        return $punctuations;
+        preg_match_all("#[[:punct:]]#", $input, $matches);
+        $this->punctuations = $matches[0];
+        return $this->punctuations;
     }
 
     public function stripPunctuation($input, $replace_with = " ")
     {
-        $unpunctuated = preg_replace(
-            '/[\:\;\/\!\?\#\.\,\'\"\{\}\[\]\<\>\(\)]/i',
-            $replace_with,
-            $input
-        );
-        return $unpunctuated;
+        return preg_replace("#[[:punct:]]#", $replace_with, $input);
     }
 
     public function respondResponse()
     {
-        $this->cost = 100;
-
-        // Thing stuff
-
         $this->thing->flagGreen();
 
         // Make message
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeSMS()
@@ -165,27 +117,26 @@ class Punctuation extends Agent
 
     public function readSubject()
     {
-        $input = strtolower($this->subject);
+        //$input = strtolower($this->subject);
+        $input = $this->assert($this->input, "punctuation", false);
 
-        $keywords = ['punctuation'];
+        $keywords = ["punctuation"];
         $pieces = explode(" ", strtolower($input));
 
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'punctuation':
+                        case "punctuation":
                             if (!isset($prefix)) {
-                                $prefix = 'punctuation';
+                                $prefix = "punctuation";
                             }
                             $words = preg_replace(
-                                '/^' . preg_quote($prefix, '/') . '/',
-                                '',
+                                "/^" . preg_quote($prefix, "/") . "/",
+                                "",
                                 $input
                             );
                             $words = ltrim($words);
-
-                            //$this->search_words = $words;
 
                             $this->extractPunctuations($words);
 

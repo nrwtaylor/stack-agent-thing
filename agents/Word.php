@@ -35,6 +35,32 @@ class Word extends Agent
         $this->thing_report["help"] =
             "Screens against a list of over four hundred thousand words.";
         $this->getMemcached();
+        $this->initWords();
+    }
+
+    public function initWords() {
+
+       if ($this->getMemory('words-words') !== true) {
+           $this->loadDictionary('words/words');
+           $this->setMemory('words-words',true); 
+       }
+
+       if ($this->getMemory('words-offensive') !== true) {
+           $this->loadDictionary('offensive/bad-words');
+           $this->setMemory('words-offensive',true); 
+       }
+
+
+       if ($this->getMemory('words-eowl') !== true) {
+
+        foreach (range("A", "Z") as $v) {
+            $resource = 'ewol/' . $v . " Words";
+           $this->loadDictionary($resource);
+        }
+
+           $this->setMemory('words-eowl',true); 
+       }
+
     }
 
     function set()
@@ -69,7 +95,6 @@ class Word extends Agent
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 ["word", "refreshed_at"],
@@ -108,23 +133,6 @@ class Word extends Agent
         }
         //
         return $new_words;
-    }
-
-    /**
-     *
-     * @param unknown $input
-     * @param unknown $replace_with (optional)
-     * @return unknown
-     */
-
-    public function stripPunctuation($input, $replace_with = " ")
-    {
-        $unpunctuated = preg_replace(
-            '/[\:\;\/\!\?\#\.\,\'\"\{\}\[\]\<\>\(\)]/i',
-            $replace_with,
-            $input
-        );
-        return $unpunctuated;
     }
 
     public function imageWord($text = null)
@@ -520,6 +528,9 @@ class Word extends Agent
     {
         $value = $this->stripPunctuation($input);
 
+//$t = $this->getMemory($value);
+//var_dump($t);
+
         $text = $this->findWord("list", $value);
 
         if ($text != false) {
@@ -764,6 +775,11 @@ class Word extends Agent
         $words = $input;
         $this->search_words = $words;
         $this->extractWords($words);
+
+//test
+//foreach(explode(" ",$words) as $i=>$word) {
+//var_dump($this->isWord($word));
+//}
 
         if ($this->word != null) {
             return;
