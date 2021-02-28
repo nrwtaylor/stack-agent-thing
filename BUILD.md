@@ -257,8 +257,14 @@ Add in agent resources as available.
 php -S localhost:8080 -t public public/index.php
 ```
 ## 8. Verify Ping, Latency
-## 9. Verify Roll PNG
 
+In `/var/www/stackr.test/`:
+```shell
+./agent ping
+./agent latency
+```
+
+## 9. Verify Roll PNG
 
 
 
