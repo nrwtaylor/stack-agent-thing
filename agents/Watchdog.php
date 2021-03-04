@@ -89,6 +89,29 @@ class Watchdog extends Agent
 
     public function readSubject()
     {
+$input = $this->assert($this->input, "watchdog", false);
+
+$tokens = explode(" ", $input);
+if (count($tokens) == 2) {
+
+$file = $tokens[0];
+
+$path = $this->resource_path;
+//$file = 'filename';
+
+$location = $path . 'read/' . $file;
+
+
+}
+
+//$location = $path . 'read/' . $file;
+//var_dump($location);
+
+$contents = file_get_contents($location);
+$this->metaRead($contents);
+$text = $this->textHtml($contents);
+//var_dump($text);
+//exit();
         $this->response .= "Heard. ";
         $input = $this->input;
         if ($input == 'watchdog') {

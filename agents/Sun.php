@@ -30,8 +30,8 @@ class Sun extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "This connects to an authorative time server.";
-        $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
+            "This provides awareness of sun position and solar time.";
+        $this->thing_report["help"] = "Try SUN. Then WEB.";
 
         $this->initSun();
     }
@@ -218,7 +218,7 @@ return;
                 ) {
                     $this->thing->log("found maximum");
                     $maximums[] = [
-                        'description'=>'winter solstice',
+                        'description'=>'summer solstice',
                         'day' => $n - 1,
                         'day_length' => $day_lengths[$n - 1],
                         'timestamp' => $this->dateEpoch(strtotime($t) + ($n-1)*$day_seconds)
@@ -234,7 +234,7 @@ return;
                 ) {
                     $this->thing->log("found minimum");
                     $minimums[] = [
-                        'description'=>'summer solstice',
+                        'description'=>'winter solstice',
                         'day' => $n - 1,
                         'day_length' => $day_lengths[$n - 1],
                         'timestamp' => $this->dateEpoch(strtotime($t) + ($n-1)*$day_seconds)

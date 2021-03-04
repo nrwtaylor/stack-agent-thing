@@ -64,7 +64,6 @@ class Html extends Agent
     {
         $detagged = $this->stripHtml($html);
         $text = html_entity_decode($detagged);
-
         $breaks = [
             "<p>",
             "</p>",
@@ -78,7 +77,10 @@ class Html extends Agent
         ];
         $text = str_ireplace($breaks, "\r\n", $text);
 
-        $text = preg_replace("/\s+/", " ", $text);
+        // All whitespace including carriage return
+        //$text = preg_replace("/\s+/", " ", $text);
+
+        $text = preg_replace ('/\h+/u', ' ', $text);
 
         // Deal with &nbsp etc
         //$text = htmlspecialchars_decode($text)
