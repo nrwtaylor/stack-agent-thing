@@ -79,7 +79,14 @@ class Agent
 $stack_settings = $thing->container['stack'];
 foreach($stack_settings as $setting_name=>$setting_value) {
 
+// For 'backwards' compatibility.
 $this->{$setting_name} = $thing->container['stack'][$setting_name];
+
+// Going forward set default_ and stack_ prefixes
+// For settings from stack private settings.
+$this->{'default_'.$setting_name} = $thing->container['stack'][$setting_name];
+$this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
+
 }
 
 /*
