@@ -74,7 +74,7 @@ class Agent
         }
 
         // Get some stuff from the stack which will be helpful.
-
+/*
 // dev test
 $stack_settings = $thing->container['stack'];
 foreach($stack_settings as $setting_name=>$setting_value) {
@@ -88,8 +88,8 @@ $this->{'default_'.$setting_name} = $thing->container['stack'][$setting_name];
 $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
 }
+*/
 
-/*
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
         $this->word = $thing->container["stack"]["word"];
@@ -99,7 +99,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
         // And some more stuff
         $this->short_name = $thing->container["stack"]["short_name"];
-*/
+
         $this->stack_state = $thing->container["stack"]["state"];
 
         $this->stack_engine_state = $thing->container["stack"]["engine_state"];
