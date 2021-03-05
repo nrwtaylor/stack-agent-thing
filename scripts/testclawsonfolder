@@ -37,7 +37,7 @@ if [ -d ${LOG_DIR} ]; then
   echo "Running: agent --channel=txt --meta=off --watch=\"http\" --flag-error claws \"<file>\""
   if [ -d ${PROCESS_DIR} ]; then
     echo "Working on ${PROCESS_DIR}"
-    for f in ${PROCESS_DIR}*; do
+    for f in ${PROCESS_DIR}/*; do
       echo ${f}
       agent --channel=txt --meta=off --watch="http" --flag-error claws "${f}" 
       STATUS="$?"
