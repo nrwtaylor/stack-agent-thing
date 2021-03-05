@@ -76,6 +76,11 @@ class Agent
         // Get some stuff from the stack which will be helpful.
 
 // dev test
+
+// TODO define all default null settings
+       $this->default_font = null;
+       $this->default_pdf_page_template = null;
+
 $stack_settings = $thing->container['stack'];
 foreach($stack_settings as $setting_name=>$setting_value) {
 
@@ -558,6 +563,19 @@ public function __set($name, $value) {
         $this->response .= "Got {$agent_name}. ";
 
         return ${$agent_name};
+    }
+
+    public function settingsAgent($settings_array) {
+
+$t = $this->thing->container['api'];
+foreach($settings_array as $setting) {
+if (!isset($t[$setting])) {
+return null;}
+
+$t =$t[$setting];
+}
+return $t;
+
     }
 
     public function readAgent($text = null)

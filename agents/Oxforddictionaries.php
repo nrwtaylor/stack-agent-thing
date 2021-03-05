@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -11,29 +11,28 @@ class Oxforddictionaries extends Agent
 {
     // This gets Forex from an API.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
         $this->test = "Development code"; // Always
-
+        $this->definitions_count = 0;
         $this->keywords = [
-            'oxford',
-            'dictionary',
-            'dictionaries',
-            'english',
-            'spanish',
-            'german',
+            "oxford",
+            "dictionary",
+            "dictionaries",
+            "english",
+            "spanish",
+            "german",
         ];
-
-        $this->application_id =
-            $this->thing->container['api']['oxford_dictionaries'][
-                'application_id'
-            ];
-        $this->application_key =
-            $this->thing->container['api']['oxford_dictionaries'][
-                'application_key'
-            ];
+        $this->application_id = $this->settingsAgent([
+            "oxford_dictionaries",
+            "application_id",
+        ]);
+        $this->application_key = $this->settingsAgent([
+            "oxford_dictionaries",
+            "application_key",
+        ]);
 
         $this->run_time_max = 360; // 5 hours
     }
@@ -65,7 +64,7 @@ class Oxforddictionaries extends Agent
         );
 
         $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->counter . ".",
+            $this->agent_prefix . "loaded " . $this->counter . ".",
             "DEBUG"
         );
 
@@ -74,6 +73,9 @@ class Oxforddictionaries extends Agent
 
     function getApi($type = "dictionary")
     {
+        if ($this->application_key == null or $this->application_id == null) {
+            return true;
+        }
         if ($type == null) {
             $type = "dictionary";
         }
@@ -86,9 +88,10 @@ class Oxforddictionaries extends Agent
         $keywords = urlencode($keywords);
 
         $options = [
-            'http' => [
-                'method' => "GET",
-                'header' =>
+            "http" => [
+                "ignore_errors" => true,
+                "method" => "GET",
+                "header" =>
                     "Accept-language: application/json\r\n" .
                     "app_id: " .
                     $this->application_id .
@@ -105,10 +108,23 @@ class Oxforddictionaries extends Agent
         $data_source =
             "https://od-api.oxforddictionaries.com:443/api/v1/entries/en/" .
             $keywords;
-
         //get /entries/{source_lang}/{word_id}/synonyms
 
         $data = @file_get_contents($data_source, false, $context);
+
+        // https://stackoverflow.com/questions/15620124/http-requests-with-file-get-contents-getting-the-response-code
+        $status_line = $http_response_header[0];
+
+        preg_match("{HTTP\/\S*\s(\d{3})}", $status_line, $match);
+
+        $status = $match[1];
+
+        if ($status !== "200") {
+            $this->response .= "Could not contact Oxforddictionaries API. ";
+            return;
+            //        throw new \RuntimeException("unexpected response status: {$status_line}\n" . $data);
+        }
+
         if ($data === false) {
             $this->response .= "Could not ask Oxford Dictionaries. ";
             $this->definitions_count = 0;
@@ -117,18 +133,17 @@ class Oxforddictionaries extends Agent
             // Invalid query of some sort.
         }
         $json_data = json_decode($data, true);
-
         $definitions =
-            $json_data['results'][0]['lexicalEntries'][0]['entries'][0][
-                'senses'
+            $json_data["results"][0]["lexicalEntries"][0]["entries"][0][
+                "senses"
             ];
 
         $count = 0;
         foreach ($definitions as $id => $definition) {
-            if (!isset($definition['definitions'][0])) {
+            if (!isset($definition["definitions"][0])) {
                 continue;
             }
-            $this->definitions[] = $definition['definitions'][0];
+            $this->definitions[] = $definition["definitions"][0];
             $count += 1;
         }
 
@@ -150,22 +165,22 @@ class Oxforddictionaries extends Agent
         $this->thing->flagGreen();
 
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         $this->flag = "green";
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        //$this->thing_report['email'] = $this->sms_message;
+        //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $this->thingreportOxforddictionaries();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-        $this->thing_report['help'] =
-            'This triggers provides currency prices using the 1forge API.';
+        $this->thing_report["help"] =
+            "This triggers provides currency prices using the 1forge API.";
     }
 
     public function makeWeb()
@@ -179,7 +194,7 @@ class Oxforddictionaries extends Agent
             foreach ($this->events as $id => $event) {
                 $event_html = $this->eventString($event);
 
-                $link = $event['link'];
+                $link = $event["link"];
                 $html_link = '<a href="' . $link . '">';
                 //        $web .= $this->html_image;
                 $html_link .= "oxford dictionaries";
@@ -221,13 +236,12 @@ class Oxforddictionaries extends Agent
 
         // Really need to refactor this double :/
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function makeMessage()
     {
         $message = "Oxford Dictionaries";
-
         switch ($this->definitions_count) {
             case 0:
                 $message .= " did not find any definitions.";
@@ -243,14 +257,14 @@ class Oxforddictionaries extends Agent
 
         $this->message = $message;
     }
-
+    /*
     private function thingreportOxforddictionaries()
     {
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['web'] = $this->html_message;
         $this->thing_report['message'] = $this->message;
     }
-
+*/
     public function readSubject()
     {
         $this->num_hits = 0;
@@ -266,7 +280,7 @@ class Oxforddictionaries extends Agent
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'oxforddictionaries') {
+            if ($input == "oxforddictionaries") {
                 //$this->search_words = null;
                 $this->response .= "Asked Oxford Dicionaries about nothing. ";
                 return;
