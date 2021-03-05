@@ -158,7 +158,7 @@ class Year extends Agent
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-        return $this->thing_report;
+//        return $this->thing_report;
     }
 
     /**

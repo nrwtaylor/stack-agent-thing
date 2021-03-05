@@ -71,7 +71,6 @@ class Item extends Agent
             ],
         ];
 
-//        $items = require '/var/www/stackr.test/resources/item/items.php';
         $items = require $this->resource_path .'item/items.php';
 
         $this->addItems($items, false);

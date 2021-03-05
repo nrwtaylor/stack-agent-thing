@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -11,12 +11,11 @@ ini_set("allow_url_fopen", 1);
 
 class ACP125G extends Agent
 {
-	public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
-
-        $this->node_list = array("acp125g"=>array("acp125g"));
+        $this->node_list = ["acp125g" => ["acp125g"]];
 
         $this->unit = "FUEL";
 
@@ -24,36 +23,41 @@ class ACP125G extends Agent
 
         $this->getNuuid();
 
-        $this->character = new Character($this->thing, "character is Rocket J. Squirrel");
+        $this->character = new Character(
+            $this->thing,
+            "character is Rocket J. Squirrel"
+        );
 
         // Get the remaining persistence of the message.
         $agent = new Persistence($this->thing, "persistence 60 minutes");
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        if (
-            isset($this->thing->container['stack']['font'])
-        ) {
-            $this->font =
-                $this->thing->container['stack']['font'];
+        if (isset($this->thing->container["stack"]["font"])) {
+            $this->font = $this->thing->container["stack"]["font"];
         }
 
-        $this->variable = new Variables($this->thing, "variables acp125g " . $this->from);
+        $this->variable = new Variables(
+            $this->thing,
+            "variables acp125g " . $this->from
+        );
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/acp125g';
-	}
+        $this->link = $this->web_prefix . "thing/" . $this->uuid . "/acp125g";
+    }
 
     function isACP125G($state = null)
     {
-
         if ($state == null) {
-            if (!isset($this->state)) {$this->state = "easy";}
+            if (!isset($this->state)) {
+                $this->state = "easy";
+            }
 
             $state = $this->state;
         }
 
-        if (($state == "easy") or ($state == "hard")
-            ) {return false;}
+        if ($state == "easy" or $state == "hard") {
+            return false;
+        }
 
         return true;
     }
@@ -62,14 +66,17 @@ class ACP125G extends Agent
     {
         $this->thing->json->setField("variables");
 
-        $this->thing->json->writeVariable( array("acp125g", "inject"), $this->inject );
+        $this->thing->json->writeVariable(["acp125g", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
 
         $this->variable->setVariable("state", $this->state);
         $this->variable->setVariable("refreshed_at", $this->current_time);
 
-        $this->thing->log($this->agent_prefix . 'set ACP 125(G) to ' . $this->state, "INFORMATION");
+        $this->thing->log(
+            $this->agent_prefix . "set ACP 125(G) to " . $this->state,
+            "INFORMATION"
+        );
     }
 
     function get()
@@ -78,7 +85,10 @@ class ACP125G extends Agent
 
         $this->refreshed_at = $this->variable->getVariable("refreshed_at");
 
-        $this->thing->log($this->agent_prefix . 'got from db ' . $this->previous_state, "INFORMATION");
+        $this->thing->log(
+            $this->agent_prefix . "got from db " . $this->previous_state,
+            "INFORMATION"
+        );
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
@@ -92,20 +102,32 @@ class ACP125G extends Agent
             $this->state = $this->default_state;
         }
 
-        $this->thing->log($this->agent_prefix . 'got a ' . strtoupper($this->state) . ' FLAG.' , "INFORMATION");
+        $this->thing->log(
+            $this->agent_prefix .
+                "got a " .
+                strtoupper($this->state) .
+                " FLAG.",
+            "INFORMATION"
+        );
 
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("acp125g", "refreshed_at") );
+        $time_string = $this->thing->json->readVariable([
+            "acp125g",
+            "refreshed_at",
+        ]);
 
         if ($time_string == false) {
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("acp125g", "refreshed_at"), $time_string );
+            $this->thing->json->writeVariable(
+                ["acp125g", "refreshed_at"],
+                $time_string
+            );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable( array("acp125g", "inject") );
+        $this->inject = $this->thing->json->readVariable(["acp125g", "inject"]);
     }
 
     function getNuuid()
@@ -122,29 +144,28 @@ class ACP125G extends Agent
 
     function getQuickresponse($text = null)
     {
-//        if ($text == null) {$text = $this->web_prefix;}
-//        $agent = new Qr($this->thing, $text);
-//        $this->quick_response_png = $agent->PNG_embed;
+        //        if ($text == null) {$text = $this->web_prefix;}
+        //        $agent = new Qr($this->thing, $text);
+        //        $this->quick_response_png = $agent->PNG_embed;
         $this->qr_agent = new Qr($this->thing, $this->link);
         $this->quick_response_png = $this->qr_agent->PNG_embed;
         $this->html_image = $this->qr_agent->html_image;
-
     }
-
 
     function setState($state)
     {
         $this->state = "easy";
-        if ((strtolower($state) == "hard") or (strtolower($state) == "easy")) {
+        if (strtolower($state) == "hard" or strtolower($state) == "easy") {
             $this->state = $state;
         }
     }
 
     function getState()
     {
-        if (!isset($this->state)) {$this->state = "easy";}
+        if (!isset($this->state)) {
+            $this->state = "easy";
+        }
         return $this->state;
-
     }
 
     function setBank($bank = null)
@@ -158,9 +179,8 @@ class ACP125G extends Agent
         //}
 
         //if ($bank == "16ln") {
-            $this->bank = "16ln-a02";
+        $this->bank = "16ln-a02";
         //}
-
     }
 
     function getBank()
@@ -169,22 +189,21 @@ class ACP125G extends Agent
             $this->bank = "16ln-a02";
         }
 
-        if (isset($this->inject) and ($this->inject != false)) {
-            $arr = explode("-",$this->inject);
+        if (isset($this->inject) and $this->inject != false) {
+            $arr = explode("-", $this->inject);
             $this->bank = $arr[0] . "-" . $arr[1];
         }
         return $this->bank;
     }
 
-	public function respondResponse()
+    public function respondResponse()
     {
-
         $this->getResponse();
 
-		$this->thing->flagGreen();
+        $this->thing->flagGreen();
 
-		$to = $this->thing->from;
-		$from = "acp125g";
+        $to = $this->thing->from;
+        $from = "acp125g";
 
         //$this->makePNG();
 
@@ -194,84 +213,126 @@ class ACP125G extends Agent
         // $this->makeTXT();
         $this->makeChoices();
 
- 		$this->thing_report["info"] = "This creates an exercise message.";
- 		$this->thing_report["help"] = 'Try CHARLEY. Or NONSENSE.';
+        $this->thing_report["info"] = "This creates an exercise message.";
+        $this->thing_report["help"] = "Try CHARLEY. Or NONSENSE.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
         //$this->makeWeb();
 
         //$this->makeTXT();
         //$this->makePDF();
-	}
+    }
 
-    function makeChoices ()
+    function makeChoices()
     {
-       $this->thing->choice->Create($this->agent_name, $this->node_list, "acp125g");
-       $this->choices = $this->thing->choice->makeLinks('acp125g');
+        $this->thing->choice->Create(
+            $this->agent_name,
+            $this->node_list,
+            "acp125g"
+        );
+        $this->choices = $this->thing->choice->makeLinks("acp125g");
 
-       $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     function makeSMS()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/acp125g.txt';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/acp125g.txt";
 
         $sms = "ACP 125(G) " . $this->inject . " > \n";
-//        $sms .= $this->short_message . "\n" . $this->response;
+        //        $sms .= $this->short_message . "\n" . $this->response;
         $sms .= $this->line_12 . " " . $link . "\n" . $this->response;
 
-
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeACP125G($message = null)
     {
-        if ($message === null) {return true;}
-        if (!isset($message['station_destination'])) {$message['station_destination']="X";}
+        if ($message === null) {
+            return true;
+        }
+        if (!isset($message["station_destination"])) {
+            $message["station_destination"] = "X";
+        }
 
         $sms = "ACP 125(G) " . $this->inject . " > \n";
         $line[1] = "."; // not used
-        $line[2] = $message['station_destination'];
-        $line[3] = "DE " . $message['station_origin'] . " " . $message['place_filed'];
-        $line[4] = $message['number'];
-        $line[5] = $message['precedence'] . " " . $message['date_filed'] . " " . $message['time_filed'];
-        $line[6] = $message['name_from'] ."/" . $message['name_from'] ."/" .$message['organization_from'] ."/" . $message['number_from'];
-        $line[7] = $message['name_to'] ."/" . $message['name_to'] ."/" .$message['organization_to'] ."/" . $message['number_to'];
+        $line[2] = $message["station_destination"];
+        $line[3] =
+            "DE " . $message["station_origin"] . " " . $message["place_filed"];
+        $line[4] = $message["number"];
+        $line[5] =
+            $message["precedence"] .
+            " " .
+            $message["date_filed"] .
+            " " .
+            $message["time_filed"];
+        $line[6] =
+            $message["name_from"] .
+            "/" .
+            $message["name_from"] .
+            "/" .
+            $message["organization_from"] .
+            "/" .
+            $message["number_from"];
+        $line[7] =
+            $message["name_to"] .
+            "/" .
+            $message["name_to"] .
+            "/" .
+            $message["organization_to"] .
+            "/" .
+            $message["number_to"];
 
         $line[8] = "."; // not used - information_addresses
         $line[9] = "."; // not used - exempted_addresses;
         $line[10] = "."; // accounting
         $line[11] = "BT";
-        $line[12] = $message['text'];
+        $line[12] = $message["text"];
         $line[13] = "BT";
         $line[14] = ".";
         $line[15] = ".";
         $line[16] = "NNNN";
 
         //$acp125g = "meep". " | " . $this->response;
-        $this->acp125g_message = $line[1] . "\n" .
-            $line[2] . "\n" . 
-            $line[3] . "\n" . 
-            $line[4] . "\n" . 
-            $line[5] . "\n" . 
-            $line[6] . "\n" . 
-            $line[7] . "\n" . 
-            $line[8] . "\n" . 
-            $line[9] . "\n" . 
-            $line[10] . "\n" . 
-            $line[11] . "\n" . 
-            $line[12] . "\n" . 
-            $line[13] . "\n" . 
-            $line[14] . "\n" . 
-            $line[15] . "\n" . 
-            $line[16] . "\n"; 
+        $this->acp125g_message =
+            $line[1] .
+            "\n" .
+            $line[2] .
+            "\n" .
+            $line[3] .
+            "\n" .
+            $line[4] .
+            "\n" .
+            $line[5] .
+            "\n" .
+            $line[6] .
+            "\n" .
+            $line[7] .
+            "\n" .
+            $line[8] .
+            "\n" .
+            $line[9] .
+            "\n" .
+            $line[10] .
+            "\n" .
+            $line[11] .
+            "\n" .
+            $line[12] .
+            "\n" .
+            $line[13] .
+            "\n" .
+            $line[14] .
+            "\n" .
+            $line[15] .
+            "\n" .
+            $line[16] .
+            "\n";
 
-        $this->thing_report['acp125g'] = $this->acp125g_message;
-
+        $this->thing_report["acp125g"] = $this->acp125g_message;
     }
-
 
     function getCast()
     {
@@ -281,24 +342,27 @@ class ACP125G extends Agent
         // Not used yet.  But will allow use of
         // message bank messages with scenario specific team.
 
-        $file = $this->resource_path .'/charley/charley.txt';
+        $file = $this->resource_path . "/charley/charley.txt";
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-
                 $person_name = $line;
-                $arr = explode(",",$line);
-                $name= trim($arr[0]);
-                if(isset($arr[1])) {$role = trim($arr[1]);} else {$role = "X";}
+                $arr = explode(",", $line);
+                $name = trim($arr[0]);
+                if (isset($arr[1])) {
+                    $role = trim($arr[1]);
+                } else {
+                    $role = "X";
+                }
 
                 // Unique name <> Role mappings. Check?
                 $this->name_list[$role] = $name;
                 $this->role_list[$name] = $role;
 
-                $this->cast[] = array("name"=>$name, "role"=>$role); 
+                $this->cast[] = ["name" => $name, "role" => $role];
             }
 
             fclose($handle);
@@ -309,15 +373,19 @@ class ACP125G extends Agent
 
     function getResponse()
     {
-        if (isset($this->response)) {return;}
+        if (isset($this->response)) {
+            return;
+        }
     }
 
     function getMember()
     {
-        if (isset($this->member)) {return;}
+        if (isset($this->member)) {
+            return;
+        }
 
         // Load in the cast. And roles.
-        $file = $this->resource_path .'/vector/members.txt';
+        $file = $this->resource_path . "/vector/members.txt";
         $contents = file_get_contents($file);
 
         $handle = fopen($file, "r");
@@ -326,28 +394,103 @@ class ACP125G extends Agent
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-                $arr = explode(",",$line);
+                $arr = explode(",", $line);
                 $member_call_sign = trim($arr[0]);
                 $member_sms = trim($arr[1]);
 
                 if ($this->from == $member_sms) {
-                    $this->member['call_sign'] = $member_call_sign;
-                    $this->member['sms'] = $member_sms;
+                    $this->member["call_sign"] = $member_call_sign;
+                    $this->member["sms"] = $member_sms;
                     return;
                 }
-
             }
         }
 
-        if (!isset($this->member['call_sign'])) {
-            $this->member['call_sign'] = "ROCKY";
-            $this->member['sms'] = "(XXX) XXX-XXXX";
+        if (!isset($this->member["call_sign"])) {
+            $this->member["call_sign"] = "ROCKY";
+            $this->member["sms"] = "(XXX) XXX-XXXX";
         }
+    }
+
+    function saveACP125G($message, $resource = null, $bank = null)
+    {
+        // TODO Write ACP125G format message to text file.
+        //        $resource = "/rocky/messages";
+        //        $bank = "rocky-librex-wikipedia-test";
+        $filename = $resource . "-" . $bank . ".txt";
+
+        $file = $this->resource_path . $filename;
+
+        file_put_contents($file, $message, FILE_APPEND | LOCK_EX);
+    }
+
+    function loadACP125G()
+    {
+        $this->getMessages();
+    }
+
+    function linesACP125G($message)
+    {
+        $lines = [];
+        $lines["line_1"] = ".";
+        $lines["line_13"] = "BT";
+        $lines["line_11"] = "BT";
+        $from_array["name_from"] = $message["name_from"];
+        $from_array["position_from"] = $message["position_from"];
+        $from_array["organization_from"] = $message["organization_from"];
+
+        $from = implode(" / ", $from_array);
+        $lines["line_6"] = $from;
+
+        $to_array["name_to"] = $message["name_to"];
+        $to_array["position_to"] = $message["position_to"];
+        $to_array["organization_to"] = $message["organization_to"];
+        $to_array["number_to"] = $message["number_to"];
+
+        $to = implode(" / ", $to_array);
+        $lines["line_7"] = $to;
+
+        isset($message["text"])
+            ? ($lines["line_12"] = $message["text"])
+            : ($lines["line_12"] = null);
+
+        isset($message["number"])
+            ? ($lines["line_4"] = $message["number"])
+            : ($lines["line_4"] = null);
+        isset($message["precedence"])
+            ? ($lines["line_5"] = $message["precedence"])
+            : ($lines["line_5"] = null);
+
+        $this->message["hx"] = null; // Not used?
+
+        isset($message["station_origin"])
+            ? ($lines["line_3"] = $message["station_origin"])
+            : ($lines["line_3"] = null);
+        isset($message["station_destination"])
+            ? ($lines["line_2"] = $message["station_destination"])
+            : ($lines["line_2"] = null);
+
+        $this->message["check"] = null;
+        $this->message["place_filed"] = null;
+        $this->message["time_filed"] = $this->message["line_5"];
+        $this->message["date_filed"] = $this->message["line_5"];
+
+        $l = [];
+        foreach (range(1, 16) as $i) {
+            if (!isset($lines["line_" . $i])) {
+                $l["line_" . $i] = "";
+                continue;
+            }
+            $l["line_" . $i] = $lines["line_" . $i];
+        }
+        return $l;
     }
 
     function getMessages()
     {
-        if (isset($this->messages)) {return;}
+        if (isset($this->messages)) {
+            return;
+        }
 
         // Load in the name of the message bank.
         $this->getBank();
@@ -368,29 +511,32 @@ class ACP125G extends Agent
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
+                $line = trim($line);
 
-            $line = trim($line);
+                $count += 1;
 
-            $count += 1;
+                if ($line == "---") {
+                    $line_count = count($message) - 1;
 
-            if ($line == "---") {
+                    if ($bank_info == null) {
+                        $this->title = $message[1];
+                        $this->author = $message[2];
+                        $this->date = $message[3];
+                        $this->version = $message[4];
 
-                $line_count = count($message) - 1;
+                        $count = 0;
+                        $message = null;
 
-                if ($bank_info == null) {
-                    $this->title = $message[1];
-                    $this->author = $message[2];
-                    $this->date = $message[3];
-                    $this->version = $message[4];
+                        $bank_info = [
+                            "title" => $this->title,
+                            "author" => $this->author,
+                            "date" => $this->date,
+                            "version" => $this->version,
+                        ];
+                        continue;
+                    }
 
-                    $count = 0;
-                    $message = null;
-
-                    $bank_info = array("title"=>$this->title, "author"=>$this->author, "date"=>$this->date, "version"=>$this->version);
-                    continue;
-                }
-
-/*
+                    /*
                 if ($line_count == 10) {
                 // recognize as J-format
 
@@ -419,44 +565,38 @@ class ACP125G extends Agent
                 $this->messages[] = $message_array;
                 }
 */
-        if ($line_count == 16) {
+                    if ($line_count == 16) {
+                        $line = [];
 
-                $line = array();
+                        $message_array = [
+                            "line_1" => $message[1],
+                            "line_2" => $message[2],
+                            "line_3" => $message[3],
+                            "line_4" => $message[4],
+                            "line_5" => $message[5],
+                            "line_6" => $message[6],
+                            "line_7" => $message[7],
+                            "line_8" => $message[8],
+                            "line_9" => $message[9],
+                            "line_10" => $message[10],
+                            "line_11" => $message[11],
+                            "line_12" => $message[12],
+                            "line_13" => $message[13],
+                            "line_14" => $message[14],
+                            "line_15" => $message[15],
+                            "line_16" => $message[16],
+                        ];
 
-                $message_array = array("line_1"=>$message[1],
-                    "line_2"=>$message[2],
-                    "line_3"=>$message[3],
-                    "line_4"=>$message[4],
-                    "line_5"=>$message[5],
-                    "line_6"=>$message[6],
-                    "line_7"=>$message[7],
-                    "line_8"=>$message[8],
-                    "line_9"=>$message[9],
-                    "line_10"=>$message[10],
-                    "line_11"=>$message[11],
-                    "line_12"=>$message[12],
-                    "line_13"=>$message[13],
-                    "line_14"=>$message[14],
-                    "line_15"=>$message[15],
-                    "line_16"=>$message[16]
-                );
+                        $this->messages[] = $message_array;
+                    }
 
-                $this->messages[] = $message_array;
-        }
+                    $count = 0;
+                    $message = null;
+                    //}
+                }
 
-
-
-
-                $count = 0;
-                $message = null;
-                //}
+                $message[] = $line;
             }
-
-
-            $message[] = $line;
-
-
-        }
 
             fclose($handle);
         } else {
@@ -468,9 +608,9 @@ class ACP125G extends Agent
     {
         $this->getMessages();
 
-        if ((!isset($this->inject)) or ($this->inject == false)) {
+        if (!isset($this->inject) or $this->inject == false) {
             $this->num = array_rand($this->messages);
-            $this->inject = $this->bank . "-" .$this->num; 
+            $this->inject = $this->bank . "-" . $this->num;
         }
 
         if ($this->inject == null) {
@@ -479,12 +619,11 @@ class ACP125G extends Agent
 
             $this->inject = $this->bank . "-" . $this->num;
         } else {
-            $arr = explode("-",$this->inject);
+            $arr = explode("-", $this->inject);
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }
- 
-   }
+    }
 
     function getMessage()
     {
@@ -494,82 +633,193 @@ class ACP125G extends Agent
 
         $this->message = $this->messages[$this->num];
 
-        $this->line_1 = $this->message['line_1'];
-        $this->line_2 = $this->message['line_2'];
-        $this->line_3 = $this->message['line_3'];
-        $this->line_4 = $this->message['line_4'];
-        $this->line_5 = $this->message['line_5'];
-        $this->line_6 = $this->message['line_6'];
-        $this->line_7 = $this->message['line_7'];
-        $this->line_8 = $this->message['line_8'];
-        $this->line_9 = $this->message['line_9'];
-        $this->line_10 = $this->message['line_10'];
-        $this->line_11 = $this->message['line_11'];
-        $this->line_12 = $this->message['line_12'];
-        $this->line_13 = $this->message['line_13'];
-        $this->line_14 = $this->message['line_14'];
-        $this->line_15 = $this->message['line_15'];
-        $this->line_16 = $this->message['line_16'];
+        $this->line_1 = $this->message["line_1"];
+        $this->line_2 = $this->message["line_2"];
+        $this->line_3 = $this->message["line_3"];
+        $this->line_4 = $this->message["line_4"];
+        $this->line_5 = $this->message["line_5"];
+        $this->line_6 = $this->message["line_6"];
+        $this->line_7 = $this->message["line_7"];
+        $this->line_8 = $this->message["line_8"];
+        $this->line_9 = $this->message["line_9"];
+        $this->line_10 = $this->message["line_10"];
+        $this->line_11 = $this->message["line_11"];
+        $this->line_12 = $this->message["line_12"];
+        $this->line_13 = $this->message["line_13"];
+        $this->line_14 = $this->message["line_14"];
+        $this->line_15 = $this->message["line_15"];
+        $this->line_16 = $this->message["line_16"];
 
-        $this->short_message = $this->line_1 . "\n" .
-            $this->line_2 . "\n" .
-            $this->line_3 . "\n" .
-            $this->line_4 . "\n" .
-            $this->line_5 . "\n" .
-            $this->line_6 . "\n" .
-            $this->line_7 . "\n" .
-            $this->line_8 . "\n" .
-            $this->line_9 . "\n" .
-            $this->line_10 . "\n" .
-            $this->line_11. "\n" .
-            $this->line_12 . "\n" .
-            $this->line_13 . "\n" .
-            $this->line_14 . "\n" .
-            $this->line_15 . "\n" . 
-            $this->line_16 . "\n";
+        $this->short_message =
+            $this->line_1 .
+            "\n" .
+            $this->line_2 .
+            "\n" .
+            $this->line_3 .
+            "\n" .
+            $this->line_4 .
+            "\n" .
+            $this->line_5 .
+            "\n" .
+            $this->line_6 .
+            "\n" .
+            $this->line_7 .
+            "\n" .
+            $this->line_8 .
+            "\n" .
+            $this->line_9 .
+            "\n" .
+            $this->line_10 .
+            "\n" .
+            $this->line_11 .
+            "\n" .
+            $this->line_12 .
+            "\n" .
+            $this->line_13 .
+            "\n" .
+            $this->line_14 .
+            "\n" .
+            $this->line_15 .
+            "\n" .
+            $this->line_16 .
+            "\n";
 
-        $from = explode("/", $this->message['line_6']);
-        $this->message['name_from'] = $from[0];
-        $this->message['position_from'] = $from[1];
-        $this->message['organization_from'] = $from[2];
-        $this->message['number_from'] = "X";
-        if(isset($from[3])) {$this->message['number_from'] = $from[3];}
+        $from = explode("/", $this->message["line_6"]);
+        $this->message["name_from"] = $from[0];
+        $this->message["position_from"] = $from[1];
+        $this->message["organization_from"] = $from[2];
+        $this->message["number_from"] = "X";
+        if (isset($from[3])) {
+            $this->message["number_from"] = $from[3];
+        }
 
-        $to = explode("/", $this->message['line_7']);
+        $to = explode("/", $this->message["line_7"]);
 
-        $this->message['name_to'] = $to[0];
-        $this->message['position_to'] = $to[1];
-        $this->message['organization_to'] = $to[2];
-        $this->message['number_to'] = "X";
-        if(isset($to[3])) {$this->message['number_to'] = $to[3];}
+        $this->message["name_to"] = $to[0];
+        $this->message["position_to"] = $to[1];
+        $this->message["organization_to"] = $to[2];
+        $this->message["number_to"] = "X";
+        if (isset($to[3])) {
+            $this->message["number_to"] = $to[3];
+        }
 
-        $this->message['text'] = $this->message['line_12'];
+        $this->message["text"] = $this->message["line_12"];
 
-        $this->message['number'] = $this->message['line_4'];
-        $this->message['precedence'] = $this->message['line_5'];
-        $this->message['hx'] = null; // Not used?
-        $this->message['station_origin'] = $this->message['line_3'];
-        $this->message['station_destination'] = $this->message['line_2'];
+        $this->message["number"] = $this->message["line_4"];
+        $this->message["precedence"] = $this->message["line_5"];
+        $this->message["hx"] = null; // Not used?
+        $this->message["station_origin"] = $this->message["line_3"];
+        $this->message["station_destination"] = $this->message["line_2"];
 
-        $this->message['check'] = null;
-        $this->message['place_filed'] = null;
-        $this->message['time_filed'] = $this->message['line_5'];
-        $this->message['date_filed'] = $this->message['line_5'];
+        $this->message["check"] = null;
+        $this->message["place_filed"] = null;
+        $this->message["time_filed"] = $this->message["line_5"];
+        $this->message["date_filed"] = $this->message["line_5"];
+    }
+
+    // dev test
+    function stripprefixText($text, $prefix)
+    {
+        if (substr($text, 0, strlen($prefix)) == $prefix) {
+            $text = substr($text, strlen($prefix));
+        }
+        return $text;
+    }
+
+    function parseACP125G($text)
+    {
+        if (!is_array($text)) {
+            $lines = explode("\n", $text);
+        }
+        if (is_array($text)) {
+            $lines = $text;
+        }
+        foreach (range(1, 16) as $i) {
+            $lines[$i] = isset($lines["line_" . $i])
+                ? $lines["line_" . $i]
+                : $lines[$i];
+        }
+
+        $lines[6] = isset($lines["line_6"]) ? $lines["line_6"] : $lines[6];
+        $from = explode("/", $lines[6]);
+
+        $message["name_from"] = $from[0];
+
+        $message["name_from"] = $this->stripprefixText(
+            $message["name_from"],
+            "FROM "
+        );
+        $message["name_from"] = $this->stripprefixText(
+            $message["name_from"],
+            "FM "
+        );
+
+        $message["position_from"] = $from[1];
+        $message["organization_from"] = $from[2];
+        $message["number_from"] = "X";
+        if (isset($from[3])) {
+            $message["number_from"] = $from[3];
+        }
+
+        $to = explode("/", $lines[7]);
+
+        $message["name_to"] = $to[0];
+
+        if ($message["name_to"] == "TO .") {
+            $message["name_to"] = "";
+        }
+        $message["name_to"] = $this->stripprefixText(
+            $message["name_to"],
+            "TO "
+        );
+
+        $message["position_to"] = $to[1];
+        $message["organization_to"] = $to[2];
+        $message["number_to"] = "X";
+        if (isset($to[3])) {
+            $message["number_to"] = $to[3];
+        }
+
+        $message["text"] = $lines[12];
+
+        $message["number"] = $lines[4];
+        $message["precedence"] = $lines[5];
+        $message["hx"] = null; // Not used?
+        $message["station_origin"] = $lines[3];
+        $message["station_destination"] = $lines[2];
+
+        $message["check"] = null;
+        $message["place_filed"] = null;
+        $message["time_filed"] = $lines[5];
+        $message["date_filed"] = $lines[5];
+
+        $message["meta"] = implode(" / ", [
+            $message["number"],
+            $message["precedence"],
+            $message["hx"],
+            $message["station_origin"],
+            $message["check"],
+            $message["place_filed"],
+            $message["time_filed"],
+            $message["date_filed"],
+        ]);
+
+        return $message;
     }
 
     function makeMessage()
     {
         $message = $this->short_message . "<br>";
         $uuid = $this->uuid;
-        $message .= "<p>" . $this->web_prefix . "thing/$uuid/acp125g\n \n\n<br> ";
-        $this->thing_report['message'] = $message;
+        $message .=
+            "<p>" . $this->web_prefix . "thing/$uuid/acp125g\n \n\n<br> ";
+        $this->thing_report["message"] = $message;
     }
 
     function getBar()
     {
         $this->bar = new Bar($this->thing, "display");
     }
-
 
     function setInject()
     {
@@ -581,18 +831,21 @@ class ACP125G extends Agent
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/acp125g';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/acp125g";
 
-        $this->node_list = array("acp125g"=>array("acp125g", "rocky", "bullwinkle","charley"));
+        $this->node_list = [
+            "acp125g" => ["acp125g", "rocky", "bullwinkle", "charley"],
+        ];
         // Make buttons
         //$this->thing->choice->Create($this->agent_name, $this->node_list, "rocky");
         //$choices = $this->thing->choice->makeLinks('rocky');
 
-        if (!isset($this->html_image)) {$this->makePNG();}
+        if (!isset($this->html_image)) {
+            $this->makePNG();
+        }
 
         $web = "<b>ACP 125(G) Agent</b>";
         $web .= "<p>";
-
 
         //$web .= '<a href="' . $link . '">'. $this->html_image . "</a>";
         //$web .= "<br>";
@@ -604,7 +857,6 @@ class ACP125G extends Agent
         $web .= $this->author . "<br>";
         $web .= $this->date . "<br>";
         $web .= $this->version . "<br>";
-
 
         $web .= "<p>";
 
@@ -619,90 +871,98 @@ class ACP125G extends Agent
         $web .= "Parsed inject";
         $web .= "<p>";
 
-
-        $web .= "# " . $this->message['number'] . "<br>";
-        $web .= "PRECEDENCE " . $this->message['precedence'] . "<br>";
-        $web .= "HX " .  $this->message['hx'] . "<br>"; // Not used?
-        $web .= "STATION ORIGIN " . $this->message['station_origin'] . "<br>";
-        $web .= "CHECKSUM " .$this->message['check'] . "<br>";
-        $web .= "PLACE FILED " . $this->message['place_filed'] . "<br>";
-        $web .= "TIME FILED " . $this->message['time_filed'] . "<br>";
-        $web .= "DATE FILED " . $this->message['date_filed'] . "<br>";
-
-        $web .= "<p>";
-
-        $web .= "TO (NAME) " . $this->message['name_to'] . "<br>";
-        $web .= "TO (POSITION) " . $this->message['position_to'] . "<br>";
-        $web .= "TO (ORGANIZATION) " . $this->message['organization_to'] . "<br>";
-        $web .= "TO (NUMBER) " . $this->message['number_to'] . "<br>";
+        $web .= "# " . $this->message["number"] . "<br>";
+        $web .= "PRECEDENCE " . $this->message["precedence"] . "<br>";
+        $web .= "HX " . $this->message["hx"] . "<br>"; // Not used?
+        $web .= "STATION ORIGIN " . $this->message["station_origin"] . "<br>";
+        $web .= "CHECKSUM " . $this->message["check"] . "<br>";
+        $web .= "PLACE FILED " . $this->message["place_filed"] . "<br>";
+        $web .= "TIME FILED " . $this->message["time_filed"] . "<br>";
+        $web .= "DATE FILED " . $this->message["date_filed"] . "<br>";
 
         $web .= "<p>";
 
-        $web .= $this->message['text'] . "<br>";
+        $web .= "TO (NAME) " . $this->message["name_to"] . "<br>";
+        $web .= "TO (POSITION) " . $this->message["position_to"] . "<br>";
+        $web .=
+            "TO (ORGANIZATION) " . $this->message["organization_to"] . "<br>";
+        $web .= "TO (NUMBER) " . $this->message["number_to"] . "<br>";
 
         $web .= "<p>";
 
-        $web .= "FROM (NAME) " . $this->message['name_from'] . "<br>";
-        $web .= "FROM (POSITION) " . $this->message['position_from'] . "<br>";
-        $web .= "FROM (ORGANIZATION) " . $this->message['organization_from'] . "<br>";
-        $web .= "FROM (NUMBER) " . $this->message['number_from'] . "<br>";
+        $web .= $this->message["text"] . "<br>";
 
+        $web .= "<p>";
 
-//        $web .= "<p>";
-//        $web .= "SMS inject";
-//        $web .= "<p>";
+        $web .= "FROM (NAME) " . $this->message["name_from"] . "<br>";
+        $web .= "FROM (POSITION) " . $this->message["position_from"] . "<br>";
+        $web .=
+            "FROM (ORGANIZATION) " .
+            $this->message["organization_from"] .
+            "<br>";
+        $web .= "FROM (NUMBER) " . $this->message["number_from"] . "<br>";
 
+        //        $web .= "<p>";
+        //        $web .= "SMS inject";
+        //        $web .= "<p>";
 
-//        $web .= nl2br($this->short_message) . "<br>";
-
+        //        $web .= nl2br($this->short_message) . "<br>";
 
         $web .= "<p>";
         $web .= "PDF inject";
         $web .= "<p>";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/acp125g.pdf';
-        $web .= '<a href="' . $link . '">'. $link . "</a>";
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/acp125g.pdf";
+        $web .= '<a href="' . $link . '">' . $link . "</a>";
         $web .= "<br>";
         $web .= "<p>";
 
-if (isset($this->thing->thing->created_at)) {
-        $ago = $this->thing->human_time ( time() - strtotime( $this->thing->thing->created_at ) );
-        $web .= "Inject was created about ". $ago . " ago.";
-        $web .= "<p>";
-        $web .= "Inject " . $this->thing->nuuid . " generated at " . $this->thing->thing->created_at. "\n";
+        if (isset($this->thing->thing->created_at)) {
+            $ago = $this->thing->human_time(
+                time() - strtotime($this->thing->thing->created_at)
+            );
+            $web .= "Inject was created about " . $ago . " ago.";
+            $web .= "<p>";
+            $web .=
+                "Inject " .
+                $this->thing->nuuid .
+                " generated at " .
+                $this->thing->thing->created_at .
+                "\n";
 
-        $togo = $this->thing->human_time($this->time_remaining);
-        $web .= " and will expire in " . $togo. ".<br>";
+            $togo = $this->thing->human_time($this->time_remaining);
+            $web .= " and will expire in " . $togo . ".<br>";
+
+            $web .= "<br>";
+        }
+        $web .=
+            "This proof-of-concept inject is hosted by the " .
+            ucwords($this->word) .
+            " service.  Read the privacy policy at " .
+            $this->web_prefix .
+            "privacy";
 
         $web .= "<br>";
-}
-        $web .= "This proof-of-concept inject is hosted by the " . ucwords($this->word) . " service.  Read the privacy policy at " . $this->web_prefix . "privacy";
 
-        $web .= "<br>";
-
-        $this->thing_report['web'] = $web;
-
-
+        $this->thing_report["web"] = $web;
     }
 
     function makeTXT()
     {
         $txt = "ACP 125(G) traffic.\n";
-        $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
+        $txt .= "Duplicate messages may exist. Can you de-duplicate?";
         $txt .= "\n";
 
         $txt .= $this->short_message;
 
         $txt .= "\n";
 
-
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
     public function makePNG()
     {
-
         $this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
@@ -721,50 +981,83 @@ if (isset($this->thing->thing->created_at)) {
 
         // Write the string at the top left
         $border = 30;
-        $radius = 1.165 * (164 - 2 * $border) / 3;
-
-
+        $radius = (1.165 * (164 - 2 * $border)) / 3;
 
         // devstack add path
         $font = $this->default_font;
-if (file_exists($font)) {
-        $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
-        $text = "INJET";
-        $text = $this->message['text'];
+        if (file_exists($font)) {
+            $text = "EXERCISE EXERCISE EXERCISE WELFARE TEST ROCKY 5";
+            $text = "INJET";
+            $text = $this->message["text"];
 
-        if (!isset($this->bar)) {$this->getBar();}
+            if (!isset($this->bar)) {
+                $this->getBar();
+            }
 
-        $bar_count = $this->bar->bar_count;
+            $bar_count = $this->bar->bar_count;
 
-        // Add some shadow to the text
+            // Add some shadow to the text
 
-        imagettftext($this->image, 40 , 0, 0 - $this->bar->bar_count*5, 75, $this->grey, $font, $text);
+            imagettftext(
+                $this->image,
+                40,
+                0,
+                0 - $this->bar->bar_count * 5,
+                75,
+                $this->grey,
+                $font,
+                $text
+            );
 
-        $size = 72;
-        $angle = 0;
-        $bbox = imagettfbbox ($size, $angle, $font, $text); 
-        $bbox["left"] = 0- min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-        $bbox["top"] = 0- min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-        $bbox["width"] = max($bbox[0],$bbox[2],$bbox[4],$bbox[6]) - min($bbox[0],$bbox[2],$bbox[4],$bbox[6]); 
-        $bbox["height"] = max($bbox[1],$bbox[3],$bbox[5],$bbox[7]) - min($bbox[1],$bbox[3],$bbox[5],$bbox[7]); 
-        extract ($bbox, EXTR_PREFIX_ALL, 'bb'); 
-        //check width of the image 
-        $width = imagesx($this->image); 
-        $height = imagesy($this->image);
-        $pad = 0;
+            $size = 72;
+            $angle = 0;
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
+            //check width of the image
+            $width = imagesx($this->image);
+            $height = imagesy($this->image);
+            $pad = 0;
 
-        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $textcolor, $font, $this->message['station_origin']);
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + $bb_height / 2,
+                $textcolor,
+                $font,
+                $this->message["station_origin"]
+            );
 
-        $size = 10;
+            $size = 10;
 
-        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height*4/5, $textcolor, $font, $this->message['station_origin']);
-}
+            imagettftext(
+                $this->image,
+                $size,
+                $angle,
+                $width / 2 - $bb_width / 2,
+                $height / 2 + ($bb_height * 4) / 5,
+                $textcolor,
+                $font,
+                $this->message["station_origin"]
+            );
+        }
 
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
         // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
-        if (ob_get_contents()) ob_clean();
+        if (ob_get_contents()) {
+            ob_clean();
+        }
 
         ob_start();
         imagepng($this->image);
@@ -772,13 +1065,16 @@ if (file_exists($font)) {
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
-        $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="snowflake"/>';
+        $response =
+            '<img src="data:image/png;base64,' .
+            base64_encode($imagedata) .
+            '"alt="snowflake"/>';
 
-        $this->PNG_embed = "data:image/png;base64,".base64_encode($imagedata);
+        $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
 
-         $this->PNG = $imagedata;
+        $this->PNG = $imagedata;
 
         $this->html_image = $response;
 
@@ -788,7 +1084,7 @@ if (file_exists($font)) {
     function extractNuuid($input)
     {
         if (!isset($this->duplicables)) {
-            $this->duplicables = array();
+            $this->duplicables = [];
         }
 
         return $this->duplicables;
@@ -796,53 +1092,54 @@ if (file_exists($font)) {
 
     public function makePDF()
     {
-        $file = $this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf';
+        $file = $this->resource_path . "percs/PERCS_Message_Form_Ver1.4.pdf";
         if (!file_exists($file)) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf'];
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
-
-        $txt = $this->thing_report['txt'];
+        $txt = $this->thing_report["txt"];
 
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
-
         // http://www.percs.bc.ca/wp-content/uploads/2014/06/PERCS_Message_Form_Ver1.4.pdf
-        $pdf->setSourceFile($this->resource_path . 'percs/PERCS_Message_Form_Ver1.4.pdf');
-        $pdf->SetFont('Helvetica','',10);
+        $pdf->setSourceFile(
+            $this->resource_path . "percs/PERCS_Message_Form_Ver1.4.pdf"
+        );
+        $pdf->SetFont("Helvetica", "", 10);
 
-        $tplidx1 = $pdf->importPage(1, '/MediaBox');
+        $tplidx1 = $pdf->importPage(1, "/MediaBox");
 
         $s = $pdf->getTemplatesize($tplidx1);
 
-        $pdf->addPage($s['orientation'], $s);
+        $pdf->addPage($s["orientation"], $s);
         // $pdf->useTemplate($tplidx1,0,0,215);
         $pdf->useTemplate($tplidx1);
 
-        $pdf->SetTextColor(0,0,0);
+        $pdf->SetTextColor(0, 0, 0);
 
-if (isset($this->thing->thing->created_at)) {
-        $text = "Inject generated at " . $this->thing->thing->created_at. ".";
-        $pdf->SetXY(130, 10);
-        $pdf->Write(0, $text);
-}
+        if (isset($this->thing->thing->created_at)) {
+            $text =
+                "Inject generated at " . $this->thing->thing->created_at . ".";
+            $pdf->SetXY(130, 10);
+            $pdf->Write(0, $text);
+        }
 
-
-            $this->getQuickresponse($this->web_prefix . 'thing\\' . $this->uuid . '\\acp125g');
-            $pdf->Image($this->quick_response_png,199,2,10,10,'PNG');
+        $this->getQuickresponse(
+            $this->web_prefix . "thing\\" . $this->uuid . "\\acp125g"
+        );
+        $pdf->Image($this->quick_response_png, 199, 2, 10, 10, "PNG");
 
         //$pdf->SetXY(15, 20);
         //$pdf->Write(0, $this->message['text']);
 
-
         $pdf->SetXY(8, 50);
-        $pdf->Write(0, $this->message['number']);
+        $pdf->Write(0, $this->message["number"]);
 
-        switch (strtolower($this->message['precedence'])) {
-            case 'r':
-            case 'routine':
+        switch (strtolower($this->message["precedence"])) {
+            case "r":
+            case "routine":
                 $pdf->SetXY(24, 52.5);
                 $pdf->Write(0, "X");
                 break;
@@ -865,54 +1162,52 @@ if (isset($this->thing->thing->created_at)) {
         }
 
         $pdf->SetXY(30, 76);
-        $pdf->Write(0, strtoupper($this->message['name_to']));
+        $pdf->Write(0, strtoupper($this->message["name_to"]));
 
         $pdf->SetXY(30, 76 + 10);
-        $pdf->Write(0, strtoupper($this->message['position_to']));
+        $pdf->Write(0, strtoupper($this->message["position_to"]));
 
         $pdf->SetXY(30, 76 + 21);
-        $pdf->Write(0, strtoupper($this->message['organization_to']));
+        $pdf->Write(0, strtoupper($this->message["organization_to"]));
 
+        $pdf->SetXY(60 + 44, 168);
+        $pdf->Write(0, strtoupper($this->message["name_from"]));
 
-        $pdf->SetXY(60+44, 168);
-        $pdf->Write(0, strtoupper($this->message['name_from']));
+        $pdf->SetXY(60 + 44, 168 + 10);
+        $pdf->Write(0, strtoupper($this->message["position_from"]));
 
-        $pdf->SetXY(60+44, 168 + 10);
-        $pdf->Write(0, strtoupper($this->message['position_from']));
-
-        $pdf->SetXY(60+44, 168 + 21);
-        $pdf->Write(0, strtoupper($this->message['organization_from']));
+        $pdf->SetXY(60 + 44, 168 + 21);
+        $pdf->Write(0, strtoupper($this->message["organization_from"]));
 
         //$pdf->SetXY(30, 40);
         //$pdf->Write(0, $this->message['precedence']);
 
         $pdf->SetXY(50, 40);
-        $pdf->Write(0, $this->message['hx']);
+        $pdf->Write(0, $this->message["hx"]);
 
         $pdf->SetXY(80, 50);
-        $pdf->Write(0, $this->message['station_origin']);
+        $pdf->Write(0, $this->message["station_origin"]);
 
         $pdf->SetXY(112, 50);
-        $pdf->Write(0, $this->message['check']);
-
+        $pdf->Write(0, $this->message["check"]);
 
         $pdf->SetXY(123, 50);
-        $pdf->Write(0, $this->message['place_filed']);
+        $pdf->Write(0, $this->message["place_filed"]);
 
         $pdf->SetXY(166, 50);
-        $pdf->Write(0, $this->message['time_filed']);
+        $pdf->Write(0, $this->message["time_filed"]);
 
         $pdf->SetXY(181, 50);
-        $pdf->Write(0, $this->message['date_filed']);
+        $pdf->Write(0, $this->message["date_filed"]);
 
         $num_rows = 5;
         $num_columns = 5;
         $offset = 0;
-        $page =1;
+        $page = 1;
         //$i = 1;
 
-        $i =0;
-        $words = explode(" ", $this->message['text']);
+        $i = 0;
+        $words = explode(" ", $this->message["text"]);
 
         $col_offset = 59;
         $row_offset = 122;
@@ -920,78 +1215,96 @@ if (isset($this->thing->thing->created_at)) {
         $row_spacing = 9;
 
         $row = 0;
-        foreach($words as $index=>$word) {
+        foreach ($words as $index => $word) {
             $col = $index % 5;
-            $pdf->SetXY($col_offset + ($col-1) * $col_spacing, $row_offset + $row *$row_spacing);
+            $pdf->SetXY(
+                $col_offset + ($col - 1) * $col_spacing,
+                $row_offset + $row * $row_spacing
+            );
             $pdf->Write(0, $word);
 
-            if ($col == 4) {$row += 1;}
+            if ($col == 4) {
+                $row += 1;
+            }
         }
-        $image = $pdf->Output('', 'S');
+        $image = $pdf->Output("", "S");
 
-        $this->thing_report['pdf'] = $image;
+        $this->thing_report["pdf"] = $image;
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
-	public function readSubject()
+    public function readSubject()
     {
-
-        if (!$this->getMember()) {$this->response = "Generated an inject.";}
+        if (!$this->getMember()) {
+            $this->response = "Generated an inject.";
+        }
 
         $input = strtolower($this->subject);
 
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-
-            if ($input == 'acp125g') {
-
+            if ($input == "acp125g") {
                 $this->getMessage();
 
-                if ((!isset($this->index)) or 
-                    ($this->index == null)) {
+                if (!isset($this->index) or $this->index == null) {
                     $this->index = 1;
                 }
                 return;
             }
         }
 
-        $keywords = array("acp125g", "inject", "hard", "16ln", "easy","hey", "rocky","charley","bullwinkle","natasha","boris");
-        foreach ($pieces as $key=>$piece) {
+        $keywords = [
+            "acp125g",
+            "inject",
+            "hard",
+            "16ln",
+            "easy",
+            "hey",
+            "rocky",
+            "charley",
+            "bullwinkle",
+            "natasha",
+            "boris",
+        ];
+        foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
-                if (strpos(strtolower($piece),$command) !== false) {
-                    switch($piece) {
-
-                        case 'hard':
-                        case 'easy':
-                        case '16ln':
-                        case 'acp125g':
-
+                if (strpos(strtolower($piece), $command) !== false) {
+                    switch ($piece) {
+                        case "hard":
+                        case "easy":
+                        case "16ln":
+                        case "acp125g":
                             $this->setState($piece);
                             $this->setBank($piece);
 
                             $this->getMessage();
-                            $this->response .= " Set messages to " . strtoupper($this->state) .".";
+                            $this->response .=
+                                " Set messages to " .
+                                strtoupper($this->state) .
+                                ".";
 
                             return;
 
-                        case 'hey':
+                        case "hey":
                             $this->getMember();
-                            $this->response = "Hey " . strtoupper($this->member['call_sign']) . ".";
+                            $this->response =
+                                "Hey " .
+                                strtoupper($this->member["call_sign"]) .
+                                ".";
 
                             return;
-                        case 'on':
+                        case "on":
                         default:
-                     }
+                    }
                 }
             }
         }
 
         $this->getMessage();
 
-        if ((!isset($this->index)) or 
-            ($this->index == null)) {
+        if (!isset($this->index) or $this->index == null) {
             $this->index = 1;
         }
     }

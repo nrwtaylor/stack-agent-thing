@@ -40,10 +40,6 @@ class Oxforddictionaries extends Agent
 
     public function run()
     {
-        $this->variables_agent = new Variables(
-            $this->thing,
-            "variables " . "oxford_dictionaries" . " " . $this->from
-        );
         $this->getApi("dictionary");
     }
 
@@ -58,6 +54,11 @@ class Oxforddictionaries extends Agent
 
     function get()
     {
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables " . "oxford_dictionaries" . " " . $this->from
+        );
+
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable(
             "refreshed_at"
@@ -106,11 +107,9 @@ class Oxforddictionaries extends Agent
             $keywords;
 
         //get /entries/{source_lang}/{word_id}/synonyms
-        //get /entries/{source_lang}/{word_id}/synonyms
 
         $data = @file_get_contents($data_source, false, $context);
-
-        if ($data == false) {
+        if ($data === false) {
             $this->response .= "Could not ask Oxford Dictionaries. ";
             $this->definitions_count = 0;
             //$this->events_count = 0;
@@ -269,7 +268,7 @@ class Oxforddictionaries extends Agent
         if (count($pieces) == 1) {
             if ($input == 'oxforddictionaries') {
                 //$this->search_words = null;
-                $this->response .= "Asked Oxford Dicionaries about nothing.";
+                $this->response .= "Asked Oxford Dicionaries about nothing. ";
                 return;
             }
         }

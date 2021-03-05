@@ -114,7 +114,7 @@ $this->link = trim($text);
      *
      * @return unknown
      */
-    public function respond() {
+    public function respondResponse() {
         $this->thing->flagGreen();
 
         $to = $this->thing->from;
@@ -134,8 +134,6 @@ $this->link = trim($text);
             $message_thing = new Message($this->thing, $this->thing_report);
             $thing_report['info'] = $message_thing->thing_report['info'] ;
         }
-
-        return $this->thing_report;
     }
 
 
@@ -150,7 +148,6 @@ $this->link = trim($text);
         $this->sms_message = $m;
         $this->thing_report['sms'] = $m;
     }
-
 
     /**
      *

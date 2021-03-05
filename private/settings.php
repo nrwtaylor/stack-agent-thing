@@ -31,6 +31,16 @@ return [
         ],
 
         'stack' => [
+            'logging_level_default' => 'INFORMATION',
+            'logging_level_trigger' => 'ERROR',
+            'console_output'=>'off', // Allow echo. Or not.
+            'queue_handler' => 'none',
+            'calendar'=>[],
+            'hash' => 'on',
+            'hash_algorithm' => 'sha256',
+            'name' => '<not set>',
+            'path' => '<not set>',
+            'hashtag' => '<not set>',
             'latitude' => '<not set>',
             'longitude' => '<not set>',
             'word' => '<not set>',

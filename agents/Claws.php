@@ -36,9 +36,6 @@ class Claws extends Agent
             return;
         }
 
-        //        $this->input = 'claws "/var/www/stackr.test/resources/call/call-test-CapiTalized.txt" "/var/www/stackr.test/resources/call/call-test.txt"';
-        //        $this->readSubject();
-
         $this->response .= "No test performed. ";
     }
 
@@ -65,8 +62,8 @@ class Claws extends Agent
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
-            "This is a claws keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
+            "This is a tool for making decisions about your MH email messages.";
+        $this->thing_report["help"] = "Try CLAWS <file name>.";
 
         $this->thing_report["message"] = $this->sms_message;
 
@@ -208,6 +205,7 @@ dev - Detect duplicates.
         $txt = "CLAWS\n";
         foreach ($this->claws_items as $i => $claws_item) {
             $text_claws = $this->textCall($claws_item["call"]);
+            $call = $claws_item["call"];
 
             // URL is available like this.
             // $text_claws .= "xx".$claws_item["call"]['url']."xx"."\n";
@@ -226,12 +224,52 @@ dev - Detect duplicates.
                     $this->timestampDateline($claws_item["dateline"]) . "\n";
             }
 
-            $txt .= $text_claws . "\n";
+            $call = $claws_item["call"];
+
+            if (
+                $this->isThing($call["password"]) and
+                $this->isThing($call["access_code"]) and
+                $this->isUrl($call["url"])
+            ) {
+                $txt .= "FOUND MEETING DETAILS\n";
+            }
+
+            if ($this->isUrl($call["url"])) {
+                $txt .= "FOUND URL\n";
+            }
+
+            $txt .= $this->textHtml($text_claws) . "\n";
+
+            // Tidy up text display.
+//            $txt = html_entity_decode($text_claws). "\n";
+ //           $txt .= $text_claws . "\n";
         }
         $txt .= "\n";
 
         $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
+    }
+
+    // For testing
+    // is it not null, true, false, X, Z, ""
+    public function isThing($text)
+    {
+        if ($text == null) {
+            return false;
+        }
+        if ($text === true) {
+            return false;
+        }
+        if ($text == "") {
+            return false;
+        }
+        if (strtoupper($text) == "Z") {
+            return false;
+        }
+        if (strtoupper($text) == "X") {
+            return false;
+        }
+        return true;
     }
 
     public function scoreAt($dateline)
@@ -284,7 +322,6 @@ dev - Detect duplicates.
         // TODO extract dates over multiple paragraphs
 
         foreach ($datelines as $i => $dateline) {
-            //    var_dump($dateline);
         }
 
         // Sort by best to worst match.
@@ -316,10 +353,6 @@ dev - Detect duplicates.
             "test" => ["test"],
         ];
         $this->flagAgent($indicators, strtolower($input));
-
-        //        $filtered_input = $this->assert($input, false);
-        //var_dump($filtered_input);
-        //exit();
 
         $string = $input;
         $str_pattern = "claws";
@@ -355,9 +388,6 @@ dev - Detect duplicates.
             // Tested on Webex.
             // Needs further service development.
             // Prioritize Zoom dev test.
-            //$call = $this->readCall($body);
-            //var_dump("Claws readCall response");
-            //var_dump($call);
             $parts = $this->attachmentsEmail($contents);
 
             $events = [];
@@ -365,6 +395,7 @@ dev - Detect duplicates.
             foreach ($parts as $i => $part) {
                 if ($part["content_type"] === "text/calendar") {
                     $event = $this->eventCalendar($part);
+
                     $uid = $event->uid;
                     if ($event->uid === null) {
                         $uid = $this->thing->getUuid();
@@ -373,6 +404,7 @@ dev - Detect duplicates.
                 }
             }
             $calendar_events_count = count($events);
+
             if ($calendar_events_count == 1) {
                 // Found exactly one calendar event.
                 $timezone = $event->calendar_timezone;
@@ -390,6 +422,7 @@ dev - Detect duplicates.
             } else {
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
+
                 $call = $this->readCall($body);
                 // Try to figure out date from body text.
 

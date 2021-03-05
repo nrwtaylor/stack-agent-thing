@@ -355,7 +355,7 @@ class Read extends Agent
         return false;
     }
 
-    function metaRead($html)
+    function metaRead($html, $class_name = null)
     {
         if ($html == "") {
             return true;
@@ -372,6 +372,7 @@ class Read extends Agent
         $elements = $xpath->query(
             "//*[contains(@class, 'class name goes here')]"
         );
+
     }
 
     /* A comment to break the confusion that the above string causes. */

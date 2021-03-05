@@ -225,7 +225,6 @@ $this->context_id = 1;
         $this->previous_contexts = [];
 
         // See if a context record exists.
-        //        require_once '/var/www/html/stackr.ca/agents/findagent.php';
         $findagent_thing = new Findagent($this->thing, 'thing');
         $this->max_index = 0;
         $match = 0;
@@ -363,10 +362,6 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         );
 
         // Check that the shift is okay for making aliases.
-
-        //        require_once '/var/www/html/stackr.ca/agents/shift.php';
-        //        $shift_thing = new Shift($this->thing);
-        //        $shift_state = strtolower($this->thing->log($shift_thing->thing_report['keyword']));
 
         $shift_override = true;
         $shift_state = "off";

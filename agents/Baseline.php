@@ -134,8 +134,24 @@ class Baseline extends Agent
         $this->getLink();
         $baseline = $this->priorBaseline();
 
+// Is this the shortest if statement?
+// When the $this->prior_thing is undefined.
+// As it might be.
+// Need to make two checks. One that it is a thing.
+// And then because the PHP requires variables to be set.
+// Need to also check it isset.
+// "Shouldn't" do this as a non-compound logic form.
+// https://stackoverflow.com/questions/18903740/php-doesnt-throw-an-error-but-just-a-notice-when-i-access-an-undefined-property
+
+//dev
+// gettype($this->thing); // returns 'null'
+// gettype($this->prior_thing); // returns 'object'
+
+if ((isset($this->prior_thing)) and ($this->isThing( $this->prior_thing ))) {
         $microtime_agent = new Microtime($this->prior_thing, "microtime");
         $this->last_timestamp = $microtime_agent->timestamp;
+}
+
     }
 
     function setState($state)
@@ -147,6 +163,9 @@ class Baseline extends Agent
     {
         $things = $this->getThings('baseline');
 
+// Easier to check if it is the specific type.
+
+if (is_array($things)) {
         foreach (array_reverse($things) as $uuid => $thing) {
             if ($uuid == $this->uuid) {
                 continue;
@@ -155,6 +174,13 @@ class Baseline extends Agent
             //$this->response .= "Got prior thing. ";
             break;
         }
+$this->response .= "Found something. ";
+return;
+}
+
+$this->response .= "Nothing found. ";
+
+
     }
 
     function getState()
@@ -227,12 +253,20 @@ class Baseline extends Agent
 
     public function calcBaseline()
     {
+        // Single responsibility.
+        // Compute response time.
+        // Z - have current timestamp, but not the last one.
+        // X - current timestamp is older than last one.
+        // N - age of baseline
+
+        if (!isset($this->last_timestamp)) {$this->response_time = "Z"; return;}
+
         if (
             $this->microtime_agent->epochtimeMicrotime($this->timestamp) <
             $this->microtime_agent->epochtimeMicrotime($this->last_timestamp)
         ) {
             $this->response_time = "X";
-            return;
+            return true;
         }
 
         $age =
@@ -661,7 +695,8 @@ class Baseline extends Agent
             " - " .
             $this->thing->nuuid .
             " - " .
-            $this->thing->thing->created_at;
+            // $this->thing->thing->created_at;
+            $this->thing->created_at;
 
         $togo = $this->thing->human_time($this->time_remaining);
         $web .= " - " . $togo . " remaining.<br>";
@@ -672,7 +707,7 @@ class Baseline extends Agent
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
         $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
+            time() - strtotime($this->thing->created_at)
         );
         $web .= "Baseline question was created about " . $ago . " ago. ";
 

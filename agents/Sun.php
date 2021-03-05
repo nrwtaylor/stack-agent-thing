@@ -30,8 +30,8 @@ class Sun extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "This connects to an authorative time server.";
-        $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
+            "This provides awareness of sun position and solar time.";
+        $this->thing_report["help"] = "Try SUN. Then WEB.";
 
         $this->initSun();
     }
@@ -191,6 +191,30 @@ return;
 
     function doSun($text = null)
     {
+
+// dev
+// TODO
+
+// Get definition of solstice
+
+/*
+https://en.wikipedia.org/wiki/Equinox
+An equinox is the instant of time when the plane of Earth's
+equator passes through the geometric center of the Sun's disk.[3][4]
+This occurs twice each year, around 20 March and 23 September.
+In other words, it is the moment at which the center of the visible Sun
+is directly above the equator. 
+
+A solstice is an event that occurs when the Sun appears to reach its most northerly or southerly excursion relative to the celestial equator
+on the celestial sphere. 
+Two solstices occur annually, around June 21 and December 21.
+In many countries, the seasons of the year are determined by reference
+to the solstices and the equinoxes. 
+
+*/
+
+// Calculate longest and shortest days at stack lat and long
+
         $day_seconds = 24 * 60 * 60;
 
         // Zulu time. Now.
@@ -200,6 +224,7 @@ return;
         $minimums = [];
         $maximums = [];
         $equinoxes = [];
+$equal_night_days = [];
 
         $day_lengths = [];
         foreach (range(-500, 500, 1) as $n) {
@@ -218,8 +243,9 @@ return;
                 ) {
                     $this->thing->log("found maximum");
                     $maximums[] = [
-                        'description'=>'winter solstice',
+                        'description'=>'longest day',
                         'day' => $n - 1,
+                        'transit' => $this->dateEpoch($arr['transit']),
                         'day_length' => $day_lengths[$n - 1],
                         'timestamp' => $this->dateEpoch(strtotime($t) + ($n-1)*$day_seconds)
 
@@ -234,8 +260,9 @@ return;
                 ) {
                     $this->thing->log("found minimum");
                     $minimums[] = [
-                        'description'=>'summer solstice',
+                        'description'=>'shortest day',
                         'day' => $n - 1,
+                        'transit' => $this->dateEpoch($arr['transit']),
                         'day_length' => $day_lengths[$n - 1],
                         'timestamp' => $this->dateEpoch(strtotime($t) + ($n-1)*$day_seconds)
 
@@ -249,7 +276,7 @@ return;
 
                 $this->thing->log("found equinoxes");
                 $equinox = [
-                    'description'=>'equinox',
+                    'description'=>'12 hour day',
                     'day' => $n,
                     'day_length' => $day_lengths[$n],
                     'timestamp' => $this->dateEpoch(strtotime($t) + ($n)*$day_seconds)
@@ -268,6 +295,7 @@ return;
 
                 } else {
                     $equinoxes[] = $equinox;
+                    $equal_night_days[] = $equinox;
                     $last_equinox = $equinox;
                 }
             //$day_length_delta = $day_lengths[$n] - $day_lengths[$n-1];
@@ -277,14 +305,22 @@ return;
 
         // Minimum is winter solstice (northern hemisphere).
         // Maximum is summer solstice  (northern hemisphere).
-        $this->winter_solstices = $maximums;
-        $this->summer_solstices = $minimums;
-        $this->equinoxes = $equinoxes;
+        //$this->winter_solstices = $maximums;
+        //$this->summer_solstices = $minimums;
+
+        $this->longest_days = $maximums;
+        $this->shortest_days = $minimums;
+        $this->equal_night_days = $equal_night_days;
+
+//        $this->equinoxes = $equinoxes;
         $this->sun_message = $this->response;
         $events = [];
-        $events = array_merge($events, $this->winter_solstices);
-        $events = array_merge($events, $this->summer_solstices);
-        $events = array_merge($events, $this->equinoxes);
+        $events = array_merge($events, $this->longest_days);
+        $events = array_merge($events, $this->shortest_days);
+        $events = array_merge($events, $this->equal_night_days);
+
+
+//        $events = array_merge($events, $this->equinoxes);
 
         usort($events, function ($first, $second) {
             return strtotime($first['timestamp']) > strtotime($second['timestamp']);
@@ -294,7 +330,6 @@ return;
 //usort($events, function($a, $b) {
 //  return new \DateTime($a['timestamp']) <=> new \DateTime($b['timestamp']);
 //});
-
         $this->events = $events;
 
         return $text;
@@ -361,7 +396,6 @@ return;
 
     }
 
-
     public function makeWeb() {
 
 
@@ -369,8 +403,8 @@ return;
 
         $web .="<b>EVENTS</b><br>";
         foreach ($this->events as $key=>$value) {
-
-            $web .= $value['timestamp']. " " .$value['description'] ."<br>"; 
+$day_length_text = intval($value['day_length'] / 60) . " minutes";
+            $web .= $value['timestamp']. " " .$value['description'] . " " . $day_length_text . "<br>"; 
 
         }
 

@@ -66,11 +66,16 @@ class Uuid extends Agent
 
         if ($text == null) {return false;}
 
-        if (!isset($this->uuids)) {$this->extractUuids($text);}
+$uuids = $this->extractUuids($text);
+//        if (!isset($this->uuids)) {$this->extractUuids($text);}
 
-        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
+        if (count($uuids) != 1) {return false;} // Too many. Is not A uuid.
 
-        if (strtolower($this->uuids[0]) == strtolower($text)) {
+
+//        if (count($this->uuids) != 1) {return false;} // Too many. Is not A uuid.
+
+//        if (strtolower($this->uuids[0]) == strtolower($text)) {
+        if (strtolower($uuids[0]) == strtolower($text)) {
 
             return true;
 
@@ -111,11 +116,11 @@ class Uuid extends Agent
         if ($input == null) {
             $input = $this->input;
         }
-        if (!isset($this->uuids)) {
-            $this->extractUuids($input);
-        }
+
+        $uuids = $this->extractUuids($input);
+
         $stripped_input = $input;
-        foreach ($this->uuids as $i => $uuid) {
+        foreach ($uuids as $i => $uuid) {
             $stripped_input = str_replace(
                 strtolower($uuid),
                 " ",

@@ -288,10 +288,13 @@ class Url extends Agent
         if ($text == null) {
             return true;
         }
-
+/*
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
+        $pattern =
+            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
+*/
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
@@ -308,7 +311,6 @@ class Url extends Agent
             if (strtotime($url) !== false) {
                 unset($urls[$i]);
                 continue;
-                //var_dump($url); var_dump(strtotime($url));
             }
 
             if (is_numeric(str_replace(".", "", $url))) {
@@ -326,8 +328,11 @@ class Url extends Agent
                 $urls[$i] = rtrim($tokens[1], "&gt");
             }
         }
-
         return $urls;
+    }
+
+    public function isUrl($text) {
+       return $this->hasUrl($text);
     }
 
     public function hasUrl($text = null)
