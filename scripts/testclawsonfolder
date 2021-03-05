@@ -45,7 +45,7 @@ if [ -d ${LOG_DIR} ]; then
         echo "$(date "+%Y-%m-%d %T") : agent claws - ${f}, status ${STATUS}"  >> ${LOG_DIR}/${LOGFILE} 2>&1
         echo ${STATUS}
       else
-       printf '%s %s\n' ${f} 'not file'
+       printf '%s %s\n' 'not file' ${f}
       fi
     done
   fi
