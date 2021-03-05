@@ -5,8 +5,6 @@ class Wordgame
 {
     function __construct(Thing $thing, $agent_input = null)
     {
-        //echo "meep";
-        //var_dump($agent_input);
 
         $this->start_time = $thing->elapsed_runtime();
         if ($agent_input == null) {
@@ -17,7 +15,6 @@ class Wordgame
 
         $this->agent_prefix = 'Agent "Word" ';
 
-        //        $this->thing_report  = array("thing"=>$this->thing->thing);
         $this->thing_report['thing'] = $this->thing->thing;
 
         $this->uuid = $thing->uuid;

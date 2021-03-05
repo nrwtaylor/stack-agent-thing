@@ -296,7 +296,6 @@ dev - Detect duplicates.
         // Read every line for a date.
 
         $count = 0;
-
         foreach ($paragraphs as $i => $paragraph) {
             // Don't waste time on empty paragraphs.
             if (trim($paragraph) == "") {
@@ -314,6 +313,8 @@ dev - Detect duplicates.
             if ($dateline == false) {
                 continue;
             }
+
+
 
             $dateline["score"] = $this->scoreAt($dateline, "meeting");
             $datelines[] = $dateline;
@@ -410,8 +411,8 @@ dev - Detect duplicates.
                 $timezone = $event->calendar_timezone;
 
                 $subject = $event->summary;
-                $dateline = $this->extractAt($event->start_at);
-
+//                $dateline = $this->extractAt($event->start_at);
+//var_dump($dateline);
                 // TODO - Consider datelineCall.
                 // dev
                 $datelines = $this->datelinesCall($event->start_at);
@@ -427,18 +428,20 @@ dev - Detect duplicates.
                 // Try to figure out date from body text.
 
                 $dateline = $this->extractAt($body);
-
                 $subject_at_score = 0;
-                if ($dateline != null) {
-                    $subject_at_score = $this->scoreAt($dateline, "meeting");
-                }
-
+//                if ($dateline != null) {
+                $subject_at_score = $this->scoreAt($dateline, "meeting");
+//                }
                 // TODO - Check if the subject has a well qualified date time.
                 // dev start with a simple score of missing information.
                 // dev assess whether date time is "adequate"
                 if ($subject_at_score <= 4) {
                     // Otherwise ... see if there is a better date time in the combined contents.
                     $datelines = $this->datelinesCall($subject . "\n" . $body);
+
+// dev
+// TODO Assess datelines for validity.
+
                     // Pick best dateline.
                     if (isset($datelines[0])) {
                         $dateline = $datelines[0];
