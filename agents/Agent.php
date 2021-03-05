@@ -74,7 +74,7 @@ class Agent
         }
 
         // Get some stuff from the stack which will be helpful.
-/*
+
 // dev test
 $stack_settings = $thing->container['stack'];
 foreach($stack_settings as $setting_name=>$setting_value) {
@@ -88,22 +88,22 @@ $this->{'default_'.$setting_name} = $thing->container['stack'][$setting_name];
 $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
 }
-*/
+/*
 
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
         $this->word = $thing->container["stack"]["word"];
         $this->email = $thing->container["stack"]["email"];
-
+*/
 
 
         // And some more stuff
-        $this->short_name = $thing->container["stack"]["short_name"];
+//        $this->short_name = $thing->container["stack"]["short_name"];
 
-        $this->stack_state = $thing->container["stack"]["state"];
+//        $this->stack_state = $thing->container["stack"]["state"];
 
-        $this->stack_engine_state = $thing->container["stack"]["engine_state"];
-
+//        $this->stack_engine_state = $thing->container["stack"]["engine_state"];
+/*
         $this->default_font = null;
         if (isset($this->thing->container["stack"]["font"])) {
             $this->default_font = $this->thing->container["stack"]["font"];
@@ -113,7 +113,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
             $this->default_pdf_page_template =
                 $this->thing->container["stack"]["pdf_page_template"];
         }
-
+*/
         $this->sqlresponse = null;
 
         $this->thing->log("running on Thing " . $this->thing->nuuid . ".");
