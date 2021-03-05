@@ -1,11 +1,11 @@
 #!/bin/bash
 
-SCRIPT_NAME=${0}
-PROCESS_DIR=${1}
+SCRIPT_NAME="${0}"
+PROCESS_DIR="${1}"
 LOG_DIR=/home/jsae/Admin/log
 LOGFILE=agent-claws.log
 LOG_DIR_EXISTS=0
-WATCH_LOG=${2}
+WATCH_LOG="${2}"
 
 if [ $# -eq 0 ];then
   printf '\n%s:\n\t%s %s\n' 'Usage' ${SCRIPT_NAME} '<Directory> <Option>'
@@ -38,11 +38,15 @@ if [ -d ${LOG_DIR} ]; then
   if [ -d ${PROCESS_DIR} ]; then
     echo "Working on ${PROCESS_DIR}"
     for f in ${PROCESS_DIR}/*; do
-      echo ${f}
-      agent --channel=txt --meta=off --watch="http" --flag-error claws "${f}" 
-      STATUS="$?"
-      echo "$(date "+%Y-%m-%d %T") : agent claws - ${f}, status ${STATUS}"  >> ${LOG_DIR}/${LOGFILE} 2>&1
-      echo ${STATUS}
+      if [ -f "${f}" ]; then
+        echo ${f}
+        agent --channel=txt --meta=off --watch="http" --flag-error claws "${f}" 
+        STATUS="$?"
+        echo "$(date "+%Y-%m-%d %T") : agent claws - ${f}, status ${STATUS}"  >> ${LOG_DIR}/${LOGFILE} 2>&1
+        echo ${STATUS}
+      else
+       printf '%s %s\n' ${f} 'not file'
+      fi
     done
   fi
 fi
