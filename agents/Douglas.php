@@ -239,13 +239,16 @@ class Douglas extends Agent
 
         $web .= "<p>";
         $web .= "Individual radiograms.<br>";
-        foreach ($this->association_uuids as $i => $uuid) {
+
+if (isset($this->association_uuids)) { 
+       foreach ($this->association_uuids as $i => $uuid) {
             $rocky_link = $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
 
             $web .= '<a href="' . $rocky_link . '">';
             $web .= $rocky_link;
             $web .= "</a><br>";
         }
+}
 
         $this->thing_report["web"] = $web;
     }
