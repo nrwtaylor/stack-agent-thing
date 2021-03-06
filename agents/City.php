@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -15,36 +15,37 @@ class City extends Agent
 
     // Search for valid city names.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
         $this->keywords = [
-            'city',
-            'next',
-            'accept',
-            'clear',
-            'drop',
-            'add',
-            'new',
-            'here',
-            'there',
+            "city",
+            "next",
+            "accept",
+            "clear",
+            "drop",
+            "add",
+            "new",
+            "here",
+            "there",
         ];
 
-        $this->default_city_name =
-            $this->thing->container['api']['city']['default_city_name'];
+        //$this->default_city_name =
+        //    $this->thing->container['api']['city']['default_city_name'];
+        $this->default_city_name = $this->settingsAgent([
+            "city",
+            "default_city_name",
+        ]);
         $this->default_city_code = null;
 
-        //      $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
-
         $this->default_alias = "Thing";
-        //    $this->current_time = $this->thing->time();
 
         $this->test = "Development code"; // Always iterative.
 
         $this->state = null; // to avoid error messages
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/city';
+        $this->link = $this->web_prefix . "thing/" . $this->uuid . "/city";
 
         $this->lastCity();
 
@@ -55,14 +56,9 @@ class City extends Agent
         );
         $this->city_code = $this->railway_city->getVariable("city_code");
 
-        if (
-            isset($this->thing->container['stack']['font'])
-        ) {
-            $this->font =
-                $this->thing->container['stack']['font'];
+        if (isset($this->thing->container["stack"]["font"])) {
+            $this->font = $this->thing->container["stack"]["font"];
         }
-
-
     }
 
     function set()
@@ -84,9 +80,9 @@ class City extends Agent
 
         $this->thing->log(
             $this->agent_prefix .
-                ' set ' .
+                " set " .
                 $this->city_code .
-                ' and ' .
+                " and " .
                 $this->city_name .
                 ".",
             "INFORMATION"
@@ -101,7 +97,8 @@ class City extends Agent
         $city->setVariable("refreshed_at", $this->refreshed_at);
     }
 
-    function isCode()
+    // dev test not used
+    function cityCode()
     {
         $city_zone = "05";
 
@@ -129,7 +126,7 @@ class City extends Agent
         $city_code_candidate = null;
 
         foreach ($this->cities as $city) {
-            $city_code = strtolower($city['code']);
+            $city_code = strtolower($city["code"]);
             if (
                 $city_code == $city_code_candidate or
                 $city_code_candidate == null
@@ -175,10 +172,10 @@ class City extends Agent
                 return [$this->city_code, $this->city_name];
             }
 
-            if ($city['code'] == $selector or $city['name'] == $selector) {
-                $this->refreshed_at = $city['refreshed_at'];
-                $this->city_name = $city['name'];
-                $this->city_code = $city['code'];
+            if ($city["code"] == $selector or $city["name"] == $selector) {
+                $this->refreshed_at = $city["refreshed_at"];
+                $this->city_name = $city["name"];
+                $this->city_code = $city["code"];
                 $this->city = new Variables(
                     $this->thing,
                     "variables " .
@@ -215,41 +212,39 @@ class City extends Agent
         $this->cities = [];
 
         // See if a headcode record exists.
-        $findagent_thing = new Findagent($this->thing, 'city');
+        $findagent_thing = new Findagent($this->thing, "city");
 
-        if ($findagent_thing->thing_report['things'] == true) {
+        if ($findagent_thing->thing_report["things"] == true) {
             return true;
         }
 
-
-        $count = count($findagent_thing->thing_report['things']);
-
+        $count = count($findagent_thing->thing_report["things"]);
 
         if (!$this->is_positive_integer($count)) {
             // No places found
         } else {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
+                array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-                $uuid = $thing_object['uuid'];
+                $uuid = $thing_object["uuid"];
 
-                $variables_json = $thing_object['variables'];
+                $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-                if (isset($variables['city'])) {
+                if (isset($variables["city"])) {
                     $city_code = $this->default_city_code;
                     $city_name = $this->default_city_name;
                     $refreshed_at = "meep getPlaces";
 
-                    if (isset($variables['city']['city_code'])) {
-                        $city_code = $variables['city']['city_code'];
+                    if (isset($variables["city"]["city_code"])) {
+                        $city_code = $variables["city"]["city_code"];
                     }
-                    if (isset($variables['city']['city_name'])) {
-                        $city_name = $variables['city']['city_name'];
+                    if (isset($variables["city"]["city_name"])) {
+                        $city_name = $variables["city"]["city_name"];
                     }
-                    if (isset($variables['city']['refreshed_at'])) {
-                        $refreshed_at = $variables['city']['refreshed_at'];
+                    if (isset($variables["city"]["refreshed_at"])) {
+                        $refreshed_at = $variables["city"]["refreshed_at"];
                     }
 
                     $this->cities[] = [
@@ -270,24 +265,24 @@ class City extends Agent
 
         $filtered_cities = [];
         foreach (array_reverse($this->cities) as $key => $city) {
-            $city_name = $city['name'];
-            $city_code = $city['code'];
+            $city_name = $city["name"];
+            $city_code = $city["code"];
 
-            if (!isset($city['refreshed_at'])) {
+            if (!isset($city["refreshed_at"])) {
                 continue;
             }
 
-            $refreshed_at = $city['refreshed_at'];
+            $refreshed_at = $city["refreshed_at"];
 
-            if (isset($filtered_cities[$city_name]['refreshed_at'])) {
+            if (isset($filtered_cities[$city_name]["refreshed_at"])) {
                 if (
                     strtotime($refreshed_at) >
-                    strtotime($filtered_cities[$city_name]['refreshed_at'])
+                    strtotime($filtered_cities[$city_name]["refreshed_at"])
                 ) {
                     $filtered_cities[$city_name] = [
                         "name" => $city_name,
                         "code" => $city_code,
-                        'refreshed_at' => $refreshed_at,
+                        "refreshed_at" => $refreshed_at,
                     ];
                 }
                 continue;
@@ -295,14 +290,14 @@ class City extends Agent
             $filtered_cities[$city_name] = [
                 "name" => $city_name,
                 "code" => $city_code,
-                'refreshed_at' => $refreshed_at,
+                "refreshed_at" => $refreshed_at,
             ];
         }
 
         // Sort by the refreshed at field
         $refreshed_at = [];
         foreach ($this->cities as $key => $row) {
-            $refreshed_at[$key] = $row['refreshed_at'];
+            $refreshed_at[$key] = $row["refreshed_at"];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->cities);
 
@@ -310,13 +305,13 @@ class City extends Agent
         $this->cities = [];
 
         foreach ($this->old_cities as $key => $row) {
-            if (strtotime($row['refreshed_at']) != false) {
+            if (strtotime($row["refreshed_at"]) != false) {
                 $this->cities[] = $row;
             }
         }
 
         // Add in a set of default cities
-        $file = $this->resource_path . 'city/cities.txt';
+        $file = $this->resource_path . "city/cities.txt";
 
         if (!file_exists($file)) {
             return true;
@@ -406,17 +401,17 @@ class City extends Agent
 
         // See if the code or name already exists
         foreach ($this->cities as $city) {
-            if ($city_code == $city['code'] or $city_name == $city['name']) {
-                $this->city_name = $city['name'];
-                $city_code = $city['code'];
-                $this->last_refreshed_at = $city['refreshed_at'];
+            if ($city_code == $city["code"] or $city_name == $city["name"]) {
+                $this->city_name = $city["name"];
+                $city_code = $city["code"];
+                $this->last_refreshed_at = $city["refreshed_at"];
             }
         }
         if ($city_code == null) {
             $city_code = $this->nextCode();
         }
 
-        $this->thing->log('will make a City for ' . $city_code . ".");
+        $this->thing->log("will make a City for " . $city_code . ".");
         $ad_hoc = true;
         $this->thing->log("is ready to make a City.");
 
@@ -454,7 +449,7 @@ class City extends Agent
         $this->thing->log('Agent "City" found a City and pointed to it.');
     }
 
-    function cityTime($input = null)
+    function timeCity($input = null)
     {
         if ($input == null) {
             $input_time = $this->current_time;
@@ -504,8 +499,8 @@ class City extends Agent
         }
 
         foreach ($this->cities as $city) {
-            $city_name = strtolower($city['name']);
-            $city_code = strtolower($city['code']);
+            $city_name = strtolower($city["name"]);
+            $city_code = strtolower($city["code"]);
 
             if (empty($city_name)) {
                 continue;
@@ -547,9 +542,9 @@ class City extends Agent
 
             $this->thing->log(
                 $this->agent_prefix .
-                    'found a city code (' .
+                    "found a city code (" .
                     $this->city_code .
-                    ') in the text.'
+                    ") in the text."
             );
             return [$this->city_code, $this->city_name];
         }
@@ -609,10 +604,10 @@ class City extends Agent
                 $this->resource->resources[ucwords($filtered_input)]
                 as $id => $resource
             ) {
-                if ($resource['code'] == "CITY") {
+                if ($resource["code"] == "CITY") {
                     $this->refreshed_at = $this->thing->time();
-                    $city_id = $resource['id'];
-                    $city_name = $resource['name'];
+                    $city_id = $resource["id"];
+                    $city_name = $resource["name"];
                     break;
                 }
             }
@@ -642,7 +637,7 @@ class City extends Agent
     {
         $message = "City is " . ucwords($this->city_name) . ".";
         $this->message = $message;
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     function makeTXT()
@@ -657,9 +652,9 @@ class City extends Agent
             $txt = "Not here";
         } else {
             $txt =
-                'These are CITIES for PLACE ' .
+                "These are CITIES for PLACE " .
                 $this->railway_city->nuuid .
-                '. ';
+                ". ";
         }
         $txt .= "\n";
         $txt .= "\n";
@@ -676,7 +671,7 @@ class City extends Agent
             $txt .=
                 " " .
                 str_pad(
-                    strtoupper(trim($city['name'])),
+                    strtoupper(trim($city["name"])),
                     40,
                     " ",
                     STR_PAD_RIGHT
@@ -684,13 +679,13 @@ class City extends Agent
             $txt .=
                 " " .
                 "  " .
-                str_pad(strtoupper(trim($city['code'])), 5, "X", STR_PAD_LEFT);
-            if (isset($city['refreshed_at'])) {
+                str_pad(strtoupper(trim($city["code"])), 5, "X", STR_PAD_LEFT);
+            if (isset($city["refreshed_at"])) {
                 $txt .=
                     " " .
                     "  " .
                     str_pad(
-                        strtoupper($city['refreshed_at']),
+                        strtoupper($city["refreshed_at"]),
                         15,
                         "X",
                         STR_PAD_LEFT
@@ -703,7 +698,7 @@ class City extends Agent
         $txt .= "Last city " . $this->last_city_name . "\n";
         $txt .= "Now at " . $this->city_name;
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -723,20 +718,20 @@ class City extends Agent
 
         if (!empty($this->city_code)) {
             $sms .=
-                " | " . $this->web_prefix . 'thing/' . $this->uuid . '/city';
+                " | " . $this->web_prefix . "thing/" . $this->uuid . "/city";
         }
 
         $sms .= " | " . $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
 
-        $link_txt = $this->web_prefix . 'thing/' . $this->uuid . '/city.txt';
+        $link_txt = $this->web_prefix . "thing/" . $this->uuid . "/city.txt";
 
         $this->node_list = ["city" => ["translink", "job"]];
         // Make buttons
@@ -745,7 +740,7 @@ class City extends Agent
             $this->node_list,
             "city"
         );
-        $choices = $this->thing->choice->makeLinks('city');
+        $choices = $this->thing->choice->makeLinks("city");
 
         $web = '<a href="' . $link . '">';
 
@@ -768,18 +763,18 @@ class City extends Agent
         $web .= $this->sms_message;
         $web .= "<br>";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/city.txt';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/city.txt";
         $web .= '<a href="' . $link . '">city.txt</a>';
         $web .= " | ";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/city.log';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/city.log";
         $web .= '<a href="' . $link . '">city.log</a>';
         $web .= " | ";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/' . "city";
-        $web .= $this->city_name . '';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/" . "city";
+        $web .= $this->city_name . "";
         $web .= " | ";
-        $web .= '<a href="' . $link . '">' . "city" . '</a>';
+        $web .= '<a href="' . $link . '">' . "city" . "</a>";
 
         $web .= "<br>";
 
@@ -797,7 +792,7 @@ class City extends Agent
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function makeImage()
@@ -860,9 +855,9 @@ class City extends Agent
                 $bbox["height"] =
                     max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
                     min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-                extract($bbox, EXTR_PREFIX_ALL, 'bb');
+                extract($bbox, EXTR_PREFIX_ALL, "bb");
 
-                if ($bbox['width'] < $image_width - 50) {
+                if ($bbox["width"] < $image_width - 50) {
                     break;
                 }
             }
@@ -903,7 +898,7 @@ class City extends Agent
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
-        $this->thing_report['png'] = $agent->image_string;
+        $this->thing_report["png"] = $agent->image_string;
     }
 
     function ImageRectangleWithRoundedCorners(
@@ -980,7 +975,7 @@ class City extends Agent
 
         //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         // Allow for indexing.
         if (!isset($this->index)) {
@@ -991,23 +986,23 @@ class City extends Agent
 
         //      $this->makeSMS();
 
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
 
         //    $this->makeMessage();
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         } else {
-            $this->thing_report['info'] =
+            $this->thing_report["info"] =
                 'Agent input was "' . $this->agent_input . '".';
         }
 
         //      $this->makeWeb();
         //    $this->makeTXT();
 
-        $this->thing_report['help'] =
-            'This is a City.  The union of a code and a name.';
+        $this->thing_report["help"] =
+            "This is a City.  The union of a code and a name.";
 
         //	return;
     }
@@ -1029,12 +1024,12 @@ class City extends Agent
             $this->thing,
             "variables city " . $this->from
         );
-        $this->last_city_code = $this->last_city->getVariable('city_code');
-        $this->last_city_name = $this->last_city->getVariable('city_name');
+        $this->last_city_code = $this->last_city->getVariable("city_code");
+        $this->last_city_name = $this->last_city->getVariable("city_name");
 
         // This doesn't work
         $this->last_refreshed_at = $this->last_city->getVariable(
-            'refreshed_at'
+            "refreshed_at"
         );
         return;
 
@@ -1045,8 +1040,8 @@ class City extends Agent
         }
 
         foreach (array_reverse($this->cities) as $key => $city) {
-            if ($city['name'] == $this->last_city_name) {
-                $this->last_refreshed_at = $city['refreshed_at'];
+            if ($city["name"] == $this->last_city_name) {
+                $this->last_refreshed_at = $city["refreshed_at"];
                 break;
             }
         }
@@ -1080,7 +1075,7 @@ class City extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'city') {
+            if ($input == "city") {
                 $this->getCity();
                 $this->response = "Last 'city' retrieved.";
                 return;
@@ -1091,20 +1086,20 @@ class City extends Agent
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'next':
+                        case "next":
                             $this->thing->log("read subject nextheadcode");
                             $this->nextCity();
                             break;
 
-                        case 'drop':
+                        case "drop":
                             $this->dropCity();
                             break;
 
-                        case 'make':
-                        case 'new':
-                        case 'city':
-                        case 'create':
-                        case 'add':
+                        case "make":
+                        case "new":
+                        case "city":
+                        case "create":
+                        case "add":
                             $this->assertCity(strtolower($input));
 
                             if (empty($this->city_name)) {
@@ -1112,7 +1107,7 @@ class City extends Agent
                             }
 
                             $this->response =
-                                'Asserted City and found ' .
+                                "Asserted City and found " .
                                 strtoupper($this->city_name) .
                                 ".";
                             return;
@@ -1127,7 +1122,7 @@ class City extends Agent
         if ($this->city_code != null) {
             $this->getCity($this->city_code);
             $this->thing->log(
-                'using extracted city_code ' . $this->city_code . ".",
+                "using extracted city_code " . $this->city_code . ".",
                 "INFORMATION"
             );
             $this->response = $this->city_code . " used to retrieve a City.";
@@ -1137,7 +1132,7 @@ class City extends Agent
         if ($this->city_name != null) {
             $this->getCity($this->city_name);
             $this->thing->log(
-                'using extracted city_name ' . $this->city_name . ".",
+                "using extracted city_name " . $this->city_name . ".",
                 "INFORMATION"
             );
             $this->response = strtoupper($this->city_name) . " retrieved.";
@@ -1148,7 +1143,7 @@ class City extends Agent
         if ($this->last_city_code != null) {
             $this->getCity($this->last_city_code);
             $this->thing->log(
-                'using extracted last_city_code ' . $this->last_city_code . ".",
+                "using extracted last_city_code " . $this->last_city_code . ".",
                 "INFORMATION"
             );
             $this->response =
@@ -1172,7 +1167,7 @@ class City extends Agent
 
         $this->makeCity(null, $city);
         $this->thing->log(
-            'using default_city_code ' . $this->default_city_code . ".",
+            "using default_city_code " . $this->default_city_code . ".",
             "INFORMATION"
         );
 

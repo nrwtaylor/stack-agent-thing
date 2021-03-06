@@ -85,7 +85,7 @@ $stack_settings = $thing->container['stack'];
 foreach($stack_settings as $setting_name=>$setting_value) {
 
 // For 'backwards' compatibility.
-$this->{$setting_name} = $thing->container['stack'][$setting_name];
+//$this->{$setting_name} = $thing->container['stack'][$setting_name];
 
 // Going forward set default_ and stack_ prefixes
 // For settings from stack private settings.
@@ -93,22 +93,22 @@ $this->{'default_'.$setting_name} = $thing->container['stack'][$setting_name];
 $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
 }
-/*
+
 
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
         $this->word = $thing->container["stack"]["word"];
         $this->email = $thing->container["stack"]["email"];
-*/
+
 
 
         // And some more stuff
-//        $this->short_name = $thing->container["stack"]["short_name"];
+        $this->short_name = $thing->container["stack"]["short_name"];
 
-//        $this->stack_state = $thing->container["stack"]["state"];
+        $this->stack_state = $thing->container["stack"]["state"];
 
-//        $this->stack_engine_state = $thing->container["stack"]["engine_state"];
-/*
+        $this->stack_engine_state = $thing->container["stack"]["engine_state"];
+
         $this->default_font = null;
         if (isset($this->thing->container["stack"]["font"])) {
             $this->default_font = $this->thing->container["stack"]["font"];
@@ -118,7 +118,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
             $this->default_pdf_page_template =
                 $this->thing->container["stack"]["pdf_page_template"];
         }
-*/
+
         $this->sqlresponse = null;
 
         $this->thing->log("running on Thing " . $this->thing->nuuid . ".");
@@ -317,10 +317,14 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
             "\\Nrwtaylor\\StackAgentThing\\" . strtoupper($agent_class_name);
 
         // Try plural and singular variants of agent name.
-        if (substr($agent_namespace_name, -2) == "es") {
+        if (substr($agent_namespace_name, -3) == "ies") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "ies") . "y";
+        } elseif (substr($agent_namespace_name, -2) == "es") {
             $agent_namespace_names[] = rtrim($agent_namespace_name, "es");
         } elseif (substr($agent_namespace_name, -1) == "s") {
             $agent_namespace_names[] = rtrim($agent_namespace_name, "s");
+        } elseif (substr($agent_namespace_name, -1) == "y") {
+            $agent_namespace_names[] = rtrim($agent_namespace_name, "y") . "ies";
         } else {
             $agent_namespace_names[] = $agent_namespace_name . "s";
             $agent_namespace_names[] = $agent_namespace_name . "es";
