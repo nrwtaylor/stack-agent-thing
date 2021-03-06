@@ -6,6 +6,8 @@ LOG_DIR=/home/jsae/Admin/log
 LOGFILE=agent-claws.log
 LOG_DIR_EXISTS=0
 WATCH_LOG="${2}"
+#FILTER_ARG=--watch="http"
+FILTER_ARG='--regex="/FOUND/"'
 
 if [ $# -eq 0 ];then
   printf '\n%s:\n\t%s %s\n' 'Usage' ${SCRIPT_NAME} '<Directory> <Option>'
@@ -34,13 +36,13 @@ fi
 if [ -d ${LOG_DIR} ]; then
   echo "Logs saved as ${LOG_DIR}/${LOGFILE}"
   echo "$(date "+%Y-%m-%d %T") : ----- New Run ----- ----- -----"  >> ${LOG_DIR}/${LOGFILE} 2>&1
-  echo "Running: agent --channel=txt --meta=off --watch=\"http\" --flag-error claws \"<file>\""
+  printf '%s %s %s\n' 'Running: agent --channel=txt --meta=off' ${FILTER_ARG} '--flag-error claws \"<file>\"'
   if [ -d ${PROCESS_DIR} ]; then
     echo "Working on ${PROCESS_DIR}"
     for f in ${PROCESS_DIR}/*; do
       if [ -f "${f}" ]; then
         echo ${f}
-        agent --channel=txt --meta=off --watch="http" --flag-error claws "${f}" 
+        agent --channel=txt --meta=off ${FILTER_ARG} --flag-error claws "${f}" 
         STATUS="$?"
         echo "$(date "+%Y-%m-%d %T") : agent claws - ${f}, status ${STATUS}"  >> ${LOG_DIR}/${LOGFILE} 2>&1
         echo ${STATUS}
