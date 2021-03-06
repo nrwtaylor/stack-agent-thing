@@ -28,14 +28,15 @@ class Zoom extends Agent
 
         $this->thing_report["info"] =
             "ZOOM is a tool for hosting audio-visual conferences.";
-        $this->thing_report["help"] = "Join the screenshare with audio share. Click Zoom link.";
+        $this->thing_report["help"] =
+            "Join the screenshare with audio share. Click Zoom link.";
 
         $this->node_list = ["zoom" => ["zoom", "uuid"]];
 
         $this->current_time = $this->thing->json->time();
 
-        $this->urls = $this->settingsAgent(['zoom','urls']);
-        $this->url = $this->settingsAgent(['zoom','url']);
+        $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        $this->url = $this->settingsAgent(["zoom", "url"]);
 
         $this->initZoom();
     }
@@ -72,16 +73,16 @@ class Zoom extends Agent
 
     public function makeUrl()
     {
-// Share default web link.
+        // Share default web link.
 
-if ($this->urls === false) {
-        $this->urls = $this->settingsAgent(['zoom','urls']);
-}
-if ($this->url === false) {
-        $this->url = $this->settingsAgent(['zoom','url']);
-}
+        if ($this->urls === false) {
+            $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        }
+        if ($this->url === false) {
+            $this->url = $this->settingsAgent(["zoom", "url"]);
+        }
 
-        $this->thing_report['url'] = $this->url; 
+        $this->thing_report["url"] = $this->url;
     }
 
     /**
@@ -89,7 +90,9 @@ if ($this->url === false) {
      */
     public function makeSMS()
     {
-        if ((!isset($this->urls)) or ($this->url === false)) {$this->makeUrl();}
+        if (!isset($this->urls) or $this->url === false) {
+            $this->makeUrl();
+        }
 
         $sms = "ZOOM | ";
 
@@ -100,16 +103,20 @@ if ($this->url === false) {
         }
         $telephone_numbers_text = implode(" / ", $this->telephone_numbers);
 
-if ( (is_array($this->urls)) and (count($this->urls) > 1) and ($this->urls[0] != $this->url)) {
-        if ($this->urls !== false) {
-            $urls_text = implode(" ", $this->urls);
-            $sms .= $urls_text . " ";
+        if (
+            is_array($this->urls) and
+            count($this->urls) > 1 and
+            $this->urls[0] != $this->url
+        ) {
+            if ($this->urls !== false) {
+                $urls_text = implode(" ", $this->urls);
+                $sms .= $urls_text . " ";
+            }
         }
-}
         $sms .= $sms_text . " ";
         $sms .= $telephone_numbers_text . " ";
 
-        $sms = trim($sms) . " "; 
+        $sms = trim($sms) . " ";
 
         $response_text = "No response.";
         if ($this->response != "") {
@@ -186,7 +193,9 @@ if ( (is_array($this->urls)) and (count($this->urls) > 1) and ($this->urls[0] !=
             $web .= "</a>";
         }
 
-        $web .= $this->restoreUrl("Use this URL to connect with us ".$this->url . ".");
+        $web .= $this->restoreUrl(
+            "Use this URL to connect with us " . $this->url . "."
+        );
 
         $web .= "<br>";
 
@@ -216,11 +225,9 @@ if ( (is_array($this->urls)) and (count($this->urls) > 1) and ($this->urls[0] !=
         $urls = $this->extractUrls($text);
 
         foreach ($urls as $i => $url) {
-
             if ($url === "https://zoom.us/") {
-               continue;
+                continue;
             }
-
 
             if (stripos($url, ".zoom.us/") !== false) {
                 // Match first instance.

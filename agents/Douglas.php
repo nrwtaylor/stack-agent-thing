@@ -26,8 +26,8 @@ class Douglas extends Agent
 
         $this->thing_report["info"] =
             "DOUGLAS is a tool for managing message generation.";
-        $this->thing_report["help"] =
-            "Click on the ZIP link for a package of PDFs.";
+        //$this->thing_report["help"] =
+        //    "Click on the ZIP link for a package of PDFs.";
 
         $this->node_list = ["douglas" => ["douglas", "uuid"]];
 
@@ -51,6 +51,7 @@ class Douglas extends Agent
 
         $this->makeChoices();
         $this->makeZip();
+        $this->makeHelp();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -78,6 +79,11 @@ class Douglas extends Agent
 
     public function zipDouglas()
     {
+if ( class_exists("\ZipArchive") == false) {
+$this->zip_error = true;
+$this->response .= "ZIP archive not available. ";
+return true;}
+
         $zip = new \ZipArchive();
 
         $ZIP_ERROR = [
@@ -219,14 +225,25 @@ class Douglas extends Agent
     {
     }
 
+    public function makeHelp() {
+$help = "ZIP files are not available on this stack.";
+if (!(isset($this->zip_error)) or ($this->zip_error !== true)) {
+$help = "Click on the ZIP link for a package of PDFs.";
+}
+$this->help = $help;
+$this->thing_report["help"] = $help;
+
+    }
+
     /**
      *
      */
     public function makeWeb()
     {
+$web = "";
+if (!(isset($this->zip_error)) or ($this->zip_error !== true)) {
         $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
         $this->node_list = ["douglas" => ["douglas"]];
-        $web = "";
         $web .=
             "ZIP file with " .
             $this->sheet_count .
@@ -239,7 +256,7 @@ class Douglas extends Agent
 
         $web .= "<p>";
         $web .= "Individual radiograms.<br>";
-
+}
 if (isset($this->association_uuids)) { 
        foreach ($this->association_uuids as $i => $uuid) {
             $rocky_link = $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
