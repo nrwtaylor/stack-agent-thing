@@ -257,12 +257,10 @@ class Rocky extends Agent
     function makeSMS()
     {
         $sms = "ROCKY " . $this->inject . " " . $this->mode . "\n";
-        //        $sms .= $this->response;
 
         $sms .= trim($this->short_message) . "\n";
 
         $sms .= "TEXT WEB";
-        // $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
@@ -672,7 +670,7 @@ $person_from = $this->name_list[array_rand($this->name_list)];
             $this->text == "X"
         ) {
             //$this->response = $this->number . " " . $this->unit . ".";
-            $this->response = "No message to pass.";
+            $this->response = "No message to pass. ";
         }
 
         if (
@@ -1176,7 +1174,7 @@ $person_from = $this->name_list[array_rand($this->name_list)];
     public function readSubject()
     {
         if (!$this->getMember()) {
-            $this->response = "Generated an inject.";
+            $this->response = "Generated an inject. ";
         }
 
         $input = strtolower($this->subject);
@@ -1232,18 +1230,18 @@ $person_from = $this->name_list[array_rand($this->name_list)];
                             $this->response .=
                                 " Set messages to " .
                                 strtoupper($this->state) .
-                                ".";
+                                ". ";
 
                             return;
 
                         case "origin":
                         case "source":
-                            $this->response .= " Set mode to origin.";
+                            $this->response .= "Set mode to origin. ";
                             $this->setMode("origin");
                             $this->getMessage();
                             return;
                         case "relay":
-                            $this->response .= " Set mode to relay.";
+                            $this->response .= "Set mode to relay. ";
                             $this->setMode("relay");
                             $this->getMessage();
                             return;
@@ -1253,7 +1251,7 @@ $person_from = $this->name_list[array_rand($this->name_list)];
                             $this->response =
                                 "Hey " .
                                 strtoupper($this->member["call_sign"]) .
-                                ".";
+                                ". ";
 
                             return;
                         case "on":
