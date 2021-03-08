@@ -294,9 +294,11 @@ if (isset($this->association_uuids)) {
             "sheet_count",
         ]);
         $this->sheet_count = $sheet_count;
-
+$associations = null;
+if (isset($this->thing->thing->assocations)) {
         $associations = json_decode($this->thing->thing->associations, true);
         //var_dump($associations);
+}
         if ($associations === null) {
             return;
         }

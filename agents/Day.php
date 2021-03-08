@@ -198,6 +198,9 @@ class Day extends Agent
             "nautical twilight end" => "astronomical twilight",
             "astronomical twilight end" => "night",
         ];
+
+        $time_of_day = 'astronomical twilight begin';
+
         $message = "";
         $count = 0;
         foreach ($arr as $period => $epoch) {

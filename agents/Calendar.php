@@ -505,9 +505,6 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
                         "[",
                         "runtime",
                         "]",
-                        //                        "\n",
-                        //                        'description',' ',"\n",
-                        //                        'location',
                     ]) . "\n";
             }
 
@@ -574,7 +571,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
                 $calendar_text .= $t;
             }
         }
-        //$this->node_list = ["calendar" => ["calendar", "dog"]];
+
         $txt =
             "CALENDAR " .
             $this->time_zone .

@@ -91,9 +91,7 @@ $this->slug = $slug;
     }
 
 public function extractSentences($text = null) {
-
 if ($text == null) {$text = $this->input;}
-
 $sentences = explode(". ", $text);
 
 $this->sentences = $sentences;

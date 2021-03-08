@@ -414,7 +414,7 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $this->thing_report["info"] = 'Agent "Email" did not send an email.';
 
-        if (isset($this->thing->account)) {
+        if ( (isset($this->thing->account)) and (isset($this->thing->account['stack'])) ) {
             if (
                 $this->thing->account["stack"]->balance["amount"] >= $this->cost
             ) {
