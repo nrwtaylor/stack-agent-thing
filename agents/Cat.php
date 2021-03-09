@@ -51,8 +51,6 @@ class Cat extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $thing_report['info'] = $message_thing->thing_report['info'];
-
-        return $this->thing_report;
     }
 
     function makeSMS()

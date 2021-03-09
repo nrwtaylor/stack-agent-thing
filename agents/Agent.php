@@ -253,19 +253,22 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         $this->thing->log(
             "ran for " . number_format($this->thing->elapsed_runtime()) . "ms."
         );
-
+//$this->thing->agent_name = "X";
         $this->thing_report["etime"] = number_format(
             $this->thing->elapsed_runtime()
         );
         $this->thing_report["log"] = $this->thing->log;
         if (isset($this->test) and $this->test) {
+            $this->thing->log("start test");
             $this->test();
         }
+        $this->thing->log("__construct complete");
     }
 
     // TODO DEV?
     public function __call($agent_function, $args)
     {
+        $this->thing->log("__call start");
         /*
         Generalize this pattern from agents.
         $agent_handler = new $agent_namespace_name($this->thing, $agent_input);
@@ -362,6 +365,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
                 $response = $this->thing->{$agent_name .
                     "_handler"}->{$function_name}(...$args);
+                $this->thing->log("__call response complete");
                 return $response;
             }
         }
@@ -387,7 +391,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
                 if (isset($agent_handler->$agent_name)) {
                     $variable = $agent_handler->$agent_name;
                 }
-
+                $this->thing->log("__call hook return");
                 return [$variable, $agent_handler];
             }
         }
@@ -399,6 +403,9 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
                 $agent_function .
                 "]. "
         );
+
+        $this->thing->log("__call complete");
+
     }
 
 // dev exploration
@@ -1788,6 +1795,8 @@ return $t;
      */
     public function read($text = null)
     {
+        $this->thing->log("read start.");
+
         if ($text == null) {
             $text = $this->subject;
         } // Always.
@@ -1825,11 +1834,12 @@ return $t;
         $this->readFrom();
 
         $this->readSubject();
-        $this->thing->log("completed read.");
+        $this->thing->log("read completed.");
     }
 
     public function readFrom($text = null)
     {
+        $this->thing->log("read from start.");
         $from = $this->from;
         if ($text != null) {
             $from = $text;
@@ -1853,14 +1863,16 @@ return $t;
 
         if (isset($uuid) and is_string($uuid)) {
             $thing = new Thing($uuid);
+            $this->thing->log("read from made a new thing.");
             if ($thing->thing != false) {
                 //$this->thing = $thing->thing;
 
                 $agent = new Agent($thing->thing);
-
-                return;
+                $this->thing->log("read from ran agent on new thing.");
+                //return;
             }
         }
+        $this->thing->log("read from complete.");
     }
 
     /**

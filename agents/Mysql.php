@@ -13,8 +13,8 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
+//use Ramsey\Uuid\Uuid;
+//use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use \PDO;
 
 class Mysql extends Agent
@@ -29,8 +29,6 @@ class Mysql extends Agent
      */
     function init()
     {
-        //    function __construct($uuid, $nom_from)
-        //    {
         $start_time = microtime(true);
         $this->start_time = $start_time;
         $this->split_time = $start_time;
@@ -58,18 +56,29 @@ class Mysql extends Agent
 
         // The problem is when they are both null.
         // Code here should allow either.
+        $this->initMysql();
+    }
+
+    public function initMysql($uuid = null, $nom_from = null)
+    {
+        if ($uuid == null) {
+            $uuid = $this->uuid;
+        }
+        if ($nom_from == null) {
+            $nom_from = $this->from;
+        }
 
         if ($nom_from == null and $uuid == null) {
-            throw new Exception('No
+            throw new \Exception('No
 			$nom_from and $uuid provided to Class Db.');
         }
 
         if ($nom_from == null) {
-            throw new Exception('No $nom_from provided to
+            throw new \Exception('No $nom_from provided to
 			Class Db.');
         }
         if ($uuid == null) {
-            throw new Exception('No $uuid provided to
+            throw new \Exception('No $uuid provided to
 			Class Db.');
         }
 
@@ -98,6 +107,8 @@ class Mysql extends Agent
         if (isset($settings["settings"]["stack"]["get_prior"])) {
             $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
+
+        $this->thing->container["stack"]["state"];
 
         $this->container = new \Slim\Container($settings);
 
@@ -128,13 +139,6 @@ class Mysql extends Agent
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             return $pdo;
-            /*
-        } catch (\Throwable $t) {
-            //throw new \Exception('Database not available.');
-        } catch (\Exception $e) {
-            //throw new \Exception('Database not available.');
-        }
-*/
         };
 
         $c["stack"] = function ($c) {
@@ -142,9 +146,9 @@ class Mysql extends Agent
             return $db;
         };
 
-        $this->get_calling_function();
+        //$this->get_calling_function();
 
-        $this->test("<b>" . $this->get_calling_function() . "</b>");
+        //$this->test("<b>" . $this->get_calling_function() . "</b>");
 
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
@@ -153,7 +157,7 @@ class Mysql extends Agent
 
         $this->uuid = $uuid;
 
-//        $this->test("Database set-up ");
+        //        $this->test("Database set-up ");
 
         // Which means at this point, we have a UUID
         // whether or not the record exists is another question.
@@ -169,6 +173,7 @@ class Mysql extends Agent
 
         return $r;
     }
+
     function get()
     {
     }
@@ -178,10 +183,8 @@ class Mysql extends Agent
     function readSubject()
     {
     }
+
     function run()
-    {
-    }
-    function respondResponse()
     {
     }
 
@@ -194,12 +197,13 @@ class Mysql extends Agent
     /**
      *
      */
+/*
     function __destruct()
     {
         // Log database transactions in test
         $this->test("Database destruct ");
     }
-
+*/
     /**
      *
      * @param unknown $created_at (optional)
@@ -444,7 +448,7 @@ class Mysql extends Agent
      *
      * @return unknown
      */
-//function Get() 
+    //function Get()
 
     function thingMysql()
     {

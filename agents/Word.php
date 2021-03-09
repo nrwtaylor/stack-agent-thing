@@ -40,26 +40,30 @@ class Word extends Agent
 
     public function initWords() {
 
+       $this->thing->log("init words start.");
        if ($this->getMemory('words-words') !== true) {
+           $this->thing->log("load words words.");
            $this->loadDictionary('words/words');
            $this->setMemory('words-words',true); 
        }
 
        if ($this->getMemory('words-offensive') !== true) {
+           $this->thing->log("load words/offensive.");
            $this->loadDictionary('offensive/bad-words');
            $this->setMemory('words-offensive',true); 
        }
 
 
        if ($this->getMemory('words-eowl') !== true) {
-
+        $this->thing->log("load words/eowl.");
         foreach (range("A", "Z") as $v) {
             $resource = 'ewol/' . $v . " Words";
            $this->loadDictionary($resource);
         }
 
-           $this->setMemory('words-eowl',true); 
+        $this->setMemory('words-eowl',true); 
        }
+       $this->thing->log("init words complete.");
 
     }
 

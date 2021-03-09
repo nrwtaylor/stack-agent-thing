@@ -116,13 +116,10 @@ class Findagent extends Agent
         }
 
         if (count($agent_things) == 0) {
-            $this->response .= "No agent thing found.";
-            //$this->sms_message .= "";
-            //$this->sms_message .= " | No agent thing found.";
+            $this->response .= "No agent thing found. ";
             $this->thing_report['things'] = true;
         } else {
             $this->agent_thing_id = $agent_things[0];
-            //$this->sms_message .=
                 ' | This is the "Find Agent" function.  Commands: none.';
             $this->thing_report['things'] = $agent_things;
         }
@@ -141,10 +138,6 @@ class Findagent extends Agent
         $this->thing->flagGreen();
 
         // Generate email response.
-
-        $to = $this->thing->from;
-
-        $from = "group";
 
         $this->thing_report['choices'] = false;
 
@@ -188,7 +181,6 @@ class Findagent extends Agent
 
     public function readSubject()
     {
-        //$this->response = null;
         $this->num_hits = 0;
     }
 }

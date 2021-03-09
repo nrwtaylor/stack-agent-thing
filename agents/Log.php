@@ -70,6 +70,38 @@ class Log extends Agent
             );
         }
     }
+
+function filterLog($log_text, $log_includes = null, $log_excludes = null)
+{
+    $response = "";
+    $lines = preg_split("/<br[^>]*>/i", $log_text);
+
+    foreach ($lines as $i => $line) {
+        foreach ($log_excludes as $j => $log_exclude) {
+            if (stripos($line, $log_exclude) !== false) {
+                continue 2;
+            }
+        }
+
+        if (count($log_includes) == 0) {
+            $response .= trim($line) . "\n";
+            continue;
+        }
+
+        foreach ($log_includes as $j => $log_include) {
+            if (stripos($line, $log_include) !== false) {
+                $response .= trim($line) . "\n";
+                continue 2;
+            }
+        }
+    }
+    if ($response === "") {
+        return true;
+    }
+    return $response;
+}
+
+
     /**
      *
      * @return unknown

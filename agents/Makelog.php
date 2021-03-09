@@ -57,9 +57,12 @@ class Makelog
 
     	// routes passes image_name to make png as $input
         $this->agent_thing = new Agent($thing, $input);
+        $this->log_handler = new Log($thing, "log");
 
         //$text = str_replace("<br>", "\n", ($this->agent_thing->thing->log));
         //$text = str_replace("\n ", "\n", $text);
+
+/*
         $log_text = "";
         $lines = explode("<br>", $this->agent_thing->thing->log);
         foreach($lines as $i=>$line) {
@@ -78,10 +81,17 @@ class Makelog
         }
 
         $text = $log_text;
+*/
+$log_text = $this->log_handler->filterLog($this->agent_thing->thing->log,null, ['make','"Agent"']);
+//var_dump($text);
+$text = $log_text;
 
         $this->text = $log_text;
 
-        $this->getRuntimes();
+
+$raw_log_text = $this->log_handler->filterLog($this->agent_thing->thing->log);
+
+        $this->runtimesLog($raw_log_text);
 
         $t = "\nSelf-reported Agent runtimes\n";
         foreach(array_reverse($this->agent_run_for) as $key=>$agent_run_for) {
@@ -149,11 +159,12 @@ $this->thing_report['snippet'] = "Merp.";
 
 }
 */
-    function getRuntimes()
+    function runtimesLog($text = null)
     {
+        if ($text == null) {$text = $this->text;}
         $c = 0;
         $this->runtimes = array();
-        $lines = explode("\n" , $this->text);  
+        $lines = explode("\n" , $text);  
         $time_stamp = 0;
         $run_time = 0;
         $previous_run_time = 0;
@@ -194,6 +205,3 @@ $this->thing_report['snippet'] = "Merp.";
         }
     }
 }
-
-
-?>
