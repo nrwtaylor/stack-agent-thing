@@ -47,12 +47,18 @@ class Agent
         }
 
         $this->getName();
+
+        //$this->thing->agent_name = $this->agent_class_name;
+
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         // Given a "thing".  Instantiate a class to identify
         // and create the most appropriate agent to respond to it.
 
         $this->thing = $thing;
         $this->thing_report["thing"] = $this->thing;
+
+        $this->thing->agent_name = $this->agent_class_name;
+
 
         if (!isset($this->thing->run_count)) {
             $this->thing->run_count = 0;

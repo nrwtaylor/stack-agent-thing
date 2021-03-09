@@ -1019,6 +1019,7 @@ class Thing
 
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+/*
         $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
@@ -1028,7 +1029,12 @@ class Thing
             $class_name_array = explode("\\", $class_namespace);
             $class_name = end($class_name_array);
         }
+*/
 
+$agent_name = "Thing";
+if (isset($this->agent_name)) {$agent_name = $this->agent_name;}
+//var_dump($agent_name);
+$class_name= $agent_name;
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
