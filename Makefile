@@ -245,7 +245,7 @@ clean: ## Clean up the web folders and settings
 # perhaps also:  mysql? php?
 
 patch: ## Activate a patch
-	sudo cp -rvf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/
+	sudo cp -rf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/
 
 debug: ## Install enhanced debugging environment (dev optional?)
 	sudo apt install php-dev
