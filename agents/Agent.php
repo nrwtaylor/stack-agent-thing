@@ -893,6 +893,50 @@ return $t;
         $this->calling_agent = null;
     }
 
+    function listAgents()
+    {
+        $this->agent_list = [];
+        $this->agents_list = [];
+
+        // Only use Stackr agents for now
+        // Single source folder ensures uniqueness of N-grams
+        $dir =
+            $GLOBALS["stack_path"] .
+            "vendor/nrwtaylor/stack-agent-thing/agents";
+        $files = scandir($dir);
+
+        foreach ($files as $key => $file) {
+            if ($file[0] == "_") {
+                continue;
+            }
+            if (strtolower(substr($file, 0, 3)) == "dev") {
+                continue;
+            }
+
+            // Ignore Makejson, Makepdf, etc
+            if (strtolower(substr($file, 0, 4)) == "Make") {
+                continue;
+            }
+
+            if (strtolower(substr($file, -7)) == "handler") {
+                continue;
+            }
+
+            if (strtolower(substr($file, -4)) != ".php") {
+                continue;
+            }
+            if (!ctype_upper($file[0])) {
+                continue;
+            }
+
+            $agent_name = substr($file, 0, -4);
+
+            $this->agent_list[] = ucwords($agent_name);
+            $this->agents_list[$agent_name] = ["name" => $agent_name];
+        }
+    }
+
+
     public function makeAgent()
     {
         $this->currentAgent();

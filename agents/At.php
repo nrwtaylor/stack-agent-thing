@@ -253,9 +253,7 @@ foreach($t as $i=>$access_code) {
 $input = str_replace($access_code, " ",$input);
 }
 
-
         $input = $this->stripTelephonenumbers($input, " ");
-
         $this->parsed_date = date_parse($input);
 
         $month = $this->parsed_date["month"];

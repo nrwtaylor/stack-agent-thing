@@ -791,6 +791,10 @@ class Year extends Agent
             }
         }
 
+// TODO ?
+// 23 may 1 is recognized by date_parse as 23 may 2001.
+// dev?
+
         $this->parsed_date = date_parse($text);
         $year = $this->parsed_date["year"];
 
@@ -898,7 +902,6 @@ class Year extends Agent
         // if (!isset($this->thing->ngram_handler)) {
         //     $this->thing->ngram_handler = new Ngram($this->thing, "ngram");
         // }
-
         $tokens = [];
         foreach (range(0, 4, 1) as $i) {
             $new_grams = $this->extractNgrams($text, $i);
@@ -914,7 +917,6 @@ class Year extends Agent
             if ($response === false) {
                 continue;
             }
-
             // TODO refactor
             if (is_string($response)) {
                 $response = intval($response);
@@ -957,7 +959,6 @@ class Year extends Agent
         $unique = array_unique($serialized);
 
         $years = array_intersect_key($years, $unique);
-
         if (count($years) === 1) {return $years;}
 
         // Check if the year appears as a distinct token.
