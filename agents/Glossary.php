@@ -34,17 +34,19 @@ class Glossary extends Agent
         $this->glossary_file_error = false;
 
         $this->time_budget = 5000; // Don't spend more than 5s building the glossary.
+    }
 
-
+    function run()
+    {
     }
 
     /**
      *
      */
-    function run()
+    function deprecate_run()
     {
-        $this->test_results = [];
-
+        //$this->test_results = [];
+        /*
         $data_source = $this->resource_path . "glossary/glossary.txt";
 
         // No glossary resource.
@@ -68,7 +70,7 @@ class Glossary extends Agent
         } else {
             $this->data = $data;
         }
-
+*/
         $this->split_time = $this->thing->elapsed_runtime();
 
         while ($this->auto_glossary == "on") {
@@ -168,74 +170,75 @@ class Glossary extends Agent
             $k = array_rand($this->agents_list);
             $agent = $this->agents_list[$k];
 
-// See if this is an agent to exclude.
-if ($this->excludeGlossary($agent) === true) {continue;}
-
-// See if this exists in the glossary already.
-if ($this->existsGlossary($agent) === true) {continue;}
-
-        $this->thing->console($agent["name"] . "\n");
-
-        $this->glossary_agents[] = $agent;
-
-        $v = $agent;
-        $agent_class_name = $v["name"];
-
-        if (strtolower($agent_class_name) == "agents") {
-            return;
-        }
-        if (strtolower($agent_class_name) == "agentstest") {
-            return;
-        }
-
-        $glossary = $this->agentGlossary($agent_class_name);
-        $this->test_results[] = $glossary;
-
-$this->saveGlossary();
-
-$this->loadGlossary();
-
-}
-
-var_dump($test_results);
-    }
-
-    public function existsGlossary($agent_name) {
-
-            $match_flag = false;
-            foreach ($this->glossary as $glossary_agent_name => $librex) {
-                if (strtolower($agent_name) == strtolower($glossary_agent_name)) {
-                    //$match_flag = true;
-                    return true;
-                    //break;
-                }
+            // See if this is an agent to exclude.
+            if ($this->excludeGlossary($agent) === true) {
+                continue;
             }
 
-           // if (!$match_flag) {
-           //     break;
-           // }
-        return false;
+            // See if this exists in the glossary already.
+            if ($this->existsGlossary($agent) === true) {
+                continue;
+            }
 
+            $this->thing->console($agent["name"] . "\n");
 
+            $this->glossary_agents[] = $agent;
+
+            $v = $agent;
+            $agent_class_name = $v["name"];
+
+            if (strtolower($agent_class_name) == "agents") {
+                return;
+            }
+            if (strtolower($agent_class_name) == "agentstest") {
+                return;
+            }
+
+            $glossary_item = $this->agentGlossary($agent_class_name);
+            //$this->test_results[] = $glossary;
+
+            $this->glossary[strtoupper($agent_class_name)] = $glossary_item;
+
+            $this->saveGlossary();
+
+            $this->loadGlossary();
+        }
+
+        //var_dump($test_results);
     }
 
-    public function excludeGlossary($agent_name) {
+    public function existsGlossary($agent_name)
+    {
+        $match_flag = false;
+        foreach ($this->glossary as $glossary_agent_name => $librex) {
+            if (strtolower($agent_name) == strtolower($glossary_agent_name)) {
+                //$match_flag = true;
+                return true;
+                //break;
+            }
+        }
 
+        // if (!$match_flag) {
+        //     break;
+        // }
+        return false;
+    }
+
+    public function excludeGlossary($agent_name)
+    {
         $exclude_agents = ["Emailhandler", "Forgetall", "Tally"];
 
-
-            foreach ($exclude_agents as $i => $exlude_agent_name) {
-                //echo $agent['name'] ." " .$agent_name ."\n";
-                if (strtolower($agent_name) == strtolower($exclude_agent_name)) {
-//                    echo $agent["name"] . " " . $agent_name . "\n";
-return true;
-//                    $match_flag = true;
-//                    break;
-                }
+        foreach ($exclude_agents as $i => $exlude_agent_name) {
+            //echo $agent['name'] ." " .$agent_name ."\n";
+            if (strtolower($agent_name) == strtolower($exclude_agent_name)) {
+                //                    echo $agent["name"] . " " . $agent_name . "\n";
+                return true;
+                //                    $match_flag = true;
+                //                    break;
             }
+        }
 
-return false;
-
+        return false;
     }
 
     public function agentGlossary($agent_class_name)
@@ -248,11 +251,6 @@ return false;
         try {
             $thing = new Thing(null);
             $test_agent = $this->getAgent($agent_class_name, null, $thing);
-
-            $help_text = "No help available.";
-            if (isset($test_agent->thing_report["help"])) {
-                $help_text = $test_agent->thing_report["help"];
-            }
         } catch (\Throwable $ex) {
             // Error is the base class for all internal PHP error exceptio$
 
@@ -261,9 +259,20 @@ return false;
             $help_text = "No help available.";
         }
 
+        $help_text = "No help available.";
+        if (isset($test_agent->thing_report["help"])) {
+            $help_text = $test_agent->thing_report["help"];
+        }
+        $info_text = "No info available.";
+        if (isset($test_agent->thing_report["info"])) {
+            $info_text = $test_agent->thing_report["info"];
+        }
+
         $glossary = [
             "agent_name" => $agent_class_name,
             "text" => $help_text,
+            "help" => $help_text,
+            "info" => $info_text,
         ];
 
         return $glossary;
@@ -283,15 +292,14 @@ return false;
         return strlen($b) - strlen($a);
     }
 
-    public function commandsGlossary($matches)
+    public function commandsGlossary($glossary)
     {
         $slug_agent = new Slug($this->thing, "slug");
         $command_agent = new Command($this->thing, "command");
-        //$commands = $command_agent->extractCommands($array['text']);
 
         $commands = [];
-        foreach ($matches as $agent_name => $packet) {
-            $l = $this->uc_first_word($packet["words"]);
+        foreach ($glossary as $agent_name => $glossary_item) {
+            $l = $this->uc_first_word($glossary_item["help"]);
 
             $commands_new = $command_agent->extractCommands($l);
 
@@ -337,7 +345,7 @@ return false;
             $this->slug_agent = new Slug($this->thing, "slug");
         }
 
-        $line = $this->uc_first_word($array["text"]);
+        $line = $this->uc_first_word($array["help"]);
 
         $t = $line;
 
@@ -402,6 +410,7 @@ return false;
      */
     function makeSMS()
     {
+        var_dump($this->glossary);
         $sms = "GLOSSARY | ";
 
         if (isset($this->response)) {
@@ -430,7 +439,7 @@ return false;
         $data = "";
         //$data = implode(" " , $this->test_results);
 
-        foreach ($this->test_results as $i => $result) {
+        foreach ($this->glossary as $i => $result) {
             $data .= "" . $result["agent_name"] . " " . $result["text"] . "\n";
         }
 
@@ -444,7 +453,7 @@ return false;
             // Handle quietly.
         }
 
-        $this->data = $data;
+        //       $this->data = $data;
     }
 
     /**
@@ -469,31 +478,18 @@ return false;
             if (isset($this->glossary[$agent_name])) {
                 continue;
             }
-            $this->glossary[$agent_name] = $packet;
+            $this->glossary[strtoupper($agent_name)] = [
+                "agent_name" => $packet["proword"],
+                "help" => $packet["words"],
+            ];
         }
 
-        $this->librex_matches = $librex_agent->matches;
+        //$this->librex_matches = $librex_agent->matches;
         $this->response .= "Read glossary. ";
-        $this->commandsGlossary($this->librex_matches);
+        $this->commandsGlossary($this->glossary);
     }
 
-    public function loadGlossary() {
-
-        // Load glossary from resource and render as text.
-
-        $librex_agent = new Librex($this->thing, "glossary/glossary");
-
-        $librex_agent->getMatches();
-
-        $txt = "";
-        ksort($librex_agent->matches);
-        $this->glossary = $librex->matches;
-    }
-
-    /**
-     *
-     */
-    function makeTXT()
+    public function loadGlossary()
     {
         // Load glossary from resource and render as text.
 
@@ -503,7 +499,30 @@ return false;
 
         $txt = "";
         ksort($librex_agent->matches);
-        foreach ($librex_agent->matches as $agent_name => $packet) {
+
+        $glossary = [];
+        foreach ($librex->matches as $agent_name => $librex_array) {
+            $glossary_item = [
+                "name" => $librex_array["proword"],
+                "help" => $librex_array["words"],
+            ];
+
+            $glossary[$agent_name] = $glossary_item;
+        }
+        $this->glossary = $glossary;
+    }
+
+    /**
+     *
+     */
+    function makeTXT()
+    {
+        // Load glossary from resource and render as text.
+
+        $glossary = $this->glossary;
+        $txt = "";
+        ksort($glossary);
+        foreach ($glossary as $agent_name => $glossary_item) {
             if (!isset($prior_firstChar)) {
                 $prior_firstChar = "";
             }
@@ -513,7 +532,7 @@ return false;
             }
             $prior_firstChar = $firstChar;
 
-            $txt .= $agent_name . " " . $packet["words"] . "\n";
+            $txt .= $agent_name . " " . $glossary_item["help"] . "\n";
         }
 
         $this->thing_report["txt"] = $txt;
@@ -529,12 +548,11 @@ return false;
 
         $web = "<b>Glossary</b>";
         $web .= "<p><p>";
-        $librex_agent = new Librex($this->thing, "glossary/glossary");
 
-        $librex_agent->getMatches();
+        $glossary = $this->glossary;
 
-        ksort($librex_agent->matches);
-        foreach ($librex_agent->matches as $agent_name => $packet) {
+        ksort($glossary);
+        foreach ($glossary as $agent_name => $glossary_item) {
             if (!isset($prior_firstChar)) {
                 $prior_firstChar = "";
             }
@@ -546,40 +564,42 @@ return false;
             }
             $prior_firstChar = $firstChar;
 
-            if (strpos($packet["words"], "DEV") !== false) {
+            if (strpos($glossary_item["help"], "DEV") !== false) {
                 continue;
             }
 
-            if (stripos($packet["words"], "no sms response") !== false) {
+            if (stripos($glossary_item["help"], "no sms response") !== false) {
                 continue;
             }
 
-            if (stripos($packet["words"], "no text response") !== false) {
+            if (stripos($glossary_item["help"], "no text response") !== false) {
                 continue;
             }
 
-            if (stripos($packet["words"], "agent response") !== false) {
+            if (stripos($glossary_item["help"], "agent response") !== false) {
                 continue;
             }
 
-            if (stripos($packet["words"], "no help available") !== false) {
+            if (
+                stripos($glossary_item["help"], "no help available") !== false
+            ) {
                 continue;
             }
 
-            if (stripos($packet["words"], "not operational") !== false) {
+            if (stripos($glossary_item["help"], "not operational") !== false) {
                 continue;
             }
 
-            if (stripos($packet["words"], "no response") !== false) {
+            if (stripos($glossary_item["help"], "no response") !== false) {
                 continue;
             }
 
-            if (stripos($packet["words"], "devstack") !== false) {
+            if (stripos($glossary_item["help"], "devstack") !== false) {
                 continue;
             }
 
-            $arr = ["name" => $agent_name, "text" => $packet["words"]];
-            $html = $this->htmlGlossary($arr);
+            //$arr = ["name" => $agent_name, "text" => $packet["words"]];
+            $html = $this->htmlGlossary($glossary_item);
 
             $web .= $html . "<br>";
         }
@@ -599,7 +619,21 @@ return false;
         $this->readGlossary();
 
         $input = $this->assert($this->input, "glossary", false);
-        //var_dump($input);
-        return;
+
+        if ($input == "dateline") {
+            //            $this->questionDateline();
+            return;
+        }
+
+        if (stripos($input, "update") !== false) {
+            $this->glossary_update_flag = true;
+        }
+
+        //        if ($input == "dateline test") {
+        //            $this->test();
+        //            return;
+        //        }
+
+        //        $this->dateline = $this->extractDateline($input);
     }
 }

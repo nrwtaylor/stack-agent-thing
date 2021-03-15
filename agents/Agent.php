@@ -1035,10 +1035,6 @@ return $t;
     // Plan to deprecate getMemcached terminology.
     public function getMemory($text = null)
     {
-        //        if (isset($this->memory)) {
-        //            return;
-        //        }
-
         // Null?
         // $this->mem_cached = null;
         // Fail to stack php memory code if Memcached is not availble.
@@ -1472,17 +1468,6 @@ return $t;
 
     public function makeLink()
     {
-        //$link = $this->web_prefix . "thing/" . $this->uuid . "/" . $this->agent_name;
-        //$this->thing_report['link'] = $link;
-        //return;
-
-        //if (isset($this->thing_report['link'])) {return;}
-        //$link = $this->web_prefix;
-
-        //if (isset($this->keyword)) {
-        //$link = $this->web_prefix . "thing/" . $this->uuid . "/" . $this->keyword;
-        //}
-
         if (isset($this->link)) {
             $link = $this->link;
         }
@@ -1637,8 +1622,6 @@ return $t;
      */
     public function makeTXT()
     {
-        //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
-        //        $this->thing_report['txt'] = $this->thing_report['sms'];
     }
 
     /**
@@ -1646,9 +1629,6 @@ return $t;
      */
     public function makeMessage()
     {
-        //if (!isset($this->thing_report['sms'])) {$this->makeSMS();}
-
-        //        $this->thing_report['message'] = $this->thing_report['sms'];
     }
 
     /**
