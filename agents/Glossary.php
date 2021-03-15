@@ -39,6 +39,17 @@ class Glossary extends Agent
     function run()
     {
         if (
+            isset($this->glossary_build_flag) and
+            $this->glossary_build_flag and
+            $this->auto_glossary == "on"
+        ) {
+            $this->response .= "Saw request to build glossary. ";
+            $this->buildGlossary();
+            return;
+        }
+
+
+        if (
             isset($this->glossary_update_flag) and
             $this->glossary_update_flag and
             $this->auto_glossary == "on"
@@ -195,6 +206,46 @@ class Glossary extends Agent
         return false;
     }
 
+   public function buildGlossary()
+    {
+            $this->listAgents();
+
+foreach($this->agents_list as $agent) {
+            //$agent = $this->agents_list[$k];
+            // See if this is an agent to exclude.
+            if ($this->excludeGlossary($agent["name"]) === true) {
+                continue;
+            }
+
+            // See if this exists in the glossary already.
+            if ($this->existsGlossary($agent["name"]) === true) {
+                continue;
+            }
+
+            $this->thing->console($agent["name"] . "\n");
+
+            $this->glossary_agents[] = $agent;
+
+            $v = $agent;
+            $agent_class_name = $v["name"];
+
+            if (strtolower($agent_class_name) == "agents") {
+                continue;
+            }
+            if (strtolower($agent_class_name) == "agentstest") {
+                continue;
+            }
+
+            $glossary_item = $this->agentGlossary($agent_class_name);
+$glossary[$agent_class_name] = $glossary_item;
+        }
+
+//var_dump($glossary);
+//exit();
+    }
+
+
+
     public function randomGlossary()
     {
         $count = 0;
@@ -246,6 +297,16 @@ class Glossary extends Agent
             }
         }
 
+        $exclude_prefixes = ['Make'];
+        foreach ($exclude_prefixes as $i => $exclude_prefix) {
+           if (substr( strtolower($agent_name), 0, strlen($exclude_prefix) ) === strtolower($exclude_prefix)) { 
+              return true;
+           }
+
+
+        }
+
+
         return false;
     }
 
@@ -254,9 +315,10 @@ class Glossary extends Agent
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
+
         try {
             $thing = new Thing(null);
-            $test_agent = $this->getAgent($agent_class_name, null, $thing);
+            $test_agent = $this->getAgent($agent_class_name, $agent_class_name, $thing);
         } catch (\Throwable $ex) {
             // Error is the base class for all internal PHP error exceptio$
 
@@ -450,21 +512,40 @@ class Glossary extends Agent
     {
         $data = "";
         $data .= "# " . $this->current_time . "\n";
-        foreach ($this->glossary as $i => $result) {
-            $data .= "" . $result["agent_name"] . " " . $result["help"] . "\n";
+        foreach ($this->glossary as $i => $glossary_item) {
+            $data .= "" . $glossary_item["agent_name"] . " " . $glossary_item["help"] . "\n";
         }
 
         $file = $this->resource_path . "glossary/glossary.txt";
         try {
-            //                if ($file_flag == false) {
             file_put_contents($file, $data, FILE_APPEND | LOCK_EX);
-            //                }
+            $this->response .= "Updated glossary file. ";
         } catch (Exception $e) {
-            $this->response .= "Count not write to glossary file. ";
+            $this->response .= "Could not write to glossary file. ";
             $this->glossary_file_error = true;
             // Handle quietly.
         }
     }
+// Overwrite. Use with rebuild.
+    function saveGlossary()
+    {
+        $data = "";
+        $data .= "# " . $this->current_time . "\n";
+        foreach ($this->glossary as $i => $glossary_item) {
+            $data .= "" . $glossary_item["agent_name"] . " " . $glossary_item["help"] . "\n";
+        }
+
+        $file = $this->resource_path . "glossary/glossary.txt";
+        try {
+            file_put_contents($file, $data);
+            $this->response .= "Overwrote glossary file. ";
+        } catch (Exception $e) {
+            $this->response .= "Could not write to glossary file. ";
+            $this->glossary_file_error = true;
+            // Handle quietly.
+        }
+    }
+
 
     /**
      *
@@ -512,16 +593,27 @@ class Glossary extends Agent
         $txt = "";
         ksort($librex_agent->matches);
         $glossary = [];
-        foreach ($librex->matches as $agent_name => $librex_array) {
+        foreach ($librex_agent->matches as $agent_name => $librex_array) {
+
+$text = $this->startstripText($librex_array['words'], $librex_array['proword']);
             $glossary_item = [
                 "name" => $librex_array["proword"],
-                "help" => $librex_array["words"],
+                "help" => $text,
             ];
 
             $glossary[$agent_name] = $glossary_item;
         }
         $this->glossary = $glossary;
     }
+
+public function startstripText($text, $prefix) {
+
+if (substr($text, 0, strlen($prefix)) == $prefix) {
+    $text = trim(substr($text, strlen($prefix)));
+} 
+return $text;
+
+}
 
     /**
      *
@@ -684,6 +776,11 @@ class Glossary extends Agent
         if (stripos($input, "full") !== false) {
             $this->glossary_full_flag = true;
         }
+
+        if (stripos($input, "build") !== false) {
+            $this->glossary_build_flag = true;
+        }
+
 
         //        $this->dateline = $this->extractDateline($input);
     }

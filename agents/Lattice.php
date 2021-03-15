@@ -90,7 +90,8 @@ class Lattice extends Agent
 
     public function timestampLattice($t = null)
     {
-        $s = $this->thing->thing->created_at;
+//        $s = $this->thing->thing->created_at;
+        $s = $this->thing->created_at;
 
         if (!isset($this->retain_to)) {
             $text = "X";

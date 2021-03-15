@@ -1920,6 +1920,9 @@ return $t;
         if (strtolower($this->agent_name) == strtolower($agent_class_name)) {
             return true;
         }
+
+        //if ($agent_class_name == null) {return true;}
+
         register_shutdown_function([$this, "shutdownHandler"]);
 
         //if ($agent_class_name == 'Test') {return false;}
@@ -1934,6 +1937,20 @@ return $t;
                 'trying Agent "' . $agent_class_name . '".',
                 "INFORMATION"
             );
+
+if ( $agent_class_name == null)  {
+throw \Exception($agent_class_name . " is a null agent.");
+
+}
+
+
+if ( is_subclass_of($agent_namespace_name, "\\Nrwtaylor\\StackAgentThing\\Agent") === false) {
+//var_dump($agent_class_name);
+$this->thing->log($agent_namespace_name . " is not an agent.");
+//echo $agent_namespace_name . "is not an agent\n";
+throw \Exception($agent_namespace_name . " is not an agent.");
+
+}
 
             // In test 25 May 2020
 
