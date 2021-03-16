@@ -486,6 +486,9 @@ class Read extends Agent
         // File cache
         //if ($uri == null) {$uri = $this->link;} // Has uuid
         if ($uri == null) {
+if (!isset($this->url)) {$this->response .= "No link provided. ";return;}
+if ($this->url == null) {$this->response .= "No link provided. "; return;}
+
             $uri = $this->url;
         } // Semi-unique
 
@@ -687,7 +690,7 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
         } else {
             $sms_message .= 'GREEN';
         }
-
+if (isset($this->do_not_index)) {
         $sms_message .= " index flag ";
         if ($this->do_not_index) {
             $sms_message .= 'RED';
@@ -696,7 +699,7 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
         }
 
         $sms_message .= ". ";
-
+}
         $this->thing_report['sms'] = $sms_message;
         $this->sms_message = $sms_message;
     }

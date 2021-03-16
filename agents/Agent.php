@@ -19,7 +19,6 @@ ini_set("display_errors", 1);
 error_reporting(-1);
 
 define("MAX_EXECUTION_TIME", 2); # seconds
-
 class Agent
 {
     public $input;
@@ -59,7 +58,6 @@ class Agent
 
         $this->thing->agent_name = $this->agent_class_name;
 
-
         if (!isset($this->thing->run_count)) {
             $this->thing->run_count = 0;
         }
@@ -83,32 +81,29 @@ class Agent
 
         // Get some stuff from the stack which will be helpful.
 
-// dev test
+        // dev test
 
-// TODO define all default null settings
-       $this->default_font = null;
-       $this->default_pdf_page_template = null;
+        // TODO define all default null settings
+        $this->default_font = null;
+        $this->default_pdf_page_template = null;
 
-$stack_settings = $thing->container['stack'];
-foreach($stack_settings as $setting_name=>$setting_value) {
+        $stack_settings = $thing->container['stack'];
+        foreach ($stack_settings as $setting_name => $setting_value) {
+            // For 'backwards' compatibility.
+            //$this->{$setting_name} = $thing->container['stack'][$setting_name];
 
-// For 'backwards' compatibility.
-//$this->{$setting_name} = $thing->container['stack'][$setting_name];
-
-// Going forward set default_ and stack_ prefixes
-// For settings from stack private settings.
-$this->{'default_'.$setting_name} = $thing->container['stack'][$setting_name];
-$this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
-
-}
-
+            // Going forward set default_ and stack_ prefixes
+            // For settings from stack private settings.
+            $this->{'default_' . $setting_name} =
+                $thing->container['stack'][$setting_name];
+            $this->{'stack_' . $setting_name} =
+                $thing->container['stack'][$setting_name];
+        }
 
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
         $this->word = $thing->container["stack"]["word"];
         $this->email = $thing->container["stack"]["email"];
-
-
 
         // And some more stuff
         $this->short_name = $thing->container["stack"]["short_name"];
@@ -186,12 +181,10 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         $this->init();
         $this->get();
         try {
-
             $this->read();
             $this->run();
             $this->make();
             $this->set();
-
         } catch (\OverflowException $t) {
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
@@ -253,7 +246,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         $this->thing->log(
             "ran for " . number_format($this->thing->elapsed_runtime()) . "ms."
         );
-//$this->thing->agent_name = "X";
+        //$this->thing->agent_name = "X";
         $this->thing_report["etime"] = number_format(
             $this->thing->elapsed_runtime()
         );
@@ -311,9 +304,9 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         // Allow for customizing this later.
         $agent_input = $agent_name;
 
-// dev test
-//$agent_input = $this->agent_input;
-//if ($this->agent_input == null) {$agent_input = $agent_name;}
+        // dev test
+        //$agent_input = $this->agent_input;
+        //if ($this->agent_input == null) {$agent_input = $agent_name;}
 
         // Namespaced class.
         $agent_namespace_name =
@@ -329,13 +322,15 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
         // Try plural and singular variants of agent name.
         if (substr($agent_namespace_name, -3) == "ies") {
-            $agent_namespace_names[] = rtrim($agent_namespace_name, "ies") . "y";
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "ies") . "y";
         } elseif (substr($agent_namespace_name, -2) == "es") {
             $agent_namespace_names[] = rtrim($agent_namespace_name, "es");
         } elseif (substr($agent_namespace_name, -1) == "s") {
             $agent_namespace_names[] = rtrim($agent_namespace_name, "s");
         } elseif (substr($agent_namespace_name, -1) == "y") {
-            $agent_namespace_names[] = rtrim($agent_namespace_name, "y") . "ies";
+            $agent_namespace_names[] =
+                rtrim($agent_namespace_name, "y") . "ies";
         } else {
             $agent_namespace_names[] = $agent_namespace_name . "s";
             $agent_namespace_names[] = $agent_namespace_name . "es";
@@ -405,11 +400,10 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         );
 
         $this->thing->log("__call complete");
-
     }
 
-// dev exploration
-/*
+    // dev exploration
+    /*
 public function __set($name, $value) {
 //	if ((stripos($name, "prior_thing")) and (!isset($this->$$name))) {
 //		throw new \Exception($name.' thing does not exist');
@@ -498,8 +492,11 @@ public function __set($name, $value) {
         return $things;
     }
 
-    public function isThing($thing) {
-        if ($thing === null) {return false;}
+    public function isThing($thing)
+    {
+        if ($thing === null) {
+            return false;
+        }
         return true;
     }
 
@@ -584,17 +581,17 @@ public function __set($name, $value) {
         return ${$agent_name};
     }
 
-    public function settingsAgent($settings_array) {
+    public function settingsAgent($settings_array)
+    {
+        $t = $this->thing->container['api'];
+        foreach ($settings_array as $setting) {
+            if (!isset($t[$setting])) {
+                return null;
+            }
 
-$t = $this->thing->container['api'];
-foreach($settings_array as $setting) {
-if (!isset($t[$setting])) {
-return null;}
-
-$t =$t[$setting];
-}
-return $t;
-
+            $t = $t[$setting];
+        }
+        return $t;
     }
 
     public function readAgent($text = null)
@@ -794,7 +791,6 @@ return $t;
 
             $thing_report["thing"] = $t;
             $this->setMemory($variable_name, $thing_report);
-
         }
 
         $this->thing->log("completed make.");
@@ -935,7 +931,6 @@ return $t;
             $this->agents_list[$agent_name] = ["name" => $agent_name];
         }
     }
-
 
     public function makeAgent()
     {
@@ -1938,26 +1933,27 @@ return $t;
                 "INFORMATION"
             );
 
-if ( $agent_class_name == null)  {
-throw \Exception($agent_class_name . " is a null agent.");
+            if ($agent_class_name == null) {
+                throw \Exception($agent_class_name . " is a null agent.");
+            }
 
-}
-
-
-if ( is_subclass_of($agent_namespace_name, "\\Nrwtaylor\\StackAgentThing\\Agent") === false) {
-//var_dump($agent_class_name);
-$this->thing->log($agent_namespace_name . " is not an agent.");
-//echo $agent_namespace_name . "is not an agent\n";
-throw \Exception($agent_namespace_name . " is not an agent.");
-
-}
+            if (
+                is_subclass_of(
+                    $agent_namespace_name,
+                    "\\Nrwtaylor\\StackAgentThing\\Agent"
+                ) === false
+            ) {
+                //var_dump($agent_class_name);
+                $this->thing->log($agent_namespace_name . " is not an agent.");
+                //echo $agent_namespace_name . "is not an agent\n";
+                throw \Exception($agent_namespace_name . " is not an agent.");
+            }
 
             // In test 25 May 2020
 
             if (!isset($thing->subject)) {
                 $thing->subject = $this->input;
             }
-
             $agent = new $agent_namespace_name($thing, $agent_input);
             restore_error_handler();
 
@@ -2182,54 +2178,10 @@ throw \Exception($agent_namespace_name . " is not an agent.");
             return false;
         }
 
-        try {
-            $agent_namespace_name =
-                "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
-
-            $this->thing->log(
-                'trying Agent "' . $agent_class_name . '".',
-                "INFORMATION"
-            );
-
-            // Added agent_class_name to avoid double call.
-            // 24 May 2020
-
-            // dev refactor to call already instantiated class - if exists
-            // ie $this->thing->{$agent_class_name."_handler"}
-
-            $agent = new $agent_namespace_name($this->thing, $agent_class_name);
-
-            return true;
-
-            // If the agent returns true it states it's response is not to be used.
-            if (isset($agent->response) and $agent->response === true) {
-                throw new Exception("Flagged true.");
-            }
-
-            $this->thing_report = $agent->thing_report;
-
-            $this->agent = $agent;
-            return true;
-        } catch (\Throwable $t) {
-            $this->thing->log("caught throwable.", "WARNING");
-        } catch (\Error $ex) {
-            // Error is the base class for all internal PHP error exceptions.
-            $this->thing->log(
-                'caught error. Could not load "' . $agent_class_name . '".',
-                "WARNING"
-            );
-            $message = $ex->getMessage();
-            // $code = $ex->getCode();
-            $file = $ex->getFile();
-            $line = $ex->getLine();
-
-            //            $input = $message . '  ' . $file . ' line:' . $line;
-            $this->thing->log($input, "WARNING");
-
-            // This is an error in the Place, so Bork and move onto the next context.
-            // $bork_agent = new Bork($this->thing, $input);
-            //continue;
+        if ($this->getAgent($agent_class_name, $agent_class_name, null) === false) {
             return false;
+        } else {
+            return true;
         }
     }
 
@@ -2505,7 +2457,7 @@ throw \Exception($agent_namespace_name . " is not an agent.");
         if (isset($uuid) and is_string($uuid)) {
             $thing = new Thing($uuid);
 
-            if ( ($thing->thing != false) and (isset($thing->created_at)) ) {
+            if ($thing->thing != false and isset($thing->created_at)) {
                 $f = trim(str_replace($uuid, "", $input));
 
                 // TODO: Test
@@ -2565,7 +2517,6 @@ throw \Exception($agent_namespace_name . " is not an agent.");
         });
         $matches = [];
         foreach ($arr as $i => $ngram) {
-
             $ngram = ucfirst($ngram);
             if ($ngram == "Thing") {
                 continue;
@@ -2587,10 +2538,12 @@ throw \Exception($agent_namespace_name . " is not an agent.");
             if ($ngram == "") {
                 continue;
             }
-            if ($this->isAgent($ngram)) {
+
+//            if ($this->isAgent($ngram)) {
                 $matches[] = $ngram;
                 //                return $this->thing_report;
-            }
+//            }
+
         }
 
         if (count($matches) == 1) {

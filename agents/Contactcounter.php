@@ -34,7 +34,10 @@ class Contactcounter extends Agent
         $contacts_list = [];
 
         $findagent_thing = new Findagent($this->thing, 'contact');
-        $count = count($findagent_thing->thing_report['things']);
+
+        $things = $findagent_thing->thing_report['things'];
+
+        $count = count($things);
 
         $this->thing->log(
             'Agent "Contactcounter" found ' .
@@ -169,3 +172,4 @@ class Contactcounter extends Agent
         return false;
     }
 }
+

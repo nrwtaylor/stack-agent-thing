@@ -47,68 +47,10 @@ class Headcode extends Agent
     public $var = "hello";
     function init()
     {
-        //   function __construct(Thing $thing, $agent_input = null)
-        //   {
-        //       $this->start_time = microtime(true);
-
-        //if ($agent_input == null) {$agent_input = "";}
-        //        $this->agent_name = "headcode";
-        //      $this->agent_input = $agent_input;
-
-        //       $this->thing = $thing;
-        //     $this->start_time = $this->thing->elapsed_runtime();
-        //       $this->thing_report['thing'] = $this->thing->thing;
-
-        //       $this->agent_prefix = 'Agent "Headcode" ';
-
-        //       $this->thing->log(
-        //         $this->agent_prefix .
-        //           'running on Thing ' .
-        //         $this->thing->nuuid .
-        //       '.',
-        //            "INFORMATION"
-        //      );
-
-        //       $this->response = null;
-
         $this->resource_path = $GLOBALS["stack_path"] . "resources/";
-
-        // Get some stuff from the stack which will be helpful.
-        //        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        //    $this->word = $thing->container['stack']['word'];
-        //  $this->email = $thing->container['stack']['email'];
-
-        // I'm not sure quite what the node_list means yet
-        // in the context of headcodes.
-        // At the moment it seems to be the headcode routing.
-        // Which is leading to me to question whether "is"
-        // or "Place" is the next Agent to code up.  I think
-        // it will be "Is" because you have to define what
-        // a "Place [is]".
-
-        //       $this->node_list = array("start"=>array("stop 1"=>array("stop 2","stop 1"),"stop 3"),"stop 3");
-        //       $this->thing->choice->load('headcode');
 
         $this->keywords = ["next", "accept", "clear", "drop", "add", "new"];
 
-        //        $this->headcode = new Variables($this->thing, "variables headcode " . $this->from);
-
-        // So around this point I'd be expecting to define the variables.
-        // But I can do that in each agent.  Though there will be some
-        // common variables?
-
-        // And Headcode is a context.
-
-        // So here is building block of putting a headcode in each Thing.
-        // And a little bit of work on a common variable framework.
-
-        // Factor in the following code.
-
-        // 'headcode' => array('default run_time'=>'105',
-        //                        'negative_time'=>'yes'),
-
-        //$this->default_run_time = $this->thing->container['api']['headcode']['default run_time'];
         $this->default_head_code = "0Z99";
         if (isset($this->thing->container["api"]["headcode"]["head_code"])) {
             $this->default_head_code =
@@ -121,55 +63,19 @@ class Headcode extends Agent
         if (!isset($this->default_head_code)) {
             $this->default_head_code = "0Z99";
         }
-        // devstack
-        //$this->head_code = "0Z" . str_pad($this->index + 11,2, '0', STR_PAD_LEFT);
 
         $this->default_alias = "Thing";
-        //        $this->current_time = $this->thing->time();
 
         $this->test = "Development code"; // Always iterative.
-
-        // Non-nominal
-        //      $this->uuid = $thing->uuid;
-        //    $this->to = $thing->to;
-        // Potentially nominal
-        //  $this->subject = $thing->subject;
-        // Treat as nominal
-        //        $this->from = $thing->from;
-
-        // Agent variables
-        //      $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response
 
         $this->link = $this->web_prefix . "thing/" . $this->uuid . "/headcode";
 
         $this->state = null; // to avoid error messages
 
-        // Read the subject to determine intent.
-        //       $this->readSubject();
-
-        // Generate a response based on that intent.
-        // I think properly capitalized.
-        //$this->set();
-        //        if ($this->agent_input == null) {
-        //          $this->Respond();
-        //    }
-        //  $this->set();
-
-        //        $this->thing->log(
-        //          $this->agent_prefix .
-        //            ' ran for ' .
-        //          number_format(
-        //            $this->thing->elapsed_runtime() - $this->start_time
-        //      ) .
-        //    'ms.'
-        //       );
-        //     $this->thing_report['log'] = $this->thing->log;
-
         if (!isset($this->response)) {
             $this->response .= "No response found. ";
         }
 
-        //        $this->thing_report['response'] = $this->response;
     }
 
     function set()
@@ -205,17 +111,11 @@ class Headcode extends Agent
             $this->current_time
         );
 
-        //$headcode = new Variables($this->thing, "variables " . $this->head_code . " " . $this->from);
-
-        //$this->head_code = $this->headcode->getVariable("head_code");
-        // devstack this is code for devstack agents refactor out
         $this->headcode->setVariable("consist", $this->consist);
         $this->headcode->setVariable("run_at", $this->run_at);
         $this->headcode->setVariable("quantity", $this->quantity);
         $this->headcode->setVariable("available", $this->available);
 
-        //    $this->response .=
-        //        "Set headcode to " . strtoupper($this->head_code) . ". ";
     }
 
     function nextHeadcode()
@@ -653,8 +553,6 @@ class Headcode extends Agent
         // Write the variables to the db.
         $this->set();
 
-        //$this->headcode_thing = $this->thing;
-
         $this->thing->log('Agent "Headcode" found headcode a pointed to it.');
     }
 
@@ -718,8 +616,7 @@ class Headcode extends Agent
 
         // Allow negative block ticks (time quanta)
         // This is needed to track behind block completion.
-        //if ($this->available < 0) {$this->available = 0;}
-        //
+
         $this->thing->log(
             'Agent "Headcode" identified ' .
                 $this->available .
@@ -740,9 +637,7 @@ class Headcode extends Agent
         $pattern = "|[A-Za-z]|";
 
         preg_match_all($pattern, $input, $m);
-        //        return $m[0];
         $this->consists = $m[0];
-        //array_pop($arr);
 
         return $this->consists;
     }
@@ -809,9 +704,6 @@ class Headcode extends Agent
             return $this->head_code;
         }
 
-        //if (count($head_codes == 0)) {return false;}
-        //if (count($head_codes > 1)) {return true;}
-
         if (is_array($head_codes) and count($head_codes) == 0) {
             return false;
         }
@@ -821,20 +713,10 @@ class Headcode extends Agent
 
         return true;
     }
-/*
-    function read()
-    {
-        $this->thing->log("read");
 
-        //        $this->get();
-        return $this->available;
-    }
-*/
     function addHeadcode()
     {
-        //$this->makeHeadcode();
         $this->get();
-        return;
     }
 
     public function makeImage()
@@ -936,7 +818,6 @@ class Headcode extends Agent
         if (!isset($this->headcode_list)) {
             $this->getHeadcodes();
         }
-        //$this->getHeadcodes();
 
         $txt =
             "These are HEADCODES for RAILWAY " . $this->headcode->nuuid . ". ";
@@ -1056,7 +937,6 @@ class Headcode extends Agent
 
     private function getFlag()
     {
-        //        $this->flag = new Flag($this->thing, "flag " .$this->head_code);
         $this->flag = new Flag($this->thing, "flag");
 
         if (!isset($this->flag->state)) {
@@ -1066,11 +946,9 @@ class Headcode extends Agent
 
     public function makeSMS()
     {
-        //$s = "GREEN";
         if (!isset($this->flag->state)) {
             $this->getFlag();
         }
-        //$s = strtoupper($this->flag->state);
 
         $flag_state = "X";
         if (isset($this->flag->state)) {
@@ -1083,19 +961,9 @@ class Headcode extends Agent
             $sms_message .= " " . strtoupper($flag_state);
         }
 
-        //$sms_message .= " | " . $this->headcodeTime($this->start_at);
         $sms_message .= " | ";
-
-        //        $sms_message .= $this->route . " [" . $this->consist . "] " . $this->quantity;
-        //$sms_message .= "A headcode needs a ROUTE, a CONSIST, and a QUANTITY. ";
-        //        $sms_message .= " | index " . $this->index;
-        //        $sms_message .= " | available " . $this->available;
         $sms_message .= $this->response;
-        //$sms_message .= " | from " . $this->headcodeTime($this->start_at) . " to " . $this->headcodeTime($this->end_at);
-        //$sms_message .= " | now " . $this->headcodeTime();
-        //        $sms_message .= " | nuuid " . strtoupper($this->headcode->nuuid);
-        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
-        //$sms_message .= "Text QUANTITY";
+
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
 
@@ -1108,16 +976,8 @@ class Headcode extends Agent
 
         $this->thing->flagGreen();
 
-        // Generate email response.
-
-        //$to = $this->thing->from;
-        //$from = "headcode";
-
-        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
         $this->thing_report["choices"] = $choices;
-
-        //$this->makeTXT();
 
         $available = $this->thing->human_time($this->available);
 
@@ -1127,34 +987,7 @@ class Headcode extends Agent
             $index = $this->index; //
         }
 
-        //        $this->makeSMS();
-        /*
-        $test_message =
-            'Last thing heard: "' .
-            $this->subject .
-            '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
-
-        $test_message .= '<br>headcode state: ' . $this->state . '<br>';
-
-        $test_message .= '<br>' . $this->sms_message;
-
-        //		$test_message .= '<br>Current node: ' . $this->thing->choice->current_node;
-
-        $test_message .= '<br>run_at: ' . $this->run_at;
-        $test_message .= '<br>end_at: ' . $this->end_at;
-*/
-        //		$test_message .= '<br>Requested state: ' . $this->requested_state;
-
-        //$this->thing_report['sms'] = $sms_message;
         $this->thing_report["email"] = $this->sms_message;
-
-        //        $this->makeMessage();
-        //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
-
-        //        $this->makePNG();
-        //        $this->makeWeb();
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -1164,8 +997,6 @@ class Headcode extends Agent
             $this->thing_report["info"] =
                 'Agent input was "' . $this->agent_input . '".';
         }
-
-        //        $this->makeTXT();
 
         $this->thing_report["help"] = "This is a headcode.";
     }
@@ -1181,7 +1012,6 @@ class Headcode extends Agent
 
     public function readSubject()
     {
-        //$this->response = null;
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
@@ -1284,14 +1114,11 @@ class Headcode extends Agent
                             break;
 
                         case "drop":
-                            //     //$this->thing->log("read subject nextheadcode");
                             $this->dropheadcode();
                             $this->response .= "Dropped headcode. ";
                             break;
 
                         case "add":
-                            //     //$this->thing->log("read subject nextheadcode");
-                            //$this->makeheadcode();
                             $this->get();
                             $this->response .= "Added headcode. ";
                             break;
@@ -1305,8 +1132,6 @@ class Headcode extends Agent
         // Check whether headcode saw a run_at and/or run_time
         // Intent at this point is less clear.  But headcode
         // might have extracted information in these variables.
-
-        // $uuids, $head_codes, $this->run_at, $this->run_time
 
         if ($this->isData($this->head_code)) {
             $this->set();
@@ -1322,13 +1147,7 @@ class Headcode extends Agent
 
         return false;
     }
-    /*
-    function kill()
-    {
-        // No messing about.
-        return $this->thing->Forget();
-    }
-*/
+
     /* More on headcodes
 
 http://myweb.tiscali.co.uk/gansg/3-sigs/bellhead.htm
