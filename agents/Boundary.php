@@ -120,8 +120,6 @@ class Boundary extends Agent
             return false;
         }
 
-        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
-
         return $text;
     }
 
@@ -145,27 +143,7 @@ class Boundary extends Agent
             $this->newBoundary();
         }
 
-        //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
         $this->colourBoundary();
-        /*
-        if (($this->suit == 'spades') or ($this->suit == 'clubs')) {
-            $this->colour = "black";
-        } else {
-            $this->colour = "red";
-        }
-*/
-
-        //$this->response .= 'Read rule. ';
-        /*
-        $this->response =
-            "" .
-            strtoupper($this->nom) .
-            " of " .
-            ucwords($this->suit) .
-            " [" .
-            strtoupper($this->colour) .
-            "].";
-*/
     }
 
     public function newBoundary()
@@ -241,11 +219,6 @@ class Boundary extends Agent
 
     public function makeWeb()
     {
-        $boundary = ["nom" => $this->nom, "suit" => $this->suit];
-
-        $filename = $this->svgBoundary($boundary);
-
-        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
         $web = "<b>Boundary Agent</b><br>";
         $web .= "<p>";
         $web .= "<p>";
@@ -253,7 +226,6 @@ class Boundary extends Agent
         if ($this->readBoundary($this->subject) !== false) {
             $web .= $this->readBoundary($this->subject);
 
-            $web .= "<center>" . $image . "</center>";
 
             $web .= "<p>";
             $web .= "To forget this boundary CLICK on the FORGET button.<p>";
@@ -266,13 +238,7 @@ class Boundary extends Agent
 
     public function makeSnippet()
     {
-        $boundary = ["nom" => $this->nom, "suit" => $this->suit];
-
-        $filename = $this->svgBoundary($boundary);
-
-        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
-
-        $web = "<center" . $image . "</center";
+            $web = $this->readBoundary($this->subject);
 
         $this->thing_report['snippet'] = $web;
     }
@@ -302,13 +268,10 @@ class Boundary extends Agent
         $this->thing->flagGreen();
 
         // Get the current user-state.
-        //$this->makeSMS();
-        //$this->makeEmail();
         $this->makeChoices();
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
-        //$this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -321,24 +284,16 @@ class Boundary extends Agent
 
     public function readSubject()
     {
-        //$this->newRule();
-        // Ignore subject.
-        return;
     }
 
     public function boundary()
     {
-        // Call the Usermanager agent and update the state
-        // Stochastically call rule.
-        //if (rand(1, $this->variable) == 1) {
         $this->getBoundary();
-        //}
 
         $this->thing->log(
             $this->agent_prefix .
                 ' says, "Think that boundary could be any boundary.\n"'
         );
 
-        return;
     }
 }

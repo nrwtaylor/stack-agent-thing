@@ -276,17 +276,16 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
     {
         $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
 
+        if ($discriminators == null) {
+            $discriminators = ['minutes', 'hours'];
+        }
+
+
         if (count($discriminators) > 4) {
             $minimum_discrimination = $default_discriminator_thresholds[4];
         } else {
             $minimum_discrimination =
                 $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        //$input = "optout opt-out opt-out";
-
-        if ($discriminators == null) {
-            $discriminators = ['minutes', 'hours'];
         }
 
         $aliases = [];

@@ -42,19 +42,6 @@ class makeEmail
                 $this->input = "No message provided.";
         }
 
-/*        if (isset($input['message'])) {
-	        $this->input = $input['message'];
-        }
-
-        } elseif (isset($input['sms'])) {
-            $this->input = $input['sms'];
-
-        } else {
-            if (!is_array($input)) {
-                $this->input = $input;
-            }
-        }
-*/
         if (isset($input['choices'])) {
             $this->choices = $input['choices'];
         }

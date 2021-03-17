@@ -25,8 +25,6 @@ function init()
     {
 
 $nonnom_agent = new Nonnom($this->thing, "nonnom");
-echo "nomnom merp";
-exit();
 $t = $nonnom_agent->nonnomify($text);
 $this->response .= $t . " ";
     }

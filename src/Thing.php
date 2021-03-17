@@ -788,8 +788,11 @@ class Thing
         // A Thing can call an UUID so called up
         // the requested UUID.  Using the null account.
 
+$thing = false;
+if (isset($this->db)) {
         $thingreport = $this->db->Get($this->uuid);
         $thing = $thingreport['thing'];
+}
 
         $this->log("loaded thing " . $this->nuuid . " from db.");
 

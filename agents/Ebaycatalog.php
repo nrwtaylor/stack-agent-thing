@@ -23,10 +23,15 @@ class Ebaycatalog extends Agent
 
         $word = strtolower($this->word) . "_production";
 
-        $this->appID = $this->thing->container['api']['ebay'][$word]['app ID'];
-        $this->certID =
-            $this->thing->container['api']['ebay'][$word]['cert ID'];
-        $this->devID = $this->thing->container['api']['ebay'][$word]['dev ID'];
+        //        $this->appID = $this->thing->container['api']['ebay'][$word]['app ID'];
+
+        $this->appID = $this->settingsAgent(['api', 'ebay', $word, 'app ID']);
+        $this->certID = $this->settingsAgent(['api', 'ebay', $word, 'cert ID']);
+        $this->devID = $this->settingsAgent(['api', 'ebay', $word, 'dev ID']);
+
+        //        $this->certID =
+        //            $this->thing->container['api']['ebay'][$word]['cert ID'];
+        //        $this->devID = $this->thing->container['api']['ebay'][$word]['dev ID'];
 
         $this->clientID = $this->appID;
 
@@ -36,16 +41,31 @@ class Ebaycatalog extends Agent
 
         $this->serverUrl = 'https://api.ebay.com/ws/api.dll'; // server URL different for prod and sandbox
 
-        $this->code_oauth =
-            $this->thing->container['api']['ebay'][$word]['production'][
-                'auth code'
-            ];
-        $this->authToken = $this->code_oauth;
+        //        $this->code_oauth =
+        //            $this->thing->container['api']['ebay'][$word]['production'][
+        //                'auth code'
+        //            ];
+        $this->code_oauth = $this->settingsAgent([
+            'api',
+            'ebay',
+            $word,
+            'production',
+            'auth code',
+        ]);
 
-        $this->ruName =
-            $this->thing->container['api']['ebay'][$word]['production'][
-                'ruName'
-            ];
+        $this->authToken = $this->code_oauth;
+        $this->ruName = $this->settingsAgent([
+            'api',
+            'ebay',
+            $word,
+            'production',
+            'ruName',
+        ]);
+
+        //        $this->ruName =
+        //            $this->thing->container['api']['ebay'][$word]['production'][
+        //                'ruName'
+        //            ];
 
         //$this->paypalEmailAddress = $this->thing->container['api']['ebay']['email address'];
 
@@ -53,6 +73,8 @@ class Ebaycatalog extends Agent
 
         //$this->authorizationToken();
         // Having gotten it it is valid for 18 months.
+
+        $this->definitions = [];
 
         $this->run_time_max = 360; // 5 hours
 
@@ -74,7 +96,7 @@ class Ebaycatalog extends Agent
         );
     }
 
-    function getLink()
+    function getLink($ref = null)
     {
         $this->link = "https://ebay.com";
     }
