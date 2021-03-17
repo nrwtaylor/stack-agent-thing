@@ -1,4 +1,4 @@
-vv<?php
+<?php
 namespace Nrwtaylor\StackAgentThing;
 
 // devstack need to think around designing for a maximum 4000 charactor json thing
