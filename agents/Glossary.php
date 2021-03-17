@@ -24,7 +24,7 @@ class Glossary extends Agent
             "This gives a list of the help text for each Agent.";
         $this->glossary_agents = [];
 
-        $this->auto_glossary = "off";
+        $this->auto_glossary = "on";
     }
 
     /**
@@ -36,7 +36,7 @@ class Glossary extends Agent
 
         $data_source = $this->resource_path . "glossary/glossary.txt";
 
-        if (!file_exists($data_source)) {$this->response .= "No glossary found. "; return true;}
+//        if (!file_exists($data_source)) {$this->response .= "No glossary found. "; return true;}
 
         $file_flag = false;
 
