@@ -1,4 +1,4 @@
-<?php
+vv<?php
 namespace Nrwtaylor\StackAgentThing;
 
 // devstack need to think around designing for a maximum 4000 charactor json thing
@@ -763,7 +763,7 @@ class Headcode extends Agent
         );
 
         $font = $this->default_font;
-
+if (file_exists($font)) {
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
         $sizes_allowed = [72, 36, 24, 18, 12, 6];
@@ -800,6 +800,7 @@ class Headcode extends Agent
             $font,
             $text
         );
+}
         //imagestring($image, 2, $image_width-75, 10, $text, $textcolor);
         imagestring(
             $image,
