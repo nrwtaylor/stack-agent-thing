@@ -318,8 +318,9 @@ class Glossary extends Agent
         $commands = [];
         foreach ($glossary as $agent_name => $glossary_item) {
             $l = $this->uc_first_word($glossary_item["help"]);
-
             $commands_new = $command_agent->extractCommands($l);
+
+if ($commands_new == true) {continue;}
 
             $commands = array_merge($commands, $commands_new);
         }
