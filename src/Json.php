@@ -189,6 +189,11 @@ class Json
             return;
         }
 
+        if (is_string($array_data)) {
+            $array_data = ['text'=>$array_data];
+        }
+
+
         foreach ($array_data as $key => $value) {
             if ($key != "") {
                 $this->{$key} = $value;

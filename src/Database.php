@@ -16,6 +16,8 @@ ini_set("allow_url_fopen", 1);
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use \PDO;
+use Nrwtaylor\StackAgentThing\Mysql;
+use Nrwtaylor\StackAgentThing\Agent;
 
 class Database
 {
@@ -273,6 +275,7 @@ return $thingreport;
 
         $nom_from = $this->from;
         $hash_nom_from = hash($this->hash_algorithm, $nom_from);
+$prior_uuid = $this->getMemory($hash_nom_from);
         // Given a $uuid.  Find the previous record the $from user
         // created.
 
@@ -572,6 +575,7 @@ return true;
                 $this->memory = new \Memcached(); //point 2.
                 $this->memory->addServer("127.0.0.1", 11211);
             } catch (\Throwable $t) {
+echo "Throwable failed to make memchached server";
                 // Failto
                 $this->memory = new Memory($this->thing, "memory");
                 //restore_error_handler();
@@ -590,6 +594,33 @@ return true;
         return $memory;
     }
 
+    public function setMemory($key, $value) {
+        if (!isset($this->memory)) {
+            try {
+                $this->memory = new \Memcached(); //point 2.
+                $this->memory->addServer("127.0.0.1", 11211);
+            } catch (\Throwable $t) {
+
+                // Failto
+                $this->memory = new Memory($this->thing, "memory");
+                //restore_error_handler();
+                $this->thing->log(
+                    "caught memcached throwable. made memory",
+                    "WARNING"
+                );
+                return;
+            } catch (\Error $ex) {
+
+                $this->thing->log("caught memcached error.", "WARNING");
+                return true;
+            }
+        }
+        $memory = $this->memory->set($key, $value);
+
+        if ($memory === false) {return true;} //error
+        if ($memory === true) {return $value;} // success
+        return true; // error
+    }
 
     /**
      *

@@ -158,7 +158,6 @@ class Glossary extends Agent
     public function buildGlossary()
     {
         $this->listAgents();
-
         foreach ($this->agents_list as $agent) {
             if ($this->excludeGlossary($agent["name"]) === true) {
                 continue;

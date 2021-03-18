@@ -209,17 +209,15 @@ class Agent
                     " " .
                     $t->getTraceAsString()
             );
-
-            echo $t->getLine() . "---" . $t->getFile() . $t->getMessage();
-            echo "\n";
-
-            //$this->response = "STACK | Variable store is full. Text FORGET ALL.";
-            //$this->thing_report['sms'] = "STACK | Variable store is full. Text FORGET ALL.";
-            $this->thing->log("caught throwable.");
+            $error_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            $this->thing->console($error_text . "\n");
+            $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
-            echo $t->getLine() . "---" . $t->getFile() . $t->getMessage();
-            echo "\n";
+            $error_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+
+//            echo $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+//            echo "\n";
 
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -230,7 +228,8 @@ class Agent
                     " " .
                     $t->getTraceAsString()
             );
-            $this->thing->log("caught exception");
+            $this->thing->console($error_text . "\n");
+            $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
 
@@ -615,10 +614,8 @@ public function __set($name, $value) {
             );
             //return;
         } catch (\Error $ex) {
-            $this->thing->log(
-                "caught make " . $this->agent_class_name . " error.",
-                "WARNING"
-            );
+            $warning_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage() . " caught make " . $this->agent_class_name . " error.";
+            $this->thing->log($warning_text, "WARNING");
         }
 
         // So ... don't call yourself.
@@ -3633,7 +3630,7 @@ public function __set($name, $value) {
             ". ";
 
         if ($this->stack_engine_state != "prod") {
-            echo $console . "\n";
+            $this->thing->console($console . "\n");
             $this->response .= "Warning seen. " . $errstr . ". ";
         }
         // do something
