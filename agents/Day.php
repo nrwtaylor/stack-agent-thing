@@ -188,6 +188,7 @@ class Day extends Agent
         $this->timestamp_epoch = $timestamp_epoch;
 
         $arr = [
+            "night"=> "night",
             "astronomical twilight begin" => "astronomical twilight",
             "nautical twilight begin" => "nautical twilight",
             "civil twilight begin" => "civil twilight",
@@ -199,7 +200,7 @@ class Day extends Agent
             "astronomical twilight end" => "night",
         ];
 
-        $time_of_day = 'astronomical twilight begin';
+        $time_of_day = 'night';
 
         $message = "";
         $count = 0;
@@ -234,6 +235,8 @@ class Day extends Agent
 
     public function twilightDay($text)
     {
+if ($text == 'night') {$text = "astronomical twilight begin";}
+
         $variable_text = str_replace(" ", "_", $text);
 
         $seconds_to_event =
