@@ -146,14 +146,10 @@ $this->response .= "Did not see tones. ";
         $list = "/\b(?:" . implode($this->semitones, "|") . ")\b/i"; // <-- Here, the (?:...) groups alternatives
         //$my_string= "This is my testing";
         if (preg_match($list, $text, $matches, PREG_OFFSET_CAPTURE)) {
-            //echo $matches[0][1];
         }
 
         foreach ($array as $char) {
             foreach ($this->semitone_array as $semitone => $frequency) {
-                //var_dump($char);
-                //var_dump($semitone);
-                //var_dump($semitone);
             }
         }
     }
@@ -211,27 +207,26 @@ $this->response .= "Did not see tones. ";
     function testTone()
     {
         if (!$this->frequencyTone("A") == 440) {
-            echo "ERROR";
+            $this->thing->console("ERROR");
         } else {
-            echo "PASS";
+            $this->thing->console("PASS");
         }
 
         if (!$this->frequencyTone("A", 3) == 220) {
-            echo "ERROR";
+            $this->thing->console("ERROR");
         } else {
-            echo "PASS";
+            $this->thing->console("PASS");
         }
         if (!$this->frequencyTone("A", 5) == 880) {
-            echo "ERROR";
+            $this->thing->console("ERROR");
         } else {
-            echo "PASS";
+            $this->thing->console("PASS");
         }
 
         foreach ($this->semitone_array as $note => $cent) {
-            echo $note . " > " . $this->frequencyTone($note) . "\n";
+            $this->thing->console($note . " > " . $this->frequencyTone($note) . "\n");
         }
 
-        //        if (!$this->frequencyTone("A") == 440) {echo "ERROR";} else {echo "PASS";}
     }
 
     function initTone($tuning = "other")
@@ -374,10 +369,6 @@ $this->response .= "Did not see tones. ";
             $w = (2 * pi() * $freqOfTone) / $sample_rate;
         }
 
-        //echo "w" . $w . "\n";
-        //echo "div " .$freqOfTone/$sample_rate . "\n";
-        //echo "mod " . $freqOfTone % $sample_rate . "\n";
-        //echo "samplescount " . $samplesCount . "\n";
         $mod = $freqOfTone % $sample_rate;
         $mod = 0;
         $samples = [];
@@ -401,7 +392,6 @@ $this->response .= "Did not see tones. ";
 
     function saveTone($samples)
     {
-        //echo "Sample size recd" . count($samples);
         $srate = $this->sample_rate; //sample rate
         $bps = 16; //bits per sample
         $Bps = $bps / 8; //bytes per sample /// I EDITED
@@ -487,13 +477,13 @@ $this->response .= "Did not see tones. ";
             number_format($elapsed) .
             " sec.";
 
-        echo "$status_bar  ";
+        $this->thing->console("$status_bar  ");
 
         flush();
 
         // when done, send a newline
         if ($done == $total) {
-            echo "\n";
+            $this->thing->console("\n");
         }
     }
 

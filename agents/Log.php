@@ -77,12 +77,15 @@ function filterLog($log_text, $log_includes = null, $log_excludes = null)
     $lines = preg_split("/<br[^>]*>/i", $log_text);
 
     foreach ($lines as $i => $line) {
+if (is_array($log_excludes)) {
         foreach ($log_excludes as $j => $log_exclude) {
             if (stripos($line, $log_exclude) !== false) {
                 continue 2;
             }
         }
+}
 
+if (is_array($log_includes)) {
         if (count($log_includes) == 0) {
             $response .= trim($line) . "\n";
             continue;
@@ -94,6 +97,7 @@ function filterLog($log_text, $log_includes = null, $log_excludes = null)
                 continue 2;
             }
         }
+}
     }
     if ($response === "") {
         return true;
@@ -236,8 +240,10 @@ function filterLog($log_text, $log_includes = null, $log_excludes = null)
         $this->max_index = 0;
 
         $match = 0;
+$things = $findagent_thing->thing_report['things'];
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+if ($things === true) {return true;}
+        foreach ($things as $block_thing) {
             $this->thing->log(
                 $block_thing['task'] .
                     " " .
@@ -334,7 +340,7 @@ function filterLog($log_text, $log_includes = null, $log_excludes = null)
         $web .= '<br>' . $this->sms_message . "<br>";
         //$web .= 'About '. $this->thing->created_at;
 
-        $received_at = strtotime($this->thing->thing->created_at);
+        $received_at = strtotime($this->thing->created_at);
         $ago = $this->thing->human_time(time() - $received_at);
         $web .= "About " . $ago . " ago.";
 

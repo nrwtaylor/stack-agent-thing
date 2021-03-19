@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -11,7 +11,7 @@ ini_set("allow_url_fopen", 1);
 
 class Charley extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
@@ -23,8 +23,8 @@ class Charley extends Agent
         $this->getNuuid();
 
         $this->mode = "voice";
-        if (isset($this->thing->container['api']['charley']['mode'])) {
-            $this->mode = $this->thing->container['api']['charley']['mode'];
+        if (isset($this->thing->container["api"]["charley"]["mode"])) {
+            $this->mode = $this->thing->container["api"]["charley"]["mode"];
         }
 
         $this->character = new Character(
@@ -38,7 +38,7 @@ class Charley extends Agent
         $this->persist_to = $agent->persist_to;
 
         $this->thing_report["help"] =
-            'Try changing the message passing mode. CHARLEY RADIOGRAM. Or CHARLEY VOICE.';
+            "Try changing the message passing mode. CHARLEY RADIOGRAM. Or CHARLEY VOICE.";
 
         $this->initCharley();
     }
@@ -136,19 +136,15 @@ class Charley extends Agent
     {
         $this->c = new Compression($this->thing, "compression charley");
 
-        //var_dump($this->c->agent->matches);
-
         $this->charlies = [];
-        if (isset($this->c->agent->matches['charley'])) {
-            $matches = $this->c->agent->matches['charley'];
+        if (isset($this->c->agent->matches["charley"])) {
+            $matches = $this->c->agent->matches["charley"];
 
             foreach ($matches as $i => $match) {
-                //var_dump($match);
-                $this->charlies[] = $match['words'];
+                $this->charlies[] = $match["words"];
             }
         }
 
-        //var_dump($this->charlies);
         // Charley variables
 
         if (!isset($this->channel_count)) {
@@ -174,7 +170,7 @@ class Charley extends Agent
         $this->thing_report["info"] = "This creates an exercise message.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     public function makeChoices()
@@ -184,33 +180,33 @@ class Charley extends Agent
             $this->node_list,
             "charley"
         );
-        $this->choices = $this->thing->choice->makeLinks('charley');
+        $this->choices = $this->thing->choice->makeLinks("charley");
 
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     public function makeSMS()
     {
         $sms = "CHARLEY " . $this->mode . "\n";
 
-        if ($this->mode == 'voice' and isset($this->voice)) {
+        if ($this->mode == "voice" and isset($this->voice)) {
             $sms .= $this->voice;
         }
 
-        if ($this->mode == 'radiogram' and isset($this->radiogram)) {
+        if ($this->mode == "radiogram" and isset($this->radiogram)) {
             $sms .= $this->radiogram;
         }
 
         $sms .= " " . $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function getCast()
     {
         // Load in the cast. And roles.
-        $file = $this->resource_path . '/charley/charley.txt';
+        $file = $this->resource_path . "/charley/charley.txt";
 
         if (!file_exists($file)) {
             return true;
@@ -259,12 +255,12 @@ class Charley extends Agent
         $input = $this->charlies;
 
         // Pick a random Charles.
-$charley_index = 0;
-if (isset($this->thing->thing->created_at)) {
-        $created_at = strtotime($this->thing->thing->created_at);
-        // $charley_index = $this->refreshed_at % count($input);
-        $charley_index = $created_at % count($input);
-}
+        $charley_index = 0;
+        if (isset($this->thing->thing->created_at)) {
+            $created_at = strtotime($this->thing->thing->created_at);
+            // $charley_index = $this->refreshed_at % count($input);
+            $charley_index = $created_at % count($input);
+        }
         $this->charley = ucwords($input[$charley_index]);
 
         if (isset($this->name_list[$role])) {
@@ -293,15 +289,15 @@ if (isset($this->thing->thing->created_at)) {
         }
 
         // Load in the cast. And roles.
-        $file = $this->resource_path . 'charley/messages-a01.txt';
+        $file = $this->resource_path . "charley/messages-a01.txt";
 
         if (!file_exists($file)) {
             $this->response .= "Could not load radiogram cards. ";
             return;
         }
 
-        if ($this->mode == 'voice') {
-            $file = $this->resource_path . 'charley/voice-a01.txt';
+        if ($this->mode == "voice") {
+            $file = $this->resource_path . "charley/voice-a01.txt";
 
             if (!file_exists($file)) {
                 $this->response .= "Could not load voice cards. ";
@@ -318,7 +314,6 @@ if (isset($this->thing->thing->created_at)) {
 
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
-                //var_dump($line);
                 $arr = explode(",", $line);
 
                 $nom = $arr[0]; // Describer of the card
@@ -379,20 +374,20 @@ if (isset($this->thing->thing->created_at)) {
             }
 
             $this->card = $this->card_list[array_rand($this->card_list)];
-            $this->nom = $this->card['nom'];
-            $this->suit = $this->card['suit'];
-            $this->number = $this->card['number'];
+            $this->nom = $this->card["nom"];
+            $this->suit = $this->card["suit"];
+            $this->number = $this->card["number"];
         }
 
         $this->card = $this->cards[strtoupper($this->nom)][$this->suit];
 
-        $this->text = $this->card['text'];
+        $this->text = $this->card["text"];
         if ($this->text == "ROCKY") {
             $this->text = "Send a ROCKY inject to the last station.";
         }
 
-        $this->role_from = $this->card['from'];
-        $this->role_to = $this->card['to'];
+        $this->role_from = $this->card["from"];
+        $this->role_to = $this->card["to"];
 
         if ($this->number == "X") {
             $this->instruction = "REPORT" . " " . $this->unit;
@@ -504,7 +499,7 @@ if (isset($this->thing->thing->created_at)) {
         $message .=
             "<p>" . $this->web_prefix . "thing/$uuid/charley\n \n\n<br> ";
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     function getBar()
@@ -522,7 +517,7 @@ if (isset($this->thing->thing->created_at)) {
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/charley';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/charley";
 
         $this->node_list = ["charley" => ["charley", "rocky", "nonsense"]];
 
@@ -581,22 +576,12 @@ if (isset($this->thing->thing->created_at)) {
         $web .= "<b>" . $this->instruction . "</b><br>";
         $web .= "<p>";
 
-        //if(isset($this->role_from)) {$web .= $this->role_from;}
-        //if(isset($this->role_to)) {$web .= $this->role_to;}
-
-        //$web .= "SMS Inject<p>" . $this->response . "<br";
-        //$web .= "<br>";
-
-        //$web .= "<p>";
-        //$received_at = strtotime($this->thing->thing->created_at);
-        //FUEL.var_dump($this->thing->thing->created_at);
-
-if (isset($this->thing->thing->created_at)) {
-        $ago = $this->thing->human_time(
-            time() - strtotime($this->thing->thing->created_at)
-        );
-        $web .= "This inject was created about " . $ago . " ago. ";
-}
+        if (isset($this->thing->thing->created_at)) {
+            $ago = $this->thing->human_time(
+                time() - strtotime($this->thing->thing->created_at)
+            );
+            $web .= "This inject was created about " . $ago . " ago. ";
+        }
         $link = $this->web_prefix . "privacy";
         $privacy_link = '<a href="' . $link . '">' . $link . "</a>";
 
@@ -609,20 +594,20 @@ if (isset($this->thing->thing->created_at)) {
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     function makeTXT()
     {
         $txt = "Traffic for CHARLEY.\n";
-        $txt .= 'Duplicate messages may exist. Can you de-duplicate?';
+        $txt .= "Duplicate messages may exist. Can you de-duplicate?";
         $txt .= "\n";
         if (isset($this->radiogram)) {
             $txt .= $this->radiogram;
         }
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -732,7 +717,7 @@ if (isset($this->thing->thing->created_at)) {
             $bbox["height"] =
                 max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
                 min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
             $pad = 0;
 
             imagettftext(
@@ -759,7 +744,7 @@ if (isset($this->thing->thing->created_at)) {
             $bbox["height"] =
                 max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
                 min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
 
             imagettftext(
                 $this->image,
@@ -791,7 +776,7 @@ if (isset($this->thing->thing->created_at)) {
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
         //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
@@ -857,7 +842,7 @@ if (isset($this->thing->thing->created_at)) {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'charley') {
+            if ($input == "charley") {
                 return;
             }
         }
@@ -875,19 +860,19 @@ if (isset($this->thing->thing->created_at)) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'radiogram':
+                        case "radiogram":
                             $this->response .=
-                                'Switched injects to radiogram mode. ';
-                            $this->mode = 'radiogram';
+                                "Switched injects to radiogram mode. ";
+                            $this->mode = "radiogram";
                             return;
 
-                        case 'voice':
+                        case "voice":
                             $this->response .=
-                                'Switched injects to voice mode. ';
-                            $this->mode = 'voice';
+                                "Switched injects to voice mode. ";
+                            $this->mode = "voice";
                             return;
 
-                        case 'charley':
+                        case "charley":
 
                         default:
                     }

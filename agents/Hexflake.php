@@ -306,11 +306,6 @@ $thing->Create('null','null','hex wall snowflake');
             }
         }
 
-        //if (!isset($cell['state'])) {
-        //var_dump($cell['state']);
-        //exit();
-        //}
-
         return $cell;
     }
 

@@ -301,8 +301,6 @@ class Message extends Agent
         //return false;
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
-        //$channel = new Channel($this->thing, "channel");
-        //var_dump($channel);
         if ($this->channel_name == "microsoft") {
             return true;
         }
@@ -354,13 +352,10 @@ class Message extends Agent
         //return false;
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
-        //$channel = new Channel($this->thing, "channel");
-        //var_dump($channel);
         if ($this->channel_name == "slack") {
             return true;
         }
         return false; // in dev
-        //exit();
         // Check address against the beta list
 
         $file = $this->resource_path . 'slack/id.txt';

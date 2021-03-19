@@ -735,6 +735,5 @@ if ($commands_new == true) {continue;}
             $this->glossary_build_flag = true;
         }
 
-        //        $this->dateline = $this->extractDateline($input);
     }
 }

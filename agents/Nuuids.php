@@ -221,7 +221,7 @@ class Nuuids
     {
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable( array("nuuids", "index"), $this->index );
-//var_dump($this->index);
+
         $this->thing->log($this->agent_prefix . ' saved duplicable index ' . $this->index[0] . '.', "INFORMATION") ;
     }
 
@@ -381,9 +381,6 @@ while ($i<$max_i) {
             }
         }
 
-
-
-//var_dump($v);
         return $this->index;
 
     }
@@ -403,8 +400,6 @@ while ($i<$max_i) {
 
     function makeNuuids($n = null) 
     {
-//echo "meep";
-//exit();
 
 /*
 //$n = "1234";
@@ -423,7 +418,6 @@ $n = ltrim($n, '0');
         foreach(range(0,100) as $i) {
             $v[$i] = rand(0,9999);
         }
-//var_dump($v);
         return $v;
 
     }
@@ -440,23 +434,16 @@ function makeNumber($digits = 4)
 }
 
 function computeTranspositions($array) {
-//echo "foo";
-//echo count($array);
-//var_dump($array);
     if (count($array) == 1) {return false;}
-//var_dump($array);
     $result = [];
     foreach(range(0,count($array)-2) as $i) {
         $tmp_array = $array;
         $tmp = $tmp_array[$i];
         $tmp_array[$i] = $tmp_array[$i+1];
         $tmp_array[$i+1] = $tmp;
-        //$this->array_swap($array, $i, $i+1);
         $result[] = $tmp_array;
-//        var_dump($array);
     }
 
-//exit();
     return $result;
 
 }

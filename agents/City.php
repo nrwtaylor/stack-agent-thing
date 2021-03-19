@@ -317,8 +317,6 @@ class City extends Agent
             return true;
         }
 
-        //        $contents = file_get_contents($file);
-
         $handle = @fopen($file, "r");
 
         if ($handle === false) {
@@ -363,14 +361,14 @@ class City extends Agent
         if ($city_code == null) {
             $city_code = $this->city_code;
         }
-        //var_dump($city_code);
+
         $this->city = new Variables(
             $this->thing,
             "variables " . "city_" . $city_code . " " . $this->from
         );
 
         $this->city_code = $this->city->getVariable("city_code");
-        //var_dump($this->city_code);
+
         $this->city_name = $this->city->getVariable("city_name");
         $this->refreshed_at = $this->city->getVariable("refreshed_at");
 

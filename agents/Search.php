@@ -158,7 +158,6 @@ class Search extends Agent
             }
         }
 
-        //var_dump($search_tokens);
 
         if ($text == null) {
             return true;
@@ -193,8 +192,6 @@ if (!isset($search_tokens)) {return true;}
 
             foreach ($search_tokens as $t => $services) {
                 $tokens = explode(" ", $t);
-                //}
-                //var_dump($tokens);
 
                 foreach ($tokens as $i => $token) {
                     if (

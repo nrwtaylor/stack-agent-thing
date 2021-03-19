@@ -177,8 +177,8 @@ class Youtube extends Agent
             '/youtube/v3/captions/id=' . $caption_id
         );
 
-        var_dump($response);
-        exit();
+return true;
+
         /*
 // returns a Guzzle HTTP Client
 $httpClient = $googleauthorize_agent->client->authorize();

@@ -1925,12 +1925,8 @@ function fatalErrorShutdownHandler()
     // ob_clean();
 
     //Add text.
-    //echo "BORK | Bounty ";
-    //exit();
 
     $last_error = error_get_last();
-
-//var_dump($last_error);
 
     if ( ($last_error['type'] ?? null) === E_ERROR) {
         // fatal error

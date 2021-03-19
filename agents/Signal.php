@@ -153,7 +153,7 @@ if (!isset($this->signals)) {return true;}
 
         foreach ($this->signals as $i => $signal) {
             if ($signal['uuid'] == $this->signal_thing->uuid) {
-                //var_dump($signal);
+
                 $this->signal_thing->state = $signal['state'];
                 return;
             }
@@ -524,7 +524,7 @@ return true;}
         }
 
         foreach ($this->signals as $i => $signal) {
-            //echo $this->textSignal($signal);
+
             if (isset($signal['uuid'])) {
                 $flag = $this->getSignalbyUuid($signal['uuid']);
                 return;
@@ -614,16 +614,13 @@ return true;}
     {
         $web = null;
         if (isset($this->signal_thing)) {
-            //$link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
-            //            $link = $this->link;
+
             $web = "";
             $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
             $web .= "<p>";
-            //            $web .= '<a href="' . $link . '">';
-            //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/sig>
+
             $web .= $this->html_image;
 
-            //            $web .= "</a>";
             $web .= "<br>";
 
             $state_text = "X";

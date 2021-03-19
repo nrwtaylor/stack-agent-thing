@@ -47,16 +47,20 @@ class Regex extends Agent
 
     function makeSMS()
     {
-        $this->sms_message = "REGEX";
-        $this->thing_report["sms"] = $this->sms_message;
+        $sms = "REGEX";
+        if ($this->response !== "") {
+            $sms .= " | " . $this->response;
+        }
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function validateRegex($text)
     {
-        set_error_handler([$this,"warning_handler"], E_WARNING);
+        set_error_handler([$this, "warning_handler"], E_WARNING);
         try {
             $test = preg_match($text, "");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
             // ...
         }
@@ -75,7 +79,9 @@ class Regex extends Agent
     public function readSubject()
     {
         $filtered_text = $this->assert($this->input, "regex", false);
-var_dump($this->validateRegex($filtered_text));
+        if ($this->validateRegex($filtered_text) == true) {
+            $this->response .= "Is regex. ";
+        }
         return false;
     }
 }

@@ -160,8 +160,6 @@ class Start {
 
         $this->makeChoices();
 
-//        if (!isset($this->html_image)) {$this->makePNG();}
-
         $web = "<b>Start Agent</b>";
         $web .= "<p>";
         $web .= "<p>";
@@ -244,7 +242,6 @@ class Start {
      *
      */
     public function respond() {
-        //var_dump($this->counter);
         // Thing actions
 
         // New user is triggered when there is no nom_from in the db.

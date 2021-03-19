@@ -216,9 +216,6 @@ class Agent
         } catch (\Exception $e) {
             $error_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage();
 
-//            echo $t->getLine() . "---" . $t->getFile() . $t->getMessage();
-//            echo "\n";
-
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -297,8 +294,6 @@ class Agent
 
         // Looking for the function in the namespace functionAgent.
         $function_name = $agent_function;
-
-        //echo $agent_class_name . " " . $function_name . " __call called.\n";
 
         // Allow for customizing this later.
         $agent_input = $agent_name;
@@ -698,11 +693,8 @@ public function __set($name, $value) {
             // Note our use of ===.  Simply == would not work as expected
             // because the position of 'a' was the 0th (first) character.
             if ($pos === false) {
-                //    echo "The string '$findme' was not found in the string '$mystring'";
                 $this->thing_report["web"] .= "<p>";
             } else {
-                //    echo "The string '$findme' was found in the string '$mystring'";
-                //    echo " and exists at position $pos";
 
                 if ($pos == $length - $needle_length) {
                 } else {
@@ -762,7 +754,6 @@ public function __set($name, $value) {
             isset($this->thing_report)
         ) {
             $variable_name = "thing-report-" . $this->uuid;
-            //var_dump($variable_name);
 
             if (!isset($this->thing->refresh_at)) {
                 $this->thing->refresh_at = false;
@@ -1940,9 +1931,7 @@ public function __set($name, $value) {
                     "\\Nrwtaylor\\StackAgentThing\\Agent"
                 ) === false
             ) {
-                //var_dump($agent_class_name);
                 $this->thing->log($agent_namespace_name . " is not an agent.");
-                //echo $agent_namespace_name . "is not an agent\n";
                 throw \Exception($agent_namespace_name . " is not an agent.");
             }
 
@@ -2251,7 +2240,6 @@ public function __set($name, $value) {
                         strtolower(str_replace("-", "", $agent_hit)) ==
                         strtolower($agent_candidate)
                     ) {
-                        //echo $agent_hit . " " . $agent_input_hit . "\n";
 
                         $agent_package = [
                             $agent_input_hit => ["agent_input" => $agent_hit],
@@ -2265,7 +2253,6 @@ public function __set($name, $value) {
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
-            //echo $responsive_agent['agent_name']. " " ;
         }
 
         return;
