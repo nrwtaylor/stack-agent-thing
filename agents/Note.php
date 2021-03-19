@@ -1,27 +1,6 @@
 <?php
 namespace Nrwtaylor\Stackr;
 
-//require 'vendor/autoload.php';
-//use Nrwtaylor\Stackr;
-
-//$argument_array = $argv;
-//$thing = new \Nrwtaylor\Stackr\Thing(null); // State contains uuid
-//$agent = new \Nrwtaylor\Stackr\Meta($thing,implode(" ", $argument_array));
-
-//var_dump($argument_array);
-//var_dump(isset($argv));
-
-//var_dump($agent->to);
-//var_dump($agent->from);
-//var_dump($agent->subject);
-
-// Need to figure out recursive array iterator in Chocie.php
-
-//$thing->Create($agent->to, $agent->from, $agent->subject);
-
-//$smsgraph = new Note($thing);
-
-
 class Note
 {
 	function __construct(\Nrwtaylor\Stackr\Thing $thing, $agent_command = null) {
