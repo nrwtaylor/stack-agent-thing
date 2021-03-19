@@ -57,8 +57,11 @@ class makeEmail
         $this->stack_state = $thing->container['stack']['state'];
         $this->short_name = $thing->container['stack']['short_name'];
 
-        $this->robot_name = $thing->container['stack']['robot_name'];
+$this->robot_name = "noreply";
+if (isset($thing->container['stack']['robot_name'])) {
 
+        $this->robot_name = $thing->container['stack']['robot_name'];
+}
 
         // Create some short-cuts.
         $this->uuid = $thing->uuid;

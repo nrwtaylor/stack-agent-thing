@@ -11,31 +11,31 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Duplicable
+class Duplicable extends Agent
 {
     public $var = 'hello';
-
-    function __construct(Thing $thing, $agent_input = null)
+function init()
+//    function __construct(Thing $thing, $agent_input = null)
     {
-        $this->agent_input = $agent_input;
+//        $this->agent_input = $agent_input;
 
-        $this->agent_name = "duplicable";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-        $this->test = "Development code";
+//        $this->agent_name = "duplicable";
+//        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+//        $this->test = "Development code";
 
-        $this->thing = $thing;
+//        $this->thing = $thing;
 
-        $this->thing_report = ["thing" => $this->thing->thing];
+//        $this->thing_report = ["thing" => $this->thing->thing];
 
-        $this->start_time = $this->thing->elapsed_runtime();
+//        $this->start_time = $this->thing->elapsed_runtime();
         $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
 
         $command_line = null;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+//        $this->uuid = $thing->uuid;
+//        $this->to = $thing->to;
+//        $this->from = $thing->from;
+//        $this->subject = $thing->subject;
 
         $this->node_list = ["duplicable" => ["index", "uuid"]];
 
@@ -45,6 +45,7 @@ class Duplicable
             $thing->subject .
             $command_line .
             $this->agent_input;
+/*
         $this->thing->log(
             $this->agent_prefix .
                 'running on Thing ' .
@@ -59,15 +60,15 @@ class Duplicable
                 '".',
             "DEBUG"
         );
-
-        $this->current_time = $this->thing->time();
+*/
+//        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
-
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
+//        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+//        $this->word = $thing->container['stack']['word'];
+//        $this->email = $thing->container['stack']['email'];
+/*
         $this->thing->log(
             $this->agent_prefix .
                 'completed init. Timestamp = ' .
@@ -75,7 +76,8 @@ class Duplicable
                 'ms.',
             "OPTIMIZE"
         );
-
+*/
+/*
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "duplicable",
@@ -90,7 +92,7 @@ class Duplicable
                 $time_string
             );
         }
-
+*/
         $split_time = $this->thing->elapsed_runtime();
 
         //$agent = new Retention($this->thing, "retention");
@@ -102,17 +104,31 @@ class Duplicable
 
         //$this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this->thing->elapsed_runtime() - $split_time) .  'ms.', "OPTIMIZE" );
 
-        $this->readSubject();
+//        $this->readSubject();
 
-        $this->init();
+        if (!isset($this->min)) {
+            $this->min = 1;
+        }
+        if (!isset($this->max)) {
+            $this->max = 9999;
+        }
+        if (!isset($this->size)) {
+            $this->size = 4;
+        }
+
+
+//        $this->init();
         $this->initDuplicables();
 
         //$this->thing->log( $this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
+
+/*
         $this->setDuplicable();
         if ($this->agent_input == null) {
             $this->setSignals();
         }
-
+*/
+/*
         $this->thing->log(
             $this->agent_prefix .
                 'completed setSignals. Timestamp = ' .
@@ -141,7 +157,33 @@ class Duplicable
         $this->thing_report['log'] = $this->thing->log;
 
         return;
+*/
     }
+
+public function get() {
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+            "duplicable",
+            "refreshed_at",
+        ]);
+
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+                ["duplicable", "refreshed_at"],
+                $time_string
+            );
+        }
+
+}
+
+public function set() {
+
+        $this->setDuplicable();
+
+
+}
 
     // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
 
@@ -165,7 +207,7 @@ class Duplicable
         $agent = new Qr($this->thing, "qr");
         $this->quick_response_png = $agent->PNG_embed;
     }
-
+/*
     function init()
     {
         if (!isset($this->min)) {
@@ -181,8 +223,8 @@ class Duplicable
         //$this->setProbability();
         // $this->setRules();
     }
-
-    private function setSignals()
+*/
+    public function respondResponse()
     {
         $this->thing->flagGreen();
 
@@ -719,12 +761,12 @@ function comb ($n, $elems) {
 */
     //$elems = array('A','B','C');
     //$v = comb(4, $elems);
-
+/*
     function read()
     {
         return $this->state;
     }
-
+*/
     function extractDuplicable($input)
     {
         if (!isset($this->duplicables)) {
