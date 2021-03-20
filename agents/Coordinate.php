@@ -188,7 +188,17 @@ class Coordinate extends Agent
 
         // See if a headcode record exists.
         $findagent_thing = new Findagent($this->thing, "coordinate");
-        $count = count($findagent_thing->thing_report["things"]);
+
+$things = $findagent_thing->thing_report["things"];
+
+
+if ($things === true) {
+$this->coordinates = [];
+$this->coordinate = null;
+return true;
+}
+
+        $count = count($things);
         $this->thing->log(
             'Agent "Coordinate" found ' .
                 count($findagent_thing->thing_report["things"]) .
@@ -201,14 +211,12 @@ class Coordinate extends Agent
         //            return array($this->placecode_list, $this->placename_list, $this->places);
         //        }
 
-        if ($findagent_thing->thing_report["things"] == true) {
-        }
 
         if (!$this->is_positive_integer($count)) {
             // No places found
         } else {
             foreach (
-                array_reverse($findagent_thing->thing_report["things"])
+                array_reverse($things)
                 as $thing_object
             ) {
                 $uuid = $thing_object["uuid"];
