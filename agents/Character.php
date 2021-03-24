@@ -20,7 +20,6 @@ class Character extends Agent
      * @param Thing   $thing
      * @return unknown
      */
-    //function __construct(Thing $thing) {
     public function init()
     {
         $this->character_thing = $this->thing;
@@ -45,10 +44,6 @@ class Character extends Agent
 
     public function get()
     {
-        //$this->getCharacters();
-
-        // If this return true then no existing characters found.
-
         $this->getCharacter(); // Should load up current
     }
 
@@ -84,14 +79,6 @@ class Character extends Agent
         $this->thing->log(
             '<pre> Agent "Character" called characterSet()</pre>'
         );
-
-        // Store counts
-        //  echo $this->from;
-        //exit();
-
-        //if (!isset ( $this->character_thing ) ) {
-        // $this->character_thing = $this->thing;
-        //}
 
         $this->character_thing->db->setFrom($this->from);
 
@@ -177,20 +164,11 @@ class Character extends Agent
             $this->characters = [];
             $this->seen_characters = [];
             foreach ($things as $thing) {
-//var_dump($thing);
-  //              $variables = $thing->variables;
-
 
                 $uuid = $thing['uuid'];
 
                 $variables_json = $thing['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
-
-
-
-                //$thing = new Thing($thing['uuid']);
-
-                //$this->character_uuid = $thing->uuid;
                 $this->character_uuid = $uuid;
 
 
@@ -206,12 +184,6 @@ class Character extends Agent
                 } else {
                     $this->seen_characters[] = $this->name;
                 }
-
-          //      $this->strength = $thing->json->readVariable([
-            //        "character",
-              //      "strength",
-                //]);
-
 
             $this->strength = "X";
             if (isset($variables['character']['strength'])) {
@@ -266,8 +238,6 @@ class Character extends Agent
                     $this->thing->log(
                         'Agent "Character" found no existing character information'
                     );
-                    //     $this->thing->log ( "No character info found.  Created a random character.");
-                    //                                        $this->randomCharacter();
                 } else {
                     $this->age = $thing->thing->created_at;
 
@@ -286,9 +256,6 @@ class Character extends Agent
                     // Successfully loaded most recent character Thing
                     // and stored the other characters in an array
                     $this->characters[] = $character;
-                    //$this->character_thing = $thing;
-                    //$this->age = $thing->thing->created_at;
-                    //return;
                 }
             }
             if (!isset($this->characters)) {
@@ -333,11 +300,8 @@ class Character extends Agent
     function characterList()
     {
         $this->sms_message = "CHARACTER > LIST";
-        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
 
         $this->sms_message .= " | ";
-
-        //                $this->sms_message .= $this->name . ' | ';
 
         if (count($this->characters) == 0) {
             $this->sms_message .=
@@ -427,14 +391,7 @@ class Character extends Agent
      */
     public function respondResponse()
     {
-        //$this->thing_report = array('thing' => $this->thing->thing);
-
-        // Thing actions
         $this->thing->flagGreen();
-
-        //  $this->readSubject();
-
-        //  $this->characterReport();
 
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['choices'] = false;
@@ -443,15 +400,7 @@ class Character extends Agent
         // Generate email response.
 
         $to = $this->thing->from;
-
-        // Testing
-        // $to = 'redpanda.stack@gmail.com';
-
         $from = "character";
-
-        // $message = $this->readSubject();
-
-        //$message = "Thank you for your request.<p><ul>" . ucwords(strtolower($response)) . '</ul>' . $this->error . " <br>";
 
         $this->thing->choice->Create(
             $this->agent_name,
@@ -504,8 +453,6 @@ class Character extends Agent
         $this->characterSet();
 
         $this->character_thing->flagGreen();
-
-        return;
     }
 
     /**
@@ -533,16 +480,7 @@ class Character extends Agent
             $this->name = $name;
         }
 
-        //$this->character_thing = $this->thing;
-
         $this->characterSet();
-        //$this->character_thing = $this->thing;
-
-        //$this->character_thing = new Thing(null);
-        //$this->character_thing->Create($this->from , 'character', 's/ reset character');
-        //$this->character_thing->flagGreen();
-
-        return;
     }
 
     /**
@@ -846,30 +784,20 @@ class Character extends Agent
         // is the job of the character<command> functions.
 
         if (!$found_flag) {
-            //                      $this->sms_message .= "";
-            //                      $this->sms_message .= " | No character found.";
-            //                $this->thingreport['characters'] = false;
 
             $this->character_thing = $this->thing;
 
             $this->thing->log(
                 '<pre> Agent "Character" got no character result. </pre>'
             );
-
-            //      $group = "meep";
         } else {
-            //                        $this->sms_message .= " | This is " . $this->name . " Commands: TBD";
             $this->character_thing = new Thing($this->character_uuid);
             $this->thing->log(
                 '<pre> Agent "Character" got character' .
                     $this->name .
                     ' is Levenshtein closest.</pre>'
             );
-
-            //                  $this->thingreport['character'] = $characters;
         }
-
-        //$this->sms_message = " | ". strtoupper( $this->group_id ) . " | " .$this->sms_message;
 
         $this->thing->log(
             '<pre> Agent "Character" found ' .
