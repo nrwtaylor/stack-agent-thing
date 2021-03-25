@@ -1843,8 +1843,9 @@ public function __set($name, $value) {
         $this->readSubject();
 
 // read the current agent.
-if (method_exists($this,"read".$this->agent_class_name)) {
-$this->{"read".$this->agent_class_name}();
+if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this->agent_class_name))) {
+//var_dump($this->agent_class_name);
+//    $this->{"read".$this->agent_class_name}();
 }
 
 
