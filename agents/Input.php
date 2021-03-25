@@ -19,7 +19,6 @@ class Input extends Agent
     public $var = 'hello';
 
     /**
-     * function __construct(Thing $thing, $text = null) {
      */
     function init()
     {
@@ -59,9 +58,7 @@ class Input extends Agent
             }
         }
         $filtered_text = $this->assert($text);
-        //if ($filtered_text == null) {return;}
 
-        //        $this->input = $filtered_text;
         return $filtered_text;
 
         $this->response .=

@@ -1841,6 +1841,13 @@ public function __set($name, $value) {
         $this->readFrom();
 
         $this->readSubject();
+
+// read the current agent.
+if (method_exists($this,"read".$this->agent_class_name)) {
+$this->{"read".$this->agent_class_name}();
+}
+
+
         $this->thing->log("read completed.");
     }
 

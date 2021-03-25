@@ -11,31 +11,32 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Crows
+class Crows extends Agent
 {
     public $var = "hello";
 
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        $this->agent_input = $agent_input;
+        //    function __construct(Thing $thing, $agent_input = null)
+        //      $this->agent_input = $agent_input;
 
-        $this->agent_name = "crows";
-        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-        $this->test = "Development code";
+        //    $this->agent_name = "crows";
+        //        $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
+        //      $this->test = "Development code";
 
-        $this->thing = $thing;
+        //    $this->thing = $thing;
 
-        $this->thing_report["thing"] = $thing;
+        //        $this->thing_report["thing"] = $thing;
 
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
+        //      $this->start_time = $this->thing->elapsed_runtime();
+        //    $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
-        $command_line = null;
+        //        $command_line = null;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+        //      $this->uuid = $thing->uuid;
+        //    $this->to = $thing->to;
+        //  $this->from = $thing->from;
+        //$this->subject = $thing->subject;
 
         $this->node_list = ["crows" => ["crows", "crow"]];
 
@@ -45,7 +46,7 @@ class Crows
             $thing->subject .
             $command_line .
             $this->agent_input;
-
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "running on Thing " .
@@ -62,13 +63,13 @@ class Crows
         );
 
         $this->current_time = $this->thing->time();
-
+*/
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container["stack"]["web_prefix"];
-        $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
-        $this->word = $thing->container["stack"]["word"];
-        $this->email = $thing->container["stack"]["email"];
-
+        //        $this->web_prefix = $thing->container["stack"]["web_prefix"];
+        //        $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
+        //        $this->word = $thing->container["stack"]["word"];
+        //        $this->email = $thing->container["stack"]["email"];
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "completed init. Timestamp = " .
@@ -76,7 +77,8 @@ class Crows
                 "ms.",
             "OPTIMIZE"
         );
-
+*/
+        /*
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "crows",
@@ -93,7 +95,7 @@ class Crows
         }
 
         $split_time = $this->thing->elapsed_runtime();
-
+*/
         //$agent = new Retention($this->thing, "retention");
         //$this->retain_to = $agent->retain_to;
 
@@ -103,18 +105,18 @@ class Crows
 
         //$this->thing->log( $this->agent_prefix .'got retention. ' . number_format($this->thing->elapsed_runtime() - $split_time) .  'ms.', "OPTIMIZE" );
 
-        $this->readSubject();
+        //        $this->readSubject();
 
-        $this->init();
+        $this->initt();
         $this->initCrows();
 
         //$this->thing->log( $this->agent_prefix .'completed getSnowflake. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE" );
-        $this->setCrows();
+        //        $this->setCrows();
 
-        if ($this->agent_input == null) {
-            $this->setSignals();
-        }
-
+        //        if ($this->agent_input == null) {
+        //            $this->setSignals();
+        //        }
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "completed setSignals. Timestamp = " .
@@ -139,23 +141,37 @@ class Crows
                 "ms.",
             "OPTIMIZE"
         );
+*/
+        //        $this->thing_report["log"] = $this->thing->log;
 
-        $this->thing_report["log"] = $this->thing->log;
+        //        return;
+    }
+    public function get()
+    {
+        $this->thing->json->setField("variables");
+        $time_string = $this->thing->json->readVariable([
+            "crows",
+            "refreshed_at",
+        ]);
 
-        return;
+        if ($time_string == false) {
+            $this->thing->json->setField("variables");
+            $time_string = $this->thing->json->time();
+            $this->thing->json->writeVariable(
+                ["crows", "refreshed_at"],
+                $time_string
+            );
+        }
     }
 
+    public function set()
+    {
+        $this->setCrows();
+    }
     // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
 
     // -----------------------
 
-    /*
-    function getNuuid()
-    {
-        $agent = new Nuuid($this->thing, "nuuid");
-        $this->nuuid_png = $agent->PNG_embed;
-    }
-*/
     function getUuid()
     {
         $agent = new Uuid($this->thing, "uuid");
@@ -168,7 +184,7 @@ class Crows
         $this->quick_response_png = $agent->PNG_embed;
     }
 
-    function init()
+    function initt()
     {
         if (!isset($this->min)) {
             $this->min = 1;
@@ -184,15 +200,15 @@ class Crows
         // $this->setRules();
     }
 
-    private function setSignals()
+    public function respondResponse()
     {
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "crows";
+        //       $to = $this->thing->from;
+        //       $from = "crows";
 
         //        $this->makePNG();
-
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "completed makePNG. Timestamp = " .
@@ -200,11 +216,12 @@ class Crows
                 "ms.",
             "OPTIMIZE"
         );
+*/
+        //        $this->makeSMS();
 
-        $this->makeSMS();
-
-        $this->makeMessage();
+        //        $this->makeMessage();
         //$this->makeTXT();
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "completed makeTXT. Timestamp = " .
@@ -212,7 +229,9 @@ class Crows
                 "ms.",
             "OPTIMIZE"
         );
+*/
         $this->makeChoices();
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "completed makeChoices. Timestamp = " .
@@ -228,10 +247,10 @@ class Crows
                 "ms.",
             "OPTIMIZE"
         );
-
+*/
         $this->thing_report["info"] = "This creates a duplicable number set.";
         $this->thing_report["help"] = 'Try "DUPLICABLE"';
-
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "started message. Timestamp = " .
@@ -239,13 +258,14 @@ class Crows
                 "ms.",
             "OPTIMIZE"
         );
-
+*/
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report["info"] = $message_thing->thing_report["info"];
-        $this->makeWeb();
+        //        $this->makeWeb();
 
-        $this->makeTXT();
-        $this->makePDF();
+        //        $this->makeTXT();
+        //        $this->makePDF();
+        /*
         $this->thing->log(
             $this->agent_prefix .
                 "completed message. Timestamp = " .
@@ -255,6 +275,7 @@ class Crows
         );
 
         return $this->thing_report;
+*/
     }
 
     function makeChoices()
