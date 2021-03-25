@@ -107,7 +107,8 @@ class Interlink extends Agent
     {
         if ($this->interlink_make_flag === true or !isset($this->interlink)) {
             $this->interlinks = $this->makeInterlink();
-            $this->response .= "Built new interlink file. ";
+            $this->response .=
+                "Built new interlink file " . $this->file_name . ". ";
         }
 
         $this->txtInterlinks($this->interlinks);
@@ -157,14 +158,18 @@ class Interlink extends Agent
             $uuid = $this->thing->getUUid();
 
             $paragraph_slugs = $this->slugsInterlink($paragraph);
-            //$ngrams = $ngram_agent->getNgrams($paragraph, 3);
+
+            $urls = $this->extractUrls($paragraph);
+            $stripped_url_paragraph = $this->stripUrls($paragraph);
+            $paragraph_slugs = $this->slugsInterlink($stripped_url_paragraph);
+
             $interlinks[$uuid] = [
-                "text" => $paragraph,
+                "text" => $stripped_url_paragraph,
                 "index" => $index,
+                "urls" => $urls,
             ];
             $slug_list[$uuid] = $paragraph_slugs;
         }
-
         // Make a list of uuids for each slug.
         // Make an array of slugs
 
@@ -207,7 +212,7 @@ class Interlink extends Agent
 
                 $count = count($slugs[$slug]);
 
-                if ($count <= 1) {
+                if ($count <= 0) {
                     continue;
                 }
 
@@ -235,7 +240,8 @@ class Interlink extends Agent
         }
 
         // Extract time
-        if (true === false) {
+        $extract_time_flag = true;
+        if ($extract_time_flag === true) {
             $dateline_agent = new Dateline($this->thing, "dateline");
             foreach ($interlinks as $uuid => $interlink) {
                 $dateline = $dateline_agent->extractDateline(
@@ -268,7 +274,7 @@ class Interlink extends Agent
         }
 
         $tags = $this->brilltagger_agent->tag($text);
-        //var_dump($tags);
+
         $tokens = explode("-", $text);
         if (isset($tokens[0])) {
             if ($tokens[0] == "and") {
@@ -337,8 +343,7 @@ class Interlink extends Agent
 
     public function saveInterlinks($interlinks)
     {
-        // TODO - Save a readable require file.
-        //        $file = $this->path . 'test.php';
+        // Save a readable require file.
         $file = $this->file_name;
         file_put_contents(
             $file,
@@ -388,6 +393,5 @@ class Interlink extends Agent
         }
 
         $this->readInterlink();
-
-  }
+    }
 }
