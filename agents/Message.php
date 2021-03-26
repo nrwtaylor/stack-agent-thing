@@ -34,7 +34,6 @@ class Message extends Agent
         }
 
         $this->previous_agent = $this->get_calling_class();
-
         // Given a "thing".  Instantiate a class to identify and create the
         // most appropriate agent to respond to it.
         //$this->thing = $thing;
@@ -447,7 +446,6 @@ class Message extends Agent
         // Process namespace to return agent name
         $previous_agent_path = explode("\\", $this->previous_agent);
         $previous_agent = $previous_agent_path[count($previous_agent_path) - 1];
-
         $this->thing->json->writeVariable(
             ["message", "agent"],
             $previous_agent

@@ -54,6 +54,9 @@ class Agent
         // and create the most appropriate agent to respond to it.
 
         $this->thing = $thing;
+
+        $this->thing->agent_class_name_current = $this->agent_class_name;
+
         $this->thing_report["thing"] = $this->thing;
 
         $this->thing->agent_name = $this->agent_class_name;
@@ -363,6 +366,7 @@ class Agent
         if (class_exists($agent_namespace_name)) {
             // No functionAgent found in the namespace.
             // ie flerpMerp
+
 
             if ($function_primitive_name == "use") {
                 // But we did see a request for the use function.
@@ -1076,7 +1080,6 @@ public function __set($name, $value) {
     public function getName()
     {
         $this->agent_name = explode("\\", strtolower(get_class($this)))[2];
-
         $this->agent_class_name = explode("\\", get_class($this))[2];
     }
 
@@ -1845,7 +1848,7 @@ public function __set($name, $value) {
 // read the current agent.
 if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this->agent_class_name))) {
 //var_dump($this->agent_class_name);
-//    $this->{"read".$this->agent_class_name}();
+    $this->{"read".$this->agent_class_name}();
 }
 
 

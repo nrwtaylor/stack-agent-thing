@@ -195,10 +195,10 @@ class Ngram extends Agent
 
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["email"] = $this->sms_message;
-
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report["info"] = $message_thing->thing_report["info"];
-
+        if (!($this->agent_input == "" and $this->agent_input == null)) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
+        }
     }
 
     /**

@@ -658,9 +658,10 @@ class Thing
         // Call Db and forget the record.
 
         if (!isset($this->db)) {
-            return;
+            return ['error'=>true];
         }
         $thingreport = $this->db->Forget($this->uuid);
+        return $thingreport;
     }
 
     public function Ignore()
@@ -1056,19 +1057,23 @@ $this->flag_set_uuid = true;
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
-        $trace = debug_backtrace(false, 2);
+//        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
+/*
         if (isset($trace[1]['class'])) {
             $class_namespace = $trace[1]['class'];
             $class_name_array = explode("\\", $class_namespace);
             $class_name = end($class_name_array);
         }
-
+*/
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
+if (isset($this->agent_class_name_current )){
+$class_name = $this->agent_class_name_current;
+}
         $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
 
         $text = str_replace($agent_prefix, "", $text);
