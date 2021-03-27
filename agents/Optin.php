@@ -184,10 +184,26 @@ class Optin extends Agent
         //		return;
     }
 
+    public function isOptin($text) {
+       $aliases = ['optin','opt in','opt-in'];
+       foreach($aliases as $alias) {
+          if (trim(strtolower($text)) === $alias) {
+             return true;
+          }
+       }
+       return false;
+    }
+
+    /**
+     *
+     */
     public function readSubject()
     {
-        $this->optin();
-    }
+if ($this->isOptin($this->input)) {
+$this->optin();
+}
+}
+
 
     function optin()
     {

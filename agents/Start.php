@@ -61,10 +61,6 @@ class Start extends Agent
             $this->agent_prefix . "loaded " . $this->counter . ".",
             "DEBUG"
         );
-
-        //        $this->counter = $this->counter + 1;
-
-        return;
     }
 
     /**
@@ -138,10 +134,9 @@ class Start extends Agent
     {
         switch ($this->counter) {
             case 1:
-                $subject = "Start Stackr?";
+                $subject = 'Start ' . $this->short_name . '?';
 
-                $message = "So an action you took (or someone else took) opted you into
-                    Stackr.
+                $message = "So an action you took (or someone else took) opted you into " . $this->short_name . ".
                     <br>
                     There is always that little element of uncertainity.  So we clearly think
                     this is a good thing and are excited to start
@@ -162,8 +157,8 @@ class Start extends Agent
                     "Thank you for your opt-in request.  'optin' has
                     added " .
                     $this->from .
-                    " to the accepted list of Stackr emails.
-                    You can now use Stackr.  Keep on stacking.\n\n";
+                    " to the accepted list of ". $this->short_name . " emails.
+                    You can now use " . $this->short_name . ".  Keep on stacking.\n\n";
 
                 break;
 
@@ -201,8 +196,8 @@ class Start extends Agent
         // Thing actions
 
         // New user is triggered when there is no nom_from in the db.
-        // If this is the case, then Stackr should send out a response
-        // which explains what stackr is and asks either
+        // If this is the case, then send out a response
+        // which explains what this is and asks either
         // for a reply to the email, or to send an email to opt-in@<email postfix>.
 
         $this->thing->flagGreen();
@@ -221,45 +216,23 @@ class Start extends Agent
             $this->agent_prefix . "responding to an instruction to start.";
     }
 
+    public function isStart($text) {
+       $aliases = ['start'];
+       foreach($aliases as $alias) {
+          if (trim(strtolower($text)) === $alias) {
+             return true;
+          }
+       }
+       return false;
+    }
+
     /**
      *
      */
     public function readSubject()
     {
-        $this->keyword = "start";
-        $keywords = ["start"];
-        if (isset($this->agent_input)) {
-            $input = $this->agent_input;
-        } else {
-            $input = strtolower($this->subject);
-        }
-
-        $prior_uuid = null;
-
-        $pieces = explode(" ", strtolower($input));
-
-        // So this is really the 'sms' section
-        // Keyword
-        if (count($pieces) == 1) {
-            if ($input == $this->keyword) {
-                $this->get();
-                $this->response = "Got the start flag.";
-                return;
-            }
-        }
-
-        foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
-                        case "start":
-                            $this->start();
-                            return;
-                        default:
-                            return;
-                    }
-                }
-            }
+        if ($this->isStart($this->input)) {
+            $this->start();
         }
     }
 

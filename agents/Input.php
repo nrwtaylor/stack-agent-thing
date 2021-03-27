@@ -10,13 +10,13 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Input extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      */
@@ -35,8 +35,9 @@ class Input extends Agent
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
 
-        if ((!isset($ngram_agent->ngrams)) or ($ngram_agent->ngrams == null)) {return;}
-
+        if (!isset($ngram_agent->ngrams) or $ngram_agent->ngrams == null) {
+            return;
+        }
 
         foreach ($ngram_agent->ngrams as $index => $ngram) {
             switch ($ngram) {
@@ -115,7 +116,7 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
 <p>&gt <span id="agent-smsmessage"></span></p>';
 
         $this->web = $web;
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function makeMessage()
@@ -135,7 +136,7 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
     {
         $sms = "INPUT | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -153,12 +154,12 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
         $this->thing_report["help"] = "This is about input variables.";
 
         //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -205,7 +206,6 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
         return true;
     }
 
-
     /**
      *
      * @return unknown
@@ -214,7 +214,7 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
     {
         $block_things = [];
         // See if a block record exists.
-        $findagent_thing = new Findagent($this->thing, 'thing');
+        $findagent_thing = new Findagent($this->thing, "thing");
 
         // This pulls up a list of other Things.
 
@@ -222,25 +222,25 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
 
         $match = 0;
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+        foreach ($findagent_thing->thing_report["things"] as $block_thing) {
             $this->thing->log(
-                $block_thing['task'] .
+                $block_thing["task"] .
                     " " .
-                    $block_thing['nom_to'] .
+                    $block_thing["nom_to"] .
                     " " .
-                    $block_thing['nom_from']
+                    $block_thing["nom_from"]
             );
 
-            if ($block_thing['nom_to'] != "usermanager") {
+            if ($block_thing["nom_to"] != "usermanager") {
                 $match += 1;
 
-                $this->link_uuid = $block_thing['uuid'];
+                $this->link_uuid = $block_thing["uuid"];
 
                 $thing = new Thing($this->link_uuid);
-                $variables = $thing->account['stack']->json->array_data;
+                $variables = $thing->account["stack"]->json->array_data;
                 //                $input_uuid = null;
 
-                if (isset($variables['input']) and $match == 2) {
+                if (isset($variables["input"]) and $match == 2) {
                     //                    if (!isset($input_uuid = $variables['input']['uuid'])) {
                     break;
                     //                    }
@@ -250,7 +250,7 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
             }
         }
 
-        $input_uuid = $variables['input']['uuid'];
+        $input_uuid = $variables["input"]["uuid"];
 
         if ($input_uuid == null) {
             // This is input
@@ -273,10 +273,19 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
     {
         $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
 
-        if ($discriminators == null) {
-            $discriminators = ['minutes', 'hours'];
+        if (
+            $this->depthArr($discriminators) == 1 and
+            $this->depthArr($this->aliases) == 2
+        ) {
+            $discriminators = $this->aliases;
         }
 
+        if ($discriminators == null) {
+            $discriminators = [
+                "minutes" => ["m", "mins", "mns", "minits"],
+                "hours" => ["hours", "h", "hr", "hrs", "hsr"],
+            ];
+        }
 
         if (count($discriminators) > 4) {
             $minimum_discrimination = $default_discriminator_thresholds[4];
@@ -285,38 +294,29 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
                 $default_discriminator_thresholds[count($discriminators)];
         }
 
-        $aliases = [];
-
-        $aliases['minutes'] = ['m', 'mins', 'mns', 'minits'];
-        $aliases['hours'] = ['hours', 'h', 'hr', 'hrs', 'hsr'];
-
-        if (isset($this->aliases)) {
-            $aliases = $this->aliases;
-        }
-
         $words = explode(" ", $input);
 
         $count = [];
 
         $total_count = 0;
         // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
+        foreach ($discriminators as $discriminator => $aliases) {
             $count[$discriminator] = 1;
             $total_count = $total_count + 1;
         }
         // ...and the total count.
 
         foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
+            foreach ($discriminators as $discriminator => $aliases) {
                 if ($word == $discriminator) {
                     $count[$discriminator] = $count[$discriminator] + 1;
                     $total_count = $total_count + 1;
                 }
 
-                if (!isset($aliases[$discriminator])) {
-                    continue;
-                }
-                foreach ($aliases[$discriminator] as $alias) {
+                //if (!isset($aliases[$discriminator])) {
+                //    continue;
+                //}
+                foreach ($aliases as $alias) {
                     if ($word == $alias) {
                         $count[$discriminator] = $count[$discriminator] + 1;
                         $total_count = $total_count + 1;
@@ -328,7 +328,7 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
         // Set total sum of all values to 1.
 
         $normalized = [];
-        foreach ($discriminators as $discriminator) {
+        foreach ($discriminators as $discriminator => $aliases) {
             $normalized[$discriminator] = $count[$discriminator] / $total_count;
         }
 

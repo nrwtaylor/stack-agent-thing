@@ -41,8 +41,6 @@ class Agent
 
         $this->getName();
 
-        //$this->thing->agent_name = $this->agent_class_name;
-
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         // Given a "thing".  Instantiate a class to identify
         // and create the most appropriate agent to respond to it.
@@ -148,6 +146,7 @@ class Agent
         $this->verbosity = 9;
 
         $this->context = null;
+
         $this->response = "";
 
         if (isset($thing->container["api"]["agent"])) {
@@ -176,6 +175,16 @@ class Agent
 */
 
         $this->init();
+
+        // read the current agent.
+        if (
+        //    $this->agent_class_name !== "Agent" and
+            method_exists($this, "read" . $this->agent_class_name)
+        ) {
+            $this->{"init" . $this->agent_class_name}();
+        }
+
+
         $this->get();
         try {
             $this->read();
@@ -251,6 +260,9 @@ class Agent
             $this->test();
         }
         $this->thing->log("__construct complete");
+    }
+
+    public function initAgent() {
     }
 
     // TODO DEV?
@@ -852,7 +864,7 @@ public function __set($name, $value) {
      *
      * @return unknown
      */
-    public function getCallingagent()
+    public function callingAgent()
     {
         //get the trace
         $trace = debug_backtrace();
@@ -881,6 +893,41 @@ public function __set($name, $value) {
 
         $this->calling_agent = null;
     }
+
+    public function traceAgent()
+    {
+        //get the trace
+$agent_trace = [];
+        $trace = debug_backtrace();
+foreach($trace as $i=>$t) {
+$agent_trace[] = $t["class"];
+}
+return $agent_trace;;
+        // Get the class that is asking for who awoke it
+        if (!isset($trace[1]["class"])) {
+            $this->calling_agent = true;
+            return true;
+        }
+
+        $class_name = $trace[1]["class"];
+        // +1 to i cos we have to account for calling this function
+        for ($i = 1; $i < count($trace); $i++) {
+            if (isset($trace[$i])) {
+                if (
+                    isset($trace[$i]["class"]) and
+                    $class_name != $trace[$i]["class"]
+                ) {
+                    // is it set?
+                    // is it a different class
+                    $this->calling_agent = $trace[$i]["class"];
+                    return $trace[$i]["class"];
+                }
+            }
+        }
+
+        $this->calling_agent = null;
+    }
+
 
     function listAgents()
     {
@@ -1088,7 +1135,7 @@ public function __set($name, $value) {
     {
         $this->thing->log("agent_name is  " . $this->agent_name . ".");
 
-        $this->getCallingagent();
+        $this->callingAgent();
         $this->thing->log("Calling agent is  " . $this->calling_agent . ".");
 
         $agent_input_text = $this->agent_input;

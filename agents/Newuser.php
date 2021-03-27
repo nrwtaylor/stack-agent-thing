@@ -174,9 +174,24 @@ class Newuser extends Agent
             $this->agent_prefix . "responding to an instruction to new user.";
     }
 
+    public function isNewuser($text) {
+       $aliases = ['newuser', 'new user'];
+       foreach($aliases as $alias) {
+          if (trim(strtolower($text)) === $alias) {
+             return true;
+          }
+       }
+       return false;
+    }
+
+    /**
+     *
+     */
     public function readSubject()
     {
-        $this->newuser();
+        if ($this->isNewuser($this->input)) {
+            $this->newuser();
+        }
     }
 
     function newuser()

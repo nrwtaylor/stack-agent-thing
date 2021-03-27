@@ -124,10 +124,26 @@ class Optout extends Agent
             $this->agent_prefix . "responding to an instruction to opt-in.";
     }
 
+    public function isOptout($text) {
+       $aliases = ['optout','opt out','opt-out'];
+       foreach($aliases as $alias) {
+          if (trim(strtolower($text)) === $alias) {
+             return true;
+          }
+       }
+       return false;
+    }
+
+    /**
+     *
+     */
     public function readSubject()
     {
-        $this->optout();
-    }
+if ($this->isOptout($this->input)) { 
+$this->optout();
+}
+}
+
 
     function optout()
     {

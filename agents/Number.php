@@ -97,7 +97,7 @@ class Number extends Agent
         $this->refreshed_at = $this->number_agent->getVariable("refreshed_at");
 
         // Extract calling agent name from class name.
-        $this->getCallingagent();
+        $this->callingAgent();
         $agent_class_name = $this->calling_agent;
         $this->calling_agent_name = strtolower(
             array_reverse(explode('\\', $agent_class_name))[0]
