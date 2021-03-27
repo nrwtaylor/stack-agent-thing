@@ -1878,8 +1878,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
      //       $this->variables_agent->nuuid .
      //       '. ';
      //   $txt .= "\n";
-
-     //   $this->thing_report['txt'] = "merp";
     //    return;
 $txt = "";
         if (!isset($this->trains)) {

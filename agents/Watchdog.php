@@ -178,7 +178,6 @@ class Watchdog extends Agent
 
         $tick_limit_seconds = 60;
         if ($age > $tick_limit_seconds) {
-            //echo 'merp';
             $thing = new Thing(null);
             // Document as $thing->Create('to', 'from', 'message text')
             $thing->Create(

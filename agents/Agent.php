@@ -1143,40 +1143,6 @@ public function __set($name, $value) {
      */
     public function getMeta($thing = null)
     {
-        /*
-        if ($thing == null) {
-            $thing = $this->thing;
-        }
-
-        // Non-nominal
-        $this->uuid = $thing->uuid;
-        if (!isset($thing->to)) {
-            $this->to = null;
-        } else {
-            $this->to = $thing->to;
-        }
-
-        // Potentially nominal
-        if (!isset($thing->subject)) {
-            $this->subject = null;
-        } else {
-            $this->subject = $thing->subject;
-        }
-
-        // Treat as nomina
-        if (!isset($thing->from)) {
-            $this->from = null;
-        } else {
-            $this->from = $thing->from;
-        }
-        // Treat as nomina
-        if (!isset($thing->created_at)) {
-            $this->created_at = null;
-        } else {
-            $this->created_at = $thing->created_at;
-        }
-*/
-
         if ($thing == null) {
             $thing = $this->thing;
         }
@@ -1212,7 +1178,7 @@ public function __set($name, $value) {
             $this->from = "null";
         }
         if (!isset($this->subject)) {
-            $this->subject = "merp";
+            $this->subject = "null";
         }
         //if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
         if (!isset($this->created_at)) {

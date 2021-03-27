@@ -242,7 +242,6 @@ class Usermanager extends Agent
         // So starting with nom_from.
         // Two conditions, we either know the nom_from, or we don't.
 
-        //$status = false;
         $this->state_change = false;
 
         // $input = strtolower($this->to . " " .$this->subject);
@@ -434,11 +433,11 @@ class Usermanager extends Agent
         );
 
         // Send to the Optin agent to handle response
-        $this->thing->choice->Choose("opt-in");
+        $this->thing->choice->Choose("opt-out");
         $this->previous_state = $this->state;
-        $this->state = "opt-in";
+        $this->state = "opt-out";
 
-        $agent = new Optin($this->thing);
+        $agent = new Optout($this->thing);
     }
 
     function optin()

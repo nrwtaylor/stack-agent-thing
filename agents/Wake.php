@@ -146,9 +146,6 @@ class Wake extends Agent
 
             $subjects[] = $thing->subject;
 
-            //
-            //			if ($i == 2) {break;}
-            //			$i = $i + 1;
         }
         $message .= "</ul>";
         $message .= '<br><br>';
@@ -178,16 +175,12 @@ class Wake extends Agent
             $char_budget = intval(
                 ((strlen($subject) + 1) / $total_chars) * $max_sms_length
             );
-            //echo $char_budget;
 
             $sms .= substr($subject, 0, $char_budget) . ' / ';
         }
-        //substr('abcdef', 0, 4)
-        //echo $this->sms_message;
 
         $sms .= " | REPLY ?";
 
-        //$sms = "merp";
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
     }
