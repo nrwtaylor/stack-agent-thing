@@ -219,8 +219,6 @@ $app->group("/api", function () use ($app) {
                 function ($request, $response, $args) {
                     $body = $request->getParsedBody();
 
-                    //echo "meep";
-                    //                $arr = json_encode(array("to"=>"web@stackr.ca", "from"=>"routes", "subject"=>"gearman webhook"));
                     $arr = json_encode([
                         "to" => "web@stackr.ca",
                         "from" => "snowflake",
@@ -861,8 +859,6 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
     $command = ltrim($command, " ");
     $command = rtrim($command, " ");
 
-    //var_dump($command);
-    //exit();
     if (substr($command, 0, 15) == "googleauthorize") {
         $thing = new Thing(null);
         $thing->Create("web", "routes", "s/ web googleauthorize");
@@ -1039,15 +1035,10 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
 
                     $agent = new $agent_namespace_name($web_thing, $agent_name);
                 } catch (Exception $e) {
-                    //echo 'Caught exception: ',  $e->getMessage(), "\n";
                     return $response->withStatus(404);
                 }
                 ob_clean();
                 if (!isset($agent->thing_report[strtolower($ext_name)])) {
-                    //var_dump($ext_name);
-                    //echo "meep";
-                    // TODO: TEST
-                    //                    exit();
                     return $response->withStatus(404);
                 }
 
@@ -1101,7 +1092,6 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
             // Check if this is no thing.
             // Don't respond to web requests without a UUID
             // to a thing which doesn't exist on the stack.
-            //echo $thing->uuid;
 
             if ($thing->thing == false) {
                 if ($uuid === null) {
@@ -1226,8 +1216,6 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                     $thing_report["email"] = $makeemail_agent->email_message;
                     break;
                 default:
-                    //var_dump($channel);
-                    //var_dump($thing_report['sms']);
                     if (isset($thing_report["web"])) {
                         $channel = "web";
                     } elseif (isset($thing_report["sms"])) {
@@ -1270,8 +1258,6 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                     $thing->json->size_overflow .
                     " characters not saved.";
             }
-            //if ($thing->json->size_overflow != false) {echo "Stack write failed.";}
-
             // We have to give a response.  Bleep.
             // So give the full thing report.
             // Which is available via the API at

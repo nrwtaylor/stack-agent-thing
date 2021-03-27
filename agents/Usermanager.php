@@ -5,32 +5,11 @@ ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
 
-class Usermanager
+class Usermanager extends Agent
 {
-    function __construct(Thing $thing, $agent_input = null)
+    public function init() 
     {
         $this->state = "X";
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $thing;
-
-        $this->agent_name = 'usermanager';
-        $this->agent_prefix = 'Agent "Usermanager"';
-        $this->agent_input = $agent_input;
-
-        // So I could call
-        $this->test = false;
-        if ($this->thing->container['stack']['state'] == 'dev') {
-            $this->test = true;
-        }
-        // I think.
-        // Instead.
-
-        // Load in some characterizations.
-        $this->short_name = $this->thing->container['stack']['short_name'];
-        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
-        $this->mail_prefix = $this->thing->container['stack']['mail_prefix'];
-        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
         $this->sms_seperator =
             $this->thing->container['stack']['sms_separator']; // |
 
@@ -52,12 +31,6 @@ class Usermanager
 
         $this->verbosity_log = 7;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
         $this->node_list = array(
             "start" => array(
                 "new user" => array(
@@ -66,58 +39,12 @@ class Usermanager
             )
         );
 
-        $this->current_time = $this->thing->time();
-
-        $this->thing->log(
-            'Agent "Usermanager" running on Thing ' . $this->thing->nuuid . '.',
-            "INFORMATION"
-        );
-//return;
-        // 279ms 303ms 306ms
-        $split_time = $this->thing->elapsed_runtime();
-
-        $this->variables_agent = new Variables(
-            $this->thing,
-            "variables usermanager " . $this->from
-        );
-
-        $this->thing->log(
-            $this->agent_prefix .
-                ' created variables agent in ' .
-                number_format($this->thing->elapsed_runtime() - $split_time) .
-                'ms.',
-            "OPTIMIZE"
-        );
-        //4ms 4ms 3ms
-        $this->get();
-
         if ($this->agent_input != null) {
             $this->readInstruction();
         } else {
-            $this->getSubject();
+            $this->readSubject();
         }
 
-        $this->set();
-
-        if ($this->agent_input == null) {
-            $this->setSignals(); /// Don't send any messages
-        }
-        $this->thing->log(
-            $this->agent_prefix .
-                'ran for ' .
-                number_format(
-                    $this->thing->elapsed_runtime() - $this->start_time
-                ) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->thing_report['etime'] = number_format(
-            $this->thing->elapsed_runtime()
-        );
-        $this->thing_report['log'] = $this->thing->log;
-
-        return;
     }
 
     function readInstruction()
@@ -195,14 +122,15 @@ class Usermanager
             "refreshed_at",
             $this->current_time
         );
-// devstack testing October 3 2019
-
-//        $this->thing->choice->save('usermanager', $this->state);
-        return;
     }
 
     function get()
     {
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables usermanager " . $this->from
+        );
+
         // get gets the state of the Flag the last time
         // it was saved into the stack (serialized).
         $this->state = $this->variables_agent->getVariable("state");
@@ -284,13 +212,11 @@ class Usermanager
         $this->thing_report['sms'] = $sms;
     }
 
-    public function setSignals()
+    public function respondResponse()
     {
         // Develop the various messages for each channel.
 
         $this->thing->flagGreen();
-
-        $this->makeSMS();
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
@@ -304,11 +230,9 @@ class Usermanager
         $this->thing_report['keyword'] = $this->state;
         $this->thing_report['help'] =
             'Agent "Usermanager" figuring the user of this Thing out';
-
-        return $this->thing_report;
     }
 
-    public function getSubject()
+    public function readSubject()
     {
         // What do we know at this point?
         // We know the nom_from.
@@ -449,8 +373,6 @@ class Usermanager
                 $this->state_change = true;
                 $this->thing->choice->Choose("start");
         }
-
-        return;
     }
 
     function newuser()
@@ -485,8 +407,6 @@ class Usermanager
         );
 
         $newuser_thing->flagRed();
-
-        return;
     }
 
     function start()
@@ -504,7 +424,6 @@ class Usermanager
         $this->state = "start";
 
         $agent = new Start($this->thing);
-        return;
     }
 
     function optout()
@@ -520,7 +439,6 @@ class Usermanager
         $this->state = "opt-in";
 
         $agent = new Optin($this->thing);
-        return;
     }
 
     function optin()
@@ -534,7 +452,6 @@ class Usermanager
         $this->state = "opt-in";
 
         $agent = new Optin($this->thing);
-        return;
     }
 
     function discriminateInput($input, $discriminators = null)
@@ -589,7 +506,6 @@ class Usermanager
                     if ($word == $alias) {
                         $count[$discriminator] = $count[$discriminator] + 1;
                         $total_count = $total_count + 1;
-                        //echo "sum";
                     }
                 }
             }
@@ -612,7 +528,6 @@ class Usermanager
         // Now see what the delta is between position 0 and 1
         $t = null;
         foreach ($normalized as $key => $value) {
-            //echo $key, $value;
             $t .= $key . " " . $value;
 
             if (isset($max)) {
@@ -632,7 +547,6 @@ class Usermanager
         );
 
         if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
             return $selected_discriminator;
         } else {
             return false; // No discriminator found.
@@ -641,5 +555,3 @@ class Usermanager
         return true;
     }
 }
-
-?>

@@ -4,12 +4,6 @@
  *
  * @package default
  */
-
-/*
- * Agent.php
- *
- * @package default
- */
 namespace Nrwtaylor\StackAgentThing;
 
 // Agent resolves message disposition
@@ -90,17 +84,17 @@ class Agent
         $this->default_font = null;
         $this->default_pdf_page_template = null;
 
-        $stack_settings = $thing->container['stack'];
+        $stack_settings = $thing->container["stack"];
         foreach ($stack_settings as $setting_name => $setting_value) {
             // For 'backwards' compatibility.
             //$this->{$setting_name} = $thing->container['stack'][$setting_name];
 
             // Going forward set default_ and stack_ prefixes
             // For settings from stack private settings.
-            $this->{'default_' . $setting_name} =
-                $thing->container['stack'][$setting_name];
-            $this->{'stack_' . $setting_name} =
-                $thing->container['stack'][$setting_name];
+            $this->{"default_" . $setting_name} =
+                $thing->container["stack"][$setting_name];
+            $this->{"stack_" . $setting_name} =
+                $thing->container["stack"][$setting_name];
         }
 
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
@@ -212,12 +206,14 @@ class Agent
                     " " .
                     $t->getTraceAsString()
             );
-            $error_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            $error_text =
+                $t->getLine() . "---" . $t->getFile() . $t->getMessage();
             $this->thing->console($error_text . "\n");
             $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Exception $e) {
-            $error_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage();
+            $error_text =
+                $t->getLine() . "---" . $t->getFile() . $t->getMessage();
 
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -366,7 +362,6 @@ class Agent
         if (class_exists($agent_namespace_name)) {
             // No functionAgent found in the namespace.
             // ie flerpMerp
-
 
             if ($function_primitive_name == "use") {
                 // But we did see a request for the use function.
@@ -581,7 +576,7 @@ public function __set($name, $value) {
 
     public function settingsAgent($settings_array)
     {
-        $t = $this->thing->container['api'];
+        $t = $this->thing->container["api"];
         foreach ($settings_array as $setting) {
             if (!isset($t[$setting])) {
                 return null;
@@ -613,7 +608,14 @@ public function __set($name, $value) {
             );
             //return;
         } catch (\Error $ex) {
-            $warning_text = $t->getLine() . "---" . $t->getFile() . $t->getMessage() . " caught make " . $this->agent_class_name . " error.";
+            $warning_text =
+                $t->getLine() .
+                "---" .
+                $t->getFile() .
+                $t->getMessage() .
+                " caught make " .
+                $this->agent_class_name .
+                " error.";
             $this->thing->log($warning_text, "WARNING");
         }
 
@@ -699,7 +701,6 @@ public function __set($name, $value) {
             if ($pos === false) {
                 $this->thing_report["web"] .= "<p>";
             } else {
-
                 if ($pos == $length - $needle_length) {
                 } else {
                     //$this->thing_report['web'] .= "<p>";
@@ -1845,12 +1846,13 @@ public function __set($name, $value) {
 
         $this->readSubject();
 
-// read the current agent.
-if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this->agent_class_name))) {
-//var_dump($this->agent_class_name);
-    $this->{"read".$this->agent_class_name}();
-}
-
+        // read the current agent.
+        if (
+            $this->agent_class_name !== "Agent" and
+            method_exists($this, "read" . $this->agent_class_name)
+        ) {
+            $this->{"read" . $this->agent_class_name}();
+        }
 
         $this->thing->log("read completed.");
     }
@@ -2070,7 +2072,6 @@ if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this-
         if (isset($this->responsive_agents)) {
             return;
         }
-
         $responsive_agents = [];
         foreach ($agents as $i => $agent_package) {
             //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
@@ -2175,7 +2176,10 @@ if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this-
             return false;
         }
 
-        if ($this->getAgent($agent_class_name, $agent_class_name, null) === false) {
+        if (
+            $this->getAgent($agent_class_name, $agent_class_name, null) ===
+            false
+        ) {
             return false;
         } else {
             return true;
@@ -2251,7 +2255,6 @@ if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this-
                         strtolower(str_replace("-", "", $agent_hit)) ==
                         strtolower($agent_candidate)
                     ) {
-
                         $agent_package = [
                             $agent_input_hit => ["agent_input" => $agent_hit],
                         ];
@@ -2534,11 +2537,10 @@ if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this-
                 continue;
             }
 
-//            if ($this->isAgent($ngram)) {
-                $matches[] = $ngram;
-                //                return $this->thing_report;
-//            }
-
+            //            if ($this->isAgent($ngram)) {
+            $matches[] = $ngram;
+            //                return $this->thing_report;
+            //            }
         }
 
         if (count($matches) == 1) {
@@ -2844,7 +2846,6 @@ if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this-
         }
 
         $this->thing->log("looking for optin/optout");
-        //    $usermanager_thing = new Usermanager($this->thing,'usermanager');
 
         if (strpos($input, "optin") !== false) {
             $this->thing->log("created a Usermanager agent.");
@@ -2886,7 +2887,6 @@ if (($this->agent_class_name !== 'Agent') and (method_exists($this,"read".$this-
         $this->thing->log("looking for UUID in address.", "INFORMATION");
 
         // Is Identity Context?
-
         $pattern = "|[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}|";
         if (preg_match($pattern, $this->to)) {
             $this->thing->log(

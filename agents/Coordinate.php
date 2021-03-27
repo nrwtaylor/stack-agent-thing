@@ -313,9 +313,9 @@ return true;
     {
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
-        if ($place_code == null) {
-            $place_code = $this->place_code;
-        }
+        //if ($place_code == null) {
+        //    $place_code = $this->place_code;
+        //}
 
         $this->variables_coordinate = new Variables(
             $this->thing,

@@ -1,167 +1,57 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Context
+class Context extends Agent
 {
     // This is the Context manager.
 
     // Usage:
     // Context - return the current users context.
 
-    public $var = 'hello';
+    public $var = "hello";
 
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
-        //if ($agent_input == null) {$agent_input = "";}
-
-        $this->agent_input = $agent_input;
-
         $this->keyword = "context";
 
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->test = "Development code"; // Always
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-        $this->agent_prefix = 'Agent "Context" ';
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'running on Thing ' .
-                $this->thing->nuuid .
-                '.'
-        );
-        $this->thing->log(
-            $this->agent_prefix .
-                'received this Thing "' .
-                $this->subject .
-                '".'
-        );
-
         $this->contexts = [
-            'identity' => 'uuid',
-            'headcode' => 'head_code',
-            'train' => 'head_code',
-            'transit' => 'transit_id',
-            'circus' => null,
-            'event' => null,
-            'place' => null,
-            'group' => 'group_id',
+            "identity" => "uuid",
+            "headcode" => "head_code",
+            "train" => "head_code",
+            "transit" => "transit_id",
+            "circus" => null,
+            "event" => null,
+            "place" => null,
+            "group" => "group_id",
         ];
 
-        // $this->node_list = array("green"=>array("red"=>array("green","red"),"red"),"green3");
-        //$this->thing->choice->load('alias');
         $this->node_list = ["off" => ["on" => ["off"]]];
 
-        // This isn't going to help because we don't know if this
-        // is the base.
-        //        $this->state = "off";
-        //        $this->thing->choice->load($this->keyword);
-
         $this->current_time = $this->thing->json->time();
 
-        //    $this->variables_agent = new Variables($this->thing, "variables alias " . $this->from);
+        $this->keywords = ["context"];
 
-        $this->keywords = ['context'];
-
-        //                'block' => array('default run_time'=>'105',
-        //                                'negative_time'=>'yes'),
-
-        $this->current_time = $this->thing->json->time();
-
-        //$default_alias_name = "alias";
-
-        //        $this->variables_agent = new Variables($this->thing, "variables " . $default_alias_name . " " . $this->from);
         $this->verbosity = 9;
 
         $this->requested_state = false;
         $this->index = 0;
-
-        // Loads in Block variables.
-        $this->get(); // Updates $this->elapsed_time; // And calls the variables-agent
-
-        $this->thing->log(
-            $this->agent_prefix .
-                '. Timestamp ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.'
-        );
-
-        // So created a token_generated_time field.
-        //        $this->thing->json->setField("variables");
-        //        $this->thing->json->writeVariable( array("stopwatch", "request_at"), $this->thing->json->time() );
-
-        //$this->thing->json->time()
-
-        $this->readSubject();
-        $this->thing->log(
-            $this->agent_prefix .
-                '. Timestamp ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.'
-        );
-
-        //        $this->set();
-
-        if ($this->agent_input == null) {
-            $this->respond();
-        }
-
-        //$this->thing->log($this->agent_prefix . 'completed.');
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'deduced ' .
-                $this->context .
-                " " .
-                $this->context_id .
-                '.'
-        );
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'ran for ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.'
-        );
-
-        $this->thing_report['log'] = $this->thing->log;
-
-        return;
     }
 
     function set()
     {
-        // A block has some remaining amount of resource and
-        // an indication where to start.
-
         // This makes sure that
         if (!isset($this->context_thing)) {
             $this->context_thing = $this->thing;
         }
 
-        //        if ($requested_state == null) {
         $requested_state = $this->requested_state;
-        //        }
-
         // Update calculated variables.
-
-        //        $this->context_thing->setVariable("state", $requested_state);
-        //        $this->variables_agent->setVariable("context", $this->context);
-        //        $this->variables_agent->setVariable("context_id", $this->context_id);
 
         $this->context_thing->json->writeVariable(
             ["context", "state"],
@@ -186,7 +76,6 @@ class Context
                 $this->current_time
             );
         }
-        //!        $this->thing->choice->save('context', $this->state);
 
         $this->thing->json->writeVariable(
             ["context", "state"],
@@ -212,68 +101,70 @@ class Context
 
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
+
+        $this->thing->log(
+            $this->agent_prefix .
+                "deduced " .
+                $this->context .
+                " " .
+                $this->context_id .
+                "."
+        );
     }
 
     function getContexts()
     {
-$this->default_context = "identity";
-$this->context = $this->default_context;
-$this->context_id = 1;
-
+        $this->default_context = "identity";
+        $this->context = $this->default_context;
+        $this->context_id = 1;
 
         $context_things = [];
         $this->previous_contexts = [];
 
         // See if a context record exists.
-        $findagent_thing = new Findagent($this->thing, 'thing');
+        $findagent_thing = new Findagent($this->thing, "thing");
         $this->max_index = 0;
         $match = 0;
+        $things = $findagent_thing->thing_report["things"];
+        if (!isset($things)) {
+            return $this->context;
+        }
 
-if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
-
-        if ($findagent_thing->thing_report['things'] == true) {
+        if ($things == true) {
             return;
         }
 
-        foreach ($findagent_thing->thing_report['things'] as $thing_object) {
+        foreach ($things as $thing_object) {
             $ref_time = microtime(true);
-            //            $this->thing->log($thing_object['task'] . " " . $thing_object['nom_to'] . " " . $thing_object['nom_from']);
-            $uuid = $thing_object['uuid'];
+            $uuid = $thing_object["uuid"];
 
-            if ($thing_object['nom_to'] != "usermanager") {
+            if ($thing_object["nom_to"] != "usermanager") {
                 $match += 1;
 
-                //x $thing= new Thing($uuid);
-
-                $variables_json = $thing_object['variables'];
+                $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-                //                $this->variables_agent = new Variables($thing, "variables context " . $this->from);
-                //                $this->variables_agent->getVariables();
-
-                //x $variables = $thing->account['stack']->json->array_data;
-
-                if (isset($variables['train']['head_code'])) {
+                if (isset($variables["train"]["head_code"])) {
                     $this->context = "train";
-                    $this->context_id = $variables['train']['head_code'];
+                    $this->context_id = $variables["train"]["head_code"];
                     break;
                 }
 
-                if (isset($variables['headcode']['head_code'])) {
+                if (isset($variables["headcode"]["head_code"])) {
                     $this->context = "headcode";
-                    $this->context_id = $variables['headcode']['head_code'];
+                    $this->context_id = $variables["headcode"]["head_code"];
                     break;
                 }
 
-                if (isset($variables['group']['group_id'])) {
+                if (isset($variables["group"]["group_id"])) {
                     $this->context = "group";
-                    $this->context_id = $variables['group']['group_id'];
+                    $this->context_id = $variables["group"]["group_id"];
                     break;
                 }
 
-                if (isset($variables['transit']['transit_id'])) {
+                if (isset($variables["transit"]["transit_id"])) {
                     $this->context = "transit";
-                    $this->context_id = $variables['group']['transit_id'];
+                    $this->context_id = $variables["group"]["transit_id"];
                     break;
                 }
 
@@ -282,9 +173,9 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
                 if ($this->verbosity == 9) {
                     $this->thing->log(
                         $this->agent_prefix .
-                            ' context get forloop ' .
+                            " context get forloop " .
                             $milliseconds .
-                            'ms.'
+                            "ms."
                     );
                 }
 
@@ -324,38 +215,24 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
 
         $this->thing->log(
             $this->agent_prefix .
-                '. Timestamp ' .
+                ". Timestamp " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
 
         $this->set();
-        $this->thing->log(
-            $this->agent_prefix .
-                '. Timestamp ' .
-                number_format($this->thing->elapsed_runtime()) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        return;
     }
 
     function makeContext($context = null)
     {
-        //$this->alias = "Logan's run";
-
-        //        $this->getAlias();
-
         if ($context == null) {
             $this->context = "identity";
         }
-        //$this->state = "stopped";
 
         $this->thing->log(
             $this->agent_prefix .
-                'will make an Context with ' .
+                "will make an Context with " .
                 $this->context .
                 ".",
             "INFORMATION"
@@ -403,18 +280,13 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
 
         $this->set();
 
-        //$this->block_thing = $this->thing;
-
         $this->thing->log(
-            $this->agent_prefix . 'found an context and made a Context entry.'
+            $this->agent_prefix . "found an context and made a Context entry."
         );
     }
 
     function extractContext()
     {
-        //        set_error_handler(array($this, '\Nrwtaylor\StackAgentThing\warning_handler'), E_WARNING);
-        //        set_error_handler('\Nrwtaylor\StackAgentThing\warning_handler', E_WARNING);
-
         foreach ($this->contexts as $context => $context_id) {
             if (
                 stripos(
@@ -428,25 +300,17 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
             }
         }
 
-        set_error_handler([$this, 'warning_handler'], E_WARNING);
-
-        //        set_error_handler("warning_handler", E_WARNING);
+        set_error_handler([$this, "warning_handler"], E_WARNING);
 
         foreach ($this->contexts as $context => $context_id) {
             $agent_class_name = ucfirst($context);
             $agent_namespace_name =
-                '\\Nrwtaylor\\StackAgentThing\\' . $agent_class_name;
+                "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
             try {
-                //include_once __DIR__ ."/". $agent_class_name . '.php';
-                //$agent = new $agent_class_name($this->thing, $context);
-                //$agent = new $agent_class_name($this->thing, "extract");
                 $agent = new $agent_namespace_name($this->thing, "extract");
 
                 if (isset($agent->{$context_id})) {
-                    //echo $context; echo "<br>";
-                    //echo $context_id; echo "<br>";
-                    //echo $agent->{$context_id}; echo "<p>";
                     $success = true;
                     break;
                 }
@@ -456,23 +320,21 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         }
 
         restore_error_handler();
-        //var_dump($this->thing->thing);
+
         $this->context = $context;
         $this->context_id = $agent->{$context_id};
 
         $this->thing->log(
             $this->agent_prefix .
-                'extracted ' .
+                "extracted " .
                 $this->context .
-                ' ' .
+                " " .
                 $this->context_id .
                 ".",
             "INFORMATION"
         );
-
-        return;
     }
-
+    /*
     function getVariable($variable_name = null, $variable = null)
     {
         // This function does a minor kind of magic
@@ -511,7 +373,7 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         // setting is found.
         return false;
     }
-
+*/
     function getContext()
     {
         $this->getHeadcode();
@@ -539,7 +401,7 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         //$this->headcode_thing = new Headcode($this->variables_agent->thing, 'headcode '. $this->input);
         $this->headcode_thing = new Headcode(
             $this->variables_agent->thing,
-            'extract'
+            "extract"
         );
 
         $this->head_code = $this->headcode_thing->head_code;
@@ -551,7 +413,6 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
     {
         $this->makeContext();
         $this->get();
-        return;
     }
 
     public function makeSMS()
@@ -563,31 +424,26 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         $sms_message .=
             " | ~rtime " .
             number_format($this->thing->elapsed_runtime()) .
-            'ms';
+            "ms";
         $sms_message .= " | TEXT ?";
 
         $this->sms_message = $sms_message;
-        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
         return;
     }
 
     public function makeTXT()
     {
-        //   if (!isset($this->previous_contexts)) {
-        //       $this->getContexts();
-        //   }
-
-        //        $txt = 'This is the CONTEXT for RAILWAY ' . $this->variables_agent->nuuid . '. ';
-        $txt = 'This is the CONTEXT. ';
+        $txt = "This is the CONTEXT. ";
 
         $txt .= "\n";
-        $txt .= count($this->previous_contexts) . ' Contexts retrieved.';
+        $txt .= count($this->previous_contexts) . " Contexts retrieved.";
         $txt .= "\n";
 
-        $txt .= 'Context is ' . $this->context . ' ' . $this->context_id . ".";
+        $txt .= "Context is " . $this->context . " " . $this->context_id . ".";
 
         $txt .= "\n";
-        $txt .= str_pad("INDEX", 7, ' ', STR_PAD_LEFT);
+        $txt .= str_pad("INDEX", 7, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("CONTEXT", 10, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad("CONTEXT ID", 10, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad("TASK", 53, " ", STR_PAD_RIGHT);
@@ -596,75 +452,46 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         $txt .= "\n";
 
         foreach ($this->previous_contexts as $key => $context) {
-            //$txt .= implode(" ", $train);
-
-            $txt .= str_pad($train['index'], 7, '0', STR_PAD_LEFT);
+            $txt .= str_pad($train["index"], 7, "0", STR_PAD_LEFT);
             $txt .=
                 " " .
                 str_pad(
-                    strtoupper($context['context']),
+                    strtoupper($context["context"]),
                     10,
                     " ",
                     STR_PAD_RIGHT
                 );
             $txt .=
                 " " .
-                str_pad(strtoupper($context['id']), 10, " ", STR_PAD_LEFT);
+                str_pad(strtoupper($context["id"]), 10, " ", STR_PAD_LEFT);
             $txt .=
                 " " .
-                str_pad(strtoupper($context['task']), 53, " ", STR_PAD_RIGHT);
+                str_pad(strtoupper($context["task"]), 53, " ", STR_PAD_RIGHT);
 
             $txt .= "\n";
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
-    private function respond()
+    public function respondResponse()
     {
-        // Thing actions
-
         $this->thing->flagGreen();
-        // Generate email response.
 
-        $to = $this->thing->from;
-        $from = "context";
+        $this->thing_report["choices"] = false;
 
-        //echo "<br>";
-
-        //!$choices = $this->thing->choice->makeLinks($this->state);
-        //!$this->thing_report['choices'] = $choices;
-
-        $this->thing_report['choices'] = false;
-        $this->makeSMS();
-        $this->makeTXT();
-
-        //		$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
         $test_message = 'Last thing heard: "' . $this->subject . '"';
+        $test_message .= "<br>Train state: " . $this->state . "<br>";
+        $test_message .= "<br>" . $this->sms_message;
 
-        $test_message .= '<br>Train state: ' . $this->state . '<br>';
-
-        $test_message .= '<br>' . $this->sms_message;
-
-        //		$test_message .= '<br>Current node: ' . $this->thing->choice->current_node;
-
-        //        $test_message .= '<br>run_at: ' . $this->run_at;
-        //        $test_message .= '<br>end_at: ' . $this->end_at;
-
-        //		$test_message .= '<br>Requested state: ' . $this->requested_state;
-
-        //			$this->thing_report['sms'] = $sms_message;
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-
-        $this->thing_report['help'] = 'This is the context extractor.';
-
-        return;
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
+        $this->thing_report["help"] = "This is the context extractor.";
     }
 
     public function readSubject()
@@ -677,7 +504,7 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
             return;
         }
 
-        if (strtolower($this->agent_input) == 'extract') {
+        if (strtolower($this->agent_input) == "extract") {
             $this->getContexts();
             return;
         }
@@ -698,8 +525,6 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         $haystack =
             $this->agent_input . " " . $this->from . " " . $this->subject;
 
-        //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
@@ -707,13 +532,13 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($this->input == 'context') {
+            if ($this->input == "context") {
                 $this->set();
                 return;
             }
 
-            if ($this->input == 'train') {
-                $this->makeContext('train');
+            if ($this->input == "train") {
+                $this->makeContext("train");
                 $this->set();
                 return;
             }
@@ -739,85 +564,42 @@ if (!isset($findagent_thing->thing_report['things'])) {return $this->context;}
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        /*
-                                                case 'stopwatch':    
-
-                                                        if ($key + 1 > count($pieces)) {
-                                                                //echo "last word is stop";
-                                                                $this->stop = false;
-                                                                return "Request not understood";
-                                                        } else {
-                                                                //echo "next word is:";
-                                                                //var_dump($pieces[$index+1]);
-                                                                $command = $pieces[$key+1];
-
-								if ( $this->thing->choice->isValidState($command) ) {
-                                                                	return $command;
-								}
-                                                        }
-                                                        break;
-*/
-
-                        case 'accept':
+                        case "accept":
                             $this->acceptThing();
                             break;
 
-                        case 'clear':
+                        case "clear":
                             $this->clearThing();
                             break;
 
-                        case 'next':
+                        case "next":
                             $this->thing->log("read subject next Context");
                             $this->nextContext();
                             break;
 
-                        case 'drop':
-                            //     //$this->thing->log("read subject nextblock");
+                        case "drop":
                             $this->dropContext();
                             break;
 
-                        case 'add':
-                            //     //$this->thing->log("read subject nextblock");
+                        case "add":
                             $this->makeContext();
                             break;
 
-                        case 'run':
-                            //     //$this->thing->log("read subject nextblock");
+                        case "run":
                             $this->runContext();
                             break;
 
-                        case 'is':
-                            //     //$this->thing->log("read subject nextblock");
+                        case "is":
                             $this->context = $this->input;
                             $this->makeContext($this->context);
                             $this->set();
                             break;
 
-                        //   case 'red':
-                        //     //$this->thing->log("read subject nextblock");
-                        //        $this->setFlag('red');
-                        //        break;
-
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }
         }
-
-        // Check whether Block saw a run_at and/or run_time
-        // Intent at this point is less clear.  But Block
-        // might have extracted information in these variables.
-
-        // $uuids, $head_codes, $this->run_at, $this->run_time
-        /*
-if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->context)) ) {
-
-    // Likely matching a head_code to a uuid.
-
-}
-*/
-        // So we know we don't just have a keyword.
 
         if ($pieces[0] == "context") {
             $this->makeContext($this->input);
@@ -846,16 +628,16 @@ if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->contex
 
         $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
         switch ($this->requested_state) {
-            case 'start':
+            case "start":
                 $this->start();
                 break;
-            case 'stop':
+            case "stop":
                 $this->stop();
                 break;
-            case 'reset':
+            case "reset":
                 $this->reset();
                 break;
-            case 'split':
+            case "split":
                 $this->split();
                 break;
         }
@@ -868,18 +650,12 @@ if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->contex
         return false;
     }
 
-    function kill()
-    {
-        // No messing about.
-        return $this->thing->Forget();
-    }
-
     function discriminateInput($input, $discriminators = null)
     {
         //$input = "optout opt-out opt-out";
 
         if ($discriminators == null) {
-            $discriminators = ['accept', 'clear'];
+            $discriminators = ["accept", "clear"];
         }
 
         $default_discriminator_thresholds = [2 => 0.3, 3 => 0.3, 4 => 0.3];
@@ -893,8 +669,8 @@ if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->contex
 
         $contexts = [];
 
-        $contexts['accept'] = ['accept', 'add', '+'];
-        $contexts['clear'] = ['clear', 'drop', 'clr', '-'];
+        $contexts["accept"] = ["accept", "add", "+"];
+        $contexts["clear"] = ["clear", "drop", "clr", "-"];
 
         $words = explode(" ", $input);
 
@@ -965,7 +741,7 @@ if ( (count($uuids) == 1) and (count($head_codes) == 1) and (isset($this->contex
         return true;
     }
 
-    function warning_handler($errno, $errstr)
+    function warning_handler($errno, $errstr, $errfile, $errline)
     {
         //throw new \Exception('Class not found.');
 
