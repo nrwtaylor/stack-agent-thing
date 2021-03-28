@@ -79,10 +79,11 @@ class Douglas extends Agent
 
     public function zipDouglas()
     {
-if ( class_exists("\ZipArchive") == false) {
-$this->zip_error = true;
-$this->response .= "ZIP archive not available. ";
-return true;}
+        if (class_exists("\ZipArchive") == false) {
+            $this->zip_error = true;
+            $this->response .= "ZIP archive not available. ";
+            return true;
+        }
 
         $zip = new \ZipArchive();
 
@@ -225,14 +226,14 @@ return true;}
     {
     }
 
-    public function makeHelp() {
-$help = "ZIP files are not available on this stack.";
-if (!(isset($this->zip_error)) or ($this->zip_error !== true)) {
-$help = "Click on the ZIP link for a package of PDFs.";
-}
-$this->help = $help;
-$this->thing_report["help"] = $help;
-
+    public function makeHelp()
+    {
+        $help = "ZIP files are not available on this stack.";
+        if (!isset($this->zip_error) or $this->zip_error !== true) {
+            $help = "Click on the ZIP link for a package of PDFs.";
+        }
+        $this->help = $help;
+        $this->thing_report["help"] = $help;
     }
 
     /**
@@ -240,32 +241,33 @@ $this->thing_report["help"] = $help;
      */
     public function makeWeb()
     {
-$web = "";
-if (!(isset($this->zip_error)) or ($this->zip_error !== true)) {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
-        $this->node_list = ["douglas" => ["douglas"]];
-        $web .=
-            "ZIP file with " .
-            $this->sheet_count .
-            " randomly generated sheets.<br>";
+        $web = "";
+        if (!isset($this->zip_error) or $this->zip_error !== true) {
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
+            $this->node_list = ["douglas" => ["douglas"]];
+            $web .=
+                "ZIP file with " .
+                $this->sheet_count .
+                " randomly generated sheets.<br>";
 
-        $web .= '<a href="' . $link . '">';
-        $web .= $link;
-        $web .= "</a>";
-        $web .= "<br>";
+            $web .= '<a href="' . $link . '">';
+            $web .= $link;
+            $web .= "</a>";
+            $web .= "<br>";
 
-        $web .= "<p>";
-        $web .= "Individual radiograms.<br>";
-}
-if (isset($this->association_uuids)) { 
-       foreach ($this->association_uuids as $i => $uuid) {
-            $rocky_link = $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
-
-            $web .= '<a href="' . $rocky_link . '">';
-            $web .= $rocky_link;
-            $web .= "</a><br>";
+            $web .= "<p>";
+            $web .= "Individual radiograms.<br>";
         }
-}
+        if (isset($this->association_uuids)) {
+            foreach ($this->association_uuids as $i => $uuid) {
+                $rocky_link =
+                    $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
+
+                $web .= '<a href="' . $rocky_link . '">';
+                $web .= $rocky_link;
+                $web .= "</a><br>";
+            }
+        }
 
         $this->thing_report["web"] = $web;
     }
@@ -294,15 +296,17 @@ if (isset($this->association_uuids)) {
             "sheet_count",
         ]);
         $this->sheet_count = $sheet_count;
-$associations = null;
-if (isset($this->thing->thing->assocations)) {
-        $associations = json_decode($this->thing->thing->associations, true);
-        //var_dump($associations);
-}
+        $associations = null;
+        if (isset($this->thing->thing->assocations)) {
+            $associations = json_decode(
+                $this->thing->thing->associations,
+                true
+            );
+        }
         if ($associations === null) {
             return;
         }
-        $association_uuids = $associations['agent'];
+        $association_uuids = $associations["agent"];
         $this->association_uuids = $association_uuids;
     }
 

@@ -169,10 +169,6 @@ class Cell extends Agent
 
     public function setCell()
     {
-        //        $this->thing->json->setField("message7");
-        //        $this->thing->json->writeVariable( array("snowflake", "lattice"), $this->lattice );
-        //echo "setSnowflake";
-        //var_dump($this->decimal_snowflake);
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(["cell", "value"], $this->value);
 
@@ -500,10 +496,8 @@ class Cell extends Agent
         $pad = 0;
 
         //$size = 10;
-
         //$font_size = 10;
-        //var_dump($bbox["height"]);
-        //exit();
+
         imagettftext(
             $this->image,
             $font_size,

@@ -83,10 +83,6 @@ class Day extends Agent
         $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
 
         $this->initDay();
-
-        //var_dump($this->current_time);
-        //$timestamp_epoch = 1616207800 + 60*60*0;
-        //$this->current_time = (date('r', $timestamp_epoch));
     }
 
     public function initDay()
@@ -926,7 +922,6 @@ class Day extends Agent
 
         $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .

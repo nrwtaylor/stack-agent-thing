@@ -315,18 +315,11 @@ class Ticketmaster extends Agent
         $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
         $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
 
-        //var_dump($event['runtime']);
-
         $run_time = new Runtime($this->thing, $event["runtime"]);
-        //var_dump($run_time->minutes);
 
         if ($event["runtime"] != "X") {
             $event_string .= " " . $this->thing->human_time($run_time->minutes);
         }
-        //var_dump($event_string);
-        //        $event_string .= " "  . $endat->day;
-        //        $event_string .= " "  . $endat->hour;
-        //        $event_string .= ":"  . $endat->minute;
 
         $event_string .= " " . $event["place"];
 
@@ -342,15 +335,7 @@ class Ticketmaster extends Agent
             $html .= "<br>No events found on Ticket Master.";
         } else {
             foreach ($this->events as $id => $event) {
-                //var_dump($event['event']);
-                //var_dump($event['runat']);
-                //var_dump($event['place']);
-                //var_dump($event['link']);
-                //            $event_html = $event['event'] . " " . $event['runat'] . " " . $event['place'];
-
                 $event_html = $this->eventString($event);
-
-                //        $link = $this->web_prefix . 'thing/' . $this->uuid . '/splosh';
                 $link = $event["link"];
                 $html_link = '<a href="' . $link . '">';
                 //        $web .= $this->html_image;
@@ -358,7 +343,6 @@ class Ticketmaster extends Agent
                 $html_link .= "</a>";
 
                 $html .= "<br>" . $event_html . " " . $html_link;
-                //exit();
             }
         }
 

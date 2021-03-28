@@ -203,7 +203,6 @@ class Bible extends Agent
         //$url = 'https://labs.bible.org/api/?passage=John+3:16-17';
         $url = 'https://labs.bible.org/api/?keyword=samaritan';
 
-        //var_dump($url);
         $xml = $this->getXML($url);
 
         return $xml;

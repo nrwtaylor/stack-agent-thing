@@ -49,7 +49,6 @@ class Hey extends Agent
 		$this->sms_message = $value;
         $this->max_nod_time = 30;
 
-        //var_dump($this->nod->time_travelled);
         if ($this->nod->time_travelled > $this->max_nod_time) {
             $this->sms_message = "Last nod was over " . $this->thing->human_time($this->max_nod_time) . " ago.";
         }

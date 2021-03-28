@@ -192,8 +192,7 @@ class Wave extends Agent
         }
 
         $lines = explode("\n", $data);
-        //var_dump($lines[7]);
-        //echo "<br>";
+
         // Seventh line has first line of forecast.  Forecast is updated 4 times daily.
         // So eventually retrieve first six lines and extract one closest
         // to current time.
@@ -211,11 +210,6 @@ class Wave extends Agent
                 $forecast[] = $line;
                 // First explore around the vertical line break
                 $fields = explode("|", $line);
-                //        echo "---<br>";
-                //        var_dump($fields);
-                //        echo "<br>";
-                // Split time info in fields
-                //$time_info = preg_split('/\s+/', $fields[1]);
 
                 if (!isset($fields[1])) {
                     continue;
@@ -223,13 +217,9 @@ class Wave extends Agent
 
                 $time_info = preg_split('/ +/', $fields[1]);
 
-                //        var_dump($time_info);
-                //        echo "<br>";
-
                 $day = intval($time_info[1]);
                 $hour = intval($time_info[2]);
 
-                //echo "day and hour " . $day . " " . $hour . "<br>";
 
                 // PULL IN ALL 5 or 6 WAVE FIELDS HERE.  AND NOTCH FILTER FOR
                 // THE SAME WAVE GUIDE.
@@ -237,7 +227,6 @@ class Wave extends Agent
                 $waves = [];
                 while ($field_num <= count($fields)) {
                     $field_num += 1;
-                    //if ($wave_field_num >= 3) {
 
                     if (isset($fields[$field_num])) {
                         $wave_info = preg_split('/\s+/', $fields[$field_num]);
@@ -245,9 +234,6 @@ class Wave extends Agent
                             $height = floatval($wave_info[1]);
                             $period = floatval($wave_info[2]);
                             $direction = intval($wave_info[3]);
-                            //      var_dump( $wave_info);
-                            //      echo "<br>";
-                            //      echo "height, period, direction " . $height . " " . $period . " " . $direction .  "<br>";
 
                             $waves[] = [
                                 "height" => $height,
@@ -284,23 +270,13 @@ class Wave extends Agent
 
         $this->hour = $at_hour;
         $this->day = $at_day;
-        //exit();
 
-        //echo "current time " . $this->current_time;
-        //echo "current hour" . $at_hour . "current day" . $at_day;
-
-        //echo "<br>";
         $i = 0;
         foreach ($wave_spectra as $key => $spectra) {
-            //    echo "hour " . $spectra['hour']. " " .$at_hour . "<br>";
-            //    echo "day " . $spectra['day']. " " .$at_day . "<br>";
 
             $i += 1;
             if ($spectra["hour"] == $at_hour and $spectra["day"] == $at_day) {
-                //        echo "meep" . $at_day . " ". $at_hour . "<br>";
-                //$this->day = $at_day;
                 $waves = $spectra['waves'];
-                //exit();
                 break;
             }
         }
@@ -309,12 +285,6 @@ class Wave extends Agent
         $wave_set_interpolated = [];
         $i = 0;
         foreach ($waves as $wave) {
-            //echo "----" . "<br>";
-            //echo "height " . $wave['height'] . " " . $next_wave_set[$i]['height'] . "<br>";
-            //echo "direction " . $wave['direction'] . " " . $next_wave_set[$i]['direction'] . "<br>";
-            //echo "period ". $wave['period'] . " " . $next_wave_set[$i]['period'] . "<br>";
-
-            //echo "minute " . $at_minute . "<br>";
             if ($wave == false) {
                 continue;
             }
@@ -448,7 +418,6 @@ class Wave extends Agent
         $to = $this->thing->from;
         $from = "wave";
 
-        //echo "<br>";
         $this->makeChoices();
         $this->choices = $this->thing->choice->makeLinks($this->state);
         $this->thing_report['choices'] = $this->choices;
