@@ -219,7 +219,7 @@ class Day extends Agent
                     $datum->getTimestamp() + $period_index * (60 * 60 * 24);
                 $e = strtotime($this->current_time);
 
-                echo ($indexed_period > $e ? "higher" : "lower") .
+                $this->thing->console (($indexed_period > $e ? "higher" : "lower" ) .
                     $datum->getTimestamp() .
                     " " .
                     $e .
@@ -227,7 +227,7 @@ class Day extends Agent
                     $period .
                     " " .
                     $epoch .
-                    " \n";
+                    " \n");
 
                 if ($indexed_period < $e) {
                     continue;
@@ -1215,7 +1215,7 @@ class Day extends Agent
             $image = $pdf->Output("", "S");
             $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo "Caught exception: ", $e->getMessage(), "\n";
+            $this->thing->console( "Caught exception: ", $e->getMessage(), "\n" );
         }
 
         return $this->thing_report["pdf"];
