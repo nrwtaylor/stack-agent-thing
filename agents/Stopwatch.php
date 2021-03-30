@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -11,7 +11,7 @@ class Stopwatch extends Agent
 {
     // devstack
 
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
@@ -25,23 +25,20 @@ class Stopwatch extends Agent
 
         $this->setMode($this->default_mode);
 
-$this->thingStopwatch();
+        $this->thingStopwatch();
 
-//var_dump("bar");
-//var_dump($this->stopwatch_thing->choice->current_node);
+        if (!isset($this->stopwatch_thing)) {
+            $this->stopwatch_thing = $this->thing;
+        }
+        $this->stopwatch_thing->choice->Choose("running");
 
-if (!isset($this->stopwatch_thing)) {$this->stopwatch_thing = $this->thing;}
-//var_dump("foo");
-                $this->stopwatch_thing->choice->Choose('running');
-//var_dump($this->stopwatch_thing->choice->current_node);
+        $this->stopwatch_thing->choice->Choose("stopped");
 
-                $this->stopwatch_thing->choice->Choose('stopped');
-//var_dump($this->stopwatch_thing->choice->current_node);
-
-
-//exit();
         // Get the remaining persistence of the message.
-        $agent = new Persistence($this->stopwatch_thing, "persistence 60 minutes");
+        $agent = new Persistence(
+            $this->stopwatch_thing,
+            "persistence 60 minutes"
+        );
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
@@ -52,9 +49,6 @@ if (!isset($this->stopwatch_thing)) {$this->stopwatch_thing = $this->thing;}
         $this->event_horizon = 60 * 60 * 24;
         $this->y_max_limit = null;
         $this->y_min_limit = null;
-
-
-
     }
     function isStopwatch($state = null)
     {
@@ -74,7 +68,6 @@ if (!isset($this->stopwatch_thing)) {$this->stopwatch_thing = $this->thing;}
 
     function set($requested_state = null)
     {
-
         $this->stopwatch_thing->json->writeVariable(
             ["stopwatch", "inject"],
             $this->inject
@@ -145,7 +138,10 @@ if (!isset($this->stopwatch_thing)) {$this->stopwatch_thing = $this->thing;}
             "response_time",
         ]);
 
-        $this->microtime_agent = new Microtime($this->stopwatch_thing, "microtime");
+        $this->microtime_agent = new Microtime(
+            $this->stopwatch_thing,
+            "microtime"
+        );
         $this->timestamp = $this->microtime_agent->timestamp;
         $this->getLink();
         $stopwatch = $this->priorStopwatch();
@@ -153,16 +149,17 @@ if (!isset($this->stopwatch_thing)) {$this->stopwatch_thing = $this->thing;}
         $this->last_timestamp = $microtime_agent->timestamp;
     }
 
-
     function thingStopwatch()
     {
         // Read the elapsed time ie 'look at stopwatch'.
 
         // See if a stopwatch record exists.
 
-        $things = $this->getThings('stopwatch');
+        $things = $this->getThings("stopwatch");
 
-if ($things === null) {return;}
+        if ($things === null) {
+            return;
+        }
 
         foreach (
             // array_reverse($findagent_thing->thing_report['things'])
@@ -173,15 +170,15 @@ if ($things === null) {return;}
             //     $variables_json = $thing['variables'];
             //   $variables = $this->thing->json->jsontoArray($variables_json);
 
-            if (!isset($variables['stopwatch'])) {
+            if (!isset($variables["stopwatch"])) {
                 continue;
             }
-            if (!isset($variables['stopwatch']['elapsed'])) {
+            if (!isset($variables["stopwatch"]["elapsed"])) {
                 continue;
             }
 
-            $thing->refreshed_at = $variables['stopwatch']['refreshed_at'];
-            $thing->elapsed_time = $variables['stopwatch']['elapsed'];
+            $thing->refreshed_at = $variables["stopwatch"]["refreshed_at"];
+            $thing->elapsed_time = $variables["stopwatch"]["elapsed"];
 
             if (
                 $thing->refreshed_at == false or
@@ -206,8 +203,8 @@ if ($things === null) {return;}
             );
             $this->elapsed_time = 0;
             $this->refreshed_at = $this->current_time;
-            $this->state = 'stop';
-            $this->previous_state = 'start';
+            $this->state = "stop";
+            $this->previous_state = "start";
         } else {
             $this->stopwatch_thing = $thing;
 
@@ -234,7 +231,6 @@ if ($things === null) {return;}
         }
     }
 
-
     function setState($state)
     {
         $this->state = "easy";
@@ -242,11 +238,12 @@ if ($things === null) {return;}
 
     public function priorStopwatch()
     {
-        $things = $this->getThings('stopwatch');
+        $things = $this->getThings("stopwatch");
 
-if ($things === null) {
-$this->prior_thing = new Thing(null);
-return;}
+        if ($things === null) {
+            $this->prior_thing = new Thing(null);
+            return;
+        }
 
         foreach (array_reverse($things) as $uuid => $thing) {
             if ($uuid == $this->uuid) {
@@ -272,10 +269,13 @@ return;}
         $this->stopwatch_thing->flagGreen();
 
         $this->thing_report["info"] = "This creates a question.";
-        $this->thing_report["help"] = 'Try STOPWATCH.';
+        $this->thing_report["help"] = "Try STOPWATCH.";
 
-        $message_thing = new Message($this->stopwatch_thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $message_thing = new Message(
+            $this->stopwatch_thing,
+            $this->thing_report
+        );
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeChoices()
@@ -285,9 +285,9 @@ return;}
             $this->node_list,
             "stopwatch"
         );
-        $this->choices = $this->stopwatch_thing->choice->makeLinks('stopwatch');
+        $this->choices = $this->stopwatch_thing->choice->makeLinks("stopwatch");
 
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     function makeTXT()
@@ -297,7 +297,7 @@ return;}
         $sms .= trim($this->short_message) . "\n";
 
         $this->sms_message = $sms;
-        $this->thing_report['txt'] = $sms;
+        $this->thing_report["txt"] = $sms;
     }
 
     public function run()
@@ -323,7 +323,7 @@ return;}
 
     public function statisticsStopwatch()
     {
-return;
+        return;
         $statistics_agent = new Statistics(
             $this->stopwatch_thing,
             "statistics stopwatch response_time"
@@ -339,8 +339,9 @@ return;
             isset($statistics_agent->number)
         ) {
             $this->statistics_text =
-                $statistics_agent->number . 's'.
-                ' ' .
+                $statistics_agent->number .
+                "s" .
+                " " .
                 "[" .
                 $statistics_agent->minimum .
                 " (" .
@@ -369,10 +370,9 @@ return;
             $short_message_text = $this->short_message;
         }
 
-
         $sms .= trim($short_message_text) . "\n";
 
-        if ((is_string($this->response)) and ($this->response != "")) {
+        if (is_string($this->response) and $this->response != "") {
             $sms .= $this->response . "\n";
         }
 
@@ -380,7 +380,7 @@ return;
         // $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeMessage()
@@ -394,12 +394,12 @@ return;
         $uuid = $this->uuid;
         $message .=
             "<p>" . $this->web_prefix . "thing/$uuid/stopwatch\n \n\n<br> ";
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/stopwatch';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/stopwatch";
 
         //        if (!isset($this->html_image)) {
         //            $this->makePNG();
@@ -440,10 +440,8 @@ return;
 
         $created_at_text = "X";
         if (isset($this->stopwatch_thing->thing->created_at)) {
-
             $created_at_text = $this->stopwatch_thing->thing->created_at;
         }
-
 
         $web .=
             $this->inject .
@@ -467,13 +465,13 @@ return;
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function readSubject()
     {
-var_dump($this->stopwatch_thing->choice->current_node);
-        $keywords = ['stop', 'start', 'lap', 'reset'];
+        var_dump($this->stopwatch_thing->choice->current_node);
+        $keywords = ["stop", "start", "lap", "reset"];
 
         $input = strtolower($this->subject);
 
@@ -489,7 +487,7 @@ var_dump($this->stopwatch_thing->choice->current_node);
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'stopwatch') {
+            if ($input == "stopwatch") {
                 $this->readStopwatch();
                 return;
             }
@@ -501,16 +499,16 @@ var_dump($this->stopwatch_thing->choice->current_node);
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'start':
+                        case "start":
                             $this->start();
                             break;
-                        case 'stop':
+                        case "stop":
                             $this->stop();
                             break;
-                        case 'reset':
+                        case "reset":
                             $this->reset();
                             break;
-                        case 'split':
+                        case "split":
                             $this->split();
                             break;
 
@@ -526,17 +524,17 @@ var_dump($this->stopwatch_thing->choice->current_node);
         $input_agent = new Input($this->stopwatch_thing, "input");
         //$input_agent->discriminateInput($discriminators);
 
-        $discriminators = ['start', 'stop', 'reset', 'lap'];
-        $input_agent->aliases['start'] = [
-            'start',
-            'sttr',
-            'stat',
-            'st',
-            'strt',
+        $discriminators = ["start", "stop", "reset", "lap"];
+        $input_agent->aliases["start"] = [
+            "start",
+            "sttr",
+            "stat",
+            "st",
+            "strt",
         ];
-        $input_agent->aliases['stop'] = ['stop', 'stp'];
-        $input_agent->aliases['reset'] = ['rst', 'reset', 'rest'];
-        $input_agent->aliases['lap'] = ['lap', 'laps', 'lp'];
+        $input_agent->aliases["stop"] = ["stop", "stp"];
+        $input_agent->aliases["reset"] = ["rst", "reset", "rest"];
+        $input_agent->aliases["lap"] = ["lap", "laps", "lp"];
 
         $this->requested_state = $input_agent->discriminateInput(
             $haystack,
@@ -544,16 +542,16 @@ var_dump($this->stopwatch_thing->choice->current_node);
         );
 
         switch ($this->requested_state) {
-            case 'start':
+            case "start":
                 $this->start();
                 break;
-            case 'stop':
+            case "stop":
                 $this->stop();
                 break;
-            case 'reset':
+            case "reset":
                 $this->reset();
                 break;
-            case 'split':
+            case "split":
                 $this->split();
                 break;
         }
@@ -590,7 +588,7 @@ var_dump($this->stopwatch_thing->choice->current_node);
     {
         // See if a stack record exists.
         //$findagent_thing = new Findagent($this->thing, 'number '. $this->horizon);
-        $things = $this->getThings('stopwatch');
+        $things = $this->getThings("stopwatch");
 
         $this->stopwatches_history = [];
 
@@ -605,15 +603,15 @@ var_dump($this->stopwatch_thing->choice->current_node);
             //     $variables_json= $thing_object['variables'];
             //     $variables = $this->thing->json->jsontoArray($variables_json);
             $variables = $thing->variables;
-            if (isset($variables['stopwatch'])) {
+            if (isset($variables["stopwatch"])) {
                 $response_time = "X";
                 $refreshed_at = "X";
 
-                if (isset($variables['stopwatch']['refreshed_at'])) {
-                    $refreshed_at = $variables['stopwatch']['refreshed_at'];
+                if (isset($variables["stopwatch"]["refreshed_at"])) {
+                    $refreshed_at = $variables["stopwatch"]["refreshed_at"];
                 }
-                if (isset($variables['stopwatch']['response_time'])) {
-                    $response_time = $variables['stopwatch']['response_time'];
+                if (isset($variables["stopwatch"]["response_time"])) {
+                    $response_time = $variables["stopwatch"]["response_time"];
                 }
             }
 
@@ -634,7 +632,7 @@ var_dump($this->stopwatch_thing->choice->current_node);
 
         $refreshed_at = [];
         foreach ($this->stopwatches_history as $key => $row) {
-            $refreshed_at[$key] = $row['timestamp'];
+            $refreshed_at[$key] = $row["timestamp"];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->stopwatches_history);
     }
@@ -655,8 +653,8 @@ var_dump($this->stopwatch_thing->choice->current_node);
         $y_max = -1e99;
 
         foreach ($this->stopwatches_history as $i => $number_object) {
-            $created_at = strtotime($number_object['timestamp']);
-            $number = $number_object['response_time'];
+            $created_at = strtotime($number_object["timestamp"]);
+            $number = $number_object["response_time"];
 
             $points[$created_at] = $number;
 
@@ -746,7 +744,7 @@ var_dump($this->stopwatch_thing->choice->current_node);
         }
         $this->chart_agent->makePNG();
         $this->image_embedded = $this->chart_agent->image_embedded;
-        $this->thing_report['png'] = $this->chart_agent->thing_report['png'];
+        $this->thing_report["png"] = $this->chart_agent->thing_report["png"];
     }
 
     function start()
@@ -756,7 +754,7 @@ var_dump($this->stopwatch_thing->choice->current_node);
         //$this->get();
 
         switch ($this->stopwatch_thing->choice->current_node) {
-            case 'running':
+            case "running":
                 $t =
                     strtotime($this->current_time) -
                     strtotime($this->refreshed_at);
@@ -767,10 +765,10 @@ var_dump($this->stopwatch_thing->choice->current_node);
                 $this->response .= "Saw it already running. ";
                 return;
             case false:
-            case 'stopped':
-                $this->stopwatch_thing->choice->Choose('running');
+            case "stopped":
+                $this->stopwatch_thing->choice->Choose("running");
 
-                $this->stopwatch_thing->flagSet('red');
+                $this->stopwatch_thing->flagSet("red");
 
                 //$this->state = 'running';
                 $this->set();
@@ -783,7 +781,9 @@ var_dump($this->stopwatch_thing->choice->current_node);
         //        throw 'not running and stopped.';
     }
 
-    function split(){}
+    function split()
+    {
+    }
 
     function stop()
     {
@@ -791,13 +791,13 @@ var_dump($this->stopwatch_thing->choice->current_node);
 
         $this->get();
 
-        if ($this->stopwatch_thing->choice->current_node == 'stopped') {
+        if ($this->stopwatch_thing->choice->current_node == "stopped") {
             // Do nothing.
             $this->response .= "Clock is stopped. ";
         }
 
-        if ($this->stopwatch_thing->choice->current_node == 'running') {
-            $this->stopwatch_thing->choice->Choose('stopped');
+        if ($this->stopwatch_thing->choice->current_node == "running") {
+            $this->stopwatch_thing->choice->Choose("stopped");
 
             $t =
                 strtotime($this->current_time) - strtotime($this->refreshed_at);
@@ -808,7 +808,7 @@ var_dump($this->stopwatch_thing->choice->current_node);
             $this->response .= "Stopped the clock. ";
         }
 
-        $this->stopwatch_thing->flagSet('green');
+        $this->stopwatch_thing->flagSet("green");
         $this->set();
 
         //                $this->elapsed_time = time() - strtotime($time_string>
@@ -822,9 +822,13 @@ var_dump($this->stopwatch_thing->choice->current_node);
         $this->get();
         // Set elapsed time as 0 and state as stopped.
         $this->elapsed_time = 0;
-        $this->stopwatch_thing->choice->Create('stopwatch', $this->node_list, 'stop');
+        $this->stopwatch_thing->choice->Create(
+            "stopwatch",
+            $this->node_list,
+            "stop"
+        );
 
-        $this->stopwatch_thing->choice->Choose('stop');
+        $this->stopwatch_thing->choice->Choose("stop");
 
         $this->set();
 
@@ -833,7 +837,6 @@ var_dump($this->stopwatch_thing->choice->current_node);
 
     function readStopwatch($variable = null)
     {
-
         if (!isset($this->response_time)) {
             $this->response .= "No response time available. ";
             return;
@@ -847,6 +850,4 @@ var_dump($this->stopwatch_thing->choice->current_node);
         $this->get();
         return $this->elapsed_time;
     }
-
-
 }

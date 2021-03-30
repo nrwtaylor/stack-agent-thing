@@ -207,19 +207,11 @@ class Microsoft
             '<pre> Agent "Microsoft" sent a message to ' .
             $this->from .
             ".</pre>";
-        //
-        //		} else {
-        //
-        //			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
-        //		}/
-        //exit();
 
         $this->thing_report["choices"] = false;
         //$this->thing_report['info'] = 'This is a facebook message agent.';
         $this->thing_report["help"] = "In development.";
         $this->thing_report["log"] = $this->thing->log;
-
-        return;
     }
 
     public function readSubject()

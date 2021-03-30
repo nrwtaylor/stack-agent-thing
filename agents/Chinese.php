@@ -47,7 +47,7 @@ class Chinese extends Agent
                 continue;
             }
             // Return dictionary entry.
-            $text = $this->findChinese('list', $value);
+            $text = $this->findChinese("list", $value);
             //echo $value . " " .$text . "<br>";
             $words = $this->getConcept($text);
             if ($words != false) {
@@ -63,7 +63,7 @@ class Chinese extends Agent
         //$this->keyword = "chinese";
 
         foreach ($arr as $key => $value) {
-            $text = $this->findChinese('mordok', $value);
+            $text = $this->findChinese("mordok", $value);
             if ($value == "U+FE0F") {
                 continue;
             }
@@ -134,7 +134,7 @@ class Chinese extends Agent
      */
     function thingreportChinese()
     {
-        $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report["log"] = $this->thing->log;
     }
 
     /**
@@ -225,7 +225,7 @@ class Chinese extends Agent
                 }
             }
         }
-        $this->thing->log('best concept ' . $best_concept);
+        $this->thing->log("best concept " . $best_concept);
         return $best_concept;
     }
 
@@ -237,13 +237,13 @@ class Chinese extends Agent
         // Get all of this users Things
         // To search for the last Chinese text provided.
         $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->userSearch(''); // Designed to accept null as $this->uuid.
+        $thingreport = $this->thing->db->userSearch(""); // Designed to accept null as $this->uuid.
 
-        $things = $thingreport['thing'];
+        $things = $thingreport["thing"];
 
         // Get the earliest from the current data set
         foreach (array_reverse($things) as $thing) {
-            $this->extractChinese($thing['task']);
+            $this->extractChinese($thing["task"]);
             if ($this->chineses != []) {
                 break;
             }
@@ -257,7 +257,7 @@ class Chinese extends Agent
     {
         // Makes a one character dictionary
 
-        $file = $this->resource_path . 'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+        $file = $this->resource_path . "chinese/cedict_1_0_ts_utf-8_mdbg.txt";
 
         $contents = "";
         if (file_exists($file)) {
@@ -270,19 +270,19 @@ class Chinese extends Agent
         while ($line !== false) {
             $word = $this->getConcept($line);
 
-            if (mb_strlen($word['traditional']) == 1) {
+            if (mb_strlen($word["traditional"]) == 1) {
                 //v/ar_dump($word);
                 //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " " . $word['pin_yin'] . implode("/",$word['english']) . "\n";
                 //echo $dictionary_entry;
-                $dictionary[$word['traditional']] = $line . "\n";
+                $dictionary[$word["traditional"]] = $line . "\n";
             }
             // do something with $line
             $line = strtok($separator);
         }
 
         $file = fopen(
-            $this->resource_path . 'chinese/chinese_mordok_new.txt',
-            'w'
+            $this->resource_path . "chinese/chinese_mordok_new.txt",
+            "w"
         );
         foreach ($dictionary as $character => $line) {
             fwrite($file, $line);
@@ -369,22 +369,22 @@ class Chinese extends Agent
         //$str = 'Hello 你怎么样？ How are you?';
 
         $english = preg_replace(
-            ['/[\p{Han}？]/u', '/(\s)+/'],
-            ['', '$1'],
+            ["/[\p{Han}？]/u", "/(\s)+/"],
+            ["", '$1'],
             $string
         );
         $chinese = preg_replace(
-            ['/[^\p{Han}？]/u', '/(\s)+/'],
-            ['', '$1'],
+            ["/[^\p{Han}？]/u", "/(\s)+/"],
+            ["", '$1'],
             $string
         );
         $this->chinese_text = $chinese;
         $this->thing->log(
-            'reads english ' . $english . " and chinese " . $chinese
+            "reads english " . $english . " and chinese " . $chinese
         );
 
         //https://stackoverflow.com/questions/1396434/what-is-the-best-way-to-split-a-string-into-an-array-of-unicode-characters-in-ph
-        $this->chineses = preg_split('//u', $chinese, -1, PREG_SPLIT_NO_EMPTY);
+        $this->chineses = preg_split("//u", $chinese, -1, PREG_SPLIT_NO_EMPTY);
 
         return $this->chineses;
     }
@@ -401,8 +401,8 @@ class Chinese extends Agent
         //https://stackoverflow.com/questions/17944961/php-separate-chinese-from-english-characters
         //$str = 'Hello 你怎么样？ How are you?';
         $chinese = preg_replace(
-            ['/[^\p{Han}？]/u', '/(\s)+/'],
-            ['', '$1'],
+            ["/[^\p{Han}？]/u", "/(\s)+/"],
+            ["", '$1'],
             $string
         );
         if ($chinese == "") {
@@ -428,7 +428,7 @@ class Chinese extends Agent
         // https://stackoverflow.com/questions/4601032/php-iterate-on-string-characters
         //$characters = mb_str_split($input);
 
-        $characters = preg_split('//u', $input, null, PREG_SPLIT_NO_EMPTY);
+        $characters = preg_split("//u", $input, null, PREG_SPLIT_NO_EMPTY);
 
         $logogram_sequence_length = mb_strlen(implode("", $characters));
         $end_flag = false;
@@ -441,22 +441,22 @@ class Chinese extends Agent
             $character = $characters[$pointer];
 
             // Process phrase seperators
-            if ($character == '，') {
+            if ($character == "，") {
                 $pointer += 1;
                 $translation .= ", ";
                 continue;
             }
-            if ($character == '　') {
+            if ($character == "　") {
                 $pointer += 1;
                 $translation .= " ";
                 continue;
             }
-            if ($character == '。') {
+            if ($character == "。") {
                 $pointer += 1;
                 $translation .= ". ";
                 continue;
             }
-            if ($character == ' ') {
+            if ($character == " ") {
                 $pointer += 1;
                 $translation .= " ";
                 continue;
@@ -496,7 +496,7 @@ class Chinese extends Agent
 
                 // Devstack
                 // Next line testing at 22ms.
-                $text_temp = $this->findChinese('list', $test_character_string);
+                $text_temp = $this->findChinese("list", $test_character_string);
 
                 if ($text_temp == false) {
                     //echo "Not in dictionary" . "\n";
@@ -563,7 +563,7 @@ class Chinese extends Agent
 
         $myInput = $str;
 
-        $myHexString = str_replace('\\u', '', $myInput);
+        $myHexString = str_replace("\\u", "", $myInput);
         $myBinString = hex2bin($myHexString);
 
         return iconv("UTF-16BE", "UTF-8", $myBinString);
@@ -594,7 +594,7 @@ class Chinese extends Agent
                 chr((($num >> 6) & 63) + 128) .
                 chr(($num & 63) + 128);
         }
-        return '';
+        return "";
     }
 
     /**
@@ -605,19 +605,19 @@ class Chinese extends Agent
     function uniord($c)
     {
         // And back again.
-        $ord0 = ord($c[0] ?? 'default value');
+        $ord0 = ord($c[0] ?? "default value");
         if ($ord0 >= 0 && $ord0 <= 127) {
             return $ord0;
         }
-        $ord1 = ord($c[1] ?? 'default value');
+        $ord1 = ord($c[1] ?? "default value");
         if ($ord0 >= 192 && $ord0 <= 223) {
             return ($ord0 - 192) * 64 + ($ord1 - 128);
         }
-        $ord2 = ord($c[2] ?? 'default value');
+        $ord2 = ord($c[2] ?? "default value");
         if ($ord0 >= 224 && $ord0 <= 239) {
             return ($ord0 - 224) * 4096 + ($ord1 - 128) * 64 + ($ord2 - 128);
         }
-        $ord3 = ord($c[3] ?? 'default value');
+        $ord3 = ord($c[3] ?? "default value");
         if ($ord0 >= 240 && $ord0 <= 247) {
             return ($ord0 - 240) * 262144 +
                 ($ord1 - 128) * 4096 +
@@ -647,18 +647,18 @@ class Chinese extends Agent
     {
         $copy = false;
         $len = strlen($str);
-        $res = '';
+        $res = "";
 
         for ($i = 0; $i < $len; ++$i) {
             $ch = $str[$i];
 
             if (!$copy) {
-                if ($ch != '0') {
+                if ($ch != "0") {
                     $copy = true;
                 }
                 // Prevent format("0") from returning ""
                 elseif ($i + 1 == $len) {
-                    $res = '0';
+                    $res = "0";
                 }
             }
 
@@ -666,7 +666,7 @@ class Chinese extends Agent
                 $res .= $ch;
             }
         }
-        return 'U+' . strtoupper($res);
+        return "U+" . strtoupper($res);
     }
 
     /**
@@ -689,7 +689,7 @@ class Chinese extends Agent
 
         // Avalable via memcache
         $contents = $this->mem_cached->get(
-            'agent-chinese-contents-' . strtolower($librex)
+            "agent-chinese-contents-" . strtolower($librex)
         );
 
         if ($contents != false) {
@@ -700,25 +700,25 @@ class Chinese extends Agent
         switch ($librex) {
             case null:
             // Drop through
-            case 'keywords':
-                $file = $this->resource_path . 'chinese/chinese-keywords.txt';
+            case "keywords":
+                $file = $this->resource_path . "chinese/chinese-keywords.txt";
                 $contents = "";
                 if (file_exists($file)) {
                     $contents = file_get_contents($file);
                 }
                 break;
-            case 'agent':
-                $file = $this->resource_path . 'chinese/chinese-agent.txt';
+            case "agent":
+                $file = $this->resource_path . "chinese/chinese-agent.txt";
                 $contents = "";
                 if (file_exists($file)) {
                     $contents = file_get_contents($file);
                 }
 
                 break;
-            case 'list':
+            case "list":
                 $file =
                     $this->resource_path .
-                    'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+                    "chinese/cedict_1_0_ts_utf-8_mdbg.txt";
                 //            $contents = file_get_contents($file);
                 $contents = "";
                 if (file_exists($file)) {
@@ -727,10 +727,10 @@ class Chinese extends Agent
 
                 break;
 
-            case 'english-chinese':
+            case "english-chinese":
                 $file =
                     $this->resource_path .
-                    'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+                    "chinese/cedict_1_0_ts_utf-8_mdbg.txt";
                 //            $contents = file_get_contents($file);
                 $contents = "";
                 if (file_exists($file)) {
@@ -739,8 +739,8 @@ class Chinese extends Agent
 
                 break;
 
-            case 'unicode':
-                $file = $this->resource_path . 'chinese/unicode.txt';
+            case "unicode":
+                $file = $this->resource_path . "chinese/unicode.txt";
                 //            $contents = file_get_contents($file);
                 $contents = "";
                 if (file_exists($file)) {
@@ -748,23 +748,23 @@ class Chinese extends Agent
                 }
 
                 break;
-            case 'context':
+            case "context":
                 $this->contextChinese();
                 $contents = $this->chinese_context;
                 $file = null;
                 break;
-            case 'emotion':
+            case "emotion":
                 break;
             default:
                 $file =
                     $this->resource_path .
-                    'chinese/cedict_1_0_ts_utf-8_mdbg.txt';
+                    "chinese/cedict_1_0_ts_utf-8_mdbg.txt";
         }
 
         $this->contents[$librex] = $contents;
 
         $this->mem_cached->set(
-            'agent-chinese-contents-' . strtolower($librex),
+            "agent-chinese-contents-" . strtolower($librex),
             $this->contents[$librex]
         );
 
@@ -785,20 +785,20 @@ class Chinese extends Agent
             return true;
         }
 
-        $this->thing->log('searchfor ' . $searchfor);
+        $this->thing->log("searchfor " . $searchfor);
         // devstack add \b to Word
-        $pattern = preg_quote($searchfor, '/');
+        $pattern = preg_quote($searchfor, "/");
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*" . $pattern . ".*\$/m";
 
         if ($librex == "mordok") {
-            $pattern = preg_quote($searchfor . " ", '/');
+            $pattern = preg_quote($searchfor . " ", "/");
             // finalise the regular expression, matching the whole line
             $pattern = "/^.*" . $pattern . ".*\$/m";
         }
 
         if ($librex == "english-chinese") {
-            $pattern = "\b" . preg_quote($searchfor, '/') . "\b";
+            $pattern = "\b" . preg_quote($searchfor, "/") . "\b";
             // finalise the regular expression, matching the whole line
             $pattern = "/^.*" . $pattern . ".*\$/m";
         }
@@ -807,7 +807,7 @@ class Chinese extends Agent
 
         //$pattern = '/' . '\b' . $searchfor . '\b/m';
 
-        $this->thing->log('regex ' . $pattern);
+        $this->thing->log("regex " . $pattern);
 
         if (true) {
             if (preg_match_all($pattern, $contents, $matches)) {
@@ -835,7 +835,6 @@ class Chinese extends Agent
 
                 $line = strtok($separator);
             }
-            //exit();
 
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
@@ -856,7 +855,7 @@ class Chinese extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -875,16 +874,16 @@ class Chinese extends Agent
         $html .= "<p><br>";
 
         foreach ($this->words as $index => $word) {
-            if (!isset($word['traditional'])) {
+            if (!isset($word["traditional"])) {
                 continue;
             }
-            if (!isset($word['simplified'])) {
+            if (!isset($word["simplified"])) {
                 continue;
             }
-            if (!isset($word['pin_yin'])) {
+            if (!isset($word["pin_yin"])) {
                 continue;
             }
-            if (!isset($word['english'])) {
+            if (!isset($word["english"])) {
                 continue;
             }
 
@@ -904,7 +903,7 @@ class Chinese extends Agent
             }
         }
         $this->web_message = $html;
-        $this->thing_report['web'] = $html;
+        $this->thing_report["web"] = $html;
     }
 
     /**
@@ -926,7 +925,7 @@ class Chinese extends Agent
                             break;
                         }
 
-                        if (!isset($word['traditional'])) {
+                        if (!isset($word["traditional"])) {
                             continue;
                         }
 
@@ -944,7 +943,7 @@ class Chinese extends Agent
                 if (count($this->words) != 0) {
                     $this->sms_message .= " | ";
                 }
-                if (isset($this->word['english'])) {
+                if (isset($this->word["english"])) {
                     $this->sms_message .= implode(
                         " / ",
                         $this->word["english"]
@@ -974,10 +973,10 @@ class Chinese extends Agent
 
                 if ($this->words != false) {
                     if (count($this->words) > 1) {
-                        $traditional = $this->words[0]['traditional'];
-                        $simplified = $this->words[0]['simplified'];
-                        $pin_yin = $this->words[0]['pin_yin'];
-                        $english = $this->words[0]['english'][0];
+                        $traditional = $this->words[0]["traditional"];
+                        $simplified = $this->words[0]["simplified"];
+                        $pin_yin = $this->words[0]["pin_yin"];
+                        $english = $this->words[0]["english"][0];
 
                         $word_string =
                             $traditional .
@@ -1010,7 +1009,7 @@ class Chinese extends Agent
                 $this->sms_message = "CHINESE | no match found.";
         }
 
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     /**
@@ -1020,10 +1019,10 @@ class Chinese extends Agent
      */
     function chineseString($word)
     {
-        $traditional = $word['traditional'];
-        $simplified = $word['simplified'];
-        $pin_yin = $word['pin_yin'];
-        $english = $word['english'][0];
+        $traditional = $word["traditional"];
+        $simplified = $word["simplified"];
+        $pin_yin = $word["pin_yin"];
+        $english = $word["english"][0];
 
         $word_string =
             $traditional . " " . $simplified . " " . $pin_yin . " " . $english;
@@ -1052,7 +1051,7 @@ class Chinese extends Agent
     {
         //$this->email_message = "CHINESE | ";
         $this->email_message = $this->sms_message;
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
     }
 
     /**
@@ -1113,7 +1112,7 @@ class Chinese extends Agent
         // No chinese characters seen.
         if ($this->hasChinese($input) === false) {
             $tokens = explode(" ", $input);
-            if ($tokens[0] == 'chinese') {
+            if ($tokens[0] == "chinese") {
                 $input = $this->assert($input);
             } else {
                 return;
@@ -1122,7 +1121,7 @@ class Chinese extends Agent
 
         $this->doChinese();
 
-        $halves = explode(' ', $input, 2); // create a two-element(maximum) array
+        $halves = explode(" ", $input, 2); // create a two-element(maximum) array
 
         $first = array_splice($halves, 0, 1)[0]; // assign first element to $first, now $halves is a single, reindexed element
 
@@ -1171,7 +1170,7 @@ class Chinese extends Agent
             // Sort by length of phrase. Shortest first.
             $traditional = [];
             foreach ($this->words as $key => $row) {
-                $traditional[$key] = mb_strlen($row['traditional']);
+                $traditional[$key] = mb_strlen($row["traditional"]);
             }
             array_multisort($traditional, SORT_ASC, $this->words);
 
@@ -1182,8 +1181,8 @@ class Chinese extends Agent
                 $this->word = $this->words[0];
                 foreach ($this->words as $word) {
                     if (
-                        $word['traditional'] == $filtered_input or
-                        $word['simplified'] == $filtered_input
+                        $word["traditional"] == $filtered_input or
+                        $word["simplified"] == $filtered_input
                     ) {
                         $this->word = $word;
                         break;
@@ -1229,7 +1228,7 @@ class Chinese extends Agent
         // devstack code below here.
         // Including a test read of a long passage.
 
-        $t = $this->findChinese('english-chinese', $filtered_input);
+        $t = $this->findChinese("english-chinese", $filtered_input);
 
         $this->filtered_input = $filtered_input;
         $this->response = "Provided chinese words for english.";
@@ -1254,35 +1253,35 @@ class Chinese extends Agent
         }
 
         $input = strtolower($this->subject);
-        $keywords = ['chinese'];
+        $keywords = ["chinese"];
         $pieces = explode(" ", strtolower($input));
 
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'chinese':
-                            $prefix = 'chinese';
+                        case "chinese":
+                            $prefix = "chinese";
                             $words = preg_replace(
-                                '/^' . preg_quote($prefix, '/') . '/',
-                                '',
+                                "/^" . preg_quote($prefix, "/") . "/",
+                                "",
                                 $input
                             );
                             $words = ltrim($words);
                             $this->search_words = $words;
-                            $t = $this->findChinese('list', $words);
+                            $t = $this->findChinese("list", $words);
 
                             // Strip out non-word matches
                             $arr = [];
                             foreach ($this->matches[0] as $match) {
                                 ///    /\b($word)\b/i
                                 $text = preg_replace(
-                                    '/[^a-z\s]/',
-                                    '',
+                                    "/[^a-z\s]/",
+                                    "",
                                     strtolower($match)
                                 );
                                 $text = preg_split(
-                                    '/\s+/',
+                                    "/\s+/",
                                     $text,
                                     null,
                                     PREG_SPLIT_NO_EMPTY

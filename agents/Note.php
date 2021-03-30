@@ -298,10 +298,6 @@ $b= $matches[count($matches) - $i]['column'];
 
 }
 
-//count($matches);
-
-exit();
-//exit();
 */
 
         $samples = [];

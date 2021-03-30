@@ -205,10 +205,6 @@ class Ticketmaster extends Agent
             foreach ($event["dates"] as $id => $date) {
                 $run_at = $date["localDate"] . " " . $date["localTime"];
 
-                //exit();
-                //    $run_at = $date['localDate'] . " " . $date['localTime']; // local event time
-
-                //    $end_at = $event['stop_time']; // local event time
                 $end_at = null;
 
                 // runtime not available.  Perhaps that is what the full day flag tells people

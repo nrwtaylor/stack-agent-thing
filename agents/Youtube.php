@@ -179,16 +179,6 @@ class Youtube extends Agent
 
 return true;
 
-        /*
-// returns a Guzzle HTTP Client
-$httpClient = $googleauthorize_agent->client->authorize();
-
-$response = $httpClient->get($data_source);
-
-var_dump($response);
-exit();
-
-*/
 
         /*
         var_dump($googleauthorize_agent->access_token);
@@ -207,17 +197,12 @@ exit();
         $context = stream_context_create($options);
 
         $data = file_get_contents($data_source, false, $context);
-var_dump($data);
-exit();
 */
         $youtube = new \Google_Service_YouTube($googleauthorize_agent->client);
 
         $captions = $youtube->captions->listCaptions("snippet", $video_id);
 
-        var_dump($captions);
-        echo "merp";
 
-        exit();
 
         return false;
     }

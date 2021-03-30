@@ -1,20 +1,19 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 /*
 print gearman_version() . "\n";
 
 $thing = new Thing();
-$t = new Manager($thing);
-$s = $t->getStatus();
-var_dump($s);
-exit();
+$manager = new Manager($thing);
+$status = $manager->getStatus();
 // Taken from https://stackoverflow.com/questions/2752431/any-way-to-access-gearman-administration
 */
+
 class Manager extends Agent
 {
     /**
@@ -45,10 +44,10 @@ class Manager extends Agent
         $this->queue_engine_version = gearman_version();
 
         $s = $this->getStatus();
-        $this->queued_jobs = $s['operations']['call_agent']['total'];
-        $this->workers_running = $s['operations']['call_agent']['running'];
+        $this->queued_jobs = $s["operations"]["call_agent"]["total"];
+        $this->workers_running = $s["operations"]["call_agent"]["running"];
         $this->workers_connected =
-            $s['operations']['call_agent']['connectedWorkers'];
+            $s["operations"]["call_agent"]["connectedWorkers"];
 
         $this->y_max_limit = null;
         $this->y_min_limit = null;
@@ -111,11 +110,11 @@ $this->response = "Gearman snowflake worker started.";
                     )
                 ) {
                     $function = $matches[1];
-                    $status['operations'][$function] = [
-                        'function' => $function,
-                        'total' => $matches[2],
-                        'running' => $matches[3],
-                        'connectedWorkers' => $matches[4],
+                    $status["operations"][$function] = [
+                        "function" => $function,
+                        "total" => $matches[2],
+                        "running" => $matches[3],
+                        "connectedWorkers" => $matches[4],
                     ];
                 }
             }
@@ -134,11 +133,11 @@ $this->response = "Gearman snowflake worker started.";
                     )
                 ) {
                     $fd = $matches[1];
-                    $status['connections'][$fd] = [
-                        'fd' => $fd,
-                        'ip' => $matches[2],
-                        'id' => $matches[3],
-                        'function' => $matches[4],
+                    $status["connections"][$fd] = [
+                        "fd" => $fd,
+                        "ip" => $matches[2],
+                        "id" => $matches[3],
+                        "function" => $matches[4],
                     ];
                 }
             }
@@ -153,10 +152,10 @@ $this->response = "Gearman snowflake worker started.";
         $this->queue_engine_version = gearman_version();
 
         $s = $this->getStatus();
-        $this->queued_jobs = $s['operations']['call_agent']['total'];
-        $this->workers_running = $s['operations']['call_agent']['running'];
+        $this->queued_jobs = $s["operations"]["call_agent"]["total"];
+        $this->workers_running = $s["operations"]["call_agent"]["running"];
         $this->workers_connected =
-            $s['operations']['call_agent']['connectedWorkers'];
+            $s["operations"]["call_agent"]["connectedWorkers"];
     }
 
     public function set()
@@ -217,23 +216,24 @@ $this->response = "Gearman snowflake worker started.";
     public function workersManager()
     {
         $this->points = [];
-        $things = $this->getThings('manager');
+        $things = $this->getThings("manager");
 
         if (!is_array($things)) {
-$this->x_min = 0;
-$this->x_max = time();
-$this->y_min = 0;
-$this->y_max = 10;
-return;}
+            $this->x_min = 0;
+            $this->x_max = time();
+            $this->y_min = 0;
+            $this->y_max = 10;
+            return;
+        }
 
         foreach (array_reverse($things) as $i => $thing) {
-            if (!isset($thing->variables['manager']['queued_jobs'])) {
+            if (!isset($thing->variables["manager"]["queued_jobs"])) {
                 continue;
             }
             //var_dump($thing->variables['manager']);
-            $n = $thing->variables['manager']['queued_jobs'];
+            $n = $thing->variables["manager"]["queued_jobs"];
 
-            $t = strtotime($thing->variables['manager']['refreshed_at']);
+            $t = strtotime($thing->variables["manager"]["refreshed_at"]);
 
             if (!isset($this->x_min)) {
                 $this->x_min = $t;
@@ -284,7 +284,8 @@ return;}
 
         $this->chart_agent = new Chart(
             $this->thing,
-            "chart manager " . "null" . $this->mail_postfix);
+            "chart manager " . "null" . $this->mail_postfix
+        );
         $this->chart_agent->points = $this->points;
 
         $this->chart_agent->x_min = $x_min;
@@ -350,7 +351,7 @@ return;}
         }
         $this->chart_agent->makePNG();
         $this->image_embedded = $this->chart_agent->image_embedded;
-        $this->thing_report['png'] = $this->chart_agent->thing_report['png'];
+        $this->thing_report["png"] = $this->chart_agent->thing_report["png"];
     }
 
     function readSubject()
@@ -363,15 +364,15 @@ return;}
 
         $this->makeChoices();
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['keyword'] = 'manager';
-        $this->thing_report['help'] = 'Checks the job queue.';
+        $this->thing_report["keyword"] = "manager";
+        $this->thing_report["help"] = "Checks the job queue.";
     }
 
     function makeSMS()
@@ -396,7 +397,7 @@ return;}
             " | queue version " . $this->queue_engine_version . "";
 
         $this->sms_message .= " | TEXT LATENCY";
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     public function makeChoices()
@@ -414,17 +415,17 @@ return;}
                 $this->node_list,
                 "manager"
             );
-            $choices = $this->thing->choice->makeLinks('manager');
+            $choices = $this->thing->choice->makeLinks("manager");
         }
 
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function makeWeb()
     {
         //$this->getData();
         //        $this->drawGraph();
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/manager';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/manager";
 
         $head = '
             <td>
@@ -460,6 +461,6 @@ return;}
 */
         $web .= "<br><br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 }

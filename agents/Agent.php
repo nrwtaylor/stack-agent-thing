@@ -24,6 +24,7 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
+
         if ($thing == null) {
             $thing = new Thing(null);
         }
@@ -1932,10 +1933,21 @@ return $agent_trace;;
 
         //if ($agent_class_name == null) {return true;}
 
+//$shouldExit = true;
         register_shutdown_function([$this, "shutdownHandler"]);
+/*
+register_shutdown_function(function() use (&$shouldExit) {
+    if (! $shouldExit) {
+echo "!shouldexit";
+        return;
+    }
+$this->shutdownHandler();
+});
+*/
 
         //if ($agent_class_name == 'Test') {return false;}
         set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
+
 
         //set_error_handler("warning_handler", E_WARNING);
 
@@ -1966,18 +1978,57 @@ return $agent_trace;;
             if (!isset($thing->subject)) {
                 $thing->subject = $this->input;
             }
+
+
+
+
+
+	          $agent = new $agent_namespace_name($thing, $agent_input);
+//$shouldExit = false;
+
+/*
+$pid = pcntl_fork();
+if ($pid == -1) {
+ die('could not fork');
+} else if ($pid) {
+ // we are the parent
+ pcntl_waitpid($pid, $status, WUNTRACED); //Protect against Zombie children
+ if (pcntl_wifexited($status)) {
+   echo "Child exited normally";
+
+ } else if (pcntl_wifstopped($status)) {
+   echo "Signal: ", pcntl_wstopsig($status), " caused this child to stop.";
+ } else if (pcntl_wifsignaled($status)) {
+   echo "Signal: ",pcntl_wtermsig($status)," caused this child to exit with return code: ", pcntl_wexitstatus($status);
+ }
+} else {
             $agent = new $agent_namespace_name($thing, $agent_input);
+            $this->thing_report = $agent->thing_report;
+            $this->agent = $agent;
+
+// pcntl_exec("/path/to/php/script");
+ echo "Could not Execute...";
+}
+*/
+
             restore_error_handler();
 
             // If the agent returns true it states it's response is not to be used.
-            if (isset($agent->response) and $agent->response === true) {
+            if (((isset($agent->response) and $agent->response === true))) {
                 throw new Exception("Flagged true.");
             }
 
             //if ($agent->thing_report == false) {return false;}
 
+//if (isset($agent)) {
             $this->thing_report = $agent->thing_report;
             $this->agent = $agent;
+//} else {
+//$this->thing_report = false;
+//$this->agent = false;
+//$agent = false;
+//}
+
 
             //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
@@ -3519,7 +3570,6 @@ return $agent_trace;;
             $this->thing_report = $c->thing_report;
             //            $this->thing_report['sms'] = "AGENT | " . "Heard " . $input .".";
             return $this->thing_report;
-            //exit();
         }
 
         // Most useful thing is to acknowledge the url.
@@ -3695,6 +3745,8 @@ return $agent_trace;;
 
     function mylog($error, $errlvl)
     {
+        $this->thing->log($error);
+        $this->thing->console($error);
         //        echo $this->response;
         //        echo "\n";
         //        echo $this->thing->log;

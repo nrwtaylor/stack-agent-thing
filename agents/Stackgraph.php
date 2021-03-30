@@ -266,32 +266,7 @@ class Stackgraph extends Agent
                 $y_old = $y;
             }
 
-            //echo $x . " " . $y;
-            //echo "<br>";
-
-            //            imagefilledrectangle($this->image,
-            //                    $i * $column_width, $this->height,
-            //                    $i * $column_width + $column_width, $p,
-            //                    $this->black);
-            /*
-            imagefilledrectangle($this->image,
-                    $i * $column_width, 200,
-                    $i * $column_width + $column_width, $y,
-                    $this->black);
-
-            imagerectangle($this->image,
-                    $i * $column_width, 200,
-                    $i * $column_width + $column_width, $y,
-                    $this->white);
-*/
-
-            //foreach(range(-1,1,1) as $key=>$offset) {
             $width = $x - $x_old;
-
-            //            imageline($this->image,
-            //                    $x_old + $offset , $y_old + $offset,
-            //                    $x, $y,
-            //                    $this->green);
 
             $offset = 1.5;
 
@@ -350,19 +325,15 @@ class Stackgraph extends Agent
             100000,
         ];
         $inc = ($y_max - $y_min) / 5;
-        //echo "inc" . $inc . "\n";
+
         $closest_distance = $y_max;
         foreach ($allowed_steps as $key => $step) {
             $distance = abs($inc - $step);
-            //echo $distance . "\n";
             if ($distance < $closest_distance) {
                 $closest_distance = $distance;
                 $preferred_step = $step;
             }
         }
-        //echo $closest_distance;
-        //echo "<br>";
-        //$inc = $closest_distance;
 
         $this->drawGrid($y_min, $y_max, $preferred_step);
     }
@@ -371,15 +342,8 @@ class Stackgraph extends Agent
     {
         $y = $this->roundUpToAny($y_min, $inc);
 
-        //echo $y . " ". $y_max;
-        //exit();
         while ($y <= $y_max) {
-            //    echo $i++;  /* the printed value would be
-            //                   $i before the increment
-            //                   (post-increment) */
 
-            //echo $y;
-            //exit();
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {
                 $y_spread = 100;
@@ -505,7 +469,6 @@ class Stackgraph extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .

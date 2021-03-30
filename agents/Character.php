@@ -261,8 +261,6 @@ class Character extends Agent
             if (!isset($this->characters)) {
                 $this->characters = [];
             }
-            //exit();
-            //   $this->characters = array_unique($this->characters);
 
             if (count($this->characters) == 0) {
                 return true;
@@ -1057,20 +1055,10 @@ if (!isset($this->characters)) {
             '<pre> Agent "Character" did not respond to any keywords</pre>'
         );
 
-        //$this->characterList();
-
-        //                return "Request not understood";
-
-        //         }
-
-        //      $this->thing->log('<pre>Agent "Character" is reading multiple words.</pre>');
-
         foreach ($pieces as $key => $piece) {
-            //$this->thing->log($piece);
-            //exit();
+
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
-                    //$this->thing->log("Matched command piece" . $piece . $command);
 
                     switch ($piece) {
                         case 'name':
@@ -1079,7 +1067,6 @@ if (!isset($this->characters)) {
                                     '<pre>Agent "Character" matched "name" as last word.</pre>'
                                 );
 
-                                //echo "last word is stop";
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
@@ -1089,8 +1076,6 @@ if (!isset($this->characters)) {
                                         '".</pre>'
                                 );
 
-                                //echo "next word is:";
-                                //var_dump($pieces[$index+1]);
                                 $check = $pieces[$key + 1]; // Have this return up to four words
                                 if ($check == "is" or $check == "character") {
                                     $adjust = 1;
@@ -1152,14 +1137,11 @@ if (!isset($this->characters)) {
 
                             $this->resetCharacter();
                             return "Character reset";
-                            //echo 'bus';
                             break;
 
                         case 'list':
                             $this->characterList();
 
-                            //echo $this->sms_message;
-                            //exit();
                             $this->thing->log(
                                 '<pre>Agent "Character" matched "list".</pre>'
                             );
@@ -1185,16 +1167,12 @@ if (!isset($this->characters)) {
                             );
                             $this->characterReport($this->name);
                             return "Character report created";
-                            //echo 'bus';
                             break;
 
                         default:
                             $this->thing->log(
                                 '<pre>Agent "Character" did not multiple-match.</pre>'
                             );
-                        //$this->characterInfo();
-
-                        //echo 'default';
                     }
                 }
             }

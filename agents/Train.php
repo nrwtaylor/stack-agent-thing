@@ -481,8 +481,6 @@ class Train extends Agent
 
 if ($things == null) {return;}
 
-        var_dump($things);
-
         $this->thing->log('found ' . count($things) . " Train Agent Things.");
 
         foreach ($things as $uuid => $train_thing) {
@@ -588,18 +586,6 @@ if ($things == null) {return;}
                 $runtime = $variables["runtime"]['minutes'];
             }
 
-            // Calculate the end time.
-            //           if ($runtime > 0) {
-
-            //exit();
-            /*
-$run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
-
-                $end_at = $this->thing->json->time(strtotime($run_at_text . " " . $runtime->minutes . " minutes"));
-            } else {
-                $end_at = null;
-            }
-*/
             //
             $train = [
                 "state" => $state,
@@ -671,7 +657,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
         }
 
 
-        //var_dump($this->trains);
     }
 
     public function selectTrain()
@@ -1159,7 +1144,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
         $this->hour = date("H", $t);
         $this->minute = date("i", $t);
 
@@ -1208,7 +1192,6 @@ $run_at_text = $run_at->day . " " . $run_at->hour . ":" . $run_at->minute;
 
         return $train_day;
 
-        //exit();
     }
 
     function extractEndat()
@@ -2195,7 +2178,6 @@ $txt .= $table_text;
 
 
 
-        //exit();
         $this->thing_report['txt'] = $txt;
         $this->txt = $txt;
     }

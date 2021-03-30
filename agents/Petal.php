@@ -335,8 +335,6 @@ class Petal extends Agent
         //array_pop($arr);
         $this->rolls = $arr;
 
-        //$var_dump($this->rolls);
-        //exit();
 
         return $this->rolls;
     }

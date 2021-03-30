@@ -3,20 +3,19 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Events extends Agent
 {
-
     // Lots of work needed here.
     // Need to decide how to process events.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->default_calendar_token = null;
 
         // So I could call
-        if (isset($this->thing->container['stack']['calendar'])) {
+        if (isset($this->thing->container["stack"]["calendar"])) {
             $this->default_calendar_token =
-                $this->thing->container['stack']['calendar'];
+                $this->thing->container["stack"]["calendar"];
         }
 
         $this->retain_for = 24; // Retain for at least 24 hours.
@@ -78,7 +77,7 @@ $events_variable['request_flag'] = false;
         // For example. current.
         $event_agent = new Event($this->thing, "event");
         if (
-            stripos($this->subject . " " . $this->agent_input, 'current') !==
+            stripos($this->subject . " " . $this->agent_input, "current") !==
             false
         ) {
             // Saw the word current somewhere.
@@ -94,7 +93,7 @@ $events_variable['request_flag'] = false;
                 "Got some useful paragraphs (" .
                 $this->thing->human_time(time() - $start_time) .
                 ") .";
-            //exit();
+
             foreach ($paragraphs as $i => $paragraph) {
                 $tokens = explode(" ", $paragraph);
                 if (count($tokens) == 1) {
@@ -124,10 +123,10 @@ $events_variable['request_flag'] = false;
         }
 
         $events_variable = [
-            'cache_request_flag' => false,
-            'text' => time(),
-            'refreshed_at' => $this->current_time,
-            'events' => $events,
+            "cache_request_flag" => false,
+            "text" => time(),
+            "refreshed_at" => $this->current_time,
+            "events" => $events,
         ];
 
         $this->setMemory("events", $events_variable);
@@ -152,42 +151,42 @@ $events_variable['request_flag'] = false;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
     public function deprecate_eventString($event)
     {
-        $event_date = date_parse($event['runat']);
-        $month_number = $event_date['month'];
-        $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
+        $event_date = date_parse($event["runat"]);
+        $month_number = $event_date["month"];
+        $month_name = date("F", mktime(0, 0, 0, $month_number, 10)); // March
 
-        $simple_date_text = $month_name . " " . $event_date['day'];
+        $simple_date_text = $month_name . " " . $event_date["day"];
         $event_string = "" . $simple_date_text;
-        $event_string .= " " . $event['event'];
+        $event_string .= " " . $event["event"];
 
-        $runat = new Runat($this->thing, "extract " . $event['runat']);
+        $runat = new Runat($this->thing, "extract " . $event["runat"]);
 
         $event_string .= " " . $runat->day;
         $event_string .= " " . str_pad($runat->hour, 2, "0", STR_PAD_LEFT);
         $event_string .= ":" . str_pad($runat->minute, 2, "0", STR_PAD_LEFT);
 
-        $run_time = new Runtime($this->thing, "extract " . $event['runtime']);
+        $run_time = new Runtime($this->thing, "extract " . $event["runtime"]);
 
-        if ($event['runtime'] != "X") {
+        if ($event["runtime"] != "X") {
             $event_string .= " " . $this->thing->human_time($run_time->minutes);
         }
 
-        $event_string .= " " . $event['place'];
+        $event_string .= " " . $event["place"];
         return $event_string;
     }
 
     function thingreportEvents()
     {
-        $this->thing_report['message'] = $this->message;
-        $this->thing_report['keyword'] = $this->keyword;
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['email'] = $this->message;
+        $this->thing_report["message"] = $this->message;
+        $this->thing_report["keyword"] = $this->keyword;
+        $this->thing_report["sms"] = $this->sms_message;
+        $this->thing_report["email"] = $this->message;
     }
 
     private function eventsDo()
@@ -206,14 +205,13 @@ $events_variable['request_flag'] = false;
         $this->events = [];
 
         $calendar_agent = new Calendar($this->thing, "calendar");
-//        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
-//            $this->default_calendar_token
-//        );
+        //        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
+        //            $this->default_calendar_token
+        //        );
 
-//        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
-//            $calendar_agent->default_calendar_token
-//        );
-
+        //        $calendar_agent->ics_links = $calendar_agent->icslinksCalendar(
+        //            $calendar_agent->default_calendar_token
+        //        );
 
         $calendar_agent->doCalendar();
 
@@ -234,7 +232,7 @@ $events_variable['request_flag'] = false;
         $this->eventful = new Eventful($this->thing, "eventful " . $keywords);
         if (isset($this->eventful->events)) {
             foreach ($this->eventful->events as &$event) {
-                $event['source'] = "eventful";
+                $event["source"] = "eventful";
             }
 
             $this->events = array_merge($this->events, $this->eventful->events);
@@ -244,7 +242,7 @@ $events_variable['request_flag'] = false;
 
         if (isset($this->meetup->events)) {
             foreach ($this->meetup->events as &$event) {
-                $event['source'] = "meetup";
+                $event["source"] = "meetup";
             }
             $this->events = array_merge($this->events, $this->meetup->events);
         }
@@ -259,7 +257,7 @@ $events_variable['request_flag'] = false;
             $this->brownpapertickets->events != true
         ) {
             foreach ($this->brownpapertickets->events as &$event) {
-                $event['source'] = "brownpapertickets";
+                $event["source"] = "brownpapertickets";
             }
 
             $this->events = array_merge(
@@ -275,7 +273,7 @@ $events_variable['request_flag'] = false;
 
         if (isset($this->ticketmaster->events)) {
             foreach ($this->ticketmaster->events as &$event) {
-                $event['source'] = "ticketmaster";
+                $event["source"] = "ticketmaster";
             }
 
             $this->events = array_merge(
@@ -290,18 +288,15 @@ $events_variable['request_flag'] = false;
 
         $runat = [];
         foreach ($this->events as $key => $row) {
-            $runat[$key] = $row['runat'];
+            $runat[$key] = $row["runat"];
         }
         array_multisort($runat, SORT_ASC, $this->events);
         $this->thing->log("end sort");
 
-        //$this->ticketmaster = new Ticketmaster($this->thing, "ticketmaster ". $keywords);
-        //exit();
-
         foreach ($this->events as $eventful_id => $event) {
-            $event_name = $event['event'];
-            $event_time = $event['runat'];
-            $event_place = $event['place']; // Doesn't presume the Rio
+            $event_name = $event["event"];
+            $event_time = $event["runat"];
+            $event_place = $event["place"]; // Doesn't presume the Rio
 
             $time_to_event =
                 strtotime($event_time) - strtotime($this->current_time);
@@ -359,32 +354,29 @@ $events_variable['request_flag'] = false;
         $events_variable = $this->getMemory("events");
 
         $age = 1e9;
-$cache_request_flag = false;
-if ($events_variable !== false) {
-
-        if (isset($events_variable['refreshed_at'])) {
-            $age =
-                strtotime($this->current_time) -
-                strtotime($events_variable['refreshed_at']);
-            $this->response .= "Age is " . $age . "s. ";
-            $this->events_cache_age = $age;
-        }
-
-        //var_dump($events_variable);
-        //$refreshed_at = $events['refreshed_at'];
-$events = [];
-if (isset($events_variable['events'])) {
-        $events = $events_variable['events'];
-        if (isset($this->events) and $this->events != null) {
-            $events = array_merge($this->events, $events);
-        }
-}
-
         $cache_request_flag = false;
-        if (isset($events_variable['cache_request_flag'])) {
-            $cache_request_flag = $events_variable['cache_request_flag'];
+        if ($events_variable !== false) {
+            if (isset($events_variable["refreshed_at"])) {
+                $age =
+                    strtotime($this->current_time) -
+                    strtotime($events_variable["refreshed_at"]);
+                $this->response .= "Age is " . $age . "s. ";
+                $this->events_cache_age = $age;
+            }
+
+            $events = [];
+            if (isset($events_variable["events"])) {
+                $events = $events_variable["events"];
+                if (isset($this->events) and $this->events != null) {
+                    $events = array_merge($this->events, $events);
+                }
+            }
+
+            $cache_request_flag = false;
+            if (isset($events_variable["cache_request_flag"])) {
+                $cache_request_flag = $events_variable["cache_request_flag"];
+            }
         }
-}
 
         $this->events_cache_request_flag = $cache_request_flag;
         if ($age > 60 and $cache_request_flag !== true) {
@@ -407,15 +399,16 @@ if (isset($events_variable['events'])) {
 
             $events_variable = $this->getMemory("events");
 
-            $events_variable['cache_request_flag'] = true;
+            $events_variable["cache_request_flag"] = true;
             $this->setMemory("events", $events_variable);
 
-            if (!isset($events)) {$events = [];}
-if (isset($events_variable['events'])) {
-            $events = array_merge($events_variable['events'], $events);
-}
+            if (!isset($events)) {
+                $events = [];
+            }
+            if (isset($events_variable["events"])) {
+                $events = array_merge($events_variable["events"], $events);
+            }
         }
-        //var_dump($events['events']);
         return $events;
     }
 
@@ -436,7 +429,6 @@ if (isset($events_variable['events'])) {
         }
 
         if ($input == "current events") {
-            //var_dump("called current_events");
             $this->events = $this->currentEvents();
             return;
         }
@@ -444,14 +436,12 @@ if (isset($events_variable['events'])) {
         if (
             stripos(
                 $this->subject . " " . $this->agent_input,
-                'reset cache'
+                "reset cache"
             ) !== false
         ) {
-            //        if ($input == "reset cache") {
-            //var_dump("reset cache");
             $events_variable = $this->getMemory("events");
 
-            $events_variable['cache_request_flag'] = false;
+            $events_variable["cache_request_flag"] = false;
 
             $this->setMemory("events", $events_variable);
 
@@ -491,12 +481,12 @@ if (isset($events_variable['events'])) {
             $this->message = $this->earliest_event_string; //. ".";
         }
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     public function makeSMS()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/events';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/events";
 
         $sms = "EVENTS ";
 
@@ -507,12 +497,12 @@ if (isset($events_variable['events'])) {
         $sms .= " | " . $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/events';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/events";
 
         $html = "<b>EVENTS WATCHER</b>";
 
@@ -527,19 +517,19 @@ if (isset($events_variable['events'])) {
             foreach ($this->events as $id => $event) {
                 //            $event_html = $this->eventString($event);
                 $event_html = $event_agent->textEvent($event);
-                if (isset($event['link'])) {
-                    $link = $event['link'];
+                if (isset($event["link"])) {
+                    $link = $event["link"];
 
                     // https://stackoverflow.com/questions/8591623/checking-if-a-url-has-http-at-the-beginning-inserting-if-not
                     $parsed = parse_url($link);
-                    if (empty($parsed['scheme'])) {
-                        $link = 'http://' . ltrim($link, '/');
+                    if (empty($parsed["scheme"])) {
+                        $link = "http://" . ltrim($link, "/");
                     }
 
                     $html_link = '<a href="' . $link . '">';
                     $event_source = "Unknown source.";
-                    if (isset($event['source'])) {
-                        $event_source = $event['source'];
+                    if (isset($event["source"])) {
+                        $event_source = $event["source"];
                     }
                     $html_link .= $event_source;
 
@@ -565,6 +555,6 @@ if (isset($events_variable['events'])) {
         }
 
         $this->web_message = $html;
-        $this->thing_report['web'] = $html;
+        $this->thing_report["web"] = $html;
     }
 }

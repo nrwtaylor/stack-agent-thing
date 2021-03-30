@@ -119,7 +119,6 @@ $this->max_hops = 2;
         $split_time = $this->thing->elapsed_runtime();
         $this->thing->log ( "Making railway - transit context");
         //echo $this->thing->log();
-//exit();
         // stop_times is a large file
         // this looks through and identifies all the blocks.
         // From one stop to the next.
@@ -180,7 +179,7 @@ $this->max_hops = 2;
                 }
             }
 
-            if ($completed == true) {return; echo "meep";exit();}
+            if ($completed == true) {return;}
             //echo "\n";
 
             // Now visiting stations up from $station_id
@@ -430,14 +429,11 @@ function searchForrId($id, $array) {
         for ($stops = $this->nextGtfs("stop_times", $selector_array); $stops->valid(); $stops->next()) {
 
             $stop = $stops->current();
-//var_dump($stop);
             $trip_id = $stop['trip_id'];
 
             $this->trips[$station_ids][] = $stop['trip_id'];
 
         }
-//echo "meep";
-//exit();
         return $this->trips[$station_ids];
     }
 
@@ -737,9 +733,6 @@ if ($handle == false) {return true;}
                 if (!isset($output_array[$field_index_value])) {$output_array[$field_index_value] = array();}
                 $output_array[$field_index_value][] = $arr;
 
-                //if ($file_name == "stop_times") {var_dump($field_index_value);var_dump($arr);echo "foo";exit();}
-
-                //$line_number += 1;
                 // process the line read.
             }
 
@@ -748,8 +741,6 @@ if ($handle == false) {return true;}
         } else {
             // error opening the file.
         }
-
-        //if ($file_name == "stop_times") {var_dump($field_index_value);var_dump($arr);echo "foo";exit();}
 
         return $output_array;
     }
@@ -833,9 +824,7 @@ if ($handle == false) {return true;}
                 $xml = simplexml_load_string($web_input);  
                 $t = $xml->NextBus;
 
-                //var_dump($xml);
                 $json_data = json_encode($t,true);
-                //echo $json_data;
 
                 $response = null;
 
@@ -972,9 +961,6 @@ $response ="";
 
         $this->makeWeb();
 
-//var_dump($this->channel->channel_name);
-//exit();
-//        if ($this->channel->channel_name == "web") {return;}
 
         $this->makeTxt(); // Do last because this needs some processing.
 
@@ -1057,8 +1043,6 @@ $response ="";
 								$this->stop = false;
 								return "Request not understood";
 							} else {
-								//echo "next word is:";
-								//var_dump($pieces[$index+1]);
 								$this->stop = $pieces[$key+1];
 								$this->response = $this->stopTranslink($this->stop);
 								return $this->response;

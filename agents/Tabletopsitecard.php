@@ -338,8 +338,7 @@ class Tabletopsitecard extends Agent
         }
 
         $ants = $this->getThings('ant');
-        //var_dump($ants);
-        //exit();
+
         $count = count($ants);
         $this->response .= "Counted " . $count . " ants. ";
 
@@ -688,12 +687,9 @@ class Tabletopsitecard extends Agent
                             //$count = count($ants);
                             $count = 0;
                             foreach ($ants as $uuid => $ant) {
-                                //var_dump($uuid);
                                 $thing = new Thing($uuid);
                                 $thing->Forget();
                                 $count += 1;
-                                //var_dump($thing);
-                                //exit();
                             }
                             $this->ants_max = rand(10, 90);
                             $this->response .=

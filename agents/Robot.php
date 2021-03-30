@@ -498,7 +498,6 @@ class Robot extends Agent
             }
         }
         $this->scheme = $scheme;
-        //exit();
         // if there isn't a robots, then we're allowed in
         //https://serverfault.com/questions/154820/what-happens-if-a-website-does-not-have-a-robots-txt-file
 

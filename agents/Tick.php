@@ -477,8 +477,6 @@ class Tick extends Agent
         // $this->thing->account['thing']->Credit($remaining_budget);
 
         // Do we pay the Thing though?  Already paid it 100.  And it owes us 100.
-
-        //exit();
     }
 }
 
@@ -494,7 +492,6 @@ class Timer_tick
     {
         $this->timer_name = $timer_name;
         $this->max_time = $max_time;
-        //echo $max_time;
         $this->start_time = $start_time;
     }
 

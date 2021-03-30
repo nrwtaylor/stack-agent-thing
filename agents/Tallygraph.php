@@ -123,7 +123,6 @@ class Tallygraph
     function getData() {
 
         $this->identity = "null" . $this->mail_postfix;
-//echo $this->identity;
         // We will probably want a getThings at some point.
         $this->thing->db->setFrom($this->identity);
         $thing_report = $this->thing->db->agentSearch("tallycounter", 99);
@@ -131,10 +130,6 @@ class Tallygraph
 
         $things = $thing_report['things'];
 
-//echo "<pre>";
-//var_dump($things);
-//echo "</pre>";
-//exit();
         if ( $things == false  ) {return;}
 
         $this->points = array();
@@ -180,11 +175,6 @@ echo $created_at;
             $this->points[] = array("created_at"=>$refreshed_at, "variable"=>$variable);
 
         }
-
-//echo "<pre>";
-//var_dump($this->points);
-//echo "</pre>";
-//exit();
 
 
     }
@@ -484,12 +474,7 @@ return;
 
         $y = $this->roundUpToAny($y_min, $inc);
 
-        //echo $y . " ". $y_max;
-        //exit();
         while ($y <= $y_max) {
-            //    echo $i++;  /* the printed value would be
-            //                   $i before the increment
-            //                   (post-increment) */
 
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {$y_spread = 100;}

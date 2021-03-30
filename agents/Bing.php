@@ -172,15 +172,12 @@ foreach ($definitions as $id=>$definition) {
             foreach ($this->events as $id => $event) {
                 $event_html = $this->eventString($event);
 
-                //        $link = $this->web_prefix . 'thing/' . $this->uuid . '/splosh';
                 $link = $event['link'];
                 $html_link = '<a href="' . $link . '">';
-                //        $web .= $this->html_image;
                 $html_link .= "eventful";
                 $html_link .= "</a>";
 
                 $html .= "<br>" . $event_html . " " . $html_link;
-                //exit();
             }
         }
         $this->html_message = $html;

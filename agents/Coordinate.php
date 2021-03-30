@@ -148,7 +148,7 @@ class Coordinate extends Agent
 
                 if (is_array($this->last_coordinate)) {
                     $this->thing->console( "lastcoord" );
-                    exit();
+                    throw \Exception("Last coordinate");
                 }
                 $this->coordinate = $this->last_coordinate;
 

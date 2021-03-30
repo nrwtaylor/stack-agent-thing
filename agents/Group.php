@@ -720,7 +720,6 @@ $this->response .= "Didn't see screen. So did not screen. ";
                         case 'group':
                             $this->response .= "Saw group. ";
 
-                            // exit() This doesn't trigger.  Group must be picked up before this.
                             if ($key + 1 > count($pieces)) {
                                 $this->group = false;
                                 return "Request not understood";

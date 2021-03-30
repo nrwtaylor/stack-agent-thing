@@ -156,7 +156,6 @@ if ($development) {
 }
 
 return;
-exit();
 
 fail:
 // Fail to this.

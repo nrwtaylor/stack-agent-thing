@@ -68,7 +68,6 @@ class Twitter extends Agent
                 $this->findWord('affect', $piece);
             }
         }
-//        exit();
         // Append a new person to the file
         $current .= "John Smith\n";
         // Write the contents back to the file
@@ -97,10 +96,9 @@ class Twitter extends Agent
         //  $pattern = "/^.*$pattern.*\$/m";
         $pattern = "|\b($searchfor)\b|";
 
-        echo "foo";
-        var_dump($contents);
-        echo "bar";
-        exit();
+// dev
+return;
+
         // search, and store all matching occurences in $matches
 
         if (preg_match_all($pattern, $contents, $matches)) {
@@ -210,9 +208,7 @@ class Twitter extends Agent
                             $words = ltrim($words);
 
                             $this->channel = $words;
-                            //exit();
 
-                            //                            $this->Get($words);
                             $this->randomTweet();
 
                             return;
@@ -355,13 +351,8 @@ class Twitter extends Agent
         ]);
 
         echo "<br>";
-        //var_dump($this->content);
-        var_dump($this->statuses);
-        var_dump(count($this->statuses));
-        echo "<br>";
-
-        var_dump($this->twitterOK());
-        exit();
+//dev
+return;
 
         //                        $connection->post('statuses/update', array('status' => $this->tweet));
         if ($connection->getLastHttpCode() === 200) {
@@ -380,8 +371,6 @@ class Twitter extends Agent
         if (!isset($this->tweets)) {
             $this->getTweets();
         }
-        //echo count($this->tweets);
-        //exit();
 
         $i = rand(1, count($this->tweets));
         $this->random_tweet = $this->tweets[$i];
@@ -446,26 +435,22 @@ class Twitter extends Agent
             $this->access_token,
             $this->access_token_secret
         );
-        //                        $this->content = $this->connection->get('account/verify_credentials');
-        //var_dump($channel);
-        //exit();
+
         $this->statuses = $this->connection->get("search/tweets", [
             "q" => $channel,
         ]);
 
         echo "<br>";
         $this->tweets = [];
-        //var_dump($this->content);
+
         foreach ($this->statuses->statuses as $k => $v) {
-            //var_dump($v->text);
+
 
             $this->tweets[] = [
                 "text" => $v->text,
                 "created_at" => $v->created_at,
             ];
-            //echo "<br>---<br>";
         }
-        //echo "<br>";
 
         if ($this->twitterOK() != 'green') {
             return true;

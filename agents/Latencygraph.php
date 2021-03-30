@@ -249,8 +249,6 @@ class Latencygraph extends Agent
 
         $y = $this->roundUpToAny($y_min, $inc);
 
-        //echo $y . " ". $y_max;
-        //exit();
         while ($y <= $y_max) {
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {$y_spread = 100;}

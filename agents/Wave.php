@@ -256,17 +256,11 @@ class Wave extends Agent
             }
         }
 
-        //exit();
-
         $utc_time = gmdate('d.m.Y H:i', strtotime($this->current_time));
 
         $at_hour = intval(date('H', strtotime($utc_time)));
         $at_day = intval(date('j', strtotime($utc_time)));
         $at_minute = intval(date('i', strtotime($utc_time)));
-
-        //echo $at_hour . "<br>";
-        //cho $at_day . "<br>";
-        //echo $at_minute . "<br>";
 
         $this->hour = $at_hour;
         $this->day = $at_day;
@@ -289,7 +283,7 @@ class Wave extends Agent
                 continue;
             }
             if (isset($next_wave_set[$i]['height'])) {
-                //echo "<br>";
+
                 $height = round(
                     $wave['height'] +
                         (($next_wave_set[$i]['height'] - $wave['height']) *
@@ -329,7 +323,7 @@ class Wave extends Agent
         //        $this->direction = $wave_spectra[$i]["direction"];
         //        $this->period = $wave_spectra[$i]["period"];
 
-        //echo $this->height, $this->direction, $this->period;
+        //$this->thing->console($this->height ." " . $this->direction ." " . $this->period ."\n");
 
         //foreach($waves as $wave) {
 

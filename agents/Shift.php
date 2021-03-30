@@ -115,7 +115,6 @@ class Shift extends Agent
 
         return $this->block_time;
 
-        //exit();
     }
 
     function set($requested_state = null)

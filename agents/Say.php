@@ -223,7 +223,6 @@ if (isset($group_thing->thing_report['groups'][0])) {
                             $this->thing->log('noted the question');
 
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is pain";
                                 break;
                                 //$this->pain_score = null;
                                 // I feel your pain buddy?
@@ -262,25 +261,6 @@ if (isset($group_thing->thing_report['groups'][0])) {
 
     public function PNG()
     {
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and tes$
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
-
-        //http://php.net/manual/en/function.imagepng.php
-
-        //header('Content-Type: text/html');
-        //echo "Hello World";
-        //exit();
-
-        //header('Content-Type: image/png');
-        //QRcode::png('PHP QR Code :)');
-        //exit();
-        // here DB request or some processing
-
         if ($this->group_id == null) {
             $this->startGroup();
         }
@@ -309,7 +289,6 @@ if (isset($group_thing->thing_report['groups'][0])) {
         //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
 
         $this->thing_report['png'] = $image;
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
         return $this->thing_report['png'];
     }
