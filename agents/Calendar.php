@@ -212,7 +212,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
 
                 $file = $ics_link;
                 if (isset($file) and is_string($file) and $file !== "") {
-                    $response = $this->readCalendar($file);
+                    $response = $this->icalCalendar($file);
                     if ($response != true) {
                         $calendar_count += 1;
                     }
@@ -684,7 +684,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         return $event;
     }
 
-    public function readCalendar($calendar_uri, $calendar_name = null)
+    public function icalCalendar($calendar_uri, $calendar_name = null)
     {
         $this->calendar_unique_events === false;
 
