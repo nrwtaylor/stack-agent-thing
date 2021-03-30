@@ -451,7 +451,6 @@ class Nod extends Agent
         $html .=
             "<p><br>" . "Thank you for your recent nod. " . $warranty->message;
 
-        //exit();
 
         $html .= "<p>";
         $html .= "<br>Last nod time " . $this->last_timestamp;

@@ -150,7 +150,6 @@ class Amount extends Agent
         }
 
         $input = $this->input;
-        //var_dump($this->input);
         $strip_words = ["amount"];
 
         foreach ($strip_words as $i => $strip_word) {

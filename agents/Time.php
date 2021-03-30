@@ -32,10 +32,6 @@ class Time extends Agent
         $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
 
         $this->initTime();
-
-        //$this->time = $this->thing->time();
-        //$this->time = time();
-        //$this->time_zone = 'America/Vancouver';
     }
 
     function initTime()
@@ -304,7 +300,7 @@ class Time extends Agent
         }
 
         // If not datum is provided.
-        // Check for a zull flug.
+        // Check for a zulu flag.
         $zulu_flag = null;
         if (strtolower(substr($text, -1)) == 'z') {
             $zulu_flag = "Z";
@@ -334,53 +330,10 @@ class Time extends Agent
 
     /**
      *
-     * @param unknown $text (optional)
-     * @return unknown
-     */
-    public function extractTimezone($text = null)
-    {
-        if ($text == null or $text == "") {
-            return true;
-        }
-
-        if (stripos($text, "lmt") !== false) {
-            return "lmt";
-        }
-
-        $text = str_replace("time", "", $text);
-        $text = trim(str_replace("stamp", "", $text));
-
-        $OptionsArray = timezone_identifiers_list();
-
-        $matches = [];
-
-        // Devstack. Librex.
-        foreach ($OptionsArray as $i => $timezone_id) {
-            if (
-                stripos($timezone_id, $text) !== false or
-                stripos($timezone_id, str_replace(" ", "_", $text)) !== false
-            ) {
-                $matches[] = $timezone_id;
-            }
-        }
-        $match = false;
-        if (isset($matches) and count($matches) == 1) {
-            $match = $matches[0];
-        } else {
-            $this->response .= "Could not resolve the timezone. ";
-        }
-        return $match;
-    }
-
-    /**
-     *
      * @return unknown
      */
     public function readSubject()
     {
-        //$input = $this->input;
-        //if (stripos($input, "lmt") !== false) {$this->timezone="lmt";}
-
         if ($this->agent_input == "time") {
             return;
         }
@@ -388,6 +341,7 @@ class Time extends Agent
 
         if ($this->filtered_input != "") {
             $timezone = $this->extractTimezone($this->filtered_input);
+            if ($timezone === true) {$this->response .= "Timezone not recognized. ";}
         }
 
         if (isset($timezone) and is_string($timezone)) {

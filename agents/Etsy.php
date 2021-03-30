@@ -363,10 +363,6 @@ $item['offers'] = $offers;
             "SearchIndex" => $index
         );
 
-        //$slug_agent = new Slug($this->thing, "slug");
-        //$keywords = $slug_agent->getSlug($this->search_words);
-        //var_dump($keywords);
-        //exit();
         $request_array = array("keywords" => $keywords);
 
         $request = $this->getRequest($request_array);

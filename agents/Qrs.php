@@ -3,8 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -13,7 +13,7 @@ ini_set("allow_url_fopen", 1);
 
 class Qrs extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -22,8 +22,8 @@ class Qrs extends Agent
         $this->node_list = ["qrs" => ["index", "uuid"]];
     }
 
-    public function get() {
-
+    public function get()
+    {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "qrs",
@@ -38,10 +38,7 @@ class Qrs extends Agent
                 $time_string
             );
         }
-
-
     }
-
 
     public function run()
     {
@@ -83,16 +80,16 @@ class Qrs extends Agent
         $this->thing_report["help"] = 'Try "DUPLICABLE"';
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeChoices()
     {
         $this->thing->log(
             $this->agent_prefix .
-                'started makeChoices. Timestamp = ' .
+                "started makeChoices. Timestamp = " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
 
@@ -103,22 +100,22 @@ class Qrs extends Agent
         );
         $this->thing->log(
             $this->agent_prefix .
-                'completed create choice. Timestamp = ' .
+                "completed create choice. Timestamp = " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
 
-        $this->choices = $this->thing->choice->makeLinks('nuuids');
+        $this->choices = $this->thing->choice->makeLinks("nuuids");
         $this->thing->log(
             $this->agent_prefix .
-                'completed makeLinks. Timestamp = ' .
+                "completed makeLinks. Timestamp = " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
 
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
 
         //  $this->thing_report['choices'] = false;
     }
@@ -129,7 +126,7 @@ class Qrs extends Agent
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/qrs.pdf";
         $sms .= " | TEXT QR";
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeMessage()
@@ -143,7 +140,7 @@ class Qrs extends Agent
             $this->web_prefix .
             "thing/$uuid/qrs\n \n\n<br> ";
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     function setNuuids()
@@ -160,7 +157,7 @@ class Qrs extends Agent
 
         if ($this->index == false) {
             $this->thing->log(
-                $this->agent_prefix . ' did not find a duplicable index.',
+                $this->agent_prefix . " did not find a duplicable index.",
                 "INFORMATION"
             );
             // Return.
@@ -168,7 +165,7 @@ class Qrs extends Agent
         }
 
         $this->thing->log(
-            $this->agent_prefix . ' loaded qrs index ' . $this->index . '.',
+            $this->agent_prefix . " loaded qrs index " . $this->index . ".",
             "INFORMATION"
         );
         return;
@@ -176,7 +173,7 @@ class Qrs extends Agent
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
         $this->node_list = ["web" => ["nuuids", "nuuid"]];
 
         $web = "";
@@ -197,13 +194,13 @@ class Qrs extends Agent
         $web .= "<br>";
 
         $web .= "<br><br>";
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     function makeTXT()
     {
         $txt = "This is an index of semi-unique NUUIDS.\n";
-        $txt .= 'Duplicate NUUIDs omitted.';
+        $txt .= "Duplicate NUUIDs omitted.";
         $txt .= "\n";
         //$txt .= count($this->lattice). ' cells retrieved.';
 
@@ -269,7 +266,7 @@ class Qrs extends Agent
                             str_pad(
                                 $this->index[$i + $local_offset],
                                 10,
-                                ' ',
+                                " ",
                                 STR_PAD_LEFT
                             );
                     } else {
@@ -278,7 +275,7 @@ class Qrs extends Agent
                             str_pad(
                                 $this->duplicables_list[$i],
                                 10,
-                                ' ',
+                                " ",
                                 STR_PAD_LEFT
                             );
                     }
@@ -289,14 +286,14 @@ class Qrs extends Agent
             $page += 1;
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
     function initNuuids()
     {
         $this->thing->log(
-            $this->agent_prefix . 'initialized the duplicables index.',
+            $this->agent_prefix . "initialized the duplicables index.",
             "INFORMATION"
         );
 
@@ -321,25 +318,11 @@ class Qrs extends Agent
             }
         }
 
-        //var_dump($v);
         return $this->index;
-    }
-
-    function echoDuplicables()
-    {
-        //
-        //        $rows = 20;
-        //        $columns = 5;
-
-        //        foreach(range(0,$rows) as $row_index) {
-        //            foreach(range(0,columns) as $column_index) {
-        //            echo $row_index . " " . $column_index . " ".$value. " ";
-        //        }
     }
 
     function makeNuuids($n = null)
     {
-
         $v = [];
 
         foreach (range(0, 100) as $i) {
@@ -366,7 +349,6 @@ class Qrs extends Agent
 
     function readQrs()
     {
-        return $this->state;
     }
 
     function extractNuuid($input)
@@ -381,34 +363,25 @@ class Qrs extends Agent
     public function makePDF()
     {
         if ($this->default_pdf_page_template === null) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf']; 
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
-        $txt = $this->thing_report['txt'];
+        $txt = $this->thing_report["txt"];
         //$txt = explode($txt , "\n");
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
         $pdf->setSourceFile($this->default_pdf_page_template);
-        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetFont("Helvetica", "", 10);
 
-        $tplidx1 = $pdf->importPage(2, '/MediaBox');
+        $tplidx1 = $pdf->importPage(2, "/MediaBox");
 
         $s = $pdf->getTemplatesize($tplidx1);
 
-        $pdf->addPage($s['orientation'], $s);
-        //        $pdf->useTemplate($tplidx1,0,0,215);
+        $pdf->addPage($s["orientation"], $s);
         $pdf->useTemplate($tplidx1);
 
-        //$separator = "\r\n";
-        //$line = strtok($this->thing_report['txt'], $separator);
-
-        //while ($line !== false) {
-        //    # do something with $line
-        //    $line = strtok( $separator );
-        //echo $line;
-        //}
         $pdf->SetTextColor(0, 0, 0);
 
         $num_rows = 17;
@@ -470,7 +443,7 @@ class Qrs extends Agent
                             str_pad(
                                 $this->index[$i + $local_offset],
                                 10,
-                                ' ',
+                                " ",
                                 STR_PAD_LEFT
                             );
 
@@ -485,7 +458,7 @@ class Qrs extends Agent
                             $top_margin + ($row - 1) * $row_height,
                             $size_x,
                             $size_y,
-                            'PNG'
+                            "PNG"
                         );
                     } else {
                         $txt .=
@@ -493,7 +466,7 @@ class Qrs extends Agent
                             str_pad(
                                 $this->duplicables_list[$i],
                                 10,
-                                ' ',
+                                " ",
                                 STR_PAD_LEFT
                             );
 
@@ -508,7 +481,7 @@ class Qrs extends Agent
                             $top_margin + $row * 5,
                             30,
                             30,
-                            'PNG'
+                            "PNG"
                         );
                     }
                 }
@@ -518,7 +491,7 @@ class Qrs extends Agent
             $page += 1;
 
             // Bubble
-            $pdf->SetFont('Helvetica', '', 12);
+            $pdf->SetFont("Helvetica", "", 12);
             //        $pdf->SetXY(17, 248);
 
             //        $txt = "NUUIDS | An index of four character";
@@ -529,30 +502,29 @@ class Qrs extends Agent
             //        $txt = "identifiers.";
             //        $pdf->Write(0, $txt);
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
             if ($i >= $max_i) {
                 break;
             } else {
-                $pdf->addPage($s['orientation'], $s);
+                $pdf->addPage($s["orientation"], $s);
                 //        $pdf->useTemplate($tplidx1,0,0,215);
                 $pdf->useTemplate($tplidx1);
             }
         }
 
-        $tplidx2 = $pdf->importPage(2, '/MediaBox');
-        $pdf->addPage($s['orientation'], $s);
+        $tplidx2 = $pdf->importPage(2, "/MediaBox");
+        $pdf->addPage($s["orientation"], $s);
 
         $pdf->useTemplate($tplidx2);
 
         // Generate some content for page 2
-        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetFont("Helvetica", "", 10);
 
         $txt = $this->web_prefix . "thing/" . $this->uuid . "/nuuids"; // Pure uuid.
 
-
         $this->getQuickresponse($txt);
-        $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
+        $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
 
         $pdf->SetTextColor(0, 0, 0);
 
@@ -562,7 +534,7 @@ class Qrs extends Agent
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(15, 10);
-        $t = $this->thing_report['sms'] . "";
+        $t = $this->thing_report["sms"] . "";
 
         $pdf->Write(0, $t);
 
@@ -580,11 +552,11 @@ class Qrs extends Agent
         $image = ob_get_contents();
         ob_clean();
 */
-        $image = $pdf->Output('', 'S');
+        $image = $pdf->Output("", "S");
 
-        $this->thing_report['pdf'] = $image;
+        $this->thing_report["pdf"] = $image;
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     public function readSubject()
@@ -594,7 +566,7 @@ class Qrs extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'qrs') {
+            if ($input == "qrs") {
                 $this->makeNuuids();
 
                 if (!isset($this->index) or $this->index == null) {
@@ -612,12 +584,12 @@ class Qrs extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'qrs':
+                        case "qrs":
                             $this->makeNuuids();
 
                             return;
 
-                        case 'on':
+                        case "on":
                         //$this->setFlag('green');
                         //break;
 

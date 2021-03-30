@@ -41,21 +41,6 @@ class Email
         //        $this->input = $input;
         $this->cost = 50;
 
-        //function __construct($arguments) {
-        //echo $arguments;
-        //var_dump($arguments);
-        //  $defaults = array(
-        //    'uuid' => Uuid::uuid4(),
-        //    'from' => NULL,
-        //  'to' => NULL,
-        //  'subject' => NULL,
-        //  'sqlresponse' => NULL
-        //  );
-
-        //  $arguments = array_merge($defaults, $arguments);
-
-        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
         $this->test = "Development code";
 
         $this->thing = $thing;
@@ -179,7 +164,6 @@ class Email
     public function attachmentsEmail($text)
     {
         // Pull the message in again.
-        //var_dump($text);
         $parser = new MailMimeParser();
 
         // parse() returns a Message
@@ -643,9 +627,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
             return true;
         }
-
-        //var_dump($to);
-        //var_dump($headers);
 
         if (strpos(strtolower($to), "@winlink.org") !== false) {
             $headers = null;

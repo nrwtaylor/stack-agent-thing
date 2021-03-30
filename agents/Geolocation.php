@@ -105,9 +105,7 @@ class Geolocation extends Agent
         //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
 
         $data = file_get_contents($data_source);
-        //var_dump($data_source);
-        //var_dump($data);
-        //exit();
+
         if ($data == false) {
             $this->response = "Could not ask Geolocation (NRCAN).";
             $this->available_places_count = 0;
@@ -118,8 +116,6 @@ class Geolocation extends Agent
 
         $json_data = json_decode($data, TRUE);
 
-        //var_dump($json_data);
-        //exit();
         $total_items = count($json_data);
 
         $this->thing->log('got ' . $total_items . " Geolocated things.");
@@ -139,8 +135,6 @@ class Geolocation extends Agent
      * @return unknown
      */
     function getPlaces($text = null) {
-        //var_dump($text);
-        //        if (!isset($this->neighbourhood)) {return;}
         if (!isset($this->places)) {$this->getGeolocation($text);}
         return $this->places;
 
@@ -217,9 +211,6 @@ class Geolocation extends Agent
             //                $location_matches[] = $this->getLocation($location['LocationID']);
             //            }
 
-            //var_dump($car);
-            //exit();
-            //            $description = $car['Make'] . " " . $car['Model'] . " " . $car['Year'] . " " . $car['Colour'];
             $description = $place['title'];
 
             $coordinates = $place['geometry']['coordinates'];
@@ -321,9 +312,7 @@ class Geolocation extends Agent
      */
     public function placeString($place) {
         if (!is_array($place)) {return;}
-        //var_dump($place);
         $place_string = $place['description'] . " " . $place['coordinates'][0] . " " . $place['coordinates'][1];
-        //var_dump($place_string);
         return $place_string;
 
     }
@@ -452,14 +441,7 @@ return;
         // if no error from query_time_server
         if (true) {
 
-            //    $tmestamp = $timevalue - 2208988800; # convert to UNIX epoch time stamp
-            //$epoch = $tmestamp;
             $epoch = $time_text;
-            //    $datum = date("Y-m-d H:i:s",$tmestamp - date("Z",$tmestamp)); /* incl time zone offset */
-            //var_dump($epoch);
-            //    $d = date("Y-m-d H:i:s",$tmestamp - date("Z",$tmestamp)); /* incl time zone offset */
-
-            //$datum = $dt = new \DateTime($tmestamp, new \DateTimeZone("UTC"));
             $datum = new \DateTime("@$epoch", new \DateTimeZone("UTC"));
 
 
@@ -571,13 +553,11 @@ return;
             $this->getPlaces($filtered_input);
 
             $this->bestPlaces($filtered_input);
-            //var_dump($this->best_matches);
+
             $r = "";
             if ($this->best_matches == null) {$this->response = "No places matched."; return;}
             foreach ($this->best_matches as $index=>$match) {
 
-                //echo $this->placeString($match);
-                //exit();
                 $r = $this->placeString($match) . " / ";
 
                 $this->response .= $r;

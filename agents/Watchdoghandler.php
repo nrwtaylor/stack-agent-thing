@@ -43,9 +43,6 @@ class Watchdoghandler
     function __construct(Thing $thing, $agent_input = null)
     {
 
-//		echo '<pre> watchdoghandler started running ';echo date("Y-m-d H:i:s");echo'</pre>';
-//		echo '<pre> watchdoghandler version redpanda 16 July 2020';echo'</pre>';
-
 		$this->stack_idle_mode = 'use'; // Prevents stack generated execution when idle.
 
         $this->thing = $thing;
@@ -53,8 +50,6 @@ class Watchdoghandler
 		$this->thing->flagGreen(); // Just make sure
 
         $watchdog_agent = new Watchdog($this->thing);
-//var_dump($watchdog_agent->thing_report['sms']);
-//exit();
         $this->thing_report['sms'] = "WATCHDOG | Tick";
         $this->thing_report['help'] = "This Agent connects the computer's clock tick to the stack.";
 

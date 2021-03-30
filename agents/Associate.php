@@ -45,7 +45,6 @@ class Associate extends Agent
         // Use the UUID agent and extract UUIDs from the provided input.
         $uuid_agent = new Uuid($this->thing, "uuid");
         $uuids = $uuid_agent->extractUuids($this->input);
-        //var_dump($uuids);
 
         // Associate each of the UUIDs with the current Thing.
         // And (if there is a Thing with the provided UUID) associate it with the current Thing.

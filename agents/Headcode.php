@@ -1098,7 +1098,7 @@ if (file_exists($font)) {
         // Keyword
         if (count($pieces) == 1) {
             if ($input == "headcode") {
-                $this->read();
+//                $this->read();
                 $this->response .= "Read headcode. ";
                 return;
             }

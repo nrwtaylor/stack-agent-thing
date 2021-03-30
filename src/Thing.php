@@ -135,6 +135,12 @@ class Thing
             $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
+        $this->hash_algorithm = "sha256";
+        if (isset($this->container['stack']['hash_algorithm'])) {
+            $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
+        }
+
+
         //set_error_handler(array($this, "exception_error_handler"));
 
         try {
@@ -157,6 +163,7 @@ class Thing
 
     function __destruct()
     {
+
         $t = "";
         if (isset($this->nuuid)) {
             $t = $this->nuuid;
@@ -651,9 +658,10 @@ class Thing
         // Call Db and forget the record.
 
         if (!isset($this->db)) {
-            return;
+            return ['error'=>true];
         }
         $thingreport = $this->db->Forget($this->uuid);
+        return $thingreport;
     }
 
     public function Ignore()
@@ -787,6 +795,15 @@ class Thing
         // Bootstrapping db access.
         // A Thing can call an UUID so called up
         // the requested UUID.  Using the null account.
+/*
+if (isset($this->db)) {
+        $hash_nom_from = hash($this->hash_algorithm, $this->from);
+
+$prior_uuid = $this->db->getMemory($hash_nom_from);
+echo "Previous uuid got " . ($prior_uuid) . "\n";
+}
+*/
+
 
 $thing = false;
 if (isset($this->db)) {
@@ -818,6 +835,23 @@ if (isset($this->db)) {
         }
 
         $this->thing = $thing;
+/*
+if ((isset($this->db)) and (!isset($this->prior_uuid))) {
+        $hash_nom_from = hash($this->hash_algorithm, $this->from);
+$this->prior_uuid = $this->db->getMemory($hash_nom_from);
+}
+
+
+if ((isset($this->db)) and (!isset($this->flag_set_uuid))) {
+        $hash_nom_from = hash($this->hash_algorithm, $this->from);
+
+$prior_uuid = $this->db->setMemory($hash_nom_from, $this->uuid);
+$log_text = "wrote key:value " . $hash_nom_from . " " . $this->uuid;
+//echo $log_text . "\n";
+$this->log($log_text);
+$this->flag_set_uuid = true;
+}
+*/
 
         // Once the Thing has been pulled we can update the db connector
         // to use the current from.
@@ -1023,25 +1057,23 @@ if (isset($this->db)) {
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
-        $trace = debug_backtrace(false, 2);
+//        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
+/*
         if (isset($trace[1]['class'])) {
             $class_namespace = $trace[1]['class'];
             $class_name_array = explode("\\", $class_namespace);
             $class_name = end($class_name_array);
         }
-
-/*
-$agent_name = "Thing";
-if (isset($this->agent_name)) {$agent_name = $this->agent_name;}
-//var_dump($agent_name);
-$class_name= $agent_name;
 */
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
+if (isset($this->agent_class_name_current )){
+$class_name = $this->agent_class_name_current;
+}
         $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
 
         $text = str_replace($agent_prefix, "", $text);

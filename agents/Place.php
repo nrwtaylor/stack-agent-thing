@@ -538,11 +538,8 @@ if (file_exists($file)) {
 
             if (isset($this->last_place_code)) {
                 $place_code = $this->last_place_code;
-                //exit();
             }
         }
-
-        //$place_code = $this->place_code;
 
         $this->place = new Variables(
             $this->thing,

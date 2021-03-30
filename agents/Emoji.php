@@ -216,7 +216,6 @@ class Emoji
         }
         $translation = preg_replace($patterns, $replacements, $string);
 
-        //exit();
         return $translation;
     }
 
@@ -554,7 +553,6 @@ class Emoji
 
         //        }
 
-        //exit();
         return $status;
     }
 
@@ -566,5 +564,3 @@ class Emoji
         return $this->emoji_context;
     }
 }
-
-?>

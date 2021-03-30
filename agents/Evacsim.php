@@ -1,20 +1,18 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Evacsim extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
-        //        $this->start_time = microtime(true);
-
         $this->keyword = "evacsim";
 
         $this->test = "Development code"; // Always
@@ -113,7 +111,7 @@ class Evacsim extends Agent
     function makeSMS()
     {
         if (isset($this->sms_message)) {
-            $this->thing_report['sms'] = $this->sms_message;
+            $this->thing_report["sms"] = $this->sms_message;
             return $this->sms_message;
         }
 
@@ -134,7 +132,7 @@ class Evacsim extends Agent
             $this->sms_message .= " | TEXT ?";
         }
 
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
         return $this->sms_message;
     }
 
@@ -146,33 +144,33 @@ class Evacsim extends Agent
             $this->state
         );
         //$choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         $test_message =
             'Last thing heard: "' .
             $this->subject .
             '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
-        $test_message .= '<br>Shift state: ' . $this->state . '<br>';
+            $choices["link"] .
+            "].";
+        $test_message .= "<br>Shift state: " . $this->state . "<br>";
 
-        $test_message .= '<br>' . $this->sms_message;
+        $test_message .= "<br>" . $this->sms_message;
 
         $test_message .=
-            '<br>Current node: ' . $this->thing->choice->current_node;
+            "<br>Current node: " . $this->thing->choice->current_node;
 
-        $test_message .= '<br>Requested state: ' . $this->requested_state;
+        $test_message .= "<br>Requested state: " . $this->requested_state;
 
         //$this->thing_report['sms'] = $sms_message;
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $test_message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $test_message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['help'] =
-            'This is Evacsim.  A tool developed to be supportive of NSEM.';
+        $this->thing_report["help"] =
+            "This is Evacsim.  A tool developed to be supportive of NSEM.";
     }
 
     function eventKnock()
@@ -193,7 +191,7 @@ class Evacsim extends Agent
         ];
 
         $n = count($knocks);
-        //var_dump($n);
+
         $i = rand(1, $n) - 1;
 
         $knock = $knocks[$i];
@@ -227,14 +225,14 @@ class Evacsim extends Agent
             " | " .
             strtoupper($this->knock_response);
 
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     public function readSubject()
     {
         $this->response = null;
 
-        $keywords = ['off', 'on', 'knock', 'unit knock', 'block clear'];
+        $keywords = ["off", "on", "knock", "unit knock", "block clear"];
 
         $input = strtolower($this->subject);
 
@@ -260,20 +258,20 @@ class Evacsim extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'off':
-                            $this->thing->log('switch off');
-                            $this->selectChoice('off');
+                        case "off":
+                            $this->thing->log("switch off");
+                            $this->selectChoice("off");
                             return;
-                        case 'on':
-                            $this->selectChoice('on');
+                        case "on":
+                            $this->selectChoice("on");
                             return;
 
-                        case 'knock':
+                        case "knock":
                             $this->eventKnock();
 
                             return;
 
-                        case 'next':
+                        case "next":
 
                         default:
                     }
@@ -282,19 +280,19 @@ class Evacsim extends Agent
         }
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['on', 'off'];
+        $discriminators = ["on", "off"];
 
-        $input_agent->aliases['on'] = ['red', 'on'];
-        $input_agent->aliases['off'] = ['green', 'off'];
+        $input_agent->aliases["on"] = ["red", "on"];
+        $input_agent->aliases["off"] = ["green", "off"];
 
         $this->requested_state = $input_agent->discriminateInput($haystack); // Run the discriminator.
 
         switch ($this->requested_state) {
-            case 'on':
-                $this->selectChoice('on');
+            case "on":
+                $this->selectChoice("on");
                 return;
-            case 'off':
-                $this->selectChoice('off');
+            case "off":
+                $this->selectChoice("off");
                 return;
         }
 

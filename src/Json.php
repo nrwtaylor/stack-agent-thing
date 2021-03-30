@@ -189,6 +189,11 @@ class Json
             return;
         }
 
+        if (is_string($array_data)) {
+            $array_data = ['text'=>$array_data];
+        }
+
+
         foreach ($array_data as $key => $value) {
             if ($key != "") {
                 $this->{$key} = $value;
@@ -318,7 +323,6 @@ class Json
         }
         array_splice($this->array_data[$stream_id], $pos, 0, $value);
         $this->setArray($this->array_data);
-        //var_dump($this->db->last_update);
     }
 
     /**
@@ -517,7 +521,6 @@ class Json
             return;
         }
         if (strlen($this->json_data) > $this->char_max) {
-            //var_dump($this->json_data);
 
             // devstack what do you do here?
             // This is the place where Json borks when asked to save too much.
@@ -556,7 +559,6 @@ class Json
                     $this->field,
                     $this->json_data
                 );
-                //var_dump($var);
             }
             return true;
         }

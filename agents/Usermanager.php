@@ -1,132 +1,51 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
-class Usermanager
+class Usermanager extends Agent
 {
-    function __construct(Thing $thing, $agent_input = null)
+    public function init()
     {
         $this->state = "X";
-        $this->thing = $thing;
-        $this->start_time = $this->thing->elapsed_runtime();
-        $this->thing_report['thing'] = $thing;
-
-        $this->agent_name = 'usermanager';
-        $this->agent_prefix = 'Agent "Usermanager"';
-        $this->agent_input = $agent_input;
-
-        // So I could call
-        $this->test = false;
-        if ($this->thing->container['stack']['state'] == 'dev') {
-            $this->test = true;
-        }
-        // I think.
-        // Instead.
-
-        // Load in some characterizations.
-        $this->short_name = $this->thing->container['stack']['short_name'];
-        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
-        $this->mail_prefix = $this->thing->container['stack']['mail_prefix'];
-        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
         $this->sms_seperator =
-            $this->thing->container['stack']['sms_separator']; // |
+            $this->thing->container["stack"]["sms_separator"]; // |
 
-        if (isset($this->thing->container['api']['usermanager'])) {
-
-            if (isset($this->thing->container['api']['usermanager']['state'])) {
-                $state = $this->thing->container['api']['usermanager']['state'];
+        if (isset($this->thing->container["api"]["usermanager"])) {
+            if (isset($this->thing->container["api"]["usermanager"]["state"])) {
+                $state = $this->thing->container["api"]["usermanager"]["state"];
             }
-            if ($state == "off") {return;}
+            if ($state == "off") {
+                return;
+            }
         }
 
         // Load in time quantums
-        $this->cron_period = $this->thing->container['stack']['cron_period']; // 60s
+        $this->cron_period = $this->thing->container["stack"]["cron_period"]; // 60s
         $this->thing_resolution =
-            $this->thing->container['stack']['thing_resolution']; // 1ms
+            $this->thing->container["stack"]["thing_resolution"]; // 1ms
 
         // Load in a pointer to the stack record.
-        $this->stack_uuid = $this->thing->container['stack']['uuid']; // 60s
+        $this->stack_uuid = $this->thing->container["stack"]["uuid"]; // 60s
 
         $this->verbosity_log = 7;
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
-        $this->node_list = array(
-            "start" => array(
-                "new user" => array(
-                    "opt-in" => array("opt-out" => array("opt-in", "delete"))
-                )
-            )
-        );
-
-        $this->current_time = $this->thing->time();
-
-        $this->thing->log(
-            'Agent "Usermanager" running on Thing ' . $this->thing->nuuid . '.',
-            "INFORMATION"
-        );
-//return;
-        // 279ms 303ms 306ms
-        $split_time = $this->thing->elapsed_runtime();
-
-        $this->variables_agent = new Variables(
-            $this->thing,
-            "variables usermanager " . $this->from
-        );
-
-        $this->thing->log(
-            $this->agent_prefix .
-                ' created variables agent in ' .
-                number_format($this->thing->elapsed_runtime() - $split_time) .
-                'ms.',
-            "OPTIMIZE"
-        );
-        //4ms 4ms 3ms
-        $this->get();
-
-        if ($this->agent_input != null) {
-            $this->readInstruction();
-        } else {
-            $this->getSubject();
-        }
-
-        $this->set();
-
-        if ($this->agent_input == null) {
-            $this->setSignals(); /// Don't send any messages
-        }
-        $this->thing->log(
-            $this->agent_prefix .
-                'ran for ' .
-                number_format(
-                    $this->thing->elapsed_runtime() - $this->start_time
-                ) .
-                'ms.',
-            "OPTIMIZE"
-        );
-
-        $this->thing_report['etime'] = number_format(
-            $this->thing->elapsed_runtime()
-        );
-        $this->thing_report['log'] = $this->thing->log;
-
-        return;
+        $this->node_list = [
+            "start" => [
+                "new user" => [
+                    "opt-in" => ["opt-out" => ["opt-in", "delete"]],
+                ],
+            ],
+        ];
     }
 
     function readInstruction()
     {
+        $existing_state = $this->state;
         $this->thing->log(
-            $this->agent_prefix .
-                ' read instruction "' .
-                $this->agent_input .
-                '".',
+            'read instruction "' . $this->agent_input . '".',
             "INFORMATION"
         );
 
@@ -136,10 +55,7 @@ class Usermanager
 
             if ($this->verbosity_log >= 8) {
                 $this->thing->log(
-                    $this->agent_prefix .
-                        'updated the state to ' .
-                        $this->state .
-                        ".",
+                    "updated the state to " . $this->state . ".",
                     "INFORMATION"
                 );
             }
@@ -156,10 +72,7 @@ class Usermanager
         }
 
         if ($this->agent_input == "usermanager start") {
-            $this->thing->log(
-                $this->agent_prefix . ' set internal state to START.',
-                "INFORMATION"
-            );
+            $this->thing->log("set internal state to START.", "INFORMATION");
 
             $this->previous_state = $this->state;
             $this->state = "start";
@@ -178,10 +91,23 @@ class Usermanager
         if ($this->agent_input == "usermanager") {
             $this->previous_state = $this->state;
         }
+
+        if ($existing_state === $this->state) {
+            $this->response .=
+                "Read instruction and did not see state change. ";
+        } else {
+            $this->response .=
+                "Read instruction and saw " . $this->state . ". ";
+        }
     }
 
     function set()
     {
+        if ($this->state === $this->previous_state) {
+            // Don't change state if there has not been a state change.
+            return;
+        }
+
         $this->variables_agent->setVariable("state", $this->state);
         $this->variables_agent->setVariable("counter", $this->counter);
 
@@ -195,14 +121,15 @@ class Usermanager
             "refreshed_at",
             $this->current_time
         );
-// devstack testing October 3 2019
-
-//        $this->thing->choice->save('usermanager', $this->state);
-        return;
     }
 
     function get()
     {
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables usermanager " . $this->from
+        );
+
         // get gets the state of the Flag the last time
         // it was saved into the stack (serialized).
         $this->state = $this->variables_agent->getVariable("state");
@@ -216,11 +143,7 @@ class Usermanager
 
         if ($this->verbosity_log >= 8) {
             $this->thing->log(
-                'Agent "Usermanager" loaded ' .
-                    $this->state .
-                    " " .
-                    $this->previous_state .
-                    ".",
+                "loaded " . $this->state . " " . $this->previous_state . ".",
                 "DEBUG"
             );
         }
@@ -228,10 +151,7 @@ class Usermanager
         $this->counter = $this->variables_agent->getVariable("counter");
 
         if ($this->verbosity_log >= 8) {
-            $this->thing->log(
-                'Agent "Usermanager" loaded ' . $this->counter . ".",
-                "DEBUG"
-            );
+            $this->thing->log("loaded " . $this->counter . ".", "DEBUG");
         }
 
         $this->counter = $this->counter + 1;
@@ -247,10 +167,7 @@ class Usermanager
         }
 
         $this->thing->log(
-            $this->agent_prefix .
-                ' retrieved a ' .
-                strtoupper($this->state) .
-                ' state.',
+            "retrieved a " . strtoupper($this->state) . " state.",
             "INFORMATION"
         );
     }
@@ -259,7 +176,7 @@ class Usermanager
     {
         switch ($this->counter) {
             case 0:
-            // drop throught
+            // drop through
             case 1:
                 $sms =
                     "USERMANAGER | " .
@@ -277,39 +194,37 @@ class Usermanager
                     strtoupper($this->previous_state);
                 break;
         }
-
-        $sms .= " counter " . $this->counter;
+        $sms .= " counter " . $this->counter . " " . $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
-    public function setSignals()
+    public function respondResponse()
     {
         // Develop the various messages for each channel.
 
         $this->thing->flagGreen();
-
-        $this->makeSMS();
-
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
         // I think this is the place to report the state.
 
-        $this->thing_report['keyword'] = $this->state;
-        $this->thing_report['help'] =
+        $this->thing_report["keyword"] = $this->state;
+        $this->thing_report["help"] =
             'Agent "Usermanager" figuring the user of this Thing out';
-
-        return $this->thing_report;
     }
 
-    public function getSubject()
+    public function readSubject()
     {
+        if ($this->agent_input != null) {
+            $this->readInstruction();
+            return;
+        }
+
         // What do we know at this point?
         // We know the nom_from.
         // We have the message.
@@ -318,64 +233,65 @@ class Usermanager
         // So starting with nom_from.
         // Two conditions, we either know the nom_from, or we don't.
 
-        //$status = false;
         $this->state_change = false;
 
-        // $input = strtolower($this->to . " " .$this->subject);
+        // Is this just the word 'usermanager'?
 
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->to . " " . $this->subject);
-        }
-
-        $keywords = array(
-            'usermanager',
-            'optin',
-            'opt-in',
-            'optout',
-            'opt-out',
-            'start',
-            'delete',
-            'new'
-        );
+        $input = $this->input;
         $pieces = explode(" ", strtolower($input));
 
-        if ($this->agent_input == "usermanager") {
-            return;
-        }
-
-        // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'usermanager') {
+            if ($input == "usermanager") {
+                $this->response .= "Got current user state. ";
                 return;
             }
         }
 
+        $input = strtolower($this->to . " " . $this->subject);
+
+        $keywords = [
+            "usermanager",
+            "optin",
+            "opt-in",
+            "optout",
+            "opt-out",
+            "start",
+            "delete",
+            "new",
+        ];
+        $pieces = explode(" ", strtolower($input));
+
+        // Keyword
+
+        /*
+        if (count($pieces) == 1) {
+            if ($input == "usermanager") {
+                $this->response .= "Got current user state. ";
+                return;
+            }
+        }
+*/
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'optin':
-                        case 'opt-in':
+                        case "optin":
+                        case "opt-in":
                             $this->optin();
                             return;
 
-                        case 'optout':
-                        case 'opt-out':
+                        case "optout":
+                        case "opt-out":
                             $this->optout();
                             return;
 
-                        case 'start':
+                        case "start":
                             $this->start();
                             return;
-                        case 'new user':
-                        case 'newuser':
-                        case 'new':
+                        case "new user":
+                        case "newuser":
+                        case "new":
                             $this->newuser();
                             return;
 
@@ -387,92 +303,97 @@ class Usermanager
             }
         }
 
-        $this->requested_state = $this->discriminateInput($input, array(
-            'opt-in',
-            'opt-out'
-        ));
+        // Did not recognize a usermanager command.
+        // Try discriminateInput.
 
-        switch ($this->state) {
-            case 'opt-out':
-                // We are in a state of opt-out.
-                // Only respond to an Opt-in message
+        $discriminators = [
+            "opt-in" => ["optin", "accept", "okay", "yes", "sure"],
+            "opt-out" => ["optout", "leave", "unsubscribe", "no", "quit"],
+        ];
 
-                if ($this->requested_state == "opt-in") {
-                    $this->optin();
-                    return;
-                }
-
-                // Otherwise ignore
-                return;
-
-            case 'opt-in':
-                // In the opt-in state.
-                if ($this->requested_state == "opt-out") {
-                    $this->optout();
-                    return;
-                }
-                // Otherwise ignore
-                return;
-
-            case 'new user':
-                if ($this->requested_state == "opt-in") {
-                    $this->optin();
-                    return;
-                }
-
-                if ($this->requested_state == "opt-out") {
-                    $this->optout();
-                    return;
-                }
-                return;
-
-            case 'start':
-                $this->newuser();
-                break;
-
-            case 'delete':
-                //$this->state_change = true;
-                //$this->thing->choice->Choose("new");
-                // Do nothing remain deleted.
-                // Make so must text "start"
-
-                // Was deleted but now continuing to have conversation
-                // Loop through to start
-                $this->state_change = true;
-                $this->thing->choice->Choose("start");
-                $this->state = "start";
-
-                break;
-
-            default:
-                $this->start();
-                $this->state_change = true;
-                $this->thing->choice->Choose("start");
+        $type = $this->discriminateInput($input, $discriminators);
+        if ($type != false) {
+            $this->requested_state = $type;
         }
 
-        return;
+        if (isset($this->requested_state) and $this->requested_state !== null) {
+            $this->response .= "Heard " . $this->requested_state . ". ";
+            switch ($this->state) {
+                case "opt-out":
+                    // We are in a state of opt-out.
+                    // Only respond to an Opt-in message
+
+                    if ($this->requested_state == "opt-in") {
+                        $this->optin();
+                        return;
+                    }
+
+                    // Otherwise ignore
+                    return;
+
+                case "opt-in":
+                    // In the opt-in state.
+                    if ($this->requested_state == "opt-out") {
+                        $this->optout();
+                        return;
+                    }
+                    // Otherwise ignore
+                    return;
+
+                case "new user":
+                    if ($this->requested_state == "opt-in") {
+                        $this->optin();
+                        return;
+                    }
+
+                    if ($this->requested_state == "opt-out") {
+                        $this->optout();
+                        return;
+                    }
+                    return;
+
+                case "start":
+                    $this->newuser();
+                    break;
+
+                case "delete":
+                    //$this->state_change = true;
+                    //$this->thing->choice->Choose("new");
+                    // Do nothing remain deleted.
+                    // Make so must text "start"
+
+                    // Was deleted but now continuing to have conversation
+                    // Loop through to start
+                    $this->state_change = true;
+                    $this->thing->choice->Choose("start");
+                    $this->state = "start";
+                    return;
+                    break;
+
+                default:
+            }
+        }
+
+        // No instruction found.
+        // Don't do anything.
     }
 
     function newuser()
     {
-        $this->thing->log(
-            $this->agent_prefix . ' chose NEWUSER.',
-            "INFORMATION"
-        );
-
+        $this->thing->log("chose NEWUSER.", "INFORMATION");
         $this->thing->choice->Choose("new user");
         $this->previous_state = $this->state;
         $this->state = "new user";
 
-        $agent = new Newuser($this->thing);
-
+        $agent = new Newuser($this->thing, "usermanager");
+        $this->response .= "Set user state to New User. ";
         return;
         // Make a record of the new user request
 
         $newuser_thing = new Thing(null);
         $newuser_thing->Create(
             $this->from,
-            'usermanager',
+            "usermanager",
             "s/ newuser (usermanager)"
         );
 
@@ -485,47 +406,39 @@ class Usermanager
         );
 
         $newuser_thing->flagRed();
-
-        return;
     }
 
     function start()
     {
-        $this->thing->log($this->agent_prefix . ' chose START.', "INFORMATION");
+        $this->thing->log("chose START.", "INFORMATION");
 
         $this->thing->choice->Choose("start");
-
-        $this->thing->log(
-            $this->agent_prefix . ' choice call completed.',
-            "INFORMATION"
-        );
 
         $this->previous_state = $this->state;
         $this->state = "start";
 
-        $agent = new Start($this->thing);
-        return;
+        $agent = new Start($this->thing, "usermanager");
+        $this->response .= "Set user state to Start. ";
     }
 
     function optout()
     {
-        $this->thing->log(
-            $this->agent_prefix . ' chose OPTOUT.',
-            "INFORMATION"
-        );
+        $this->thing->log("chose OPTOUT.", "INFORMATION");
 
         // Send to the Optin agent to handle response
-        $this->thing->choice->Choose("opt-in");
+        $this->thing->choice->Choose("opt-out");
         $this->previous_state = $this->state;
-        $this->state = "opt-in";
+        $this->state = "opt-out";
+        $a = $this->traceAgent();
+        $b = $this->callingAgent();
 
-        $agent = new Optin($this->thing);
-        return;
+        $agent = new Optout($this->thing, "usermanager");
+        $this->response .= "Set user state to Opt-out. ";
     }
 
     function optin()
     {
-        $this->thing->log($this->agent_prefix . ' chose OPTIN.', "INFORMATION");
+        $this->thing->log("chose OPTIN.", "INFORMATION");
 
         // Send to the Optin agent to handle response
 
@@ -533,113 +446,7 @@ class Usermanager
         $this->previous_state = $this->state;
         $this->state = "opt-in";
 
-        $agent = new Optin($this->thing);
-        return;
-    }
-
-    function discriminateInput($input, $discriminators = null)
-    {
-        $default_discriminator_thresholds = array(2 => 0.3, 3 => 0.3, 4 => 0.3);
-
-        if (count($discriminators) > 4) {
-            $minimum_discrimination = $default_discriminator_thresholds[4];
-        } else {
-            $minimum_discrimination =
-                $default_discriminator_thresholds[count($discriminators)];
-        }
-
-        //$input = "optout opt-out opt-out";
-
-        if ($discriminators == null) {
-            $discriminators = array('opt-in', 'opt-out');
-        }
-
-        $aliases = array();
-
-        $aliases['opt-in'] = array('optin', 'accept', 'okay', 'yes', 'sure');
-        $aliases['opt-out'] = array(
-            'optout',
-            'leave',
-            'unsubscribe',
-            'no',
-            'quit'
-        );
-
-        $words = explode(" ", $input);
-
-        $count = array();
-
-        $total_count = 0;
-        // Set counts to 1.  Bayes thing...
-        foreach ($discriminators as $discriminator) {
-            $count[$discriminator] = 1;
-            $total_count = $total_count + 1;
-        }
-        // ...and the total count.
-
-        foreach ($words as $word) {
-            foreach ($discriminators as $discriminator) {
-                if ($word == $discriminator) {
-                    $count[$discriminator] = $count[$discriminator] + 1;
-                    $total_count = $total_count + 1;
-                    //$this->thing->log("sum");
-                }
-
-                foreach ($aliases[$discriminator] as $alias) {
-                    if ($word == $alias) {
-                        $count[$discriminator] = $count[$discriminator] + 1;
-                        $total_count = $total_count + 1;
-                        //echo "sum";
-                    }
-                }
-            }
-        }
-
-        $this->thing->log(
-            'Agent "Usermanager" total count is ' . $total_count,
-            "DEBUG"
-        );
-        // Set total sum of all values to 1.
-
-        $normalized = array();
-        foreach ($discriminators as $discriminator) {
-            $normalized[$discriminator] = $count[$discriminator] / $total_count;
-        }
-
-        // Is there good discrimination
-        arsort($normalized);
-
-        // Now see what the delta is between position 0 and 1
-        $t = null;
-        foreach ($normalized as $key => $value) {
-            //echo $key, $value;
-            $t .= $key . " " . $value;
-
-            if (isset($max)) {
-                $delta = $max - $value;
-                break;
-            }
-            if (!isset($max)) {
-                $max = $value;
-                $selected_discriminator = $key;
-            }
-            $t .= " ";
-        }
-
-        $this->thing->log(
-            'Agent "Usermanager" normalized discrimators "' . $t . '".',
-            "DEBUG"
-        );
-
-        if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
-            return $selected_discriminator;
-        } else {
-            return false; // No discriminator found.
-        }
-
-        return true;
+        $agent = new Optin($this->thing, "usermanager");
+        $this->response .= "Set user state to Opt-in. ";
     }
 }
-
-?>

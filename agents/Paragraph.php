@@ -220,7 +220,6 @@ class Paragraph extends Word
             ["paragraph", "reading"],
             $this->reading
         );
-        //var_dump($this->paragraphs);
         return $this->thing_report;
     }
 
@@ -310,7 +309,6 @@ class Paragraph extends Word
         $pieces = explode(" ", strtolower($input));
 
         $this->extractParagraphs($input);
-        //var_dump($this->paragraphs);
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {

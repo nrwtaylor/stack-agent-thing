@@ -165,7 +165,6 @@ class Fuel extends Agent
             "refreshed_at"
         );
 
-        //var_dump($this->fuel);
         $this->getFuel();
         return $this->fuel;
     }
@@ -189,17 +188,7 @@ class Fuel extends Agent
         if ($fuel == null) {
             return true;
         }
-        //var_dump($coordinate);
 
-        /*
-        if (!isset($this->coordinates)) {$this->getCoordinates();}
-
-        // See if the coordination is already tagged
-        foreach ($this->coordinates as $coordinate_object) {
-            if ($coordinate == $coordinate_object['coordinate']) {return true;}
-        }
-*/
-        //if ($coordinate == null) {$coordinate = $this->nextCode();}
         $this->thing->log(
             'Agent "Fuel" will make a Fuel for ' .
                 $this->stringFuel($fuel) .
@@ -330,11 +319,8 @@ class Fuel extends Agent
     {
         //$this->makeHeadcode();
         $this->get();
-        var_dump($this->fuel_quantity);
-        $this->fuel_quantity += $number;
-        var_dump($this->fuel_quantity);
 
-        return;
+        $this->fuel_quantity += $number;
     }
 
     public function makeWeb()
@@ -387,24 +373,13 @@ class Fuel extends Agent
     // String to array
     function arrayFuel($input)
     {
-        //if (is_array($input)) {echo "meep";exit();}
-
         $quantities = $this->extractQuantities($input);
 
         $fuel_array = true;
 
-        //prod
-        //var_dump($coordinates);
-        //        if (is_array($coordinates)) {
-
-        //        if (count($coordinates) == 1) {$coordinate_array = $coordinates[0];}
-        //        }
-
         if (is_array($quantities) and count($quantities) == 1) {
             $fuel_array = $quantities[0];
         }
-
-        //exit();
 
         return $fuel_array;
     }
@@ -500,45 +475,6 @@ class Fuel extends Agent
         }
     }
 
-    /*
-    function lastFuel()
-    {
-        $this->last_fuel_variable = new Variables($this->thing, "variables fuel " . $this->from);
-       // $this->last_coordinate = $this->last_coordinate_variable->getVariable('coordinate');
-
-        // Get a textual representation of a coordinate
-        $fuel = $this->last_fuel_variable->getVariable("fuel");
-
-        // Turn the text into an array
-//        $this->last_quantity = $this->arrayQuantity($quantity);
-        $this->last_fuel = $fuel;  
-        // This doesn't work
-        $this->last_refreshed_at = $this->last_fuel_variable->getVariable('refreshed_at');
-
-        return;
-
-        // So do it the hard way
-
-        if (!isset($this->quantities)) {$this->getQuantities();}
-$last_fuel = $this->quantities[0];
-
-$this->last_fuel = $last_fuel['fuel'];
-$this->last_refreshed_at = $last_coordinate['refreshed_at'];
-var_dump($last_fuel['fuel']);
-//        foreach(array_reverse($this->coordinates) as $key=>$coordinate) {
-
-//            if ($coordinate['coordinate'] == $this->last_coordinate) {
-//                $this->last_refreshed_at = $coordinate['refreshed_at'];
-//                break;
-//            }
-
-
-//        }
-//exit();
-
-
-    }
-*/
     public function readSubject()
     {
         $this->response = null;

@@ -34,7 +34,6 @@ class Message extends Agent
         }
 
         $this->previous_agent = $this->get_calling_class();
-
         // Given a "thing".  Instantiate a class to identify and create the
         // most appropriate agent to respond to it.
         //$this->thing = $thing;
@@ -301,8 +300,6 @@ class Message extends Agent
         //return false;
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
-        //$channel = new Channel($this->thing, "channel");
-        //var_dump($channel);
         if ($this->channel_name == "microsoft") {
             return true;
         }
@@ -354,13 +351,10 @@ class Message extends Agent
         //return false;
         // https://api.slack.com/changelog/2016-08-11-user-id-format-changes
         // Don't make assumptions about characters in slack id.
-        //$channel = new Channel($this->thing, "channel");
-        //var_dump($channel);
         if ($this->channel_name == "slack") {
             return true;
         }
         return false; // in dev
-        //exit();
         // Check address against the beta list
 
         $file = $this->resource_path . 'slack/id.txt';
@@ -452,7 +446,6 @@ class Message extends Agent
         // Process namespace to return agent name
         $previous_agent_path = explode("\\", $this->previous_agent);
         $previous_agent = $previous_agent_path[count($previous_agent_path) - 1];
-
         $this->thing->json->writeVariable(
             ["message", "agent"],
             $previous_agent

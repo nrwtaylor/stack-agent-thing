@@ -532,9 +532,6 @@ class Word extends Agent
     {
         $value = $this->stripPunctuation($input);
 
-//$t = $this->getMemory($value);
-//var_dump($t);
-
         $text = $this->findWord("list", $value);
 
         if ($text != false) {
@@ -780,10 +777,6 @@ class Word extends Agent
         $this->search_words = $words;
         $this->extractWords($words);
 
-//test
-//foreach(explode(" ",$words) as $i=>$word) {
-//var_dump($this->isWord($word));
-//}
 
         if ($this->word != null) {
             return;

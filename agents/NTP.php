@@ -9,7 +9,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 class NTP extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -43,11 +43,11 @@ class NTP extends Agent
         //$this->thing_report["info"] = "This is a ntp in a park.";
         //$this->thing_report["help"] = "This is finding picnics. And getting your friends to join you. Text RANGER.";
 
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
         return $this->thing_report;
     }
@@ -57,10 +57,10 @@ class NTP extends Agent
      */
     function makeSMS()
     {
-        $this->node_list = array("ntp" => array("ntp"));
+        $this->node_list = ["ntp" => ["ntp"]];
         $m = strtoupper($this->agent_name) . " | " . $this->response;
         $this->sms_message = $m;
-        $this->thing_report['sms'] = $m;
+        $this->thing_report["sms"] = $m;
     }
 
     /* Query a time server (C) 1999-09-29, Ralf D. Kloth (QRQ.software) <ralf at qrq.de> */
@@ -76,7 +76,7 @@ class NTP extends Agent
             $timevalue = " ";
         }
 
-        $ret = array();
+        $ret = [];
         $ret[] = $timevalue;
         $ret[] = $err; # error code
         $ret[] = $errstr; # error text
@@ -91,7 +91,7 @@ class NTP extends Agent
     function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     function doNTP($text = null)
@@ -105,11 +105,11 @@ class NTP extends Agent
 
         // "None" agent command received.
         if ($this->agent_input == null) {
-            $token_thing = new Tokenlimiter($this->thing, 'ntp');
+            $token_thing = new Tokenlimiter($this->thing, "ntp");
 
             $dev_overide = null;
             if (
-                $token_thing->thing_report['token'] == 'ntp' or
+                $token_thing->thing_report["token"] == "ntp" or
                 $dev_overide == true
             ) {
                 // From example
@@ -122,15 +122,15 @@ class NTP extends Agent
 
                 $timercvd = $this->query_time_server($timeserver, 37);
 
-                $this->time_zone = 'America/Vancouver';
+                $this->time_zone = "America/Vancouver";
 
                 //if no error from query_time_server
                 if (!$timercvd[1]) {
                     $timevalue = bin2hex($timercvd[0]);
                     $timevalue = abs(
-                        HexDec('7fffffff') -
+                        HexDec("7fffffff") -
                             HexDec($timevalue) -
-                            HexDec('7fffffff')
+                            HexDec("7fffffff")
                     );
                     $tmestamp = $timevalue - 2208988800; # convert to UNIX epoch time stamp
                     $epoch = $tmestamp;
@@ -147,30 +147,16 @@ class NTP extends Agent
 
                     $datum->setTimezone(new \DateTimeZone($this->time_zone));
 
-                    //var_dump($datum);
-                    //$dt = new \DateTime($d, new \DateTimeZone($tz));
-                    //..echo $dt->format('d.m.Y, H:i:s');
-                    //    $doy = (date("z",$tmestamp)+1);
-
-                    //    $m = "Time check from time server ",$timeserver," : [<font color=\"red\">",$timevalue,"</font>]";
-                    //    $m = "Time check from time server ".$timeserver." : [".$timevalue. "]";
                     $m = "Time check from time server " . $timeserver . ". ";
-                    // : [".$timevalue. "]";
 
-                    //    $m .= " (seconds since 1900-01-01 00:00.00).\n";
-                    //    $m .= "The current date and universal time is ".$datum." UTC. ";
                     $m =
                         "In the timezone " .
                         $this->time_zone .
                         ", it is " .
-                        $datum->format('l') .
+                        $datum->format("l") .
                         " " .
-                        $datum->format('d/m/Y, H:i:s') .
+                        $datum->format("d/m/Y, H:i:s") .
                         ". ";
-                    //    $m .= "It is day ".$doy." of this year.\n";
-                    //    $m .= "The unix epoch time stamp is $tmestamp.\n";
-
-                    //    $m .= date("d/m/Y H:i:s", $tmestamp);
                 } else {
                     $m = "Unfortunately, the time server $timeserver could not be reached at this time. ";
                     $m .= "$timercvd[1] $timercvd[2].\n";

@@ -112,12 +112,11 @@ class Ping extends Agent
         $this->thing_report['message'] = $message;
     }
 
-
     /**
      *
      */
     public function readSubject() {
-        $this->response = "Responded to a ping.";
+        $this->response .= "Responded to a ping. ";
     }
 
 

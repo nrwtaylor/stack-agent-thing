@@ -7,16 +7,17 @@ class Travelogue extends Agent
 
     public function init()
     {
-        $this->file_name = $this->resource_path . "interlink/test.php";
+        $this->file_name = $this->resource_path . "interlink/calendar.php";
 
         $this->initTravelogue();
     }
 
     public function initTravelogue()
     {
-    	$this->thing_report['help'] = 'Try INTERLINK interlink/test.php. Or INTERLINK <uuid>.';
-        $this->thing_report['info'] = 'Navigates a set of UUIDs with prior and posterior links.';
-
+        $this->thing_report["help"] =
+            "Try INTERLINK interlink/test.php. Or INTERLINK <uuid>.";
+        $this->thing_report["info"] =
+            "Navigates a set of UUIDs with prior and posterior links.";
     }
 
     public function run()
@@ -105,6 +106,24 @@ class Travelogue extends Agent
             $web .= "<p><p>";
         }
         $web .= $url_agent->restoreUrl($this->text) . "</div>";
+        $web .= "<p>";
+
+        if (
+            isset($this->interlinkTravelogue($this->uuid)["urls"]) and
+            $this->interlinkTravelogue($this->uuid)["urls"] != null
+        ) {
+            $web .= "<div>";
+            $web .= "<b>URLS</b><p>";
+            $arr = [];
+
+            foreach ($this->interlinkTravelogue($this->uuid)["urls"] as $url) {
+                $web .= '<div style="margin-bottom: 16px">';
+                $link = '<a href="' . $url . '">' . $url . "</a>";
+                $web .= $link . " ";
+                $web .= "</div>";
+            }
+            $web .= "</div>";
+        }
 
         $web .= "<p>";
         if (is_array($this->slugs)) {
@@ -136,7 +155,7 @@ class Travelogue extends Agent
         $interlink_prior = $this->interlinkTravelogue($this->prior_uuid);
         if ($interlink_prior !== false) {
             $web .= "<div>";
-          $web .= "<b>PREVIOUS</b><p>";
+            $web .= "<b>PREVIOUS</b><p>";
 
             $web .=
                 $this->linkTravelogue($this->prior_uuid, "previous") .
@@ -152,7 +171,7 @@ class Travelogue extends Agent
         if ($interlink_posterior !== false) {
             $web .= "<p>";
             $web .= "<div>";
-          $web .= "<b>NEXT</b><p>";
+            $web .= "<b>NEXT</b><p>";
 
             $web .=
                 $this->linkTravelogue($this->posterior_uuid, "next") .

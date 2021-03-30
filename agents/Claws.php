@@ -104,8 +104,6 @@ class Claws extends Agent
 
     public function readClaws($text = null)
     {
-        var_dump("Claws readClaws");
-        var_dump($text);
     }
 
     /*
@@ -411,8 +409,7 @@ dev - Detect duplicates.
                 $timezone = $event->calendar_timezone;
 
                 $subject = $event->summary;
-//                $dateline = $this->extractAt($event->start_at);
-//var_dump($dateline);
+
                 // TODO - Consider datelineCall.
                 // dev
                 $datelines = $this->datelinesCall($event->start_at);

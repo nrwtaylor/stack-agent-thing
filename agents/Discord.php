@@ -81,7 +81,7 @@ class Discord
         $this->test2();
 
         $this->test();
-        exit();
+return;
 
         $this->eventGet();
 
@@ -341,12 +341,6 @@ class Discord
             '<pre> Agent "Discord" sent a message to ' .
             $this->from .
             '.</pre>';
-        //
-        //		} else {
-        //
-        //			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
-        //		}/
-        //exit();
 
         $this->thing_report['choices'] = false;
         //$this->thing_report['info'] = 'This is a facebook message agent.';
@@ -489,15 +483,6 @@ class Discord
         }';
 */
 
-        //                    $this->thing->json->setField("message0");
-        //                    $names = $this->thing->json-readVariable( array("microsoft") );
-
-        //var_dump($this->body);
-
-        //echo "<br>--------------------<br>";
-
-        //exit();
-
         if (!isset($this->message)) {
             $this->json_message = "No message provided.";
             return;
@@ -557,8 +542,6 @@ class Discord
             '"
 }';
 
-        //var_dump($jsonData);
-        //exit();
         $this->json_message = $jsonData;
     }
 
@@ -639,9 +622,7 @@ class Discord
         //if( !empty($message_to_reply) ){
         $result = curl_exec($ch);
         //}
-
-        var_dump($result);
-        exit();
+return;
 
         $result_json = json_decode($result, true);
         $this->access_token = $result_json['access_token'];

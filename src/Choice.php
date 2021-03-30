@@ -434,7 +434,6 @@ class Choice {
         // Valid states for this Thing
         //  $valid_states = $this->validStates();
         $valid_states = $this->getChoices();
-        //var_dump($valid_states);
 
         if ($valid_states == null) {return false;}
         if ($valid_states == false) {return false;}

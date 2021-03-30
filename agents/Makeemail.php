@@ -57,8 +57,11 @@ class makeEmail
         $this->stack_state = $thing->container['stack']['state'];
         $this->short_name = $thing->container['stack']['short_name'];
 
-        $this->robot_name = $thing->container['stack']['robot_name'];
+$this->robot_name = "noreply";
+if (isset($thing->container['stack']['robot_name'])) {
 
+        $this->robot_name = $thing->container['stack']['robot_name'];
+}
 
         // Create some short-cuts.
         $this->uuid = $thing->uuid;
@@ -77,7 +80,7 @@ class makeEmail
 
         $from =false;
 
-        if (is_array($this->input)) {var_dump($this->input); exit();}
+        if (is_array($this->input)) {var_dump($this->input); throw new \Exception("devstack");}
 
 	    $email = $this->generateMultipart($from, $this->input, $this->choices);
 

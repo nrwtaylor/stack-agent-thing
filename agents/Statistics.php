@@ -64,7 +64,7 @@ class Statistics extends Agent
                     continue;
                 }
 
-                exit();
+                throw new \Exception("devstack");
                 /*
                 $this->age = $thing->json->readVariable([
                 $this->count = $thing->json->readVariable([

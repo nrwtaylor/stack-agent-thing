@@ -45,9 +45,6 @@ class Trivia extends Agent
             "variables trivia " . $this->from
         );
 
-        //var_dump($this->thing);
-        //exit();
-        //        $this->getMemcached();
     }
 
     function isTrivia($state = null)

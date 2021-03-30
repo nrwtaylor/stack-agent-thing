@@ -198,9 +198,16 @@ class City extends Agent
         ];
         foreach ($cities as $city_name) {
             if ($city_name == $selector) {
+                $this->city_code = 999999;
+                $this->city_name = $selector;
+
                 return [999999, $selector];
             }
         }
+
+        $this->city_code = null;
+        $this->city_name = $this->default_city_name;
+        return [null, $this->city_name];
 
         return true;
     }
@@ -317,8 +324,6 @@ class City extends Agent
             return true;
         }
 
-        //        $contents = file_get_contents($file);
-
         $handle = @fopen($file, "r");
 
         if ($handle === false) {
@@ -363,15 +368,21 @@ class City extends Agent
         if ($city_code == null) {
             $city_code = $this->city_code;
         }
-        //var_dump($city_code);
+
         $this->city = new Variables(
             $this->thing,
             "variables " . "city_" . $city_code . " " . $this->from
         );
 
         $this->city_code = $this->city->getVariable("city_code");
-        //var_dump($this->city_code);
-        $this->city_name = $this->city->getVariable("city_name");
+
+        $city_name = $this->city->getVariable("city_name");
+
+        if ($city_name === false) {
+            $city_name = $this->default_city_name;
+        }
+        $this->city_name = $city_name;
+
         $this->refreshed_at = $this->city->getVariable("refreshed_at");
 
         return [$this->city_code, $this->city_name];
@@ -695,7 +706,9 @@ class City extends Agent
         }
 
         $txt .= "\n";
+if (isset($this->last_city_name)) {
         $txt .= "Last city " . $this->last_city_name . "\n";
+}
         $txt .= "Now at " . $this->city_name;
 
         $this->thing_report["txt"] = $txt;
@@ -969,11 +982,6 @@ class City extends Agent
 
         $this->thing->flagGreen();
 
-        // Generate email response.
-        //		$to = $this->thing->from;
-        //		$from = "city";
-
-        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
         $this->thing_report["choices"] = $choices;
 
@@ -984,11 +992,7 @@ class City extends Agent
             $index = $this->index; //
         }
 
-        //      $this->makeSMS();
-
         $this->thing_report["email"] = $this->sms_message;
-
-        //    $this->makeMessage();
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -998,13 +1002,8 @@ class City extends Agent
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        //      $this->makeWeb();
-        //    $this->makeTXT();
-
         $this->thing_report["help"] =
             "This is a City.  The union of a code and a name.";
-
-        //	return;
     }
 
     function isData($variable)
@@ -1024,9 +1023,21 @@ class City extends Agent
             $this->thing,
             "variables city " . $this->from
         );
-        $this->last_city_code = $this->last_city->getVariable("city_code");
-        $this->last_city_name = $this->last_city->getVariable("city_name");
 
+        $last_city_code = $this->last_city->getVariable("city_code");
+        $last_city_name = $this->last_city->getVariable("city_name");
+        /*
+if ($last_city_code === false) {
+$last_city_code = null;
+}
+
+if ($last_city_name === false) {
+$last_city_name = $this->default_city_name;
+}
+
+$this->last_city_code = $last_city_code;
+$this->last_city_name = $last_city_name;
+*/
         // This doesn't work
         $this->last_refreshed_at = $this->last_city->getVariable(
             "refreshed_at"
@@ -1071,7 +1082,6 @@ class City extends Agent
         if ($this->agent_input == "extract") {
             return;
         }
-
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
@@ -1081,7 +1091,6 @@ class City extends Agent
                 return;
             }
         }
-
         foreach ($pieces as $key => $piece) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {

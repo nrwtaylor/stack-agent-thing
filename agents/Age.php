@@ -15,7 +15,6 @@ class Age extends Chart
      *
      * @param Thing   $thing
      */
-    //    function __construct(Thing $thing)
     function init()
     {
         $this->height = 200;
@@ -24,10 +23,6 @@ class Age extends Chart
         $this->series = ["age"];
 
         $this->node_list = ["start"];
-
-        $this->thing->log(
-            '<pre> Agent "Age" running on Thing ' . $this->uuid . " </pre>"
-        );
 
         $this->mail_postfix = $this->thing->container["stack"]["mail_postfix"];
         $this->web_prefix = $this->thing->container["stack"]["web_prefix"];
@@ -604,7 +599,6 @@ class Age extends Chart
             // Not because this is an age sample ignore 0 age.
 
             if ($variable == 0) {
-                //echo "age = 0";
                 continue;
             }
 
@@ -615,7 +609,6 @@ class Age extends Chart
             }
 
             if ($this->sample_count > $this->total_things / 4) {
-                //echo " Sampled 1 in 4";
                 // 20% should be enough for sampling
                 break;
             }

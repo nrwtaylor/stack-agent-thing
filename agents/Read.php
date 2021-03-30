@@ -66,10 +66,6 @@ class Read extends Agent
         // Pass through google doc reader url rewriter.
         $link = $this->googleRead($link);
 
-        //var_dump($this->link);
-        //    function run()
-
-        //$link = $this->link;
 
         // Now have this->link potentially from reading subject
         $this->matched_sentences = [];
@@ -450,7 +446,6 @@ class Read extends Agent
         }
 
         foreach ($meta as $i => $tag) {
-            //echo $i . " " . $tag . "<br>";
         }
 
         $response = "an empty description.";
