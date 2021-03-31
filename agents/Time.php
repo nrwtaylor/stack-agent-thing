@@ -173,6 +173,29 @@ class Time extends Agent
         return $datum;
     }
 
+    function humanTime($text = null)
+    {
+        if ($text == null) {
+            $text = $this->getTime();
+        }
+        if ($this->isDateValid($text)) {
+
+            $datum = $this->datumTime($text);
+            if ($datum !== false) {
+                //$this->text = $datum->format('H:i');
+                $text =
+                    $datum->format('l') .
+                    " " .
+                    $datum->format('d/m/Y, H:i:s');
+            }
+
+            if ($datum === false) {
+                $text =  $this->lmtTime();
+            }
+        }
+        return $text;
+    }
+
     function getTime($text = null)
     {
         $timevalue = $text;

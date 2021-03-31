@@ -215,6 +215,7 @@ class Day extends Agent
                     $datum->getTimestamp() + $period_index * (60 * 60 * 24);
                 $e = strtotime($this->current_time);
 
+/*
                 $this->thing->console (($indexed_period > $e ? "higher" : "lower" ) .
                     $datum->getTimestamp() .
                     " " .
@@ -224,7 +225,7 @@ class Day extends Agent
                     " " .
                     $epoch .
                     " \n");
-
+*/
                 if ($indexed_period < $e) {
                     continue;
                 }
