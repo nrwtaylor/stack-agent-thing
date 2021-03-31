@@ -47,7 +47,6 @@ class Roll extends Agent
         ]);
 
         if ($time_string == false) {
-            //      $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 ["roll", "refreshed_at"],
@@ -57,7 +56,6 @@ class Roll extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        //$this->thing->json->setField("variables");
         $this->last_roll = strtolower(
             $this->thing->json->readVariable(["roll", "roll"])
         );
@@ -226,15 +224,12 @@ class Roll extends Agent
                 $name .
                 '.txt" >';
 
-            //        $html = '<br><img src="data:image/png;base64,'. $image_string . '" alt="test" /><br>';
-
             //$html ="";
             $web .= $html;
             //break;
         }
         $web .= "<br>";
 
-        //$received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time(time() - $this->refreshed_at);
         $web .= "Rolled about " . $ago . " ago.";
 

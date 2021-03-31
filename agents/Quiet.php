@@ -134,7 +134,7 @@ class Quiet extends Agent
      *
      * @return unknown
      */
-    function readQuiet()
+    function readQuiet($text = null)
     {
         //$this->thing->log("read");
 

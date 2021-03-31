@@ -130,6 +130,22 @@ dev - Detect duplicates.
         $this->response .= "Wrote item to When calendar file. ";
     }
 
+    public function emacsorgClaws()
+    {
+        if ($this->claws_emacsorg_flag != "on") {
+            return;
+        }
+
+        // Code to write an org item goes here.
+
+        // Build entry for when calendar
+        $line = "test item";
+
+        $this->updateEmacs($line);
+        $this->response .= "Wrote item to Emacs buffer file. ";
+    }
+
+
     // for testing.
     // Might be better as Link but try Url first.
     public function makeUrl()
@@ -348,6 +364,7 @@ dev - Detect duplicates.
         // Recognize if the instruction has "when" in it.
         // Set a flag so that we can later create a calendar item if needed.
         $indicators = [
+            "emacsorg" => ["emacsorg"],
             "when" => ["when"],
             "test" => ["test"],
         ];

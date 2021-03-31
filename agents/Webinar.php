@@ -191,16 +191,16 @@ class Webinar extends Agent
                 $selected_paragraphs[] = $paragraph;
                 continue;
             }
-
-
         }
-$urls = [];
-foreach($selected_paragraphs as $s=>$paragraph) {
-
-$urls = array_merge($this->extractUrls($paragraph), $urls);
-$urls = array_unique($urls);
-}
-if (count($urls) === 1) {$url = $urls[0]; return $url;}
+        $urls = [];
+        foreach ($selected_paragraphs as $s => $paragraph) {
+            $urls = array_merge($this->extractUrls($paragraph), $urls);
+            $urls = array_unique($urls);
+        }
+        if (count($urls) === 1) {
+            $url = $urls[0];
+            return $url;
+        }
 
         return false;
     }
@@ -305,7 +305,5 @@ if (count($urls) === 1) {$url = $urls[0]; return $url;}
         }
 
         $this->getWebinar();
-
-        return;
     }
 }

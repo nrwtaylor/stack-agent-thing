@@ -503,7 +503,7 @@ if ($commands_new == true) {continue;}
     /**
      *
      */
-    function readGlossary()
+    function readGlossary($text = null)
     {
         if (!isset($this->glossary)) {
             $this->glossary = null;

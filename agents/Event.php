@@ -228,12 +228,6 @@ class Event extends Agent
         $event->events = $this->events;
         $event->refreshed_at = $this->current_time;
 
-        /*
-        $uuid = $this->uuid;
-        $uuid = "merp";
-
-        $this->setMemory("event-".$uuid, $event);
-        */
     }
 
     function lastEvent()
@@ -597,13 +591,6 @@ foreach($filtered_places as $key=>$filtered_place) {
 
     public function get($event_code = null)
     {
-        /*
-        // dev
-        $uuid = 'merp';
-        $event = $this->getMemory("event-".$uuid);
-        var_dump($event);
-        */
-
         // This is a request to get the Place from the Thing
         // and if that doesn't work then from the Stack.
         if ($event_code == null) {
@@ -636,11 +623,8 @@ foreach($filtered_places as $key=>$filtered_place) {
 
     private function getRuntime()
     {
-        //if (isset($this->minutes)) {return;}
-
         $agent = new Runtime($this->thing, "runtime");
 
-        //$this->minutes = $agent->minutes;
         $this->minutes = $agent->runtime;
     }
 
@@ -839,9 +823,6 @@ foreach($filtered_places as $key=>$filtered_place) {
             $this->event_names = [];
         }
 
-        //        $pattern = "|\d[A-Za-z]{1}\d{2}|"; //headcode pattern
-        //$pattern = "|\{5}|"; // 5 digits
-
         $pattern = "|\d{7}$|";
 
         preg_match_all($pattern, $input, $m);
@@ -870,8 +851,6 @@ foreach($filtered_places as $key=>$filtered_place) {
                 $this->event_names[] = $event_name;
             }
         }
-
-        //}
 
         $this->event_codes = array_unique($this->event_codes);
         $this->event_names = array_unique($this->event_names);
@@ -905,17 +884,7 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         return true;
 
-        // And then extract place names.
-        // Take out word 'place' at the start.
-        //        $filtered_input = ltrim(strtolower($input), "event");
-
-        //        foreach($this->event_names as $event_name) {
-
-        //           if (strpos($filtered_input, $event_name) !== false) {
         $event_names[] = $event_name;
-        //            }
-
-        //        }
 
         if (count($event_names) == 1) {
             $this->event_name = $this->event_names[0];
@@ -946,12 +915,16 @@ foreach($filtered_places as $key=>$filtered_place) {
         if (isset($this->best_event)) {
             $web .= "<br>Nearest event found.";
             $web .= "<br>" . $this->best_event["name"];
-            //var_dump($this->best_event);
             $web .= "<p>";
         }
 
         $web .= "<br>event_name is " . $this->event_name . "";
-        $web .= "<br>event_code is " . $this->event_code . "";
+
+        $event_code_text = "X";
+        if ((isset($this->event_code)) and ($this->event_code !== false)) {
+            $event_code_text = $this->event_code;
+        }
+        $web .= "<br>event_code is " . $event_code_text . "";
 
         $web .= "<br>" . $this->last_event_code;
         $web .= "<br>" . $this->last_event_name;
@@ -1039,33 +1012,6 @@ foreach($filtered_places as $key=>$filtered_place) {
         $txt .= "\n";
         $txt .= "\n";
 
-        /*
-
-        //$txt = "Test \n";
-        foreach ($this->placecode_list as $place_code) {
-    
-            $txt .= " " . str_pad(" ", 40, " ", STR_PAD_RIGHT);
-
-            $txt .= " " . "  " . str_pad(strtoupper($place_code), 5, "X", STR_PAD_LEFT);
-            //$txt .= " " . str_pad($train['alias'], 10, " " , STR_PAD_RIGHT);
-
-            $txt .= "\n";
-
-
-
-        }
-
-
-        foreach ($this->placename_list as $place_name) {
-
-            $txt .= " " . str_pad(strtoupper($place_name), 40, " ", STR_PAD_RIGHT);
-
-            $txt .= "\n";
-
-
-
-        }
-*/
         // Places must have both a name and a code.  Otherwise it's not a place.
         foreach ($this->events as $key => $event) {
             $txt .=
@@ -1106,9 +1052,6 @@ foreach($filtered_places as $key=>$filtered_place) {
 
     function makeChoices()
     {
-        //        $this->thing->choice->Choose($this->state);
-        //        $this->thing->choice->save($this->keyword, $this->state);
-
         $node_list = ["event" => ["going", "meh"]];
 
         $this->thing->choice->Create($this->agent_name, $node_list, "event");
@@ -1125,9 +1068,7 @@ foreach($filtered_places as $key=>$filtered_place) {
         }
 
         $sms_message = "EVENT";
-        //$sms_message .= $this->event->nuuid ." ";
-        // . strtoupper($this->event_code) ." | " . $s;
-        //$sms_message .= " | " . $this->headcodeTime($this->start_at);
+
         $sms_message .= " ";
 
         $sms_message .= $this->event_name;
@@ -1164,23 +1105,11 @@ foreach($filtered_places as $key=>$filtered_place) {
             }
         }
 
-        //        if ( (isset($this->day)) and (isset($this->minute)) ) {
-        //            $run_at_text .= " ";
-        //            if (isset($this->day)) {$sms_message .= $this->day;}
-        //        }
-
         if ($this->day == "X" or $this->hour == "X" or $this->minute == "X") {
             $run_at_text = "Set RUNAT. ";
         }
 
         $sms_message .= $run_at_text;
-
-        //        $sms_message .= " | index " . $this->index;
-
-        //        $sms_message .= " | nuuid " . strtoupper($this->event->nuuid);
-        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
-
-        //       $sms_message .= " | ptime " . number_format($this->event->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
@@ -1227,7 +1156,6 @@ foreach($filtered_places as $key=>$filtered_place) {
     {
         $this->num_hits = 0;
 
-        //$input = $this->input;
         $input = $this->agent_input;
         if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
@@ -1249,13 +1177,10 @@ foreach($filtered_places as $key=>$filtered_place) {
             $b = $this->currentEvent();
             return;
         }
-        // Haystack doesn't work well here because we want to run the extraction on the cleanest signal.
-        // Think about this.
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
-
         // Is there a place in the provided datagram
+
         $this->extractEvent($input);
         if ($this->agent_input == "extract") {
             return;
@@ -1308,7 +1233,6 @@ foreach($filtered_places as $key=>$filtered_place) {
                             break;
 
                         case "drop":
-                            //     //$this->thing->log("read subject nextheadcode");
                             $this->dropEvent();
                             break;
 
@@ -1334,7 +1258,6 @@ foreach($filtered_places as $key=>$filtered_place) {
                             break;
 
                             $event_type = "4";
-                            //$place_code = $place_zone  . str_pad(rand(0,999) + 1,6,  '0', STR_PAD_LEFT);
 
                             foreach (range(1, 9999999) as $n) {
                                 foreach ($this->events as $event) {
@@ -1363,15 +1286,12 @@ foreach($filtered_places as $key=>$filtered_place) {
                                     "Foo" . rand(0, 1000000) . "Bar";
                             }
 
-                            //$this->makeheadcode();
                             $this->makeEvent(
                                 $this->event_code,
                                 $this->event_name
                             );
                             $this->getEvent($this->event_code);
-                            //$this->set();
                             return;
-                            break;
 
                         default:
                     }

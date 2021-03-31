@@ -206,7 +206,7 @@ class Read extends Agent
         return false;
     }
 
-    public function readRead($text)
+    public function readRead($text = null)
     {
         if ($text == null) {
             return true;

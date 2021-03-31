@@ -245,12 +245,8 @@ class Runat extends Agent
         $this->txt = $txt;
     }
 
-    /**
-     *
-     */
-    public function makeSMS()
-    {
-        $day = "X";
+    public function textRunat() {
+
         if (isset($this->day)) {
             $day = $this->day;
         }
@@ -268,30 +264,38 @@ class Runat extends Agent
             $minute = $this->minute;
         }
 
-        $sms_message = "RUNAT";
-
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
-
         $minute_text = str_pad($minute, 2, "0", STR_PAD_LEFT);
-
         $day_text = $day;
 
-        $sms_message .= " " . strtoupper($this->head_code) . " ";
-        $sms_message .=
-            "|" .
+        $text =
             " day " .
             $day_text .
             " hour " .
             $hour_text .
             " minute " .
-            $minute_text .
-            ". ";
+            $minute_text;
+
+        return $text;
+    }
+
+    /**
+     *
+     */
+    public function makeSMS()
+    {
+        $sms_message = "RUNAT";
+
+        $sms_message .= " " . strtoupper($this->head_code) . " ";
+        $sms_message .=
+            "|" . $this->textRunat() . ". ";
+
         $sms_message .= $this->response;
 
         if (
-            !$this->isInput($day) or
-            !$this->isInput($hour) or
-            !$this->isInput($minute)
+            !$this->isInput($this->day) or
+            !$this->isInput($this->hour) or
+            !$this->isInput($this->minute)
         ) {
             $sms_message .= " | Set RUNAT. ";
         }
@@ -299,6 +303,22 @@ class Runat extends Agent
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
     }
+
+    public function makeWeb()
+    {
+        $stamp = "";
+        if (!isset($this->response)) {
+            $this->response = "Made web page. ";
+        }
+
+        $m = '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+
+        $m .= $this->textRunat();
+
+        $this->web_message = $m;
+        $this->thing_report['web'] = $m;
+    }
+
 
     /**
      *
