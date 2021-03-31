@@ -138,13 +138,34 @@ dev - Detect duplicates.
 
         // Code to write an org item goes here.
 
+/*
+** Strategy Meeting
+   SCHEDULED: <2021-03-31 Wed 11:00>
+   https://meeting.example.com/place/z.phz?MTID=a1a1a1a1a1
+
+*/
+
         // Build entry for when calendar
         $line = "test item";
 
         $this->updateEmacs($line);
+
+/*
+
+        foreach ($this->claws_items as $i => $claws_item) {
+            $call = $claws_item["call"];
+
+            $text_claws .= $claws_item["subject"] . "\n";
+
+            "   " . $call["password"]) and
+            "   " . $call["access_code"]) and
+                $this->isUrl($call["url"])
+
+         }
+*/
+
         $this->response .= "Wrote item to Emacs buffer file. ";
     }
-
 
     // for testing.
     // Might be better as Link but try Url first.
@@ -255,8 +276,8 @@ dev - Detect duplicates.
             $txt .= $this->textHtml($text_claws) . "\n";
 
             // Tidy up text display.
-//            $txt = html_entity_decode($text_claws). "\n";
- //           $txt .= $text_claws . "\n";
+            //            $txt = html_entity_decode($text_claws). "\n";
+            //           $txt .= $text_claws . "\n";
         }
         $txt .= "\n";
 
@@ -328,8 +349,6 @@ dev - Detect duplicates.
                 continue;
             }
 
-
-
             $dateline["score"] = $this->scoreAt($dateline, "meeting");
             $datelines[] = $dateline;
         }
@@ -394,8 +413,12 @@ dev - Detect duplicates.
             $filename = trim($token);
 
             // Delegating contents to agents for processing
-            $contents = $this->loadClaws($filename);
 
+            if (!file_exists($filename)) {
+                continue;
+            }
+
+            $contents = $this->loadClaws($filename);
             // Pass contents through MH routine to remove trailing =
             //$subject = $this->subjectMH($contents);
             //$body = $this->bodyMH($contents);
@@ -437,15 +460,14 @@ dev - Detect duplicates.
             } else {
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
-
                 $call = $this->readCall($body);
-                // Try to figure out date from body text.
 
+                // Try to figure out date from body text.
                 $dateline = $this->extractAt($body);
                 $subject_at_score = 0;
-//                if ($dateline != null) {
+                //                if ($dateline != null) {
                 $subject_at_score = $this->scoreAt($dateline, "meeting");
-//                }
+                //                }
                 // TODO - Check if the subject has a well qualified date time.
                 // dev start with a simple score of missing information.
                 // dev assess whether date time is "adequate"
@@ -453,8 +475,8 @@ dev - Detect duplicates.
                     // Otherwise ... see if there is a better date time in the combined contents.
                     $datelines = $this->datelinesCall($subject . "\n" . $body);
 
-// dev
-// TODO Assess datelines for validity.
+                    // dev
+                    // TODO Assess datelines for validity.
 
                     // Pick best dateline.
                     if (isset($datelines[0])) {
@@ -468,7 +490,6 @@ dev - Detect duplicates.
                 "dateline" => $dateline,
             ];
         }
-
         // get an MH reader to clean up the format
         // See what we get from Call.
         //$call_agent = new Call($this->thing, "call");

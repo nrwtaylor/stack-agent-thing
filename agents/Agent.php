@@ -180,7 +180,7 @@ class Agent
         // read the current agent.
         if (
         //    $this->agent_class_name !== "Agent" and
-            method_exists($this, "read" . $this->agent_class_name)
+            method_exists($this, "init" . $this->agent_class_name)
         ) {
             $this->{"init" . $this->agent_class_name}();
         }
@@ -1865,7 +1865,7 @@ return $agent_trace;;
             $this->agent_class_name !== "Agent" and
             method_exists($this, "read" . $this->agent_class_name)
         ) {
-            $this->{"read" . $this->agent_class_name}();
+            $this->{"read" . $this->agent_class_name}($text);
         }
 
         $this->thing->log("read completed.");

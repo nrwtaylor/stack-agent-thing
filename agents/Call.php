@@ -209,7 +209,6 @@ class Call extends Agent
         $urls = [];
         $host_url = "X";
         $telephone_numbers = [];
-
         $urls = $this->extractUrls($text);
         $telephone_numbers = $this->extractTelephonenumbers($text);
 

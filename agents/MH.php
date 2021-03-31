@@ -60,13 +60,14 @@ class MH extends Agent
 
     public function subjectMH($text = null)
     {
-        if ($text == null) {
-            return;
-        }
+if ($text !== null) {
+$datagram = $this->readEmail($text);
+return $datagram['subject'];
+}
 
-        if (!isset($this->datagram)) {
-            $this->datagram = $this->readEmail($text);
-        }
+//        if (!isset($this->datagram)) {
+//            $this->datagram = $this->readEmail($text);
+//        }
 
         if (isset($this->datagram['subject'])) {
             return $this->datagram['subject'];
@@ -80,6 +81,15 @@ class MH extends Agent
 
     public function bodyMH($text = null)
     {
+if ($text !== null) {
+$datagram = $this->readEmail($text);
+return $datagram['text'];
+}
+
+//        if (!isset($this->datagram)) {
+//            $this->datagram = $this->readEmail($text);
+//        }
+
         if (isset($this->datagram['text'])) {
             return $this->datagram['text'];
         }

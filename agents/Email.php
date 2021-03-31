@@ -230,7 +230,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         // test
         //$text = str_replace('Content-Type: multipart/alternative',
         //'Content-Type: multipart/mixed',$text);
-
         $message = Message::from($text);
 
         $subject = $message->getHeaderValue("Subject");
