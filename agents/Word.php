@@ -310,7 +310,6 @@ class Word extends Agent
             $this->thing->log("loaded ewol dictionary from memory.");
             return;
         }
-        //}
 
         $contents = "";
         foreach (range("A", "Z") as $v) {
@@ -319,7 +318,9 @@ class Word extends Agent
             if (file_exists($file)) {
                 $c = @file_get_contents($file);
             }
-            if ($c == false) {
+            if ($c === false) {
+                if (!isset($this->error)) {$this->error = "";}
+                $this->error .= "Missing ewol file. ";
                 return true;
             }
             $contents .= $c;
@@ -332,7 +333,6 @@ class Word extends Agent
             }
             $this->ewol_dictionary[$line] = true;
         }
-
         if ($this->wordpress_path_to !== false) {
             $this->mem_cached->set(
                 "agent-ewol-dictionary",
@@ -373,7 +373,6 @@ class Word extends Agent
                 }
                 $file = $this->resource_path_words . "words.txt";
 
-                //$this->getMemcached();
                 if ($contents = $this->mem_cached->get("agent-words-list")) {
                     $this->words_list = $contents;
                     $this->thing->log("loaded words from memory.");
@@ -523,9 +522,8 @@ class Word extends Agent
         }
 
         $this->contents = $contents;
-        //   if ($this->wordpress_path_to !== false) {
+
         $this->mem_cached->set("agent-word-contents", $this->contents);
-        //   }
     }
 
     function isWord($input)

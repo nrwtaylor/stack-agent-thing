@@ -125,12 +125,11 @@ if (!isset($this->response)) {$this->makeResponse();}
         //            $response .= " until " . $this->runat->day . " " . str_pad("0", 2, $this->runat->hour, STR_PAD_LEFT) . ":" . str_pad("0", 2, $this->runat->minute, STR_PAD_LEFT);
 
         $date_string = $this->rundate->year . "/" . $this->rundate->month . "/" . $this->rundate->day;
-        //var_dump($date_string);
 
         $time = new Time($this->thing, "time");
         $time->doTime($date_string);
 
-if ($time->datum != null) {
+if ((isset($time->datum)) and ($time->datum != null)) {
 
         $response .= " " . $time->datum->format('l') . " " . $time->datum->format('d/m/Y, H:i:s') ."";
         $response .= " in " . $time->time_zone;
@@ -138,15 +137,8 @@ if ($time->datum != null) {
 }
         $response .= ".";
 
-
-
-        //$response .= " " . $m . ".";
         if ($this->time_until == null) {$response = "TIME UNTIL | No response.";}
         $this->cat_message = $response;
-        //    } else {
-        //        $this->cat_message = $this->agent_input;
-        //    }
-
 
         $this->response = $this->cat_message;
         $this->node_list = array("cat"=>array("cat", "time until"));
@@ -155,27 +147,15 @@ if ($time->datum != null) {
 
     }
 
-
-    /**
-     *
-     */
-    /*
-    function makeChoices() {
-        $this->thing->choice->Create('channel', $this->node_list, "cat");
-        $choices = $this->thing->choice->makeLinks('cat');
-        $this->thing_report['choices'] = $choices;
-    }
-*/
-
     /**
      *
      * @return unknown
      */
     public function readSubject() {
-
-        $this->filterAgent();
+        $input = $this->filterAgent();
         return false;
     }
 
 
 }
+

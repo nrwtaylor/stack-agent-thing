@@ -224,39 +224,6 @@ class Place extends Agent
         return $place;
     }
 
-    /*
-    function getVariable($variable_name = null, $variable = null)
-    {
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
     function getPlace($selector = null)
     {
         foreach ($this->places as $place) {

@@ -2342,6 +2342,9 @@ if ($pid == -1) {
      */
     public function readSubject()
     {
+        // Only run this for agent
+        if ($this->agent_name !== "agent") {return;}
+
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;

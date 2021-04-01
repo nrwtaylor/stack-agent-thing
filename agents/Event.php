@@ -308,7 +308,7 @@ class Event extends Agent
 
         foreach ($events as $event) {
             if ($timestamp_agent->isTimestamp($selector)) {
-                //   var_dump($event);
+
                 if (isset($event["dateline"])) {
                     $t = $timestamp_agent->extractTimestamp($event["dateline"]);
                     $time_distance = strtotime($selector) - strtotime($t);
@@ -527,15 +527,6 @@ class Event extends Agent
         }
         array_multisort($refreshed_at, SORT_DESC, $this->events);
 
-        /*
-// Get latest per place
-$this->places = array();
-foreach($filtered_places as $key=>$filtered_place) {
-//var_dump($filtered_place);
-
-        $this->places[] = $filtered_place;
-}
-*/
         $this->old_events = $this->events;
         $this->events = [];
         foreach ($this->old_events as $key => $row) {
@@ -1188,7 +1179,7 @@ foreach($filtered_places as $key=>$filtered_place) {
 
         if ($this->agent_input == "vancouver pride 2018") {
             $this->makeEvent(500001, "vancouver pride 2018");
-            echo $this->event_name;
+            $this->thing->console($this->event_name);
             return;
         }
 

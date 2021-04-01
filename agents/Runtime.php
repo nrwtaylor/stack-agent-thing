@@ -6,15 +6,15 @@
  */
 
 namespace Nrwtaylor\StackAgentThing;
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Runtime extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -23,12 +23,12 @@ class Runtime extends Agent
      */
     function init()
     {
-        $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
+        $this->keywords = ["runtime", "run"];
         $this->test = "Development code"; // Always iterative.
 
-        $this->default_runtime = "X";
+        $this->units = "minutes";
 
-        //        $this->runtime = false;
+        $this->default_runtime = "X";
     }
 
     function set($requested_runtime = null)
@@ -40,10 +40,6 @@ class Runtime extends Agent
                 if (isset($this->runtime)) {
                     $this->requested_runtime = $this->runtime;
                 }
-                // Set default behaviour.
-                // $this->requested_state = "green";
-                // $this->requested_state = "red";
-                //                $this->requested_state = "green"; // If not sure, show green.
             }
 
             $requested_runtime = $this->requested_runtime;
@@ -53,16 +49,7 @@ class Runtime extends Agent
         $this->refreshed_at = $this->current_time;
 
         $this->variables->setVariable("runtime", $this->runtime);
-
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
-        //$this->variables_thing->setVariable("flag_id", $this->nuuid);
-
         $this->variables->setVariable("refreshed_at", $this->current_time);
-
-        $this->thing->log(
-            $this->agent_prefix . 'set Runtime to ' . $this->runtime,
-            "INFORMATION"
-        );
     }
 
     /**
@@ -75,7 +62,8 @@ class Runtime extends Agent
             if (isset($run_time)) {
                 $this->run_time = $run_time;
             } else {
-                $this->run_at = "Meep";
+                return true;
+                //$this->run_at = "Meep";
             }
         }
         return $this->run_time;
@@ -85,6 +73,7 @@ class Runtime extends Agent
     {
         $flag_variable_name = "";
         // Get the current Identities flag
+
         $this->variables = new Variables(
             $this->thing,
             "variables runtime" . $flag_variable_name . " " . $this->from
@@ -138,7 +127,6 @@ class Runtime extends Agent
      */
     function extractRuntime($input = null)
     {
-        //        $this->runtime = "X";
         $periods = [
             1440 => ["d", "days", "dys", "dys", "dy", "day"],
             60 => ["h", "hours", "hrs", "hs", "hr"],
@@ -152,9 +140,6 @@ class Runtime extends Agent
 
         foreach ($pieces as $key => $piece) {
             foreach ($periods as $multiplier => $period) {
-                //echo $piece . " " . $period;
-                //echo "<br>";
-
                 foreach ($period as $period_name) {
                     if (
                         $period_name == $piece and
@@ -178,7 +163,8 @@ class Runtime extends Agent
         // If nothing found assume a lone number represents minutes
         if (count($list) == 0) {
             foreach ($pieces as $key => $piece) {
-                if ($this->is_decimal($piece)) {
+                if ($this->isDecimal($piece)) {
+                    $this->response .= "Saw a decimal and read as hours. ";
                     // Assue this is hours
                     $list[] = $piece * 60;
                 } elseif (is_numeric($piece)) {
@@ -195,16 +181,6 @@ class Runtime extends Agent
 
     /**
      *
-     * @param unknown $val
-     * @return unknown
-     */
-    function is_decimal($val)
-    {
-        return is_numeric($val) && floor($val) != $val;
-    }
-
-    /**
-     *
      * @param unknown $input (optional)
      * @return unknown
      */
@@ -214,7 +190,14 @@ class Runtime extends Agent
         $days = [
             22 => ["default"],
             15 => ["quarter hour", "quarter", "1/4", "0.25"],
-            30 => ["half hour", "half hour", "half", "0.5"],
+            30 => [
+                "half hour",
+                "half hour",
+                "halfhour",
+                "half an hour",
+                "half",
+                "0.5",
+            ],
             60 => ["hour", "hr"],
             1440 => ["day"],
         ];
@@ -245,7 +228,7 @@ class Runtime extends Agent
     {
         $txt = $this->sms_message;
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -259,7 +242,7 @@ class Runtime extends Agent
             $sms_message .= " " . strtoupper($this->variables->head_code);
         }
 
-        $sms_message .= " " . $this->runtime . " ";
+        $sms_message .= " " . $this->runtime . " ". $this->units ." ";
         $sms_message .= $this->response;
 
         if ($this->runtime == "X") {
@@ -267,10 +250,9 @@ class Runtime extends Agent
         }
 
         $sms_message .= " | nuuid " . strtoupper($this->variables->nuuid);
-        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
-        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
     }
 
     /**
@@ -288,39 +270,16 @@ class Runtime extends Agent
         }
         $this->response .= " | " . $response_text;
 
-        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
-        //$test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
-        //$test_message .= '<br>' . $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        if (!$this->thing->isData($this->agent_input)) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
-        } else {
-            $this->thing_report['info'] =
-                'Agent input was "' . $this->agent_input . '".';
-        }
-
-        $this->thing_report['help'] = 'This is the runtime manager.';
-    }
-
-    /**
-     *
-     * @param unknown $variable
-     * @return unknown
-     */
-    function isData($variable)
-    {
-        if ($variable !== false and $variable !== true and $variable != null) {
-            return true;
-        } else {
-            return false;
-        }
+        $this->thing_report["help"] = "This is the runtime manager.";
     }
 
     /**
@@ -331,8 +290,6 @@ class Runtime extends Agent
     {
         $this->response = null;
         $this->num_hits = 0;
-
-        //        $keywords = $this->keywords;
 
         if (strpos($this->agent_input, "runtime") !== false) {
             return;
@@ -352,13 +309,6 @@ class Runtime extends Agent
 
         $this->requested_runtime = $this->runtime;
         if ($this->agent_input == "extract") {
-            return;
-        }
-
-        $pieces = explode(" ", strtolower($this->input));
-
-        if ($this->runtime == "X") {
-            //            $this->get();
             return;
         }
     }
