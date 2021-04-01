@@ -434,7 +434,6 @@ class Group extends Agent
             $web .= "<p>";
 
             foreach ($this->members as $i => $text) {
-                //var_dump($text);
                 $web .= $text['task'] . "<br>";
             }
         }

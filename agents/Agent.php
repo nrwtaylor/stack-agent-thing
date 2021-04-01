@@ -1804,7 +1804,6 @@ return $agent_trace;;
     public function timestampAgent($text = null)
     {
         if ($text == null) {
-            //$text = $this->thing->thing->created_at;
             $text = $this->created_at;
         }
         $time = strtotime($text);
@@ -1857,7 +1856,6 @@ return $agent_trace;;
         $this->thing->log('read "' . $this->subject . '".');
 
         $this->readFrom();
-
         $this->readSubject();
 
         // read the current agent.
@@ -1885,7 +1883,6 @@ return $agent_trace;;
 
         if ($this->thing->deny_agent->isDeny() === true) {
             $this->do_not_respond = true;
-            //return;
             throw new \Exception("Address not allowed.");
         }
 
@@ -2030,7 +2027,6 @@ if ($pid == -1) {
 //}
 
 
-            //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
             restore_error_handler();
 
@@ -2138,7 +2134,7 @@ if ($pid == -1) {
         }
         $responsive_agents = [];
         foreach ($agents as $i => $agent_package) {
-            //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
+
             // Allow for doing something smarter here with
             // word position and Bayes.  Agent scoring
             // But for now call the first agent found and
@@ -2205,14 +2201,9 @@ if ($pid == -1) {
         }
 
         $pieces = explode(" ", $text);
-
         $num_pieces = count($pieces);
-        //foreach($pieces as $i=>$piece) {
 
-        //        $score = strlen($text) * pow(10, $num_pieces);
         $score = $matched_characters * pow(10, $num_pieces);
-
-        //}
 
         return $score;
     }
@@ -2231,8 +2222,6 @@ if ($pid == -1) {
         if (substr($agent_class_name, 0, 5) === "Thing") {
             return false;
         }
-
-        // MERP
 
         $uuid = new Uuid($this->thing, "extract");
         $uuid->extractUuids($agent_class_name);
@@ -2279,7 +2268,6 @@ if ($pid == -1) {
             $arr[] = $this->to;
         } else {
             $arr = $this->ngramsText($agent_input_text);
-            //$arr = explode(' ', $agent_input_text);
         }
 
         // Does this agent have code.
@@ -2332,8 +2320,6 @@ if ($pid == -1) {
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
-
-        return;
     }
 
     /**
@@ -2604,10 +2590,7 @@ if ($pid == -1) {
                 continue;
             }
 
-            //            if ($this->isAgent($ngram)) {
             $matches[] = $ngram;
-            //                return $this->thing_report;
-            //            }
         }
 
         if (count($matches) == 1) {

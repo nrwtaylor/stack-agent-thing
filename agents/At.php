@@ -398,16 +398,6 @@ $input = str_replace($access_code, " ",$input);
         }
 
         $this->timezone = $this->extractTimezone($input);
-/*
-var_dump($this->year);
-var_dump($this->month);
-var_dump($this->day);
-var_dump($this->day_number);
-var_dump($this->hour);
-var_dump($this->minute);
-var_dump($this->timezone);
-*/
-
 
 $at = ['year'=>$this->year,
 'month'=>$this->month,
@@ -416,13 +406,14 @@ $at = ['year'=>$this->year,
 'hour'=>$this->hour,
 'minute'=>$this->minute,
 'timezone'=>$this->timezone];
-//var_dump($at);
+
         // TODO - Gregorian?
         //$this->extractCalendar($input);
 return $at;
 
     }
 
+    // TODO Refactor and replace with call to Timezone.
     function extractTimezone($input)
     {
         // Identifiy UTC.
