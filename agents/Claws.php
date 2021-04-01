@@ -59,6 +59,9 @@ class Claws extends Agent
         $this->makeClaws();
         $this->makeUrl();
         $this->makeZoommtg();
+
+        $this->emacsorgClaws();
+
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -132,39 +135,50 @@ dev - Detect duplicates.
 
     public function emacsorgClaws()
     {
-        if ($this->claws_emacsorg_flag != "on") {
+        // Add emacsorg to agent command string to trigger writing of emacs buffer file
+
+        if (
+            isset($this->claws_emacsorg_flag) and
+            $this->claws_emacsorg_flag != "on"
+        ) {
             return;
         }
-
         // Code to write an org item goes here.
 
-/*
+        /*
 ** Strategy Meeting
    SCHEDULED: <2021-03-31 Wed 11:00>
    https://meeting.example.com/place/z.phz?MTID=a1a1a1a1a1
-
 */
 
-        // Build entry for when calendar
-        $line = "test item";
+        // Build entry for emacs org mode
+        // and append to appropriate emacs buffer
 
-        $this->updateEmacs($line);
-
-/*
-
+        $count = 0;
+        $text = "";
         foreach ($this->claws_items as $i => $claws_item) {
+            // Build suitable emacs org time for schedule
+
+            // Refactor to Time
+            $dateline = $this->timestampDateline($claws_item["dateline"]);
+            $date_text = substr($dateline, 0, 10);
+            $day_text = ucwords(strtolower($claws_item["dateline"]["day"]));
+            $time_text = substr($dateline, 11, 5);
+            $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
+
             $call = $claws_item["call"];
 
-            $text_claws .= $claws_item["subject"] . "\n";
+            $text .= "**" . " " . $claws_item["subject"] . "\n";
+            $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
+            $text .= "   " . $call["url"] . "\n";
+            $text .=
+                "   " . $call["password"] . " / " . $call["access_code"] . "\n";
+            $text .= "\n";
 
-            "   " . $call["password"]) and
-            "   " . $call["access_code"]) and
-                $this->isUrl($call["url"])
-
-         }
-*/
-
-        $this->response .= "Wrote item to Emacs buffer file. ";
+            $this->updateEmacs($text);
+            $count += 1;
+        }
+        $this->response .= "Wrote " . $count . " items to Emacs buffer file. ";
     }
 
     // for testing.

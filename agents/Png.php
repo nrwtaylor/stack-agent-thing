@@ -222,7 +222,7 @@ class Png extends Agent
                 $text
             );
         }
-        //var_dump ($width);
+
         imagestring($image, 2, 100, 0, $this->thing->nuuid, $textcolor);
 
         $this->image = $image;

@@ -7,6 +7,7 @@ class Emacs extends Agent
 
     function init()
     {
+       $this->emacs_default_buffer = $this->settingsAgent(['emacs','default_buffer']);
     }
 
     function claws()
@@ -33,15 +34,27 @@ class Emacs extends Agent
         $thing_report["info"] = $message_thing->thing_report["info"];
     }
 
-    public function updateEmacs($filename = null, $text = null)
+    public function updateEmacs($text = null, $filename = null)
     {
         if ($text == null) {
             return true;
         }
+
+        if ($filename == null) {
+           if ($this->emacs_default_buffer == null) {return true;}
+           $filename = $this->emacs_default_buffer;
+        }
         $filename = trim($filename, '"');
 
-        if (!file_exists($filename)) {
-            return true;
+        // Check if the text is already in the buffer.
+        if (file_exists($filename)) {
+
+            $contents = file_get_contents($filename);
+
+            if (strpos($contents, $text) !== false) {
+                $this->response .= 'Text already in buffer. ';
+                return true;
+            }
         }
 
         file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);

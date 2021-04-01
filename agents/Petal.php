@@ -96,7 +96,7 @@ class Petal extends Agent
             $sms = "PETAL | Request not processed. Check syntax.";
         } else {
             $sms = "PETAL | ";
-            //var_dump($this->result);
+
             foreach ($this->result as $k => $v) {
                 foreach ($v as $key => $value) {
                     if ($key == "roll") {
@@ -277,11 +277,10 @@ class Petal extends Agent
     function iteratePetal()
     {
         $step_length = 20;
-        echo "<pre>";
+
         $drive_vector = [0, 1];
         $i = 0;
         foreach ($this->points as &$point) {
-            //  var_dump(rand(0,360)/360);
 
             $disturbance_vector = [rand(0, 100) / 100, rand(0, 100) / 100];
             $growth_vector = [
@@ -302,7 +301,6 @@ class Petal extends Agent
         if (!isset($this->rolls)) {
             $this->rolls = $this->extractRolls($input);
         }
-        //var_dump($this->rolls);
 
         if (count($this->rolls) == 1) {
             $this->roll = $this->rolls[0];
@@ -382,7 +380,6 @@ $input = $this->assert($this->input, "petal", false);
         }
 
         foreach ($dies as $die) {
-            //echo $die;
 
             $elements = explode("d", $die, 2);
 

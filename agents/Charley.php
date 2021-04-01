@@ -760,12 +760,6 @@ class Charley extends Agent
         // Small nuuid text for back-checking.
         imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
 
-        // Save the image
-        //header('Content-Type: image/png');
-        //imagepng($im);
-        //xob_clean();
-
-        // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
         if (ob_get_contents()) {
             ob_clean();
         }
@@ -778,7 +772,6 @@ class Charley extends Agent
 
         $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -832,7 +825,6 @@ class Charley extends Agent
 
     function readCharley()
     {
-        return $this->state;
     }
 
     public function readSubject()

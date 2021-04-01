@@ -3,7 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 class MH extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -17,7 +17,7 @@ class MH extends Agent
     public function doMH()
     {
         if ($this->agent_input == null) {
-            $array = ['miao', 'miaou', 'hiss', 'prrr', 'grrr'];
+            $array = ["miao", "miaou", "hiss", "prrr", "grrr"];
             $k = array_rand($array);
             $v = $array[$k];
 
@@ -39,11 +39,11 @@ class MH extends Agent
             "This mostly deals with equal signs at the end of lines.";
 
         //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     public function metaMH($text = null)
@@ -60,17 +60,13 @@ class MH extends Agent
 
     public function subjectMH($text = null)
     {
-if ($text !== null) {
-$datagram = $this->readEmail($text);
-return $datagram['subject'];
-}
+        if ($text !== null) {
+            $datagram = $this->readEmail($text);
+            return $datagram["subject"];
+        }
 
-//        if (!isset($this->datagram)) {
-//            $this->datagram = $this->readEmail($text);
-//        }
-
-        if (isset($this->datagram['subject'])) {
-            return $this->datagram['subject'];
+        if (isset($this->datagram["subject"])) {
+            return $this->datagram["subject"];
         }
 
         // Test and dev.
@@ -81,17 +77,13 @@ return $datagram['subject'];
 
     public function bodyMH($text = null)
     {
-if ($text !== null) {
-$datagram = $this->readEmail($text);
-return $datagram['text'];
-}
+        if ($text !== null) {
+            $datagram = $this->readEmail($text);
+            return $datagram["text"];
+        }
 
-//        if (!isset($this->datagram)) {
-//            $this->datagram = $this->readEmail($text);
-//        }
-
-        if (isset($this->datagram['text'])) {
-            return $this->datagram['text'];
+        if (isset($this->datagram["text"])) {
+            return $this->datagram["text"];
         }
     }
 
@@ -100,8 +92,8 @@ return $datagram['text'];
         if ($text == null) {
             return;
         }
-$text = quoted_printable_decode($text);
-return $text;
+        $text = quoted_printable_decode($text);
+        return $text;
 
         // Test and dev.
 
@@ -142,14 +134,14 @@ return $text;
     {
         $this->node_list = ["mh" => ["mh", "dog"]];
         $this->sms_message = "" . $this->mh_message;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     function makeChoices()
     {
-        $this->thing->choice->Create('channel', $this->node_list, "mh");
-        $choices = $this->thing->choice->makeLinks('mh');
-        $this->thing_report['choices'] = $choices;
+        $this->thing->choice->Create("channel", $this->node_list, "mh");
+        $choices = $this->thing->choice->makeLinks("mh");
+        $this->thing_report["choices"] = $choices;
     }
 
     public function readSubject()
