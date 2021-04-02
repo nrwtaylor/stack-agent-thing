@@ -590,8 +590,6 @@ class Qrs extends Agent
                             return;
 
                         case "on":
-                        //$this->setFlag('green');
-                        //break;
 
                         default:
                     }

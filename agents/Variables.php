@@ -2,7 +2,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set("display_errors", 1);
 
 /*
 set_error_handler(function(int $number, string $message) {
@@ -35,31 +35,31 @@ class Variables
 
         $this->uuid = $thing->uuid;
 
-// Review.
-// This is needed for null things.
-// Need to extend Variables with Agent.
-// And avoid recursive calls.
+        // Review.
+        // This is needed for null things.
+        // Need to extend Variables with Agent.
+        // And avoid recursive calls.
 
-$this->to = 'null';
-if (isset($thing->to)) {
-        $this->to = $thing->to;
-}
+        $this->to = "null";
+        if (isset($thing->to)) {
+            $this->to = $thing->to;
+        }
         $this->from = $thing->from;
 
-$this->subject = 'merp';
-if (isset($thing->subject)) {
-        $this->subject = $thing->subject;
-}
+        $this->subject = "merp";
+        if (isset($thing->subject)) {
+            $this->subject = $thing->subject;
+        }
         $this->identity = $this->from;
 
-$this->response = "";
+        $this->response = "";
 
         // Setup Agent
         $this->agent = strtolower(get_class());
 
         $this->agent_name = "variables";
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
-        $this->agent_variables = ['variable', 'name', 'alpha', 'beta']; //Default variable set.
+        $this->agent_variables = ["variable", "name", "alpha", "beta"]; //Default variable set.
         $this->agent_variables = [];
         $this->max_variable_sets = 5;
 
@@ -69,12 +69,12 @@ $this->response = "";
         $this->log_verbosity = 1;
 
         $this->agent_keywords = [
-            'add',
-            'increment',
-            'equal',
-            'equals',
-            '=',
-            'is',
+            "add",
+            "increment",
+            "equal",
+            "equals",
+            "=",
+            "is",
             "&",
             "+",
             "-",
@@ -89,12 +89,12 @@ $this->response = "";
         $this->limit = 1e99;
 
         // Setup reporting
-        $this->thing_report['thing'] = $this->thing->thing;
+        $this->thing_report["thing"] = $this->thing->thing;
 
         if ($agent_command == null) {
             $this->thing->log(
                 $this->agent_prefix .
-                    'did not find an agent command. No action taken.',
+                    "did not find an agent command. No action taken.",
                 "WARNING"
             );
         }
@@ -107,7 +107,7 @@ $this->response = "";
             $agent_command . " " . $this->from . " " . $this->subject;
 
         // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {
+        if ($this->thing->container["stack"]["state"] == "dev") {
             $this->test = true;
         }
         // I think.
@@ -117,10 +117,10 @@ $this->response = "";
 
         $this->thing->log(
             $this->agent_prefix .
-                'running on Thing ' .
+                "running on Thing " .
                 $this->thing->nuuid .
-                '.',
-            'INFORMATION'
+                ".",
+            "INFORMATION"
         );
 
         $this->readInstruction();
@@ -144,25 +144,24 @@ $this->response = "";
 
         $this->thing->log(
             $this->agent_prefix .
-                'ran for ' .
+                "ran for " .
                 number_format(
                     $this->thing->elapsed_runtime() - $this->start_time
                 ) .
-                'ms.',
-            'OPTIMIZE'
+                "ms.",
+            "OPTIMIZE"
         );
 
-        $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report["log"] = $this->thing->log;
     }
 
     function setVariables()
     {
-if (!isset($this->thing->db)) {
-$this->thing->log("Could not write to stack.");
-$this->response .= "Could not write to stack. ";
-return;
-
-}
+        if (!isset($this->thing->db)) {
+            $this->thing->log("Could not write to stack.");
+            $this->response .= "Could not write to stack. ";
+            return;
+        }
         $this->thing->db->setFrom($this->identity);
 
         $refreshed_at = false;
@@ -210,26 +209,25 @@ return;
 
         $this->thing->log(
             $this->agent_prefix . 'got variable "' . $variable_set_name . '".',
-            'INFORMATION'
+            "INFORMATION"
         );
 
         // We will probably want a getThings at some point.
 
-// Is there a database?
-$things = [null];
-if (isset($this->thing->db)) {
+        // Is there a database?
+        $things = [null];
+        if (isset($this->thing->db)) {
+            $this->thing->db->setFrom($this->identity);
 
-        $this->thing->db->setFrom($this->identity);
+            // Returns variable sets managed by Variables.
+            // Creates just one record per variable set.
+            $thing_report = $this->thing->db->agentSearch(
+                "variables",
+                $this->max_variable_sets
+            );
 
-        // Returns variable sets managed by Variables.
-        // Creates just one record per variable set.
-        $thing_report = $this->thing->db->agentSearch(
-            "variables",
-            $this->max_variable_sets
-        );
-
-        $things = $thing_report['things'];
-}
+            $things = $thing_report["things"];
+        }
         // When we have that list of Things, we check it for the tally we are looking for.
         // Review using $this->limit as search length limiter.  Might even just
         // limit search to N microseconds of search.
@@ -241,25 +239,24 @@ if (isset($this->thing->db)) {
         } else {
             $this->thing->log(
                 $this->agent_prefix .
-                    'got ' .
+                    "got " .
                     count($things) .
-                    ' recent variable sets.',
+                    " recent variable sets.",
                 "DEBUG"
             );
 
             foreach ($things as $thing) {
                 // Check each of the Things.
-        //        $this->variables_thing = new Thing($thing['uuid']);
+                //        $this->variables_thing = new Thing($thing['uuid']);
 
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
 
                 if ($this->getVariableSet($thing) == false) {
-
                     $this->thing->log(
                         $this->agent_prefix .
-                            'got ' .
+                            "got " .
                             $this->variables_thing->nuuid,
                         "DEBUG"
                     );
@@ -292,7 +289,7 @@ if (isset($this->thing->db)) {
         $this->variables_thing->Create(
             $this->identity,
             "variables",
-            's/ variables'
+            "s/ variables"
         );
         $this->variables_thing->flagGreen();
 
@@ -319,7 +316,7 @@ if (isset($this->thing->db)) {
         $this->{$variable . "_overflow_flag"} = false;
 
         if ($variable == null) {
-            $variable = 'variable';
+            $variable = "variable";
         }
 
         if (isset($this->variables_thing->$variable)) {
@@ -335,7 +332,7 @@ if (isset($this->thing->db)) {
             $this->{$variable . "_overflow_flag"} = true; // true is the error flag
             //$this->thing->flagRed();
 
-            $this->thing->log('Variable overflow.', "ERROR");
+            $this->thing->log("Variable overflow.", "ERROR");
             $this->function_message = "Variable overflow";
             // THIS IS WHERE THE WORK IS nrwtaylor 1635 18 Oct 2017
 
@@ -356,24 +353,21 @@ if (isset($this->thing->db)) {
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
-//if (!isset($thing['uuid'])) {
-//    $thing['uuid'] = null;
-//}
-$uuid = null;
-if (isset($thing['uuid'])) {
-$uuid = $thing['uuid'];
-}
-                $this->variables_thing = new Thing($uuid);
+        //if (!isset($thing['uuid'])) {
+        //    $thing['uuid'] = null;
+        //}
+        $uuid = null;
+        if (isset($thing["uuid"])) {
+            $uuid = $thing["uuid"];
+        }
+        $this->variables_thing = new Thing($uuid);
 
-
-        if (!isset($this->variables_thing->account['stack'])) {
+        if (!isset($this->variables_thing->account["stack"])) {
             // No stack balance available.
             return null;
         }
 
-
-
-        $variables = $this->variables_thing->account['stack']->json->array_data;
+        $variables = $this->variables_thing->account["stack"]->json->array_data;
 
         if (isset($variables[$this->variable_set_name])) {
             $this->context = "train";
@@ -394,16 +388,17 @@ $uuid = $thing['uuid'];
         return false;
     }
 
-    public function makeVariableset() {
-
+    public function makeVariableset()
     {
         // Urgh :/
         $t = "";
         $t .= "<br>Screened on: " . $this->variable_set_name . "<br>";
-        $t .= "<br>nuuid " . substr($this->variables_thing->uuid, 0, 4) . "<br>";
+        $t .=
+            "<br>nuuid " . substr($this->variables_thing->uuid, 0, 4) . "<br>";
 
         foreach ($this->agent_variables as $key => $variable_name) {
-            $t .= $variable_name .
+            $t .=
+                $variable_name .
                 " is " .
                 $this->variables_thing->$variable_name .
                 " ";
@@ -413,9 +408,6 @@ $uuid = $thing['uuid'];
         return $t;
     }
 
-
-    }
-
     function echoVariableset()
     {
         echo $this->makeVariableset();
@@ -423,9 +415,9 @@ $uuid = $thing['uuid'];
 
     function getVariable($variable = null)
     {
-if (!isset($this->thing->db)) {
-return true;
-}
+        if (!isset($this->thing->db)) {
+            return true;
+        }
 
         // Pulls variable from the database
         // and sets variables thing on the current record.
@@ -441,7 +433,7 @@ return true;
         // only two role descriptions.)
 
         if ($variable == null) {
-            $variable = 'variable';
+            $variable = "variable";
         }
 
         $this->variables_thing->db->setFrom($this->identity);
@@ -459,9 +451,9 @@ return true;
 
     function setVariable($variable = null, $value = null)
     {
-if (!isset($this->thing->db)) {
-return true;
-}
+        if (!isset($this->thing->db)) {
+            return true;
+        }
         // Take a variable in the variables_thing and save
         // into the database.  Probably end
         // up coding setVariables, to
@@ -469,7 +461,7 @@ return true;
         // a logic perspective.
 
         if ($variable == null) {
-            $variable = 'variable';
+            $variable = "variable";
         }
 
         // Review why it would be unsset at this point.
@@ -496,9 +488,9 @@ return true;
             $text = strtolower($this->subject);
             if ($text == "forget all" or $text == "forgetall") {
             } else {
-                $this->thing_report['thing'] = $this->thing->thing;
+                $this->thing_report["thing"] = $this->thing->thing;
                 //                $this->thing_report['sms'] = $this->sms_message;
-                $this->thing_report['sms'] =
+                $this->thing_report["sms"] =
                     "VARIABLES | 10,000 character stack variable space exhausted. Please text FORGET ALL to resolve.";
 
                 $agent_message = new Message($this->thing, $this->thing_report);
@@ -570,7 +562,7 @@ return true;
 
     function incrementVariable($variable = null)
     {
-        $this->addVariable('variable', 1);
+        $this->addVariable("variable", 1);
     }
 
     public function Respond()
@@ -620,13 +612,13 @@ return true;
         }
 
         if ($this->verbosity >= 5) {
-            $this->sms_message .= ' | TEXT ?';
+            $this->sms_message .= " | TEXT ?";
         }
-        $this->thing_report['thing'] = $this->thing->thing;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["thing"] = $this->thing->thing;
+        $this->thing_report["sms"] = $this->sms_message;
 
         // While we work on this
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
         $message_thing = new Message($this->thing, $this->thing_report);
 
         return $this->thing_report;
@@ -635,7 +627,7 @@ return true;
     public function defaultCommand()
     {
         $this->thing->log(
-            $this->agent_prefix . 'default command set.',
+            $this->agent_prefix . "default command set.",
             "DEBUG"
         );
 
@@ -828,15 +820,15 @@ with the start agent. And doesn't seem to be necessary
                             return;
 */
 
-                        case 'plus':
-                        case 'add':
-                        case '+':
+                        case "plus":
+                        case "add":
+                        case "+":
                             if (
                                 isset($this->number) and isset($this->variable)
                             ) {
                                 $this->thing->log(
                                     $this->agent_prefix .
-                                        'adding number to variable.',
+                                        "adding number to variable.",
                                     "INFORMATION"
                                 );
                                 $this->addVariable(
@@ -846,16 +838,16 @@ with the start agent. And doesn't seem to be necessary
                                 return;
                             }
 
-                        case 'minus':
-                        case 'subtract':
-                        case 'less':
-                        case '-':
+                        case "minus":
+                        case "subtract":
+                        case "less":
+                        case "-":
                             if (
                                 isset($this->number) and isset($this->variable)
                             ) {
                                 $this->thing->log(
                                     $this->agent_prefix .
-                                        'adding number to variable.',
+                                        "adding number to variable.",
                                     "INFORMATION"
                                 );
                                 $this->addVariable(
@@ -865,30 +857,30 @@ with the start agent. And doesn't seem to be necessary
                                 return;
                             }
 
-                        case 'increment':
+                        case "increment":
                             if (isset($this->variable)) {
                                 $this->thing->log(
                                     $this->agent_prefix .
-                                        'incrementing variable.',
+                                        "incrementing variable.",
                                     "INFORMATION"
                                 );
                                 $this->incrementVariable($this->variable);
                                 return;
                             }
 
-                        case 'equals':
-                        case 'is':
-                        case '=':
+                        case "equals":
+                        case "is":
+                        case "=":
                             if (
                                 isset($this->number) and isset($this->variable)
                             ) {
                                 $this->thing->log(
                                     $this->agent_prefix .
-                                        'setting ' .
+                                        "setting " .
                                         $this->variable .
-                                        ' to ' .
+                                        " to " .
                                         $this->number .
-                                        '.',
+                                        ".",
                                     "INFORMATION"
                                 );
 
@@ -899,7 +891,7 @@ with the start agent. And doesn't seem to be necessary
                                 return;
                             }
 
-                        case 'add':
+                        case "add":
                         case "&":
                             if (isset($this->variable)) {
                                 $this->thing->log(
@@ -920,7 +912,7 @@ with the start agent. And doesn't seem to be necessary
                                 return;
                             }
 
-                        case 'memory':
+                        case "memory":
                             //$t = $this->thing->db->length();
                             //var_dump($t);
 
@@ -932,7 +924,7 @@ with the start agent. And doesn't seem to be necessary
             }
         }
 
-        $this->thing->log($this->agent_prefix . ' did no operation.', "DEBUG");
+        $this->thing->log($this->agent_prefix . " did no operation.", "DEBUG");
     }
 
     public function newVariable($name = null, $value = null)

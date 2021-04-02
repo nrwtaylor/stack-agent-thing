@@ -101,6 +101,12 @@ class Token extends Agent
         $this->slug = $slug;
     }
 
+    public function countTokens($input = null) {
+       if ($input === null) {return true;}
+       $tokens = explode(" ", $input);
+       return count($tokens);
+    }
+
     /**
      *
      */

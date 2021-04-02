@@ -153,8 +153,9 @@ class Ngram extends Agent
         return $ngrams;
     }
 
-    public function extractNgrams($input, $n = 3)
+    public function extractNgrams($input, $n = 3, $n_min = null)
     {
+        if ($n_min == null) {$n_min = 1;}
         if (is_array($input)) {
             return true;
         }
@@ -162,7 +163,7 @@ class Ngram extends Agent
         $ngrams = [];
 
         $num = $n;
-        foreach (range(1, $n, 1) as $num) {
+        foreach (range($n_min, $n, 1) as $num) {
             foreach ($words as $key => $value) {
                 if ($key < count($words) - ($num - 1)) {
                     $ngram = "";

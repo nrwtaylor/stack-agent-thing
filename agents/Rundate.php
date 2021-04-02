@@ -67,11 +67,26 @@ class Rundate extends Agent
      */
     function get($run_at = null)
     {
-
+/*
         $this->rundate = new Variables(
             $this->thing,
             "variables rundate " . $this->from
         );
+*/
+        $this->thing->json->setField("variables");
+        $this->head_code = $this->thing->json->readVariable([
+            "headcode",
+            "head_code",
+        ]);
+
+        $flag_variable_name = "_" . $this->head_code;
+
+        // Get the current Identities flag
+        $this->rundate = new Variables(
+            $this->thing,
+            "variables rundate" . $flag_variable_name . " " . $this->from
+        );
+
 
         if ($this->rundate == false) {
             return;

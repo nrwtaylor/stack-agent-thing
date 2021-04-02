@@ -74,10 +74,26 @@ class Runat extends Agent
      */
     function get($run_at = null)
     {
+/*
         $this->runat = new Variables(
             $this->thing,
             "variables runat " . $this->from
         );
+*/
+        $this->thing->json->setField("variables");
+        $this->head_code = $this->thing->json->readVariable([
+            "headcode",
+            "head_code",
+        ]);
+
+        $flag_variable_name = "_" . $this->head_code;
+
+        // Get the current Identities flag
+        $this->rundate = new Variables(
+            $this->thing,
+            "variables runat" . $flag_variable_name . " " . $this->from
+        );
+
 
         $headcode_agent = new Headcode($this->thing, "headcode");
         $this->head_code = $headcode_agent->head_code;

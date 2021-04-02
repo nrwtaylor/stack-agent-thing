@@ -538,7 +538,6 @@ public function __set($name, $value) {
                 $variables_array[$uuid] = $variables;
             }
         }
-
         return $variables_array;
     }
 
