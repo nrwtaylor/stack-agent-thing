@@ -86,18 +86,18 @@ class Runat extends Agent
             "head_code",
         ]);
 
-        $flag_variable_name = "_" . $this->head_code;
-
+ //       $flag_variable_name = "_" . $this->head_code;
+        $flag_variable_name = "";
         // Get the current Identities flag
-        $this->rundate = new Variables(
+        $this->runat = new Variables(
             $this->thing,
             "variables runat" . $flag_variable_name . " " . $this->from
         );
 
-
+/*
         $headcode_agent = new Headcode($this->thing, "headcode");
         $this->head_code = $headcode_agent->head_code;
-
+*/
         if ($this->runat == false) {
             return;
         }

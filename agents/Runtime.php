@@ -97,17 +97,22 @@ Show 1 minute.
 
     public function get()
     {
+        // Get headcode.
+        // Runtime is a train variable.
+        // So no need to post_fix variable name.
         $flag_variable_name = "";
+
+        // So report the associated headcode.
+
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
             "headcode",
             "head_code",
         ]);
 
-        $flag_variable_name = "_" . $this->head_code;
+        //$flag_variable_name = "_" . $this->head_code;
 
         // Get the current Identities flag
-
         $this->runtime = new Variables(
             $this->thing,
             "variables runtime" . $flag_variable_name . " " . $this->from

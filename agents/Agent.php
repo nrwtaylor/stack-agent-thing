@@ -148,6 +148,8 @@ class Agent
 
         $this->context = null;
 
+        $this->error = "";
+        $this->warning = "";
         $this->response = "";
 
         if (isset($thing->container["api"]["agent"])) {
@@ -645,6 +647,10 @@ public function __set($name, $value) {
         $this->makePNG();
         $this->makePNGs();
         $this->makeSMS();
+
+        // Snippet might be used by web.
+        // So run it first.
+        $this->makeSnippet();
         $this->makeWeb();
 
         $this->makeJson();
@@ -723,7 +729,7 @@ public function __set($name, $value) {
             $this->thing_report["web"] .= "<p>" . $web;
         }
 
-        $this->makeSnippet();
+        //$this->makeSnippet();
         $this->makeEmail();
         $this->makeTXT();
 

@@ -123,6 +123,8 @@ class Variables
             "INFORMATION"
         );
 
+        $this->initVariables();
+
         $this->readInstruction();
 
         // Not sure this is limiting.
@@ -154,7 +156,47 @@ class Variables
 
         $this->thing_report["log"] = $this->thing->log;
     }
+    
 
+    public function initVariables() {
+
+        // Train variables have an associated headcode.
+        $this->train_agents = [
+            "bell",
+            "horn",
+            "A4",
+            "stopwatch",
+            "hey",
+            "nod",
+            "at",
+            "event",
+            "job",
+            "frequency",
+            "qr",
+            "tone",
+            "pain",
+            "coordinate",
+            "place",
+            "rundate",
+            "amount",
+            "fuel",
+            "flag",
+            "state",
+            "quantity",
+            "alias",
+            "slug",
+            "url",
+            "runtime",
+            "runat",
+            "endat",
+            "available",
+            "state",
+            "route",
+            "consist",
+        ];
+
+
+    }
     function setVariables()
     {
         if (!isset($this->thing->db)) {
@@ -655,6 +697,8 @@ class Variables
         $headcode_flagging = "on";
         $variable_headcode = "";
 
+        $train_agents = $this->train_agents;
+/*
         $train_agents = [
             "flag",
             "state",
@@ -670,7 +714,7 @@ class Variables
             "route",
             "consist",
         ];
-
+*/
         if ($headcode_flagging == "on") {
             // Is this a train agent.
             // One which has a headcode associated with it.

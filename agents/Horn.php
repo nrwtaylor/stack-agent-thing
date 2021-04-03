@@ -7,17 +7,17 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Flag extends Agent
+class Horn extends Agent
 {
     public $var = 'hello';
 
     function init()
     {
-        $this->keyword = "flag";
+        $this->keyword = "horn";
 
         $this->test = "Development code"; // Always
 
-        // Set up default flag settings
+        // Set up default horn settings
         $this->verbosity = 1;
         $this->requested_state = null;
         $this->default_state = "green";
@@ -25,11 +25,11 @@ class Flag extends Agent
 
         // Get some stuff from the stack which will be helpful.
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/flag';
+        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/horn';
 
-        $this->refreshed_at = null;
+        //$this->refreshed_at = null;
 
-        $this->current_time = $this->thing->time();
+        //$this->current_time = $this->thing->time();
     }
 
     function set($requested_state = null)
@@ -49,34 +49,27 @@ class Flag extends Agent
         $this->state = $requested_state;
         $this->refreshed_at = $this->current_time;
 
-        $this->flag->setVariable("state", $this->state);
-        $this->flag->setVariable("refreshed_at", $this->current_time);
+        $this->horn->setVariable("state", $this->state);
+        $this->horn->setVariable("refreshed_at", $this->current_time);
 
     }
 
-    function isFlag($flag = null)
+    function isHorn($horn = null)
     {
-        // Validates whether the Flag is green or red.
+        // Validates whether the Horn is on or off.
         // Nothing else is allowed.
 
-        if ($flag == null) {
+        if ($horn == null) {
             if (!isset($this->state)) {
-                $this->state = "red";
+                $this->state = "on";
             }
 
-            $flag = $this->state;
+            $horn = $this->state;
         }
 
         if (
-            $flag == "red" or
-            $flag == "green" or
-            $flag == "rainbow" or
-            $flag == "yellow" or
-            $flag == "blue" or
-            $flag == "indigo" or
-            $flag == "violet" or
-            $flag == "orange" or
-            $flag == "grey"
+            $horn == "on" or
+            $horn == "off"
         ) {
             return false;
         }
@@ -87,29 +80,30 @@ class Flag extends Agent
     public function get()
     {
 
-
+        // Train variable so show headcode.
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
             "headcode",
             "head_code",
         ]);
 
-        $flag_variable_name = "_" . $this->head_code;
+        // $horn_variable_name = "_" . $this->head_code;
+        $horn_variable_name = "";
 
-        // Get the current Identities flag
-        $this->flag = new Variables(
+        // Get the current Identities horn
+        $this->horn = new Variables(
             $this->thing,
-            "variables flag" . $flag_variable_name . " " . $this->from
+            "variables horn" . $horn_variable_name . " " . $this->from
         );
 
-        // get gets the state of the Flag the last time
+        // get gets the state of the Horn the last time
         // it was saved into the stack (serialized).
-        $this->previous_state = $this->flag->getVariable("state");
-        $this->refreshed_at = $this->flag->getVariable("refreshed_at");
+        $this->previous_state = $this->horn->getVariable("state");
+        $this->refreshed_at = $this->horn->getVariable("refreshed_at");
 
         // If it is a valid previous_state, then
         // load it into the current state variable.
-        if (!$this->isFlag($this->previous_state)) {
+        if (!$this->isHorn($this->previous_state)) {
             $this->state = $this->previous_state;
         } else {
             $this->state = $this->default_state;
@@ -120,7 +114,7 @@ class Flag extends Agent
     {
         if ($choice == null) {
             if (!isset($this->state)) {
-                $this->response .= "Did not find an existing flag. ";
+                $this->response .= "Did not find an existing horn. ";
                 $this->state = $this->default_state;
             }
             $choice = $this->state;
@@ -132,16 +126,7 @@ class Flag extends Agent
         $this->previous_state = $this->state;
         $this->state = $choice;
 
-        $this->response .= "Selected a " . $this->state . " flag. ";
-
-        $this->thing->log(
-            'Agent "' .
-                ucwords($this->keyword) .
-                '" chose "' .
-                $this->state .
-                '".',
-            "INFORMATION"
-        );
+        $this->response .= "Selected horn " . $this->state . ". ";
 
         return $this->state;
     }
@@ -154,7 +139,7 @@ class Flag extends Agent
             $this->state
         );
 
-        $choices = $this->flag->thing->choice->makeLinks($this->state);
+        $choices = $this->horn->thing->choice->makeLinks($this->state);
         $this->thing_report['choices'] = $choices;
         $this->choices = $choices;
     }
@@ -175,14 +160,14 @@ class Flag extends Agent
         $this->thing_report['web'] = $web;
     }
 
-    public function readFlag()
+    public function readHorn()
     {
         $state_text = "X";
         if ((isset($this->state)) and ($this->state !== false))  {
             $state_text = $this->state;
         }
 
-        $this->response .= "Saw a " . $state_text . " Flag. ";
+        $this->response .= "Saw horn is " . $state_text . ". ";
     }
 
     public function respondResponse()
@@ -191,9 +176,6 @@ class Flag extends Agent
         //        $this->set($this->state);
 
         // Thing actions
-
-        $this->thing->flagGreen();
-
         if ($this->state == "inside nest") {
             $t = "NOT SET";
         } else {
@@ -210,21 +192,21 @@ class Flag extends Agent
 
     function makeHelp()
     {
-        if ($this->state == "green") {
+        if ($this->state == "on") {
             $this->thing_report['help'] =
-                'This Flag is either RED or GREEN. GREEN means available.';
+                'This Horn is either ON or OFF. ON means it can be heard.';
         }
 
-        if ($this->state == "red") {
+        if ($this->state == "off") {
             $this->thing_report['help'] =
-                'This Flag is either RED or GREEN. RED means busy.';
+                'This Horn is either OFF or ON. OFF means it can not be heard.';
         }
     }
 
     function makeTXT()
     {
-        $txt = 'This is FLAG POLE ' . $this->flag->nuuid . '. ';
-        $txt .= 'There is a ' . strtoupper($this->state) . " FLAG. ";
+        $txt = 'This is HORN ' . $this->horn->nuuid . ' for '. $this->head_code .  '. ';
+        $txt .= 'Horn is ' . strtoupper($this->state) . ". ";
         if ($this->verbosity >= 5) {
             $txt .=
                 'It was last refreshed at ' . $this->current_time . ' (UTC).';
@@ -236,16 +218,16 @@ class Flag extends Agent
 
     function makeSMS()
     {
-        $flag_state = "X";
+        $horn_state = "X";
         if ($this->state != false) {
-            $flag_state = $this->state;
+            $horn_state = $this->state;
         }
 
         $headcode_text = strtoupper($this->head_code);
         //$headcode_text = "XXXX";
 
         $sms_message =
-            "FLAG " . $headcode_text . " IS " . strtoupper($flag_state);
+            "HORN " . $headcode_text . " IS " . strtoupper($horn_state);
         if ($this->verbosity > 6) {
             $sms_message .=
                 " | previous state " . strtoupper($this->previous_state);
@@ -261,11 +243,11 @@ class Flag extends Agent
         }
         if ($this->verbosity >= 9) {
             $sms_message .=
-                " | base nuuid " . strtoupper($this->flag->thing->nuuid);
+                " | base nuuid " . strtoupper($this->horn->thing->nuuid);
         }
 
         if ($this->verbosity > 0) {
-            $sms_message .= " | nuuid " . $this->flag->nuuid;
+            $sms_message .= " | nuuid " . $this->horn->nuuid;
         }
 
         if ($this->verbosity > 2) {
@@ -287,19 +269,17 @@ class Flag extends Agent
     function makeMessage()
     {
         $message =
-            'This is a FLAG POLE.  The flag is a ' .
+            'This is a HORN.  The horn is ' .
             trim(strtoupper($this->state)) .
-            " FLAG. ";
+            ". ";
 
-        if ($this->state == 'red') {
-            $message .= 'It is a BAD time at the moment. ';
+        if ($this->state == 'off') {
+            $message .= 'No horn sounding. ';
         }
 
-        if ($this->state == 'green') {
-            $message .= 'It is a GOOD time now. ';
+        if ($this->state == 'on') {
+            $message .= 'Horn is sounding. ';
         }
-
-        //$test_message .= 'And the flag is ' . strtoupper($this->state) . ".";
 
         $this->message = $message;
         $this->thing_report['message'] = $message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
@@ -308,12 +288,6 @@ class Flag extends Agent
     public function makeImage()
     {
         $this->image = imagecreatetruecolor(200, 125);
-        //$red = imagecolorallocate($this->image, 255, 0, 0);
-        //$green = imagecolorallocate($this->image, 0, 255, 0);
-        //$grey = imagecolorallocate($this->image, 100, 100, 100);
-
-        //$this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -321,42 +295,8 @@ class Flag extends Agent
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
-        // For Vancouver Pride 2018
-
-        // https://en.wikipedia.org/wiki/Rainbow_flag
-        // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
-        // https://www.schemecolor.com/lgbt-flag-colors.php
-
-        // https://www.bustle.com/p/9-pride-flags-whose-symbolism-everyone-should-know-9276529
-
-        $this->blue = imagecolorallocate($this->image, 0, 68, 255);
-
-        $this->pride_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->pride_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->pride_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->pride_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->pride_blue = imagecolorallocate($this->image, 0, 68, 255);
-        $this->pride_violet = imagecolorallocate($this->image, 118, 0, 137);
-
-        $this->flag_red = imagecolorallocate($this->image, 231, 0, 0);
-        $this->flag_orange = imagecolorallocate($this->image, 255, 140, 0);
-        $this->flag_yellow = imagecolorallocate($this->image, 255, 239, 0);
-        $this->flag_green = imagecolorallocate($this->image, 0, 129, 31);
-        $this->flag_blue = imagecolorallocate($this->image, 0, 68, 255);
-        // Indigo https://www.rapidtables.com/web/color/purple-color.html
-        $this->flag_indigo = imagecolorallocate($this->image, 75, 0, 130);
-        $this->flag_violet = imagecolorallocate($this->image, 118, 0, 137);
-
-        $this->indigo = imagecolorallocate($this->image, 75, 0, 130);
-
-        $this->color_palette = [
-            $this->pride_red,
-            $this->pride_orange,
-            $this->pride_yellow,
-            $this->pride_green,
-            $this->pride_blue,
-            $this->pride_violet,
-        ];
+        $this->horn_on = imagecolorallocate($this->image, 231, 0, 0); // red = sounding
+        $this->horn_off = imagecolorallocate($this->image, 0, 129, 31); // green = quiet
 
         // Draw a white rectangle
         if (!isset($this->state) or $this->state == false) {
@@ -364,31 +304,14 @@ class Flag extends Agent
         } else {
             if (isset($this->{$this->state})) {
                 $color = $this->{$this->state};
-            } elseif (isset($this->{'flag_' . $this->state})) {
-                $color = $this->{'flag_' . $this->state};
+            } elseif (isset($this->{'horn_' . $this->state})) {
+                $color = $this->{'horn_' . $this->state};
             }
         }
 
-        if ($this->state == "rainbow") {
-            //    $color = $this->grey;
-            foreach (range(0, 5) as $n) {
-                $a = $n * (200 / 6);
-                $b = $n * (200 / 6) + 200 / 6;
-                $color = $this->color_palette[$n];
+        imagefilledrectangle($this->image, 0, 0, 200, 125, $color);
 
-                $a = $n * (125 / 6);
-                $b = $n * (125 / 6) + 200 / 6;
-
-                imagefilledrectangle($this->image, 0, $a, 200, $b, $color);
-            }
-        } else {
-            if (!isset($color)) {
-                $color = $this->grey;
-            }
-            imagefilledrectangle($this->image, 0, 0, 200, 125, $color);
-        }
-
-        $light_text_list = ["red", "rainbow", "indigo", "violet", "blue"];
+        $light_text_list = ["on"];
         if (in_array($this->state, $light_text_list)) {
             $textcolor = imagecolorallocate($this->image, 255, 255, 255);
         } else {
@@ -396,7 +319,7 @@ class Flag extends Agent
         }
 
         // Write the string at the top left
-        imagestring($this->image, 2, 150, 100, $this->flag->nuuid, $textcolor);
+        imagestring($this->image, 2, 150, 100, $this->horn->nuuid, $textcolor);
     }
 
     public function makePNG()
@@ -418,22 +341,12 @@ class Flag extends Agent
 
     public function readSubject()
     {
-        //$this->response = null;
-
         $keywords = [
-            'flag',
-            'red',
-            'green',
-            'rainbow',
-            'blue',
-            'indigo',
-            'orange',
-            'yellow',
-            'violet',
-            'gray',
-            'grey',
-            'gris',
-            'cinzento',
+            'horn',
+            'on',
+            'off',
+            'sound',
+            'quiet',
         ];
 
         if (isset($this->agent_input)) {
@@ -442,18 +355,14 @@ class Flag extends Agent
             $input = strtolower($this->subject);
         }
 
-        //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-
         $prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
-        // So this is really the 'sms' section
-        // Keyword
         if (count($pieces) == 1) {
             if ($input == $this->keyword) {
                 //$this->get();
-                $this->response .= "Got the flag. ";
+                $this->response .= "Got the horn. ";
                 return;
             }
         }
@@ -462,31 +371,18 @@ class Flag extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'red':
+                        case 'sound':
+                        case 'on':
                             $this->thing->log(
                                 $this->agent_prefix .
-                                    'received request for RED FLAG.',
+                                    'received request for HORN ON.',
                                 "INFORMATION"
                             );
-                            $this->selectChoice('red');
+                            $this->selectChoice('on');
                             return;
-                        case 'green':
-                            $this->selectChoice('green');
-                            return;
-                        case 'rainbow':
-                        case 'blue':
-                        case 'indigo':
-                        case 'orange':
-                        case 'yellow':
-                        case 'violet':
-                            $this->selectChoice($piece);
-                            return;
-
-                        case 'gray':
-                        case 'grey':
-                        case 'gris':
-                        case 'cinzento':
-                            $this->selectChoice('grey');
+                        case 'quiet':
+                        case 'off':
+                            $this->selectChoice('off');
                             return;
 
                         case 'next':
@@ -497,7 +393,7 @@ class Flag extends Agent
             }
         }
 
-        $this->readFlag();
+        $this->readHorn();
 
     }
 }
