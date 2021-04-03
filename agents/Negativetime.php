@@ -28,7 +28,7 @@ class Negativetime extends Agent {
     /**
      *
      */
-    function run() {
+    function get() {
         $this->getNegativetime();
     }
 
@@ -55,14 +55,13 @@ class Negativetime extends Agent {
 
         $date_text = $enddate->year . "-" . $enddate->month . "-" . $enddate->day ." " . $this->endat->hour . ":" . $this->endat->minute;
         $end_time = strtotime($date_text);
-var_dump($date_text);
+
         $now = (strtotime($this->current_time));
-var_dump($this->current_time);
+
         $negative_time = $end_time - $now;
 
 
         if ($negative_time > 0) {
-            //var_dump($runat->datetime);
             $this->negative_time = $end_time - $now;
         } else {
             $this->negative_time = null;
@@ -76,40 +75,22 @@ var_dump($this->current_time);
      *
      * @return unknown
      */
-    public function respond() {
-
+    public function respondResponse() {
 
         $this->thing->flagGreen();
 
-        $to = $this->thing->from;
-        $from = "negativetime";
-
-
-
-
-
-        //        $response = $input . "Try " . strtoupper($v) . ".";
-
-
-        $this->makeSMS();
         $this->makeChoices();
 
         $this->thing_report["info"] = "This is about negative time.";
         $this->thing_report["help"] = "Negative time is the time after a Bell.  It is a measure of the total advance on the bell.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['txt'] = $this->sms_message;
-
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $thing_report['info'] = $message_thing->thing_report['info'] ;
         }
-
-        return $this->thing_report;
-
-
     }
 
 
@@ -131,18 +112,18 @@ var_dump($this->current_time);
             } else {
                 $response = "NEGATIVE TIME | " . "+".$this->thing->human_time( $this->negative_time)." until ";
             }
-            $response .= "" . $this->endat->day . " " . str_pad("0", 2, $this->endat->hour, STR_PAD_LEFT) . ":" . str_pad("0", 2, $this->endat->minute, STR_PAD_LEFT) .".";
+            $response .= "" . $this->endat->day . " " . str_pad($this->endat->hour, 2 ,"0" , STR_PAD_LEFT) . ":" . str_pad($this->endat->minute, 2, "0", STR_PAD_LEFT) .".";
 
             if ($this->negative_time == null) {$response = "NEGATIVE TIME | Event not set. Set ENDDATE and/or ENDAT.";}
 
-            $this->cat_message = $response;
+            $this->negativetime_message = $response;
         } else {
-            $this->cat_message = $this->agent_input;
+            $this->negativetime_message = $this->agent_input;
         }
 
 
-        $this->node_list = array("cat"=>array("cat", "negative time"));
-        $this->sms_message = "" . $this->cat_message;
+        $this->node_list = array("negativetime"=>array( "negative time"));
+        $this->sms_message = "" . $this->negativetime_message;
         $this->thing_report['sms'] = $this->sms_message;
 
     }
@@ -152,8 +133,7 @@ var_dump($this->current_time);
      *
      */
     function makeChoices() {
-        $this->thing->choice->Create('channel', $this->node_list, "cat");
-        $choices = $this->thing->choice->makeLinks('cat');
+        $choices = false;
         $this->thing_report['choices'] = $choices;
     }
 
@@ -163,12 +143,6 @@ var_dump($this->current_time);
      * @return unknown
      */
     public function readSubject() {
-
-
-        //$input = strtolower($this->subject);
-
-
-        return false;
     }
 
 

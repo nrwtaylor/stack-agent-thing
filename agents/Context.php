@@ -690,20 +690,17 @@ class Context extends Agent
                 if ($word == $discriminator) {
                     $count[$discriminator] = $count[$discriminator] + 1;
                     $total_count = $total_count + 1;
-                    //echo "sum";
                 }
 
                 foreach ($contexts[$discriminator] as $context) {
                     if ($word == $context) {
                         $count[$discriminator] = $count[$discriminator] + 1;
                         $total_count = $total_count + 1;
-                        //echo "sum";
                     }
                 }
             }
         }
 
-        //echo "total count"; $total_count;
         // Set total sum of all values to 1.
 
         $normalized = [];
@@ -717,7 +714,6 @@ class Context extends Agent
         // Now see what the delta is between position 0 and 1
 
         foreach ($normalized as $key => $value) {
-            //echo $key, $value;
 
             if (isset($max)) {
                 $delta = $max - $value;
@@ -729,10 +725,7 @@ class Context extends Agent
             }
         }
 
-        //echo '<pre> Agent "Train" normalized discrimators "';print_r($normalized);echo'"</pre>';
-
         if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
             return $selected_discriminator;
         } else {
             return false; // No discriminator found.
@@ -744,11 +737,7 @@ class Context extends Agent
     function warning_handler($errno, $errstr, $errfile, $errline)
     {
         //throw new \Exception('Class not found.');
-
         //trigger_error("Fatal error", E_USER_ERROR);
-
-        //echo $errno;
-        //echo $errstr;
         // do something
     }
 }

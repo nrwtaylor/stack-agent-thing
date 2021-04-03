@@ -274,8 +274,6 @@ class Douglas extends Agent
 
     public function get()
     {
-        //echo "associations" . $this->thing->associations ."\n";
-
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "douglas",

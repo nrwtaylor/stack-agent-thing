@@ -300,7 +300,6 @@ class Pain extends Agent
                             );
 
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is pain";
                                 $this->pain_score = null;
                                 $this->notePain($input);
                                 $this->sms_message = "meep";
@@ -407,7 +406,6 @@ class Pain extends Agent
         //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
 
         $this->thing_report['png'] = $image;
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
         return $this->thing_report['png'];
     }

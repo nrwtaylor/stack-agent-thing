@@ -105,9 +105,6 @@ class Exclamation extends Agent
     {
         $input = strtolower($this->input);
 
-//$test = $this->stripExclamation($input , ".");
-//var_dump($test);
-
         $this->readExclamation($input);
 
         $keywords = ['!', 'interrobang', 'exclamation'];

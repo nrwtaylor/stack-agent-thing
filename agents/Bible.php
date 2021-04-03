@@ -319,7 +319,6 @@ class Bible extends Agent
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

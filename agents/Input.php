@@ -349,7 +349,6 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
         }
 
         if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
             return $selected_discriminator;
         } else {
             return false; // No discriminator found.

@@ -5,113 +5,98 @@
  * @package default
  */
 
-
 // 4 letters.  Is handy to have.
 namespace Nrwtaylor\StackAgentThing;
 
 // Transparency
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Alpha extends Agent
 {
-
-public function isAlpha($token) {
-
-                    if (ctype_alpha($token)) {
-                        return true;
-                    }
-return false;
-
-
-}
-
+    public function isAlpha($token)
+    {
+        if (ctype_alpha($token)) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      *
      */
-    function init() {
-        $this->node_list = array("alpha"=>
-            array("number"));
+    function init()
+    {
+        $this->node_list = ["alpha" => ["number"]];
 
-        $this->aliases = array("learning"=>array("good job"));
+        $this->aliases = ["learning" => ["good job"]];
         $this->recognize_french = true; // Flag error
     }
 
-
     /**
      *
      */
-    function get() {
-//        $this->alpha_agent = new Variables($this->thing, "variables alpha " . $this->from);
-
-//        $this->alpha = $this->alpha_agent->getVariable("alpha");
-//        $this->refreshed_at = $this->alpha_agent->getVariable("refreshed_at");
+    function get()
+    {
     }
 
-
     /**
      *
      */
-    function set() {
-
+    function set()
+    {
         $time_string = $this->thing->json->time();
         $this->thing->json->writeVariable(
-            array("alpha", "refreshed_at"),
+            ["alpha", "refreshed_at"],
             $time_string
         );
-
-//        $this->alpha_agent->setVariable("alpha", $this->alpha);
-
-//        $this->alpha_agent->setVariable("refreshed_at", $this->current_time);
-
+/*
+        $this->thing->json->setField("settings");
+        $this->thing->json->writeVariable(
+            ["alpha", "received_at"],
+            $this->thing->json->time()
+        );
+*/
     }
 
-    public function trimAlpha($text) {
-$letters = array();
-$new_text = "";
-$flag = false;
-foreach(range(0, mb_strlen($text)) as $i) {
+    public function trimAlpha($text)
+    {
+        $letters = [];
+        $new_text = "";
+        $flag = false;
+        foreach (range(0, mb_strlen($text)) as $i) {
+            $letter = substr($text, $i, 1);
 
-$letter = substr($text,$i,1);
-//if (ctype_alpha($letter)) {$flag = true;}
-if (ctype_alnum($letter)) {$flag = true;}
+            if (ctype_alnum($letter)) {
+                $flag = true;
+            }
 
+            if (!ctype_alnum($letter) and $flag == false) {
+                $letter = "";
+            }
 
-//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
-if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
+            $letters[] = $letter;
+        }
 
-$letters[] = $letter;
+        $new_text = "";
+        $flag = false;
+        foreach (array_reverse($letters) as $i => $letter) {
+            if (ctype_alnum($letter)) {
+                $flag = true;
+            }
 
-}
+            if (!ctype_alnum($letter) and $flag == false) {
+                $letter = "";
+            }
 
-//$text = $new_text;
+            $n = count($letters) - $i - 1;
 
-$new_text = "";
-$flag = false;
-foreach(array_reverse($letters) as $i=>$letter) {
+            $letters[$n] = $letter;
+        }
+        $new_text = implode("", $letters);
 
-//$letter = substr($text,$i,1);
-//if (ctype_alpha($letter)) {$flag = true;}
-if (ctype_alnum($letter)) {$flag = true;}
-
-
-//if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
-if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
-
-$n = count($letters) - $i -1;
-
-$letters[$n] = $letter;
-
-}
-$new_text = implode("",$letters);
-
-return $new_text;
-
-
-
-
+        return $new_text;
     }
 
     function countAlpha($text)
@@ -138,13 +123,13 @@ return $new_text;
         return $max_count;
     }
 
-
     /**
      *
      * @param unknown $input (optional)
      * @return unknown
      */
-    function extractAlphas($input = null) {
+    function extractAlphas($input = null)
+    {
         if ($input == null) {
             $input = $this->subject;
         }
@@ -152,132 +137,67 @@ return $new_text;
         // Life goals regex that does this
 
         if (!isset($this->alphas)) {
-            $this->alphas = array();
+            $this->alphas = [];
         }
 
         $pieces = explode(" ", $input);
         $this->alphas = [];
-        foreach ($pieces as $key=>$piece) {
-
+        foreach ($pieces as $key => $piece) {
             if (ctype_alpha($piece)) {
                 $this->alphas[] = $piece;
                 continue;
             }
-
-            // X - Specify. Z - Available.
-            //if ((strtoupper($piece) == "X") or (strtoupper($piece == "Z"))) {
-            //    $this->alphas[] = $piece;
-            //    continue;
-            //}
-
-
-            //            if (is_numeric(substr($piece,1,-1))) {
-            //                if ((substr($piece,0,1) == "(") and (substr($piece,-1,1) == ")")) {
-            //                    $this->numbers[] = -1 * substr($piece,1,-1);
-            //                    continue;
-            //                }
-
-            //                $this->numbers[] = substr($piece,1,-1);
-            //                continue;
-            //            }
 
             if (ctype_alpha(str_replace(",", "", $piece))) {
                 $this->alphas[] = str_replace(",", "", $piece);
                 continue;
             }
 
-            // preg_match_all('!\d+!', $piece, $matches);
-//var_dump($piece);
-
-if (ctype_alpha($piece)) {
-
-$this->alphas[] = $piece;
-
-
-}
-
-//            preg_match_all('/^\p{Alphabetic}+$/',  $piece, $matches);
-
-//            foreach ($matches[0] as $key=>$match) {
-//                $this->alphas[] = $match;
-//            }
-
+            if (ctype_alpha($piece)) {
+                $this->alphas[] = $piece;
+            }
         }
 
         return $this->alphas;
     }
 
-
     /**
      *
      */
-    function extractAlpha() {
+    function extractAlpha()
+    {
         $this->alpha = false; // No numbers.
-        if (!isset($this->alphas)) {$this->extractAlphas();}
+        if (!isset($this->alphas)) {
+            $this->extractAlphas();
+        }
 
         if (isset($this->alphas[0])) {
             $this->alpha = $this->alphas[0];
         }
-
     }
-
 
     /**
      *
      */
-    public function respond() {
+    public function respondResponse()
+    {
         // Thing actions
-
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(array("alpha",
-                "received_at"),  $this->thing->json->time()
-        );
-
         $this->thing->flagGreen();
-
-        $from = $this->from;
-        $to = $this->to;
-
-        $subject = $this->subject;
-
-        // Now passed by Thing object
-        $uuid = $this->uuid;
-        $sqlresponse = "yes";
-
-        //$message = "Thank you here is a Number.<p>" . $this->web_prefix . "thing/$uuid\n$sqlresponse \n\n<br> ";
-        //$message .= '<img src="' . $this->web_prefix . 'thing/'. $uuid.'/receipt.png" alt="thing:'.$uuid.'" height="92" width="92">';
-
-        $this->makeSMS();
-
-        //$this->thing_report['email'] = array('to'=>$from,
-        //   'from'=>'uuid',
-        //   'subject'=>$subject,
-        //   'message'=>$message,
-        //   'choices'=>$choices);
-
-        //$this->makePNG();
 
         $this->makeChoices();
 
-
-
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'] ;
 
-        $this->makeWeb();
-
-        $this->thing_report['thing'] = $this->thing->thing;
-
-        $this->thing_report['help'] = "This extracts alphas from the datagram.";
-
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
+        $this->thing_report["help"] = "This extracts alphas from the datagram.";
     }
-
 
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
+    public function readSubject()
+    {
         // If the to line is a UUID, then it needs
         // to be sent a receipt.
         if ($this->agent_input == null) {
@@ -293,7 +213,6 @@ $this->alphas[] = $piece;
         $this->extractAlphas($input);
         $this->extractAlpha();
 
-
         if ($this->alpha == false) {
             $this->get();
         }
@@ -301,8 +220,7 @@ $this->alphas[] = $piece;
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-
-            if ($input == 'alpha') {
+            if ($input == "alpha") {
                 $this->getAlpha();
                 $this->response = "Last alpha retrieved.";
                 return;
@@ -314,31 +232,35 @@ $this->alphas[] = $piece;
         return $status;
     }
 
-
     /**
      *
      */
-    function makeWeb() {
+    function makeWeb()
+    {
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/uuid";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/uuid';
-
-        $this->node_list = array("number"=>array("number", "thing"));
+        $this->node_list = ["number" => ["number", "thing"]];
 
         $web = '<a href="' . $link . '">';
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/uuid.png">';
+        $web .=
+            '<img src= "' .
+            $this->web_prefix .
+            "thing/" .
+            $this->uuid .
+            '/uuid.png">';
         $web .= "</a>";
 
         $web .= "<br>";
-        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+        $web .= "<b>" . ucwords($this->agent_name) . " Agent</b><br>";
         $web .= $this->subject . "<br>";
 
         if (!isset($this->numbers[0])) {
             $web .= "No numbers found<br>";
         } else {
-            $web .= "First number is ". $this->alphas[0] . "<br>";
+            $web .= "First number is " . $this->alphas[0] . "<br>";
             $web .= "Extracted numbers are:<br>";
         }
-        foreach ($this->alphas as $key=>$alpha) {
+        foreach ($this->alphas as $key => $alpha) {
             $web .= $alpha . "<br>";
         }
 
@@ -348,14 +270,14 @@ $this->alphas[] = $piece;
 
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
-
 
     /**
      *
      */
-    function makeSMS() {
+    function makeSMS()
+    {
         $sms = "ALPHA | ";
         //foreach ($this->numbers as $key=>$number) {
         //    $this->sms_message .= $number . " | ";
@@ -364,27 +286,26 @@ $this->alphas[] = $piece;
         //$this->sms_message .= 'devstack';
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
-
 
     /**
      *
      */
-    function makeChoices() {
+    function makeChoices()
+    {
         $this->thing->choice->Create("number", $this->node_list, "number");
 
         $choices = $this->thing->choice->makeLinks("number");
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
-
 
     /**
      *
      * @return unknown
      */
-/*
+    /*
     public function makePNG() {
         $text = "thing:".$this->alphas[0];
 
@@ -401,5 +322,4 @@ $this->alphas[] = $piece;
         return $this->thing_report['png'];
     }
 */
-
 }

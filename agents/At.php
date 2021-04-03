@@ -243,15 +243,15 @@ class At extends Agent
         // Remove non dates.
         $input = $this->stripUrls($input);
 
-// Remove access codes (3 4 4)
+        // Remove access codes (3 4 4)
 
         $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
         preg_match_all($pattern, $input, $match);
         $t = $match[0];
 
-foreach($t as $i=>$access_code) {
-$input = str_replace($access_code, " ",$input);
-}
+        foreach ($t as $i => $access_code) {
+            $input = str_replace($access_code, " ", $input);
+        }
 
         $input = $this->stripTelephonenumbers($input, " ");
         $this->parsed_date = date_parse($input);
@@ -396,41 +396,23 @@ $input = str_replace($access_code, " ",$input);
             $this->minute = false;
             $this->hour = false;
         }
-
         $this->timezone = $this->extractTimezone($input);
 
-$at = ['year'=>$this->year,
-'month'=>$this->month,
-'day'=>$this->day,
-'day_number'=>$this->day_number,
-'hour'=>$this->hour,
-'minute'=>$this->minute,
-'timezone'=>$this->timezone];
+        $at = [
+            "year" => $this->year,
+            "month" => $this->month,
+            "day" => $this->day,
+            "day_number" => $this->day_number,
+            "hour" => $this->hour,
+            "minute" => $this->minute,
+            "timezone" => $this->timezone,
+        ];
 
         // TODO - Gregorian?
         //$this->extractCalendar($input);
-return $at;
-
+        return $at;
     }
 
-    // TODO Refactor and replace with call to Timezone.
-    function extractTimezone($input)
-    {
-        // Identifiy UTC.
-        $timezone = false;
-        if (stripos($input, "utc") !== false) {
-            $timezone = "UTC";
-        }
-
-        if (stripos($input, "pacific standard time") !== false) {
-            $timezone = "PST";
-        }
-// https://stackoverflow.com/questions/5362628/how-to-get-the-names-and-abbreviations-of-a-time-zone-in-php
-//var_dump(timezone_abbreviations_list());
-//$x = date_parse($input);
-
-        return $timezone;
-    }
     /**
      *
      * @param unknown $input (optional)

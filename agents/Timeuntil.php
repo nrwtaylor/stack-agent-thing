@@ -5,74 +5,70 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
-class Timeuntil extends Agent {
-
-    public $var = 'hello';
-
+class Timeuntil extends Agent
+{
+    public $var = "hello";
 
     /**
      *
      */
-    function init() {
-
-        $this->agent_name = 'time until';
-        $this->test= "Development code";
+    function init()
+    {
+        $this->agent_name = "time until";
+        $this->test = "Development code";
 
         $this->thing_report["info"] = "This is about time until.";
-        $this->thing_report["help"] = "Time until is the time to go until the Bell.";
-
-
+        $this->thing_report["help"] =
+            "Time until is the time to go until the Bell.";
     }
-
 
     /**
      *
      */
-    function run() {
+    function run()
+    {
         $this->getTimeuntil();
-
     }
-
 
     /**
      *
      */
-    function getTimeuntil() {
-
+    function getTimeuntil()
+    {
         // Read the subject line in $this->thing to get the currently focused date.
-
-        // devstack
-        //echo "Test what event parses.\n";
-        //$this->event = new Event($this->thing, "event");
-        //var_dump($this->event->day);
-        //var_dump($this->event->hour);
-        //var_dump($this->event->minute);
 
         $this->runat = new Runat($this->thing, "runat"); // get hour minute seconds for the currently focused event
         $rundate = new Rundate($this->thing, "rundate"); // get day month year for the currently focused event
         $this->rundate = $rundate;
 
-
-        if ( ($rundate->year == "X") or
-            ($rundate->month == "X") or
-            ($rundate->day == "X") or
-            ($this->runat->day == "X") or
-            (($this->runat->hour == "X") and ($this->runat->hour != 0)) or
-            (($this->runat->minute == "X") and ($this->runat->minute != 0))  ) {
-
-
+        if (
+            $rundate->year == "X" or
+            $rundate->month == "X" or
+            $rundate->day == "X" or
+            $this->runat->day == "X" or
+            $this->runat->hour == "X" and $this->runat->hour != 0 or
+            $this->runat->minute == "X" and $this->runat->minute != 0
+        ) {
             $this->time_until = null;
             return;
         }
 
-        $date_text = $rundate->year . "-" . $rundate->month . "-" . $rundate->day ." " . $this->runat->hour . ":" . $this->runat->minute;
+        $date_text =
+            $rundate->year .
+            "-" .
+            $rundate->month .
+            "-" .
+            $rundate->day .
+            " " .
+            $this->runat->hour .
+            ":" .
+            $this->runat->minute;
         $run_time = strtotime($date_text);
 
         $this->current_time = $this->thing->json->time();
-        $now = (strtotime($this->current_time));
+        $now = strtotime($this->current_time);
 
         $time_until = $run_time - $now;
 
@@ -86,76 +82,83 @@ class Timeuntil extends Agent {
         }
     }
 
-
-    /*
-    function makeSMS() {
-if (!isset($this->response)) {$this->makeResponse();}
-        $this->sms_message = "TIME UNTIL | " . $this->response;
-        $this->thing_report['sms'] = $this->sms_message;
-
-    }
-*/
-
-
-
     /**
      *
      */
-    function makeSMS() {
-
-
-
-        $response = "merp";
-        //        if ($this->agent_input == null) {
+    function makeSMS()
+    {
+        $response = "";
 
         if ($this->time_until < 0) {
-            $response = "TIME UNTIL | " . $this->thing->human_time( $this->time_until / -1)."";
+            $response =
+                "TIME UNTIL | " .
+                $this->thing->human_time($this->time_until / -1) .
+                "";
         } else {
-            $response = "TIME UNTIL | " . $this->thing->human_time( $this->time_until )."";
+            $response =
+                "TIME UNTIL | " .
+                $this->thing->human_time($this->time_until) .
+                "";
 
-            $days_to_go = intval($this->time_until / (24 * 60 *60));
-            $hours_to_go = intval(($this->time_until / (60*60)) - $days_to_go * 24);
-            $minutes_to_go = intval(($this->time_until / (60)) - (($days_to_go * 24 * 60) + ($hours_to_go * 60)));
-            $response .= " [" . $days_to_go . " days " . $hours_to_go . "hrs " . $minutes_to_go . "mins]";
+            $days_to_go = intval($this->time_until / (24 * 60 * 60));
+            $hours_to_go = intval(
+                $this->time_until / (60 * 60) - $days_to_go * 24
+            );
+            $minutes_to_go = intval(
+                $this->time_until / 60 -
+                    ($days_to_go * 24 * 60 + $hours_to_go * 60)
+            );
+            $response .=
+                " [" .
+                $days_to_go .
+                " days " .
+                $hours_to_go .
+                "hrs " .
+                $minutes_to_go .
+                "mins]";
         }
 
         $response .= " until";
 
-
-        //            $response .= " until " . $this->runat->day . " " . str_pad("0", 2, $this->runat->hour, STR_PAD_LEFT) . ":" . str_pad("0", 2, $this->runat->minute, STR_PAD_LEFT);
-
-        $date_string = $this->rundate->year . "/" . $this->rundate->month . "/" . $this->rundate->day;
+        $date_string =
+            $this->rundate->year .
+            "/" .
+            $this->rundate->month .
+            "/" .
+            $this->rundate->day;
 
         $time = new Time($this->thing, "time");
         $time->doTime($date_string);
 
-if ((isset($time->datum)) and ($time->datum != null)) {
-
-        $response .= " " . $time->datum->format('l') . " " . $time->datum->format('d/m/Y, H:i:s') ."";
-        $response .= " in " . $time->time_zone;
-
-}
+        if (isset($time->datum) and $time->datum != null) {
+            $response .=
+                " " .
+                $time->datum->format("l") .
+                " " .
+                $time->datum->format("d/m/Y, H:i:s") .
+                "";
+            $response .= " in " . $time->time_zone;
+        }
         $response .= ".";
 
-        if ($this->time_until == null) {$response = "TIME UNTIL | No response.";}
+        if ($this->time_until == null) {
+            $response = "TIME UNTIL | No response.";
+        }
         $this->cat_message = $response;
 
         $this->response = $this->cat_message;
-        $this->node_list = array("cat"=>array("cat", "time until"));
+        $this->node_list = ["cat" => ["cat", "time until"]];
         $this->sms_message = "" . $this->cat_message;
-        $this->thing_report['sms'] = $this->sms_message;
-
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
+    public function readSubject()
+    {
         $input = $this->filterAgent();
         return false;
     }
-
-
 }
-

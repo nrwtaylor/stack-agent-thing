@@ -3598,7 +3598,7 @@ if ($pid == -1) {
      * @param unknown $text (optional)
      * @return unknown
      */
-    function filterAgent($text = null)
+    function filterAgent($text = null, $more_strip_words = [])
     {
         //$input = strtolower($this->subject);
         $input = $this->input;
@@ -3612,6 +3612,9 @@ if ($pid == -1) {
             ucwords($this->agent_name),
             strtoupper($this->agent_name),
         ];
+
+        $strip_words = array_merge($strip_words, $more_strip_words);
+
         foreach ($strip_words as $i => $strip_word) {
             $strip_words[] = str_replace(" ", "", $strip_word);
         }

@@ -162,6 +162,7 @@ class Variables
 
         // Train variables have an associated headcode.
         $this->train_agents = [
+            "destination",
             "bell",
             "horn",
             "A4",
@@ -178,6 +179,7 @@ class Variables
             "coordinate",
             "place",
             "rundate",
+            "enddate",
             "amount",
             "fuel",
             "flag",
@@ -186,6 +188,7 @@ class Variables
             "alias",
             "slug",
             "url",
+            "negativetime",
             "runtime",
             "runat",
             "endat",
@@ -845,7 +848,6 @@ with the start agent. And doesn't seem to be necessary
                             $needle = "start";
                             $this->thing->log( $this->agent_prefix . 'processing new variables.', "INFORMATION" );
                             $right_of_needle = ltrim(substr($this->nom_input, strpos($this->nom_input, $needle)+strlen($needle)));
-//var_dump($right_of_needle);
                             $pairs = array();
 
 
@@ -958,7 +960,6 @@ with the start agent. And doesn't seem to be necessary
 
                         case "memory":
                             //$t = $this->thing->db->length();
-                            //var_dump($t);
 
                             return;
 

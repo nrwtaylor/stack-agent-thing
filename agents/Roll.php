@@ -386,7 +386,6 @@ class Roll extends Agent
                     $number
                 );
             }
-            //var_dump ($width);
             imagestring($image, 2, 100, 0, $die, $textcolor);
         }
 

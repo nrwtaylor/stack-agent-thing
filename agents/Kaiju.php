@@ -747,8 +747,6 @@ class Kaiju extends Agent
         $kaiju_messages = [];
 
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
-            //            $this->thing->log($block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from']);
-            //echo $block_thing['task'] . " " . $block_thing['nom_to'] . " " . $block_thing['nom_from'] . "\n";
             if ($block_thing['nom_from'] != $this->kaiju_address) {
                 continue;
             }
@@ -757,10 +755,9 @@ class Kaiju extends Agent
                 $match += 1;
                 $this->link_uuid = $block_thing['uuid'];
                 $link_uuids[] = $block_thing['uuid'];
-                //                $kaiju_messages[] = $block_thing['task'];
+
                 $kaiju_messages[] = $block_thing;
-                // if ($match == 2) {break;}
-                // Get upto 10 matches
+
                 if ($match == $this->horizon) {
                     break;
                 }
@@ -1073,10 +1070,6 @@ class Kaiju extends Agent
             $clock_time = $dict[15] . " " . $dict[16];
         }
 
-        //if (!isset($nuuid)) {
-        //    var_dump($dict);
-        //}
-
         $parsed_line = [
             "nuuid" => $nuuid,
             "kaiju_voltage" => $kaiju_voltage,
@@ -1129,9 +1122,6 @@ class Kaiju extends Agent
         $this->getResponse();
 
         $this->thing->flagGreen();
-
-//        $to = $this->thing->from;
-//        $from = "kaiju";
 
         $this->makeChoices();
 
@@ -1379,7 +1369,6 @@ class Kaiju extends Agent
         $this->calcDvdt();
         if (isset($this->points)) {
             foreach ($this->points as $key => $point) {
-                //$time_text = echo date('m/d/Y H:i', $point['refreshed_at']);
                 $time_text = date('H:i', $point['refreshed_at']);
                 $date_text = date('m/d/Y', $point['refreshed_at']);
 
@@ -1475,7 +1464,6 @@ class Kaiju extends Agent
                             $this->setState($piece);
                             $this->setBank($piece);
 
-                            //                        $this->getMessage();
                             $this->response .=
                                 " Set messages to " .
                                 strtoupper($this->state) .
@@ -1490,7 +1478,6 @@ class Kaiju extends Agent
                             $this->test_flag = true;
                             $this->test();
                             $l = $this->parseThing($this->test_string);
-                            //var_dump($l);
                             return;
 
                         case 'on':
@@ -1499,8 +1486,6 @@ class Kaiju extends Agent
                 }
             }
         }
-
-        //        $this->getMessage();
 
         if (!isset($this->index) or $this->index == null) {
             $this->index = 1;

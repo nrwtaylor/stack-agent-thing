@@ -184,7 +184,6 @@ $link_thumbnail = $amazon_item['SmallImage']['URL'];
         }
 
         //$item = $this->parsedItem($amazon_item);
-        //echo "---<br>";
         $item = [
             "id" => $asin,
             "title" => $title,

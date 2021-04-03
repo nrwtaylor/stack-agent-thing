@@ -332,7 +332,6 @@ class Paragraph extends Word
                             }
 
                         default:
-                        //echo 'default';
                     }
                 }
             }

@@ -128,7 +128,6 @@ class Ebaycatalog extends Agent
         //$link = "https://api.ebay.com/identity/v1/oauth2/token";
         $link =
             "https://api.ebay.com/commerce/catalog/v1_beta/product_summary/search?q=drone&limit=3";
-        //var_dump($this->clientID.':'.$this->certID);
         $codeAuth = base64_encode($this->clientID . ':' . $this->certID);
 
         $this->doApi($text);
@@ -149,7 +148,6 @@ class Ebaycatalog extends Agent
         $json = json_decode($response, true);
         $info = curl_getinfo($ch);
         curl_close($ch);
-        //var_dump($json);
         if ($json != null) {
             $this->authToken = $json["access_token"];
             $this->refreshToken = $json["refresh_token"];
@@ -158,11 +156,8 @@ class Ebaycatalog extends Agent
 
     public function doApi($post_data)
     {
-        //echo "Do API" . "\n";
-
         // Your ID and token
         $authToken = $this->authToken;
-        //var_dump($authToken);
         // The data to send to the API
         $post_data = json_encode([
             "legacyOrderId" => "110181400870-27973775001",
@@ -193,7 +188,6 @@ class Ebaycatalog extends Agent
             'Content-Type: application/json',
             'X-EBAY-C-MARKETPLACE-ID: EBAY-US',
         ];
-        //var_dump($header);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -205,12 +199,9 @@ class Ebaycatalog extends Agent
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
         $response = curl_exec($ch);
         if (curl_errno($ch)) {
-            echo "ERROR:" . curl_error($ch);
+            $this->error .= "ERROR:" . curl_error($ch) .". ";
         }
         curl_close($ch);
-        //echo "JSON Response." . "\n";
-        //var_dump($response);
-        //        echo json_decode($response,true);
     }
 
     function doEligibility()
@@ -242,7 +233,6 @@ class Ebaycatalog extends Agent
         echo "Requested authorization token." . "\n";
         $link = "https://api.ebay.com/identity/v1/oauth2/token";
         $codeAuth = base64_encode($this->clientID . ':' . $this->certID);
-        //var_dump($codeAuth);
         $ch = curl_init($link);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/x-www-form-urlencoded',
@@ -265,18 +255,14 @@ class Ebaycatalog extends Agent
         $info = curl_getinfo($ch);
         curl_close($ch);
         if ($json != null) {
-            //echo "JSON dump" ."\n";
-            //var_dump($json);
 
             if (!isset($json['access_token'])) {
                 echo "Did not retrieve access token.";
             } else {
                 $this->authToken = $json["access_token"];
             }
-            //var_dump($this->authToken);
 
             $this->refreshToken = $json["refresh_token"];
-            //var_dump($this->refreshToken);
         }
     }
 
@@ -289,7 +275,6 @@ class Ebaycatalog extends Agent
             'Content-Type: application/x-www-form-urlencoded',
             'Authorization: Basic ' . $codeAuth,
         ]);
-        echo $this->refreshToken;
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_POST, 1);

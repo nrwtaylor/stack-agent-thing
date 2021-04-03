@@ -59,7 +59,6 @@ class Manager extends Agent
         $client->addServer();
 //        $client->doNormal("call_agent", $arr);
         $client->doHighBackground("call_agent", $arr);
-//        var_dump($client);
 $this->response = "Gearman snowflake worker started.";
 */
     }
@@ -230,7 +229,6 @@ $this->response = "Gearman snowflake worker started.";
             if (!isset($thing->variables["manager"]["queued_jobs"])) {
                 continue;
             }
-            //var_dump($thing->variables['manager']);
             $n = $thing->variables["manager"]["queued_jobs"];
 
             $t = strtotime($thing->variables["manager"]["refreshed_at"]);
@@ -381,8 +379,6 @@ $this->response = "Gearman snowflake worker started.";
         //        $rtime = $this->thing->elapsed_runtime() - $this->start_time;
 
         $this->node_list = ["manager" => ["managergraph"]];
-
-        //echo $this->queued_jobs ." " . $this->workers_running . " of " . $this->workers_connected . " workers (" . $this->queue_engine_version . ")";
 
         $this->sms_message = "MANAGER";
         $this->sms_message .=

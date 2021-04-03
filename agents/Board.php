@@ -175,8 +175,6 @@ class Board extends Agent
             foreach (range(-1, 1, 1) as $k) {
                 $count = 0;
                 $b = substr($this->binary_board, $count, 1);
-                //var_dump($b);
-                //$this->board[$i][$j][$k]['value'] = rand();
                 $this->board[$i][$j][$k]["state"] = $b;
                 $count += 1;
             }
@@ -202,10 +200,6 @@ class Board extends Agent
         $this->makeTXT();
         $web = nl2br($this->thing_report["txt"]);
 
-        //var_dump($this->board);
-
-        //}
-
         $web .= "<p>";
         $web .= $this->response;
 
@@ -217,8 +211,7 @@ class Board extends Agent
         // Make a web html representation of the board.
         // Start with TXT.
         $text = "A BOARD\n";
-        //$this->response .= "Board is " . $this->decimal_board;
-        //foreach(range(-1,0,1) as $i) {
+
         $i = 0;
         foreach (range(-1, 1, 1) as $j) {
             foreach (range(-1, 1, 1) as $k) {
@@ -232,11 +225,6 @@ class Board extends Agent
             $text .= "\n";
         }
         $text .= "\n";
-
-        //}
-        //var_dump($this->board);
-
-        //}
 
         $this->thing_report["txt"] = $text;
     }

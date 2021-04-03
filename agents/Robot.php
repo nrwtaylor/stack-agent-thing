@@ -738,7 +738,6 @@ return true;
         $allRobots = [];
         $fh = fopen($robotsUrl, 'r');
         while (($line = fgets($fh)) != false) {
-            //            echo $line . "<br>";
             if (preg_match("/user-agent.*/i", $line)) {
                 if ($robot != null) {
                     array_push($allRobots, $robot);

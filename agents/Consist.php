@@ -1,7 +1,7 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -10,11 +10,11 @@ ini_set("allow_url_fopen", 1);
 
 class Consist extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
-        $this->keywords = ['next', 'accept', 'clear', 'drop', 'add', 'new'];
+        $this->keywords = ["next", "accept", "clear", "drop", "add", "new"];
 
         $this->default_consist = "NX";
 
@@ -47,7 +47,7 @@ class Consist extends Agent
         if (isset($this->consist)) {
             $consist = $this->consist;
         }
-        $consist['refreshed_at'] = $this->current_time;
+        $consist["refreshed_at"] = $this->current_time;
 
         $this->thing->json->writeVariable(["consist"], $consist);
     }
@@ -65,42 +65,43 @@ class Consist extends Agent
     {
         $this->consists = [];
         // See if a consist record exists.
-        $findagent_thing = new Findagent($this->thing, 'consist');
-$consists = $findagent_thing->thing_report['things'];
-if ($consists == true) {return;}
+        $findagent_thing = new Findagent($this->thing, "consist");
+        $consists = $findagent_thing->thing_report["things"];
+        if ($consists == true) {
+            return;
+        }
 
-        foreach (
-            array_reverse($consists)
-            as $thing_object
-        ) {
+        foreach (array_reverse($consists) as $thing_object) {
             // While timing is an issue of concern
 
-            $uuid = $thing_object['uuid'];
+            $uuid = $thing_object["uuid"];
 
-            $variables_json = $thing_object['variables'];
+            $variables_json = $thing_object["variables"];
             $variables = $this->thing->json->jsontoArray($variables_json);
 
-            if (isset($variables['consist'])) {
-                if (!$this->isConsist($variables['consist'])) {continue;}
-                if (!isset($variables['consist']['refreshed_at'])) {continue;}
+            if (isset($variables["consist"])) {
+                if (!$this->isConsist($variables["consist"])) {
+                    continue;
+                }
+                if (!isset($variables["consist"]["refreshed_at"])) {
+                    continue;
+                }
 
-                $this->consists[] = $variables['consist'];
+                $this->consists[] = $variables["consist"];
             }
         }
 
         $refreshed_at = [];
         foreach ($this->consists as $key => $row) {
-            $refreshed_at[$key] = $row['refreshed_at'];
+            $refreshed_at[$key] = $row["refreshed_at"];
         }
         array_multisort($refreshed_at, SORT_DESC, $this->consists);
-
 
         return $this->consists;
     }
 
     function getConsist($selector = null)
     {
-
         if (!isset($this->consists)) {
             $this->getConsists();
         }
@@ -108,14 +109,13 @@ if ($consists == true) {return;}
         foreach ($this->consists as $key => $consist) {
         }
 
-if (count($this->consists) !=0) {
-        $this->consist = $this->consists[0];
-}
+        if (count($this->consists) != 0) {
+            $this->consist = $this->consists[0];
+        }
     }
 
     function get($consist = null)
     {
-
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
             "consist",
@@ -133,14 +133,10 @@ if (count($this->consists) !=0) {
             );
         }
 
-
         if (!isset($this->consist)) {
-            $this->consist = $this->variables->getVariable('consist');
+            $this->consist = $this->variables->getVariable("consist");
             //$this->head_code = $this->variables->getVariable('head_code');
         }
-
-
-
     }
 
     function makeConsist($head_code = null)
@@ -162,7 +158,6 @@ if (count($this->consists) !=0) {
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
         $this->hour = date("H", $t);
         $this->minute = date("i", $t);
 
@@ -182,19 +177,20 @@ if (count($this->consists) !=0) {
 
     function makeTXT()
     {
-        if (!isset($this->consists)) {$this->getConsists();}
+        if (!isset($this->consists)) {
+            $this->getConsists();
+        }
 
         $txt = "Test \n";
         foreach ($this->consists as $i => $consist) {
-
-            if (!isset($consist['vehicles'])) {
+            if (!isset($consist["vehicles"])) {
                 continue;
             }
             $txt .= $this->textConsist($consist);
             $txt .= "\n";
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
     }
 
     public function respondResponse()
@@ -203,25 +199,25 @@ if (count($this->consists) !=0) {
 
         $this->thing->flagGreen();
 
-        $this->thing_report['email'] = $this->thing_report['sms'];
-        $this->thing_report['message'] = $this->thing_report['sms']; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["email"] = $this->thing_report["sms"];
+        $this->thing_report["message"] = $this->thing_report["sms"]; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         if (!$this->thing->isData($this->agent_input)) {
             $message_thing = new Message($this->thing, $this->thing_report);
 
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         } else {
-            $this->thing_report['info'] =
+            $this->thing_report["info"] =
                 'Agent input was "' . $this->agent_input . '".';
         }
 
-        $this->thing_report['help'] = 'This is a consist.';
+        $this->thing_report["help"] = "This is a consist.";
     }
 
     public function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function vehiclesConsist($text = null)
@@ -246,7 +242,7 @@ if (count($this->consists) !=0) {
             return false;
         }
 
-        if (isset($consist['vehicles'])) {
+        if (isset($consist["vehicles"])) {
             return true;
         }
 
@@ -257,13 +253,13 @@ if (count($this->consists) !=0) {
     {
         $vehicles = $this->vehiclesConsist($text);
 
-        $consist = ['vehicles' => $vehicles];
+        $consist = ["vehicles" => $vehicles];
         return $consist;
     }
 
     public function textConsist($consist = null)
     {
-	$text = "X";
+        $text = "X";
         if ($consist == null) {
             return $text;
         }
@@ -271,19 +267,26 @@ if (count($this->consists) !=0) {
             return $text;
         }
 
-        if (!is_array($consist['vehicles'])) {return $text;}
+        if (!is_array($consist["vehicles"])) {
+            return $text;
+        }
 
-        $text = implode('', $consist['vehicles']);
+        $text = implode("", $consist["vehicles"]);
         return $text;
     }
 
     public function makeSMS()
     {
         $sms =
-            "CONSIST " .strtoupper($this->head_code) ." " . $this->textConsist($this->consist) . " " . $this->response;
+            "CONSIST " .
+            strtoupper($this->head_code) .
+            " " .
+            $this->textConsist($this->consist) .
+            " " .
+            $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function isData($variable)
@@ -327,7 +330,7 @@ if (count($this->consists) !=0) {
             if ($this->isConsist($known_consist) === false) {
                 continue;
             }
-            if ($known_consist['vehicles'] === $consist['vehicles']) {
+            if ($known_consist["vehicles"] === $consist["vehicles"]) {
                 $this->response .= "Recognized consist. ";
                 return $this->consists[$i];
             }
@@ -341,22 +344,19 @@ if (count($this->consists) !=0) {
     public function readSubject()
     {
         $input = $this->input;
-//var_dump($input);
-//var_dump($this->agent_input);
-//var_dump($this->subject);
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;
         }
 
-        if (($input == "consist") or ($this->agent_input == "consist")) {
+        if ($input == "consist" or $this->agent_input == "consist") {
             $this->response .= "Saw a request for the current consist. ";
             return;
         }
 
         $pos = stripos($input, "consist");
         if ($pos === 0) {
-            $input = trim(substr_replace($input, "", 0, strlen('consist')));
+            $input = trim(substr_replace($input, "", 0, strlen("consist")));
         }
 
         $consist = $this->readConsist($input);
@@ -368,13 +368,12 @@ if (count($this->consists) !=0) {
             $this->response .= "Saw and extracted a consist. ";
         }
 
-
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'consist') {
+            if ($input == "consist") {
                 return;
             }
         }
@@ -383,16 +382,16 @@ if (count($this->consists) !=0) {
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'next':
+                        case "next":
                             $this->thing->log("read subject nextheadcode");
                             $this->nextConsist();
                             break;
 
-                        case 'drop':
+                        case "drop":
                             $this->dropConsist();
                             break;
 
-                        case 'add':
+                        case "add":
                             $this->addConsist();
                             break;
 

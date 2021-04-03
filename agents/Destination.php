@@ -152,13 +152,8 @@ class Destination extends Agent
         $this->response = null;
 
         $keywords = ["destination"];
-        /*
-        $input = strtolower($this->subject);
 
-        $input = str_replace("destination ", "", $input);
-*/
         $filtered_input = $this->assert($this->input, "destination", false);
-        var_dump($filtered_input);
         if ($filtered_input == "") {
             $this->response .= "No destination provided. ";
             return;

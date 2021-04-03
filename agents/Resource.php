@@ -851,7 +851,6 @@ $this->resource_quantity = $resource_quantity;
                         case "create":
                         case "place":
                         case "add":
-                            //var_dump("merp");
                             $this->assertResource(strtolower($input));
                             return;
 

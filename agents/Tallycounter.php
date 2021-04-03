@@ -50,14 +50,9 @@ class Tallycounter
 
         $this->nom_input =
             $agent_command . " " . $this->from . " " . $this->subject;
-        //        $this->nom_input = "tally message" . " " . "tally@stackr.ca";
-        //      $this->nom_input = "tally message tally@stackr.ca";
 
         $this->readInput();
 
-        //var_dump($this->identity);
-        //        $this->identity = "tally@stackr.ca";
-        //        $this->name = "message";
         $this->thing->log(
             $this->agent_prefix .
                 "settings are: " .
@@ -68,9 +63,6 @@ class Tallycounter
                 $this->identity .
                 "."
         );
-        //$this->thing->log( $this->agent_prefix . 'settings are: ' . $this->agent . ' ' . $this->name . ' ' . str_repeat("nom", strlen($this->identity)/3) . "." );
-
-        ///        $this->readInput();
 
         // So I could call
         if ($this->thing->container["stack"]["state"] == "dev") {

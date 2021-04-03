@@ -134,16 +134,6 @@ class Tallygraph
 
         $this->points = array();
         foreach ($things as $thing) {
-/*
-            // Check each of the three Things.
-            $this->variables_thing = new Thing($thing['uuid']);
-
-            $created_at = strtotime($thing['created_at']);
-echo $created_at;
-            $variable = $this->getVariable('count');
-            //$name = $this->getVariable('name');
-            //$next_uuid = $this->getVariable('next_uuid');
-*/
 
                 $uuid = $thing['uuid'];
 
@@ -152,17 +142,10 @@ echo $created_at;
 
                 if (isset($variables['tallycounter'])) {
 
-//                    if(isset($variables['tallycounter']['created_at'])) {$created_at = strtotime($variables['tallycounter']['created_at']);}
                     if(isset($variables['tallycounter']['count'])) {$variable = $variables['tallycounter']['count'];}
                     if(isset($variables['tallycounter']['refreshed_at'])) {$refreshed_at = strtotime($variables['tallycounter']['refreshed_at']);}
                 }
 
-//echo $created_at;
-//echo $refreshed_at;
-//if (!isset($created_at)) {$created_at = $refreshed_at;}
-
-//echo $variable . " " . $refreshed_at . "<br>";
-//($variable);
             if ((($variable == null) or ($variable == 0)) and ($this->ignore_empty)) {
                 continue;
             }
@@ -171,7 +154,6 @@ echo $created_at;
             if ($variable > 1e6) {continue;}
 
 
-//            $this->points[] = array("created_at"=>$created_at, "variable"=>$variable);
             $this->points[] = array("created_at"=>$refreshed_at, "variable"=>$variable);
 
         }
@@ -565,10 +547,6 @@ return;
         $width = imagesx($this->image); 
         $height = imagesy($this->image);
         $pad = 0;
-        // imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $grey, $font, $number);
-
-
-        // imagestring($this->image, 2, 100, 0, $this->thing->nuuid, $textcolor);
 
         ob_start();
         imagepng($this->image);
@@ -577,7 +555,6 @@ return;
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response = '<img src="data:image/png;base64,'.base64_encode($imagedata).'"alt="tallygraph"/>';
         $this->image_embedded = $response;
 
