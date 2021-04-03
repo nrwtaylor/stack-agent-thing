@@ -188,11 +188,6 @@ class Flip extends Agent
                 ["flip", "result"],
                 $this->result
             );
-
-            $this->thing->log(
-                $this->agent_prefix . ' completed read.',
-                "OPTIMIZE"
-            );
         }
     }
 
@@ -203,21 +198,12 @@ class Flip extends Agent
     public function readSubject()
     {
         if ($this->last_result == false) {
-            if ($this->agent_input != null) {
-                $input = strtolower($this->agent_input);
-            } else {
-                $input = strtolower($this->subject);
-
-                $temp_thing = new Emoji($this->thing, "emoji");
-                $input = $temp_thing->translated_input;
-            }
-
             $this->result = rand(1, 2);
         } else {
-            $input = strtolower($this->input);
             $this->result = $this->last_result;
         }
 
+        $input = strtolower($this->input);
         $filtered_input = $this->assert($input);
 
         if ($filtered_input == 'heads' or $filtered_input == 'tails') {
