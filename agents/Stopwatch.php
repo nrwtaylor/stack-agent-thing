@@ -69,17 +69,41 @@ class Stopwatch extends Agent
         $this->stopwatch->setVariable("state", $this->state);
         $this->stopwatch->setVariable("reading", $this->reading);
 
+        if (isset($this->reading_split)) {
+            $this->stopwatch->setVariable(
+                "reading_split",
+                $this->reading_split
+            );
+        }
+
         if (isset($this->microtime)) {
             $this->stopwatch->setVariable("microtime", $this->microtime);
         }
+
+        if (isset($this->microtime_split)) {
+            $this->stopwatch->setVariable(
+                "microtime_split",
+                $this->microtime_split
+            );
+        }
+
         $this->stopwatch->setVariable("refreshed_at", $this->current_time);
     }
 
     function get()
     {
         $this->previous_state = $this->stopwatch->getVariable("state");
+
         $this->previous_reading = $this->stopwatch->getVariable("reading");
+        $this->previous_reading_split = $this->stopwatch->getVariable(
+            "reading_split"
+        );
+
         $this->previous_microtime = $this->stopwatch->getVariable("microtime");
+        $this->previous_microtime_split = $this->stopwatch->getVariable(
+            "microtime_split"
+        );
+
         $this->refreshed_at = $this->stopwatch->getVariable("refreshed_at");
 
         // If it is a valid previous_state, then
@@ -96,6 +120,10 @@ class Stopwatch extends Agent
 
         if ($this->previous_reading == false) {
             $this->previous_reading = $this->default_reading;
+        }
+
+        if ($this->previous_reading_split == false) {
+            $this->previous_reading_split = $this->default_reading;
         }
 
         $this->updateStopwatch();
@@ -165,15 +193,7 @@ class Stopwatch extends Agent
             break;
         }
     }
-    /*
-    function getState()
-    {
-        if (!isset($this->state)) {
-            $this->state = "easy";
-        }
-        return $this->state;
-    }
-*/
+
     public function respondResponse()
     {
         $this->makeChoices();
@@ -218,22 +238,40 @@ class Stopwatch extends Agent
     public function updateStopwatch()
     {
         $elapsed_time = 0;
-        if ($this->state === "split" or $this->state === "running") {
-            $this->microtime = microtime(true);
+        if ($this->state === "running") {
+            $this->current_microtime = microtime(true);
+        }
+        /*
+        if ($this->state === "split") {
+            $this->microtime_split = microtime(true);
+        }
+*/
+
+        if (
+            $this->previous_state === "split" or
+            $this->previous_state === "running"
+        ) {
+            $elapsed_time =
+                $this->current_microtime - $this->previous_microtime;
         }
 
         if (
             $this->previous_state === "split" or
             $this->previous_state === "running"
         ) {
-            $elapsed_time = $this->microtime - $this->previous_microtime;
+            $elapsed_time_split =
+                $this->current_microtime - $this->previous_microtime_split;
         }
 
         if ($this->previous_state === "stopped") {
             $this->previous_reading = 0;
         }
 
-        $this->reading = $this->previous_reading + $elapsed_time;
+        $this->reading = $elapsed_time;
+
+        if (isset($elapsed_time_split)) {
+            $this->reading_split = $elapsed_time_split;
+        }
     }
 
     function makeSMS()
@@ -251,12 +289,16 @@ class Stopwatch extends Agent
     function makeMessage()
     {
         $message = "";
-        if (isset($this->reading)) {
-            $message .= $this->reading;
+        if (isset($this->state)) {
+            $message .= "" . strtoupper($this->state);
         }
 
-        if (isset($this->state)) {
-            $message .= " " . $this->state;
+        if (isset($this->reading)) {
+            $message .= " TIMER " . $this->humanRuntime($this->reading);
+        }
+
+        if (isset($this->reading_split)) {
+            $message .= " SPLIT " . $this->humanRuntime($this->reading_split);
         }
 
         $this->message = $message;
@@ -267,10 +309,6 @@ class Stopwatch extends Agent
     {
         $link = $this->web_prefix . "thing/" . $this->uuid . "/stopwatch";
 
-        //        if (!isset($this->html_image)) {
-        //            $this->makePNG();
-        //        }
-
         $web = "<b>Stopwatch Agent</b>";
         $web .= "<p>";
 
@@ -279,6 +317,12 @@ class Stopwatch extends Agent
         if (isset($this->reading) and $this->reading != false) {
             $web .= "Reading is ";
             $web .= "" . $this->reading;
+            $web .= "<br>";
+        }
+
+        if (isset($this->reading_split) and $this->reading_split != false) {
+            $web .= "Split Reading is ";
+            $web .= "" . $this->reading_split;
             $web .= "<br>";
         }
 
@@ -325,63 +369,8 @@ class Stopwatch extends Agent
                 }
             }
         }
-
-        // If all else fails try the discriminator.
-        /*
-        $input_agent = new Input($this->stopwatch_thing, "input");
-        //$input_agent->discriminateInput($discriminators);
-
-        $discriminators = ["start", "stop", "reset", "lap"];
-        $input_agent->aliases["start"] = [
-            "start",
-            "sttr",
-            "stat",
-            "st",
-            "strt",
-        ];
-        $input_agent->aliases["stop"] = ["stop", "stp"];
-        $input_agent->aliases["reset"] = ["rst", "reset", "rest"];
-        $input_agent->aliases["lap"] = ["lap", "laps", "lp"];
-
-        $this->requested_state = $input_agent->discriminateInput(
-            $haystack,
-            $discriminators
-        );
-
-        switch ($this->requested_state) {
-            case "start":
-                $this->startStopwatch();
-                break;
-            case "stop":
-                $this->stopStopwatch();
-                break;
-            case "reset":
-                $this->resetStopwatch();
-                break;
-            case "split":
-                $this->splitStopwatch();
-                break;
-        }
-*/
     }
-    /*
-    function setReading($reading = null)
-    {
-        if ($reading == null) {
-            return;
-        }
-        $this->reading = $reading;
-    }
-*/
-    /*
-    function getReading()
-    {
-        if (!isset($this->reading)) {
-            $this->reading = $this->default_reading;
-        }
-        return $this->reading;
-    }
-*/
+
     public function makeImage()
     {
         $this->image = $this->chart_agent->image;
@@ -559,14 +548,21 @@ class Stopwatch extends Agent
                 $this->previous_state = $this->state;
                 $this->state = "running";
                 $this->updateStopwatch();
-                $this->response .= "Started stopwatch. ";
+                //                $this->response .= "Started stopwatch. ";
 
                 break;
         }
+
+        $this->response .= "Started stopwatch. ";
+
+        $this->microtime = microtime(true);
+        $this->microtime_split = microtime(true);
     }
 
     function splitStopwatch()
     {
+        $this->microtime_split = microtime(true);
+        $this->response .= "Set split. ";
     }
 
     function stopStopwatch()
@@ -584,7 +580,11 @@ class Stopwatch extends Agent
 
     function resetStopwatch()
     {
-        $this->state = "stopped";
+        $this->microtime = microtime(true);
+        $this->microtime_split = microtime(true);
+
+        $this->state = "running";
+        $this->response .= "Reset stopwatch. ";
     }
 
     function readStopwatch($variable = null)
@@ -594,6 +594,6 @@ class Stopwatch extends Agent
             return;
         }
 
-        $this->response .= "Read " . $this->reading . ". ";
+        //        $this->response .= "Read " . $this->reading . ". ";
     }
 }

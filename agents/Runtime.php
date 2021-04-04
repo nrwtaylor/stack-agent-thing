@@ -22,15 +22,15 @@ presentation units ie seconds = 60, units = minutes.
 Show 1 minute.
 */
 
-// TODO Recognize "hours" or "minutes" without a number as request to set units.
-// Tests
-// runtime 5s
-// runtime 5 s
-// runtime 5 seconds
-// runtime 1 hour
-// runtime hour
-// runtime 50
-// runtime half an hour
+    // TODO Recognize "hours" or "minutes" without a number as request to set units.
+    // Tests
+    // runtime 5s
+    // runtime 5 s
+    // runtime 5 seconds
+    // runtime 1 hour
+    // runtime hour
+    // runtime 50
+    // runtime half an hour
 
     /**
      *
@@ -137,6 +137,30 @@ Show 1 minute.
         } else {
             $this->units = $this->default_units;
         }
+    }
+
+    public function humanRuntime($seconds = null)
+    {
+        $whole = (int) $seconds; // -5
+        $decimal_seconds = $seconds - $whole;
+
+        $s = ($seconds % 60) + round($decimal_seconds, 6);
+        $m = floor(($seconds % 3600) / 60);
+        $h = floor(($seconds % 86400) / 3600);
+        $d = floor(($seconds % 2592000) / 86400);
+        //$M = floor($seconds/2592000);
+
+        if ($d == 0) {
+            return "$h:$m:$s";
+        }
+        if ($d == 0 and $h == 0) {
+            return "$m:$s";
+        }
+        if ($d == 0 and $h == 0 and $m == 0) {
+            return "$ss";
+        }
+
+        return "$d days, $h hours, $m minutes, $s seconds";
     }
 
     public function isRuntime($text = null)
