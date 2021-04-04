@@ -181,8 +181,6 @@ class Eventbrite extends Agent
                 $runtime = "X";
             }
 
-            //if ($runtime > $this->run_time_max) {echo "meep";continue;}
-
             // Will need to run a venue request.
             $venue_name = null; //$event['venue_name'];
 

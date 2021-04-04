@@ -157,11 +157,6 @@ class Api extends Agent
         );
         $choices = $this->thing->choice->makeLinks("api");
         $web = "";
-        /*
-        $web = '<a href="' . $link . '">';
-        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->link_uuid . '/receipt.png">';
-        $web .= "</a>";
-*/
         $web .= "<br>";
 
         $web .= $this->subject;
@@ -171,32 +166,18 @@ class Api extends Agent
         $web .= "<br><br>";
 
         $web .= "<br>";
-        /*  
-      $web .= $head;
-        $web .= $choices['button'];
-        $web .= $foot;
-//        $web .= $this->thing_report['channel'];
-
-//echo        $this->thing->account['thing']->balance['amount'];
-  //  echo    $this->thing->account['stack']->balance['amount'];
-*/
 
         $this->thing_report["web"] = $web;
     }
 
     function defaultButtons()
     {
-        //$html_links = $this->thing->choice->makeLinks();
-
         if (rand(1, 6) <= 3) {
             $this->thing->choice->Create("web", $this->node_list, "start a");
         } else {
             $this->thing->choice->Create("web", $this->node_list, "start b");
         }
 
-        //$this->thing->choice->Choose("inside nest");
         $this->thing->flagGreen();
-
-        return;
     }
 }

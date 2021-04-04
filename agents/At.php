@@ -205,36 +205,6 @@ class At extends Agent
 
     /**
      *
-     * @param unknown $input
-     * @return unknown
-     */
-    /*
-    function isInput($input)
-    {
-        if ($input === false) {
-            return false;
-        }
-
-        if ($input === null) {
-            return false;
-        }
-
-        if (strtolower($input) == strtolower("X")) {
-            return false;
-        }
-
-        if (is_numeric($input)) {
-            return true;
-        }
-        if ($input == 0) {
-            return true;
-        }
-
-        return true;
-    }
-*/
-    /**
-     *
      * @param unknown $input (optional)
      * @return unknown
      */
@@ -310,11 +280,6 @@ class At extends Agent
                 if ($minute == 0 and $hour == 0) {
                     $minute = substr($this->numbers[0], 2, 2);
                     $hour = substr($this->numbers[0], 0, 2);
-
-                    //                if ($this->isInput($minute)) {$this->minute = $minute;}
-                    //                if ($this->isInput($hour)) {$this->hour = $hour%24;}
-                    //$this->minute = $minute;
-                    //$this->hour = $hour;
                 }
             }
         } elseif (count($this->numbers) == 2) {
@@ -333,17 +298,9 @@ class At extends Agent
                 }
             } else {
                 if ($this->isInput($minute)) {
-                    //        if(($minute<0) and ($minute>=60)) {
-                    //            $minute = false;
-                    //        }
                     $this->minute = $minute;
                 }
                 if ($this->isInput($hour)) {
-                    //        if(($hour<0) and ($hour>=24)) {
-                    //            $hour = false;
-                    //        }
-                    //                    $this->hour = $hour;
-
                     $this->hour = $hour % 24;
                 }
             }
@@ -374,7 +331,6 @@ class At extends Agent
         }
 
         $this->year = false;
-        //$year = $this->year_agent->extractYear($input);
 
         $year = $this->extractYear($input);
 
@@ -448,7 +404,6 @@ class At extends Agent
                     switch ($piece) {
                         case "stop":
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
@@ -528,11 +483,9 @@ class At extends Agent
                         continue;
                     }
 
-                    //      $day_evidence[] = $day_name;
                     $day = $key;
                     $day_evidence[$key][] = $day_name;
 
-                    //break;
                 }
             }
         }
@@ -642,14 +595,11 @@ class At extends Agent
         if (isset($this->hour)) {
             $hour = $this->hour;
         }
-        //if ($hour == null) {$hour = "X";}
 
         $minute = "X";
         if (isset($this->minute)) {
             $minute = $this->minute;
         }
-
-        //if ($minute == null) {$minute = "X";}
 
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
         if ($hour == "X") {
@@ -669,7 +619,7 @@ class At extends Agent
     public function makeSMS()
     {
         $sms_message = "AT IS " . $this->textAt();
-        //$sms_message .= " | ";
+
         $sms_message .= $this->response;
 
         $day = "X";
@@ -684,7 +634,6 @@ class At extends Agent
         if (isset($this->hour)) {
             $hour = $this->hour;
         }
-        //if ($hour == null) {$hour = "X";}
 
         $minute = "X";
         if (isset($this->minute)) {
@@ -696,13 +645,8 @@ class At extends Agent
             !$this->isInput($hour) or
             !$this->isInput($minute)
         ) {
-            //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
-
             $sms_message .= " | Retrieved time. ";
         }
-
-        //$sms_message .= "| nuuid " . strtoupper($this->at->nuuid);
-        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
@@ -751,40 +695,10 @@ class At extends Agent
 
     /**
      *
-     * @param unknown $text (optional)
-     */
-    /*
-    function printAt($text = null)
-    {
-        return;
-        echo $text . "\n";
-
-        if (!isset($this->day)) {
-            $day = "X";
-        } else {
-            $day = $this->day;
-        }
-        if (!isset($this->hour)) {
-            $hour = "X";
-        } else {
-            $hour = $this->hour;
-        }
-        if (!isset($this->minute)) {
-            $minute = "X";
-        } else {
-            $minute = $this->minute;
-        }
-
-        echo $day . " " . $hour . " " . $minute . "\n";
-    }
-*/
-    /**
-     *
      * @return unknown
      */
     public function readSubject()
     {
-        //$this->response = null;
         $this->num_hits = 0;
 
         $input = $this->input;
@@ -794,7 +708,6 @@ class At extends Agent
         }
 
         if ($input == "at") {
-            //            $this->extractRunat($filtered_input);
             return;
         }
 
@@ -806,11 +719,6 @@ class At extends Agent
             $this->day = "X";
             return;
         }
-        //        $this->extractRunat($this->input);
-        //        if ($this->input == "at") {
-        //            //            $this->extractRunat($filtered_input);
-        //            return;
-        //        }
 
         if ($this->isAlpha($filtered_input) === true) {
             $this->tag = $filtered_input . "at";

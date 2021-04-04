@@ -395,7 +395,6 @@ class Fuel extends Agent
                 $this->fuel_name;
         }
 
-        //        if (!is_array($quantity)) {$this->quantity_string = true; return $this->quantity_string;}
         if (is_array($fuel_string)) {
             $this->fuel_string = true;
             return $this->fuel_string;
@@ -415,11 +414,8 @@ class Fuel extends Agent
     {
         $this->inject = null;
         $s = $this->inject;
-        //echo "makesms";
-        //echo implode(" ", $this->coordinate);
-        //echo "\n";
+
         $string_fuel = $this->stringFuel();
-        //echo $string_coordinate;
 
         $sms = "FUEL " . $string_fuel;
 

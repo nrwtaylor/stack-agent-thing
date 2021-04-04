@@ -3741,10 +3741,5 @@ if ($pid == -1) {
     {
         $this->thing->log($error);
         $this->thing->console($error);
-        //        echo $this->response;
-        //        echo "\n";
-        //        echo $this->thing->log;
-        //...do whatever you want...
-        //echo $this->uuid;
     }
 }

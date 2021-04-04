@@ -1,6 +1,5 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-//echo "Spike says do you want some rabbit fish?<br>";
 
 class Spike extends Agent
 {

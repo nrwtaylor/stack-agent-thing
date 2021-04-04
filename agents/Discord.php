@@ -201,7 +201,6 @@ return;
 
         $count = 0;
         foreach ($synonyms_list as $key => $item) {
-            //var_dump($item['text']);
             $this->synonyms[] = $item['text'];
             $count += 1;
         }
@@ -223,41 +222,24 @@ return;
 
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["discord"], $input);
-
-        //$this->thing->flagGreen();
-
-        return;
     }
 
     function getResponseurl()
     {
-        //$activity = ($this->body['channelData']['clientActivityId']);
         if (isset($this->body['channelData']['clientActivityId'])) {
             $this->activity_id = $this->body['channelData']['clientActivityId'];
             return $this->activity_id;
         }
-
-        //if ( isset( $this->body['event']['channel'] )) {
-        //    $this->channel_id = $this->body['event']['channel'];
-        //    return $this->channel_id;
-        //}
 
         return true;
     }
 
     function getActivity()
     {
-        //$activity = ($this->body['channelData']['clientActivityId']);
-
         if (isset($this->body['channelData']['clientActivityId'])) {
             $this->activity_id = $this->body['channelData']['clientActivityId'];
             return $this->activity_id;
         }
-
-        //if ( isset( $this->body['event']['channel'] )) {
-        //    $this->channel_id = $this->body['event']['channel'];
-        //    return $this->channel_id;
-        //}
 
         return true;
     }
@@ -269,11 +251,6 @@ return;
             return $this->channel_id;
         }
 
-        //if ( isset( $this->body['event']['channel'] )) {
-        //    $this->channel_id = $this->body['event']['channel'];
-        //    return $this->channel_id;
-        //}
-
         return true;
     }
 
@@ -283,11 +260,6 @@ return;
             $this->user = $this->body['from']['id'];
             return $this->user;
         }
-
-        //if ( isset($this->body['event']['user']) ) {
-        //    $this->user = $this->body['event']['user'];
-        //    return $this->user;
-        //}
 
         return true;
     }
@@ -299,43 +271,18 @@ return;
             return $this->text;
         }
 
-        //if ( isset( $this->body['event']['text'] )) {
-        //   $this->text = $this->body['event']['text'];
-        //    return $this->text;
-        //}
-
         return true;
     }
 
-    // -----------------------
-
     private function respond()
     {
-        // Thing actions
         $this->thing->flagGreen();
 
-        // Generate email response.
-
         $to = $this->from;
-        //		$from = $this->to;
 
-        //		if ($this->input != null) {
-        //			$test_message = $this->input;
-        //		} else {
-        //			$test_message = $this->subject;
-        //		}
-
-        //        if ($this->input != null) {
-        //            $test_message = $this->input;
-        //        } else {
-        //            $test_message = $this->subject;
-        //        }
         $test_message = null;
 
-        //		if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
         $this->sendMessage($to, $test_message);
-        //			$this->thing->account['stack']->Debit($this->cost);
-        //			$this->thing->log("FB message sent");
 
         $this->thing_report['info'] =
             '<pre> Agent "Discord" sent a message to ' .
@@ -378,15 +325,8 @@ return;
 
     function eventGet()
     {
-        $this->thing->log('<pre> Agent "Slack" called eventGet()</pre>');
+        $this->thing->log('called eventGet()');
 
-        //        $this->thing->db->setFrom($this->from);
-        //echo "<br>";
-        //        $this->thing->db->setFrom($this->from);
-        //echo "<br>";
-        //echo ($this->from);
-        //echo ($this->to);
-        //echo "<br>";
         $bodies = json_decode($this->thing->thing->message0, true);
         $this->body = $bodies['discord'];
 
@@ -401,8 +341,6 @@ return;
         $this->text = $this->getText();
         $this->activity_id = $this->getActivity();
         $this->service_url = $this->body['serviceUrl'];
-
-        return;
     }
 
     function makeMessage($message = null)
@@ -465,12 +403,6 @@ return;
 
     function makeBasicMessage($message = null)
     {
-        //        if ($this->input != null) {
-        //            $message = $this->input;
-        //        } else {
-        //            $message = $this->subject;
-        //        }
-
         $sender = $this->from;
         /*
         $jsonData = '{
@@ -735,8 +667,6 @@ Content-Type: application/json
         //      }
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        //echo "<br>" ."return code is " . $httpCode . "<br>";
-        //var_dump($result);
 
         $this->thing->json->setField("variables");
         $names = $this->thing->json->writeVariable(

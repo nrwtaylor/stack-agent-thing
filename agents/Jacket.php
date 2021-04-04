@@ -268,12 +268,9 @@ class Jacket extends Agent
     public function isRain($haystack)
     {
         $needles = array("rain", "showers", "drizzle", "showers");
-        //$this->weather = new Weather($this->thing,"weather");
-        //$haystack = $this->weather->sms_message;
 
         foreach ($needles as $needle) {
             if (strpos($haystack, $needle) !== false) {
-                //echo $haystack. " " .$needle;
                 return true;
             }
         }

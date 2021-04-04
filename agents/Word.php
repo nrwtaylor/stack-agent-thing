@@ -73,8 +73,6 @@ class Word extends Agent
         if (isset($this->words)) {
             $this->reading = count($this->words);
         }
-//        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
-
 
         $this->thing->json->writeVariable(["word", "reading"], $this->reading);
 
@@ -129,7 +127,6 @@ class Word extends Agent
 
         $pattern =
             '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){1,}/';
-        //      $t = explode("  ", $test);
         $t = preg_split($pattern, $test);
 
         foreach ($t as $key => $word) {
@@ -150,7 +147,6 @@ class Word extends Agent
         }
 
         $image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($image, 255, 255, 255);
         $this->black = imagecolorallocate($image, 0, 0, 0);
@@ -196,9 +192,8 @@ class Word extends Agent
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
         extract($bbox, EXTR_PREFIX_ALL, "bb");
+
         //check width of the image
-        //        $width = imagesx($this->image);
-        //        $height = imagesy($this->image);
         $pad = 0;
         imagettftext(
             $image,
@@ -256,11 +251,9 @@ class Word extends Agent
             $text = $this->findWord("list", $value);
 
             if ($text != false) {
-                //   echo "word is " . $text . "\n";
                 $this->words[] = $text;
             } else {
                 $this->notwords[] = $value;
-                //   echo "word is not " . $value . "\n";
             }
         }
 
@@ -765,7 +758,6 @@ class Word extends Agent
                             }
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

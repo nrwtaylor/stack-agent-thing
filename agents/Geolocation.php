@@ -5,73 +5,79 @@
  * @package default
  */
 
-
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Geolocation extends Agent
 {
-
     // This gets events from the Modo API.
 
-    public $var = 'hello';
+    public $var = "hello";
     public $country = "Canada only.";
-
 
     /**
      *
      */
-    function init() {
-
-//        $this->agent_name = "Geolocation";
+    function init()
+    {
         $this->keyword = "geolocation";
-        $this->test= "Development code"; // Always
+        $this->test = "Development code"; // Always
 
-        $this->keywords = array('geolocation');
+        $this->keywords = ["geolocation"];
 
         $this->run_time_max = 360; // 5 hours
 
-        $this->variables_agent = new Variables($this->thing, "variables " . "geolocation" . " " . $this->from);
-
-        //        $this->getGeolocation();
-
+        $this->variables_agent = new Variables(
+            $this->thing,
+            "variables " . "geolocation" . " " . $this->from
+        );
     }
-
 
     /**
      *
      */
-    function set() {
+    function set()
+    {
         $this->variables_agent->setVariable("counter", $this->counter);
-        $this->variables_agent->setVariable("refreshed_at", $this->current_time);
+        $this->variables_agent->setVariable(
+            "refreshed_at",
+            $this->current_time
+        );
     }
-
 
     /**
      *
      */
-    function get() {
+    function get()
+    {
         $this->counter = $this->variables_agent->getVariable("counter");
-        $this->refreshed_at = $this->variables_agent->getVariable("refreshed_at");
+        $this->refreshed_at = $this->variables_agent->getVariable(
+            "refreshed_at"
+        );
 
-        $this->thing->log( $this->agent_prefix .  'loaded ' . $this->counter . ".", "DEBUG");
+        $this->thing->log(
+            $this->agent_prefix . "loaded " . $this->counter . ".",
+            "DEBUG"
+        );
 
         $this->counter = $this->counter + 1;
     }
-
 
     /**
      *
      * @param unknown $lookup_text (optional)
      * @return unknown
      */
-    function getGeolocation($lookup_text = null) {
-        if ($lookup_text == null) {return;}
+    function getGeolocation($lookup_text = null)
+    {
+        if ($lookup_text == null) {
+            return;
+        }
         //        if ($sort_order == null) {$sort_order = "popularity";}
 
         $city = "vancouver";
@@ -90,7 +96,9 @@ class Geolocation extends Agent
         //        $data_source = "https://api.meetup.com/2/open_events.xml?format=json&and_text=true&text=" . $keywords . "&time=,1w&key=". $this->api_key;
         //$lookup_text = "470 Granville, Vancouver";
 
-        $data_source = "http://geogratis.gc.ca/services/geolocation/en/locate?q=". urlencode($lookup_text);
+        $data_source =
+            "http://geogratis.gc.ca/services/geolocation/en/locate?q=" .
+            urlencode($lookup_text);
         //        $data_source = "http://geogratis.gc.ca/services/geolocation/en/suggest?q=". urlencode($lookup_text);
 
         //        $time = "&time=,1w";
@@ -114,11 +122,11 @@ class Geolocation extends Agent
             // Invalid query of some sort.
         }
 
-        $json_data = json_decode($data, TRUE);
+        $json_data = json_decode($data, true);
 
         $total_items = count($json_data);
 
-        $this->thing->log('got ' . $total_items . " Geolocated things.");
+        $this->thing->log("got " . $total_items . " Geolocated things.");
 
         //$this->available_cars_count = $total_items;
 
@@ -128,132 +136,126 @@ class Geolocation extends Agent
         return false;
     }
 
-
     /**
      *
      * @param unknown $text (optional)
      * @return unknown
      */
-    function getPlaces($text = null) {
-        if (!isset($this->places)) {$this->getGeolocation($text);}
+    function getPlaces($text = null)
+    {
+        if (!isset($this->places)) {
+            $this->getGeolocation($text);
+        }
         return $this->places;
-
     }
-
 
     /**
      *
      * @param unknown $text (optional)
      */
-    function bestPlaces($text = null) {
-        if (!isset($this->places)) {$this->getPlaces($text);}
+    function bestPlaces($text = null)
+    {
+        if (!isset($this->places)) {
+            $this->getPlaces($text);
+        }
 
-        if ($this->places == null) {$this->best_matches = null;return;}
+        if ($this->places == null) {
+            $this->best_matches = null;
+            return;
+        }
 
         $min_lev = 1e99;
-        $this->matches = array();
-        foreach ($this->places as $geolocation_id=>$place) {
-
-            $lev = levenshtein($place['description'], $text);
+        $this->matches = [];
+        foreach ($this->places as $geolocation_id => $place) {
+            $lev = levenshtein($place["description"], $text);
             $this->matches[$lev][] = $place;
-            if ($lev < $min_lev) {$min_lev = $lev;
-                //echo $min_lev. "\n";
+            if ($lev < $min_lev) {
+                $min_lev = $lev;
             }
         }
         $this->best_matches = $this->matches[$min_lev];
-
     }
-
-
-    /**
-     *
-     * @param unknown $place
-     */
-    function printGeolocation($place) {
-
-        echo $this->geolocationString($place) . "\n";
-
-    }
-
 
     /**
      *
      * @param unknown $text (optional)
      */
-    function getPlace($text = null) {
-
-        if (!isset($this->places)) {$this->getGeolocation();}
+    function getPlace($text = null)
+    {
+        if (!isset($this->places)) {
+            $this->getGeolocation();
+        }
         //$this->cars[$modo_id] = array("description"=>$description, "runat"=>null, "runtime"=>null, "place"=>$locations[0], "link"=>null);
-        $this->matches = array();
-        foreach ($this->places as $geolocation_id=>$place) {
+        $this->matches = [];
+        foreach ($this->places as $geolocation_id => $place) {
             //            foreach ($place['locations'] as $i => $location) {
-            if (strtolower($place['description']) == strtolower($text)) {$this->matches[] = $place;}
+            if (strtolower($place["description"]) == strtolower($text)) {
+                $this->matches[] = $place;
+            }
             //            }
         }
-
-
-
     }
-
 
     /**
      *
      * @param unknown $geolocation_places
      */
-    function placesGeolocation($geolocation_places) {
-        if (!isset($this->places)) {$this->places = array();}
-        if ($geolocation_places == null) {$this->places_count = 0;return;}
+    function placesGeolocation($geolocation_places)
+    {
+        if (!isset($this->places)) {
+            $this->places = [];
+        }
+        if ($geolocation_places == null) {
+            $this->places_count = 0;
+            return;
+        }
 
-        foreach ($geolocation_places as $id=>$place) {
-
+        foreach ($geolocation_places as $id => $place) {
             //            $locations = $car['Location'];
             //            foreach ($locations as $i=>$location) {
             //                $location_matches[] = $this->getLocation($location['LocationID']);
             //            }
 
-            $description = $place['title'];
+            $description = $place["title"];
 
-            $coordinates = $place['geometry']['coordinates'];
+            $coordinates = $place["geometry"]["coordinates"];
 
             $geolocation_id = null;
 
             $this->places_count = count($this->places);
             //            $this->events[$meetup_id] = array("event"=>$event_name, "runat"=>$run_at, "runtime"=>$runtime, "locations"=>$venue_name, "link"=>$link);
-            $this->places[$geolocation_id] = array("description"=>$description, "coordinates"=>$coordinates);
+            $this->places[$geolocation_id] = [
+                "description" => $description,
+                "coordinates" => $coordinates,
+            ];
 
-            $this->places[] = array("description"=>$description, "coordinates"=>$coordinates);
-
-
+            $this->places[] = [
+                "description" => $description,
+                "coordinates" => $coordinates,
+            ];
         }
 
         $this->places_count = count($this->places);
-
     }
-
 
     /**
      *
      * @param unknown $text (optional)
      * @return unknown
      */
-    function isNeighbourhood($text = null) {
-        if (!isset($this->locations)) {$this->getLocations();}
-        $matches = array();
-        foreach ($this->locations as $i=>$location) {
-
-            if (strtolower($location['Neighbourhood']) == strtolower($text)) {
-                //echo "Is " . $location['Neighbourhood'] . "\n";
+    function isNeighbourhood($text = null)
+    {
+        if (!isset($this->locations)) {
+            $this->getLocations();
+        }
+        $matches = [];
+        foreach ($this->locations as $i => $location) {
+            if (strtolower($location["Neighbourhood"]) == strtolower($text)) {
                 return true;
             }
-
         }
-
-        //$this->neighbourhoods = $matches;
-        //if ((isset($matches)) and (count($matches) >= 1)) {return true;}
         return false;
-
     }
-
 
     /**
      * function getNeighbourhood($text = null) {
@@ -289,13 +291,18 @@ class Geolocation extends Agent
      *
      * @param unknown $place
      */
-    public function makePlace($place) {
+    public function makePlace($place)
+    {
         // Need to check whether the events exists...
         // This can be post response.
 
         // Load as new event things onto stack
         $thing = new Thing(null);
-        $thing->Create("geolocation@stackr.ca", "places", "s/ places geolocation " . $place);
+        $thing->Create(
+            "geolocation@stackr.ca",
+            "places",
+            "s/ places geolocation " . $place
+        );
 
         // make sure the right fields are directly given
         //        new Event($thing, "event is ". $event['name']);
@@ -304,35 +311,41 @@ class Geolocation extends Agent
         //        new Link($thing, "link is " . $event['link']);
     }
 
-
     /**
      *
      * @param unknown $place
      * @return unknown
      */
-    public function placeString($place) {
-        if (!is_array($place)) {return;}
-        $place_string = $place['description'] . " " . $place['coordinates'][0] . " " . $place['coordinates'][1];
+    public function placeString($place)
+    {
+        if (!is_array($place)) {
+            return;
+        }
+        $place_string =
+            $place["description"] .
+            " " .
+            $place["coordinates"][0] .
+            " " .
+            $place["coordinates"][1];
         return $place_string;
-
     }
-
 
     /**
      *
      */
-    public function makeWeb() {
-return;
+    public function makeWeb()
+    {
+        return;
         $html = "<b>Geolocation Agent</b>";
         $html .= "<p><b>Geolocation Cars</b>";
 
         if (!isset($this->events)) {
             $html .= "<br>No places found on Geolocation.";
         } else {
-            foreach ($this->events as $id=>$event) {
+            foreach ($this->events as $id => $event) {
                 $event_html = $this->eventString($event);
 
-                $link = $event['link'];
+                $link = $event["link"];
                 $html_link = '<a href="' . $link . '">';
                 $html_link .= "geolocation";
                 $html_link .= "</a>";
@@ -344,24 +357,24 @@ return;
         $this->html_message = $html;
     }
 
-
     /**
      *
      */
-    public function makeSMS() {
+    public function makeSMS()
+    {
         $sms = "GEOLOCATION" . " | " . $this->response;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
-
 
     /**
      *
      */
-    public function makeMessage() {
+    public function makeMessage()
+    {
         $message = "Geolocation";
-/*
+        /*
         switch ($this->cars_count) {
         case 0:
             $message .= " did not find any events.";
@@ -381,30 +394,32 @@ return;
         $this->message = $message;
     }
 
-
     /**
      *
      */
-    private function thingreportGeolocation() {
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['web'] = $this->html_message;
-        $this->thing_report['message'] = $this->message;
+    private function thingreportGeolocation()
+    {
+        $this->thing_report["sms"] = $this->sms_message;
+        $this->thing_report["web"] = $this->html_message;
+        $this->thing_report["message"] = $this->message;
     }
-
 
     /**
      *
      * @param unknown $input (optional)
      * @return unknown
      */
-    public function extractNumber($input = null) {
-        if ($input == null) {$input = $this->subject;}
+    public function extractNumber($input = null)
+    {
+        if ($input == null) {
+            $input = $this->subject;
+        }
 
         $pieces = explode(" ", strtolower($input));
 
         // Extract number
         $matches = 0;
-        foreach ($pieces as $key=>$piece) {
+        foreach ($pieces as $key => $piece) {
             if (is_numeric($piece)) {
                 $number = $piece;
                 $matches += 1;
@@ -424,47 +439,40 @@ return;
         return $this->number;
     }
 
-
     /**
      *
      * @param unknown $time_text
      * @return unknown
      */
-    function timeString($time_text) {
+    function timeString($time_text)
+    {
+        if ($time_text == null) {
+            return "X";
+        }
 
-        if ($time_text == null) {return "X";}
-
-        //$timevalue = $this->current_time;
-
-        $this->time_zone = 'America/Vancouver';
+        $this->time_zone = "America/Vancouver";
         $m = "";
         // if no error from query_time_server
         if (true) {
-
             $epoch = $time_text;
             $datum = new \DateTime("@$epoch", new \DateTimeZone("UTC"));
 
-
-
             $datum->setTimezone(new \DateTimeZone($this->time_zone));
 
-            $m .= $datum->format('d/m H:i') . " ";
-
-
-        }
-        else {
-            $m =  "Unfortunately, the time server $timeserver could not be reached at this time. ";
+            $m .= $datum->format("d/m H:i") . " ";
+        } else {
+            $m = "Unfortunately, the time server $timeserver could not be reached at this time. ";
         }
 
         return $m;
-
     }
 
     /**
      *
      * @return unknown
      */
-    public function respondResponse() {
+    public function respondResponse()
+    {
         $this->thing->flagGreen();
 
         // This should be the code to handle non-matching responses.
@@ -477,73 +485,59 @@ return;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         //$this->makeWeb();
 
-
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
 
         return $this->thing_report;
     }
-
 
     /**
      *
      * @return unknown
      */
-    public function readSubject() {
+    public function readSubject()
+    {
         $this->response = null;
 
         $this->num_hits = 0;
 
         $keywords = $this->keywords;
-        /*
-        if ($this->agent_input != null) {
-
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-
-        } else {
-            $input = strtolower($this->subject);
-        }
-
-        $this->input = $input;
-*/
 
         $input = $this->input;
-
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-        //$prior_uuid = null;
 
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-
-            if ($input == 'geolocation') {
+            if ($input == "geolocation") {
                 //$this->search_words = null;
                 $this->response = "Asked Geolocation about places.";
                 return;
             }
-
         }
 
         $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), "geolocation is")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("geolocation is"));
-        } elseif (($pos = strpos(strtolower($input), "geolocation")) !== FALSE) {
-            $whatIWant = substr(strtolower($input), $pos+strlen("geolocation"));
+        if (($pos = strpos(strtolower($input), "geolocation is")) !== false) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("geolocation is")
+            );
+        } elseif (
+            ($pos = strpos(strtolower($input), "geolocation")) !== false
+        ) {
+            $whatIWant = substr(
+                strtolower($input),
+                $pos + strlen("geolocation")
+            );
         }
 
         $filtered_input = ltrim(strtolower($whatIWant), " ");
-        //echo "foo";
         if ($filtered_input != "") {
-            //echo "bar";
             $this->search_words = $filtered_input;
 
             //                $this->response .= "Got neighbourhood " . $this->neighbourhood.".\n";
@@ -555,15 +549,16 @@ return;
             $this->bestPlaces($filtered_input);
 
             $r = "";
-            if ($this->best_matches == null) {$this->response = "No places matched."; return;}
-            foreach ($this->best_matches as $index=>$match) {
-
+            if ($this->best_matches == null) {
+                $this->response = "No places matched.";
+                return;
+            }
+            foreach ($this->best_matches as $index => $match) {
                 $r = $this->placeString($match) . " / ";
 
                 $this->response .= $r;
             }
             return;
-
 
             // At this point the Agent has not matched the words against a neighbourhood.
             // See what best match.
@@ -571,14 +566,11 @@ return;
 
             //            $this->getCar($filtered_input);
 
-
-            $this->response .= "Asked Geolocation about " . $this->search_words . " cars. ";
+            $this->response .=
+                "Asked Geolocation about " . $this->search_words . " cars. ";
             return false;
         }
         $this->response .= "Message not understood";
         return true;
-
     }
-
-
 }

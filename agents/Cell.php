@@ -423,7 +423,6 @@ class Cell extends Agent
 
         $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -712,11 +711,8 @@ class Cell extends Agent
                 break;
             } else {
                 $n = rand(3, 8);
-                //                $n = 13;
             }
         }
-
-        //echo " p = " .$n
 
         // So we are supposed to use rule N for
         // finding the probability of melting
@@ -737,29 +733,7 @@ class Cell extends Agent
 
         $this->value = ["name" => "seed", "state" => "on", "value" => 0.5];
     }
-    /*
-    public function getCell($q, $r, $s)
-    {
 
-        if (($q > $this->lattice_size) or
-            ($q < -$this->lattice_size) or
-            ($r > $this->lattice_size) or
-            ($r < -$this->lattice_size) or
-            ($s > $this->lattice_size) or
-            ($s < -$this->lattice_size)) {
-            $cell = array('name'=>'boundary', 'state'=>'off', 'value'=>0); // red?
-        } else {
-            if (isset($this->lattice[$q][$r][$s])) {
-                $cell = $this->lattice[$q][$r][$s];
-            } else {
-                // Flag an error;
-                $cell = array('name'=>"bork", 'state'=>'off', 'value'=>true);
-            }
-        }
-
-        return $cell;
-    }
-*/
     public function updateCell($q, $r, $s)
     {
         // Process the cell;
@@ -1038,7 +1012,7 @@ class Cell extends Agent
 
             $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo "Caught exception: ", $e->getMessage(), "\n";
+            $this->error .= "Caught exception: " . $e->getMessage() . ". ";
         }
 
         return $this->thing_report["pdf"];

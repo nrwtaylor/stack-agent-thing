@@ -7,8 +7,6 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-//use QR_Code\QR_Code;
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -123,7 +121,6 @@ class Slice extends Agent
             $whatIWant = substr(strtolower($input), $pos + strlen($whatis));
         }
 
-        //$filtered_input = ltrim(strtolower($whatIWant), " ");
         $filtered_input = ltrim($whatIWant, " ");
 
         $this->whatis = $filtered_input;
@@ -137,14 +134,11 @@ class Slice extends Agent
     public function timestampSlice($t = null)
     {
 
-//        $s = $this->thing->thing->created_at;
-
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {
             $t = $this->retain_to;
             $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
-            //$text = "CLICK FOR PDF";
         }
         $this->timestamp = $text;
         return $this->timestamp;
@@ -449,7 +443,6 @@ class Slice extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -762,7 +755,7 @@ class Slice extends Agent
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= 'Caught exception: ' . $e->getMessage() .". ";
         }
 
         return $this->thing_report['pdf'];

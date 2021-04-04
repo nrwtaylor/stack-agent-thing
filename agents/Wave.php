@@ -47,22 +47,22 @@ class Wave extends Agent
             $this->verbosity = 2;
         }
 
-        if ($this->notch_height == false) {
+        if ((!isset($this->notch_height)) or ($this->notch_height == false)) {
             $this->notch_height = 1.6;
         }
-        if ($this->notch_direction == false) {
+        if ( (!isset($this->notch_direction)) or ($this->notch_direction == false) ) {
             $this->notch_direction = 180;
         }
-        if ($this->notch_spread == false) {
+        if ((!isset($this->notch_spread)) or ($this->notch_spread == false)) {
             $this->notch_spread = 80;
         }
-        if ($this->notch_min_period == false) {
+        if ((!isset($this->notch_min_period)) or ($this->notch_min_period == false)) {
             $this->notch_min_period = 10;
         }
-        if ($this->noaa_buoy_id == false) {
+        if ((!isset($this->noaa_buoy_id)) or ($this->noaa_buoy_id == false)) {
             $this->noaa_buoy_id = 44025;
         }
-        if ($this->link == false) {
+        if ((!isset($this->link)) or ($this->link == false)) {
             $this->link =
                 "https://magicseaweed.com/Georgica-East-Hampton-Surf-Report/4226/";
         }
@@ -206,7 +206,6 @@ class Wave extends Agent
         foreach ($lines as $line) {
             $i += 1;
             if ($i >= 8) {
-                //echo $line . "<br>";
                 $forecast[] = $line;
                 // First explore around the vertical line break
                 $fields = explode("|", $line);
@@ -416,91 +415,12 @@ class Wave extends Agent
         $this->choices = $this->thing->choice->makeLinks($this->state);
         $this->thing_report['choices'] = $this->choices;
 
-        //$interval = date_diff($datetime1, $datetime2);
-        //echo $interval->format('%R%a days');
-        //$available = $this->thing->human_time($this->available);
-
-        //$s = $this->block_thing->state;
         if (!isset($this->flag)) {
             $this->flag = strtoupper($this->getFlag());
         }
-        //$this->link = "https://magicseaweed.com/Hampton-Beach-Surf-Report/2074/";
-        /*
-        if (strtolower($this->flag) == "red") {
-            $sms_message = "WAVE = SURF'S UP";
-        } else {
-            $sms_message = "WAVE";
-        }
 
-        if ($this->verbosity >= 2) {
-            $sms_message .= " | flag " . strtoupper($this->flag);
-            $sms_message .= " | direction " . strtoupper($this->direction) . "";
-            $sms_message .= " | height " . strtoupper($this->height) . "m";
-            $sms_message .= " | period " . strtoupper($this->period) . "s";
-            $sms_message .= " | source NOAA Wavewatch III ";
-        }
-
-        if ($this->verbosity >= 9) {
-            $sms_message .= " | nowcast " . $this->day . " " . $this->hour;
-        }
-
-        if ($this->verbosity >= 5) {
-            $sms_message .=
-                " | notch " .
-                $this->notch_height .
-                "m " .
-                $this->notch_direction .
-                " " .
-                $this->notch_spread .
-                " " .
-                $this->notch_min_period .
-                "s";
-        }
-
-        if ($this->verbosity >= 2) {
-            $sms_message .= " | buoy " . $this->noaa_buoy_id;
-        }
-
-        $sms_message .= " | curated link " . $this->link;
-
-        if ($this->verbosity >= 9) {
-            $sms_message .=
-                " | nuuid " . substr($this->variables_agent->thing->uuid, 0, 4);
-
-            $run_time = microtime(true) - $this->start_time;
-            $milliseconds = round($run_time * 1000);
-
-            $sms_message .= " | rtime " . number_format($milliseconds) . 'ms';
-        }
-$index = null;
-if (isset($this->index)) {$index = $this->index;}
-        switch ($index) {
-            case null:
-                $sms_message .= " | TEXT WAVE ";
-
-                break;
-
-            case '1':
-                $sms_message .= " | TEXT WAVE";
-                break;
-            case '2':
-                $sms_message .= " | TEXT WAVE";
-                break;
-            case '3':
-                $sms_message .= " | TEXT WAVE";
-                break;
-            case '4':
-                $sms_message .= " | TEXT WAVE";
-                break;
-            default:
-                $sms_message .= " | TEXT ?";
-                break;
-        }
-*/
-
-        //        $this->thing_report['sms'] = $sms_message;
         $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
@@ -614,8 +534,6 @@ if (isset($this->index)) {$index = $this->index;}
         $test_message .=
             '<br>Current node: ' . $this->thing->choice->current_node;
 
-        //        $test_message .= '<br>run_at: ' . $this->run_at;
-        //        $test_message .= '<br>end_at: ' . $this->end_at;
     }
 
     public function extractNumber($input = null)
@@ -680,8 +598,6 @@ if (isset($this->index)) {$index = $this->index;}
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'wave') {
-                //echo "readsubject block";
-                //$this->read();
                 return;
             }
         }
@@ -748,12 +664,6 @@ if (isset($this->index)) {$index = $this->index;}
                 continue;
             }
         }
-
-        //    if ($matches == 1) {
-        //        $this->quantity = $piece;
-        //        $this->num_hits += 1;
-        //$this->thing->log('Agent "Block" found a "run time" of ' . $this->quantity .'.');
-        //    }
 
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {

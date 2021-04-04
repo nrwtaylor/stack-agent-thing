@@ -7,8 +7,6 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-//use QR_Code\QR_Code;
-
 ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
@@ -117,7 +115,6 @@ class Year extends Agent
             $whatIWant = substr(strtolower($input), $pos + strlen($whatis));
         }
 
-        //$filtered_input = ltrim(strtolower($whatIWant), " ");
         $filtered_input = ltrim($whatIWant, " ");
 
         $this->whatis = $filtered_input;
@@ -130,8 +127,6 @@ class Year extends Agent
      */
     public function timestampYear($t = null)
     {
-        //        $s = $this->thing->thing->created_at;
-
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {
@@ -157,8 +152,6 @@ class Year extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-
-//        return $this->thing_report;
     }
 
     /**
@@ -243,7 +236,6 @@ class Year extends Agent
      */
     public function getYear()
     {
-        return;
     }
 
     /**
@@ -251,7 +243,6 @@ class Year extends Agent
      */
     public function initYear()
     {
-        //$this->number_agent = new Number($this->thing, "number");
     }
 
     public function run()
@@ -311,7 +302,6 @@ class Year extends Agent
             $canvas_size_y = 164;
         }
         $this->image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -390,9 +380,6 @@ class Year extends Agent
         );
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
-        //if (isset($this->text_color)) {
-        //    $textcolor = $this->text_color;
-        //}
 
         $this->drawYear();
 
@@ -427,11 +414,6 @@ class Year extends Agent
         $width = imagesx($this->image);
         $height = imagesy($this->image);
         $pad = 0;
-        //        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->black, $font, $text);
-
-        //imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
-
-        // https://stackoverflow.com/questions/14549110/failed-to-delete-buffer-no-buffer-to-delete
 
         if (ob_get_contents()) {
             ob_clean();
@@ -445,7 +427,6 @@ class Year extends Agent
 
         $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -458,21 +439,9 @@ class Year extends Agent
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
 
-        //        $this->thing_report['png'] = $image;
-
-        //        $this->PNG = $this->image;
         $this->PNG = $imagedata;
-        //imagedestroy($this->image);
-        //        $this->thing_report['png'] = $imagedata;
-
-        //        $this->PNG_data = "data:image/png;base64,'.base64_encode($imagedata).'";
 
         return $response;
-
-        $this->PNG = $image;
-        $this->thing_report["png"] = $image;
-
-        return;
     }
 
     public function drawYear($type = null)
@@ -494,9 +463,6 @@ class Year extends Agent
             $this->image = $this->round_agent->image;
             return;
         }
-
-        //        $number_of_months = 12;
-        //        if ($this->calendar_type = '13 month') {$number_of_months = 13;}
 
         $this->slice_agent = new Slice(
             $this->thing,
@@ -589,16 +555,7 @@ class Year extends Agent
         foreach (range(0, $number_of_months - 1, 1) as $i) {
             $x_pt = $size * cos($angle * $i + $init_angle);
             $y_pt = $size * sin($angle * $i + $init_angle);
-            /*
-            imageline(
-                $this->image,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $center_x + $x_pt,
-                $center_y + $y_pt,
-                $this->black
-            );
-*/
+
             imageline(
                 $this->image,
                 $center_x,
@@ -663,23 +620,8 @@ class Year extends Agent
 
             $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
-            /*
-            if (isset($this->hextile_PNG)) {
-                $top_x = -6;
-                $top_y = 11;
 
-                $pdf->Image(
-                    $this->hextile_PNG,
-                    $top_x,
-                    $top_y,
-                    -300,
-                    -300,
-                    'PNG'
-                );
-            }
-*/
             $this->getNuuid();
-            //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
             $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
@@ -723,8 +665,6 @@ class Year extends Agent
             $this->getQuickresponse($link);
             $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
 
-            //$pdf->Link(175,5,30,30, $link);
-
             $pdf->SetTextColor(0, 0, 0);
 
             $pdf->SetXY(15, 7);
@@ -736,8 +676,6 @@ class Year extends Agent
             $t = str_replace(" | ", "\n", $t);
 
             $pdf->MultiCell(150, $line_height, $t, 0);
-
-            //$pdf->Link(15,7,150,10, $link);
 
             $y = $pdf->GetY() + 0.95;
             $pdf->SetXY(15, $y);
@@ -765,7 +703,7 @@ class Year extends Agent
             $image = $pdf->Output("", "S");
             $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo "Caught exception: ", $e->getMessage(), "\n";
+            $this->error .= "Caught exception: " . $e->getMessage() . ". ";
         }
 
         return $this->thing_report["pdf"];
@@ -791,9 +729,9 @@ class Year extends Agent
             }
         }
 
-// TODO ?
-// 23 may 1 is recognized by date_parse as 23 may 2001.
-// dev?
+        // TODO ?
+        // 23 may 1 is recognized by date_parse as 23 may 2001.
+        // dev?
 
         $this->parsed_date = date_parse($text);
         $year = $this->parsed_date["year"];
@@ -823,8 +761,6 @@ class Year extends Agent
             "carbon",
             "year of our lord",
         ];
-
-        //$number_agent = new Number($this->thing, "number");
 
         foreach ($year_indicators as $year_indicator) {
             if (stripos($text, $year_indicator) !== false) {
@@ -899,14 +835,9 @@ class Year extends Agent
             return true;
         }
 
-        // if (!isset($this->thing->ngram_handler)) {
-        //     $this->thing->ngram_handler = new Ngram($this->thing, "ngram");
-        // }
         $tokens = [];
         foreach (range(0, 4, 1) as $i) {
             $new_grams = $this->extractNgrams($text, $i);
-
-            //            $new_grams = $this->thing->ngram_handler->extractNgrams($text, $i);
             $tokens = array_merge($tokens, $new_grams);
         }
         foreach ($tokens as $i => $token) {
@@ -932,12 +863,12 @@ class Year extends Agent
                 // But is it a number inside of a telephone number.
                 $t = $this->extractTelephonenumbers($text);
 
-// Or a 3 3 4 pattern.
+                // Or a 3 3 4 pattern.
 
-//        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
+                //        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
 
-//        preg_match_all($pattern, $text, $match);
-//        $t = array_merge($t, $match[0]);
+                //        preg_match_all($pattern, $text, $match);
+                //        $t = array_merge($t, $match[0]);
 
                 foreach ($t as $j => $telephone_number) {
                     if (
@@ -959,7 +890,9 @@ class Year extends Agent
         $unique = array_unique($serialized);
 
         $years = array_intersect_key($years, $unique);
-        if (count($years) === 1) {return $years;}
+        if (count($years) === 1) {
+            return $years;
+        }
 
         // Check if the year appears as a distinct token.
         $filtered_years = [];
@@ -1079,6 +1012,5 @@ class Year extends Agent
         }
 
         $this->getYear();
-        return;
     }
 }

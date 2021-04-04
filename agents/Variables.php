@@ -93,7 +93,6 @@ class Variables
 
         if ($agent_command == null) {
             $this->thing->log(
-                $this->agent_prefix .
                     "did not find an agent command. No action taken.",
                 "WARNING"
             );
@@ -116,7 +115,6 @@ class Variables
         $this->node_list = ["start"];
 
         $this->thing->log(
-            $this->agent_prefix .
                 "running on Thing " .
                 $this->thing->nuuid .
                 ".",
@@ -139,13 +137,7 @@ class Variables
             $this->Respond();
         }
 
-        // Commented out 4 Jul 2018
-        // Toss in a refreshed.
-        //$time_string = $this->thing->time();
-        //$this->setVariable("refreshed_at", $time_string);
-
         $this->thing->log(
-            $this->agent_prefix .
                 "ran for " .
                 number_format(
                     $this->thing->elapsed_runtime() - $this->start_time
@@ -156,7 +148,6 @@ class Variables
 
         $this->thing_report["log"] = $this->thing->log;
     }
-    
 
     public function initVariables() {
 
@@ -212,9 +203,6 @@ class Variables
         $refreshed_at = false;
 
         foreach ($this->agent_variables as $key => $variable_name) {
-            // Write the agent name (not "variables")
-            //            $this->variables_thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
-            //            $this->thing->json->writeVariable( array($this->variable_set_name, $variable_name), $this->name );
 
             // Intentionally write to the variable thing.  And the current thing.
             if (isset($variable_name)) {
@@ -300,7 +288,6 @@ class Variables
 
                 if ($this->getVariableSet($thing) == false) {
                     $this->thing->log(
-                        $this->agent_prefix .
                             "got " .
                             $this->variables_thing->nuuid,
                         "DEBUG"
@@ -339,11 +326,7 @@ class Variables
         $this->variables_thing->flagGreen();
 
         foreach ($this->agent_variables as $key => $variable_name) {
-            //if ($variable_name == "name" {
-            //    $this->setVariable($variable_name, $this->agent_name); // Reserved for the agent name.
-            //} else {
             $this->setVariable($variable_name, null);
-            //}
         }
 
         // Not yet implemented/used?
@@ -375,7 +358,6 @@ class Variables
             $this->resetVariable();
             // Call next tallier, with a flag.
             $this->{$variable . "_overflow_flag"} = true; // true is the error flag
-            //$this->thing->flagRed();
 
             $this->thing->log("Variable overflow.", "ERROR");
             $this->function_message = "Variable overflow";
@@ -389,7 +371,6 @@ class Variables
 
         // Store counts
         $this->setVariable($variable, $this->variables_thing->$variable);
-        // $this->variables_thing->flagGreen();
 
         return $this->{$variable . "_overflow_flag"};
     }
@@ -398,9 +379,6 @@ class Variables
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
-        //if (!isset($thing['uuid'])) {
-        //    $thing['uuid'] = null;
-        //}
         $uuid = null;
         if (isset($thing["uuid"])) {
             $uuid = $thing["uuid"];
@@ -619,8 +597,6 @@ class Variables
         // can be left alone until called on next.
         $this->thing->flagGreen();
 
-        // $this->thing->log( $this->agent_prefix . ' ' .$this->variables_thing->variable . '.' );
-
         $this->sms_message = "VARIABLES SET IS ";
         $this->sms_message .= strtoupper($this->name);
 
@@ -642,15 +618,7 @@ class Variables
                     $this->sms_message .= "X";
                 }
             }
-            //if (isset($this->variables_thing->$agent_variable)) {
-            //    $this->sms_message .= " | " . strtolower($agent_variable) . " " . $this->variables_thing->$agent_variable;
-            //}
         }
-
-        // = " . number_format($this->variables_thing->variable);
-        //$this->sms_message .= " | name " . $this->variables_thing->name;
-
-        //$this->sms_message .= " | nuuid " . substr($this->variables_thing->next_uuid, 0 ,4);
 
         if (isset($this->function_message)) {
             $this->sms_message .= " | " . $this->function_message;
@@ -672,7 +640,7 @@ class Variables
     public function defaultCommand()
     {
         $this->thing->log(
-            $this->agent_prefix . "default command set.",
+            "default command set.",
             "DEBUG"
         );
 
@@ -701,23 +669,7 @@ class Variables
         $variable_headcode = "";
 
         $train_agents = $this->train_agents;
-/*
-        $train_agents = [
-            "flag",
-            "state",
-            "quantity",
-            "alias",
-            "slug",
-            "url",
-            "runtime",
-            "runat",
-            "endat",
-            "available",
-            "state",
-            "route",
-            "consist",
-        ];
-*/
+
         if ($headcode_flagging == "on") {
             // Is this a train agent.
             // One which has a headcode associated with it.
@@ -804,22 +756,11 @@ class Variables
 
     public function readText()
     {
-        //$this->thing->log( $this->agent_prefix . 'started reading the received text.' );
         $this->num_hits = 0;
         // No need to read text.  Any identity input to Tally
         // increments the tally.
 
         $keywords = $this->agent_keywords;
-
-        /*
-        if ($this->agent_command == null) {
-            return false;
-        } else {
-
-
-        }
-*/
-        //$this->input = $input;
 
         $haystack = strtolower($this->nom_input);
         $pieces = explode(" ", strtolower($this->nom_input));
@@ -828,12 +769,10 @@ class Variables
         // Keyword
         if (count($pieces) == 1) {
             if ($this->nom_input == $this->agent) {
-                //$this->readVariables();
                 return;
             }
         }
 
-        //$this->thing->log( $this->agent_prefix . 'extract variable and number.' );
         $this->extractVariable($this->subject);
         $this->extractNumber($this->subject);
 
@@ -841,30 +780,6 @@ class Variables
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        /*
-Turn this off Mar 17 2018.  Causes a conflict
-with the start agent. And doesn't seem to be necessary
-                        case 'start':
-                            $needle = "start";
-                            $this->thing->log( $this->agent_prefix . 'processing new variables.', "INFORMATION" );
-                            $right_of_needle = ltrim(substr($this->nom_input, strpos($this->nom_input, $needle)+strlen($needle)));
-                            $pairs = array();
-
-
-                            preg_match_all('/[A-Za-z0-9\.]+(?: [A-Za-z0-9\.]+)?/',
-                                $right_of_needle,$pairs);
-                            $pairs = $pairs[0];
-                            foreach ($pairs as $key=>$pair) {
-
-                                $words = explode(" ", strtolower($pair));
-
-                                $name = $words[0];
-                                $value = $words[1];
-
-                                $this->newVariable($name,$value);
-                            }
-                            return;
-*/
 
                         case "plus":
                         case "add":
@@ -873,7 +788,6 @@ with the start agent. And doesn't seem to be necessary
                                 isset($this->number) and isset($this->variable)
                             ) {
                                 $this->thing->log(
-                                    $this->agent_prefix .
                                         "adding number to variable.",
                                     "INFORMATION"
                                 );
@@ -892,7 +806,6 @@ with the start agent. And doesn't seem to be necessary
                                 isset($this->number) and isset($this->variable)
                             ) {
                                 $this->thing->log(
-                                    $this->agent_prefix .
                                         "adding number to variable.",
                                     "INFORMATION"
                                 );
@@ -906,7 +819,6 @@ with the start agent. And doesn't seem to be necessary
                         case "increment":
                             if (isset($this->variable)) {
                                 $this->thing->log(
-                                    $this->agent_prefix .
                                         "incrementing variable.",
                                     "INFORMATION"
                                 );
@@ -921,7 +833,6 @@ with the start agent. And doesn't seem to be necessary
                                 isset($this->number) and isset($this->variable)
                             ) {
                                 $this->thing->log(
-                                    $this->agent_prefix .
                                         "setting " .
                                         $this->variable .
                                         " to " .
@@ -941,7 +852,6 @@ with the start agent. And doesn't seem to be necessary
                         case "&":
                             if (isset($this->variable)) {
                                 $this->thing->log(
-                                    $this->agent_prefix .
                                         'adding variable "' .
                                         $this->variable .
                                         '".',
@@ -959,7 +869,6 @@ with the start agent. And doesn't seem to be necessary
                             }
 
                         case "memory":
-                            //$t = $this->thing->db->length();
 
                             return;
 
@@ -969,7 +878,7 @@ with the start agent. And doesn't seem to be necessary
             }
         }
 
-        $this->thing->log($this->agent_prefix . " did no operation.", "DEBUG");
+        $this->thing->log("did no operation.", "DEBUG");
     }
 
     public function newVariable($name = null, $value = null)

@@ -157,9 +157,6 @@ class Ticketmaster extends Agent
             return;
         }
         foreach ($events as $id => $event) {
-            //            $privacy = $event['privacy'];
-            //            if ($privacy != 1) {echo "privacy";continue;}
-
             //            $region_abbr = $event['region_abbr'];
             $match = false;
             $places_list = [];
@@ -177,10 +174,6 @@ class Ticketmaster extends Agent
                 continue;
             }
 
-            //if ($region_abbr != "BC") {echo "bc";continue;} // Restrict to BC events in dev/test/prod
-
-            //    $all_day_flag = $event['all_day'];
-
             $description = null;
 
             // devstack extract dates from description
@@ -189,8 +182,6 @@ class Ticketmaster extends Agent
             $event_title = $event["name"];
 
             $ref = $event["id"];
-
-            //    $all_day_flag = $event['all_day'];
 
             foreach ($event["_embedded"]["venues"] as $id => $venue) {
                 $venue_name = $venue["name"];
@@ -253,30 +244,12 @@ class Ticketmaster extends Agent
 
     public function respondResponse()
     {
-        // Thing actions
-
         $this->thing->flagGreen();
-        // Generate email response.
 
-        //		$to = $this->thing->from;
-        //		$from = "ticketmaster";
-
-        //echo "<br>";
-
-        //$choices = $this->thing->choice->makeLinks($this->state);
         $choices = false;
         $this->thing_report["choices"] = $choices;
 
-        //$interval = date_diff($datetime1, $datetime2);
-        //echo $interval->format('%R%a days');
-        //$available = $this->thing->human_time($this->available);
-
         $this->flag = "green";
-
-        //       $this->makeSms();
-        //     $this->makeMessage();
-
-        //   $this->makeWeb();
 
         $this->thing_report["email"] = $this->sms_message;
         $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
@@ -290,8 +263,6 @@ class Ticketmaster extends Agent
 
         $this->thing_report["help"] =
             "This triggers provides currency prices using the 1forge API.";
-
-        //		return;
     }
 
     public function eventString($event)
@@ -360,28 +331,6 @@ class Ticketmaster extends Agent
                 $sms .= " | No events found.";
                 break;
             case 1:
-                /*
-                $event = reset($this->events);
-                $event_date = date_parse($event['runat']);
-
-                $month_number = $event_date['month'];
-                $month_name = date('F', mktime(0, 0, 0, $month_number, 10)); // March
-
-                $simple_date_text = $month_name . " " . $event_date['day'];
-*/
-                /*
-                $sms .= " "  . $simple_date_text;
-
-                $sms .= " "  . $event['event'];
-
-                $runat = new Runat($this->thing, $event['runat']);
-
-                $sms .= " "  . $runat->day;
-                $sms .= " "  . $runat->hour;
-                $sms .= ":"  . $runat->minute;
-
-                $sms .= " "  . $event['place'];
-*/
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
                 $sms .= " | " . $event_html;
@@ -428,26 +377,15 @@ class Ticketmaster extends Agent
 
                 $message .= " found " . $event_html . ".";
 
-                //if ($this->available_events_count != $this->events_count) {
-                //    $message .= $this->events_count. " events retrieved.";
-                //}
-
                 break;
             default:
                 $message .=
                     " found " . $this->available_events_count . " events.";
-                //if ($this->available_events_count != $this->events_count) {
-                //    $message .= $this->events_count. " retrieved";
-                //}
 
                 $event = reset($this->events);
                 $event_html = $this->eventString($event);
                 $message .= " This was one of them. " . $event_html . ".";
         }
-
-        // $message .= " | " . $this->response;
-
-        // Really need to refactor this double :/
 
         $this->message = $message;
     }

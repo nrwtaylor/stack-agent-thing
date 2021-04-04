@@ -211,7 +211,6 @@ class Statistics extends Agent
             }
 
             if ($this->sample_count > $this->total_things * $proportion) {
-                //echo " Sampled 1 in 4";
                 // 20% should be enough for sampling
                 break;
             }

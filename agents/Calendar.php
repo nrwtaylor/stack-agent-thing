@@ -982,7 +982,7 @@ $when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
         }
 
         if ($this->stack_engine_state != "prod") {
-            echo $console . "\n";
+            $this->thing->console($console . "\n");
             $this->response .=
                 "Unexpected calendar warning seen. " . $errstr . ". ";
         }

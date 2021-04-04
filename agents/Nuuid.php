@@ -270,8 +270,6 @@ class Nuuid extends Agent
                 $text
             );
         }
-        // imagestring($image, 2, 100, 0, $this->roll, $textcolor);
-        // imagestring($this->image, 20, $bbox["left"], $bbox["top"], $this->thing->nuuid, $textcolor);
 
         // Save the image
         ob_start();
@@ -281,7 +279,6 @@ class Nuuid extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .

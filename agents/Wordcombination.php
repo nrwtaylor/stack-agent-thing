@@ -16,12 +16,10 @@ class Wordcombination extends Agent
      */
     function init()
     {
-        //      $this->resource_path = $GLOBALS['stack_path'] . 'resources/words/';
     }
 
     public function run()
     {
-        //$this->test();
     }
 
     public function test()
@@ -39,7 +37,6 @@ class Wordcombination extends Agent
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 ["wordcombination", "refreshed_at"],
@@ -155,15 +152,8 @@ class Wordcombination extends Agent
 
         $this->thing->flagGreen();
 
-        //        $this->makeSMS();
-        //        $this->thing_report['sms'] = $this->sms_message;
-
         // Make message
         $this->thing_report['message'] = $this->sms_message;
-
-        // Make email
-        //        $this->makeEmail();
-
         $this->thing_report['email'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -175,8 +165,6 @@ class Wordcombination extends Agent
         }
 
         $this->thing->json->writeVariable(["word", "reading"], $this->reading);
-
-        //        return $this->thing_report;
     }
 
     /**
@@ -265,15 +253,11 @@ class Wordcombination extends Agent
                             );
                             $words = ltrim($words);
 
-                            //$this->search_words = $words;
-
                             $this->extractWordcombinations($words);
 
                             return;
 
                         default:
-
-                        //echo 'default';
                     }
                 }
             }
@@ -282,9 +266,6 @@ class Wordcombination extends Agent
         $this->extractWordcombinations($input);
 
         $status = true;
-
-        //        }
-
         return $status;
     }
 }

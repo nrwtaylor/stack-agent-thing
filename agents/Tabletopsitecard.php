@@ -606,7 +606,6 @@ class Tabletopsitecard extends Agent
             $alt_text = $this->thing_report['alt_text'];
         }
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -697,21 +696,13 @@ class Tabletopsitecard extends Agent
 
                             $this->response .= "Killed " . $count . " Ants. ";
                             return;
-                        //                        case 'picanic':
-                        //                            $this->getCard();
-
-                        //                            return;
 
                         case 'on':
-                        //$this->setFlag('green');
-                        //break;
 
                         default:
                     }
                 }
             }
         }
-
-        //$this->getCard();
     }
 }
