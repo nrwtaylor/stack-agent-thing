@@ -447,14 +447,6 @@ return $html_table;
         //        $pdf->useTemplate($tplidx1,0,0,215);
         $pdf->useTemplate($tplidx1);
 
-        //$separator = "\r\n";
-        //$line = strtok($this->thing_report['txt'], $separator);
-
-        //while ($line !== false) {
-        //    # do something with $line
-        //    $line = strtok( $separator );
-        //echo $line;
-        //}
         $pdf->SetTextColor(0, 0, 0);
 
         $num_rows = 40;

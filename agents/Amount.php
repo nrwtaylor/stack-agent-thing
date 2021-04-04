@@ -74,10 +74,6 @@ class Amount extends Agent
         //$num = '$21.34';
         $a = new \NumberFormatter($region, \NumberFormatter::CURRENCY);
 
-        //echo $a->format("12353.2342) . "\n";
-        //echo "foo";
-        //echo $a->parseCurrency($num, $currency) . "\n";
-
         $tokens = explode(' ', $input);
         $amounts = [];
 

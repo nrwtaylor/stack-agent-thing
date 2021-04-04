@@ -180,6 +180,6 @@ class Destination extends Agent
             $this->route_list_text = $route_text;
         }
 
-        $this->response .= "Got routes serving " . $input . ". ";
+        $this->response .= "Got routes serving " . $filtered_input . ". ";
     }
 }

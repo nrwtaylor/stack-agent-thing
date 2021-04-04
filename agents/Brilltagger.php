@@ -75,18 +75,6 @@ class Brilltagger extends Agent
      *
      * @param unknown $tags
      */
-    function printTag($tags)
-    {
-        foreach ($tags as $t) {
-            echo $t['token'] . "/" . $t['tag'] . " ";
-        }
-        echo "\n";
-    }
-
-    /**
-     *
-     * @param unknown $tags
-     */
     function textTag($tags)
     {
         $text = "";
@@ -162,7 +150,6 @@ class Brilltagger extends Agent
         // Then run it through the classifier.
         $tags = $this->tag($filtered_input);
         $this->tags = $tags;
-        //        $this->printTag($tags);
         $this->textTag($tags);
     }
 

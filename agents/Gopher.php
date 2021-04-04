@@ -290,7 +290,6 @@ DirEntity ::= Type User_Name Tab Selector Tab Host Tab Port CR-LF
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

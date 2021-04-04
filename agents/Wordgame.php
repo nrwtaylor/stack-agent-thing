@@ -243,7 +243,6 @@ class Wordgame extends Agent
                             0
                         );
                         $letter_arrangements[] = $letter_arrangement;
-                        echo $letter_arrangement . "\n";
                     }
                 }
             }

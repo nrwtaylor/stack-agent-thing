@@ -71,21 +71,15 @@ class Prompt extends Agent
         if ($this->state_change) {
             switch ($this->requested_state) {
                 case 'opt-in':
-                    //						$agent = new Optin($this->thing);
                     break;
 
                 case 'opt-out':
-                    //						$agent = new Optout($this->thing);
-                    //                echo '<pre> Agent "Usermanager" chose optout</pre>';
-
                     break;
 
                 case null:
                     // Tested case
                     // Web view of
                     // thing/<34 char>/usermanager
-
-                    //echo '<pre> Agent "Prompt" null received no action</pre>';
 
                     $this->thing->choice->Create(
                         'start',
@@ -161,9 +155,6 @@ class Prompt extends Agent
 
                     $message .= "<br>";
 
-                    //$this->time_scale = $this->discriminateInput($input, array('minutes', 'days'));
-                    //echo $this->time_scale . "<br>";
-
                     $message .= "<br>";
                     $message .= $date;
                     $message .= " 
@@ -171,15 +162,6 @@ class Prompt extends Agent
                                         Keep on stacking.
 
                                         ";
-
-                    //echo $choices['button'];
-
-                    // devstack
-                    //                                $this->thing->email->sendGeneric($this->from,$this->agent_name,$subject, $message, $choices);
-                    //                                echo '<pre> Agent "Prompt" terms sent to '; echo $this->from; echo ' </pre>';
-
-                    //        $message_thing = new Message($this->thing, $this->thing_report);
-                    //        $thing_report['info'] = $message_thing->thing_report['info'];
 
                     $thing_report = [
                         'thing' => $this->thing->thing,
@@ -211,7 +193,6 @@ class Prompt extends Agent
 
         // NOTE THAT IT IS REALLY EASY TO CREATE A NEW AGENT TO 'PASS' THE
         // THING TO.
-        //		echo '<pre> Agent created a Optout agent</pre>';
         //			$temp_thing = new Optout($this->thing);
         //
         //			// Whereas in the new scheme it would look like this.
@@ -436,7 +417,6 @@ class Prompt extends Agent
         }
 
         if ($delta >= $minimum_discrimination) {
-            //echo "discriminator" . $discriminator;
             return $selected_discriminator;
         } else {
             return false; // No discriminator found.

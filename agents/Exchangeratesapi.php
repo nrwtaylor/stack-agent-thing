@@ -1,27 +1,30 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
+
+// As of 3 April 2021 exchangeratesapi.io requires signup for an API key.
+// Dev needed to accept api key.
 
 class Exchangeratesapi extends Agent
 {
     // This gets Forex from an API.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->test = "Development code"; // Always
 
-        $this->keywords = ['forex', 'exchange rate', 'USDCAD', 'CADUSA'];
+        $this->keywords = ["forex", "exchange rate", "USDCAD", "CADUSA"];
 
-        $this->thing_report['help'] = 'Try FOREX CADUSA.';
-        $this->thing_report['info'] =
-            'This provides currency prices using the Exchange Rates API.';
+        $this->thing_report["help"] = "Try FOREX CADUSA.";
+        $this->thing_report["info"] =
+            "This provides currency prices using the Exchange Rates API.";
     }
 
     function run()
@@ -66,8 +69,6 @@ class Exchangeratesapi extends Agent
         if ($this->currency_pair == false) {
             $this->currency_pair = "USDCAD";
         }
-
-        return;
     }
 
     function getForex()
@@ -82,6 +83,19 @@ class Exchangeratesapi extends Agent
         //$data = file_get_contents($data_source, NULL, NULL, 0, 4000);
 
         $data = file_get_contents($data_source);
+
+        if (isset($data["success"]) and $data["success"] === false) {
+            $this->error .=
+                $data["error"]["code"] .
+                " " .
+                $data["error"]["type"] .
+                " " .
+                $data["error"]["info"] .
+                ". ";
+            $this->response .= "Exchange rates API not available. ";
+            return;
+        }
+
         if ($data == false) {
             return true;
             // Invalid query of some sort.
@@ -90,7 +104,10 @@ class Exchangeratesapi extends Agent
         $json_data = json_decode($data, true);
 
         $this->bid = null;
-        $this->price = $json_data['rates'][$symbol];
+        $this->price = null;
+        if (isset($json_data["rates"])) {
+            $this->price = $json_data["rates"][$symbol];
+        }
         $this->ask = null;
 
         return $this->price;
@@ -115,19 +132,24 @@ class Exchangeratesapi extends Agent
         // Generate email response.
 
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         $sms_message = "FOREX " . $this->currency_pair;
 
         if ($this->verbosity >= 2) {
-            $sms_message .= " | flag " . strtoupper($this->flag);
-            $sms_message .= " | price " . $this->price . " ";
+            if (isset($this->flag)) {
+                $sms_message .= " | flag " . strtoupper($this->flag);
+            }
+            if (isset($this->price) and $this->price != null) {
+                $sms_message .= " | price " . $this->price . " ";
+            }
             if (isset($this->bid) or $this->bid != null) {
                 $sms_message .= " | bid " . $this->bid . " ";
             }
             if (isset($this->ask) or $this->ask != null) {
                 $sms_message .= " | ask " . $this->ask . " ";
             }
+
             $sms_message .= " | source exchangeratesapi ";
         }
 
@@ -140,30 +162,21 @@ class Exchangeratesapi extends Agent
             $run_time = microtime(true) - $this->start_time;
             $milliseconds = round($run_time * 1000);
 
-            $sms_message .= " | rtime " . number_format($milliseconds) . 'ms';
+            $sms_message .= " | rtime " . number_format($milliseconds) . "ms";
         }
 
         $sms_message .= " | TEXT ?";
 
-        $test_message =
-            'Last thing heard: "' .
-            $this->subject .
-            '".  Your next choices are [ ' .
-            $choices['link'] .
-            '].';
-
-        $test_message .= '<br>' . $sms_message;
-
-        $this->thing_report['sms'] = $sms_message;
-        $this->thing_report['email'] = $sms_message;
-        $this->thing_report['message'] = $sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["sms"] = $sms_message;
+        $this->thing_report["email"] = $sms_message;
+        $this->thing_report["message"] = $sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['help'] =
-            'This triggers provides currency prices using the 1forge API.';
+        $this->thing_report["help"] =
+            "This triggers provides currency prices using the 1forge API.";
     }
 
     public function extractNumber($input = null)
@@ -200,11 +213,6 @@ class Exchangeratesapi extends Agent
     {
         $this->response = null;
         $this->num_hits = 0;
-        // Extract uuids into
-
-        //$this->number = extractNumber();
-
-        //        $keywords = $this->keywords;
 
         if ($this->agent_input != null) {
             // If agent input has been provided then
@@ -227,7 +235,7 @@ class Exchangeratesapi extends Agent
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'forex') {
+            if ($input == "forex") {
                 return;
             }
         }
@@ -246,7 +254,7 @@ class Exchangeratesapi extends Agent
         }
 
         if ($matches == 1) {
-            $this->currency_pair = 'USD' . $currencies[0];
+            $this->currency_pair = "USD" . $currencies[0];
         }
 
         if ($matches == 2) {
@@ -257,8 +265,8 @@ class Exchangeratesapi extends Agent
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'verbosity':
-                        case 'mode':
+                        case "verbosity":
+                        case "mode":
                             $number = $this->extractNumber();
                             if (is_numeric($number)) {
                                 $this->verbosity = $number;
@@ -267,7 +275,6 @@ class Exchangeratesapi extends Agent
                             return;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }

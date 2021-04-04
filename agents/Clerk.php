@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -11,13 +11,13 @@ ini_set("allow_url_fopen", 1);
 
 class Clerk extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
-        $this->api_key = $this->thing->container['api']['clerk'];
-        $this->account_name = 'thing';
-        $this->thing_report['help'] = 'Try CLERK CREDIT THING 10.';
+        $this->api_key = $this->thing->container["api"]["clerk"];
+        $this->account_name = "thing";
+        $this->thing_report["help"] = "Try CLERK CREDIT THING 10.";
         $this->amount = 0;
     }
 
@@ -26,11 +26,11 @@ class Clerk extends Agent
         $this->thing->flagGreen();
 
         $this->new_number =
-            $this->thing->account[$this->account_name]->balance['amount'];
+            $this->thing->account[$this->account_name]->balance["amount"];
 
         $this->response .= "new number :" . $this->new_number;
 
-        $this->response .= 'Account name ' . $this->account_name . '. ';
+        $this->response .= "Account name " . $this->account_name . ". ";
 
         $this->message =
             "Thank you for your request.  The following accounting was done: " .
@@ -45,14 +45,14 @@ class Clerk extends Agent
     {
         $sms = "CLERK | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function creditClerk()
     {
-        $this->response .= 'identified a Credit transaction.';
+        $this->response .= "identified a Credit transaction.";
         $this->old_number =
-            $this->thing->account[$this->account_name]->balance['amount'];
+            $this->thing->account[$this->account_name]->balance["amount"];
 
         if (!isset($this->amount)) {
             $this->response .= "An amount is needed. ";
@@ -61,18 +61,18 @@ class Clerk extends Agent
 
         $this->thing->account[$this->account_name]->Credit($this->amount);
         $this->amount =
-            $this->thing->account[$this->account_name]->balance['amount'];
+            $this->thing->account[$this->account_name]->balance["amount"];
     }
 
     public function getBalance()
     {
         $this->balance =
-            $this->thing->account[$this->account_name]->balance['amount'];
+            $this->thing->account[$this->account_name]->balance["amount"];
     }
 
     public function createClerk()
     {
-        $this->response .= 'identified an Account creation transaction.';
+        $this->response .= "identified an Account creation transaction.";
         $balance = [
             "amount" => $this->amount,
             "attribute" => $this->attribute,
@@ -89,28 +89,27 @@ class Clerk extends Agent
 
         $input_agent = new Input($this->thing, "input");
         $discriminators = ["statement", "create", "credit", "destroy"];
-        $input_agent->aliases['statement'] = ['statement'];
-        $input_agent->aliases['create'] = ['create'];
-        $input_agent->aliases['credit'] = ['credit'];
-        $input_agent->aliases['destroy'] = ['destroy'];
+        $input_agent->aliases["statement"] = ["statement"];
+        $input_agent->aliases["create"] = ["create"];
+        $input_agent->aliases["credit"] = ["credit"];
+        $input_agent->aliases["destroy"] = ["destroy"];
 
         $response = $input_agent->discriminateInput($command, $discriminators);
 
         switch ($response) {
-            case 'credit':
+            case "credit":
                 $this->creditClerk();
                 break;
-            case 'create':
+            case "create":
                 $this->createClerk();
                 break;
-            case 'destroy':
+            case "destroy":
                 //etc
                 break;
 
             case false:
                 $this->response .= "Noted. ";
             default:
-            //echo 'default';
         }
 
         // Look for one number in the subject line.
@@ -120,9 +119,9 @@ class Clerk extends Agent
 
         if ($this->scoreCredit() > $this->scoreCreate()) {
             // Likely subject is a Credit instruction
-            return 'credit';
+            return "credit";
         } else {
-            return 'create';
+            return "create";
             //			return $this->thing->scalar->Create($this->amount);
         }
 
@@ -135,16 +134,11 @@ class Clerk extends Agent
 
         //preg_match_all('/((?:[0-9]+,)*[0-9]+(?:\.[0-9]+)?)/', $this->subject, $numbers);
         preg_match_all(
-            '/(\+|-)?((?:[0-9]+,)*[0-9]+(?:\.[0-9]+)?)/',
+            "/(\+|-)?((?:[0-9]+,)*[0-9]+(?:\.[0-9]+)?)/",
             $this->subject,
             $numbers
         );
         $numbers = $numbers[0]; // Take first element of three part array.
-
-        // http://stackoverflow.com/questions/15814592/how-do-i-include-negative-decimal-numbers-in-this-regular-expression
-
-        //	echo '<pre> $numbers: '; print_r($numbers); echo '</pre>';
-        //	echo '<pre> $count(numbers): '; print_r(count($numbers)); echo '</pre>';
 
         if (count($numbers) == 1) {
             $this->amount = $numbers[0];
@@ -165,7 +159,7 @@ class Clerk extends Agent
         $confidence = 0.0;
         $this->response = null;
 
-        $keywords = ['credit', 'debit'];
+        $keywords = ["credit", "debit"];
 
         $input = strtolower($this->subject);
         $pieces = explode(" ", strtolower($input));
@@ -180,7 +174,6 @@ class Clerk extends Agent
                         if (isset($pieces[$key + 1])) {
                             $this->amount = $pieces[$key + 2];
                             if (is_numeric($this->amount)) {
-                                //echo "numeric";
                                 $confidence = $confidence + 0.6;
                             } else {
                                 $confidence = 0.0;
@@ -198,7 +191,6 @@ class Clerk extends Agent
                         }
                     } catch (Exception $e) {
                     }
-                    echo $confidence;
                 }
             }
         }
@@ -211,7 +203,7 @@ class Clerk extends Agent
         $confidence = 0.0;
         $this->response = null;
 
-        $keywords = ['create', 'make', 'log', 'track', 'new', 'open'];
+        $keywords = ["create", "make", "log", "track", "new", "open"];
 
         $input = strtolower($this->subject);
 
@@ -229,7 +221,6 @@ class Clerk extends Agent
                         $this->amount = $pieces[$key + 2];
 
                         if (is_numeric($this->amount)) {
-                            //echo "numeric";
                             $confidence = 0.8;
                         }
 

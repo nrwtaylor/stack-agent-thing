@@ -1,20 +1,20 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Read extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->test = "Development code"; // Always
-        $this->keywords = ['read', 'link', 'date', 'wordlist', 'last'];
+        $this->keywords = ["read", "link", "date", "wordlist", "last"];
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -45,11 +45,11 @@ class Read extends Agent
 
         if (
             isset(
-                $this->thing->container['api']['read']['do_not_read_filename']
+                $this->thing->container["api"]["read"]["do_not_read_filename"]
             )
         ) {
             $this->do_not_read_filename =
-                $this->thing->container['api']['read']['do_not_read_filename'];
+                $this->thing->container["api"]["read"]["do_not_read_filename"];
         }
     }
     function run()
@@ -65,7 +65,6 @@ class Read extends Agent
 
         // Pass through google doc reader url rewriter.
         $link = $this->googleRead($link);
-
 
         // Now have this->link potentially from reading subject
         $this->matched_sentences = [];
@@ -109,7 +108,7 @@ class Read extends Agent
                 ) {
                     // Okay.
                 } elseif (isset($this->robot_agent->scheme)) {
-                    $link = $this->robot_agent->scheme . '://' . $link;
+                    $link = $this->robot_agent->scheme . "://" . $link;
                 } else {
                     $this->response .= "Local file? ";
                     if ($this->do_not_read_filename === true) {
@@ -123,22 +122,22 @@ class Read extends Agent
                 if ($this->noindexRead($this->contents)) {
                     $this->do_not_index = true;
                     // Read as noindex do not set url
-                    $this->response .= 'Do not index. ';
+                    $this->response .= "Do not index. ";
                 }
 
                 if ($this->copyrightRead($this->contents)) {
-                    $this->response .= 'Saw a copyright notice. ';
+                    $this->response .= "Saw a copyright notice. ";
                     $this->do_not_cache = true;
                 }
 
                 if ($this->trademarkRead($this->contents)) {
-                    $this->response .= 'Saw a trademark notice. ';
+                    $this->response .= "Saw a trademark notice. ";
                     $this->do_not_cache = true;
                 }
 
                 // Okay to read meta. Get description.
                 $description = $this->descriptionRead($this->contents);
-                $this->response .= 'Read meta ' . $description . ' ';
+                $this->response .= "Read meta " . $description . " ";
 
                 //}
 
@@ -150,12 +149,12 @@ class Read extends Agent
 
                 $text = strip_tags($this->contents);
                 // Remove multiple spaces
-                $text = preg_replace('/\s+/', ' ', $text);
+                $text = preg_replace("/\s+/", " ", $text);
                 // Remove start and end spaces
                 $text = trim($text);
 
                 //https://stackoverflow.com/questions/16377437/split-a-text-into-sentences
-                $pattern = '/(?<=[.?!])\s+(?=[a-z])/i';
+                $pattern = "/(?<=[.?!])\s+(?=[a-z])/i";
 
                 //$pattern = '/(?<!\.\.\.)(?<!Dr\.)(?<=[.?!]|\.\.)|\.")\s+(?=[a-zA-Z"\(])/';
                 $this->sentences = preg_split($pattern, $text);
@@ -179,27 +178,27 @@ class Read extends Agent
     {
         // devstack
 
-        if (stripos($html, 'copywrite') !== false) {
+        if (stripos($html, "copywrite") !== false) {
             return true;
         }
 
-        if (stripos($html, 'copyright') !== false) {
+        if (stripos($html, "copyright") !== false) {
             return true;
         }
 
-        if (stripos($html, '©') !== false) {
+        if (stripos($html, "©") !== false) {
             return true;
         }
 
-        if (stripos($html, '(c)') !== false) {
+        if (stripos($html, "(c)") !== false) {
             return true;
         }
 
-        if (stripos($html, 'copr') !== false) {
+        if (stripos($html, "copr") !== false) {
             return true;
         }
 
-        if (stripos($html, '&copy') !== false) {
+        if (stripos($html, "&copy") !== false) {
             return true;
         }
 
@@ -220,23 +219,23 @@ class Read extends Agent
 
         $first_two_characters = strtolower(substr($text, 0, 2));
 
-        if ($first_two_characters == 's/') {
+        if ($first_two_characters == "s/") {
             return false;
         }
 
-        if (strpos($text, 'read') !== false) {
+        if (strpos($text, "read") !== false) {
         } else {
             return false;
         }
 
         $tokens = explode(" ", $text);
-        if (strtolower($tokens[0]) == 'read') {
+        if (strtolower($tokens[0]) == "read") {
             array_shift($tokens);
             $text = trim(implode(" ", $tokens));
         }
 
-        $text = preg_replace('/^read _/', '', $text);
-        $text = preg_replace('/^read_/', '', $text);
+        $text = preg_replace("/^read _/", "", $text);
+        $text = preg_replace("/^read_/", "", $text);
 
         return $text;
     }
@@ -248,14 +247,14 @@ class Read extends Agent
         $this->reads_list = [];
         $this->unique_count = 0;
 
-        $findagent_thing = new Findagent($this->thing, 'read');
-        if (!is_array($findagent_thing->thing_report['things'])) {
+        $findagent_thing = new Findagent($this->thing, "read");
+        if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
-        $count = count($findagent_thing->thing_report['things']);
+        $count = count($findagent_thing->thing_report["things"]);
         $this->thing->log(
             'Agent "Read" found ' .
-                count($findagent_thing->thing_report['things']) .
+                count($findagent_thing->thing_report["things"]) .
                 " Read Things."
         );
 
@@ -263,19 +262,19 @@ class Read extends Agent
 
         if ($count > 0) {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
+                array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-                $uuid = $thing_object['uuid'];
+                $uuid = $thing_object["uuid"];
 
                 if ($uuid == $this->uuid) {
                     continue;
                 }
 
-                $variables_json = $thing_object['variables'];
+                $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
-                $response = $this->readRead($thing_object['task']);
+                $response = $this->readRead($thing_object["task"]);
 
                 // This can be refactered I think with a call to the empty thing function.
                 //if ($response == false) {continue;}
@@ -293,7 +292,7 @@ class Read extends Agent
 
                 $age =
                     strtotime($this->thing->time()) -
-                    strtotime($thing_object['created_at']);
+                    strtotime($thing_object["created_at"]);
 
                 if ($age > $this->read_horizon) {
                     continue;
@@ -302,7 +301,7 @@ class Read extends Agent
                 $read = [
                     "url" => $response,
                     "age" => $age,
-                    "uuid" => $thing_object['uuid'],
+                    "uuid" => $thing_object["uuid"],
                 ];
 
                 $reads_list[] = $read;
@@ -316,29 +315,29 @@ class Read extends Agent
     {
         // devstack
 
-        if (stripos($html, 'trademark') !== false) {
+        if (stripos($html, "trademark") !== false) {
             return true;
         }
 
-        if (stripos($html, ' TM ') !== false) {
+        if (stripos($html, " TM ") !== false) {
             return true;
         }
 
-        if (stripos($html, '(TM)') !== false) {
+        if (stripos($html, "(TM)") !== false) {
             return true;
         }
 
-        if (stripos($html, 'TM.') !== false) {
+        if (stripos($html, "TM.") !== false) {
             return true;
         }
 
-        if (stripos($html, '™') !== false) {
+        if (stripos($html, "™") !== false) {
             $this->response .= "trademark b";
 
             return true;
         }
 
-        if (stripos($html, '®') !== false) {
+        if (stripos($html, "®") !== false) {
             $this->response .= "trademark c";
 
             return true;
@@ -368,7 +367,6 @@ class Read extends Agent
         $elements = $xpath->query(
             "//*[contains(@class, 'class name goes here')]"
         );
-
     }
 
     /* A comment to break the confusion that the above string causes. */
@@ -481,8 +479,14 @@ class Read extends Agent
         // File cache
         //if ($uri == null) {$uri = $this->link;} // Has uuid
         if ($uri == null) {
-if (!isset($this->url)) {$this->response .= "No link provided. ";return;}
-if ($this->url == null) {$this->response .= "No link provided. "; return;}
+            if (!isset($this->url)) {
+                $this->response .= "No link provided. ";
+                return;
+            }
+            if ($this->url == null) {
+                $this->response .= "No link provided. ";
+                return;
+            }
 
             $uri = $this->url;
         } // Semi-unique
@@ -491,34 +495,30 @@ if ($this->url == null) {$this->response .= "No link provided. "; return;}
         // TOD Memcache cache
         $slug_agent = new Slug($this->thing, "slug");
         $uri_slug = $slug_agent->getSlug($uri);
-        $file = $this->resource_path . 'read/' . $uri_slug;
+        $file = $this->resource_path . "read/" . $uri_slug;
 
         if (!isset($this->contents) or $this->contents === null) {
             $this->response .= "No contents found. ";
             return;
         }
 
-try {
-$response = @file_put_contents($file, $this->contents);
-if ($response !== false) {        $this->response .= "Cached contents in file system. ";}
+        try {
+            $response = @file_put_contents($file, $this->contents);
+            if ($response !== false) {
+                $this->response .= "Cached contents in file system. ";
+            }
 
-if ($response === false) { $this->response .= "Could not write read cache. ";}
-
+            if ($response === false) {
+                $this->response .= "Could not write read cache. ";
+            }
         } catch (\OverflowException $t) {
-            $this->response .=
-                "Could not write read cache. ";
+            $this->response .= "Could not write read cache. ";
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
-            $this->response .=
-                "Could not write read cache. ";
+            $this->response .= "Could not write read cache. ";
         } catch (\Exception $e) {
-            $this->response .=
-                "Could not write read cache. ";
+            $this->response .= "Could not write read cache. ";
         }
-
-
-
-
 
         $this->thing->db->setFrom($this->from);
 
@@ -551,21 +551,21 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
         $data_source = $url;
         // Has this been read recently?
         foreach ($this->reads_list as $i => $read) {
-            if ("http://" . $read['url'] == $url) {
+            if ("http://" . $read["url"] == $url) {
                 if (!isset($last_seen)) {
-                    $last_seen = $read['age'];
+                    $last_seen = $read["age"];
                 }
-                if ($read['age'] < $last_seen) {
-                    $last_seen = $read['age'];
+                if ($read["age"] < $last_seen) {
+                    $last_seen = $read["age"];
                 }
             }
 
-            if ("https://" . $read['url'] == $url) {
+            if ("https://" . $read["url"] == $url) {
                 if (!isset($last_seen)) {
-                    $last_seen = $read['age'];
+                    $last_seen = $read["age"];
                 }
-                if ($read['age'] < $last_seen) {
-                    $last_seen = $read['age'];
+                if ($read["age"] < $last_seen) {
+                    $last_seen = $read["age"];
                 }
             }
         }
@@ -577,9 +577,9 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
         $context = null;
         if (isset($this->robot_agent)) {
             $options = [
-                'http' => [
-                    'method' => "GET",
-                    'header' =>
+                "http" => [
+                    "method" => "GET",
+                    "header" =>
                         "User-Agent: " . $this->robot_agent->useragent . "\r\n",
                 ],
             ];
@@ -604,11 +604,11 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
                 return;
             }
 
-            $this->thing->log('No response code header found.');
+            $this->thing->log("No response code header found.");
             return true;
         }
 
-        $parts = explode(' ', $response_string);
+        $parts = explode(" ", $response_string);
         $response_code = null;
         if (isset($parts[1])) {
             $response_code = $parts[1];
@@ -619,7 +619,7 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
             $data == false or
             !in_array($response_code, $allowed_response_codes)
         ) {
-            $this->thing->log('No response or response code not 200.');
+            $this->thing->log("No response or response code not 200.");
             return true;
             // Invalid return from site..
         }
@@ -659,13 +659,12 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
     public function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function makeTxt()
     {
-        //        $this->thing_report['txt'] = implode("/n", $this->yard_sales);
-        $this->thing_report['txt'] = "No text retrieved.";
+        $this->thing_report["txt"] = "No text retrieved.";
     }
 
     function makeSMS()
@@ -681,21 +680,21 @@ if ($response === false) { $this->response .= "Could not write read cache. ";}
         }
         $sms_message .= " | cache flag ";
         if ($this->do_not_cache) {
-            $sms_message .= 'RED';
+            $sms_message .= "RED";
         } else {
-            $sms_message .= 'GREEN';
+            $sms_message .= "GREEN";
         }
-if (isset($this->do_not_index)) {
-        $sms_message .= " index flag ";
-        if ($this->do_not_index) {
-            $sms_message .= 'RED';
-        } else {
-            $sms_message .= 'GREEN';
-        }
+        if (isset($this->do_not_index)) {
+            $sms_message .= " index flag ";
+            if ($this->do_not_index) {
+                $sms_message .= "RED";
+            } else {
+                $sms_message .= "GREEN";
+            }
 
-        $sms_message .= ". ";
-}
-        $this->thing_report['sms'] = $sms_message;
+            $sms_message .= ". ";
+        }
+        $this->thing_report["sms"] = $sms_message;
         $this->sms_message = $sms_message;
     }
 
@@ -716,20 +715,20 @@ if (isset($this->do_not_index)) {
             $links = array_unique($link_agent->links);
 
             foreach ($links as $i => $link) {
-                $unsafe_characters = ['{', '}'];
+                $unsafe_characters = ["{", "}"];
 
                 if (
                     preg_match(
-                        '/[' .
-                            preg_quote(implode(',', $unsafe_characters)) .
-                            ']+/',
+                        "/[" .
+                            preg_quote(implode(",", $unsafe_characters)) .
+                            "]+/",
                         $link
                     )
                 ) {
                     continue;
                 }
 
-                $web .= '<a href="' . $link . '">' . $link . '</a>' . '<br>';
+                $web .= '<a href="' . $link . '">' . $link . "</a>" . "<br>";
             }
 
             $this->sentencesRead();
@@ -740,17 +739,17 @@ if (isset($this->do_not_index)) {
 
             $unique_words = array_unique($words);
 
-            $web .= "<p><b>Words read</b>" . '<br>';
+            $web .= "<p><b>Words read</b>" . "<br>";
 
             foreach ($unique_words as $i => $unique_word) {
                 $web .= $unique_word . " ";
             }
 
-            $web .= '<p>';
+            $web .= "<p>";
         }
         $web .= $this->sms_message;
-        $web .= '<br>';
-        $this->thing_report['web'] = $web;
+        $web .= "<br>";
+        $this->thing_report["web"] = $web;
     }
 
     public function respondResponse()
@@ -759,13 +758,13 @@ if (isset($this->do_not_index)) {
 
         $this->thing->flagGreen();
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-        $this->thing_report['help'] = 'This reads a web resource.';
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
+        $this->thing_report["help"] = "This reads a web resource.";
     }
 
     public function extractNumber($input = null)
@@ -819,7 +818,7 @@ if (isset($this->do_not_index)) {
 
         // Just a read.
         if (count($pieces) == 1) {
-            if ($input == 'read') {
+            if ($input == "read") {
                 return;
             }
         }

@@ -36,18 +36,6 @@ $this->resource_path_cache = $GLOBALS['stack_path'] . 'vendor/vanderlee/syllable
 
     }
 
-
-    /**
-     *
-     * @param unknown $tags
-     */
-    function printTag($tags) {
-        foreach ($tags as $t) {
-            echo $t['token'] . "/" . $t['tag'] .  " ";
-        }
-        echo "\n";
-    }
-
     /**
      *
      * @param unknown $tags

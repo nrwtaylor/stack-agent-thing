@@ -15,7 +15,7 @@ class Stopwatch extends Agent
 
     public function init()
     {
-        $this->node_list = ["stopwatch" => ["stopwatch", "nonsense"]];
+        $this->node_list = ["stopwatch" => ["stopwatch"]];
 
         $this->keywords = [
             "stopwatch",
@@ -143,18 +143,17 @@ class Stopwatch extends Agent
 
         foreach (array_reverse($things) as $uuid => $thing) {
             //            $uuid = $thing['uuid'];
-            //     $variables_json = $thing['variables'];
-            //   $variables = $this->thing->json->jsontoArray($variables_json);
+               $variables_json = $thing['variables'];
+               $variables = $this->thing->json->jsontoArray($variables_json);
 
             if (!isset($variables["stopwatch"])) {
                 continue;
             }
-            if (!isset($variables["stopwatch"]["elapsed"])) {
+            if (!isset($variables["stopwatch"]["reading"])) {
                 continue;
             }
 
             $thing->refreshed_at = $variables["stopwatch"]["refreshed_at"];
-            //$thing->elapsed_time = $variables["stopwatch"]["reading"];
 
             if ($thing->refreshed_at == false) {
                 continue;
@@ -167,30 +166,6 @@ class Stopwatch extends Agent
             $this->stopwatch_thing = $this->thing;
         } else {
             $this->stopwatch_thing = $thing;
-        }
-    }
-
-    function setState($state)
-    {
-        $this->state = "easy";
-    }
-
-    public function priorStopwatch()
-    {
-        $things = $this->getThings("stopwatch");
-
-        if ($things === null) {
-            $this->prior_thing = new Thing(null);
-            return;
-        }
-
-        foreach (array_reverse($things) as $uuid => $thing) {
-            if ($uuid == $this->uuid) {
-                continue;
-            }
-            $this->prior_thing = new Thing($uuid);
-            //$this->response .= "Got prior thing. ";
-            break;
         }
     }
 
@@ -241,11 +216,6 @@ class Stopwatch extends Agent
         if ($this->state === "running") {
             $this->current_microtime = microtime(true);
         }
-        /*
-        if ($this->state === "split") {
-            $this->microtime_split = microtime(true);
-        }
-*/
 
         if (
             $this->previous_state === "split" or
@@ -276,10 +246,9 @@ class Stopwatch extends Agent
 
     function makeSMS()
     {
-        $sms = "STOPWATCH " . "\n";
+        $sms = "STOPWATCH " . "";
 
-        $sms .= trim($this->message) . "\n";
-
+        $sms .= trim($this->message) . "";
         $sms .= " " . $this->response;
 
         $this->sms_message = $sms;
@@ -312,7 +281,7 @@ class Stopwatch extends Agent
         $web = "<b>Stopwatch Agent</b>";
         $web .= "<p>";
 
-        $web .= $this->image_embedded;
+        //$web .= $this->image_embedded;
 
         if (isset($this->reading) and $this->reading != false) {
             $web .= "Reading is ";
@@ -342,8 +311,6 @@ class Stopwatch extends Agent
             if ($input == "stopwatch") {
                 return;
             }
-
-            // return "Request not understood";
         }
 
         foreach ($pieces as $key => $piece) {
@@ -364,7 +331,6 @@ class Stopwatch extends Agent
                             break;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }
@@ -402,8 +368,8 @@ class Stopwatch extends Agent
                 if (isset($variables["stopwatch"]["refreshed_at"])) {
                     $refreshed_at = $variables["stopwatch"]["refreshed_at"];
                 }
-                if (isset($variables["stopwatch"]["response_time"])) {
-                    $response_time = $variables["stopwatch"]["response_time"];
+                if (isset($variables["stopwatch"]["reading"])) {
+                    $reading = $variables["stopwatch"]["response_time"];
                 }
             }
 
@@ -418,7 +384,7 @@ class Stopwatch extends Agent
 
             $this->stopwatches_history[] = [
                 "timestamp" => $refreshed_at,
-                "response_time" => $response_time,
+                "reading" => $reading,
             ];
         }
 
@@ -548,8 +514,6 @@ class Stopwatch extends Agent
                 $this->previous_state = $this->state;
                 $this->state = "running";
                 $this->updateStopwatch();
-                //                $this->response .= "Started stopwatch. ";
-
                 break;
         }
 
@@ -593,7 +557,5 @@ class Stopwatch extends Agent
             $this->response .= "No reading available. ";
             return;
         }
-
-        //        $this->response .= "Read " . $this->reading . ". ";
     }
 }

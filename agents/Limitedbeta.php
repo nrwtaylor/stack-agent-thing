@@ -96,7 +96,6 @@ class LimitedBeta extends Agent {
 
 
                 $limitedbeta_address = trim($line);
-                //echo $limitedbeta_address . " "  . $input_address . "\n";
 
                 $limitedbeta_address_array = explode("@", $limitedbeta_address);
 
