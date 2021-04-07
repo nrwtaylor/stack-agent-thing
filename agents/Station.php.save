@@ -10,12 +10,6 @@ ini_set("allow_url_fopen", 1);
 // Stations can see other stations on the forward path.
 // And hear stations on the backward path.
 
-
-// TODO Lots to do.
-// Entity to keep track of stations forward and behind.
-
-// Not functional.
-
 class Station extends Agent
 {
     public $var = "hello";
@@ -30,82 +24,94 @@ class Station extends Agent
         $this->context = new Context($this->thing, "context");
         $this->transit = new Transit($this->thing, "transit");
 
-        $this->node_list = ["station" => ["station"]];
+        // Some notes
+
+        $this->retain_for = 2; // Retain for at least 2 hours.
+
+        $this->sqlresponse = null;
+
+        $this->node_list = ["start" => ["useful", "useful?"]];
 
         $this->max_hops = 2;
 
-        $this->networkStations();
         $this->getNetworktime();
         $this->destinationsStation(); // Get the stops available from this stop.  Availability includes runat.
     }
 
-    public function nextStation($parameter, $selector = null)
-    {
-        $station_list = [
-            [
-                "station_id" => "Mornington Crescent",
-                "trip_id" => "x",
-                "stop_sequence" => 6,
-                "shape_dist_traveled" => null,
-                "stop_code" => 51380,
-                "stop_desc" => null,
-                "stop_lat" => null,
-                "stop_lon" => null,
-            ],
-            [
-                "station_id" => "Euston Station",
-                "trip_id" => "c",
-                "stop_sequence" => 10,
-                "shape_dist_traveled" => null,
-                "stop_code" => 51381,
-                "stop_desc" => null,
-                "stop_lat" => null,
-                "stop_lon" => null,
-            ],
-            [
-                "station_id" => "Kings Cross Station",
-                "trip_id" => "b",
-                "stop_sequence" => 8,
-                "shape_dist_traveled" => null,
-                "stop_code" => 51382,
-                "stop_desc" => null,
-                "stop_lat" => null,
-                "stop_lon" => null,
-            ],
-        ];
+    public function nextStation($parameter, $selector = null) {
 
-        $count = 0;
-        while ($count < count($station_list)) {
-            yield $station_list[$count];
-            $count += 1;
-        }
+       $station_list = [
+["stop_id" => "Mornington Crescent",
+"trip_id" => "x",
+"stop_sequence" => 6,
+"shape_dist_traveled"=>null,
+"stop_code"=>51380,
+"stop_desc"=>null,
+"stop_lat"=>null,
+"stop_lon"=>null,
+],
+["stop_id" => "Euston Station", 
+"trip_id" => "c",
+"stop_sequence" => 10,
+"shape_dist_traveled"=>null,
+"stop_code"=>51381,
+"stop_desc"=>null, 
+"stop_lat"=>null, 
+"stop_lon"=>null,],
+["stop_id" => "Kings Cross Station", 
+"trip_id" => "b",
+"stop_sequence" => 8,
+"shape_dist_traveled"=>null,
+"stop_code"=>51380,
+"stop_desc"=>null, 
+"stop_lat"=>null, 
+"stop_lon"=>null,
+]];
+
+
+
+
+$count = 0;
+       while($count < count($station_list)) {
+           yield $station_list[$count];
+$count += 1;
+       }
+
+
     }
 
-    public function networkStations()
+    public function railwayStation()
     {
         // Running in 15s.  4 Aug 2018.
         $split_time = $this->thing->elapsed_runtime();
         $this->thing->log("Making railway - transit context");
 
         for (
-            $channels = $this->nextStation("station_times");
+            $channels = $this->nextStation("stop_times");
             $channels->valid();
             $channels->next()
         ) {
             $channel = $channels->current();
-            $station_id = $channel["station_id"];
+
+            $station_id = $channel["stop_id"];
             $train_id = $channel["trip_id"];
 
             $stop_sequence = $channel["stop_sequence"];
             if ($stop_sequence == 1) {
                 unset($last_station);
             }
+
             if (isset($last_station)) {
                 $this->blocks[$last_station][$station_id] = $channel;
             }
             $last_station = $station_id;
         }
-        $this->stations_network = $this->blocks;
+        $this->railway = $this->blocks;
+        $this->thing->log(
+            "Made a railway in " .
+                number_format($this->thing->elapsed_runtime() - $split_time) .
+                "ms."
+        );
     }
 
     function getStations($text = null)
@@ -120,11 +126,11 @@ class Station extends Agent
         // And this should do that.  Let's check.
         //$stop_code = $this->idStation($text);
         $stop_code = 51380;
-        $station_id = $this->idStation($text);
+        $stop_id = $this->idStation($text);
 
         // Make the networks
-        //        $this->networkStations();
-        $station_id = $station_id; // Work in train context
+        $this->railwayStation();
+        $station_id = $stop_id; // Work in train context
 
         $visible_stations[$station_id] = [
             "visited" => false,
@@ -152,30 +158,32 @@ class Station extends Agent
             if ($completed == true) {
                 return;
             }
+            //echo "\n";
+
             // Now visiting stations up from $station_id
+            $stations = $this->railway[$station_id_pointer];
 
-            if (isset($this->stations_network[$station_id_pointer])) {
-                $stations = $this->stations_network[$station_id_pointer];
-
-                foreach ($stations as $station_id => $station) {
-                    $visible_stations[$station_id] = [
-                        "visited" => false,
-                        "station_id" => $station_id,
-                        "station" => $station,
-                    ];
-                    $completed = false;
-                }
-
-                $visible_stations[$station_id_pointer]["visited"] = true;
+            foreach ($stations as $station_id => $station) {
+                $visible_stations[$station_id] = [
+                    "visited" => false,
+                    "station_id" => $station_id,
+                    "station" => $station,
+                ];
+                echo $station_id . " ";
+                $completed = false;
             }
+
+            $visible_stations[$station_id_pointer]["visited"] = true;
             $hops += 1;
             if ($hops > $this->max_hops) {
                 break;
             }
         }
 
-        $this->stations_visible = $visible_stations;
-        return $this->stations_visible;
+        echo "\n";
+
+        $this->stations = $visible_stations;
+        return $this->stations;
     }
 
     public function destinationsStation()
@@ -188,11 +196,12 @@ class Station extends Agent
         $this->origins = []; // Fair enough.
     }
 
+
     public function nullStation()
     {
         $this->message = "STATION | Request not understood. | TEXT SYNTAX";
         $this->sms_message = "STATION | Request not understood. | TEXT SYNTAX";
-        $this->response .= "Null station. ";
+        $this->response = true;
         return $this->message;
     }
 
@@ -203,52 +212,41 @@ class Station extends Agent
 
         // Transit context
         // Take text and recognize the id.
-        $stop_code = "51382";
-        $station = $this->stopcodeStation($stop_code);
+        $stop_code = 51380;
+        $stops = $this->stopsStation($stop_code);
 
-        $this->station_id = $station["station_id"];
+        if (isset($stops[0])) {
+            $stop_id = $stops[0]["stop_id"];
+        }
+        $this->thing->log(
+            "Matched stop_code " . $stop_code . " to stop_id " . $stop_id . "."
+        );
+
+        $this->station_id = $stop_id;
         return $this->station_id;
     }
 
-    public function stopsStation($stop_code = null)
-    {
-        if ($stop_code === null) {
-            return true;
-        }
+    public function stopsStation($stop_code = null) {
+        if ($stop_code === null) {return true;}
         // TODO build a look up of stops at each station.
         // Placeholder for now.
-        $a = $this->stopcodeStation($stop_code);
-        //    $a = $this->searchForStopCode($stop_code, $this->stations_network);
-        $stops[0] = $this->stations_network[$stop_code];
 
+        $stops[0]['stop_id'] = "Mornington Crescent";
         return $stops;
-    }
 
-    function stopcodeStation($stop_code)
-    {
-        foreach ($this->stations_network as $ststation_id => $stations) {
-            foreach ($stations as $station) {
-                if ($station["stop_code"] == $stop_code) {
-                    return $station;
-                }
-                break;
-            }
-        }
-
-        return true;
     }
 
     function makeStation($station)
     {
         $trip_id = $station["trip_id"];
-        $station_id = $station["station_id"];
+        $stop_id = $station["stop_id"];
         $arrival_time = $station["arrival_time"];
         $departure_time = $station["departure_time"];
         $shape_dist_traveled = $station["shape_dist_traveled"];
 
         $stop = [
             "trip_id" => $trip_id,
-            "station_id" => $station_id,
+            "stop_id" => $stop_id,
             "arrival_time" => $arrival_time,
             "departure_time" => $departure_time,
             "shape_dist_traveled" => $shape_dist_traveled,
@@ -263,6 +261,19 @@ class Station extends Agent
     {
         $time = explode(":", $time);
         return mktime($time[0], $time[1], $time[2]);
+    }
+
+    function echoTuple()
+    {
+        // Deploy
+        $stop_tuple = $this->stop_tuples["51380"]["9130759"]["27:54:00"];
+
+        $txt = $stop_tuple["stop_id"];
+        $txt .= $stop_tuple["trip_time_elapsed"];
+        $txt .= $stop_tuple["shape_dist_traveled"];
+        $txt .= $stop_tuple["departure_time"];
+
+        echo $txt;
     }
 
     function getStation($station_id = null)
@@ -282,13 +293,15 @@ class Station extends Agent
 
         // Currently taking 15s.  4 August 2018.
 
+        //        $selector_array = array("stop_id"=>$station_id); // Because this is a Station
+
         if (!isset($this->stations_db)) {
-            $this->stations_db = $this->stopsStation([$station_id]);
+            $this->stations_db = $this->get("stops");
         }
-
         $station_count = $this->searchForsId($station_id, $this->stations_db);
-
         $station = $this->stations_db[$station_count];
+
+        // stop_times.txt maps stop_id <> trip_id
 
         if (!isset($this->routes[$station_id])) {
             $this->routesStation($station_id);
@@ -309,9 +322,7 @@ class Station extends Agent
         }
 
         for (
-            $routes = $this->nextStation("trips", [
-                "ststation_id" => $station_id,
-            ]);
+            $routes = $this->nextStation("trips", ["stop_id" => $station_id]);
             $routes->valid();
             $routes->next()
         ) {
@@ -326,10 +337,6 @@ class Station extends Agent
 
     function searchForId($id, $array)
     {
-        if ($array === null) {
-            return true;
-        }
-
         foreach ($array as $key => $val) {
             if ($val["trip_id"] === $id) {
                 return $key;
@@ -340,11 +347,8 @@ class Station extends Agent
 
     function searchForsId($id, $array)
     {
-        if ($array === null) {
-            return true;
-        }
         foreach ($array as $key => $val) {
-            if ($val["station_id"] === $id) {
+            if ($val["stop_id"] === $id) {
                 return $key;
             }
         }
@@ -353,25 +357,8 @@ class Station extends Agent
 
     function searchForrId($id, $array)
     {
-        if ($array === null) {
-            return true;
-        }
-
         foreach ($array as $key => $val) {
             if ($val["route_id"] === $id) {
-                return $key;
-            }
-        }
-        return null;
-    }
-
-    function searchForStopCode($id, $array)
-    {
-        if ($array === null) {
-            return true;
-        }
-        foreach ($array as $key => $val) {
-            if ($val["stop_code"] === $id) {
                 return $key;
             }
         }
@@ -397,7 +384,7 @@ class Station extends Agent
         }
 
         if (!isset($this->trips_db)) {
-            $this->trips_db = $this->tripsStation([$station_id]);
+            $this->trips_db = $this->get("trips");
         }
 
         // For each trip_id get the route
@@ -417,11 +404,13 @@ class Station extends Agent
 
             $this->routes[$station_id][$route_id] = $route;
 
+            //            echo ".";
             $this->thing->log(
                 "Got station " . $station_id . " and route " . $route_id . "."
             );
         }
 
+        echo "\n";
         $this->thing->log("Got stations.");
 
         return $this->routes[$station_id];
@@ -429,16 +418,22 @@ class Station extends Agent
 
     function tripsStation($station_ids)
     {
+        //echo "\n";
         $this->thing->log(
             "Getting trips passing through " . $station_ids . "."
         );
         //if (isset($this->trips[$station_ids])) {return $this->trips[$station_ids];}
 
         // stop times is 80Mb
-        $selector_array = ["station_id" => $station_ids];
+        $selector_array = ["stop_id" => $station_ids];
+
+        //foreach($this->stations as $station_id=>$station) {
+        //    if (!isset($this->trips[$station_id])) {$this->trips[$station_id] = array();}
+        //    $selector_array[] = array("stop_id"=>$station_id);
+        //}
 
         for (
-            $stops = $this->nextStation("station_times", $selector_array);
+            $stops = $this->nextStation("stop_times", $selector_array);
             $stops->valid();
             $stops->next()
         ) {
@@ -461,7 +456,7 @@ class Station extends Agent
 
     function makeTXT()
     {
-        if (!isset($this->stations_visible)) {
+        if (!isset($this->stations)) {
             $this->getStations();
         }
 
@@ -471,7 +466,7 @@ class Station extends Agent
 
         $txt .= "\n";
 
-        foreach ($this->stations_visible as $station_id => $station) {
+        foreach ($this->stations as $station_id => $station) {
             if ($station["visited"]) {
                 $txt .= "[" . $station_id . "] ";
             } else {
@@ -480,16 +475,20 @@ class Station extends Agent
         }
         $j = 0;
 
-        foreach ($this->stations_visible as $station_id => $station) {
+        foreach ($this->stations as $station_id => $station) {
+
             $this->split_time = $this->thing->elapsed_runtime();
-            if (!isset($station["station"]["station_id"])) {
-                continue;
-            }
-            $station_id = $station["station"]["station_id"];
+
+            $stop_id = $station["station"]["stop_id"];
 
             $next_stop_distance = $station["station"]["shape_dist_traveled"];
 
-            $next_station = $this->getStation($station_id);
+            //if ($this->thing->elapsed_runtime() > (20000)) {
+            //    break;
+            //}
+
+            $next_station = $this->getStation($stop_id);
+            //$this->stations[$stop_id]; // functionally equivalent
 
             // Create text block for routes served at a specific stop
             $r = "";
@@ -499,7 +498,7 @@ class Station extends Agent
             $r = "\n";
 
             // Create text block for static information about stop
-            $next_station_id = $next_station["station_id"];
+            $next_station_id = $next_station["stop_id"];
             $next_station_code = $next_station["stop_code"];
             $next_station_desc = $next_station["stop_desc"];
             $next_station_lat = $next_station["stop_lat"];
@@ -594,10 +593,142 @@ class Station extends Agent
         $this->sms_message .= "TEXT HELP";
     }
 
+    public function stopStation($stop)
+    {
+        $split_time = $this->thing->elapsed_runtime();
+        //$this->thing->log('Agent "Translink". Start Translink API call. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
+
+        $this->stop = $stop;
+        try {
+            $file =
+                "http://api.translink.ca/rttiapi/v1/stops/" .
+                $stop .
+                "/estimates?apikey=" .
+                $this->api_key .
+                "&count=3&timeframe=60";
+
+            $web_input = file_get_contents(
+                "http://api.translink.ca/rttiapi/v1/stops/" .
+                    $stop .
+                    "/estimates?apikey=" .
+                    $this->api_key .
+                    "&count=3&timeframe=60"
+            );
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $file);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $xmldata = curl_exec($ch);
+            curl_close($ch);
+
+            $web_input = $xmldata;
+
+            $this->error = "";
+        } catch (Exception $e) {
+            echo "Caught exception: ", $e->getMessage(), "\n";
+            $this->error = $e;
+            $web_input = false;
+            $this->sms_message = "Request not understood: " . $this->error;
+
+            return "Request not understood";
+        }
+
+        //echo $web_input;
+
+        $xml = simplexml_load_string($web_input);
+        $t = $xml->NextBus;
+
+        $json_data = json_encode($t, true);
+
+        $response = null;
+
+        foreach ($t as $item) {
+            $response .=
+                "<li>" .
+                $item->Schedules->Schedule->ExpectedLeaveTime .
+                " " .
+                $item->RouteNo .
+                " " .
+                $item->RouteName .
+                " " .
+                "> " .
+                $item->Schedules->Schedule->Destination .
+                "</li>";
+        }
+
+        $message =
+            "Thank you for your request for stop " .
+            $stop .
+            ".  The next buses are: <p><ul>" .
+            ucwords(strtolower($response)) .
+            "</ul>";
+        $message .= "";
+        $message .= "Source: Translink real-time data feed.";
+
+        // Hacky here to be refactored.
+        // Generate a special short SMS message
+
+        $this->sms_message = "";
+        $response = "";
+
+        foreach ($t as $item) {
+            // $response .=  $item->Schedules->Schedule->ExpectedLeaveTime . ' ' . $item->RouteNo . '> ' . $item->Schedules->Schedule->Destination . ' | ';
+
+            $response .=
+                $item->RouteNo .
+                " " .
+                $item->Schedules->Schedule->ExpectedLeaveTime .
+                " > " .
+                $item->Schedules->Schedule->Destination .
+                " | ";
+        }
+
+        $this->sms_message = "NEXT BUS";
+        if (count($t) > 1) {
+            $this->sms_message .= "ES";
+        }
+
+        $this->sms_message .= " | ";
+
+        // Sometimes Translink return
+        // a date in the time string.  Remove it.
+
+        $input = $response;
+        //$input = "Current from 2014-10-10 to 2015/05/23 and 2001.02.10";
+        $output = preg_replace(
+            "/(\d{4}[\.\/\-][01]\d[\.\/\-][0-3]\d)/",
+            "",
+            $input
+        );
+
+        //echo $output;
+
+        if (count($t) == 0) {
+            $this->sms_message .=
+                "No information returned for stop " . $this->stop . " | ";
+        } else {
+            $this->sms_message .= ucwords(strtolower($output));
+        }
+
+        $this->sms_message .= "Source: Translink | ";
+
+        $this->sms_message .= "TEXT ?";
+
+        $this->thing->log(
+            'Agent "Translink". Translink API call took ' .
+                number_format($this->thing->elapsed_runtime() - $split_time) .
+                "ms."
+        );
+
+        return $message;
+    }
+
     public function respondResponse()
     {
         // Thing actions
         $this->thing->flagGreen();
+
+        $this->thing_report["sms"] = $this->sms_message;
 
         $this->thing_report["choices"] = false;
         $this->thing_report["info"] = "SMS sent";
@@ -620,39 +751,71 @@ class Station extends Agent
 
     public function readSubject()
     {
-        $this->keywords = ["stop", "bus", "route"];
-        $input = $this->input;
+        $this->response = null;
 
-        $filtered_input = $this->assert($input, "station");
+        $keywords = ["stop", "bus", "route"];
 
-        $pieces = explode(" ", strtolower($filtered_input));
+        $input = strtolower($this->subject);
+
+        $prior_uuid = null;
+
+        $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            //        $input = $this->subject;
+            $input = $this->subject;
 
-            if (is_numeric($filtered_input) and strlen($filtered_input) == 5) {
-                return $this->stopcodeStation($filtered_input);
+            if (ctype_alpha($this->subject[0]) == true) {
+                // Strip out first letter and process remaning 4 or 5 digit number
+                $input = substr($input, 1);
+                if (is_numeric($input) and strlen($input) == 4) {
+                    return $this->busTranslink($input);
+                    //return $this->response;
+                }
+
+                if (is_numeric($input) and strlen($input) == 5) {
+                    return $this->busTranslink($input);
+                    //return $this->response;
+                }
+
+                if (is_numeric($input) and strlen($input) == 6) {
+                    return $this->busTranslink($input);
+                    //return $this->response;
+                }
             }
+
+            if (is_numeric($this->subject) and strlen($input) == 5) {
+                return $this->stopStation($input);
+                //return $this->response;
+            }
+
+            if (is_numeric($this->subject) and strlen($input) == 4) {
+                return $this->busTranslink($input);
+                //return $this->response;
+            }
+
+            //                        return "Request not understood";
         }
 
         foreach ($pieces as $key => $piece) {
-            foreach ($this->keywords as $command) {
+            foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         case "stop":
                             if ($key + 1 > count($pieces)) {
+                                //echo "last word is stop";
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
                                 $this->stop = $pieces[$key + 1];
-                                $this->response .= $this->stopStation(
+                                $this->response = $this->stopStation(
                                     $this->stop
                                 );
-                                return;
+                                return $this->response;
                             }
                             break;
 
                         case "bus":
+                            //echo 'bus';
                             break;
 
                         case "translink":
@@ -670,6 +833,7 @@ class Station extends Agent
                             return;
 
                         default:
+
                     }
                 }
             }

@@ -67,6 +67,18 @@ class Arr extends Agent
         return $text;
     }
 
+    public function searchArr(array $array, $search_key, $id)
+    {
+        foreach ($array as $key => $val) {
+
+            if ($val[$search_key] == $id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+
     // https://stackoverflow.com/questions/262891/is-there-a-way-to-find-out-how-deep-a-php-array-is
     public function depthArr($array)
     {

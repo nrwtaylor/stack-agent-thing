@@ -92,7 +92,6 @@ class Run extends Agent
             }
         }
 
-        //echo "Assertion heard " . $text . ".\n";
         $this->assertIs($this->input);
         $this->response .= "Said that the agent is now running. ";
 
