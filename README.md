@@ -17,16 +17,21 @@ Requirements
 Installation
 ============
 
-    composer require nrwtaylor/stack-agent-thing
+To install all the required parts:  
 
-    Stack build recipe. See BUILD in root folder.
+```shell
+composer require nrwtaylor/stack-agent-thing
+```
 
-    1.  Install Ubuntu.
+Stack build recipe. See `BUILD` in root folder.
 
-    2.  Install LAMP stack.
+## 1.  Install Ubuntu.
 
-    3.  Create MySQL database.
+## 2.  Install LAMP stack.
 
+## 3.  Create MySQL database.
+
+```shell
 mysql> DESCRIBE stack;
 +--------------+---------------+------+-----+-------------------+-------+
 | Field        | Type          | Null | Key | Default           | Extra |
@@ -50,42 +55,66 @@ mysql> DESCRIBE stack;
 | settings     | varchar(998)  | YES  |     | NULL              |       |
 | variables    | varchar(3998) | YES  | MUL | NULL              |       |
 +--------------+---------------+------+-----+-------------------+-------+
+```
 
-    4.  Install PHP extensions
-        sudo apt install php7.1-bcmath
-        sudo apt-get install php-bcmath
+## 4.  Install PHP extensions
+    
+```shell 
+sudo apt install php7.1-bcmath
+sudo apt-get install php-bcmath
+```
 
+## 5.  Configure private/settings.php
 
-    5.  Configure private/settings.php
+Not all the settings need to be set. But you will need to enter the MySQL database settings.
 
-        Not all the settings need to be set. But you will need to enter the MySQL database settings.
+## 6.  Test localhost serving to local-wide TCP/IP
 
-    6.  Test localhost serving to local-wide TCP/IP
-        php -S localhost:8080 -t public public/index.php
+```shell
+php -S localhost:8080 -t public public/index.php
+```
+## 7.  Install PHP extensions
 
-    7.  Install PHP extensions
-        sudo apt install php7.1-bcmath
-        sudo apt-get install php-bcmath
-        restart.
+```shell
+sudo apt install php7.1-bcmath
+sudo apt-get install php-bcmath
+restart
+```
 
-    8.  Set-up and verify cron
-        * * * * * cd /var/www/html/<site name> && /usr/bin/php -q /var/www/html/<site name>/agents/Cron.php >/dev/null 2>&1
+## 8.  Set-up and verify cron
 
-    9.  Install Gearman.
+```shell
+* * * * * cd /var/www/html/<site name> && /usr/bin/php -q /var/www/html/<site name>/agents/Cron.php >/dev/null 2>&1
+```
 
-    10. Test stack. 
-        http://localhost
-        http://localhost/privacy.  Select 'Start'.
+## 9.  Install Gearman.
 
-    11.  Test Roll PNG
+## 10. Test stack. 
 
-    12.  Test Snowflake (web, PNG, PDF)
+Browse to: 
+```
+http://localhost
+http://localhost/privacy.  Select 'Start'.
+```
 
+## 11.  Test Roll PNG
+
+```shell
+agent roll
+agent ping
+```
+
+## 12.  Test Snowflake (web, PNG, PDF)
+
+```shell
+agent snowflake
+```
 
 Usage
 =====
 
-    Make a Thing
+Make a Thing
+```php
     $thing = new Thing(null); // creates a UUID for a thing
 
     Show a Thing's UUID
@@ -96,8 +125,13 @@ Usage
 
     Run an agent on a Thing
     $agent = new Start($thing); // runs the Start agent 
+```
 
-    http://www.stackr.test/thing/67a8038d-4c19-4777-9b5f-18b8b74d8f1e/start // Runs Start agent
+Run the start agent from a browser: 
+
+```
+http://www.stackr.test/thing/67a8038d-4c19-4777-9b5f-18b8b74d8f1e/start
+```
 
 Credits
 =======
@@ -108,4 +142,4 @@ Credits
 
 Dev
 ===
-https://stack-agent-thing.slack.com/archives/C01PT2V6B8U Slack invitation
+`https://stack-agent-thing.slack.com/archives/C01PT2V6B8U` Slack invitation
