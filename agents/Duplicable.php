@@ -17,13 +17,6 @@ class Duplicable extends Agent
     {
         $this->node_list = ["duplicable" => ["index", "uuid"]];
 
-        $this->haystack =
-            $thing->uuid .
-            $thing->to .
-            $thing->subject .
-            $command_line .
-            $this->agent_input;
-
         if (!isset($this->min)) {
             $this->min = 1;
         }
@@ -59,8 +52,6 @@ class Duplicable extends Agent
     {
         $this->setDuplicable();
     }
-
-    // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
 
     function getUuid()
     {
@@ -305,7 +296,6 @@ class Duplicable extends Agent
 
             foreach ($arr as $key => $value) {
                 $v = implode($value);
-                //                echo $v . "\n";
                 if ($v > $i) {
                     $this->duplicables_index[$v] = false;
                 }
@@ -330,18 +320,6 @@ class Duplicable extends Agent
         return $d / 5;
     }
 
-    function echoDuplicables()
-    {
-        //
-        //        $rows = 20;
-        //        $columns = 5;
-
-        //        foreach(range(0,$rows) as $row_index) {
-        //            foreach(range(0,columns) as $column_index) {
-        //            echo $row_index . " " . $column_index . " ".$value. " ";
-        //        }
-    }
-
     function getDuplicables($n)
     {
         //$n = "1234";
@@ -353,16 +331,8 @@ class Duplicable extends Agent
         $num_digits = $this->size;
         $num_digits = count($elems);
 
-        //strlen($n)
-        //var_dump(count($elems));
-        //echo "<br>";
-
-        //echo $this->size;
-        //echo "<br>";
-
         $i = 0;
         while ($i < $num_digits - count($elems)) {
-            //    echo $i . "<br>";
             array_unshift($elems, null);
             $i += 1;
         }

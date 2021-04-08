@@ -57,9 +57,11 @@ class Socket extends Agent
         if (
             ($socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false
         ) {
-            echo "Couldn't create socket" .
-                socket_strerror(socket_last_error()) .
-                "\n";
+            $this->thing->console(
+                "Couldn't create socket" .
+                    socket_strerror(socket_last_error()) .
+                    "\n"
+            );
         }
 
         $this->socket = $socket;
@@ -70,22 +72,26 @@ class Socket extends Agent
 */
 
         if (socket_bind($socket, $address, $port) === false) {
-            echo "Bind Error " .
-                socket_strerror(socket_last_error($sock)) .
-                "\n";
+            $this->thing->console(
+                "Bind Error " . socket_strerror(socket_last_error($sock)) . "\n"
+            );
         }
 
         if (socket_listen($socket, 5) === false) {
-            echo "Listen Failed " .
-                socket_strerror(socket_last_error($socket)) .
-                "\n";
+            $this->thing->console(
+                "Listen Failed " .
+                    socket_strerror(socket_last_error($socket)) .
+                    "\n"
+            );
         }
 
         do {
             if (($msgsock = socket_accept($socket)) === false) {
-                echo "Error: socket_accept: " .
-                    socket_strerror(socket_last_error($socket)) .
-                    "\n";
+                $this->thing->console(
+                    "Error: socket_accept: " .
+                        socket_strerror(socket_last_error($socket)) .
+                        "\n"
+                );
                 break;
             }
 
@@ -98,9 +104,11 @@ class Socket extends Agent
                     false ===
                     ($buf = socket_read($msgsock, 2048, PHP_NORMAL_READ))
                 ) {
-                    echo "socket read error: " .
-                        socket_strerror(socket_last_error($msgsock)) .
-                        "\n";
+                    $this->thing->console(
+                        "socket read error: " .
+                            socket_strerror(socket_last_error($msgsock)) .
+                            "\n"
+                    );
                     break 2;
                 }
                 if (!($buf = trim($buf))) {
@@ -187,5 +195,3 @@ declare(ticks = 1);                                      // Allow posix signal h
 pcntl_signal(SIGINT,[$this,"shutdown"]);
 */
 }
-
-?>

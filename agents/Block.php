@@ -724,7 +724,6 @@ if ($things === true) {return true;}
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'block') {
-                //echo "readsubject block";
                 $this->readBlock();
                 return;
             }
@@ -840,7 +839,6 @@ if ($things === true) {return true;}
                             break;
 
                         default:
-                        //$this->read();                                                    //echo 'default';
                     }
                 }
             }

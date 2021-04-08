@@ -482,7 +482,6 @@ class Ant extends Agent
                     break;
                 default:
                     $this->response .= "Ant spawned. ";
-                    // echo "not found => spawn()";
                     $this->thing->log("spawn Thing default");
                     $this->spawn();
                     $this->thing->log("spawned Thing");
@@ -621,8 +620,6 @@ class Ant extends Agent
         // ->db->userSearch($keyword)
         // ->UUids($uuid = null)
 
-        //echo "ant state: " . $this->thing->getState('hive');
-
         // Form a haystack from the whole thing.
     }
 
@@ -658,13 +655,6 @@ class Ant extends Agent
 
         $haystack .= json_encode($posterior_thing);
 
-        // And we can do this...
-
-        //echo "the thing is:";
-        //print_r($this->thing);
-
-        // But that really depends on the security of the Channel.
-
         // devstack use Uuid to extract Uuids.
         // $match = "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12‌​}/";
 
@@ -686,7 +676,6 @@ class Ant extends Agent
         $linked = [];
 
         foreach ($arr as $key => $value) {
-            //echo $value;
             $temp_thing = new Thing($value);
 
             if ($temp_thing == false) {

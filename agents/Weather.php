@@ -185,7 +185,6 @@ class Weather extends Agent
                 }
             }
         }
-        //var_dump($this->daily_forecast);
         $weather_text = "";
 
         $index = 0;
@@ -313,7 +312,6 @@ class Weather extends Agent
         // String html tags
         //$data = strip_tags($data);
         $data = preg_replace("/<.*?>/", " ", $data);
-        //var_dump($data);
         $contents = $data;
         $this->weather_contents = $data;
         $searchfor = "Current Conditions";

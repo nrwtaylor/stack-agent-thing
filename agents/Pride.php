@@ -1,6 +1,5 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
-//echo "Watson says hi<br>";
 
 class Pride extends Agent
 {

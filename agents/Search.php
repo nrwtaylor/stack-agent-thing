@@ -386,7 +386,6 @@ if (!isset($search_tokens)) {return true;}
             foreach ($this->search_links as $search_engine => $link) {
                 //$link2 = html_entity_decode($link);
                 //$link = utf8_encode($link);
-                //echo $link;
                 //$link =  html_entity_decode($link, ENT_COMPAT);
 
                 //$link = htmlentities($link);

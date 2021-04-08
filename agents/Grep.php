@@ -80,7 +80,6 @@ class Grep extends Agent
             if ($this->isGrep($task)) {
                 continue;
             }
-            // echo $thing_string . "\n";
             $this->greps[] = $thing;
         }
     }

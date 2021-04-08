@@ -158,6 +158,7 @@ class Zoom extends Agent
 
     public function readZoom($text = null)
     {
+        if ($text == null) {return true;}
         //        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
         //        if (file_exists($file)) {

@@ -244,9 +244,6 @@ class CHS extends Agent
             "asc"
         );
         foreach ($m->data as $key => $item) {
-            //echo "station" . $value->metadata[0]->value . " ";
-            //echo $value->metadata[1]->value . "";
-
             $date_min = $item->boundaryDate->min;
             $date_max = $item->boundaryDate->max;
 
@@ -531,10 +528,6 @@ class CHS extends Agent
      */
     public function getStation()
     {
-        //$ngrams = new Ngram($this->thing,"ngram");
-        //$ngrams->extractNgrams($this->input);
-        //var_dump($ngrams->ngrams);
-
         $this->station_name = $this->default_station_name;
 
         foreach ($this->stations as $station_name => $prediction) {
@@ -616,8 +609,6 @@ class CHS extends Agent
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'weather') {
-                //echo "readsubject block";
-                //$this->read();
                 $this->response = "Did nothing.";
                 return;
             }
@@ -642,8 +633,6 @@ class CHS extends Agent
                             return;
 
                         default:
-                        //$this->read();
-                        //echo 'default';
                     }
                 }
             }

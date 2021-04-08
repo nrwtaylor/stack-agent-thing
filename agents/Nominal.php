@@ -489,7 +489,6 @@ $things = $findagent_thing->thing_report['things'];
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'nominal') {
-                //echo "readsubject Nominal";
                 $this->readNominal();
                 return;
             }

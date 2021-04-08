@@ -21,16 +21,6 @@ class Hexflake extends Agent
 
     public function get()
     {
-/*
-$thing = new Thing(null);
-$thing->Create('null','null','hex wall snowflake');
-        $this->snowflake_agent = new Snowflake(
-            $thing,
-            'snowflake'
-        );
-*/
-// devstack
-
         $this->snowflake_agent = new Snowflake(
             $this->thing,
             'snowflake hex wall'
@@ -106,7 +96,6 @@ $thing->Create('null','null','hex wall snowflake');
         $message = "Stackr made a hexflake for you.<br>";
 
         $uuid = $this->uuid;
-        //$this->web_prefix = "https://stackr.ca/";
 
         $message .=
             "Keep on stacking.\n\n<p>" .
@@ -262,7 +251,6 @@ $thing->Create('null','null','hex wall snowflake');
             foreach (range(-$n, $n) as $r) {
                 foreach (range(-$n, $n) as $s) {
                     $this->lattice[$q][$r][$s] = $value;
-                    //array($q=>array($r=>array($s=>$value)));
                 }
             }
         }
@@ -356,10 +344,6 @@ $thing->Create('null','null','hex wall snowflake');
             $states[5]
         );
 
-        echo "( " . $q . ", " . $r . ", " . $s . ") ";
-        echo " | " . $p_melt . " " . $p_freeze;
-        echo "<br>";
-
         if ($p_melt < $p_freeze) {
             $cell['state'] = 'on';
         }
@@ -369,8 +353,6 @@ $thing->Create('null','null','hex wall snowflake');
 
     function readHexflake()
     {
-        //$this->thing->log("read");
-
         $this->get();
         return $this->state;
     }

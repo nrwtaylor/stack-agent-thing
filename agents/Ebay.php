@@ -832,9 +832,6 @@ http://open.api.ebay.com/shopping?
         if (isset($this->search_words)) {
             $keywords = $this->search_words;
         }
-        //echo "looking for " . implode(" ",$this->keywords) . "<br>";
-        // Create + seperated keyword string
-        //$keywords = $this->thing->subject;
 
         if ($text != null) {
             $keywords = $text;
@@ -1333,7 +1330,6 @@ http://open.api.ebay.com/shopping?
 
         if (isset($ebay_item["ViewItemURLForNaturalSearch"])) {
             $link = $ebay_item["ViewItemURLForNaturalSearch"];
-            //echo $link;
         }
 
         //$link = "X";
@@ -1551,7 +1547,6 @@ http://open.api.ebay.com/shopping?
         if (preg_match("/(?<=QQitemZ).*?\z/", $text, $match)) {
             return $match;
         }
-        //echo "No match found";
         else {
             return null;
         }

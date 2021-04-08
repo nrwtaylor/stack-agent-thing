@@ -145,14 +145,8 @@ First name: <input type="text" onkeyup="showHint(this.value)">
         $this->readTip();
         // devstack
         // Get input from AJAX
-        //var_dump($this->subject);
-        //var_dump($this->input);
-        //var_dump($this->agent_input);
-
-        //var_dump($input);
         $this->response .= "devstack read tip";
+
         //$q = $_REQUEST["q"];
-        //var_dump($q);
-        //		return;
     }
 }

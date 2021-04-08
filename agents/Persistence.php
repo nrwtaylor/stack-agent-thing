@@ -97,8 +97,6 @@ class Persistence extends Agent
         $from = $this->from;
         $to = $this->to;
 
-        //echo "from",$from,"to",$to;
-
         $subject = $this->subject;
 
         // Now passed by Thing object

@@ -80,7 +80,7 @@ if (isset($thing->container['stack']['robot_name'])) {
 
         $from =false;
 
-        if (is_array($this->input)) {var_dump($this->input); throw new \Exception("devstack");}
+        if (is_array($this->input)) {throw new \Exception("devstack");}
 
 	    $email = $this->generateMultipart($from, $this->input, $this->choices);
 

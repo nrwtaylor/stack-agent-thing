@@ -41,7 +41,6 @@ class Ngram extends Agent
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 ["ngram", "refreshed_at"],
@@ -49,15 +48,10 @@ class Ngram extends Agent
             );
         }
 
-        //$this->reading = $this->thing->json->readVariable( array("ngram", "reading") );
     }
 
     public function set()
     {
-        //$this->thing->json->writeVariable( array("ngram", "reading"), $this->reading );
-
-        //        if ($this->agent_input == null) {$this->respond();}
-
         if (isset($this->ngrams) and count($this->ngrams) != 0) {
             $this->ngram = $this->ngrams[0];
             $this->thing->log(
@@ -144,17 +138,15 @@ class Ngram extends Agent
             }
         }
 
-        //$this->ngrams[] = $ngram;
-
         if (count($ngrams) != 0) {
             array_push($this->ngrams, ...$ngrams);
         }
-        //        array_merge($this->ngrams, $ngram);
         return $ngrams;
     }
 
-    public function extractNgrams($input, $n = 3)
+    public function extractNgrams($input, $n = 3, $n_min = null)
     {
+        if ($n_min == null) {$n_min = 1;}
         if (is_array($input)) {
             return true;
         }
@@ -162,7 +154,7 @@ class Ngram extends Agent
         $ngrams = [];
 
         $num = $n;
-        foreach (range(1, $n, 1) as $num) {
+        foreach (range($n_min, $n, 1) as $num) {
             foreach ($words as $key => $value) {
                 if ($key < count($words) - ($num - 1)) {
                     $ngram = "";
@@ -283,7 +275,6 @@ class Ngram extends Agent
             }
             $this->ngrams_duplicate[$ngram] = $score;
 
-            //            $html_ngrams_duplicate .= $ngram . " " . $score . "<br>";
         }
 
         $count = 0;
@@ -318,8 +309,6 @@ class Ngram extends Agent
      */
     public function readSubject()
     {
-        //$input = strtolower($this->subject);
-
         $input = $this->agent_input;
         if ($this->agent_input == null or $this->agent_input == "") {
             $input = $this->subject;
@@ -349,8 +338,6 @@ class Ngram extends Agent
                             );
                             $words = ltrim($words);
 
-                            //$this->search_words = $words;
-
                             $this->extractNgrams($words, 3);
                             $this->extractNgrams($words, 2);
                             $this->extractNgrams($words, 1);
@@ -359,7 +346,6 @@ class Ngram extends Agent
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }
@@ -370,8 +356,6 @@ class Ngram extends Agent
         $this->extractNgrams($input, 1);
 
         $status = true;
-
-        //        }
 
         return $status;
     }

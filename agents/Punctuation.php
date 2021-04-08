@@ -143,8 +143,6 @@ class Punctuation extends Agent
                             return;
 
                         default:
-
-                        //echo 'default';
                     }
                 }
             }

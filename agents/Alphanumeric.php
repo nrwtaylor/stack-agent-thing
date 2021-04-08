@@ -112,15 +112,8 @@ class Alphanumeric extends Agent
             } else {
                 $letters[] = " ";
             }
-            //$flag = true;}
-
-            //if ((!ctype_alpha($letter)) and ($flag == false)) {$letter = "";}
-            //if ((!ctype_alnum($letter)) and ($flag == false)) {$letter = "";}
-
-            //$letters[] = $letter;
         }
 
-        //var_dump($letters);
         $new_text = implode("", $letters);
         $this->filter_alphanumeric = $new_text;
         return $new_text;

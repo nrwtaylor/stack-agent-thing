@@ -29,8 +29,6 @@ class More extends Agent
         $this->input_agent = null;
     }
 
-    // -----------------------
-
     function assertIs($input)
     {
         $this->input_agent = null;
@@ -64,7 +62,6 @@ class More extends Agent
             switch ($ngram) {
                 case "more":
                     $web = new Web($this->thing, "web");
-                    var_dump($web->prior_agent);
 
                     if (strtolower($web->prior_agent) == strtolower("more")) {
                         $this->response .= "More more? ";
@@ -72,9 +69,8 @@ class More extends Agent
                     }
 
                     $this->getMore($web->prior_agent);
-                    //var_dump($this->agent->thing_report['sms']);
+
                     $this->response .= $this->agent->thing_report["sms"];
-                    //                $this->response .= "Hello more. ";
                     return;
 
                 default:
@@ -117,29 +113,22 @@ class More extends Agent
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         $this->thing->flagGreen();
 
-//        $to = $this->thing->from;
-//        $from = "more";
-
-//        $this->makeSMS();
-
         $choices = false;
-
         $this->thing_report["choices"] = $choices;
-        $this->thing_report["info"] = "This makes an input thing.";
-        $this->thing_report["help"] = "This is about input variables.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["info"] = "This makes an more thing.";
+        $this->thing_report["help"] = "This is about asking for more things.";
+
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-//        return $this->thing_report;
     }
 
     /**
@@ -186,21 +175,17 @@ class More extends Agent
                 'could not load "' . $agent_class_name . '".',
                 "WARNING"
             );
-            // echo $ex;
+
             $message = $ex->getMessage();
-            // $code = $ex->getCode();
+            $code = $ex->getCode();
             $file = $ex->getFile();
             $line = $ex->getLine();
 
             $input = $message . "  " . $file . " line:" . $line;
             $this->thing->log($input, "WARNING");
 
-            // This is an error in the Place, so Bork and move onto the next context.
-            // $bork_agent = new Bork($this->thing, $input);
-            //continue;
             return false;
         }
-        //if (!isset($this->thing_report['sms'])) {return false;}
         return true;
     }
 }

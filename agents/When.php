@@ -152,7 +152,7 @@ class When extends Agent
         $this->calendar_unique_events = false;
 
         $this->thing->log("When calendarWhen call readCalendar", "DEBUG");
-        $this->thing->calendar_handler->readCalendar($text, $name);
+        $this->thing->calendar_handler->icalCalendar($text, $name);
         $this->thing->log(
             "When calendarWhen call readCalendar complete",
             "DEBUG"
@@ -412,8 +412,9 @@ w=fri & !(m=dec & d=25) , poker game
 */
     }
 
-    public function readWhen($text)
+    public function readWhen($text = null)
     {
+        if ($text == null) {return true;}
         if (file_exists($text)) {
             $this->response .= "Saw a reference to a file. ";
             $this->response .= "Did not do anything with it. ";

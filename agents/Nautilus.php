@@ -108,7 +108,6 @@ class Nautilus extends Agent
             $whatIWant = substr(strtolower($input), $pos + strlen($whatis));
         }
 
-        //$filtered_input = ltrim(strtolower($whatIWant), " ");
         $filtered_input = ltrim($whatIWant, " ");
 
         $this->whatis = $filtered_input;
@@ -401,7 +400,6 @@ class Nautilus extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -464,7 +462,7 @@ class Nautilus extends Agent
             $init_degrees = 0;
         }
         $init_radians = ($init_degrees / 360) * 2 * pi();
-        //var_dump($init_radians);
+
         if ($size == null) {
             $size = $this->size;
         }
@@ -783,15 +781,10 @@ class Nautilus extends Agent
                 "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
-            // Good until?
-            //$text = $this->timestampNautilus();
-            //$pdf->SetXY(175, 35);
-            //$pdf->MultiCell(30, $line_height, $text, 0, "L");
-
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= 'Caught exception: ' . $e->getMessage().  ". ";
         }
 
         return $this->thing_report['pdf'];

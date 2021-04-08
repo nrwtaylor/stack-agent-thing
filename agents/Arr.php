@@ -36,9 +36,9 @@ class Arr extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] =
-            "This agent handles HTML.";
-        $this->thing_report["help"] = "This is about recognizing and processing HTML.";
+        $this->thing_report["info"] = "This agent handles HTML.";
+        $this->thing_report["help"] =
+            "This is about recognizing and processing HTML.";
 
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
@@ -63,27 +63,72 @@ class Arr extends Agent
     function textArr($arr)
     {
         $flattened_array = $this->flattenArray($arr);
-$text = implode(" ", $flattened_array);
+        $text = implode(" ", $flattened_array);
         return $text;
     }
 
-// https://stackoverflow.com/questions/262891/is-there-a-way-to-find-out-how-deep-a-php-array-is
-public function depthArr($array) {
-    $max_indentation = 1;
+    public function searchArr(array $array, $search_key, $id)
+    {
+        foreach ($array as $key => $val) {
 
-    $array_str = print_r($array, true);
-    $lines = explode("\n", $array_str);
-
-    foreach ($lines as $line) {
-        $indentation = (strlen($line) - strlen(ltrim($line))) / 4;
-
-        if ($indentation > $max_indentation) {
-            $max_indentation = $indentation;
+            if ($val[$search_key] == $id) {
+                return $key;
+            }
         }
+        return null;
     }
 
-    return ceil(($max_indentation - 1) / 2) + 1;
-}
+
+    // https://stackoverflow.com/questions/262891/is-there-a-way-to-find-out-how-deep-a-php-array-is
+    public function depthArr($array)
+    {
+        $max_indentation = 1;
+
+        $array_str = print_r($array, true);
+        $lines = explode("\n", $array_str);
+
+        foreach ($lines as $line) {
+            $indentation = (strlen($line) - strlen(ltrim($line))) / 4;
+
+            if ($indentation > $max_indentation) {
+                $max_indentation = $indentation;
+            }
+        }
+
+        return ceil(($max_indentation - 1) / 2) + 1;
+    }
+
+    public function snippetArr(array $array)
+    {
+        $web = "";
+        if (isset($array) and count($array) !== 0) {
+            $web .= "<ul>";
+            foreach ($array as $index => $array_element) {
+                $web .=
+                    "<li><div>" .
+                    implode(" ", $this->flattenArr($array_element)) .
+                    "</div>";
+            }
+            $web .= "</ul>";
+            $web .= "<p>";
+        }
+
+        return $web;
+    }
+
+    public function filterArr(array $array, $search_words)
+    {
+        $filtered_array = [];
+        foreach ($array as $i => $array_element) {
+            $haystack = implode(" ", $this->flattenArr($array_element));
+
+            if (stripos($haystack, $search_words) !== false) {
+                $filtered_array[] = $array_element;
+            }
+        }
+
+        return $filtered_array;
+    }
 
     /**
      *
@@ -108,7 +153,6 @@ public function depthArr($array) {
         }
         return $flat;
     }
-
 
     public function readSubject()
     {

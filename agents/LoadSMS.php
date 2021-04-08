@@ -88,12 +88,11 @@ class LoadSMS {
         foreach ($csvFile as $csv_line) {
 
             $line = str_getcsv($csv_line);
-//var_dump($line);
             if (!isset($line[1])) {continue;}
 
             // Incomplete line...drop
-            if (!isset($line[4])) {continue;var_dump($line);}
-            if (!isset($line[5])) {continue;var_dump($line);}
+            if (!isset($line[4])) {continue;}
+            if (!isset($line[5])) {continue;}
 
             if (isset($line[6])) {$to = $line[4]; $from = null;}
             if (isset($line[5])) {$from = $line[4]; $to = null;}

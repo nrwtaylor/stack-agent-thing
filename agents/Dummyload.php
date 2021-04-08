@@ -110,7 +110,6 @@ class Dummyload extends Agent
         $result = $client->doLowBackground("call_agent", $arr);
 
         if ($result) {
-            //            echo "Success: $result\n";
         }
 
         return;
@@ -145,7 +144,6 @@ class Dummyload extends Agent
             } else {
                 $balance = $thing->account["stack"]->balance["amount"];
             }
-            //echo $thing->thing->created_at;
             $this->things[] = [
                 "nuuid" => "not returned",
                 "balance" => $balance,
@@ -166,10 +164,8 @@ class Dummyload extends Agent
             $this->agent_prefix . " dummyload cost = " . $value_created . "."
         );
 
-        //echo "Value destroyed: " . $value_destroyed;
 
         $this->value_created = $value_created;
-        //$this->thing_destroyed = $things_destroyed;
 
         return $value_created;
     }

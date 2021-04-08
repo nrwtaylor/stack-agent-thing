@@ -148,6 +148,8 @@ class Agent
 
         $this->context = null;
 
+        $this->error = "";
+        $this->warning = "";
         $this->response = "";
 
         if (isset($thing->container["api"]["agent"])) {
@@ -180,7 +182,7 @@ class Agent
         // read the current agent.
         if (
         //    $this->agent_class_name !== "Agent" and
-            method_exists($this, "read" . $this->agent_class_name)
+            method_exists($this, "init" . $this->agent_class_name)
         ) {
             $this->{"init" . $this->agent_class_name}();
         }
@@ -538,7 +540,6 @@ public function __set($name, $value) {
                 $variables_array[$uuid] = $variables;
             }
         }
-
         return $variables_array;
     }
 
@@ -646,6 +647,10 @@ public function __set($name, $value) {
         $this->makePNG();
         $this->makePNGs();
         $this->makeSMS();
+
+        // Snippet might be used by web.
+        // So run it first.
+        $this->makeSnippet();
         $this->makeWeb();
 
         $this->makeJson();
@@ -724,7 +729,7 @@ public function __set($name, $value) {
             $this->thing_report["web"] .= "<p>" . $web;
         }
 
-        $this->makeSnippet();
+        //$this->makeSnippet();
         $this->makeEmail();
         $this->makeTXT();
 
@@ -1804,7 +1809,6 @@ return $agent_trace;;
     public function timestampAgent($text = null)
     {
         if ($text == null) {
-            //$text = $this->thing->thing->created_at;
             $text = $this->created_at;
         }
         $time = strtotime($text);
@@ -1857,7 +1861,6 @@ return $agent_trace;;
         $this->thing->log('read "' . $this->subject . '".');
 
         $this->readFrom();
-
         $this->readSubject();
 
         // read the current agent.
@@ -1865,7 +1868,7 @@ return $agent_trace;;
             $this->agent_class_name !== "Agent" and
             method_exists($this, "read" . $this->agent_class_name)
         ) {
-            $this->{"read" . $this->agent_class_name}();
+            $this->{"read" . $this->agent_class_name}($text);
         }
 
         $this->thing->log("read completed.");
@@ -1885,7 +1888,6 @@ return $agent_trace;;
 
         if ($this->thing->deny_agent->isDeny() === true) {
             $this->do_not_respond = true;
-            //return;
             throw new \Exception("Address not allowed.");
         }
 
@@ -2030,7 +2032,6 @@ if ($pid == -1) {
 //}
 
 
-            //        } catch (Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
         } catch (\Throwable $t) {
             restore_error_handler();
 
@@ -2138,7 +2139,7 @@ if ($pid == -1) {
         }
         $responsive_agents = [];
         foreach ($agents as $i => $agent_package) {
-            //$agent_class_name = '\Nrwtaylor\Stackr\' . $agent_class_name;
+
             // Allow for doing something smarter here with
             // word position and Bayes.  Agent scoring
             // But for now call the first agent found and
@@ -2205,14 +2206,9 @@ if ($pid == -1) {
         }
 
         $pieces = explode(" ", $text);
-
         $num_pieces = count($pieces);
-        //foreach($pieces as $i=>$piece) {
 
-        //        $score = strlen($text) * pow(10, $num_pieces);
         $score = $matched_characters * pow(10, $num_pieces);
-
-        //}
 
         return $score;
     }
@@ -2231,8 +2227,6 @@ if ($pid == -1) {
         if (substr($agent_class_name, 0, 5) === "Thing") {
             return false;
         }
-
-        // MERP
 
         $uuid = new Uuid($this->thing, "extract");
         $uuid->extractUuids($agent_class_name);
@@ -2279,7 +2273,6 @@ if ($pid == -1) {
             $arr[] = $this->to;
         } else {
             $arr = $this->ngramsText($agent_input_text);
-            //$arr = explode(' ', $agent_input_text);
         }
 
         // Does this agent have code.
@@ -2332,8 +2325,6 @@ if ($pid == -1) {
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
-
-        return;
     }
 
     /**
@@ -2342,6 +2333,9 @@ if ($pid == -1) {
      */
     public function readSubject()
     {
+        // Only run this for agent
+        if ($this->agent_name !== "agent") {return;}
+
         $this->thing->log('read subject "' . $this->subject . '".');
 
         $status = false;
@@ -2601,10 +2595,7 @@ if ($pid == -1) {
                 continue;
             }
 
-            //            if ($this->isAgent($ngram)) {
             $matches[] = $ngram;
-            //                return $this->thing_report;
-            //            }
         }
 
         if (count($matches) == 1) {
@@ -3607,7 +3598,7 @@ if ($pid == -1) {
      * @param unknown $text (optional)
      * @return unknown
      */
-    function filterAgent($text = null)
+    function filterAgent($text = null, $more_strip_words = [])
     {
         //$input = strtolower($this->subject);
         $input = $this->input;
@@ -3621,6 +3612,9 @@ if ($pid == -1) {
             ucwords($this->agent_name),
             strtoupper($this->agent_name),
         ];
+
+        $strip_words = array_merge($strip_words, $more_strip_words);
+
         foreach ($strip_words as $i => $strip_word) {
             $strip_words[] = str_replace(" ", "", $strip_word);
         }
@@ -3747,10 +3741,5 @@ if ($pid == -1) {
     {
         $this->thing->log($error);
         $this->thing->console($error);
-        //        echo $this->response;
-        //        echo "\n";
-        //        echo $this->thing->log;
-        //...do whatever you want...
-        //echo $this->uuid;
     }
 }

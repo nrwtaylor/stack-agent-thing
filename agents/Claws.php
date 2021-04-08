@@ -59,6 +59,9 @@ class Claws extends Agent
         $this->makeClaws();
         $this->makeUrl();
         $this->makeZoommtg();
+
+        $this->emacsorgClaws();
+
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
@@ -128,6 +131,54 @@ dev - Detect duplicates.
 
         $this->updateWhen($line);
         $this->response .= "Wrote item to When calendar file. ";
+    }
+
+    public function emacsorgClaws()
+    {
+        // Add emacsorg to agent command string to trigger writing of emacs buffer file
+
+        if (
+            isset($this->claws_emacsorg_flag) and
+            $this->claws_emacsorg_flag != "on"
+        ) {
+            return;
+        }
+        // Code to write an org item goes here.
+
+        /*
+** Strategy Meeting
+   SCHEDULED: <2021-03-31 Wed 11:00>
+   https://meeting.example.com/place/z.phz?MTID=a1a1a1a1a1
+*/
+
+        // Build entry for emacs org mode
+        // and append to appropriate emacs buffer
+
+        $count = 0;
+        $text = "";
+        foreach ($this->claws_items as $i => $claws_item) {
+            // Build suitable emacs org time for schedule
+
+            // Refactor to Time
+            $dateline = $this->timestampDateline($claws_item["dateline"]);
+            $date_text = substr($dateline, 0, 10);
+            $day_text = ucwords(strtolower($claws_item["dateline"]["day"]));
+            $time_text = substr($dateline, 11, 5);
+            $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
+
+            $call = $claws_item["call"];
+
+            $text .= "**" . " " . $claws_item["subject"] . "\n";
+            $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
+            $text .= "   " . $call["url"] . "\n";
+            $text .=
+                "   " . $call["password"] . " / " . $call["access_code"] . "\n";
+            $text .= "\n";
+
+            $this->updateEmacs($text);
+            $count += 1;
+        }
+        $this->response .= "Wrote " . $count . " items to Emacs buffer file. ";
     }
 
     // for testing.
@@ -239,8 +290,8 @@ dev - Detect duplicates.
             $txt .= $this->textHtml($text_claws) . "\n";
 
             // Tidy up text display.
-//            $txt = html_entity_decode($text_claws). "\n";
- //           $txt .= $text_claws . "\n";
+            //            $txt = html_entity_decode($text_claws). "\n";
+            //           $txt .= $text_claws . "\n";
         }
         $txt .= "\n";
 
@@ -312,8 +363,6 @@ dev - Detect duplicates.
                 continue;
             }
 
-
-
             $dateline["score"] = $this->scoreAt($dateline, "meeting");
             $datelines[] = $dateline;
         }
@@ -348,6 +397,7 @@ dev - Detect duplicates.
         // Recognize if the instruction has "when" in it.
         // Set a flag so that we can later create a calendar item if needed.
         $indicators = [
+            "emacsorg" => ["emacsorg"],
             "when" => ["when"],
             "test" => ["test"],
         ];
@@ -377,8 +427,12 @@ dev - Detect duplicates.
             $filename = trim($token);
 
             // Delegating contents to agents for processing
-            $contents = $this->loadClaws($filename);
 
+            if (!file_exists($filename)) {
+                continue;
+            }
+
+            $contents = $this->loadClaws($filename);
             // Pass contents through MH routine to remove trailing =
             //$subject = $this->subjectMH($contents);
             //$body = $this->bodyMH($contents);
@@ -420,15 +474,14 @@ dev - Detect duplicates.
             } else {
                 $subject = $this->subjectMH($contents);
                 $body = $this->bodyMH($contents);
-
                 $call = $this->readCall($body);
-                // Try to figure out date from body text.
 
+                // Try to figure out date from body text.
                 $dateline = $this->extractAt($body);
                 $subject_at_score = 0;
-//                if ($dateline != null) {
+                //                if ($dateline != null) {
                 $subject_at_score = $this->scoreAt($dateline, "meeting");
-//                }
+                //                }
                 // TODO - Check if the subject has a well qualified date time.
                 // dev start with a simple score of missing information.
                 // dev assess whether date time is "adequate"
@@ -436,8 +489,8 @@ dev - Detect duplicates.
                     // Otherwise ... see if there is a better date time in the combined contents.
                     $datelines = $this->datelinesCall($subject . "\n" . $body);
 
-// dev
-// TODO Assess datelines for validity.
+                    // dev
+                    // TODO Assess datelines for validity.
 
                     // Pick best dateline.
                     if (isset($datelines[0])) {
@@ -451,7 +504,6 @@ dev - Detect duplicates.
                 "dateline" => $dateline,
             ];
         }
-
         // get an MH reader to clean up the format
         // See what we get from Call.
         //$call_agent = new Call($this->thing, "call");

@@ -48,7 +48,6 @@ class Chinese extends Agent
             }
             // Return dictionary entry.
             $text = $this->findChinese("list", $value);
-            //echo $value . " " .$text . "<br>";
             $words = $this->getConcept($text);
             if ($words != false) {
                 $this->words = array_merge($this->getConcept($text));
@@ -60,7 +59,6 @@ class Chinese extends Agent
         }
 
         $this->keywords = [];
-        //$this->keyword = "chinese";
 
         foreach ($arr as $key => $value) {
             $text = $this->findChinese("mordok", $value);
@@ -203,7 +201,6 @@ class Chinese extends Agent
                 //                    if ((mb_strlen($concept) < $shortest_concept_length) and (mb_strlen($concept) != 0)) {
                 if (mb_strlen($concept) != 0) {
                     $words = explode(" ", $concept);
-                    //echo "Counted " . count($words) . " words.\n";
                     $num_words = count($words);
                     $concept_length = mb_strlen($concept);
 
@@ -271,9 +268,7 @@ class Chinese extends Agent
             $word = $this->getConcept($line);
 
             if (mb_strlen($word["traditional"]) == 1) {
-                //v/ar_dump($word);
                 //$dictionary_entry = $word['traditional'] . " " . $word['simplified'] . " " . $word['pin_yin'] . implode("/",$word['english']) . "\n";
-                //echo $dictionary_entry;
                 $dictionary[$word["traditional"]] = $line . "\n";
             }
             // do something with $line
@@ -433,8 +428,6 @@ class Chinese extends Agent
         $logogram_sequence_length = mb_strlen(implode("", $characters));
         $end_flag = false;
         while ($pointer !== $string_length) {
-            //            echo "----------------- " . $pointer . " -----------". "\n";
-            //            echo "translation " . $translation . "\n";
             if ($end_flag) {
                 break;
             }
@@ -485,27 +478,20 @@ class Chinese extends Agent
                 $test_character_string .= $characters[$pointer + $value];
 
                 if ($this->isChinese($test_character_string) == false) {
-                    //                    echo "no chinese found in test character string: " . $test_character_string . "\n";
-                    //$pointer += mb_strlen($character_string);
                     $character_string = $test_character_string;
                     $pointer += $value + 1;
                     break;
                 }
-
-                //echo "test if character string " . $test_character_string . " is in dictionary.\n";
 
                 // Devstack
                 // Next line testing at 22ms.
                 $text_temp = $this->findChinese("list", $test_character_string);
 
                 if ($text_temp == false) {
-                    //echo "Not in dictionary" . "\n";
 
                     $pointer += $value;
-                    //echo "character string " . $character_string . "\n";
                     break;
                 }
-                //echo "Is in dictionary." . "\n";
 
                 $match_flag = true;
                 //if ($match_flag = false) {break;}
@@ -719,7 +705,6 @@ class Chinese extends Agent
                 $file =
                     $this->resource_path .
                     "chinese/cedict_1_0_ts_utf-8_mdbg.txt";
-                //            $contents = file_get_contents($file);
                 $contents = "";
                 if (file_exists($file)) {
                     $contents = file_get_contents($file);
@@ -731,7 +716,6 @@ class Chinese extends Agent
                 $file =
                     $this->resource_path .
                     "chinese/cedict_1_0_ts_utf-8_mdbg.txt";
-                //            $contents = file_get_contents($file);
                 $contents = "";
                 if (file_exists($file)) {
                     $contents = file_get_contents($file);
@@ -741,7 +725,6 @@ class Chinese extends Agent
 
             case "unicode":
                 $file = $this->resource_path . "chinese/unicode.txt";
-                //            $contents = file_get_contents($file);
                 $contents = "";
                 if (file_exists($file)) {
                     $contents = file_get_contents($file);
@@ -768,7 +751,6 @@ class Chinese extends Agent
             $this->contents[$librex]
         );
 
-        //$this->contents = $contents;
     }
 
     public function findChinese($librex, $searchfor)
@@ -811,7 +793,6 @@ class Chinese extends Agent
 
         if (true) {
             if (preg_match_all($pattern, $contents, $matches)) {
-                //echo "Found matches:\n";
                 $m = implode("\n", $matches[0]);
                 $this->matches = $matches;
             }
@@ -1096,15 +1077,11 @@ class Chinese extends Agent
      */
     public function readSubject()
     {
-        //$input = $this->subject;
         $input = strtolower($this->input);
-        //        $input = $this->test();
-        //$input = $this->input;
 
         $this->thing->log($input);
 
         if (strtolower($input) == "chinese") {
-            //            $this->chineseThing();
             $this->response = "Retrieved a message with Chinese in it.";
             return;
         }
@@ -1130,17 +1107,9 @@ class Chinese extends Agent
             $filtered_input = $halves[0];
         }
 
-        //        $whatIWant = $input;
-        //        if (($pos = strpos(strtolower($input), "chinese is")) !== FALSE) {
-        //            $whatIWant = substr(strtolower($input), $pos+strlen("chinese is"));
-        //        } elseif (($pos = strpos(strtolower($input), "chinese")) !== FALSE) {
-        //            $whatIWant = substr(strtolower($input), $pos+strlen("chinese"));
-        //        }
-
         // Clean input
         $filtered_input = strtolower($filtered_input);
         $filtered_input = trim($filtered_input);
-        //        $filtered_input = ltrim(strtolower($whatIWant), " ");
 
         $string_length = mb_strlen($filtered_input);
 
@@ -1149,9 +1118,7 @@ class Chinese extends Agent
 
         if ($has_chinese_characters) {
             $t = $this->readChinese($filtered_input);
-            //$this->translation = $t;
             $this->translated_input = $t;
-            //echo "translation " . $t. "\n";
 
             $text = $this->findChinese("list", $filtered_input);
             $separator = "\r\n";

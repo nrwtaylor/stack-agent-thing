@@ -11,8 +11,6 @@ ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
 error_reporting(-1);
 
-//ini_set('memory_limit', '1024M');
-
 ini_set("allow_url_fopen", 1);
 
 class Translink extends Agent
@@ -43,14 +41,7 @@ class Translink extends Agent
         //   this gives a list of all the stops after the stop on routes served
         //   from the stop
 
-        //        $this->agent_input = $agent_input;
-
-        //  $this->thing = $thing;
         $this->agent_name = "translink";
-
-        //        $this->thing_report['thing'] = $thing;
-
-        //        $this->start_time = $this->thing->elapsed_runtime();
 
         // So I could call
         if ($this->thing->container["stack"]["state"] == "dev") {
@@ -66,27 +57,7 @@ class Translink extends Agent
         // Allow for a new state tree to be introduced here.
         $this->node_list = ["start" => ["useful", "useful?"]];
 
-        $this->thing->log(
-            'Agent "Translink" running on Thing ' . $this->thing->nuuid . "."
-        );
-        $this->thing->log(
-            'Agent "Translink" received this Thing "' . $this->subject . '".'
-        );
 
-        //  $this->readSubject(); // No need to read subject 'translink' is pretty clear.
-        //$this->thing->log('Agent "Translink". Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-
-        // Use this to create routes from a given stop
-        // devstack NRWTaylor 28 July 2018
-        //$this->getEvents();
-
-        $this->thing->log(
-            "ran for " .
-                number_format(
-                    $this->thing->elapsed_runtime() - $this->start_time
-                ) .
-                "ms."
-        );
     }
 
     /**
@@ -118,7 +89,7 @@ class Translink extends Agent
     /**
      *
      */
-    function getStopid()
+    function deprecate_getStopid()
     {
     }
 
@@ -133,7 +104,7 @@ class Translink extends Agent
         $this->thing->console("Getting " . $file_name . "\n");
 
         $matches = [];
-        $iterator = $this->nextGtfs($file_name, $selector_array);
+        $iterator = $this->gtfsTranslink($file_name, $selector_array);
 
         foreach ($iterator as $iteration) {
             $matches[] = $iteration;
@@ -204,7 +175,7 @@ class Translink extends Agent
         );
         $this->stop_id = $stop_id;
         // Information for this stop.  Generator/yield magic.
-        $events = $this->nextGtfs("stop_times", ["stop_id" => $stop_id]);
+        $events = $this->gtfsTranslink("stop_times", ["stop_id" => $stop_id]);
 
         $stop_events = [];
 
@@ -214,7 +185,7 @@ class Translink extends Agent
         // Generate the next event
         $visible = "off";
         for (
-            $events = $this->nextGtfs("stop_times", ["stop_id" => $stop_id]);
+            $events = $this->gtfsTranslink("stop_times", ["stop_id" => $stop_id]);
             $events->valid();
             $events->next()
         ) {
@@ -256,7 +227,7 @@ class Translink extends Agent
         //                    $trip_events = $this->stops[$event_stop_id][$event_trip_id];
 
         // Generator to get the stops on the next trip
-        $trip_events = $this->nextGtfs("stop_times", [
+        $trip_events = $this->gtfsTranslink("stop_times", [
             "trip_id" => $event_trip_id,
         ]);
         $visible = "off"; // No events visible.
@@ -273,7 +244,6 @@ class Translink extends Agent
 
         $this->events = $stop_events;
         return;
-        //            $trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$event_trip_id));
 
         $visible = "off"; // No events visible.
         foreach ($trip_events as $trip_event) {
@@ -317,11 +287,10 @@ class Translink extends Agent
         $trips = [];
         $trip_ids = [];
 
-        //$trips = $this->nextGtfs("trips");
         // Information for this stop.
         // Generate the next event
         for (
-            $trips = $this->nextGtfs("stop_times", ["stop_id" => $stop_id]);
+            $trips = $this->gtfsTranslink("stop_times", ["stop_id" => $stop_id]);
             $trips->valid();
             $trips->next()
         ) {
@@ -329,8 +298,6 @@ class Translink extends Agent
             //$route_id = $trip['route_id'];
             $trip_id = $trip["trip_id"];
             $stop_id = $trip["stop_id"];
-
-            //$trip_headsign = $trip['trip_headsign'];
 
             $trip_ids[] = $trip_id;
 
@@ -347,14 +314,14 @@ class Translink extends Agent
         // I think this is where this forks to station 3 August 2018
 
         $this->routes = [];
-        $routes = $this->nextGtfs("routes");
+        $routes = $this->gtfsTranslink("routes");
         //$stop_events = array();
         $trip_ids = [];
         // Information for this stop.
         // Generate the next event
         $visible = "off";
         for (
-            $routes = $this->nextGtfs("routes");
+            $routes = $this->gtfsTranslink("routes");
             $routes->valid();
             $routes->next()
         ) {
@@ -376,14 +343,14 @@ class Translink extends Agent
         //if (!isset($this->events)) {$this->getEvents();}
 
         $this->routes = [];
-        $routes = $this->nextGtfs("routes");
+        $routes = $this->gtfsTranslink("routes");
         $stop_events = [];
         $trip_ids = [];
         // Information for this stop.
         // Generate the next event
         $visible = "off";
         for (
-            $routes = $this->nextGtfs("routes");
+            $routes = $this->gtfsTranslink("routes");
             $routes->valid();
             $routes->next()
         ) {
@@ -399,11 +366,10 @@ class Translink extends Agent
         $this->trips = [];
         $this->trip_ids = [];
 
-        //$trips = $this->nextGtfs("trips");
         // Information for this stop.
         // Generate the next event
         for (
-            $trips = $this->nextGtfs("trips");
+            $trips = $this->gtfsTranslink("trips");
             $trips->valid();
             $trips->next()
         ) {
@@ -483,8 +449,6 @@ class Translink extends Agent
                     STR_PAD_LEFT
                 );
 
-                //$txt .= str_pad($event['trip_time_elapsed'], 15, " ", STR_PAD_LEFT) ;
-                //$txt .= str_pad($event['shape_dist_traveled'], 15, " ", STR_PAD_LEFT) ;
                 $line .= "\n";
 
                 if (!isset($lines[$event_time_delta])) {
@@ -492,6 +456,7 @@ class Translink extends Agent
                 }
 
                 $lines[$event_time_delta][] = $line;
+
                 //still devstack here
 
                 $trip_ids[] = $trip_id;
@@ -500,9 +465,8 @@ class Translink extends Agent
                 if ($find_stops) {
                     $i = 0;
                     $j += 1;
-                    //$trip_events = $this->nextGtfs("stop_times", array("trip_id"=>$trip_id));
                     for (
-                        $trip_events = $this->nextGtfs("stop_times", [
+                        $trip_events = $this->gtfsTranslink("stop_times", [
                             "trip_id" => $trip_id,
                         ]);
                         $trip_events->valid();
@@ -560,10 +524,6 @@ class Translink extends Agent
         }
 
         $txt .= "\n";
-        //}
-        //        }
-
-        //        $txt .= "Test";
 
         $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
@@ -626,7 +586,7 @@ class Translink extends Agent
      * @param unknown $file_name
      * @param unknown $selector_array (optional)
      */
-    function nextGtfs($file_name, $selector_array = null)
+    function gtfsTranslink($file_name, $selector_array = null)
     {
         $file =
             $GLOBALS["stack_path"] .
@@ -670,21 +630,6 @@ class Translink extends Agent
                 $i += 1;
             }
 
-            /*
-            //$field_index = 0;
-            $arr = array();
-            $i = 0;
-            foreach ($field_names as $field_name) {
-                if (!isset($field_values[$i])) {$field_values[$i] = null;}
-                    $arr[$field_name] = $field_values[$i];
-                    $i += 1;
-                }
-
-//                $field_index_value = $field_values[$field_index];
-//                if (!isset($output_array[$field_index_value])) {$output_array[$field_index_value] = array();}
-//                $output_array[$field_index_value][] = $arr;
-            }
-*/
 
             if ($selector_array == null) {
                 yield $arr;
@@ -693,11 +638,8 @@ class Translink extends Agent
             $match_count = 0;
             $match = true;
             foreach ($arr as $field_name => $field_value) {
-                //if ($selector_array == null) {$matches[] = $iteration; continue;}
 
                 // Look for all items in the selector_array matching
-                //$match_count = 0;
-                //$match = true;
                 if ($selector_array == null) {
                     continue;
                 }
@@ -742,7 +684,6 @@ class Translink extends Agent
 
         $handle = fopen($file, "r");
 
-        //$this->{$file_name} = array();
         $output_array = [];
 
         if ($handle) {
@@ -778,7 +719,6 @@ class Translink extends Agent
 
                 $field_values = explode(",", $line);
 
-                //$field_index = 0;
                 $arr = [];
                 $i = 0;
                 foreach ($field_names as $field_name) {
@@ -809,10 +749,9 @@ class Translink extends Agent
     /**
      *
      */
-    function translinkInfo()
+    function infoTranslink()
     {
         $this->sms_message = "TRANSIT";
-        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
         $this->sms_message .= " | ";
         $this->sms_message .=
             "Live data feed provided through the TransLink Open API. | https://developer.translink.ca/ | ";
@@ -824,7 +763,7 @@ class Translink extends Agent
     /**
      *
      */
-    function translinkHelp()
+    function helpTranslink()
     {
         $this->sms_message = "TRANSIT";
         //                      if (count($t) > 1) {$this->sms_message .= "ES";}
@@ -838,7 +777,7 @@ class Translink extends Agent
     /**
      *
      */
-    function translinkSyntax()
+    function syntaxTranslink()
     {
         $this->sms_message = "TRANSIT";
         //                      if (count($t) > 1) {$this->sms_message .= "ES";}
@@ -1183,23 +1122,17 @@ class Translink extends Agent
                             break;
 
                         case "translink":
-                            $this->translinkInfo();
-                            return;
-
                         case "info":
-                            $this->translinkInfo();
-                            return;
-
                         case "information":
-                            $this->translinkInfo();
+                            $this->infoTranslink();
                             return;
 
                         case "help":
-                            $this->translinkHelp();
+                            $this->helpTranslink();
                             return;
 
                         case "syntax":
-                            $this->translinkSyntax();
+                            $this->syntaxTranslink();
                             return;
 
                         default:

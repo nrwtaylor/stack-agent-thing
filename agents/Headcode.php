@@ -196,11 +196,8 @@ class Headcode extends Agent
 
     function getQuantity()
     {
-        // $this->quantity = $this->thing->json->readVariable( array("headcode", "quantity"))  ;
         $this->quantity = "X";
 
-        //$this->quantity_agent = new Quantity($this->thing,"quantity");
-        //echo $this->quantity_agent->quantity;
     }
 
     function getHeadcodes()
@@ -909,7 +906,6 @@ if (file_exists($font)) {
                 if (isset($headcode["quantity"]["quantity"])) {
                     $quantity = $headcode["quantity"]["quantity"];
                 }
-                //var_dump($headcode['quantity']);
                 $txt .= " " . str_pad($quantity, 9, " ", STR_PAD_LEFT);
             }
             if (isset($headcode["consist"])) {
@@ -1047,7 +1043,6 @@ if (file_exists($font)) {
         foreach ($head_codes as $j => $head_code) {
             foreach ($uuid_agent->uuids as $i => $uuid) {
                 if (stripos($uuid, $head_code) !== false) {
-                    //    echo 'true';
                 } else {
                     $this->head_codes[] = $head_code;
                 }

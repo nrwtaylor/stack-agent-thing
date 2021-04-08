@@ -210,13 +210,10 @@ class Listen extends Agent
                     switch ($piece) {
                         case 'listen':
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->group = false;
                                 $this->response .= "Request not understood. ";
                                 return;
                             } else {
-                                //echo "next word is:";
-                                //var_dump($pieces[$index+1]);
                                 $this->group = $pieces[$key + 1];
                                 $this->response .= $this->joinGroup(
                                     $this->group
@@ -230,7 +227,6 @@ class Listen extends Agent
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

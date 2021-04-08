@@ -51,7 +51,6 @@ class Slack
         $this->subject = $thing->subject;
         $this->sqlresponse = null;
 
-        //var_dump($this->from);
         if ($this->from == "null@stackr.ca") {
             return;
         }
@@ -105,10 +104,7 @@ $input =
         }
 
         ob_start();
-        var_dump($input);
         $test = ob_get_clean();
-
-        //$this->message = "devstack ".$test;
 
         $this->message = "devstack test";
 
@@ -241,7 +237,6 @@ if (!isset($this->error_message)) {
         $this->channel_id = $this->getChannel();
         $this->user = $this->getUser();
         $this->text = $this->getText();
-        //var_dump($this->body);
         $this->response_url = null;
         if (isset($this->body["response_url"])) {
             $this->response_url = $this->body["response_url"];
@@ -525,16 +520,12 @@ $arr = array(
 */
 
         //$arr = $message;
-        //var_dump($message);
 
         $data = http_build_query($message);
 
         //$data = '{payload = ' . json_encode($message) . '}';
         //$data = '{payload= ' . json_encode($data) . '}';
 
-        //echo "<br>to" . $to . "<br>";
-        //echo "<br>data" . $data . "<br>";
-        //echo "<br>";
 
         /*
 
@@ -550,7 +541,6 @@ $arr = array(
         /*
 //$data = http_build_query($message);
 //$arr = json_decode($message);
-//var_dump($arr);
 $data = http_build_query($message);
 */
 
@@ -586,7 +576,6 @@ $data = http_build_query($message);
         $response = json_decode($result);
 
         ob_start();
-        var_dump($result);
         $test = ob_get_clean();
 
         $this->thing->json->setField("message1");
@@ -850,7 +839,6 @@ $data = http_build_query($message);
         $this->message = str_replace("  ", " ", $doubleSpace);
 
         ob_start();
-        var_dump($this->choices);
         $test = ob_get_clean();
 
         /*

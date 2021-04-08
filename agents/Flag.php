@@ -41,10 +41,6 @@ class Flag extends Agent
                 if (isset($this->state)) {
                     $this->requested_state = $this->state;
                 }
-                // Set default behaviour.
-                // $this->requested_state = "green";
-                // $this->requested_state = "red";
-                //                $this->requested_state = "green"; // If not sure, show green.
             }
 
             $requested_state = $this->requested_state;
@@ -54,16 +50,8 @@ class Flag extends Agent
         $this->refreshed_at = $this->current_time;
 
         $this->flag->setVariable("state", $this->state);
-
-        //$this->nuuid = substr($this->variables_thing->variables_thing->uuid,0,4);
-        //$this->variables_thing->setVariable("flag_id", $this->nuuid);
-
         $this->flag->setVariable("refreshed_at", $this->current_time);
 
-        $this->thing->log(
-            $this->agent_prefix . 'set Flag to ' . $this->state,
-            "INFORMATION"
-        );
     }
 
     function isFlag($flag = null)
@@ -119,11 +107,6 @@ class Flag extends Agent
         $this->previous_state = $this->flag->getVariable("state");
         $this->refreshed_at = $this->flag->getVariable("refreshed_at");
 
-        $this->thing->log(
-            $this->agent_prefix . 'got from db ' . $this->previous_state,
-            "INFORMATION"
-        );
-
         // If it is a valid previous_state, then
         // load it into the current state variable.
         if (!$this->isFlag($this->previous_state)) {
@@ -131,17 +114,6 @@ class Flag extends Agent
         } else {
             $this->state = $this->default_state;
         }
-
-        //        $this->thing->choice->Create($this->keyword, $this->node_list, $this->state);
-        //        $check = $this->thing->choice->current_node;
-
-        $this->thing->log(
-            $this->agent_prefix .
-                'got a ' .
-                strtoupper($this->state) .
-                ' FLAG.',
-            "INFORMATION"
-        );
     }
 
     function selectChoice($choice = null)
@@ -206,7 +178,7 @@ class Flag extends Agent
     public function readFlag()
     {
         $state_text = "X";
-        if (isset($this->state)) {
+        if ((isset($this->state)) and ($this->state !== false))  {
             $state_text = $this->state;
         }
 
@@ -234,9 +206,6 @@ class Flag extends Agent
 
         $message_thing = new Message($this->thing, $this->thing_report);
         $this->thing_report['info'] = $message_thing->thing_report['info'];
-
-        //$this->thing_report['help'] = 'This Flag is either RED or GREEN. RED means busy.';
-        //$this->makeHelp();
     }
 
     function makeHelp()
@@ -528,26 +497,7 @@ class Flag extends Agent
             }
         }
 
-        // If all else fails try the discriminator.
-        //        if (!isset($haystack)) {$this->response = "Did nothing."; return;}
-
-/*
-        $this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
-
-
-        switch ($this->requested_state) {
-            case 'green':
-                $this->selectChoice('green');
-                return;
-            case 'red':
-                $this->selectChoice('red');
-                return;
-        }
-*/
         $this->readFlag();
 
-        // devstack
-        return "Message not understood";
-        return false;
     }
 }

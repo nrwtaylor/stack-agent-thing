@@ -160,39 +160,14 @@ class Sms
         if (!isset($this->body)) {
             return;
         }
-        // https://developers.google.com/api-client-library/php/auth/web-app
-        //        $key_file_location = $this->thing->container['api']['google_service']['key_file_location'];
 
-        //        $this->client = new \Google_Client();
-        //        $this->client->setApplicationName("Stan");
-        //        $this->client->setAuthConfig($key_file_location);
-        //        $this->client->setScopes(['https://www.googleapis.com/auth/chat.bot']);
-
-        //        $hangoutschat = new \Google_Service_HangoutsChat($this->client);
-
-        //        $message = new \Google_Service_HangoutsChat_Message();
-        //var_dump($this->body);
         $text = $this->body['text'];
 
         //$type = $this->body["type"];
 
         $space_name = $this->body['msisdn'];
-
         $user_name = $this->body['to'];
 
-        //                $arr = json_encode(array("to"=>$body['msisdn'], "from"=>$body['to'], "subject"=>$body['text']));
-
-        ///        $thing = new Thing(null);
-        ///        $thing->Create($space_name,$user_name,$text);
-        ///        $agent = new Agent($thing);
-
-        ///        $response = $agent->thing_report['sms'];
-
-        //$message->setText($response);
-        ///        $this->sms_message = $response;
-        //$hangoutschat->spaces_messages->create($space_name, $message);
-
-        ///        $this->sendSMS($user_name, $response);
     }
 
     // -----------------------
@@ -212,8 +187,6 @@ class Sms
         }
 
         $this->thing_report['sms'] = "SMS | " . $test_message;
-
-        //$test_message = str_replace(" | ", "\n", $test_message);
 
         $received_at = strtotime($this->thing->thing->created_at);
         $time_ago = time() - $received_at;

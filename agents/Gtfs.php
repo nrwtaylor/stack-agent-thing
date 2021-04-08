@@ -29,14 +29,6 @@ class Gtfs extends Agent
         $this->channel = new Channel($this->thing, "channel");
         $this->channel_name = $this->channel->channel_name;
 
-        // Handle stations specifically.
-        // And if the context is Transit handle Translink Stops.
-        //        $this->context = new Context($thing, "context");
-        // 1 word messages don't action.
-
-        //       $this->transit = new Transit($thing,"translink");
-        //$this->findStop("Madison and Hastings");
-
         // Some notes
         // agency.txt - agency_id, agency_name - descriptions of the three agencies
         // feed_info.txt - description of the feed publisher
@@ -63,11 +55,7 @@ class Gtfs extends Agent
             $this->test = true;
         }
 
-        $this->api_key = $this->thing->container["api"]["translink"];
-
         $this->retain_for = 2; // Retain for at least 2 hours.
-
-        $this->sqlresponse = null;
 
         // Allow for a new state tree to be introduced here.
         $this->node_list = ["start" => ["useful", "useful?"]];
@@ -77,29 +65,16 @@ class Gtfs extends Agent
 
         $this->max_hops = 10;
 
-        //        $this->getNetworktime();
-
-        //        $this->getDestinations(); // Get the stops available from this stop.  Availability includes runat.
-
-        $this->thing->log(
-            "ran for " .
-                number_format(
-                    $this->thing->elapsed_runtime() - $this->start_time
-                ) .
-                "ms."
-        );
-
         $this->thing_report["help"] =
             "Asks Translink about where you are. Try GTFS MADISON HASTINGS.";
 
-        $this->thing_report["response"] = $this->response;
     }
 
     /**
      *
      * @return unknown
      */
-    function getRailway()
+    function railwayGtfs()
     {
         if (isset($this->railway)) {
             return $this->railway;
@@ -147,7 +122,7 @@ class Gtfs extends Agent
      * @param unknown $station_id (optional)
      * @return unknown
      */
-    function getStop($station_id = null)
+    function stopGtfs($station_id = null)
     {
         if ($station_id == null) {
             $station_id = $this->station_id;
@@ -156,20 +131,9 @@ class Gtfs extends Agent
         if (isset($this->stops[$station_id])) {
             return $this->stops[$station_id];
         }
-        $stop = $this->getStops($station_id);
+        $stop = $this->stopsGtfs($station_id);
         $this->thing->log("Got stop " . $station_id . ".");
         return $stop;
-        /*
-        // Use Translink file language.  This is a station in train context.
-        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
-        $stop_count = $this->searchForsId($station_id, $this->stops_db);
-
-        $stop = null;
-        if (!($stop_count == null)) {$stop = $this->stops_db[$stop_count];}
-        $this->stop = $stop;
-
-        return $stop;
-*/
     }
 
     /**
@@ -196,7 +160,7 @@ class Gtfs extends Agent
      * @param unknown $station_id (optional)
      * @return unknown
      */
-    function getStops($station_id = null)
+    function stopsGtfs($station_id = null)
     {
         if ($station_id == null) {
             $station_id = $this->station_id;
@@ -227,7 +191,7 @@ class Gtfs extends Agent
      * @param unknown $station_id (optional)
      * @return unknown
      */
-    function getStations($station_id = null)
+    function stationsGtfs($station_id = null)
     {
         if (isset($this->stations[$station_id])) {
             return $this->stations;
@@ -242,21 +206,11 @@ class Gtfs extends Agent
         // For transit context speak that looks like seeing which stops are
         // on all the routes which pass through this stop.
 
-        // And this should do that.  Let's check.
-        //$stop_code = $this->idStation($text);
-        //$text = 51380;
-        //        $stop_id = $this->idStation($text);
-
         // Make the networks
-
-        $this->getRailway();
-        //        $station_id = $stop_id; // Work in train context
+        $this->railwayGtfs();
 
         // Use Translink file language.  This is a station in train context.
-        //        if (!isset($this->stops_db)) {$this->stops_db = $this->get("stops");}
-        //        $stop_count = $this->searchForsId($station_id, $this->stops_db);
-        //        $stop = $this->stops_db[$stop_count];
-        $stop = $this->getStops($station_id);
+        $stop = $this->stopsGtfs($station_id);
 
         $visible_stations[$station_id] = [
             "visited" => false,
@@ -292,16 +246,16 @@ class Gtfs extends Agent
                 $visible_stations[$station_id] = [
                     "visited" => false,
                     "station_id" => $station_id,
-                    "station" => $this->getStops($station_id),
+                    "station" => $this->stopsGtfs($station_id),
                 ];
                 $completed = false;
             }
 
-            $visible_stations[$station_id_pointer]["station"] = $this->getStops(
+            $visible_stations[$station_id_pointer]["station"] = $this->stopsGtfs(
                 $station_id_pointer
             );
 
-            $visible_stations[$station_id_pointer]["routes"] = $this->getRoutes(
+            $visible_stations[$station_id_pointer]["routes"] = $this->routesGtfs(
                 $station_id_pointer
             );
             $visible_stations[$station_id_pointer]["visited"] = true;
@@ -383,11 +337,6 @@ class Gtfs extends Agent
             $matches[] = $iteration;
         }
 
-        /*
-        if (!isset($this->mem_cached)) {$this->getMemcached();}
-        $this->mem_cached->set('gtfs-translink',  $matches); //point 3
-*/
-
         return $matches;
     }
 
@@ -454,7 +403,7 @@ class Gtfs extends Agent
         if (isset($this->stations[$station_id]["station"])) {
             return $this->stations[$station_id];
         }
-        $this->getStations($station_id);
+        $this->stationsGtfs($station_id);
         return $this->stations[$station_id];
     }
 
@@ -514,7 +463,6 @@ class Gtfs extends Agent
         $match_array = [];
         $num_words = count($pieces);
         foreach ($array as $key => $val) {
-            //            $stop_desc = strtolower($val['stop_desc']);
             $stop_name = strtolower($val["stop_name"]);
 
             $stop_id = strtolower($val["stop_id"]);
@@ -523,8 +471,6 @@ class Gtfs extends Agent
             $count = 0;
 
             foreach ($pieces as $piece) {
-                //                if (stripos($stop_desc, $piece) !== false) {
-                //if (preg_match("/\b$piece\b/i", $stop_desc)) {
                 if (preg_match("/\b$piece\b/i", $stop_name)) {
                     $count += 1;
                     $match = true;
@@ -537,9 +483,6 @@ class Gtfs extends Agent
                     break;
                 }
             }
-            //            if ($count == $num_words) {$match_array[] = array("stop_desc"=>$stop_desc,"stop_name"=>$stop_name,
-            //                    "stop_id"=>$stop_id,
-            //                    "stop_code"=>$stop_code);}
 
             if ($count == $num_words) {
                 $match_array[] = [
@@ -590,11 +533,9 @@ class Gtfs extends Agent
      * @param unknown $station_id
      * @return unknown
      */
-    function getRoutes($station_id)
+    function routesGtfs($station_id)
     {
         $this->tripRoute($station_id); // trip_routes (quick trip to route conversion)
-
-        // $this->getTrips($station_id);
 
         $this->split_time = $this->thing->elapsed_runtime();
 
@@ -602,14 +543,13 @@ class Gtfs extends Agent
 
         // This is slow
         if (!isset($this->trips[$station_id])) {
-            $this->getTrips($station_id);
+            $this->tripsGtfs($station_id);
         }
 
         if (!isset($this->routes[$station_id])) {
             $this->routes[$station_id] = [];
         }
 
-        //        if (!isset($this->trips_db)) {$this->trips_db = $this->get("trips");}
         if (!isset($this->routes_db)) {
             $this->routes_db = $this->getMatches("routes");
         }
@@ -617,9 +557,6 @@ class Gtfs extends Agent
         // For each trip_id get the route
         foreach ($this->trips[$station_id] as $trip) {
             // Translate trip_id to route_id
-            //  $route_id =  $this->trip_routes[$trip_id];
-            // Have we processed it?
-
             $trip_id = $trip["trip_id"];
             $route_id = $this->trip_routes[$trip_id];
 
@@ -629,8 +566,6 @@ class Gtfs extends Agent
 
             $index = $this->searchForrId($route_id, $this->routes_db);
             $route = $this->routes_db[$index];
-
-            //    $route_id = $route['route_id'];
 
             $this->routes[$station_id][$route_id] = $route;
 
@@ -649,14 +584,13 @@ class Gtfs extends Agent
      * @param unknown $station_id_input
      * @return unknown
      */
-    function getTrips($station_id_input)
+    function tripsGtfs($station_id_input)
     {
         $this->thing->log(
             "Getting trips connecting through station_id " .
                 $station_id_input .
                 "."
         );
-        //if (isset($this->trips[$station_ids])) {return $this->trips[$station_ids];}
 
         // stop times is 80Mb
 
@@ -706,15 +640,15 @@ class Gtfs extends Agent
         }
 
         if (!isset($this->routes[$this->station_id])) {
-            $this->getRoutes($this->station_id);
+            $this->routesGtfs($this->station_id);
         }
         if (!isset($this->stations[$this->station_id])) {
-            $this->getStations($this->station_id);
+            $this->stationsGtfs($this->station_id);
         }
 
         // Produce a list of stops
         $s = "";
-        $stops = $this->getStations($this->station_id);
+        $stops = $this->stationsGtfs($this->station_id);
         foreach ($stops as $stop_id => $stop) {
             $station = $stop["station"];
             $stop_text = $station["stop_desc"];
@@ -725,7 +659,7 @@ class Gtfs extends Agent
             $s .= " [";
             $r = "";
             if (!isset($stop["routes"])) {
-                $routes = $this->getRoutes($stop_id);
+                $routes = $this->routesGtfs($stop_id);
                 foreach ($routes[$stop_id] as $route_id => $route) {
                     $r .= $route["route_short_name"] . " ";
                 }
@@ -777,7 +711,7 @@ class Gtfs extends Agent
         }
 
         if (!isset($this->stations)) {
-            $this->getStations();
+            $this->stationsGtfs();
         }
 
         $txt = "FUTURE STOPS VISIBLE FROM THIS STATION " . $this->station_id;
@@ -804,7 +738,7 @@ class Gtfs extends Agent
 
             //if (!isset($station['station'])) {$txt .= "No station information.\n";}
 
-            $stop = $this->getStops($station_id);
+            $stop = $this->stopsGtfs($station_id);
             $stop_code = $stop["stop_code"];
             $stop_id = $stop["stop_id"];
             $stop_desc = $stop["stop_desc"];
@@ -963,17 +897,6 @@ class Gtfs extends Agent
                 continue;
             }
 
-            //$line = trim(fgets($handle));
-            //            $arr = array();
-            /*
-            $field_values = explode(",", $line);
-            $i = 0;
-            foreach ($field_names as $field_name) {
-                if (!isset($field_values[$i])) {$field_values[$i] = null;}
-                $arr[$field_name] = $field_values[$i];
-                $i += 1;
-            }
-*/
             $arr = $this->parseLine($line, $field_names);
 
             // If there is no selector array, just return it.
@@ -1032,50 +955,25 @@ class Gtfs extends Agent
 
     /**
      *
-     * @param unknown $selector_array (optional)
-     */
-    function isMatch($selector_array = null)
-    {
-    }
-
-    /**
-     *
      * @param unknown $file_name
      * @param unknown $index_name (optional)
      * @return unknown
      */
     function getGtfs($file_name, $index_name = null)
     {
-        //$file_name = "stops.txt";
         // Load in data files
         //       $searchfor = strtoupper($this->search_words);
         //$searchfor = "MAIN HASTINGS";
+
         $file =
             $GLOBALS["stack_path"] .
             "resources/translink/" .
             $file_name .
             ".txt";
-
-        /*
-        $contents = file_get_contents($file);
-        $lines = explode("\n", $contents); // this is your array of words $line
-
-        $field_names = explode(",",$lines[0]);
-
-        // Tidy up headers
-        // https://gist.github.com/josephspurrier/8780545
-        $i = 0;
-        foreach ($field_names as $field){
-            $field_names[$i] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $field);
-            $i += 1;
-
-        }
-*/
+        $output_array = [];
+        if (!file_exists($file)) {return $output_array;}
 
         $handle = fopen($file, "r");
-
-        //$this->{$file_name} = array();
-        $output_array = [];
 
         if ($handle) {
             $line_number = 0;
@@ -1156,9 +1054,9 @@ class Gtfs extends Agent
     /**
      *
      */
-    function translinkHelp()
+    function gtfsHelp()
     {
-        $this->sms_message = "TRANSIT";
+        $this->sms_message = "GTFS";
         //                      if (count($t) > 1) {$this->sms_message .= "ES";}
         $this->sms_message .= " | ";
         $this->sms_message .=
@@ -1169,7 +1067,7 @@ class Gtfs extends Agent
     /**
      *
      */
-    function translinkSyntax()
+    function gtfsSyntax()
     {
         $this->sms_message = "GTFS";
         //                      if (count($t) > 1) {$this->sms_message .= "ES";}
@@ -1178,25 +1076,16 @@ class Gtfs extends Agent
         $this->sms_message .= "TEXT HELP";
     }
 
-    // -----------------------
-
     /**
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
-        //$this->thing->log('Agent "Translink". Start Respond. Timestamp ' . number_format($this->thing->elapsed_runtime()) . 'ms.');
-        // Thing actions
         $this->thing->flagGreen();
 
         $this->thing_report["choices"] = false;
         $this->thing_report["info"] = "SMS sent";
-
-        // Generate email response.
-
-        $to = $this->thing->from;
-        $from = "station";
 
         $this->thing_report["info"] =
             "This is the Station Agent responding to a request.";
@@ -1205,8 +1094,6 @@ class Gtfs extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-
-        return $this->thing_report;
     }
 
     /**
@@ -1223,19 +1110,10 @@ class Gtfs extends Agent
      */
     public function readSubject()
     {
-        $this->thing->log("reading subject.");
-
-        $this->response = null;
 
         $keywords = ["stop", "bus", "route"];
 
-        if ($this->agent_input == null) {
-            $input = strtolower($this->subject);
-        } else {
-            $input = strtolower($this->agent_input);
-        }
-
-        //        $input = str_replace("gtfs " , "", $input);
+        $input = $this->input;
         $input = $this->assert($input);
         $arr = $this->findStop($input);
 
@@ -1263,13 +1141,6 @@ class Gtfs extends Agent
                 $m .= trim(implode(" ", $stops)) . " " . $stop_desc . " / ";
             }
 
-            //$this->places = $temp_array;
-
-            /*
-            foreach ($arr as $stop) {
-                $m .= $stop['stop_code'] . " " . $stop['stop_desc'] . " /  ";
-            }
-*/
             $this->message = $m;
             return;
         }
@@ -1307,98 +1178,6 @@ class Gtfs extends Agent
 
         $m = "No matching stops found.";
         $this->message = $m;
-        return;
 
-        ////        $stop_id = $this->idStation($text);
-
-        return;
-
-        $prior_uuid = null;
-
-        $pieces = explode(" ", strtolower($input));
-
-        if (count($pieces) == 1) {
-            $input = $this->subject;
-
-            if (ctype_alpha($this->subject[0]) == true) {
-                // Strip out first letter and process remaning 4 or 5 digit number
-                $input = substr($input, 1);
-                if (is_numeric($input) and strlen($input) == 4) {
-                    return $this->busTranslink($input);
-                    //return $this->response;
-                }
-
-                if (is_numeric($input) and strlen($input) == 5) {
-                    return $this->busTranslink($input);
-                    //return $this->response;
-                }
-
-                if (is_numeric($input) and strlen($input) == 6) {
-                    return $this->busTranslink($input);
-                    //return $this->response;
-                }
-            }
-
-            if (is_numeric($this->subject) and strlen($input) == 5) {
-                return $this->stopTranslink($input);
-                //return $this->response;
-            }
-
-            if (is_numeric($this->subject) and strlen($input) == 4) {
-                return $this->busTranslink($input);
-                //return $this->response;
-            }
-
-            //                        return "Request not understood";
-        }
-
-        foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
-                if (strpos(strtolower($piece), $command) !== false) {
-                    switch ($piece) {
-                        case "stop":
-                            if ($key + 1 > count($pieces)) {
-                                $this->stop = false;
-                                return "Request not understood";
-                            } else {
-                                $this->stop = $pieces[$key + 1];
-                                $this->response = $this->stopTranslink(
-                                    $this->stop
-                                );
-                                return $this->response;
-                            }
-                            break;
-
-                        case "bus":
-                            break;
-
-                        case "translink":
-                            $this->translinkInfo();
-                            return;
-
-                        case "info":
-                            $this->translinkInfo();
-                            return;
-
-                        case "information":
-                            $this->translinkInfo();
-                            return;
-
-                        case "help":
-                            $this->translinkHelp();
-                            return;
-
-                        case "syntax":
-                            $this->translinkSyntax();
-                            return;
-
-                        default:
-
-                    }
-                }
-            }
-        }
-        $this->nullAction();
-        return "Message not understood";
     }
 }

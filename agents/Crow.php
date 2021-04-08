@@ -948,23 +948,6 @@ class Crow extends Agent
 
         $haystack .= json_encode($posterior_thing);
 
-        // And we can do this...
-
-        //echo "the thing is:";
-        //print_r($this->thing);
-
-        // But that really depends on the security of the Channel.
-
-        // devstack use Uuid to extract Uuids.
-        // $match = "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12‌​}/";
-
-        // This is a loose screen on any alphanumeric sequence with UUID like hyphenation.
-
-        // Some other screens
-        //preg_match_all('/(\S{4,})/i', $haystack, $matches); // more than four letters long
-        //preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $haystack, $matches);
-        //preg_match_all('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12‌​}/', $haystack, $matches);
-
         // But use this one.
         preg_match_all('/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/', $haystack, $matches);
 

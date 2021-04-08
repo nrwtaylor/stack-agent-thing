@@ -202,14 +202,13 @@ class Call extends Agent
     // TODO: Test extraction of telephone numbers
     public function readCall($text = null)
     {
-        $service = "X";
+        $service_name = "X";
         $password = "X";
         $access_code = "X";
         $url = "X";
         $urls = [];
         $host_url = "X";
         $telephone_numbers = [];
-
         $urls = $this->extractUrls($text);
         $telephone_numbers = $this->extractTelephonenumbers($text);
 
@@ -225,7 +224,7 @@ class Call extends Agent
                 } // Take first matching service.
                 $this->thing->{$service . "_handler"}->{"read" .
                     ucwords($service)}($text);
-
+                $service_name = $service;
                 $password = $this->thing->{$service . "_handler"}->password;
                 $access_code =
                     $this->thing->{$service . "_handler"}->access_code;
@@ -244,7 +243,7 @@ class Call extends Agent
             $url = $this->urlWebinar($text);
         }
         $call = [
-            "service" => $service,
+            "service" => $service_name,
             "password" => $password,
             "access_code" => $access_code,
             "url" => $url,

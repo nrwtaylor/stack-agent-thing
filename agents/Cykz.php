@@ -9,7 +9,7 @@ class Cykz extends Agent
     {
     }
 
-    public function readCykz()
+    public function readCykz($text = null)
     {
         if ($this->agent_input == null) {
             $array = [

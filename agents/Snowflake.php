@@ -667,7 +667,6 @@ return;
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -1110,7 +1109,6 @@ return;
                 //                $n = 13;
             }
         }
-        //echo " p = " .$n
 
         // So we are supposed to use rule N for
         // finding the probability of melting
@@ -1325,7 +1323,6 @@ return;
         foreach (range(0, $this->max) as $a) {
             foreach (range(0, $a - 3) as $b) {
                 if (!($a - $b > $a)) {
-                    //echo $a-$b . " " .-$a . " " .$b . "---" . ( ($a-$b) > $a) . "<br>";
                     $this->point_list[] = [$a - $b, -$a, $b];
                 }
             }
@@ -1818,7 +1815,7 @@ return;
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= 'Caught exception: '. $e->getMessage() . ". ";
         }
 
         return $this->thing_report['pdf'];

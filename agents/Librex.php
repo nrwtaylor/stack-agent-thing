@@ -285,7 +285,6 @@ class Librex extends Word
         }
 */
         $file = $this->resource_path . $librex_name . ".txt";
-
         $this->librex_name = $librex_name;
 
         if ($contents == null) {

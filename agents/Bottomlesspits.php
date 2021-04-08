@@ -96,10 +96,6 @@ class Bottomlesspits extends Agent
 
         $this->number_agent = new Number($this->thing, "number");
         $this->number_agent->set();
-
-        //$this->thing->choice->Choose($this->state);
-
-        //$this->state = $this->thing->choice->load($this->primary_place);
     }
 
     public function get($crow_code = null)
@@ -118,7 +114,7 @@ class Bottomlesspits extends Agent
         }
 
         if ($this->time_string == false) {
-            $this->thing->json->setField("variables");
+            //            $this->thing->json->setField("variables");
             $this->time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 [$this->agent_name, "refreshed_at"],
@@ -128,7 +124,7 @@ class Bottomlesspits extends Agent
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->thing->json->setField("variables");
+        //        $this->thing->json->setField("variables");
         $this->bottomless_pit_name = $this->thing->json->readVariable([
             $this->agent_name,
             "name",
@@ -136,17 +132,7 @@ class Bottomlesspits extends Agent
 
         if ($this->bottomless_pit_name == false) {
             $this->bottomless_pit();
-            //$this->cave = random_int(1,20);
         }
-
-        //if( ($this->left_count == false) or ($this->left_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-        //if( ($this->right_count == false) or ($this->right_count = "")) {$this->left_count = 0;$this->right_count = 0;}
-
-        // For the Crow
-        //        $this->created_at = $this->thing->thing->created_at;
-
-        //    $this->cave_name = $this->thing->choice->load($this->primary_place);
-        //    $this->entity = new Entity ($this->thing, $this->primary_place);
     }
 
     function alphanumeric($input)
@@ -202,29 +188,12 @@ class Bottomlesspits extends Agent
 
     private function getCave($requested_nuuid = null)
     {
-        //if ($requested_nuuid == null) {$requested_nuuid = $this->entity->id;}
-
-        //$entity = new Entity($this->thing, "wumpus");
-        //$this->thing = $entity->thing;
-
-        //return;
-
-        //if ($requested_nuuid == null) {$requested_nuuid = $this->id;}
-
         $entity = new Entity($this->thing, $this->primary_place);
 
         $this->thing = $entity->thing;
 
-        //$this->cave_name = $this->thing->choice->load($this->primary_place);
-
         $this->uuid = $this->thing->uuid;
         $this->nuuid = $this->thing->nuuid;
-
-        // But not this ... use the provided input
-        //        $this->subject = $this->thing->subject;
-
-        //        $this->choices = $this->thing->choice->makeLinks($this->state);
-        //$this->choices = $this->thing->choice->makeLinks($this->cave_name);
     }
 
     private function getNumber()
@@ -272,9 +241,8 @@ class Bottomlesspits extends Agent
         $from = "bottomless pits";
 
         $this->makeChoices();
-        $this->makeMessage();
-        $this->makeSMS();
-        //$this->makeWeb();
+        //        $this->makeMessage();
+        //        $this->makeSMS();
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
@@ -284,7 +252,7 @@ class Bottomlesspits extends Agent
         $this->thing_report["help"] =
             'This is the "Bottomless Pits" Agent. It stumbles around Things.';
 
-        return;
+        //        return;
     }
 
     public function makeWeb()
@@ -310,39 +278,7 @@ class Bottomlesspits extends Agent
 
         $this->thing_report["web"] = $test_message;
     }
-    /*
-    public function makeChoices()
-    {
-        $this->choices_text = "Wumpus";
-        $this->bottomless_pit_name = $this->thing->choice->load($this->primary_place);
 
-        if ($this->bottomless_pit_name == false) {
-            // Hopefully the first run
-            $this->bottomless_pit_name = strval(random_int(1,20));
-        }
-//var_dump($this->bottomless_pit_name);
-//        $this->choices = $this->bottomless_pits[$this->bottomless_pit_name];
-//var_dump($this->choices);
-    //$choices_text = implode(" ",$choices['words']);
-//        $sms .= "AVAILABLE CHOICES ARE [ NORTH EAST SOUTH WEST ] ";
-
-      //  $sms .= "AVAILABLE CHOICES ARE [" . $choices_text."] ";
-
-
-        //$this->choices_text = $this->thing->choice->current_node; 
-        $this->choices_text = "";
-        if ($this->choices != null) {
-//var_dump($this->choices);
-            $this->choices_text = strtoupper(implode("  " ,$this->choices));
-        }
-
-
-        //$choices = $this->thing->choice->makeLinks();
-        //$this->choices = $choices;
-        $this->thing_report['choices'] = $this->choices ;
-    }
-
-*/
     public function makeChoices()
     {
         $this->state = "END";
@@ -400,28 +336,6 @@ class Bottomlesspits extends Agent
         $sms .= " | " . $this->response;
         $sms .= "| ";
         $sms .= "AVAILABLE CHOICES ARE [" . $this->choices_text . "] ";
-
-        //        $this->choices_text = $this->thing->choice->current_node;
-        //        if ($this->choices['words'] != null) {
-        //            $this->choices_text = strtoupper(implode(" / " ,$this->choices['words']));
-        //        }
-
-        //        $choices = $this->thing->choice->makeLinks("2");
-
-        //        $this->cave = $this->thing->choice->load('cave');
-        //$this->cave = "2";
-        //$this->thing->choice->Choose($this->state);
-        //$this->state = $this->thing->choice->load('hive');
-        //$choices = $this->thing->choice->makeLinks($this->state);
-        //$this->choices = $choices;
-        //$this->thing_report['choices'] = $choices ;
-        //        $this->thing->choice->Create('cave', $this->caves, $this->cave);
-        //        $this->thing->choice->Choose($this->cave);
-
-        //        $choices = $this->thing->choice->makeLinks($this->cave);
-
-        //$choices_text = implode(" ",$choices['words']);
-        //        $sms .= "AVAILABLE CHOICES ARE [ NORTH EAST SOUTH WEST ] ";
 
         $sms .= "AVAILABLE CHOICES ARE [ " . $this->choices_text . " ] ";
 
@@ -503,7 +417,6 @@ class Bottomlesspits extends Agent
 
                         case "start":
                             $this->start();
-                            //              $this->thing->choice->Choose($piece);
 
                             $this->response .= "Heard " . $this->state . ". ";
                             break;
@@ -511,9 +424,6 @@ class Bottomlesspits extends Agent
                 }
             }
         }
-
-        //        $this->makeChoices();
-        //	$this->thing->choice->Create($this->primary_place, $this->node_list, $this->state);
 
         return false;
     }
@@ -526,12 +436,6 @@ class Bottomlesspits extends Agent
     function bottomless_pit()
     {
         $this->getBottomlesspit();
-        //        $coordinate = new Coordinate($this->thing, "(0,0)");
-
-        //$pheromone['stack'] = 4;
-
-        //        $this->bottomless_pit_name = strval(random_int(1,20));
-        // And then check if it is one of the adjacent pits.
         $this->thing->flagRed();
     }
 }

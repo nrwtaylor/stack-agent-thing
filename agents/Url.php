@@ -317,6 +317,14 @@ class Url extends Agent
                 unset($urls[$i]);
                 continue;
             }
+
+            // 12.000kHz is not a URL
+            $tokens = explode(".", $url);
+            if ((count($tokens) === 2) and (is_numeric($tokens[0]))) {
+                unset($urls[$i]);
+                continue;
+            }
+
         }
 
         // Deal with spaces

@@ -172,7 +172,6 @@ if (count($this->routes) !=0) {
 
         $t = strtotime($input_time);
 
-        //echo $t->format("Y-m-d H:i:s");
         $this->hour = date("H", $t);
         $this->minute = date("i", $t);
 
@@ -353,9 +352,7 @@ if (count($this->routes) !=0) {
     public function readSubject()
     {
         $input = $this->input;
-//var_dump($input);
-//var_dump($this->agent_input);
-//var_dump($this->subject);
+
         // Bail at this point if only a headcode check is needed.
         if ($this->agent_input == "extract") {
             return;

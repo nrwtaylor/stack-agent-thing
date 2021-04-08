@@ -65,8 +65,6 @@ class Join extends Agent
         $this->response .= "Joined group " . $group . ". ";
     }
 
-    // -----------------------
-
     public function respondResponse()
     {
         // Thing actions
@@ -200,7 +198,6 @@ class Join extends Agent
             }
 
             if (is_numeric($this->subject) and strlen($input) == 5) {
-                //return $this->response;
             }
 
             if (is_numeric($this->subject) and strlen($input) == 4) {
@@ -216,11 +213,9 @@ class Join extends Agent
                     switch ($piece) {
                         case 'join':
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->group = false;
                                 return "Request not understood";
                             } else {
-                                //echo "next word is:";
                                 $this->group = $pieces[$key + 1];
                                 $this->joinGroup($this->group);
 
@@ -232,18 +227,13 @@ class Join extends Agent
                             $this->response .= 'Saw new. ';
                             $this->startGroup();
                             return;
-                        //echo 'bus';
-                        //break;
                         case 'start':
                             $this->response .= 'Start group. ';
                             $this->startGroup();
                             return;
-                        //echo 'bus';
-                        //break;
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }
@@ -270,7 +260,6 @@ class Join extends Agent
         //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
 
         $this->thing_report['png'] = $image;
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
         return $this->thing_report['png'];
     }
