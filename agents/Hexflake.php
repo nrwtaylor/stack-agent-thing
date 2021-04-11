@@ -1,13 +1,13 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Hexflake extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -16,16 +16,14 @@ class Hexflake extends Agent
         $this->node_list = ["hexflake" => ["hexflake", "uuid"]];
 
         $this->lattice_size = 10;
-
     }
 
     public function get()
     {
         $this->snowflake_agent = new Snowflake(
             $this->thing,
-            'snowflake hex wall'
+            "snowflake hex wall"
         );
-
 
         $this->getHexflake();
 
@@ -61,7 +59,7 @@ class Hexflake extends Agent
             "This is about hexagons. Alias HEX WALL SNOWFLAKE.";
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeChoices()
@@ -72,23 +70,23 @@ class Hexflake extends Agent
             "hexflake"
         );
 
-        $choices = $this->thing->choice->makeLinks('hexflake');
-        $this->thing_report['choices'] = $choices;
+        $choices = $this->thing->choice->makeLinks("hexflake");
+        $this->thing_report["choices"] = $choices;
     }
 
     function makePDF()
     {
-        $pdf = $this->snowflake_agent->thing_report['pdf'];
-        $this->thing_report['pdf'] = $pdf;
+        $pdf = $this->snowflake_agent->thing_report["pdf"];
+        $this->thing_report["pdf"] = $pdf;
     }
 
     function makeSMS()
     {
         $cell = $this->lattice[0][0][0];
-        $sms = "HEXFLAKE | cell (0,0,0) state " . strtoupper($cell['state']);
+        $sms = "HEXFLAKE | cell (0,0,0) state " . strtoupper($cell["state"]);
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeMessage()
@@ -104,11 +102,11 @@ class Hexflake extends Agent
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
             '/hexflake.png" alt="hexflake" height="92" width="92">';
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     function setHexflake()
@@ -136,7 +134,7 @@ class Hexflake extends Agent
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
 
         $this->node_list = ["web" => ["hexflake"]];
         // Make buttons
@@ -145,7 +143,7 @@ class Hexflake extends Agent
             $this->node_list,
             "web"
         );
-        $choices = $this->thing->choice->makeLinks('web');
+        $choices = $this->thing->choice->makeLinks("web");
 
         $head = '
 <td>
@@ -158,7 +156,9 @@ class Hexflake extends Agent
 
         $web = '<a href="' . $link . '">';
         $web .=
-            '<img src= "' . $this->web_prefix . 'thing/' .
+            '<img src= "' .
+            $this->web_prefix .
+            "thing/" .
             $this->uuid .
             '/hexflake.png">';
         $web .= "</a>";
@@ -168,20 +168,20 @@ class Hexflake extends Agent
 
         $web .= "<br><br>";
         $web .= $head;
-        $web .= $choices['button'];
+        $web .= $choices["button"];
         $web .= $foot;
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     function makeTXT()
     {
-        $txt = 'This is a HEXFLAKE';
+        $txt = "This is a HEXFLAKE";
         $txt .= "\n";
-        $txt .= count($this->lattice) . ' cells retrieved.';
+        $txt .= count($this->lattice) . " cells retrieved.";
 
         $txt .= "\n";
-        $txt .= str_pad("COORD (Q,R,S)", 15, ' ', STR_PAD_LEFT);
+        $txt .= str_pad("COORD (Q,R,S)", 15, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("NAME", 10, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("STATE", 10, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad("VALUE", 10, " ", STR_PAD_LEFT);
@@ -212,26 +212,26 @@ class Hexflake extends Agent
                             STR_PAD_LEFT
                         );
 
-                    $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
+                    $txt .= " " . str_pad($cell["name"], 10, " ", STR_PAD_LEFT);
                     $txt .=
-                        " " . str_pad($cell['state'], 10, " ", STR_PAD_LEFT);
+                        " " . str_pad($cell["state"], 10, " ", STR_PAD_LEFT);
                     $txt .=
-                        " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
+                        " " . str_pad($cell["value"], 10, " ", STR_PAD_RIGHT);
                     $txt .= "\n";
                 }
             }
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
     public function makePNG()
     {
-        $image = $this->snowflake_agent->thing_report['png'];
+        $image = $this->snowflake_agent->thing_report["png"];
 
         $this->PNG = $image;
-        $this->thing_report['png'] = $image;
+        $this->thing_report["png"] = $image;
     }
 
     function initLattice($n)
@@ -284,13 +284,13 @@ class Hexflake extends Agent
             $s > $this->lattice_size or
             $s < -$this->lattice_size
         ) {
-            $cell = ['name' => 'boundary', 'state' => 'off', 'value' => 0]; // red?
+            $cell = ["name" => "boundary", "state" => "off", "value" => 0]; // red?
         } else {
             if (isset($this->lattice[$q][$r][$s])) {
                 $cell = $this->lattice[$q][$r][$s];
             } else {
                 // Flag an error;
-                $cell = ['name' => "bork", 'state' => 'off', 'value' => true];
+                $cell = ["name" => "bork", "state" => "off", "value" => true];
             }
         }
 
@@ -322,7 +322,7 @@ class Hexflake extends Agent
                         $s + $s_offset
                     );
 
-                    if ($neighbour_cell['state'] == 'on') {
+                    if ($neighbour_cell["state"] == "on") {
                         $states[$i] = 1;
                     } else {
                         $states[$i] = 0;
@@ -345,7 +345,7 @@ class Hexflake extends Agent
         );
 
         if ($p_melt < $p_freeze) {
-            $cell['state'] = 'on';
+            $cell["state"] = "on";
         }
         // Then set lattice value
         $this->lattice[$q][$r][$s] = $cell;
@@ -353,8 +353,7 @@ class Hexflake extends Agent
 
     function readHexflake()
     {
-        $this->get();
-        return $this->state;
+        //$this->get();
     }
 
     public function readSubject()
