@@ -24,10 +24,65 @@ class Glossary extends Agent
             "This gives a list of the help text for each Agent.";
         $this->glossary_agents = [];
 
-        //$this->auto_glossary = "on";
-        $this->auto_glossary = $this->settingsAgent(["glossary", "auto"]);
-        if ($this->auto_glossary === null) {
-            $this->auto_glossary = "off";
+<<<<<<< HEAD
+        $this->auto_glossary = "on";
+    }
+
+    /**
+     *
+     */
+    function run()
+    {
+        $this->test_results = [];
+
+        $data_source = $this->resource_path . "glossary/glossary.txt";
+
+//        if (!file_exists($data_source)) {$this->response .= "No glossary found. "; return true;}
+
+        $file_flag = false;
+
+        $data = @file_get_contents($data_source);
+        $file_flag = true;
+        if ($data == false) {
+            // Start the glossary.
+            $this->doGlossary();
+
+            // Handle quietly.
+
+            //            $data_source = trim($this->link);
+
+            //            $data = file_get_contents($data_source);
+            //            if ($data === false) {
+            // Handle quietly.
+            //            }
+
+            //            $file = $this->resource_path . "vector/channels.txt";
+            //            try {
+
+            //                if ($file_flag == false) {
+            //                    file_put_contents($file, $data, FILE_APPEND | LOCK_EX);
+            //                }
+            //            } catch (Exception $e) {
+            //                // Handle quietly.
+            //            }
+        } else {
+            $this->data = $data;
+        }
+        $this->split_time = $this->thing->elapsed_runtime();
+        $this->time_budget = 5000;
+
+        while ($this->auto_glossary == "on") {
+            $this->glossary();
+            echo "time " .
+                ($this->thing->elapsed_runtime() - $this->split_time) .
+                "\n";
+
+            if (
+                $this->thing->elapsed_runtime() - $this->split_time >
+                $this->time_budget
+            ) {
+                break;
+            }
         }
         $this->auto_glossary = "on";
 
