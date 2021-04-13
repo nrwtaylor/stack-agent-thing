@@ -588,16 +588,17 @@ public function __set($name, $value) {
         return ${$agent_name};
     }
 
-    public function settingsAgent($settings_array)
+    public function settingsAgent($settings_array, $default_setting = null)
     {
         $t = $this->thing->container["api"];
         foreach ($settings_array as $setting) {
             if (!isset($t[$setting])) {
-                return null;
+                return $default_setting;
             }
 
             $t = $t[$setting];
         }
+var_dump($t);
         return $t;
     }
 

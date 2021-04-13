@@ -186,16 +186,47 @@ class Chart extends Agent
             return true;
         }
 
+        $x_min = $this->x_min;
+        $x_max = $this->x_max;
+        $y_min = $this->y_min;
+        $y_max = $this->y_max;
+
+        $y_spread = 1;
         if (!isset($this->y_spread)) {
-            $this->y_spread = $this->y_max - $this->y_min;
-        }
-        if (!isset($this->x_spread)) {
-            $this->x_spread = $this->x_max - $this->x_min;
+            if (is_numeric($y_min) and is_numeric($y_max)) {
+               $y_spread = $y_max - $y_min;
+            }
         }
 
-        if ($this->x_spread == 0) {
+        $x_spread = 1;
+        if (!isset($this->x_spread)) {
+            if (is_numeric($x_min) and is_numeric($x_max)) {
+               $x_spread = $x_max - $x_min;
+            }
+        }
+
+        if ($x_spread == 0) {
             return true;
         }
+switch (true) {
+case  ( is_numeric($x_min) and (in_array(strtoupper($x_max), ["X","Z"] ))):
+$x_max = $x_min + 1;
+break;
+
+case  ( (in_array(strtoupper($x_min), ["X","Z"] ) and is_numeric($x_max))):
+$x_min = $x_max -1;
+break;
+
+case  ( is_numeric($y_min) and (in_array(strtoupper($y_max), ["X","Z"] ))):
+$y_max = $y_min + 1;
+break;
+
+case  ( (in_array(strtoupper($y_min), ["X","Z"] ) and is_numeric($y_max))):
+$y_min = $y_max -1;
+break;
+
+
+}
 
         $this->chart_width = $this->width - 20;
         $this->chart_height = $this->height - 20;
@@ -212,14 +243,17 @@ class Chart extends Agent
         foreach ($this->points as $x => $y) {
             $common_variable = $y;
 
+            if (in_array(strtoupper($x), ['X','Z'])) {continue;}
+            if (in_array(strtoupper($y), ['X','Z'])) {continue;}
+
             $y =
                 10 +
                 $this->chart_height -
-                (($common_variable - $this->y_min) / $this->y_spread) *
+                (($common_variable - $y_min) / $y_spread) *
                     $this->chart_height;
             $x =
                 10 +
-                (($x - $this->x_min) / $this->x_spread) * $this->chart_width;
+                (($x - $x_min) / $x_spread) * $this->chart_width;
             if (is_nan($y)) {
                 return true;
             }
@@ -285,9 +319,11 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         $preferred_step = 10;
         $allowed_step_multiples = [1, 2, 5];
 
-        $range = $this->y_max - $this->y_min;
+        //$range = $this->y_max - $this->y_min;
+        $range = $y_spread;
 
-        $inc = ($this->y_max - $this->y_min) / 5;
+//        $inc = ($this->y_max - $this->y_min) / 5;
+        $inc = ($y_spread) / 5;
 
         $digits = $range !== 0 ? floor(log10($range) + 1) : 1;
 
@@ -299,7 +335,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             10 * pow(10, $digits),
         ];
 
-        $closest_distance = $this->y_max;
+        $closest_distance = $y_max;
 
         foreach ($allowed_steps as $key => $step) {
             $distance = abs($inc - $step);
@@ -309,7 +345,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             }
         }
 
-        $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
+        $this->drawGrid($y_min, $y_max, $preferred_step);
     }
 
     /**
@@ -406,6 +442,10 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         }
     }
 
+    public function yspreadChart() {
+
+    }
+
     /**
      *
      * @param unknown $y_min
@@ -414,7 +454,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
      */
     public function drawGrid($y_min, $y_max, $inc)
     {
-        $y = $this->roundUpToAny($y_min, $inc);
+        $y = $this->roundupNumber($y_min, $inc);
 
         $y_spread = $y_max - $y_min;
 
@@ -468,21 +508,6 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             ((0 - $y_min) / $y_spread) * $this->chart_height;
 
         imageline($this->image, 10, $plot_y, 300 - 10, $plot_y, $this->black);
-    }
-
-    /**
-     *
-     * @param unknown $n
-     * @param unknown $x (optional)
-     * @return unknown
-     */
-    function roundUpToAny($n, $x = null)
-    {
-        if ($x == null) {
-            $x = 5;
-        }
-
-        return round(($n + $x / 2) / $x) * $x;
     }
 
     /**

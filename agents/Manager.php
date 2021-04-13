@@ -27,27 +27,12 @@ class Manager extends Agent
 
     public function init()
     {
-        $host = "127.0.0.1";
-        $port = 4730;
-
-        if (!isset($host)) {
-            $this->host = $host;
-        }
-        if (!isset($port)) {
-            $this->port = $port;
-        }
+        $this->host = $this->settingsAgent(["gearman", "host"], $this->host);
+        $this->port = $this->settingsAgent(["gearman", "port"], $this->port);
 
         $this->test = "Development code";
 
         $this->node_list = ["nuuid" => ["nuuid"]];
-
-        $this->queue_engine_version = gearman_version();
-
-        $s = $this->getStatus();
-        $this->queued_jobs = $s["operations"]["call_agent"]["total"];
-        $this->workers_running = $s["operations"]["call_agent"]["running"];
-        $this->workers_connected =
-            $s["operations"]["call_agent"]["connectedWorkers"];
 
         $this->y_max_limit = null;
         $this->y_min_limit = null;
@@ -72,13 +57,14 @@ $this->response = "Gearman snowflake worker started.";
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
                 ["manager", "refreshed_at"],
                 $time_string
             );
         }
+
+        $this->getManager();
     }
 
     /**
@@ -87,6 +73,8 @@ $this->response = "Gearman snowflake worker started.";
     public function getStatus()
     {
         $status = null;
+
+        // Pick up and process errors below.
         $handle = fsockopen(
             $this->host,
             $this->port,
@@ -94,6 +82,13 @@ $this->response = "Gearman snowflake worker started.";
             $errorString,
             30
         );
+
+        if ($handle === false) {
+            $this->error .= $errorNumber . " " . $errorString . ". ";
+            $this->response .= "Could not connect to Gearman server. ";
+            return true;
+        }
+
         if ($handle != null) {
             fwrite($handle, "status\n");
             while (!feof($handle)) {
@@ -151,6 +146,21 @@ $this->response = "Gearman snowflake worker started.";
         $this->queue_engine_version = gearman_version();
 
         $s = $this->getStatus();
+
+        $this->queued_jobs = "X";
+        $this->workers_running = "X";
+        $this->workers_connected = "X";
+
+        if ($s == null) {
+            return;
+        }
+        if ($s === true) {
+            return;
+        }
+        if ($s === false) {
+            return;
+        }
+
         $this->queued_jobs = $s["operations"]["call_agent"]["total"];
         $this->workers_running = $s["operations"]["call_agent"]["running"];
         $this->workers_connected =
@@ -160,33 +170,6 @@ $this->response = "Gearman snowflake worker started.";
     public function set()
     {
         $this->current_time = $this->thing->time();
-
-        // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
-            "manager",
-            "refreshed_at",
-        ]);
-
-        if ($time_string == false) {
-            //            $this->thing->json->setField("variables");
-            $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
-                ["manager", "refreshed_at"],
-                $time_string
-            );
-        }
-
-        $this->refreshed_at = strtotime($time_string);
-
-        //        $this->thing->json->setField("variables");
-        //        $queue_time = $this->thing->json->readVariable( array("manager", "queued_jobs") );
-        //        $run_time = $this->thing->json->readVariable( array("manager", "workers_running") );
-
-        //        if ($this->queue_engine_version == false) {
-        $this->getManager();
-
-        $this->readSubject();
 
         $this->thing->json->writeVariable(
             ["manager", "queued_jobs"],
@@ -200,7 +183,6 @@ $this->response = "Gearman snowflake worker started.";
             ["manager", "workers_connected"],
             $this->workers_connected
         );
-        //        }
     }
 
     function run()
@@ -375,24 +357,24 @@ $this->response = "Gearman snowflake worker started.";
 
     function makeSMS()
     {
-        //        $this->getQueuetime();
-        //        $rtime = $this->thing->elapsed_runtime() - $this->start_time;
-
         $this->node_list = ["manager" => ["managergraph"]];
 
-        $this->sms_message = "MANAGER";
-        $this->sms_message .=
-            " | queued jobs " . number_format($this->queued_jobs) . "";
-        $this->sms_message .=
-            " | workers running " . number_format($this->workers_running) . "";
-        $this->sms_message .=
-            " | workers connected " .
-            number_format($this->workers_connected) .
+        $sms = "MANAGER";
+        $sms .=
+            " | queued jobs " . $this->formatNumber($this->queued_jobs) . "";
+        $sms .=
+            " | workers running " .
+            $this->formatNumber($this->workers_running) .
             "";
-        $this->sms_message .=
-            " | queue version " . $this->queue_engine_version . "";
+        $sms .=
+            " | workers connected " .
+            $this->formatNumber($this->workers_connected) .
+            "";
+        $sms .= " | queue version " . $this->queue_engine_version . "";
+        $sms .= " ";
+        $sms .= $this->response;
 
-        $this->sms_message .= " | TEXT LATENCY";
+        $this->sms_message = $sms;
         $this->thing_report["sms"] = $this->sms_message;
     }
 
@@ -419,8 +401,6 @@ $this->response = "Gearman snowflake worker started.";
 
     public function makeWeb()
     {
-        //$this->getData();
-        //        $this->drawGraph();
         $link = $this->web_prefix . "thing/" . $this->uuid . "/manager";
 
         $head = '

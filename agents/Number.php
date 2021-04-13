@@ -317,6 +317,40 @@ class Number extends Agent
         return $num_digits;
     }
 
+    function roundupNumber($n, $x = null)
+    {
+        // X - Specify
+        // Y - Available
+
+        // Rounding up X or Y gives 1.
+
+        if (in_array(strtoupper($n), ['X','Z'])) {return 1;}
+
+        if ($x == null) { 
+            $x = 5;
+        }
+
+        return round(($n + $x / 2) / $x) * $x;
+    }
+
+    public function formatNumber($text) {
+
+       $number = $text;
+
+       if ((strtoupper($number) == "X") or (strtoupper($number) == "Z")) {
+
+          return strtoupper($number);
+
+       }
+
+       if (is_string($number)) {$number = floatval($number);}
+
+       $number = number_format($text);
+
+       return $number;
+
+    }
+
     /**
      *
      * @return unknown
