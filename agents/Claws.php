@@ -249,8 +249,51 @@ dev - Detect duplicates.
         $this->sms_message = $sms;
     }
 
+    public function emacsorgtextClaws() {
+
+        $count = 0;
+        $text = "";
+        foreach ($this->claws_items as $i => $claws_item) {
+            // Build suitable emacs org time for schedule
+
+            // Refactor to Time
+            $dateline = $this->timestampDateline($claws_item["dateline"]);
+            $date_text = substr($dateline, 0, 10);
+            $day_text = ucwords(strtolower($claws_item["dateline"]["day"]));
+            $time_text = substr($dateline, 11, 5);
+            $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
+
+            $call = $claws_item["call"];
+
+            $text .= "**" . " " . $claws_item["subject"] . "\n";
+            $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
+            $text .= "   " . $call["url"] . "\n";
+            $text .=
+                "   " . "password " . $call["password"] . " / access code " . $call["access_code"] . "\n";
+            $text .= "\n";
+
+            $count += 1;
+        }
+return $text;
+
+    }
+
     public function makeTXT()
     {
+        if (
+            isset($this->claws_emacsorg_flag) and
+            $this->claws_emacsorg_flag == "on"
+        ) {
+
+$txt = $this->emacsorgtextClaws();
+
+
+        $this->thing_report["txt"] = $txt;
+        $this->txt = $txt;
+return;
+
+        }
+
         $txt = "CLAWS\n";
         foreach ($this->claws_items as $i => $claws_item) {
             $text_claws = $this->textCall($claws_item["call"]);

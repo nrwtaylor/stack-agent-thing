@@ -140,7 +140,7 @@ class Number extends Agent
     /**
      *
      */
-    public function makeChart()
+    public function deprecate_makeChart()
     {
         if (!isset($this->numbers_history)) {
             $this->historyNumber();
@@ -244,6 +244,9 @@ class Number extends Agent
      */
     public function makeImage()
     {
+        if ((!isset($this->chart_agent)) or (!is_resource($this->chart_agent))) {
+return true;
+        } 
         $this->image = $this->chart_agent->image;
     }
 
@@ -790,10 +793,10 @@ return $spread;
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/number';
 
         $this->node_list = ["number" => ["number"]];
-
+$web = "";
         $embedded = true;
         if (!$embedded) {
-            $web = '<a href="' . $link . '">';
+            $web .= '<a href="' . $link . '">';
             $web .=
                 '<img src= "' .
                 $this->web_prefix .
@@ -802,9 +805,13 @@ return $spread;
                 '/number.png">';
             $web .= "</a>";
         } else {
-            $web = '<a href="' . $link . '">';
+
+if (isset($this->image_embedded)) {
+            $web .= '<a href="' . $link . '">';
             $web .= $this->image_embedded;
             $web .= "</a>";
+}
+
         }
         $web .= "<br>";
 
@@ -857,6 +864,8 @@ return $spread;
                 $this->web_return_max .
                 " extracted numbers are:<br>";
         }
+
+if (isset($this->numbers_history)) {
         $i = 0;
         foreach ($this->numbers_history as $key => $number) {
             $i += 1;
@@ -876,7 +885,7 @@ return $spread;
 
             $web .= "<br>";
         }
-
+}
         if ($this->recognize_french == true) {
             //if (count($this->numbers) == $this->test_count) {
             //https://french.kwiziq.com/revision/grammar/how-to-write-decimal-numbers-in-french
