@@ -1011,10 +1011,11 @@ $this->flag_set_uuid = true;
 
     public function console($text = null)
     {
-        //$this->c_output = "off";
-        //if (isset($this->container['stack']['console_output'])) {
-        //        $this->console_output = $this->container['stack']['console_output'];
-        //}
+        if (!isset($this->console_output_used_flag)) {
+
+            $this->console_output_used_flag = 'on';
+            echo "Thing console started. Turn off in private/settings.\n";
+        }
 
         if (!isset($this->console_output)) {
             return;

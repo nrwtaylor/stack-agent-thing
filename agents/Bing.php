@@ -27,7 +27,6 @@ class Bing extends Agent
 
     public function run()
     {
-        //   $this->getApi();
     }
 
     function set()
@@ -37,8 +36,6 @@ class Bing extends Agent
             "refreshed_at",
             $this->current_time
         );
-
-        return;
     }
 
     function get()
@@ -51,11 +48,6 @@ class Bing extends Agent
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable(
             "refreshed_at"
-        );
-
-        $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->counter . ".",
-            "DEBUG"
         );
 
         $this->counter = $this->counter + 1;
@@ -72,19 +64,7 @@ class Bing extends Agent
             $keywords = $this->search_words;
         }
 
-        //        $keywords = str_replace(" ", "%20%", $keywords);
         $keywords = urlencode($keywords);
-
-        /*
-$options = array(
-  'http'=>array(
-    'method'=>"GET",
-    'header'=>"Accept-language: application/json\r\n" .
-              "Ocp-Apim-Subscription-Key: " . $this->api_key . "\r\n" .  // check function.stream-context-create on php.net
-              "" // i.e. An iPad 
-  )
-);
-*/
 
         $options = [
             'http' => [
@@ -164,7 +144,7 @@ foreach ($definitions as $id=>$definition) {
     public function makeWeb()
     {
         $html = "<b>BING</b>";
-        $html .= "<p><b>Bing Defintitions</b>";
+        $html .= "<p><b>Bing Definitions</b>";
 
         if (!isset($this->events)) {
             $html .= "<br>No definitions found on Bing.";
@@ -186,7 +166,6 @@ foreach ($definitions as $id=>$definition) {
     public function makeSMS()
     {
         $sms = "BING";
- 
 
         if ((isset($this->search_words)) and ($this->search_words != null)) {
             $sms .= " " . strtoupper($this->search_words);
@@ -254,39 +233,22 @@ if (isset($this->definitions_count)) {
 
     public function readSubject()
     {
-        $this->num_hits = 0;
-
-        $keywords = $this->keywords;
-
-        if ($this->agent_input != null) {
-            // If agent input has been provided then
-            // ignore the subject.
-            // Might need to review this.
-            $input = strtolower($this->agent_input);
-        } else {
-            $input = strtolower($this->subject);
-        }
-
         $this->input = $input;
 
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
-
-        //$prior_uuid = null;
-
+        $input = $this->input;
         $pieces = explode(" ", strtolower($input));
 
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'bing') {
-                //$this->search_words = null;
                 $this->response .= "Nothing to asked Bing about. ";
                 return;
             }
         }
 
         foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
+            foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
                         default:
@@ -299,12 +261,9 @@ if (isset($this->definitions_count)) {
 
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            //$this->response .= "Asked Bing about the word " . $this->search_words . ". ";
             $this->getApi();
             return false;
         }
 
-        $this->response .= "Message not understood. ";
-        return true;
     }
 }
