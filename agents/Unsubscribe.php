@@ -7,69 +7,10 @@ error_reporting(-1);
 
 class Unsubscribe extends Agent
 {
-    public function init() {
-
-//        $this->thing = $thing;
-  //      $this->agent_name = "unsubscribe";
-    //    $this->agent_prefix = 'Agent "' . ucwords($this->agent_name) . '" ';
-
-      //  $this->thing_report["thing"] = $this->thing->thing;
-
-        // So I could call
- //       if ($this->thing->container["stack"]["state"] == "dev") {
-   //         $this->test = true;
-     //   }
-        // I think.
-        // Instead.
-
-   //     $this->uuid = $thing->uuid;
-     //   $this->to = $thing->to;
-       // $this->from = $thing->from;
-   //     $this->subject = $thing->subject;
-        //$this->sqlresponse = null;
-
+    public function init()
+    {
         $this->node_list = ["unsubscribe" => ["opt-in", "start"]];
-
-//        $this->variables_agent = new Variables(
-  ///          $this->thing,
-     //       "variables unsubscribe " . $this->from
-       // );
-//        $this->current_time = $this->thing->json->time();
-
         $this->verbosity = 1;
-
-        // Get some stuff from the stack which will be helpful.
-  //      $this->web_prefix = $thing->container["stack"]["web_prefix"];
-    //    $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
-      //  $this->word = $thing->container["stack"]["word"];
-        //$this->email = $thing->container["stack"]["email"];
-
-  //      $this->get();
-    //    $this->readSubject();
-
-      //  $this->set();
-        //$this->respond();
-
-        //$this->thing_report = $thing_report;
-
-   //     $this->thing->flagGreen();
-
-        //		echo '<pre> Agent "Optin" completed</pre>';
-/*
-     //   $this->thing->log(
-            $this->agent_prefix .
-                "ran for " .
-                number_format($this->thing->elapsed_runtime()) .
-                "ms."
-        );
-
-        $this->thing_report["etime"] = number_format(
-            $this->thing->elapsed_runtime()
-        );
-        $this->thing_report["log"] = $this->thing->log;
-
-        return;
-*/
     }
 
     function set()
@@ -79,10 +20,6 @@ class Unsubscribe extends Agent
             "refreshed_at",
             $this->current_time
         );
-
-        //        $this->thing->choice->save('usermanager', $this->state);
-
-        return;
     }
 
     function get()
@@ -193,8 +130,6 @@ class Unsubscribe extends Agent
 
         // Get the current user-state.
 
-        //        $this->makeSMS();
-        //        $this->makeEmail();
         $this->makeChoices();
 
         $this->thing_report["message"] = $this->sms_message;
@@ -237,7 +172,7 @@ class Unsubscribe extends Agent
         // Call the Usermanager agent and update the state
         $agent = new Usermanager($this->thing, "usermanager unsubscribe");
         $this->thing->log(
-                "called the Usermanager to update user state to unsubscribe."
+            "called the Usermanager to update user state to unsubscribe."
         );
     }
 }

@@ -333,6 +333,33 @@ class Number extends Agent
         return round(($n + $x / 2) / $x) * $x;
     }
 
+    public function spreadNumbers($min, $max, $default_spread = null) {
+
+         $spread = $default_x_spread;
+        if ($spread == null) {
+            if (is_numeric($min) and is_numeric($max)) {
+               $spread = $max - $min;
+            }
+        }
+
+switch (true) {
+case  ( is_numeric($min) and (in_array(strtoupper($max), ["X","Z"] ))):
+$spread = $default_spread;
+break;
+
+case  ( (in_array(strtoupper($min), ["X","Z"] ) and is_numeric($max))):
+$spread = $default_spread;
+break;
+default:
+$spread = $max - $min;
+
+
+}
+
+return $spread;
+
+    }
+
     public function formatNumber($text) {
 
        $number = $text;

@@ -14,6 +14,13 @@ Provide text interface for weather station list,
 traffic report by keyword
 and weather by station name.
 
+Tests
+drivebc weather north courtenay
+drivebc weather 64091
+drivebc vancouver
+drivebc highway 99
+drivebc highway 1
+
 */
 
 class Drivebc extends Agent
@@ -28,7 +35,7 @@ class Drivebc extends Agent
         $this->keywords = ["drive", "drivebc", "traffic", "weather"];
 
         $this->thing_report["help"] =
-            "This provides Province of British Columbia provincial road network information.";
+            "This provides Province of British Columbia provincial road network information. Try DRIVEBC WEATHER DRAGON LAKE. Or DRIVEBC WEATHER STATION.";
     }
 
     function run()
@@ -47,14 +54,29 @@ class Drivebc extends Agent
         $this->filtered_events = [];
         foreach ($this->events as $i => $event) {
             $haystack = implode(" ",$this->flattenArr($event));
-            if (stripos($haystack, $this->search_words) !== false) {
+
+            // Find Highway 1... not Highway 15. And 13.
+            if (stripos($haystack, $this->search_words. " ") !== false) {
                 $this->filtered_events[] = $event;
+                continue;
             }
+
+          if (stripos($haystack, $this->search_words . ",") !== false) {
+                $this->filtered_events[] = $event;
+                continue;
+            }
+
+          if (stripos($haystack, $this->search_words . " ") !== false) {
+                $this->filtered_events[] = $event;
+                continue;
+            }
+
+
         }
 
         $this->filtered_weather = [];
         foreach ($this->stations as $i => $station) {
-            $haystack = $station["name"] . " " . $station["event"];
+            $haystack = $station["name"] . " " . $station["event"] . " " . $station['id'];
             if (stripos($haystack, $this->search_words) !== false) {
                 $this->filtered_weather[] = $station;
             }

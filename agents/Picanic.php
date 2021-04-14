@@ -593,7 +593,6 @@ class Picanic extends Agent
             $alt_text = $this->thing_report['alt_text'];
         }
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .

@@ -349,9 +349,6 @@ return $text;
             // False. Is not a word.
             //$nearest_word = $word_agent->isWord($token);
 
-            //echo $token ." " . $nearest_word . "<br>";
-            //if ($nearest_word == false) {continue;}
-
             if (strpos($tag["tag"], 'VB') !== false) {
                 $text .= $tag["token"] . " ";
                 continue;
@@ -442,15 +439,6 @@ return $text;
 
         $tags = $this->thing->brilltagger_agent->tag($text);
 
-        /*
-foreach($tags as $i=>$token_tag) {
-
-$tag= $token_tag['tag'];
-$token = $token_tag['token'];
-echo $token . "  " . $tag  . "<br>";
-
-}
-*/
 
         // --- now it gets tricky.
         // https://cs.uwaterloo.ca/~jimmylin/downloads/brill-javadoc/edu/mit/csail/brill/BrillTagger.html

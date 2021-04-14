@@ -598,7 +598,6 @@ public function __set($name, $value) {
 
             $t = $t[$setting];
         }
-var_dump($t);
         return $t;
     }
 
