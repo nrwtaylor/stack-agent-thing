@@ -154,27 +154,9 @@ dev - Detect duplicates.
         // Build entry for emacs org mode
         // and append to appropriate emacs buffer
 
-        $count = 0;
-        $text = "";
+        //$text = "";
         foreach ($this->claws_items as $i => $claws_item) {
-            // Build suitable emacs org time for schedule
-
-            // Refactor to Time
-            $dateline = $this->timestampDateline($claws_item["dateline"]);
-            $date_text = substr($dateline, 0, 10);
-            $day_text = ucwords(strtolower($claws_item["dateline"]["day"]));
-            $time_text = substr($dateline, 11, 5);
-            $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
-
-            $call = $claws_item["call"];
-
-            $text .= "**" . " " . $claws_item["subject"] . "\n";
-            $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
-            $text .= "   " . $call["url"] . "\n";
-            $text .=
-                "   " . $call["password"] . " / " . $call["access_code"] . "\n";
-            $text .= "\n";
-
+            $text = $this->textEmacs($claws_item);
             $this->updateEmacs($text);
             $count += 1;
         }
@@ -249,33 +231,15 @@ dev - Detect duplicates.
         $this->sms_message = $sms;
     }
 
-    public function emacsorgtextClaws() {
-
+    public function emacsorgtextClaws()
+    {
         $count = 0;
         $text = "";
         foreach ($this->claws_items as $i => $claws_item) {
-            // Build suitable emacs org time for schedule
-
-            // Refactor to Time
-            $dateline = $this->timestampDateline($claws_item["dateline"]);
-            $date_text = substr($dateline, 0, 10);
-            $day_text = ucwords(strtolower($claws_item["dateline"]["day"]));
-            $time_text = substr($dateline, 11, 5);
-            $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
-
-            $call = $claws_item["call"];
-
-            $text .= "**" . " " . $claws_item["subject"] . "\n";
-            $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
-            $text .= "   " . $call["url"] . "\n";
-            $text .=
-                "   " . "password " . $call["password"] . " / access code " . $call["access_code"] . "\n";
-            $text .= "\n";
-
+            $text .= $this->textEmacs($claws_item);
             $count += 1;
         }
-return $text;
-
+        return $text;
     }
 
     public function makeTXT()
@@ -284,14 +248,11 @@ return $text;
             isset($this->claws_emacsorg_flag) and
             $this->claws_emacsorg_flag == "on"
         ) {
+            $txt = $this->emacsorgtextClaws();
 
-$txt = $this->emacsorgtextClaws();
-
-
-        $this->thing_report["txt"] = $txt;
-        $this->txt = $txt;
-return;
-
+            $this->thing_report["txt"] = $txt;
+            $this->txt = $txt;
+            return;
         }
 
         $txt = "CLAWS\n";
@@ -547,7 +508,7 @@ return;
                 "dateline" => $dateline,
             ];
         }
-        // get an MH reader to clean up the format
+        // get an MH reader to clean up the format - done
         // See what we get from Call.
         //$call_agent = new Call($this->thing, "call");
 

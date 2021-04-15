@@ -60,6 +60,32 @@ class Emacs extends Agent
         file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
     }
 
+    public function textEmacs($event) {
+
+            $text = "";
+            $dateline = $this->timestampDateline($event["dateline"]);
+            $date_text = substr($dateline, 0, 10);
+            $day_text = ucwords(strtolower($event["dateline"]["day"]));
+            $time_text = substr($dateline, 11, 5);
+            $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
+
+            $text .= "**" . " " . $event["subject"] . "\n";
+
+            $call = $event["call"];
+
+            $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
+            $text .= "   " . $call["url"] . "\n";
+            $text .=
+                "   " . "password " . $call["password"] . " ";
+            $text .= ($call['access_code'] ? "/ access code " . $call["access_code"] : null); 
+            $text .= "\n";
+
+            $text .= "   " . "stack " . $call["service"];
+            $text .= "\n";
+            return $text;
+
+    }
+
     public function readSubject()
     {
         $input = $this->input;
