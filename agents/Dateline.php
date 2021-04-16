@@ -223,7 +223,6 @@ class Dateline extends Agent
             return false;
         }
         $t = $this->thing->at_agent->extractAt($paragraph);
-
         $flag = false;
         $date = [];
 
@@ -235,7 +234,6 @@ class Dateline extends Agent
             }
             $date[$component] = $this->{$component};
         }
-
         if ($flag === false) {
             // No components seen
             return false;

@@ -92,7 +92,13 @@ class MH extends Agent
         if ($text == null) {
             return;
         }
-        $text = quoted_printable_decode($text);
+
+        // quoted_printable_decode removes the last ?=
+        // which causes problems when reading a UTF8 encoded subject
+
+        $text = iconv("UTF-8", "ASCII//TRANSLIT//IGNORE", $text);
+        //        $text = quoted_printable_decode($text);
+
         return $text;
 
         // Test and dev.
@@ -123,7 +129,6 @@ class MH extends Agent
         if ($text == null) {
             return;
         }
-
         $this->email = $this->readEmail($text);
         $this->subject = $this->subjectMH($text);
         $this->meta = $this->metaMH($text);

@@ -13,8 +13,6 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-//use Ramsey\Uuid\Uuid;
-//use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use \PDO;
 
 class Mysql extends Agent
@@ -58,6 +56,12 @@ class Mysql extends Agent
         // Code here should allow either.
         $this->initMysql();
     }
+
+    public function make() {}
+
+    public function respond() {}
+
+    public function read() {}
 
     public function initMysql($uuid = null, $nom_from = null)
     {
@@ -450,7 +454,7 @@ class Mysql extends Agent
      */
     //function Get()
 
-    function thingMysql()
+    function getMysql()
     {
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
@@ -480,37 +484,11 @@ class Mysql extends Agent
             $thing = false;
         }
 
-        if ($thing === false) {
-            $t = $this->getMemory($this->uuid);
-            if ($t !== false) {
-                $thing = new Thing(null);
-                $thing->created_at = null;
-                $thing->nom_to = null;
-                $thing->nom_from = null;
-                $thing->task = "empty task";
-                $thing->variables = json_encode($t, true);
-                $thing->settings = null;
-            }
-        }
-
-        $sth = null;
-
-        $thingreport = [
-            "thing" => $thing,
-            "info" =>
-                "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
-                $this->web_prefix .
-                "api/thing/<32 characters>.",
-            "help" => "Check your junk/spam folder.",
-        ];
-
-        //   $this->test();
-
-        return $thingreport;
+        return $thing;
     }
 
     // Plan to deprecate getMemcached terminology.
-    public function getMemory($text = null)
+    public function deprecate_getMemory($text = null)
     {
         //        if (isset($this->memory)) {
         //            return;
@@ -546,7 +524,7 @@ class Mysql extends Agent
      *
      * @return unknown
      */
-    function Forget()
+    function forgetMysql()
     {
         $sth = $this->container->db->prepare(
             "DELETE FROM stack WHERE uuid=:uuid"

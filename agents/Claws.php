@@ -155,6 +155,7 @@ dev - Detect duplicates.
         // and append to appropriate emacs buffer
 
         //$text = "";
+        $count = 0;
         foreach ($this->claws_items as $i => $claws_item) {
             $text = $this->textEmacs($claws_item);
             $this->updateEmacs($text);
@@ -472,24 +473,28 @@ dev - Detect duplicates.
                 // dev
                 $datelines = $this->datelinesCall($event->start_at);
                 $dateline = $datelines[0];
-
                 $dateline["line"] = $event->summary;
                 $call = $this->readCall($event->description);
             } else {
                 $subject = $this->subjectMH($contents);
+
                 $body = $this->bodyMH($contents);
                 $call = $this->readCall($body);
 
                 // Try to figure out date from body text.
+
+// This does poorly with large chunks of text.
+/*
                 $dateline = $this->extractAt($body);
                 $subject_at_score = 0;
-                //                if ($dateline != null) {
                 $subject_at_score = $this->scoreAt($dateline, "meeting");
-                //                }
+*/
+
                 // TODO - Check if the subject has a well qualified date time.
                 // dev start with a simple score of missing information.
                 // dev assess whether date time is "adequate"
-                if ($subject_at_score <= 4) {
+
+//                if ($subject_at_score <= 4) {
                     // Otherwise ... see if there is a better date time in the combined contents.
                     $datelines = $this->datelinesCall($subject . "\n" . $body);
 
@@ -500,7 +505,7 @@ dev - Detect duplicates.
                     if (isset($datelines[0])) {
                         $dateline = $datelines[0];
                     }
-                }
+//                }
             }
             $this->claws_items[] = [
                 "subject" => $subject,

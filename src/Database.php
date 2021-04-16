@@ -166,7 +166,10 @@ class Database
         $this->split_time = microtime(true);
 
         $r = "";
-
+//if (!isset($this->mysql_handler)) {
+//$this->mysql_handler =  new Mysql(null,null);
+//}
+//echo "merp";
         return $r;
     }
 
@@ -500,6 +503,8 @@ class Database
         // Chance of collision super-super-small.
 
         // So just return the contents of thing.  false if it doesn't exist.
+//$mysql_handler =  new Mysql(null,null);
+//$thing = $mysql_handler->getMysql();
 
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
