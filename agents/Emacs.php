@@ -81,6 +81,12 @@ class Emacs extends Agent
             $text .= "\n";
 
             $text .= "   " . "stack " . $call["service"];
+
+            $meta = $event["meta"];
+            $text .= "\n";
+            $text .= "   " . "meta " . $meta["date"];
+
+
             $text .= "\n";
             return $text;
 

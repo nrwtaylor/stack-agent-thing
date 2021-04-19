@@ -161,6 +161,24 @@ class Email
         return;
     }
 
+    public function metaEmail($text)
+    {
+        // Pull the message in again.
+        $parser = new MailMimeParser();
+
+        // parse() returns a Message
+        $message = $parser->parse($text);
+
+        $subject = $message->getHeaderValue("Subject");
+        $sent = $message->getHeaderValue("Sent");
+        $received = $message->getHeaderValue("Received");
+        $date = $message->getHeaderValue("Date");
+
+        $meta = ["subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
+
+        return $meta;
+    }
+
     public function attachmentsEmail($text)
     {
         // Pull the message in again.

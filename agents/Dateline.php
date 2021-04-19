@@ -242,7 +242,6 @@ class Dateline extends Agent
         $dateline = $this->textDateline($date);
         $date['line'] = $paragraph;
         $date['dateline'] = $dateline;
-
         return $date;
     }
 

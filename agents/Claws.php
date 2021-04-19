@@ -446,6 +446,9 @@ dev - Detect duplicates.
             // Tested on Webex.
             // Needs further service development.
             // Prioritize Zoom dev test.
+
+            $meta = $this->metaEmail($contents);
+
             $parts = $this->attachmentsEmail($contents);
 
             $events = [];
@@ -511,6 +514,7 @@ dev - Detect duplicates.
                 "subject" => $subject,
                 "call" => $call,
                 "dateline" => $dateline,
+                "meta" => $meta,
             ];
         }
         // get an MH reader to clean up the format - done
