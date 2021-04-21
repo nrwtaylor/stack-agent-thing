@@ -333,7 +333,6 @@ class At extends Agent
         $this->year = false;
 
         $year = $this->extractYear($input);
-
         $year_text = "X";
         if ($year !== false) {
             $year_text = $year["year"]; // Discard era information.

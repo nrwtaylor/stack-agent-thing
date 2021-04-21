@@ -23,7 +23,6 @@ class Claws extends Agent
 
     function run()
     {
-
         $this->doClaws();
     }
 
@@ -357,6 +356,19 @@ dev - Detect duplicates.
                 continue;
             }
 
+            // Ignore code (ie css);
+            if ($this->isCode($paragraph) === true) {
+                continue;
+            }
+            if ($this->isStreet($paragraph) === true) {
+                continue;
+            }
+
+            // Check for things like #00363a
+            if ($this->isColour($paragraph) === true) {
+                continue;
+            }
+
             $count += 1;
 
             $containsDigit = preg_match("/\d/", $paragraph);
@@ -449,13 +461,12 @@ dev - Detect duplicates.
             // Needs further service development.
             // Prioritize Zoom dev test.
 
-//            $isEmail = $this->isEmail($contents);
+            //            $isEmail = $this->isEmail($contents);
 
-//if ($isEmail === true) {
+            //if ($isEmail === true) {
             $meta = $this->metaEmail($contents);
 
             $parts = $this->attachmentsEmail($contents);
-
 
             $events = [];
 
@@ -472,9 +483,7 @@ dev - Detect duplicates.
             }
             $calendar_events_count = count($events);
 
-
             if ($calendar_events_count == 1) {
-
                 // Found exactly one calendar event.
                 $timezone = $event->calendar_timezone;
 
@@ -489,9 +498,7 @@ dev - Detect duplicates.
                 $dateline["line"] = $event->summary;
 
                 $call = $this->readCall($event->description);
-
             } else {
-
                 $subject = $this->subjectMH($contents);
 
                 $body = $this->bodyMH($contents);
@@ -499,8 +506,8 @@ dev - Detect duplicates.
 
                 // Try to figure out date from body text.
 
-// This does poorly with large chunks of text.
-/*
+                // This does poorly with large chunks of text.
+                /*
                 $dateline = $this->extractAt($body);
                 $subject_at_score = 0;
                 $subject_at_score = $this->scoreAt($dateline, "meeting");
@@ -510,20 +517,19 @@ dev - Detect duplicates.
                 // dev start with a simple score of missing information.
                 // dev assess whether date time is "adequate"
 
-//                if ($subject_at_score <= 4) {
-                    // Otherwise ... see if there is a better date time in the combined contents.
-                    $datelines = $this->datelinesCall($subject . "\n" . $body);
+                //                if ($subject_at_score <= 4) {
+                // Otherwise ... see if there is a better date time in the combined contents.
+                $datelines = $this->datelinesCall($subject . "\n" . $body);
 
-                    // dev
-                    // TODO Assess datelines for validity.
+                // dev
+                // TODO Assess datelines for validity.
 
-                    // Pick best dateline.
-                    if (isset($datelines[0])) {
-                        $dateline = $datelines[0];
-                    }
-//                }
+                // Pick best dateline.
+                if (isset($datelines[0])) {
+                    $dateline = $datelines[0];
+                }
+                //                }
             }
-
 
             $this->claws_items[] = [
                 "subject" => $subject,
@@ -531,8 +537,7 @@ dev - Detect duplicates.
                 "dateline" => $dateline,
                 "meta" => $meta,
             ];
-//}
-
+            //}
         }
         // get an MH reader to clean up the format - done
         // See what we get from Call.

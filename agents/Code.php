@@ -145,6 +145,16 @@ class Code extends Agent
         $this->thing_report["choices"] = $choices;
     }
 
+    public function isCode($text) {
+
+       $brackets_open_count = substr_count($text,"{");
+       $brackets_close_count = substr_count($text,"}");
+
+       if ($brackets_open_count + $brackets_close_count >= 4) {return true;}
+       return false;
+
+    }
+
     public function makePDF()
     {
         $this->thing->report["pdf"] = false;

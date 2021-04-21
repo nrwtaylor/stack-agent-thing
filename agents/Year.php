@@ -737,13 +737,40 @@ class Year extends Agent
         $year = $this->parsed_date["year"];
 
         if ($year !== false) {
-            return $year;
+            // Test if parsed_date has extracted a year from a larger number.
+            $stripped_text = str_replace($year, "", $text);
+            if (mb_strlen($stripped_text) == 0) {
+                return $year;
+            }
+
+            // Look for the year in the format 2021/06/05 or 2021-06-05.
+
+            $variants = [];
+            $variants[] = " " . $year . "-";
+            $variants[] = " " . $year . "/";
+            foreach ($variants as $variant) {
+                if (stripos($text, $variant) !== false) {
+                    return $year;
+                }
+            }
+
+            $variants = [];
+            $variants[] = "" . $year . "-";
+            $variants[] = "" . $year . "/";
+            foreach ($variants as $variant) {
+                if (substr($text, 0, mb_strlen($variant)) == $variant) {
+                    return $year;
+                }
+            }
+
+            //            return $year;
         }
 
         // Any number less than 9999 could be a year.
         if (is_integer($text) and $text < 9999) {
             return $text;
         }
+
         // https://blog.esllibrary.com/2015/11/05/abbreviations-bc-ad-bce-ce/
         // BC, BCE, CE come after the year
         // AD comes before the year (but recognize common practice)
@@ -766,8 +793,27 @@ class Year extends Agent
             if (stripos($text, $year_indicator) !== false) {
                 //$number = $this->number_agent->extractNumber($text);
                 $number = $this->extractNumber($text);
+                if ($number == null) {
+                    continue;
+                }
 
-                return $number;
+                // Test against a few ways these might appear.
+                $variants = [];
+                $variants[] = $year_indicator . " " . $number;
+                $variants[] = $year_indicator . "" . $number;
+                $variants[] = $number . " " . $year_indicator;
+                $variants[] = $number . "" . $year_indicator;
+                $variants[] = $number . "(" . $year_indicator . ")";
+                $variants[] = $number . "[" . $year_indicator . "]";
+
+                foreach ($variants as $variant) {
+                    if (stripos($text, $variant) !== false) {
+                        return $number;
+                    }
+                }
+
+                //var_dump($number);
+                //                return $number;
             }
         }
 
@@ -884,6 +930,7 @@ class Year extends Agent
                 $years[] = $year;
             }
         }
+
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-values-from-a-multi-dimensional-array-in-php
         $serialized = array_map("serialize", $years);

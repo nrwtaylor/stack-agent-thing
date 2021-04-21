@@ -145,7 +145,6 @@ class Dateline extends Agent
         }
 
         $text = $dateline['line'];
-
         if (ctype_space($text) === true) {
             return false;
         }

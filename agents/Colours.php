@@ -129,4 +129,21 @@ class Colours extends Agent
         ];
     }
 
+    public function extractColours($text) {
+
+        $pattern =
+            '/\#[A-Za-z0-9]{6}/i';
+
+
+        preg_match_all($pattern, $text, $match);
+        if (!isset($colours)) {
+            $colours = [];
+        }
+
+        $colours = array_merge($colours, $match[0]);
+        $colours = array_unique($colours);
+
+        return $colours;
+    }
+
 }

@@ -215,7 +215,6 @@ class Call extends Agent
 
         $services = ["zoom", "webex", "gotomeeting", "mailchimp"];
         foreach ($this->recognized_services as $i => $service) {
-$this->thing->console("completed call to isWebex()");
             $is_service_flag = $this->{"is" . ucwords($service)}($text);
             $count = 0;
             if ($is_service_flag) {
