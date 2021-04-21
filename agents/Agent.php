@@ -75,6 +75,8 @@ class Agent
             //            $quiet_thing = new Quiet($this->thing,"quiet on");
         }
 
+        //$is_email = $this->isEmail($input);
+
         // Get some stuff from the stack which will be helpful.
 
         // dev test

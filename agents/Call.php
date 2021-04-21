@@ -202,6 +202,7 @@ class Call extends Agent
     // TODO: Test extraction of telephone numbers
     public function readCall($text = null)
     {
+
         $service_name = "X";
         $password = "X";
         $access_code = "X";
@@ -214,9 +215,11 @@ class Call extends Agent
 
         $services = ["zoom", "webex", "gotomeeting", "mailchimp"];
         foreach ($this->recognized_services as $i => $service) {
+$this->thing->console("completed call to isWebex()");
             $is_service_flag = $this->{"is" . ucwords($service)}($text);
             $count = 0;
             if ($is_service_flag) {
+
                 // True service matches
                 $count += 1;
                 if ($count > 1) {
@@ -237,6 +240,7 @@ class Call extends Agent
                     $this->thing->{$service . "_handler"}->telephone_numbers;
             }
         }
+
         // No URL? Try a general search for a
         // paragraph with join a webinar and a url in it.
         if (($url === false) or ($url == "X")) {

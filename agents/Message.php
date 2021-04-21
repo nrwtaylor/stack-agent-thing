@@ -408,31 +408,12 @@ class Message extends Agent
      */
     public function respondMessage()
     {
-        //        $this->thing_report['info'] = 'No info available.';
-
-//        if ($this->thing->isSilent()) {
-//            return;
-//        }
-
         $this->uuidMessage();
-/*
-        if ($this->isOpen() == "off") {
-            $this->thing->log(
-                $this->agent_prefix . ' messaging is off.',
-                "WARNING"
-            );
-            $this->thing_report['info'] =
-                'Agent "Message" says user messaging is OFF.';
 
-            //            return; Do not implement until usermanager is defaulting to start
-        }
-*/
         if (isset($this->do_not_send) and $this->do_not_send == true) {
             $this->thing->log($this->agent_prefix . ' do not send.', "WARNING");
             $this->thing_report['info'] = 'Agent "Message" says do not send.';
             return;
-
-            //            return; Do not implement until usermanager is defaulting to start
         }
 
         // Thing actions

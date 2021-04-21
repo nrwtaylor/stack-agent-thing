@@ -161,6 +161,21 @@ class Email
         return;
     }
 
+    public function isEmail($text) {
+       $meta = $this->metaEmail($text);
+$is_email = true;
+if (!isset($meta['from'])) {
+$is_email = false;
+}
+
+if (!isset($meta['subject'])) {
+$is_email = false;
+}
+
+
+       return $is_email;
+    }
+
     public function metaEmail($text)
     {
         // Pull the message in again.
@@ -169,12 +184,14 @@ class Email
         // parse() returns a Message
         $message = $parser->parse($text);
 
+        $from = $message->getHeaderValue("From");
+
         $subject = $message->getHeaderValue("Subject");
         $sent = $message->getHeaderValue("Sent");
         $received = $message->getHeaderValue("Received");
         $date = $message->getHeaderValue("Date");
 
-        $meta = ["subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
+        $meta = ["from"=>$from, "subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
 
         return $meta;
     }

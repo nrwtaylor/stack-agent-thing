@@ -130,12 +130,14 @@ class Webex extends Agent
         //           $text = file_get_contents($file);
         //       }
         $this->access_code = $this->accesscodeWebex($text);
+
         $this->password = $this->passwordWebex($text);
 
         $this->url = $this->urlWebex($text);
         $this->host_url = $this->hosturlWebex($text);
 
         $this->telephone_numbers = $this->telephonenumberWebex($text);
+        //$this->thing->console("initWebex completed");
     }
 
     public function run()
@@ -384,12 +386,13 @@ class Webex extends Agent
     {
         $input = strtolower($this->subject);
         $this->readWebex($input);
-
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
             if ($input == "webex") {
+$this->thing->console("call getWebex");
                 $this->getWebex();
+$this->thing->console("called getWebex");
                 return;
             }
         }

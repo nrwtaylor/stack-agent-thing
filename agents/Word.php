@@ -16,7 +16,6 @@ class Word extends Agent
      */
     function init()
     {
-
         $this->resource_path_words =
             $this->resource_path . "words/";
 
@@ -39,7 +38,6 @@ class Word extends Agent
     }
 
     public function initWords() {
-
        $this->thing->log("init words start.");
        if ($this->getMemory('words-words') !== true) {
            $this->thing->log("load words words.");
@@ -52,8 +50,6 @@ class Word extends Agent
            $this->loadDictionary('offensive/bad-words');
            $this->setMemory('words-offensive',true); 
        }
-
-
        if ($this->getMemory('words-eowl') !== true) {
         $this->thing->log("load words/eowl.");
         foreach (range("A", "Z") as $v) {
@@ -722,7 +718,6 @@ class Word extends Agent
 
         $keywords = ["word", "random"];
         $pieces = explode(" ", strtolower($input));
-
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -762,7 +757,6 @@ class Word extends Agent
                 }
             }
         }
-
         $words = $input;
         $this->search_words = $words;
         $this->extractWords($words);

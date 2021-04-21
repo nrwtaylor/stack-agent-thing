@@ -69,11 +69,26 @@ class Emacs extends Agent
             $time_text = substr($dateline, 11, 5);
             $timestamp_text = $date_text . " " . $day_text . " " . $time_text;
 
-            $text .= "**" . " " . $event["subject"] . "\n";
+if (stripos($timestamp_text, "x") !== false) {
 
+            $text .= "**" . " " . "TODO - ". $event["subject"] . "\n";
+
+
+} else {
+            $text .= "**" . " " . $event["subject"] . "\n";
+}
             $call = $event["call"];
 
+if (stripos($timestamp_text, "x") !== false) {
+
+            $text .= "   " . "SCHEDULED: " . $timestamp_text . "\n";
+} else {
+
             $text .= "   " . "SCHEDULED: <" . $timestamp_text . ">\n";
+
+
+}
+
             $text .= "   " . $call["url"] . "\n";
             $text .=
                 "   " . "password " . $call["password"] . " ";
@@ -86,7 +101,13 @@ class Emacs extends Agent
             $text .= "\n";
             $text .= "   " . "meta " . $meta["date"];
 
+if (stripos($timestamp_text, "x") !== false) {
+$text .= "\n";
+$text .= "extracted date from\n";
+$text .= $event['dateline']['line'];
+$text .= "\n";
 
+}
             $text .= "\n";
             return $text;
 

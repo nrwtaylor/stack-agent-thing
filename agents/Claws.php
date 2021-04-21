@@ -23,6 +23,7 @@ class Claws extends Agent
 
     function run()
     {
+
         $this->doClaws();
     }
 
@@ -438,6 +439,7 @@ dev - Detect duplicates.
             }
 
             $contents = $this->loadClaws($filename);
+
             // Pass contents through MH routine to remove trailing =
             //$subject = $this->subjectMH($contents);
             //$body = $this->bodyMH($contents);
@@ -447,9 +449,13 @@ dev - Detect duplicates.
             // Needs further service development.
             // Prioritize Zoom dev test.
 
+//            $isEmail = $this->isEmail($contents);
+
+//if ($isEmail === true) {
             $meta = $this->metaEmail($contents);
 
             $parts = $this->attachmentsEmail($contents);
+
 
             $events = [];
 
@@ -466,7 +472,9 @@ dev - Detect duplicates.
             }
             $calendar_events_count = count($events);
 
+
             if ($calendar_events_count == 1) {
+
                 // Found exactly one calendar event.
                 $timezone = $event->calendar_timezone;
 
@@ -474,11 +482,16 @@ dev - Detect duplicates.
 
                 // TODO - Consider datelineCall.
                 // dev
+
                 $datelines = $this->datelinesCall($event->start_at);
+
                 $dateline = $datelines[0];
                 $dateline["line"] = $event->summary;
+
                 $call = $this->readCall($event->description);
+
             } else {
+
                 $subject = $this->subjectMH($contents);
 
                 $body = $this->bodyMH($contents);
@@ -510,12 +523,16 @@ dev - Detect duplicates.
                     }
 //                }
             }
+
+
             $this->claws_items[] = [
                 "subject" => $subject,
                 "call" => $call,
                 "dateline" => $dateline,
                 "meta" => $meta,
             ];
+//}
+
         }
         // get an MH reader to clean up the format - done
         // See what we get from Call.
