@@ -29,8 +29,11 @@ class Database
      * @param unknown $nom_from
      * @return unknown
      */
-    function __construct($uuid, $nom_from)
+    function __construct($thing = null, $agent_input)
     {
+        $uuid = $agent_input['uuid'];
+        $nom_from = $agent_input['from'];
+
         $start_time = microtime(true);
         $this->start_time = $start_time;
         $this->split_time = $start_time;

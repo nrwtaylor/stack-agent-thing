@@ -1027,7 +1027,7 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                 // OK - Done all we can.
                 // So now need to create a Thing.
 
-                $web_thing->db = new Database($web_thing->uuid, "null");
+                $web_thing->db = new Database(null, ['uuid'=>$web_thing->uuid, 'from'=>"null"]);
 
                 try {
                     $agent_namespace_name =

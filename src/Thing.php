@@ -245,7 +245,7 @@ class Thing
 
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
-            $this->db = new Database($this->uuid, 'null' . $this->mail_postfix);
+            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->log("Thing made a db connector.");
 
@@ -361,7 +361,7 @@ class Thing
                 $this->uuid . " found and removed an @ sign";
         }
 
-        $this->db = new Database($this->uuid, $from);
+        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
         $this->log("Create. Database connector made.");
 
         // All records are associated with a posterior record.  Ideally
