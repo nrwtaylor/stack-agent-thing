@@ -205,7 +205,6 @@ class Thing
             // Variable overflow is challenging. See VARIABLES.
 
             // Can't call db here, can only call it when $from is known.
-            // $this->db = new Database($this->uuid, $this->from);
 
             $this->json = new Json($this->uuid);
 
@@ -822,53 +821,12 @@ if (isset($this->db)) {
             // This just makes sure these four variables
             // are consistently available
             // as top level Thing objects.
-            //$this->uuid = $this->thing->uuid;
             $this->to = $thing->nom_to;
             $this->from = $thing->nom_from;
-
-            // One of these looks promising.
-
-            //$thingreport = $this->db->setUser($this->from);
-            //$thingreport = $this->db->from = $this->from;
-
             $this->subject = $thing->task;
         }
 
         $this->thing = $thing;
-/*
-if ((isset($this->db)) and (!isset($this->prior_uuid))) {
-        $hash_nom_from = hash($this->hash_algorithm, $this->from);
-$this->prior_uuid = $this->db->getMemory($hash_nom_from);
-}
-
-
-if ((isset($this->db)) and (!isset($this->flag_set_uuid))) {
-        $hash_nom_from = hash($this->hash_algorithm, $this->from);
-
-$prior_uuid = $this->db->setMemory($hash_nom_from, $this->uuid);
-$log_text = "wrote key:value " . $hash_nom_from . " " . $this->uuid;
-//echo $log_text . "\n";
-$this->log($log_text);
-$this->flag_set_uuid = true;
-}
-*/
-
-        // Once the Thing has been pulled we can update the db connector
-        // to use the current from.
-
-        //		$this->db->setFrom($this->from);
-
-        //$this->db = new Database($this->uuid, $this->from);
-
-        //$thingreport = $this->db->setUser($this->from);
-
-        // Uncommenting any of the above options results in non-working uuids
-
-        // Commented out to allow PNG to work
-
-        // Keep for debugging.  Working as of 5 April 2017.  And passing all tests
-        // 25 Apr, except Test 4: Test posterior association.
-        // echo '<pre>  db.php Get()'; print_r($this->thing); echo '</pre>';
 
         return $thing;
     }
@@ -885,9 +843,6 @@ $this->flag_set_uuid = true;
 
     function getState($agent = null)
     {
-        // This can probably be deprecated after updating usermanager
-        //echo "agent provided";$agent;
-
         if ($agent == null) {
             $agent = 'thing';
         }

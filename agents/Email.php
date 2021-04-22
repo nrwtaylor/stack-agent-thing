@@ -649,9 +649,6 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
 
         $user_state = $email_thing->getState("usermanager");
 
-        //  $db = new Database($this->uuid, $this->from);
-        //  $db->setUser($this->from);
-
         if ($donotsend) {
             return true;
         }
