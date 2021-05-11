@@ -73,7 +73,7 @@ class Meta extends Agent
                 $thing = $this->thing;
             }
         }
-
+/*
         if (!isset($thing->to)) {
             $this->to = null;
         } else {
@@ -88,6 +88,45 @@ class Meta extends Agent
             $this->subject = null;
         } else {
             $this->subject = $thing->subject;
+        }
+*/
+
+        // Non-nominal
+        $this->uuid = $thing->uuid;
+
+        if (isset($thing->to)) {
+            $this->to = $thing->to;
+        }
+
+        // Potentially nominal
+        if (isset($thing->subject)) {
+            $this->subject = $thing->subject;
+        }
+
+        // Treat as nomina
+        if (isset($thing->from)) {
+            $this->from = $thing->from;
+        }
+        // Treat as nomina
+        if (isset($thing->created_at)) {
+            $this->created_at = $thing->created_at;
+        }
+
+        if (isset($this->thing->thing->created_at)) {
+            $this->created_at = strtotime($this->thing->thing->created_at);
+        }
+        if (!isset($this->to)) {
+            $this->to = "null";
+        }
+        if (!isset($this->from)) {
+            $this->from = "null";
+        }
+        if (!isset($this->subject)) {
+            $this->subject = "null";
+        }
+        //if (!isset($this->created_at)) {$this->created_at = date('Y-m-d H:i:s');}
+        if (!isset($this->created_at)) {
+            $this->created_at = time();
         }
 
         $data_gram = [
@@ -283,8 +322,6 @@ class Meta extends Agent
 
         $this->extractMeta();
         $status = true;
-
-        return $status;
     }
 
     function contextWord()

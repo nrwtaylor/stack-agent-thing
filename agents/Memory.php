@@ -29,7 +29,6 @@ class Memory extends Agent
         }
     }
 
-    // Plan to deprecate getMemcached terminology.
     public function getMemory($text = null)
     {
         // Null?
@@ -58,7 +57,6 @@ class Memory extends Agent
         return $memory;
     }
 
-    // Plan to deprecate getMemcached terminology.
     public function setMemory($text = null, $variable = null)
     {
         if (!isset($this->memory)) {
@@ -127,6 +125,5 @@ class Memory extends Agent
 
     public function readSubject()
     {
-        return false;
     }
 }

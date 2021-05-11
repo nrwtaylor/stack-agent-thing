@@ -103,8 +103,8 @@ if (stripos($timestamp_text, "x") !== false) {
 
 if (stripos($timestamp_text, "x") !== false) {
 $text .= "\n";
-$text .= "extracted date from\n";
-$text .= $event['dateline']['line'];
+$text .= "   " ."extracted date from\n";
+$text .= "   " .$event['dateline']['line'];
 $text .= "\n";
 
 }

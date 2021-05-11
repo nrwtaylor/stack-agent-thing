@@ -126,11 +126,10 @@ class Timezone extends Agent
                     stripos($text, $descriptor) !== false or
                     stripos(str_replace(" ", "_", $text), $descriptor) !== false
                 ) {
-                    $matches[] = $descriptor;
+                    $matches[] = $timezone_id;
                 }
             }
         }
-
         $matches = array_unique($matches);
         $match = false;
         if (isset($matches) and count($matches) == 1) {

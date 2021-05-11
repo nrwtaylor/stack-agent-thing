@@ -67,7 +67,9 @@ class Agent
         if ($this->thing->container["stack"]["engine_state"] == "dev") {
             $this->dev = true;
         }
-        $this->getMeta();
+
+        $this->metaAgent();
+
         $this->thing->log("Got meta.");
         // Tell the thing to be quiet
         if ($this->agent_input != null) {
@@ -1076,7 +1078,7 @@ return $agent_trace;;
     }
 
     // Plan to deprecate getMemcached terminology.
-    public function getMemory($text = null)
+    public function deprecate_getMemory($text = null)
     {
         // Null?
         // $this->mem_cached = null;
@@ -1105,7 +1107,7 @@ return $agent_trace;;
     }
 
     // Plan to deprecate getMemcached terminology.
-    public function setMemory($text = null, $variable = null)
+    public function deprecate_setMemory($text = null, $variable = null)
     {
         if (!isset($this->memory)) {
             try {
@@ -1196,8 +1198,11 @@ return $agent_trace;;
      *
      * @param unknown $thing (optional)
      */
-    public function getMeta($thing = null)
+    public function metaAgent($thing = null)
     {
+        // TODO move meta code to Meta agent.
+        //if (!isset($this->meta_handler)) {$this->meta_handler = new Meta($this->thing, "meta");}
+
         if ($thing == null) {
             $thing = $this->thing;
         }
