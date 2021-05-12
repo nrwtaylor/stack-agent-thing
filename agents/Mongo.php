@@ -1,132 +1,145 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-class Memory extends Agent
+// https://www.php.net/manual/en/mongodb.tutorial.library.php
+
+class Mongo extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
+        $path =
+            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
+
+        $client = new \MongoDB\Client($path);
+
+        $db = $client->test;
+        $this->collection = $client->stack_db->things;
+
+        $uuid = "5282cdc9-8252-4bd6-9d03-e1e0c0cec926";
+
+        $thing = [
+            "uuid" => $this->uuid,
+            "subject" => $this->subject,
+            "from" => $this->from,
+            "to" => $this->to,
+            "settings" => null,
+            "variables" => null,
+        ];
+
+        $result = $this->collection->insertOne($thing);
+
+        $this->response .= "Inserted with Object ID '{$result->getInsertedId()}'. ";
+
+        $value = $this->getMongo($uuid);
+
+        $this->response .= "Got value for key " . $uuid . ". ";
+
+        $condition = ["_id" => $uuid];
+
+        // Dev review how this works.
+
+        $this->setMongo($uuid, [$thing]);
+
+        $result = $this->setMongo(null, [$thing]);
+
+        $result = $this->findMongo(["subject" => "mongo"]);
+
+        $this->response .= "Found " . count($result) . " things. ";
+
+
+        foreach ($result as $entry) {
+//            echo $entry["_id"], ": ", $entry["subject"], "\n";
+        }
+
+        // For testing
+        $this->forgetMongo('609b5994088b47714d648172');
+
+
     }
 
     function run()
     {
-        $this->doMemory();
     }
 
-    public function doMemory()
+    public function doMongo()
     {
-        if ($this->agent_input == null) {
-            $array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
-            $k = array_rand($array);
-            $v = $array[$k];
+    }
 
-            $response = "MEMORY | " . strtolower($v) . ".";
+    // use memcache model for get.
+    public function getMongo($text = null)
+    {
+        $result = $this->collection->findOne(["_id" => $text]);
+        return iterator_to_array($result);
+    }
 
-            $this->memory_message = $response; // mewsage?
-        } else {
-            $this->memory_message = $this->agent_input;
+    // use memcache model for set.
+    public function setMongo($key = null, $variable = null)
+    {
+        if ($key == null) {$key = $this->thing->getUUid();}
+
+        $condition = ["_id" => $key];
+        $value = $variable[0];
+
+        $result = $this->collection->updateOne($condition, [
+            '$set' => $value,
+        ]);
+        return $key;
+    }
+
+    // Delete by key.
+    public function forgetMongo($key = null)
+    {
+        if ($key == null) {return true;}
+
+        $condition = ["_id" => $key];
+
+        $result = $this->collection->deleteOne($condition);
+        $count = $result->getDeletedCount();
+        return $result;
+    }
+
+    public function findMongo($arr)
+    {
+        // example
+        // [ '_id' => $uuid ]
+        $result = $this->collection->find($arr);
+
+        $arr = [];
+        foreach ($result as $entry) {
+            $key_id = (string)$entry['_id'];
+            $arr[$key_id] = iterator_to_array($entry);
         }
+        return $arr;
     }
-
-    // Plan to deprecate getMemcached terminology.
-    public function getMemory($text = null)
-    {
-        // Null?
-        // $this->mem_cached = null;
-        // Fail to stack php memory code if Memcached is not availble.
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->get($text);
-        return $memory;
-    }
-
-    // Plan to deprecate getMemcached terminology.
-    public function setMemory($text = null, $variable = null)
-    {
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->set($text, $variable);
-        return $memory;
-    }
-
-
-    function getNegativetime()
-    {
-        $agent = new Negativetime($this->thing, "memory");
-        $this->negative_time = $agent->negative_time; //negative time is asking
-    }
-
-    // -----------------------
 
     public function respondResponse()
     {
         $this->thing->flagGreen();
 
         $this->thing_report["info"] =
-            "This is a memory keeping an eye on how late this Thing is.";
-        $this->thing_report["help"] = "This is about being inscrutable.";
+            "This is an agent to manage Mongo database calls.";
+        $this->thing_report["help"] = "Not yet user facing.";
 
-        //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
-
-        return $this->thing_report;
+        $thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeSMS()
     {
-        $this->node_list = array("memory" => array("memory"));
-        $this->sms_message = "" . $this->memory_message;
-        $this->thing_report['sms'] = $this->sms_message;
-    }
+        $this->node_list = ["mongo" => ["mongo"]];
 
-    function makeChoices()
-    {
-        $this->thing->choice->Create('channel', $this->node_list, "memory");
-        $choices = $this->thing->choice->makeLinks('memory');
-        $this->thing_report['choices'] = $choices;
+        $sms = "MONGO | " . $this->response; 
+
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function readSubject()
     {
-        return false;
     }
 }
