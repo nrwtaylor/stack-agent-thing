@@ -35,7 +35,7 @@ class Database
     function __construct($thing = null, $agent_input)
     {
 //$agent_input = $this->agent_input;  
-      $uuid = $agent_input['uuid'];
+        $uuid = $agent_input['uuid'];
         $nom_from = $agent_input['from'];
 
         $start_time = microtime(true);
@@ -67,7 +67,6 @@ class Database
         // Code here should allow either.
 
         if ($nom_from == null and $uuid == null) {
-return;
             throw new \Exception('No
 			$nom_from and $uuid provided to Class Db.');
         }
@@ -122,7 +121,7 @@ return;
                     ->write("AGENT | Maintenance.");
             };
         };
-
+/*
         $c["db"] = function ($c) {
             $db = $c["settings"]["db"];
 
@@ -136,15 +135,8 @@ return;
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             return $pdo;
-            /*
-        } catch (\Throwable $t) {
-            //throw new \Exception('Database not available.');
-        } catch (\Exception $e) {
-            //throw new \Exception('Database not available.');
-        }
-*/
         };
-
+*/
         $c["stack"] = function ($c) {
             $db = $c["settings"]["stack"];
             return $db;
@@ -173,6 +165,34 @@ return;
 
         $this->split_time = microtime(true);
 
+// No memory available.
+if ($thing === false) {return;}
+
+        $c["db"] = function ($c) {
+            $db = $c["settings"]["db"];
+
+            //try {
+
+            $pdo = new PDO(
+                "mysql:host=" . $db["host"] . ";dbname=" . $db["dbname"],
+                $db["user"],
+                $db["pass"]
+            );
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            return $pdo;
+            /*
+        } catch (\Throwable $t) {
+            //throw new \Exception('Database not available.');
+        } catch (\Exception $e) {
+            //throw new \Exception('Database not available.');
+        }
+*/
+        };
+
+
+
+
         $r = "";
 //if (!isset($this->mysql_handler)) {
 //$this->mysql_handler =  new Mysql(null,null);
@@ -189,8 +209,8 @@ return;
 //$this->mysql = new Mysql(new Thing(false), null);
 //}
 
-
         return $r;
+
     }
 
     /**
