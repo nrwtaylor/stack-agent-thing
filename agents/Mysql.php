@@ -54,14 +54,14 @@ class Mysql extends Agent
 
         // The problem is when they are both null.
         // Code here should allow either.
+
         $this->initMysql();
+
     }
 
-    public function make() {}
-
-    public function respond() {}
-
-    public function read() {}
+    public function test() {
+       $thingreport = $this->priorGet();
+    }
 
     public function initMysql($uuid = null, $nom_from = null)
     {
@@ -82,6 +82,7 @@ class Mysql extends Agent
 			Class Db.');
         }
         if ($uuid == null) {
+return;
             throw new \Exception('No $uuid provided to
 			Class Db.');
         }
@@ -184,6 +185,23 @@ class Mysql extends Agent
     function set()
     {
     }
+
+    public function respondResponse()
+    {
+        $this->thing->flagGreen();
+
+        $this->thing_report["info"] =
+            "This is an agent to manage Mongo database calls.";
+        $this->thing_report["help"] = "Not yet user facing.";
+
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $thing_report["info"] = $message_thing->thing_report["info"];
+    }
+
+
     function readSubject()
     {
     }
@@ -192,22 +210,13 @@ class Mysql extends Agent
     {
     }
 
-    function makeSMS()
+    public function makeSMS()
     {
         $sms = "MYSQL";
         $this->sms_message = $sms;
         $this->thing_response["sms"] = $sms;
     }
-    /**
-     *
-     */
-/*
-    function __destruct()
-    {
-        // Log database transactions in test
-        $this->test("Database destruct ");
-    }
-*/
+
     /**
      *
      * @param unknown $created_at (optional)
@@ -487,49 +496,19 @@ class Mysql extends Agent
         return $thing;
     }
 
-    // Plan to deprecate getMemcached terminology.
-    public function deprecate_getMemory($text = null)
-    {
-        //        if (isset($this->memory)) {
-        //            return;
-        //        }
-
-        // Null?
-        // $this->mem_cached = null;
-        // Fail to stack php memory code if Memcached is not availble.
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->get($text);
-        return $memory;
-    }
-
     /**
      *
      * @return unknown
      */
-    function forgetMysql()
+    function forgetMysql($uuid = null)
     {
+
+        if ($uuid == null) {$uuid = $this->uuid;}
+
         $sth = $this->container->db->prepare(
             "DELETE FROM stack WHERE uuid=:uuid"
         );
-        $sth->bindParam("uuid", $this->uuid);
+        $sth->bindParam("uuid", $uuid);
         $sth->execute();
 
         $sth = null;

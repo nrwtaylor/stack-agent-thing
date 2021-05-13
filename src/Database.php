@@ -17,7 +17,9 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use \PDO;
 use Nrwtaylor\StackAgentThing\Mysql;
+use Nrwtaylor\StackAgentThing\Mongo;
 use Nrwtaylor\StackAgentThing\Agent;
+use Nrwtaylor\StackAgentThing\Thing;
 
 class Database
 {
@@ -65,16 +67,17 @@ class Database
         // Code here should allow either.
 
         if ($nom_from == null and $uuid == null) {
-            throw new Exception('No
+return;
+            throw new \Exception('No
 			$nom_from and $uuid provided to Class Db.');
         }
 
         if ($nom_from == null) {
-            throw new Exception('No $nom_from provided to
+            throw new \Exception('No $nom_from provided to
 			Class Db.');
         }
         if ($uuid == null) {
-            throw new Exception('No $uuid provided to
+            throw new \Exception('No $uuid provided to
 			Class Db.');
         }
 
@@ -175,6 +178,18 @@ class Database
 //$this->mysql_handler =  new Mysql(null,null);
 //}
 //echo "merp";
+
+//if (!isset($this->mongo)) {
+//echo "mongo";
+//$this->mongo = new Mongo(new Thing(false), null);
+//}
+
+//if (!isset($this->mysql)) {
+//echo "mysql";
+//$this->mysql = new Mysql(new Thing(false), null);
+//}
+
+
         return $r;
     }
 

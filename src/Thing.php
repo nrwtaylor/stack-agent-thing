@@ -142,7 +142,6 @@ class Thing
 
 
         //set_error_handler(array($this, "exception_error_handler"));
-
         try {
             $this->getThing($uuid);
         } catch (\Exception $e) {
@@ -245,8 +244,8 @@ class Thing
 
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
-            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
+            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
             $this->log("Thing made a db connector.");
 
             // Provide handler for Json translation from/to MySQL.
@@ -361,7 +360,9 @@ class Thing
                 $this->uuid . " found and removed an @ sign";
         }
 
+if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
+}
         $this->log("Create. Database connector made.");
 
         // All records are associated with a posterior record.  Ideally

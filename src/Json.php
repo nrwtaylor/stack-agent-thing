@@ -52,8 +52,9 @@ class Json
 
         // This will be creating multiple (unnecessay?) db calls.
         // But needed otherwise readField on null line 422
+if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
-
+}
         $this->array_data = array();
         $this->json_data = '{}';
 

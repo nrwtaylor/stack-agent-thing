@@ -89,8 +89,11 @@ class Variables
         $this->limit = 1e99;
 
         // Setup reporting
+if (!isset($this->thing->thing)) {
+$this->thing_report["thing"] = false;
+} else {
         $this->thing_report["thing"] = $this->thing->thing;
-
+}
         if ($agent_command == null) {
             $this->thing->log(
                     "did not find an agent command. No action taken.",

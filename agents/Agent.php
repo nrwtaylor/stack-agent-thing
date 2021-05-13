@@ -24,6 +24,11 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
+//        if ($thing == null) {
+//           $this->thing = false;
+//           return;
+//        }
+
 
         if ($thing == null) {
             $thing = new Thing(null);

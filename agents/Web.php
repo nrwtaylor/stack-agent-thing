@@ -202,6 +202,8 @@ class Web extends Agent
             $this->variables->setVariable("refreshed_at", $this->current_time);
         }
 
+if (!isset($this->thing->json)) {return;}
+
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(
             ["web", "received_at"],
