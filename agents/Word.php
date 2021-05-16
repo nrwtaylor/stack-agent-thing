@@ -21,7 +21,6 @@ class Word extends Agent
 
 
         $this->resource_path_ewol = $this->resource_path . "ewol/";
-
         $this->keywords = [];
 
         $this->wordpress_path_to = false;

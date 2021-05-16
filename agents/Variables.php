@@ -4,12 +4,6 @@ namespace Nrwtaylor\StackAgentThing;
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
-/*
-set_error_handler(function(int $number, string $message) {
-   echo "Handler captured error $number: '$message'" . PHP_EOL  ;
-});
-*/
-
 // TODO: Rebuild. Faster.
 
 class Variables
@@ -237,6 +231,13 @@ $this->thing_report["thing"] = false;
 
     function getVariables($variable_set_name = null)
     {
+
+if ((isset($this->thing->variables_thing)) and (isset($this->thing->variables_thing->db))) {
+$this->variables_thing = $this->thing->variables_thing;
+return;
+}
+
+
         $split_time = $this->thing->elapsed_runtime();
 
         if ($variable_set_name == null) {
@@ -288,13 +289,7 @@ $this->thing_report["thing"] = false;
                 // Load the full variable set.
                 // If we code this right it shouldn't be a penalty
                 // over $this->getVariable();
-
                 if ($this->getVariableSet($thing) == false) {
-                    $this->thing->log(
-                            "got " .
-                            $this->variables_thing->nuuid,
-                        "DEBUG"
-                    );
 
                     // Should echo the matching variable sets
                     $match_count += 1;
@@ -302,12 +297,16 @@ $this->thing_report["thing"] = false;
                     $this->setVariables(); // Make sure thing and stack match.
                     // Consider seeing if this is really needed.
 
+// dev store this in thing for memoization.
+$this->thing->variables_thing = $this->variables_thing;
                     return;
                 }
             }
             $this->startVariables();
             // So we get dropped out here with $this->variables_thing set
         }
+$this->thing->variables_thing = $this->variables_thing;
+
     }
 
     function resetVariable()
@@ -382,10 +381,12 @@ $this->thing_report["thing"] = false;
     {
         // Pulls in the full set from the db in one operation.
         // From a loaded Thing.
+
         $uuid = null;
         if (isset($thing["uuid"])) {
             $uuid = $thing["uuid"];
         }
+
         $this->variables_thing = new Thing($uuid);
 
         if (!isset($this->variables_thing->account["stack"])) {
@@ -393,7 +394,10 @@ $this->thing_report["thing"] = false;
             return null;
         }
 
+
         $variables = $this->variables_thing->account["stack"]->json->array_data;
+
+
 
         if (isset($variables[$this->variable_set_name])) {
             $this->context = "train";
@@ -405,7 +409,6 @@ $this->thing_report["thing"] = false;
                 $this->variables_thing->$name = $variable;
                 $this->agent_variables[] = $name;
             }
-
             return false;
         } else {
             return null;

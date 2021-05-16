@@ -24,9 +24,12 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
-//        if ($thing == null) {
-//           $this->thing = false;
-//           return;
+
+        // dev test
+//        if ($thing == false) {
+//           $thing = new Thing(false);
+           //$this->thing = false;
+           //return;
 //        }
 
 
@@ -206,7 +209,6 @@ class Agent
         } catch (\OverflowException $t) {
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
-
             $web_thing = new Thing(null);
             $web_thing->Create(
                 $this->from,
@@ -483,7 +485,6 @@ public function __set($name, $value) {
                 $associations = $this->thing->json->jsontoArray(
                     $associations_json
                 );
-
                 //$thing = new \stdClass();
                 $thing = new Thing(null);
                 $thing->subject = $thing_object["task"];
@@ -1080,61 +1081,6 @@ return $agent_trace;;
             $this->thing->log("caught memcached error.", "WARNING");
             return true;
         }
-    }
-
-    // Plan to deprecate getMemcached terminology.
-    public function deprecate_getMemory($text = null)
-    {
-        // Null?
-        // $this->mem_cached = null;
-        // Fail to stack php memory code if Memcached is not availble.
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->get($text);
-        return $memory;
-    }
-
-    // Plan to deprecate getMemcached terminology.
-    public function deprecate_setMemory($text = null, $variable = null)
-    {
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->set($text, $variable);
-        return $memory;
     }
 
     /**

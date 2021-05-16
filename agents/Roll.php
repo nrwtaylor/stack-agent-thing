@@ -41,14 +41,14 @@ class Roll extends Agent
 
         // Borrow this from iching
         $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "roll",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["roll", "refreshed_at"],
                 $time_string
             );
@@ -57,9 +57,9 @@ class Roll extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->last_roll = strtolower(
-            $this->thing->json->readVariable(["roll", "roll"])
+            $this->thing->Read(["roll", "roll"])
         );
-        $this->last_result = $this->thing->json->readVariable([
+        $this->last_result = $this->thing->Read([
             "roll",
             "result",
         ]);
@@ -745,8 +745,8 @@ class Roll extends Agent
     function set()
     {
         if ($this->last_roll == false or $this->last_result == false) {
-            $this->thing->json->writeVariable(["roll", "roll"], $this->roll);
-            $this->thing->json->writeVariable(
+            $this->thing->Write(["roll", "roll"], $this->roll);
+            $this->thing->Write(
                 ["roll", "result"],
                 $this->result
             );

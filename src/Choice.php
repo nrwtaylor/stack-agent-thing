@@ -338,7 +338,6 @@ class Choice {
         // I choose to call these ants.  The state map is a relatively
         // generic one to test the full range of stack capabilities.
 
-
         $choice_thing = new Thing(null); // This times at 2ms.
         // And at 3, 3, 3, 5 ms on 7 June 2018
 

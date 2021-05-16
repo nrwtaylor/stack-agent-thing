@@ -525,6 +525,21 @@ if (!isset($this->db)) {
         return false;
     }
 
+/*
+Use this pattern. And deprecate getVariables.
+And review Agent variables.
+*/
+
+    public function Read($path) {
+        $this->json->setField("variables");
+        return $this->json->readVariable($path);
+    }
+
+    public function Write($path, $value) {
+        $this->json->setField("variables");
+        $this->json->writeVariable($path, $value);
+    }
+
     public function loadAccounts()
     {
         $this->json->setField("variables");

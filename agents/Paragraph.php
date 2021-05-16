@@ -7,7 +7,7 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-class Paragraph extends Word
+class Paragraph extends Agent
 {
     /**
      *

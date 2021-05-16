@@ -47,6 +47,7 @@ class Dateline extends Agent
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($paragraphs as $i => $paragraph) {
+echo ".";
             if (trim($paragraph) == "") {
                 continue;
             }
@@ -115,6 +116,7 @@ class Dateline extends Agent
         $arr = ['year', 'month', 'day', 'day_number', 'hour', 'minute'];
 
         foreach ($this->paragraphs as $i => $paragraph) {
+echo "line " . $i . "\n";
             $dateline = $this->extractDateline($paragraph);
             if ($this->isDateline($dateline) === false) {
                 continue;

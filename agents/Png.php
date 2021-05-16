@@ -24,9 +24,12 @@ class Png extends Agent
         // If it is an agent request for png only generate png (for speed)
         if ($this->agent_input == "png") {
             $this->makePNG();
-        } else {
+        }
+/*
+ else {
             $this->respondResponse();
         }
+*/
     }
 
     public function respondResponse()
@@ -35,12 +38,13 @@ class Png extends Agent
 
         // This should be the code to handle non-matching responses.
 
-        $to = $this->thing->from;
+ //       $to = $this->thing->from;
 
-        $from = "png";
+ //       $from = "png";
 
         // So maybe not choices, but the message needs to be passed.
-        $this->makeSMS();
+/* 
+       $this->makeSMS();
         $this->makeMessage();
         $this->makePNG();
 
@@ -48,7 +52,7 @@ class Png extends Agent
         $this->makeWeb();
 
         $this->makeEmail();
-
+*/
         $this->thing_report["info"] = "This makes a PNG.";
 
         if (!isset($this->thing_report["help"])) {
@@ -60,9 +64,9 @@ class Png extends Agent
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-        $this->makeTXT();
+//        $this->makeTXT();
 
-        return $this->thing_report;
+//        return $this->thing_report;
     }
 
     function makeTXT()
@@ -75,6 +79,7 @@ class Png extends Agent
 
     function makeChoices()
     {
+return;
         $this->thing->choice->Create(
             $this->agent_name,
             $this->node_list,
@@ -100,7 +105,7 @@ class Png extends Agent
             $this->node_list,
             "email"
         );
-        $choices = $this->thing->choice->makeLinks("email");
+        //$choices = $this->thing->choice->makeLinks("email");
 
         $web = '<a href="' . $link . '">' . $this->html_image . "</a>";
         $web .= "<br>";
@@ -117,7 +122,11 @@ class Png extends Agent
 
     function makeWeb()
     {
-        $this->makePNG();
+        if (!isset($this->image_html)) {
+            $this->makePNG();
+        }
+
+//        $this->makePNG();
         $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
 
         $this->node_list = ["web" => ["png"]];
@@ -391,11 +400,12 @@ class Png extends Agent
         imageline($image, 20, 280, 280, 280, $black);
     }
 
+/*
     function read($variable = null)
     {
         $this->get();
     }
-
+*/
     public function readSubject()
     {
     }

@@ -205,6 +205,7 @@ class Interlink extends Agent
         }
 
         foreach ($interlinks as $uuid => $interlink) {
+            if ($slug_list[$uuid] == false) {continue;}
             foreach ($slug_list[$uuid] as $i => $slug) {
                 if (!isset($slugs[$slug])) {
                     continue;

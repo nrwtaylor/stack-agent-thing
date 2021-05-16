@@ -404,10 +404,8 @@ class Flag extends Agent
         if (!isset($this->image)) {
             $this->makeImage();
         }
+
         $agent = new Png($this->thing, "png");
-
-        //$this->makeImage();
-
         $agent->makePNG($this->image);
 
         $this->html_image = $agent->html_image;

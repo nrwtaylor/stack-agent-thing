@@ -75,15 +75,18 @@ class Resource extends Agent
             "Try MAKE RESOURCE FUEL. And QUANTITY 10.";
     }
 
-    public function loadResource($text)
+    public function loadResource($text, $prefix = 'resource-')
     {
+        // Rule is you can't create a uuid.
+        // So prefix it. And use that to respond to uuids.
+
         $uuid = null;
         if ($this->isUuid($text)) {
             $uuid = $this->extractUuid($text);
         }
         // Remove uuids
         $text = $this->stripUuids($text);
-        $response = $this->getMemory($text);
+        $response = $this->getMemory($prefix.$text);
 
         if ($response === false) {
             $file = $this->resource_path . $text;
@@ -95,7 +98,7 @@ class Resource extends Agent
 
                 if (is_array($interlinks)) {
                     foreach ($interlinks as $uuid => $interlink) {
-                        $this->setMemory($uuid, $interlink);
+                        $this->setMemory($prefix.$uuid, $interlink);
                     }
                     $this->response .= "Loaded array into memory. ";
                 }
@@ -105,7 +108,7 @@ class Resource extends Agent
             if ($uuid === false and is_array($interlinks)) {
                 $uuid = array_key_first($interlinks);
             }
-            $response = $this->getMemory($uuid);
+            $response = $this->getMemory($prefix.$uuid);
         }
         return $response;
     }

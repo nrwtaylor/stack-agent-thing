@@ -27,15 +27,9 @@ class Mysql extends Agent
      */
     function init()
     {
-        $start_time = microtime(true);
-        $this->start_time = $start_time;
-        $this->split_time = $start_time;
-        $this->operations_time = 0;
-        $this->operations = 0;
-        $this->log = [];
-
-        //        $this->hash_algorithm = 'sha256';
-        //        $this->hash_state = 'on';
+        $this->thing_report["info"] =
+            "This is an agent to manage MySQL database calls.";
+        $this->thing_report["help"] = "Not yet user facing.";
 
         // Database controls access by $uuid.
 
@@ -54,13 +48,14 @@ class Mysql extends Agent
 
         // The problem is when they are both null.
         // Code here should allow either.
-
         $this->initMysql();
-
+//        $this->test();
     }
 
-    public function test() {
-       $thingreport = $this->priorGet();
+    public function test()
+    {
+        $thingreport = $this->priorGet();
+        var_dump($thingreport);
     }
 
     public function initMysql($uuid = null, $nom_from = null)
@@ -81,8 +76,8 @@ class Mysql extends Agent
             throw new \Exception('No $nom_from provided to
 			Class Db.');
         }
+
         if ($uuid == null) {
-return;
             throw new \Exception('No $uuid provided to
 			Class Db.');
         }
@@ -90,7 +85,7 @@ return;
         $this->from = $nom_from;
         $this->uuid = $uuid;
 
-        // create container and configure it
+        // create ontainer and configure it
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
@@ -113,52 +108,53 @@ return;
             $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
 
+        // Load MySQL database settings.
+
         $this->thing->container["stack"]["state"];
 
-        $this->container = new \Slim\Container($settings);
+        if (isset($this->thing->container["settings"]["db"]["host"])) {
+            $this->host = $this->thing->container["settings"]["db"]["host"];
+        }
 
-        // create app instance
-        $app = new \Slim\App($this->container);
-        $c = $app->getContainer();
+        if (isset($this->thing->container["settings"]["db"]["dbname"])) {
+            $this->dbname = $this->thing->container["settings"]["db"]["dbname"];
+        }
 
-        // Haven't seen this triggered.
-        $c["errorHandler"] = function ($c) {
-            return function ($request, $response, $exception) use ($c) {
-                return $c["response"]
-                    ->withStatus(500)
-                    ->withHeader("Content-Type", "text/html")
-                    ->write("AGENT | Maintenance.");
-            };
-        };
+        if (isset($this->thing->container["settings"]["db"]["user"])) {
+            $this->user = $this->thing->container["settings"]["db"]["user"];
+        }
 
-        $c["db"] = function ($c) {
-            $db = $c["settings"]["db"];
+        if (isset($this->thing->container["settings"]["db"]["pass"])) {
+            $this->pass = $this->thing->container["settings"]["db"]["pass"];
+        }
 
-            //try {
+        // Make a PDO object for interacting with the MySQL database.
 
+        try {
             $pdo = new PDO(
-                "mysql:host=" . $db["host"] . ";dbname=" . $db["dbname"],
-                $db["user"],
-                $db["pass"]
+                "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
+                $this->user,
+                $this->pass
             );
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            return $pdo;
-        };
 
-        $c["stack"] = function ($c) {
-            $db = $c["settings"]["stack"];
-            return $db;
-        };
+            $this->pdo = $pdo;
+        } catch (\Throwable $t) {
+            $this->thing->log("caught Mysql throwable.", "WARNING");
+            $this->thing->console("Could not connect to MySQL database.");
 
-        //$this->get_calling_function();
-
-        //$this->test("<b>" . $this->get_calling_function() . "</b>");
+            throw new \Exception("Could not connect to MySQL database.");
+        } catch (\Error $ex) {
+            $this->thing->log("caught Mysql error.", "WARNING");
+            $this->thing->console("Could not connect to MySQL database.");
+            throw new \Exception("Could not connect to MySQL database.");
+        }
 
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
 
-        $this->char_max = $c["stack"]["char_max"];
+        $this->char_max = $this->thing->container["stack"]["char_max"];
 
         $this->uuid = $uuid;
 
@@ -172,11 +168,7 @@ return;
 
         // So just return the contents of thing.  false if it doesn't exist.
 
-        $this->split_time = microtime(true);
-
-        $r = "";
-
-        return $r;
+        //        $this->split_time = microtime(true);
     }
 
     function get()
@@ -190,17 +182,15 @@ return;
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] =
-            "This is an agent to manage Mongo database calls.";
-        $this->thing_report["help"] = "Not yet user facing.";
-
         $this->thing_report["message"] = $this->sms_message;
         $this->thing_report["txt"] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
 
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report["info"] = $message_thing->thing_report["info"];
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
+        }
     }
-
 
     function readSubject()
     {
@@ -214,7 +204,7 @@ return;
     {
         $sms = "MYSQL";
         $this->sms_message = $sms;
-        $this->thing_response["sms"] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -277,7 +267,7 @@ return;
                 "' order by created_at DESC LIMIT 3";
         }
         try {
-            $sth = $this->container->db->prepare($query_string);
+            $sth = $this->pdo->prepare($query_string);
             $sth->execute();
             $thing = $sth->fetchObject();
         } catch (\Exception $e) {
@@ -311,8 +301,8 @@ return;
      */
     function writeField($field_text, $string_text)
     {
-        $this->split_time = microtime(true);
-        $this->log = [$field_text, $string_text];
+        //        $this->split_time = microtime(true);
+        //        $this->log = [$field_text, $string_text];
         //$this->test( $this->get_calling_function() );
 
         // sqlinjection commentary
@@ -321,7 +311,7 @@ return;
 
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
-            $sth = $this->container->db->prepare($query);
+            $sth = $this->pdo->prepare($query);
 
             $sth->bindParam(":uuid", $this->uuid);
             $sth->bindParam(":string_text", $string_text);
@@ -353,8 +343,8 @@ return;
 
         $sth = null;
 
-        $this->operations_time += microtime(true) - $this->split_time;
-        $this->operations += 1;
+        //        $this->operations_time += microtime(true) - $this->split_time;
+        //        $this->operations += 1;
         //$this->test("writeField");
     }
 
@@ -364,7 +354,7 @@ return;
      */
     function count()
     {
-        $sth = $this->container->db->prepare("SELECT count(*) FROM stack");
+        $sth = $this->pdo->prepare("SELECT count(*) FROM stack");
         $sth->execute();
 
         $thing_count = $sth->fetchColumn();
@@ -410,11 +400,11 @@ return;
     {
         try {
             // Create a new record in the db for the Thing.
-            $this->split_time = microtime(true);
+            //            $this->split_time = microtime(true);
 
             //$this->test("Create");
 
-            $query = $this->container->db->prepare("INSERT INTO stack
+            $query = $this->pdo->prepare("INSERT INTO stack
 			(uuid,task,nom_from,nom_to)
 			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
 
@@ -472,7 +462,7 @@ return;
 
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
-            $sth = $this->container->db->prepare(
+            $sth = $this->pdo->prepare(
                 "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
             );
 
@@ -502,12 +492,11 @@ return;
      */
     function forgetMysql($uuid = null)
     {
+        if ($uuid == null) {
+            $uuid = $this->uuid;
+        }
 
-        if ($uuid == null) {$uuid = $this->uuid;}
-
-        $sth = $this->container->db->prepare(
-            "DELETE FROM stack WHERE uuid=:uuid"
-        );
+        $sth = $this->pdo->prepare("DELETE FROM stack WHERE uuid=:uuid");
         $sth->bindParam("uuid", $uuid);
         $sth->execute();
 
@@ -577,7 +566,7 @@ return;
             // $value = "*$value*"; // Value to search for in Variables
             // $query = "SELECT uuid, variables FROM stack WHERE nom_from=:user_search AND MATCH(variables) AGAINST(:value IN BOOLEAN MODE ) $
 
-            $sth = $this->container->db->prepare($query);
+            $sth = $this->pdo->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
             $sth->bindParam(":hash_user_search", $hash_user_search);
@@ -641,7 +630,7 @@ return;
             //    $query =
             //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
 
-            $sth = $this->container->db->prepare($query);
+            $sth = $this->pdo->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
             $sth->bindParam(":hash_user_search", $hash_user_search);
@@ -679,7 +668,7 @@ return;
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND uuid LIKE :nuuid ORDER BY created_at DESC";
 
-            $sth = $this->container->db->prepare($query);
+            $sth = $this->pdo->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
             $sth->bindParam(":hash_user_search", $hash_user_search);
@@ -713,7 +702,7 @@ return;
         $query =
             'SELECT * FROM stack WHERE task="something something something"';
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
 
         try {
             $sth->execute();
@@ -760,7 +749,7 @@ return;
         $max = (int) $max;
 
         if ($mode == null or strtolower($mode) == "boolean") {
-            $keyword = $this->container->db->quote($keyword_input);
+            $keyword = $this->pdo->quote($keyword_input);
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max";
         }
@@ -771,13 +760,13 @@ return;
                 "SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max";
         }
         if (strtolower($mode) == "where") {
-            $keyword = $this->container->db->quote($keyword_input);
+            $keyword = $this->pdo->quote($keyword_input);
             $query =
                 "SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "natural language") {
-            $keyword = $this->container->db->quote($keyword_input);
+            $keyword = $this->pdo->quote($keyword_input);
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max";
         }
@@ -786,7 +775,7 @@ return;
             $keyword =
                 "adidas adiPower S bounce men\'s spikeless Golf Shoe NEW";
             //      $keyword = $keyword_input; // Value to search for in Variables
-            $keyword = $this->container->db->quote(
+            $keyword = $this->pdo->quote(
                 "adidas adiPower S bounce men\'s spikeless Golf Shoe NEW"
             );
 
@@ -798,7 +787,7 @@ return;
             $query = 'SELECT * FROM stack WHERE task=":keyword"';
         }
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->bindParam(":user_search", $user_search);
         $sth->bindParam(":hash_user_search", $hash_user_search);
 
@@ -839,7 +828,7 @@ return;
                 "SELECT DISTINCT nom_from FROM stack WHERE created_at > (NOW() - INTERVAL :horizon HOUR)";
         }
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
 
         if ($horizon != null) {
             $sth->bindParam(":horizon", $horizon, PDO::PARAM_INT);
@@ -882,7 +871,7 @@ return;
         $query =
             "SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) AND created_at > (NOW() - INTERVAL :horizon HOUR)";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->bindParam(":user_search", $user_search);
         $sth->bindParam(":hash_user_search", $hash_user_search);
 
@@ -933,7 +922,7 @@ return;
             "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
         //$query = 'DELETE FROM stack WHERE nom_to=:agent and task <= (SELECT task FROM (SELECT task FROM stack ORDER BY id DESC LIMIT 1 OFFSET 1) foo)';
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         //        $sth->bindParam(":user_search", $user_search);
         //        $sth->bindParam(":agent", $agent);
         //        $sth->bindParam(":max", $max, PDO::PARAM_INT);
@@ -970,7 +959,7 @@ return;
         $query =
             "delete from stack where nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->bindParam(":user_search", $user_search);
         $sth->bindParam(":hash_user_search", $hash_user_search);
 
@@ -1014,7 +1003,7 @@ return;
             "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         try {
-            $sth = $this->container->db->prepare($query);
+            $sth = $this->pdo->prepare($query);
             $sth->bindParam(":user_search", $user_search);
             $sth->bindParam(":hash_user_search", $hash_user_search);
             $sth->bindParam(":agent", $agent);
@@ -1062,7 +1051,7 @@ return;
             "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND task LIKE :keyword ORDER BY created_at DESC";
 
         try {
-            $sth = $this->container->db->prepare($query);
+            $sth = $this->pdo->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
             $sth->bindParam(":hash_user_search", $hash_user_search);
@@ -1293,7 +1282,7 @@ return;
             $sub_query .
             " ORDER BY RAND()"; // LIMIT 3";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->bindParam("nom_from", $this->from);
         $sth->execute();
         $things = $sth->fetchAll();
@@ -1377,7 +1366,7 @@ return;
 
         $query = "SELECT * FROM stack WHERE variables LIKE " . $search_term;
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->execute();
         //$thing = $sth->fetchObject();
         $things = $sth->fetchAll();
@@ -1416,7 +1405,7 @@ return;
         $query =
             "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->bindParam(":user_search", $user_search);
         $sth->bindParam(":hash_user_search", $hash_user_search);
 
@@ -1445,7 +1434,7 @@ return;
     {
         $query = "SELECT * FROM stack WHERE variables is NULL";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->execute();
         $things = $sth->fetchAll();
 
@@ -1469,7 +1458,7 @@ return;
     {
         $query =
             "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->execute();
         $response = $sth->fetchAll();
 
@@ -1499,7 +1488,7 @@ return;
 
         $query = "SHOW STATUS WHERE `variable_name` = 'Threads_connected'";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->execute();
         $response = $sth->fetchAll();
 
@@ -1563,7 +1552,7 @@ return;
             //            $q = "SELECT * FROM stack ORDER BY RAND() LIMIT " . $n;
             //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((20/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 20";
 
-            $sth = $this->container->db->prepare($q);
+            $sth = $this->pdo->prepare($q);
 
             $sth->execute();
             //      $thing = $sth->fetchObject();
@@ -1578,7 +1567,7 @@ return;
         } else {
             $q =
                 "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
-            $sth = $this->container->db->prepare($q);
+            $sth = $this->pdo->prepare($q);
 
             $sth->execute();
             $thing = $sth->fetchObject();
@@ -1611,7 +1600,7 @@ return;
         $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
         // Pick N of identity's things.
-        $sth = $this->container->db->prepare(
+        $sth = $this->pdo->prepare(
             "SELECT * FROM stack WHERE (nom_from=:nom_from OR nom_from=:hash_nom_from) ORDER BY RAND() LIMIT 3"
         );
         $sth->bindParam("nom_from", $nom_from);
@@ -1687,7 +1676,7 @@ return;
             $nom_to_sql .
             ") ORDER BY RAND() LIMIT 3";
 
-        $sth = $this->container->db->prepare($query);
+        $sth = $this->pdo->prepare($query);
         $sth->bindParam("nom_from", $nom_from);
         $sth->execute();
         $things = $sth->fetchAll();
@@ -1704,4 +1693,3 @@ return;
         return $thingreport;
     }
 }
-
