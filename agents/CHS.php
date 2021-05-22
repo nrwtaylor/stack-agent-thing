@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -36,7 +36,7 @@ class CHS extends Agent
     // endorsement by the Canadian Hydrographic Service or
     // the Department of Fisheries and Oceans of this product.”
 
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -48,15 +48,15 @@ class CHS extends Agent
         $this->agent_prefix = 'Agent "Weather" ';
 
         $this->keywords = [
-            'water',
-            'level',
-            'tide',
-            'tides',
-            'height',
-            'prediction',
-            'metocean',
-            'tides',
-            'nautical',
+            "water",
+            "level",
+            "tide",
+            "tides",
+            "height",
+            "prediction",
+            "metocean",
+            "tides",
+            "nautical",
         ];
 
         $this->variables_agent = new Variables(
@@ -71,14 +71,59 @@ class CHS extends Agent
         if ($this->verbosity == false) {
             $this->verbosity = 2;
         }
+
+        // Rest API server
+        $this->url = "https://api-iwls.dfo-mpo.gc.ca";
+
+        // Vancouver 07735
+        // wlp-hilo
+        // 2021-05-22T00:00:00Z
+
+        // https://api-iwls.dfo-mpo.gc.ca/api/v1/stations?code=07735
+        // To get
+
+        // 5cebf1de3d0f4a073c4bb943
+
+        // https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/5cebf1de3d0f4a073c4bb943/data?time-series-code=wlp-hilo&from=2021-05-22T00%3A00%3A00Z&to=2021-05-23T00%3A00%3A00Z
+
+        /*
+[
+  {
+    "eventDate": "2021-05-22T02:58:00Z",
+    "qcFlagCode": "2",
+    "value": 1.9,
+    "timeSeriesId": "5d9dd7b933a9f593161c3e55"
+  },
+  {
+    "eventDate": "2021-05-22T09:52:00Z",
+    "qcFlagCode": "2",
+    "value": 4.5,
+    "timeSeriesId": "5d9dd7b933a9f593161c3e55"
+  },
+  {
+    "eventDate": "2021-05-22T16:46:00Z",
+    "qcFlagCode": "2",
+    "value": 1.9,
+    "timeSeriesId": "5d9dd7b933a9f593161c3e55"
+  },
+  {
+    "eventDate": "2021-05-22T22:30:00Z",
+    "qcFlagCode": "2",
+    "value": 3.5,
+    "timeSeriesId": "5d9dd7b933a9f593161c3e55"
+  }
+]
+*/
+
         // Create the SoapClient instance
         $url = "https://ws-shc.qc.dfo-mpo.gc.ca/predictions" . "?wsdl";
 
-        if (!extension_loaded('soap')) {
+        if (!extension_loaded("soap")) {
             $this->response .= "Tide connector not available. ";
             // Do things
         }
 
+        /*
         try {
             $this->client = new \SoapClient($url);
             // $this->client     = new \SoapClient($url, array("trace" => 1, "exception" => 0));
@@ -89,10 +134,10 @@ class CHS extends Agent
         } catch (Exception $e) {
             $this->response .= "Could not get tides. ";
         }
+*/
         $this->getWeather();
 
-        $this->thing->refresh_at = $this->thing->time(time() + 5*60); // Refresh after 5 minutes.
-
+        $this->thing->refresh_at = $this->thing->time(time() + 5 * 60); // Refresh after 5 minutes.
     }
 
     /**
@@ -170,6 +215,10 @@ class CHS extends Agent
         $this->refreshed_at = $this->current_time;
     }
 
+    public function hiloCHS()
+    {
+    }
+
     /**
      *
      */
@@ -202,16 +251,21 @@ class CHS extends Agent
 
         $dt = new \DateTime($this->current_time, new \DateTimeZone("UTC"));
 
-        $now = $dt->format('Y-m-d H:i:s');
+        $now = $dt->format("Y-m-d H:i:s");
 
         $start_time = date(
-            'Y-m-d H:i:s',
-            strtotime('-12 hour', strtotime($now))
+            "Y-m-d H:i:s",
+            strtotime("-12 hour", strtotime($now))
         );
         $end_time = date(
-            'Y-m-d H:i:s',
-            strtotime('+48 hour +30 minutes', strtotime($now))
+            "Y-m-d H:i:s",
+            strtotime("+48 hour +30 minutes", strtotime($now))
         );
+
+        $data = file_get_contents(
+            "https://api-iwls.dfo-mpo.gc.ca/api/v1/stations/5cebf1de3d0f4a073c4bb943/data?time-series-code=wlp-hilo&from=2021-05-22T00%3A00%3A00Z&to=2021-05-23T00%3A00%3A00Z"
+        );
+        $json_data = json_decode($data, true);
 
         // Area around Vancouver.
         $lat = 49.3;
@@ -227,6 +281,7 @@ class CHS extends Agent
 
         //        $m = $this->client->search("hilo", $lat - $size, $lat + $size, $long - $size, $long + $size, 0.0, 0.0, $date . " ". "00:00:00", $date . " " . "23:59:59", 1, 100, true, "", "asc");
 
+        /*
         $m = $this->client->search(
             "hilo",
             $lat - $size,
@@ -243,32 +298,40 @@ class CHS extends Agent
             "",
             "asc"
         );
-        foreach ($m->data as $key => $item) {
+*/
+
+        foreach ($json_data as $key => $item) {
+            /*
             $date_min = $item->boundaryDate->min;
             $date_max = $item->boundaryDate->max;
-
+*/
+            /*
             if ($date_min == $date_max) {
                 // expected
                 $date = $date_min;
             } else {
                 $date = true;
             }
-
+*/
+            $date = $item["eventDate"];
+            /*
             $name = $item->metadata[1]->value;
             $name = str_replace("* ", " ", $name);
             $name = str_replace(" *", " ", $name);
             $name = trim($name);
-
-            $id = $item->metadata[0]->value;
-            $value = $item->value;
-
+*/
+            //            $id = $item->metadata[0]->value;
+            $value = $item["value"];
+            $name = "Vancouver";
+            $id = "77035";
+            $units = "m";
             $prediction = [
                 "date" => $date,
                 "name" => $name,
                 "id" => $id,
                 "value" => $value,
                 "units" => $units,
-                "item" => $item,
+                //                "item" => $item,
             ];
             $this->predictions[] = $prediction;
 
@@ -323,23 +386,23 @@ class CHS extends Agent
         $from = "chs";
 
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         $this->makeSms();
         $this->makeMessage();
 
-        $this->thing_report['email'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
         //$this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         $this->makeWeb();
 
-        $this->thing_report['help'] = 'This reads a web resource.';
+        $this->thing_report["help"] = "This reads a web resource.";
     }
 
     /**
@@ -352,7 +415,7 @@ class CHS extends Agent
         $web .= "<p>";
 
         foreach ($this->predictions as $key => $prediction) {
-            $dt = new \DateTime($prediction['date'], new \DateTimeZone("UTC"));
+            $dt = new \DateTime($prediction["date"], new \DateTimeZone("UTC"));
 
             $dt->setTimezone(new \DateTimeZone($this->time_zone));
 
@@ -361,14 +424,14 @@ class CHS extends Agent
             //                $date = $dt->format('Y/m/d');
 
             //        $now = date("Y-m-d H:i:s");
-            $prediction_datetime = $dt->format('Y-m-d H:i:s');
+            $prediction_datetime = $dt->format("Y-m-d H:i:s");
 
             //            $web .= $prediction['date'] . " ";
             $web .= $prediction_datetime . " ";
 
-            $web .= $prediction['id'] . " ";
-            $web .= $prediction['name'] . " ";
-            $web .= $prediction['value'] . " " . $prediction['units'];
+            $web .= $prediction["id"] . " ";
+            $web .= $prediction["name"] . " ";
+            $web .= $prediction["value"] . " " . $prediction["units"];
             $web .= "<br>";
         }
 
@@ -393,7 +456,7 @@ class CHS extends Agent
         $web .= "CHS feed last queried " . $ago . " ago.<br>";
 
         //$this->sms_message = $sms_message;
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -432,18 +495,18 @@ class CHS extends Agent
                 $dt->setTimezone(new \DateTimeZone($this->time_zone));
 
                 //                $d = date('H:i', strtotime($prediction["date"]));
-                $d = $dt->format('H:i');
-                $date = $dt->format('Y/m/d');
+                $d = $dt->format("H:i");
+                $date = $dt->format("Y/m/d");
 
                 if ($i == 0) {
-                    $d = $dt->format('Y/m/d H:i');
+                    $d = $dt->format("Y/m/d H:i");
 
                     $old_date = $date;
                 }
 
                 if ($old_date != $date) {
                     //   $d = date('m/d H:i',strtotime($prediction["date"]));
-                    $d = $dt->format('m/d H:i');
+                    $d = $dt->format("m/d H:i");
                 }
 
                 $i += 1;
@@ -474,7 +537,7 @@ class CHS extends Agent
             ".";
 
         $this->sms_message = $sms_message;
-        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
     }
 
     /**
@@ -486,7 +549,7 @@ class CHS extends Agent
         $message .= " " . "Licensed by Canadian Hydrographic Service.";
 
         $this->message = $message;
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     /**
@@ -608,7 +671,7 @@ class CHS extends Agent
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'weather') {
+            if ($input == "weather") {
                 $this->response = "Did nothing.";
                 return;
             }
@@ -623,8 +686,8 @@ class CHS extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'verbosity':
-                        case 'mode':
+                        case "verbosity":
+                        case "mode":
                             $number = $this->extractNumber();
                             if (is_numeric($number)) {
                                 $this->verbosity = $number;

@@ -83,7 +83,20 @@ Title => deaths-by-lha-2020.pdf
 Author => Oracle Reports
 Pages => 2
 */
-
+        $break_tokens = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
         // Loop over each property to extract values (string or array).
         foreach ($details as $property => $value) {
             if (is_array($value)) {
@@ -95,13 +108,80 @@ Pages => 2
         $tokens = [];
         // Loop over each page to extract text.
         foreach ($pages as $page_no => $page) {
+
             $text = $page->getText();
             $toks = $this->processThing($text);
             $tokens = array_merge($tokens, $toks);
+$page_tokens[$page_no] = $toks;
         }
         // dev
         // TODO process tokens.
-        // var_dump($tokens);
+      //  var_dump($tokens);
+foreach($page_tokens as $tokens) {
+        $lines = [];
+        $i = 0;
+        $i_start = null;
+$month = null;
+$data_section = false;
+        //foreach($tokens as $i=>$token) {
+        while ($i < count($tokens)) {
+            $token = $tokens[$i];
+
+if ($data_section === true) {
+$i += 1;
+if (in_array($token, $break_tokens)) { $month_row_count = 0;$month = $token; continue;}
+if ($month == null) {continue;}
+echo $month_row_count . " " . $token . "\n";
+
+$lines[$lha_id_index[$month_row_count]]['months'][$month] = $token;
+
+$month_row_count += 1;
+//$i += 1;
+continue;
+
+}
+
+ 
+           if ($token === "Page" and $i_start === null) {
+                $i_start = $i + 3;
+$lha_row_count = 0;
+$lha_id_index[$lha_row_count] = true;
+            }
+            if ($i >= $i_start) {
+                if (is_numeric($token)) {
+                    $health_authority_id = $token;
+                    $health_authority = null;
+                }
+if (!isset($health_authority_id)) {$i += 1;continue;}
+                if (ctype_alpha($token)) {
+                    if (ctype_alpha($tokens[$i + 1])) {
+                        $health_authority = $token . " " . $tokens[$i + 1];
+			$i += 2;
+                    } else {
+                        $health_authority = $token;
+                        $i += 1;
+                    }
+
+if ($health_authority === 'Health Area') {$data_section = true;}
+
+
+if (!isset($lines[$health_authority_id])) {$lines[$health_authority_id] = [];}
+                   $lha_id_index[$lha_row_count] = $health_authority_id;
+$lha_row_count += 1;   
+                        $lines[$health_authority_id]['lha'] = $health_authority;
+                        $lines[$health_authority_id]['lha_id'] = $health_authority_id;
+continue;
+                }
+            }
+$i += 1;
+        }
+//var_dump($lha_id_index);
+var_dump($lines);
+exit();
+}
+        //}
+
+        //}
     }
 
     public function processThing($text = null)
