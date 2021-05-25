@@ -93,6 +93,21 @@ class Text extends Agent
         $this->thing->log("Initialized Text.", "DEBUG");
     }
 
+    function needlesText($needles, $haystack)
+    {
+        if (empty($needles)) {
+            return false;
+        }
+
+        foreach ($needles as $needle) {
+            if (strpos($haystack, $needle) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     public function postfixText(
         $text = null,
         $post_fix = null,
