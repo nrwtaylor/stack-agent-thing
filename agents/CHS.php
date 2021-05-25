@@ -419,15 +419,15 @@ class CHS extends Agent
 
         $chs_stations = $this->getMemory("chs-stations");
 
-        $use_cache = false;
+        $use_cache = true;
 
         if (isset($chs_stations["refreshed_at"])) {
             $age =
                 strtotime($this->thing->time()) -
                 strtotime($chs_stations["refreshed_at"]);
 
-            if ($age > 0 * 24 * 60 * 60) {
-                $use_cache = true;
+            if ($age < 24 * 60 * 60) {
+                $use_cache = false;
             }
         }
 
