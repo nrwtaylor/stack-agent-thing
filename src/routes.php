@@ -995,7 +995,7 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                         );
                     }
                 }
-
+if (in_array($ext_name,['jpg','jfif','jfif-tbnl','jpe','jpeg','jpg'])) {$ext_name = 'jpeg';}
                 $agent_class_name = "Make" . strtolower($ext_name);
 
                 $web_thing = new Thing($uuid);
@@ -1003,6 +1003,7 @@ $app->get("[/{params:.*}]", function ($request, $response, $args) {
                 $content_types = [
                     "pdf" => "application/pdf",
                     "png" => "image/png",
+                    "jpeg" => "image/jpeg",
                     "txt" => "text/plain",
                     "php" => "text/plain",
                     "log" => "text/plain",

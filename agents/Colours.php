@@ -8,13 +8,13 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Colours extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -39,7 +39,7 @@ class Colours extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -66,7 +66,7 @@ class Colours extends Agent
         $this->green = imagecolorallocate($this->image, 0, 255, 0);
         $this->grey = imagecolorallocate($this->image, 128, 128, 128);
 
-//        imagecolortransparent($this->image, $this->white);
+        //        imagecolortransparent($this->image, $this->white);
 
         // https://en.wikipedia.org/wiki/Rainbow_flag
         // https://en.wikipedia.org/wiki/Rainbow_flag_(LGBT_movement)
@@ -129,11 +129,59 @@ class Colours extends Agent
         ];
     }
 
-    public function extractColours($text) {
+    public function loadColours()
+    {
+        $this->colour_names = [];
+        //if ($file_name == null) {
+        $resource_name = "colours/colornames.csv";
+        //}
 
-        $pattern =
-            '/\#[A-Za-z0-9]{6}/i';
+        $file = $this->resource_path . $resource_name;
+        $handle = fopen($file, "r");
+        $line_number = 0;
+        while (!feof($handle)) {
+            $line = trim(fgets($handle));
+            $line_number += 1;
+            // Get headers
+            if ($line_number == 1) {
+                $i = 0;
+                $field_names = explode(",", $line);
 
+                foreach ($field_names as $field) {
+                    $field_names[$i] = preg_replace(
+                        '/[\x00-\x1F\x80-\xFF]/',
+                        "",
+                        $field
+                    );
+                    $i += 1;
+                }
+                continue;
+            }
+
+            $arr = [];
+            $field_values = explode(",", $line);
+            $i = 0;
+            foreach ($field_names as $field_name) {
+                if (!isset($field_values[$i])) {
+                    $field_values[$i] = null;
+                }
+                $arr[$field_name] = $field_values[$i];
+                $i += 1;
+            }
+
+            $slug = $this->getSlug($arr["name"]);
+            $variable_slug = str_replace("-", "_", $slug);
+            //$arr['colour'] = $this->allocatehexColour($arr['hex']);
+            $this->colour_names[$slug] = $arr;
+        }
+
+        fclose($handle);
+        return $this->colour_names;
+    }
+
+    public function extractColours($text)
+    {
+        $pattern = "/\#[A-Za-z0-9]{6}/i";
 
         preg_match_all($pattern, $text, $match);
         if (!isset($colours)) {
@@ -145,5 +193,4 @@ class Colours extends Agent
 
         return $colours;
     }
-
 }

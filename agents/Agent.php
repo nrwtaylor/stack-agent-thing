@@ -653,9 +653,13 @@ public function __set($name, $value) {
         //$this->makeChoices();
         $this->makeMessage();
         $this->makeChart();
+
         $this->makeImage();
         $this->makePNG();
         $this->makePNGs();
+        $this->makeJPEG();
+       $this->makeJPEGs();
+
         $this->makeSMS();
 
         // Snippet might be used by web.
@@ -3618,6 +3622,22 @@ if ($pid == -1) {
     public function makePNGs()
     {
     }
+
+    /**
+     *
+     */
+    public function makeJPEG()
+    {
+    }
+
+    /**
+     *
+     */
+    public function makeJPEGs()
+    {
+    }
+
+
 
     /**
      *

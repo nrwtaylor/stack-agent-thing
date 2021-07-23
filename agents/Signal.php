@@ -1210,7 +1210,27 @@ if (isset($this->signal_thing->uuid)) {
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
+        $this->thing_report['png'] = $agent->PNG;
     }
+
+    public function makeJPEG()
+    {
+        if (!isset($this->image)) {
+            $this->makeImage();
+        }
+        $agent = new JPEG($this->thing, "jpeg");
+
+        //$this->makeImage();
+
+        $agent->makeJPEG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->JPEG = $agent->JPEG;
+        $this->JPEG_embed = $agent->JPEG_embed;
+        $this->thing_report['jpeg'] = $agent->JPEG;
+    }
+
 
     public function readSignal()
     {
