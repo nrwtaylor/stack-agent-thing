@@ -68,6 +68,60 @@ class Colour extends Agent
         return imagecolorallocate($im, $r, $g, $b);
     }
 
+    public function hextorgbColour($hex)
+    {
+        $hex = ltrim($hex, "#");
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        return [$r, $g, $b];
+    }
+
+    public function makeLink()
+    {
+        $this->link = false;
+
+        if (isset($this->colour) and isset($this->colour["hex"])) {
+            $colour = $this->colour["hex"];
+            $hex = ltrim($colour, "#");
+
+            $this->link = "https://htmlcolors.com/hex/" . $hex;
+        }
+        $this->thing_report["link"] = $this->link;
+    }
+
+    public function closesthexColour($hex)
+    {
+        $hex = ltrim($hex, "#");
+        $target_r = hexdec(substr($hex, 0, 2));
+        $target_g = hexdec(substr($hex, 2, 2));
+        $target_b = hexdec(substr($hex, 4, 2));
+
+        if (!isset($this->colour_names)) {
+            $this->colour_names = $this->loadColours();
+        }
+
+        $closest_distance = 1e99;
+
+        foreach ($this->colour_names as $slug => $colour_array) {
+            list($r, $g, $b) = $this->hextorgbColour($colour_array["hex"]);
+
+            $distance = pow(
+                pow($target_r - $r, 2) +
+                    pow($target_g - $g, 2) +
+                    pow($target_b - $b, 2),
+                0.5
+            );
+            if ($distance < $closest_distance) {
+                $closest_colour = $colour_array;
+                $closest_distance = $distance;
+            }
+        }
+
+        return $closest_colour;
+    }
+
     public function hexColour($text)
     {
         $pattern = "/\#[A-Za-z0-9]{6}/i";
@@ -103,6 +157,27 @@ class Colour extends Agent
         return false;
     }
 
+    public function closesttextColour($text)
+    {
+        if (!isset($this->colour_names)) {
+            $this->colour_names = $this->loadColours();
+        }
+
+        $closest_distance = 1e99;
+
+        foreach ($this->colour_names as $slug => $colour_array) {
+            $distance = levenshtein(
+                $this->getSlug($colour_array["name"]),
+                $this->getSlug($text)
+            );
+            if ($distance < $closest_distance) {
+                $closest_colour = $colour_array;
+                $closest_distance = $distance;
+            }
+        }
+        return $closest_colour;
+    }
+
     public function texthexColour($text)
     {
         $hex = $this->textColour($text);
@@ -110,5 +185,75 @@ class Colour extends Agent
             return $hex["hex"];
         }
         return false;
+    }
+
+    public function respondResponse()
+    {
+        //        $this->makeHelp();
+        //        $this->makeInfo();
+        $this->thing->flagGreen();
+
+        $message_thing = new Message($this->thing, $this->thing_report);
+        //$thing_report['info'] = $message_thing->thing_report['info'];
+    }
+
+    public function makeSMS()
+    {
+        $sms_message = strtoupper($this->agent_name) . " | " . $this->response;
+        $this->sms_message = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
+    }
+
+    public function readSubject()
+    {
+        $input = $this->input;
+        $filtered_input = $this->assert(strtolower($input));
+        if ($filtered_input != "") {
+            $colours = $this->extractColours($this->input);
+
+            if (count($colours) !== 0) {
+                $this->response .= "Saw " . $colours[0] . " is a colour. ";
+                $x = $this->closesthexColour($colours[0]);
+
+                if ($x["hex"] === $colours[0]) {
+                    $this->response .= "A colour called " . $x["name"] . ". ";
+                } else {
+                    $this->response .=
+                        "A colour close to " .
+                        $x["name"] .
+                        " (" .
+                        $x["hex"] .
+                        "). ";
+                }
+
+                $this->colour = $x;
+            }
+
+            $colour = $this->textColour($filtered_input);
+            // Found exact.
+            if ($colour !== false) {
+                $this->response .=
+                    "Saw " .
+                    $filtered_input .
+                    " is a colour (" .
+                    $colour["hex"] .
+                    "). ";
+                $this->colour = $colour;
+            } else {
+                // Look for a close levenshtein match.
+                $colour = $this->closesttextColour($filtered_input);
+                $this->response .=
+                    "Saw " .
+                    $colour["name"] .
+                    " might be a close match colour (" .
+                    $colour["hex"] .
+                    "). ";
+                $this->colour = $colour;
+            }
+        }
+
+        if (!isset($this->colour)) {
+            $this->response .= "Did not hear a colour. ";
+        }
     }
 }
