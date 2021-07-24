@@ -66,6 +66,13 @@ class Ngram extends Agent
         }
     }
 
+    public function countNgrams($text) {
+
+       $tokens = explode(" ", $text);
+       return count($tokens);
+
+    }
+
     public function getNgrams($input, $n = 3)
     {
         if (is_array($input)) {
