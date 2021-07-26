@@ -350,9 +350,11 @@ class Colour extends Agent
                 }
 
                 $agent = new Agent($this->thing, $filtered_input);
-                $sms = $agent->thing_report["sms"];
-                $message = $agent->thing_report["message"];
-                $colour = $this->extractColour($message);
+                // $sms = $agent->thing_report["sms"];
+                if (isset($agent->thing_report["message"])) {
+                    $message = $agent->thing_report["message"];
+                    $colour = $this->extractColour($message);
+                }
 
                 // If no color is found but there is bit of text provided.
                 // Try to find it.
