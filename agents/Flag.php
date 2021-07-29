@@ -54,6 +54,8 @@ class Flag extends Agent
 
     }
 
+
+
     function isFlag($flag = null)
     {
         // Validates whether the Flag is green or red.

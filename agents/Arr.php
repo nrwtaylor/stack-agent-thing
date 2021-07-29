@@ -98,6 +98,17 @@ class Arr extends Agent
         return ceil(($max_indentation - 1) / 2) + 1;
     }
 
+    public function variableArr(array $array, $variable_name) {
+
+//        if (!isset($this->{$variable_name})) {$this->{$variable_name} = new \stdClass();}
+$temp_variable = new \stdClass();
+        foreach($variable_array as $variable_variable_name=>$variable_value) {
+            $temp_variable->{$variable_variable_name} = $variable_value;
+        }
+return $temp_variable;
+
+    }
+
     public function snippetArr(array $array)
     {
         $web = "";

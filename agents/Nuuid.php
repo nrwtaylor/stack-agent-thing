@@ -96,6 +96,7 @@ class Nuuid extends Agent
     function extractNuuid($input)
     {
         $nuuids = $this->extractNuuids($input);
+
         if (!is_array($nuuids)) {
             return true;
         }
@@ -327,8 +328,7 @@ class Nuuid extends Agent
             return true;
         }
 
-        $thing_report = $this->thing->db->nuuidSearch($nuuid);
-        $things = $thing_report['things'];
+        $things = $this->thingsNuuid($nuuid);
 
         if (count($things) == 1) {
             $this->response .= "Got a UUID from the stack. ";
@@ -336,9 +336,24 @@ class Nuuid extends Agent
             return $nuuid_uuid;
         }
 
-        $this->response .= "Did not find a corresponding UUID. ";
+        if (count($things) > 1) {
+            return null;
+        }
 
+        $this->response .= "Did not find a corresponding UUID. ";
         return false;
+    }
+
+    public function thingsNuuid($nuuid = null) {
+        if ($nuuid == null) {
+            return true;
+        }
+
+        $thing_report = $this->thing->db->nuuidSearch($nuuid);
+        $things = $thing_report['things'];
+        $this->things = $things;
+        return $things;
+
     }
 
     /**

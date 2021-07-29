@@ -29,13 +29,20 @@ class Socket extends Agent
 
     function initSocket()
     {
-        if (is_array($this->agent_input)) {
-            $this->thing->console("readArray");
-        }
-
         $this->session_terminator = ".";
         $this->address = "127.0.0.1";
         $this->port = 7075;
+
+        if (is_array($this->agent_input)) {
+
+if (isset($this->agent_input['session_terminator'])) {
+$this->session_terminator = $this->agent_input['session_terminator'];}
+if (isset($this->agent_input['address'])) {$this->address = $this->agent_input['address'];}
+if (isset($this->agent_input['port'])) {$this->port = $this->agent_input['port'];}
+
+
+        }
+
     }
 
     function streamSocket()
@@ -46,7 +53,6 @@ class Socket extends Agent
         // Settings
         $address = $this->address;
         $port = $this->port;
-
         /*
     function socket_create ( int $domain , int $type , int $protocol )
     $domain can be AF_INET, AF_INET6 for IPV6 , AF_UNIX for Local communication protocol
@@ -73,7 +79,7 @@ class Socket extends Agent
 
         if (socket_bind($socket, $address, $port) === false) {
             $this->thing->console(
-                "Bind Error " . socket_strerror(socket_last_error($sock)) . "\n"
+                "Bind Error " . socket_strerror(socket_last_error($socket)) . "\n"
             );
         }
 
@@ -151,8 +157,6 @@ class Socket extends Agent
         $input = $this->input;
 
         $filtered_input = $this->assert($input, "socket", false);
-
-        var_dump($filtered_input);
 
         if (strtolower($filtered_input) === "stream") {
             $this->streamSocket();

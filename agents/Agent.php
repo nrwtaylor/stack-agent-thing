@@ -24,14 +24,12 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
-
         // dev test
-//        if ($thing == false) {
-//           $thing = new Thing(false);
-           //$this->thing = false;
-           //return;
-//        }
-
+        //        if ($thing == false) {
+        //           $thing = new Thing(false);
+        //$this->thing = false;
+        //return;
+        //        }
 
         if ($thing == null) {
             $thing = new Thing(null);
@@ -188,17 +186,12 @@ class Agent
 
 }
 */
-
         $this->init();
 
         // read the current agent.
-        if (
-        //    $this->agent_class_name !== "Agent" and
-            method_exists($this, "init" . $this->agent_class_name)
-        ) {
+        if (method_exists($this, "init" . $this->agent_class_name)) {
             $this->{"init" . $this->agent_class_name}();
         }
-
 
         $this->get();
         try {
@@ -276,7 +269,8 @@ class Agent
         $this->thing->log("__construct complete");
     }
 
-    public function initAgent() {
+    public function initAgent()
+    {
     }
 
     // TODO DEV?
@@ -658,7 +652,7 @@ public function __set($name, $value) {
         $this->makePNG();
         $this->makePNGs();
         $this->makeJPEG();
-       $this->makeJPEGs();
+        $this->makeJPEGs();
 
         $this->makeSMS();
 
@@ -917,12 +911,12 @@ public function __set($name, $value) {
     public function traceAgent()
     {
         //get the trace
-$agent_trace = [];
+        $agent_trace = [];
         $trace = debug_backtrace();
-foreach($trace as $i=>$t) {
-$agent_trace[] = $t["class"];
-}
-return $agent_trace;;
+        foreach ($trace as $i => $t) {
+            $agent_trace[] = $t["class"];
+        }
+        return $agent_trace;
         // Get the class that is asking for who awoke it
         if (!isset($trace[1]["class"])) {
             $this->calling_agent = true;
@@ -947,7 +941,6 @@ return $agent_trace;;
 
         $this->calling_agent = null;
     }
-
 
     function listAgents()
     {
@@ -1125,6 +1118,10 @@ return $agent_trace;;
     {
         if ($agent == null) {
             $agent = $this->agent_name;
+        }
+
+        if (is_array($input)) {
+            return "";
         }
 
         $string = $input;
@@ -1824,7 +1821,6 @@ return $agent_trace;;
 
         $this->readFrom();
         $this->readSubject();
-
         // read the current agent.
         if (
             $this->agent_class_name !== "Agent" and
@@ -1897,9 +1893,9 @@ return $agent_trace;;
 
         //if ($agent_class_name == null) {return true;}
 
-//$shouldExit = true;
+        //$shouldExit = true;
         register_shutdown_function([$this, "shutdownHandler"]);
-/*
+        /*
 register_shutdown_function(function() use (&$shouldExit) {
     if (! $shouldExit) {
 echo "!shouldexit";
@@ -1911,7 +1907,6 @@ $this->shutdownHandler();
 
         //if ($agent_class_name == 'Test') {return false;}
         set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
-
 
         //set_error_handler("warning_handler", E_WARNING);
 
@@ -1943,14 +1938,10 @@ $this->shutdownHandler();
                 $thing->subject = $this->input;
             }
 
+            $agent = new $agent_namespace_name($thing, $agent_input);
+            //$shouldExit = false;
 
-
-
-
-	          $agent = new $agent_namespace_name($thing, $agent_input);
-//$shouldExit = false;
-
-/*
+            /*
 $pid = pcntl_fork();
 if ($pid == -1) {
  die('could not fork');
@@ -1978,22 +1969,20 @@ if ($pid == -1) {
             restore_error_handler();
 
             // If the agent returns true it states it's response is not to be used.
-            if (((isset($agent->response) and $agent->response === true))) {
+            if (isset($agent->response) and $agent->response === true) {
                 throw new Exception("Flagged true.");
             }
 
             //if ($agent->thing_report == false) {return false;}
 
-//if (isset($agent)) {
+            //if (isset($agent)) {
             $this->thing_report = $agent->thing_report;
             $this->agent = $agent;
-//} else {
-//$this->thing_report = false;
-//$this->agent = false;
-//$agent = false;
-//}
-
-
+            //} else {
+            //$this->thing_report = false;
+            //$this->agent = false;
+            //$agent = false;
+            //}
         } catch (\Throwable $t) {
             restore_error_handler();
 
@@ -2101,7 +2090,6 @@ if ($pid == -1) {
         }
         $responsive_agents = [];
         foreach ($agents as $i => $agent_package) {
-
             // Allow for doing something smarter here with
             // word position and Bayes.  Agent scoring
             // But for now call the first agent found and
@@ -2296,7 +2284,9 @@ if ($pid == -1) {
     public function readSubject()
     {
         // Only run this for agent
-        if ($this->agent_name !== "agent") {return;}
+        if ($this->agent_name !== "agent") {
+            return;
+        }
 
         $this->thing->log('read subject "' . $this->subject . '".');
 
@@ -2387,11 +2377,6 @@ if ($pid == -1) {
                     return false;
                 }
             }
-
-            //if ($button_agent == $token_agent) {
-            //    $this->response .=
-            //        "Clicked the " . strtoupper($button_agent) . " button.";
-            //}
         }
 
         // Dev test for robots
@@ -2433,6 +2418,7 @@ if ($pid == -1) {
 
         $nuuid = new Nuuid($this->thing, "nuuid");
         $n = $nuuid->extractNuuid($input);
+
         // See if this matches a stripe token
         if ($n != false) {
             $temp_email = $this->thing->db->from;
@@ -2456,19 +2442,64 @@ if ($pid == -1) {
                         return;
                     }
                 }
+
+                foreach ($t as $t_uuid => $t_thing) {
+                    if (strpos($t_thing["task"], "ship") !== false) {
+                        $thing = new Thing($t_thing["uuid"]);
+                        $ship_agent = new Ship($thing, "ship token recognized");
+                        $this->thing_report = $ship_agent->thing_report;
+                        return;
+                    }
+                }
+
+                // Reset the database email address
+                $this->thing->db->from = $temp_email;
+
+                // Single match to the nuuid.
+                // dev Things can be forgotten so no guarantee this is
+                // the matching uuid.
+                // But it is the best there is on this stack.
+                if (
+                    isset($nuuid->nuuid_uuid) and is_string($nuuid->nuuid_uuid)
+                ) {
+                    $nuuid_filtered_input = trim(
+                        str_replace($nuuid->nuuid_uuid, "", $input)
+                    );
+
+                    $thing = new Thing($nuuid->nuuid_uuid);
+                    $agent = new Agent($thing, $nuuid_filtered_input);
+                    $this->thing_report = $agent->thing_report;
+                    return;
+                }
+
+                // Multiple match to the nuuid.
+                if (isset($nuuid->nuuid_uuid) and $nuuid->nuuid_uuid == null) {
+                    $this->response .=
+                        "Development code for multiple matching nuuids. ";
+                    $nuuid_filtered_input = trim(
+                        str_replace($nuuid->nuuid_uuid, "", $input)
+                    );
+                    $thing = new Thing($nuuid->nuuid_uuid);
+                    $lowest_score = 1e99;
+                    foreach ($nuuid->things as $i => $nuuid_thing) {
+                        $score = levenshtein(
+                            $nuuid_thing["task"],
+                            $nuuid_filtered_input
+                        );
+                        if ($score < $lowest_score) {
+                            $lowest_score = $score;
+                            $best_thing = $nuuid_thing;
+                        }
+                        //            $agent = new Agent($thing, $nuuid_filtered_input);
+                        //            $this->thing_report = $agent->thing_report;
+                        //            return;
+                    }
+                    $agent = new Agent($best_thing, $nuuid_filtered_input);
+                    $this->thing_report = $agent->thing_report;
+                    return;
+                }
             }
-            // Reset the database email address
-            $this->thing->db->from = $temp_email;
         }
-
-        if (isset($nuuid->nuuid_uuid) and is_string($nuuid->nuuid_uuid)) {
-            $thing = new Thing($nuuid->nuuid_uuid);
-            $f = trim(str_replace($nuuid->nuuid_uuid, "", $input));
-            $agent = new Agent($thing, $f);
-            $this->thing_report = $agent->thing_report;
-            return;
-        }
-
         $uuid = new Uuid($this->thing, "uuid");
         $uuid = $uuid->extractUuid($input);
 
@@ -3636,8 +3667,6 @@ if ($pid == -1) {
     public function makeJPEGs()
     {
     }
-
-
 
     /**
      *
