@@ -391,6 +391,11 @@ class Url extends Agent
         return $text;
     }
 
+    public function readUrl($text = null) {
+      if (!$this->isUrl($text)) {return true;}
+      return $this->urlRead($text);
+    }
+
     public function readSubject()
     {
         $this->response = null;

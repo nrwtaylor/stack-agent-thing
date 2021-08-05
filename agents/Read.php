@@ -172,6 +172,7 @@ class Read extends Agent
 
         // Test
         $this->do_not_cache = false; // False = allow caching
+        return $this->contents;
     }
 
     function copyrightRead($html)

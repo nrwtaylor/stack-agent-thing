@@ -11,11 +11,6 @@ namespace Nrwtaylor\StackAgentThing;
 // https://kb.meinbergglobal.com/kb/time_sync/ntp/configuration/ntp_leap_second_file
 // ftp://tycho.usno.navy.mil/pub/ntp/leap-seconds.list
 
-/*
-November 20, 2038. “GPS devices that use only the C/A code and its legacy navigation message (LNAV) can expect the next rollover on November 20, 2038.” https://www.gps.gov/support/user/rollover/
-2137. “Newer devices can avoid that event [November 20, 2038 GPS rollover] by using the new civil signals being added to GPS. Those signals use a modernized civil navigation message (CNAV) with a 13-bit week number that won't roll over until 2137.” 
-*/
-
 // dev cache local leap seconds file
 // dev implement GPS time to unix converter
 // test
@@ -28,12 +23,10 @@ class GPS extends Agent
 
     function init()
     {
-
 $this->url = 'https://hpiers.obspm.fr/iers/bul/bulc/ntp/leap-seconds.list';
 echo "foo";
 $this->getleaps();
 echo "bar";
-
     }
 
     function run()
@@ -44,11 +37,9 @@ echo "bar";
 // Define GPS leap seconds
    function getleaps() {
 $read_handler = new Read($this->thing, "read");
-echo "starting url read";
 $read_handler->urlRead($this->url);
-echo "completed url read";
-var_dump($read_handler->sentences);
-var_dump($read_handler->contents);
+//var_dump($read_handler->sentences);
+//var_dump($read_handler->contents);
       $leaps = array(46828800, 78364801, 109900802, 173059203, 252028804, 315187205, 346723206, 393984007, 425520008, 457056009, 504489610, 551750411, 599184012, 820108813, 914803214, 1025136015, 1119744016, 1167264017);
       return $leaps;
    }
