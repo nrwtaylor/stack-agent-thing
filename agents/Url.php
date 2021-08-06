@@ -392,8 +392,10 @@ class Url extends Agent
     }
 
     public function readUrl($text = null) {
-      if (!$this->isUrl($text)) {return true;}
-      return $this->urlRead($text);
+// dev below creates a loop
+// develop
+//      if (!$this->isUrl($text)) {return true;}
+//      return $this->urlRead($text);
     }
 
     public function readSubject()
@@ -426,7 +428,6 @@ class Url extends Agent
 
 
         $input_input = trim($filtered_input);
-
         if ($input == '') {
             $this->getUrl();
             return;

@@ -619,6 +619,14 @@ return $spread;
         return null;
     }
 
+    public function isNumber($text = null) {
+
+       $number = $this->extractNumber($text);
+       if ($number === null) {return false;}
+       return true;
+
+    }
+
     /**
      *
      * @return unknown

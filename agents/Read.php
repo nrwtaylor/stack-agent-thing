@@ -30,7 +30,6 @@ class Read extends Agent
         $this->do_not_catalogue = false;
 
         $this->read_horizon = 6 * 60 * 60; // 6 hours
-
         $this->initRead();
     }
 
@@ -57,7 +56,7 @@ class Read extends Agent
         //$this->urlRead($this->link);
     }
 
-    function urlRead($link = null)
+    function urlRead($link = null, $file_cache_horizon = null)
     {
         if ($link === null) {
             return true;
@@ -65,6 +64,24 @@ class Read extends Agent
 
         // Pass through google doc reader url rewriter.
         $link = $this->googleRead($link);
+
+        if ($file_cache_horizon !== null) {
+            $uri = $link;
+            $slug_agent = new Slug($this->thing, "slug");
+            $uri_slug = $slug_agent->getSlug($uri);
+            $file = $this->resource_path . "read/" . $uri_slug;
+
+            $cached_time = filemtime($file);
+            $age = time() - $cached_time;
+            // Use cached file if horizon is set and age is less than horizon.
+            if ($age < $file_cache_horizon) {
+                $this->contents = file_get_contents($file);
+
+                $this->response .= "Got local file cache. ";
+                return $this->contents;
+                //return $this->contents;
+            }
+        }
 
         // Now have this->link potentially from reading subject
         $this->matched_sentences = [];
@@ -116,9 +133,20 @@ class Read extends Agent
                     }
                 }
                 // Populate $this->contents
-                $this->getUrl($link);
+                $get_url_response = $this->getUrl($link);
+
+                if ($get_url_response === true) {
+                    $this->do_not_index = true;
+                    $this->do_not_cache = true;
+                    $this->contents = true;
+                    $this->sentences = true;
+                    // Read as noindex do not set url
+                    $this->response .= "No url response. ";
+                    return true;
+                }
 
                 $this->metaRead($this->contents);
+
                 if ($this->noindexRead($this->contents)) {
                     $this->do_not_index = true;
                     // Read as noindex do not set url
@@ -144,7 +172,6 @@ class Read extends Agent
                 // Get all the URLs in the page.
                 //                $url_agent = new Url($this->thing, "url");
                 //                $this->urls = $url_agent->extractUrls($this->contents);
-
                 $this->extractUrls($this->contents);
 
                 $text = strip_tags($this->contents);
@@ -169,7 +196,6 @@ class Read extends Agent
                     }
                 }
         }
-
         // Test
         $this->do_not_cache = false; // False = allow caching
         return $this->contents;
@@ -276,7 +302,6 @@ class Read extends Agent
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 $response = $this->readRead($thing_object["task"]);
-
                 // This can be refactered I think with a call to the empty thing function.
                 //if ($response == false) {continue;}
                 //if ($response == true) {continue;}
@@ -536,11 +561,10 @@ class Read extends Agent
         $this->refreshed_at = $this->variables_agent->getVariables(
             "refreshed_at"
         );
-
         $this->getReads();
     }
 
-    function getUrl($url = null)
+    function getUrl($url = null, $file_cache_horizon = false)
     {
         $this->contents = false;
         if ($url == null) {
@@ -575,6 +599,28 @@ class Read extends Agent
             $this->response .=
                 "Last read " . $this->thing->human_time($last_seen) . " ago. ";
         }
+
+        // See whether there is a file stored.
+
+        if ($file_cache_horizon !== false) {
+            $slug_agent = new Slug($this->thing, "slug");
+            $uri_slug = $slug_agent->getSlug($uri);
+            $file = $this->resource_path . "read/" . $uri_slug;
+
+            $cached_time = filemtime($file);
+            $age = time() - $cached_time;
+            // Use cached file if horizon is set and age is less than horizon.
+            if ($age < $file_cache_horizon) {
+                $this->contents = file_get_contents($file);
+
+                $this->response .=
+                    "Got local file cache " . $age . " seconds old. ";
+
+                return;
+                //return $this->contents;
+            }
+        }
+
         $context = null;
         if (isset($this->robot_agent)) {
             $options = [
@@ -733,7 +779,10 @@ class Read extends Agent
             }
 
             $this->sentencesRead();
-            $sentence = $this->sentences[0];
+
+            if ($this->sentences !== true) {
+                $sentence = $this->sentences[0];
+            }
 
             $word_agent = new Word($this->thing, "word");
             $words = $word_agent->extractWords($this->contents);
@@ -756,7 +805,6 @@ class Read extends Agent
     public function respondResponse()
     {
         // Thing actions
-
         $this->thing->flagGreen();
 
         $this->thing_report["email"] = $this->sms_message;
@@ -826,10 +874,7 @@ class Read extends Agent
 
         $this->num_hits = 0;
 
-        //        $url_agent = new Url($this->thing, "url");
-        //        $url = $url_agent->extractUrl($input);
         $url = $this->extractUrl($input);
-
         $url = $this->googleRead($url);
 
         $filename = "/" . $url;
@@ -849,20 +894,5 @@ class Read extends Agent
         $this->search_phrase = trim(strtolower($input));
 
         $this->urlRead($this->link);
-
-        //        $input = str_replace($this->url, "", $input);
-        //        $this->search_phrase = trim(strtolower($input));
-
-        //        $pieces = explode(" ", strtolower($input));
-
-        //        if (count($pieces) == 1) {
-        //            if ($input == 'read') {
-        //                return;
-        //            }
-        //        }
-
-        //        return "Message not understood";
-
-        //        return false;
     }
 }

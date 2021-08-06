@@ -23,6 +23,7 @@ class NTP extends Agent
         $this->thing_report["info"] =
             "This connects to an authorative time server.";
         $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
+        $this->epoch_convert = 2208988800;
     }
 
     /**
@@ -92,6 +93,14 @@ class NTP extends Agent
     {
         $choices = false;
         $this->thing_report["choices"] = $choices;
+    }
+
+    public function timestampNTP($ntp = null)
+    {
+        if ($ntp == null) {
+            return true;
+        }
+        return $ntp - $this->epoch_convert;
     }
 
     function doNTP($text = null)
@@ -178,7 +187,7 @@ class NTP extends Agent
      */
     public function readSubject()
     {
-        $this->doNTP($this->input);
+        //        $this->doNTP($this->input);
 
         return false;
     }

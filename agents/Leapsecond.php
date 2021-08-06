@@ -1,9 +1,19 @@
 <?php
 /**
- * Second.php
+ * Leapsecond.php
  *
  * @package default
  */
+
+// review https://www.ietf.org/timezones/data/leap-seconds.list
+// review https://www.usno.navy.mil/USNO/time/master-clock/leap-seconds
+// not found http://maia.usno.navy.mil/ser7/tai-utc.dat list of historical leap seconds
+// https://kb.meinbergglobal.com/kb/time_sync/ntp/configuration/ntp_leap_second_file
+// ftp://tycho.usno.navy.mil/pub/ntp/leap-seconds.list
+
+// dev cache local leap seconds file
+
+// https://hpiers.obspm.fr/iers/bul/bulc/ntp/leap-seconds.list
 
 namespace Nrwtaylor\StackAgentThing;
 
@@ -15,7 +25,7 @@ use setasign\Fpdi;
 
 ini_set("allow_url_fopen", 1);
 
-class Second extends Agent
+class Leapsecond extends Agent
 {
     public $var = "hello";
 
@@ -29,7 +39,7 @@ class Second extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] =
-            "A SECOND is a measurement of elapsed time.";
+            "A LEAP SECOND is a reconcilation of elapsed time.";
         $this->thing_report["help"] = "Click on the image for a PDF.";
 
         $this->resource_path = $GLOBALS["stack_path"] . "resources/";
@@ -37,11 +47,13 @@ class Second extends Agent
         $command_line = null;
 
         $this->node_list = [
-            "second" => ["leap second", "minut", "year", "uuid"],
+            "leap second" => ["leap second", "minute", "year", "uuid"],
         ];
 
         $this->current_time = $this->thing->json->time();
 
+        $this->leap_seconds_url = "https://hpiers.obspm.fr/iers/bul/bulc/ntp/leap-seconds.list";
+        $this->leap_second_cache_horizon = 24 * 60 * 60;
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container["stack"]["entity_name"];
 
@@ -55,7 +67,7 @@ class Second extends Agent
         $this->time_remaining = $agent->time_remaining;
         $this->persist_to = $agent->persist_to;
 
-        $this->initSecond();
+        $this->initLeapsecond();
 
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
@@ -75,51 +87,11 @@ class Second extends Agent
 
     public function set()
     {
-        $this->setSecond();
+        $this->setLeapsecond();
     }
 
-    /**
-     *
-     * @param unknown $text (optional)
-     */
-    function getQuickresponse($text = null)
-    {
-        if ($text == null) {
-            $text = $this->web_prefix;
-        }
-        $agent = new Qr($this->thing, $text);
-        $this->quick_response_png = $agent->PNG_embed;
-    }
+    public function countLeapseconds($timestamp) {
 
-    /**
-     *
-     */
-    public function getNuuid()
-    {
-        $agent = new Nuuid($this->thing, "nuuid");
-        $this->nuuid_png = $agent->PNG_embed;
-    }
-
-    /**
-     *
-     * @param unknown $input
-     */
-    function getWhatis($input)
-    {
-        $whatis = "second";
-        $whatIWant = $input;
-        if (($pos = strpos(strtolower($input), $whatis . " is")) !== false) {
-            $whatIWant = substr(
-                strtolower($input),
-                $pos + strlen($whatis . " is")
-            );
-        } elseif (($pos = strpos(strtolower($input), $whatis)) !== false) {
-            $whatIWant = substr(strtolower($input), $pos + strlen($whatis));
-        }
-
-        $filtered_input = ltrim($whatIWant, " ");
-
-        $this->whatis = $filtered_input;
     }
 
     /**
@@ -127,7 +99,7 @@ class Second extends Agent
      * @param unknown $t (optional)
      * @return unknown
      */
-    public function timestampSecond($t = null)
+    public function timestampLeapsecond($t = null)
     {
         if (!isset($this->retain_to)) {
             $text = "X";
@@ -170,23 +142,24 @@ class Second extends Agent
      */
     public function makeSMS()
     {
-        $sms = "SECOND | ";
+        $sms = "LEAP SECOND | ";
 
-        $seconds = [];
-        if (isset($this->seconds)) {
-            $seconds = $this->seconds;
+        $leap_seconds = [];
+        if (isset($this->leap_seconds)) {
+            $leap_seconds = $this->leap_seconds;
         }
 
-        $second_text = "";
-        foreach ($seconds as $i => $second) {
-            $second_text .= $second["second"] . " ";
+        $leap_second_text = "";
+        foreach ($leap_seconds as $i => $leap_second) {
+            $leap_second_text .= $leap_second["ntp_time"] . " ";
         }
-        $sms .= $second_text;
+        $sms .= $leap_second_text;
+        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/leap_second";
+        $sms .= " | " . $this->response;
 
-
-        $sms .= "" . $this->response;
-
-        $sms .= $this->web_prefix . "thing/" . $this->uuid . "/second";
+        if (isset($this->file_expiry_date)) {
+            $sms .= "File expires " . $this->file_expiry_date . ". ";
+        }
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }
@@ -196,20 +169,20 @@ class Second extends Agent
      */
     public function makeMessage()
     {
-        $message = "Made a second for you.<br>";
+        $message = "Made a leap second for you.<br>";
 
         $uuid = $this->uuid;
 
         $message .=
             "Keep on stacking.\n\n<p>" .
             $this->web_prefix .
-            "thing/$uuid/second.png\n \n\n<br> ";
+            "thing/$uuid/leap_second.png\n \n\n<br> ";
         $message .=
             '<img src="' .
             $this->web_prefix .
             "thing/" .
             $uuid .
-            '/second.png" alt="second" height="92" width="92">';
+            '/leap_second.png" alt="leap_second" height="92" width="92">';
 
         $this->thing_report["message"] = $message;
     }
@@ -217,37 +190,120 @@ class Second extends Agent
     /**
      *
      */
-    public function setSecond()
+    public function setLeapsecond()
     {
-        return;
+//        return;
+$leap_second = false;
+if (isset($this->leap_second)) {
+$leap_second = $this->leap_second;
+}
         $this->thing->json->setField("variables");
         $this->thing->json->writeVariable(
-            ["second", "decimal"],
-            $this->decimal_second
+            ["leap_second", "leap_second"],
+            $leap_second
         );
+    }
 
-        $this->thing->log(
-            $this->agent_prefix .
-                " saved decimal second " .
-                $this->decimal_second .
-                ".",
-            "INFORMATION"
-        );
+    public function loadLeapseconds()
+    {
+
+        $url = $this->leap_seconds_url;
+
+        //       $contents = $this->urlRead($url, 24*60*60);
+
+        // or
+        // better because the results of the read are available.
+
+if (isset($this->file_expiry_date)) {
+if ($this->file_expiry_date < strtotime($this->current_time)) {return true;}
+}
+
+
+if (isset($this->leap_seconds_list)) {return $this->leap_seconds_list;}
+
+        $read_handler = new Read($this->thing, "read");
+        $read_handler->urlRead($url, $this->leap_second_cache_horizon);
+        $this->response .= $read_handler->response;
+        $lines = explode("\n", $read_handler->contents);
+        foreach ($lines as $i => $line) {
+            if (substr($line, 0, 2) == "#\$") {
+                $comp = preg_split("/\s+/", $line);
+                $this->file_last_update = $this->timestampNTP($comp[1]);
+            }
+            if (substr($line, 0, 2) == "#@") {
+                $comp = preg_split("/\s+/", $line);
+                $this->file_expiry_date = $this->timestampNTP($comp[1]);
+            }
+
+            if (substr($line, 0, 1) == "#") {
+                continue;
+            }
+            if ($line == "") {
+                continue;
+            }
+
+            $comp = preg_split("/\s+/", $line);
+
+            /*
+#	NTP timestamp (X parameter) is the number of seconds since 1900.0
+#
+#	MJD: The Modified Julian Day number. MJD = X/86400 + 15020
+#
+#	DTAI: The difference DTAI= TAI-UTC in units of seconds
+#	It is the quantity to add to UTC to get the time in TAI
+#
+#	Day Month Year : epoch in clear
+#
+#NTP Time      DTAI    Day Month Year
+*/
+            $ntp_time = $comp[0];
+            $dtai = $comp[1];
+            $day = $comp[3];
+            $month = $comp[4];
+            $year = $comp[5];
+
+            // dev review this
+            // https://stackoverflow.com/questions/16592142/retrieve-time-from-ntp-server-via-php
+            // $tmestamp = $timevalue - 2208988800; # convert to UNIX epoch time stamp
+            $timestamp = $this->timestampNTP($ntp_time);
+            $leap_second = [
+                "ntp_time" => $ntp_time,
+                "timestamp" => $timestamp,
+                "dtai" => $dtai,
+                "date" => $day . "-" . $month . "-" . $year,
+            ];
+            $leap_seconds[] = $leap_second;
+        }
+$this->leap_seconds_list = $leap_seconds;
+return $this->leap_seconds_list;
     }
 
     /**
      *
      * @return unknown
      */
-    public function getSecond()
+    public function getLeapsecond($text = null)
     {
+if ($text === null) {return true;}
+
+foreach($this->leap_seconds_list as $i=>$leap_second) {
+
+if ($text == $leap_second['ntp_time']) {return $leap_second;}
+if ($text == $leap_second['timestamp']) {return $leap_second;}
+if (strtotime($text) == strtotime($leap_second['date'])) {return $leap_second;}
+
+}
+
+return false;
+
     }
 
     /**
      *
      */
-    public function initSecond()
+    public function initLeapsecond()
     {
+        $this->loadLeapseconds();
     }
 
     public function run()
@@ -259,8 +315,8 @@ class Second extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/second.pdf";
-        $this->node_list = ["second" => ["minute" => ["year"]]];
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/leap_second.pdf";
+        $this->node_list = ["leap second" => ["minute" => ["year"]]];
         $web = "";
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
@@ -275,7 +331,7 @@ class Second extends Agent
      */
     public function makeTXT()
     {
-        $txt = "This is a SECOND";
+        $txt = "This is a LEAP SECOND";
         $txt .= "\n";
 
         $this->thing_report["txt"] = $txt;
@@ -386,7 +442,7 @@ class Second extends Agent
 
         $textcolor = imagecolorallocate($this->image, 0, 0, 0);
 
-        $this->drawSecond();
+        $this->drawLeapsecond();
 
         // Write the string at the top left
         $border = 30;
@@ -396,7 +452,7 @@ class Second extends Agent
 
         // devstack add path
         $font = $this->default_font;
-        $text = "A second in slices...";
+        $text = "A leap second in slices...";
         // Add some shadow to the text
         //imagettftext($image, 40, 0, 0, 75, $grey, $font, $number);
 
@@ -435,12 +491,12 @@ class Second extends Agent
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="second"/>';
+            '"alt="leap second"/>';
 
         $this->html_image =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
-            '"alt="second"/>';
+            '"alt="leap second"/>';
 
         $this->PNG_embed = "data:image/png;base64," . base64_encode($imagedata);
 
@@ -449,7 +505,7 @@ class Second extends Agent
         return $response;
     }
 
-    public function drawSecond($type = null)
+    public function drawLeapsecond($type = null)
     {
         if ($type == null) {
             $type = $this->type;
@@ -476,7 +532,7 @@ class Second extends Agent
         $this->image = $this->slice_agent->image;
     }
 
-    public function sliceSecond()
+    public function sliceLeapsecond()
     {
         $size = null;
         if ($size == null) {
@@ -521,7 +577,7 @@ class Second extends Agent
         }
     }
 
-    public function wedgeSecond()
+    public function wedgeLeapsecond()
     {
         $number_of_months = 12;
         if ($this->calendar_type = "13 month") {
@@ -587,7 +643,7 @@ class Second extends Agent
     {
         $this->thing->json->setField("variables");
         $time_string = $this->thing->json->readVariable([
-            "second",
+            "leap_second",
             "refreshed_at",
         ]);
 
@@ -595,7 +651,7 @@ class Second extends Agent
             $this->thing->json->setField("variables");
             $time_string = $this->thing->json->time();
             $this->thing->json->writeVariable(
-                ["second", "refreshed_at"],
+                ["leap_second", "refreshed_at"],
                 $time_string
             );
         }
@@ -612,7 +668,7 @@ class Second extends Agent
             return;
         }
 
-        $this->getWhatis($this->subject);
+        //$this->getWhatis($this->subject);
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
@@ -626,19 +682,19 @@ class Second extends Agent
             $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
 
-            $this->getNuuid();
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
+            //$this->getNuuid();
+            //$pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
 
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetXY(1, 1);
+            //$pdf->SetTextColor(0, 0, 0);
+            //$pdf->SetXY(1, 1);
 
-            $pdf->SetFont("Helvetica", "", 26);
-            $this->txt = "" . $this->whatis . ""; // Pure uuid.
+            //$pdf->SetFont("Helvetica", "", 26);
+            //$this->txt = "" . $this->whatis . ""; // Pure uuid.
 
-            $pdf->SetXY(140, 7);
-            $text = $this->whatis;
-            $line_height = 20;
-            $pdf->MultiCell(150, $line_height, $text, 0);
+            //$pdf->SetXY(140, 7);
+            //$text = $this->whatis;
+            //$line_height = 20;
+            //$pdf->MultiCell(150, $line_height, $text, 0);
 
             if (isset($this->hextile_PNG)) {
                 $top_x = -6;
@@ -665,10 +721,10 @@ class Second extends Agent
             $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . "thing/" . $this->uuid . "/second";
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/leap_second";
 
-            $this->getQuickresponse($link);
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
+            //$this->getQuickresponse($link);
+            //$pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -701,7 +757,7 @@ class Second extends Agent
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
             // Good until?
-            $text = $this->timestampSecond();
+            $text = $this->timestampLeapsecond();
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
@@ -714,114 +770,24 @@ class Second extends Agent
         return $this->thing_report["pdf"];
     }
 
-    public function isSecond($text)
+    public function isLeapsecond($text)
     {
-        if (is_float($text)) {
-            return false;
-        }
 
-        // 1, 2, three or 4 number string.
-        // Possibly followed by a string sec, secs, seconds etc
+// Is it an NTP leap second
 
-        // Apologies to the future.
+foreach($this->leap_seconds_list as $i=>$leap_second) {
 
-        // Any number might be a a count of seconds.
-        //        if (mb_strlen($text) == 4) {
-        if (ctype_digit($text)) {
-            $second = $text;
-            return $second;
-        }
-        //        }
+if ($text == $leap_second['ntp_time']) {return true;}
+if ($text == $leap_second['timestamp']) {return true;}
+if (strtotime($text) == strtotime($leap_second['date'])) {return true;}
 
-        // TODO ?
-        // 23 may 1 is recognized by date_parse as 23 may 2001.
-        // dev?
-
-        $this->parsed_date = date_parse($text);
-        $second = $this->parsed_date["second"];
-
-        if ($second !== false) {
-            // Test if parsed_date has extracted a second from a larger number.
-            $stripped_text = str_replace($second, "", $second);
-            if (mb_strlen($stripped_text) == 0) {
-                return $second;
-            }
-
-            // Look for the year in the format 2021/06/05 or 2021-06-05.
-            /*
-            $variants = [];
-            $variants[] = " " . $year . "-";
-            $variants[] = " " . $year . "/";
-            foreach ($variants as $variant) {
-                if (stripos($text, $variant) !== false) {
-                    return $year;
-                }
-            }
-
-            $variants = [];
-            $variants[] = "" . $year . "-";
-            $variants[] = "" . $year . "/";
-            foreach ($variants as $variant) {
-                if (substr($text, 0, mb_strlen($variant)) == $variant) {
-                    return $year;
-                }
-            }
-*/
-            //            return $year;
-        }
-
-        // Any number less than 60 could be a second.
-        // Rely on the number catch at the start of this function for any number.
-        if (is_integer($text) and $text < 60) {
-            return $text;
-        }
-
-        // https://blog.esllibrary.com/2015/11/05/abbreviations-bc-ad-bce-ce/
-        // BC, BCE, CE come after the year
-        // AD comes before the year (but recognize common practice)
-        $second_indicators = [
-            "s",
-            "sec",
-            "secs",
-            "second",
-            "seconds",
-            "s.",
-            "sec.",
-            "secs.",
-            "segundos",
-        ];
-
-        foreach ($second_indicators as $second_indicator) {
-            if (stripos($text, $second_indicator) !== false) {
-                //$number = $this->number_agent->extractNumber($text);
-                $number = $this->extractNumber($text);
-                if ($number == null) {
-                    continue;
-                }
-
-                // Test against a few ways these might appear.
-                $variants = [];
-                $variants[] = $second_indicator . " " . $number;
-                $variants[] = $second_indicator . "" . $number;
-                $variants[] = $number . " " . $second_indicator;
-                $variants[] = $number . "" . $second_indicator;
-                $variants[] = $number . "(" . $second_indicator . ")";
-                $variants[] = $number . "[" . $second_indicator . "]";
-
-                foreach ($variants as $variant) {
-                    if (stripos($text, $variant) !== false) {
-                        return $number;
-                    }
-                }
-            }
-        }
-
-        return false;
+}
+return false;
     }
 
-    public function extractSeconds($text = null)
+    public function extractLeapseconds($text = null)
     {
-        $seconds = [];
+        $leap_seconds = [];
 
         if ($text == null or $text == "") {
             return true;
@@ -836,97 +802,69 @@ class Second extends Agent
             if ($token == "") {
                 continue;
             }
-            $response = $this->isSecond($token);
-            if ($response === false) {
+            $leap_second = $this->getLeapsecond($token);
+            if ($leap_second === false) {
                 continue;
             }
             // TODO refactor
-            if (is_string($response)) {
-                $response = intval($response);
-            }
-            if (is_integer($response)) {
-                // Check if a day has been mis-categorized as a second.
-                $this->parsed_date = date_parse($text);
-                $day = $this->parsed_date["day"];
-                if ($response == $day) {
-                    continue;
-                }
-                // It is a number.
-                // But is it a number inside of a telephone number.
-                $t = $this->extractTelephonenumbers($text);
-
-                // Or a 3 3 4 pattern.
-
-                //        $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
-
-                //        preg_match_all($pattern, $text, $match);
-                //        $t = array_merge($t, $match[0]);
-
-                foreach ($t as $j => $telephone_number) {
-                    if (
-                        stripos($telephone_number, strval($response)) !== false
-                    ) {
-                        continue 2;
-                    }
-                }
-                $second_text = strval($response);
-
-                //$era = $this->eraYear($text);
-                $second = ["second" => $second_text];
-                $seconds[] = $second;
-            }
+            //if (is_string($response)) {
+            //    $response = intval($response);
+            //}
+$leap_seconds[] = $leap_second;
         }
 
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-values-from-a-multi-dimensional-array-in-php
-        $serialized = array_map("serialize", $seconds);
+        $serialized = array_map("serialize", $leap_seconds);
         $unique = array_unique($serialized);
 
-        $seconds = array_intersect_key($seconds, $unique);
+        $leap_seconds = array_intersect_key($leap_seconds, $unique);
 
-        if (count($seconds) === 1) {
-            return $seconds;
+        if (count($leap_seconds) === 1) {
+            return $leap_seconds;
         }
 
         // Check if the year appears as a distinct token.
-        $filtered_seconds = [];
+        $filtered_leap_seconds = [];
         foreach ($tokens as $i => $token) {
-            foreach ($seconds as $j => $second) {
-                if ($second["second"] === $token) {
-                    $filtered_seconds[] = $second;
+            foreach ($leap_seconds as $j => $leap_second) {
+                if ($leap_second["leap_second"] === $token) {
+                    $filtered_leap_seconds[] = $leap_second;
                 }
             }
         }
 
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-value>
-        $serialized = array_map("serialize", $filtered_seconds);
+        $serialized = array_map("serialize", $filtered_leap_seconds);
         $unique = array_unique($serialized);
 
-        $filtered_seconds = array_intersect_key($filtered_seconds, $unique);
-        return $filtered_seconds;
+        $filtered_leap_seconds = array_intersect_key(
+            $filtered_leap_seconds,
+            $unique
+        );
+        return $filtered_leap_seconds;
     }
 
-    public function extractSecond($text = null)
+    public function extractLeapsecond($text = null)
     {
         if ($text == null) {
             return true;
         }
-        $second = false;
 
-        if (isset($this->seconds) and $this->seconds == []) {
-            return false;
-        }
+        //if (isset($this->leap_seconds) and $this->leap_seconds == []) {
+        //    return false;
+        //}
 
-        $seconds = [];
-        if (!isset($this->seconds)) {
-            $seconds = $this->extractSeconds($text);
-        }
+        //if (!isset($this->leap_seconds)) {
+            $leap_seconds = $this->extractLeapseconds($text);
+        //}
 
-        if (count($seconds) == 1) {
-            $second = $seconds[0];
+        if (count($leap_seconds) == 1) {
+            $leap_second = $leap_seconds[0];
+            return $leap_second;
         }
-        return $second;
+        return false;
     }
 
     /**
@@ -941,45 +879,22 @@ class Second extends Agent
             $input = $this->subject;
         }
 
-        if ($input == "second") {
+        if ($input == "leapsecond") {
             return;
         }
 
-        $this->seconds = $this->extractSeconds($input);
-        $second = $this->extractSecond($input);
-        if ($second != false) {
-            $this->second = $second["second"];
+        $this->leap_seconds = $this->extractLeapseconds($input);
+        $leap_second = $this->extractLeapsecond($input);
+        if ($leap_second != false) {
+            $this->leap_second = $leap_second;
         }
 
         $pieces = explode(" ", strtolower($input));
 
-        $this->calendar_type = null;
-        if (
-            stripos($input, "13") !== false or
-            stripos($input, "thirteen month") !== false
-        ) {
-            $this->calendar_type = "13 month";
-            $this->response .= "Saw a request for a thirteen month calendar. ";
-        }
+        if (count($pieces) == 2) {
+            if ($input == "leap second") {
+                $this->getLeapsecond();
 
-        if (count($pieces) == 1) {
-            if ($input == "second") {
-                $this->getSecond();
-
-                if (
-                    !isset($this->decimal_second) or
-                    $this->decimal_second == null
-                ) {
-                    $this->decimal_second = rand(1, rand(1, 10) * 1e11);
-                }
-
-                $this->binarySecond($this->decimal_second);
-                $p = strlen($this->binary_second);
-
-                $this->max = 13;
-                $this->size = 4;
-                $this->lattice_size = 40;
-                $this->response .= "Made a second. ";
                 return;
             }
         }
@@ -994,7 +909,7 @@ class Second extends Agent
             $this->type = $type;
         }
 
-        $keywords = ["second"];
+        $keywords = ["leap second"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -1005,6 +920,6 @@ class Second extends Agent
             }
         }
 
-        $this->getSecond();
+        $this->getLeapsecond();
     }
 }
