@@ -85,6 +85,9 @@ class NMEA extends Agent
         if ($text == "null") {
             return true;
         }
+        if ($this->validateNMEA($text) !== true) {
+            return true;
+        } // Not valid NMEA string
 
         $parts = $this->explodeNMEA($text);
         if ($parts === true) {
@@ -147,6 +150,7 @@ class NMEA extends Agent
         $computed_checksum = str_pad($computed_checksum, 2, "0", STR_PAD_LEFT);
 
         $provided_checksum = rtrim($provided_checksum);
+
         if ($computed_checksum == $provided_checksum) {
             return true;
         }
@@ -215,6 +219,48 @@ class NMEA extends Agent
         return $xte;
     }
 
+    public function longitudeNMEA($longitude, $longitude_east_west)
+    {
+        // "dddmm.mmmmm"
+        $sign = 0;
+        if (strtolower($longitude_east_west) == "e") {
+            $sign = +1;
+        }
+        if (strtolower($longitude_east_west) == "w") {
+            $sign = -1;
+        }
+        if ($sign == 0) {
+            return true;
+        }
+
+        $d = substr($longitude, 0, 3);
+        $m = substr($longitude, 3, 7);
+
+        $longitude_decimal = $sign * ($d + $m / 60);
+        return $longitude_decimal;
+    }
+
+    public function latitudeNMEA($latitude, $latitude_north_south)
+    {
+        // "dddmm.mmmmm"
+        $sign = 0;
+        if (strtolower($latitude_north_south) == "n") {
+            $sign = +1;
+        }
+        if (strtolower($latitude_north_south) == "s") {
+            $sign = -1;
+        }
+        if ($sign == 0) {
+            return true;
+        }
+
+        $d = substr($latitude, 0, 2);
+        $m = substr($latitude, 2, 7);
+
+        $latitude_decimal = $sign * ($d + $m / 60);
+        return $latitude_decimal;
+    }
+
     // RMB - Recommended Minimum Navigation Information
     public function rmbNMEA($text)
     {
@@ -232,6 +278,15 @@ class NMEA extends Agent
         $destination_waypoint_longitude = $parts[8];
         $destination_waypoint_longitude_east_west = $parts[9];
 
+        $destination_waypoint_longitude_decimal = $this->longitudeNMEA(
+            $destination_waypoint_longitude,
+            $destination_waypoint_longitude_east_west
+        );
+        $destination_waypoint_latitude_decimal = $this->latitudeNMEA(
+            $destination_waypoint_latitude,
+            $destination_waypoint_latitude_north_south
+        );
+
         $range_to_destination_in_nautical_miles = $parts[10];
         $bearing_to_destination_in_degrees_true = $parts[11];
 
@@ -247,9 +302,11 @@ class NMEA extends Agent
 
             "destination_waypoint_latitude" => $destination_waypoint_latitude,
             "destination_waypoint_latitude_north_south" => $destination_waypoint_latitude_north_south,
+            "destination_waypoint_latitude_decimal" => $destination_waypoint_latitude_decimal,
 
             "destination_waypoint_longitude" => $destination_waypoint_longitude,
             "destination_waypoint_longitude_east_west" => $destination_waypoint_longitude_east_west,
+            "destination_waypoint_longitude_decimal" => $destination_waypoint_longitude_decimal,
 
             "range_to_destination_in_nautical_miles" => $range_to_destination_in_nautical_miles,
             "bearing_to_destination_in_degrees_true" => $bearing_to_destination_in_degrees_true,
@@ -271,11 +328,22 @@ class NMEA extends Agent
         $current_longitude_east_west = $parts[4];
         $checksum = $parts[5];
 
+        $current_longitude_decimal = $this->longitudeNMEA(
+            $current_longitude,
+            $current_longitude_east_west
+        );
+        $current_latitude_decimal = $this->latitudeNMEA(
+            $current_latitude,
+            $current_latitude_north_south
+        );
+
         $gll = [
             "current_latitude" => $current_latitude,
             "current_latitude_north_south" => $current_latitude_north_south,
+            "current_latitude_decimal" => $current_latitude_decimal,
             "current_longitude" => $current_longitude,
             "current_longitude_east_west" => $current_longitude_east_west,
+            "current_longitude_decimal" => $current_longitude_decimal,
             "checksum" => $checksum,
         ];
 
@@ -421,6 +489,15 @@ class NMEA extends Agent
         $current_longitude = $parts[5];
         $current_longitude_east_west = $parts[6];
 
+        $current_longitude_decimal = $this->longitudeNMEA(
+            $current_longitude,
+            $current_longitude_east_west
+        );
+        $current_latitude_decimal = $this->latitudeNMEA(
+            $current_latitude,
+            $current_latitude_north_south
+        );
+
         $speed_in_knots = $parts[7];
 
         $true_course = $parts[8];
@@ -435,8 +512,10 @@ class NMEA extends Agent
             "validity" => $validity,
             "current_latitude" => $current_latitude,
             "current_latitude_north_south" => $current_latitude_north_south,
+            "current_latitude_decimal" => $current_latitude_decimal,
             "current_longitude" => $current_longitude,
             "current_longitude_east_west" => $current_longitude_east_west,
+            "current_longitude_decimal" => $current_longitude_decimal,
             "speed_in_knots" => $speed_in_knots,
             "true_course" => $true_course,
             "date_stamp" => $date_stamp,
@@ -459,6 +538,15 @@ class NMEA extends Agent
         $longitude = $parts[4];
         $longitude_east_west = $parts[5];
 
+        $longitude_decimal = $this->longitudeNMEA(
+            $longitude,
+            $longitude_east_west
+        );
+        $latitude_decimal = $this->latitudeNMEA(
+            $latitude,
+            $latitude_north_south
+        );
+
         $fix_quality = $parts[6];
 
         // Number of satellites in use, 00 - 12
@@ -476,6 +564,8 @@ class NMEA extends Agent
             "fix_time" => $time,
             "latitude" => $latitude,
             "longitude" => $longitude,
+            "latitude_decimal" => $latitude_decimal,
+            "longitude_decimal" => $longitude_decimal,
             "fix_quality" => $fix_quality,
             "number_of_satellites" => $number_of_satellites,
             "horizontal_dilution_of_precision" => $horizontal_dilution_of_precision,
@@ -522,7 +612,11 @@ class NMEA extends Agent
 
     public function extractNMEA($text)
     {
-        return true;
+        $nmea_array = $this->parseNMEA($text);
+        if ($nmea_array === true) {
+            return true;
+        }
+        return $nmea_array;
     }
 
     public function readNMEA($text)
@@ -538,16 +632,17 @@ class NMEA extends Agent
         $nmea = false;
 
         if ($filtered_input != "") {
-            $nmea = $this->extractNMEA($filtered_input);
+            $nmea_array = $this->extractNMEA($filtered_input);
 
-            if ($nmea !== false) {
-                $this->response .= "Saw a NMEA of " . $nmea . "°. ";
-                $this->nmea = $nmea;
+            if ($nmea_array === false or $nmea_array === true) {
+                $this->response .= "Did not hear a nmea. ";
+            } else {
+                $this->response .=
+                    "Saw a NMEA string of " .
+                    $nmea_array["sentence_identifier"] .
+                    ". ";
+                $this->nmea = $nmea_array;
             }
-        }
-
-        if ($nmea === false) {
-            $this->response .= "Did not hear a nmea. ";
         }
     }
 }

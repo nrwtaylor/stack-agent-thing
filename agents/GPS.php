@@ -212,15 +212,46 @@ class GPS extends Agent
         $this->thing_report["choices"] = $choices;
     }
 
+    public function nmeaGPS($text)
+    {
+        $nmea_array = $this->parseNMEA($text);
+        if (
+            isset($nmea_array["current_latitude"]) and
+            isset($nmea_array["current_latitude_north_south"])
+        ) {
+            $this->latitude =
+                $nmea_array["current_latitude"] .
+                strtoupper($nmea_array["current_latitude_north_south"]);
+        }
+        if (
+            isset($nmea_array["current_longitude"]) and
+            isset($nmea_array["current_longitude_east_west"])
+        ) {
+            $this->longitude =
+                $nmea_array["current_longitude"] .
+                strtoupper($nmea_array["current_longitude_east_west"]);
+        }
+
+        if (isset($this->latitude) and isset($this->longitude)) {
+            $this->response .=
+                "Saw position " .
+                $this->latitude .
+                " " .
+                $this->longitude .
+                ". ";
+        }
+    }
+
     public function readSubject()
     {
         $input = $this->input;
         $filtered_input = $this->assert($input);
 
-        $number = $this->extractNumber($filtered_input);
-        if ($number !== null) {
-            $this->response .= "Saw a number " . $number . ". ";
+        $numbers = $this->extractNumbers($filtered_input);
+        if ($numbers !== null) {
+            $this->response .= "Saw numbers " . implode(" ", $numbers) . ". ";
         }
+        $this->nmeaGPS($filtered_input);
         return false;
     }
 }
