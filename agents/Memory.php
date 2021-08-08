@@ -12,13 +12,13 @@ class Memory extends Agent
 
     public function initMemory()
     {
-        if (!isset($this->memory)) {
+        if (!isset($this->thing->memory)) {
             try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
+                $this->thing->memory = new \Memcached(); //point 2.
+                $this->thing->memory->addServer("127.0.0.1", 11211);
             } catch (\Throwable $t) {
                 // Failto
-                $this->memory = new Memory($this->thing, "memory");
+                $this->thing->memory = new Memory($this->thing, "memory");
                 //restore_error_handler();
                 $this->thing->log(
                     "caught memcached throwable. made memory",
@@ -57,7 +57,7 @@ class Memory extends Agent
         // Null?
         // $this->mem_cached = null;
         // Fail to stack php memory code if Memcached is not availble.
-        $memory = $this->memory->get($text);
+        $memory = $this->thing->memory->get($text);
         return $memory;
     }
 
@@ -79,7 +79,7 @@ class Memory extends Agent
         if ($text === null) {
             $text = $this->thing->getUuid();
         }
-        $memory = $this->memory->set($text, $variable);
+        $memory = $this->thing->memory->set($text, $variable);
         return $memory;
     }
 
