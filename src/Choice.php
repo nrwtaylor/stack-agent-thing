@@ -505,7 +505,10 @@ class Choice {
             foreach ($choice_list as $item) {
                 //$url = "http://project-stack.dev:8080/public/thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
                 $word = $item['choice'];
+                //$url = $this->web_prefix . "thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
 
+
+//                $thing = new Thing(null);
                 $slug_agent = new Slug(null, "slug");
                 $choice_slug = $slug_agent->getSlug($item['choice']);
 
@@ -517,11 +520,7 @@ class Choice {
 
                 $pos = strrpos($url, '/');
                 $to = $pos === false ? $url : substr($url, $pos + 1);
-
-                //$word = ucfirst($item['choice']);
-                $word = str_replace("-", " ",$word);
-                $word = ucwords($word);
-
+                $word = ucfirst($item['choice']);
                 $html = '<a href="' . $url . '"><div class="choice-button">' . $word .'</div></a>';
 
                 $words[] = $word;

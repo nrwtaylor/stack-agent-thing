@@ -26,7 +26,7 @@ class Json
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
-        $settings = require $GLOBALS['stack_path'] . "private/settings.php";
+        $settings = require($GLOBALS['stack_path'] . "private/settings.php");
         $this->container = new \Slim\Container($settings);
 
         $this->mail_postfix = $settings['settings']['stack']['mail_postfix'];

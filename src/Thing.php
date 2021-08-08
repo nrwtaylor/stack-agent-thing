@@ -53,8 +53,8 @@ class Thing
 
         if (!isset($GLOBALS['stack_path'])) {
             // Try this, otherwise fail.
-            $GLOBALS['stack_path'] = "/var/www/stackr.test/";
-            //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+            //$GLOBALS['stack_path'] = "/var/www/stackr.test/";
+            $GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
         }
 
         //set_error_handler(array($this, "exception_error_handler"));
