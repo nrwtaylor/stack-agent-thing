@@ -2279,6 +2279,7 @@ if ($pid == -1) {
 
     public function stripAgent($text = null)
     {
+        $filtered_text = $text;
         $pos = stripos($text, "agent");
         if ($pos === 0) {
             $filtered_text = trim(
