@@ -219,12 +219,10 @@ class Url extends Agent
         $urls = $this->extractUrls($text);
 
         if ($urls === true) {return $text;}
-
         foreach ($urls as $i => $url) {
             $link = '<a href="' . $url . '">' . $url . '</a>';
             $text = str_replace($url, $link, $text);
         }
-
         $restored_text = $text;
         return $restored_text;
     }
@@ -326,7 +324,6 @@ class Url extends Agent
             }
 
         }
-
         // Deal with spaces
         $urls = $this->filterUrls($urls);
         // TODO: Test.

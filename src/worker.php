@@ -16,11 +16,11 @@ echo "Worker whitefox 1 December 2020\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 
-$arr = (array)$worker;
-if (!$arr) {
-echo "Gearman worker not available.";
-exit();
-}
+//$arr = (array)$worker;
+//if (!$arr) {
+//echo "Gearman worker not available.";
+//exit();
+//}
 
 var_dump($worker);
 $worker->addServer();

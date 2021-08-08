@@ -2277,6 +2277,24 @@ if ($pid == -1) {
         }
     }
 
+    public function stripAgent($text = null)
+    {
+        $pos = stripos($text, "agent");
+        if ($pos === 0) {
+            $filtered_text = trim(
+                substr_replace($text, "", 0, strlen("agent"))
+            );
+        }
+
+        // Strip Discord ids.
+        $filtered_text = preg_replace("/\<\@\!.*?\>/", "", $filtered_text);
+        $filtered_text = preg_replace("/\<\@.*?\>/", "", $filtered_text);
+
+        $filtered_text = ltrim($filtered_text);
+
+        return $filtered_text;
+    }
+
     /**
      *
      * @return unknown
@@ -2390,10 +2408,7 @@ if ($pid == -1) {
         }
 
         // ignore agent at the start
-        $pos = stripos($input, "agent");
-        if ($pos === 0) {
-            $input = trim(substr_replace($input, "", 0, strlen("agent")));
-        }
+        $input = $this->stripAgent($input);
 
         $dispatcher_agent = new Dispatcher($this->thing, "dispatcher");
 

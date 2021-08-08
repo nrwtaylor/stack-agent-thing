@@ -162,7 +162,6 @@ function snippetWeb($text, $buttons_on = true)
     $html = '<div class="snippet">';
     $html .= nestAhref($text);
     //$html .= '<object>' . $text . '</object>';
-
     //                echo quoted_printable_decode($value);
     if ($buttons_on) {
         $html .= buttonsChoices();
@@ -234,7 +233,6 @@ function displayThingreport($channel, $value)
                 '">';
         }
     }
-
     echo '<div class="channel">';
     echo '<div class="channel-title">' . $channel . "</div>";
     echo '<div class="channel-snippet">';
@@ -254,7 +252,6 @@ function displayThingreport($channel, $value)
 
         case "snippet":
             echo quoted_printable_decode(snippetWeb($value, false));
-
             break;
 
         case "png":
@@ -305,7 +302,6 @@ function displayThingreport($channel, $value)
                 //$value = '<object>' . $value . '</object>';
 
                 //                echo quoted_printable_decode($value);
-
                 echo quoted_printable_decode(snippetWeb($value, false));
 
                 //                echo "Web content available";
@@ -462,7 +458,10 @@ if (in_array(strtolower($requested_channel), $whitelistArray)) {
             //echo snippetWeb($value);
             //break;
 
-            echo quoted_printable_decode(snippetWeb($value));
+// dev August 8, 2021 - quoted_printable_decode process a href link value
+//            echo quoted_printable_decode(snippetWeb($value));
+            echo snippetWeb($value);
+
             break;
 
             $value = str_replace("</a>", "</object></a>", $value);
