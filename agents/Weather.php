@@ -301,9 +301,14 @@ class Weather extends Agent
     function getWeather()
     {
         $data_source = $this->xml_link;
-
-        $data = file_get_contents($data_source);
-
+try {
+        $data = @file_get_contents($data_source);
+        } catch (\Throwable $t) {
+return true;
+        } catch (\Exception $e) {
+return true;
+        }
+var_dump($data);
         if ($data == false) {
             return true;
             // Invalid weather setting.

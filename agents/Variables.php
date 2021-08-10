@@ -263,7 +263,7 @@ return;
                 $this->max_variable_sets
             );
 
-            $things = $thing_report["things"];
+            $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
         }
         // When we have that list of Things, we check it for the tally we are looking for.
         // Review using $this->limit as search length limiter.  Might even just

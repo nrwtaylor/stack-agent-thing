@@ -180,6 +180,7 @@ class Mysql extends Agent
 
     public function respondResponse()
     {
+/*
         $this->thing->flagGreen();
 
         $this->thing_report["message"] = $this->sms_message;
@@ -190,6 +191,7 @@ class Mysql extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
+*/
     }
 
     function readSubject()

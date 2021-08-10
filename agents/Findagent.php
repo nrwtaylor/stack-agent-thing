@@ -75,7 +75,7 @@ class Findagent extends Agent
                 $name,
                 $this->horizon
             );
-            $things = $thingreport['things'];
+            $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
         }
 
         $run_time = $this->thing->elapsed_runtime() - $ref_time;

@@ -9,7 +9,7 @@ class Account
 
     function __construct($uuid, $account_uuid, $account_name)
     {
-        $this->json = new Json($uuid);
+        $this->json = new Json(null, $uuid);
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 

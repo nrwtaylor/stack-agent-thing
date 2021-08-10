@@ -47,17 +47,6 @@ class Chatbot extends Agent
 
         $this->thing->json->setField("variables");
         $this->name = strtolower($this->thing->json->readVariable( array("chatbot", "name") ));
-/*
-        if ( ($this->name == false) ) {
-
-            $this->readSubject();
-
-            $this->thing->json->writeVariable( array("chatbot", "name"), $this->name );
-
-
-            $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
-        }
-*/
     }
 
     public function set() {
@@ -234,6 +223,8 @@ class Chatbot extends Agent
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
 
+                if (substr($line,0,1) == "#") {continue;}
+
                 $person_name = $line;
                 $arr = explode(",", $line);
                 $name= trim($arr[0]);
@@ -357,7 +348,6 @@ class Chatbot extends Agent
             }
         }
 
-        //$this->getChatbot();
         $this->response .= "OK. ";
     }
 

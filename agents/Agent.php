@@ -30,11 +30,9 @@ class Agent
         //$this->thing = false;
         //return;
         //        }
-
         if ($thing == null) {
             $thing = new Thing(null);
         }
-
         // Start the thing timer.
         $this->start_time = $thing->elapsed_runtime();
 
@@ -192,7 +190,6 @@ class Agent
         if (method_exists($this, "init" . $this->agent_class_name)) {
             $this->{"init" . $this->agent_class_name}();
         }
-
         $this->get();
         try {
             $this->read();
@@ -3010,9 +3007,7 @@ if ($pid == -1) {
             }
         }
         // Remove references to named chatbot agents
-        //        $chatbot = new Chatbot($this->thing,"chatbot");
-        //        $input =  $chatbot->filtered_input;
-
+        $input = $this->filterChatbots($input);
         // Remove reference to thing.
         //$input = str_replace("thing","",$input);
 
