@@ -49,7 +49,7 @@ class Mysql extends Agent
         // The problem is when they are both null.
         // Code here should allow either.
         $this->initMysql();
-//        $this->test();
+        //        $this->test();
     }
 
     public function test()
@@ -58,15 +58,16 @@ class Mysql extends Agent
         var_dump($thingreport);
     }
 
-    public function initMysql($uuid = null, $nom_from = null)
+    public function initMysql()
     {
+        /*
         if ($uuid == null) {
             $uuid = $this->uuid;
         }
         if ($nom_from == null) {
             $nom_from = $this->from;
         }
-
+echo "initMysql";
         if ($nom_from == null and $uuid == null) {
             throw new \Exception('No
 			$nom_from and $uuid provided to Class Db.');
@@ -81,10 +82,10 @@ class Mysql extends Agent
             throw new \Exception('No $uuid provided to
 			Class Db.');
         }
-
+echo "fopo";
         $this->from = $nom_from;
         $this->uuid = $uuid;
-
+*/
         // create ontainer and configure it
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
@@ -109,27 +110,37 @@ class Mysql extends Agent
         }
 
         // Load MySQL database settings.
+        if (isset($this->thing)) {
+            $this->thing->container["stack"]["state"];
 
-        $this->thing->container["stack"]["state"];
+            if (isset($this->thing->container["settings"]["db"]["host"])) {
+                $this->host = $this->thing->container["settings"]["db"]["host"];
+            }
 
-        if (isset($this->thing->container["settings"]["db"]["host"])) {
-            $this->host = $this->thing->container["settings"]["db"]["host"];
+            if (isset($this->thing->container["settings"]["db"]["dbname"])) {
+                $this->dbname =
+                    $this->thing->container["settings"]["db"]["dbname"];
+            }
+
+            if (isset($this->thing->container["settings"]["db"]["user"])) {
+                $this->user = $this->thing->container["settings"]["db"]["user"];
+            }
+
+            if (isset($this->thing->container["settings"]["db"]["pass"])) {
+                $this->pass = $this->thing->container["settings"]["db"]["pass"];
+            }
+
+            $this->char_max = $this->thing->container["stack"]["char_max"];
+        } else {
+            // No thing provided.
+
+            $settings = require $GLOBALS["stack_path"] . "private/settings.php";
+            $db = $settings["settings"]["db"];
+            $this->host = $db["host"];
+            $this->dbname = $db["dbname"];
+            $this->user = $db["user"];
+            $this->pass = $db["pass"];
         }
-
-        if (isset($this->thing->container["settings"]["db"]["dbname"])) {
-            $this->dbname = $this->thing->container["settings"]["db"]["dbname"];
-        }
-
-        if (isset($this->thing->container["settings"]["db"]["user"])) {
-            $this->user = $this->thing->container["settings"]["db"]["user"];
-        }
-
-        if (isset($this->thing->container["settings"]["db"]["pass"])) {
-            $this->pass = $this->thing->container["settings"]["db"]["pass"];
-        }
-
-        // Make a PDO object for interacting with the MySQL database.
-
         try {
             $pdo = new PDO(
                 "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
@@ -141,22 +152,17 @@ class Mysql extends Agent
 
             $this->pdo = $pdo;
         } catch (\Throwable $t) {
-            $this->thing->log("caught Mysql throwable.", "WARNING");
-            $this->thing->console("Could not connect to MySQL database.");
-
             throw new \Exception("Could not connect to MySQL database.");
         } catch (\Error $ex) {
-            $this->thing->log("caught Mysql error.", "WARNING");
-            $this->thing->console("Could not connect to MySQL database.");
             throw new \Exception("Could not connect to MySQL database.");
         }
 
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
 
-        $this->char_max = $this->thing->container["stack"]["char_max"];
+        //   $this->char_max = $this->thing->container["stack"]["char_max"];
 
-        $this->uuid = $uuid;
+        //   $this->uuid = $uuid;
 
         //        $this->test("Database set-up ");
 
@@ -180,7 +186,7 @@ class Mysql extends Agent
 
     public function respondResponse()
     {
-/*
+        /*
         $this->thing->flagGreen();
 
         $this->thing_report["message"] = $this->sms_message;
@@ -354,7 +360,7 @@ class Mysql extends Agent
      *
      * @return unknown
      */
-    function count()
+    function countMysql()
     {
         $sth = $this->pdo->prepare("SELECT count(*) FROM stack");
         $sth->execute();
@@ -380,13 +386,13 @@ class Mysql extends Agent
      */
     function readField($field)
     {
-        $thingreport = $this->Get();
-        $this->thing = $thingreport["thing"];
+        $thing = $this->getMysql();
+        //$this->thing = $thingreport["thing"];
 
-        if (isset($this->thing->$field)) {
+        if (isset($thing->$field)) {
             // I think I should also do
-            $this->$field = $this->thing->$field;
-            return $this->thing->$field;
+            $this->$field = $thing->$field;
+            return $thing->$field;
         } else {
             return false;
         }
@@ -398,7 +404,7 @@ class Mysql extends Agent
      * @param unknown $to
      * @return unknown
      */
-    function Create($subject, $to)
+    function createMysql($subject, $to)
     {
         try {
             // Create a new record in the db for the Thing.

@@ -30,9 +30,24 @@ class Agent
         //$this->thing = false;
         //return;
         //        }
+
+        $this->getName();
+
+
+        if (($thing == null) and (isset($input['uuid']))) {
+
+           // If the stack was able to pull a thing,
+           // then we would have it.
+           // So assume that it couldn't.
+
+           // Return making the agent class available.
+           return;
+        }
+
         if ($thing == null) {
             $thing = new Thing(null);
         }
+
         // Start the thing timer.
         $this->start_time = $thing->elapsed_runtime();
 
@@ -44,7 +59,7 @@ class Agent
             $this->agent_input = $input;
         }
 
-        $this->getName();
+//        $this->getName();
 
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         // Given a "thing".  Instantiate a class to identify

@@ -79,9 +79,43 @@ class Database
             throw new \Exception('No $uuid provided to
 			Class Db.');
         }
+// Determine which filestore to use.
+
+$this->agent_input = $agent_input;
+
+$service = null;
+$handler = null;
+//        switch (true) {
+//            case "#":
+//                return true;
+//        }
+
+
+
 
         $this->from = $nom_from;
         $this->uuid = $uuid;
+
+$mysql_handler = $this->mysqlDatabase();
+if ($mysql_handler !== false) {$handler = $mysql_handler;
+$service = "mysql";}
+
+$this->service = $service;
+$this->service_handler = $handler;
+
+
+/*
+try {
+$this->mysql_handler = new Mysql(null, $agent_input);
+$this->mysql_handler->uuid = $uuid;
+$this->mysql_handler->init();
+$service = "mysql";
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+
+$this->service = $service;
+*/
 
         // create container and configure it
 
@@ -166,7 +200,7 @@ class Database
         $this->split_time = microtime(true);
 
 // No memory available.
-if ($thing === false) {return;}
+if ($thing === false) {echo "false thing"; return;}
 
         $c["db"] = function ($c) {
             $db = $c["settings"]["db"];
@@ -181,35 +215,9 @@ if ($thing === false) {return;}
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             return $pdo;
-            /*
-        } catch (\Throwable $t) {
-            //throw new \Exception('Database not available.');
-        } catch (\Exception $e) {
-            //throw new \Exception('Database not available.');
-        }
-*/
         };
 
 
-
-
-        $r = "";
-//if (!isset($this->mysql_handler)) {
-//$this->mysql_handler =  new Mysql(null,null);
-//}
-//echo "merp";
-
-//if (!isset($this->mongo)) {
-//echo "mongo";
-//$this->mongo = new Mongo(new Thing(false), null);
-//}
-
-//if (!isset($this->mysql)) {
-//echo "mysql";
-//$this->mysql = new Mysql(new Thing(false), null);
-//}
-
-        return $r;
 
     }
 
@@ -220,6 +228,21 @@ if ($thing === false) {return;}
     {
         // Log database transactions in test
         $this->test("Database destruct ");
+    }
+
+    function mysqlDatabase() {
+
+try {
+$handler = new Mysql(null, $this->agent_input);
+$handler->uuid = $this->uuid;
+$handler->init();
+$service = "mysql";
+return $handler;
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+return true;
+
     }
 
     /**
@@ -299,6 +322,13 @@ if ($thing === false) {return;}
      */
     function priorGet($created_at = null)
     {
+
+//if ($this->service == "mysql") {
+//$thingreport = $this->mysql_handler->priorGet($created_at);
+//}
+//return $thingreport;
+
+
         if ($this->get_prior === false) {
             $thingreport = [
                 "thing" => false,
@@ -385,8 +415,12 @@ if ($thing === false) {return;}
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    function writeField($field_text, $string_text)
+    public function writeField($field_text, $string_text)
     {
+if ($this->service == "mysql") {
+$this->service_handler->writeField($field_text, $string_text);
+}
+return;
         $this->split_time = microtime(true);
         $this->log = [$field_text, $string_text];
         //$this->test( $this->get_calling_function() );
@@ -440,21 +474,11 @@ if ($thing === false) {return;}
      */
     function count()
     {
-        $sth = $this->container->db->prepare("SELECT count(*) FROM stack");
-        $sth->execute();
-
-        $thing_count = $sth->fetchColumn();
-
-        $sth = null;
-
-        $thingreport = [
-            "things" => false,
-            "info" => "Counted " . $thing_count . "  records on stack.",
-            "help" => "This is how big the stack is.",
-        ];
-        $thingreport["number"] = $thing_count;
-
-        return $thingreport;
+$thingreport = true;
+if ($this->service == "mysql") {
+$thingreport = $this->service_handler->countMysql();
+}
+return $thingreport;
     }
 
     /**
@@ -484,6 +508,13 @@ if ($thing === false) {return;}
      */
     function Create($subject, $to)
     {
+//$response = false;
+//if ($this->service == "mysql") {
+//$response = $this->mysql_handler->createMysql($subject, $to);
+//}
+//return $response;
+
+
         try {
             // Create a new record in the db for the Thing.
             $this->split_time = microtime(true);
@@ -545,7 +576,7 @@ if ($thing === false) {return;}
         // So just return the contents of thing.  false if it doesn't exist.
 //$mysql_handler =  new Mysql(null,null);
 //$thing = $mysql_handler->getMysql();
-
+/*
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
             $sth = $this->container->db->prepare(
@@ -568,6 +599,13 @@ if ($thing === false) {return;}
             }
             $thing = false;
         }
+*/
+$thing = false;
+if ($this->service == "mysql") {
+$thing = $this->service_handler->getMysql();
+}
+
+
 
         if ($thing === false) {
             $t = $this->getMemory($this->uuid);

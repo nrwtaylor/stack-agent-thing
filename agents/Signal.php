@@ -548,7 +548,7 @@ return true;}
         $this->signals = [];
 
         $things = $this->getThings('signal');
-var_dump($things);
+
         if ($things === null) {
             return;
         }
