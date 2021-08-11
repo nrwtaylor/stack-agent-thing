@@ -242,9 +242,9 @@ echo "<br>";
 echo "Test 4: Test random3";
 
 $thing = new Thing(null);
-$thing->Create("null@stackr.ca", "test", "Test randomN() at " . time());
+$thing->Create("null@stackr.ca", "test", "Test randomn() at " . time());
 
-$thingreport = $thing->db->randomN("null@stackr.ca");
+$thingreport = $thing->db->randomn("null@stackr.ca");
 
 
 

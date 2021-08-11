@@ -31,12 +31,12 @@ class Database
      * @param unknown $nom_from
      * @return unknown
      */
-//public function init() 
+    //public function init()
     function __construct($thing = null, $agent_input)
     {
-//$agent_input = $this->agent_input;  
-        $uuid = $agent_input['uuid'];
-        $nom_from = $agent_input['from'];
+        //$agent_input = $this->agent_input;
+        $uuid = $agent_input["uuid"];
+        $nom_from = $agent_input["from"];
 
         $start_time = microtime(true);
         $this->start_time = $start_time;
@@ -79,43 +79,41 @@ class Database
             throw new \Exception('No $uuid provided to
 			Class Db.');
         }
-// Determine which filestore to use.
+        // Determine which filestore to use.
 
-$this->agent_input = $agent_input;
+        $this->agent_input = $agent_input;
 
-$service = null;
-$handler = null;
-//        switch (true) {
-//            case "#":
-//                return true;
-//        }
-
-
-
+        $service = null;
+        $handler = null;
 
         $this->from = $nom_from;
         $this->uuid = $uuid;
 
-$mysql_handler = $this->mysqlDatabase();
-if ($mysql_handler !== false) {$handler = $mysql_handler;
-$service = "mysql";}
-
-$this->service = $service;
-$this->service_handler = $handler;
-
-
-/*
-try {
-$this->mysql_handler = new Mysql(null, $agent_input);
-$this->mysql_handler->uuid = $uuid;
-$this->mysql_handler->init();
-$service = "mysql";
-        } catch (\Throwable $t) {
-        } catch (\Error $ex) {
+        switch (true) {
+            case "mysql":
+                $mysql_handler = $this->mysqlDatabase();
+                if ($mysql_handler !== true) {
+                    $handler = $mysql_handler;
+                    $service = "mysql";
+                }
+                if ($service !== null) {
+                    break;
+                }
+            case "memory":
+                $memory_handler = $this->memoryDatabase();
+                if ($memory_handler !== true) {
+                    $handler = $memory_handler;
+                    $service = "memory";
+                }
+                if ($service !== null) {
+                    break;
+                }
         }
 
-$this->service = $service;
-*/
+        $this->service = $service;
+        $this->service_handler = $handler;
+        $this->service_handler->uuid = $this->uuid;
+        $this->service_handler->from = $this->from;
 
         // create container and configure it
 
@@ -140,6 +138,12 @@ $this->service = $service;
             $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
 
+        $this->service_handler->hash_state = $this->hash_state;
+        $this->service_handler->hash_algorithm = $this->hash_algorithm;
+        $this->service_handler->get_prior = $this->get_prior;
+
+
+
         $this->container = new \Slim\Container($settings);
 
         // create app instance
@@ -155,22 +159,7 @@ $this->service = $service;
                     ->write("AGENT | Maintenance.");
             };
         };
-/*
-        $c["db"] = function ($c) {
-            $db = $c["settings"]["db"];
 
-            //try {
-
-            $pdo = new PDO(
-                "mysql:host=" . $db["host"] . ";dbname=" . $db["dbname"],
-                $db["user"],
-                $db["pass"]
-            );
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            return $pdo;
-        };
-*/
         $c["stack"] = function ($c) {
             $db = $c["settings"]["stack"];
             return $db;
@@ -199,8 +188,11 @@ $this->service = $service;
 
         $this->split_time = microtime(true);
 
-// No memory available.
-if ($thing === false) {echo "false thing"; return;}
+        // No memory available.
+        if ($thing === false) {
+            echo "false thing";
+            return;
+        }
 
         $c["db"] = function ($c) {
             $db = $c["settings"]["db"];
@@ -216,9 +208,6 @@ if ($thing === false) {echo "false thing"; return;}
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             return $pdo;
         };
-
-
-
     }
 
     /**
@@ -230,19 +219,32 @@ if ($thing === false) {echo "false thing"; return;}
         $this->test("Database destruct ");
     }
 
-    function mysqlDatabase() {
-
-try {
-$handler = new Mysql(null, $this->agent_input);
-$handler->uuid = $this->uuid;
-$handler->init();
-$service = "mysql";
-return $handler;
+    function mysqlDatabase()
+    {
+        try {
+            $handler = new Mysql(null, $this->agent_input);
+            $handler->uuid = $this->uuid;
+            $handler->init();
+            $service = "mysql";
+            return $handler;
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
         }
-return true;
+        return true;
+    }
 
+    function memoryDatabase()
+    {
+        try {
+            $handler = new Memory(null, $this->agent_input);
+            $handler->uuid = $this->uuid;
+            $handler->init();
+            $service = "memory";
+            return $handler;
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+        return true;
     }
 
     /**
@@ -322,12 +324,10 @@ return true;
      */
     function priorGet($created_at = null)
     {
-
-//if ($this->service == "mysql") {
-//$thingreport = $this->mysql_handler->priorGet($created_at);
-//}
-//return $thingreport;
-
+        //if ($this->service == "mysql") {
+        //$thingreport = $this->mysql_handler->priorGet($created_at);
+        //}
+        //return $thingreport;
 
         if ($this->get_prior === false) {
             $thingreport = [
@@ -417,55 +417,12 @@ return true;
      */
     public function writeField($field_text, $string_text)
     {
-if ($this->service == "mysql") {
-$this->service_handler->writeField($field_text, $string_text);
-}
-return;
-        $this->split_time = microtime(true);
-        $this->log = [$field_text, $string_text];
-        //$this->test( $this->get_calling_function() );
-
-        // sqlinjection commentary
-        // user provided string_text
-        // stack provided field_text
-
-        try {
-            $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
-            $sth = $this->container->db->prepare($query);
-
-            $sth->bindParam(":uuid", $this->uuid);
-            $sth->bindParam(":string_text", $string_text);
-
-            // This is not allowed by PHP.
-            // Noting that field_text is generated by an Agent.  Not channel input.
-            //$sth->bindParam(":field_text", $field_text);
-
-            $sth->execute();
-            //            $sth = null;
-            //$sth->close();
-            $this->last_update = false;
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-            // Do this for now.
-
-            //            $t = new Thing(null);
-            //            $t->Create('stack', "error", 'writeField ' . $e->getMessage());
-
-            // Commented out 24 November 2019.
-            // Prevents a SQLSTATE[22001] error from looping.
-            //$t = new Bork($t);
-
-            //echo "BORK | Thing is full.";
-            //echo 'Caught error: ',  $e->getMessage(), "\n";
-            $thing = false;
-            $this->last_update = true;
+        if ($this->service_handler == null) {
+            return true;
         }
-
-        $sth = null;
-
-        $this->operations_time += microtime(true) - $this->split_time;
-        $this->operations += 1;
-        //$this->test("writeField");
+        if ($this->service == "mysql") {
+            $this->service_handler->writeField($field_text, $string_text);
+        }
     }
 
     /**
@@ -474,11 +431,14 @@ return;
      */
     function count()
     {
-$thingreport = true;
-if ($this->service == "mysql") {
-$thingreport = $this->service_handler->countMysql();
-}
-return $thingreport;
+        if ($this->service_handler == null) {
+            return true;
+        }
+        $thingreport = true;
+        if ($this->service == "mysql") {
+            $thingreport = $this->service_handler->countMysql();
+        }
+        return $thingreport;
     }
 
     /**
@@ -508,60 +468,12 @@ return $thingreport;
      */
     function Create($subject, $to)
     {
-//$response = false;
-//if ($this->service == "mysql") {
-//$response = $this->mysql_handler->createMysql($subject, $to);
-//}
-//return $response;
 
-
-        try {
-            // Create a new record in the db for the Thing.
-            $this->split_time = microtime(true);
-
-            //$this->test("Create");
-
-            $query = $this->container->db->prepare("INSERT INTO stack
-			(uuid,task,nom_from,nom_to)
-			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
-
-            $query->bindParam(":uuid", $uuid);
-            $query->bindParam(":task", $task);
-            $query->bindParam(":hash_nom_from", $hash_nom_from);
-            $query->bindParam(":nom_to", $nom_to);
-
-            $uuid = $this->uuid;
-            $task = $subject;
-            $nom_from = $this->from;
-
-            $hash_nom_from = hash($this->hash_algorithm, $nom_from);
-
-            if ($this->hash_state == "off") {
-                $hash_nom_from = $nom_from;
-            }
-            $nom_to = $to;
-
-            $query->execute();
-            $query = null;
-            return true;
-            return $query;
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-            // Do this for now.
-
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'Create' . $e->getMessage());
-
-            // Commented out 24 November 2019.
-            // Prevents a SQLSTATE[22001] error from looping.
-            //$t = new Bork($t);
-
-            //echo "BORK | Thing is full.";
-            //echo 'Caught error: ',  $e->getMessage(), "\n";
-            $thing = false;
-            $this->last_update = true;
-            return false;
+        $response = false;
+        if ($this->service == "mysql") {
+        $response = $this->service_handler->createMysql($subject, $to);
         }
+        return $response;
     }
 
     /**
@@ -574,9 +486,9 @@ return $thingreport;
         // Chance of collision super-super-small.
 
         // So just return the contents of thing.  false if it doesn't exist.
-//$mysql_handler =  new Mysql(null,null);
-//$thing = $mysql_handler->getMysql();
-/*
+        //$mysql_handler =  new Mysql(null,null);
+        //$thing = $mysql_handler->getMysql();
+        /*
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
             $sth = $this->container->db->prepare(
@@ -600,15 +512,16 @@ return $thingreport;
             $thing = false;
         }
 */
-$thing = false;
-if ($this->service == "mysql") {
-$thing = $this->service_handler->getMysql();
-}
+        //if ($this->service_handler == null) {return true;}
 
+        $thing = false;
+        if ($this->service == "mysql") {
+            $thing = $this->service_handler->getMysql();
+        }
 
+        if ($this->service == "memory") {
+            $t = $this->service_handler->getMemory($this->uuid);
 
-        if ($thing === false) {
-            $t = $this->getMemory($this->uuid);
             if ($t !== false) {
                 $thing = new Thing(null);
                 $thing->created_at = null;
@@ -619,8 +532,6 @@ $thing = $this->service_handler->getMysql();
                 $thing->settings = null;
             }
         }
-
-        $sth = null;
 
         $thingreport = [
             "thing" => $thing,
@@ -670,7 +581,7 @@ $thing = $this->service_handler->getMysql();
         return $memory;
     }
 
-    public function setMemory($key, $value)
+    public function deprecate_setMemory($key, $value)
     {
         if (!isset($this->memory)) {
             try {
@@ -707,25 +618,18 @@ $thing = $this->service_handler->getMysql();
      */
     function Forget()
     {
-        $error = null;
-        try {
-            $sth = $this->container->db->prepare(
-                "DELETE FROM stack WHERE uuid=:uuid"
-            );
-            $sth->bindParam("uuid", $this->uuid);
-            $sth->execute();
-
-            $sth = null;
-        } catch (\Throwable $t) {
-            $error = true;
-        } catch (\Error $ex) {
-            $error = true;
+        if ($this->service == "mysql") {
+            $thingreport = $this->service_handler->forgetMysql($this->uuid);
         }
 
+        if ($this->service == "memory") {
+            $memory = $this->service_handler->setMemory($this->uuid, null);
         $thingreport = [
             "info" => "That thing was forgotten.",
-            "error" => $error,
+            "error" => $false,
         ];
+
+        }
         return $thingreport;
     }
 
@@ -1679,26 +1583,25 @@ $thing = $this->service_handler->getMysql();
      */
     function length()
     {
-        $query =
-            "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
-        $sth = $this->container->db->prepare($query);
-        $sth->execute();
-        $response = $sth->fetchAll();
-
-        $keys = array_keys($response);
-
-        $sth = null;
-
-        $thingreport = [
+        $thing_report = [
             "thing" => false,
-            "db" => $response,
+            "db" => true,
             "info" => "So here is the length of the variables field.",
             "help" =>
                 "There is a limit to the variables the stack can keep track of.",
             "whatisthis" => "The maximum length of the variables field.",
         ];
 
-        return $thingreport;
+
+        if ($this->service_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->lengthMysql();
+        }
+
+        return $thing_report;
     }
 
     /**
@@ -1707,31 +1610,25 @@ $thing = $this->service_handler->getMysql();
      */
     function connections()
     {
-        // NOT TESTED
 
-        $query = "SHOW STATUS WHERE `variable_name` = 'Threads_connected'";
-
-        $sth = $this->container->db->prepare($query);
-        $sth->execute();
-        $response = $sth->fetchAll();
-
-        $keys = array_keys($response);
-
-        $sth = null;
-
-        $thingreport = [
+        $thing_report = [
             "thing" => false,
-            "db" => $response,
+            "db" => true,
             "info" =>
-                'So here are Things matching at least one of the words provided. That\'s what you wanted.',
+                'Connected threads.',
             "help" => "It is up to you what you do with these.",
-            "whatisthis" =>
-                "A list of Things which match at least one keyword.",
         ];
 
-        //$thingreport = false;
 
-        return $thingreport;
+        if ($this->service_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->connectionsMysql();
+        }
+
+        return $thing_report;
     }
 
     /**
@@ -1742,74 +1639,23 @@ $thing = $this->service_handler->getMysql();
      */
     function random($nom_from = null, $n = 1)
     {
-        if ($nom_from == null) {
-            // https://explainextended.com/2009/03/01/selecting-random-rows/
-            // https://stackoverflow.com/questions/1244555/how-can-i-optimize-mysqls-order-by-rand-function
-            /*
-            $q = "SELECT  *
-                FROM    (
-                    SELECT  @cnt := COUNT(*) + 1,
-                        @lim := 1
-                FROM stack
-                ) vars
-                STRAIGHT_JOIN
-                (
-                SELECT  r.*,
-                    @lim := @lim - 1
-                    FROM    stack r
-                    WHERE   (@cnt := @cnt - 1)
-                    AND RAND(20090301) < @lim / @cnt
-                ) i";
-*/
-            //            $q = "SELECT * FROM stack WHERE RAND()<=0.0006 limit 1";
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) LIMIT 1";
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
+        $thing_report = [
+            "thing" => [],
+            "info" =>
+                'So here is a random thing from the stack.',
+            "help" => "It is up to you what you do with these.",
+        ];
 
-            $q =
-                "SELECT * FROM stack WHERE RAND()<(SELECT ((" .
-                $n .
-                "/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT " .
-                $n;
 
-            //            $q = "SELECT * FROM stack ORDER BY RAND() LIMIT " . $n;
-            //            $q = "SELECT * FROM stack WHERE RAND()<(SELECT ((20/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 20";
-
-            $sth = $this->container->db->prepare($q);
-
-            $sth->execute();
-            //      $thing = $sth->fetchObject();
-            $things = $sth->fetchAll();
-
-            $thingreport = [
-                "things" => $things,
-                "info" =>
-                    'So here are three things you put on the stack.  That\'s what you wanted.',
-                "help" => "It is up to you what you do with these.",
-            ];
-        } else {
-            $q =
-                "SELECT * FROM stack WHERE RAND()<(SELECT ((1/COUNT(*))*10) FROM stack) ORDER BY RAND() LIMIT 1";
-            $sth = $this->container->db->prepare($q);
-
-            $sth->execute();
-            $thing = $sth->fetchObject();
-
-            $this->to = $thing->nom_to;
-            $this->from = $thing->nom_from;
-            $this->subject = $thing->task;
-
-            $thingreport = [
-                "things" => $thing,
-                "info" =>
-                    'So here are three things you put on the stack.  That\'s what you wanted.',
-                "help" => "It is up to you what you do with these.",
-            ];
+        if ($this->service_handler == null) {
+            return $thing_report;
         }
 
-        $sth = null;
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->randomMysql($nom_from, $n);
+        }
 
-        return $thingreport;
+        return $thing_report;
     }
 
     /**
@@ -1818,30 +1664,26 @@ $thing = $this->service_handler->getMysql();
      * @param unknown $n        (optional)
      * @return unknown
      */
-    function randomN($nom_from, $n = 3)
+    function randomn($nom_from, $n = 3)
     {
-        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
-        // Pick N of identity's things.
-        $sth = $this->container->db->prepare(
-            "SELECT * FROM stack WHERE (nom_from=:nom_from OR nom_from=:hash_nom_from) ORDER BY RAND() LIMIT 3"
-        );
-        $sth->bindParam("nom_from", $nom_from);
-        $sth->bindParam("hash_nom_from", $hash_nom_from);
-
-        $sth->execute();
-        $things = $sth->fetchAll();
-
-        $thingreport = [
-            "thing" => $things,
+        $thing_report = [
+            "thing" => [],
             "info" =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
             "help" => "It is up to you what you do with these.",
         ];
 
-        $sth = null;
 
-        return $thingreport;
+        if ($this->service_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->randomnMysql($nom_from, $n);
+        }
+
+        return $thing_report;
     }
 
     /**
@@ -1857,63 +1699,24 @@ $thing = $this->service_handler->getMysql();
         $task_exclusions = null,
         $nom_to_exclusions = null
     ) {
-        // Example:
-        // SELECT * FROM stack WHERE nom_from='test@test.test' and ((task not like '%?%') or (nom_from not like '%transit%') or (nom_from not like '%test%')) ORDER BY RAND() LIMIT 3;
 
-        // sqlinjection comment
-        // $task_exlusions and $nom_to_exclusions are code defined
-
-        if ($task_exclusions == null) {
-            $task_exclusions = "";
-        } else {
-            $and = "";
-            $task_sql = "(";
-            foreach ($task_exclusions as $task_exclusion) {
-                $task_sql .= $and . "task not like '%" . $task_exclusion . "%'";
-                $and = " and ";
-            }
-            $task_sql .= " and task not like ''";
-            $task_sql .= ")";
-        }
-
-        if ($nom_to_exclusions == null) {
-            $nom_to_exclusions = "";
-        } else {
-            $nom_to_sql = "(";
-            $and = "";
-            //$nom_to_sql = "";
-            foreach ($nom_to_exclusions as $nom_to_exclusion) {
-                $nom_to_sql .=
-                    $and . "nom_to not like '%" . $nom_to_exclusion . "%'";
-                $and = " and ";
-            }
-            $nom_to_sql .= ")";
-        }
-
-        $query =
-            "SELECT * FROM stack WHERE nom_from='" .
-            $nom_from .
-            "' and (" .
-            $task_sql .
-            " and " .
-            $nom_to_sql .
-            ") ORDER BY RAND() LIMIT 3";
-
-        $sth = $this->container->db->prepare($query);
-        $sth->bindParam("nom_from", $nom_from);
-        $sth->execute();
-        $things = $sth->fetchAll();
-
-        $sth = null;
-
-        $thingreport = [
-            "thing" => $things,
+        $thing_report = [
+            "thing" => [],
             "info" =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
             "help" => "It is up to you what you do with these.",
         ];
 
-        return $thingreport;
+
+        if ($this->service_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->reminderMysql($nom_from, $task_exclusions, $nom_to_exclusions);
+        }
+
+        return $thing_report;
     }
 }
 

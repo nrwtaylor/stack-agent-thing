@@ -503,14 +503,22 @@ echo "fopo";
         if ($uuid == null) {
             $uuid = $this->uuid;
         }
-
+$error = null;
+try {
         $sth = $this->pdo->prepare("DELETE FROM stack WHERE uuid=:uuid");
         $sth->bindParam("uuid", $uuid);
         $sth->execute();
+        } catch (\Throwable $t) {
+            $error = true;
+        } catch (\Error $ex) {
+            $error = true;
+        }
 
-        $sth = null;
+        $thingreport = [
+            "info" => "That thing was forgotten.",
+            "error" => $error,
+        ];
 
-        $thingreport = ["info" => "That thing was forgotten."];
         return $thingreport;
     }
 
@@ -1462,7 +1470,7 @@ echo "fopo";
      *
      * @return unknown
      */
-    function length()
+    function lengthMysql()
     {
         $query =
             "SELECT variables, LENGTH(variables) AS mlen FROM stack ORDER BY mlen DESC LIMIT 1";
@@ -1490,7 +1498,7 @@ echo "fopo";
      *
      * @return unknown
      */
-    function connections()
+    function connectionsMysql()
     {
         // NOT TESTED
 
@@ -1525,7 +1533,7 @@ echo "fopo";
      * @param unknown $n        (optional)
      * @return unknown
      */
-    function random($nom_from = null, $n = 1)
+    function randomMysql($nom_from = null, $n = 1)
     {
         if ($nom_from == null) {
             // https://explainextended.com/2009/03/01/selecting-random-rows/
@@ -1603,7 +1611,7 @@ echo "fopo";
      * @param unknown $n        (optional)
      * @return unknown
      */
-    function randomN($nom_from, $n = 3)
+    function randomnMysql($nom_from, $n = 3)
     {
         $hash_nom_from = hash($this->hash_algorithm, $nom_from);
 
@@ -1637,7 +1645,7 @@ echo "fopo";
      * @param unknown $nom_to_exclusions (optional)
      * @return unknown
      */
-    function reminder(
+    function reminderMysql(
         $nom_from,
         $task_exclusions = null,
         $nom_to_exclusions = null
