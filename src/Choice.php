@@ -22,7 +22,7 @@ class Choice
      */
     function __construct($uuid, $nom_from = null)
     {
-        $this->json = new Json(null, $uuid);
+        $this->json = new Json($uuid);
 
         $this->uuid = $uuid;
 

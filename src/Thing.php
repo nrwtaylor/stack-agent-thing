@@ -170,30 +170,6 @@ class Thing
         $this->log("Thing " . $t . " de-instantiated.");
     }
 
-    function validate() {
-
-        if (!isset($this->from) and !isset($this->uuid)) {
-            throw new Exception(
-                '$this->from and $this->uuid not set.  Required.'
-            );
-        }
-
-        // Fail if a null nom_from is provided
-        if ($this->from == null) {
-            throw new Exception('$this->nom_from set as null.  Required.');
-        }
-
-        // Every Thing should be able to do this.
-        // but which Things reply should be private to the Things.
-        // But for accounting a Thing has to be able to say
-        // "Do you know me. Tell me your balance"
-        //
-        // This will need to be a public Stack variable.
-
-        // Double-UU intentionally.
-
-    }
-
     function getThing($uuid = null)
     {
         if (null === $uuid) {
@@ -229,13 +205,13 @@ class Thing
 
             // Can't call db here, can only call it when $from is known.
 
-            $this->json = new Json($this, $this->uuid);
+            $this->json = new Json($this->uuid);
 
             $this->log("JSON connector made.");
             $this->log("Made a thing from null.");
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
-            $this->variables = new Json($this, $this->uuid);
+            $this->variables = new Json($this->uuid);
             $this->variables->setField("variables");
 
             $this->choice = new Choice($this->uuid, $this->from);
@@ -268,15 +244,14 @@ class Thing
 
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
-
-            $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
+            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
             $this->log("Thing made a db connector.");
 
             // Provide handler for Json translation from/to MySQL.
-            $this->json = new Json($this, $this->uuid);
+            $this->json = new Json($this->uuid);
 
             // This is a placeholder for refactoring the Thing variables
-            $this->variables = new Json($this, $this->uuid);
+            $this->variables = new Json($this->uuid);
             $this->variables->setField("variables");
             $this->log("Thing made a json connector.");
 
@@ -385,7 +360,7 @@ class Thing
         }
 
 if (!isset($this->db)) {
-        $this->db = new Database($this, ['uuid'=>$this->uuid, 'from'=>$from] );
+        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
 }
         $this->log("Create. Database connector made.");
 
@@ -947,7 +922,7 @@ if (isset($this->db)) {
             // record if true.  Previous record updated to point to new record.
 
             if ($this->associate_posterior === true) {
-                $posterior_thing->json = new Json($this, $posterior_thing->uuid);
+                $posterior_thing->json = new Json($posterior_thing->uuid);
                 $posterior_thing->json->setField("associations");
                 $posterior_thing->json->pushStream($this->uuid);
                 //Tested with unset and commented out

@@ -45,8 +45,6 @@ class Database
         $this->operations = 0;
         $this->log = [];
 
-//        $this->nothing_handler = new Nothing($thing,"nothing");
-
         //        $this->hash_algorithm = 'sha256';
         //        $this->hash_state = 'on';
 
@@ -1335,6 +1333,34 @@ if ($thing === false) {return;}
 
     /**
      *
+     */
+    function validateThing()
+    {
+        if (!isset($this->from) and !isset($this->uuid)) {
+            throw new Exception(
+                '$this->from and $this->uuid not set.  Required.'
+            );
+        }
+
+        // Fail if a null nom_from is provided
+        if ($this->from == null) {
+            throw new Exception('$this->nom_from set as null.  Required.');
+        }
+
+        // Every Thing should be able to do this.
+        // but which Things reply should be private to the Things.
+        // But for accounting a Thing has to be able to say
+        // "Do you know me. Tell me your balance"
+        //
+        // This will need to be a public Stack variable.
+
+        // Double-UU intentionally.
+
+        return;
+    }
+
+    /**
+     *
      * @param unknown $uuid (optional)
      * @return unknown
      */
@@ -1344,7 +1370,7 @@ if ($thing === false) {return;}
         // UUids requires both to be set to do a search
         // for all records contain the $uuid.
 
-        $this->thing->validate();
+        $this->validateThing(); // Throws exception if request
         // is asking for too much.
 
         // Do a self look-up if no uuid provided.

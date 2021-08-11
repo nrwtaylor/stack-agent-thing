@@ -31,10 +31,10 @@ class Connection extends Agent
         $this->test = "Development code"; // Always
         $this->keywords = ["connection"];
 
-       //         $this->variables_agent = new Variables(
-       //             $this->thing,
-       //             "variables " . "connection" . " " . $this->from
-       //         );
+        //         $this->variables_agent = new Variables(
+        //             $this->thing,
+        //             "variables " . "connection" . " " . $this->from
+        //         );
 
         $this->default_state = "green";
 
@@ -126,21 +126,19 @@ class Connection extends Agent
             }
         }
 
-// Failed.
+        // Failed.
         //$this->up = $this->variables_agent->getVariable("up");
         //$this->test_results = $this->variables_agent->getVariable("test_results");
         //$this->refreshed_at = $this->variables_agent->getVariable(
         //    "refreshed_at"
         //);
-
-
-
     }
 
     function set()
     {
-
-        if ((!isset($this->up)) or (!isset($this->test_results))) { return; }
+        if (!isset($this->up) or !isset($this->test_results)) {
+            return;
+        }
         if ($this->last_up === false or $this->last_test_results === false) {
             $this->thing->Write(["connection", "up"], $this->up);
             $this->thing->Write(
@@ -148,17 +146,12 @@ class Connection extends Agent
                 $this->test_results
             );
 
-
-        //$this->variables_agent->setVariable("up", $this->up);
-        //$this->variables_agent->setVariable("test_results", $this->test_results);
-        //$this->variables_agent->setVariable(
-        //    "refreshed_at",
-        //    $this->refreshed_at
-        //);
-
-
-
-
+            //$this->variables_agent->setVariable("up", $this->up);
+            //$this->variables_agent->setVariable("test_results", $this->test_results);
+            //$this->variables_agent->setVariable(
+            //    "refreshed_at",
+            //    $this->refreshed_at
+            //);
         }
     }
 
@@ -182,7 +175,6 @@ class Connection extends Agent
             "connection",
             "test_results",
         ]);
-
     }
 
     /**
@@ -210,13 +202,13 @@ class Connection extends Agent
         $web .= "<p>";
 
         if (isset($this->test_results)) {
-        $web .= $this->htmlTable($this->test_results);
-        $web .= "<br>";
+            $web .= $this->htmlTable($this->test_results);
+            $web .= "<br>";
         }
 
         if ($this->last_refreshed_at !== false) {
-        $ago = $this->thing->human_time(time() - $this->refreshed_at);
-        $web .= "Checked about " . $ago . " ago.";
+            $ago = $this->thing->human_time(time() - $this->refreshed_at);
+            $web .= "Checked about " . $ago . " ago.";
         }
 
         $this->thing_report["web"] = $web;
@@ -230,8 +222,8 @@ class Connection extends Agent
         $sms_message = "CONNECTION";
 
         if (isset($this->up)) {
-        $sms_message .= " ";
-        $sms_message .= $this->up ? "UP" : "DOWN";
+            $sms_message .= " ";
+            $sms_message .= $this->up ? "UP" : "DOWN";
         }
         $sms_message .= " | ";
 

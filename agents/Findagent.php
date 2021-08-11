@@ -69,13 +69,15 @@ class Findagent extends Agent
 
         $things = [];
         if (isset($this->thing->db)) {
-            $thingreport = $this->thing->db->setUser($this->from);
-            $thingreport = $this->thing->db->variableSearch(
+            $thing_report = $this->thing->db->setUser($this->from);
+            $thing_report = $this->thing->db->variableSearch(
                 null,
                 $name,
                 $this->horizon
             );
             $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
+        } else {
+            return true;
         }
 
         $run_time = $this->thing->elapsed_runtime() - $ref_time;

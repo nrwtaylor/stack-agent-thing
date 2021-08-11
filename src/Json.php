@@ -22,7 +22,7 @@ class Json
      * @param unknown $uuid
      * @return unknown
      */
-    function __construct($thing = null, $uuid)
+    function __construct($uuid)
     {
         $this->start_time = microtime(true);
         //        $settings = require 'settings.php';
@@ -55,17 +55,7 @@ class Json
         // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
 
         // new Database(false, ...) creates a read-only thing.
-$this->db = true;
-try {
-        $this->db = new Database($thing, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
-} catch (\Throwable $t) {
-//        throw new \Exception('Database not available.');
-} catch (\Exception $e) {
-//        throw new \Exception('Database not available.');
-}
-
-
-
+        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
         $this->array_data = array();
         $this->json_data = '{}';
 
@@ -293,7 +283,6 @@ try {
      */
     function fallingWater($value)
     {
-        if ($this->db === true) {return true;}
         // Drop N items off end of queue until less than max_chars.
 
         // First push onto the left.
@@ -529,11 +518,6 @@ try {
      */
     function write()
     {
-        if ($this->db === true) {
-            throw new \Exception('Could not write Json to DB.');
-        }
-
-
         // Now write to defined column.
         if ($this->field == null) {
             return;
@@ -589,11 +573,6 @@ try {
      */
     function read()
     {
-        if ($this->db === true) {
-            throw new \Exception('Could not read Json from DB.');
-
-
-        }
         $this->json_data = $this->db->readField($this->field);
 
         //        if ($this->json_data == null) {$this->initField();}
