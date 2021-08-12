@@ -30,6 +30,7 @@ class Mongo extends Agent
 
         $result = $this->collection->insertOne($thing);
 
+if (!isset($this->response)) {$this->response = "";}
         $this->response .= "Inserted with Object ID '{$result->getInsertedId()}'. ";
 
         $value = $this->getMongo($uuid);

@@ -37,6 +37,9 @@ class Database
         //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
+        $to = isset($agent_input["to"]) ? $agent_input['to'] : null;
+        $subject = isset($agent_input["subject"]) ? $agent_input['subject'] : null;
+
 
         $start_time = microtime(true);
         $this->start_time = $start_time;
@@ -88,34 +91,8 @@ class Database
 
         $this->from = $nom_from;
         $this->uuid = $uuid;
-
-        switch (true) {
-            case "mysql":
-                $mysql_handler = $this->mysqlDatabase();
-                if ($mysql_handler !== true) {
-                    $handler = $mysql_handler;
-                    $service = "mysql";
-                }
-                if ($service !== null) {
-                    break;
-                }
-            case "memory":
-                $memory_handler = $this->memoryDatabase();
-                if ($memory_handler !== true) {
-                    $handler = $memory_handler;
-                    $service = "memory";
-                }
-                if ($service !== null) {
-                    break;
-                }
-        }
-
-        $this->service = $service;
-        $this->service_handler = $handler;
-        $this->service_handler->uuid = $this->uuid;
-        $this->service_handler->from = $this->from;
-
-        // create container and configure it
+        $this->subject = $subject;
+        $this->to = $to;
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
@@ -138,11 +115,26 @@ class Database
             $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
 
-        $this->service_handler->hash_state = $this->hash_state;
-        $this->service_handler->hash_algorithm = $this->hash_algorithm;
-        $this->service_handler->get_prior = $this->get_prior;
 
 
+
+        $this->available_services = [];
+        $this->service_handlers = [];
+
+        $this->candidate_services = ['mysql','mongo', 'memory'];
+
+foreach($this->candidate_services as $i=>$candidate_service) {
+                $handler = $this->connectDatabase($candidate_service);
+
+                if ($handler !== true) {
+                    $this->available_services[] = $candidate_service;
+                    $this->service_handlers[$candidate_service] = $handler;
+                }
+
+}
+
+        $this->service = $this->available_services[0];
+        $this->service_handler = $this->service_handlers[$this->service];
 
         $this->container = new \Slim\Container($settings);
 
@@ -219,27 +211,28 @@ class Database
         $this->test("Database destruct ");
     }
 
-    function mysqlDatabase()
-    {
-        try {
-            $handler = new Mysql(null, $this->agent_input);
-            $handler->uuid = $this->uuid;
-            $handler->init();
-            $service = "mysql";
-            return $handler;
-        } catch (\Throwable $t) {
-        } catch (\Error $ex) {
-        }
-        return true;
-    }
+    // Test whether the persistence service is available.
+    // If it is provide a handler.
+    // Otherwise return true.
 
-    function memoryDatabase()
+    function connectDatabase($service_name)
     {
+$agent_class_name = ucwords($service_name);
+$agent_namespace_name =
+                "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+
         try {
-            $handler = new Memory(null, $this->agent_input);
+            $handler = new $agent_namespace_name(null, $this->agent_input);
             $handler->uuid = $this->uuid;
+            $handler->from = $this->from;
+            $handler->to = $this->to;
+            $handler->subject =$this->subject;
+            $handler->hash_state = $this->hash_state;
+            $handler->hash_algorithm = $this->hash_algorithm;
+            $handler->get_prior = $this->get_prior;
+
             $handler->init();
-            $service = "memory";
+            $service = $service_name;
             return $handler;
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
@@ -488,31 +481,6 @@ class Database
         // So just return the contents of thing.  false if it doesn't exist.
         //$mysql_handler =  new Mysql(null,null);
         //$thing = $mysql_handler->getMysql();
-        /*
-        try {
-            // Trying long form.  Doesn't seme to have performance advantage.
-            $sth = $this->container->db->prepare(
-                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
-            );
-
-            //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
-            $sth->bindParam("uuid", $this->uuid);
-            $sth->execute();
-            $thing = $sth->fetchObject();
-        } catch (\Exception $e) {
-            // devstack look get the error code.
-            // SQLSTATE[HY000] [2002] Connection refused
-            if ($e->getCode() == "2002" or $e->getCode() == "HY000") {
-                // devstack write to text file?
-                // Don't try making more entries when the database is refusing entries...
-            } else {
-                //            $t = new Thing(null);
-                //            $t->Create("stack", "error", 'Get ' . $e->getCode());
-            }
-            $thing = false;
-        }
-*/
-        //if ($this->service_handler == null) {return true;}
 
         $thing = false;
         if ($this->service == "mysql") {

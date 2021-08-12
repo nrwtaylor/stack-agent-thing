@@ -288,7 +288,8 @@ class Agent
     // TODO DEV?
     public function __call($agent_function, $args)
     {
-        $this->thing->log("__call start");
+if (!isset($this->thing)) {return true;}
+//        $this->thing->log("__call start");
         /*
         Generalize this pattern from agents.
         $agent_handler = new $agent_namespace_name($this->thing, $agent_input);
@@ -315,9 +316,9 @@ class Agent
             $function_primitive_name = $pieces[0];
         }
 
-        $this->thing->log(
-            "Check if " . $agent_name . " == " . $this->agent_name
-        );
+    //    $this->thing->log(
+    //        "Check if " . $agent_name . " == " . $this->agent_name
+    //    );
 
         if ($agent_name == $this->agent_name) {
             return false;
@@ -385,7 +386,7 @@ class Agent
 
                 $response = $this->thing->{$agent_name .
                     "_handler"}->{$function_name}(...$args);
-                $this->thing->log("__call response complete");
+  //              $this->thing->log("__call response complete");
                 return $response;
             }
         }

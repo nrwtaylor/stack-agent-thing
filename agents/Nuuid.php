@@ -327,9 +327,7 @@ class Nuuid extends Agent
         if ($nuuid == null) {
             return true;
         }
-
         $things = $this->thingsNuuid($nuuid);
-
         if (count($things) == 1) {
             $this->response .= "Got a UUID from the stack. ";
             $nuuid_uuid = $things[0]['uuid'];
@@ -376,7 +374,6 @@ class Nuuid extends Agent
 
         $nuuid = $this->extractNuuid($input);
         $nuuid_uuid = $this->uuidNuuid($nuuid);
-
         if ($nuuid_uuid === false) {
             $this->response .= "No matching UUID found. ";
         }

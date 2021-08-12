@@ -54,7 +54,7 @@ class Mysql extends Agent
 
     public function test()
     {
-        $thingreport = $this->priorGet();
+        $thingreport = $this->priorMysql();
         var_dump($thingreport);
     }
 
@@ -220,7 +220,7 @@ echo "fopo";
      * @param unknown $created_at (optional)
      * @return unknown
      */
-    function priorGet($created_at = null)
+    function priorMysql($created_at = null)
     {
         if ($this->get_prior === false) {
             $thingreport = [
@@ -503,11 +503,11 @@ echo "fopo";
         if ($uuid == null) {
             $uuid = $this->uuid;
         }
-$error = null;
-try {
-        $sth = $this->pdo->prepare("DELETE FROM stack WHERE uuid=:uuid");
-        $sth->bindParam("uuid", $uuid);
-        $sth->execute();
+        $error = null;
+        try {
+            $sth = $this->pdo->prepare("DELETE FROM stack WHERE uuid=:uuid");
+            $sth->bindParam("uuid", $uuid);
+            $sth->execute();
         } catch (\Throwable $t) {
             $error = true;
         } catch (\Error $ex) {
@@ -553,7 +553,7 @@ try {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function associationSearch($value, $max = null)
+    function associationsearchMysql($value, $max = null)
     {
         if ($max == null) {
             $max = 3;
@@ -619,7 +619,7 @@ try {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function variableSearch($path, $value, $max = null)
+    function variablesearchMysql($path, $value, $max = null)
     {
         if ($max == null) {
             $max = 3;
@@ -671,7 +671,7 @@ try {
         return $thingreport;
     }
 
-    function nuuidSearch($nuuid)
+    function nuuidsearchMysql($nuuid)
     {
         $user_search = $this->from;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
@@ -703,7 +703,6 @@ try {
         }
 
         $sth = null;
-
         return $thingreport;
     }
 
