@@ -37,10 +37,9 @@ class Database
         //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
-        $to = isset($agent_input["to"]) ? $agent_input["to"] : null;
-        $subject = isset($agent_input["subject"])
-            ? $agent_input["subject"]
-            : null;
+        $subject = isset($agent_input["subject"]) ? $agent_input['subject'] : null;
+        $to = isset($agent_input["to"]) ? $agent_input['to'] : null;
+
 
         $start_time = microtime(true);
         $this->start_time = $start_time;
@@ -95,6 +94,47 @@ class Database
         $this->subject = $subject;
         $this->to = $to;
 
+
+        $this->available_services = [];
+        $this->service_handlers = [];
+
+        switch (true) {
+            case "mysql":
+                $mysql_handler = $this->mysqlDatabase();
+                if ($mysql_handler !== true) {
+                    $handler = $mysql_handler;
+                    $service = "mysql";
+                    $this->available_services[] = $service;
+                    $this->service_handlers[$service] = $handler;
+                }
+
+            case "mongo":
+                $handler = $this->mongoDatabase();
+                if ($handler !== true) {
+                    $service = "mongo";
+                    $this->available_services[] = $service;
+                    $this->service_handlers[$service] = $handler;
+                }
+                //if ($service !== null) {
+                //    break;
+                //}
+            case "memory":
+                $memory_handler = $this->memoryDatabase();
+                if ($memory_handler !== true) {
+                    $handler = $memory_handler;
+                    $service = "memory";
+                    $this->available_services[] = $service; 
+                    $this->service_handlers[$service] = $handler;
+                }
+        }
+
+        $this->service = $this->available_services[0];
+        $this->service_handler = $this->service_handlers[$this->service];
+        $this->service_handler->uuid = $this->uuid;
+        $this->service_handler->from = $this->from;
+
+        // create container and configure it
+
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
@@ -116,24 +156,11 @@ class Database
             $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
 
-        $this->available_services = [];
-        $this->service_handlers = [];
+        $this->service_handler->hash_state = $this->hash_state;
+        $this->service_handler->hash_algorithm = $this->hash_algorithm;
+        $this->service_handler->get_prior = $this->get_prior;
 
-        $this->candidate_services = ["mysql", "mongo", "memory"];
 
-        foreach ($this->candidate_services as $i => $candidate_service) {
-            $handler = $this->connectDatabase($candidate_service);
-
-            if ($handler !== true) {
-                $this->available_services[] = $candidate_service;
-                $this->service_handlers[$candidate_service] = $handler;
-            }
-        }
-
-        $this->active_services = $this->available_services;
-
-        $this->service = $this->available_services[0];
-        $this->service_handler = $this->service_handlers[$this->service];
 
         $this->container = new \Slim\Container($settings);
 
@@ -210,28 +237,45 @@ class Database
         $this->test("Database destruct ");
     }
 
-    // Test whether the persistence service is available.
-    // If it is provide a handler.
-    // Otherwise return true.
-
-    function connectDatabase($service_name)
+    function mysqlDatabase()
     {
-        $agent_class_name = ucwords($service_name);
-        $agent_namespace_name =
-            "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
-
         try {
-            $handler = new $agent_namespace_name(null, $this->agent_input);
+            $handler = new Mysql(null, $this->agent_input);
+            $handler->uuid = $this->uuid;
+            $handler->init();
+            $service = "mysql";
+            return $handler;
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+        return true;
+    }
+
+    function mongoDatabase()
+    {
+        try {
+            $handler = new Mongo(null, $this->agent_input);
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
-            $handler->to = $this->to;
             $handler->subject = $this->subject;
-            $handler->hash_state = $this->hash_state;
-            $handler->hash_algorithm = $this->hash_algorithm;
-            $handler->get_prior = $this->get_prior;
-
+            $handler->to = $this->to;
             $handler->init();
-            $service = $service_name;
+            $service = "mongo";
+            return $handler;
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+        return true;
+    }
+
+
+    function memoryDatabase()
+    {
+        try {
+            $handler = new Memory(null, $this->agent_input);
+            $handler->uuid = $this->uuid;
+            $handler->init();
+            $service = "memory";
             return $handler;
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
@@ -316,90 +360,21 @@ class Database
      */
     function priorGet($created_at = null)
     {
-        //if ($this->service == "mysql") {
-        //$thingreport = $this->mysql_handler->priorGet($created_at);
-        //}
-        //return $thingreport;
-
-        if ($this->get_prior === false) {
-            $thingreport = [
+           $thingreport = [
                 "thing" => false,
-                "info" => "Prior get is off for this stack.",
+                "info" => "Could not get prior for this stack.",
                 "help" => "No help available.",
             ];
 
+        if ($this->service_handler == null) {
             return $thingreport;
         }
-
-        $nom_from = $this->from;
-        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
-        $prior_uuid = $this->getMemory($hash_nom_from);
-        // Given a $uuid.  Find the previous record the $from user
-        // created.
-
-        // Review thought.  Wouldn't searching for the latest record
-        // before the time_stamp be more efficient?
-
-        // http://stackoverflow.com/questions/28451031/how-to-get-second-last-row-from-mysql-database
-        // Doesn't work in case of same time_stamp.
-        // That is acceptable.  A second resolution for creating records is
-        // likely a good limit.  Easy to upgrade by adding a 'microsecond' column to the
-        // database.
-
-        // Change to InnoDB means stack is likely now working on microsecond
-        // time quantum.
-
-        // sqlinjection commentary
-        // nom_from is a carrier provided identifier, therefore judged safe to
-        // pass by message carriers.
-        // created_at is a stack created field
-
-        if ($created_at == null) {
-            $query_string =
-                "SELECT * FROM (SELECT * FROM stack WHERE
-				(nom_from='" .
-                $this->from .
-                "' OR nom_from='" .
-                $hash_nom_from .
-                "'" .
-                ") ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
-        } else {
-            $query_string =
-                "SELECT * FROM stack where (nom_from = '" .
-                $this->from .
-                "' OR nom_from='" .
-                $hash_nom_from .
-                "'" .
-                ") and created_at < '" .
-                $created_at .
-                "' order by created_at DESC LIMIT 3";
+        if ($this->service == "mysql") {
+            $thingreport = $this->service_handler->priorMysql($created_at);
         }
-        try {
-            $sth = $this->container->db->prepare($query_string);
-            $sth->execute();
-            $thing = $sth->fetchObject();
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
-            $thing = false;
-        }
-
-        $sth = null;
-
-        $thingreport = [
-            "thing" => $thing,
-            "info" =>
-                "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
-                $this->web_prefix .
-                "api/thing/<32 characters>.",
-            "help" => "Check your junk/spam folder.",
-        ];
-
-        // Runs in 0 to 8ms
 
         return $thingreport;
+
     }
 
     /**
@@ -409,36 +384,12 @@ class Database
      */
     public function writeField($field_text, $string_text)
     {
-        //if ($this->service_handler == null) {
-        //    return true;
-        //}
-        foreach ($this->active_services as $i => $active_service) {
-
-        if ($active_service == "mysql") {
-            $this->service_handlers["mysql"]->writeField(
-                $field_text,
-                $string_text
-            );
+        if ($this->service_handler == null) {
+            return true;
         }
-/*
-        if ($active_service == "mongo") {
-            $key = $this->service_handlers["mongo"]->setMongo($key, $value);
-            if ($key === true) {return true;}
+        if ($this->service == "mysql") {
+            $this->service_handler->writeField($field_text, $string_text);
         }
-
-        if ($active_service == "memory") {
-            $memory = $this->service_handlers["memory"]->set($key, $value);
-
-            if ($memory === false) {
-                return true;
-            } //error
-            if ($memory === true) {
-                return $value;
-            } // success
-            return true; // error
-        }
-*/
-}
     }
 
     /**
@@ -484,9 +435,10 @@ class Database
      */
     function Create($subject, $to)
     {
+
         $response = false;
         if ($this->service == "mysql") {
-            $response = $this->service_handler->createMysql($subject, $to);
+        $response = $this->service_handler->createMysql($subject, $to);
         }
         return $response;
     }
@@ -501,8 +453,6 @@ class Database
         // Chance of collision super-super-small.
 
         // So just return the contents of thing.  false if it doesn't exist.
-        //$mysql_handler =  new Mysql(null,null);
-        //$thing = $mysql_handler->getMysql();
 
         $thing = false;
         if ($this->service == "mysql") {
@@ -608,34 +558,19 @@ class Database
      */
     function Forget()
     {
-        $thing_reports = [];
-        foreach ($this->active_services as $i => $active_service) {
-            if ($active_service == "mysql") {
-                $thing_reports[
-                    $active_service
-                ] = $this->service_handler->forgetMysql($this->uuid);
-            }
-
-            if ($active_service == "mongo") {
-                $thing_reports[
-                    $active_service
-                ] = $this->service_handler->forgetMongo($this->uuid);
-            }
-
-            if ($active_service == "memory") {
-                $memory = $this->service_handler->setMemory($this->uuid, null);
-                $thing_reports[$active_service] = [
-                    "info" => "That thing was forgotten.",
-                    "error" => $memory,
-                ];
-            }
+        if ($this->service == "mysql") {
+            $thingreport = $this->service_handler->forgetMysql($this->uuid);
         }
 
-        // Thing report fusion?
-        // But for now.get first element
-        $thing_report = reset($thing_reports);
+        if ($this->service == "memory") {
+            $memory = $this->service_handler->setMemory($this->uuid, null);
+        $thingreport = [
+            "info" => "That thing was forgotten.",
+            "error" => $false,
+        ];
 
-        return $thing_report;
+        }
+        return $thingreport;
     }
 
     /**
@@ -673,14 +608,18 @@ class Database
     {
         $thing_report = [
             "things" => [],
-            "info" => "Did not find any things with that association.",
-            "help" => "Finds associated things.",
+            "info" =>
+                'Associated things.',
+            "help" => "No help available.",
         ];
 
+
+        if ($this->service_handler == null) {
+            return $thing_report;
+        }
+
         if ($this->service == "mysql") {
-            $thing_report = $this->service_handlers[
-                "mysql"
-            ]->associationsearchMysql($value, $max);
+            $thing_report = $this->service_handler->associationsearchMysql($value, $max);
         }
 
         return $thing_report;
@@ -695,58 +634,50 @@ class Database
      */
     function variableSearch($path, $value, $max = null)
     {
-        if ($max == null) {
-            $max = 3;
-        }
-        $max = (int) $max;
+        $thing_report = [
+            "things" => [],
+            "info" =>
+                'Search Things variables.',
+            "help" => "No help available.",
+        ];
 
-        $user_search = $this->from;
-        $hash_user_search = hash($this->hash_algorithm, $user_search);
 
-        // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-        $value = "%$value%"; // Value to search for in Variables
-
-        $thingreport["things"] = [];
-
-        try {
-            //            $query =
-            //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-
-            $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-
-            //$value = "+$value"; // Value to search for in Variables
-
-            //    $query =
-            //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
-
-            $sth = $this->container->db->prepare($query);
-
-            $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
-
-            $sth->bindParam(":value", $value);
-            $sth->bindParam(":max", $max, PDO::PARAM_INT);
-            $sth->execute();
-
-            $things = $sth->fetchAll();
-
-            $thingreport["info"] =
-                'So here are Things with the variable you provided in \$variables. That\'s what you want';
-            $thingreport["things"] = $things;
-        } catch (\PDOException $e) {
-            // echo "Error in PDO: ".$e->getMessage()."<br>";
-            $thingreport["info"] = $e->getMessage();
-            $thingreport["things"] = [];
+        if ($this->service_handler == null) {
+            return $thing_report;
         }
 
-        $sth = null;
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->variablesearchMysql($path, $value, $max);
+        }
 
-        return $thingreport;
+        return $thing_report;
     }
 
     function nuuidSearch($nuuid)
     {
+/*
+        $thing_report = [
+            "things" => [],
+            "info" =>
+                'Search for a nuuid.',
+            "help" => "No help available.",
+        ];
+
+
+        if ($this->service_handler == null) {
+            return $thing_report;
+        }
+
+        if ($this->service == "mysql") {
+            $thing_report = $this->service_handler->nuuidsearchMysql($nuuid);
+        }
+var_dump($thing_report);
+        return $thing_report;
+*/
+
+
+
+
         $user_search = $this->from;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
@@ -1555,6 +1486,7 @@ class Database
             "whatisthis" => "The maximum length of the variables field.",
         ];
 
+
         if ($this->service_handler == null) {
             return $thing_report;
         }
@@ -1572,12 +1504,15 @@ class Database
      */
     function connections()
     {
+
         $thing_report = [
             "thing" => false,
             "db" => true,
-            "info" => "Connected threads.",
+            "info" =>
+                'Connected threads.',
             "help" => "It is up to you what you do with these.",
         ];
+
 
         if ($this->service_handler == null) {
             return $thing_report;
@@ -1600,9 +1535,11 @@ class Database
     {
         $thing_report = [
             "thing" => [],
-            "info" => "So here is a random thing from the stack.",
+            "info" =>
+                'So here is a random thing from the stack.',
             "help" => "It is up to you what you do with these.",
         ];
+
 
         if ($this->service_handler == null) {
             return $thing_report;
@@ -1623,12 +1560,14 @@ class Database
      */
     function randomn($nom_from, $n = 3)
     {
+
         $thing_report = [
             "thing" => [],
             "info" =>
                 'So here are three things you put on the stack.  That\'s what you wanted.',
             "help" => "It is up to you what you do with these.",
         ];
+
 
         if ($this->service_handler == null) {
             return $thing_report;
@@ -1654,6 +1593,7 @@ class Database
         $task_exclusions = null,
         $nom_to_exclusions = null
     ) {
+
         $thing_report = [
             "thing" => [],
             "info" =>
@@ -1661,16 +1601,13 @@ class Database
             "help" => "It is up to you what you do with these.",
         ];
 
+
         if ($this->service_handler == null) {
             return $thing_report;
         }
 
         if ($this->service == "mysql") {
-            $thing_report = $this->service_handler->reminderMysql(
-                $nom_from,
-                $task_exclusions,
-                $nom_to_exclusions
-            );
+            $thing_report = $this->service_handler->reminderMysql($nom_from, $task_exclusions, $nom_to_exclusions);
         }
 
         return $thing_report;
@@ -1781,3 +1718,4 @@ function fatalErrorShutdownHandler()
     // An exit here will cut off the footer display.
     //exit();
 }
+

@@ -1,15 +1,15 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Flag extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -25,11 +25,13 @@ class Flag extends Agent
 
         // Get some stuff from the stack which will be helpful.
 
-        $this->link = $this->web_prefix . 'thing/' . $this->uuid . '/flag';
+        $this->link = $this->web_prefix . "thing/" . $this->uuid . "/flag";
 
         $this->refreshed_at = null;
 
         $this->current_time = $this->thing->time();
+        $this->nauticalFlags();
+        $this->colourFlags();
     }
 
     function set($requested_state = null)
@@ -51,10 +53,158 @@ class Flag extends Agent
 
         $this->flag->setVariable("state", $this->state);
         $this->flag->setVariable("refreshed_at", $this->current_time);
-
     }
 
+    public function lexiconFlags($lexicon_name = null)
+    {
+        $haystack = function ($variable) {
+            $text = "";
+            if (is_string($variable)) {
+                return $variable;
+            }
+            foreach ($variable as $parameter => $arr) {
+                if (is_string($arr)) {
+                    $text .= $arr . " ";
+                    continue;
+                }
 
+                if (is_int($arr)) {
+                    $text .= $arr . " ";
+                    continue;
+                }
+
+                if ($arr == null) {
+                    continue;
+                }
+
+                foreach ($arr as $i => $w) {
+                    $text .= $w . " ";
+                }
+            }
+            return trim($text);
+        };
+
+        $flags_lexicon = [];
+        $this->flags_resource[$lexicon_name] =
+            "flag/" . $lexicon_name . "-flags.php";
+        $flags = require $this->resource_path .
+            $this->flags_resource[$lexicon_name];
+
+        foreach ($flags as $group_name => $group) {
+            foreach ($group["set"] as $flag_name => $flag_descriptor) {
+                // dev improve
+                if (is_numeric($flag_name)) {
+                    continue;
+                }
+
+                //if ((!isset($flag_descriptor)) or ($flag_descriptor == [])) {var_dump("no descriptor",$flag_name);}
+
+                $flag_slug = $this->getSlug($flag_name);
+
+                if (!isset($flag_descriptor["word"])) {
+                    $flag_descriptor["word"] = $flag_name;
+                }
+
+                if (!isset($flags_lexicon[$flag_slug])) {
+                    $flags_lexicon[$flag_slug] = $flag_descriptor;
+                    $flags_lexicon[$flag_slug]["haystack"] = $haystack(
+                        $flag_descriptor
+                    );
+
+                    $flags_lexicon[$flag_slug]["slug"] = $flag_slug;
+                }
+                /*
+                if (!isset($flag_descriptor["word"])) {
+                    $flag_slug_word = $flag_slug;
+
+if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
+
+                    $flags_lexicon[$flag_slug] = $flag_descriptor;
+
+                    $flags_lexicon[$flag_slug]["haystack"] = $haystack(
+                        $flag_descriptor
+                    );
+                    $flags_lexicon[$flag_slug]["slug"] = $flag_slug;
+                    continue;
+                }
+*/
+
+                foreach ($flag_descriptor["word"] as $parameter => $flag_word) {
+                    $flag_slug_word = $this->getSlug($flag_word);
+
+                    //                    if (!isset($flags_lexicon[$flag_slug_word])) {
+                    //                        $flags_lexicon[$flag_slug_word] = [];
+                    //                    }
+                    $flags_lexicon[$flag_slug_word] = $flag_descriptor;
+
+                    $flags_lexicon[$flag_slug_word]["haystack"] = $haystack(
+                        $flag_descriptor
+                    );
+
+                    $flags_lexicon[$flag_slug_word]["slug"] = $flag_slug;
+                }
+            }
+        }
+        //var_dump($flags_lexicon);
+        $this->flags_lexicon[$lexicon_name] = $flags_lexicon;
+    }
+
+    public function nauticalFlags($text = null)
+    {
+        $this->lexiconFlags("nautical");
+    }
+
+    public function colourFlags($text = null)
+    {
+        $this->lexiconFlags("colour");
+    }
+
+    public function extractFlags($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        $tokens = explode(" ", $text);
+        $lexicons = ["nautical", "colour"];
+        $matches = [];
+        foreach ($tokens as $i => $token) {
+            foreach ($lexicons as $i => $lexicon_name) {
+                foreach (
+                    $this->flags_lexicon[$lexicon_name]
+                    as $flag_slug => $flag_descriptor
+                ) {
+                    if (!is_string($flag_slug)) {
+                        $flag_slug = "" . $flag_slug;
+                    }
+
+                    if ($this->getSlug($token) == $flag_slug) {
+                        //if (!isset($flag_descriptor['slug'])) {
+                        //    $matches[] = $flag_descriptor['slug'];
+                        //}
+                        if (!isset($flag_descriptor["slug"])) {
+                        }
+                        $matches[] = $flag_descriptor["slug"];
+                    }
+                }
+            }
+        }
+        return $matches;
+    }
+
+    public function extractFlag($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+
+        $flag_slugs = $this->extractFlags($text);
+
+        if (count($flag_slugs) == 1) {
+            return $flag_slugs[0];
+        }
+        return false;
+    }
 
     function isFlag($flag = null)
     {
@@ -67,6 +217,22 @@ class Flag extends Agent
             }
 
             $flag = $this->state;
+        }
+        $matches = [];
+        foreach (
+            $this->flags_lexicon["nautical"]
+            as $flag_slug => $flag_descriptor
+        ) {
+            if (!is_string($flag_slug)) {
+                $flag_slug = chr($flag_slug);
+            }
+            if (strpos($this->getSlug($flag), $flag_slug) !== false) {
+                $matches[] = $flag_slug;
+            }
+        }
+
+        if (count($matches) == 1) {
+            return true;
         }
 
         if (
@@ -88,8 +254,6 @@ class Flag extends Agent
 
     public function get()
     {
-
-
         $this->thing->json->setField("variables");
         $this->head_code = $this->thing->json->readVariable([
             "headcode",
@@ -157,15 +321,15 @@ class Flag extends Agent
         );
 
         $choices = $this->flag->thing->choice->makeLinks($this->state);
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
 
-        $web = '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
+        $web = "<b>" . ucwords($this->agent_name) . " Agent</b><br><p>";
         $web .= "<p>";
         $web .= '<a href="' . $link . '">';
 
@@ -174,13 +338,13 @@ class Flag extends Agent
         $web .= "</a>";
         $web .= "<br>";
         $web .= $this->sms_message;
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function readFlag()
     {
         $state_text = "X";
-        if ((isset($this->state)) and ($this->state !== false))  {
+        if (isset($this->state) and $this->state !== false) {
             $state_text = $this->state;
         }
 
@@ -202,37 +366,37 @@ class Flag extends Agent
             $t = $this->state;
         }
 
-        $this->thing_report['email'] = $this->message;
+        $this->thing_report["email"] = $this->message;
 
         $this->makeChoices();
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     function makeHelp()
     {
         if ($this->state == "green") {
-            $this->thing_report['help'] =
-                'This Flag is either RED or GREEN. GREEN means available.';
+            $this->thing_report["help"] =
+                "This Flag is either RED or GREEN. GREEN means available.";
         }
 
         if ($this->state == "red") {
-            $this->thing_report['help'] =
-                'This Flag is either RED or GREEN. RED means busy.';
+            $this->thing_report["help"] =
+                "This Flag is either RED or GREEN. RED means busy.";
         }
     }
 
     function makeTXT()
     {
-        $txt = 'This is FLAG POLE ' . $this->flag->nuuid . '. ';
-        $txt .= 'There is a ' . strtoupper($this->state) . " FLAG. ";
+        $txt = "This is FLAG POLE " . $this->flag->nuuid . ". ";
+        $txt .= "There is a " . strtoupper($this->state) . " FLAG. ";
         if ($this->verbosity >= 5) {
             $txt .=
-                'It was last refreshed at ' . $this->current_time . ' (UTC).';
+                "It was last refreshed at " . $this->current_time . " (UTC).";
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -276,35 +440,37 @@ class Flag extends Agent
             }
 
             if ($this->state == "green") {
-                $sms_message .= ' | MESSAGE Red';
+                $sms_message .= " | MESSAGE Red";
             }
         }
 
         $sms_message .= " " . $this->response;
 
+        $sms_message = $this->filterAn($sms_message);
+
         $this->sms_message = $sms_message;
-        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
     }
 
     function makeMessage()
     {
         $message =
-            'This is a FLAG POLE.  The flag is a ' .
+            "This is a FLAG POLE.  The flag is a " .
             trim(strtoupper($this->state)) .
             " FLAG. ";
 
-        if ($this->state == 'red') {
-            $message .= 'It is a BAD time at the moment. ';
+        if ($this->state == "red") {
+            $message .= "It is a BAD time at the moment. ";
         }
 
-        if ($this->state == 'green') {
-            $message .= 'It is a GOOD time now. ';
+        if ($this->state == "green") {
+            $message .= "It is a GOOD time now. ";
         }
 
         //$test_message .= 'And the flag is ' . strtoupper($this->state) . ".";
 
         $this->message = $message;
-        $this->thing_report['message'] = $message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
+        $this->thing_report["message"] = $message; // NRWTaylor. Slack won't take hmtl raw. $test_message;
     }
 
     public function makeImage()
@@ -366,8 +532,8 @@ class Flag extends Agent
         } else {
             if (isset($this->{$this->state})) {
                 $color = $this->{$this->state};
-            } elseif (isset($this->{'flag_' . $this->state})) {
-                $color = $this->{'flag_' . $this->state};
+            } elseif (isset($this->{"flag_" . $this->state})) {
+                $color = $this->{"flag_" . $this->state};
             }
         }
 
@@ -421,28 +587,28 @@ class Flag extends Agent
         //$this->response = null;
 
         $keywords = [
-            'flag',
-            'red',
-            'green',
-            'rainbow',
-            'blue',
-            'indigo',
-            'orange',
-            'yellow',
-            'violet',
-            'gray',
-            'grey',
-            'gris',
-            'cinzento',
+            "flag",
+            "red",
+            "green",
+            "rainbow",
+            "blue",
+            "indigo",
+            "orange",
+            "yellow",
+            "violet",
+            "gray",
+            "grey",
+            "gris",
+            "cinzento",
         ];
 
-        if (isset($this->agent_input)) {
-            $input = $this->agent_input;
-        } else {
-            $input = strtolower($this->subject);
-        }
-
-        //		$this->requested_state = $this->discriminateInput($haystack); // Run the discriminator.
+        //        if (isset($this->agent_input)) {
+        //            $input = $this->agent_input;
+        //        } else {
+        //            $input = strtolower($this->subject);
+        //        }
+        $input = $this->input;
+        $filtered_input = $this->assert($input);
 
         $prior_uuid = null;
 
@@ -458,38 +624,45 @@ class Flag extends Agent
             }
         }
 
+        $flag_slug = $this->extractFlag($input);
+
+        if ($flag_slug !== false) {
+            $this->selectChoice($flag_slug);
+            return;
+        }
+
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'red':
+                        case "red":
                             $this->thing->log(
                                 $this->agent_prefix .
-                                    'received request for RED FLAG.',
+                                    "received request for RED FLAG.",
                                 "INFORMATION"
                             );
-                            $this->selectChoice('red');
+                            $this->selectChoice("red");
                             return;
-                        case 'green':
-                            $this->selectChoice('green');
+                        case "green":
+                            $this->selectChoice("green");
                             return;
-                        case 'rainbow':
-                        case 'blue':
-                        case 'indigo':
-                        case 'orange':
-                        case 'yellow':
-                        case 'violet':
+                        case "rainbow":
+                        case "blue":
+                        case "indigo":
+                        case "orange":
+                        case "yellow":
+                        case "violet":
                             $this->selectChoice($piece);
                             return;
 
-                        case 'gray':
-                        case 'grey':
-                        case 'gris':
-                        case 'cinzento':
-                            $this->selectChoice('grey');
+                        case "gray":
+                        case "grey":
+                        case "gris":
+                        case "cinzento":
+                            $this->selectChoice("grey");
                             return;
 
-                        case 'next':
+                        case "next":
 
                         default:
                     }
@@ -498,6 +671,5 @@ class Flag extends Agent
         }
 
         $this->readFlag();
-
     }
 }
