@@ -24,7 +24,6 @@ class Glossary extends Agent
             "This gives a list of the help text for each Agent.";
         $this->glossary_agents = [];
 
-<<<<<<< HEAD
         $this->auto_glossary = "on";
     }
 
@@ -33,6 +32,7 @@ class Glossary extends Agent
      */
     function run()
     {
+/*
         $this->test_results = [];
 
         $data_source = $this->resource_path . "glossary/glossary.txt";
@@ -89,10 +89,11 @@ class Glossary extends Agent
         $this->glossary_file_error = false;
 
         $this->time_budget = 5000; // Don't spend more than 5s building the glossary.
-    }
+*/
+//    }
 
-    function run()
-    {
+//    function run()
+//    {
         if (
             isset($this->glossary_build_flag) and
             $this->glossary_build_flag and
