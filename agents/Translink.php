@@ -74,8 +74,7 @@ class Translink extends Agent
      */
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             "null"
         );

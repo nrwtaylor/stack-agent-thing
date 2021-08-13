@@ -21,7 +21,7 @@ class Negativetime extends Agent {
         $this->agent_name = 'negative time';
         $this->test= "Development code";
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
     }
 
 

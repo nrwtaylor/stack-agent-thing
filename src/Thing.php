@@ -13,6 +13,11 @@ use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 // For testing.
 // See https://jolicode.com/blog/find-segfaults-in-php-like-a-boss
 
+// PHP class for a Thing.
+// A Thing needs access to a store (db)
+// and a means to serialize and deserialize into that store (json).
+// And a way to generate a unique identifier (uuid).
+
 class Thing
 {
     public $var = 'hello';
@@ -185,7 +190,7 @@ class Thing
 
             $this->log("Thing made a UUID.");
 
-            // And then we pull out some Thing related variables and settings.
+            // And then we pull out some Thing related svariables and settings.
 
             $this->container['thing'] = function ($c) {
                 $db = $c['settings']['thing'];
@@ -543,7 +548,7 @@ And review Agent variables.
     {
         $this->json->setField("variables");
 
-        $accounts = $this->json->readVariable(["account"]);
+        $accounts = $this->Read(["account"]);
 
         // At this point we have a PHP array of all accounts on
         // this Thing.
@@ -680,32 +685,26 @@ And review Agent variables.
 
     public function Ignore()
     {
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "green");
+        $this->Write(["thing", "status"], "green");
         $this->Get();
     }
 
     public function flagRed()
     {
         // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "red");
+        $this->Write(["thing", "status"], "red");
         $this->Get();
     }
 
     public function silenceOn()
     {
-        // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "silence"], "on");
+        $this->Write(["thing", "silence"], "on");
         $this->Get();
     }
 
     public function silenceOff()
     {
-        // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "silence"], "off");
+        $this->Write(["thing", "silence"], "off");
         $this->Get();
     }
 
@@ -713,7 +712,7 @@ And review Agent variables.
     {
         // Ask if the Thing is Green
         $var_path = ["thing", "silence"];
-        if ($this->json->readVariable($var_path) == "on") {
+        if ($this->Read($var_path) == "on") {
             return true;
         }
         return false;
@@ -722,16 +721,14 @@ And review Agent variables.
     public function flagAmber()
     {
         // Make the Thing show Amber
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "amber");
+        $this->Write(["thing", "status"], "amber");
         $this->Get();
     }
 
     public function flagGreen()
     {
         // Make the Thing show Green
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "green");
+        $this->Write(["thing", "status"], "green");
         $this->Get();
     }
 
@@ -739,7 +736,7 @@ And review Agent variables.
     {
         // Ask if the Thing is Red
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "red") {
+        if ($this->Read($var_path) == "red") {
             return true;
         }
         return false;
@@ -749,7 +746,7 @@ And review Agent variables.
     {
         // Ask if the Thing is Green
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "green") {
+        if ($this->Read($var_path) == "green") {
             return true;
         }
         return false;
@@ -760,7 +757,7 @@ And review Agent variables.
     {
         // Ask if the Thing is Amber.  Is it ready to go?
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "amber") {
+        if ($this->Read($var_path) == "amber") {
             return true;
         }
         return false;
@@ -787,7 +784,7 @@ And review Agent variables.
     {
         // More open way to ask a thing for its flag
         $var_path = ["thing", "status"];
-        return $this->json->readVariable($var_path);
+        return $this->Read($var_path);
     }
 
     public function flagSet($color = null)
@@ -797,8 +794,7 @@ And review Agent variables.
             $color = 'red';
         }
 
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], $color);
+        $this->Write(["thing", "status"], $color);
         $this->Get();
     }
 

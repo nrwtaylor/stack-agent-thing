@@ -29,8 +29,7 @@ class Useful extends Agent
     {
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["useful", "refreshed_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

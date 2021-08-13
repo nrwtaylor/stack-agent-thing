@@ -92,7 +92,7 @@ class Shift extends Agent
         // This isn't going to help because we don't know if this
         // is the base.
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->test = "Development code"; // Always
     }
@@ -121,12 +121,11 @@ class Shift extends Agent
             $requested_state = $this->requested_state;
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->keyword, "state"],
             $requested_state
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->keyword, "refreshed_at"],
             $this->current_time
         );
@@ -153,7 +152,7 @@ class Shift extends Agent
             $run_time = $train['run_time'];
             $run_at = $train['run_at'];
 
-            $end_at = $this->thing->json->time(
+            $end_at = $this->thing->time(
                 strtotime($train['run_at'] . " " . $run_time . " minutes")
             );
 
@@ -199,12 +198,11 @@ class Shift extends Agent
         ) {
             $thing = new Thing($thing_obj['uuid']);
 
-            $thing->json->setField("variables");
-            $thing->previous_state = $thing->json->readVariable([
+            $thing->previous_state = $thing->Read([
                 $this->keyword,
                 "state",
             ]);
-            $thing->refreshed_at = $thing->json->readVariable([
+            $thing->refreshed_at = $thing->Read([
                 $this->keyword,
                 "refreshed_at",
             ]);
@@ -239,13 +237,12 @@ class Shift extends Agent
             $this->base_thing = $thing;
         }
 
-        $this->base_thing->json->setField("variables");
 
-        $this->previous_state = $this->base_thing->json->readVariable([
+        $this->previous_state = $this->base_thing->Read([
             $this->keyword,
             "state",
         ]);
-        $this->refreshed_at = $this->base_thing->json->readVariable([
+        $this->refreshed_at = $this->base_thing->Read([
             $this->keyword,
             "refreshed_at",
         ]);
@@ -283,7 +280,7 @@ class Shift extends Agent
             $run_time = $train['run_time'];
             $run_at = $train['run_at'];
 
-            $end_at = $this->thing->json->time(
+            $end_at = $this->thing->time(
                 strtotime($train['run_at'] . " " . $run_time . " minutes")
             );
 

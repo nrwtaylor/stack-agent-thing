@@ -23,12 +23,11 @@ class Channel extends Agent
             $channel_name = $this->channel_name;
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["channel", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
-        $this->thing->json->writeVariable(["channel", "name"], $channel_name);
+        $this->thing->Write(["channel", "name"], $channel_name);
     }
 
     public function initChannels()
@@ -85,8 +84,7 @@ class Channel extends Agent
     public function get()
     {
         if ($this->agent_input == "channel") {
-            $this->thing->json->setField("variables");
-            $this->channel_name = $this->thing->json->readVariable([
+            $this->channel_name = $this->thing->Read([
                 "channel",
                 "name",
             ]);

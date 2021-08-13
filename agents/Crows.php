@@ -24,16 +24,14 @@ class Crows extends Agent
     }
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "crows",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["crows", "refreshed_at"],
                 $time_string
             );
@@ -149,8 +147,7 @@ class Crows extends Agent
 
     function setCrows()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["crows", "index"], $this->index);
+        $this->thing->Write(["crows", "index"], $this->index);
 
         $this->thing->log(
             $this->agent_prefix .
@@ -163,8 +160,7 @@ class Crows extends Agent
 
     function getCrows()
     {
-        $this->thing->json->setField("variables");
-        $this->index = $this->thing->json->readVariable(["crows", "index"]);
+        $this->index = $this->thing->Read(["crows", "index"]);
 
         if ($this->index == false) {
             $this->thing->log(

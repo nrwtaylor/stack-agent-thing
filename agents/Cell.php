@@ -19,7 +19,7 @@ class Cell extends Agent
     {
         $this->node_list = ["cell" => ["cell", "lattice"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         if (!isset($this->max)) {
             $this->max = 12;
@@ -53,16 +53,14 @@ class Cell extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "cell",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["cell", "refreshed_at"],
                 $time_string
             );
@@ -169,8 +167,7 @@ class Cell extends Agent
 
     public function setCell()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["cell", "value"], $this->value);
+        $this->thing->Write(["cell", "value"], $this->value);
 
         $this->thing->log(
             $this->agent_prefix .
@@ -183,8 +180,7 @@ class Cell extends Agent
 
     public function getCell()
     {
-        $this->thing->json->setField("variables");
-        $this->value = $this->thing->json->readVariable(["lattice", "decimal"]);
+        $this->value = $this->thing->Read(["lattice", "decimal"]);
 
         if ($this->value == false) {
             $this->thing->log(

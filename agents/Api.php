@@ -40,8 +40,7 @@ class Api extends Agent
         $this->sms_message .= " | TEXT WHATIS";
         $this->thing_report["sms"] = $this->sms_message;
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["api", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

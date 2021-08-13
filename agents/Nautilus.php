@@ -43,7 +43,7 @@ class Nautilus extends Agent
             "nautilus" => ["nautilus", "nautilii"],
         ];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -178,8 +178,7 @@ class Nautilus extends Agent
      */
     public function setNautilus()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["nautilus", "nautilii"],
             $this->nautilii
         );
@@ -192,8 +191,7 @@ class Nautilus extends Agent
     // TODO
     public function getNautilus()
     {
-        $this->thing->json->setField("variables");
-        $nautilii = $this->thing->json->readVariable(["nautilus", "nautilii"]);
+        $nautilii = $this->thing->Read(["nautilus", "nautilii"]);
 
         if ($nautilii == false) {
             $this->thing->log(
@@ -631,16 +629,14 @@ class Nautilus extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "nautilus",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["nautilus", "refreshed_at"],
                 $time_string
             );

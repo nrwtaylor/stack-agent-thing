@@ -266,17 +266,17 @@ class Pixel extends Agent
             return true;
         }
 
-        $this->pixel_thing->json->writeVariable(
+        $this->pixel_thing->Write(
             ["pixel", "state"],
             $this->pixel["state"]
         );
 
-        $this->pixel_thing->json->writeVariable(
+        $this->pixel_thing->Write(
             ["pixel", "text"],
             $this->pixel["text"]
         );
 
-        $this->pixel_thing->json->writeVariable(
+        $this->pixel_thing->Write(
             ["pixel", "refreshed_at"],
             $this->current_time
         );

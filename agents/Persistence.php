@@ -15,18 +15,16 @@ class Persistence extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["persistence", "persist_to"],
-            $this->thing->json->time($this->persist_to)
+            $this->thing->time($this->persist_to)
         );
     }
 
     public function run()
     {
         // Before doing anything else
-        $this->thing->json->setField("variables");
-        $this->remember_status = $this->thing->json->readVariable([
+        $this->remember_status = $this->thing->Read([
             "remember",
             "status",
         ]);
@@ -86,10 +84,9 @@ class Persistence extends Agent
 
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["persistence", "persist_to"],
-            $this->thing->json->time($this->persist_to)
+            $this->thing->time($this->persist_to)
         );
 
         $this->thing->flagGreen();

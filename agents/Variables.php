@@ -203,11 +203,11 @@ $this->thing_report["thing"] = false;
 
             // Intentionally write to the variable thing.  And the current thing.
             if (isset($variable_name)) {
-                $this->variables_thing->json->writeVariable(
+                $this->variables_thing->Write(
                     [$this->variable_set_name, $variable_name],
                     $this->variables_thing->$variable_name
                 );
-                $this->thing->json->writeVariable(
+                $this->thing->Write(
                     [$this->variable_set_name, $variable_name],
                     $this->variables_thing->$variable_name
                 );
@@ -501,10 +501,9 @@ $this->thing->variables_thing = $this->variables_thing;
         $this->variables_thing->$variable = $value;
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
 
         try {
-            $this->variables_thing->json->writeVariable(
+            $this->variables_thing->Write(
                 [$this->variable_set_name, $variable],
                 $value
             );
@@ -560,8 +559,7 @@ $this->thing->variables_thing = $this->variables_thing;
 
         // And save variable_set onto local Thing.
         $this->thing->db->setFrom($this->identity);
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->variable_set_name, $variable],
             $value
         );

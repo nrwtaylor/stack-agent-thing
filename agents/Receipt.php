@@ -42,10 +42,9 @@ class Receipt extends Agent
 
     function setReceipt()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["receipt", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

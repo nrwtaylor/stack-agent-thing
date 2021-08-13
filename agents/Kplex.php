@@ -30,10 +30,7 @@ $socket = new Socket($this->thing, ['session_terminator'=>".", "address"=>"192.1
 
     function get()
     {
-        // Take a look at this thing for IChing variables.
-
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "kplex",
             "refreshed_at",
         ]);
@@ -41,16 +38,14 @@ $socket = new Socket($this->thing, ['session_terminator'=>".", "address"=>"192.1
         // And if there is no IChing timestamp create one now.
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["kplex", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->kplex = $this->thing->json->readVariable([
+        $this->kplex = $this->thing->Read([
             "kplex",
             "kplex",
         ]);
@@ -61,7 +56,7 @@ $socket = new Socket($this->thing, ['session_terminator'=>".", "address"=>"192.1
      */
     function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["kplex", "kplex"],
             $this->kplex
         );

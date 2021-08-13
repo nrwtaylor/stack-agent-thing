@@ -81,8 +81,7 @@ class Horn extends Agent
     {
 
         // Train variable so show headcode.
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);

@@ -80,8 +80,7 @@ class Runat extends Agent
             "variables runat " . $this->from
         );
 */
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);

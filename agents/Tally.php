@@ -117,20 +117,19 @@ class Tally
     function setVariables()
     {
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable(
+        $this->variables_thing->Write(
             array("tally", "variable"),
             $this->variables_thing->variable
         );
-        $this->variables_thing->json->writeVariable(
+        $this->variables_thing->Write(
             array("tally", "name"),
             $this->variables_thing->name
         );
-        $this->variables_thing->json->writeVariable(
+        $this->variables_thing->Write(
             array("tally", "limit"),
             $this->variables_thing->limit
         );
-        $this->variables_thing->json->writeVariable(
+        $this->variables_thing->Write(
             array("tally", "next_uuid"),
             $this->variables_thing->next_uuid
         );
@@ -140,21 +139,20 @@ class Tally
         // So just provides a backup in case the main record gets
         // forgetton.
         $this->thing->db->setFrom($this->identity);
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("tally", "variable"),
             $this->variables_thing->variable
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("tally", "name"),
             $this->variables_thing->name
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("tally", "limit"),
             $this->variables_thing->limit
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("tally", "next_uuid"),
             $this->variables_thing->next_uuid
         );
@@ -350,8 +348,7 @@ class Tally
         }
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->$variable = $this->variables_thing->json->readVariable(
+        $this->variables_thing->$variable = $this->variables_thing->Read(
             array($this->agent, $variable)
         );
 
@@ -378,8 +375,7 @@ class Tally
         $this->variables_thing->$variable = $value;
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable(
+        $this->variables_thing->Write(
             array($this->agent, $variable),
             $value
         );

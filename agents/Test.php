@@ -10,18 +10,18 @@ class Test extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["test", "refreshed_at"],
             $this->current_time
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["test", "response"],
             $this->response
         );
 
         if (isset($this->test_text)) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["test", "text"],
                 $this->test_text
             );

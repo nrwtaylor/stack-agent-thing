@@ -36,7 +36,7 @@ class Block extends Agent
         $this->negative_time =
             $this->thing->container['api']['block']['negative_time'];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->shift_state = "off";
         $this->max_index = 0;
@@ -53,27 +53,26 @@ class Block extends Agent
             $this->block_thing = $this->thing;
         }
 
-        $this->block_thing->json->setField("variables");
-        $this->block_thing->json->writeVariable(
+        $this->block_thing->Write(
             ["block", "index"],
             $this->index
         );
 
-        $this->block_thing->json->writeVariable(
+        $this->block_thing->Write(
             ["block", "start_at"],
             $this->start_at
         );
-        $this->block_thing->json->writeVariable(
+        $this->block_thing->Write(
             ["block", "quantity"],
             $this->quantity
         );
 
         $this->getAvailable();
-        $this->block_thing->json->writeVariable(
+        $this->block_thing->Write(
             ["block", "available"],
             $this->available
         );
-        $this->block_thing->json->writeVariable(
+        $this->block_thing->Write(
             ["block", "refreshed_at"],
             $this->current_time
         );
@@ -92,7 +91,7 @@ class Block extends Agent
 
         // One minute into next block
         $quantity = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -136,32 +135,30 @@ if ($things === true) {return true;}
         foreach ($findagent_thing->thing_report['things'] as $block_thing) {
             $thing = new Thing($block_thing['uuid']);
 
-            $thing->json->setField("variables");
-
-            $thing->index = $thing->json->readVariable(["block", "index"]);
+            $thing->index = $thing->Read(["block", "index"]);
             if ($thing->index > $this->max_index) {
                 $this->max_index = $thing->index;
             }
 
-            $thing->start_at = $thing->json->readVariable([
+            $thing->start_at = $thing->Read([
                 "block",
                 "start_at",
             ]);
-            $thing->quantity = $thing->json->readVariable([
+            $thing->quantity = $thing->Read([
                 "block",
                 "quantity",
             ]);
-            $thing->available = $thing->json->readVariable([
+            $thing->available = $thing->Read([
                 "block",
                 "available",
             ]);
-            $thing->refreshed_at = $thing->json->readVariable([
+            $thing->refreshed_at = $thing->Read([
                 "block",
                 "refreshed_at",
             ]);
 
             if ($thing->quantity > 0) {
-                $thing->end_at = $this->thing->json->time(
+                $thing->end_at = $this->thing->time(
                     strtotime(
                         $thing->start_at . " " . $thing->quantity . " minutes"
                     )
@@ -249,18 +246,15 @@ if ($things === true) {return true;}
             foreach ($this->associations as $association_uuid) {
                 $association_thing = new Thing($association_uuid);
 
-                $association_thing->json->setField("variables");
-                $this->flagposts[] = $association_thing->json->readVariable([
+                $this->flagposts[] = $association_thing->Read([
                     "flagpost",
                 ]);
 
-                $association_thing->json->setField("variables");
-                $this->trains[] = $association_thing->json->readVariable([
+                $this->trains[] = $association_thing->Read([
                     "train",
                 ]);
 
-                $association_thing->json->setField("variables");
-                $this->bells[] = $association_thing->json->readVariable([
+                $this->bells[] = $association_thing->Read([
                     "bell",
                 ]);
             }
@@ -414,7 +408,7 @@ if ($things === true) {return true;}
     function getEndat()
     {
         if ($this->start_at != "x" and $this->quantity != "x") {
-            $this->end_at = $this->thing->json->time(
+            $this->end_at = $this->thing->time(
                 strtotime($this->start_at . " " . $this->quantity . " minutes")
             );
         } else {
@@ -525,9 +519,8 @@ if ($things === true) {return true;}
         $this->elapsed_time = 0;
         $this->thing->choice->Create('block', $this->node_list, 'red');
         /*
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("stopwatch", "refreshed_at"), $this->current_time);
-        $this->thing->json->writeVariable( array("stopwatch", "elapsed"), $this->elapsed_time);
+        $this->thing->Write( array("stopwatch", "refreshed_at"), $this->current_time);
+        $this->thing->Write( array("stopwatch", "elapsed"), $this->elapsed_time);
 */
         $this->thing->choice->Choose('start');
 

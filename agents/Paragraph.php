@@ -28,7 +28,7 @@ class Paragraph extends Agent
 
     function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["paragraph", "reading"],
             $this->reading
         );
@@ -41,23 +41,21 @@ class Paragraph extends Agent
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "paragraph",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["paragraph", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "paragraph",
             "reading",
         ]);
@@ -216,7 +214,7 @@ class Paragraph extends Agent
         if (isset($this->words)) {
             $this->reading = count($this->words);
         }
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["paragraph", "reading"],
             $this->reading
         );

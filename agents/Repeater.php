@@ -133,7 +133,7 @@ function set() {
 
         $this->thing->json->setField("settings");
         $this->thing->json->writeVariable(array("repeater",
-                "received_at"),  $this->thing->json->time()
+                "received_at"),  $this->thing->time()
         );
 
 }

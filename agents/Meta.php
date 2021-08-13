@@ -30,32 +30,25 @@ class Meta extends Agent
 
     function set()
     {
-        /*
-        $this->thing->json->writeVariable(
-            array("meta", "reading"),
-            $this->reading
-        );
-*/
     }
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "meta",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["meta", "refreshed_at"],
                 $time_string
             );
         }
         /*
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(array(
+        $this->reading = $this->thing->Read(array(
             "meta",
             "reading"
         ));
@@ -249,7 +242,7 @@ class Meta extends Agent
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         if (isset($this->meta)) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 [$this->agent_name, "meta"],
                 $this->meta
             );

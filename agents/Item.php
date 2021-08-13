@@ -121,8 +121,7 @@ class Item extends Agent
             return;
         }
 
-        $this->thing->json->setField("variables");
-        $item = $this->thing->json->readVariable(["item"]);
+        $item = $this->thing->Read(["item"]);
 
         if ($item === false) {
             $item = $this->default_item;
@@ -456,13 +455,12 @@ class Item extends Agent
             $item['created_at'] = $this->thing->time();
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["item"], $item);
+        $this->thing->Write(["item"], $item);
 
-        $this->thing->json->writeVariable(["items"], $this->items);
+        $this->thing->Write(["items"], $this->items);
 
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["item", "refreshed_at"],
             $time_string
         );

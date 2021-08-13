@@ -292,17 +292,17 @@ if (!isset($this->signals)) {return true;}
             return true;
         }
 
-        $this->signal_thing->json->writeVariable(
+        $this->signal_thing->Write(
             ["signal", "state"],
             $this->signal['state']
         );
 
-        $this->signal_thing->json->writeVariable(
+        $this->signal_thing->Write(
             ["signal", "text"],
             $this->signal['text']
         );
 
-        $this->signal_thing->json->writeVariable(
+        $this->signal_thing->Write(
             ["signal", "refreshed_at"],
             $this->current_time
         );

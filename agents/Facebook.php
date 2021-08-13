@@ -283,13 +283,12 @@ class Facebook
             $result = curl_exec($ch);
         }
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->json->Write(
             ["facebook", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->json->Write(
             ["facebook", "refreshed_at"],
             $time_string
         );
@@ -297,6 +296,3 @@ class Facebook
         return;
     }
 }
-?>
-
- ?>

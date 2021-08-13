@@ -17,8 +17,7 @@ class Wake extends Agent
 
         $this->initWake();
 
-        $this->thing->json->setField("variables");
-        $this->wake_time = $this->thing->json->readVariable([
+        $this->wake_time = $this->thing->Read([
             "wake",
             "wake_time",
         ]);
@@ -30,16 +29,14 @@ class Wake extends Agent
 
     public function initWake()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "wake",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["wake", "refreshed_at"],
                 $time_string
             );
@@ -48,8 +45,7 @@ class Wake extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $this->wake_time = $this->thing->json->readVariable([
+        $this->wake_time = $this->thing->Read([
             "wake",
             "wake_time",
         ]);
@@ -68,14 +64,12 @@ class Wake extends Agent
 
     function setWaketime()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["wake", "wake_time"],
             $this->wake_time
         );
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["wake", "state"], 'sleep');
+        $this->thing->Write(["wake", "state"], 'sleep');
     }
 
     public function wake()

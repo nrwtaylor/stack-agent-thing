@@ -69,8 +69,8 @@ class Entity extends Agent
         $this->entity_id->setVariable("id", $this->id);
         $this->entity_id->setVariable("refreshed_at", $this->current_time);
 
-        $this->thing->json->writeVariable( array("entity", "id"), $this->id );
-        $this->thing->json->writeVariable( array("entity", "refreshed_at"), $this->current_time );
+        $this->thing->Write( array("entity", "id"), $this->id );
+        $this->thing->Write( array("entity", "refreshed_at"), $this->current_time );
 
         $this->refreshed_at = $this->current_time;
     }
@@ -89,7 +89,7 @@ class Entity extends Agent
 
         // One minute into the next entity
         $quantity = 1;
-        $next_time = $this->thing->json->time(strtotime($this->end_at . " " . $quantity . " minutes"));
+        $next_time = $this->thing->time(strtotime($this->end_at . " " . $quantity . " minutes"));
 
         $this->get($next_time);
 

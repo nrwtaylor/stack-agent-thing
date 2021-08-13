@@ -56,7 +56,7 @@ class Robot extends Agent
 
         $this->node_list = ["start" => ["acknowledge"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->useragent = ini_get("user_agent");
         $url = rtrim($this->web_prefix . "/");

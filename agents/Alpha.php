@@ -46,18 +46,11 @@ class Alpha extends Agent
      */
     function set()
     {
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["alpha", "refreshed_at"],
             $time_string
         );
-/*
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
-            ["alpha", "received_at"],
-            $this->thing->json->time()
-        );
-*/
     }
 
     public function trimAlpha($text)

@@ -254,8 +254,7 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);

@@ -204,8 +204,7 @@ class Web extends Agent
 
 if (!isset($this->thing->json)) {return;}
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["web", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

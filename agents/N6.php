@@ -17,12 +17,11 @@ class N6 extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable(["n6", "refreshed_at"]);
+        $time_string = $this->thing->Read(["n6", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["n6", "refreshed_at"],
                 $time_string
             );
@@ -30,16 +29,16 @@ class N6 extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->number = $this->thing->json->readVariable(["n6", "number"]);
-        $this->text = $this->thing->json->readVariable(["n6", "text"]); // Test because this will become A6.
+        $this->number = $this->thing->Read(["n6", "number"]);
+        $this->text = $this->thing->Read(["n6", "text"]); // Test because this will become A6.
     }
 
     public function set()
     {
         if ($this->number == false or $this->text == false) {
             $this->makeN6();
-            $this->thing->json->writeVariable(["n6", "number"], $this->number);
-            $this->thing->json->writeVariable(["n6", "text"], $this->text);
+            $this->thing->Write(["n6", "number"], $this->number);
+            $this->thing->Write(["n6", "text"], $this->text);
         }
     }
 

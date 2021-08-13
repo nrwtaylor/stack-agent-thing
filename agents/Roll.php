@@ -37,17 +37,16 @@ class Roll extends Agent
      */
     public function get()
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
         $time_string = $this->thing->Read([
             "roll",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
+            $time_string = $this->thing->time();
             $this->thing->Write(
                 ["roll", "refreshed_at"],
                 $time_string

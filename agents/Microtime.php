@@ -66,7 +66,7 @@ class Microtime extends Agent
     {
         $this->refreshed_at = $this->current_time;
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["microtime", "refreshed_at"],
             $this->current_time
         );
@@ -78,16 +78,14 @@ class Microtime extends Agent
         // If it is a valid previous_state, then
         // load it into the current state variable.
 
-        $this->thing->json->setField("variables");
-        //
 
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "microtime",
             "refreshed_at",
         ]);
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["microtime", "refreshed_at"],
                 $time_string
             );
@@ -95,15 +93,14 @@ class Microtime extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $timestamp_string = $this->thing->json->readVariable([
+        $timestamp_string = $this->thing->Read([
             "microtime",
             "timestamp",
         ]);
 
         if ($timestamp_string == false) {
-            $this->thing->json->setField("variables");
             $timestamp_string = $this->getMicrotime();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["microtime", "timestamp"],
                 $timestamp_string
             );

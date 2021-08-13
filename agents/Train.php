@@ -199,7 +199,7 @@ class Train extends Agent
 
         // One minute into next block
         $runtime = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . "+" . runtime . " minutes")
         );
 
@@ -504,7 +504,6 @@ if ($things == null) {return;}
                 $refreshed_at = $variables["train"]["refreshed_at"];
             }
 
-            //$thing->json->setField("variables");
             $index = "X";
             if (isset($variables['index']['index'])) {
                 $index = $variables["index"]['index'];
@@ -1258,7 +1257,7 @@ if ($things == null) {return;}
                 $t =
                     $this->runat->hour . ":" . $this->runat->minute;
 
-                $this->end_at = $this->thing->json->time(
+                $this->end_at = $this->thing->time(
                     strtotime($t . " + " . $this->runtime->minutes . " minutes")
                 );
         }

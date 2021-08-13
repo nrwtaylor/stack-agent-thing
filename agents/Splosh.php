@@ -26,20 +26,19 @@ class Splosh extends Agent
     function set()
     {
         // UK Commonwealth spelling
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["splosh", "distance"],
             $this->distance
         );
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["splosh", "refreshed_at"],
             $time_string
         );
 
         $splosh_timestamp = $this->thing->microtime();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["splosh", "timestamp"],
             $splosh_timestamp
         );
@@ -47,13 +46,12 @@ class Splosh extends Agent
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "splosh",
             "refreshed_at",
         ]);
 
-        $micro_timestamp = $this->thing->json->readVariable([
+        $micro_timestamp = $this->thing->Read([
             "splosh",
             "timestamp",
         ]);
@@ -61,8 +59,8 @@ class Splosh extends Agent
         // Keep second level timestamp because I'm not
         // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["splosh", "refreshed_at"],
                 $time_string
             );
@@ -71,7 +69,7 @@ class Splosh extends Agent
         // And in microtime code for Splosh.
         if ($micro_timestamp == false) {
             $micro_timestamp = $this->thing->microtime();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["splosh", "timestamp"],
                 $micro_timestamp
             );
@@ -80,7 +78,7 @@ class Splosh extends Agent
         // If it has already been processed ...
         $this->last_timestamp = $micro_timestamp;
 
-        $this->distance = $this->thing->json->readVariable([
+        $this->distance = $this->thing->Read([
             "splosh",
             "distance",
         ]);

@@ -44,21 +44,18 @@ class Say extends Agent
     public function get()
     {
         // Read the group agent variable
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "say",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $this->group_id = $this->thing->json->readVariable(["say", "group_id"]);
+        $this->group_id = $this->thing->Read(["say", "group_id"]);
 
         if ($this->group_id == false) {
             // No group_id found on this Thing either.
@@ -85,13 +82,12 @@ if (isset($group_thing->thing_report['groups'][0])) {
         }
         //    if ($this->pain_score != null) {
         // Then this Thing has no group information
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["say", "refreshed_at"],
             $time_string
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["say", "group_id"],
             strtoupper($this->group_id)
         );

@@ -197,12 +197,11 @@ if (!isset($this->error_message)) {
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["slack", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
-        //        $this->thing->json->writeVariable(array("slack",
+        //        $this->thing->Write(array("slack",
         //            "name"),  $this->channel_name
         //            );
     }

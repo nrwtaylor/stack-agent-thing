@@ -40,7 +40,7 @@ class Snowflake extends Agent
 
         $this->node_list = ["snowflake" => ["snowflake", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -265,8 +265,7 @@ class Snowflake extends Agent
      */
     public function setSnowflake()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["snowflake", "decimal"],
             $this->decimal_snowflake
         );
@@ -286,8 +285,7 @@ class Snowflake extends Agent
      */
     public function getSnowflake()
     {
-        $this->thing->json->setField("variables");
-        $this->decimal_snowflake = $this->thing->json->readVariable([
+        $this->decimal_snowflake = $this->thing->Read([
             "snowflake",
             "decimal",
         ]);
@@ -1621,16 +1619,14 @@ return;
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "snowflake",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["snowflake", "refreshed_at"],
                 $time_string
             );

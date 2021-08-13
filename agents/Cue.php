@@ -38,12 +38,16 @@ class Cue extends Agent
             $this->current_time
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["cue", "headcode"],
             $this->head_code
         );
-        $this->thing->json->writeVariable(["alias", "context"], $this->context);
-        $this->thing->json->writeVariable(
+
+// dev review
+// agent shouldn't write to another agents variable
+
+        $this->thing->Write(["alias", "context"], $this->context);
+        $this->thing->Write(
             ["cue", "refreshed_at"],
             $this->current_time
         );

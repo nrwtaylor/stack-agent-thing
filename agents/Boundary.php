@@ -36,16 +36,14 @@ class Boundary extends Agent
         );
         $this->current_time = $this->thing->time();
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "boundary",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["boundary", "refreshed_at"],
                 $time_string
             );
@@ -54,11 +52,11 @@ class Boundary extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["boundary", "nom"])
+            $this->thing->Read(["boundary", "nom"])
         );
 
         $this->suit = $this->default_suit;
-        $suit = $this->thing->json->readVariable(["boundary", "suit"]);
+        $suit = $this->thing->Read(["boundary", "suit"]);
         if ($suit !== false) {
             $this->suit = $suit;
         }
@@ -66,8 +64,8 @@ class Boundary extends Agent
         if ($this->nom == false or $this->suit == false) {
             $this->getBoundary();
 
-            $this->thing->json->writeVariable(["boundary", "nom"], $this->nom);
-            $this->thing->json->writeVariable(["boundary", "suit"], $this->suit);
+            $this->thing->Write(["boundary", "nom"], $this->nom);
+            $this->thing->Write(["boundary", "suit"], $this->suit);
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',

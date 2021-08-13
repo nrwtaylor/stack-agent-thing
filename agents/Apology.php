@@ -25,11 +25,9 @@ class Apology extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-
         $this->apology['refreshed_at'] = $this->current_time;
 
-        $this->thing->json->writeVariable(["apology"], $this->apology);
+        $this->thing->Write(["apology"], $this->apology);
     }
 
     public function isApology($apology = null)

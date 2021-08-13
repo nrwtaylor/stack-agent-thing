@@ -120,8 +120,7 @@ class Message extends Agent
      */
     function get()
     {
-        $this->thing->json->setField("variables");
-        $outcome = $this->thing->json->readVariable(["message", "outcome"]);
+        $outcome = $this->thing->Read(["message", "outcome"]);
 
         if ($outcome != false) {
             $this->do_not_send = true;
@@ -309,8 +308,7 @@ class Message extends Agent
     public function set()
     {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["message", "outcome"],
             $this->thing_report['info']
         );
@@ -418,16 +416,15 @@ class Message extends Agent
 
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["message", "received_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
 
         // Process namespace to return agent name
         $previous_agent_path = explode("\\", $this->previous_agent);
         $previous_agent = $previous_agent_path[count($previous_agent_path) - 1];
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["message", "agent"],
             $previous_agent
         );

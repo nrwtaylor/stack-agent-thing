@@ -198,11 +198,11 @@ class Crow extends Agent
         // "I/we call this place < some symbol signal >"
         // "Awk."
 
-        $this->crow_thing->json->writeVariable(
+        $this->crow_thing->Write(
             ["crow", "place_name"],
             $this->place_name
         );
-        $this->crow_thing->json->writeVariable(
+        $this->crow_thing->Write(
             ["crow", "signal"],
             $this->signal
         );
@@ -229,17 +229,15 @@ class Crow extends Agent
         // Load up the appropriate crow_thing
         $this->getCrow($crow_code);
 
-        $this->current_time = $this->crow_thing->json->time();
-        $this->crow_thing->json->setField("variables");
-        $this->time_string = $this->crow_thing->json->readVariable([
+        $this->current_time = $this->crow_thing->time();
+        $this->time_string = $this->crow_thing->Read([
             "crow",
             "refreshed_at",
         ]);
 
         if ($this->time_string == false) {
-            $this->crow_thing->json->setField("variables");
-            $this->time_string = $this->crow_thing->json->time();
-            $this->crow_thing->json->writeVariable(
+            $this->time_string = $this->crow_thing->time();
+            $this->crow_thing->Write(
                 ["crow", "refreshed_at"],
                 $this->time_string
             );
@@ -248,9 +246,9 @@ class Crow extends Agent
         $this->refreshed_at = strtotime($this->time_string);
 
         $this->place_name = strtolower(
-            $this->crow_thing->json->readVariable(["crow", "place_name"])
+            $this->crow_thing->Read(["crow", "place_name"])
         );
-        $this->signal = $this->crow_thing->json->readVariable([
+        $this->signal = $this->crow_thing->Read([
             "crow",
             "signal",
         ]);

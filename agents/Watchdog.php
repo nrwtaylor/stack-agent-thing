@@ -49,11 +49,9 @@ class Watchdog extends Agent
 
     function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["watchdog", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

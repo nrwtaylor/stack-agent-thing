@@ -31,21 +31,20 @@ class Reminder extends Agent
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "reminder",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["reminder", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->reminder_ids = $this->thing->json->readVariable([
+        $this->reminder_ids = $this->thing->Read([
             "reminder",
             "uuids",
         ]);
@@ -77,8 +76,7 @@ class Reminder extends Agent
             }
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["reminder", "uuids"],
             $this->reminder_ids
         );

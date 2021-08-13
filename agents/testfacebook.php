@@ -114,9 +114,8 @@ $this->num_hits = 0;
                        $thing_report['info'] = $fb_thing->thing_report['info'];
 
         
-                        $this->thing->json->setField("variables");
-                        $time_string = $this->thing->json->time();
-                        $this->thing->json->writeVariable( array("testfacebook", "refreshed_at"), $time_string );
+                        $time_string = $this->thing->time();
+                        $this->thing->Write( array("testfacebook", "refreshed_at"), $time_string );
 
 
 

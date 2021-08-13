@@ -606,22 +606,22 @@ class Ship extends Agent
             return true;
         }
 
-        $this->ship_thing->json->writeVariable(
+        $this->ship_thing->Write(
             ["ship", "state"],
             $this->ship["state"]
         );
 
-        $this->ship_thing->json->writeVariable(
+        $this->ship_thing->Write(
             ["ship", "text"],
             $this->ship["text"]
         );
 
-        $this->ship_thing->json->writeVariable(
+        $this->ship_thing->Write(
             ["ship", "snapshot"],
             $this->ship["snapshot"]
         );
 
-        $this->ship_thing->json->writeVariable(
+        $this->ship_thing->Write(
             ["ship", "refreshed_at"],
             $this->current_time
         );

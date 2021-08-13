@@ -22,16 +22,14 @@ class Forgetall extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "forgetall",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["forgetall", "refreshed_at"],
                 $time_string
             );
@@ -94,7 +92,6 @@ class Forgetall extends Agent
         // can be left alone until called on next.
         $this->thing->flagGreen();
 
-        $this->thing->json->setField("variables");
 
         $this->sms_message =
             "FORGET ALL | " . $this->response . " | TEXT PRIVACY";

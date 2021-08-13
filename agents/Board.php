@@ -38,8 +38,7 @@ class Board extends Agent
     {
         $this->decimalBoard();
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["board", "decimal"],
             $this->decimal_board
         );
@@ -152,8 +151,7 @@ class Board extends Agent
 
     public function getBoard()
     {
-        $this->thing->json->setField("variables");
-        $this->decimal_board = $this->thing->json->readVariable([
+        $this->decimal_board = $this->thing->Read([
             "board",
             "decimal",
         ]);

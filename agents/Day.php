@@ -43,7 +43,7 @@ class Day extends Agent
 
         $this->node_list = ["day" => ["day", "year", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container["stack"]["entity_name"];
@@ -665,8 +665,7 @@ class Day extends Agent
     public function setDay()
     {
         return;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["day", "decimal"],
             $this->decimal_day
         );
@@ -1066,16 +1065,14 @@ class Day extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "day",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["day", "refreshed_at"],
                 $time_string
             );

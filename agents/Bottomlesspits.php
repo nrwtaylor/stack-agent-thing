@@ -89,7 +89,7 @@ class Bottomlesspits extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             [$this->agent_name, "name"],
             $this->bottomless_pit_name
         );
@@ -100,11 +100,10 @@ class Bottomlesspits extends Agent
 
     public function get($crow_code = null)
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $this->time_string = $this->thing->json->readVariable([
+        $this->time_string = $this->thing->Read([
             $this->agent_name,
             "refreshed_at",
         ]);
@@ -114,9 +113,8 @@ class Bottomlesspits extends Agent
         }
 
         if ($this->time_string == false) {
-            //            $this->thing->json->setField("variables");
-            $this->time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $this->time_string = $this->thing->time();
+            $this->thing->Write(
                 [$this->agent_name, "refreshed_at"],
                 $this->time_string
             );
@@ -124,8 +122,7 @@ class Bottomlesspits extends Agent
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        //        $this->thing->json->setField("variables");
-        $this->bottomless_pit_name = $this->thing->json->readVariable([
+        $this->bottomless_pit_name = $this->thing->Read([
             $this->agent_name,
             "name",
         ]);

@@ -26,7 +26,7 @@ class Stamp extends Agent
             'microseconds',
             'microseconds',
         ];
-        $this->current_time = $this->thing->json->microtime();
+        $this->current_time = $this->thing->microtime();
 
         $this->default_stamp = "X";
 

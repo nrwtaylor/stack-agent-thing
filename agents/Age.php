@@ -27,7 +27,7 @@ class Age extends Chart
         $this->mail_postfix = $this->thing->container["stack"]["mail_postfix"];
         $this->web_prefix = $this->thing->container["stack"]["web_prefix"];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->tubs_max = 8;
         $this->y_origin = 10;
@@ -36,8 +36,7 @@ class Age extends Chart
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "age",
             "refreshed_at",
         ]);
@@ -646,20 +645,19 @@ class Age extends Chart
         // Store counts
         $this->age_thing->db->setFrom($this->from);
 
-        $this->age_thing->json->setField("variables");
-        $this->age_thing->json->writeVariable(["age", "mean"], $this->mean);
-        $this->age_thing->json->writeVariable(["age", "count"], $this->count);
-        $this->age_thing->json->writeVariable(["age", "sum"], $this->sum);
-        $this->age_thing->json->writeVariable(
+        $this->age_thing->Write(["age", "mean"], $this->mean);
+        $this->age_thing->Write(["age", "count"], $this->count);
+        $this->age_thing->Write(["age", "sum"], $this->sum);
+        $this->age_thing->Write(
             ["age", "sum_squared"],
             floatval($this->sum_squared)
         );
-        $this->age_thing->json->writeVariable(
+        $this->age_thing->Write(
             ["age", "sum_squared_difference"],
             floatval($this->sum_squared_difference)
         );
 
-        $this->age_thing->json->writeVariable(
+        $this->age_thing->Write(
             ["age", "earliest"],
             $this->earliest_known
         );
@@ -678,9 +676,6 @@ class Age extends Chart
         // Develop the various messages for each channel.
         $this->thing->flagGreen();
 
-        $this->thing->json->setField("variables");
-
-        //        $this->thing_report["thing"] = $this->thing->thing;
         $this->thing_report["email"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);

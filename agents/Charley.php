@@ -61,15 +61,14 @@ class Charley extends Agent
         }
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "charley",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["charley", "refreshed_at"],
                 $time_string
             );
@@ -78,10 +77,10 @@ class Charley extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["charley", "nom"])
+            $this->thing->Read(["charley", "nom"])
         );
-        $this->number = $this->thing->json->readVariable(["charley", "number"]);
-        $this->suit = $this->thing->json->readVariable(["charley", "suit"]);
+        $this->number = $this->thing->Read(["charley", "number"]);
+        $this->suit = $this->thing->Read(["charley", "suit"]);
 
         if (
             $this->nom == false or
@@ -90,12 +89,12 @@ class Charley extends Agent
         ) {
             $this->getCard();
 
-            $this->thing->json->writeVariable(["charley", "nom"], $this->nom);
-            $this->thing->json->writeVariable(
+            $this->thing->Write(["charley", "nom"], $this->nom);
+            $this->thing->Write(
                 ["charley", "number"],
                 $this->number
             );
-            $this->thing->json->writeVariable(["charley", "suit"], $this->suit);
+            $this->thing->Write(["charley", "suit"], $this->suit);
         }
 
         $this->getCard();
@@ -103,10 +102,8 @@ class Charley extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["charley", "refreshed_at"],
             $time_string
         );

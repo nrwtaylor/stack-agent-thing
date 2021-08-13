@@ -65,10 +65,8 @@ class Basket extends Agent {
         // "I/we call this place < some symbol signal >"
         // "Awk."
 
-        //        $this->basket_thing->json->setField('variables');
-
-        $this->basket_thing->json->writeVariable( array("basket", "name"), $this->name );
-        $this->basket_thing->json->writeVariable( array("basket", "sign"), $this->sign );
+        $this->basket_thing->Write( array("basket", "name"), $this->name );
+        $this->basket_thing->Write( array("basket", "sign"), $this->sign );
 
     }
 
@@ -124,20 +122,18 @@ return;
         if (!isset($this->basket_thing)) {$this->newBasket();}
 
 
-        $this->current_time = $this->basket_thing->json->time();
-        $this->basket_thing->json->setField("variables");
-        $this->time_string = $this->basket_thing->json->readVariable( array("basket", "refreshed_at") );
+        $this->current_time = $this->basket_thing->time();
+        $this->time_string = $this->basket_thing->Read( array("basket", "refreshed_at") );
 
         if ($this->time_string == false) {
-            $this->basket_thing->json->setField("variables");
-            $this->time_string = $this->basket_thing->json->time();
-            $this->basket_thing->json->writeVariable( array("basket", "refreshed_at"), $this->time_string );
+            $this->time_string = $this->basket_thing->time();
+            $this->basket_thing->Write( array("basket", "refreshed_at"), $this->time_string );
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->name = strtolower($this->basket_thing->json->readVariable( array("basket", "name") ));
-        $this->sign = $this->basket_thing->json->readVariable( array("basket", "sign") );
+        $this->name = strtolower($this->basket_thing->Read( array("basket", "name") ));
+        $this->sign = $this->basket_thing->Read( array("basket", "sign") );
 
 
         if ( ($this->name == false) or ($this->name = "")) {

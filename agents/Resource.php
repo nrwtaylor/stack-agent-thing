@@ -254,7 +254,7 @@ class Resource extends Agent
 
         // One minute into next headcode
         $quantity = 1;
-        $next_resource = $this->thing->json->time(
+        $next_resource = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -455,7 +455,7 @@ class Resource extends Agent
             $resource_name = $this->resource_name;
         }
 
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);

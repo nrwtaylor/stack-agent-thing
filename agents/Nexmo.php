@@ -70,9 +70,7 @@ class Nexmo
         }
         $this->respond();
 
-        $this->thing->log('Agent "Microsoft" completed.');
-
-        return;
+//        $this->thing->log('Agent "Microsoft" completed.');
     }
 
     function eventSet($input = null)
@@ -88,9 +86,6 @@ class Nexmo
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["nexmo"], $input);
 
-        //$this->thing->flagGreen();
-
-        return;
     }
 
     function getResponseurl()
@@ -228,8 +223,7 @@ class Nexmo
         }
 
         //$message_reply_id = $this->agent_input;
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(["nexmo", "reply_id"], null);
+        $names = $this->thing->Write(["nexmo", "reply_id"], null);
 
         //"channelData":{"clientActivityId":"1536536110650.9566644201124537.16"}}
 
@@ -416,8 +410,6 @@ class Nexmo
 
         $result_json = json_decode($result, true);
         $this->access_token = $result_json["access_token"];
-
-        return;
     }
 
     function sendMessage($to, $text)
@@ -494,13 +486,12 @@ Content-Type: application/json
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["nexmo", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["nexmo", "refreshed_at"],
             $time_string
         );

@@ -71,7 +71,7 @@ class Tallycounter
         // I think.
         // Instead.
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->node_list = ["tallycounter"];
 
@@ -105,21 +105,19 @@ class Tallycounter
 
     function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["tallycounter", "count"],
             $this->count
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["tallycounter", "display"],
             $this->display
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["tallycounter", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -153,12 +151,11 @@ class Tallycounter
             $thing = new Thing($uuid);
 
             $thing->db->setFrom($this->identity);
-            $thing->json->setField("variables");
 
-            $variable = $thing->json->readVariable(["tally", "variable"]);
-            $limit = $thing->json->readVariable(["tally", "limit"]);
-            $name = $thing->json->readVariable(["tally", "name"]);
-            $next_uuid = $thing->json->readVariable(["tally", "next_uuid"]);
+            $variable = $thing->Read(["tally", "variable"]);
+            $limit = $thing->Read(["tally", "limit"]);
+            $name = $thing->Read(["tally", "name"]);
+            $next_uuid = $thing->Read(["tally", "next_uuid"]);
 
             $count = $count + pow($limit, $index) * $variable;
             $display = $variable . "/" . $display;
@@ -329,8 +326,8 @@ class Tallycounter
         }
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->$variable = $this->variables_thing->json->readVariable(
+
+        $this->variables_thing->$variable = $this->variables_thing->Read(
             [$this->variables_agent, $variable]
         );
 
@@ -357,8 +354,8 @@ class Tallycounter
         $this->variables_thing->$variable = $value;
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable(
+
+        $this->variables_thing->Write(
             [$this->variables_agent, $variable],
             $value
         );

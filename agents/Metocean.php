@@ -110,32 +110,20 @@ class Metocean extends Agent {
 
 
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("metocean", "refreshed_at") );
+        $time_string = $this->thing->Read( array("metocean", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("metocean", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("metocean", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
-        //        $queue_time = $this->thing->json->readVariable( array("metocean", "current_conditions") );
-        //        $run_time = $this->thing->json->readVariable( array("metocean", "forecast_conditions") );
-
-
-        //        if (($queue_time == false) and ($run_time==false) ) {
-        //            $this->getLatency();
-
-        //            $this->readSubject();
-
-        $this->thing->json->writeVariable( array("metocean", "current_conditions"), $this->current_conditions );
-        $this->thing->json->writeVariable( array("metocean", "forecast_conditions"), $this->forecast_conditions );
+        $this->thing->Write( array("metocean", "current_conditions"), $this->current_conditions );
+        $this->thing->Write( array("metocean", "forecast_conditions"), $this->forecast_conditions );
 
         //        }
 

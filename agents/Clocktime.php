@@ -34,7 +34,7 @@ class Clocktime extends Agent
         // You will probably see these a lot.
         // Unless you learn headcodes after typing SYNTAX.
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Agent variables
         $this->sqlresponse = null; // True - error. (Null or False) - no response. Text - response

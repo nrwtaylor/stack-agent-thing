@@ -39,7 +39,6 @@ class Stackgraph extends Agent
 
     function set()
     {
-        $this->thing->json->setField("variables");
     }
 
     function get()
@@ -128,8 +127,7 @@ class Stackgraph extends Agent
         $this->variables_thing->$variable = $value;
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable(
+        $this->variables_thing->Write(
             [$this->variables_agent, $variable],
             $value
         );

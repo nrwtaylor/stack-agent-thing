@@ -69,7 +69,7 @@ class Word extends Agent
             $this->reading = count($this->words);
         }
 
-        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
+        $this->thing->Write(["word", "reading"], $this->reading);
 
         if ((isset($this->words) and count($this->words)) != 0) {
             $this->thing->log(
@@ -85,22 +85,21 @@ class Word extends Agent
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "word",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["word", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(["word", "reading"]);
+        $this->reading = $this->thing->Read(["word", "reading"]);
     }
 
     /**

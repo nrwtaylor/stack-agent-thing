@@ -40,7 +40,7 @@ class Second extends Agent
             "second" => ["leap second", "minut", "year", "uuid"],
         ];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container["stack"]["entity_name"];
@@ -220,8 +220,7 @@ class Second extends Agent
     public function setSecond()
     {
         return;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["second", "decimal"],
             $this->decimal_second
         );
@@ -585,16 +584,14 @@ class Second extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "second",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["second", "refreshed_at"],
                 $time_string
             );

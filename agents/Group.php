@@ -62,23 +62,20 @@ class Group extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "group",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["group", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->group_id = $this->thing->json->readVariable([
+        $this->group_id = $this->thing->Read([
             "group",
             "group_id",
         ]);
@@ -116,8 +113,7 @@ class Group extends Agent
 
     public function joinGroup($group_id = null)
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(["group", "action"], 'join');
+        $names = $this->thing->Write(["group", "action"], 'join');
 
         // Find out if the group exists
 
@@ -133,16 +129,14 @@ class Group extends Agent
         $this->thing->log('joined group ' . $group_id . '');
         $this->group_id = $group_id;
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["group", "group_id"],
             $this->group_id
         );
 
         // Super primitive, but it does have this.
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["group", "refreshed_at"],
             $time_string
         );
@@ -154,16 +148,14 @@ class Group extends Agent
 
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(["group", "action"], 'null');
+        $names = $this->thing->Write(["group", "action"], 'null');
 
         $this->response .= "Null action. ";
     }
 
     public function leaveGroup($group = null)
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["group", "action"],
             'leave'
         );
@@ -173,8 +165,7 @@ class Group extends Agent
 
     public function startGroup($type = null)
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["group", "action"],
             'start'
         );
@@ -193,15 +184,13 @@ class Group extends Agent
         //$this->message = $this->group_id;
         $this->response .= "Type 'SAY' followed by your message. ";
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["group", "group_id"],
             $this->group_id
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["group", "refreshed_at"],
             $time_string
         );
@@ -220,8 +209,7 @@ class Group extends Agent
 
         // Retries the last <99> group names.
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(["group", "action"], 'find');
+        $names = $this->thing->Write(["group", "action"], 'find');
 
         $thingreport = $this->thing->db->setUser($this->from);
         $thingreport = $this->thing->db->variableSearch(null, "group_id", 99);
@@ -231,16 +219,14 @@ class Group extends Agent
         foreach ($thingreport['things'] as $thing_obj) {
             $thing = new Thing($thing_obj['uuid']);
 
-            $thing->json->setField("variables");
-            $group_id = $thing->json->readVariable(["group", "group_id"]);
+            $group_id = $thing->Read(["group", "group_id"]);
 
             if ($group_id == false or $group_id == null) {
             } else {
                 $groups[] = $group_id;
             }
 
-            $thing->json->setField("variables");
-            $refreshed_at = $thing->json->readVariable([
+            $refreshed_at = $thing->Read([
                 "group",
                 "refreshed_at",
             ]);
@@ -254,7 +240,7 @@ class Group extends Agent
         } else {
             $this->group_id = $groups[0];
 
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["group", "group_id"],
                 $this->group_id
             );
@@ -275,8 +261,7 @@ class Group extends Agent
     public function listenGroup($group = null)
     {
         $this->members = [];
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["group", "action"],
             'listen'
         );

@@ -97,13 +97,10 @@ class Orac extends Agent {
         $this->message = $value;
         $this->sms_message = $value;
 
-        $this->thing->json->setField("variables");
+        $names = $this->thing->Write( array("orac", "log"), $this->text );
 
-        $names = $this->thing->json->writeVariable( array("orac", "log"), $this->text );
-
-        $this->thing->json->setField("variables");
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable( array("orac", "refreshed_at"), $time_string );
+        $this->thing->Write( array("orac", "refreshed_at"), $time_string );
 
         return $this->message;
     }

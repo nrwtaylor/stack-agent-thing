@@ -30,22 +30,21 @@ class Wordcombination extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "wordcombination",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["wordcombination", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "wordcombination",
             "reading",
         ]);
@@ -53,7 +52,7 @@ class Wordcombination extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["wordcombination", "reading"],
             $this->reading
         );
@@ -164,7 +163,7 @@ class Wordcombination extends Agent
             $this->reading = count($this->words);
         }
 
-        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
+        $this->thing->Write(["word", "reading"], $this->reading);
     }
 
     /**

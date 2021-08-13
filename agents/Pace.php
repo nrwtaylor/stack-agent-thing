@@ -65,20 +65,19 @@ class Pace extends Agent
     function set()
     {
         // UK Commonwealth spelling
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["pace", "time_travelled"],
             $this->time_travelled
         );
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["pace", "refreshed_at"],
             $time_string
         );
 
         $pace_timestamp = $this->thing->microtime();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["pace", "timestamp"],
             $pace_timestamp
         );
@@ -89,13 +88,12 @@ class Pace extends Agent
      */
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "pace",
             "refreshed_at",
         ]);
 
-        $micro_timestamp = $this->thing->json->readVariable([
+        $micro_timestamp = $this->thing->Read([
             "pace",
             "timestamp",
         ]);
@@ -103,8 +101,8 @@ class Pace extends Agent
         // Keep second level timestamp because I'm not
         // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["pace", "refreshed_at"],
                 $time_string
             );
@@ -113,7 +111,7 @@ class Pace extends Agent
         // And in microtime code for Pace.
         if ($micro_timestamp == false) {
             $micro_timestamp = $this->thing->microtime();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["pace", "timestamp"],
                 $micro_timestamp
             );
@@ -122,7 +120,7 @@ class Pace extends Agent
         // If it has already been processed ...
         $this->last_timestamp = $micro_timestamp;
 
-        $this->time_travelled = $this->thing->json->readVariable([
+        $this->time_travelled = $this->thing->Read([
             "pace",
             "time_travelled",
         ]);

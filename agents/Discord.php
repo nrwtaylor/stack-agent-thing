@@ -209,8 +209,7 @@ class Discord extends Agent
         }
 
         //$message_reply_id = $this->agent_input;
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["discord", "reply_id"],
             null
         );

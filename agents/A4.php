@@ -31,13 +31,11 @@ class A4 extends Agent
     public function get()
     {
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable(["a4", "refreshed_at"]);
+        $time_string = $this->thing->Read(["a4", "refreshed_at"]);
 
         if ($time_string == false) {
-            //            $this->thing->json->setField("variables");
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["a4", "refreshed_at"],
                 $time_string
             );
@@ -45,9 +43,7 @@ class A4 extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        //        $this->thing->json->setField("variables");
-        $this->alpha = $this->thing->json->readVariable(["a4", "alpha"]);
-        //        $this->text = $this->thing->json->readVariable( array("a4", "text") ); // Test because this will become A6.
+        $this->alpha = $this->thing->Read(["a4", "alpha"]);
     }
 
     /**
@@ -57,8 +53,7 @@ class A4 extends Agent
     {
         if ($this->alpha == false) {
             $this->makeA4();
-            $this->thing->json->writeVariable(["a4", "alpha"], $this->alpha);
-            //            $this->thing->json->writeVariable( array("a4", "text"), $this->text );
+            $this->thing->Write(["a4", "alpha"], $this->alpha);
         }
     }
 

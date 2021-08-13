@@ -230,8 +230,7 @@ class Microsoft
         }
 
         //$message_reply_id = $this->agent_input;
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["microsoft", "reply_id"],
             null
         );
@@ -341,9 +340,6 @@ class Microsoft
             }
         }';
 */
-
-        //                    $this->thing->json->setField("message0");
-        //                    $names = $this->thing->json-readVariable( array("microsoft") );
 
         if (!isset($this->message)) {
             $this->json_message = "No message provided.";
@@ -521,13 +517,12 @@ Content-Type: application/json
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["microsoft", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["microsoft", "refreshed_at"],
             $time_string
         );

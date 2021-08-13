@@ -33,7 +33,7 @@ class Event extends Agent
             $this->thing->container["api"]["event"]["default_event_code"];
 
         $this->default_alias = "Thing";
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->max_index = 0;
 
@@ -273,7 +273,7 @@ class Event extends Agent
 
         // One minute into next headcode
         $quantity = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 

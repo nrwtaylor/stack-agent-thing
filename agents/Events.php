@@ -26,10 +26,8 @@ class Events extends Agent
     function set()
     {
         // UK Commonwealth spelling
-        $this->thing->json->setField("variables");
-
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["events", "refreshed_at"],
             $time_string
         );
@@ -37,19 +35,16 @@ class Events extends Agent
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "events",
             "refreshed_at",
         ]);
 
-        //$micro_timestamp = $this->thing->json->readVariable( array("splosh", "timestamp") );
-
         // Keep second level timestamp because I'm not
         // sure Stackr can deal with microtimes (yet).
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["events", "refreshed_at"],
                 $time_string
             );

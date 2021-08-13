@@ -42,17 +42,14 @@ class Tokenlimiter {
 
 
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("tokenlimiter", "refreshed_at") );
+        $time_string = $this->thing->Read( array("tokenlimiter", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("tokenlimiter", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $tokens = $this->thing->json->readVariable( array("tokenlimiter", "tokens") );
+        $tokens = $this->thing->Read( array("tokenlimiter", "tokens") );
 
 
         if ($tokens == false) {
@@ -91,8 +88,7 @@ class Tokenlimiter {
                 unset($this->tokens[$key]);
 
 
-                $this->thing->json->setField("variables");
-                $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
+                $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
                 //callAgent($this->thing->uuid, $token);
                 $c = new Callagent($this->thing);
@@ -108,10 +104,6 @@ class Tokenlimiter {
 
         $this->thing_report['token'] = false;
 
-        //$this->thing->json->setField("variables");
-        //$this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
-
-        //             $this->thing->log("<pre>Token issue" . print_r($this->tokens) . "</pre>");
 
         $this->thing->log( 'Agent "Token Limiter" did not provide a Token.' );
 
@@ -182,15 +174,12 @@ class Tokenlimiter {
      */
     function initTokens() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
+        $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
         $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'sms', 'facebook', 'slack', 'email', 'satoshi', 'satoshi', 'microsoft','ntp');
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
+        $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
-        return;
     }
 
 
@@ -199,26 +188,20 @@ class Tokenlimiter {
      */
     function refreshTokens() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
+        $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
         $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'satoshi');
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
-
-        return;
+        $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
     }
 
     function revokeTokens() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
+        $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
         $this->tokens = array();
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
+        $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
     }
 

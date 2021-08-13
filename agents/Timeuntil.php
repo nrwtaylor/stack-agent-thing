@@ -67,7 +67,7 @@ class Timeuntil extends Agent
             $this->runat->minute;
         $run_time = strtotime($date_text);
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
         $now = strtotime($this->current_time);
 
         $time_until = $run_time - $now;

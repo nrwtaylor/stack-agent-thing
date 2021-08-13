@@ -23,10 +23,9 @@ class Url extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["url", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

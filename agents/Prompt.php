@@ -310,7 +310,7 @@ class Prompt extends Agent
                 $this->thing->json->setField("settings");
                 $this->thing->json->writeVariable(
                     ["prompt", "received_at"],
-                    $this->thing->json->time()
+                    $this->thing->time()
                 );
 
                 //$date_string = date('Y-m-d H:i:s', mktime($date_array['hour'], $date_array['minute'], $date_array['second'], $date_array['month'], $date_array['day'], $date_array['year']));
@@ -318,10 +318,9 @@ class Prompt extends Agent
                 //$this->date;
                 //$this->duration;
 
-                $this->thing->json->setField("variables");
-                $this->thing->json->writeVariable(
+                $this->thing->Write(
                     ["prompt", "trigger_at"],
-                    $this->thing->json->time()
+                    $this->thing->time()
                 );
 
                 $this->state_change = true;

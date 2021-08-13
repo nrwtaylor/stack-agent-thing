@@ -47,15 +47,14 @@ class Proword extends Word
             "librex"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "proword",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["proword", "refreshed_at"],
                 $time_string
             );
@@ -66,7 +65,7 @@ class Proword extends Word
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "proword",
             "reading",
         ]);
@@ -83,7 +82,7 @@ class Proword extends Word
 
         $this->proword_variables->setVariable("librex", $this->librex_name);
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["proword", "reading"],
             $this->has_prowords
         );

@@ -36,15 +36,14 @@ class Nuuids extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "nuuids",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["nuuids", "refreshed_at"],
                 $time_string
             );
@@ -141,8 +140,7 @@ class Nuuids extends Agent
 
     function setNuuids()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["nuuids", "index"], $this->index);
+        $this->thing->Write(["nuuids", "index"], $this->index);
 
         $this->thing->log(
             $this->agent_prefix .
@@ -155,8 +153,7 @@ class Nuuids extends Agent
 
     function getNuuids()
     {
-        $this->thing->json->setField("variables");
-        $this->index = $this->thing->json->readVariable(["nuuids", "index"]);
+        $this->index = $this->thing->Read(["nuuids", "index"]);
 
         if ($this->index == false) {
             $this->thing->log(

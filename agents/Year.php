@@ -38,7 +38,7 @@ class Year extends Agent
 
         $this->node_list = ["year" => ["year", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container["stack"]["entity_name"];
@@ -215,8 +215,7 @@ class Year extends Agent
     public function setYear()
     {
         return;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["year", "decimal"],
             $this->decimal_year
         );
@@ -580,16 +579,14 @@ class Year extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "year",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["year", "refreshed_at"],
                 $time_string
             );

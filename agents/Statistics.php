@@ -66,8 +66,8 @@ class Statistics extends Agent
 
                 throw new \Exception("devstack");
                 /*
-                $this->age = $thing->json->readVariable([
-                $this->count = $thing->json->readVariable([
+                $this->age = $thing->Read([
+                $this->count = $thing->Read([
                 $this->sum = floatval(
                 $this->sum_squared = floatval(
                 $this->sum_squared_difference = floatval(
@@ -281,45 +281,44 @@ array(
 ));
 */
         $statistics = $this->statistics;
-        $this->statistics_thing->json->writeVariable(["statistics"], $statistics);
+        $this->statistics_thing->Write(["statistics"], $statistics);
 
         return;
         // Store counts
         $this->statistics_thing->db->setFrom($this->from);
 
-        $this->statistics_thing->json->setField("variables");
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "mean"],
             $this->mean
         );
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "count"],
             $this->count
         );
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "sum"],
             $this->sum
         );
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "sum_squared"],
             floatval($this->sum_squared)
         );
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "sum_squared_difference"],
             floatval($this->sum_squared_difference)
         );
 
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "earliest_seen"],
             $this->earliest_seen
         );
 
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "minimum"],
             $this->minimum
         );
 
-        $this->statistics_thing->json->writeVariable(
+        $this->statistics_thing->Write(
             ["statistics", $this->variable_name, "maximum"],
             $this->maximum
         );

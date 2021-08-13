@@ -25,7 +25,7 @@ class Lattice extends Agent
 
         $this->node_list = ["snowflake" => ["snowflake", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->canvas_size_x = 1640;
         $this->canvas_size_y = 1640;
@@ -177,8 +177,7 @@ class Lattice extends Agent
 
     public function setLattice()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["lattice", "decimal"],
             $this->decimal_lattice
         );
@@ -194,8 +193,7 @@ class Lattice extends Agent
 
     public function getLattice()
     {
-        $this->thing->json->setField("variables");
-        $this->decimal_lattice = $this->thing->json->readVariable([
+        $this->decimal_lattice = $this->thing->Read([
             "lattice",
             "decimal",
         ]);
@@ -1337,27 +1335,16 @@ rgb
 
         return;
     }
-    /*
-    public function read()
-    {
-        //$this->thing->log("read");
-
-        //        $this->get();
-        return $this->state;
-    }
-*/
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "snowflake",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["snowflake", "refreshed_at"],
                 $time_string
             );

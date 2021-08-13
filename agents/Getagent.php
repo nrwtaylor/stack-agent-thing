@@ -117,8 +117,7 @@ class Getagent extends Agent
         $sms = "GETAGENT | " . ucwords($this->agent_name);
         $this->thing_report['sms'] = $sms;
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["getagent", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

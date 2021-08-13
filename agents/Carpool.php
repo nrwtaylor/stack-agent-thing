@@ -22,7 +22,7 @@ class Carpool extends Agent
 
         $this->link = $this->web_prefix . "thing/" . $this->uuid . "/carpool";
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
         $this->thing_report["help"] =
             "This is your Carpool. Try CARPOOL ON. CARPOOL OFF. PLACE IS GILMORE. FLAG IS RAINBOW.";
         $this->thing_report["info"] =

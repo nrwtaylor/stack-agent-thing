@@ -15,7 +15,7 @@ class Eventbrite extends Agent
     {
         $this->keywords = ["eventbrite", "event", "show", "happening"];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->api_key = null;
         if (isset($this->thing->container["api"]["eventbrite"]["api_key"])) {

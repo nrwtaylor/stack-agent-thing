@@ -27,16 +27,14 @@ class Hexflake extends Agent
 
         $this->getHexflake();
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "hexflake",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["hexflake", "refreshed_at"],
                 $time_string
             );
@@ -111,8 +109,7 @@ class Hexflake extends Agent
 
     function setHexflake()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["hexflake", "lattice"],
             $this->lattice
         );
@@ -121,8 +118,7 @@ class Hexflake extends Agent
     function getHexflake()
     {
         $n = 2;
-        $this->thing->json->setField("variables");
-        $this->lattice = $this->thing->json->readVariable([
+        $this->lattice = $this->thing->Read([
             "hexflake",
             "lattice",
         ]);

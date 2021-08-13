@@ -33,7 +33,7 @@ class Bcvitalstatisticsdeathreports extends Agent
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
+            $time_string = $this->thing->time();
             $this->thing->Write(
                 ["bcvitalstatistics", "refreshed_at"],
                 $time_string

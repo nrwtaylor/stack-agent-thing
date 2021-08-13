@@ -15,8 +15,7 @@ class Retention extends Agent
         $this->retain_for = $this->thing->container["stack"]["retain_for"];
 
         // Before doing anything else
-        $this->thing->json->setField("variables");
-        $this->remember_status = $this->thing->json->readVariable([
+        $this->remember_status = $this->thing->Read([
             "remember",
             "status",
         ]);
@@ -57,7 +56,7 @@ class Retention extends Agent
 
                 if ($age > $this->retain_for["amount"]) {
                     $persistence_thing = new Persistence($this->thing, "quiet");
-                    $this->persist_to = $this->thing->json->readVariable([
+                    $this->persist_to = $this->thing->Read([
                         "persistence",
                         "persist_to",
                     ]);
@@ -103,7 +102,7 @@ class Retention extends Agent
         $this->thing->json->setField("settings");
         $this->thing->json->writeVariable(
             ["retention", "received_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
 
         $this->thing->flagGreen();

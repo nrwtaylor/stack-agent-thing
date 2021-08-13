@@ -50,7 +50,7 @@ class Leapsecond extends Agent
             "leap second" => ["leap second", "minute", "year", "uuid"],
         ];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->leap_seconds_url = "https://hpiers.obspm.fr/iers/bul/bulc/ntp/leap-seconds.list";
         $this->leap_second_cache_horizon = 24 * 60 * 60;
@@ -197,8 +197,7 @@ $leap_second = false;
 if (isset($this->leap_second)) {
 $leap_second = $this->leap_second;
 }
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["leap_second", "leap_second"],
             $leap_second
         );
@@ -641,16 +640,14 @@ return false;
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "leap_second",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["leap_second", "refreshed_at"],
                 $time_string
             );

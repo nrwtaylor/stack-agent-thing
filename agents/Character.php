@@ -58,8 +58,7 @@ class Character extends Agent
      */
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             'null'
         );
@@ -82,39 +81,37 @@ class Character extends Agent
 
         $this->character_thing->db->setFrom($this->from);
 
-        $this->character_thing->json->setField("variables");
-
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "name"],
             $this->name
         );
 
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "strength"],
             $this->strength
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "dexterity"],
             $this->dexterity
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "constitution"],
             $this->constitution
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "intelligence"],
             $this->intelligence
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "wisdom"],
             $this->wisdom
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "charisma"],
             $this->charisma
         );
 
-        //$this->age_thing->json->writeVariable( array("character", "earliest_seen"), $this->earliest_seen   );
+        //$this->age_thing->Write( array("character", "earliest_seen"), $this->earliest_seen   );
 
         $this->character_thing->flagGreen();
     }
@@ -125,17 +122,15 @@ class Character extends Agent
      */
     function getCharacters()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "character",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no character information
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["character", "refreshed_at"],
                 $time_string
             );

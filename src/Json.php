@@ -88,7 +88,7 @@ class Json
      * @param unknown $time (optional)
      * @return unknown
      */
-    function time($time = null)
+    function deprecate_time($time = null)
     {
         if ($time == null) {
             $time = time();
@@ -103,7 +103,7 @@ class Json
      * @param unknown $time (optional)
      * @return unknown
      */
-    function microtime($time = null)
+    function deprecate_microtime($time = null)
     {
         if ($time == null) {
             $time = time();

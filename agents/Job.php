@@ -96,13 +96,12 @@ class Job extends Agent
     function set()
     {
         // Record receipt of the request.
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["job", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
 
-        $this->thing->json->writeVariable(["job", "response"], $this->response);
+        $this->thing->Write(["job", "response"], $this->response);
     }
 
     /**

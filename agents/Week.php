@@ -39,7 +39,7 @@ class Week extends Agent
 
         $this->node_list = ["week" => ["week", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -219,7 +219,7 @@ class Week extends Agent
      */
     public function setWeek()
     {
-        $this->thing->json->setField("variables");
+        //$this->thing->json->setField("variables");
     }
 
     /**
@@ -468,16 +468,14 @@ class Week extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "week",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["week", "refreshed_at"],
                 $time_string
             );

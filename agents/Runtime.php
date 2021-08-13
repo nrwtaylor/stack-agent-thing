@@ -104,8 +104,7 @@ Show 1 minute.
 
         // So report the associated headcode.
 
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);

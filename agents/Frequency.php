@@ -460,10 +460,9 @@ class Frequency extends Agent
      */
     function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["frequency", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

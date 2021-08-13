@@ -39,7 +39,7 @@ class Slice extends Agent
 
         $this->node_list = ["slice" => ["slice", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -221,8 +221,7 @@ class Slice extends Agent
     public function setSlice()
     {
         return;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["slice", "decimal"],
             $this->decimal_slice
         );
@@ -613,16 +612,14 @@ class Slice extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "slice",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["slice", "refreshed_at"],
                 $time_string
             );

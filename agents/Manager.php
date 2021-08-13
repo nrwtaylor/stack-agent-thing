@@ -50,15 +50,14 @@ $this->response = "Gearman snowflake worker started.";
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "manager",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["manager", "refreshed_at"],
                 $time_string
             );
@@ -171,15 +170,15 @@ $this->response = "Gearman snowflake worker started.";
     {
         $this->current_time = $this->thing->time();
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["manager", "queued_jobs"],
             $this->queued_jobs
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["manager", "workers_running"],
             $this->workers_running
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["manager", "workers_connected"],
             $this->workers_connected
         );

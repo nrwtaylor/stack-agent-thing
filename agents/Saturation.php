@@ -31,8 +31,7 @@ class Saturation extends Agent
     {
         // Take a look at this thing for IChing variables.
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "saturation",
             "refreshed_at",
         ]);
@@ -40,16 +39,14 @@ class Saturation extends Agent
         // And if there is no IChing timestamp create one now.
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["saturation", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->saturation = $this->thing->json->readVariable([
+        $this->saturation = $this->thing->Read([
             "saturation",
             "saturation",
         ]);
@@ -60,7 +57,7 @@ class Saturation extends Agent
      */
     function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["saturation", "saturation"],
             $this->saturation
         );

@@ -181,7 +181,7 @@ class Place extends Agent
 
         // One minute into next headcode
         $quantity = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -344,8 +344,6 @@ $count = count($things);
             ) {
                 //$uuid = $thing_object['uuid'];
 $uuid = $thing->uuid;
-                //$variables_json = $thing_object['variables'];
-                //$variables = $this->thing->json->jsontoArray($variables_json);
 $variables = $thing->variables;
                 if (isset($variables['place'])) {
                     $place_code = $this->default_place_code;

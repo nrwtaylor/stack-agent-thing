@@ -103,14 +103,13 @@ class Burst extends Agent
         $this->flag = $requested_flag;
         $this->refreshed_at = $this->current_time;
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["burst", "flag"], $this->flag);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["burst", "flag"], $this->flag);
+        $this->thing->Write(
             ["burst", "refreshed_at"],
             $this->current_time
         );
-        $this->thing->json->writeVariable(["burst", "burst"], $this->burst);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["burst", "burst"], $this->burst);
+        $this->thing->Write(
             ["burst", "burstiness"],
             $this->burstiness
         );

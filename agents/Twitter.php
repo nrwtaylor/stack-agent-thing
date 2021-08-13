@@ -49,8 +49,7 @@ class Twitter extends Agent
 
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             "null"
         );
@@ -579,13 +578,12 @@ class Twitter extends Agent
             $result = curl_exec($ch);
         }
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["twitter", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["twitter", "refreshed_at"],
             $time_string
         );

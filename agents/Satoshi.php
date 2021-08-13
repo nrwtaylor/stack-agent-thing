@@ -32,10 +32,8 @@ class Satoshi extends Agent
         //print 'private (WIF)  : ' . $coin['private'] . "<br>";
         //print 'private (Hex)  : ' . $coin['private_hex'] . "<br>";
 
-        $this->thing->json->setField("variables");
-
-        $public = $this->thing->json->readVariable(["satoshi", "public"]);
-        $secret = $this->thing->json->readVariable(["satoshi", "secret"]);
+        $public = $this->thing->Read(["satoshi", "public"]);
+        $secret = $this->thing->Read(["satoshi", "secret"]);
 
         if ($public == false and $secret == false) {
             $public_key = $coin['public'];
@@ -44,12 +42,12 @@ class Satoshi extends Agent
             $secret_key = $coin['private'];
             $this->secret_key = $secret_key;
 
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["satoshi", "public"],
                 $this->public_key
             );
 
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["satoshi", "secret"],
                 $this->secret_key
             );

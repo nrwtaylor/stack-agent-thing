@@ -62,8 +62,7 @@ class Log extends Agent
     public function set()
     {
         if ($this->state == "on") {
-            $this->thing->json->setField("variables");
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["log", "received_at"],
                 gmdate("Y-m-d\TH:i:s\Z", time())
             );

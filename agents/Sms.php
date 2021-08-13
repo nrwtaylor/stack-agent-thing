@@ -46,23 +46,20 @@ class Sms
         $this->sqlresponse = null;
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "sms",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["sms", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->sms_count = $this->thing->json->readVariable(["sms", "count"]);
+        $this->sms_count = $this->thing->Read(["sms", "count"]);
 
         if ($this->sms_count == false) {
             $this->sms_count = 0;
@@ -218,7 +215,7 @@ class Sms
             $this->thing_report['info'] =
                 '<pre> Agent "Sms" sent a SMS to ' . $this->from . '.</pre>';
 
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["sms", "count"],
                 $this->sms_count + 1
             );

@@ -33,7 +33,7 @@ class Context extends Agent
 
         $this->node_list = ["off" => ["on" => ["off"]]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->keywords = ["context"];
 
@@ -53,19 +53,19 @@ class Context extends Agent
         $requested_state = $this->requested_state;
         // Update calculated variables.
 
-        $this->context_thing->json->writeVariable(
+        $this->context_thing->Write(
             ["context", "state"],
             $requested_state
         );
 
         if (isset($this->context)) {
-            $this->context_thing->json->writeVariable(
+            $this->context_thing->Write(
                 ["context", "context"],
                 $this->context
             );
         }
         if (isset($this->context_id)) {
-            $this->context_thing->json->writeVariable(
+            $this->context_thing->Write(
                 ["context", "context_id"],
                 $this->context_id
             );
@@ -77,24 +77,24 @@ class Context extends Agent
             );
         }
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["context", "state"],
             $requested_state
         );
 
         if (isset($this->context)) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["context", "context"],
                 $this->context
             );
         }
         if (isset($this->context_id)) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["context", "context_id"],
                 $this->context_id
             );
         }
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["context", "refreshed_at"],
             $this->current_time
         );

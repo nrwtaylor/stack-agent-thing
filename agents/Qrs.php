@@ -24,16 +24,14 @@ class Qrs extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "qrs",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["qrs", "refreshed_at"],
                 $time_string
             );
@@ -145,15 +143,13 @@ class Qrs extends Agent
 
     function setNuuids()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["qrs", "index"], $this->index);
+        $this->thing->Write(["qrs", "index"], $this->index);
         //$this->thing->log($this->agent_prefix . ' saved duplicable index ' . $this->index . '.', "INFORMATION") ;
     }
 
     function getNuuids()
     {
-        $this->thing->json->setField("variables");
-        $this->index = $this->thing->json->readVariable(["qrs", "index"]);
+        $this->index = $this->thing->Read(["qrs", "index"]);
 
         if ($this->index == false) {
             $this->thing->log(

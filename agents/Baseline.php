@@ -58,7 +58,7 @@ class Baseline extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["baseline", "inject"],
             $this->inject
         );
@@ -71,7 +71,7 @@ class Baseline extends Agent
         $this->baseline->setVariable("refreshed_at", $this->current_time);
 
         if (isset($this->prior_thing)) {
-            $this->prior_thing->json->writeVariable(
+            $this->prior_thing->Write(
                 ["baseline", "response_time"],
                 $this->response_time
             );
@@ -102,16 +102,14 @@ class Baseline extends Agent
 
         $this->mode = $this->previous_mode;
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "baseline",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["baseline", "refreshed_at"],
                 $time_string
             );
@@ -119,12 +117,12 @@ class Baseline extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable([
+        $this->inject = $this->thing->Read([
             "baseline",
             "inject",
         ]);
 
-        $this->last_response_time = $this->thing->json->readVariable([
+        $this->last_response_time = $this->thing->Read([
             "baseline",
             "response_time",
         ]);

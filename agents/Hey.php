@@ -53,13 +53,12 @@ class Hey extends Agent
             $this->sms_message = "Last nod was over " . $this->thing->human_time($this->max_nod_time) . " ago.";
         }
 
-	    $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable( array("hey", "requested_agent"), $this->requested_agent );
+        $names = $this->thing->Write( array("hey", "requested_agent"), $this->requested_agent );
 
         //if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("hey", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("hey", "refreshed_at"), $time_string );
+
         //}
 
         return $this->message;

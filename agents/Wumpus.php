@@ -181,17 +181,17 @@ class Wumpus extends Agent
         $variables->setVariable("tag", $this->wumpus_tag);
         $variables->setVariable("refreshed_at", $this->refreshed_at);
 
-        $this->entity_agent->json->writeVariable(
+        $this->entity_agent->Write(
             ["wumpus", "left_count"],
             $this->left_count
         );
-        $this->entity_agent->json->writeVariable(
+        $this->entity_agent->Write(
             ["wumpus", "right_count"],
             $this->right_count
         );
 
         // Which cave is the Wumpus in?  And is it a number or a name?
-        $this->entity_agent->json->writeVariable(
+        $this->entity_agent->Write(
             ["wumpus", "cave"],
             strval($this->x)
         );
@@ -224,11 +224,10 @@ class Wumpus extends Agent
 
         $this->getWumpus($crow_code);
 
-        $this->current_time = $this->entity_agent->json->time();
+        $this->current_time = $this->entity_agent->time();
 
         // Borrow this from iching
-        $this->entity_agent->json->setField("variables");
-        $this->time_string = $this->entity_agent->json->readVariable([
+        $this->time_string = $this->entity_agent->Read([
             "wumpus",
             "refreshed_at",
         ]);
@@ -237,10 +236,9 @@ class Wumpus extends Agent
             $crow_code = $this->uuid;
         }
 
-        $this->entity_agent->json->setField("variables");
         if ($this->time_string == false) {
-            $this->time_string = $this->entity_agent->json->time();
-            $this->entity_agent->json->writeVariable(
+            $this->time_string = $this->entity_agent->time();
+            $this->entity_agent->Write(
                 ["wumpus", "refreshed_at"],
                 $this->time_string
             );
@@ -249,13 +247,13 @@ class Wumpus extends Agent
         $this->refreshed_at = strtotime($this->time_string);
 
         $this->left_count = strtolower(
-            $this->entity_agent->json->readVariable(["wumpus", "left_count"])
+            $this->entity_agent->Read(["wumpus", "left_count"])
         );
-        $this->right_count = $this->entity_agent->json->readVariable([
+        $this->right_count = $this->entity_agent->Read([
             "wumpus",
             "right_count",
         ]);
-        $this->x = $this->entity_agent->json->readVariable(["wumpus", "cave"]);
+        $this->x = $this->entity_agent->Read(["wumpus", "cave"]);
 
         if ($this->left_count == false or ($this->left_count = "")) {
             $this->left_count = 0;

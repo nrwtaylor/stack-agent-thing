@@ -41,7 +41,7 @@ class Round extends Agent
             "round" => ["tzol\'kin", "haab", "day", "round", "week"],
         ];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container["stack"]["entity_name"];
@@ -169,8 +169,7 @@ class Round extends Agent
      */
     public function setRound()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["round", "rounds"], $this->rounds);
+        $this->thing->Write(["round", "rounds"], $this->rounds);
     }
 
     /**
@@ -180,8 +179,7 @@ class Round extends Agent
     // TODO
     public function getRound()
     {
-        $this->thing->json->setField("variables");
-        $rounds = $this->thing->json->readVariable(["round", "rounds"]);
+        $rounds = $this->thing->Read(["round", "rounds"]);
 
         if ($rounds == false) {
             $this->thing->log(
@@ -508,16 +506,14 @@ class Round extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "round",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["round", "refreshed_at"],
                 $time_string
             );

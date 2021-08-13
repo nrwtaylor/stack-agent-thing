@@ -99,10 +99,9 @@ $uuids = $this->extractUuids($text);
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["uuid", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

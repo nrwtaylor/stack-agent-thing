@@ -157,14 +157,11 @@ class Connection extends Agent
 
     public function get()
     {
-        //        $this->current_time = $this->thing->json->time();
-
-        $this->thing->json->setField("variables");
         $time_string = $this->thing->Read(["connection", "refreshed_at"]);
         $this->last_refreshed_at = $time_string;
 
         if ($time_string === false) {
-            $time_string = $this->thing->json->time();
+            $time_string = $this->thing->time();
             $this->thing->Write(["connection", "refreshed_at"], $time_string);
         }
 

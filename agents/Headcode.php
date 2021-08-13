@@ -102,11 +102,11 @@ class Headcode extends Agent
 
         $this->headcode_id->setVariable("refreshed_at", $this->current_time);
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["headcode", "head_code"],
             $this->head_code
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["headcode", "refreshed_at"],
             $this->current_time
         );
@@ -131,7 +131,7 @@ class Headcode extends Agent
 
         // One minute into next headcode
         $quantity = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -177,7 +177,7 @@ class Headcode extends Agent
 
     function getRoute()
     {
-        //$this->route = $this->thing->json->readVariable( array("headcode", "route") );
+        //$this->route = $this->thing->Read( array("headcode", "route") );
         //            $this->route = "na";
 
         //$route_agent = new Route($this->thing, $this->head_code);
@@ -583,7 +583,7 @@ class Headcode extends Agent
     function getEndat()
     {
         if ($this->run_at != "x" and $this->quantity != "x") {
-            $this->end_at = $this->thing->json->time(
+            $this->end_at = $this->thing->time(
                 strtotime($this->run_at . " " . $this->quantity . " minutes")
             );
         } else {

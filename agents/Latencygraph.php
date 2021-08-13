@@ -25,14 +25,13 @@ class Latencygraph extends Agent
         // I think.
         // Instead.
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->node_list = ["latencygraph"];
     }
 
     function set()
     {
-        $this->thing->json->setField("variables");
     }
 
     function get()

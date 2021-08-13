@@ -41,8 +41,7 @@ class Code extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["code", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

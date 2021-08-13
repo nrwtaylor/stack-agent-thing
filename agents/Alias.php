@@ -25,7 +25,7 @@ class Alias extends Agent
 
         $this->node_list = ["off" => ["on" => ["off"]]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->variables_agent = new Variables(
             $this->thing,
@@ -76,14 +76,14 @@ class Alias extends Agent
             $this->current_time
         );
 
-        $this->thing->json->writeVariable(["alias", "alias"], $this->alias);
-        $this->thing->json->writeVariable(["alias", "context"], $this->context);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["alias", "alias"], $this->alias);
+        $this->thing->Write(["alias", "context"], $this->context);
+        $this->thing->Write(
             ["alias", "alias_id"],
             $this->alias_id
         ); // exactly same as context_id
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["alias", "refreshed_at"],
             $this->current_time
         );
@@ -231,8 +231,7 @@ class Alias extends Agent
                 "ms."
         );
 
-        $this->thing->json->setField("variables");
-        $this->head_code = $this->thing->json->readVariable([
+        $this->head_code = $this->thing->Read([
             "headcode",
             "head_code",
         ]);

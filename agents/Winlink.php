@@ -102,8 +102,7 @@ class Winlink extends Agent
      */
     public function set() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("winlink",
+        $this->thing->Write(array("winlink",
                 "refreshed_at"),  $this->thing->time()
         );
 

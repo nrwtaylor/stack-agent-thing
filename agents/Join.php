@@ -25,21 +25,18 @@ class Join extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "group",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $this->group_id = $this->thing->json->readVariable([
+        $this->group_id = $this->thing->Read([
             "group",
             "group_id",
         ]);
@@ -147,7 +144,7 @@ class Join extends Agent
                         $uuid = $thing['uuid'];
                         $group_thing = new Thing($uuid);
 
-                        $this->group_id = $group_thing->json->readVariable([
+                        $this->group_id = $group_thing->Read([
                             "group",
                             "group_id",
                         ]);

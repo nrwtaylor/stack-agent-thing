@@ -130,12 +130,10 @@ class Ebay extends Agent
 
         $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
 
-        $this->thing->json->setField("variables");
+        $this->thing->Write(["ebay", "runtime"], $this->runtime);
 
-        $this->thing->json->writeVariable(["ebay", "runtime"], $this->runtime);
-
-        $this->thing->json->writeVariable(["ebay", "state"], $this->state);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["ebay", "state"], $this->state);
+        $this->thing->Write(
             ["ebay", "refreshed_at"],
             $this->current_time
         );

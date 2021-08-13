@@ -68,8 +68,7 @@ class Gopher extends Agent
 
     public function nullGopher()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             "null"
         );

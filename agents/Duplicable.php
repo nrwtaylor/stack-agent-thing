@@ -32,16 +32,14 @@ class Duplicable extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "duplicable",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["duplicable", "refreshed_at"],
                 $time_string
             );
@@ -123,8 +121,7 @@ class Duplicable extends Agent
 
     function setDuplicable()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["duplicable", "index"],
             $this->index
         );
@@ -139,8 +136,7 @@ class Duplicable extends Agent
 
     function getDuplicable()
     {
-        $this->thing->json->setField("variables");
-        $this->index = $this->thing->json->readVariable([
+        $this->index = $this->thing->Read([
             "duplicable",
             "index",
         ]);

@@ -20,35 +20,32 @@ class Petal extends Agent
             $this->subject .
             $this->agent_input;
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
     }
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "petal",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["petal", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->roll = $this->thing->json->readVariable(["petal", "roll"]);
-        $this->result = $this->thing->json->readVariable(["petal", "result"]);
+        $this->roll = $this->thing->Read(["petal", "roll"]);
+        $this->result = $this->thing->Read(["petal", "result"]);
     }
 
     public function set()
     {
-        $this->thing->json->writeVariable(["petal", "roll"], $this->roll);
-        $this->thing->json->writeVariable(["petal", "result"], $this->result);
+        $this->thing->Write(["petal", "roll"], $this->roll);
+        $this->thing->Write(["petal", "result"], $this->result);
 
     }
 

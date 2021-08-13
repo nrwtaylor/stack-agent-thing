@@ -54,8 +54,7 @@ class Pdf extends Agent
 		$this->sms_message .= " | TEXT INFO";
 		$this->thing_report['sms'] = $this->sms_message;
 */
-		$this->thing->json->setField("variables");
-		$this->thing->json->writeVariable(array("pdf",
+		$this->thing->Write(array("pdf",
 			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
 			);
 

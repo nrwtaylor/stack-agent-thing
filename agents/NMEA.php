@@ -38,8 +38,7 @@ class NMEA extends Agent
     {
         // Take a look at this thing for IChing variables.
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "nmea",
             "refreshed_at",
         ]);
@@ -47,16 +46,14 @@ class NMEA extends Agent
         // And if there is no IChing timestamp create one now.
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["nmea", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->nmea = $this->thing->json->readVariable(["nmea", "nmea"]);
+        $this->nmea = $this->thing->Read(["nmea", "nmea"]);
     }
 
     /**
@@ -64,7 +61,7 @@ class NMEA extends Agent
      */
     function set()
     {
-        $this->thing->json->writeVariable(["nmea", "nmea"], $this->nmea);
+        $this->thing->Write(["nmea", "nmea"], $this->nmea);
     }
 
     public function talkeridNMEA($text)

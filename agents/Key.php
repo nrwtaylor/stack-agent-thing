@@ -16,8 +16,7 @@ class Key extends Agent
     {
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["key", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

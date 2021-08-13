@@ -190,13 +190,11 @@ class Ant extends Agent
 
     function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["ant", "left_count"],
             $this->left_count
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["ant", "right_count"],
             $this->right_count
         );
@@ -206,11 +204,10 @@ class Ant extends Agent
 
     public function get($ant_code = null)
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $this->time_string = $this->thing->json->readVariable([
+        $this->time_string = $this->thing->Read([
             "ant",
             "refreshed_at",
         ]);
@@ -222,9 +219,8 @@ class Ant extends Agent
         }
 
         if ($this->time_string == false) {
-            $this->thing->json->setField("variables");
-            $this->time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $this->time_string = $this->thing->time();
+            $this->thing->Write(
                 ["ant", "refreshed_at"],
                 $this->time_string
             );
@@ -232,12 +228,11 @@ class Ant extends Agent
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->thing->json->setField("variables");
-        $this->left_count = $this->thing->json->readVariable([
+        $this->left_count = $this->thing->Read([
             "ant",
             "left_count",
         ]);
-        $this->right_count = $this->thing->json->readVariable([
+        $this->right_count = $this->thing->Read([
             "ant",
             "right_count",
         ]);

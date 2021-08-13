@@ -53,31 +53,29 @@ class Mbox extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(["mbox", "reading"], $this->reading);
+        $this->thing->Write(["mbox", "reading"], $this->reading);
 
         $this->reading = count($this->messages);
-        $this->thing->json->writeVariable(["mbox", "reading"], $this->reading);
+        $this->thing->Write(["mbox", "reading"], $this->reading);
     }
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "mbox",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["mbox", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(["mbox", "reading"]);
+        $this->reading = $this->thing->Read(["mbox", "reading"]);
     }
 
     public function filterMbox($search_object)

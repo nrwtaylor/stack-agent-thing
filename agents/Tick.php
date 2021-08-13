@@ -42,9 +42,7 @@ class Tick extends Agent
             $this->thing,
             "variables tick " . $this->from
         );
-        $this->current_time = $this->thing->json->time();
-
-        $this->thing->json->setField("variables");
+        $this->current_time = $this->thing->time();
 
         $max_tick_count =
             $this->thing->container['api']['tick']['default_max_tick_count'];
@@ -145,14 +143,12 @@ class Tick extends Agent
      */
     function set()
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["tick", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
 
-        $this->thing->json->writeVariable(["tick", "count"], $this->tick_count);
+        $this->thing->Write(["tick", "count"], $this->tick_count);
 
         $this->variables->setVariable("count", $this->tick_count);
         $this->variables->setVariable("refreshed_at", $this->current_time);

@@ -48,28 +48,25 @@ class Librex extends Word
         );
         //$this->librex_name = $this->previous_librex_name;
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "librex",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["librex", "refreshed_at"],
                 $time_string
             );
         }
-
-        //        $this->librex_name = $this->thing->json->readVariable( array("proword", "librex") );
 
         if (!isset($this->librex_name) or $this->librex_name == false) {
             $this->librex_name = $this->default_librex_name;
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "librex",
             "reading",
         ]);
@@ -86,7 +83,7 @@ class Librex extends Word
 
         $this->librex_variables->setVariable("librex", $this->librex_name);
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["librex", "reading"],
             $this->has_matches
         );

@@ -16,7 +16,7 @@ class Damage extends Agent
             $this->thing,
             "variables " . "damage " . $this->from
         );
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->damage_budget = $this->default_damage_budget;
         $this->time_budget = $this->default_damage_budget; // because it takes time to destroy things //ms

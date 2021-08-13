@@ -46,16 +46,14 @@ class Picanic extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "picanic",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["picanic", "refreshed_at"],
                 $time_string
             );
@@ -63,12 +61,11 @@ class Picanic extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["picanic", "nom"])
+            $this->thing->Read(["picanic", "nom"])
         );
-        $this->number = $this->thing->json->readVariable(["picanic", "number"]);
-        $this->suit = $this->thing->json->readVariable(["picanic", "suit"]);
+        $this->number = $this->thing->Read(["picanic", "number"]);
+        $this->suit = $this->thing->Read(["picanic", "suit"]);
 
         // Maintain a stack variable
         // For the maximum number of ants that can be tolerated this round.
@@ -619,12 +616,12 @@ class Picanic extends Agent
         ) {
             $this->readSubject();
 
-            $this->thing->json->writeVariable(["picanic", "nom"], $this->nom);
-            $this->thing->json->writeVariable(
+            $this->thing->Write(["picanic", "nom"], $this->nom);
+            $this->thing->Write(
                 ["picanic", "number"],
                 $this->number
             );
-            $this->thing->json->writeVariable(["picanic", "suit"], $this->suit);
+            $this->thing->Write(["picanic", "suit"], $this->suit);
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',

@@ -58,7 +58,7 @@ class Tallygraph
         $this->word = $thing->container['stack']['word'];
         $this->email = $thing->container['stack']['email'];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
 		$this->node_list = array("tallycounter");
 
@@ -88,19 +88,17 @@ class Tallygraph
     function set()
     {
 
-        $this->thing->json->setField("variables");
-
-//        $this->thing->json->writeVariable(array("tallycounter",
+//        $this->thing->Write(array("tallycounter",
 //            "count"),  $this->count
 //            );
 
-//        $this->thing->json->writeVariable(array("tallycounter",
+//        $this->thing->Write(array("tallycounter",
 //            "display"),  $this->display
 //            );
 
 
-//        $this->thing->json->writeVariable(array("tallycounter",
-//            "refreshed_at"),  $this->thing->json->time()
+//        $this->thing->Write(array("tallycounter",
+//            "refreshed_at"),  $this->thing->time()
 //            );
 
 
@@ -296,11 +294,10 @@ return;
 
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
 
         $this->variables_agent = "tallycounter";
 
-        $this->variables_thing->$variable = $this->variables_thing->json->readVariable( array($this->variables_agent, $variable) );
+        $this->variables_thing->$variable = $this->variables_thing->Read( array($this->variables_agent, $variable) );
 
         // And then load it into the thing
 //        $this->$variable = $this->variables_thing->$variable;
@@ -323,8 +320,7 @@ return;
         $this->variables_thing->$variable = $value;
 
         $this->variables_thing->db->setFrom($this->identity);
-        $this->variables_thing->json->setField("variables");
-        $this->variables_thing->json->writeVariable( array($this->variables_agent, $variable), $value );
+        $this->variables_thing->Write( array($this->variables_agent, $variable), $value );
 
         return $this->variables_thing->$variable;
     }

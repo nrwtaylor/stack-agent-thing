@@ -82,22 +82,21 @@ class Chinese extends Agent
      */
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "chinese",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["chinese", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "chinese",
             "reading",
         ]);
@@ -114,7 +113,7 @@ class Chinese extends Agent
 
         $this->reading = $this->chinese;
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["chinese", "reading"],
             $this->reading
         );

@@ -21,17 +21,15 @@ class Grep extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "grep",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
     }
 

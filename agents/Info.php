@@ -103,8 +103,7 @@ class Info extends Agent
     public function respondRespose()
     {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["info", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );

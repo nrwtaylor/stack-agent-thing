@@ -30,22 +30,21 @@ class Wordgame extends Agent
 
         $this->keywords = [];
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "word",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["word", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->search_words = $this->thing->json->readVariable([
+        $this->search_words = $this->thing->Read([
             "word",
             "letters",
         ]);
@@ -66,7 +65,7 @@ class Wordgame extends Agent
 
         $this->getLetters();
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["word", "letters"],
             $this->search_words
         );
@@ -94,14 +93,13 @@ class Wordgame extends Agent
 
     function set()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["wordgame", "letters"],
             $this->search_words
         );
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["wordgame", "refreshed_at"],
             $time_string
         );

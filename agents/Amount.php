@@ -124,10 +124,9 @@ class Amount extends Agent
 
     function set()
     {
-        $this->thing->json->setField("settings");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["amount", "received_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

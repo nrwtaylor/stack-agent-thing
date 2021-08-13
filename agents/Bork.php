@@ -34,14 +34,12 @@ class Bork extends Agent
         $this->message = $this->requested_agent;
         $this->sms_message = $this->requested_agent;
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["bork", "requested_agent"],
             $this->requested_agent
         );
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["bork", "refreshed_at"],
             $time_string
         );

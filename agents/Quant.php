@@ -14,27 +14,26 @@ class Quant extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(["quant", "significance"], $this->significance);
+        $this->thing->Write(["quant", "significance"], $this->significance);
     }
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "quant",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["quant", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->significance = $this->thing->json->readVariable(["quant", "significance"]);
+        $this->significance = $this->thing->Read(["quant", "significance"]);
     }
 
     function extractQuants($message = null)

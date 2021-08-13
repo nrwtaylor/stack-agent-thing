@@ -33,26 +33,23 @@ class Chatbot extends Agent
     public function get() {
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("chatbot", "refreshed_at") );
+        $time_string = $this->thing->Read( array("chatbot", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("chatbot", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("chatbot", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
 
-        $this->thing->json->setField("variables");
-        $this->name = strtolower($this->thing->json->readVariable( array("chatbot", "name") ));
+        $this->name = strtolower($this->thing->Read( array("chatbot", "name") ));
     }
 
     public function set() {
 
         if ( ($this->name == false) ) {
-            $this->thing->json->writeVariable( array("chatbot", "name"), $this->name );
+            $this->thing->Write( array("chatbot", "name"), $this->name );
             $this->thing->log($this->agent_prefix . ' completed read.', "OPTIMIZE") ;
         }
 

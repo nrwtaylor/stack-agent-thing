@@ -28,21 +28,18 @@ class Pain extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "pain",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $this->pain_score = $this->thing->json->readVariable([
+        $this->pain_score = $this->thing->Read([
             "pain",
             "pain_score",
         ]);
@@ -138,8 +135,7 @@ class Pain extends Agent
 
             $pain_thing = new Thing($thing['uuid']);
 
-            $pain_thing->json->setField("variables");
-            $pain_score = $pain_thing->json->readVariable([
+            $pain_score = $pain_thing->Read([
                 "pain",
                 "pain_score",
             ]);
@@ -196,13 +192,12 @@ class Pain extends Agent
 
         if ($this->pain_score != null) {
             // Then this Thing has no group information
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["pain", "refreshed_at"],
                 $time_string
             );
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["pain", "pain_score"],
                 $this->pain_score
             );

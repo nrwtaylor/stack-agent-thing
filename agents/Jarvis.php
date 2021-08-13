@@ -50,15 +50,13 @@ class Jarvis extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["jarvis", "requested_agent"],
             $this->requested_agent
         );
 
-        $this->thing->json->setField("variables");
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["jarvis", "refreshed_at"],
             $time_string
         );

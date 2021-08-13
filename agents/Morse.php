@@ -78,22 +78,21 @@ class Morse extends Agent
      */
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "morse",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["morse", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(["morse", "reading"]);
+        $this->reading = $this->thing->Read(["morse", "reading"]);
     }
 
     /**
@@ -101,7 +100,7 @@ class Morse extends Agent
      */
     function set()
     {
-        $this->thing->json->writeVariable(["morse", "reading"], $this->reading);
+        $this->thing->Write(["morse", "reading"], $this->reading);
     }
 
     /**
@@ -714,7 +713,7 @@ class Morse extends Agent
         $this->makeWeb();
 
         $this->reading = $this->morse;
-        $this->thing->json->writeVariable(["morse", "reading"], $this->reading);
+        $this->thing->Write(["morse", "reading"], $this->reading);
 
         return $this->thing_report;
     }
