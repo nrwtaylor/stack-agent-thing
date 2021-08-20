@@ -97,6 +97,12 @@ class Database
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
+        // Get let of stacks
+        $this->stacks = ["mysql"=>['infrastructure'=>'mysql'], "mongo"=>['infrastructure'=>'mysql'], "memory"=>['infrastructure'=>'mysql']];
+        if (isset($settings["settings"]["stacks"])) {
+            $this->stacks = $settings['settings']['stacks'];
+        }
+
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 
@@ -116,24 +122,27 @@ class Database
             $this->get_prior = $settings["settings"]["stack"]["get_prior"];
         }
 
-        $this->available_services = [];
-        $this->service_handlers = [];
+        $this->available_stacks = [];
+        $this->stack_handlers = [];
 
-        $this->candidate_services = ["mysql", "mongo", "memory"];
+        $this->candidate_stacks = $this->stacks;
 
-        foreach ($this->candidate_services as $i => $candidate_service) {
+        foreach ($this->candidate_stacks as $candidate_service_name => $candidate_service) {
             $handler = $this->connectDatabase($candidate_service);
 
             if ($handler !== true) {
-                $this->available_services[] = $candidate_service;
-                $this->service_handlers[$candidate_service] = $handler;
+                $this->available_stacks[$candidate_service_name] = $candidate_service;
+                $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
 
-        $this->active_services = $this->available_services;
+        $this->active_stacks = $this->available_stacks;
 
-        $this->service = $this->available_services[0];
-        $this->service_handler = $this->service_handlers[$this->service];
+        $primary_stack = reset($this->available_stacks);
+        $primary_stack_name = key($this->available_stacks);
+
+        $this->stack = $this->available_stacks[$primary_stack_name];
+        $this->stack_handler = $this->stack_handlers[$primary_stack_name];
 
         $this->container = new \Slim\Container($settings);
 
@@ -214,9 +223,10 @@ class Database
     // If it is provide a handler.
     // Otherwise return true.
 
-    function connectDatabase($service_name)
+    function connectDatabase($stack)
     {
-        $agent_class_name = ucwords($service_name);
+        $agent_name = $stack['infrastructure'];
+        $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
 
@@ -231,7 +241,17 @@ class Database
             $handler->get_prior = $this->get_prior;
 
             $handler->init();
-            $service = $service_name;
+
+if (isset($stack['host'])) {
+$handler->host = $stack['host'];
+}
+
+if (isset($stack['pass'])) {
+$handler->pass = $stack['pass'];
+}
+if (isset($stack['user'])) {
+$handler->user = $stack['user'];
+}
             return $handler;
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
@@ -316,16 +336,11 @@ class Database
      */
     function priorGet($created_at = null)
     {
-        //if ($this->service == "mysql") {
-        //$thingreport = $this->mysql_handler->priorGet($created_at);
-        //}
-        //return $thingreport;
-
         if ($this->get_prior === false) {
             $thingreport = [
                 "thing" => false,
                 "info" => "Prior get is off for this stack.",
-                "help" => "No help available.",
+                "help" => "Now help available.",
             ];
 
             return $thingreport;
@@ -409,25 +424,22 @@ class Database
      */
     public function writeField($field_text, $string_text)
     {
-        //if ($this->service_handler == null) {
-        //    return true;
-        //}
-        foreach ($this->active_services as $i => $active_service) {
+        foreach ($this->active_stacks as $active_service_name => $active_service) {
 
-        if ($active_service == "mysql") {
-            $this->service_handlers["mysql"]->writeField(
+        if ($active_service_name == "mysql") {
+            $this->stack_handlers["mysql"]->writeField(
                 $field_text,
                 $string_text
             );
         }
 /*
         if ($active_service == "mongo") {
-            $key = $this->service_handlers["mongo"]->setMongo($key, $value);
+            $key = $this->stack_handlers["mongo"]->setMongo($key, $value);
             if ($key === true) {return true;}
         }
 
         if ($active_service == "memory") {
-            $memory = $this->service_handlers["memory"]->set($key, $value);
+            $memory = $this->stack_handlers["memory"]->set($key, $value);
 
             if ($memory === false) {
                 return true;
@@ -447,12 +459,12 @@ class Database
      */
     function count()
     {
-        if ($this->service_handler == null) {
+        if ($this->stack_handler == null) {
             return true;
         }
         $thingreport = true;
-        if ($this->service == "mysql") {
-            $thingreport = $this->service_handler->countMysql();
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thingreport = $this->stack_handler->countMysql();
         }
         return $thingreport;
     }
@@ -485,8 +497,8 @@ class Database
     function Create($subject, $to)
     {
         $response = false;
-        if ($this->service == "mysql") {
-            $response = $this->service_handler->createMysql($subject, $to);
+        if ($this->stack['infrastructure'] == "mysql") {
+            $response = $this->stack_handler->createMysql($subject, $to);
         }
         return $response;
     }
@@ -501,16 +513,47 @@ class Database
         // Chance of collision super-super-small.
 
         // So just return the contents of thing.  false if it doesn't exist.
-        //$mysql_handler =  new Mysql(null,null);
-        //$thing = $mysql_handler->getMysql();
+
+        // Get first available.
 
         $thing = false;
-        if ($this->service == "mysql") {
-            $thing = $this->service_handler->getMysql();
+
+        foreach($this->available_stacks as $stack_name=>$stack) {
+
+switch ($stack['infrastructure']) {
+    case 'mysql':
+            $thing = $this->stack_handler->getMysql();
+        break 2;
+    case 'mongo':
+        echo "i equals 1";
+        break 2;
+    case 'memory':
+            $t = $this->stack_handler->getMemory($this->uuid);
+            if ($t !== false) {
+                $thing = new Thing(null);
+                $thing->created_at = null;
+                $thing->nom_to = null;
+                $thing->nom_from = null;
+                $thing->task = "empty task";
+                $thing->variables = json_encode($t, true);
+                $thing->settings = null;
+            }
+
+        break 2;
+}
+
+
         }
 
-        if ($this->service == "memory") {
-            $t = $this->service_handler->getMemory($this->uuid);
+/*
+        $thing = false;
+
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing = $this->stack_handler->getMysql();
+        }
+
+        if ($this->stack['infrastructure'] == "memory") {
+            $t = $this->stack_handler->getMemory($this->uuid);
 
             if ($t !== false) {
                 $thing = new Thing(null);
@@ -522,7 +565,7 @@ class Database
                 $thing->settings = null;
             }
         }
-
+*/
         $thingreport = [
             "thing" => $thing,
             "info" =>
@@ -531,8 +574,6 @@ class Database
                 "api/thing/<32 characters>.",
             "help" => "Check your junk/spam folder.",
         ];
-
-        $this->test();
 
         return $thingreport;
     }
@@ -609,22 +650,22 @@ class Database
     function Forget()
     {
         $thing_reports = [];
-        foreach ($this->active_services as $i => $active_service) {
-            if ($active_service == "mysql") {
+        foreach ($this->active_stacks as $active_service_name => $active_service) {
+            if ($active_service_name == "mysql") {
                 $thing_reports[
-                    $active_service
-                ] = $this->service_handler->forgetMysql($this->uuid);
+                    $active_service_name
+                ] = $this->stack_handler->forgetMysql($this->uuid);
             }
 
-            if ($active_service == "mongo") {
+            if ($active_service_name == "mongo") {
                 $thing_reports[
-                    $active_service
-                ] = $this->service_handler->forgetMongo($this->uuid);
+                    $active_service_name
+                ] = $this->stack_handler->forgetMongo($this->uuid);
             }
 
-            if ($active_service == "memory") {
-                $memory = $this->service_handler->setMemory($this->uuid, null);
-                $thing_reports[$active_service] = [
+            if ($active_service_name == "memory") {
+                $memory = $this->stack_handler->setMemory($this->uuid, null);
+                $thing_reports[$active_service_name] = [
                     "info" => "That thing was forgotten.",
                     "error" => $memory,
                 ];
@@ -677,8 +718,8 @@ class Database
             "help" => "Finds associated things.",
         ];
 
-        if ($this->service == "mysql") {
-            $thing_report = $this->service_handlers[
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing_report = $this->stack_handlers[
                 "mysql"
             ]->associationsearchMysql($value, $max);
         }
@@ -1555,12 +1596,12 @@ class Database
             "whatisthis" => "The maximum length of the variables field.",
         ];
 
-        if ($this->service_handler == null) {
+        if ($this->stack_handler == null) {
             return $thing_report;
         }
 
-        if ($this->service == "mysql") {
-            $thing_report = $this->service_handler->lengthMysql();
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing_report = $this->stack_handler->lengthMysql();
         }
 
         return $thing_report;
@@ -1579,12 +1620,12 @@ class Database
             "help" => "It is up to you what you do with these.",
         ];
 
-        if ($this->service_handler == null) {
+        if ($this->stack_handler == null) {
             return $thing_report;
         }
 
-        if ($this->service == "mysql") {
-            $thing_report = $this->service_handler->connectionsMysql();
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing_report = $this->stack_handler->connectionsMysql();
         }
 
         return $thing_report;
@@ -1604,12 +1645,12 @@ class Database
             "help" => "It is up to you what you do with these.",
         ];
 
-        if ($this->service_handler == null) {
+        if ($this->stack_handler == null) {
             return $thing_report;
         }
 
-        if ($this->service == "mysql") {
-            $thing_report = $this->service_handler->randomMysql($nom_from, $n);
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing_report = $this->stack_handler->randomMysql($nom_from, $n);
         }
 
         return $thing_report;
@@ -1630,12 +1671,12 @@ class Database
             "help" => "It is up to you what you do with these.",
         ];
 
-        if ($this->service_handler == null) {
+        if ($this->stack_handler == null) {
             return $thing_report;
         }
 
-        if ($this->service == "mysql") {
-            $thing_report = $this->service_handler->randomnMysql($nom_from, $n);
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing_report = $this->stack_handler->randomnMysql($nom_from, $n);
         }
 
         return $thing_report;
@@ -1661,12 +1702,12 @@ class Database
             "help" => "It is up to you what you do with these.",
         ];
 
-        if ($this->service_handler == null) {
+        if ($this->stack_handler == null) {
             return $thing_report;
         }
 
-        if ($this->service == "mysql") {
-            $thing_report = $this->service_handler->reminderMysql(
+        if ($this->stack['infrastructure'] == "mysql") {
+            $thing_report = $this->stack_handler->reminderMysql(
                 $nom_from,
                 $task_exclusions,
                 $nom_to_exclusions
