@@ -525,7 +525,6 @@ switch ($stack['infrastructure']) {
             $thing = $this->stack_handler->getMysql();
         break 2;
     case 'mongo':
-        echo "i equals 1";
         break 2;
     case 'memory':
             $t = $this->stack_handler->getMemory($this->uuid);
@@ -734,8 +733,36 @@ switch ($stack['infrastructure']) {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function variableSearch($path, $value, $max = null)
+    public function variableSearch($path, $value, $max = null)
     {
+
+//        $thing = false;
+/*
+        $thing_report = [];
+        $thing_report["info"] =
+                'No things found.';
+        $thing_report["things"] = [];
+
+        foreach($this->available_stacks as $stack_name=>$stack) {
+
+switch ($stack['infrastructure']) {
+    case 'mysql':
+            $thing_report = $this->stack_handler->variablesearchMysql($path, $value, $max);
+        break 2;
+    case 'mongo':
+//        break 2;
+    case 'memory':
+//        break 2;
+}
+
+
+        }
+
+return $thing_report;
+*/
+
+
+
         if ($max == null) {
             $max = 3;
         }

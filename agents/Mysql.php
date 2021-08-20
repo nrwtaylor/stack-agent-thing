@@ -661,6 +661,7 @@ echo "fopo";
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport["things"] = $things;
         } catch (\PDOException $e) {
+
             // echo "Error in PDO: ".$e->getMessage()."<br>";
             $thingreport["info"] = $e->getMessage();
             $thingreport["things"] = [];
