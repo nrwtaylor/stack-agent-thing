@@ -39,7 +39,7 @@ class From extends Agent
 
     public function countFrom() {
 
-        $things = $this->thing->db->fromCount();
+        $things = $this->thing->db->fromcountDatabase();
         $this->from_count = count($things);
     }
 

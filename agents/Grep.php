@@ -55,7 +55,6 @@ class Grep extends Agent
         //$this->thing->db->setUser($this->from);
         $thing_report = $this->thing->db->userSearch($text);
         $user_things = $thing_report['thing']; // Fix this discrepancy thing vs things
-
         // Or this.
         $thing_report = $this->thing->db->variableSearch(null, $text);
         $variable_things = $thing_report['things'];

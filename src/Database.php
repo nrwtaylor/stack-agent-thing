@@ -98,9 +98,13 @@ class Database
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
 
         // Get let of stacks
-        $this->stacks = ["mysql"=>['infrastructure'=>'mysql'], "mongo"=>['infrastructure'=>'mysql'], "memory"=>['infrastructure'=>'mysql']];
+        $this->stacks = [
+            "mysql" => ["infrastructure" => "mysql"],
+            "mongo" => ["infrastructure" => "mysql"],
+            "memory" => ["infrastructure" => "mysql"],
+        ];
         if (isset($settings["settings"]["stacks"])) {
-            $this->stacks = $settings['settings']['stacks'];
+            $this->stacks = $settings["settings"]["stacks"];
         }
 
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
@@ -127,11 +131,16 @@ class Database
 
         $this->candidate_stacks = $this->stacks;
 
-        foreach ($this->candidate_stacks as $candidate_service_name => $candidate_service) {
+        foreach (
+            $this->candidate_stacks
+            as $candidate_service_name => $candidate_service
+        ) {
             $handler = $this->connectDatabase($candidate_service);
 
             if ($handler !== true) {
-                $this->available_stacks[$candidate_service_name] = $candidate_service;
+                $this->available_stacks[
+                    $candidate_service_name
+                ] = $candidate_service;
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
@@ -225,7 +234,7 @@ class Database
 
     function connectDatabase($stack)
     {
-        $agent_name = $stack['infrastructure'];
+        $agent_name = $stack["infrastructure"];
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
             "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
@@ -242,16 +251,16 @@ class Database
 
             $handler->init();
 
-if (isset($stack['host'])) {
-$handler->host = $stack['host'];
-}
+            if (isset($stack["host"])) {
+                $handler->host = $stack["host"];
+            }
 
-if (isset($stack['pass'])) {
-$handler->pass = $stack['pass'];
-}
-if (isset($stack['user'])) {
-$handler->user = $stack['user'];
-}
+            if (isset($stack["pass"])) {
+                $handler->pass = $stack["pass"];
+            }
+            if (isset($stack["user"])) {
+                $handler->user = $stack["user"];
+            }
             return $handler;
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
@@ -336,6 +345,25 @@ $handler->user = $stack['user'];
      */
     function priorGet($created_at = null)
     {
+        $thingreport = [
+            "thing" => false,
+            "info" => "Prior get is off for this stack.",
+            "help" => "Now help available.",
+        ];
+
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $thingreport = $this->stack_handlers["mysql"]->priorMysql(
+                    $created_at
+                );
+                break;
+            }
+        }
+        return $thingreport;
+        /*
         if ($this->get_prior === false) {
             $thingreport = [
                 "thing" => false,
@@ -415,6 +443,7 @@ $handler->user = $stack['user'];
         // Runs in 0 to 8ms
 
         return $thingreport;
+*/
     }
 
     /**
@@ -424,15 +453,17 @@ $handler->user = $stack['user'];
      */
     public function writeField($field_text, $string_text)
     {
-        foreach ($this->active_stacks as $active_service_name => $active_service) {
-
-        if ($active_service_name == "mysql") {
-            $this->stack_handlers["mysql"]->writeField(
-                $field_text,
-                $string_text
-            );
-        }
-/*
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $this->stack_handlers["mysql"]->writeField(
+                    $field_text,
+                    $string_text
+                );
+            }
+            /*
         if ($active_service == "mongo") {
             $key = $this->stack_handlers["mongo"]->setMongo($key, $value);
             if ($key === true) {return true;}
@@ -450,7 +481,7 @@ $handler->user = $stack['user'];
             return true; // error
         }
 */
-}
+        }
     }
 
     /**
@@ -463,7 +494,7 @@ $handler->user = $stack['user'];
             return true;
         }
         $thingreport = true;
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thingreport = $this->stack_handler->countMysql();
         }
         return $thingreport;
@@ -497,7 +528,7 @@ $handler->user = $stack['user'];
     function Create($subject, $to)
     {
         $response = false;
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $response = $this->stack_handler->createMysql($subject, $to);
         }
         return $response;
@@ -518,33 +549,30 @@ $handler->user = $stack['user'];
 
         $thing = false;
 
-        foreach($this->available_stacks as $stack_name=>$stack) {
+        foreach ($this->available_stacks as $stack_name => $stack) {
+            switch ($stack["infrastructure"]) {
+                case "mysql":
+                    $thing = $this->stack_handler->getMysql();
+                    break 2;
+                case "mongo":
+                    break 2;
+                case "memory":
+                    $t = $this->stack_handler->getMemory($this->uuid);
+                    if ($t !== false) {
+                        $thing = new Thing(null);
+                        $thing->created_at = null;
+                        $thing->nom_to = null;
+                        $thing->nom_from = null;
+                        $thing->task = "empty task";
+                        $thing->variables = json_encode($t, true);
+                        $thing->settings = null;
+                    }
 
-switch ($stack['infrastructure']) {
-    case 'mysql':
-            $thing = $this->stack_handler->getMysql();
-        break 2;
-    case 'mongo':
-        break 2;
-    case 'memory':
-            $t = $this->stack_handler->getMemory($this->uuid);
-            if ($t !== false) {
-                $thing = new Thing(null);
-                $thing->created_at = null;
-                $thing->nom_to = null;
-                $thing->nom_from = null;
-                $thing->task = "empty task";
-                $thing->variables = json_encode($t, true);
-                $thing->settings = null;
+                    break 2;
             }
-
-        break 2;
-}
-
-
         }
 
-/*
+        /*
         $thing = false;
 
         if ($this->stack['infrastructure'] == "mysql") {
@@ -578,7 +606,7 @@ switch ($stack['infrastructure']) {
     }
 
     // Plan to deprecate getMemcached terminology.
-    public function getMemory($text = null)
+    public function deprecate_getMemory($text = null)
     {
         //        if (isset($this->memory)) {
         //            return;
@@ -649,7 +677,10 @@ switch ($stack['infrastructure']) {
     function Forget()
     {
         $thing_reports = [];
-        foreach ($this->active_stacks as $active_service_name => $active_service) {
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
             if ($active_service_name == "mysql") {
                 $thing_reports[
                     $active_service_name
@@ -717,7 +748,7 @@ switch ($stack['infrastructure']) {
             "help" => "Finds associated things.",
         ];
 
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handlers[
                 "mysql"
             ]->associationsearchMysql($value, $max);
@@ -735,9 +766,8 @@ switch ($stack['infrastructure']) {
      */
     public function variableSearch($path, $value, $max = null)
     {
-
-//        $thing = false;
-/*
+        //        $thing = false;
+        /*
         $thing_report = [];
         $thing_report["info"] =
                 'No things found.';
@@ -760,8 +790,6 @@ switch ($stack['infrastructure']) {
 
 return $thing_report;
 */
-
-
 
         if ($max == null) {
             $max = 3;
@@ -843,41 +871,6 @@ return $thing_report;
             $thingreport["info"] = $e->getMessage();
             $thingreport["things"] = [];
         }
-
-        $sth = null;
-
-        return $thingreport;
-    }
-
-    /**
-     *
-     * @param unknown $agent
-     * @param unknown $max   (optional)
-     * @return unknown
-     */
-    function testSearch($keyword_input)
-    {
-        $query =
-            'SELECT * FROM stack WHERE task="something something something"';
-
-        $sth = $this->container->db->prepare($query);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
-        }
-        $things = $sth->fetchAll();
-        //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
-        $thingreport = [
-            "things" => $things,
-            "info" =>
-                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            "help" => "It is up to you what you do with these.",
-            "whatisthis" =>
-                "A list of Things which match at the provided phrase.",
-        ];
 
         $sth = null;
 
@@ -976,8 +969,29 @@ return $thing_report;
         return $thingreport;
     }
 
-    function fromCount($horizon = null)
+    function fromcountDatabase($horizon = null)
     {
+        $thing_report = [
+            "thing" => false,
+            "things" => [],
+            "info" => "Did not count any things.",
+            "help" => "Counts things.",
+        ];
+
+        foreach (
+            $this->active_stacks
+            as $active_service_name => $active_service
+        ) {
+            if ($active_service_name == "mysql") {
+                $thingreport = $this->stack_handlers["mysql"]->fromcountMysql(
+                    $horizon
+                );
+                break;
+            }
+        }
+
+        return $thingreport;
+
         $query = "SELECT DISTINCT nom_from FROM stack";
 
         if ($horizon != null) {
@@ -1627,7 +1641,7 @@ return $thing_report;
             return $thing_report;
         }
 
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handler->lengthMysql();
         }
 
@@ -1651,7 +1665,7 @@ return $thing_report;
             return $thing_report;
         }
 
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handler->connectionsMysql();
         }
 
@@ -1676,7 +1690,7 @@ return $thing_report;
             return $thing_report;
         }
 
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handler->randomMysql($nom_from, $n);
         }
 
@@ -1702,7 +1716,7 @@ return $thing_report;
             return $thing_report;
         }
 
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handler->randomnMysql($nom_from, $n);
         }
 
@@ -1733,7 +1747,7 @@ return $thing_report;
             return $thing_report;
         }
 
-        if ($this->stack['infrastructure'] == "mysql") {
+        if ($this->stack["infrastructure"] == "mysql") {
             $thing_report = $this->stack_handler->reminderMysql(
                 $nom_from,
                 $task_exclusions,

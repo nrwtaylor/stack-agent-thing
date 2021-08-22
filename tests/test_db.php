@@ -130,8 +130,8 @@ echo '<pre> test_db.php $thing3->uuid: '; print_r($thing2->uuid); echo '</pre>';
 
 
 
-echo "<br>";
-echo "Test 2: Test priorGet with two items";
+echo "/n";
+echo "Test 2: Test priorGet with two items/n";
 
 
 $thing1 = new Thing(null);
@@ -172,11 +172,11 @@ if($thing1->uuid == $prior_uuid) {
 
 	//echo '<pre> thingtest.php thing1: '; print_r($thing1->uuid); echo '</pre>';
 
-echo '<pre> test_db.php $prior_uuid: '; print_r($prior_uuid); echo '</pre>';
-echo '<pre> test_db.php $thing3->uuid: '; print_r($thing2->uuid); echo '</pre>';
+echo 'test_db.php $prior_uuid: '; print_r($prior_uuid); echo '/n';
+echo 'test_db.php $thing3->uuid: '; print_r($thing2->uuid); echo '/n';
 
-	echo '<pre> thingtest.php thing1: '; print_r($thing1->uuid); echo '</pre>';
-	echo '<pre> thingtest.php thing2: '; print_r($thing2->uuid); echo '</pre>';
+	echo 'thingtest.php thing1: '; print_r($thing1->uuid); echo '/n';
+	echo 'thingtest.php thing2: '; print_r($thing2->uuid); echo '/n';
 
 	}
 

@@ -713,41 +713,6 @@ echo "fopo";
      * @param unknown $max   (optional)
      * @return unknown
      */
-    function testSearch($keyword_input)
-    {
-        $query =
-            'SELECT * FROM stack WHERE task="something something something"';
-
-        $sth = $this->pdo->prepare($query);
-
-        try {
-            $sth->execute();
-        } catch (\PDOException $e) {
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'testSearch ' . $e->getMessage());
-        }
-        $things = $sth->fetchAll();
-        //        $thingreport = array('things' => $things, 'info' => 'So here are Things with the phrase you provided in \$variables. That\'s what y$
-        $thingreport = [
-            "things" => $things,
-            "info" =>
-                'So here are Things with the phrase you provided in \$variables. That\'s what you wanted.',
-            "help" => "It is up to you what you do with these.",
-            "whatisthis" =>
-                "A list of Things which match at the provided phrase.",
-        ];
-
-        $sth = null;
-
-        return $thingreport;
-    }
-
-    /**
-     *
-     * @param unknown $agent
-     * @param unknown $max   (optional)
-     * @return unknown
-     */
     function subjectSearch($keyword_input, $agent, $max, $mode = null)
     {
         $user_search = $this->from;
@@ -834,7 +799,7 @@ echo "fopo";
         return $thingreport;
     }
 
-    function fromCount($horizon = null)
+    function fromcountMysql($horizon = null)
     {
         $query = "SELECT DISTINCT nom_from FROM stack";
 

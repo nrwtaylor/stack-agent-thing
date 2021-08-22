@@ -945,7 +945,7 @@ class Crow extends Agent
         $posterior_thing = $thingreport['thing'];
 
         $haystack .= json_encode($posterior_thing);
-
+var_dump($haystack);
         // But use this one.
         preg_match_all('/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/', $haystack, $matches);
 

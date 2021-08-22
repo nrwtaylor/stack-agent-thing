@@ -75,7 +75,7 @@ class Channel extends Agent
 
     public function countChannels()
     {
-        $things = $this->thing->db->fromCount();
+        $things = $this->thing->db->fromcountDatabase();
 
         $channel_count = count($things);
         return $channel_count;
