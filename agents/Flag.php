@@ -26,6 +26,7 @@ class Flag extends Agent
         // Get some stuff from the stack which will be helpful.
 
         $this->link = $this->web_prefix . "thing/" . $this->uuid . "/flag";
+        $this->flag_lexicons = ["nautical", "colour"];
 
         $this->refreshed_at = null;
 
@@ -87,6 +88,10 @@ class Flag extends Agent
         $flags_lexicon = [];
         $this->flags_resource[$lexicon_name] =
             "flag/" . $lexicon_name . "-flags.php";
+
+if (!file_exists($this->flags_resource[$lexicon_name])) {return false;}
+
+
         $flags = require $this->resource_path .
             $this->flags_resource[$lexicon_name];
 
@@ -165,8 +170,10 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
             return true;
         }
 
+        if (!isset($this->flags_lexicon)) {return false;}
+
         $tokens = explode(" ", $text);
-        $lexicons = ["nautical", "colour"];
+        $lexicons = $this->flag_lexicons;
         $matches = [];
         foreach ($tokens as $i => $token) {
             foreach ($lexicons as $i => $lexicon_name) {
@@ -200,6 +207,8 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
 
         $flag_slugs = $this->extractFlags($text);
 
+        if ($flag_slugs === false) {return false;}
+
         if (count($flag_slugs) == 1) {
             return $flag_slugs[0];
         }
@@ -219,8 +228,11 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
             $flag = $this->state;
         }
         $matches = [];
+
+if (isset($this->flags_lexicon)) {
+foreach ($this->flag_lexicons as $i=>$flag_lexicon) {
         foreach (
-            $this->flags_lexicon["nautical"]
+            $this->flags_lexicon[$flag_lexicon]
             as $flag_slug => $flag_descriptor
         ) {
             if (!is_string($flag_slug)) {
@@ -230,6 +242,8 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
                 $matches[] = $flag_slug;
             }
         }
+}
+}
 
         if (count($matches) == 1) {
             return true;

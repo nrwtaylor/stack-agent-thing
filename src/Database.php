@@ -147,11 +147,16 @@ class Database
 
         $this->active_stacks = $this->available_stacks;
 
+$this->stack = false;
+$this->stack_handler = false;
+if (count($this->available_stacks) > 0) {
+
         $primary_stack = reset($this->available_stacks);
         $primary_stack_name = key($this->available_stacks);
 
         $this->stack = $this->available_stacks[$primary_stack_name];
         $this->stack_handler = $this->stack_handlers[$primary_stack_name];
+}
 
         $this->container = new \Slim\Container($settings);
 
