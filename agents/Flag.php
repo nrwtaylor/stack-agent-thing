@@ -89,8 +89,9 @@ class Flag extends Agent
         $this->flags_resource[$lexicon_name] =
             "flag/" . $lexicon_name . "-flags.php";
 
-if (!file_exists($this->flags_resource[$lexicon_name])) {return false;}
-
+        if (!file_exists($this->flags_resource[$lexicon_name])) {
+            return false;
+        }
 
         $flags = require $this->resource_path .
             $this->flags_resource[$lexicon_name];
@@ -170,7 +171,9 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
             return true;
         }
 
-        if (!isset($this->flags_lexicon)) {return false;}
+        if (!isset($this->flags_lexicon)) {
+            return false;
+        }
 
         $tokens = explode(" ", $text);
         $lexicons = $this->flag_lexicons;
@@ -207,7 +210,9 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
 
         $flag_slugs = $this->extractFlags($text);
 
-        if ($flag_slugs === false) {return false;}
+        if ($flag_slugs === false) {
+            return false;
+        }
 
         if (count($flag_slugs) == 1) {
             return $flag_slugs[0];
@@ -229,21 +234,21 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
         }
         $matches = [];
 
-if (isset($this->flags_lexicon)) {
-foreach ($this->flag_lexicons as $i=>$flag_lexicon) {
-        foreach (
-            $this->flags_lexicon[$flag_lexicon]
-            as $flag_slug => $flag_descriptor
-        ) {
-            if (!is_string($flag_slug)) {
-                $flag_slug = chr($flag_slug);
-            }
-            if (strpos($this->getSlug($flag), $flag_slug) !== false) {
-                $matches[] = $flag_slug;
+        if (isset($this->flags_lexicon)) {
+            foreach ($this->flag_lexicons as $i => $flag_lexicon) {
+                foreach (
+                    $this->flags_lexicon[$flag_lexicon]
+                    as $flag_slug => $flag_descriptor
+                ) {
+                    if (!is_string($flag_slug)) {
+                        $flag_slug = chr($flag_slug);
+                    }
+                    if (strpos($this->getSlug($flag), $flag_slug) !== false) {
+                        $matches[] = $flag_slug;
+                    }
+                }
             }
         }
-}
-}
 
         if (count($matches) == 1) {
             return true;
@@ -268,10 +273,7 @@ foreach ($this->flag_lexicons as $i=>$flag_lexicon) {
 
     public function get()
     {
-        $this->head_code = $this->thing->Read([
-            "headcode",
-            "head_code",
-        ]);
+        $this->head_code = $this->thing->Read(["headcode", "head_code"]);
 
         $flag_variable_name = "_" . $this->head_code;
 

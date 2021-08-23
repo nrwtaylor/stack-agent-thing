@@ -1,28 +1,35 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Stack extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
-
         $this->default_state = "off";
         $this->state = $this->default_state;
 
         $this->node_list = ["stack" => ["agent", "thing"], "null" => ["stack"]];
 
+        $this->stack_uuid = false;
+        if (isset($this->thing->container["stack"]["uuid"])) {
+            $this->stack_uuid = $this->thing->container["stack"]["uuid"];
+        }
+
+        $this->stack_word = false;
+        if (isset($this->thing->container["stack"]["word"])) {
+            $this->stack_word = $this->thing->container["stack"]["word"];
+        }
     }
 
-    public function run() {
-
+    public function run()
+    {
         $this->countStack();
-
     }
 
     function resetStack()
@@ -56,7 +63,7 @@ class Stack extends Agent
         $this->stack->setVariable("identity", $this->identity);
 
         $this->thing->log(
-            $this->agent_prefix . 'set Stack to ' . $this->state,
+            $this->agent_prefix . "set Stack to " . $this->state,
             "INFORMATION"
         );
     }
@@ -93,7 +100,7 @@ class Stack extends Agent
         }
 
         $this->thing->log(
-            $this->agent_prefix . 'got from db ' . $this->previous_state,
+            $this->agent_prefix . "got from db " . $this->previous_state,
             "INFORMATION"
         );
 
@@ -112,9 +119,9 @@ class Stack extends Agent
 
         $this->thing->log(
             $this->agent_prefix .
-                'got a ' .
+                "got a " .
                 strtoupper($this->state) .
-                ' FLAG.',
+                " FLAG.",
             "INFORMATION"
         );
 
@@ -181,24 +188,22 @@ class Stack extends Agent
 
         $thing_report = $this->thing->json->jsontoArray($thing_json);
 
-        
-        if ((!isset($thing_report['thing'])) or ($thing_report['thing'] == null)) {
+        if (!isset($thing_report["thing"]) or $thing_report["thing"] == null) {
             $this->response .= "Thing not found. ";
             return true;
             // No thing found
         }
 
-        $thing = $thing_report['thing'];
+        $thing = $thing_report["thing"];
 
         $this->variables = $thing["variables"];
-        $this->settings = $thing['settings'];
-
+        $this->settings = $thing["settings"];
     }
 
     function variablesStack()
     {
-        $this->agent = $this->variables['agent'];
-        $this->account = $this->variables['account'];
+        $this->agent = $this->variables["agent"];
+        $this->account = $this->variables["account"];
     }
 
     function printArrayList($array, $h = null, $depth = 0)
@@ -263,7 +268,7 @@ class Stack extends Agent
 
         $w .= $this->printArrayList($settings) . "<br>";
 
-        $this->thing_report['web'] = $w;
+        $this->thing_report["web"] = $w;
     }
 
     public function makeChoices()
@@ -284,10 +289,10 @@ class Stack extends Agent
                 $this->node_list,
                 "stack"
             );
-            $choices = $this->thing->choice->makeLinks('stack');
+            $choices = $this->thing->choice->makeLinks("stack");
         }
 
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
         return;
     }
 
@@ -301,7 +306,7 @@ class Stack extends Agent
     function countStack()
     {
         $thing_report = $this->thing->db->count();
-        $this->count = $thing_report['number'];
+        $this->count = $thing_report["number"];
     }
 
     function isNumeric($number = null)
@@ -315,18 +320,17 @@ class Stack extends Agent
 
         $this->makeChoices();
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
         $this->messageStack($this->response);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['keyword'] = 'stack';
+        $this->thing_report["keyword"] = "stack";
         //$this->thing_report['info'] = 'Ping agent pinged back';
-        $this->thing_report['help'] = 'Useful for checking the stack.';
-
+        $this->thing_report["help"] = "Useful for checking the stack.";
     }
 
     function messageStack($text = null)
@@ -339,6 +343,11 @@ class Stack extends Agent
         }
     }
 
+    public function uuidStack()
+    {
+        $this->response .= "Stack UUID is " . $this->stack_uuid . ". ";
+    }
+
     function makeSMS()
     {
         $this->sms_message = "STACK";
@@ -349,10 +358,12 @@ class Stack extends Agent
         } else {
             $identity = $this->identity;
         }
-        $this->sms_message .= " | identity " . $identity;
+        $this->sms_message .= " | uuid " . $this->stack_uuid;
+        $this->sms_message .= " | word " . $this->stack_word;
+
         $this->sms_message .= " | TEXT LATENCY";
 
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     public function readSubject()

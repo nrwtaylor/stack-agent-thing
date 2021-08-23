@@ -10,7 +10,7 @@ namespace Nrwtaylor\StackAgentThing;
 class Ping extends Agent
 {
     public $var = "hello";
-private $data = 'Ping';
+    private $data = "Ping"; // becomes this->data
 
     /**
      *
@@ -24,8 +24,6 @@ private $data = 'Ping';
         }
         // I think.
         // Instead.
-
-//$this->data = null;
 
         $this->node_list = ["ping" => ["pong"]];
     }
@@ -46,62 +44,67 @@ private $data = 'Ping';
         }
     }
 
-      private function socketPing() {
-    // Create a package.
-    $type = "\x08";
-    $code = "\x00";
-    $checksum = "\x00\x00";
-    $identifier = "\x00\x00";
-    $seq_number = "\x00\x00";
-    $package = $type . $code . $checksum . $identifier . $seq_number . $this->data;
+    private function socketPing()
+    {
+        // Apparently this only works with root privilege.
 
-    // Calculate the checksum.
-    $checksum = $this->checksumPing($package);
+        // Create a package.
+        $type = "\x08";
+        $code = "\x00";
+        $checksum = "\x00\x00";
+        $identifier = "\x00\x00";
+        $seq_number = "\x00\x00";
+        $package =
+            $type . $code . $checksum . $identifier . $seq_number . $this->data;
 
-    // Finalize the package.
-    $package = $type . $code . $checksum . $identifier . $seq_number . $this->data;
+        // Calculate the checksum.
+        $checksum = $this->checksumPing($package);
 
-    // Create a socket, connect to server, then read socket and calculate.
-    if ($socket = socket_create(AF_INET, SOCK_RAW, 1)) {
-      socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
-        'sec' => 10,
-        'usec' => 0,
-      ));
-      // Prevent errors from being printed when host is unreachable.
-      @socket_connect($socket, $this->host, null);
-      $start = microtime(true);
-      // Send the package.
-      @socket_send($socket, $package, strlen($package), 0);
-      if (socket_read($socket, 255) !== false) {
-        $latency = microtime(true) - $start;
-        $latency = round($latency * 1000, 4);
-      }
-      else {
-        $latency = false;
-      }
-    }
-    else {
-      $latency = false;
-    }
-    // Close the socket.
-    socket_close($socket);
-    return $latency;
-  }
+        // Finalize the package.
+        $package =
+            $type . $code . $checksum . $identifier . $seq_number . $this->data;
 
-  private function checksumPing($data) {
-    if (strlen($data) % 2) {
-      $data .= "\x00";
-    }
+        // Create a socket, connect to server, then read socket and calculate.
+        if ($socket = socket_create(AF_INET, SOCK_RAW, 1)) {
+            socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, [
+                "sec" => 10,
+                "usec" => 0,
+            ]);
+            // Prevent errors from being printed when host is unreachable.
+            @socket_connect($socket, $this->host, null);
+            $start = microtime(true);
+            // Send the package.
+            @socket_send($socket, $package, strlen($package), 0);
+            if (socket_read($socket, 255) !== false) {
+                $latency = microtime(true) - $start;
+                $latency = round($latency * 1000, 4);
+            } else {
+                $latency = false;
+            }
+            socket_close($socket);
 
-    $bit = unpack('n*', $data);
-    $sum = array_sum($bit);
+        } else {
+            $latency = false;
+        }
 
-    while ($sum >> 16) {
-      $sum = ($sum >> 16) + ($sum & 0xffff);
+        return $latency;
     }
 
-    return pack('n*', ~$sum);
-  }
+    private function checksumPing($data)
+    {
+        if (strlen($data) % 2) {
+            $data .= "\x00";
+        }
+
+        $bit = unpack("n*", $data);
+        $sum = array_sum($bit);
+
+        while ($sum >> 16) {
+            $sum = ($sum >> 16) + ($sum & 0xffff);
+        }
+
+        return pack("n*", ~$sum);
+    }
 
     /**
      *
@@ -167,7 +170,8 @@ private $data = 'Ping';
      */
     public function readSubject()
     {
-$this->socketPing();
+        $ping_socket_latency = $this->socketPing();
+        if ($ping_socket_latency !== false) {$this->response .= "Socket latency is " . $ping_socket_latency . ". ";}
         $this->response .= "Responded to a ping. ";
     }
 }

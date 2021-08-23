@@ -137,6 +137,10 @@ class Colours extends Agent
         //}
 
         $file = $this->resource_path . $resource_name;
+        if (!file_exists($file)) {
+            $this->response .= "This stack can not see colours. ";
+            return true;
+        }
         $handle = fopen($file, "r");
         $line_number = 0;
         while (!feof($handle)) {

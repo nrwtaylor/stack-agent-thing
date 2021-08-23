@@ -99,7 +99,11 @@ class Colour extends Agent
         $target_b = hexdec(substr($hex, 4, 2));
 
         if (!isset($this->colour_names)) {
-            $this->colour_names = $this->loadColours();
+            $colour_names = $this->loadColours();
+            if ($colour_names === true) {
+                return true;
+            }
+            $this->colour_names = $colour_names;
         }
 
         $closest_distance = 1e99;
@@ -362,12 +366,14 @@ class Colour extends Agent
                 // If the text isn't an agent.
                 if ($colour === false and !$this->isAgent($filtered_input)) {
                     $colour = $this->closesttextColour($filtered_input);
-                    $this->response .=
-                        "Saw " .
-                        $colour["name"] .
-                        " might be a close match colour (" .
-                        $colour["hex"] .
-                        "). ";
+                    if ($colour != null) {
+                        $this->response .=
+                            "Saw " .
+                            $colour["name"] .
+                            " might be a close match colour (" .
+                            $colour["hex"] .
+                            "). ";
+                    }
                 }
                 $this->colour = $colour;
             }

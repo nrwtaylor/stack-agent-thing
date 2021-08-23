@@ -89,6 +89,11 @@ $socket = new Socket($this->thing, ['session_terminator'=>".", "address"=>"192.1
     }
 */
 
+    public function listenKplex() {
+
+
+    }
+
     public function respondResponse()
     {
         $this->thing->flagGreen();
