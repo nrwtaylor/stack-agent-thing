@@ -470,9 +470,14 @@ echo "fopo";
 
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
+//            $sth = $this->pdo->prepare(
+//                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
+//            );
+
             $sth = $this->pdo->prepare(
-                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
+                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, settings, variables FROM stack WHERE uuid=:uuid"
             );
+
 
             //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
             $sth->bindParam("uuid", $this->uuid);

@@ -32,7 +32,7 @@ class Database
      * @return unknown
      */
     //public function init()
-    function __construct($thing = null, $agent_input)
+    function __construct($thing = null, $agent_input = null)
     {
         //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
@@ -106,7 +106,6 @@ class Database
         if (isset($settings["settings"]["stacks"])) {
             $this->stacks = $settings["settings"]["stacks"];
         }
-
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 

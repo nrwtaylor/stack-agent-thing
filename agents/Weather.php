@@ -308,7 +308,6 @@ return true;
         } catch (\Exception $e) {
 return true;
         }
-var_dump($data);
         if ($data == false) {
             return true;
             // Invalid weather setting.
