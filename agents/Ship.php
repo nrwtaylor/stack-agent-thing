@@ -1778,7 +1778,10 @@ class Ship extends Agent
         usort($keywords, function ($a, $b) {
             $countA = $this->countNgrams($a);
             $countB = $this->countNgrams($b);
-            return $countA < $countB;
+
+            $diff = $countB - $countA;
+            return $diff;
+            //return $countA < $countB;
         });
         if ($input == null) {
             $input = $this->input;

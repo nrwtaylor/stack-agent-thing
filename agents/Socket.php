@@ -45,6 +45,43 @@ if (isset($this->agent_input['port'])) {$this->port = $this->agent_input['port']
 
     }
 
+    public function createSocket() {
+
+        $address = $this->address;
+        $port = $this->port;
+
+        if (
+            ($socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false
+        ) {
+            $this->thing->console(
+                "Couldn't create socket" .
+                    socket_strerror(socket_last_error()) .
+                    "\n"
+            );
+        }
+
+if (!socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1)) {
+    echo socket_strerror(socket_last_error($socket));
+    exit;
+} 
+
+        if (socket_bind($socket, $address, $port) === false) {
+            $this->thing->console(
+                "Bind Error " . socket_strerror(socket_last_error($socket)) . "\n"
+            );
+        }
+
+        if (socket_listen($socket, 5) === false) {
+            $this->thing->console(
+                "Listen Failed " .
+                    socket_strerror(socket_last_error($socket)) .
+                    "\n"
+            );
+        }
+
+        $this->socket = $socket;
+    }
+
     function streamSocket()
     {
         set_time_limit(0); // disable timeout
