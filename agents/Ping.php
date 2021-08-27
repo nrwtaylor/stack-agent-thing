@@ -170,8 +170,20 @@ class Ping extends Agent
      */
     public function readSubject()
     {
+        try {
         $ping_socket_latency = $this->socketPing();
-        if ($ping_socket_latency !== false) {$this->response .= "Socket latency is " . $ping_socket_latency . ". ";}
+    if ($ping_socket_latency !== false) {$this->response .= "Socket latency is " . $ping_socket_latency . ". ";}
+
+
+        } catch (\OverflowException $t) {
+            $this->response =
+                "Foo";
+        } catch (\Throwable $t) {
+            $this->response =
+                "Bar";
+
+        }
+
         $this->response .= "Responded to a ping. ";
     }
 }

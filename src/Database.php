@@ -576,27 +576,6 @@ if (count($this->available_stacks) > 0) {
             }
         }
 
-        /*
-        $thing = false;
-
-        if ($this->stack['infrastructure'] == "mysql") {
-            $thing = $this->stack_handler->getMysql();
-        }
-
-        if ($this->stack['infrastructure'] == "memory") {
-            $t = $this->stack_handler->getMemory($this->uuid);
-
-            if ($t !== false) {
-                $thing = new Thing(null);
-                $thing->created_at = null;
-                $thing->nom_to = null;
-                $thing->nom_from = null;
-                $thing->task = "empty task";
-                $thing->variables = json_encode($t, true);
-                $thing->settings = null;
-            }
-        }
-*/
         $thingreport = [
             "thing" => $thing,
             "info" =>
@@ -607,71 +586,6 @@ if (count($this->available_stacks) > 0) {
         ];
 
         return $thingreport;
-    }
-
-    // Plan to deprecate getMemcached terminology.
-    public function deprecate_getMemory($text = null)
-    {
-        //        if (isset($this->memory)) {
-        //            return;
-        //        }
-
-        // Null?
-        // $this->mem_cached = null;
-        // Fail to stack php memory code if Memcached is not availble.
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                echo "Throwable failed to make memchached server";
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-
-        $memory = $this->memory->get($text);
-        return $memory;
-    }
-
-    public function deprecate_setMemory($key, $value)
-    {
-        if (!isset($this->memory)) {
-            try {
-                $this->memory = new \Memcached(); //point 2.
-                $this->memory->addServer("127.0.0.1", 11211);
-            } catch (\Throwable $t) {
-                // Failto
-                $this->memory = new Memory($this->thing, "memory");
-                //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
-                return;
-            } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
-                return true;
-            }
-        }
-        $memory = $this->memory->set($key, $value);
-
-        if ($memory === false) {
-            return true;
-        } //error
-        if ($memory === true) {
-            return $value;
-        } // success
-        return true; // error
     }
 
     /**
@@ -707,7 +621,7 @@ if (count($this->available_stacks) > 0) {
         }
 
         // Thing report fusion?
-        // But for now.get first element
+        // But for now get first element
         $thing_report = reset($thing_reports);
 
         return $thing_report;
