@@ -874,6 +874,8 @@ public function __set($name, $value) {
 
         $contents = file_get_contents($file);
 
+        return $contents;
+
         $handle = fopen($file, "r");
 
         if ($handle) {

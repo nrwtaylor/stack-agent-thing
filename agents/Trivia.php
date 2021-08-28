@@ -242,10 +242,13 @@ $this->makeChoices();
 
     function makeSMS()
     {
-        $sms = "TRIVIA ". "\n";
+        $sms = "TRIVIA ". "";
 
+        if ($this->short_message == '') {
+        $sms .= "\n";
         $sms .= trim($this->short_message) . "\n";
-
+        }
+        $sms .= $this->response . " " ;
         $sms .= "TEXT WEB";
         // $this->response;
 
@@ -355,6 +358,11 @@ $this->makeChoices();
     {
         $this->getMessages();
 
+        if ($this->messages == null) {
+$this->response .= "No injects found. ";
+return true;
+}
+
         if ($this->inject == false) {
             $this->num = array_rand($this->messages);
             $this->inject = $this->bank . "-" . $this->num;
@@ -370,6 +378,7 @@ $this->makeChoices();
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }
+
     }
 
     public function getMessage()
