@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -11,28 +11,27 @@ class Bar extends Agent
 {
     public function init()
     {
-
         $this->state = "red"; // running
 
         $this->current_time = $this->thing->time();
 
-        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
+        $this->mail_postfix = $this->thing->container["stack"]["mail_postfix"];
 
         $this->max_bar_count = 80;
         if (
             isset(
-                $this->thing->container['api']['bar']['default_max_bar_count']
+                $this->thing->container["api"]["bar"]["default_max_bar_count"]
             )
         ) {
             $max_bar_count =
-                $this->thing->container['api']['bar']['default_max_bar_count'];
+                $this->thing->container["api"]["bar"]["default_max_bar_count"];
         }
 
         if (isset($max_bar_count) and $max_bar_count != false) {
             $this->max_bar_count = $max_bar_count;
         }
 
-        $this->thing_report['help'] =
+        $this->thing_report["help"] =
             "Counts time to " . $this->max_bar_count . " bars. Text BPM.";
 
         //        $this->response = "";
@@ -56,7 +55,7 @@ class Bar extends Agent
         foreach ($this->ticks_history as $i => $tick_history) {
             if (
                 strtotime($this->last_refreshed_at) >
-                strtotime($tick_history['refreshed_at'])
+                strtotime($tick_history["refreshed_at"])
             ) {
                 break;
             }
@@ -83,7 +82,11 @@ class Bar extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+
+            // test
+            $this->sendDiscord($this->thing_report["sms"], "Kokopelli");
+
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -109,7 +112,7 @@ class Bar extends Agent
             "refreshed_at"
         );
         $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->last_bar_count . "."
+            $this->agent_prefix . "loaded " . $this->last_bar_count . "."
         );
     }
 
@@ -132,12 +135,12 @@ class Bar extends Agent
         }
 
         $this->sms_message = $message;
-        $this->thing_report['sms'] = $message;
+        $this->thing_report["sms"] = $message;
     }
 
     function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
 
         $web = '<a href="' . $link . '">';
         // $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/flag.png">';
@@ -145,10 +148,10 @@ class Bar extends Agent
 
         $web .= "</a>";
         $web .= "<br>";
-        $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br>';
+        $web .= "<b>" . ucwords($this->agent_name) . " Agent</b><br>";
         $web .= $this->sms_message;
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function readSubject()
@@ -160,7 +163,7 @@ class Bar extends Agent
         $this->number_agent->extractNumber($this->input);
 
         $pieces = explode(" ", strtolower($input));
-        $keywords = array("advance", "reset", "maximum", "bar"); // Order important?
+        $keywords = ["advance", "reset", "maximum", "bar"]; // Order important?
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -177,17 +180,17 @@ class Bar extends Agent
     public function Perform($piece)
     {
         switch ($piece) {
-            case 'advance':
+            case "advance":
                 $this->advanceBar();
                 return;
-            case 'reset':
+            case "reset":
                 $this->resetBar();
                 return;
-            case 'maximum':
+            case "maximum":
                 $this->maxcountBar();
                 return;
 
-            case 'on':
+            case "on":
             default:
                 if ($this->number_agent->number != false) {
                     $this->bar_count = $this->number_agent->number;
@@ -246,29 +249,31 @@ class Bar extends Agent
 
         $t = $this->thing->db->agentSearch("bar", 99);
 
-        $this->ticks_history = array();
-	$things = $t['things'];
+        $this->ticks_history = [];
+        $things = $t["things"];
 
-        if ($things === false) {return;}
+        if ($things === false) {
+            return;
+        }
 
         foreach ($things as $thing_object) {
-            $variables_json = $thing_object['variables'];
+            $variables_json = $thing_object["variables"];
             $variables = $this->thing->json->jsontoArray($variables_json);
-            if (isset($variables['bar'])) {
+            if (isset($variables["bar"])) {
                 $bar_count = "X";
                 $refreshed_at = "X";
 
-                if (isset($variables['bar']['count'])) {
-                    $bar_count = $variables['bar']['count'];
+                if (isset($variables["bar"]["count"])) {
+                    $bar_count = $variables["bar"]["count"];
                 }
-                if (isset($variables['bar']['refreshed_at'])) {
-                    $refreshed_at = $variables['bar']['refreshed_at'];
+                if (isset($variables["bar"]["refreshed_at"])) {
+                    $refreshed_at = $variables["bar"]["refreshed_at"];
                 }
 
-                $this->bars_history[] = array(
+                $this->bars_history[] = [
                     "count" => $bar_count,
-                    "refreshed_at" => $refreshed_at
-                );
+                    "refreshed_at" => $refreshed_at,
+                ];
             }
         }
 
@@ -280,30 +285,32 @@ class Bar extends Agent
         $this->thing->db->setFrom("null" . $this->mail_postfix);
 
         $t = $this->thing->db->agentSearch("cron", 99);
-	$things = $t['things'];
+        $things = $t["things"];
 
-        if ($things === false) {return;}
+        if ($things === false) {
+            return;
+        }
 
-        $this->ticks_history = array();
+        $this->ticks_history = [];
         foreach ($things as $thing_object) {
-            $variables_json = $thing_object['variables'];
+            $variables_json = $thing_object["variables"];
             $variables = $this->thing->json->jsontoArray($variables_json);
 
-            if (isset($variables['tick'])) {
+            if (isset($variables["tick"])) {
                 $tick_count = "X";
                 $refreshed_at = "X";
 
-                if (isset($variables['tick']['count'])) {
-                    $tick_count = $variables['tick']['count'];
+                if (isset($variables["tick"]["count"])) {
+                    $tick_count = $variables["tick"]["count"];
                 }
-                if (isset($variables['tick']['refreshed_at'])) {
-                    $refreshed_at = $variables['tick']['refreshed_at'];
+                if (isset($variables["tick"]["refreshed_at"])) {
+                    $refreshed_at = $variables["tick"]["refreshed_at"];
                 }
 
-                $this->ticks_history[] = array(
+                $this->ticks_history[] = [
                     "count" => $tick_count,
-                    "refreshed_at" => $refreshed_at
-                );
+                    "refreshed_at" => $refreshed_at,
+                ];
             }
         }
 
@@ -316,55 +323,56 @@ class Bar extends Agent
             return false;
         }
 
+        $this->stackJob($this->bar_count);
+        return;
+
         $this->thing->log($this->agent_prefix . "called Tallycounter.");
 
         $thing = new Thing(null);
-        $thing->Create(null, "tallycounter", 's/ tallycounter message');
+        $thing->Create(null, "tallycounter", "s/ tallycounter message");
         $tallycounter = new Tallycounter(
             $thing,
-            'tallycounter message tally' . $this->mail_postfix
+            "tallycounter message tally" . $this->mail_postfix
         );
 
         $this->response .= "Did a tally count. ";
 
         $thing = new Thing(null);
-        $thing->Create(null, "watchdog", 's/ watchdog');
-        $watchdog = new Watchdog($thing, 'watchdog');
+        $thing->Create(null, "watchdog", "s/ watchdog");
+        $watchdog = new Watchdog($thing, "watchdog");
 
         $this->response .= "Called the watchdog. ";
 
         if ($this->bar_count == 0) {
             $thing = new Thing(null);
-            $thing->Create(null, "stack", 's/ stack count');
-            $stackcount = new Stack($thing, 'stack count');
+            $thing->Create(null, "stack", "s/ stack count");
+            $stackcount = new Stack($thing, "stack count");
 
             $this->response .= "Did a stack count. ";
         }
 
         if ($this->bar_count % 2 == 0) {
             $thing = new Thing(null);
-            $thing->Create(null, "latency", 's/ latency check');
-            $stackcount = new Latency($thing, 'latency check');
+            $thing->Create(null, "latency", "s/ latency check");
+            $stackcount = new Latency($thing, "latency check");
 
             $this->response .= "Checked stack latency. ";
         }
 
         if ($this->bar_count % 5 == 0) {
             $thing = new Thing(null);
-            $thing->Create(null, "manager", 's/ manager');
-            $stackcount = new Manager($thing, 'manager');
+            $thing->Create(null, "manager", "s/ manager");
+            $stackcount = new Manager($thing, "manager");
 
             $this->response .= "Checked manager. ";
         }
 
-
-
         if ($this->bar_count % 7 == 0) {
-            $arr = json_encode(array(
+            $arr = json_encode([
                 "to" => "null" . $this->mail_postfix,
                 "from" => "damage",
-                "subject" => "s/ damage Z"
-            ));
+                "subject" => "s/ damage Z",
+            ]);
 
             $client = new \GearmanClient();
             $client->addServer();
@@ -393,13 +401,13 @@ class Bar extends Agent
         $this->yellow = imagecolorallocate($this->image, 255, 239, 0);
         $this->green = imagecolorallocate($this->image, 0, 129, 31);
 
-        $this->color_palette = array($this->red, $this->yellow, $this->green);
+        $this->color_palette = [$this->red, $this->yellow, $this->green];
 
         imagefilledrectangle($this->image, 0, 0, 200, 125, $this->white);
 
         $border = 25;
 
-        $lines = array("e", "g", "b", "d", "f");
+        $lines = ["e", "g", "b", "d", "f"];
         $i = 0;
         foreach ($lines as $key => $line) {
             $x1 = 0;
@@ -446,37 +454,39 @@ class Bar extends Agent
         }
         $count_notation = $this->bar_count + 1;
 
-if (file_exists($font)) {
-        if ($count_notation != 1 or $count_notation == $this->max_bar_count) {
-            imagettftext(
-                $this->image,
-                $size,
-                $angle,
-                0 + 10,
-                110,
-                $this->black,
-                $font,
-                $count_notation
-            );
-        }
+        if (file_exists($font)) {
+            if (
+                $count_notation != 1 or
+                $count_notation == $this->max_bar_count
+            ) {
+                imagettftext(
+                    $this->image,
+                    $size,
+                    $angle,
+                    0 + 10,
+                    110,
+                    $this->black,
+                    $font,
+                    $count_notation
+                );
+            }
 
-        if (
-            $count_notation + 1 != 1 or
-            $count_notation + 1 == $this->max_bar_count + 1
-        ) {
-            imagettftext(
-                $this->image,
-                $size,
-                $angle,
-                200 - 25,
-                110,
-                $this->black,
-                $font,
-                $count_notation + 1
-            );
+            if (
+                $count_notation + 1 != 1 or
+                $count_notation + 1 == $this->max_bar_count + 1
+            ) {
+                imagettftext(
+                    $this->image,
+                    $size,
+                    $angle,
+                    200 - 25,
+                    110,
+                    $this->black,
+                    $font,
+                    $count_notation + 1
+                );
+            }
         }
-}
-
     }
 
     public function makePNG()

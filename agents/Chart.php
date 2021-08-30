@@ -68,7 +68,7 @@ class Chart extends Agent
 
     public function spreadNumbers($min, $max, $default_spread = null)
     {
-        $spread = $default_x_spread;
+        $spread = $this->default_x_spread;
         if ($spread == null) {
             if (is_numeric($min) and is_numeric($max)) {
                 $spread = $max - $min;
@@ -219,6 +219,13 @@ class Chart extends Agent
         if ($x_spread == 0) {
             return true;
         }
+
+        // The is an x signal. But no y spread.
+        if ($y_spread == 0) {
+            $y_spread = 1;
+        }
+
+
         switch (true) {
             case is_numeric($x_min) and
                 in_array(strtoupper($x_max), ["X", "Z"]):

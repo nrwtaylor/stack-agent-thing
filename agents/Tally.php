@@ -359,7 +359,7 @@ class Tally
         return $this->variables_thing->$variable;
     }
 
-    function setVariable($variable = null, $value)
+    function setVariable($variable = null, $value = null)
     {
         // Take a variable in the variables_thing and save
         // into the database.  Probably end

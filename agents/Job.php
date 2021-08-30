@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -20,20 +20,20 @@ class Job extends Agent
      */
     function init()
     {
-        $this->short_name = '<us?>';
+        $this->short_name = "<us?>";
 
-        $this->web_prefix = $this->thing->container['stack']['web_prefix'];
+        $this->web_prefix = $this->thing->container["stack"]["web_prefix"];
 
-        $this->mail_postfix = $this->thing->container['stack']['mail_postfix'];
-        $this->word = '<job?>';
-        $this->email = '<email address?>';
-        $this->entity_name = '<us?>';
+        $this->mail_postfix = $this->thing->container["stack"]["mail_postfix"];
+        $this->word = "<job?>";
+        $this->email = "<email address?>";
+        $this->entity_name = "<us?>";
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
-        $state = 'off';
-        if (isset($this->thing->container['api']['job']['state'])) {
-            $state = $this->thing->container['api']['job']['state'];
+        $state = "off";
+        if (isset($this->thing->container["api"]["job"]["state"])) {
+            $state = $this->thing->container["api"]["job"]["state"];
         }
         $this->state = $state;
 
@@ -55,7 +55,7 @@ class Job extends Agent
 
         $this->PNG();
 
-        $this->thing_report['help'] =
+        $this->thing_report["help"] =
             "Creates a unique reference for a job. Try WEB.";
     }
 
@@ -90,16 +90,42 @@ class Job extends Agent
         $this->index_png = $agent->PNG_embed;
     }
 
+    public function runJob($datagram)
+    {
+        $to = $datagram["to"];
+        $subject = $datagram["subject"];
+        $from = $datagram["from"];
+
+        if ($datagram["agent_input"] == "gearman") {
+            $arr = json_encode([
+                "to" => $to,
+                "from" => $from,
+                "subject" => $subject,
+            ]);
+
+            $client = new \GearmanClient();
+            $client->addServer();
+            $client->doLowBackground("call_agent", $arr);
+
+            return;
+        }
+
+        $this->thing->console($subject . "\n");
+
+        $thing = new Thing(null);
+        $thing->Create($from, $to, $subject);
+        $agent_handler = new Agent($thing, null);
+        $this->thing->console($agent_handler->thing_report["sms"] . "\n");
+        $this->response .= "Ran job. ";
+    }
+
     /**
      *
      */
     function set()
     {
         // Record receipt of the request.
-        $this->thing->Write(
-            ["job", "refreshed_at"],
-            $this->thing->time()
-        );
+        $this->thing->Write(["job", "refreshed_at"], $this->thing->time());
 
         $this->thing->Write(["job", "response"], $this->response);
     }
@@ -115,10 +141,10 @@ class Job extends Agent
 
         $choices = false;
 
-        $this->thing_report['email'] = $this->message;
+        $this->thing_report["email"] = $this->message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
         return $this->thing_report;
     }
@@ -205,12 +231,12 @@ class Job extends Agent
             $bbox["height"] =
                 max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
                 min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
 
             //check width of the image
             $width = imagesx($image);
             $height = imagesy($image);
-            if ($bbox['width'] < $image_width - 50) {
+            if ($bbox["width"] < $image_width - 50) {
                 break;
             }
         }
@@ -263,7 +289,7 @@ class Job extends Agent
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $this->uuid .
             '/snowflake.png" alt="look a freezing snowflake">';
 
@@ -271,7 +297,7 @@ class Job extends Agent
         $message = nl2br($message);
 
         $this->message = $message;
-        $this->thing_report['message'] = $this->message;
+        $this->thing_report["message"] = $this->message;
     }
 
     /**
@@ -346,7 +372,7 @@ class Job extends Agent
                 "privacy";
         }
 
-        $this->thing_report['txt'] = $this->txt_message;
+        $this->thing_report["txt"] = $this->txt_message;
 
         return $this->txt_message;
     }
@@ -357,7 +383,7 @@ class Job extends Agent
     function makeWeb()
     {
         $head = '<p class="description">';
-        $foot = '</p>';
+        $foot = "</p>";
 
         if (!isset($this->txt_message)) {
             $this->makeTXT();
@@ -371,7 +397,7 @@ class Job extends Agent
                 $web_message .=
                     '<img src="' .
                     $this->web_prefix .
-                    'thing/' .
+                    "thing/" .
                     $this->uuid .
                     '/index.png" alt="look a 4 digit index">';
 
@@ -380,7 +406,7 @@ class Job extends Agent
                 $web_message .=
                     '<img src="' .
                     $this->web_prefix .
-                    'thing/' .
+                    "thing/" .
                     $this->uuid .
                     '/nuuid.png" alt="look a 4 character semi-unique id">';
                 break;
@@ -388,25 +414,25 @@ class Job extends Agent
                 $web_message .=
                     '<img src="' .
                     $this->web_prefix .
-                    'thing/' .
+                    "thing/" .
                     $this->uuid .
                     '/snowflake.png" alt="look a freezing snowflake">';
         }
 
         $web_message .= "<br>";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/job.txt';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/job.txt";
         $web_message .= '<a href="' . $link . '">job.txt</a>';
         $web_message .= " | ";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/job.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/job.pdf";
         $web_message .= '<a href="' . $link . '">job.pdf</a>';
         $web_message .= " | ";
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/job.log';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/job.log";
         $web_message .= '<a href="' . $link . '">job.log</a>';
 
         $this->web_message = $head . $web_message . $foot;
-        $this->thing_report['web'] = $this->web_message;
+        $this->thing_report["web"] = $this->web_message;
     }
 
     /**
@@ -415,29 +441,34 @@ class Job extends Agent
      */
     public function makePDF()
     {
-        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf'];
+        if (
+            $this->default_pdf_page_template === null or
+            !file_exists($this->default_pdf_page_template)
+        ) {
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
         $file = $this->default_pdf_page_template;
 
-        if (!file_exists($file)) {return true;}
+        if (!file_exists($file)) {
+            return true;
+        }
 
         try {
             // initiate FPDI
             $pdf = new Fpdi\Fpdi();
 
             $pdf->setSourceFile($file);
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
-            $tplidx1 = $pdf->importPage(2, '/MediaBox');
+            $tplidx1 = $pdf->importPage(2, "/MediaBox");
             $s = $pdf->getTemplatesize($tplidx1);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
 
-            $pdf->SetFont('Helvetica', '', 12);
+            $pdf->SetFont("Helvetica", "", 12);
             $line_height = 5;
             $pdf->SetXY(16, 243);
             $pdf->MultiCell(94, $line_height, $this->response, 0);
@@ -445,19 +476,19 @@ class Job extends Agent
             switch ($this->index_type) {
                 case "index":
                     $this->getIndex();
-                    $pdf->Image($this->index_png, 5, 18, 20, 20, 'PNG');
+                    $pdf->Image($this->index_png, 5, 18, 20, 20, "PNG");
 
                     break;
                 case "nuuid":
                     $this->getNuuid();
-                    $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+                    $pdf->Image($this->nuuid_png, 5, 18, 20, 20, "PNG");
                     break;
                 default:
                     $this->getNuuid();
-                    $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+                    $pdf->Image($this->nuuid_png, 5, 18, 20, 20, "PNG");
             }
 
-            $pdf->SetFont('Helvetica', '', 12);
+            $pdf->SetFont("Helvetica", "", 12);
 
             $pdf->SetXY(20, 40);
             $pdf->MultiCell(175, 8, $this->txt_message, 0);
@@ -465,23 +496,23 @@ class Job extends Agent
             // Page 2
             $tplidx2 = $pdf->importPage(2);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
             $this->getQuickresponse(
-                $this->web_prefix . 'thing\\' . $this->uuid . '\\job'
+                $this->web_prefix . "thing\\" . $this->uuid . "\\job"
             );
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
+            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(15, 10);
-            $t = $this->thing_report['sms'];
+            $t = $this->thing_report["sms"];
 
             $line_height = 4;
 
@@ -505,14 +536,14 @@ class Job extends Agent
                 $this->entity_name;
             $pdf->MultiCell(150, $line_height, $text, 0);
 
-            $image = $pdf->Output('', 'S');
+            $image = $pdf->Output("", "S");
 
-            $this->thing_report['pdf'] = $image;
+            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            $this->thing->log('Caught exception: ' .  $e->getMessage());
+            $this->thing->log("Caught exception: " . $e->getMessage());
         }
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     /**
@@ -530,7 +561,7 @@ class Job extends Agent
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
-        $this->thing_report['png'] = $agent->image_string;
+        $this->thing_report["png"] = $agent->image_string;
     }
 
     /**
@@ -565,7 +596,7 @@ class Job extends Agent
 
         $this->sms_message = $sms;
 
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -578,8 +609,8 @@ class Job extends Agent
         // $this->state = "on";
         $input = $this->input;
         $filtered_input = strtolower($this->assert($input));
-        if ($this->state == 'on') {
-            if ($filtered_input == 'stack') {
+        if ($this->state == "on") {
+            if ($filtered_input == "stack") {
                 $manager_agent = new Manager($this->thing, "manager");
                 if ($manager_agent->queued_jobs > 100) {
                     $this->response .=
@@ -590,7 +621,7 @@ class Job extends Agent
                 }
                 //$manager->workers_running;
                 //$manager->workers_connected;
-                if ((!isset($this->jobs)) or ($this->jobs == null)) {
+                if (!isset($this->jobs) or $this->jobs == null) {
                     $this->response .= "No jobs found. ";
                     return;
                 }
@@ -600,13 +631,13 @@ class Job extends Agent
                 $datagram = [
                     "to" => "null" . $this->mail_postfix,
                     "from" => "job",
-                    "subject" => "s/ " . $job['text'],
+                    "subject" => "s/ " . $job["text"],
                 ];
 
-		$this->thing->log("spawn Thing");
+                $this->thing->log("spawn Thing");
                 $this->thing->spawn($datagram);
-		$this->thing->log("spawned " . $job['text']);
-                $this->response .= "Spawned " . $job['text'] . ". ";
+                $this->thing->log("spawned " . $job["text"]);
+                $this->response .= "Spawned " . $job["text"] . ". ";
 
                 return;
             }
@@ -619,15 +650,41 @@ class Job extends Agent
 
     public function get()
     {
-        $this->load('job/jobs.txt');
+        $contents = $this->load("job/jobs.txt");
+        $this->jobs_list = require $this->resource_path . "job/jobs.php";
+
         $this->getJobs();
+    }
+
+    public function stackJob($bar_number = null)
+    {
+        foreach ($this->jobs_list as $job_id => $job) {
+            if (intval($job["bar_count"]) == $bar_number) {
+                $this->runJob($job);
+                continue;
+            }
+
+            if (substr($job["bar_count"], 0, 1) == "%") {
+                $num = intval(ltrim($job["bar_count"], $job["bar_count"][0]));
+
+                if ($bar_number % $num == 0) {
+                    $this->runJob($job);
+                    continue;
+                }
+            }
+
+            if ($job["bar_count"] == "*") {
+                $this->runJob($job);
+                continue;
+            }
+        }
     }
 
     public function getJobs()
     {
         $this->run_jobs = [];
-        $agent_name = 'job';
-        $things = $this->getThings('job');
+        $agent_name = "job";
+        $things = $this->getThings("job");
 
         if ($things == []) {
             return true;
@@ -659,7 +716,7 @@ class Job extends Agent
         $snowflake_agent->makePNG();
         $this->PNG = $snowflake_agent->PNG;
 
-        $this->thing_report['png'] = $this->PNG;
+        $this->thing_report["png"] = $this->PNG;
 
         $response =
             '<img src="data:image/png;base64,' .
