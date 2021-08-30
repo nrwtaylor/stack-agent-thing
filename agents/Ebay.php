@@ -883,6 +883,7 @@ http://open.api.ebay.com/shopping?
         }
 
         $entries = 50;
+
         $data_source =
             $end_point .
             "?OPERATION-NAME=findItemsAdvanced&SERVICE-VERSION=1.0.1&SECURITY-APPNAME=" .
@@ -893,10 +894,36 @@ http://open.api.ebay.com/shopping?
             $global_id .
             "&paginationInput.entriesPerPage=" .
             $entries .
+            "&" .
             "itemFilter(0).name=HideDuplicateItems&" .
-            "itemFilter(0).value=true&" .
+            "itemFilter(0).value=true" .
             "&paginationInput.pageNumber=1&keywords=" .
             $keywords;
+
+
+/*
+            "itemFilter(0).name=HideDuplicateItems&" .
+            "itemFilter(0).value=true&" .
+*/
+
+
+// dev test
+// https://forums.developer.ebay.com/questions/19859/findcompleteditems-returns-unable-to-create-xml-st.html
+
+/*
+        $data_source =
+            $end_point .
+            "?OPERATION-NAME=findItemsAdvanced&SERVICE-VERSION=1.0.1&SECURITY-APPNAME=" .
+            $app_id .
+            "&RESPONSE-DATA-FORMAT=" .
+            $format .
+            "&REST-PAYLOAD=true&GLOBAL-ID=" .
+            $global_id .
+            "&paginationInput.entriesPerPage=" .
+            $entries .
+            "&paginationInput.pageNumber=1&keywords=" .
+            $keywords;
+*/
 
         // From the example.
         // . "&itemFilter(0).name=ListingType&itemFilter(0).value(0)=FixedPrice";
@@ -908,9 +935,9 @@ http://open.api.ebay.com/shopping?
         //        ini_set('default_socket_timeout', 5);
 
         $this->call = $data_source;
-
-        $data = @file_get_contents($data_source, false, $context);
-
+var_dump($data_source);
+        $data = file_get_contents($data_source, false, $context);
+var_dump($data);
         $this->ebay_daily_call_count += 1;
 
         //        ini_set('default_socket_timeout', $default_socket_timeout);
