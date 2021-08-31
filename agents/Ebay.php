@@ -935,9 +935,8 @@ http://open.api.ebay.com/shopping?
         //        ini_set('default_socket_timeout', 5);
 
         $this->call = $data_source;
-var_dump($data_source);
+
         $data = file_get_contents($data_source, false, $context);
-var_dump($data);
         $this->ebay_daily_call_count += 1;
 
         //        ini_set('default_socket_timeout', $default_socket_timeout);
@@ -1231,10 +1230,16 @@ var_dump($data);
         if ($ebay_item == null) {
             return true;
         }
-        $end_time = $ebay_item["listingInfo"]["endTime"];
 
+$end_time = null;
+if (isset($ebay_item["listingInfo"]["endTime"])) {
+$end_time = $ebay_item["listingInfo"]["endTime"];
+} else if (isset($ebay_item["listingInfo"][0]["endTime"])) {
+$end_time = $ebay_item["listingInfo"][0]["endTime"];
+}
         $available = "no";
-        if ($end_time < $this->current_time) {
+
+        if (($end_time !== null) and ($end_time < $this->current_time)) {
             $available = "yes";
         }
 
@@ -1319,7 +1324,7 @@ var_dump($data);
 
 // https://stackoverflow.com/questions/294865/how-do-i-format-a-number-to-a-dollar-amount-in-php
 // needs php intl extension
-    $formatter = new \NumberFormatter('en_US', NumberFormatter::CURRENCY);
+    $formatter = new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
     $price_text =  $formatter->formatCurrency($price, 'USD');
         }
 
