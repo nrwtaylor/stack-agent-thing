@@ -1314,7 +1314,13 @@ var_dump($data);
             $price_text = $currency_prefix . $price . $currency_postfix;
 
             // https://www.php.net/manual/en/function.money-format.php
-            $price_text = money_format("%.2n", $price);
+// Deprecated
+      //      $price_text = money_format("%.2n", $price);
+
+// https://stackoverflow.com/questions/294865/how-do-i-format-a-number-to-a-dollar-amount-in-php
+// needs php intl extension
+    $formatter = new \NumberFormatter('en_US', NumberFormatter::CURRENCY);
+    $price_text =  $formatter->formatCurrency($price, 'USD');
         }
 
         if (isset($ebay_item["sellingStatus"]["currentPrice"])) {

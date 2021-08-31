@@ -100,8 +100,8 @@ class Database
         // Get let of stacks
         $this->stacks = [
             "mysql" => ["infrastructure" => "mysql"],
-            "mongo" => ["infrastructure" => "mysql"],
-            "memory" => ["infrastructure" => "mysql"],
+            "mongo" => ["infrastructure" => "mongo"],
+            "memory" => ["infrastructure" => "memory"],
         ];
         if (isset($settings["settings"]["stacks"])) {
             $this->stacks = $settings["settings"]["stacks"];
@@ -367,87 +367,6 @@ if (count($this->available_stacks) > 0) {
             }
         }
         return $thingreport;
-        /*
-        if ($this->get_prior === false) {
-            $thingreport = [
-                "thing" => false,
-                "info" => "Prior get is off for this stack.",
-                "help" => "Now help available.",
-            ];
-
-            return $thingreport;
-        }
-
-        $nom_from = $this->from;
-        $hash_nom_from = hash($this->hash_algorithm, $nom_from);
-        $prior_uuid = $this->getMemory($hash_nom_from);
-        // Given a $uuid.  Find the previous record the $from user
-        // created.
-
-        // Review thought.  Wouldn't searching for the latest record
-        // before the time_stamp be more efficient?
-
-        // http://stackoverflow.com/questions/28451031/how-to-get-second-last-row-from-mysql-database
-        // Doesn't work in case of same time_stamp.
-        // That is acceptable.  A second resolution for creating records is
-        // likely a good limit.  Easy to upgrade by adding a 'microsecond' column to the
-        // database.
-
-        // Change to InnoDB means stack is likely now working on microsecond
-        // time quantum.
-
-        // sqlinjection commentary
-        // nom_from is a carrier provided identifier, therefore judged safe to
-        // pass by message carriers.
-        // created_at is a stack created field
-
-        if ($created_at == null) {
-            $query_string =
-                "SELECT * FROM (SELECT * FROM stack WHERE
-				(nom_from='" .
-                $this->from .
-                "' OR nom_from='" .
-                $hash_nom_from .
-                "'" .
-                ") ORDER BY created_at DESC LIMIT 2) AS t ORDER BY created_at ASC LIMIT 2";
-        } else {
-            $query_string =
-                "SELECT * FROM stack where (nom_from = '" .
-                $this->from .
-                "' OR nom_from='" .
-                $hash_nom_from .
-                "'" .
-                ") and created_at < '" .
-                $created_at .
-                "' order by created_at DESC LIMIT 3";
-        }
-        try {
-            $sth = $this->container->db->prepare($query_string);
-            $sth->execute();
-            $thing = $sth->fetchObject();
-        } catch (\Exception $e) {
-            // Devstack - decide how to handle thing full
-
-            //            $t = new Thing(null);
-            //            $t->Create("stack", "error", 'priorGet ' . $e->getMessage());
-            $thing = false;
-        }
-
-        $sth = null;
-
-        $thingreport = [
-            "thing" => $thing,
-            "info" =>
-                "Turns out it has an imperfect and forgetful memory.  But you can see what is on the stack by typing " .
-                $this->web_prefix .
-                "api/thing/<32 characters>.",
-            "help" => "Check your junk/spam folder.",
-        ];
-
-        // Runs in 0 to 8ms
-
-        return $thingreport;
-*/
     }
 
     /**
@@ -531,8 +450,9 @@ if (count($this->available_stacks) > 0) {
      */
     function Create($subject, $to)
     {
+
         $response = false;
-        if ($this->stack["infrastructure"] == "mysql") {
+        if ((isset($this->stack['infrastructure'])) and ($this->stack["infrastructure"] == "mysql")) {
             $response = $this->stack_handler->createMysql($subject, $to);
         }
         return $response;
