@@ -27,28 +27,13 @@ $worker->addFunction($name, function() use($task) {
          $result = call_user_func_array($task, func_get_args());
      } catch(\Exception $e) {
          $result = GEARMAN_WORK_EXCEPTION;
-         echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+         echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage() . "\n";
          // Send exception to Exceptional so it can be logged with details
          Exceptional::handle_exception($e, FALSE);
      }
 
      return $result;
 },$uuid);
-
-/*
-$worker->addFunction($name, function() use($task) {
-     try {
-         $result = call_user_func_array($task, func_get_args());
-     } catch(\Exception $e) {
-         $result = GEARMAN_WORK_EXCEPTION;
-         echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
-         // Send exception to Exceptional so it can be logged with details
-         Exceptional::handle_exception($e, FALSE);
-     }
-
-     return $result;
-});
-*/
 
 // This would limit the length of any one worker.
 // This is handled by supervisor
@@ -57,11 +42,11 @@ $worker->addFunction($name, function() use($task) {
 while ($worker->work()) {
     echo "\nWaiting for a job\n";
 
-//      if ($worker->returnCode() != GEARMAN_SUCCESS)
-//      {
-//        echo "return_code: " . $worker->returnCode() . "\n";
-//      }
-//        echo "\nGearman return code " . $worker->returnCode() . "\n";
+      if ($worker->returnCode() != GEARMAN_SUCCESS)
+      {
+        echo "return_code: " . $worker->returnCode() . "\n";
+      }
+        echo "\nGearman return code " . $worker->returnCode() . "\n";
 
 }
 
@@ -76,7 +61,7 @@ function call_agent_function($job)
     }
 
     if (isset($arr['uuid'])) {
-        echo "worker found uuid\n";
+        echo "worker found uuid - loading thing " . $arr['uuid'] . "\n";
         $thing = new Thing($arr['uuid'], $agent_input);
         $start_time = $thing->elapsed_runtime();
     } else {
@@ -85,6 +70,11 @@ function call_agent_function($job)
         $start_time = $thing->elapsed_runtime();
         $thing->Create($arr['to'], $arr['from'], $arr['subject']);
     }
+
+    //if ($thing->from== "17787923915") {
+    //    echo "matched number";
+    //    return true;
+    //}
 
     if ($thing->thing == false) {
         echo "Thing is false";
@@ -103,9 +93,9 @@ function call_agent_function($job)
 
         $m = $thing->db->variableSearch(null, $message_id);
 
-        var_dump(count($m['things']));
+        echo "things with message idenfifier " . $message_id . ": " . count($m['things']) . "\n";
         if (count($m['things']) > 0) {
-            echo "Found message already.";
+            echo "Found message already.\n";
             $do_not_respond = true;
         }
 
