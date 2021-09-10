@@ -93,7 +93,10 @@ class Who extends Agent
     public function readSubject()
     {
         $keywords = ["?"];
-        $input = strtolower($this->subject);
+//        $input = strtolower($this->subject);
+$input = $this->input;
+
+$this->hasPerson($input);
 
         $pieces = explode(" ", strtolower($input));
 

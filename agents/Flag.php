@@ -597,6 +597,12 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
         $this->PNG_embed = $agent->PNG_embed;
     }
 
+    public function assertFlag($text = null) {
+      if (!isset($this->flag)) {
+         $this->flag = null;
+      }
+    }
+
     public function readSubject()
     {
         //$this->response = null;

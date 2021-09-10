@@ -593,6 +593,16 @@ return $text;
         );
     }
 
+    public function hasText($haystack = null, $needle = null) {
+// https://stackoverflow.com/questions/4366730/how-do-i-check-if-a-string-contains-a-specific-word
+// a classic
+
+if (stripos($haystack, $needle) !== false) {
+    return true;
+}
+return false;
+    }
+
     public function readSubject()
     {
         if ($this->input == "text") {
