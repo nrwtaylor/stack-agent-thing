@@ -168,6 +168,7 @@ class Bar extends Agent
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     $this->Perform($piece);
+                    break 2;
                 }
             }
         }
