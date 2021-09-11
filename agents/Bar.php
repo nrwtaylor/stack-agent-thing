@@ -84,7 +84,7 @@ class Bar extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
 
             // test
-            $this->sendDiscord($this->thing_report["sms"], "Kokopelli");
+            $this->sendDiscord($this->thing_report["sms"] . " " . $this->input, "Kokopelli");
 
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
