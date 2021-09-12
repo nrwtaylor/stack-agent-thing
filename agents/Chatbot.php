@@ -82,7 +82,7 @@ class Chatbot extends Agent
         }
         $this->chatbot_names = array_unique($this->chatbot_names);
 
-        return array($this->chatbot_names);
+        return $this->chatbot_names;
     }
 
 

@@ -2000,7 +2000,6 @@ if ($pid == -1) {
             //}
         } catch (\Throwable $t) {
             restore_error_handler();
-
             $this->thing->log("caught throwable.", "WARNING");
             return false;
         } catch (\Error $ex) {
@@ -2531,6 +2530,7 @@ if ($pid == -1) {
                 }
             }
         }
+
         $uuid = new Uuid($this->thing, "uuid");
         $uuid = $uuid->extractUuid($input);
 
@@ -2621,7 +2621,6 @@ if ($pid == -1) {
 
             $matches[] = $ngram;
         }
-
         if (count($matches) == 1) {
             $this->getAgent($matches[0], $this->agent_input);
             return $this->thing_report;
@@ -3024,14 +3023,42 @@ if ($pid == -1) {
                 }
             }
         }
+
+
         // Remove references to named chatbot agents
+$chatbots = $this->extractChatbots($input);
+
         $input = $this->filterChatbots($input);
         // Remove reference to thing.
         //$input = str_replace("thing","",$input);
 
+// Currently case sensitive.
+
+if (count($chatbots) === 1) {
+
+
+$agent_class_name = ucwords($input);
+$agent_handler = $this->getAgent($agent_class_name, null);
+if ($agent_handler !== false) {
+}
+
+}
+
         // dev
         // Check whether input is expected.
         // Or not.
+/*
+        if (
+            $this->getAgent($agent_class_name, null) ===
+            false
+        ) {
+echo "FALSE";
+            //return false;
+        } else {
+echo "TRUE";
+            //return true;
+        }
+*/
 
         $input_agent = new Input($this->thing, "input");
         $input_state = $input_agent->stateInput();

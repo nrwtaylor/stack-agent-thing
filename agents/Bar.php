@@ -39,6 +39,13 @@ class Bar extends Agent
 
     public function set()
     {
+        // Important that everytime this function is called that the count gets updated
+        // to reflect the current bar.
+
+        // Why?
+
+        // Otherwise the bar count gets repeated. And that people notice.
+
         $this->variables->setVariable("count", $this->bar_count);
         $this->variables->setVariable("max_bar_count", $this->max_bar_count);
 
@@ -48,22 +55,55 @@ class Bar extends Agent
     public function run()
     {
         // devstack develop per user bar counts
-        $this->getBars();
+        //$this->getBars();
+        $this->getTicks();
+        $this->ticksBar();
+
+        $this->age = strtotime($this->current_time) - strtotime($this->last_refreshed_at);
+
+    }
+
+    public function ticksBar() {
+
+        // So the question is when was the last bar.
+        // without hearing the last bar.
+
+        // Make an assumption. And then check if we miss anything.
+        // Eventually.
+
+$bar_time = 60 * 4;
+
         $this->getTicks();
 
+        // A step to making this faster because then we can end the for loop
+        // as soon as we see it.
+
+$timestamp = $this->last_refreshed_at;
+if ($this->last_refreshed_at === false) {$timestamp = $this->current_time;}
+
+        usort($this->ticks_history, function ($a, $b) {
+            $countA = strtotime($a['refreshed_at']);
+            $countB = strtotime($b['refreshed_at']);
+
+            $diff = $countB - $countA;
+            return $diff;
+            //return $countA < $countB;
+        });
+
+        // How many ticks have there been send the last_refreshed_at time stamp.
         $count = 0;
         foreach ($this->ticks_history as $i => $tick_history) {
-            if (
-                strtotime($this->last_refreshed_at) >
-                strtotime($tick_history["refreshed_at"])
-            ) {
-                break;
+$is_new_tick = (strtotime($timestamp) - $bar_time) <
+                strtotime($tick_history["refreshed_at"]);
+//echo $tick_history["refreshed_at"] . " " . $this->last_refreshed_at . ($is_new_tick ? "NEW TICK" : "-") . "\n";
+            if ($is_new_tick)
+            {
+                $count += 1;
             }
-            $count += 1;
         }
 
         $this->tick_count = $count;
-        $this->doBar();
+
     }
 
     public function makeChoice()
@@ -80,11 +120,31 @@ class Bar extends Agent
 
         // This should be the code to handle non-matching responses.
 
+        // test
+        $t = $this->agent_input;
+        if (is_array($this->agent_input)) {
+            $t = "array";
+        }
+
+        $this->sendDiscord(
+            $this->thing_report["sms"] .
+                " " .
+                $this->input .
+                " " .
+                $t .
+                " " .
+                $this->nuuid . 
+                " " .
+                $this->link .
+                $this->last_refreshed_at. " age " . $this->age,
+            "Kokopelli"
+        );
+
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
 
             // test
-            $this->sendDiscord($this->thing_report["sms"], "Kokopelli");
+            //            $this->sendDiscord($this->thing_report["sms"], "Kokopelli");
 
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
@@ -114,6 +174,9 @@ class Bar extends Agent
         $this->thing->log(
             $this->agent_prefix . "loaded " . $this->last_bar_count . "."
         );
+
+        $this->getBars();
+
     }
 
     function makeSMS()
@@ -176,6 +239,9 @@ class Bar extends Agent
         if (!isset($this->bar_count)) {
             $this->bar_count = $this->last_bar_count;
         }
+
+        $this->doBar();
+
     }
 
     public function Perform($piece)
@@ -321,66 +387,14 @@ class Bar extends Agent
     function doBar($depth = null)
     {
         if ($this->from != "null" . $this->mail_postfix) {
+            $this->response .= "Not from null. ";
             return false;
         }
 
+        // Call stack job with the current bar,
+        // to trigger stack related jobs on file.
         $this->stackJob($this->bar_count);
-        return;
 
-        $this->thing->log($this->agent_prefix . "called Tallycounter.");
-
-        $thing = new Thing(null);
-        $thing->Create(null, "tallycounter", "s/ tallycounter message");
-        $tallycounter = new Tallycounter(
-            $thing,
-            "tallycounter message tally" . $this->mail_postfix
-        );
-
-        $this->response .= "Did a tally count. ";
-
-        $thing = new Thing(null);
-        $thing->Create(null, "watchdog", "s/ watchdog");
-        $watchdog = new Watchdog($thing, "watchdog");
-
-        $this->response .= "Called the watchdog. ";
-
-        if ($this->bar_count == 0) {
-            $thing = new Thing(null);
-            $thing->Create(null, "stack", "s/ stack count");
-            $stackcount = new Stack($thing, "stack count");
-
-            $this->response .= "Did a stack count. ";
-        }
-
-        if ($this->bar_count % 2 == 0) {
-            $thing = new Thing(null);
-            $thing->Create(null, "latency", "s/ latency check");
-            $stackcount = new Latency($thing, "latency check");
-
-            $this->response .= "Checked stack latency. ";
-        }
-
-        if ($this->bar_count % 5 == 0) {
-            $thing = new Thing(null);
-            $thing->Create(null, "manager", "s/ manager");
-            $stackcount = new Manager($thing, "manager");
-
-            $this->response .= "Checked manager. ";
-        }
-
-        if ($this->bar_count % 7 == 0) {
-            $arr = json_encode([
-                "to" => "null" . $this->mail_postfix,
-                "from" => "damage",
-                "subject" => "s/ damage Z",
-            ]);
-
-            $client = new \GearmanClient();
-            $client->addServer();
-            $client->doLowBackground("call_agent", $arr);
-
-            $this->response .= "Damage. ";
-        }
     }
 
     public function makeImage()
