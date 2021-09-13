@@ -77,6 +77,8 @@ class Channel extends Agent
     {
         $things = $this->thing->db->fromcountDatabase();
 
+        if ($things == null) {return false;}
+
         $channel_count = count($things);
         return $channel_count;
     }
