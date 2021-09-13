@@ -95,7 +95,7 @@ if ($this->last_refreshed_at === false) {$timestamp = $this->current_time;}
         foreach ($this->ticks_history as $i => $tick_history) {
 $is_new_tick = (strtotime($timestamp) - $bar_time) <
                 strtotime($tick_history["refreshed_at"]);
-//echo $tick_history["refreshed_at"] . " " . $this->last_refreshed_at . ($is_new_tick ? "NEW TICK" : "-") . "\n";
+
             if ($is_new_tick)
             {
                 $count += 1;
