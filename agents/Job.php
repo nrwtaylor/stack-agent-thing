@@ -107,7 +107,7 @@ class Job extends Agent
             $client->addServer();
             $client->doLowBackground("call_agent", $arr);
 
-            return;
+            return false;
         }
 
         $this->thing->console($subject . "\n");
@@ -117,6 +117,7 @@ class Job extends Agent
         $agent_handler = new Agent($thing, null);
         $this->thing->console($agent_handler->thing_report["sms"] . "\n");
         $this->response .= "Ran job. ";
+        return $agent_handler->thing_report;
     }
 
     /**
@@ -587,7 +588,7 @@ class Job extends Agent
                 "thing/" .
                 $this->uuid .
                 "/job" .
-                " | Made up a job at " .
+                " | Made up a job, '" . $this->subject . "' at " .
                 $this->thing->thing->created_at .
                 ".";
         }

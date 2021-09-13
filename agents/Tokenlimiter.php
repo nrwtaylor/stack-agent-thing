@@ -34,7 +34,7 @@ class Tokenlimiter {
 
         // Call the TokenLimiter which will then 'on-call' the service you are requesting.
 
-        $this->tokens = array('red', 'red', 'blue', 'red', 'sms', 'facebook', 'slack', 'email','ntp');
+        $this->tokens = array('red', 'red', 'blue', 'red', 'sms', 'facebook', 'slack', 'email','ntp', 'discord');
 
         // Set default rate at 1 per 15 minutes.
         $this->token_window = 30;
@@ -176,7 +176,7 @@ class Tokenlimiter {
 
         $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
-        $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'sms', 'facebook', 'slack', 'email', 'satoshi', 'satoshi', 'microsoft','ntp');
+        $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'sms', 'facebook', 'slack', 'email', 'satoshi', 'satoshi', 'microsoft','ntp', 'discord');
 
         $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 

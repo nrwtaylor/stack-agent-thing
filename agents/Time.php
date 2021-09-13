@@ -51,6 +51,12 @@ class Time extends Agent
         $this->time_zone = $this->default_time_zone;
     }
 
+    public function set() {
+
+$this->thing->Write(['time','refreshed_at'], $this->current_time);
+
+    }
+
     /**
      *
      */

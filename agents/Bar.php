@@ -126,25 +126,10 @@ $is_new_tick = (strtotime($timestamp) - $bar_time) <
             $t = "array";
         }
 
-        $this->sendDiscord(
-            $this->thing_report["sms"] .
-                " " .
-                $this->input .
-                " " .
-                $t .
-                " " .
-                $this->nuuid . 
-                " " .
-                $this->link .
-                $this->last_refreshed_at. " age " . $this->age,
-            "Kokopelli"
-        );
-
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
 
             // test
-            //            $this->sendDiscord($this->thing_report["sms"], "Kokopelli");
 
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }

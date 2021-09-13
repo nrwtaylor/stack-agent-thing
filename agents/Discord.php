@@ -110,6 +110,16 @@ class Discord extends Agent
 
     public function sendDiscord($text, $to)
     {
+
+$bot_name = $to;
+
+$parts = explode(":",$to);
+if (count($parts) == 2) {
+   $to = $parts[1];
+   $bot_name = ucwords($parts[0]);
+}
+
+
         $bot_webhook = $this->settingsAgent([
             "discord",
             "servers",
@@ -117,7 +127,7 @@ class Discord extends Agent
             "webhook",
         ]);
 
-        $datagram = ["to" => $bot_webhook, "from" => $to, "subject" => $text];
+        $datagram = ["to" => $bot_webhook, "from" => $bot_name, "subject" => $text];
 
         $this->webhookDiscord($datagram);
     }

@@ -1437,6 +1437,7 @@ public function __set($name, $value) {
 
         //$this->response = "Standby.";
         $this->response = "";
+        $this->thing_report['response'] = $this->response;
     }
 
     /**
