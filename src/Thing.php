@@ -324,8 +324,10 @@ class Thing
 
         $client->addServer();
         $arr = json_encode($datagram);
+$function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
+//        $client->doLowBackground("call_agent", $arr);
+        $client->doLowBackground($function_name, $arr);
 
-        $client->doLowBackground("call_agent", $arr);
         $this->log("spawned a Thing.");
     }
 

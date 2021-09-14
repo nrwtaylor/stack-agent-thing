@@ -2563,6 +2563,17 @@ if ($pid == -1) {
             }
         }
 
+        // Check for recognizable robot strings.
+        // like NMEA
+
+        // $TZXDR,X,3445.000000,mV,ThingVcc*01
+        if ($this->isNMEA($this->subject)) {
+            $nmea_agent = new NMEA($this->thing, "nmea");
+            $this->thing_report = $nmea_agent->thing_report;
+            return $this->thing_report;
+
+        }
+
         // Handle call intended for humans.
         $human_agent = new Human($this->thing, "human");
         if (is_string($human_agent->address)) {

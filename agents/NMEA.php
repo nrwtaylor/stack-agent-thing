@@ -586,11 +586,12 @@ class NMEA extends Agent
     public function isNMEA($text)
     {
         // NMEA strings appear to start with $ and have 5 alpha following.
-        if (substr($text, 0, 1) !== '\$') {
+        if (substr($text, 0, 1) === '$') {
             if (ctype_alpha(substr($text, 1, 5))) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -632,7 +633,11 @@ class NMEA extends Agent
             $nmea_array = $this->extractNMEA($filtered_input);
 
             if ($nmea_array === false or $nmea_array === true) {
-                $this->response .= "Did not hear a nmea. ";
+                if ($this->isNMEA($this->input)) {
+                    $this->response .= $this->input;
+                    return;
+                }
+                $this->response .= "Did not hear a NMEA signal. ";
             } else {
                 $this->response .=
                     "Saw a NMEA string of " .
