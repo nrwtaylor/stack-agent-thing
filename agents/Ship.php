@@ -1652,6 +1652,13 @@ class Ship extends Agent
                 }
             }
 
+            if (substr($nmea_response["sentence_identifier"],2,3) == "XDR") {
+                $transducer_id = substr($nmea_response["sentence_identifier"],1,2);
+                if (!isset($transducers)) {$transducers = [];}
+                $transducers[$transducer_id] = $nmea_response["transducers"];
+            }
+
+
             if ($nmea_response["sentence_identifier"] == "\$GPGSA") {
                 $SV_IDs = $nmea_response["SV_IDs"];
             }
@@ -1661,7 +1668,8 @@ class Ship extends Agent
             }
 
             if ($nmea_response["sentence_identifier"] == "\$GPGGA") {
-                $last_fix_time = $nmea_response["time"];
+
+                $last_fix_time = $nmea_response["fix_time"];
 
                 $fix_quality = $nmea_response["fix_quality"];
                 $units_of_the_geoid_seperation =
