@@ -66,7 +66,7 @@ class Capitalise extends Agent
                 }
             }
 
-            $mixed_agent = new Mixed($this->thing, "mixed");
+            $mixed_agent = new _Mixed($this->thing, "mixed");
 
             if ($mixed_agent->isMixed($token)) {
                 $tcapitalised_token = strtoupper($tag_array['token']);

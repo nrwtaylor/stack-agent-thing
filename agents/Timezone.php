@@ -92,19 +92,17 @@ class Timezone extends Agent
         $text = trim(str_replace("stamp", "", $text));
 
         $OptionsArray = timezone_identifiers_list();
-
         $matches = [];
-
         // Devstack. Librex.
         foreach ($OptionsArray as $i => $timezone_id) {
             if (
+                stripos($timezone_id, $text) !== false or
                 stripos($text, $timezone_id) !== false or
-                stripos(str_replace(" ", "_", $text),  $timezone_id) !== false
+                stripos(str_replace(" ", "_", $text), $timezone_id) !== false
             ) {
                 $matches[] = $timezone_id;
             }
         }
-
 
         $match = false;
         if (isset($matches) and count($matches) == 1) {
@@ -113,7 +111,7 @@ class Timezone extends Agent
         }
 
         if (!isset($this->supplemental_timezone_identifiers_list)) {
-           return true;
+            return true;
         }
 
         $OptionsArray = $this->supplemental_timezone_identifiers_list;
