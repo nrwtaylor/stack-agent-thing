@@ -71,7 +71,7 @@ class Bar extends Agent
         // Make an assumption. And then check if we miss anything.
         // Eventually.
 
-$bar_time = 60 * 4;
+$this->bar_time = 60 * 4;
 
         $this->getTicks();
 
@@ -79,7 +79,9 @@ $bar_time = 60 * 4;
         // as soon as we see it.
 
 $timestamp = $this->last_refreshed_at;
-if ($this->last_refreshed_at === false) {$timestamp = $this->current_time;}
+if ($this->last_refreshed_at === false) {
+$timestamp = $this->current_time;
+$this->response .= "Saw false timestamp. ";}
 
         usort($this->ticks_history, function ($a, $b) {
             $countA = strtotime($a['refreshed_at']);
@@ -93,7 +95,7 @@ if ($this->last_refreshed_at === false) {$timestamp = $this->current_time;}
         // How many ticks have there been send the last_refreshed_at time stamp.
         $count = 0;
         foreach ($this->ticks_history as $i => $tick_history) {
-$is_new_tick = (strtotime($timestamp) - $bar_time) <
+$is_new_tick = (strtotime($timestamp) - $this->bar_time) <
                 strtotime($tick_history["refreshed_at"]);
 
             if ($is_new_tick)
@@ -178,7 +180,10 @@ $is_new_tick = (strtotime($timestamp) - $bar_time) <
                 $this->max_bar_count .
                 ". Counted " .
                 $this->tick_count .
-                " ticks since the last bar update. " .
+                " ticks since the last bar update " . $this->age . " ago. " .
+                " current time " . $this->current_time . " " .
+                " last refreshed at " . $this->last_refreshed_at . " " .
+                " bar time " . $this->bar_time . " " . 
                 $this->response;
         }
 
