@@ -14,6 +14,12 @@ class EnvironmentCanadaMarineWeather extends Agent
         $this->doEnvironmentCanadaMarineWeather();
     }
 
+    public function set()
+    {
+        $this->thing->Write(["environmentcanadamarineweather", "refreshed_at"], $this->current_time);
+    }
+
+
     public function doEnvironmentCanadaMarineWeather()
     {
         $url =
@@ -103,7 +109,6 @@ class EnvironmentCanadaMarineWeather extends Agent
 
     public function readSubject()
     {
-        echo "merp";
         return false;
     }
 }
