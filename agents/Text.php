@@ -538,7 +538,7 @@ class Text extends Agent
         }
 
         if (!isset($this->thing->mixed_agent)) {
-            $this->thing->mixed_agent = new Mixed(null, "brilltagger");
+            $this->thing->mixed_agent = new _Mixed(null, "brilltagger");
         }
 
         if (!isset($this->thing->alpha_agent)) {
@@ -624,7 +624,7 @@ class Text extends Agent
         $hyphenates = $this->thing->text_agent->extractHyphenates($post_title);
 
         $alpha_agent = new Alpha($this->thing, "alpha");
-        $mixed_agent = new Mixed($this->thing, "mixed");
+        $mixed_agent = new _Mixed($this->thing, "mixed");
         $word_agent = new Word($this->thing, "word");
         $brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
         $slug_agent = new Slug($this->thing, "slug");

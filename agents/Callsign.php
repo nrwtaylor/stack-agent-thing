@@ -414,7 +414,7 @@ class Callsign extends Agent
 
         $slug_agent = new Slug($this->thing, "slug");
         $chatbot_agent = new Chatbot($this->thing, "chatbot");
-        $mixed_agent = new Mixed($this->thing, "mixed");
+        $mixed_agent = new _Mixed($this->thing, "mixed");
 
         $input = $chatbot_agent->filterChatbots($input);
 

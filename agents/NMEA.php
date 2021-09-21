@@ -688,6 +688,16 @@ if (isset($parts[17])) {
 
     public function respondResponse()
     {
+
+        $this->thing_report["info"] =
+            "This handles NMEA traffic.";
+        $this->thing_report["help"] = "This is about monitoring things.";
+
+        //$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
+
         $this->thing->flagGreen();
         $message_thing = new Message($this->thing, $this->thing_report);
     }

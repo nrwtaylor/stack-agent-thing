@@ -65,7 +65,7 @@ class Token extends Agent
         }
 
         if (!isset($this->mixed_agent)) {
-            $this->mixed_agent = new Mixed($this->thing, "mixed");
+            $this->mixed_agent = new _Mixed($this->thing, "mixed");
         }
     }
 
@@ -74,10 +74,7 @@ class Token extends Agent
      */
     function set()
     {
-        $this->thing->Write(
-            ["token", "refreshed_at"],
-            $this->thing->time()
-        );
+        $this->thing->Write(["token", "refreshed_at"], $this->thing->time());
     }
 
     public function getToken($text = null)
@@ -429,6 +426,43 @@ class Token extends Agent
         $sms .= " " . $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
+    }
+
+    public function subsetsTokens($tokens)
+    {
+        $number_of_tokens = count($tokens);
+        $subsets = [];
+        foreach (range(0, $number_of_tokens) as $start => $values) {
+            foreach (range(0, $number_of_tokens) as $end => $valuee) {
+                if ($start > $end) {
+                    continue;
+                }
+
+                $selected_tokens = [];
+                foreach (range($start, $end) as $index => $value) {
+                    $selected_tokens[] = trim($tokens[$value]);
+                }
+
+                $text = trim(implode(" ", $selected_tokens));
+
+                if ($text == "") {
+                    continue;
+                }
+
+                $subsets[] = $text;
+
+                //}
+            }
+        }
+        $subsets = array_unique($subsets);
+
+        usort($subsets, function ($a, $b) {
+            return mb_strlen($a) - mb_strlen($b);
+        });
+        // Sort so longest string to shortest string
+        $subsets = array_reverse($subsets);
+
+        return $subsets;
     }
 
     public function itemToken($colour = null)
