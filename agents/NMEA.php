@@ -216,6 +216,97 @@ class NMEA extends Agent
         return $xte;
     }
 
+    // XDR - Trans ducer
+    public function xdrNMEA($text)
+    {
+$transducers = [];
+        $parts = $this->explodeNMEA($text);
+
+        $talker_identifier = substr($text,1,2);
+
+        $type = $parts[1];
+        $amount = $parts[2];
+
+        $units = $parts[3];
+        $name = $parts[4];
+
+        $transducers[0] = [
+            "talker_identifier" => $talker_identifier,
+            "type" => $type,
+            "amount" => $amount,
+            "units" => $units,
+            "name" => $name,
+        ];
+
+
+// Not tested
+if (isset($parts[6])) {
+
+        $type = $parts[5];
+        $amount = $parts[6];
+
+        $units = $parts[7];
+        $name = $parts[8];
+
+        $transducers[1] = [
+            "talker_identifier" => $talker_identifier,
+            "type" => $type,
+            "amount" => $amount,
+            "units" => $units,
+            "name" => $name,
+        ];
+
+}
+
+if (isset($parts[12])) {
+
+        $type = $parts[9];
+        $amount = $parts[10];
+
+        $units = $parts[11];
+        $name = $parts[12];
+
+        $transducers[2] = [
+            "talker_identifier" => $talker_identifier,
+            "type" => $type,
+            "amount" => $amount,
+            "units" => $units,
+            "name" => $name,
+        ];
+
+
+}
+
+if (isset($parts[17])) {
+
+        $type = $parts[13];
+        $amount = $parts[14];
+
+        $units = $parts[15];
+        $name = $parts[16];
+
+        $transducers[3] = [
+            "talker_identifier" => $talker_identifier,
+            "type" => $type,
+            "amount" => $amount,
+            "units" => $units,
+            "name" => $name,
+        ];
+
+
+}
+
+        $checksum = $parts[5];
+
+        $xdr = [
+            "talker_identifier" => $talker_identifier,
+            "transducers" => $transducers,
+            "checksum" => $checksum,
+        ];
+        return $xdr;
+    }
+
+
     public function longitudeNMEA($longitude, $longitude_east_west)
     {
         // "dddmm.mmmmm"
