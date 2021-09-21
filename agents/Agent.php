@@ -2217,9 +2217,13 @@ if ($pid == -1) {
 
         $bigrams = $this->getNgrams($text, 2);
         $trigrams = $this->getNgrams($text, 3);
+        $quadgrams = $this->getNgrams($text, 4);
+
 
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
+        $arr = array_merge($arr, $quadgrams);
+
         return $arr;
     }
 
@@ -2231,7 +2235,6 @@ if ($pid == -1) {
         }
 
         $arr = $this->ngramsText($input);
-
         // Added this March 6, 2018.  Testing.
 
         if ($this->agent_input == null) {
@@ -2290,6 +2293,9 @@ if ($pid == -1) {
         $this->responsiveAgents($this->agents);
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
+
+
+        return $this->responsive_agents;
     }
 
     public function stripAgent($text = null)
@@ -2589,7 +2595,6 @@ if ($pid == -1) {
         // So look hear to generalize that.
         $text = urldecode($agent_input_text);
         //$text = urldecode($input);
-
         $text = strtolower($text);
         //$arr = explode(' ', trim($text));
 
@@ -2599,10 +2604,12 @@ if ($pid == -1) {
         $onegrams = $this->getNgrams($text, $n = 1);
         $bigrams = $this->getNgrams($text, $n = 2);
         $trigrams = $this->getNgrams($text, $n = 3);
+        $quadgrams = $this->getNgrams($text, $n = 4);
 
         $arr = array_merge($arr, $onegrams);
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
+        $arr = array_merge($arr, $quadgrams);
 
         usort($arr, function ($a, $b) {
             return strlen($b) <=> strlen($a);
@@ -2637,6 +2644,7 @@ if ($pid == -1) {
             $this->getAgent($matches[0], $this->agent_input);
             return $this->thing_report;
         }
+
         // First things first.  Special instructions to ignore.
         if (strpos($input, "cronhandler run") !== false) {
             $this->thing->log('Agent "Agent" ignored "cronhandler run".');
@@ -3141,6 +3149,16 @@ echo "TRUE";
         );
         $arr = $this->extractAgents($input);
         $this->input = $input;
+// Sort and pick best scoring agent response.
+
+usort($this->responsive_agents, function ($a, $b) {
+        return $b['score'] - $a['score'];
+    });
+
+//foreach($this->responsive_agents as $i=>$r) {
+//$r['thing_report'] = null;
+//}
+
 
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]["thing_report"];
