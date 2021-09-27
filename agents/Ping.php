@@ -137,7 +137,7 @@ class Ping extends Agent
         $sms .=
             " | Received " .
             $this->thing->human_time($this->ping_text) .
-            " ago.";
+            " ago. ";
         $sms .= $this->response;
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
@@ -209,6 +209,7 @@ class Ping extends Agent
         if (is_array($thing_object)) {
             if (count($thing_object) == 1 and $this->isUrl($thing_object[0])) {
                 $text = $thing_object[0];
+                $this->response .= "Pinging " . $text .". ";
                 $this->addressPing($text);
             }
         }
@@ -225,6 +226,7 @@ class Ping extends Agent
             $this->hostPing($urls);
         }
 
+        // Test
         try {
             $ping_socket_latency = $this->socketPing();
             if ($ping_socket_latency !== false) {
@@ -237,6 +239,5 @@ class Ping extends Agent
             $this->response = "Bar";
         }
 
-        $this->response .= "Ping. ";
     }
 }

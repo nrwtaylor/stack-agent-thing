@@ -457,6 +457,8 @@ public function __set($name, $value) {
      */
     public function set()
     {
+       if (!isset($this->ping)) {return true;}
+       $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
     }
 
     public function getThings($agent_name = null)
