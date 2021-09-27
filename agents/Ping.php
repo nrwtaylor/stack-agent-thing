@@ -165,11 +165,37 @@ class Ping extends Agent
         $this->thing_report["message"] = $message;
     }
 
+
+public function hostPing($thing_object = null) {
+
+if ($thing_object == null) {return true;}
+
+if (is_array($thing_object)) {
+
+if ((count($thing_object) == 1) and (isUrl($thing_object[0]))) {
+
+var_dump($thing_object[0]);
+
+}
+
+}
+
+}
+
     /**
      *
      */
     public function readSubject()
     {
+$urls = $this->extractUrls($this->input);
+//var_dump($urls);
+
+if ($urls) {
+
+var_dump("saw", $urls);
+$this->hostPing($urls);
+}
+
         try {
         $ping_socket_latency = $this->socketPing();
     if ($ping_socket_latency !== false) {$this->response .= "Socket latency is " . $ping_socket_latency . ". ";}

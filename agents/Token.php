@@ -561,25 +561,4 @@ class Token extends Agent
         $this->choices = $choices;
     }
 
-    /**
-     *
-     * @return unknown
-     */
-    /*
-    public function makePNG() {
-        $text = "thing:".$this->alphas[0];
-
-        ob_clean();
-
-        ob_start();
-
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
-
-        $image = ob_get_contents();
-        ob_clean();
-
-        $this->thing_report['png'] = $image;
-        return $this->thing_report['png'];
-    }
-*/
 }
