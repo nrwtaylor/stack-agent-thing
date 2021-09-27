@@ -2161,6 +2161,7 @@ if ($pid == -1) {
 
         foreach ($this->responsive_agents as $i => $j) {
             $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n");
+
         }
     }
 

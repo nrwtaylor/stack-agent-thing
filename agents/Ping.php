@@ -35,7 +35,13 @@ class Ping extends Agent
     {
         $this->getPing();
     }
+    /*
+    public function set() {
+       if (!isset($this->ping)) {return true;}
 
+       $this->thing->Write('ping', $this->ping);
+    }
+*/
     function test()
     {
         $this->test_result = "Not OK";
@@ -82,7 +88,6 @@ class Ping extends Agent
                 $latency = false;
             }
             socket_close($socket);
-
         } else {
             $latency = false;
         }
@@ -128,13 +133,14 @@ class Ping extends Agent
      */
     public function makeSMS()
     {
-        $this->sms_message = "PING | A message from this Identity pinged us.";
-        $this->sms_message .=
+        $sms = "PING | A message from this Identity pinged us.";
+        $sms .=
             " | Received " .
             $this->thing->human_time($this->ping_text) .
             " ago.";
-
-        $this->thing_report["sms"] = $this->sms_message;
+        $sms .= $this->response;
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -164,52 +170,73 @@ class Ping extends Agent
         $this->sms_message = $message;
         $this->thing_report["message"] = $message;
     }
+    // https://stackoverflow.com/questions/8030789/pinging-an-ip-address-using-php-and-echoing-the-result
+    public function addressPing($ip)
+    {
+        //    $pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
+        $pingresult = exec("/bin/ping -c 3 $ip", $lines, $status);
 
+        if (0 == $status) {
+            $status = "OK";
+        } else {
+            $status = "NOT OK";
+        }
+        $this->response .= "Address $ip responded " . $status . ". ";
 
-public function hostPing($thing_object = null) {
+        $last_line = $lines[count($lines) - 1];
+        $this->response .= 'Heard "' . $last_line . '". ';
+        $number_part = explode("=", $last_line)[1];
+        $numbers = explode("/", $number_part);
 
-if ($thing_object == null) {return true;}
+        foreach ($numbers as $i => $number) {
+            $numbers[$i] = trim(rtrim($number, "ms"));
+        }
 
-if (is_array($thing_object)) {
+        $this->ping = [
+            "minimum" => $numbers[0],
+            "average" => $numbers[1],
+            "maximum" => $numbers[2],
+            "standard_deviation" => $numbers[3],
+        ];
+    }
 
-if ((count($thing_object) == 1) and (isUrl($thing_object[0]))) {
+    public function hostPing($thing_object = null)
+    {
+        if ($thing_object == null) {
+            return true;
+        }
 
-var_dump($thing_object[0]);
-
-}
-
-}
-
-}
+        if (is_array($thing_object)) {
+            if (count($thing_object) == 1 and $this->isUrl($thing_object[0])) {
+                $text = $thing_object[0];
+                $this->addressPing($text);
+            }
+        }
+    }
 
     /**
      *
      */
     public function readSubject()
     {
-$urls = $this->extractUrls($this->input);
-//var_dump($urls);
+        $urls = $this->extractUrls($this->input);
 
-if ($urls) {
-
-var_dump("saw", $urls);
-$this->hostPing($urls);
-}
-
-        try {
-        $ping_socket_latency = $this->socketPing();
-    if ($ping_socket_latency !== false) {$this->response .= "Socket latency is " . $ping_socket_latency . ". ";}
-
-
-        } catch (\OverflowException $t) {
-            $this->response =
-                "Foo";
-        } catch (\Throwable $t) {
-            $this->response =
-                "Bar";
-
+        if ($urls) {
+            $this->hostPing($urls);
         }
 
-        $this->response .= "Responded to a ping. ";
+        try {
+            $ping_socket_latency = $this->socketPing();
+            if ($ping_socket_latency !== false) {
+                $this->response .=
+                    "Socket latency is " . $ping_socket_latency . ". ";
+            }
+        } catch (\OverflowException $t) {
+            $this->response = "Foo";
+        } catch (\Throwable $t) {
+            $this->response = "Bar";
+        }
+
+        $this->response .= "Ping. ";
     }
 }
