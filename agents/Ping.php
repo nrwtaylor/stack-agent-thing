@@ -25,6 +25,8 @@ class Ping extends Agent
         // I think.
         // Instead.
 
+        $this->url = $this->settingsAgent(["ping", "url"], 'localhost');
+
         $this->node_list = ["ping" => ["pong"]];
     }
 
@@ -171,8 +173,13 @@ class Ping extends Agent
         $this->thing_report["message"] = $message;
     }
     // https://stackoverflow.com/questions/8030789/pinging-an-ip-address-using-php-and-echoing-the-result
-    public function addressPing($ip)
+    public function addressPing($ip = null)
     {
+        // Do not all user provided input ...
+
+        $ip = $this->url;
+var_dump($this->url);
+
         //    $pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
         $pingresult = exec("/bin/ping -c 3 $ip", $lines, $status);
 
@@ -222,11 +229,19 @@ class Ping extends Agent
     {
         $urls = $this->extractUrls($this->input);
 
+// dev
+/*
         if ($urls) {
             $this->hostPing($urls);
         }
+*/
+
+        $this->response .= 'Heard, "' . $this->input . '". ';
+
+
 
         // Test
+/*
         try {
             $ping_socket_latency = $this->socketPing();
             if ($ping_socket_latency !== false) {
@@ -234,10 +249,11 @@ class Ping extends Agent
                     "Socket latency is " . $ping_socket_latency . ". ";
             }
         } catch (\OverflowException $t) {
-            $this->response = "Foo";
+            $this->response .= "Foo";
         } catch (\Throwable $t) {
-            $this->response = "Bar";
+            $this->response .= "Bar";
         }
+*/
 
     }
 }

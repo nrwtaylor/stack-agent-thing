@@ -36,21 +36,14 @@ class NMEA extends Agent
 
     function get()
     {
-        // Take a look at this thing for IChing variables.
+        // Take a look at this thing for agent variables.
+        $time_string = $this->thing->Read(["nmea", "refreshed_at"]);
 
-        $time_string = $this->thing->Read([
-            "nmea",
-            "refreshed_at",
-        ]);
-
-        // And if there is no IChing timestamp create one now.
+        // And if there is no timestamp create one now.
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["nmea", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["nmea", "refreshed_at"], $time_string);
         }
 
         $this->nmea = $this->thing->Read(["nmea", "nmea"]);
@@ -219,10 +212,10 @@ class NMEA extends Agent
     // XDR - Trans ducer
     public function xdrNMEA($text)
     {
-$transducers = [];
+        $transducers = [];
         $parts = $this->explodeNMEA($text);
 
-        $talker_identifier = substr($text,1,2);
+        $talker_identifier = substr($text, 1, 2);
 
         $type = $parts[1];
         $amount = $parts[2];
@@ -238,63 +231,54 @@ $transducers = [];
             "name" => $name,
         ];
 
+        // Not tested
+        if (isset($parts[6])) {
+            $type = $parts[5];
+            $amount = $parts[6];
 
-// Not tested
-if (isset($parts[6])) {
+            $units = $parts[7];
+            $name = $parts[8];
 
-        $type = $parts[5];
-        $amount = $parts[6];
+            $transducers[1] = [
+                "talker_identifier" => $talker_identifier,
+                "type" => $type,
+                "amount" => $amount,
+                "units" => $units,
+                "name" => $name,
+            ];
+        }
 
-        $units = $parts[7];
-        $name = $parts[8];
+        if (isset($parts[12])) {
+            $type = $parts[9];
+            $amount = $parts[10];
 
-        $transducers[1] = [
-            "talker_identifier" => $talker_identifier,
-            "type" => $type,
-            "amount" => $amount,
-            "units" => $units,
-            "name" => $name,
-        ];
+            $units = $parts[11];
+            $name = $parts[12];
 
-}
+            $transducers[2] = [
+                "talker_identifier" => $talker_identifier,
+                "type" => $type,
+                "amount" => $amount,
+                "units" => $units,
+                "name" => $name,
+            ];
+        }
 
-if (isset($parts[12])) {
+        if (isset($parts[17])) {
+            $type = $parts[13];
+            $amount = $parts[14];
 
-        $type = $parts[9];
-        $amount = $parts[10];
+            $units = $parts[15];
+            $name = $parts[16];
 
-        $units = $parts[11];
-        $name = $parts[12];
-
-        $transducers[2] = [
-            "talker_identifier" => $talker_identifier,
-            "type" => $type,
-            "amount" => $amount,
-            "units" => $units,
-            "name" => $name,
-        ];
-
-
-}
-
-if (isset($parts[17])) {
-
-        $type = $parts[13];
-        $amount = $parts[14];
-
-        $units = $parts[15];
-        $name = $parts[16];
-
-        $transducers[3] = [
-            "talker_identifier" => $talker_identifier,
-            "type" => $type,
-            "amount" => $amount,
-            "units" => $units,
-            "name" => $name,
-        ];
-
-
-}
+            $transducers[3] = [
+                "talker_identifier" => $talker_identifier,
+                "type" => $type,
+                "amount" => $amount,
+                "units" => $units,
+                "name" => $name,
+            ];
+        }
 
         $checksum = $parts[5];
 
@@ -305,7 +289,6 @@ if (isset($parts[17])) {
         ];
         return $xdr;
     }
-
 
     public function longitudeNMEA($longitude, $longitude_east_west)
     {
@@ -688,15 +671,12 @@ if (isset($parts[17])) {
 
     public function respondResponse()
     {
-
-        $this->thing_report["info"] =
-            "This handles NMEA traffic.";
+        $this->thing_report["info"] = "This handles NMEA traffic.";
         $this->thing_report["help"] = "This is about monitoring things.";
 
         //$this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
-
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
 
         $this->thing->flagGreen();
         $message_thing = new Message($this->thing, $this->thing_report);
