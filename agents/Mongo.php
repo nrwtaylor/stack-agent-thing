@@ -11,7 +11,6 @@ class Mongo extends Agent
     {
         $path =
             "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb";
-
         $client = new \MongoDB\Client($path);
 
         $db = $client->test;

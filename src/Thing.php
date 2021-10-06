@@ -149,6 +149,7 @@ class Thing
         //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
+
         } catch (\Exception $e) {
             $this->log("No Thing to get.");
 
@@ -161,7 +162,6 @@ class Thing
         // devstack
         //		echo "Stack Balance<br>";
         //		$this->stackBalance($this->uuid);
-
         $this->log("Thing instantiation completed.");
     }
 
@@ -246,12 +246,11 @@ class Thing
 
             $this->uuid = $uuid;
             $this->nuuid = substr($this->uuid, 0, 4);
-
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
             $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
-            $this->log("Thing made a db connector.");
 
+            $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
             $this->json = new Json($this->uuid);
 
@@ -1124,7 +1123,7 @@ $class_name = $this->agent_class_name_current;
         ];
 
         foreach ($a as $secs => $str) {
-            $d = $etime / $secs;
+            $d = (float) $etime / (float) $secs;
             if ($d >= 1) {
                 $r = round($d);
                 return $r . ' ' . ($r > 1 ? $a_plural[$str] : $str) . '';

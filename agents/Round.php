@@ -438,7 +438,7 @@ class Round extends Agent
         $this->wedgeRound($n, $size, $next_size);
     }
 
-    public function wedgeRound($n = 7, $size = null, $next_size)
+    public function wedgeRound($n = 7, $size = null, $next_size = null)
     {
         if ($size == null) {
             $size = $this->size;

@@ -34,6 +34,7 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
+
         //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
@@ -134,7 +135,13 @@ class Database
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
         ) {
+
+try {
             $handler = $this->connectDatabase($candidate_service);
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+
 
             if ($handler !== true) {
                 $this->available_stacks[
@@ -143,8 +150,8 @@ class Database
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
-
         $this->active_stacks = $this->available_stacks;
+
 
 $this->stack = false;
 $this->stack_handler = false;
@@ -238,6 +245,7 @@ if (count($this->available_stacks) > 0) {
 
     function connectDatabase($stack)
     {
+
         $agent_name = $stack["infrastructure"];
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
@@ -245,6 +253,7 @@ if (count($this->available_stacks) > 0) {
 
         try {
             $handler = new $agent_namespace_name(null, $this->agent_input);
+
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
             $handler->to = $this->to;
@@ -281,10 +290,9 @@ if (count($this->available_stacks) > 0) {
      */
     function test($comment = null, $instruction = null)
     {
-        if ($this->state != "test") {
+        if (isset($this->state) and $this->state != "test") {
             return;
         }
-
         if ($comment == null and $instruction == null) {
             $comment = "";
         }

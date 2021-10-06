@@ -67,7 +67,7 @@ class Url extends Agent
         $web = "<b>URL Agent</b><br><p>";
         $web .= "<p>";
 
-        if (isset($this->urls) and count($this->urls) > 0) {
+        if (isset($this->urls) and is_array($this->urls) and count($this->urls) > 0) {
             $web .= "<b>COLLECTED URLS</b><br><p>";
             $web .= "<ul>";
             //$urls = array_unique($this->urls);

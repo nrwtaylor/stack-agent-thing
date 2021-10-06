@@ -1,6 +1,11 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
+error_reporting(-1);
+
+
 class Memory extends Agent
 {
     public $var = "hello";
@@ -12,21 +17,33 @@ class Memory extends Agent
 
     public function initMemory()
     {
+if (isset($this->agent_input) and $this->agent_input == 'fallback memory') {
+return;}
         if (!isset($this->memory)) {
             try {
                 $this->memory = new \Memcached(); //point 2.
                 $this->memory->addServer("127.0.0.1", 11211);
             } catch (\Throwable $t) {
+                //$this->response .= "Could not access memory. ";
                 // Failto
-                $this->memory = new Memory($this->thing, "memory");
+//var_dump("merp");
+
+//$thing = $this->thing;
+//if ($this->thing == null) {
+//$thing = new Thing(null);
+//}
+//                $this->memory = new Memory($this->thing, "fallback memory");
+
+
+//$this->memory = new Memory($thing, "merp");
                 //restore_error_handler();
-                $this->thing->log(
-                    "caught memcached throwable. made memory",
-                    "WARNING"
-                );
+//                $this->thing->log(
+//                    "caught memcached throwable. made memory",
+//                    "WARNING"
+//                );
                 return;
             } catch (\Error $ex) {
-                $this->thing->log("caught memcached error.", "WARNING");
+//                $this->thing->log("caught memcached error.", "WARNING");
                 return true;
             }
         }
@@ -54,6 +71,8 @@ class Memory extends Agent
 
     public function getMemory($text = null)
     {
+
+if (!isset($this->memory)) {return null;}
         // Null?
         // $this->mem_cached = null;
         // Fail to stack php memory code if Memcached is not availble.
@@ -79,6 +98,10 @@ class Memory extends Agent
         if ($text === null) {
             $text = $this->thing->getUuid();
         }
+if (!isset($this->memory)) {
+return true;
+}
+
         $memory = $this->memory->set($text, $variable);
         return $memory;
     }
