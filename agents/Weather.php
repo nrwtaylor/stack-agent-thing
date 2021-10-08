@@ -445,6 +445,7 @@ class Weather extends Agent
     /**
      *
      */
+/*
     public function respondResponse()
     {
         // Thing actions
@@ -473,7 +474,7 @@ class Weather extends Agent
 
         $this->thing_report["help"] = "This reads a web resource.";
     }
-
+*/
     /**
      *
      */

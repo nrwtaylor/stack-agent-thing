@@ -1403,6 +1403,7 @@ public function __set($name, $value) {
     /**
      *
      */
+/*
     public function respondResponse()
     {
         $agent_flag = true;
@@ -1423,7 +1424,7 @@ public function __set($name, $value) {
             }
         }
     }
-
+*/
     public function makeInput()
     {
     }

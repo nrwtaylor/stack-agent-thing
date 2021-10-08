@@ -194,17 +194,24 @@ class Token extends Agent
         }
 
         //$mixed_agent = new Mixed($this->thing,"mixed");
-        $mixeds = $this->mixed_agent->extractMixeds($this->input);
+        //        $mixeds = $this->mixed_agent->extractMixeds($this->input);
+        $mixeds = $this->mixed_agent->extractMixeds($text);
 
         $this->addTokens($mixeds);
 
+        //        $this->getToken($this->input);
         $this->getToken($this->input);
-        $text = str_replace("-", " ", $this->input);
+
+        //$text = str_replace("-", " ", $this->input);
+        $text = str_replace("-", " ", $text);
 
         $t = $this->pairTokens($text);
         $this->addTokens($t);
 
         $t = $this->tripletTokens($text);
+        $this->addTokens($t);
+
+        $t = $this->quadTokens($text);
         $this->addTokens($t);
 
         $this->trimTokens();
@@ -255,6 +262,31 @@ class Token extends Agent
             }
 
             $t[] = $tokens[$i] . " " . $tokens[$i + 1] . " " . $tokens[$i + 2];
+            $i += 1;
+        }
+
+        return $t;
+    }
+
+    public function quadTokens($str)
+    {
+        $t = [];
+        $tokens = explode(" ", $str);
+        $i = 0;
+        foreach ($tokens as $i => $token) {
+            if ($i > count($tokens) - 4) {
+                break;
+            }
+
+            $t[] =
+                $tokens[$i] .
+                " " .
+                $tokens[$i + 1] .
+                " " .
+                $tokens[$i + 2] .
+                " " .
+                $tokens[$i + 3];
+
             $i += 1;
         }
 
@@ -561,5 +593,4 @@ class Token extends Agent
         $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
-
 }

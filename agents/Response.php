@@ -29,15 +29,48 @@ class Response extends Agent
         }
     }
 
+    public function limitResponse($thing_report = null) {
+if ($thing_report == null) {
+    $thing_report = $this->thing_report;
+}
+
+// dev placeholder for calling shorten.
+// Needs to work through the whole thing_report.
+$thing_report['sms'] = "[apply limit] " . $thing_report['sms'];
+
+return $thing_report;
+    }
+
+    /**
+     *
+     */
     public function respondResponse()
     {
-        $this->thing->flagGreen();
+$t = $this->tokensLimit();
+if ($t != null and in_array('response', $t)) {
 
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+$this->response .= "Saw limit response token. ";
+$this->thing_report = $this->limitResponse();
 
-        $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+}
+
+        $agent_flag = true;
+        if ($this->agent_name == "agent") {
+            return;
+        }
+
+        if ($agent_flag == true) {
+            if (!isset($this->thing_report["sms"])) {
+                $this->thing_report["sms"] = "AGENT | Standby.";
+            }
+
+            $this->thing_report["message"] = $this->thing_report["sms"];
+            if ($this->agent_input == null or $this->agent_input == "") {
+                $message_thing = new Message($this->thing, $this->thing_report);
+                $this->thing_report["info"] =
+                    $message_thing->thing_report["info"];
+            }
+        }
     }
 
     function makeSMS()
