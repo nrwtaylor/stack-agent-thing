@@ -40,7 +40,7 @@ class Kplex extends Agent
         echo "Connected to kplex server.\n";
 
         $ship_handler = new Ship($this->thing, "ship");
-
+        $snapshot = null;
         $datagram_stack = [];
         $unrecognized_sentences = [];
         $start_time = time();
@@ -67,6 +67,7 @@ class Kplex extends Agent
             }
         }
         $this->snapshot = $snapshot;
+
     }
 
     function get()
@@ -126,6 +127,7 @@ class Kplex extends Agent
     public function makeSMS()
     {
         $sms = strtoupper($this->agent_name) . " | ";
+if ($this->snapshot != null) {
         $sms .= "latitude " . $this->snapshot->current_latitude_decimal . " ";
         $sms .= "longitude " . $this->snapshot->current_longitude_decimal . " ";
         $sms .= "speed " . $this->snapshot->speed_in_knots . " knots ";
@@ -157,6 +159,7 @@ class Kplex extends Agent
                 $this->snapshot->destination_closing_velocity_in_knots .
                 " knots ";
         }
+}
 
         $sms .= $this->response;
         $this->sms_message = $sms;
@@ -182,6 +185,12 @@ class Kplex extends Agent
         if (isset($this->snapshot) and $this->snapshot !== false) {
             $this->response .= "Heard data stream from Kplex server. ";
             return;
+        }
+
+        if ($this->snapshot == null) {
+
+            $this->response .= "Did not hear data stream from Kplex server. ";
+
         }
         // return;
 

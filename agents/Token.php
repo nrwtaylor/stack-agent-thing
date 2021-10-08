@@ -212,6 +212,7 @@ class Token extends Agent
         $this->tokens = array_unique($this->tokens, SORT_REGULAR);
 
         $this->makeSnippet();
+        return $this->tokens;
     }
 
     public function trimTokens($arr = null)
