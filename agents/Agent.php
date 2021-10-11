@@ -29,6 +29,7 @@ class Agent
      */
     function __construct(Thing $thing = null, $input = null)
     {
+        //microtime(true);
         if ($thing == null) {
             $thing = new Thing(null);
         }
@@ -41,6 +42,8 @@ class Agent
             $this->agent_input = $input;
         }
         if (is_string($input)) {
+            //$this->agent_input = strtolower($input);
+            // TODO Variable configured case sensitive strings 3 November 2020.
             $this->agent_input = $input;
         }
 
@@ -74,38 +77,13 @@ class Agent
         }
 
         // Get some stuff from the stack which will be helpful.
-
-// dev test
-
-// TODO define all default null settings
-/*
-       $this->default_font = null;
-       $this->default_pdf_page_template = null;
-
-$stack_settings = $thing->container['stack'];
-foreach($stack_settings as $setting_name=>$setting_value) {
-
-// For 'backwards' compatibility.
-$this->{$setting_name} = $thing->container['stack'][$setting_name];
-
-// Going forward set default_ and stack_ prefixes
-// For settings from stack private settings.
-$this->{'default_'.$setting_name} = $thing->container['stack'][$setting_name];
-$this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
-
-}
-*/
-
         $this->web_prefix = $thing->container["stack"]["web_prefix"];
         $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
         $this->word = $thing->container["stack"]["word"];
         $this->email = $thing->container["stack"]["email"];
 
-
-
         // And some more stuff
         $this->short_name = $thing->container["stack"]["short_name"];
-
         $this->stack_state = $thing->container["stack"]["state"];
 
         $this->stack_engine_state = $thing->container["stack"]["engine_state"];
@@ -142,6 +120,7 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         // TODO
 
         //$this->time_agent = new Time($this->thing,"time");
+        //$this->current_time = $this->time_agent->time;
         $this->current_time = $this->thing->time();
 
         $this->num_hits = 0;
@@ -176,15 +155,21 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 }
 */
 
+        //$link_agent = new Link($this->thing,"link");
+
         $this->init();
         $this->get();
         try {
-
             $this->read();
-            $this->run();
-            $this->make();
-            $this->set();
 
+            $this->run();
+
+            $this->make();
+
+            // This is where we deal with insufficient space to serialize the variabes to the stack.
+            //if (!isset($this->signal_thing)) {return true;}
+            //        try {
+            $this->set();
         } catch (\OverflowException $t) {
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
@@ -256,6 +241,19 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         }
     }
 
+    public function settingsAgent($settings_array, $default_setting = null)
+    {
+        $t = $this->thing->container["api"];
+        foreach ($settings_array as $setting) {
+            if (!isset($t[$setting])) {
+                return $default_setting;
+            }
+
+            $t = $t[$setting];
+        }
+        return $t;
+    }
+
     // TODO DEV?
     public function __call($agent_function, $args)
     {
@@ -288,7 +286,6 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         $this->thing->log(
             "Check if " . $agent_name . " == " . $this->agent_name
         );
-
         if ($agent_name == $this->agent_name) {
             return false;
         }
@@ -300,10 +297,6 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
 
         // Allow for customizing this later.
         $agent_input = $agent_name;
-
-// dev test
-//$agent_input = $this->agent_input;
-//if ($this->agent_input == null) {$agent_input = $agent_name;}
 
         // Namespaced class.
         $agent_namespace_name =
@@ -390,16 +383,6 @@ $this->{'stack_'.$setting_name} = $thing->container['stack'][$setting_name];
         );
     }
 
-// dev exploration
-/*
-public function __set($name, $value) {
-//	if ((stripos($name, "prior_thing")) and (!isset($this->$$name))) {
-//		throw new \Exception($name.' thing does not exist');
-//	}
-
-}
-*/
-
     /**
      *
      */
@@ -480,11 +463,6 @@ public function __set($name, $value) {
         return $things;
     }
 
-    public function isThing($thing) {
-        if ($thing === null) {return false;}
-        return true;
-    }
-
     public function getVariables($agent_name = null)
     {
         $variables_array = [];
@@ -514,7 +492,11 @@ public function __set($name, $value) {
                 $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
+                //if (isset($variables[$agent_name])) {
                 $variables_array[$uuid] = $variables;
+                //}
+
+                //$response = $this->readAgent($thing_object['task']);
             }
         }
 
@@ -543,8 +525,14 @@ public function __set($name, $value) {
 
     public function memoryAgent($text = null)
     {
+        //$agent_class_name = "Dateline";
         $agent_class_name = $text;
         $agent_name = strtolower($agent_class_name);
+
+        //        if (!isset($this->slug_handler)) {
+        //            $this->slug_handler = new Slug($this->thing, "slug");
+        //        }
+        //        $slug = $this->slug_handler->getSlug($agent_name . "-" . $this->from);
 
         $slug = $this->getSlug($agent_name . "-" . $this->from);
 
@@ -564,19 +552,6 @@ public function __set($name, $value) {
         $this->response .= "Got {$agent_name}. ";
 
         return ${$agent_name};
-    }
-
-    public function settingsAgent($settings_array) {
-
-$t = $this->thing->container['api'];
-foreach($settings_array as $setting) {
-if (!isset($t[$setting])) {
-return null;}
-
-$t =$t[$setting];
-}
-return $t;
-
     }
 
     public function readAgent($text = null)
@@ -632,8 +607,8 @@ return $t;
         if ($this->stack_engine_state == "prod") {
             $agents = $prod_agents;
         }
-
         $web = "";
+        //        if (isset($this->thing_report['web'])) {
         if (isset($this->thing_report["web"])) {
             foreach ($agents as $i => $agent_name) {
                 if (
@@ -777,6 +752,8 @@ return $t;
             $thing_report["thing"] = $t;
             $this->setMemory($variable_name, $thing_report);
 
+            //$variable_name = "thing-json-" . $this->uuid;
+            //$this->setMemory($variable_name, $thing_report);
         }
 
         $this->thing->log("completed make.");
@@ -1069,6 +1046,24 @@ return $t;
         if ($agent == null) {
             $agent = $this->agent_name;
         }
+        /*
+        $whatIWant = $input;
+
+        $pos = strpos(strtolower($input), $agent);
+
+        if (($pos = strpos(strtolower($input), $agent . " is")) !== false) {
+            $whatIWant = substr($input, $pos + strlen($agent . " is"));
+        } elseif (($pos = strpos(strtolower($input), $agent)) !== false) {
+            // Distinguish if assertion match is at beginning or end of text.
+            if (strlen($input) == $pos + strlen($agent)) {
+                $length = strlen($input) - strlen($agent);
+                $whatIWant = substr($input, 0, $length);
+            } else {
+                $whatIWant = substr($input, $pos + strlen($agent));
+            }
+        }
+        $filtered_input = trim($whatIWant, " ");
+*/
 
         $string = $input;
         $str_pattern = $agent;
@@ -1844,7 +1839,6 @@ return $t;
             $thing = new Thing($uuid);
             if ($thing->thing != false) {
                 //$this->thing = $thing->thing;
-
                 $agent = new Agent($thing->thing);
 
                 return;
@@ -1892,6 +1886,7 @@ return $t;
 
             if (!isset($thing->subject)) {
                 $thing->subject = $this->input;
+                //               }
             }
 
             $agent = new $agent_namespace_name($thing, $agent_input);
@@ -2059,10 +2054,13 @@ return $t;
                     "thing_report" => $this->thing_report,
                     "score" => $score,
                 ];
+                //            if ($this->getAgent($agent_class_name, $input)) {
+                //return $this->thing_report;
             }
         }
         // Use length of matched agent name as proxy for match closeness.
         // If more than one word.
+        //$responsive_agents = $this->responsive_agents;
         usort($responsive_agents, function ($a, $b) {
             return -1 * ($a["score"] - $b["score"]);
         });
@@ -2258,26 +2256,6 @@ return $t;
         return;
     }
 
-    public function stripAgent($text = null)
-    {
-        $filtered_text = $text;
-        $pos = stripos($text, "agent");
-        if ($pos === 0) {
-            $filtered_text = trim(
-                substr_replace($text, "", 0, strlen("agent"))
-            );
-        }
-
-        // Strip Discord ids.
-        $filtered_text = preg_replace("/\<\@\!.*?\>/", "", $filtered_text);
-        $filtered_text = preg_replace("/\<\@.*?\>/", "", $filtered_text);
-
-        $filtered_text = ltrim($filtered_text);
-
-        return $filtered_text;
-    }
-
-
     /**
      *
      * @return unknown
@@ -2296,15 +2274,17 @@ return $t;
         if (is_array($this->agent_input)) {
             $agent_input_text = "";
         }
+        /*
+        $input = strtolower(
+            $agent_input_text . " " . $this->to . " " . $this->subject
+        );
+        if ($this->agent_input == null) {
+            $input = strtolower($this->to . " " . $this->subject);
+        } else {
+            $input = strtolower($agent_input_text);
+        }
+*/
         $input = $agent_input_text . " " . $this->to . " " . $this->subject;
-
-        // If there is no agent_input provided.
-        // Then set the input to the to and subject
-        // Otherwise set the input to the provided agent_input
-
-        // TODO recognize piped text from command line
-
-        // subject and agent_input
 
         if ($this->agent_input == null) {
             $input = $this->to . " " . $this->subject;
@@ -2312,10 +2292,7 @@ return $t;
             $input = $agent_input_text;
         }
 
-        // prodstack
-        if (substr($this->subject, 0, 12) == "THING | b97f") {
-           return false;
-        }
+        //$input = strtolower($this->input);
 
         // Recognize and ignore stack commands.
         // Devstack
@@ -2390,20 +2367,16 @@ return $t;
         $this->robot_agent = new Robot($this->thing, "robot");
 
         if ($this->robot_agent->isRobot()) {
-            $this->response .= "We think you are a robot. ";
+            $this->response .= "We think you are a robot.";
             $this->thing_report = $this->robot_agent->thing_report;
             return;
         }
 
         // ignore agent at the start
-//        $pos = stripos($input, "agent");
-//        if ($pos === 0) {
-//            $input = trim(substr_replace($input, "", 0, strlen("agent")));
-//        }
-
-        // ignore agent at the start
-        $input = $this->stripAgent($input);
-
+        $pos = stripos($input, "agent");
+        if ($pos === 0) {
+            $input = trim(substr_replace($input, "", 0, strlen("agent")));
+        }
 
         $dispatcher_agent = new Dispatcher($this->thing, "dispatcher");
 
@@ -2470,7 +2443,7 @@ return $t;
         if (isset($uuid) and is_string($uuid)) {
             $thing = new Thing($uuid);
 
-            if ( ($thing->thing != false) and (isset($thing->created_at)) ) {
+            if ($thing->thing != false) {
                 $f = trim(str_replace($uuid, "", $input));
 
                 // TODO: Test
@@ -2496,7 +2469,11 @@ return $t;
         }
 
         // Handle call intended for humans.
+        //        $t = $this->assert($input);
         $human_agent = new Human($this->thing, "human");
+
+        //$web_agent = new Web($this->thing,'web');
+
         if (is_string($human_agent->address)) {
             $this->thing_report = $human_agent->thing_report;
             return $this->thing_report;
@@ -2505,13 +2482,20 @@ return $t;
         // Strip @ callsigns from input
         $atsign_agent = new Atsign($this->thing, "atsign");
         $input = $atsign_agent->stripAtsigns($input);
+
         // Basically if the agent input directly matches an agent name
         // Then run it.
+
         // So look hear to generalize that.
+
         $text = urldecode($agent_input_text);
+
+        //$text = urldecode($input);
+
         //$text = urldecode($input);
 
         $text = strtolower($text);
+
         //$arr = explode(' ', trim($text));
 
         $arr = explode("\%20", trim(strtolower($text)));
@@ -2529,8 +2513,8 @@ return $t;
             return strlen($b) <=> strlen($a);
         });
         $matches = [];
-        foreach ($arr as $i => $ngram) {
 
+        foreach ($arr as $i => $ngram) {
             $ngram = ucfirst($ngram);
             if ($ngram == "Thing") {
                 continue;
@@ -2559,9 +2543,10 @@ return $t;
         }
 
         if (count($matches) == 1) {
-            $this->getAgent($matches[0], $this->agent_input);
+            $this->getAgent($matches[0]);
             return $this->thing_report;
         }
+
         // First things first.  Special instructions to ignore.
         if (strpos($input, "cronhandler run") !== false) {
             $this->thing->log('Agent "Agent" ignored "cronhandler run".');
@@ -2815,7 +2800,6 @@ return $t;
             // Compressions found.
             $input = $compression_thing->filtered_input;
         }
-
         $input = trim($input);
         $this->input = $input;
         // Check if it is a command (starts with s slash)
