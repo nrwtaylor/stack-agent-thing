@@ -1455,6 +1455,11 @@ class Agent
      */
     public function makeHelp()
     {
+//$this->{strtolower($this->agent_name) . "Help"};
+        if (isset($this->thing_report['help'])) {
+//echo $this->thing_report['help'];
+        //    $this->thing_report['help'] = $this->restoreUrl($this->thing_report['help']);
+        }
     }
 
     /**
