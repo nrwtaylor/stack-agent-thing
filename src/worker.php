@@ -65,6 +65,11 @@ function call_agent_function($job)
         $thing = new Thing($arr['uuid'], $agent_input);
         $start_time = $thing->elapsed_runtime();
     } else {
+var_dump($arr);
+if (($arr['to'] == null) and ($arr['from'] == null) and ($arr['subject'] == null)) {
+return true;
+}
+
         echo "worker found message\n";
         $thing = new \Nrwtaylor\StackAgentThing\Thing(null, $agent_input);
         $start_time = $thing->elapsed_runtime();
@@ -85,7 +90,7 @@ function call_agent_function($job)
     echo "worker timestamp " . $thing->microtime() . "\n";
     echo "job timestamp " . $thing->thing->created_at . "\n";
 
-    echo "agent input" . $agent_input . "\n";
+//    echo "agent input" . $agent_input . "\n";
 
     $do_not_respond = false;
     if (isset($arr['body']['messageId'])) {
