@@ -33,7 +33,6 @@ class Discord extends Agent
             $this->bot_name,
             "text",
         ]);
-
         $this->bot_url = $this->settingsAgent([
             "discord",
             "bots",
@@ -100,50 +99,7 @@ class Discord extends Agent
             "permissions_integer",
         ]);
 
-        $this->thing_report["info"] = $this->settingsAgent([
-            "discord",
-            "bots",
-            $this->bot_name,
-            "info",
-        ]);
-
-        $this->thing_report["help"] = $this->settingsAgent([
-            "discord",
-            "bots",
-            $this->bot_name,
-            "help",
-        ]);
-
-/*
-        $this->bot_url = $this->settingsAgent([
-            "discord",
-            "bots",
-            $this->bot_name,
-            "url",
-        ]);
-
-        $this->server_name = $this->settingsAgent([
-            "discord",
-            "servers",
-            $this->server_name,
-            "name",
-        ]);
-        $this->server_text = $this->settingsAgent([
-            "discord",
-            "servers",
-            $this->server_name,
-            "text",
-        ]);
-        $this->server_url = $this->settingsAgent([
-            "discord",
-            "servers",
-            $this->server_name,
-            "url",
-        ]);
-*/
-        $this->test = "Development code";
-
-        //$this->thing_report["info"] = "This is an agent to manage Discord.";
+        $this->node_list = ["sms send" => ["sms send"]];
 
         $channel = new Channel($this->thing, "discord");
     }
@@ -154,6 +110,16 @@ class Discord extends Agent
 
     public function sendDiscord($text, $to)
     {
+
+$bot_name = $to;
+
+$parts = explode(":",$to);
+if (count($parts) == 2) {
+   $to = $parts[1];
+   $bot_name = ucwords($parts[0]);
+}
+
+
         $bot_webhook = $this->settingsAgent([
             "discord",
             "servers",
@@ -161,7 +127,7 @@ class Discord extends Agent
             "webhook",
         ]);
 
-        $datagram = ["to" => $bot_webhook, "from" => $to, "subject" => $text];
+        $datagram = ["to" => $bot_webhook, "from" => $bot_name, "subject" => $text];
 
         $this->webhookDiscord($datagram);
     }
@@ -287,6 +253,7 @@ class Discord extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -362,77 +329,10 @@ class Discord extends Agent
                 $this->bot_url .
                 "."
         );
-    }
 
-    public function makeSMS()
-    {
-        $response = "No response seen. ";
-        if ($this->response != "") {
-            $response = $this->response;
-        }
-
-        $sms = "DISCORD | " . $response;
-        $this->sms_message = $sms;
-        $this->thing_report["sms"] = $sms;
-    }
-
-    public function makeWeb()
-    {
-        $web = "";
-
-        if (isset($this->thing_report["pdf"])) {
-            $link = $this->web_prefix . "thing/" . $this->uuid . "/discord.pdf";
-            $this->node_list = ["zoom" => ["zoom"]];
-            $web = "";
-        }
-
-        if (isset($this->html_image)) {
-            $web .= '<a href="' . $link . '">';
-            $web .= $this->html_image;
-            $web .= "</a>";
-        }
-/*
-       $web .= "<br>";
-        $web .= $this->restoreUrl(
-            "Use this URL to add our Discord bot " .
-                $this->bot_name .
-                " " .
-                $this->bot_url .
-                "."
-        );
         $web .= "<br>";
-*/
-$web .= $this->bot_text;
-
-        $button_text = 'Add Edna to your Discord server';
-$link_begin = '<a href="'.                 $this->bot_url .'">';
-$link_end = '</a>';
-        $web .=
-            $link_begin .
-            '<div class="payment-button" id="checkout-button"><b>' .
-            $button_text .
-            '</b></div>'. $link_end;
-
 
         $this->thing_report["web"] = $web;
-    }
-
-    public function helpDiscord() {
-
-        $web .= "See if the operators of Edna are around. Chat with us live, message us, and test out Edna commands with support in Edna's Discord server.";
-        $web .= "<br>";
-       $web .= "<br>";
-        $web .= $this->restoreUrl(
-            "Use this URL to join our Discord server " .
-                $this->server_name .
-                " " .
-                $this->server_url .
-                "."
-        );
-
-        $web .= "<br>";
-$this->thing_report['help'] = "bananas";
-
     }
 
     function eventGet()

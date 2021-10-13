@@ -1214,7 +1214,7 @@ $class_name = $this->agent_class_name_current;
         ];
 
         foreach ($a as $secs => $str) {
-            $d = $etime / $secs;
+            $d = (float) $etime / (float) $secs;
             if ($d >= 1) {
                 $r = round($d);
                 return $r . ' ' . ($r > 1 ? $a_plural[$str] : $str) . '';
