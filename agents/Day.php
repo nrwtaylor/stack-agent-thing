@@ -1411,7 +1411,17 @@ class Day extends Agent
         }
 
         if (count($scores) == 1) {
-            return array_key_first($scores);
+
+if (!function_exists('array_key_first')) {
+   // function array_key_first(array $scores) {
+        foreach($arr as $key => $unused) {
+            return $key;
+        }
+        return NULL;
+    //}
+}
+
+//            return array_key_first($scores);
         }
 
         // Leave it here for now.
