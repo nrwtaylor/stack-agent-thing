@@ -127,6 +127,81 @@ class Discord extends Agent
     {
     }
 
+
+    public function sendDiscord($text, $to)
+    {
+
+$bot_name = $to;
+
+$parts = explode(":",$to);
+if (count($parts) == 2) {
+   $to = $parts[1];
+   $bot_name = ucwords($parts[0]);
+}
+
+
+        $bot_webhook = $this->settingsAgent([
+            "discord",
+            "servers",
+            $to,
+            "webhook",
+        ]);
+
+        $datagram = ["to" => $bot_webhook, "from" => $bot_name, "subject" => $text];
+
+        $this->webhookDiscord($datagram);
+    }
+
+
+    // https://github.com/agorlov/discordmsg
+    public function webhookDiscord($datagram = null)
+    {
+        if ($datagram == null) {
+            return true;
+        }
+
+        $url = $datagram["to"];
+        $from = $datagram["from"];
+        $msg = $datagram["subject"];
+        $avatar = null;
+
+        $curl = curl_init();
+        //timeouts - 5 seconds
+        curl_setopt($curl, CURLOPT_TIMEOUT, 5); // 5 seconds
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5); // 5 seconds
+
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+            "Content-Type: application/json",
+        ]);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+        curl_setopt(
+            $curl,
+            CURLOPT_POSTFIELDS,
+            json_encode([
+                "content" => $msg,
+                "username" => $from,
+                "avatar_url" => $avatar,
+            ])
+        );
+
+        $output = json_decode(curl_exec($curl), true);
+
+        if (curl_getinfo($curl, CURLINFO_HTTP_CODE) != 204) {
+            curl_close($curl);
+            $this->response .=
+                "Could not send message: " . $output["message"] . ". ";
+            return true;
+            //throw new Exception("Something went wrong to send a discord message: " . $output['message']);
+        }
+
+        curl_close($curl);
+    }
+
     function eventSet($input = null)
     {
         if ($input == null) {
@@ -226,13 +301,15 @@ class Discord extends Agent
             $this->response .=
                 $this->server_name . " link " . $this->server_url . ". ";
         }
+        //$message_reply_id = $this->agent_input;
+        $names = $this->thing->Write(["discord", "reply_id"], null);
 
         //$message_reply_id = $this->agent_input;
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
-            ["discord", "reply_id"],
-            null
-        );
+//        $this->thing->json->setField("variables");
+ //       $names = $this->thing->json->writeVariable(
+ //           ["discord", "reply_id"],
+ //           null
+ //       );
     }
 
     public function makeSMS()
