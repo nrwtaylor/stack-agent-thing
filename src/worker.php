@@ -39,8 +39,16 @@ $worker->addFunction($name, function() use($task) {
 // This is handled by supervisor
 //$worker->setTimeout(1000);
 
-while ($worker->work()) {
+$worker->setTimeout(5000);
+
+while ($worker->work() || $worker->returnCode() == GEARMAN_TIMEOUT) {
     echo "\nWaiting for a job\n";
+
+  if($worker->returnCode() == GEARMAN_TIMEOUT)
+  {
+    echo "Timeout.\n";
+    exit(0);
+  }
 
       if ($worker->returnCode() != GEARMAN_SUCCESS)
       {

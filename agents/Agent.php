@@ -165,7 +165,6 @@ class Agent
             $this->run();
 
             $this->make();
-
             // This is where we deal with insufficient space to serialize the variabes to the stack.
             //if (!isset($this->signal_thing)) {return true;}
             //        try {
@@ -184,6 +183,7 @@ class Agent
             $this->thing->log("caught overflow exception.");
             // Executed only in PHP 7, will not match in PHP 5
         } catch (\Throwable $t) {
+
             $this->thing_report["sms"] = $t->getMessage();
             $web_thing = new Thing(null);
             $web_thing->Create(
@@ -222,7 +222,6 @@ class Agent
         if ($this->agent_input == null or $this->agent_input == "") {
             $this->respond();
         }
-
         if (!isset($this->response)) {
             $this->response = "No response found.";
         }
@@ -237,6 +236,7 @@ class Agent
         );
         $this->thing_report["log"] = $this->thing->log;
         if (isset($this->test) and $this->test) {
+
             $this->test();
         }
     }
@@ -341,7 +341,6 @@ class Agent
                         $agent_input
                     );
                 }
-
                 $response = $this->thing->{$agent_name .
                     "_handler"}->{$function_name}(...$args);
                 return $response;
@@ -373,7 +372,6 @@ class Agent
                 return [$variable, $agent_handler];
             }
         }
-
         throw new \Exception(
             "Agent (" .
                 $this->agent_name .
@@ -1872,6 +1870,150 @@ class Agent
         if (strtolower($this->agent_name) == strtolower($agent_class_name)) {
             return true;
         }
+
+        //if ($agent_class_name == null) {return true;}
+
+        //$shouldExit = true;
+        register_shutdown_function([$this, "shutdownHandler"]);
+        /*
+register_shutdown_function(function() use (&$shouldExit) {
+    if (! $shouldExit) {
+echo "!shouldexit";
+        return;
+    }
+$this->shutdownHandler();
+});
+*/
+
+        //if ($agent_class_name == 'Test') {return false;}
+        set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
+
+        //set_error_handler("warning_handler", E_WARNING);
+        try {
+            $agent_namespace_name =
+                "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+            $this->thing->log(
+                'trying Agent "' . $agent_class_name . '".',
+                "INFORMATION"
+            );
+
+
+            if ($agent_class_name == null) {
+
+                throw \Exception($agent_class_name . " is a null agent.");
+            }
+            if (
+                is_subclass_of(
+                    $agent_namespace_name,
+                    "\\Nrwtaylor\\StackAgentThing\\Agent"
+                ) === false
+            ) {
+
+                $this->thing->log($agent_namespace_name . " is not an agent.");
+                throw \Exception($agent_namespace_name . " is not an agent.");
+            }
+
+            // In test 25 May 2020
+
+            if (!isset($thing->subject)) {
+                $thing->subject = $this->input;
+            }
+var_dump("agent_ook", $agent_namespace_name);
+
+            $agent = new $agent_namespace_name($thing, $agent_input);
+var_dump("week_pog", $agent_namespace_name);
+
+            //$shouldExit = false;
+
+            /*
+$pid = pcntl_fork();
+if ($pid == -1) {
+ die('could not fork');
+} else if ($pid) {
+ // we are the parent
+ pcntl_waitpid($pid, $status, WUNTRACED); //Protect against Zombie children
+ if (pcntl_wifexited($status)) {
+   echo "Child exited normally";
+ } else if (pcntl_wifstopped($status)) {
+   echo "Signal: ", pcntl_wstopsig($status), " caused this child to stop.";
+ } else if (pcntl_wifsignaled($status)) {
+   echo "Signal: ",pcntl_wtermsig($status)," caused this child to exit with return code: ", pcntl_wexitstatus($status);
+ }
+} else {
+            $agent = new $agent_namespace_name($thing, $agent_input);
+            $this->thing_report = $agent->thing_report;
+            $this->agent = $agent;
+// pcntl_exec("/path/to/php/script");
+ echo "Could not Execute...";
+}
+*/
+
+            restore_error_handler();
+
+            // If the agent returns true it states it's response is not to be used.
+            if (isset($agent->response) and $agent->response === true) {
+                throw new Exception("Flagged true.");
+            }
+
+            //if ($agent->thing_report == false) {return false;}
+
+            //if (isset($agent)) {
+            $this->thing_report = $agent->thing_report;
+            $this->agent = $agent;
+            //} else {
+            //$this->thing_report = false;
+            //$this->agent = false;
+            //$agent = false;
+            //}
+        } catch (\Throwable $t) {
+            restore_error_handler();
+            $this->thing->log("caught throwable.", "WARNING");
+            return false;
+        } catch (\Error $ex) {
+            restore_error_handler();
+            // Error is the base class for all internal PHP error exceptions.
+            $this->thing->log(
+                'caught error. Could not load "' . $agent_class_name . '".',
+                "WARNING"
+            );
+            $message = $ex->getMessage();
+
+            // $code = $ex->getCode();
+            $file = $ex->getFile();
+            $line = $ex->getLine();
+
+            $input = $message . "  " . $file . " line:" . $line;
+            $this->thing->log($input, "WARNING");
+
+            // This is an error in the Place, so Bork and move onto the next context.
+            // $bork_agent = new Bork($this->thing, $input);
+            //continue;
+            return false;
+        }
+        return $agent;
+    }
+
+    /**
+     *
+     * @param unknown $agent_class_name (optional)
+     * @param unknown $agent_input      (optional)
+     * @return unknown
+     */
+    public function depreacate_getAgent(
+        $agent_class_name = null,
+        $agent_input = null,
+        $thing = null
+    ) {
+        //$agent = null;
+        if ($thing == null) {
+            $thing = $this->thing;
+        }
+
+        // Do not call self.
+        // devstack depthcount
+        if (strtolower($this->agent_name) == strtolower($agent_class_name)) {
+            return true;
+        }
         register_shutdown_function([$this, "shutdownHandler"]);
 
         //if ($agent_class_name == 'Test') {return false;}
@@ -2204,8 +2346,11 @@ class Agent
             //$arr = explode(' ', $agent_input_text);
         }
 
+
         // Does this agent have code.
         $this->validateAgents($arr);
+
+
 
         $uuid_agent = new Uuid($this->thing, "uuid");
         //$t = $uuid_agent->stripUuids($input);
@@ -2254,6 +2399,7 @@ class Agent
 
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
+
         foreach ($this->responsive_agents as $i => $responsive_agent) {
             //echo $responsive_agent['agent_name']. " " ;
         }
@@ -2433,7 +2579,6 @@ class Agent
             // Reset the database email address
             $this->thing->db->from = $temp_email;
         }
-
         if (isset($nuuid->nuuid_uuid) and is_string($nuuid->nuuid_uuid)) {
             $thing = new Thing($nuuid->nuuid_uuid);
             $f = trim(str_replace($nuuid->nuuid_uuid, "", $input));
@@ -3012,6 +3157,7 @@ class Agent
 
         // Temporarily alias robots
         if (strpos($input, "robots") !== false) {
+
             $this->thing->log(
                 "<pre> Agent created a Robot agent</pre>",
                 "INFORMATION"
@@ -3029,8 +3175,11 @@ class Agent
                 "ms.",
             "OPTIMIZE"
         );
+
+
         $arr = $this->extractAgents($input);
         $this->input = $input;
+
 
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]["thing_report"];
@@ -3069,9 +3218,11 @@ class Agent
             $this->thing_report = $translink_thing->thing_report;
             return $this->thing_report;
         }
+var_dump("agent_place");
 
         $this->thing->log("now looking at Place Context.");
         $place_thing = new Place($this->thing, "place");
+var_dump("agent _done_place");
 
         if (!$place_thing->isPlace($input)) {
             //        if (!$place_thing->isPlace($this->subject)) {
@@ -3124,7 +3275,6 @@ class Agent
         }
 
         $frequency_thing = new Frequency($this->thing, "extract");
-
         if (
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag

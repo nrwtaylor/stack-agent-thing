@@ -81,15 +81,17 @@ class Place extends Agent
         $this->lastPlace();
 
         // Read the subject to determine intent.
-
         $this->railway_place = new Variables(
             $this->thing,
             "variables place " . $this->from
         );
+
     }
 
     function set()
     {
+var_dump("place set");
+
         if (!isset($this->refreshed_at)) {
             $this->refreshed_at = $this->thing->time();
         }
@@ -224,39 +226,6 @@ class Place extends Agent
         return $place;
     }
 
-    /*
-    function getVariable($variable_name = null, $variable = null)
-    {
-        // This function does a minor kind of magic
-        // to resolve between $variable, $this->variable,
-        // and $this->default_variable.
-
-        if ($variable != null) {
-            // Local variable found.
-            // Local variable takes precedence.
-            return $variable;
-        }
-
-        if (isset($this->$variable_name)) {
-            // Class variable found.
-            // Class variable follows in precedence.
-            return $this->$variable_name;
-        }
-
-        // Neither a local or class variable was found.
-        // So see if the default variable is set.
-        if (isset( $this->{"default_" . $variable_name} )) {
-
-            // Default variable was found.
-            // Default variable follows in precedence.
-            return $this->{"default_" . $variable_name};
-        }
-
-        // Return false ie (false/null) when variable
-        // setting is found.
-        return false;
-    }
-*/
     function getPlace($selector = null)
     {
         foreach ($this->places as $place) {
@@ -946,7 +915,7 @@ if (file_exists($file)) {
         $this->thing_report['sms'] = $sms;
     }
 
-    function makeWeb()
+    public function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
@@ -1149,7 +1118,7 @@ if (file_exists($font)) {
     }
 
     // Must be able to factor this out with Image. Eventually.
-    function ImageRectangleWithRoundedCorners(
+    public function ImageRectangleWithRoundedCorners(
         &$im,
         $x1,
         $y1,
@@ -1213,6 +1182,8 @@ if (file_exists($font)) {
 
     public function respondResponse()
     {
+var_dump("adfas");
+
         // Thing actions
 
         $this->thing->flagGreen();
