@@ -47,6 +47,12 @@ class Punctuation extends Agent
                 ["punctuation", "refreshed_at"],
                 $time_string
             );
+
+/*                $this->punctuations[] = $gram;
+            } else {
+                $message .= " " . $gram;
+            }
+*/
         }
 
         // If it has already been processed ...

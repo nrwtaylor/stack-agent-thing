@@ -81,15 +81,17 @@ class Place extends Agent
         $this->lastPlace();
 
         // Read the subject to determine intent.
-
         $this->railway_place = new Variables(
             $this->thing,
             "variables place " . $this->from
         );
+
     }
 
     function set()
     {
+var_dump("place set");
+
         if (!isset($this->refreshed_at)) {
             $this->refreshed_at = $this->thing->time();
         }
@@ -908,7 +910,7 @@ if (file_exists($file)) {
         $this->thing_report['sms'] = $sms;
     }
 
-    function makeWeb()
+    public function makeWeb()
     {
         $link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
 
@@ -1111,7 +1113,7 @@ if (file_exists($font)) {
     }
 
     // Must be able to factor this out with Image. Eventually.
-    function ImageRectangleWithRoundedCorners(
+    public function ImageRectangleWithRoundedCorners(
         &$im,
         $x1,
         $y1,
@@ -1175,6 +1177,8 @@ if (file_exists($font)) {
 
     public function respondResponse()
     {
+var_dump("adfas");
+
         // Thing actions
 
         $this->thing->flagGreen();

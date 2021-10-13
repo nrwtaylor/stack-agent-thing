@@ -57,9 +57,13 @@ class Thing
         // It is a significant Stack concern.
 
         if (!isset($GLOBALS['stack_path'])) {
+$directory = __DIR__ .'/../../../../';
+
             // Try this, otherwise fail.
-            $GLOBALS['stack_path'] = "/var/www/stackr.test/";
-            //$GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+            //$GLOBALS['stack_path'] = "/var/www/stackr.test/";
+//            $GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+            $GLOBALS['stack_path'] = $directory;
+
         }
 
         //set_error_handler(array($this, "exception_error_handler"));
@@ -993,7 +997,95 @@ if (isset($this->db)) {
         echo $text;
     }
 
-    function log($text = null, $logging_level = null)
+function log($text = null, $logging_level = null)
+    {
+        if ($text == null) {
+            return $this->log_last;
+        }
+
+        if (!isset($this->log)) {
+            $this->log = "\n";
+        }
+        // DEBUG, INFORMATION, WARNING, ERROR, FATAL
+        // Plus OPTIMIZE
+
+        if ($logging_level == null) {
+            $logging_level = "INFORMATION";
+            if (isset($this->logging_level_default)) {
+                $logging_level = $this->logging_level_default; // If message isn't specific - assume WARNING
+            }
+            //if (isset($this->logging_level)) {$logging_level = $this->logging_level;}
+        }
+
+        //get the calling class
+
+        // Causing a segmentation fault?
+        //    72.1589   76828520
+        //   -> debug_backtrace() /var/www/stackr.test/vendor/nrwtaylor/stack-agent-thing/src/Thing.php:1020
+
+        // Adjusted PHP7.4 CLI dev memory limit. Test
+
+        //        $trace = debug_backtrace();
+        //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+//        $trace = debug_backtrace(false, 2);
+
+        // Get the class that is asking for who awoke it
+        $class_name = "X";
+/*
+        if (isset($trace[1]['class'])) {
+            $class_namespace = $trace[1]['class'];
+            $class_name_array = explode("\\", $class_namespace);
+            $class_name = end($class_name_array);
+        }
+*/
+        $runtime = number_format($this->elapsed_runtime()) . "ms";
+
+        $text = strip_tags($text);
+if (isset($this->agent_class_name_current )){
+$class_name = $this->agent_class_name_current;
+}
+        $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
+
+        $text = str_replace($agent_prefix, "", $text);
+
+        $text = lcfirst($text);
+        $text = trim($text);
+        $t =
+            str_pad($runtime, 10, " ", STR_PAD_LEFT) .
+            " " .
+            $agent_prefix .
+            ' ' .
+            strip_tags($text);
+
+        $this->log .= $t . " [" . $logging_level . "]" . "<br>";
+
+        if (isset($this->logging_console)) {
+            switch (strtoupper($this->logging_console)) {
+                case "ON":
+                    $this->console($t . " [" . $logging_level . "]" . "\n");
+                    break;
+                case "OPTIMIZE":
+                case "FATAL":
+                case "ERROR":
+                case "WARNING":
+                case "INFORMATION":
+                case "DEBUG":
+                    if (
+                        strtoupper($logging_level) ===
+                        strtoupper($this->logging_console)
+                    ) {
+                        $this->console($t . " [" . $logging_level . "]" . "\n");
+                        break;
+                    }
+                default:
+                //echo "i is not equal to 0, 1 or 2";
+            }
+        }
+        $this->log_last = $t;
+    }
+
+    function deprecate_log($text = null, $logging_level = null)
     {
         if ($text == null) {
             return $this->log_last;

@@ -30,4 +30,11 @@ $container['db'] = function ($c) {
     return $pdo;
 };
 
-
+$container['messageids'] = function ($c) {
+//    $settings = $c->get('settings')['renderer'];
+    $c->id_list = array("hello");
+//    if (!isset($identities)) {$identities = array();}
+ 
+//$v = "hello";
+    return $c->id_list;
+};

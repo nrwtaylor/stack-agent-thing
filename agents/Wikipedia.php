@@ -174,14 +174,13 @@ class Wikipedia extends Agent
     {
         $sms = "WIKIPEDIA | ";
 
-        if (!isset($this->text) or $this->text == "") {
+        if ((!isset($this->text)) or ($this->text == "")) {
             $text = "Nothing found.";
         } else {
             $text = $this->truncate($this->text, 100);
         }
 
         $sms .= $text;
-
         $sms .= " | " . $this->response;
         $this->thing_report["sms"] = $sms;
         $this->sms_message = $sms;
@@ -189,7 +188,7 @@ class Wikipedia extends Agent
 
     public function makeMessage()
     {
-        if (!isset($this->text) or $this->text == "") {
+        if ((!isset($this->text)) or ($this->text == "")) {
             $text = "Nothing found.";
         } else {
             $text = $this->truncate($this->text, 100);
@@ -209,7 +208,6 @@ class Wikipedia extends Agent
         $this->thing_report["message"] = $message;
         $this->message = $message;
     }
-
     public function extractNumber($input = null)
     {
         if ($input == null) {

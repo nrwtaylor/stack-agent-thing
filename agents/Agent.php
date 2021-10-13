@@ -210,6 +210,7 @@ class Agent
             $this->read();
             $this->run();
             $this->make();
+
             $this->set();
         } catch (\OverflowException $t) {
             $this->response =
@@ -260,7 +261,6 @@ class Agent
         if ($this->agent_input == null or $this->agent_input == "") {
             $this->respond();
         }
-
         if (!isset($this->response)) {
             $this->response = "No response found.";
         }
@@ -269,7 +269,6 @@ class Agent
         $this->thing->log(
             "ran for " . number_format($this->thing->elapsed_runtime()) . "ms."
         );
-        //$this->thing->agent_name = "X";
         $this->thing_report["etime"] = number_format(
             $this->thing->elapsed_runtime()
         );
@@ -284,7 +283,20 @@ class Agent
     public function initAgent()
     {
     }
+/*
+    public function settingsAgent($settings_array, $default_setting = null)
+    {
+        $t = $this->thing->container["api"];
+        foreach ($settings_array as $setting) {
+            if (!isset($t[$setting])) {
+                return $default_setting;
+            }
 
+            $t = $t[$setting];
+        }
+        return $t;
+    }
+*/
     // TODO DEV?
     public function __call($agent_function, $args)
     {
@@ -319,7 +331,6 @@ if (!isset($this->thing)) {return true;}
     //    $this->thing->log(
     //        "Check if " . $agent_name . " == " . $this->agent_name
     //    );
-
         if ($agent_name == $this->agent_name) {
             return false;
         }
@@ -383,7 +394,6 @@ if (!isset($this->thing)) {return true;}
                         $agent_input
                     );
                 }
-
                 $response = $this->thing->{$agent_name .
                     "_handler"}->{$function_name}(...$args);
   //              $this->thing->log("__call response complete");
@@ -416,7 +426,6 @@ if (!isset($this->thing)) {return true;}
                 return [$variable, $agent_handler];
             }
         }
-
         throw new \Exception(
             "Agent (" .
                 $this->agent_name .
@@ -934,6 +943,7 @@ public function __set($name, $value) {
         return $agent_trace;
         // Get the class that is asking for who awoke it
         if (!isset($trace[1]["class"])) {
+
             $this->calling_agent = true;
             return true;
         }
@@ -1487,6 +1497,11 @@ public function __set($name, $value) {
      */
     public function makeHelp()
     {
+//$this->{strtolower($this->agent_name) . "Help"};
+        if (isset($this->thing_report['help'])) {
+//echo $this->thing_report['help'];
+        //    $this->thing_report['help'] = $this->restoreUrl($this->thing_report['help']);
+        }
     }
 
     /**
@@ -2240,8 +2255,11 @@ if ($pid == -1) {
             $arr = $this->ngramsText($agent_input_text);
         }
 
+
         // Does this agent have code.
         $this->validateAgents($arr);
+
+
 
         $uuid_agent = new Uuid($this->thing, "uuid");
         //$t = $uuid_agent->stripUuids($input);
@@ -2288,6 +2306,7 @@ if ($pid == -1) {
 
         // Does this agent provide a text response.
         $this->responsiveAgents($this->agents);
+
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
     }
@@ -2418,7 +2437,7 @@ if ($pid == -1) {
         $this->robot_agent = new Robot($this->thing, "robot");
 
         if ($this->robot_agent->isRobot()) {
-            $this->response .= "We think you are a robot. ";
+            $this->response .= "We think you are a robot.";
             $this->thing_report = $this->robot_agent->thing_report;
             return;
         }
@@ -2564,6 +2583,7 @@ if ($pid == -1) {
 
         // Handle call intended for humans.
         $human_agent = new Human($this->thing, "human");
+
         if (is_string($human_agent->address)) {
             $this->thing_report = $human_agent->thing_report;
             return $this->thing_report;
@@ -3100,8 +3120,11 @@ if ($pid == -1) {
                 "ms.",
             "OPTIMIZE"
         );
+
+
         $arr = $this->extractAgents($input);
         $this->input = $input;
+
 
         if (count($this->responsive_agents) > 0) {
             $this->thing_report = $this->responsive_agents[0]["thing_report"];
@@ -3140,9 +3163,11 @@ if ($pid == -1) {
             $this->thing_report = $translink_thing->thing_report;
             return $this->thing_report;
         }
+var_dump("agent_place");
 
         $this->thing->log("now looking at Place Context.");
         $place_thing = new Place($this->thing, "place");
+var_dump("agent _done_place");
 
         if (!$place_thing->isPlace($input)) {
             //        if (!$place_thing->isPlace($this->subject)) {
@@ -3195,7 +3220,6 @@ if ($pid == -1) {
         }
 
         $frequency_thing = new Frequency($this->thing, "extract");
-
         if (
             $frequency_thing->hasFrequency($input) and
             !$frequency_exception_flag

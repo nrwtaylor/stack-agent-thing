@@ -3,6 +3,7 @@ namespace Nrwtaylor\StackAgentThing;
 
 // Refactor to use GLOBAL variable
 require "/var/www/stackr.test/vendor/autoload.php";
+//require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 ini_set("display_startup_errors", 1);
 ini_set("display_errors", 1);
@@ -18,6 +19,11 @@ $worker->addServer();
 $uuid = null;
 $name = "call_agent";
 $task = "Nrwtaylor\StackAgentThing\call_agent_function";
+//$worker->addFunction(
+//    $name,
+//    $task,
+//    $uuid
+//);
 
 $worker->addFunction(
     $name,
@@ -49,14 +55,23 @@ $worker->addFunction(
 // This is handled by supervisor
 //$worker->setTimeout(1000);
 
-while ($worker->work()) {
+$worker->setTimeout(5000);
 
-    if ($worker->returnCode() != GEARMAN_SUCCESS) {
-        echo "worker unsuccessful [" . $worker->returnCode() . "]\n";
-    }
+while ($worker->work() || $worker->returnCode() == GEARMAN_TIMEOUT) {
+    echo "\nWaiting for a job\n";
 
-    echo "\n";
-    echo "worker waiting for a job\n";
+  if($worker->returnCode() == GEARMAN_TIMEOUT)
+  {
+    echo "Timeout.\n";
+    exit(0);
+  }
+
+      if ($worker->returnCode() != GEARMAN_SUCCESS)
+      {
+        echo "return_code: " . $worker->returnCode() . "\n";
+      }
+        echo "\nGearman return code " . $worker->returnCode() . "\n";
+
 }
 
 function call_agent_function($job)
@@ -69,23 +84,33 @@ function call_agent_function($job)
         $agent_input = $arr["agent_input"];
     }
 
-    if (isset($arr["uuid"])) {
-        echo "worker found uuid\n";
-        $thing = new Thing($arr["uuid"], $agent_input);
+    if (isset($arr['uuid'])) {
+        echo "worker found uuid - loading thing " . $arr['uuid'] . "\n";
+        $thing = new Thing($arr['uuid'], $agent_input);
         $start_time = $thing->elapsed_runtime();
     } else {
+var_dump($arr);
+if (($arr['to'] == null) and ($arr['from'] == null) and ($arr['subject'] == null)) {
+return true;
+}
+
         echo "worker found message\n";
         $thing = new \Nrwtaylor\StackAgentThing\Thing(null, $agent_input);
         $start_time = $thing->elapsed_runtime();
         $thing->Create($arr["to"], $arr["from"], $arr["subject"]);
     }
 
+    //if ($thing->from== "17787923915") {
+    //    echo "matched number";
+    //    return true;
+    //}
+
     if ($thing->thing == false) {
         echo "Thing is false";
-        //return true;
+        return true;
     }
-    echo "thing nuuid " . $thing->nuuid . "\n";
-    echo "thing uuid " . $thing->uuid . "\n";
+    echo "worker nuuid " . $thing->nuuid . "\n";
+    echo "worker uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
 
     $age = true;
@@ -100,22 +125,27 @@ function call_agent_function($job)
     }
     echo "agent input " . $agent_input_text . "\n";
 
-    $do_not_respond = false;
-
     // Exploring here to see how long it has been waiting.
     // I don't see a call to get the task age from Gearman.
     // So this will show the age a a uuid retrieved from the stack.
     // Or that a new thing was created.
     echo "thing age is " . $thing->human_time($age) . " ago.\n";
 
-    if (isset($arr["body"]["messageId"])) {
-        $message_id = $arr["body"]["messageId"];
+
+    echo "job timestamp " . $thing->thing->created_at . "\n";
+
+//    echo "agent input" . $agent_input . "\n";
+
+    $do_not_respond = false;
+    if (isset($arr['body']['messageId'])) {
+        $message_id = $arr['body']['messageId'];
 
         $m = $thing->db->variableSearch(null, $message_id);
 
-        var_dump(count($m["things"]));
-        if (count($m["things"]) > 0) {
-            echo "Found message already.";
+        echo "things with message idenfifier " . $message_id . ": " . count($m['things']) . "\n";
+        if (count($m['things']) > 0) {
+            echo "Found message already.\n";
+
             $do_not_respond = true;
         }
 
@@ -156,7 +186,7 @@ function call_agent_function($job)
 
     echo "worker ran for " .
         number_format($thing->elapsed_runtime() - $start_time) .
-        "ms\n";
+        "ms\n\n";
 
     $json = json_encode(
         $t->thing_report,

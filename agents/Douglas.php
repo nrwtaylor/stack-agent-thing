@@ -303,6 +303,15 @@ class Douglas extends Agent
             return;
         }
         $association_uuids = $associations["agent"];
+
+/*
+        $associations = json_decode($this->thing->thing->associations, true);
+        //var_dump($associations);
+        if ($associations === null) {
+            return;
+        }
+        $association_uuids = $associations['agent'];
+*/
         $this->association_uuids = $association_uuids;
     }
 

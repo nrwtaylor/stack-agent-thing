@@ -522,6 +522,8 @@ class Choice
                 //$url = "http://project-stack.dev:8080/public/thing/".$item['uuid']."/".$this->alphanumeric($item['choice']);
                 $word = $item["choice"];
 
+
+//                $thing = new Thing(null);
                 $slug_agent = new Slug(null, "slug");
                 $choice_slug = $slug_agent->getSlug($item["choice"]);
 

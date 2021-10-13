@@ -66,10 +66,11 @@ class Week extends Agent
             $this->default_canvas_size_x,
             $this->default_canvas_size_y
         );
+
     }
 
     public function set()
-    {
+{
         $this->setWeek();
     }
 
@@ -146,9 +147,7 @@ class Week extends Agent
     public function respondResponse()
     {
         $this->thing->flagGreen();
-
         $this->makeChoices();
-
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
@@ -284,6 +283,7 @@ class Week extends Agent
      */
     public function makePNG()
     {
+
         if (isset($this->canvas_size_x)) {
             $canvas_size_x = $this->canvas_size_x;
             $canvas_size_y = $this->canvas_size_x;
@@ -494,7 +494,6 @@ class Week extends Agent
             $this->thing_report['pdf'] = null;
             return;
         }
-
         $this->getWhatis($this->subject);
         try {
             // initiate FPDI
@@ -633,7 +632,6 @@ class Week extends Agent
                 return;
             }
         }
-
         $input_agent = new Input($this->thing, "input");
         $discriminators = ['wedge', 'slice'];
         $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
@@ -642,7 +640,6 @@ class Week extends Agent
         if ($type != false) {
             $this->type = $type;
         }
-
         $keywords = ["week", "day"];
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {

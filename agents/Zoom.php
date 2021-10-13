@@ -38,6 +38,9 @@ class Zoom extends Agent
         $this->urls = $this->settingsAgent(["zoom", "urls"]);
         $this->url = $this->settingsAgent(["zoom", "url"]);
 
+        $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        $this->url = $this->settingsAgent(["zoom", "url"]);
+
         $this->initZoom();
     }
 

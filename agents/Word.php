@@ -455,6 +455,7 @@ class Word extends Agent
         }
 
         if ($number === null or $number === false) {
+
             $min_number = 3;
             $max_number = $number;
             if ($number == false) {
@@ -759,6 +760,14 @@ class Word extends Agent
         $this->search_words = $words;
         $this->extractWords($words);
 
+
+        if ($this->word != null) {
+            return;
+        }
+
+        $words = $input;
+        $this->search_words = $words;
+        $this->extractWords($words);
 
         if ($this->word != null) {
             return;

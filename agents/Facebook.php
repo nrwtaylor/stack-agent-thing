@@ -7,21 +7,18 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Facebook
-{
-    public $var = "hello";
+class Facebook extends Agent {
 
-    function __construct(Thing $thing, $input = null)
-    {
-        $this->input = $input;
-        $this->cost = 50;
+	public $var = 'hello';
+
+    public function init() {
+    //function __construct(Thing $thing, $input = null) {
+	//	$this->input = $input;
+	//	$this->cost = 50;
 
         $this->test = "Development code";
 
-        $this->thing = $thing;
-
-        $this->thing_report = ["thing" => $this->thing->thing];
-        $this->thing_report["info"] = "This is a facebook message agent.";
+		$this->thing_report['info'] = 'This is a facebook message agent.';
 
         $this->app_token =
             $this->thing->container["api"]["facebook"]["app token"];
@@ -31,43 +28,74 @@ class Facebook
         $this->page_access_token =
             $this->thing->container["api"]["facebook"]["page_access_token"];
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
 
         $this->agent_prefix = 'Agent "Facebook" ';
 
         $this->node_list = ["sms send" => ["sms send"]];
 
-        $this->thing->log(
-            'Agent "Facebook" running on Thing ' . $this->thing->nuuid . "."
-        );
-        $this->thing->log(
-            'Agent "Facebook" received this Thing "' . $this->subject . '".'
-        );
+//		$this->thing->log( 'Agent "Facebook" running on Thing ' .  $this->thing->nuuid . '.' );
+//		$this->thing->log( 'Agent "Facebook" received this Thing "' .  $this->subject . '".' );
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container["stack"]["web_prefix"];
-        $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
-        $this->word = $thing->container["stack"]["word"];
-        $this->email = $thing->container["stack"]["email"];
+//        $this->web_prefix = $thing->container['stack']['web_prefix'];
+  //      $this->mail_postfix = $thing->container['stack']['mail_postfix'];
+    //    $this->word = $thing->container['stack']['word'];
+      //  $this->email = $thing->container['stack']['email'];
 
-        if ($this->readSubject() == true) {
-            $this->thing_report = [
-                "thing" => $this->thing->thing,
-                "choices" => false,
-                "info" => "A Facebook ID wasn't provided.",
-                "help" => "from needs to be a number.",
-            ];
 
-            $this->thing->log(
-                'Agent "Facebook" completed without sending a message.'
-            );
-            return;
+/*
+		if ( $this->readSubject() == true) {
+			$this->thing_report = array('thing' => $this->thing->thing, 
+				'choices' => false,
+				'info' => "A Facebook ID wasn't provided.",
+				'help' => 'from needs to be a number.');
+
+		        $this->thing->log( 'Agent "Facebook" completed without sending a message.' );
+			return;
+		}
+*/
+//		$this->respond();
+
+//		$this->thing->log ( 'Agent "Facebook" completed.' );
+
+//		return;
+
+		}
+
+public function set() {
+
+$this->setFacebook();
+
+}
+
+    public function setFacebook()
+    {
+        $test = true;
+        if ($test) {
+            if (isset($this->agent_input) and is_array($this->agent_input)) {
+                $input = $this->agent_input;
+
+//                $this->thing->db->setFrom($this->from);
+
+                $this->thing->json->setField("message0");
+                $this->thing->json->writeVariable(["facebook"], $input);
+            }
         }
-        $this->respond();
+    }
+
+
+    public function testFacebook() {
+
+// https://developers.facebook.com/docs/messenger-platform/reference/send-api/
+$to = $this->from;
+$test_message = "Hello";
+           $this->sendMessage($to, $test_message);
+$this->response .= "Tested facebook. ";
+
+    }
+
+// -----------------------
+/*
 
         $this->thing->log('Agent "Facebook" completed.');
 
@@ -94,18 +122,18 @@ class Facebook
 
         $this->sendMessage($to, $test_message);
 
-        $this->thing_report["info"] =
-            '<pre> Agent "Facebook Messenger" sent a fb message to ' .
-            $this->from .
-            ".</pre>";
-
-        $this->thing_report["choices"] = false;
-        $this->thing_report["help"] = "In development.";
-        $this->thing_report["log"] = $this->thing->log;
-    }
+	}
+*/
 
     public function readSubject()
     {
+        var_dump($this->input);
+
+if (stripos($this->input, 'test') !== false) {
+    $this->testFacebook();
+return;
+}
+
         // Nothing to read.
         return false;
     }
@@ -226,13 +254,14 @@ class Facebook
 
         //$attachment = '"attachment":{}';
 
-        // above is not working
-        //$attachment = "";
-
+//        $url =
+//            "https://graph.facebook.com/v2.6/me/messages?access_token=" .
+ //           $this->page_access_token;
+// above is not working
+//$attachment = "";
         //API Url
-        $url =
-            "https://graph.facebook.com/v2.6/me/messages?access_token=" .
-            $this->page_access_token;
+//        $url = 'https://graph.facebook.com/v2.6/me/messages?access_token='.$this->page_access_token;
+        $url = 'https://graph.facebook.com/v12.0/me/messages?access_token='.$this->page_access_token;
 
         //Initiate cURL.
         $ch = curl_init($url);
@@ -278,20 +307,20 @@ class Facebook
         ]);
         //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
 
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
         //Execute the request
         if (!empty($message_to_reply)) {
             $result = curl_exec($ch);
         }
 
-        $names = $this->thing->json->Write(
-            ["facebook", "result"],
-            $result
-        );
-        $time_string = $this->thing->time();
-        $this->thing->json->Write(
-            ["facebook", "refreshed_at"],
-            $time_string
-        );
+                    $this->thing->json->setField("variables");
+                    $names = $this->thing->json->writeVariable( array("facebook", "result"), $result );
+                        $time_string = $this->thing->json->time();
+                        $this->thing->json->writeVariable( array("facebook", "refreshed_at"), $time_string );
+
+
+
 
         return;
     }

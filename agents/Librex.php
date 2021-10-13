@@ -299,6 +299,7 @@ class Librex extends Word
         return $this->getMatches($searchfor, $parser_name);
     }
 
+
     /**
      *
      * @param unknown $librex_name
@@ -375,6 +376,7 @@ class Librex extends Word
 
         $contents = $this->librex;
         $this->lines = [];
+
         $separator = "\r\n";
         $line = strtok($contents, $separator);
 
