@@ -55,7 +55,6 @@ class Mysql extends Agent
     public function test()
     {
         $thingreport = $this->priorMysql();
-        var_dump($thingreport);
     }
 
     public function initMysql()

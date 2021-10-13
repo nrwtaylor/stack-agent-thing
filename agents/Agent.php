@@ -3224,11 +3224,9 @@ usort($this->responsive_agents, function ($a, $b) {
             $this->thing_report = $translink_thing->thing_report;
             return $this->thing_report;
         }
-var_dump("agent_place");
 
         $this->thing->log("now looking at Place Context.");
         $place_thing = new Place($this->thing, "place");
-var_dump("agent _done_place");
 
         if (!$place_thing->isPlace($input)) {
             //        if (!$place_thing->isPlace($this->subject)) {

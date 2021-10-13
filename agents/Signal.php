@@ -61,15 +61,29 @@ class Signal extends Agent
     {
     }
 
+
     public function respondResponse()
     {
+/*
+        $this->thing->flagGreen();
+
+        $this->thing_report["info"] =
+            "This is a cat keeping an eye on how late this Thing is.";
+        $this->thing_report["help"] = "This is about being inscrutable.";
+*/
         $this->makeHelp();
         $this->makeInfo();
         $this->thing->flagGreen();
 
+
+        //$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
         $message_thing = new Message($this->thing, $this->thing_report);
-        //$thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report['info'] = $message_thing->thing_report['info'];
     }
+
 
     public function set()
     {

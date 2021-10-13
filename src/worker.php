@@ -204,7 +204,6 @@ function call_agent_function($job)
         $thing = new Thing($arr['uuid'], $agent_input);
         $start_time = $thing->elapsed_runtime();
     } else {
-var_dump($arr);
 if (($arr['to'] == null) and ($arr['from'] == null) and ($arr['subject'] == null)) {
 return true;
 }
@@ -294,6 +293,8 @@ return true;
     if (isset($t->thing_report["png"])) {
         $t->thing_report["png"] = base64_encode($t->thing_report["png"]);
     }
+
+    $t->thing_report["jpeg"] = null;
 
     $t->thing_report["png"] = null;
     $t->thing_report["pdf"] = null;

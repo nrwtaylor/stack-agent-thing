@@ -178,7 +178,6 @@ class Ping extends Agent
         // Do not all user provided input ...
 
         $ip = $this->url;
-var_dump($this->url);
 
         //    $pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
         $pingresult = exec("/bin/ping -c 3 $ip", $lines, $status);

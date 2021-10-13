@@ -90,7 +90,6 @@ class Place extends Agent
 
     function set()
     {
-var_dump("place set");
 
         if (!isset($this->refreshed_at)) {
             $this->refreshed_at = $this->thing->time();
@@ -1177,7 +1176,6 @@ if (file_exists($font)) {
 
     public function respondResponse()
     {
-var_dump("adfas");
 
         // Thing actions
 

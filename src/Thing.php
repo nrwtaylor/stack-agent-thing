@@ -57,12 +57,12 @@ class Thing
         // It is a significant Stack concern.
 
         if (!isset($GLOBALS['stack_path'])) {
-$directory = __DIR__ .'/../../../../';
+//$directory = __DIR__ .'/../../../../';
 
             // Try this, otherwise fail.
             //$GLOBALS['stack_path'] = "/var/www/stackr.test/";
-//            $GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
-            $GLOBALS['stack_path'] = $directory;
+            $GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+//            $GLOBALS['stack_path'] = $directory;
 
         }
 
