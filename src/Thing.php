@@ -982,6 +982,8 @@ if (isset($this->db)) {
 
     public function console($text = null)
     {
+if ($this->output_console == 'off') {return;}
+
         if (!isset($this->console_output_used_flag)) {
 
             $this->console_output_used_flag = 'on';
