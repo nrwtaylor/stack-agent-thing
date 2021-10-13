@@ -305,7 +305,7 @@ class Stamp extends Agent
             $stamp = trim($this->stamp);
         }
 
-        if ($this->micro_time_flag === true) {
+        if ($this->micro_time_flag === true and isset($this->timestamp)) {
             $stamp = $this->timestamp;
         }
 
