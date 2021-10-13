@@ -61,6 +61,8 @@ class Regex extends Agent
         try {
             $test = preg_match($text, "");
         } catch (\Exception $e) {
+        restore_error_handler();
+
             return false;
             // ...
         }

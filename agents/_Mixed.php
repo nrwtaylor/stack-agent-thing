@@ -13,7 +13,7 @@ error_reporting(-1);
 // Apologies.
 
 
-class Mixed extends Agent
+class _Mixed extends Agent
 {
     public $var = 'hello';
 

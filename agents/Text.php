@@ -3,8 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 // Display all errors in production.
 // The site must run clean transparent code.
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 //ini_set("allow_url_fopen", 1);
@@ -14,15 +14,15 @@ error_reporting(-1);
 
 class Text extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function getNgrams($input, $n = 3)
     {
         if (!isset($this->ngrams)) {
-            $this->ngrams = array();
+            $this->ngrams = [];
         }
-        $words = explode(' ', $input);
-        $ngrams = array();
+        $words = explode(" ", $input);
+        $ngrams = [];
 
         foreach ($words as $key => $value) {
             if ($key < count($words) - ($n - 1)) {
@@ -39,7 +39,7 @@ class Text extends Agent
 
     public function trimAlpha($text)
     {
-        $letters = array();
+        $letters = [];
         $new_text = "";
         $flag = false;
         foreach (range(0, mb_strlen($text)) as $i) {
@@ -84,13 +84,104 @@ class Text extends Agent
 
     public function init()
     {
-        $this->node_list = array("start" => array("helpful", "useful"));
+        $this->node_list = ["start" => ["helpful", "useful"]];
 
-        $this->thing_report['info'] = 'Text did not add anything useful.';
-        $this->thing_report['help'] =
+        $this->thing_report["info"] = "Text did not add anything useful.";
+        $this->thing_report["help"] =
             "An agent which provides search insight. Click on a button.";
 
         $this->thing->log("Initialized Text.", "DEBUG");
+    }
+
+    public function removeextraspacesText($text = null)
+    {
+        return trim(preg_replace("/\s+/", " ", $text));
+    }
+
+    public function shortenText($text = null)
+    {
+        if ($text == null) {
+            return true;
+        }
+        // Start by removing square brackets each time this is called.
+        // not greedy
+        $shortened_text = preg_replace("/\[.*?\]/", "", $text);
+        // greedy
+        //$shortened_text = preg_replace('/\[.*\]/', '', $text);
+
+        if ($shortened_text != $text) {
+            return $this->removeextraspacesText($shortened_text);
+        }
+
+        // That had no effect. So try removed ( brackets next.
+        // not greedy
+        $shortened_text = preg_replace("/\(.*?\)/", "", $text);
+
+        // greedy
+        //$shortened_text = preg_replace('/\(.*\)/', '', $text);
+
+        if ($shortened_text != $text) {
+            return $this->removeextraspacesText($shortened_text);
+        }
+
+        // So [ and ( brackets removed.
+        // Next remove non sentences ie sentences that don't start with a capital.
+
+        $sentences = explode(".", $text);
+        $shortened_text = "";
+        foreach ($sentences as $i => $sentence) {
+            $sentence = trim($sentence);
+            if (preg_match("~^\p{Lu}~u", $sentence)) {
+                $shortened_text .= $sentence . ". ";
+            } else {
+                //echo "\"{$string}\" does not start with uppercase.";
+            }
+        }
+
+        if (trim($shortened_text) != trim($text)) {
+            return $this->removeextraspacesText($shortened_text);
+        }
+
+        // So now we are left with sentences.
+        // Probably.
+
+        // If two. Remove last.
+        // If three. Remove middle.
+        // If more than three. Remove second to last.
+
+        $sentences = explode(".", $text);
+        // tidy up
+        foreach ($sentences as $i => $sentence) {
+            $sentence = trim($sentence);
+            if ($sentence == "") {
+                unset($sentences[$i]);
+                continue;
+            }
+            $sentences[$i] = $sentence;
+        }
+
+        $sentences_count = count($sentences);
+
+        if ($sentences_count == 2) {
+            unset($sentences[$sentences_count - 1]);
+            $shortened_text = implode(". ", $sentences);
+            $shortened_text .= ".";
+
+            if ($shortened_text != $text) {
+                return $this->removeextraspacesText($shortened_text);
+            }
+        }
+
+        if ($sentences_count >= 3) {
+            unset($sentences[$sentences_count - 2]);
+            $shortened_text = implode(". ", $sentences);
+            $shortened_text .= ".";
+            if ($shortened_text != $text) {
+                return $this->removeextraspacesText($shortened_text);
+            }
+        }
+
+        return trim($text);
     }
 
     function needlesText($needles, $haystack)
@@ -106,7 +197,6 @@ class Text extends Agent
         }
         return true;
     }
-
 
     public function postfixText(
         $text = null,
@@ -144,15 +234,15 @@ class Text extends Agent
             return true;
         }
         $tokens = explode(
-            ' ',
+            " ",
             str_replace(
-                array(',', '*', '(', ')', '[', ']', '!', '&', 'and', '.', '-'),
-                ' ',
+                [",", "*", "(", ")", "[", "]", "!", "&", "and", ".", "-"],
+                " ",
                 $input
             )
         );
 
-        $codes = array();
+        $codes = [];
 
         //     if (!isset($words) or count($words) == 0) {return $ngrams;}
 
@@ -165,8 +255,8 @@ class Text extends Agent
             //}
 
             if (
-                preg_match('/[A-Za-z]/', $token) &&
-                preg_match('/[0-9]/', $token)
+                preg_match("/[A-Za-z]/", $token) &&
+                preg_match("/[0-9]/", $token)
             ) {
                 $codes[] = $token;
             }
@@ -175,50 +265,53 @@ class Text extends Agent
         return $this->codes;
     }
 
-function filterText($log_text, $log_includes = null, $log_excludes = null)
-{
-    $response = "";
-    $lines = preg_split("/<br[^>]*>/i", $log_text);
+    function filterText($log_text, $log_includes = null, $log_excludes = null)
+    {
+        $response = "";
+        $lines = preg_split("/<br[^>]*>/i", $log_text);
 
-    foreach ($lines as $i => $line) {
-        foreach ($log_excludes as $j => $log_exclude) {
-            if (stripos($line, $log_exclude) !== false) {
-                continue 2;
+        foreach ($lines as $i => $line) {
+            foreach ($log_excludes as $j => $log_exclude) {
+                if (stripos($line, $log_exclude) !== false) {
+                    continue 2;
+                }
             }
-        }
 
-        if (count($log_includes) == 0) {
-            $response .= trim($line) . "\n";
-            continue;
-        }
-
-        foreach ($log_includes as $j => $log_include) {
-            if (stripos($line, $log_include) !== false) {
+            if (count($log_includes) == 0) {
                 $response .= trim($line) . "\n";
-                continue 2;
+                continue;
+            }
+
+            foreach ($log_includes as $j => $log_include) {
+                if (stripos($line, $log_include) !== false) {
+                    $response .= trim($line) . "\n";
+                    continue 2;
+                }
             }
         }
+        if ($response === "") {
+            return true;
+        }
+        return $response;
     }
-    if ($response === "") {
-        return true;
+
+    public function punctuateText($text)
+    {
+        $text = trim($text);
+        if (substr($text, -1) == ".") {
+            return $text;
+        }
+
+        if (substr($text, -1) == "!") {
+            return $text;
+        }
+        if (substr($text, -1) == "?") {
+            return $text;
+        }
+
+        $text .= ".";
+        return $text;
     }
-    return $response;
-}
-
-
-public function punctuateText($text) {
-
-$text = trim($text);
-if ( substr($text, -1) == ".") {return $text;}
-
-if ( substr($text, -1) == "!") {return $text;}
-if ( substr($text, -1) == "?") {return $text;}
-
-$text .= ".";
-return $text;
-
-
-}
 
     function extractNumbers($input = null)
     {
@@ -229,15 +322,15 @@ return $text;
             return true;
         }
         $tokens = explode(
-            ' ',
+            " ",
             str_replace(
-                array(',', '*', '(', ')', '[', ']', '!', '&', 'and', '.', '-'),
-                ' ',
+                [",", "*", "(", ")", "[", "]", "!", "&", "and", ".", "-"],
+                " ",
                 $input
             )
         );
 
-        $numbers = array();
+        $numbers = [];
 
         //     if (!isset($words) or count($words) == 0) {return $ngrams;}
 
@@ -271,14 +364,14 @@ return $text;
             return true;
         }
         $tokens = explode(
-            ' ',
+            " ",
             str_replace(
-                array(',', '*', '(', ')', '[', ']', '!', '&', 'and', '.'),
-                ' ',
+                [",", "*", "(", ")", "[", "]", "!", "&", "and", "."],
+                " ",
                 $input
             )
         );
-        $hyphens = array();
+        $hyphens = [];
 
         //     if (!isset($words) or count($words) == 0) {return $ngrams;}
 
@@ -321,7 +414,7 @@ return $text;
         if (!isset($this->response)) {
             $this->response = "";
         }
-        $this->response .= 'Asked about,"' . $this->subject . '"' . '. ';
+        $this->response .= 'Asked about,"' . $this->subject . '"' . ". ";
     }
 
     public function textN3($input)
@@ -356,7 +449,7 @@ return $text;
                 continue;
             }
 
-            if (1 === preg_match('~[0-9]~', $tag["token"])) {
+            if (1 === preg_match("~[0-9]~", $tag["token"])) {
                 continue;
             }
             $token = $tag["token"];
@@ -364,17 +457,17 @@ return $text;
             // False. Is not a word.
             //$nearest_word = $word_agent->isWord($token);
 
-            if (strpos($tag["tag"], 'VB') !== false) {
+            if (strpos($tag["tag"], "VB") !== false) {
                 $text .= $tag["token"] . " ";
                 continue;
             }
 
-            if (strpos($tag["tag"], 'JJ') !== false) {
+            if (strpos($tag["tag"], "JJ") !== false) {
                 $text .= $tag["token"] . " ";
                 continue;
             }
 
-            if (strpos($tag["tag"], 'NN') !== false) {
+            if (strpos($tag["tag"], "NN") !== false) {
                 $text .= $tag["token"] . " ";
                 continue;
             }
@@ -401,7 +494,7 @@ return $text;
     {
         $raw = $text1 . " " . $text2;
         $raw = strtolower($raw);
-        $filtered = implode(' ', array_unique(explode(' ', $raw)));
+        $filtered = implode(" ", array_unique(explode(" ", $raw)));
         return $filtered;
     }
 
@@ -445,7 +538,7 @@ return $text;
         }
 
         if (!isset($this->thing->mixed_agent)) {
-            $this->thing->mixed_agent = new Mixed(null, "brilltagger");
+            $this->thing->mixed_agent = new _Mixed(null, "brilltagger");
         }
 
         if (!isset($this->thing->alpha_agent)) {
@@ -454,48 +547,47 @@ return $text;
 
         $tags = $this->thing->brilltagger_agent->tag($text);
 
-
         // --- now it gets tricky.
         // https://cs.uwaterloo.ca/~jimmylin/downloads/brill-javadoc/edu/mit/csail/brill/BrillTagger.html
 
-        $arr = array(
-            "adjective" => array('JJ', 'JJR', 'JJS'),
-            "noun" => array('NN', 'NNS', 'NNP', 'NNPS'),
-            "pronoun" => array('PRP', 'PRPS', 'WP'),
-            "verb" => array('VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ'),
-            "adverb" => array('RB', 'RBR', 'RBS', 'WRB'),
-            "preposition" => array('IN')
-        );
+        $arr = [
+            "adjective" => ["JJ", "JJR", "JJS"],
+            "noun" => ["NN", "NNS", "NNP", "NNPS"],
+            "pronoun" => ["PRP", "PRPS", "WP"],
+            "verb" => ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"],
+            "adverb" => ["RB", "RBR", "RBS", "WRB"],
+            "preposition" => ["IN"],
+        ];
 
         //$pattern_tokens = explode("-", $pattern);
 
         $processed_text = "";
         foreach ($tags as $i => $token_tag) {
-            $tag = $tags[$i]['tag'];
-            $token = $tags[$i]['token'];
+            $tag = $tags[$i]["tag"];
+            $token = $tags[$i]["token"];
 
             switch (true) {
                 case $this->thing->mixed_agent->isMixed($token):
-                    $tags[$i]['pos'] = 'mixed';
+                    $tags[$i]["pos"] = "mixed";
                     break;
                 case is_numeric($token):
-                    $tags[$i]['pos'] = 'numeric';
+                    $tags[$i]["pos"] = "numeric";
                     break;
                 case $this->thing->alpha_agent->isAlpha($token):
-                    if (in_array($tag, $arr['adjective'])) {
-                        $tags[$i]['pos'] = 'adjective';
+                    if (in_array($tag, $arr["adjective"])) {
+                        $tags[$i]["pos"] = "adjective";
                     } else {
-                        $tags[$i]['pos'] = 'alpha';
+                        $tags[$i]["pos"] = "alpha";
                     }
 
                     break;
-                case !isset($tags[$i]['pos']):
+                case !isset($tags[$i]["pos"]):
                 default:
-                    $tags[$i]['pos'] = "X";
+                    $tags[$i]["pos"] = "X";
                     break;
             }
 
-            $processed_text .= "-" . $tags[$i]['pos'];
+            $processed_text .= "-" . $tags[$i]["pos"];
         }
         $processed_text = trim($processed_text, "-");
 
@@ -515,10 +607,7 @@ return $text;
         // Log which agent was requested ie Ebay.
         // And note the time.
         $time_string = $this->thing->time();
-        $this->thing->Write(
-            array("text", "refreshed_at"),
-            $time_string
-        );
+        $this->thing->Write(["text", "refreshed_at"], $time_string);
 
         /// ?
         //$place_agent thing = new Place($this->thing, $ngram);
@@ -535,7 +624,7 @@ return $text;
         $hyphenates = $this->thing->text_agent->extractHyphenates($post_title);
 
         $alpha_agent = new Alpha($this->thing, "alpha");
-        $mixed_agent = new Mixed($this->thing, "mixed");
+        $mixed_agent = new _Mixed($this->thing, "mixed");
         $word_agent = new Word($this->thing, "word");
         $brilltagger_agent = new Brilltagger($this->thing, "brilltagger");
         $slug_agent = new Slug($this->thing, "slug");
@@ -554,9 +643,9 @@ return $text;
         $tokens = $slug_agent->getSlug($post_title);
         $p = "";
         foreach ($tags as $i => $tag) {
-            $token = $tag['token'];
+            $token = $tag["token"];
 
-            if (strpos($tag['tag'], 'NNS') !== false) {
+            if (strpos($tag["tag"], "NNS") !== false) {
                 $token = $singular_agent->singularize($token);
             }
 
@@ -570,27 +659,38 @@ return $text;
         $nouns = "";
 
         foreach ($tags as $i => $tag) {
-            if ($tag['tag'] == "JJ") {
-                $adjectives .= $tag['token'] . " ";
+            if ($tag["tag"] == "JJ") {
+                $adjectives .= $tag["token"] . " ";
             }
 
-            if (strpos($tag['tag'], 'NN') !== false) {
-                $nouns .= $tag['token'] . " ";
+            if (strpos($tag["tag"], "NN") !== false) {
+                $nouns .= $tag["token"] . " ";
             }
         }
 
         $adjectives = trim($adjectives);
         $nouns = trim($nouns);
 
-        $processed_text = array(
+        $processed_text = [
             "adjectives" => $adjectives,
             "nouns" => $nouns,
             "codes" => $codes,
             "alphas" => $alphas,
             "mixed" => $mixeds,
             "words" => $words,
-            "notwords" => $notwords
-        );
+            "notwords" => $notwords,
+        ];
+    }
+
+    public function hasText($haystack = null, $needle = null)
+    {
+        // https://stackoverflow.com/questions/4366730/how-do-i-check-if-a-string-contains-a-specific-word
+        // a classic
+
+        if (stripos($haystack, $needle) !== false) {
+            return true;
+        }
+        return false;
     }
 
     public function readSubject()

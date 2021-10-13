@@ -34,6 +34,7 @@ class Database
     //public function init()
     function __construct($thing = null, $agent_input = null)
     {
+
         //$agent_input = $this->agent_input;
         $uuid = $agent_input["uuid"];
         $nom_from = $agent_input["from"];
@@ -134,7 +135,13 @@ class Database
             $this->candidate_stacks
             as $candidate_service_name => $candidate_service
         ) {
+
+try {
             $handler = $this->connectDatabase($candidate_service);
+        } catch (\Throwable $t) {
+        } catch (\Error $ex) {
+        }
+
 
             if ($handler !== true) {
                 $this->available_stacks[
@@ -143,8 +150,8 @@ class Database
                 $this->stack_handlers[$candidate_service_name] = $handler;
             }
         }
-
         $this->active_stacks = $this->available_stacks;
+
 
 $this->stack = false;
 $this->stack_handler = false;
@@ -238,6 +245,7 @@ if (count($this->available_stacks) > 0) {
 
     function connectDatabase($stack)
     {
+
         $agent_name = $stack["infrastructure"];
         $agent_class_name = ucwords($agent_name);
         $agent_namespace_name =
@@ -245,6 +253,7 @@ if (count($this->available_stacks) > 0) {
 
         try {
             $handler = new $agent_namespace_name(null, $this->agent_input);
+
             $handler->uuid = $this->uuid;
             $handler->from = $this->from;
             $handler->to = $this->to;
@@ -269,6 +278,8 @@ if (count($this->available_stacks) > 0) {
         } catch (\Throwable $t) {
         } catch (\Error $ex) {
         }
+
+
         return true;
     }
 
@@ -279,10 +290,9 @@ if (count($this->available_stacks) > 0) {
      */
     function test($comment = null, $instruction = null)
     {
-        if ($this->state != "test") {
+        if (isset($this->state) and $this->state != "test") {
             return;
         }
-
         if ($comment == null and $instruction == null) {
             $comment = "";
         }
@@ -664,7 +674,6 @@ return $thing_report;
             $sth->execute();
 
             $things = $sth->fetchAll();
-
             $thingreport["info"] =
                 'So here are Things with the variable you provided in \$variables. That\'s what you want';
             $thingreport["things"] = $things;
@@ -674,6 +683,8 @@ return $thing_report;
             $thingreport["things"] = [];
         }
 
+        // Destroy object
+        // https://stackoverflow.com/questions/5772626/fatal-error-call-to-undefined-method-pdoclose
         $sth = null;
 
         return $thingreport;
@@ -790,7 +801,8 @@ return $thing_report;
             //            $t = new Thing(null);
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
-        }
+        } 
+
         $things = $sth->fetchAll();
 
         $sth = null;
@@ -853,7 +865,8 @@ return $thing_report;
             //            $t->Create("stack", "error", 'subjectSearch ' .$e->getMessage());
 
             //            echo 'Caught exception: ', $e->getMessage(), "\n";
-        }
+        } 
+
 
         $sth = null;
 
@@ -1019,7 +1032,6 @@ return $thing_report;
             $sth->bindParam(":agent", $agent);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
-
             $things = $sth->fetchAll();
         } catch (\Exception $e) {
             //            $t = new Thing(null);
@@ -1027,7 +1039,7 @@ return $thing_report;
 
             //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
-        }
+        } 
 
         $sth = null;
 
@@ -1077,6 +1089,7 @@ return $thing_report;
             //            echo 'Caught error: ', $e->getMessage(), "\n";
             $things = false;
         }
+
 
         $sth = null;
 
@@ -1134,7 +1147,6 @@ return $thing_report;
         }
 
         $thing = $this->user_things->fetch();
-        //$things = $sth->fetchAll();
 
         $thing_report["thing"] = $thing;
         $thing_report["info"] = "So here is the next thing.";

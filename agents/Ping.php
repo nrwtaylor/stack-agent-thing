@@ -25,6 +25,8 @@ class Ping extends Agent
         // I think.
         // Instead.
 
+        $this->url = $this->settingsAgent(["ping", "url"], 'localhost');
+
         $this->node_list = ["ping" => ["pong"]];
     }
 
@@ -35,7 +37,13 @@ class Ping extends Agent
     {
         $this->getPing();
     }
+    /*
+    public function set() {
+       if (!isset($this->ping)) {return true;}
 
+       $this->thing->Write('ping', $this->ping);
+    }
+*/
     function test()
     {
         $this->test_result = "Not OK";
@@ -82,7 +90,6 @@ class Ping extends Agent
                 $latency = false;
             }
             socket_close($socket);
-
         } else {
             $latency = false;
         }
@@ -128,13 +135,14 @@ class Ping extends Agent
      */
     public function makeSMS()
     {
-        $this->sms_message = "PING | A message from this Identity pinged us.";
-        $this->sms_message .=
+        $sms = "PING | A message from this Identity pinged us.";
+        $sms .=
             " | Received " .
             $this->thing->human_time($this->ping_text) .
-            " ago.";
-
-        $this->thing_report["sms"] = $this->sms_message;
+            " ago. ";
+        $sms .= $this->response;
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -164,26 +172,88 @@ class Ping extends Agent
         $this->sms_message = $message;
         $this->thing_report["message"] = $message;
     }
+    // https://stackoverflow.com/questions/8030789/pinging-an-ip-address-using-php-and-echoing-the-result
+    public function addressPing($ip = null)
+    {
+        // Do not all user provided input ...
+
+        $ip = $this->url;
+var_dump($this->url);
+
+        //    $pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
+        $pingresult = exec("/bin/ping -c 3 $ip", $lines, $status);
+
+        if (0 == $status) {
+            $status = "OK";
+        } else {
+            $status = "NOT OK";
+        }
+        $this->response .= "Address $ip responded " . $status . ". ";
+
+        $last_line = $lines[count($lines) - 1];
+        $this->response .= 'Heard "' . $last_line . '". ';
+        $number_part = explode("=", $last_line)[1];
+        $numbers = explode("/", $number_part);
+
+        foreach ($numbers as $i => $number) {
+            $numbers[$i] = trim(rtrim($number, "ms"));
+        }
+
+        $this->ping = [
+            "minimum" => $numbers[0],
+            "average" => $numbers[1],
+            "maximum" => $numbers[2],
+            "standard_deviation" => $numbers[3],
+        ];
+    }
+
+    public function hostPing($thing_object = null)
+    {
+        if ($thing_object == null) {
+            return true;
+        }
+
+        if (is_array($thing_object)) {
+            if (count($thing_object) == 1 and $this->isUrl($thing_object[0])) {
+                $text = $thing_object[0];
+                $this->response .= "Pinging " . $text .". ";
+                $this->addressPing($text);
+            }
+        }
+    }
 
     /**
      *
      */
     public function readSubject()
     {
-        try {
-        $ping_socket_latency = $this->socketPing();
-    if ($ping_socket_latency !== false) {$this->response .= "Socket latency is " . $ping_socket_latency . ". ";}
+        $urls = $this->extractUrls($this->input);
 
-
-        } catch (\OverflowException $t) {
-            $this->response =
-                "Foo";
-        } catch (\Throwable $t) {
-            $this->response =
-                "Bar";
-
+// dev
+/*
+        if ($urls) {
+            $this->hostPing($urls);
         }
+*/
 
-        $this->response .= "Responded to a ping. ";
+        $this->response .= 'Heard, "' . $this->input . '". ';
+
+
+
+        // Test
+/*
+        try {
+            $ping_socket_latency = $this->socketPing();
+            if ($ping_socket_latency !== false) {
+                $this->response .=
+                    "Socket latency is " . $ping_socket_latency . ". ";
+            }
+        } catch (\OverflowException $t) {
+            $this->response .= "Foo";
+        } catch (\Throwable $t) {
+            $this->response .= "Bar";
+        }
+*/
+
     }
 }

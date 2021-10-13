@@ -466,6 +466,8 @@ public function __set($name, $value) {
      */
     public function set()
     {
+       if (!isset($this->ping)) {return true;}
+       $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
     }
 
     public function getThings($agent_name = null)
@@ -1411,6 +1413,7 @@ public function __set($name, $value) {
     /**
      *
      */
+/*
     public function respondResponse()
     {
         $agent_flag = true;
@@ -1431,7 +1434,7 @@ public function __set($name, $value) {
             }
         }
     }
-
+*/
     public function makeInput()
     {
     }
@@ -1447,6 +1450,7 @@ public function __set($name, $value) {
 
         //$this->response = "Standby.";
         $this->response = "";
+        $this->thing_report['response'] = $this->response;
     }
 
     /**
@@ -2015,7 +2019,6 @@ if ($pid == -1) {
             //}
         } catch (\Throwable $t) {
             restore_error_handler();
-
             $this->thing->log("caught throwable.", "WARNING");
             return false;
         } catch (\Error $ex) {
@@ -2176,6 +2179,7 @@ if ($pid == -1) {
 
         foreach ($this->responsive_agents as $i => $j) {
             $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n");
+
         }
     }
 
@@ -2232,9 +2236,13 @@ if ($pid == -1) {
 
         $bigrams = $this->getNgrams($text, 2);
         $trigrams = $this->getNgrams($text, 3);
+        $quadgrams = $this->getNgrams($text, 4);
+
 
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
+        $arr = array_merge($arr, $quadgrams);
+
         return $arr;
     }
 
@@ -2246,7 +2254,6 @@ if ($pid == -1) {
         }
 
         $arr = $this->ngramsText($input);
-
         // Added this March 6, 2018.  Testing.
 
         if ($this->agent_input == null) {
@@ -2309,6 +2316,9 @@ if ($pid == -1) {
 
         foreach ($this->responsive_agents as $i => $responsive_agent) {
         }
+
+
+        return $this->responsive_agents;
     }
 
     public function stripAgent($text = null)
@@ -2550,6 +2560,7 @@ if ($pid == -1) {
                 }
             }
         }
+
         $uuid = new Uuid($this->thing, "uuid");
         $uuid = $uuid->extractUuid($input);
 
@@ -2581,6 +2592,17 @@ if ($pid == -1) {
             }
         }
 
+        // Check for recognizable robot strings.
+        // like NMEA
+
+        // $TZXDR,X,3445.000000,mV,ThingVcc*01
+        if ($this->isNMEA($this->subject)) {
+            $nmea_agent = new NMEA($this->thing, "nmea");
+            $this->thing_report = $nmea_agent->thing_report;
+            return $this->thing_report;
+
+        }
+
         // Handle call intended for humans.
         $human_agent = new Human($this->thing, "human");
 
@@ -2597,7 +2619,6 @@ if ($pid == -1) {
         // So look hear to generalize that.
         $text = urldecode($agent_input_text);
         //$text = urldecode($input);
-
         $text = strtolower($text);
         //$arr = explode(' ', trim($text));
 
@@ -2607,10 +2628,12 @@ if ($pid == -1) {
         $onegrams = $this->getNgrams($text, $n = 1);
         $bigrams = $this->getNgrams($text, $n = 2);
         $trigrams = $this->getNgrams($text, $n = 3);
+        $quadgrams = $this->getNgrams($text, $n = 4);
 
         $arr = array_merge($arr, $onegrams);
         $arr = array_merge($arr, $bigrams);
         $arr = array_merge($arr, $trigrams);
+        $arr = array_merge($arr, $quadgrams);
 
         usort($arr, function ($a, $b) {
             return strlen($b) <=> strlen($a);
@@ -2641,11 +2664,11 @@ if ($pid == -1) {
 
             $matches[] = $ngram;
         }
-
         if (count($matches) == 1) {
             $this->getAgent($matches[0], $this->agent_input);
             return $this->thing_report;
         }
+
         // First things first.  Special instructions to ignore.
         if (strpos($input, "cronhandler run") !== false) {
             $this->thing->log('Agent "Agent" ignored "cronhandler run".');
@@ -3044,14 +3067,42 @@ if ($pid == -1) {
                 }
             }
         }
+
+
         // Remove references to named chatbot agents
+$chatbots = $this->extractChatbots($input);
+
         $input = $this->filterChatbots($input);
         // Remove reference to thing.
         //$input = str_replace("thing","",$input);
 
+// Currently case sensitive.
+
+if (count($chatbots) === 1) {
+
+
+$agent_class_name = ucwords($input);
+$agent_handler = $this->getAgent($agent_class_name, null);
+if ($agent_handler !== false) {
+}
+
+}
+
         // dev
         // Check whether input is expected.
         // Or not.
+/*
+        if (
+            $this->getAgent($agent_class_name, null) ===
+            false
+        ) {
+echo "FALSE";
+            //return false;
+        } else {
+echo "TRUE";
+            //return true;
+        }
+*/
 
         $input_agent = new Input($this->thing, "input");
         $input_state = $input_agent->stateInput();
@@ -3124,6 +3175,16 @@ if ($pid == -1) {
 
         $arr = $this->extractAgents($input);
         $this->input = $input;
+// Sort and pick best scoring agent response.
+
+usort($this->responsive_agents, function ($a, $b) {
+        return $b['score'] - $a['score'];
+    });
+
+//foreach($this->responsive_agents as $i=>$r) {
+//$r['thing_report'] = null;
+//}
+
 
 
         if (count($this->responsive_agents) > 0) {

@@ -65,7 +65,7 @@ class Token extends Agent
         }
 
         if (!isset($this->mixed_agent)) {
-            $this->mixed_agent = new Mixed($this->thing, "mixed");
+            $this->mixed_agent = new _Mixed($this->thing, "mixed");
         }
     }
 
@@ -74,10 +74,7 @@ class Token extends Agent
      */
     function set()
     {
-        $this->thing->Write(
-            ["token", "refreshed_at"],
-            $this->thing->time()
-        );
+        $this->thing->Write(["token", "refreshed_at"], $this->thing->time());
     }
 
     public function getToken($text = null)
@@ -197,12 +194,16 @@ class Token extends Agent
         }
 
         //$mixed_agent = new Mixed($this->thing,"mixed");
-        $mixeds = $this->mixed_agent->extractMixeds($this->input);
+        //        $mixeds = $this->mixed_agent->extractMixeds($this->input);
+        $mixeds = $this->mixed_agent->extractMixeds($text);
 
         $this->addTokens($mixeds);
 
+        //        $this->getToken($this->input);
         $this->getToken($this->input);
-        $text = str_replace("-", " ", $this->input);
+
+        //$text = str_replace("-", " ", $this->input);
+        $text = str_replace("-", " ", $text);
 
         $t = $this->pairTokens($text);
         $this->addTokens($t);
@@ -210,11 +211,15 @@ class Token extends Agent
         $t = $this->tripletTokens($text);
         $this->addTokens($t);
 
+        $t = $this->quadTokens($text);
+        $this->addTokens($t);
+
         $this->trimTokens();
 
         $this->tokens = array_unique($this->tokens, SORT_REGULAR);
 
         $this->makeSnippet();
+        return $this->tokens;
     }
 
     public function trimTokens($arr = null)
@@ -257,6 +262,31 @@ class Token extends Agent
             }
 
             $t[] = $tokens[$i] . " " . $tokens[$i + 1] . " " . $tokens[$i + 2];
+            $i += 1;
+        }
+
+        return $t;
+    }
+
+    public function quadTokens($str)
+    {
+        $t = [];
+        $tokens = explode(" ", $str);
+        $i = 0;
+        foreach ($tokens as $i => $token) {
+            if ($i > count($tokens) - 4) {
+                break;
+            }
+
+            $t[] =
+                $tokens[$i] .
+                " " .
+                $tokens[$i + 1] .
+                " " .
+                $tokens[$i + 2] .
+                " " .
+                $tokens[$i + 3];
+
             $i += 1;
         }
 
@@ -431,6 +461,43 @@ class Token extends Agent
         $this->thing_report["sms"] = $sms;
     }
 
+    public function subsetsTokens($tokens)
+    {
+        $number_of_tokens = count($tokens);
+        $subsets = [];
+        foreach (range(0, $number_of_tokens) as $start => $values) {
+            foreach (range(0, $number_of_tokens) as $end => $valuee) {
+                if ($start > $end) {
+                    continue;
+                }
+
+                $selected_tokens = [];
+                foreach (range($start, $end) as $index => $value) {
+                    $selected_tokens[] = trim($tokens[$value]);
+                }
+
+                $text = trim(implode(" ", $selected_tokens));
+
+                if ($text == "") {
+                    continue;
+                }
+
+                $subsets[] = $text;
+
+                //}
+            }
+        }
+        $subsets = array_unique($subsets);
+
+        usort($subsets, function ($a, $b) {
+            return mb_strlen($a) - mb_strlen($b);
+        });
+        // Sort so longest string to shortest string
+        $subsets = array_reverse($subsets);
+
+        return $subsets;
+    }
+
     public function itemToken($colour = null)
     {
         if ($colour == null) {
@@ -526,26 +593,4 @@ class Token extends Agent
         $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
-
-    /**
-     *
-     * @return unknown
-     */
-    /*
-    public function makePNG() {
-        $text = "thing:".$this->alphas[0];
-
-        ob_clean();
-
-        ob_start();
-
-        QRcode::png($text, false, QR_ECLEVEL_Q, 4);
-
-        $image = ob_get_contents();
-        ob_clean();
-
-        $this->thing_report['png'] = $image;
-        return $this->thing_report['png'];
-    }
-*/
 }

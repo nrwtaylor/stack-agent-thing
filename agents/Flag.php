@@ -103,8 +103,6 @@ class Flag extends Agent
                     continue;
                 }
 
-                //if ((!isset($flag_descriptor)) or ($flag_descriptor == [])) {var_dump("no descriptor",$flag_name);}
-
                 $flag_slug = $this->getSlug($flag_name);
 
                 if (!isset($flag_descriptor["word"])) {
@@ -119,21 +117,6 @@ class Flag extends Agent
 
                     $flags_lexicon[$flag_slug]["slug"] = $flag_slug;
                 }
-                /*
-                if (!isset($flag_descriptor["word"])) {
-                    $flag_slug_word = $flag_slug;
-
-if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
-
-                    $flags_lexicon[$flag_slug] = $flag_descriptor;
-
-                    $flags_lexicon[$flag_slug]["haystack"] = $haystack(
-                        $flag_descriptor
-                    );
-                    $flags_lexicon[$flag_slug]["slug"] = $flag_slug;
-                    continue;
-                }
-*/
 
                 foreach ($flag_descriptor["word"] as $parameter => $flag_word) {
                     $flag_slug_word = $this->getSlug($flag_word);
@@ -151,7 +134,6 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
                 }
             }
         }
-        //var_dump($flags_lexicon);
         $this->flags_lexicon[$lexicon_name] = $flags_lexicon;
     }
 
@@ -595,6 +577,13 @@ if(is_string($flag_descriptor)) {$flag_descriptor = ['word'=>$flag_descriptor];}
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
+    }
+
+    public function assertFlag($text = null)
+    {
+        if (!isset($this->flag)) {
+            $this->flag = null;
+        }
     }
 
     public function readSubject()

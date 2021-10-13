@@ -51,6 +51,120 @@ $worker->addFunction(
     $uuid
 );
 
+$name = "call_agent_welfare";
+$task = "Nrwtaylor\StackAgentThing\call_agent_function";
+
+$worker->addFunction(
+    $name,
+    function () use ($task) {
+// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+//         set_error_handler(
+//               'worker_fatal_handler',
+//               E_FATAL
+//           );
+
+        try {
+            $result = call_user_func_array($task, func_get_args());
+        } catch (\Exception $e) {
+            $result = GEARMAN_WORK_EXCEPTION;
+            echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+            // Send exception to Exceptional so it can be logged with details
+            // Exceptional::handle_exception($e, false);
+            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+        }
+
+//            restore_error_handler();
+
+        return $result;
+    },
+    $uuid
+);
+
+$name = "call_agent_routine";
+
+$worker->addFunction(
+    $name,
+    function () use ($task) {
+// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+//         set_error_handler(
+//               'worker_fatal_handler',
+//               E_FATAL
+//           );
+
+        try {
+            $result = call_user_func_array($task, func_get_args());
+        } catch (\Exception $e) {
+            $result = GEARMAN_WORK_EXCEPTION;
+            echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+            // Send exception to Exceptional so it can be logged with details
+            // Exceptional::handle_exception($e, false);
+            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+        }
+
+//            restore_error_handler();
+
+        return $result;
+    },
+    $uuid
+);
+
+$name = "call_agent_priority";
+
+$worker->addFunction(
+    $name,
+    function () use ($task) {
+// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+//         set_error_handler(
+//               'worker_fatal_handler',
+//               E_FATAL
+//           );
+
+        try {
+            $result = call_user_func_array($task, func_get_args());
+        } catch (\Exception $e) {
+            $result = GEARMAN_WORK_EXCEPTION;
+            echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+            // Send exception to Exceptional so it can be logged with details
+            // Exceptional::handle_exception($e, false);
+            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+        }
+
+//            restore_error_handler();
+
+        return $result;
+    },
+    $uuid
+);
+
+$name = "call_agent_emergency";
+
+$worker->addFunction(
+    $name,
+    function () use ($task) {
+// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+//         set_error_handler(
+//               'worker_fatal_handler',
+//               E_FATAL
+//           );
+
+        try {
+            $result = call_user_func_array($task, func_get_args());
+        } catch (\Exception $e) {
+            $result = GEARMAN_WORK_EXCEPTION;
+            echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
+            // Send exception to Exceptional so it can be logged with details
+            // Exceptional::handle_exception($e, false);
+            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+        }
+
+//            restore_error_handler();
+
+        return $result;
+    },
+    $uuid
+);
+
+
 // This would limit the length of any one worker.
 // This is handled by supervisor
 //$worker->setTimeout(1000);
@@ -112,6 +226,8 @@ return true;
     echo "worker nuuid " . $thing->nuuid . "\n";
     echo "worker uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
+    echo "thing subject " . $thing->subject . "\n";
+
 
     $age = true;
     if (isset($thing->thing->created_at)) {

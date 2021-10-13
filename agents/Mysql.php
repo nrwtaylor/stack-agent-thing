@@ -141,12 +141,15 @@ echo "fopo";
             $this->user = $db["user"];
             $this->pass = $db["pass"];
         }
+
         try {
             $pdo = new PDO(
                 "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
                 $this->user,
                 $this->pass
             );
+//echo "bar";
+//exit();
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
@@ -449,6 +452,7 @@ echo "fopo";
 
             //echo "BORK | Thing is full.";
             //echo 'Caught error: ',  $e->getMessage(), "\n";
+            $query = null;
             $thing = false;
             $this->last_update = true;
             return false;
@@ -483,6 +487,7 @@ echo "fopo";
             $sth->bindParam("uuid", $this->uuid);
             $sth->execute();
             $thing = $sth->fetchObject();
+
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -495,7 +500,7 @@ echo "fopo";
             }
             $thing = false;
         }
-
+        $sth = null;
         return $thing;
     }
 
@@ -523,7 +528,7 @@ echo "fopo";
             "info" => "That thing was forgotten.",
             "error" => $error,
         ];
-
+        $sth = null;
         return $thingreport;
     }
 

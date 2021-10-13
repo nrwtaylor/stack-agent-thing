@@ -153,6 +153,7 @@ $directory = __DIR__ .'/../../../../';
         //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
+
         } catch (\Exception $e) {
             $this->log("No Thing to get.");
 
@@ -165,7 +166,6 @@ $directory = __DIR__ .'/../../../../';
         // devstack
         //		echo "Stack Balance<br>";
         //		$this->stackBalance($this->uuid);
-
         $this->log("Thing instantiation completed.");
     }
 
@@ -250,12 +250,11 @@ $directory = __DIR__ .'/../../../../';
 
             $this->uuid = $uuid;
             $this->nuuid = substr($this->uuid, 0, 4);
-
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
             $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
-            $this->log("Thing made a db connector.");
 
+            $this->log("Thing made a db connector.");
             // Provide handler for Json translation from/to MySQL.
             $this->json = new Json($this->uuid);
 
@@ -328,8 +327,10 @@ $directory = __DIR__ .'/../../../../';
 
         $client->addServer();
         $arr = json_encode($datagram);
+$function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
+//        $client->doLowBackground("call_agent", $arr);
+        $client->doLowBackground($function_name, $arr);
 
-        $client->doLowBackground("call_agent", $arr);
         $this->log("spawned a Thing.");
     }
 
