@@ -982,11 +982,11 @@ if (isset($this->db)) {
 
     public function console($text = null)
     {
-if ($this->output_console == 'off') {return;}
+if ($this->console_output == 'off') {return;}
 
-        if (!isset($this->console_output_used_flag)) {
+        if (!isset($this->console_output)) {
 
-            $this->console_output_used_flag = 'on';
+            $this->console_output = 'on';
             echo "Thing console started. Turn off in private/settings.\n";
         }
 
