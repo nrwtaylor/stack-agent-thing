@@ -662,7 +662,7 @@ if ($string_in_string === true) {
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 */
-
+/*
 if ($this->hash_state == "off") {
             $query =
                 "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
@@ -672,7 +672,9 @@ if ($this->hash_state == "on") {
             $query =
                 "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 }
-
+*/
+           $query =
+                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables
 
             //    $query =
