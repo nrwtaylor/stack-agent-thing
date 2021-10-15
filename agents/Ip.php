@@ -420,6 +420,32 @@ class Ip extends Agent
 
         $input = $this->input;
         $this->ips = $this->extractIps($input);
+
+if (count($this->ips) == 1) {
+
+       // $input = $this->assert($input);
+        $arr = $this->findIp($this->ips[0]);
+        $this->matching_ips = $arr;
+
+
+        $arr = $arr[0];
+        $this->message =
+            $input .
+            " " .
+            $arr["jurisdiction"] .
+            " " .
+            $arr["subjurisdiction"] .
+            " " .
+            $arr["place"] .
+            " " .
+            $arr["latitude"] .
+            " " .
+            $arr["longitude"];
+
+return;
+
+}
+
         $input = $this->assert($input);
         $arr = $this->findIp($input);
 
