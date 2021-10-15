@@ -691,11 +691,14 @@ class Message extends Agent
                 case true:
                     $sms_thing = new Sms($this->thing, $this->sms_message);
 
-                    $this->thing_report["info"] = 'Agent "Message" sent a SMS.';
-                    $this->thing->log(
-                        "<pre> " . $this->thing_report["info"] . "</pre>",
-                        "INFORMATION"
-                    );
+//                    $this->thing_report["info"] = 'Agent "Message" sent a SMS.';
+$this->thing_report['info'] = $sms_thing->thing_report['info'];
+//if ($sms_thing->error != "") {$this->thing_report['info'] = $sms_thing->error;}
+
+//                    $this->thing->log(
+//                        "<pre> " . $this->thing_report["info"] . "</pre>",
+//                        "INFORMATION"
+//                    );
 
                     $this->tallyMessage();
                     $quota = new Quota($this->thing, "quota use");

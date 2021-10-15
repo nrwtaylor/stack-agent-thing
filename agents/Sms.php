@@ -273,6 +273,7 @@ class Sms
         error_log(
             'You sent ' . $decoded_response['message-count'] . ' messages.'
         );
+
         foreach ($decoded_response['messages'] as $message) {
             if ($message['status'] == 0) {
                 error_log("Success " . $message['message-id']);
