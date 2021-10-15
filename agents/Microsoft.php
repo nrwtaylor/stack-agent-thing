@@ -7,74 +7,28 @@ error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
-class Microsoft
+class Microsoft extends Agent
 {
     public $var = "hello";
-
-    function __construct(Thing $thing, $agent_input = null)
+    function init()
     {
-        $this->agent_input = $agent_input;
         $this->cost = 50;
 
-        $this->test = "Development code";
-
-        $this->thing = $thing;
-
-        $this->thing_report = ["thing" => $this->thing->thing];
         $this->thing_report["info"] = "This is a microsoft agent.";
 
-        //        $this->app_token = $this->thing->container['api']['microsoft']['app token'];
         $this->app_id =
             $this->thing->container["api"]["microsoft"]["edna"]["appid"];
         $this->app_secret =
             $this->thing->container["api"]["microsoft"]["edna"]["appsecret"];
-        //        $this->page_access_token = $this->thing->container['api']['facebook']['page_access_token'];
 
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
-        $this->sqlresponse = null;
-
-        $this->agent_prefix = 'Agent "Microsoft" ';
+        new Channel($this->thing, 'microsoft');
 
         $this->node_list = ["sms send" => ["sms send"]];
+    }
 
-        $this->thing->log(
-            'Agent "Microsoft" running on Thing ' . $this->thing->nuuid . "."
-        );
-        $this->thing->log(
-            'Agent "Microsoft" received this Thing "' . $this->subject . '".'
-        );
-
-        // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container["stack"]["web_prefix"];
-        $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
-        $this->word = $thing->container["stack"]["word"];
-        $this->email = $thing->container["stack"]["email"];
-
+    public function get()
+    {
         $this->eventGet();
-
-        $channel = new Channel($this->thing, "microsoft");
-
-        if ($this->readSubject() == true) {
-            $this->thing_report = [
-                "thing" => $this->thing->thing,
-                "choices" => false,
-                "info" => "A Microsoft ID wasn't provided.",
-                "help" => "from needs to be a number.",
-            ];
-
-            $this->thing->log(
-                'Agent "Microsoft" completed without sending a message.'
-            );
-            return;
-        }
-        $this->respond();
-
-        $this->thing->log('Agent "Microsoft" completed.');
-
-        return;
     }
 
     function eventSet($input = null)
@@ -83,47 +37,27 @@ class Microsoft
             $input = $this->body;
         }
 
-        $this->thing->log('<pre> Agent "Slack" called eventSet()');
-
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["microsoft"], $input);
-
-        //$this->thing->flagGreen();
-
-        return;
     }
 
     function getResponseurl()
     {
-        //$activity = ($this->body['channelData']['clientActivityId']);
         if (isset($this->body["channelData"]["clientActivityId"])) {
             $this->activity_id = $this->body["channelData"]["clientActivityId"];
             return $this->activity_id;
         }
-
-        //if ( isset( $this->body['event']['channel'] )) {
-        //    $this->channel_id = $this->body['event']['channel'];
-        //    return $this->channel_id;
-        //}
-
         return true;
     }
 
     function getActivity()
     {
-        //$activity = ($this->body['channelData']['clientActivityId']);
-
         if (isset($this->body["channelData"]["clientActivityId"])) {
             $this->activity_id = $this->body["channelData"]["clientActivityId"];
             return $this->activity_id;
         }
-
-        //if ( isset( $this->body['event']['channel'] )) {
-        //    $this->channel_id = $this->body['event']['channel'];
-        //    return $this->channel_id;
-        //}
 
         return true;
     }
@@ -135,11 +69,6 @@ class Microsoft
             return $this->channel_id;
         }
 
-        //if ( isset( $this->body['event']['channel'] )) {
-        //    $this->channel_id = $this->body['event']['channel'];
-        //    return $this->channel_id;
-        //}
-
         return true;
     }
 
@@ -149,11 +78,6 @@ class Microsoft
             $this->user = $this->body["from"]["id"];
             return $this->user;
         }
-
-        //if ( isset($this->body['event']['user']) ) {
-        //    $this->user = $this->body['event']['user'];
-        //    return $this->user;
-        //}
 
         return true;
     }
@@ -165,75 +89,26 @@ class Microsoft
             return $this->text;
         }
 
-        //if ( isset( $this->body['event']['text'] )) {
-        //   $this->text = $this->body['event']['text'];
-        //    return $this->text;
-        //}
-
         return true;
-    }
-
-    // -----------------------
-
-    private function respond()
-    {
-        // Thing actions
-        $this->thing->flagGreen();
-
-        // Generate email response.
-
-        $to = $this->from;
-        //		$from = $this->to;
-
-        //		if ($this->input != null) {
-        //			$test_message = $this->input;
-        //		} else {
-        //			$test_message = $this->subject;
-        //		}
-
-        //        if ($this->input != null) {
-        //            $test_message = $this->input;
-        //        } else {
-        //            $test_message = $this->subject;
-        //        }
-        $test_message = null;
-
-        //		if ($this->thing->account['stack']->balance['amount'] >= $this->cost ) {
-        $this->sendMessage($to, $test_message);
-        //			$this->thing->account['stack']->Debit($this->cost);
-        //			$this->thing->log("FB message sent");
-
-        $this->thing_report["info"] =
-            '<pre> Agent "Microsoft" sent a message to ' .
-            $this->from .
-            ".</pre>";
-
-        $this->thing_report["choices"] = false;
-        //$this->thing_report['info'] = 'This is a facebook message agent.';
-        $this->thing_report["help"] = "In development.";
-        $this->thing_report["log"] = $this->thing->log;
     }
 
     public function readSubject()
     {
         if (is_array($this->agent_input)) {
-            $this->response = "Processed datagram.";
+            $this->response .= "Processed datagram.";
             $this->eventSet($this->agent_input);
+            $this->body = $this->agent_input;
             return;
         }
 
         if (is_string($this->agent_input)) {
-            $this->response = "Sent message.";
+            $this->response .= "Sent message.";
             $this->message = $this->agent_input;
             //$this->eventSet($this->agent_input);
             return;
         }
-
         //$message_reply_id = $this->agent_input;
-        $names = $this->thing->Write(
-            ["microsoft", "reply_id"],
-            null
-        );
+        $names = $this->thing->Write(["microsoft", "reply_id"], null);
 
         //"channelData":{"clientActivityId":"1536536110650.9566644201124537.16"}}
 
@@ -243,11 +118,12 @@ class Microsoft
 
     function eventGet()
     {
-        $this->thing->log('<pre> Agent "Slack" called eventGet()</pre>');
+        if (!isset($this->body)) {
+            $this->thing->log('<pre> Agent "Slack" called eventGet()</pre>');
 
-        $bodies = json_decode($this->thing->thing->message0, true);
-        $this->body = $bodies["microsoft"];
-
+            $bodies = json_decode($this->thing->thing->message0, true);
+            $this->body = $bodies["microsoft"];
+        }
         $this->variablesGet();
         return $this->body;
     }
@@ -259,8 +135,6 @@ class Microsoft
         $this->text = $this->getText();
         $this->activity_id = $this->getActivity();
         $this->service_url = $this->body["serviceUrl"];
-
-        return;
     }
 
     function makeMessage($message = null)
@@ -341,11 +215,14 @@ class Microsoft
         }';
 */
 
+        //if ($message == null) {return;}
+        /*
         if (!isset($this->message)) {
-            $this->json_message = "No message provided.";
-            return;
+$this->message = $message;
+          //  $this->json_message = "No message provided.";
+          //  return;
         }
-
+*/
         $jsonData =
             '{"type": "message",
     "from": {
@@ -396,7 +273,7 @@ class Microsoft
             '"
     },
     "text": "' .
-            $this->message .
+            $message .
             '"
 }';
 
@@ -437,10 +314,12 @@ class Microsoft
 
         $result_json = json_decode($result, true);
         $this->access_token = $result_json["access_token"];
-
-        return;
     }
 
+    public function sendMicrosoft($to, $text)
+    {
+        $this->sendMessage($to, $text);
+    }
     function sendMessage($to, $text)
     {
         // Get access token each time
@@ -489,8 +368,8 @@ Content-Type: application/json
         $ch = curl_init($url);
 
         //The JSON data.
-
-        $this->makeBasicMessage();
+        //$text = "roo";
+        $this->makeBasicMessage($text);
         $jsonData = $this->json_message;
         //Encode the array into JSON.
         //        $jsonDataEncoded = $jsonData;
@@ -513,22 +392,29 @@ Content-Type: application/json
         //Execute the request
         //      if( !empty($message_to_reply) ){
         $result = curl_exec($ch);
-        //      }
+        $e = null;
+        if ($result === false) {
+            $e = curl_error($ch);
+        }
+
+        // Check HTTP return code, too; might be something else than 200
+        $httpReturnCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        //$this->thing->json->setField("message1");
+        //$this->thing->json->writeVariable(["microsoft"], $jsonData);
+
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        $names = $this->thing->Write(
-            ["microsoft", "result"],
-            $result
-        );
-        $time_string = $this->thing->time();
-        $this->thing->Write(
-            ["microsoft", "refreshed_at"],
-            $time_string
-        );
+        $this->thing->Write(["microsoft", "http_code"], $httpCode);
 
-        return;
+        $this->thing->Write(["microsoft", "url"], $url);
+
+        $this->thing->Write(["microsoft", "error"], $e);
+
+        $names = $this->thing->Write(["microsoft", "result"], $result);
+        $time_string = $this->thing->time();
+        $this->thing->Write(["microsoft", "refreshed_at"], $time_string);
+
     }
 }
-
-?>

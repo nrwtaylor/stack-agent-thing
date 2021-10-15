@@ -540,16 +540,23 @@ class Message extends Agent
                 $token_thing->thing_report["token"] == "microsoft" or
                 $dev_overide == true
             ) {
+                //$this->sendMicrosoft($this->from, "testtest");
+/*
                 $microsoft_thing = new Microsoft(
                     $this->thing,
                     $this->sms_message
                 );
 
-                $thing_report["info"] = $fb_thing->thing_report["info"];
+                $microsoft_thing->sendMicrosoft($this->from, $this->sms_message);
+*/
+                $this->sendMicrosoft($this->from, $this->sms_message);
+
+
+                $thing_report["info"] = $microsoft_thing->thing_report["info"];
 
                 $this->thing_report["channel"] = "microsoft"; // one of sms, email, keyword etc
-                $this->thing_report["info"] =
-                    'Agent "Message" sent a Microsoft message.';
+                //$this->thing_report["info"] =
+                //    'Agent "Message" sent a Microsoft message.';
 
                 $this->thing->log(
                     "<pre> " . $this->thing_report["info"] . "</pre>",
@@ -558,7 +565,7 @@ class Message extends Agent
 
                 $this->tallyMessage();
             } else {
-                $this->thing_report["channel"] = "facebook"; // one of sms, email, keyword etc
+                $this->thing_report["channel"] = "microsoft"; // one of sms, email, keyword etc
                 $this->thing_report["info"] =
                     "You were sent this link through " .
                     $this->thing_report["channel"];
@@ -593,10 +600,7 @@ class Message extends Agent
                 $token_thing->thing_report["token"] == "discord" or
                 $dev_overide == true
             ) {
-                $this->sendDiscord(
-                    $this->thing_report["sms"],
-                    $from
-                );
+                $this->sendDiscord($this->thing_report["sms"], $from);
 
                 $this->thing_report["channel"] = "discord"; // one of sms, email, keyword etc
                 $this->thing_report["info"] =
@@ -691,14 +695,15 @@ class Message extends Agent
                 case true:
                     $sms_thing = new Sms($this->thing, $this->sms_message);
 
-//                    $this->thing_report["info"] = 'Agent "Message" sent a SMS.';
-$this->thing_report['info'] = $sms_thing->thing_report['info'];
-//if ($sms_thing->error != "") {$this->thing_report['info'] = $sms_thing->error;}
+                    //                    $this->thing_report["info"] = 'Agent "Message" sent a SMS.';
+                    $this->thing_report["info"] =
+                        $sms_thing->thing_report["info"];
+                    //if ($sms_thing->error != "") {$this->thing_report['info'] = $sms_thing->error;}
 
-//                    $this->thing->log(
-//                        "<pre> " . $this->thing_report["info"] . "</pre>",
-//                        "INFORMATION"
-//                    );
+                    //                    $this->thing->log(
+                    //                        "<pre> " . $this->thing_report["info"] . "</pre>",
+                    //                        "INFORMATION"
+                    //                    );
 
                     $this->tallyMessage();
                     $quota = new Quota($this->thing, "quota use");
