@@ -11,7 +11,7 @@ error_reporting(-1);
 
 //register_shutdown_function('shutdown');
 
-echo "Worker whitefox 27 August 2021\n";
+echo "Worker whitefox 14 October 2021\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 
@@ -210,8 +210,12 @@ return true;
 
         echo "worker found message\n";
         $thing = new \Nrwtaylor\StackAgentThing\Thing(null, $agent_input);
+        echo "worker instantiated a thing " .$thing->uuid . "\n";
+
         $start_time = $thing->elapsed_runtime();
         $thing->Create($arr["to"], $arr["from"], $arr["subject"]);
+        echo "worker created a thing\n";
+
     }
 
     //if ($thing->from== "17787923915") {
@@ -256,9 +260,12 @@ return true;
     if (isset($arr['body']['messageId'])) {
         $message_id = $arr['body']['messageId'];
 
-        $m = $thing->db->variableSearch(null, $message_id);
+    echo "worker looking for message id " . $message_id. "\n";
 
-        echo "things with message idenfifier " . $message_id . ": " . count($m['things']) . "\n";
+
+        $m = $thing->db->variableSearch(null, $message_id, false);
+
+        echo "worker counted things with message idenfifier " . $message_id . ": " . count($m['things']) . "\n";
         if (count($m['things']) > 0) {
             echo "Found message already.\n";
 
@@ -267,6 +274,9 @@ return true;
 
         new Messageidentifier($thing, $message_id);
     }
+
+echo "worker wrote message to thing";
+
     $thing->db->setFrom($thing->from);
 
     $thing->json->setField("message0");

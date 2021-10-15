@@ -612,7 +612,7 @@ if (count($this->available_stacks) > 0) {
      * @param unknown $max   (optional)
      * @return unknown
      */
-    public function variableSearch($path, $value, $max = null)
+    public function variableSearch($path, $value, $max = null, $string_in_string = false)
     {
         //        $thing = false;
         /*
@@ -648,16 +648,30 @@ return $thing_report;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
+if ($string_in_string === true) {
         $value = "%$value%"; // Value to search for in Variables
-
+}
         $thingreport["things"] = [];
 
         try {
             //            $query =
             //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
+
+/*
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+*/
+
+if ($this->hash_state == "off") {
+            $query =
+                "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+}
+
+if ($this->hash_state == "on") {
+            $query =
+                "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+}
 
             //$value = "+$value"; // Value to search for in Variables
 
