@@ -73,7 +73,8 @@ class Findagent extends Agent
             $thing_report = $this->thing->db->variableSearch(
                 null,
                 $name,
-                $this->horizon
+                $this->horizon,
+                true
             );
             $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
         } else {
