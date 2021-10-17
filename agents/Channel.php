@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set("display_startup_errors", 1);
-ini_set("display_errors", 1);
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
 error_reporting(-1);
 
 class Channel extends Agent
@@ -23,13 +23,16 @@ class Channel extends Agent
             $channel_name = $this->channel_name;
         }
 
-        $this->thing->Write(["channel", "refreshed_at"], $this->thing->time());
+        $this->thing->Write(
+            ["channel", "refreshed_at"],
+            $this->thing->time()
+        );
         $this->thing->Write(["channel", "name"], $channel_name);
     }
 
     public function initChannels()
     {
-        $resource_name = "channel/channels.php";
+        $resource_name = 'channel/channels.php';
 
         if (!file_exists($this->resource_path . $resource_name)) {
             return true;
@@ -67,16 +70,14 @@ class Channel extends Agent
             "video" => 8,
             "presence" => 2,
         ];
-        $this->verbosity_levels["sms"] = $sms_verbosity_levels;
+        $this->verbosity_levels['sms'] = $sms_verbosity_levels;
     }
 
     public function countChannels()
     {
         $things = $this->thing->db->fromcountDatabase();
 
-        if ($things == null) {
-            return false;
-        }
+        if ($things == null) {return false;}
 
         $channel_count = count($things);
         return $channel_count;
@@ -85,7 +86,10 @@ class Channel extends Agent
     public function get()
     {
         if ($this->agent_input == "channel") {
-            $this->channel_name = $this->thing->Read(["channel", "name"]);
+            $this->channel_name = $this->thing->Read([
+                "channel",
+                "name",
+            ]);
         } elseif ($this->agent_input != null) {
             $this->channel_name = $this->agent_input;
         }
@@ -99,23 +103,23 @@ class Channel extends Agent
         switch ($this->channel_name) {
             case null:
                 break;
-            case "email":
+            case 'email':
                 break;
-            case "sms":
+            case 'sms':
                 break;
-            case "3":
+            case '3':
                 break;
-            case "4":
+            case '4':
                 break;
             default:
                 break;
         }
-        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
 
-            $thing_report["info"] = $message_thing->thing_report["info"];
+            $thing_report['info'] = $message_thing->thing_report['info'];
         }
     }
 
@@ -129,12 +133,12 @@ class Channel extends Agent
         if ($channel_resource == null) {
             $this->channel = $channel_name;
 
-            if (!isset($this->channels_resource["unknown"])) {
+            if (!isset($this->channels_resource['unknown'])) {
                 $this->channel = "null";
                 return;
             }
 
-            $channel_resource = $this->channels_resource["unknown"];
+            $channel_resource = $this->channels_resource['unknown'];
         }
 
         if ($channel_resource == null) {
@@ -187,7 +191,7 @@ class Channel extends Agent
 
         if (strlen($this->from) == 16 and is_numeric($this->from)) {
             //$this->channel = "messenger";
-            $this->resourceChannel("messenger");
+            $this->resourceChannel('messenger');
 
             //$this->getMessenger();
             return;
@@ -195,20 +199,20 @@ class Channel extends Agent
 
         if (filter_var($this->from, FILTER_VALIDATE_EMAIL)) {
             //$this->channel = "email";
-            $this->resourceChannel("email");
+            $this->resourceChannel('email');
             //$this->getEmail();
             return;
         }
 
         if (strlen($this->from) == 11 and is_numeric($this->from)) {
             // Comes in as 11.  Perhaps has a blank space.
-            $this->resourceChannel("sms");
+            $this->resourceChannel('sms');
             //$this->getSMS();
             return;
         }
 
         if ($this->from == "console") {
-            $this->resourceChannel("console");
+            $this->resourceChannel('console');
             //            $this->getConsole();
             return;
         }
@@ -224,15 +228,6 @@ class Channel extends Agent
 
         $input = $this->input;
 
-        if (isset($this->agent_input) and is_string($this->agent_input)) {
-            if (
-                isset($this->channels_resource[strtolower($this->agent_input)])
-            ) {
-                $this->resourceChannel(strtolower($this->agent_input));
-return;
-            }
-        }
-
         if (stripos($input, "count") !== false) {
             $channel_count = $this->countChannels();
             $this->response .=
@@ -242,8 +237,8 @@ return;
             return;
         }
 
-//        $filtered_input = trim($this->assert($input));
-//        $this->resourceChannel($filtered_input);
+        $filtered_input = trim($this->assert($input));
+        $this->resourceChannel($filtered_input);
 
         $status = true;
         return $status;
@@ -251,38 +246,38 @@ return;
 
     public function PNG()
     {
-        $this->thing_report["png"] = null;
-        return $this->thing_report["png"];
+        $this->thing_report['png'] = null;
+        return $this->thing_report['png'];
     }
 
     public function textChannel()
     {
         $order = [
-            "CHANNEL",
-            "x",
-            "channel_name",
-            "plain_text_statement",
-            "x",
-            "retention_policy",
-            "reach",
-            "fields",
-            "eyes",
-            "x",
-            "latency",
-            "characters",
-            "threading",
-            "x",
-            "association",
-            "cueing",
-            "emoji",
-            "images",
-            "buttons",
-            "x",
-            "carousel",
-            "attachments",
-            "voice",
-            "video",
-            "presence",
+            'CHANNEL',
+            'x',
+            'channel_name',
+            'plain_text_statement',
+            'x',
+            'retention_policy',
+            'reach',
+            'fields',
+            'eyes',
+            'x',
+            'latency',
+            'characters',
+            'threading',
+            'x',
+            'association',
+            'cueing',
+            'emoji',
+            'images',
+            'buttons',
+            'x',
+            'carousel',
+            'attachments',
+            'voice',
+            'video',
+            'presence',
         ];
 
         $t = "";
@@ -293,8 +288,8 @@ return;
             }
 
             $verbosity_level = 1;
-            if (isset($this->verbosity_levels["sms"][$descriptor])) {
-                $verbosity_level = $this->verbosity_levels["sms"][$descriptor];
+            if (isset($this->verbosity_levels['sms'][$descriptor])) {
+                $verbosity_level = $this->verbosity_levels['sms'][$descriptor];
             }
 
             if ($verbosity_level <= $this->verbosity) {
@@ -307,7 +302,7 @@ return;
                 }
 
                 // Unrecognized. Add as plain text.
-                $t .= $descriptor . " ";
+                $t .= $descriptor . ' ';
             }
         }
         return $t;
@@ -317,7 +312,7 @@ return;
     {
         $sms = $this->textChannel();
         $this->sms_message = $sms;
-        $this->thing_report["sms"] = $sms;
+        $this->thing_report['sms'] = $sms;
     }
 
     function makeEmail()
@@ -326,6 +321,6 @@ return;
             $this->makeSMS();
         }
         $this->email_message = $this->sms_message;
-        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report['email'] = $this->sms_message;
     }
 }
