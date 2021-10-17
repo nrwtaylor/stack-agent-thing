@@ -228,6 +228,17 @@ class Channel extends Agent
 
         $input = $this->input;
 
+/*
+        if (isset($this->agent_input) and is_string($this->agent_input)) {
+            if (
+                isset($this->channels_resource[strtolower($this->agent_input)])
+            ) {
+                $this->resourceChannel(strtolower($this->agent_input));
+return;
+            }
+        }
+*/
+
         if (stripos($input, "count") !== false) {
             $channel_count = $this->countChannels();
             $this->response .=
@@ -236,7 +247,9 @@ class Channel extends Agent
                 " unique channels on this stack. ";
             return;
         }
-
+/*
+And then this is commented out.
+*/
         $filtered_input = trim($this->assert($input));
         $this->resourceChannel($filtered_input);
 
