@@ -69,6 +69,7 @@ class Findagent extends Agent
 
         $things = [];
         if (isset($this->thing->db)) {
+
             $thing_report = $this->thing->db->setUser($this->from);
             $thing_report = $this->thing->db->variableSearch(
                 null,
@@ -77,6 +78,9 @@ class Findagent extends Agent
                 true
             );
             $things = isset($thing_report["things"]) ? $thing_report['things'] : [];
+foreach($things as $i=>$thing) {
+
+}
         } else {
             return true;
         }
