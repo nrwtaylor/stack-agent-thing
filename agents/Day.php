@@ -245,7 +245,9 @@ class Day extends Agent
 
                 $variable_text = str_replace(" ", "_", $period);
 
-                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
+                if ($this->solarDay($datum_projected)[$variable_text] < $timestamp_epoch) {
+//
+//                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
                     $time_of_day = $period;
                 }
                 if ($count > 7) {
