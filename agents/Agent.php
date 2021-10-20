@@ -481,7 +481,6 @@ public function __set($name, $value) {
 
         $this->rules_list = [];
         $this->unique_count = 0;
-
         $findagent_thing = new Findagent($this->thing, $agent_name);
         if (!is_array($findagent_thing->thing_report["things"])) {
             return;
