@@ -87,6 +87,9 @@ class Day extends Agent
 
     public function initDay()
     {
+        $time_agent = new Time($this->thing, "time");
+        $this->working_datum = $time_agent->datumtime($this->current_time);
+
         $this->long_count_rounds = [
             "baktun" => 20,
             "katun" => 20,
@@ -163,6 +166,7 @@ class Day extends Agent
 
     public function runDay($text = null)
     {
+        /*
         $longitude_agent = new Longitude($this->thing, "longitude");
 
         // Cannot calculate local time without knowing longitude.
@@ -174,12 +178,12 @@ class Day extends Agent
 
         $latitude_agent = new Latitude($this->thing, "latitude");
         $latitude = $latitude_agent->latitude;
-
-        if ($latitude === false) {
+*/
+        if ($this->latitude === false) {
             $this->response .= "Latitude not known. ";
         }
 
-        if ($latitude === false or $longitude === false) {
+        if ($this->latitude === false or $this->longitude === false) {
             return true;
         }
 
@@ -188,8 +192,11 @@ class Day extends Agent
             $timestamp_epoch = strtotime($text);
         }
 
-        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
-
+        $solar_array = date_sun_info(
+            $timestamp_epoch,
+            $this->latitude,
+            $this->longitude
+        );
         $this->solar_array = $solar_array;
         $this->timestamp_epoch = $timestamp_epoch;
 
@@ -210,23 +217,20 @@ class Day extends Agent
         $count = 0;
         foreach (range(0, 1, 1) as $period_index) {
             foreach ($arr as $period => $epoch) {
-                $datum = $this->twilightDay($period);
-                $indexed_period =
-                    $datum->getTimestamp() + $period_index * (60 * 60 * 24);
+                // The datum returned is when this event will happen
+                // as a DateTime (datum) object.
+
+                $period_timestamp =
+                    $this->working_datum->getTimestamp() +
+                    $period_index * (60 * 60 * 24);
+
                 $e = strtotime($this->current_time);
 
-/*
-                $this->thing->console (($indexed_period > $e ? "higher" : "lower" ) .
-                    $datum->getTimestamp() .
-                    " " .
-                    $e .
-                    " " .
-                    $period .
-                    " " .
-                    $epoch .
-                    " \n");
-*/
-                if ($indexed_period < $e) {
+                $datum_projected = new \DateTime();
+                $datum_projected->setTimestamp($period_timestamp);
+                $datum = $this->twilightDay($period, $datum_projected);
+
+                if ($period_timestamp < $e) {
                     continue;
                 }
 
@@ -234,7 +238,8 @@ class Day extends Agent
                     $message .=
                         $period . " " . $datum->format("Y/m/d G:i:s") . " ";
                 } else {
-                    $message .= $period . " " . $datum->format("G:i:s") . " ";
+                    $message .=
+                        $period . " " . $datum_projected->format("G:i:s") . " ";
                 }
                 $count += 1;
 
@@ -242,6 +247,9 @@ class Day extends Agent
 
                 if ($this->solar_array[$variable_text] < $timestamp_epoch) {
                     $time_of_day = $period;
+                }
+                if ($count > 7) {
+                    break;
                 }
             }
         }
@@ -251,7 +259,7 @@ class Day extends Agent
             $day_time = $arr[$time_of_day];
         }
 
-        $tz = $datum->getTimezone();
+        $tz = $datum_projected->getTimezone();
         $message .= $tz->getName();
 
         if (
@@ -265,7 +273,28 @@ class Day extends Agent
         $this->day_time = $day_time;
     }
 
-    public function twilightDay($text)
+    public function solarDay($text = null)
+    {
+        $timestamp_epoch = time();
+
+        if ($text != null and is_string($text)) {
+            $timestamp_epoch = strtotime($text);
+        }
+
+        if (is_a($text, "DateTime")) {
+            $timestamp_epoch = $text->getTimestamp();
+        }
+
+        $solar_array = date_sun_info(
+            $timestamp_epoch,
+            $this->latitude,
+            $this->longitude
+        );
+
+        return $solar_array;
+    }
+
+    public function twilightDay($text, $datum = null)
     {
         if ($text == "night") {
             $text = "astronomical twilight begin";
@@ -273,11 +302,19 @@ class Day extends Agent
 
         $variable_text = str_replace(" ", "_", $text);
 
-        $seconds_to_event =
-            $this->solar_array[$variable_text] - $this->timestamp_epoch;
+        // $seconds_to_event =
+        //     $this->solar_array[$variable_text] - $this->timestamp_epoch;
 
-        $time_agent = new Time($this->thing, "time");
-        $working_datum = $time_agent->datumtime($this->current_time);
+        //$time_agent = new Time($this->thing, "time");
+        //$working_datum = $time_agent->datumtime($this->current_time);
+        $working_datum = $this->working_datum;
+        if ($datum != null) {
+            $working_datum = $datum;
+        }
+
+        $seconds_to_event =
+            $this->solarDay($working_datum)[$variable_text] -
+            $this->timestamp_epoch;
 
         if ($seconds_to_event < 0) {
             $working_datum->sub(
@@ -665,10 +702,7 @@ class Day extends Agent
     public function setDay()
     {
         return;
-        $this->thing->Write(
-            ["day", "decimal"],
-            $this->decimal_day
-        );
+        $this->thing->Write(["day", "decimal"], $this->decimal_day);
 
         $this->thing->log(
             $this->agent_prefix .
@@ -685,6 +719,18 @@ class Day extends Agent
      */
     public function getDay()
     {
+        $longitude_agent = new Longitude($this->thing, "longitude");
+
+        // Cannot calculate local time without knowing longitude.
+        if ($longitude_agent->longitude === false) {
+            $this->response .= "Longitude not known. ";
+        }
+
+        $this->longitude = $longitude_agent->longitude;
+
+        $latitude_agent = new Latitude($this->thing, "latitude");
+        $this->latitude = $latitude_agent->latitude;
+
         return;
     }
 
@@ -999,6 +1045,8 @@ class Day extends Agent
 
     public function wedgeDay()
     {
+        imagesetthickness($this->image, 1);
+
         $size = null;
         if ($size == null) {
             $size = $this->size;
@@ -1018,19 +1066,25 @@ class Day extends Agent
         $center_x = $canvas_size_x / 2;
         $center_y = $canvas_size_y / 2;
 
+        $this->center_x = $center_x;
+        $this->center_y = $center_y;
+
         // devstack rotation not yet implemented
         if (!isset($this->angle)) {
             $this->angle = 0;
         }
 
-        $init_angle = (-1 * pi()) / 2;
+        $i = (-1 * pi()) / 2;
+        $this->init_angle = $i;
         $angle = (2 * 3.14159) / 24;
         //$x_pt =  230;
         //$y_pt = 230;
 
         foreach (range(0, 24 - 1, 1) as $i) {
-            $x_pt = $size * cos($angle * $i + $init_angle);
-            $y_pt = $size * sin($angle * $i + $init_angle);
+            $this->drawTick(null, $i * (360 / 24), 25, $size - 25);
+
+            $x_pt = $size * cos($angle * $i + $this->init_angle);
+            $y_pt = $size * sin($angle * $i + $this->init_angle);
             /*
             imageline(
                 $this->image,
@@ -1041,6 +1095,7 @@ class Day extends Agent
                 $this->black
             );
 */
+            /*
             imageline(
                 $this->image,
                 $center_x,
@@ -1049,7 +1104,45 @@ class Day extends Agent
                 $center_y + $y_pt,
                 $this->black
             );
+*/
         }
+        $angle = 20;
+        $length = 50;
+        $radius = $size;
+        $text = "tick";
+
+        $arc = [];
+
+        $a = $this->solarDay();
+        foreach ($a as $period_name => $period) {
+            $period_timestamp = $this->working_datum->getTimestamp();
+
+            $datum_projected = new \DateTime();
+            $datum_projected->setTimestamp($period_timestamp);
+
+            $datum = $this->twilightDay($period_name, $datum_projected);
+
+            $t = $datum->format("G:i:s");
+            // dev?
+
+            $parts = explode(":", $t);
+            $angle =
+                (($parts[0] * 60 * 60 + $parts[1] * 60 + $parts[2]) /
+                    (24 * 60 * 60)) *
+                360;
+            imagesetthickness($this->image, 2);
+            //if ($period_name == "sunset" or $period_name == "sunrise") {
+            //    imagesetthickness($this->image, 7);
+            //}
+            if (strpos($period_name, "astronomical") !== false) {
+                $arc[] = $angle;
+                imagesetthickness($this->image, 7);
+            }
+
+            $this->drawTick($text, $angle, $radius, $length);
+        }
+
+        imagesetthickness($this->image, 3);
 
         imagearc(
             $this->image,
@@ -1061,24 +1154,60 @@ class Day extends Agent
             360,
             $this->black
         );
+
+        imagesetthickness($this->image, 7);
+
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            $arc[1] + ($this->init_angle * 180) / pi(),
+            $arc[0] + ($this->init_angle * 180) / pi(),
+            $this->black
+        );
     }
 
     public function get()
     {
-        $time_string = $this->thing->Read([
-            "day",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["day", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["day", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["day", "refreshed_at"], $time_string);
         }
+
+        $this->getDay();
     }
 
+    public function drawTick($text, $angle, $radius, $length)
+    {
+        // angle in degrees
+        //imagesetthickness($this->image, 5);
+        //$init_angle = (-1 * pi()) / 2;
+        //$angle = (2 * 3.14159) / 24;
+        //$x_pt =  230;
+        //$y_pt = 230;
+
+        $angle_radians = ($angle / 180) * pi();
+
+        //foreach (range(0, 24 - 1, 1) as $i) {
+        $x_start = $radius * cos($angle_radians + $this->init_angle);
+        $y_start = $radius * sin($angle_radians + $this->init_angle);
+
+        $x_end = ($radius + $length) * cos($angle_radians + $this->init_angle);
+        $y_end = ($radius + $length) * sin($angle_radians + $this->init_angle);
+
+        imageline(
+            $this->image,
+            $this->center_x + $x_start,
+            $this->center_y + $y_start,
+            $this->center_x + $x_end,
+            $this->center_y + $y_end,
+            $this->black
+        );
+    }
     /**
      *
      * @return unknown
@@ -1208,7 +1337,7 @@ class Day extends Agent
             $image = $pdf->Output("", "S");
             $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            $this->thing->console( "Caught exception: ", $e->getMessage(), "\n" );
+            $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
 
         return $this->thing_report["pdf"];
@@ -1411,17 +1540,16 @@ class Day extends Agent
         }
 
         if (count($scores) == 1) {
+            if (!function_exists("array_key_first")) {
+                // function array_key_first(array $scores) {
+                foreach ($arr as $key => $unused) {
+                    return $key;
+                }
+                return null;
+                //}
+            }
 
-if (!function_exists('array_key_first')) {
-   // function array_key_first(array $scores) {
-        foreach($arr as $key => $unused) {
-            return $key;
-        }
-        return NULL;
-    //}
-}
-
-//            return array_key_first($scores);
+            //            return array_key_first($scores);
         }
 
         // Leave it here for now.
