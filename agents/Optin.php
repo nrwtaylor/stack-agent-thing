@@ -124,10 +124,10 @@ class Optin extends Agent
 
         $this->makeChoices();
 
-        $web = "<b>Opt-in Agent</b>";
-        $web .= "<p>";
-        $web .= "<p>";
-
+        //$web = "<b>Opt-in Agent</b>";
+        //$web .= "<p>";
+        //$web .= "<p>";
+$web = "";
         $web .= "Text OPTIN in your text channel.";
 
         $web .= "<br>";
@@ -199,6 +199,9 @@ class Optin extends Agent
      */
     public function readSubject()
     {
+
+        $this->response .= "Heard an opt-in query.";
+
 if ($this->isOptin($this->input)) {
 $this->optin();
 }
@@ -213,5 +216,6 @@ $this->optin();
             $this->agent_prefix .
                 'called the Usermanager to update user state to optin.'
         );
+        $this->response .= "Sent an opt-in request to the User Manager.";
     }
 }
