@@ -3,50 +3,79 @@ namespace Nrwtaylor\StackAgentThing;
 
 class Travelogue extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
-        $this->path = null;
-        if (isset($this->thing->container['stack']['path'])) {
-            $this->path = $this->thing->container['stack']['path'];
-        }
-
+        $this->file_name = $this->resource_path . "interlink/calendar.php";
+        $this->resource_prefix = "travelogue-initerlink-calendar";
         $this->initTravelogue();
     }
 
     public function initTravelogue()
     {
+        $this->thing_report["help"] =
+            "Try INTERLINK interlink/test.php. Or INTERLINK <uuid>.";
+        $this->thing_report["info"] =
+            "Navigates a set of UUIDs with prior and posterior links.";
     }
 
     public function run()
     {
-        $this->runTravelogue();
     }
 
     public function test()
     {
     }
 
-    public function runTravelogue()
+    public function prepareTravelogue($travelogue = null)
     {
-        $interlink = $this->interlink;
-
-        $this->text = $interlink['text'];
-        $this->prior_uuid = $interlink['prior_uuid'];
-        $this->posterior_uuid = $interlink['posterior_uuid'];
-
-        $this->slugs = false;
-        if (isset($interlink['slugs'])) {
-            $this->slugs = $interlink['slugs'];
+        if ($travelogue == null) {
         }
-        if ($this->agent_input == null) {
-            $response = "Travelogue.";
 
-            $this->travelogue_message = $response; // mewsage?
+        $this->text = null;
+        $this->prior_uuid = null;
+        $this->posterior_uuid = null;
+        $this->slugs = [];
+        if (!$this->isTravelogue($travelogue)) {
+            return true;
+        }
+
+        $this->text = $travelogue["text"];
+        $this->prior_uuid = $travelogue["prior_uuid"];
+        $this->posterior_uuid = $travelogue["posterior_uuid"];
+
+        $this->slugs = [];
+        if (isset($travelogue["slugs"])) {
+            $this->slugs = $travelogue["slugs"];
+        }
+
+        if ($this->agent_input == null) {
+            $this->travelogue_message = "Read travelogue.";
         } else {
             $this->travelogue_message = $this->agent_input;
         }
+    }
+
+    public function isTravelogue($travelogue)
+    {
+        if (!isset($travelogue["text"])) {
+            return false;
+        }
+        if (!isset($travelogue["prior_uuid"])) {
+            return false;
+        }
+
+        if (
+            !isset($travelogue["posterior_uuid"]) and
+            $travelogue["posterior_uuid"] == null
+        ) {
+            $this->response .= "Did not see a posterior reference . ";
+            return true;
+        }
+
+        $this->response .= "Saw a travelogue. ";
+        return true;
     }
 
     public function makeMessage()
@@ -54,7 +83,7 @@ class Travelogue extends Agent
         $message = "Travelogue message.";
 
         $this->sms_message = $message;
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     public function makeWeb()
@@ -64,6 +93,37 @@ class Travelogue extends Agent
         $url_agent = new Url($this->thing, "url");
 
         $web = "";
+
+        $web .= "<div>";
+
+        $interlink_prior = $this->interlinkTravelogue($this->prior_uuid);
+        if ($interlink_prior !== false) {
+            //            $web .= "<div>";
+            //            $web .= "<b>PREVIOUS</b><p>";
+
+            $web .= $this->linkTravelogue($this->prior_uuid, "previous");
+            //                " " .
+            //                $url_agent->restoreUrl($interlink_prior["text"]) .
+            //                "\n";
+            //            $web .= "</div>";
+        }
+        $web .= " ";
+        $interlink_posterior = $this->interlinkTravelogue(
+            $this->posterior_uuid
+        );
+        if ($interlink_posterior !== false) {
+            //            $web .= "<p>";
+            //            $web .= "<div>";
+            //            $web .= "<b>NEXT</b><p>";
+
+            $web .= $this->linkTravelogue($this->posterior_uuid, "next");
+            //                " " .
+            //                $url_agent->restoreUrl($interlink_posterior["text"]) .
+            //                "\n";
+            //            $web .= "</div>";
+        }
+        $web .= "</div>";
+
         $web .= "<div>";
 
         // TODO pre-process date extraction
@@ -72,10 +132,28 @@ class Travelogue extends Agent
 
             // TODO Natural (human) date reconstruction.
             $date = $dateline_agent->extractDateline($this->text);
-            $web .= $date['dateline'];
+            $web .= $date["dateline"];
             $web .= "<p><p>";
         }
         $web .= $url_agent->restoreUrl($this->text) . "</div>";
+        $web .= "<p>";
+
+        if (
+            isset($this->interlinkTravelogue($this->uuid)["urls"]) and
+            $this->interlinkTravelogue($this->uuid)["urls"] != null
+        ) {
+            $web .= "<div>";
+            $web .= "<b>URLS</b><p>";
+            $arr = [];
+
+            foreach ($this->interlinkTravelogue($this->uuid)["urls"] as $url) {
+                $web .= '<div style="margin-bottom: 16px">';
+                $link = '<a href="' . $url . '">' . $url . "</a>";
+                $web .= $link . " ";
+                $web .= "</div>";
+            }
+            $web .= "</div>";
+        }
 
         $web .= "<p>";
         if (is_array($this->slugs)) {
@@ -94,23 +172,25 @@ class Travelogue extends Agent
                 $web .= '<div style="margin-bottom: 16px">';
                 $link = $this->linkTravelogue($uuid, "link");
                 $web .= $link . " ";
-//$t = $this->slugtextTravelogue($slugs);
+                //$t = $this->slugtextTravelogue($slugs);
                 $t = implode(" ", $slugs);
-                $web .= " [". $t . "] ";
-$text = $this->interlinkTravelogue($uuid)['text'];
-$text = $url_agent->restoreUrl($text);
+                $web .= " [" . $t . "] ";
+                $text = $this->interlinkTravelogue($uuid)["text"];
+                $text = $url_agent->restoreUrl($text);
                 $web .= $text . "</div>";
             }
             $web .= "</div>";
         }
-
+        /*
         $interlink_prior = $this->interlinkTravelogue($this->prior_uuid);
         if ($interlink_prior !== false) {
             $web .= "<div>";
+            $web .= "<b>PREVIOUS</b><p>";
+
             $web .=
                 $this->linkTravelogue($this->prior_uuid, "previous") .
                 " " .
-                $url_agent->restoreUrl($interlink_prior['text']) .
+                $url_agent->restoreUrl($interlink_prior["text"]) .
                 "\n";
             $web .= "</div>";
         }
@@ -121,52 +201,37 @@ $text = $url_agent->restoreUrl($text);
         if ($interlink_posterior !== false) {
             $web .= "<p>";
             $web .= "<div>";
+            $web .= "<b>NEXT</b><p>";
+
             $web .=
                 $this->linkTravelogue($this->posterior_uuid, "next") .
                 " " .
-                $url_agent->restoreUrl($interlink_posterior['text']) .
+                $url_agent->restoreUrl($interlink_posterior["text"]) .
                 "\n";
             $web .= "</div>";
         }
-
-        $this->thing_report['web'] = $web;
+*/
+        $this->thing_report["web"] = $web;
     }
 
     public function linkTravelogue($uuid, $text = null)
     {
         if ($text == null) {
-            $text = 'link';
+            $text = "link";
         }
 
         return '<a href="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
             '/travelogue">' .
             $text .
-            '</a>';
+            "</a>";
     }
-/*
-    public function slugtextTravelogue($slugs) {
 
-usort($slugs, function ($a, $b) { return (strlen($a) <=> strlen($b)); });
-foreach($slugs as $i=>$slug) {
-
-
-    $a = array_filter($slugs, function($el) use ($slug) {
-        return ( strpos($el, $slug) !== false );
-    });
-if (count($a) > 1)) {unset($slugs[$i]);}
-}
-                $t = implode(" ", $slugs);
-
-return $t;
-
-    }
-*/
     public function interlinkTravelogue($uuid)
     {
-        $interlink = $this->getMemory($uuid);
+        $interlink = $this->getMemory($this->resource_prefix . $uuid);
         return $interlink;
     }
 
@@ -199,7 +264,7 @@ return $t;
                 "Previous: " .
                 $this->prior_uuid .
                 " " .
-                $interlink_prior['text'] .
+                $interlink_prior["text"] .
                 "\n";
             $txt .= "\n";
         }
@@ -212,7 +277,7 @@ return $t;
                 "Next: " .
                 $this->posterior_uuid .
                 " " .
-                $interlink_posterior['text'] .
+                $interlink_posterior["text"] .
                 "\n";
             $txt .= "\n";
         }
@@ -220,78 +285,80 @@ return $t;
         $this->txt = $txt;
     }
 
+    public function makeLink()
+    {
+        $uuid = $this->travelogue_uuid;
+
+        if ($this->travelogue_uuid === false) {
+            $uuid = $this->prior_uuid;
+        }
+
+        if ($this->prior_uuid == null) {
+            $uuid = $this->uuid;
+        }
+
+        $this->link = $this->web_prefix . "thing/" . $uuid . "/travelogue";
+        $this->thing_report["link"] = $this->link;
+    }
+
     public function makeTXT()
     {
         $this->txtTravelogue();
-        $this->thing_report['txt'] = $this->txt;
+        $this->thing_report["txt"] = $this->txt;
     }
 
     public function respondResponse()
     {
         $this->thing->flagGreen();
 
-        $this->thing_report["info"] =
-            "This navigates interlinks between blocks of text.";
-        $this->thing_report["help"] = "This is about links between things.";
-
-        $this->thing_report['message'] = $this->sms_message;
-        $this->thing_report['txt'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
+        $this->thing_report["txt"] = $this->sms_message;
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $thing_report['info'] = $message_thing->thing_report['info'];
+            $thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
     function makeSMS()
     {
         $this->node_list = ["travelogue" => ["travelogue"]];
-$link = "";
-//$link = $this->web_prefix . 'thing/' . $uuid . '/travelogue';
+        $link = "";
 
+        $travelogue_message = "No travelogue seen.";
+        if (isset($this->travelogue_message)) {
+            $travelogue_message = $this->travelogue_message;
+        }
 
         $sms =
-            "TRAVELOGUE | " . $this->travelogue_message . " " . $this->response. " " . $link;
+            "TRAVELOGUE | " .
+            $travelogue_message .
+            " " .
+            $this->response .
+            " " .
+            $link;
         $this->sms_message = "" . $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function readSubject()
     {
-        $input = $this->input;
-
+        $input = $this->assert($this->input, "travelogue", false);
         $uuid_agent = new Uuid($this->thing, "uuid");
         $this->travelogue_uuid = $uuid_agent->extractUuid($input);
 
-        if ($this->travelogue_uuid == false) {
-            $this->travelogue_uuid = $this->uuid;
+        if (!isset($this->thing->created_at)) {
+            $input = $this->thing->uuid;
         }
 
-        $t = $this->getMemory($this->travelogue_uuid);
-
-        if ($t === false) {
-            $file = $this->path . 'test.php';
-
-            if (file_exists($file)) {
-                include $file;
-                $this->interlinks = $interlinks;
-                $this->response .= "Loaded interlink file. ";
-
-                foreach ($this->interlinks as $uuid => $interlink) {
-                    $this->setMemory($uuid, $interlink);
-                }
-            }
-            if ($this->travelogue_uuid === false) {
-                $this->travelogue_uuid = array_key_first($interlinks);
-            }
-
-            $t = $this->getMemory($this->travelogue_uuid);
-        }
-        $this->interlink = $t;
+        $t = $this->loadResource($input, $this->resource_prefix);
+        // Expect a single travelogue entry back.
+        // Try reading it.
+        $this->prepareTravelogue($t);
     }
 }

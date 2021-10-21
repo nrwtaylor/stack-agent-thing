@@ -42,19 +42,6 @@ class makeEmail
                 $this->input = "No message provided.";
         }
 
-/*        if (isset($input['message'])) {
-	        $this->input = $input['message'];
-        }
-
-        } elseif (isset($input['sms'])) {
-            $this->input = $input['sms'];
-
-        } else {
-            if (!is_array($input)) {
-                $this->input = $input;
-            }
-        }
-*/
         if (isset($input['choices'])) {
             $this->choices = $input['choices'];
         }
@@ -70,8 +57,11 @@ class makeEmail
         $this->stack_state = $thing->container['stack']['state'];
         $this->short_name = $thing->container['stack']['short_name'];
 
-        $this->robot_name = $thing->container['stack']['robot_name'];
+$this->robot_name = "noreply";
+if (isset($thing->container['stack']['robot_name'])) {
 
+        $this->robot_name = $thing->container['stack']['robot_name'];
+}
 
         // Create some short-cuts.
         $this->uuid = $thing->uuid;
@@ -90,7 +80,7 @@ class makeEmail
 
         $from =false;
 
-        if (is_array($this->input)) {var_dump($this->input); exit();}
+        if (is_array($this->input)) {throw new \Exception("devstack");}
 
 	    $email = $this->generateMultipart($from, $this->input, $this->choices);
 
@@ -326,8 +316,6 @@ $this->email_message = $message;
 
 		//Html body
 		$message .= quoted_printable_encode($this->generateHTML($raw_message, $choices)) . "\r\n";
-
-//		echo $choices['email_html'];
 
 		//$message .= "--PHP-alt-" . $boundary . "\r\n";
 		//$attachment = chunk_split(base64_encode(file_get_contents('attachment.zip'))); 

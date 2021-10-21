@@ -33,7 +33,10 @@ class Zoom extends Agent
 
         $this->node_list = ["zoom" => ["zoom", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
+
+        $this->urls = $this->settingsAgent(["zoom", "urls"]);
+        $this->url = $this->settingsAgent(["zoom", "url"]);
 
         $this->urls = $this->settingsAgent(["zoom", "urls"]);
         $this->url = $this->settingsAgent(["zoom", "url"]);
@@ -158,6 +161,7 @@ class Zoom extends Agent
 
     public function readZoom($text = null)
     {
+        if ($text == null) {return true;}
         //        $file = $this->resource_path . 'call/call-zoom-test' . '.txt';
 
         //        if (file_exists($file)) {
@@ -204,16 +208,14 @@ class Zoom extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "zoom",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["zoom", "refreshed_at"],
                 $time_string
             );

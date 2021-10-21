@@ -36,16 +36,14 @@ class Boundary extends Agent
         );
         $this->current_time = $this->thing->time();
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "boundary",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["boundary", "refreshed_at"],
                 $time_string
             );
@@ -54,11 +52,11 @@ class Boundary extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["boundary", "nom"])
+            $this->thing->Read(["boundary", "nom"])
         );
 
         $this->suit = $this->default_suit;
-        $suit = $this->thing->json->readVariable(["boundary", "suit"]);
+        $suit = $this->thing->Read(["boundary", "suit"]);
         if ($suit !== false) {
             $this->suit = $suit;
         }
@@ -66,8 +64,8 @@ class Boundary extends Agent
         if ($this->nom == false or $this->suit == false) {
             $this->getBoundary();
 
-            $this->thing->json->writeVariable(["boundary", "nom"], $this->nom);
-            $this->thing->json->writeVariable(["boundary", "suit"], $this->suit);
+            $this->thing->Write(["boundary", "nom"], $this->nom);
+            $this->thing->Write(["boundary", "suit"], $this->suit);
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',
@@ -120,8 +118,6 @@ class Boundary extends Agent
             return false;
         }
 
-        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
-
         return $text;
     }
 
@@ -145,27 +141,7 @@ class Boundary extends Agent
             $this->newBoundary();
         }
 
-        //$this->response = "Drew " . $this->colour . " " . $this->face . " " . $this->suit;
         $this->colourBoundary();
-        /*
-        if (($this->suit == 'spades') or ($this->suit == 'clubs')) {
-            $this->colour = "black";
-        } else {
-            $this->colour = "red";
-        }
-*/
-
-        //$this->response .= 'Read rule. ';
-        /*
-        $this->response =
-            "" .
-            strtoupper($this->nom) .
-            " of " .
-            ucwords($this->suit) .
-            " [" .
-            strtoupper($this->colour) .
-            "].";
-*/
     }
 
     public function newBoundary()
@@ -241,11 +217,6 @@ class Boundary extends Agent
 
     public function makeWeb()
     {
-        $boundary = ["nom" => $this->nom, "suit" => $this->suit];
-
-        $filename = $this->svgBoundary($boundary);
-
-        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
         $web = "<b>Boundary Agent</b><br>";
         $web .= "<p>";
         $web .= "<p>";
@@ -253,7 +224,6 @@ class Boundary extends Agent
         if ($this->readBoundary($this->subject) !== false) {
             $web .= $this->readBoundary($this->subject);
 
-            $web .= "<center>" . $image . "</center>";
 
             $web .= "<p>";
             $web .= "To forget this boundary CLICK on the FORGET button.<p>";
@@ -266,13 +236,7 @@ class Boundary extends Agent
 
     public function makeSnippet()
     {
-        $boundary = ["nom" => $this->nom, "suit" => $this->suit];
-
-        $filename = $this->svgBoundary($boundary);
-
-        $image = @file_get_contents($this->resource_path . 'boundary/' . $filename);
-
-        $web = "<center" . $image . "</center";
+            $web = $this->readBoundary($this->subject);
 
         $this->thing_report['snippet'] = $web;
     }
@@ -302,13 +266,10 @@ class Boundary extends Agent
         $this->thing->flagGreen();
 
         // Get the current user-state.
-        //$this->makeSMS();
-        //$this->makeEmail();
         $this->makeChoices();
 
         $this->thing_report['message'] = $this->sms_message;
         $this->thing_report['email'] = $this->sms_message;
-        //$this->thing_report['sms'] = $this->sms_message;
 
         // While we work on this
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -321,24 +282,16 @@ class Boundary extends Agent
 
     public function readSubject()
     {
-        //$this->newRule();
-        // Ignore subject.
-        return;
     }
 
     public function boundary()
     {
-        // Call the Usermanager agent and update the state
-        // Stochastically call rule.
-        //if (rand(1, $this->variable) == 1) {
         $this->getBoundary();
-        //}
 
         $this->thing->log(
             $this->agent_prefix .
                 ' says, "Think that boundary could be any boundary.\n"'
         );
 
-        return;
     }
 }

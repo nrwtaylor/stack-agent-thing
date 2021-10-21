@@ -15,21 +15,19 @@ class EightBall extends Agent
 
     function set()
     {
-        $this->thing->json->writeVariable(["eightball", "face"], $this->face);
+        $this->thing->Write(["eightball", "face"], $this->face);
     }
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "eightball",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["eightball", "refreshed_at"],
                 $time_string
             );
@@ -37,9 +35,8 @@ class EightBall extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
         $this->face = strtolower(
-            $this->thing->json->readVariable(["eightball", "face"])
+            $this->thing->Read(["eightball", "face"])
         );
     }
 

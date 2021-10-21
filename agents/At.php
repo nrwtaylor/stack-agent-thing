@@ -205,36 +205,6 @@ class At extends Agent
 
     /**
      *
-     * @param unknown $input
-     * @return unknown
-     */
-    /*
-    function isInput($input)
-    {
-        if ($input === false) {
-            return false;
-        }
-
-        if ($input === null) {
-            return false;
-        }
-
-        if (strtolower($input) == strtolower("X")) {
-            return false;
-        }
-
-        if (is_numeric($input)) {
-            return true;
-        }
-        if ($input == 0) {
-            return true;
-        }
-
-        return true;
-    }
-*/
-    /**
-     *
      * @param unknown $input (optional)
      * @return unknown
      */
@@ -243,19 +213,17 @@ class At extends Agent
         // Remove non dates.
         $input = $this->stripUrls($input);
 
-// Remove access codes (3 4 4)
+        // Remove access codes (3 4 4)
 
         $pattern = "/\b\d{3} \d{4} \d{4}\b/i";
         preg_match_all($pattern, $input, $match);
         $t = $match[0];
 
-foreach($t as $i=>$access_code) {
-$input = str_replace($access_code, " ",$input);
-}
-
+        foreach ($t as $i => $access_code) {
+            $input = str_replace($access_code, " ", $input);
+        }
 
         $input = $this->stripTelephonenumbers($input, " ");
-
         $this->parsed_date = date_parse($input);
 
         $month = $this->parsed_date["month"];
@@ -312,11 +280,6 @@ $input = str_replace($access_code, " ",$input);
                 if ($minute == 0 and $hour == 0) {
                     $minute = substr($this->numbers[0], 2, 2);
                     $hour = substr($this->numbers[0], 0, 2);
-
-                    //                if ($this->isInput($minute)) {$this->minute = $minute;}
-                    //                if ($this->isInput($hour)) {$this->hour = $hour%24;}
-                    //$this->minute = $minute;
-                    //$this->hour = $hour;
                 }
             }
         } elseif (count($this->numbers) == 2) {
@@ -335,17 +298,9 @@ $input = str_replace($access_code, " ",$input);
                 }
             } else {
                 if ($this->isInput($minute)) {
-                    //        if(($minute<0) and ($minute>=60)) {
-                    //            $minute = false;
-                    //        }
                     $this->minute = $minute;
                 }
                 if ($this->isInput($hour)) {
-                    //        if(($hour<0) and ($hour>=24)) {
-                    //            $hour = false;
-                    //        }
-                    //                    $this->hour = $hour;
-
                     $this->hour = $hour % 24;
                 }
             }
@@ -376,10 +331,8 @@ $input = str_replace($access_code, " ",$input);
         }
 
         $this->year = false;
-        //$year = $this->year_agent->extractYear($input);
 
         $year = $this->extractYear($input);
-
         $year_text = "X";
         if ($year !== false) {
             $year_text = $year["year"]; // Discard era information.
@@ -398,29 +351,23 @@ $input = str_replace($access_code, " ",$input);
             $this->minute = false;
             $this->hour = false;
         }
-
         $this->timezone = $this->extractTimezone($input);
+
+        $at = [
+            "year" => $this->year,
+            "month" => $this->month,
+            "day" => $this->day,
+            "day_number" => $this->day_number,
+            "hour" => $this->hour,
+            "minute" => $this->minute,
+            "timezone" => $this->timezone,
+        ];
+
         // TODO - Gregorian?
         //$this->extractCalendar($input);
+        return $at;
     }
 
-    function extractTimezone($input)
-    {
-        // Identifiy UTC.
-        $timezone = false;
-        if (stripos($input, "utc") !== false) {
-            $timezone = "UTC";
-        }
-
-        if (stripos($input, "pacific standard time") !== false) {
-            $timezone = "PST";
-        }
-// https://stackoverflow.com/questions/5362628/how-to-get-the-names-and-abbreviations-of-a-time-zone-in-php
-//var_dump(timezone_abbreviations_list());
-//$x = date_parse($input);
-
-        return $timezone;
-    }
     /**
      *
      * @param unknown $input (optional)
@@ -456,7 +403,6 @@ $input = str_replace($access_code, " ",$input);
                     switch ($piece) {
                         case "stop":
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
@@ -536,11 +482,9 @@ $input = str_replace($access_code, " ",$input);
                         continue;
                     }
 
-                    //      $day_evidence[] = $day_name;
                     $day = $key;
                     $day_evidence[$key][] = $day_name;
 
-                    //break;
                 }
             }
         }
@@ -650,14 +594,11 @@ $input = str_replace($access_code, " ",$input);
         if (isset($this->hour)) {
             $hour = $this->hour;
         }
-        //if ($hour == null) {$hour = "X";}
 
         $minute = "X";
         if (isset($this->minute)) {
             $minute = $this->minute;
         }
-
-        //if ($minute == null) {$minute = "X";}
 
         $hour_text = str_pad($hour, 2, "0", STR_PAD_LEFT);
         if ($hour == "X") {
@@ -677,7 +618,7 @@ $input = str_replace($access_code, " ",$input);
     public function makeSMS()
     {
         $sms_message = "AT IS " . $this->textAt();
-        //$sms_message .= " | ";
+
         $sms_message .= $this->response;
 
         $day = "X";
@@ -692,7 +633,6 @@ $input = str_replace($access_code, " ",$input);
         if (isset($this->hour)) {
             $hour = $this->hour;
         }
-        //if ($hour == null) {$hour = "X";}
 
         $minute = "X";
         if (isset($this->minute)) {
@@ -704,13 +644,8 @@ $input = str_replace($access_code, " ",$input);
             !$this->isInput($hour) or
             !$this->isInput($minute)
         ) {
-            //if (($this->hour == "X") or ($this->day == "X") or ($this->minute == "X")) {
-
             $sms_message .= " | Retrieved time. ";
         }
-
-        //$sms_message .= "| nuuid " . strtoupper($this->at->nuuid);
-        //        $sms_message .= " | ~rtime " . number_format($this->thing->elapsed_runtime())."ms";
 
         $this->sms_message = $sms_message;
         $this->thing_report["sms"] = $sms_message;
@@ -759,40 +694,10 @@ $input = str_replace($access_code, " ",$input);
 
     /**
      *
-     * @param unknown $text (optional)
-     */
-    /*
-    function printAt($text = null)
-    {
-        return;
-        echo $text . "\n";
-
-        if (!isset($this->day)) {
-            $day = "X";
-        } else {
-            $day = $this->day;
-        }
-        if (!isset($this->hour)) {
-            $hour = "X";
-        } else {
-            $hour = $this->hour;
-        }
-        if (!isset($this->minute)) {
-            $minute = "X";
-        } else {
-            $minute = $this->minute;
-        }
-
-        echo $day . " " . $hour . " " . $minute . "\n";
-    }
-*/
-    /**
-     *
      * @return unknown
      */
     public function readSubject()
     {
-        //$this->response = null;
         $this->num_hits = 0;
 
         $input = $this->input;
@@ -802,7 +707,6 @@ $input = str_replace($access_code, " ",$input);
         }
 
         if ($input == "at") {
-            //            $this->extractRunat($filtered_input);
             return;
         }
 
@@ -814,11 +718,6 @@ $input = str_replace($access_code, " ",$input);
             $this->day = "X";
             return;
         }
-        //        $this->extractRunat($this->input);
-        //        if ($this->input == "at") {
-        //            //            $this->extractRunat($filtered_input);
-        //            return;
-        //        }
 
         if ($this->isAlpha($filtered_input) === true) {
             $this->tag = $filtered_input . "at";

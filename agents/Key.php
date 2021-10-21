@@ -16,8 +16,7 @@ class Key extends Agent
     {
         // Thing actions
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["key", "received_at"],
             gmdate("Y-m-d\TH:i:s\Z", time())
         );
@@ -27,24 +26,11 @@ class Key extends Agent
         $from = $this->from;
         $to = $this->to;
 
-        //echo "from",$from,"to",$to;
-
         $subject = $this->subject;
 
-        // Assemble a button set.
-
-        //$node_list = array("key maintenance"=>array("happy","not happy"=>array("more","less")));
-        //		$this->thing->choice->Create($node_list, "key maintenance");
-
-        //$choices = $this->thing->choice->getChoices();
-        //$links = array("url"=>$urls, "link"=>$html_links, "button"=>$buttons);
-
         $choices = $this->thing->choice->makeLinks();
-        //$html_button_set = $links['button'];
         $this->thing_report['choices'] = $choices;
 
-        //$this->thing_report['sms'] = $this->sms_message;
-        //$this->thing_report['message'] = $message;
         $this->thing_report['email'] = $this->thing_report['message'];
         $this->thing_report['choices'] = $choices;
 

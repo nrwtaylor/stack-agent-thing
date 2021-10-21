@@ -7,8 +7,8 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Log extends Agent
@@ -22,27 +22,27 @@ class Log extends Agent
     function init()
     {
         if ($this->thing != true) {
-            $this->thing->log('ran on a null Thing ' . $thing->uuid . '.');
-            $this->thing_report['info'] = 'Tried to run Log on a null Thing.';
-            $this->thing_report['help'] = "That isn't going to work";
+            $this->thing->log("ran on a null Thing " . $thing->uuid . ".");
+            $this->thing_report["info"] = "Tried to run Log on a null Thing.";
+            $this->thing_report["help"] = "That isn't going to work";
 
             return $this->thing_report;
         }
 
         // So I could call
-        if ($this->thing->container['stack']['state'] == 'dev') {
+        if ($this->thing->container["stack"]["state"] == "dev") {
             $this->test = true;
         }
 
         $this->state = "X";
-        if (isset($this->thing->container['api']['log']['state'])) {
-            $this->state = $this->thing->container['api']['log']['state'];
+        if (isset($this->thing->container["api"]["log"]["state"])) {
+            $this->state = $this->thing->container["api"]["log"]["state"];
         }
 
         $this->node_list = [
-            'log' => ['privacy'],
-            'code' => ['web', 'log'],
-            'uuid' => ['snowflake', 'optin'],
+            "log" => ["privacy"],
+            "code" => ["web", "log"],
+            "uuid" => ["snowflake", "optin"],
         ];
     }
 
@@ -54,22 +54,55 @@ class Log extends Agent
             $web_thing->Create(
                 $this->from,
                 $this->agent_name,
-                's/ record web view'
+                "s/ record web view"
             );
         }
-        //$this->makeSnippet();
     }
 
     public function set()
     {
         if ($this->state == "on") {
-            $this->thing->json->setField("variables");
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["log", "received_at"],
                 gmdate("Y-m-d\TH:i:s\Z", time())
             );
         }
     }
+
+    function filterLog($log_text, $log_includes = null, $log_excludes = null)
+    {
+        $response = "";
+        $lines = preg_split("/<br[^>]*>/i", $log_text);
+
+        foreach ($lines as $i => $line) {
+            if (is_array($log_excludes)) {
+                foreach ($log_excludes as $j => $log_exclude) {
+                    if (stripos($line, $log_exclude) !== false) {
+                        continue 2;
+                    }
+                }
+            }
+
+            if (is_array($log_includes)) {
+                if (count($log_includes) == 0) {
+                    $response .= trim($line) . "\n";
+                    continue;
+                }
+
+                foreach ($log_includes as $j => $log_include) {
+                    if (stripos($line, $log_include) !== false) {
+                        $response .= trim($line) . "\n";
+                        continue 2;
+                    }
+                }
+            }
+        }
+        if ($response === "") {
+            return true;
+        }
+        return $response;
+    }
+
     /**
      *
      * @return unknown
@@ -78,28 +111,21 @@ class Log extends Agent
     {
         $this->thing->flagGreen();
 
-        $this->thing_report['info'] = 'This is the log agent.';
-        $this->thing_report['help'] =
-            'This agent shows the log file, and explains it.';
-
-        $this->thing->log(
-            '<pre> Agent "Log" credited 25 to the Thing account.  Balance is now ' .
-                $this->thing->account['thing']->balance['amount'] .
-                '</pre>'
-        );
+        $this->thing_report["info"] = "This is the log agent.";
+        $this->thing_report["help"] =
+            "This agent shows the log file, and explains it.";
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-        return $this->thing_report;
     }
 
     function makeSnippet()
     {
         $gap_time_max = 0;
-        $lines = explode('<br>', $this->thing->log);
+        $lines = explode("<br>", $this->thing->log);
         $log = [];
         foreach ($lines as $i => $line) {
             $line = trim($line);
@@ -133,7 +159,7 @@ class Log extends Agent
         $gap_time_sorted_log = $log;
         $gap_time = [];
         foreach ($gap_time_sorted_log as $key => $row) {
-            $gap_time[$key] = $row['gap_time'];
+            $gap_time[$key] = $row["gap_time"];
         }
         array_multisort($gap_time, SORT_DESC, $gap_time_sorted_log);
 
@@ -142,7 +168,7 @@ class Log extends Agent
         $highlight = [];
         foreach ($gap_time_sorted_log as $i => $log_entry) {
             $count += 1;
-            $highlight[] = $log_entry['number'];
+            $highlight[] = $log_entry["number"];
             if ($count >= $max_entries) {
                 break;
             }
@@ -150,18 +176,18 @@ class Log extends Agent
 
         $snippet = "";
         foreach ($log as $i => $log_entry) {
-            $line = $log_entry['line'];
+            $line = $log_entry["line"];
             //if ($i == $log_index_max) { $line = '<b>' . $log_entry['line'] . '</b>';}
 
             foreach ($highlight as $k => $highlight_index) {
                 if ($highlight_index == $i) {
-                    $line = '<b>' . $log_entry['line'] . '</b>';
+                    $line = "<b>" . $log_entry["line"] . "</b>";
                 }
             }
 
-            $snippet .= $line . '<br>';
+            $snippet .= $line . "<br>";
         }
-        $this->thing_report['snippet'] = $snippet;
+        $this->thing_report["snippet"] = $snippet;
     }
 
     /**
@@ -187,7 +213,7 @@ class Log extends Agent
         $this->sms_message = "LOG | " . $link_text;
 
         $this->sms_message .= " | TEXT INFO";
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     /**
@@ -199,37 +225,41 @@ class Log extends Agent
     {
         $block_things = [];
         // See if a block record exists.
-        $findagent_thing = new Findagent($this->thing, 'thing');
+        $findagent_thing = new Findagent($this->thing, "thing");
 
         $this->max_index = 0;
 
         $match = 0;
+        $things = $findagent_thing->thing_report["things"];
 
-        foreach ($findagent_thing->thing_report['things'] as $block_thing) {
+        if ($things === true) {
+            return true;
+        }
+        foreach ($things as $block_thing) {
             $this->thing->log(
-                $block_thing['task'] .
+                $block_thing["task"] .
                     " " .
-                    $block_thing['nom_to'] .
+                    $block_thing["nom_to"] .
                     " " .
-                    $block_thing['nom_from']
+                    $block_thing["nom_from"]
             );
 
-            if ($block_thing['nom_to'] != "usermanager") {
+            if ($block_thing["nom_to"] != "usermanager") {
                 $match += 1;
-                $this->link_uuid = $block_thing['uuid'];
+                $this->link_uuid = $block_thing["uuid"];
                 if ($match == 2) {
                     break;
                 }
             }
         }
 
-        $previous_thing = new Thing($block_thing['uuid']);
+        $previous_thing = new Thing($block_thing["uuid"]);
 
-        if (!isset($previous_thing->json->array_data['message']['agent'])) {
+        if (!isset($previous_thing->json->array_data["message"]["agent"])) {
             $this->prior_agent = "php";
         } else {
             $this->prior_agent =
-                $previous_thing->json->array_data['message']['agent'];
+                $previous_thing->json->array_data["message"]["agent"];
         }
 
         return $this->link_uuid;
@@ -241,15 +271,10 @@ class Log extends Agent
      */
     public function readSubject()
     {
-
         $input = $this->input;
         $filtered_input = $this->assert("search", $input);
 
-
         $this->defaultButtons();
-
-        $status = true;
-        return $status;
     }
 
     /**
@@ -263,9 +288,9 @@ class Log extends Agent
             $this->node_list,
             "log"
         );
-        $choices = $this->thing->choice->makeLinks('log');
+        $choices = $this->thing->choice->makeLinks("log");
 
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     /**
@@ -273,7 +298,7 @@ class Log extends Agent
      */
     public function makePDF()
     {
-        $this->thing->report['pdf'] = false;
+        $this->thing->report["pdf"] = false;
     }
 
     /**
@@ -281,7 +306,7 @@ class Log extends Agent
      */
     function makeWeb()
     {
-        $link = $this->web_prefix . 'web/' . $this->uuid . '/thing';
+        $link = $this->web_prefix . "web/" . $this->uuid . "/thing";
 
         $this->node_list = ["web" => ["iching", "roll"]];
 
@@ -290,24 +315,21 @@ class Log extends Agent
         if (isset($this->prior_agent)) {
             $agent_text = ucwords($this->prior_agent);
         }
-        $web .= '<b>' . $agent_text . ' Agent</b>';
-
-        //$web .= 'The last agent to run was the ' . ucwords($this->prior_agent) . ' Agent.<br>';
+        $web .= "<b>" . $agent_text . " Agent</b>";
 
         $web .= '<br>This Thing said it heard, "' . $this->subject . '".';
 
         $web .=
-            '<br>This will provide a full log description of what the code did with datagram.';
+            "<br>This will provide a full log description of what the code did with datagram.";
 
-        $web .= '<br>' . $this->sms_message . "<br>";
-        //$web .= 'About '. $this->thing->created_at;
+        $web .= "<br>" . $this->sms_message . "<br>";
 
-        $received_at = strtotime($this->thing->thing->created_at);
+        $received_at = strtotime($this->thing->created_at);
         $ago = $this->thing->human_time(time() - $received_at);
         $web .= "About " . $ago . " ago.";
 
         $web .= "<br>";
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -316,12 +338,11 @@ class Log extends Agent
     function defaultButtons()
     {
         if (rand(1, 6) <= 3) {
-            $this->thing->choice->Create('log', $this->node_list, 'log');
+            $this->thing->choice->Create("log", $this->node_list, "log");
         } else {
-            $this->thing->choice->Create('log', $this->node_list, 'code');
+            $this->thing->choice->Create("log", $this->node_list, "code");
         }
 
-        //$this->thing->choice->Choose("inside nest");
         $this->thing->flagGreen();
     }
 }

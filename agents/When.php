@@ -35,7 +35,7 @@ private/settings.php
 
 class When extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
@@ -63,32 +63,32 @@ class When extends Agent
         $this->preferences_location = null;
         if (
             isset(
-                $this->thing->container['api']['when']['preferences_location']
+                $this->thing->container["api"]["when"]["preferences_location"]
             )
         ) {
             $preferences =
-                $this->thing->container['api']['when']['preferences_location'];
+                $this->thing->container["api"]["when"]["preferences_location"];
         }
 
         $this->calendar_location = null;
         if (
-            isset($this->thing->container['api']['when']['calendar_location'])
+            isset($this->thing->container["api"]["when"]["calendar_location"])
         ) {
             $this->calendar_location =
-                $this->thing->container['api']['when']['calendar_location'];
+                $this->thing->container["api"]["when"]["calendar_location"];
         }
 
         $this->calendar_list = null;
 
-        $this->more_flag = 'off';
-        if (isset($this->thing->container['api']['when'])) {
-            if (isset($this->thing->container['api']['when']['more'])) {
+        $this->more_flag = "off";
+        if (isset($this->thing->container["api"]["when"])) {
+            if (isset($this->thing->container["api"]["when"]["more"])) {
                 $this->more_flag =
-                    $this->thing->container['api']['when']['more'];
+                    $this->thing->container["api"]["when"]["more"];
             }
         }
 
-        $file = $this->resource_path . 'when/when.txt';
+        $file = $this->resource_path . "when/when.txt";
 
         if (file_exists($file)) {
             $handle = fopen($file, "r");
@@ -117,29 +117,30 @@ class When extends Agent
             }
         }
 
-if (!isset($this->thing->calendar_handler)) {
-        $this->thing->calendar_handler = new Calendar($this->thing, "calendar");
-}
+        if (!isset($this->thing->calendar_handler)) {
+            $this->thing->calendar_handler = new Calendar(
+                $this->thing,
+                "calendar"
+            );
+        }
         $this->thing->calendar_handler->span = 10;
         $this->calendar_contents = file_get_contents($this->calendar_location);
 
         // Pull in the stack timezone.
 
-if (!isset($this->thing->time_handler)) {
-        $this->thing->time_handler = new Time($this->thing, "time");
-}
+        if (!isset($this->thing->time_handler)) {
+            $this->thing->time_handler = new Time($this->thing, "time");
+        }
         $this->time_zone = $this->thing->time_handler->time_zone;
-$this->thing->log("When init completed");
+        $this->thing->log("When init completed");
     }
 
     function run()
     {
-//        $this->doWhen();
     }
 
     public function calendarWhen($text = null, $name = null)
     {
-
         if ($text == null) {
             return true;
         }
@@ -150,9 +151,12 @@ $this->thing->log("When init completed");
         // This variable indicates whether all the events in the calendar have a unique identity.
         $this->calendar_unique_events = false;
 
-$this->thing->log("When calendarWhen call readCalendar", "DEBUG");
-        $this->thing->calendar_handler->readCalendar($text, $name);
-$this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
+        $this->thing->log("When calendarWhen call readCalendar", "DEBUG");
+        $this->thing->calendar_handler->icalCalendar($text, $name);
+        $this->thing->log(
+            "When calendarWhen call readCalendar complete",
+            "DEBUG"
+        );
         $this->response .= $this->thing->calendar_handler->response;
 
         return $this->thing->calendar_handler->calendar->events;
@@ -168,7 +172,7 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
 
         $date = new \DateTime($text);
 
-        $response = $date->format('Y M d');
+        $response = $date->format("Y M d");
         return $response;
     }
 
@@ -178,7 +182,7 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
         // TODO: Test
         $date = new \DateTime($text);
         //$date = new \DateTime($text, new \DateTimeZone($this->time_zone));
-        $response = $date->format('H:i');
+        $response = $date->format("H:i");
 
         return $response;
     }
@@ -190,7 +194,7 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
         }
         if ($runtime < 0) {
             return "";
-        } // Apparenly also a possibility :|
+        } // Apparently also a possibility :|
 
         $runtime_text = $this->thing->human_time($runtime);
 
@@ -201,7 +205,9 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
     {
         //$time_agent = new Time($this->thing, "time");
 
-        $timestamp = $this->thing->calendar_handler->textCalendar($event, ['timestamp']);
+        $timestamp = $this->thing->calendar_handler->textCalendar($event, [
+            "timestamp",
+        ]);
         $timestamp = trim($timestamp);
 
         $runtime_text = $this->runtimeWhen(
@@ -210,7 +216,7 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
         );
 
         if ($runtime_text != "") {
-            $runtime_text = '[' . $runtime_text . ']';
+            $runtime_text = "[" . $runtime_text . "]";
         }
 
         $summary_text = $event->summary;
@@ -219,7 +225,7 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
             strtolower($event->summary) == "available"
         ) {
             if (isset($event->calendar_name)) {
-                $summary_text = $event->summary . ' - ' . $event->calendar_name;
+                $summary_text = $event->summary . " - " . $event->calendar_name;
             }
         }
 
@@ -237,32 +243,30 @@ $this->thing->log("When calendarWhen call readCalendar complete", "DEBUG");
 
     public function doWhen()
     {
-$this->thing->log("doWhen called");
+        $this->thing->log("doWhen called");
         $events = [];
-        if ($this->calendar_list === NULL) {
-            $this->response.="No calendars found. ";
+        if ($this->calendar_list === null) {
+            $this->response .= "No calendars found. ";
             return true;
         }
         foreach ($this->calendar_list as $i => $calendar) {
             $ics_links = $this->thing->calendar_handler->icslinksCalendar(
-                $calendar['ics_link']
+                $calendar["ics_link"]
             );
             foreach ($ics_links as $j => $ics_link) {
-                $new_events = $this->calendarWhen($ics_link, $calendar['name']);
+                $new_events = $this->calendarWhen($ics_link, $calendar["name"]);
             }
         }
 
         $events = $this->thing->calendar_handler->calendar->events;
 
-        //$call_agent = new Call($this->thing, "call");
-        //$frequency_agent = new Frequency($this->thing, "frequency");
         $txt = "";
         foreach ($events as $i => $event) {
             $when_description = $this->thing->calendar_handler->descriptionCalendar(
                 $event
             );
 
-            if ($this->description_flag != 'on') {
+            if ($this->description_flag != "on") {
                 $when_description = "";
             }
             $when_description = " " . $when_description;
@@ -288,24 +292,22 @@ $this->thing->log("doWhen called");
         $this->thing_report["info"] = "This is supportive of calendar.";
         $this->thing_report["help"] = "This is about seeing Events.";
 
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report["info"] = $message_thing->thing_report["info"];
 
         return $this->thing_report;
     }
 
     function makeWeb()
     {
-        //$time_agent = new Time($this->thing, "time");
-
-        $web = '<div>No web output. Check the TXT channel.</div>';
+        $web = "<div>No web output. Check the TXT channel.</div>";
         if (isset($this->events)) {
             $web = "";
             foreach ($this->events as $event) {
                 $web .=
-                    '<div>' .
+                    "<div>" .
                     $this->thing->time_handler->textTime($event->dtstart_tz) .
                     " " .
                     $this->thing->time_handler->textTime($event->dtend_tz) .
@@ -319,7 +321,7 @@ $this->thing->log("doWhen called");
             }
         }
         $this->web = $web;
-        $this->thing_report['web'] = $this->web;
+        $this->thing_report["web"] = $this->web;
     }
 
     function makeSMS()
@@ -331,23 +333,23 @@ $this->thing->log("doWhen called");
         $sms .= "Text TXT. Or WEB.";
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function makeTXT()
     {
         $text = $this->calendar_contents;
-if (isset($this->when_text)) {
-        $text .= $this->when_text;
-}
+        if (isset($this->when_text)) {
+            $text .= $this->when_text;
+        }
         $this->txt = $text;
-        $this->thing_report['txt'] = $text;
+        $this->thing_report["txt"] = $text;
     }
 
     function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function extractWhen($text)
@@ -359,15 +361,12 @@ if (isset($this->when_text)) {
             $timedate = trim($tokens[0]);
             $description = trim($tokens[1]);
         }
-        //$this->when_date = $timedate;
-        //$this->when_time = $timedate;
-
         $when_date = $this->dateWhen($timedate);
         $when_time = $this->timeWhen($timedate);
         $when = [
-            'date' => $when_date,
-            'time' => $when_time,
-            'description' => $description,
+            "date" => $when_date,
+            "time" => $when_time,
+            "description" => $description,
         ];
 
         return $when;
@@ -413,13 +412,13 @@ w=fri & !(m=dec & d=25) , poker game
 */
     }
 
-    public function readWhen($text)
+    public function readWhen($text = null)
     {
+        if ($text == null) {return true;}
         if (file_exists($text)) {
-          $this->response .= "Saw a reference to a file. ";
-          $this->response .= "Did not do anything with it. ";
-          return;
-
+            $this->response .= "Saw a reference to a file. ";
+            $this->response .= "Did not do anything with it. ";
+            return;
         }
         // http://www.lightandmatter.com/when/when.html
         $tokens = explode(",", $text);
@@ -438,15 +437,14 @@ w=fri & !(m=dec & d=25) , poker game
 
         $this->response .= "No When interpretation available. ";
         $this->response .= "Used stack date extractor. ";
-        $this->response .= "Saw ". $dateline['dateline'] . " " .$description . ". ";
+        $this->response .=
+            "Saw " . $dateline["dateline"] . " " . $description . ". ";
     }
 
     public function interpretWhen($text)
     {
-
         // TODO - Lots of work here to parse When parameter based language.
         return true;
-
 
         $text = trim($text); // Make sure
 
@@ -477,13 +475,13 @@ The date has to be in year-month-day format, but you can either spell
                left    |
 */
 
-// Below exploratory. Not functional. Yet.
-// Need to reconsider token expansion to allow for symbols.
+        // Below exploratory. Not functional. Yet.
+        // Need to reconsider token expansion to allow for symbols.
 
         // https://stackoverflow.com/questions/19347005/how-can-i-explode-and-trim-whitespace
-        $tokens = array_map('trim', explode('&', $text)); //explode and trim
+        $tokens = array_map("trim", explode("&", $text)); //explode and trim
 
-// TODO - Above line ignores brackets. So needs to be reworked.
+        // TODO - Above line ignores brackets. So needs to be reworked.
 
         if (!isset($this->parameters)) {
             $this->parameters = [];
@@ -491,11 +489,9 @@ The date has to be in year-month-day format, but you can either spell
 
         foreach ($tokens as $i => $token) {
             $token = trim($token);
-            $this->thing->log( "token " . $token . " ","INFORMATION");
+            $this->thing->log("token " . $token . " ", "INFORMATION");
 
-            if (
-                substr($token, 0, 2) === "!("
-            ) {
+            if (substr($token, 0, 2) === "!(") {
                 // recurse.
                 if (substr($token, 0, 2) === "!(") {
                     $token = substr($token, 2);
@@ -511,7 +507,7 @@ The date has to be in year-month-day format, but you can either spell
                 continue;
             }
 
-            $p = array_map('trim', explode('=', $token)); //explode and trim
+            $p = array_map("trim", explode("=", $token)); //explode and trim
             $key = $p[0];
 
             if (!isset($p[1])) {
@@ -552,11 +548,13 @@ The date has to be in year-month-day format, but you can either spell
             $input = $this->agent_input;
         }
 
-        if ($input == 'when') {
+        if ($input == "when") {
             $input = $this->subject;
         }
 
-        if ($this->agent_input === "when") {return;}
+        if ($this->agent_input === "when") {
+            return;
+        }
 
         $this->description_flag = "off";
         if (stripos($input, "description") !== false) {
@@ -567,8 +565,8 @@ The date has to be in year-month-day format, but you can either spell
         // Pipe via Calendar.
         // https://stackoverflow.com/questions/9598665/php-replace-first-occurrence-of-string->
         $string = $input;
-        $str_pattern = 'when';
-        $str_replacement = '';
+        $str_pattern = "when";
+        $str_replacement = "";
 
         $filtered_input = "";
         if (strpos($string, $str_pattern) !== false) {
@@ -583,16 +581,13 @@ The date has to be in year-month-day format, but you can either spell
 
         $filtered_input = trim($filtered_input);
 
+        if ($filtered_input == "") {
+            $this->doWhen();
 
-        if ($filtered_input == '') {
-        $this->doWhen();
-
-return;}
+            return;
+        }
 
         $this->readWhen($filtered_input);
         $this->doWhen();
-
-
-
     }
 }

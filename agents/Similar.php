@@ -59,7 +59,7 @@ class Similar extends Agent
 
         $this->node_list = ["green" => ["red" => ["green"]]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         if ($this->verbosity >= 2) {
             $this->thing->log(
@@ -132,17 +132,16 @@ class Similar extends Agent
         $this->flag = $requested_flag;
         $this->refreshed_at = $this->current_time;
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["similar", "flag"], $this->flag);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["similar", "flag"], $this->flag);
+        $this->thing->Write(
             ["similar", "refreshed_at"],
             $this->current_time
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["similar", "similarness"],
             $this->similarness
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["similar", "similarity"],
             $this->similarity
         );

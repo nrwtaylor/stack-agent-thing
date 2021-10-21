@@ -1,15 +1,15 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Nexmo
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function __construct(Thing $thing, $agent_input = null)
     {
@@ -20,13 +20,13 @@ class Nexmo
 
         $this->thing = $thing;
 
-        $this->thing_report = ['thing' => $this->thing->thing];
-        $this->thing_report['info'] = 'This is a Nexmo agent.';
+        $this->thing_report = ["thing" => $this->thing->thing];
+        $this->thing_report["info"] = "This is a Nexmo agent.";
 
         $this->app_id =
-            $this->thing->container['api']['microsoft']['edna']['appid'];
+            $this->thing->container["api"]["microsoft"]["edna"]["appid"];
         $this->app_secret =
-            $this->thing->container['api']['microsoft']['edna']['appsecret'];
+            $this->thing->container["api"]["microsoft"]["edna"]["appsecret"];
 
         $this->uuid = $thing->uuid;
         $this->to = $thing->to;
@@ -39,17 +39,17 @@ class Nexmo
         $this->node_list = ["sms send" => ["sms send"]];
 
         $this->thing->log(
-            'Agent "Nexmo" running on Thing ' . $this->thing->nuuid . '.'
+            'Agent "Nexmo" running on Thing ' . $this->thing->nuuid . "."
         );
         $this->thing->log(
             'Agent "Nexmo" received this Thing "' . $this->subject . '".'
         );
 
         // Get some stuff from the stack which will be helpful.
-        $this->web_prefix = $thing->container['stack']['web_prefix'];
-        $this->mail_postfix = $thing->container['stack']['mail_postfix'];
-        $this->word = $thing->container['stack']['word'];
-        $this->email = $thing->container['stack']['email'];
+        $this->web_prefix = $thing->container["stack"]["web_prefix"];
+        $this->mail_postfix = $thing->container["stack"]["mail_postfix"];
+        $this->word = $thing->container["stack"]["word"];
+        $this->email = $thing->container["stack"]["email"];
 
         $this->eventGet();
 
@@ -57,10 +57,10 @@ class Nexmo
 
         if ($this->readSubject() == true) {
             $this->thing_report = [
-                'thing' => $this->thing->thing,
-                'choices' => false,
-                'info' => "A Nexmo ID wasn't provided.",
-                'help' => 'from needs to be a number.',
+                "thing" => $this->thing->thing,
+                "choices" => false,
+                "info" => "A Nexmo ID wasn't provided.",
+                "help" => "from needs to be a number.",
             ];
 
             $this->thing->log(
@@ -70,9 +70,7 @@ class Nexmo
         }
         $this->respond();
 
-        $this->thing->log('Agent "Microsoft" completed.');
-
-        return;
+//        $this->thing->log('Agent "Microsoft" completed.');
     }
 
     function eventSet($input = null)
@@ -88,16 +86,13 @@ class Nexmo
         $this->thing->json->setField("message0");
         $this->thing->json->writeVariable(["nexmo"], $input);
 
-        //$this->thing->flagGreen();
-
-        return;
     }
 
     function getResponseurl()
     {
         //$activity = ($this->body['channelData']['clientActivityId']);
-        if (isset($this->body['channelData']['clientActivityId'])) {
-            $this->activity_id = $this->body['channelData']['clientActivityId'];
+        if (isset($this->body["channelData"]["clientActivityId"])) {
+            $this->activity_id = $this->body["channelData"]["clientActivityId"];
             return $this->activity_id;
         }
 
@@ -113,8 +108,8 @@ class Nexmo
     {
         //$activity = ($this->body['channelData']['clientActivityId']);
 
-        if (isset($this->body['channelData']['clientActivityId'])) {
-            $this->activity_id = $this->body['channelData']['clientActivityId'];
+        if (isset($this->body["channelData"]["clientActivityId"])) {
+            $this->activity_id = $this->body["channelData"]["clientActivityId"];
             return $this->activity_id;
         }
 
@@ -128,8 +123,8 @@ class Nexmo
 
     function getChannel()
     {
-        if (isset($this->body['conversation']['id'])) {
-            $this->channel_id = $this->body['conversation']['id'];
+        if (isset($this->body["conversation"]["id"])) {
+            $this->channel_id = $this->body["conversation"]["id"];
             return $this->channel_id;
         }
 
@@ -143,8 +138,8 @@ class Nexmo
 
     function getUser()
     {
-        if (isset($this->body['from']['id'])) {
-            $this->user = $this->body['from']['id'];
+        if (isset($this->body["from"]["id"])) {
+            $this->user = $this->body["from"]["id"];
             return $this->user;
         }
 
@@ -158,8 +153,8 @@ class Nexmo
 
     function getText()
     {
-        if (isset($this->body['text'])) {
-            $this->text = $this->body['text'];
+        if (isset($this->body["text"])) {
+            $this->text = $this->body["text"];
             return $this->text;
         }
 
@@ -201,19 +196,13 @@ class Nexmo
         //			$this->thing->account['stack']->Debit($this->cost);
         //			$this->thing->log("FB message sent");
 
-        $this->thing_report['info'] =
-            '<pre> Agent "Nexmo" sent a message to ' . $this->from . '.</pre>';
-        //
-        //		} else {
-        //
-        //			$this->thing_report['info'] = 'SMS not sent.  Balance of ' . $this->thing->account['stack']->balance['amount'] . " less than " . $this->cost ;
-        //		}/
-        //exit();
+        $this->thing_report["info"] =
+            '<pre> Agent "Nexmo" sent a message to ' . $this->from . ".</pre>";
 
-        $this->thing_report['choices'] = false;
+        $this->thing_report["choices"] = false;
         //$this->thing_report['info'] = 'This is a facebook message agent.';
-        $this->thing_report['help'] = 'In development.';
-        $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report["help"] = "In development.";
+        $this->thing_report["log"] = $this->thing->log;
 
         return;
     }
@@ -234,8 +223,7 @@ class Nexmo
         }
 
         //$message_reply_id = $this->agent_input;
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(["nexmo", "reply_id"], null);
+        $names = $this->thing->Write(["nexmo", "reply_id"], null);
 
         //"channelData":{"clientActivityId":"1536536110650.9566644201124537.16"}}
 
@@ -247,15 +235,8 @@ class Nexmo
     {
         $this->thing->log('<pre> Agent "Slack" called eventGet()</pre>');
 
-        //        $this->thing->db->setFrom($this->from);
-        //echo "<br>";
-        //        $this->thing->db->setFrom($this->from);
-        //echo "<br>";
-        //echo ($this->from);
-        //echo ($this->to);
-        //echo "<br>";
         $bodies = json_decode($this->thing->thing->message0, true);
-        $this->body = $bodies['nexmo'];
+        $this->body = $bodies["nexmo"];
 
         $this->variablesGet();
         return $this->body;
@@ -267,9 +248,7 @@ class Nexmo
         $this->user = $this->getUser();
         $this->text = $this->getText();
         $this->activity_id = $this->getActivity();
-        $this->service_url = $this->body['serviceUrl'];
-
-        return;
+        $this->service_url = $this->body["serviceUrl"];
     }
 
     function makeMessage($message = null)
@@ -332,32 +311,8 @@ class Nexmo
 
     function makeBasicMessage($message = null)
     {
-        //        if ($this->input != null) {
-        //            $message = $this->input;
-        //        } else {
-        //            $message = $this->subject;
-        //        }
-
         $sender = $this->from;
-        /*
-        $jsonData = '{
-            "recipient":{
-               "id":"'. $sender.'"
-            },
-            "message":{
-                "text":"'.$message.'"
-            }
-        }';
-*/
 
-        //                    $this->thing->json->setField("message0");
-        //                    $names = $this->thing->json-readVariable( array("microsoft") );
-
-        //var_dump($this->body);
-
-        //echo "<br>--------------------<br>";
-
-        //exit();
 
         if (!isset($this->message)) {
             $this->json_message = "No message provided.";
@@ -368,23 +323,23 @@ class Nexmo
             '{"type": "message",
     "from": {
         "id": "' .
-            $this->body['recipient']['id'] .
+            $this->body["recipient"]["id"] .
             '",
         "name": "' .
-            $this->body['recipient']['name'] .
+            $this->body["recipient"]["name"] .
             '"
     },
     "conversation": {
         "id": "' .
-            $this->body['conversation']['id'] .
+            $this->body["conversation"]["id"] .
             '"
     },
    "recipient": {
         "id": "' .
-            $this->body['from']['id'] .
+            $this->body["from"]["id"] .
             '",
         "name": "' .
-            $this->body['from']['name'] .
+            $this->body["from"]["name"] .
             '"
     },
     "text": "I have several times available on Saturday!"
@@ -394,23 +349,23 @@ class Nexmo
             '{"type": "message",
     "from": {
         "id": "' .
-            $this->body['recipient']['id'] .
+            $this->body["recipient"]["id"] .
             '",
         "name": "' .
-            $this->body['recipient']['name'] .
+            $this->body["recipient"]["name"] .
             '"
     },
     "conversation": {
         "id": "' .
-            $this->body['conversation']['id'] .
+            $this->body["conversation"]["id"] .
             '"
     },
    "recipient": {
         "id": "' .
-            $this->body['from']['id'] .
+            $this->body["from"]["id"] .
             '",
         "name": "' .
-            $this->body['from']['name'] .
+            $this->body["from"]["name"] .
             '"
     },
     "text": "' .
@@ -418,8 +373,6 @@ class Nexmo
             '"
 }';
 
-        //var_dump($jsonData);
-        //exit();
         $this->json_message = $jsonData;
     }
 
@@ -447,7 +400,7 @@ class Nexmo
 
         //Set the content type to application/json
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/x-www-form-urlencoded',
+            "Content-Type: application/x-www-form-urlencoded",
         ]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         //Execute the request
@@ -456,9 +409,7 @@ class Nexmo
         //}
 
         $result_json = json_decode($result, true);
-        $this->access_token = $result_json['access_token'];
-
-        return;
+        $this->access_token = $result_json["access_token"];
     }
 
     function sendMessage($to, $text)
@@ -526,30 +477,24 @@ Content-Type: application/json
         //        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $this->access_token));
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->access_token,
+            "Content-Type: application/json",
+            "Authorization: Bearer " . $this->access_token,
         ]);
 
         //Execute the request
-        //      if( !empty($message_to_reply) ){
         $result = curl_exec($ch);
-        //      }
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        //echo "<br>" ."return code is " . $httpCode . "<br>";
-        //var_dump($result);
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["nexmo", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["nexmo", "refreshed_at"],
             $time_string
         );
 
-        return;
     }
 }

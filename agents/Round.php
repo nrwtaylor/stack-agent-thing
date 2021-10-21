@@ -9,8 +9,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -19,7 +19,7 @@ ini_set("allow_url_fopen", 1);
 
 class Round extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -31,9 +31,9 @@ class Round extends Agent
         $this->test = "Development code";
 
         $this->thing_report["info"] = "A ROUND is a repeating pattern.";
-        $this->thing_report["help"] = 'Click on the image for a PDF.';
+        $this->thing_report["help"] = "Click on the image for a PDF.";
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $command_line = null;
 
@@ -41,10 +41,10 @@ class Round extends Agent
             "round" => ["tzol\'kin", "haab", "day", "round", "week"],
         ];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
-        $this->entity_name = $this->thing->container['stack']['entity_name'];
+        $this->entity_name = $this->thing->container["stack"]["entity_name"];
 
         $this->default_canvas_size_x = 2000;
         $this->default_canvas_size_y = 2000;
@@ -71,13 +71,9 @@ class Round extends Agent
             $this->default_canvas_size_y
         );
 
-        if (
-            isset($this->thing->container['stack']['font'])
-        ) {
-            $this->font =
-                $this->thing->container['stack']['font'];
+        if (isset($this->thing->container["stack"]["font"])) {
+            $this->font = $this->thing->container["stack"]["font"];
         }
-
     }
 
     public function set()
@@ -102,7 +98,6 @@ class Round extends Agent
             $whatIWant = substr(strtolower($input), $pos + strlen($whatis));
         }
 
-        //$filtered_input = ltrim(strtolower($whatIWant), " ");
         $filtered_input = ltrim($whatIWant, " ");
 
         $this->whatis = $filtered_input;
@@ -120,7 +115,7 @@ class Round extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -130,7 +125,7 @@ class Round extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     /**
@@ -143,7 +138,7 @@ class Round extends Agent
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/round";
         $sms .= " | " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -162,11 +157,11 @@ class Round extends Agent
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
             '/round.png" alt="round" height="92" width="92">';
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     /**
@@ -174,8 +169,7 @@ class Round extends Agent
      */
     public function setRound()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["round", "rounds"], $this->rounds);
+        $this->thing->Write(["round", "rounds"], $this->rounds);
     }
 
     /**
@@ -185,12 +179,11 @@ class Round extends Agent
     // TODO
     public function getRound()
     {
-        $this->thing->json->setField("variables");
-        $rounds = $this->thing->json->readVariable(["round", "rounds"]);
+        $rounds = $this->thing->Read(["round", "rounds"]);
 
         if ($rounds == false) {
             $this->thing->log(
-                $this->agent_prefix . ' did not find rounds.',
+                $this->agent_prefix . " did not find rounds.",
                 "INFORMATION"
             );
             // No round saved.  Return.
@@ -217,7 +210,7 @@ class Round extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/round.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/round.pdf";
         $this->node_list = ["round" => ["week"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
@@ -225,7 +218,7 @@ class Round extends Agent
         $web .= "</a>";
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -233,10 +226,10 @@ class Round extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a ROUND';
+        $txt = "This is a ROUND";
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -356,18 +349,18 @@ class Round extends Agent
         $size = $canvas_size_x - 90;
         $size = 20;
         $angle = 0;
-if (file_exists($font)) {
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-} 
+        if (file_exists($font)) {
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
+        }
         //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
@@ -388,9 +381,8 @@ if (file_exists($font)) {
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -446,7 +438,7 @@ if (file_exists($font)) {
         $this->wedgeRound($n, $size, $next_size);
     }
 
-    public function wedgeRound($n = 7, $size = null, $next_size)
+    public function wedgeRound($n = 7, $size = null, $next_size = null)
     {
         if ($size == null) {
             $size = $this->size;
@@ -514,16 +506,14 @@ if (file_exists($font)) {
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "round",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["round", "refreshed_at"],
                 $time_string
             );
@@ -537,8 +527,8 @@ if (file_exists($font)) {
     public function makePDF()
     {
         if ($this->default_pdf_page_template === null) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf']; 
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
         $this->getWhatis($this->subject);
@@ -547,20 +537,20 @@ if (file_exists($font)) {
             $pdf = new Fpdi\Fpdi();
 
             $pdf->setSourceFile($this->default_pdf_page_template);
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $tplidx1 = $pdf->importPage(1, "/MediaBox");
             $s = $pdf->getTemplatesize($tplidx1);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
 
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, 'PNG');
+            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
 
-            $pdf->SetFont('Helvetica', '', 26);
+            $pdf->SetFont("Helvetica", "", 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
 
             $pdf->SetXY(140, 7);
@@ -578,22 +568,22 @@ if (file_exists($font)) {
                     $top_y,
                     -300,
                     -300,
-                    'PNG'
+                    "PNG"
                 );
             }
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
 
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/round';
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/round";
 
             $pdf->SetTextColor(0, 0, 0);
 
@@ -601,7 +591,7 @@ if (file_exists($font)) {
 
             $line_height = 4;
 
-            $t = $this->thing_report['sms'];
+            $t = $this->thing_report["sms"];
 
             $t = str_replace(" | ", "\n", $t);
 
@@ -627,18 +617,13 @@ if (file_exists($font)) {
                 "Pre-printed text and graphics (c) 2020 " . $this->entity_name;
             $pdf->MultiCell(150, $line_height, $text, 0, "L");
 
-            // Good until?
-            //$text = $this->timestampRound();
-            //$pdf->SetXY(175, 35);
-            //$pdf->MultiCell(30, $line_height, $text, 0, "L");
-
-            $image = $pdf->Output('', 'S');
-            $this->thing_report['pdf'] = $image;
+            $image = $pdf->Output("", "S");
+            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= "Caught exception: " . $e->getMessage() . ". ";
         }
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     /**
@@ -648,7 +633,6 @@ if (file_exists($font)) {
     {
         $this->type = "wedge";
 
-// $input = strtolower($this->subject);
         $input = $this->input;
 
         $number_agent = new Number($this->thing, "number");
@@ -667,7 +651,7 @@ if (file_exists($font)) {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'round') {
+            if ($input == "round") {
                 $this->getRound();
 
                 $this->size = 4;
@@ -677,9 +661,9 @@ if (file_exists($font)) {
         }
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['wedge', 'slice'];
-        $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
-        $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
+        $discriminators = ["wedge", "slice"];
+        $input_agent->aliases["wedge"] = ["pizza", "wheel", "wedge"];
+        $input_agent->aliases["slice"] = ["slice", "column", "columns"];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;

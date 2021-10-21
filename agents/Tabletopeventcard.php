@@ -38,16 +38,14 @@ class Tabletopeventcard extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "tabletopeventcard",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["tabletopeventcard", "refreshed_at"],
                 $time_string
             );
@@ -55,15 +53,14 @@ class Tabletopeventcard extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->thing->json->setField("variables");
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["tabletopeventcard", "nom"])
+            $this->thing->Read(["tabletopeventcard", "nom"])
         );
-        $this->number = $this->thing->json->readVariable([
+        $this->number = $this->thing->Read([
             "tabletopeventcard",
             "number",
         ]);
-        $this->suit = $this->thing->json->readVariable([
+        $this->suit = $this->thing->Read([
             "tabletopeventcard",
             "suit",
         ]);
@@ -338,8 +335,7 @@ class Tabletopeventcard extends Agent
         }
 
         $ants = $this->getThings('ant');
-        //var_dump($ants);
-        //exit();
+
         $count = count($ants);
         $this->response .= "Counted " . $count . " ants. ";
 
@@ -607,7 +603,6 @@ class Tabletopeventcard extends Agent
             $alt_text = $this->thing_report['alt_text'];
         }
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -634,15 +629,15 @@ class Tabletopeventcard extends Agent
         ) {
             $this->readSubject();
 
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["tabletop-event-card", "nom"],
                 $this->nom
             );
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["tabletop-event-card", "number"],
                 $this->number
             );
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["tabletop-event-card", "suit"],
                 $this->suit
             );
@@ -688,12 +683,10 @@ class Tabletopeventcard extends Agent
                             //$count = count($ants);
                             $count = 0;
                             foreach ($ants as $uuid => $ant) {
-                                //var_dump($uuid);
+
                                 $thing = new Thing($uuid);
                                 $thing->Forget();
                                 $count += 1;
-                                //var_dump($thing);
-                                //exit();
                             }
                             $this->ants_max = rand(10, 90);
                             $this->response .=

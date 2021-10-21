@@ -2,6 +2,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 /*
+This agent uses the Grogg ICS parser.
 
 $/var/www/stackr.test
 $composer require johngrogg/ics-parser
@@ -13,6 +14,16 @@ use ICal\ICal;
 // John Grogg (?) has built a nice ICal parser.
 // Call it here (and only here) so the stack can read ICS.
 
+/*
+settings.php
+        'stack' => [
+...
+        'calendar'=>['bob@example.com','mark@example.com'],
+...
+]
+
+*/
+
 class Calendar extends Agent
 {
     public $var = "hello";
@@ -20,22 +31,26 @@ class Calendar extends Agent
     function init()
     {
         $this->default_calendar_token = null;
-
+        $this->default_calendar_tokens = [];
         // So I could call
         if (isset($this->thing->container["stack"]["calendar"])) {
             if (is_string($this->thing->container["stack"]["calendar"])) {
                 $this->default_calendar_token =
                     $this->thing->container["stack"]["calendar"];
                 $this->default_calendar_tokens = [
-                    $this->default_calendar_token,
+                    $this->default_calendar_token
                 ];
             }
 
             if (is_array($this->thing->container["stack"]["calendar"])) {
                 $this->default_calendar_tokens =
                     $this->thing->container["stack"]["calendar"];
-                $this->default_calendar_token =
-                    $this->default_calendar_tokens[0];
+                if ($this->default_calendar_tokens == []) {
+                    $this->default_calendar_token = null;
+                } else {
+                    $this->default_calendar_token =
+                        $this->default_calendar_tokens[0];
+                }
             }
         }
 
@@ -101,11 +116,18 @@ class Calendar extends Agent
         $text = $event->description;
 
         // TODO read for call details.
-        //$call = $call_agent->extractCall($event->description);
-        //$frequency = $frequency_agent->extractFrequency($event->description);
 
-        $description = strip_tags($text);
-        $when_description = html_entity_decode($description);
+        // TODO: Test with tag stripping and html_entity_decoding turned off.
+        //
+
+        $preprocess_text = false;
+        if ($preprocess_text === true) {
+            $description = strip_tags($text);
+            $when_description = html_entity_decode($description);
+        } else {
+            $when_description = html_entity_decode($text);
+            //$when_description = $text;
+        }
 
         $when_description = str_replace(
             ["\n", "\t", "\r"],
@@ -122,10 +144,23 @@ class Calendar extends Agent
             break;
         }
 
+        // Protect URLS wrapped in <> from tag stripping.
+        /*
+$urls = $this->extractUrls($when_description);
         // Strip html tags.
-        $when_description = strip_tags(
+foreach($urls as $u=>$url) {
+
+$when_description = str_replace("<".$url.">", " ".$url." ",$when_description);
+
+}
+        // Strip html tags.
+
+       $when_description = strip_tags(
             str_replace("<", " <", $when_description)
         );
+*/
+
+        $when_description = $this->stripHtml($when_description);
 
         // Strip repeating spaces.
         $when_description = preg_replace("/\s+/", " ", $when_description);
@@ -135,7 +170,6 @@ class Calendar extends Agent
             "$1",
             $when_description
         );
-
         return $when_description;
     }
 
@@ -178,7 +212,7 @@ class Calendar extends Agent
 
                 $file = $ics_link;
                 if (isset($file) and is_string($file) and $file !== "") {
-                    $response = $this->readCalendar($file);
+                    $response = $this->icalCalendar($file);
                     if ($response != true) {
                         $calendar_count += 1;
                     }
@@ -398,24 +432,6 @@ class Calendar extends Agent
         if (isset($this->calendar->events)) {
             foreach ($this->calendar->events as $event) {
                 $c .= "BEGIN:VEVENT" . "\n";
-                /*
-                foreach ($arr as $key => $variable) {
-var_dump($key);
-var_dump($variable);  
-                  $t = "";
-                    if (isset($event->{$key})) {
-                        if (isset($variable)) {
-                            $t = $event->{$variable};
-                        } else {
-                            $t = $event->{$key};
-                        }
-                        $c .= strtoupper($key) . ":" . $t . "\n";
-                    }
-                    continue;
-
-                    $c .= "DTSTAMP:" . $dtstamp . "\n";
-                }
-*/
 
                 $c .= "DTSTART:" . $event->start_at . "\n";
                 $c .= "DTEND:" . $event->end_at . "\n";
@@ -489,9 +505,6 @@ var_dump($variable);
                         "[",
                         "runtime",
                         "]",
-                        //                        "\n",
-                        //                        'description',' ',"\n",
-                        //                        'location',
                     ]) . "\n";
             }
 
@@ -558,7 +571,7 @@ var_dump($variable);
                 $calendar_text .= $t;
             }
         }
-        //$this->node_list = ["calendar" => ["calendar", "dog"]];
+
         $txt =
             "CALENDAR " .
             $this->time_zone .
@@ -580,8 +593,6 @@ var_dump($variable);
 
     public function eventCalendar($text = null)
     {
-//        $this->calendar_unique_events === false;
-
         try {
             // ICal is noisy at the WARNING and NOTICE level.
             // TODO ?
@@ -612,7 +623,6 @@ var_dump($variable);
             // See note above.
             // error_reporting($old_level);
             // Test with the GitHub provided ics file.
-
         } catch (\Exception $e) {
             $this->response .= "Could not read event. ";
             return true;
@@ -628,17 +638,24 @@ var_dump($variable);
 
         $e = $event;
 
-//        $e->start_at = $e->dtstart;
+        //        $e->start_at = $e->dtstart;
 
-$t = $this->ical->iCalDateWithTimeZone((array) $e,'dtstart',\DateTime::ATOM);
-$e->start_at =$t;
+        $t = $this->ical->iCalDateWithTimeZone(
+            (array) $e,
+            "dtstart",
+            \DateTime::ATOM
+        );
+        $e->start_at = $t;
 
-//public function iCalDateToDateTime($icalDate)
+        //public function iCalDateToDateTime($icalDate)
 
-//        $e->end_at = $e->dtend;
-$t = $this->ical->iCalDateWithTimeZone((array) $e,'dtend',\DateTime::ATOM);
-$e->end_at =$t;
-
+        //        $e->end_at = $e->dtend;
+        $t = $this->ical->iCalDateWithTimeZone(
+            (array) $e,
+            "dtend",
+            \DateTime::ATOM
+        );
+        $e->end_at = $t;
 
         //            $e->calendar_name = $calendar_name;
         $e->calendar_timezone = $calendar_timezone;
@@ -667,13 +684,8 @@ $e->end_at =$t;
         return $event;
     }
 
-    public function readCalendar($calendar_uri, $calendar_name = null)
+    public function icalCalendar($calendar_uri, $calendar_name = null)
     {
-        //    set_error_handler([$this, 'calendar_warning_handler'], E_WARNING | E_NOTICE);
-        //  restore_error_handler();
-
-        //var_dump($calendar_uri);
-
         $this->calendar_unique_events === false;
 
         try {
@@ -734,7 +746,7 @@ $e->end_at =$t;
         foreach ($events as $event) {
             // TODO - Recognize event structure.
             // For now assume it is Grogg object.
-//            $e = $this->eventCalendar($event);
+            //            $e = $this->eventCalendar($event);
             $e = $event;
 
             $e->start_at = $e->dtstart;
@@ -865,10 +877,10 @@ $e->end_at =$t;
         }
 
         if ($input == "calendar") {
+            $ics_links = [];
+
             $tokens = $this->default_calendar_tokens;
             //$new_ics_links = $this->icslinksCalendar($token);
-
-            $ics_links = [];
 
             foreach ($tokens as $i => $token) {
                 $new_ics_links = $this->icslinksCalendar($token);
@@ -970,7 +982,7 @@ $e->end_at =$t;
         }
 
         if ($this->stack_engine_state != "prod") {
-            echo $console . "\n";
+            $this->thing->console($console . "\n");
             $this->response .=
                 "Unexpected calendar warning seen. " . $errstr . ". ";
         }

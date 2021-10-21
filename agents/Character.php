@@ -20,7 +20,6 @@ class Character extends Agent
      * @param Thing   $thing
      * @return unknown
      */
-    //function __construct(Thing $thing) {
     public function init()
     {
         $this->character_thing = $this->thing;
@@ -45,10 +44,6 @@ class Character extends Agent
 
     public function get()
     {
-        //$this->getCharacters();
-
-        // If this return true then no existing characters found.
-
         $this->getCharacter(); // Should load up current
     }
 
@@ -63,8 +58,7 @@ class Character extends Agent
      */
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
             'null'
         );
@@ -85,49 +79,39 @@ class Character extends Agent
             '<pre> Agent "Character" called characterSet()</pre>'
         );
 
-        // Store counts
-        //  echo $this->from;
-        //exit();
-
-        //if (!isset ( $this->character_thing ) ) {
-        // $this->character_thing = $this->thing;
-        //}
-
         $this->character_thing->db->setFrom($this->from);
 
-        $this->character_thing->json->setField("variables");
-
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "name"],
             $this->name
         );
 
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "strength"],
             $this->strength
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "dexterity"],
             $this->dexterity
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "constitution"],
             $this->constitution
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "intelligence"],
             $this->intelligence
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "wisdom"],
             $this->wisdom
         );
-        $this->character_thing->json->writeVariable(
+        $this->character_thing->Write(
             ["character", "charisma"],
             $this->charisma
         );
 
-        //$this->age_thing->json->writeVariable( array("character", "earliest_seen"), $this->earliest_seen   );
+        //$this->age_thing->Write( array("character", "earliest_seen"), $this->earliest_seen   );
 
         $this->character_thing->flagGreen();
     }
@@ -138,17 +122,15 @@ class Character extends Agent
      */
     function getCharacters()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "character",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no character information
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["character", "refreshed_at"],
                 $time_string
             );
@@ -177,20 +159,11 @@ class Character extends Agent
             $this->characters = [];
             $this->seen_characters = [];
             foreach ($things as $thing) {
-//var_dump($thing);
-  //              $variables = $thing->variables;
-
 
                 $uuid = $thing['uuid'];
 
                 $variables_json = $thing['variables'];
                 $variables = $this->thing->json->jsontoArray($variables_json);
-
-
-
-                //$thing = new Thing($thing['uuid']);
-
-                //$this->character_uuid = $thing->uuid;
                 $this->character_uuid = $uuid;
 
 
@@ -206,12 +179,6 @@ class Character extends Agent
                 } else {
                     $this->seen_characters[] = $this->name;
                 }
-
-          //      $this->strength = $thing->json->readVariable([
-            //        "character",
-              //      "strength",
-                //]);
-
 
             $this->strength = "X";
             if (isset($variables['character']['strength'])) {
@@ -266,8 +233,6 @@ class Character extends Agent
                     $this->thing->log(
                         'Agent "Character" found no existing character information'
                     );
-                    //     $this->thing->log ( "No character info found.  Created a random character.");
-                    //                                        $this->randomCharacter();
                 } else {
                     $this->age = $thing->thing->created_at;
 
@@ -286,16 +251,11 @@ class Character extends Agent
                     // Successfully loaded most recent character Thing
                     // and stored the other characters in an array
                     $this->characters[] = $character;
-                    //$this->character_thing = $thing;
-                    //$this->age = $thing->thing->created_at;
-                    //return;
                 }
             }
             if (!isset($this->characters)) {
                 $this->characters = [];
             }
-            //exit();
-            //   $this->characters = array_unique($this->characters);
 
             if (count($this->characters) == 0) {
                 return true;
@@ -333,11 +293,8 @@ class Character extends Agent
     function characterList()
     {
         $this->sms_message = "CHARACTER > LIST";
-        //                      if (count($t) > 1) {$this->sms_message .= "ES";}
 
         $this->sms_message .= " | ";
-
-        //                $this->sms_message .= $this->name . ' | ';
 
         if (count($this->characters) == 0) {
             $this->sms_message .=
@@ -427,14 +384,7 @@ class Character extends Agent
      */
     public function respondResponse()
     {
-        //$this->thing_report = array('thing' => $this->thing->thing);
-
-        // Thing actions
         $this->thing->flagGreen();
-
-        //  $this->readSubject();
-
-        //  $this->characterReport();
 
         $this->thing_report['sms'] = $this->sms_message;
         $this->thing_report['choices'] = false;
@@ -443,15 +393,7 @@ class Character extends Agent
         // Generate email response.
 
         $to = $this->thing->from;
-
-        // Testing
-        // $to = 'redpanda.stack@gmail.com';
-
         $from = "character";
-
-        // $message = $this->readSubject();
-
-        //$message = "Thank you for your request.<p><ul>" . ucwords(strtolower($response)) . '</ul>' . $this->error . " <br>";
 
         $this->thing->choice->Create(
             $this->agent_name,
@@ -504,8 +446,6 @@ class Character extends Agent
         $this->characterSet();
 
         $this->character_thing->flagGreen();
-
-        return;
     }
 
     /**
@@ -533,16 +473,7 @@ class Character extends Agent
             $this->name = $name;
         }
 
-        //$this->character_thing = $this->thing;
-
         $this->characterSet();
-        //$this->character_thing = $this->thing;
-
-        //$this->character_thing = new Thing(null);
-        //$this->character_thing->Create($this->from , 'character', 's/ reset character');
-        //$this->character_thing->flagGreen();
-
-        return;
     }
 
     /**
@@ -846,30 +777,20 @@ class Character extends Agent
         // is the job of the character<command> functions.
 
         if (!$found_flag) {
-            //                      $this->sms_message .= "";
-            //                      $this->sms_message .= " | No character found.";
-            //                $this->thingreport['characters'] = false;
 
             $this->character_thing = $this->thing;
 
             $this->thing->log(
                 '<pre> Agent "Character" got no character result. </pre>'
             );
-
-            //      $group = "meep";
         } else {
-            //                        $this->sms_message .= " | This is " . $this->name . " Commands: TBD";
             $this->character_thing = new Thing($this->character_uuid);
             $this->thing->log(
                 '<pre> Agent "Character" got character' .
                     $this->name .
                     ' is Levenshtein closest.</pre>'
             );
-
-            //                  $this->thingreport['character'] = $characters;
         }
-
-        //$this->sms_message = " | ". strtoupper( $this->group_id ) . " | " .$this->sms_message;
 
         $this->thing->log(
             '<pre> Agent "Character" found ' .
@@ -1129,20 +1050,10 @@ if (!isset($this->characters)) {
             '<pre> Agent "Character" did not respond to any keywords</pre>'
         );
 
-        //$this->characterList();
-
-        //                return "Request not understood";
-
-        //         }
-
-        //      $this->thing->log('<pre>Agent "Character" is reading multiple words.</pre>');
-
         foreach ($pieces as $key => $piece) {
-            //$this->thing->log($piece);
-            //exit();
+
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
-                    //$this->thing->log("Matched command piece" . $piece . $command);
 
                     switch ($piece) {
                         case 'name':
@@ -1151,7 +1062,6 @@ if (!isset($this->characters)) {
                                     '<pre>Agent "Character" matched "name" as last word.</pre>'
                                 );
 
-                                //echo "last word is stop";
                                 $this->stop = false;
                                 return "Request not understood";
                             } else {
@@ -1161,8 +1071,6 @@ if (!isset($this->characters)) {
                                         '".</pre>'
                                 );
 
-                                //echo "next word is:";
-                                //var_dump($pieces[$index+1]);
                                 $check = $pieces[$key + 1]; // Have this return up to four words
                                 if ($check == "is" or $check == "character") {
                                     $adjust = 1;
@@ -1224,14 +1132,11 @@ if (!isset($this->characters)) {
 
                             $this->resetCharacter();
                             return "Character reset";
-                            //echo 'bus';
                             break;
 
                         case 'list':
                             $this->characterList();
 
-                            //echo $this->sms_message;
-                            //exit();
                             $this->thing->log(
                                 '<pre>Agent "Character" matched "list".</pre>'
                             );
@@ -1257,16 +1162,12 @@ if (!isset($this->characters)) {
                             );
                             $this->characterReport($this->name);
                             return "Character report created";
-                            //echo 'bus';
                             break;
 
                         default:
                             $this->thing->log(
                                 '<pre>Agent "Character" did not multiple-match.</pre>'
                             );
-                        //$this->characterInfo();
-
-                        //echo 'default';
                     }
                 }
             }

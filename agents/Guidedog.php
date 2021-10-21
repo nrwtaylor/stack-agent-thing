@@ -49,10 +49,8 @@ class Guidedog extends Agent
     }
 
     function set() {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(array("guidedog",
-                "refreshed_at"),  $this->thing->json->time()
+        $this->thing->Write(array("guidedog",
+                "refreshed_at"),  $this->thing->time()
         );
     }
 

@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -23,19 +23,19 @@ class Table extends Agent
     public function dataTable()
     {
         $data = [];
-        $data['X'] = [
-            'index' => 4,
-            'head_code' => 'X',
-            'alias' => 'X',
-            'flag' => 'X',
-            'day' => 'X',
-            'run_at' => 'X',
-            'end_at' => 'X',
-            'runtime' => 'X',
-            'available' => 'X',
-            'quantity' => 'X',
-            'consist' => 'X',
-            'route' => 'X',
+        $data["X"] = [
+            "index" => 4,
+            "head_code" => "X",
+            "alias" => "X",
+            "flag" => "X",
+            "day" => "X",
+            "run_at" => "X",
+            "end_at" => "X",
+            "runtime" => "X",
+            "available" => "X",
+            "quantity" => "X",
+            "consist" => "X",
+            "route" => "X",
         ];
 
         $this->data = $data;
@@ -46,30 +46,53 @@ class Table extends Agent
         //        $table = [['a' => ['b', 'c', 'd']], ['e' => ['f', 'g', 'h']]];
 
         $table = [
-            'index' => ['INDEX' => 7],
-            'head_code' => ['HEAD' => 4],
-            'alias' => ['ALIAS' => 10],
-            'flag' => ['FLAG' => 6],
-            'day' => ['DAY' => 4],
+            "index" => ["INDEX" => 7],
+            "head_code" => ["HEAD" => 4],
+            "alias" => ["ALIAS" => 10],
+            "flag" => ["FLAG" => 6],
+            "day" => ["DAY" => 4],
 
-            'run_at' => ['RUNAT' => 6],
-            'end_at' => ['ENDAT' => 6],
+            "run_at" => ["RUNAT" => 6],
+            "end_at" => ["ENDAT" => 6],
 
-            'runtime' => ['RUNTIME' => 8],
+            "runtime" => ["RUNTIME" => 8],
 
-            'available' => ['AVAILABLE' => 6],
-            'quantity' => ['QUANTITY' => 9],
-            'consist' => ['CONSIST' => 6],
-            'route' => ['ROUTE' => 6],
+            "available" => ["AVAILABLE" => 6],
+            "quantity" => ["QUANTITY" => 9],
+            "consist" => ["CONSIST" => 6],
+            "route" => ["ROUTE" => 6],
         ];
 
         $this->table = $table;
     }
 
+    public function htmlTable($table_array)
+    {
+        $table_html = "";
+
+        foreach ($table_array as $i => $array_element) {
+            $table_html .= '<div class="TableRow">';
+            foreach (
+                $array_element
+                as $table_column_name => $table_column_data
+            ) {
+                $table_html .=
+                    '<div class="TableCell">' .
+                    strtoupper($array_element[$table_column_name]) .
+                    "</div>";
+            }
+
+//            '<div class="TableCell">' . strtoupper($state) . "</div>";
+
+            $table_html .= "</div>";
+        }
+        return $table_html;
+    }
+
     public function makeSMS()
     {
         $sms = "TABLE | Text TEXT. Or TXT.";
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
         $this->sms = $sms;
     }
 
@@ -84,7 +107,7 @@ class Table extends Agent
         $t = $this->textTable($table);
 
         $this->txt = $t;
-        $this->thing_report['txt'] = $t;
+        $this->thing_report["txt"] = $t;
     }
 
     public function cellTable($variable)
@@ -92,8 +115,10 @@ class Table extends Agent
         $key = key($variable);
         $value = $variable[$key];
 
-// TODO review
-        if (is_int($value)) {return true;}
+        // TODO review
+        if (is_int($value)) {
+            return true;
+        }
 
         $width = $value[key($value)];
 
@@ -158,7 +183,7 @@ class Table extends Agent
                 $t .= $this->rowTable($row_id);
                 $t .= "\n";
             }
-	}
+        }
 
         return $t;
     }

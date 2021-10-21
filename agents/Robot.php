@@ -56,7 +56,7 @@ class Robot extends Agent
 
         $this->node_list = ["start" => ["acknowledge"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->useragent = ini_get("user_agent");
         $url = rtrim($this->web_prefix . "/");
@@ -498,7 +498,6 @@ class Robot extends Agent
             }
         }
         $this->scheme = $scheme;
-        //exit();
         // if there isn't a robots, then we're allowed in
         //https://serverfault.com/questions/154820/what-happens-if-a-website-does-not-have-a-robots-txt-file
 
@@ -739,7 +738,6 @@ return true;
         $allRobots = [];
         $fh = fopen($robotsUrl, 'r');
         while (($line = fgets($fh)) != false) {
-            //            echo $line . "<br>";
             if (preg_match("/user-agent.*/i", $line)) {
                 if ($robot != null) {
                     array_push($allRobots, $robot);

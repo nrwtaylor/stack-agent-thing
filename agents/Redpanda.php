@@ -38,7 +38,6 @@ class Redpanda extends Agent
         // Forget thing.
 
         //Seems like I'm not sure I need this line.  Won't touch it.
-        //$json_data = $this->thing->readJson("variables");
         $json_data = $this->thing->json->json_data;
 
         //$t = $this->thing->json->getVariable(array("dispatcher"));
@@ -70,10 +69,9 @@ class Redpanda extends Agent
 
     public function respondResponse()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["redpanda"],
-            ['log:{"start_at":' . $this->thing->json->time() . '}']
+            ['log:{"start_at":' . $this->thing->time() . '}']
         );
 
         $thing_report = $this->chooseResponse();

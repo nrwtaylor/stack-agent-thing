@@ -64,9 +64,7 @@ class ACP125G extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(["acp125g", "inject"], $this->inject);
+        $this->thing->Write(["acp125g", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
 
@@ -110,16 +108,14 @@ class ACP125G extends Agent
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "acp125g",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["acp125g", "refreshed_at"],
                 $time_string
             );
@@ -127,7 +123,7 @@ class ACP125G extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable(["acp125g", "inject"]);
+        $this->inject = $this->thing->Read(["acp125g", "inject"]);
     }
 
     function getNuuid()

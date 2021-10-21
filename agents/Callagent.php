@@ -59,13 +59,7 @@ class Callagent
 
 	    $agent_class_name = ucfirst($to);
 	    echo "Agent name: ",$agent_class_name;
-/*
-	    try {
-		    include_once '/var/www/html/stackr.ca/agents/' . strtolower($agent_class_name) . '.php';
-	    } catch (Exception $e) {
-    		echo 'Caught exception: ',  $e->getMessage(), "\n";
-	    }
-*/
+
 	    if (class_exists($agent_class_name)) {
 
 		    $agent = new $agent_class_name($thing, $this->agent_instruction);
@@ -73,16 +67,11 @@ class Callagent
 	    } else {
 
 		    echo '<pre> Agent\'s file not found: '; print_r($agent_class_name); echo '</pre>';	
-		    //require_once '/var/www/html/stackr.ca/agents/agent.php';
 		    // If class doesn't exist then call standard agent.
 
-            //        try {
-            //register_shutdown_function('shutDownFunction');
             try {
                 $agent = new Agent($thing, $this->agent_instruction);
             } catch (\Throwable $ex) { // Error is the base class for all internal PHP error exceptions.
-
-                //require_once '/var/www/html/stackr.ca/agents/bork.php';
 
                 $message = $ex->getMessage();
                 $code = $ex->getCode();
@@ -94,8 +83,6 @@ class Callagent
                 $agent = new Bork($thing, 'agenthandler/' . $input );
 
             } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptions.
-
-                //require_once '/var/www/html/stackr.ca/agents/bork.php';
 
                 $message = $ex->getMessage();
                 $code = $ex->getCode();

@@ -49,7 +49,7 @@ class Qr extends Agent
         $this->thing->json->setField("settings");
         $this->thing->json->writeVariable(
             ["qr", "received_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 

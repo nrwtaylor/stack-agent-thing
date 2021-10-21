@@ -28,21 +28,18 @@ class Pain extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "pain",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $this->pain_score = $this->thing->json->readVariable([
+        $this->pain_score = $this->thing->Read([
             "pain",
             "pain_score",
         ]);
@@ -138,8 +135,7 @@ class Pain extends Agent
 
             $pain_thing = new Thing($thing['uuid']);
 
-            $pain_thing->json->setField("variables");
-            $pain_score = $pain_thing->json->readVariable([
+            $pain_score = $pain_thing->Read([
                 "pain",
                 "pain_score",
             ]);
@@ -196,13 +192,12 @@ class Pain extends Agent
 
         if ($this->pain_score != null) {
             // Then this Thing has no group information
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["pain", "refreshed_at"],
                 $time_string
             );
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["pain", "pain_score"],
                 $this->pain_score
             );
@@ -300,7 +295,6 @@ class Pain extends Agent
                             );
 
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is pain";
                                 $this->pain_score = null;
                                 $this->notePain($input);
                                 $this->sms_message = "meep";
@@ -381,25 +375,6 @@ class Pain extends Agent
 
     public function PNG()
     {
-        // Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-        //I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and tes$
-        //No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-        //So beware of your included files!
-        //Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-        //Hope it save someone's time.
-
-        //http://php.net/manual/en/function.imagepng.php
-
-        //header('Content-Type: text/html');
-        //echo "Hello World";
-        //exit();
-
-        //header('Content-Type: image/png');
-        //QRcode::png('PHP QR Code :)');
-        //exit();
-        // here DB request or some processing
-
         if ($this->group_id == null) {
             $this->startGroup();
         }
@@ -426,7 +401,6 @@ class Pain extends Agent
         //imagestring($image, 5, 0, 0, 'Hello world!', $textcolor);
 
         $this->thing_report['png'] = $image;
-        //echo $this->thing_report['png']; // for testing.  Want function to be silent.
 
         return $this->thing_report['png'];
     }

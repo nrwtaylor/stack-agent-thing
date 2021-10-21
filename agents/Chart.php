@@ -8,7 +8,7 @@
 namespace Nrwtaylor\StackAgentThing;
 
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set("display_errors", 1);
 
 class Chart extends Agent
 {
@@ -30,10 +30,11 @@ class Chart extends Agent
         $this->height = 200;
         $this->width = 300;
 
+        $this->default_x_spread = 100;
         $this->default_y_spread = 100;
 
         $this->initChart();
-        $this->getColours();
+//        $this->getColours();
         $this->node_list = ["chart"];
 
         $this->y_max_limit = null;
@@ -63,16 +64,30 @@ class Chart extends Agent
         $this->getData();
     }
 
-    /**
-     *
-     */
-    function getColours()
+    // dev refactor to numbers
+
+    public function spreadNumbers($min, $max, $default_spread = null)
     {
-        $this->white = imagecolorallocate($this->image, 255, 255, 255);
-        $this->black = imagecolorallocate($this->image, 0, 0, 0);
-        $this->red = imagecolorallocate($this->image, 255, 0, 0);
-        $this->green = imagecolorallocate($this->image, 0, 255, 0);
-        $this->grey = imagecolorallocate($this->image, 128, 128, 128);
+        $spread = $this->default_x_spread;
+        if ($spread == null) {
+            if (is_numeric($min) and is_numeric($max)) {
+                $spread = $max - $min;
+            }
+        }
+
+        switch (true) {
+            case is_numeric($min) and in_array(strtoupper($max), ["X", "Z"]):
+                $spread = $default_spread;
+                break;
+
+            case in_array(strtoupper($min), ["X", "Z"]) and is_numeric($max):
+                $spread = $default_spread;
+                break;
+            default:
+                $spread = $max - $min;
+        }
+
+        return $spread;
     }
 
     /**
@@ -89,11 +104,10 @@ class Chart extends Agent
         // We will probably want a getThings at some point.
         $things = false;
         if (isset($this->thing->db)) {
-
             $this->thing->db->setFrom($this->identity);
             $thing_report = $this->thing->db->agentSearch($agent_name, 99);
 
-            $things = $thing_report['things'];
+            $things = $thing_report["things"];
         }
         if ($things == false) {
             return;
@@ -101,7 +115,7 @@ class Chart extends Agent
 
         $this->points = [];
         foreach ($things as $thing) {
-            $variables_json = $thing['variables'];
+            $variables_json = $thing["variables"];
 
             $variables = $this->thing->json->jsontoArray($variables_json);
 
@@ -162,9 +176,9 @@ class Chart extends Agent
         if (isset($this->function_message)) {
             $this->sms_message .= " | " . $this->function_message;
         }
-        $this->sms_message .= ' | TEXT ?';
+        $this->sms_message .= " | TEXT ?";
 
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     /**
@@ -186,15 +200,52 @@ class Chart extends Agent
             return true;
         }
 
-        if (!isset($this->y_spread)) {
-            $this->y_spread = $this->y_max - $this->y_min;
-        }
-        if (!isset($this->x_spread)) {
-            $this->x_spread = $this->x_max - $this->x_min;
+        $x_min = $this->x_min;
+        $x_max = $this->x_max;
+        $y_min = $this->y_min;
+        $y_max = $this->y_max;
+
+        $x_spread = $this->spreadNumbers(
+            $x_min,
+            $x_max,
+            $this->default_x_spread
+        );
+        $y_spread = $this->spreadNumbers(
+            $y_min,
+            $y_max,
+            $this->default_y_spread
+        );
+
+        if ($x_spread == 0) {
+            return true;
         }
 
-        if ($this->x_spread == 0) {
-            return true;
+        // The is an x signal. But no y spread.
+        if ($y_spread == 0) {
+            $y_spread = 1;
+        }
+
+
+        switch (true) {
+            case is_numeric($x_min) and
+                in_array(strtoupper($x_max), ["X", "Z"]):
+                $x_max = $x_min + $x_spread;
+                break;
+
+            case in_array(strtoupper($x_min), ["X", "Z"]) and
+                is_numeric($x_max):
+                $x_min = $x_max - $x_spread;
+                break;
+
+            case is_numeric($y_min) and
+                in_array(strtoupper($y_max), ["X", "Z"]):
+                $y_max = $y_min + $y_spread;
+                break;
+
+            case in_array(strtoupper($y_min), ["X", "Z"]) and
+                is_numeric($y_max):
+                $y_min = $y_max - $y_spread;
+                break;
         }
 
         $this->chart_width = $this->width - 20;
@@ -212,14 +263,18 @@ class Chart extends Agent
         foreach ($this->points as $x => $y) {
             $common_variable = $y;
 
+            if (in_array(strtoupper($x), ["X", "Z"])) {
+                continue;
+            }
+            if (in_array(strtoupper($y), ["X", "Z"])) {
+                continue;
+            }
+
             $y =
                 10 +
                 $this->chart_height -
-                (($common_variable - $this->y_min) / $this->y_spread) *
-                    $this->chart_height;
-            $x =
-                10 +
-                (($x - $this->x_min) / $this->x_spread) * $this->chart_width;
+                (($common_variable - $y_min) / $y_spread) * $this->chart_height;
+            $x = 10 + (($x - $x_min) / $x_spread) * $this->chart_width;
             if (is_nan($y)) {
                 return true;
             }
@@ -285,9 +340,11 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         $preferred_step = 10;
         $allowed_step_multiples = [1, 2, 5];
 
-        $range = $this->y_max - $this->y_min;
+        //$range = $this->y_max - $this->y_min;
+        $range = $y_spread;
 
-        $inc = ($this->y_max - $this->y_min) / 5;
+        //        $inc = ($this->y_max - $this->y_min) / 5;
+        $inc = $y_spread / 5;
 
         $digits = $range !== 0 ? floor(log10($range) + 1) : 1;
 
@@ -299,7 +356,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             10 * pow(10, $digits),
         ];
 
-        $closest_distance = $this->y_max;
+        $closest_distance = $y_max;
 
         foreach ($allowed_steps as $key => $step) {
             $distance = abs($inc - $step);
@@ -309,7 +366,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             }
         }
 
-        $this->drawGrid($this->y_min, $this->y_max, $preferred_step);
+        $this->drawGrid($y_min, $y_max, $preferred_step);
     }
 
     /**
@@ -321,7 +378,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
      */
     public function drawSeries(
         $series_name = null,
-        $colour = 'red',
+        $colour = "red",
         $line_width = 1.5
     ) {
         if ($series_name == null) {
@@ -343,7 +400,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
 
             $series = $point[$series_name];
 
-            $refreshed_at = $point['refreshed_at'];
+            $refreshed_at = $point["refreshed_at"];
 
             $y_spread = $y_max - $y_min;
             if ($y_spread == 0) {
@@ -406,6 +463,10 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         }
     }
 
+    public function yspreadChart()
+    {
+    }
+
     /**
      *
      * @param unknown $y_min
@@ -414,7 +475,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
      */
     public function drawGrid($y_min, $y_max, $inc)
     {
-        $y = $this->roundUpToAny($y_min, $inc);
+        $y = $this->roundupNumber($y_min, $inc);
 
         $y_spread = $y_max - $y_min;
 
@@ -472,21 +533,6 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
 
     /**
      *
-     * @param unknown $n
-     * @param unknown $x (optional)
-     * @return unknown
-     */
-    function roundUpToAny($n, $x = null)
-    {
-        if ($x == null) {
-            $x = 5;
-        }
-
-        return round(($n + $x / 2) / $x) * $x;
-    }
-
-    /**
-     *
      */
     private function drawBar()
     {
@@ -503,6 +549,8 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         }
 
         $this->image = imagecreatetruecolor($this->width, $this->height);
+
+//        $this->getColours;
 
         $this->white = imagecolorallocate($this->image, 255, 255, 255);
         $this->black = imagecolorallocate($this->image, 0, 0, 0);
@@ -535,7 +583,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         $imagedata = ob_get_contents();
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
         $response =
             '<img src="data:image/png;base64,' .
@@ -552,12 +600,12 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
     function makeWeb()
     {
         if (!isset($this->image)) {
-            $this->thing_report['web'] = "No chart available.";
+            $this->thing_report["web"] = "No chart available.";
 
             return;
         }
 
-        $link = $this->web_prefix . 'chart/' . $this->uuid . '/agent';
+        $link = $this->web_prefix . "chart/" . $this->uuid . "/agent";
 
         $head = '
             <td>
@@ -577,7 +625,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
 
         $web .= "<br><br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -588,11 +636,11 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         return true;
 
         if (!isset($this->points)) {
-            $this->thing_report['txt'] = "No data available.";
+            $this->thing_report["txt"] = "No data available.";
             return;
         }
 
-        $txt = 'This is a CHART. ';
+        $txt = "This is a CHART. ";
         $txt .= "\n";
 
         $count = null;
@@ -600,7 +648,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             $count = count($this->points);
         }
 
-        $txt .= $count . '' . ' Points retrieved.\n';
+        $txt .= $count . "" . ' Points retrieved.\n';
 
         $tubs = [];
         $dimension[0] = "age";
@@ -608,31 +656,31 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
 
         foreach ($this->points as $key => $point) {
             if (!isset($x_min)) {
-                $x_min = $point['age'];
+                $x_min = $point["age"];
             }
             if (!isset($x_max)) {
-                $x_max = $point['age'];
+                $x_max = $point["age"];
             }
 
-            if ($point['age'] < $x_min) {
-                $x_min = $point['age'];
+            if ($point["age"] < $x_min) {
+                $x_min = $point["age"];
             }
-            if ($point['age'] > $x_max) {
-                $x_max = $point['age'];
+            if ($point["age"] > $x_max) {
+                $x_max = $point["age"];
             }
 
             if (!isset($y_min)) {
-                $y_min = $point['bin_sum'];
+                $y_min = $point["bin_sum"];
             }
             if (!isset($y_max)) {
-                $y_max = $point['bin_sum'];
+                $y_max = $point["bin_sum"];
             }
 
-            if ($point['bin_sum'] < $y_min) {
-                $y_min = $point['bin_sum'];
+            if ($point["bin_sum"] < $y_min) {
+                $y_min = $point["bin_sum"];
             }
-            if ($point['bin_sum'] > $y_max) {
-                $y_max = $point['bin_sum'];
+            if ($point["bin_sum"] > $y_max) {
+                $y_max = $point["bin_sum"];
             }
         }
 
@@ -652,7 +700,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
             //$spread = the distance between youngest and oldest age
             $tub_index =
                 intval(
-                    (($num_tubs - 1) * ($x_max - $point['age'])) /
+                    (($num_tubs - 1) * ($x_max - $point["age"])) /
                         $this->x_spread
                 ) + 1;
 
@@ -664,13 +712,13 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         }
 
         foreach ($tubs as $x => $y) {
-            $txt .= str_pad($x, 7, ' ', STR_PAD_LEFT);
+            $txt .= str_pad($x, 7, " ", STR_PAD_LEFT);
             $txt .= " ";
-            $txt .= str_pad($y, 7, ' ', STR_PAD_LEFT);
+            $txt .= str_pad($y, 7, " ", STR_PAD_LEFT);
             $txt .= "\n";
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -749,7 +797,7 @@ if ( (-1 * ($x_old + $offset)) > $this->chart_width)  {continue;}
         $y_max = -1e99;
 
         foreach ($variables_history as $i => $number_object) {
-            $created_at = $number_object['created_at'];
+            $created_at = $number_object["created_at"];
             $number = $number_object[$variable_name];
             $points[$created_at] = $number;
 

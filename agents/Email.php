@@ -41,21 +41,6 @@ class Email
         //        $this->input = $input;
         $this->cost = 50;
 
-        //function __construct($arguments) {
-        //echo $arguments;
-        //var_dump($arguments);
-        //  $defaults = array(
-        //    'uuid' => Uuid::uuid4(),
-        //    'from' => NULL,
-        //  'to' => NULL,
-        //  'subject' => NULL,
-        //  'sqlresponse' => NULL
-        //  );
-
-        //  $arguments = array_merge($defaults, $arguments);
-
-        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
         $this->test = "Development code";
 
         $this->thing = $thing;
@@ -105,23 +90,20 @@ class Email
         $this->node_list = ["email" => ["email"]];
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "email",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["email", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->email_count = $this->thing->json->readVariable([
+        $this->email_count = $this->thing->Read([
             "email",
             "count",
         ]);
@@ -176,10 +158,44 @@ class Email
         return;
     }
 
+    public function isEmail($text) {
+       $meta = $this->metaEmail($text);
+$is_email = true;
+if (!isset($meta['from'])) {
+$is_email = false;
+}
+
+if (!isset($meta['subject'])) {
+$is_email = false;
+}
+
+
+       return $is_email;
+    }
+
+    public function metaEmail($text)
+    {
+        // Pull the message in again.
+        $parser = new MailMimeParser();
+
+        // parse() returns a Message
+        $message = $parser->parse($text);
+
+        $from = $message->getHeaderValue("From");
+
+        $subject = $message->getHeaderValue("Subject");
+        $sent = $message->getHeaderValue("Sent");
+        $received = $message->getHeaderValue("Received");
+        $date = $message->getHeaderValue("Date");
+
+        $meta = ["from"=>$from, "subject"=>$subject, "sent"=>$sent, "received"=>$received, "date"=>$date];
+
+        return $meta;
+    }
+
     public function attachmentsEmail($text)
     {
         // Pull the message in again.
-        //var_dump($text);
         $parser = new MailMimeParser();
 
         // parse() returns a Message
@@ -243,6 +259,10 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
     {
         // https://github.com/zbateson/mail-mime-parser
 
+        // test
+        //$text = str_replace('Content-Type: multipart/alternative',
+        //'Content-Type: multipart/mixed',$text);
+
         $message = Message::from($text);
 
         $subject = $message->getHeaderValue("Subject");
@@ -272,29 +292,40 @@ echo $part->getHeaderParameter(                         // value of "charset" pa
         //    ->getHeader(HeaderConsts::CC)                      // also AddressHeader
         //    ->getAddresses()[0]                                // AddressPart
         //    ->getEmail();                                      // user@example.com
-
         $email_text = $message->getTextContent();
         $email_html = $message->getHtmlContent();
 
-// Strip tags
-//        $email_html_text = strip_tags($email_html);
+        // Strip tags
+        //        $email_html_text = strip_tags($email_html);
 
-// https://stackoverflow.com/questions/12824899/strip-tags-replace-tags-by-space-rather-than-deleting-them
-$string      = $email_html;
-$spaceString = str_replace( '<', ' <',$string );
-$doubleSpace = strip_tags( $spaceString );
-$singleSpace = str_replace( '  ', ' ', $doubleSpace );
-$email_html_text = $singleSpace;
+        // https://stackoverflow.com/questions/12824899/strip-tags-replace-tags-by-space-rather-than-deleting-them
+        $string = $email_html;
+        $spaceString = str_replace("<", " <", $string);
+        $doubleSpace = strip_tags($spaceString);
+        $singleSpace = str_replace("  ", " ", $doubleSpace);
+        $email_html_text = $singleSpace;
 
         //$body = $email_html;
         //if ($email_html === null) {$body = $email_text;}
 
         $body = $email_text . "\n" . $email_html_text;
 
+        // ZBateson library can sometimes come back null.
+        // With multipart.
+        // https://github.com/zbateson/mail-mime-parser/issues/29
+        // Test for this and use text as body if so.
+
+        if ($email_text == null and $email_html == null) {
+            $html_handler = new Html($this->thing, "html");
+            //    $body = $html_handler->textHtml($text);
+            $body = $this->bodyEmail($text);
+        }
+
         $toEmail = null;
         if (isset($toEmails[0])) {
             $toEmail = $toEmails[0];
         }
+
         $datagram = [
             "to" => $toEmail,
             "from" => $from,
@@ -305,6 +336,55 @@ $email_html_text = $singleSpace;
         $this->attachmentsEmail($text);
 
         return $datagram;
+    }
+
+    function bodyEmail($text)
+    {
+        [$to, $from, $subject, $message] = $this->parseEmail($text);
+        return $message;
+    }
+
+    // Basic parser.
+    // https://stackoverflow.com/questions/12896/parsing-raw-email-in-php
+    function parseEmail($text)
+    {
+        // handle email
+        $lines = explode("\n", $text);
+
+        // empty vars
+        $to = "";
+        $from = "";
+        $subject = "";
+        $headers = "";
+        $message = "";
+        $splittingheaders = true;
+        for ($i = 0; $i < count($lines); $i++) {
+            if ($splittingheaders) {
+                // this is a header
+                $headers .= $lines[$i] . "\n";
+
+                // look out for special headers
+                if (preg_match("/^Subject: (.*)/", $lines[$i], $matches)) {
+                    $subject = $matches[1];
+                }
+                if (preg_match("/^From: (.*)/", $lines[$i], $matches)) {
+                    $from = $matches[1];
+                }
+                if (preg_match("/^To: (.*)/", $lines[$i], $matches)) {
+                    $to = $matches[1];
+                }
+            } else {
+                // not a header, but message
+                $message .= $lines[$i] . "\n";
+            }
+
+            if (trim($lines[$i]) == "") {
+                // empty line, header section has ended
+                $splittingheaders = false;
+            }
+        }
+
+        return [$to, $from, $subject, $message];
     }
 
     /**
@@ -351,7 +431,7 @@ $email_html_text = $singleSpace;
 
         $this->thing_report["info"] = 'Agent "Email" did not send an email.';
 
-        if (isset($this->thing->account)) {
+        if ( (isset($this->thing->account)) and (isset($this->thing->account['stack'])) ) {
             if (
                 $this->thing->account["stack"]->balance["amount"] >= $this->cost
             ) {
@@ -566,9 +646,6 @@ $email_html_text = $singleSpace;
 
         $user_state = $email_thing->getState("usermanager");
 
-        //  $db = new Database($this->uuid, $this->from);
-        //  $db->setUser($this->from);
-
         if ($donotsend) {
             return true;
         }
@@ -580,9 +657,6 @@ $email_html_text = $singleSpace;
 
             return true;
         }
-
-        //var_dump($to);
-        //var_dump($headers);
 
         if (strpos(strtolower($to), "@winlink.org") !== false) {
             $headers = null;

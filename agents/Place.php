@@ -90,7 +90,6 @@ class Place extends Agent
 
     function set()
     {
-var_dump("place set");
 
         if (!isset($this->refreshed_at)) {
             $this->refreshed_at = $this->thing->time();
@@ -183,7 +182,7 @@ var_dump("place set");
 
         // One minute into next headcode
         $quantity = 1;
-        $next_time = $this->thing->json->time(
+        $next_time = $this->thing->time(
             strtotime($this->end_at . " " . $quantity . " minutes")
         );
 
@@ -346,8 +345,6 @@ $count = count($things);
             ) {
                 //$uuid = $thing_object['uuid'];
 $uuid = $thing->uuid;
-                //$variables_json = $thing_object['variables'];
-                //$variables = $this->thing->json->jsontoArray($variables_json);
 $variables = $thing->variables;
                 if (isset($variables['place'])) {
                     $place_code = $this->default_place_code;
@@ -507,11 +504,8 @@ if (file_exists($file)) {
 
             if (isset($this->last_place_code)) {
                 $place_code = $this->last_place_code;
-                //exit();
             }
         }
-
-        //$place_code = $this->place_code;
 
         $this->place = new Variables(
             $this->thing,
@@ -1182,7 +1176,6 @@ if (file_exists($font)) {
 
     public function respondResponse()
     {
-var_dump("adfas");
 
         // Thing actions
 

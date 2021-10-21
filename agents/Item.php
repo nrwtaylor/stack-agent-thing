@@ -18,8 +18,6 @@ class Item extends Agent
 
     public function init()
     {
-        //$this->initItem();
-
         $this->item = null;
         $this->items = [];
 
@@ -71,7 +69,6 @@ class Item extends Agent
             ],
         ];
 
-//        $items = require '/var/www/stackr.test/resources/item/items.php';
         $items = require $this->resource_path .'item/items.php';
 
         $this->addItems($items, false);
@@ -124,10 +121,7 @@ class Item extends Agent
             return;
         }
 
-//        $this->thing->db->setFrom($this->from);
-
-        $this->thing->json->setField("variables");
-        $item = $this->thing->json->readVariable(["item"]);
+        $item = $this->thing->Read(["item"]);
 
         if ($item === false) {
             $item = $this->default_item;
@@ -144,11 +138,6 @@ class Item extends Agent
 
     public function getItems($text = null, $mode = "and")
     {
-        //if ($this->tile_cache == "off") {
-
-        //        return array(array(), array(), array());
-
-        //}/
         $text = trim($text);
 
         $items = [];
@@ -190,7 +179,7 @@ class Item extends Agent
         );
 
         $this->response .= 'item';
-        //echo "item<br>";
+
         foreach (array_reverse($things) as $i => $thing) {
             $variables_json = $thing['variables'];
             $variables = $this->thing->json->jsontoArray($variables_json);
@@ -230,7 +219,6 @@ class Item extends Agent
             $count = 0;
             foreach ($item_words as $j => $item_word) {
                 foreach ($text_words as $k => $text_word) {
-                    //echo $tile_word . " " . $text_word . "<br>";
                     if (strtolower($item_word) == strtolower($text_word)) {
                         $count += 1;
                     }
@@ -278,9 +266,6 @@ class Item extends Agent
         }
 
         if ($agent_flag == true) {
-            //        if ($this->agent_input == null) {
-            //          $this->respond();
-            //      }
 
             if (!isset($this->thing_report['sms'])) {
                 $this->thing_report['sms'] = "ITEM | Standby.";
@@ -289,9 +274,6 @@ class Item extends Agent
             $this->thing_report['message'] = $this->thing_report['sms'];
 
             if ($this->agent_input == null or $this->agent_input == "") {
-                //             $message_thing = new Message($this->thing, $this->thing_report);
-                //             $this->thing_report['info'] =
-                //                 $message_thing->thing_report['info'];
             }
         }
     }
@@ -337,14 +319,12 @@ class Item extends Agent
             $this->response .
             " | Got " .
             count($this->items) .
-            "items.";
+            " items.";
         $this->sms_message = "ITEM | " . $this->thing_report['sms'];
     }
 
     public function run()
     {
-        // Call to generate pattern for this class.
-        //$this->spamTitle();
     }
 
     public function makeResponse()
@@ -377,8 +357,6 @@ class Item extends Agent
 
     public function matchItem($test_text)
     {
-        //$tokens = explode(" " ,$test_text);
-
         $found_post_title = get_the_title();
         $test_found_post_title = strtolower(
             str_replace("-", " ", $found_post_title)
@@ -391,13 +369,9 @@ class Item extends Agent
             $number = $n;
         }
 
-        //$test_found_post_title = implode(" " ,$arr);
-        //$test_found_post_title = trim($test_found_post_title);
         $test_found_post_title = strtolower(
             str_replace(" ", "", $test_found_post_title)
         );
-
-        //$alpha_agent = new Alpha($this->thing,"alpha");
 
         $test_found_post_title = preg_replace(
             "/[^a-zA-Z0-9]+/",
@@ -406,7 +380,6 @@ class Item extends Agent
         );
 
         $test_found_post_title = strtolower($this->stripText(get_the_title()));
-        //$test_found_title = str_replace("-"," ",$wp->slug_agent->getSlug(get_the_title()) );
 
         if (isset($number)) {
             $test_found_post_title = str_replace(
@@ -440,13 +413,9 @@ class Item extends Agent
 
     public function closestItem()
     {
-        //        $this->item_id = null;
-        //        $this->item = null;
-
-        //        $this->index = 0;
         $lev_min = 1e99;
         $index = -1;
-        //        if ($item_id == null) {
+
         foreach ($this->items as $i => $item) {
             if (!isset($nearest)) {
                 $nearest = $item["title"];
@@ -465,11 +434,8 @@ class Item extends Agent
         }
 
         if ($index == -1) {
-            //$this->item_id = null;
-            //$this->item = null;
             return null;
         }
-        //        }
         $this->thing->log(
             'picked the closest item ' . $i . '. Which is, "' . $nearest . '".'
         );
@@ -489,13 +455,12 @@ class Item extends Agent
             $item['created_at'] = $this->thing->time();
         }
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["item"], $item);
+        $this->thing->Write(["item"], $item);
 
-        $this->thing->json->writeVariable(["items"], $this->items);
+        $this->thing->Write(["items"], $this->items);
 
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["item", "refreshed_at"],
             $time_string
         );
@@ -538,9 +503,7 @@ class Item extends Agent
 
     public function doItem($text = null)
     {
-        //    public function getItems($text = null)
         global $wp;
-        //if (count($this->items) > 20) {$this->no_api = true;}
 
         $this->thing->log('asked to get "' . $text . '".');
 
@@ -562,10 +525,7 @@ class Item extends Agent
 
         $this->search_text = $text;
 
-        //        $post_title = $this->filterItem($text);
-        //$this->item_title = $post_title;
         if ($post_title == "") {
-            //$this->items = array();
             $this->response = "Empty query. ";
             return;
         }
@@ -592,7 +552,6 @@ class Item extends Agent
         if ($cache_flag) {
             $this->makeCache($vendor_items);
         }
-        //                $this->makeCache($ebay_items);
     }
 
     public function addItems($items = null)
@@ -607,7 +566,6 @@ class Item extends Agent
         // Need to test this
         $this->thing->log("received " . count($items) . " items to add.");
 
-        //        if (isset($items)) {
         $total_age_seconds = 0;
         $count_add = 0;
 
@@ -617,7 +575,6 @@ class Item extends Agent
             $this->items[$index] = $item;
         }
 
-        //       }
         $this->thing->log(
             "Now have " . count($this->items) . " unique fresh items."
         );
@@ -647,7 +604,6 @@ class Item extends Agent
 
     public function extractItem($text = null)
     {
-        //$this->tile_title = $arr['subject'];
         if (isset($text['agent_input'])) {
             $item = $text['agent_input'];
             $this->item = $item;
@@ -668,7 +624,6 @@ class Item extends Agent
             return;
         }
 
-        //$tokens = explode(" ", $this->post_title);
         $tokens = $this->getTokens($this->post_title);
         $last_title_token = end($tokens);
 
@@ -678,7 +633,6 @@ class Item extends Agent
                 $title_numbers[] = $token;
             }
         }
-        //$title_numbers = $this->title_numbers;
 
         $vendor_id = null;
         if (
@@ -694,21 +648,6 @@ class Item extends Agent
         return $this->item_id;
     }
 
-    public function echoItem($item = null)
-    {
-        if ($item == null) {
-            $item = $this->item;
-        }
-        $t = "";
-        foreach ($item as $key => $value) {
-            if ($key == "ebay") {
-                continue;
-            }
-            $t .= $key . " " . $value . "<br>";
-        }
-        echo $t;
-    }
-
     public function get()
     {
         $this->slug_agent = new Slug(null, "slug");
@@ -721,21 +660,6 @@ class Item extends Agent
         if (isset($this->item)) {
             $this->setItem($this->item);
         }
-
-        // And note the time.
-/*
-        $this->thing->db->setFrom($this->from);
-        $this->thing->json->setField("variables");
-
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
-            ["item", "refreshed_at"],
-            $time_string
-        );
-*/
-        //$count = count($this->items);
-
-        //$this->thing->json->writeVariable(array("item", "item"), $this->item);
 
         $this->thing->log("Set item.");
     }

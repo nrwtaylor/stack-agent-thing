@@ -61,15 +61,29 @@ class Signal extends Agent
     {
     }
 
+
     public function respondResponse()
     {
+/*
+        $this->thing->flagGreen();
+
+        $this->thing_report["info"] =
+            "This is a cat keeping an eye on how late this Thing is.";
+        $this->thing_report["help"] = "This is about being inscrutable.";
+*/
         $this->makeHelp();
         $this->makeInfo();
         $this->thing->flagGreen();
 
+
+        //$this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report['txt'] = $this->sms_message;
+
         $message_thing = new Message($this->thing, $this->thing_report);
-        //$thing_report['info'] = $message_thing->thing_report['info'];
+        $thing_report['info'] = $message_thing->thing_report['info'];
     }
+
 
     public function set()
     {
@@ -153,7 +167,7 @@ if (!isset($this->signals)) {return true;}
 
         foreach ($this->signals as $i => $signal) {
             if ($signal['uuid'] == $this->signal_thing->uuid) {
-                //var_dump($signal);
+
                 $this->signal_thing->state = $signal['state'];
                 return;
             }
@@ -292,17 +306,17 @@ if (!isset($this->signals)) {return true;}
             return true;
         }
 
-        $this->signal_thing->json->writeVariable(
+        $this->signal_thing->Write(
             ["signal", "state"],
             $this->signal['state']
         );
 
-        $this->signal_thing->json->writeVariable(
+        $this->signal_thing->Write(
             ["signal", "text"],
             $this->signal['text']
         );
 
-        $this->signal_thing->json->writeVariable(
+        $this->signal_thing->Write(
             ["signal", "refreshed_at"],
             $this->current_time
         );
@@ -524,7 +538,7 @@ return true;}
         }
 
         foreach ($this->signals as $i => $signal) {
-            //echo $this->textSignal($signal);
+
             if (isset($signal['uuid'])) {
                 $flag = $this->getSignalbyUuid($signal['uuid']);
                 return;
@@ -614,16 +628,13 @@ return true;}
     {
         $web = null;
         if (isset($this->signal_thing)) {
-            //$link = $this->web_prefix . 'thing/' . $this->uuid . '/agent';
-            //            $link = $this->link;
+
             $web = "";
             $web .= '<b>' . ucwords($this->agent_name) . ' Agent</b><br><p>';
             $web .= "<p>";
-            //            $web .= '<a href="' . $link . '">';
-            //        $web .= '<img src= "' . $this->web_prefix . 'thing/' . $this->uuid . '/sig>
+
             $web .= $this->html_image;
 
-            //            $web .= "</a>";
             $web .= "<br>";
 
             $state_text = "X";
@@ -1213,7 +1224,27 @@ if (isset($this->signal_thing->uuid)) {
         $this->image = $agent->image;
         $this->PNG = $agent->PNG;
         $this->PNG_embed = $agent->PNG_embed;
+        $this->thing_report['png'] = $agent->PNG;
     }
+
+    public function makeJPEG()
+    {
+        if (!isset($this->image)) {
+            $this->makeImage();
+        }
+        $agent = new JPEG($this->thing, "jpeg");
+
+        //$this->makeImage();
+
+        $agent->makeJPEG($this->image);
+
+        $this->html_image = $agent->html_image;
+        $this->image = $agent->image;
+        $this->JPEG = $agent->JPEG;
+        $this->JPEG_embed = $agent->JPEG_embed;
+        $this->thing_report['jpeg'] = $agent->JPEG;
+    }
+
 
     public function readSignal()
     {

@@ -36,18 +36,17 @@ class Flip extends Agent
      */
     public function get()
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "flip",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["flip", "refreshed_at"],
                 $time_string
             );
@@ -55,7 +54,7 @@ class Flip extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->last_result = $this->thing->json->readVariable([
+        $this->last_result = $this->thing->Read([
             "flip",
             "result",
         ]);
@@ -184,14 +183,9 @@ class Flip extends Agent
     function set()
     {
         if ($this->last_result == false) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["flip", "result"],
                 $this->result
-            );
-
-            $this->thing->log(
-                $this->agent_prefix . ' completed read.',
-                "OPTIMIZE"
             );
         }
     }
@@ -203,21 +197,12 @@ class Flip extends Agent
     public function readSubject()
     {
         if ($this->last_result == false) {
-            if ($this->agent_input != null) {
-                $input = strtolower($this->agent_input);
-            } else {
-                $input = strtolower($this->subject);
-
-                $temp_thing = new Emoji($this->thing, "emoji");
-                $input = $temp_thing->translated_input;
-            }
-
             $this->result = rand(1, 2);
         } else {
-            $input = strtolower($this->input);
             $this->result = $this->last_result;
         }
 
+        $input = strtolower($this->input);
         $filtered_input = $this->assert($input);
 
         if ($filtered_input == 'heads' or $filtered_input == 'tails') {

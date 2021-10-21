@@ -36,16 +36,14 @@ class Rule extends Agent
         );
         $this->current_time = $this->thing->time();
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "rule",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["rule", "refreshed_at"],
                 $time_string
             );
@@ -54,11 +52,11 @@ class Rule extends Agent
         $this->refreshed_at = strtotime($time_string);
 
         $this->nom = strtolower(
-            $this->thing->json->readVariable(["rule", "nom"])
+            $this->thing->Read(["rule", "nom"])
         );
 
         $this->suit = $this->default_suit;
-        $suit = $this->thing->json->readVariable(["rule", "suit"]);
+        $suit = $this->thing->Read(["rule", "suit"]);
         if ($suit !== false) {
             $this->suit = $suit;
         }
@@ -66,8 +64,8 @@ class Rule extends Agent
         if ($this->nom == false or $this->suit == false) {
             $this->getRule();
 
-            $this->thing->json->writeVariable(["rule", "nom"], $this->nom);
-            $this->thing->json->writeVariable(["rule", "suit"], $this->suit);
+            $this->thing->Write(["rule", "nom"], $this->nom);
+            $this->thing->Write(["rule", "suit"], $this->suit);
 
             $this->thing->log(
                 $this->agent_prefix . ' completed read.',

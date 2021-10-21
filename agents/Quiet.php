@@ -38,8 +38,6 @@ class Quiet extends Agent
 
         $this->node_list = ["off" => ["on" => ["off"]]];
 
-        //        $this->current_time = $this->thing->json->time();
-
         $this->default_state = 'on';
 
         if ($this->save_to_stack == true) {
@@ -134,7 +132,7 @@ class Quiet extends Agent
      *
      * @return unknown
      */
-    function readQuiet()
+    function readQuiet($text = null)
     {
         //$this->thing->log("read");
 

@@ -15,22 +15,21 @@ class Nonnom extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "nonnom",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["nonnom", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "nonnom",
             "reading",
         ]);
@@ -45,7 +44,7 @@ class Nonnom extends Agent
 
         $this->reading = $reading;
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["nonnom", "reading"],
             $this->reading
         );
@@ -89,8 +88,6 @@ class Nonnom extends Agent
             $this->getWords();
         }
 
-        //var_dump($this->words);
-
         $words = $this->words;
         $nominals = [];
 
@@ -98,7 +95,6 @@ class Nonnom extends Agent
         $message_nonnom = "";
 
         foreach ($grams as $key => $gram) {
-            //var_dump($gram);
             if ($gram == "") {
                 continue;
             }
@@ -112,30 +108,15 @@ class Nonnom extends Agent
                 $message_nonnom .= " " . $gram_nonnom;
                 $this->nominals[] = $gram;
 
-                //echo $gram_nonnom . " " . $gram . "\n";
             } else {
                 $message_nonnom .= " " . $gram;
             }
         }
 
-        //var_dump($this->nominals);
-
         $message_nonnom = ltrim($message_nonnom);
 
         $this->message_nonnom = $message_nonnom;
 
-        //        echo "nominal message\n";
-        //        echo $this->subject;
-        //        echo "\n";
-        //        echo "nonnom message\n";
-        //        echo $this->message_nonnom;
-        //        echo "\n";
-        //exit();
-
-        //        if (count($ngrams) != 0) {
-        //            array_push($this->ngrams, ...$ngrams);
-        //        }
-        //        array_merge($this->ngrams, $ngram);
         return $nominals;
     }
 
@@ -146,17 +127,11 @@ class Nonnom extends Agent
         }
 
         $gram_filtered = $this->stripPunctuation($gram, "");
-        //var_dump($gram_filtered);
 
         $is_word = false;
         foreach ($this->words as $temp => $word) {
-            //  var_dump(strtolower($word));
 
             $match = strtolower($word) == strtolower($gram_filtered);
-
-            //echo strtolower($word);
-            //echo strtolower($gram_filtered);
-            //var_dump($match);
 
             if ($match) {
                 //if (strtolower($word) == strtolower($gram_filtered)) {
@@ -165,7 +140,6 @@ class Nonnom extends Agent
             }
         }
 
-        //echo "isWord? " . ($is_word==true) . " " . $gram  . " (filtered: " . $gram_filtered .")". "\n";
 
         return $is_word;
     }
@@ -195,7 +169,6 @@ class Nonnom extends Agent
         );
         $punctuation_array = str_split($punctuation_string);
 
-        //echo "punctatation string:" .  $punctuation_string . "\n";
         $length = strlen($input);
         $repeat_gram = "nomnom";
 
@@ -239,7 +212,6 @@ class Nonnom extends Agent
             }
         }
 
-        //var_dump($s);
         return $s;
     }
 
@@ -338,7 +310,6 @@ class Nonnom extends Agent
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

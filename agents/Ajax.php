@@ -45,16 +45,14 @@ class Ajax extends Agent
         $this->message = $value;
         $this->sms_message = $value;
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["ajax", "requested_agent"],
             $this->requested_agent
         );
 
         //if ($time_string == false) {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
+        $time_string = $this->thing->time();
+        $this->thing->Write(
             ["ajax", "refreshed_at"],
             $time_string
         );
@@ -107,8 +105,6 @@ class Ajax extends Agent
         $this->link = $this->web_prefix . 'thing/' . $this->uuid . "/ajax";
         $ajax_link = 'thing/' . $this->uuid . "/ajax";
 
-        //var_dump($this->link);
-        //exit();
 
         $html = '<script>
 function showHint(str) {
@@ -147,16 +143,7 @@ First name: <input type="text" onkeyup="showHint(this.value)">
     public function readSubject()
     {
         $this->readAjax();
-        // devstack
-        // Get input from AJAX
-        //var_dump($this->subject);
-        //var_dump($this->input);
-        //var_dump($this->agent_input);
 
-        //var_dump($input);
         $this->response .= "devstack read ajax";
-        //$q = $_REQUEST["q"];
-        //var_dump($q);
-        //		return;
     }
 }

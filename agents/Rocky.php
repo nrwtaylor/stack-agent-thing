@@ -57,8 +57,7 @@ class Rocky extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(["rocky", "inject"], $this->inject);
+        $this->thing->Write(["rocky", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
 
@@ -110,16 +109,14 @@ class Rocky extends Agent
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "rocky",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["rocky", "refreshed_at"],
                 $time_string
             );
@@ -127,7 +124,7 @@ class Rocky extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable(["rocky", "inject"]);
+        $this->inject = $this->thing->Read(["rocky", "inject"]);
     }
 
     function getNuuid()

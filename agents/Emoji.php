@@ -81,29 +81,26 @@ class Emoji
             }
         }
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "emoji",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["emoji", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        //$this->thing->json->setField("variables");
-        $this->reading = $this->thing->json->readVariable(["emoji", "reading"]);
+        $this->reading = $this->thing->Read(["emoji", "reading"]);
         $this->readSubject();
         //        if ( ($this->reading == false) ) {
         //            $this->thing->log( $this->agent_prefix . 'no prior reading found.' );
 
-        $this->thing->json->writeVariable(["emoji", "reading"], $this->reading);
+        $this->thing->Write(["emoji", "reading"], $this->reading);
         //			$this->readSubject(); // Commented out 4 Dec 2017.  First call if there is a problem.
         if ($this->agent_input == null) {
             $this->Respond();
@@ -216,7 +213,6 @@ class Emoji
         }
         $translation = preg_replace($patterns, $replacements, $string);
 
-        //exit();
         return $translation;
     }
 
@@ -419,7 +415,7 @@ class Emoji
         $this->thing_report['info'] = $message_thing->thing_report['info'];
 
         $this->reading = $this->emoji;
-        $this->thing->json->writeVariable(["emoji", "reading"], $this->reading);
+        $this->thing->Write(["emoji", "reading"], $this->reading);
 
         return $this->thing_report;
     }
@@ -554,7 +550,6 @@ class Emoji
 
         //        }
 
-        //exit();
         return $status;
     }
 
@@ -566,5 +561,3 @@ class Emoji
         return $this->emoji_context;
     }
 }
-
-?>

@@ -1,50 +1,36 @@
 <?php
+namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
-
-//require '../vendor/autoload.php';
-//require '/var/www/html/stackr.ca/vendor/autoload.php';
 
 ini_set("allow_url_fopen", 1);
 
 class Authenticategoogle extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
-        //    function __construct(Thing $thing) {
-
         $this->test = "Development code";
 
-        //		$thingy = $thing->thing;
-        $this->thing = $thing;
-
-        $this->api_key = $this->thing->container['api']['google']['API key'];
+        $this->api_key = $this->thing->container["api"]["google"]["API key"];
 
         $this->client_id =
-            $this->thing->container['api']['google']['client ID'];
+            $this->thing->container["api"]["google"]["client ID"];
         $this->client_secret =
-            $this->thing->container['api']['google']['client secret'];
-
-        $this->uuid = $thing->uuid;
-        $this->to = $thing->to;
-        $this->from = $thing->from;
-        $this->subject = $thing->subject;
+            $this->thing->container["api"]["google"]["client secret"];
 
         $client = new Google_Client();
         $client->setDeveloperKey($this->api_key);
 
-        $client->setAccessType('online'); // default: offline
-        $client->setApplicationName('Stackr');
+        $client->setAccessType("online"); // default: offline
+        $client->setApplicationName("Stackr");
         $client->setClientId($this->client_id);
         $client->setClientSecret($this->client_secret);
         //$client->setRedirectUri($scriptUri);
         //$client->setDeveloperKey('INSERT HERE'); // API key
-
-        //exit();
 
         $this->node_list = [
             "authenticate request" => [
@@ -52,23 +38,19 @@ class Authenticategoogle extends Agent
             ],
         ];
 
-        $this->response .= 'Start state is ';
-        $this->state = $thing->choice->load('token'); //this might cause problems
+        $this->response .= "Start state is ";
+        $this->state = $thing->choice->load("token"); //this might cause problems
 
-        $this->response .= 'Start state is ' . $this->state . ". ";
+        $this->response .= "Start state is " . $this->state . ". ";
 
-        $this->thing->account['thing']->Debit(10);
-
-
-        //return;
+        $this->thing->account["thing"]->Debit(10);
     }
     public function set()
     {
         $this->thing->choice->Choose($this->state);
-        $this->state = $thing->choice->load('token');
+        $this->state = $thing->choice->load("token");
         //echo $this->thing->getState('usermanager');
         $this->response .= "End state is " . $this->state . ". ";
-
     }
 
     public function respondResponse()
@@ -78,36 +60,27 @@ class Authenticategoogle extends Agent
         $choices = $this->thing->choice->makeLinks($this->state);
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $thing_report['info'] = $message_thing->thing_report['info'];
-
+        $thing_report["info"] = $message_thing->thing_report["info"];
     }
 
     public function readSubject()
     {
-        //		$this->response = null;
-
         if ($this->state == null) {
             echo "authenticate detected state null - run subject discriminator";
 
             switch ($this->subject) {
                 case "authenticate request":
-                    //echo "spawn";
                     $this->create();
                     break;
                 case "authenticate verify":
-                    //$this->kill();
                     break;
 
                 default:
-                    echo "not found => create()";
                     $this->create();
             }
         }
 
-        $this->state = $this->thing->choice->load('authenticate');
-
-        echo "this state is " . $this->state;
-        //echo "meep";
+        $this->state = $this->thing->choice->load("authenticate");
 
         // Will need to develop this to only only valid state changes.
 
@@ -125,7 +98,7 @@ class Authenticategoogle extends Agent
         }
 
         $this->thing->choice->Create(
-            'authenticate',
+            "authenticate",
             $this->node_list,
             $this->state
         );
@@ -142,18 +115,18 @@ class Authenticategoogle extends Agent
 
     function create()
     {
-// devstack
-        $ant_pheromone['stack'] = 4;
+        // devstack
+        $ant_pheromone["stack"] = 4;
 
-        if (rand(0, 5) + 1 <= $ant_pheromone['stack']) {
+        if (rand(0, 5) + 1 <= $ant_pheromone["stack"]) {
             $this->thing->choice->Create(
-                'token',
+                "token",
                 $this->node_list,
                 "authenticate request"
             );
         } else {
             $this->thing->choice->Create(
-                'token',
+                "token",
                 $this->node_list,
                 "authenticate request"
             );

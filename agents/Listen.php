@@ -36,21 +36,18 @@ class Listen extends Agent
     function get()
     {
         // Read the group agent variable
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "group",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
             // Then this Thing has no group information
-            //$this->thing->json->setField("variables");
-            //$time_string = $this->thing->json->time();
-            //$this->thing->json->writeVariable( array("group", "refreshed_at"), $time_string );
+            //$time_string = $this->thing->time();
+            //$this->thing->Write( array("group", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $this->group_id = $this->thing->json->readVariable([
+        $this->group_id = $this->thing->Read([
             "group",
             "group_id",
         ]);
@@ -210,13 +207,10 @@ class Listen extends Agent
                     switch ($piece) {
                         case 'listen':
                             if ($key + 1 > count($pieces)) {
-                                //echo "last word is stop";
                                 $this->group = false;
                                 $this->response .= "Request not understood. ";
                                 return;
                             } else {
-                                //echo "next word is:";
-                                //var_dump($pieces[$index+1]);
                                 $this->group = $pieces[$key + 1];
                                 $this->response .= $this->joinGroup(
                                     $this->group
@@ -230,7 +224,6 @@ class Listen extends Agent
 
                         default:
 
-                        //echo 'default';
                     }
                 }
             }

@@ -37,19 +37,17 @@ class Roll extends Agent
      */
     public function get()
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "roll",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //      $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["roll", "refreshed_at"],
                 $time_string
             );
@@ -57,11 +55,10 @@ class Roll extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        //$this->thing->json->setField("variables");
         $this->last_roll = strtolower(
-            $this->thing->json->readVariable(["roll", "roll"])
+            $this->thing->Read(["roll", "roll"])
         );
-        $this->last_result = $this->thing->json->readVariable([
+        $this->last_result = $this->thing->Read([
             "roll",
             "result",
         ]);
@@ -226,15 +223,12 @@ class Roll extends Agent
                 $name .
                 '.txt" >';
 
-            //        $html = '<br><img src="data:image/png;base64,'. $image_string . '" alt="test" /><br>';
-
             //$html ="";
             $web .= $html;
             //break;
         }
         $web .= "<br>";
 
-        //$received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time(time() - $this->refreshed_at);
         $web .= "Rolled about " . $ago . " ago.";
 
@@ -391,7 +385,6 @@ class Roll extends Agent
                     $number
                 );
             }
-            //var_dump ($width);
             imagestring($image, 2, 100, 0, $die, $textcolor);
         }
 
@@ -751,8 +744,8 @@ class Roll extends Agent
     function set()
     {
         if ($this->last_roll == false or $this->last_result == false) {
-            $this->thing->json->writeVariable(["roll", "roll"], $this->roll);
-            $this->thing->json->writeVariable(
+            $this->thing->Write(["roll", "roll"], $this->roll);
+            $this->thing->Write(
                 ["roll", "result"],
                 $this->result
             );

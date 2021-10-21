@@ -1,4 +1,4 @@
-<?php $settings = $GLOBALS['settings']; ?>
+<?php $settings = $GLOBALS["settings"]; ?>
 <meta name="viewport" content="width=device-width" />
 <!DOCTYPE html>
 
@@ -7,8 +7,8 @@
 <html>
     <head>
         <meta charset="utf-8"/>
-        <title><?php echo $settings['settings']['stack'][
-            'short_name'
+        <title><?php echo $settings["settings"]["stack"][
+            "short_name"
         ]; ?></title>
         <link rel="stylesheet" href="/style.css?131" type='text/css'>
 
@@ -46,19 +46,21 @@ var thing_report = JSON.parse(this.responseText);
 
 <header>
 <div class="logo uuid"><?php
-$settings = $GLOBALS['settings'];
-$web_prefix = $settings['settings']['stack']['web_prefix'];
+$settings = $GLOBALS["settings"];
+$web_prefix = $settings["settings"]["stack"]["web_prefix"];
 
-echo $settings['settings']['stack']['short_name'];
+echo $settings["settings"]["stack"]["short_name"];
 ?></div>
 <?php
 global $web_prefix;
-$web_prefix = $settings['settings']['stack']['web_prefix'];
+$web_prefix = $settings["settings"]["stack"]["web_prefix"];
 ?>
 
-<?php $mail_postfix = $settings['settings']['stack']['mail_postfix']; ?>
+<?php $mail_postfix = $settings["settings"]["stack"]["mail_postfix"]; ?>
 
-        <div class="what-is uuid"><?php echo $settings['settings']['thing']['is']; ?></div>
+        <div class="what-is uuid"><?php echo $settings["settings"]["thing"][
+            "is"
+        ]; ?></div>
 
 </header>
 
@@ -66,31 +68,35 @@ $web_prefix = $settings['settings']['stack']['web_prefix'];
 
 
 <?php
-$GLOBALS['thingy'] = $thing_report;
+$GLOBALS["thingy"] = $thing_report;
 
-if (isset($thing_report['thing']->variables->array_data['message'])) {
-$GLOBALS['agent_name'] = $thing_report['thing']->variables->array_data['message']['agent'];
+if (isset($thing_report["thing"]->variables->array_data["message"])) {
+    $GLOBALS["agent_name"] =
+        $thing_report["thing"]->variables->array_data["message"]["agent"];
 }
 
-if (isset($thing_report['thing']->variables->array_data['message'])) {
-$GLOBALS['received_at'] = $thing_report['thing']->variables->array_data['message']['received_at'];
+if (isset($thing_report["thing"]->variables->array_data["message"])) {
+    $GLOBALS["received_at"] =
+        $thing_report["thing"]->variables->array_data["message"]["received_at"];
 }
 
-function nestAhref($html) {
-                $html = str_replace('</a>','</a></object>', $html);
-                $processed_html = str_replace('<a ','<object><a ', $html);
-return $processed_html;
+function nestAhref($html)
+{
+    $html = str_replace("</a>", "</a></object>", $html);
+    $processed_html = str_replace("<a ", "<object><a ", $html);
+    return $processed_html;
 }
 
 function buttonsChoices($channel = null)
 {
+    if ($channel == null) {
+        $channel = "thing";
+    }
 
-if ($channel == null) {$channel = 'thing';}
+    $thing_report = $GLOBALS["thingy"];
 
-$thing_report = $GLOBALS['thingy'];
-
-    $settings = $GLOBALS['settings'];
-    $web_prefix = $settings['settings']['stack']['web_prefix'];
+    $settings = $GLOBALS["settings"];
+    $web_prefix = $settings["settings"]["stack"]["web_prefix"];
 
     // Set the default button here... display if false or not set.
     $default_button = "meep";
@@ -98,13 +104,13 @@ $thing_report = $GLOBALS['thingy'];
         <a href="<?php echo $web_prefix; ?>privacy"><div class="choice-button">Privacy</div></a>
         </div>';
 
-    $head = '';
-    $foot = '';
+    $head = "";
+    $foot = "";
 
     $forget_button = "";
 
-    if (isset($GLOBALS['thingy']['thing']->uuid)) {
-        $uuid = $GLOBALS['thingy']['thing']->uuid;
+    if (isset($GLOBALS["thingy"]["thing"]->uuid)) {
+        $uuid = $GLOBALS["thingy"]["thing"]->uuid;
 
         $word = "Forget";
         $url_link = $web_prefix . $channel . "/" . $uuid . "/forget";
@@ -112,10 +118,10 @@ $thing_report = $GLOBALS['thingy'];
             '<a href="' .
             $url_link .
             '"><div class="choice-button"> ' .
-            '' .
+            "" .
             $word .
-            '' .
-            '</div></a>';
+            "" .
+            "</div></a>";
     }
 
     $word = "Privacy";
@@ -124,27 +130,27 @@ $thing_report = $GLOBALS['thingy'];
         '<a style="text-decoration: none; color: white;" href="' .
         $url_link .
         '"><div class="choice-button"> ' .
-        '' .
+        "" .
         $word .
-        '' .
-        ' </div></a>';
+        "" .
+        " </div></a>";
 
     $content =
         '<div class="choice-button-set">' .
         $forget_button .
-        ' ' .
+        " " .
         $privacy_button .
-        '</div>';
+        "</div>";
 
-    if (isset($thing_report['choices']['button'])) {
+    if (isset($thing_report["choices"]["button"])) {
         if ($thing_report["choices"]["button"] != null) {
             $content = $thing_report["choices"]["button"];
 
-$content = str_replace('/thing/', '/'.$channel . '/', stripslashes($content));
-
-//$content = preg_replace('#/thing/#',$channel, $content);
-
-            //var_dump($content);
+            $content = str_replace(
+                "/thing/",
+                "/" . $channel . "/",
+                stripslashes($content)
+            );
         }
     }
 
@@ -154,141 +160,132 @@ $content = str_replace('/thing/', '/'.$channel . '/', stripslashes($content));
 function snippetWeb($text, $buttons_on = true)
 {
     $html = '<div class="snippet">';
-$html .= nestAhref($text);
+    $html .= nestAhref($text);
     //$html .= '<object>' . $text . '</object>';
-
     //                echo quoted_printable_decode($value);
-if ($buttons_on) {
-    $html .= buttonsChoices();
-}
-    $html .= '</div>';
+    if ($buttons_on) {
+        $html .= buttonsChoices();
+    }
+    $html .= "</div>";
 
     return $html;
 }
-
 
 function thingWeb($text, $buttons_on = true)
 {
     $html = '<div class="thing">';
-$html .= nestAhref($text);
+    $html .= nestAhref($text);
     //$html .= '<object>' . $text . '</object>';
 
     //                echo quoted_printable_decode($value);
-if ($buttons_on) {
-    $html .= buttonsChoices();
-}
-    $html .= '</div>';
+    if ($buttons_on) {
+        $html .= buttonsChoices();
+    }
+    $html .= "</div>";
 
     return $html;
 }
-
 
 function bubbleSMS($text, $buttons_on = true)
 {
     $button_align = "left";
     //https://stackoverflow.com/questions/1960461/convert-plain-text-urls-into-html-hyperlinks-in-php
     $string = $text;
-    $url = '~(?:(https?)://([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![\.,:])~i';
+    $url = "~(?:(https?)://([^\s<]+)|(www\.[^\s<]+?\.[^\s<]+))(?<![\.,:])~i";
     //$string = preg_replace($url, '<a href="$0" target="_blank" title="$0">$0</a>', $string);
     $string = preg_replace($url, '<a href="$0" title="$0">$0</a>', $string);
 
     //echo $string;
 
-    $bubble = '<div class="triangle-border">' . $text . '</div>';
-    $bubble = '<div class="triangle-border">' . $string . '</div>';
+    $bubble = '<div class="triangle-border">' . $text . "</div>";
+    $bubble = '<div class="triangle-border">' . $string . "</div>";
 
     $html = '<div class="sms">';
     $html .= quoted_printable_decode($bubble);
-if ($buttons_on) {
-    $html .= buttonsChoices('sms');
-}
-    $html .= '</div>';
+    if ($buttons_on) {
+        $html .= buttonsChoices("sms");
+    }
+    $html .= "</div>";
 
     return $html;
 }
 
 function displayThingreport($channel, $value)
 {
-$clickable = true;
+    $clickable = true;
     global $web_prefix;
 
     $uuid = "X";
-    if (isset($GLOBALS['thingy']['thing'])) {
-        $uuid = $GLOBALS['thingy']['thing']->uuid;
+    if (isset($GLOBALS["thingy"]["thing"])) {
+        $uuid = $GLOBALS["thingy"]["thing"]->uuid;
     }
-if ($clickable) {
-if (isset($GLOBALS['agent_name'])) {
-$agent_name = strtolower($GLOBALS['agent_name']);
-echo '<a href="' . $web_prefix . '' . $channel . '/' . $uuid . '/' . $agent_name .'">';
-}
-}
-
-
+    if ($clickable) {
+        if (isset($GLOBALS["agent_name"])) {
+            $agent_name = strtolower($GLOBALS["agent_name"]);
+            echo '<a href="' .
+                $web_prefix .
+                "" .
+                $channel .
+                "/" .
+                $uuid .
+                "/" .
+                $agent_name .
+                '">';
+        }
+    }
     echo '<div class="channel">';
-    echo '<div class="channel-title">' . $channel . '</div>';
+    echo '<div class="channel-title">' . $channel . "</div>";
     echo '<div class="channel-snippet">';
     //echo '<div class="card">';
     switch ($channel) {
-        case 'thing':
+        case "thing":
             if (isset($value)) {
                 echo '"' . quoted_printable_decode("") . '"';
             } else {
-                echo 'Task not found.';
+                echo "Task not found.";
             }
             break;
-case 'sms':
+        case "sms":
+            echo quoted_printable_decode(bubbleSMS($value, false));
 
-echo quoted_printable_decode(bubbleSMS($value, false));
+            break;
 
+        case "snippet":
+            echo quoted_printable_decode(snippetWeb($value, false));
+            break;
 
-
-break;
-
-case 'snippet':
-
-echo quoted_printable_decode(snippetWeb($value, false));
-
-
-
-break;
-
-
-
-        case 'png':
+        case "png":
             $base64 = base64_encode($value); ?>
 
             <br><img src="data:image/png;base64,<?php echo $base64; ?>" alt="" />
 
             <?php break;
-        case 'email':
-
-
-
+        case "email":
             if (is_array($value)) {
-                $value_message = '<object>' . $value['message'] . '</object>';
+                $value_message = "<object>" . $value["message"] . "</object>";
                 echo quoted_printable_decode($value_message);
             } else {
-                $value = '<object>' . $value . '</object>';
+                $value = "<object>" . $value . "</object>";
                 echo quoted_printable_decode($value);
             }
             //echo "<br>";
             break;
 
-        case 'pdf':
+        case "pdf":
             echo "PDF data available.<br>";
-            $filename = $GLOBALS['thingy']['filename'] . ".pdf";
+            $filename = $GLOBALS["thingy"]["filename"] . ".pdf";
             //$uuid = $GLOBALS['thingy']['thing']->uuid;
             $link = $web_prefix . "thing/" . $uuid . "/" . $filename;
             echo "<object><a href = '" . $link . "'>" . $link . "</a></object>";
             //echo "<br>";
             break;
 
-        case 'txt':
+        case "txt":
             if (is_string($value)) {
-                $value = '<object>' . $value . '</object>';
+                $value = "<object>" . $value . "</object>";
                 echo "TXT data available.<br>";
 
-                $filename = $GLOBALS['thingy']['filename'] . ".txt";
+                $filename = $GLOBALS["thingy"]["filename"] . ".txt";
                 $link = $web_prefix . "thing/" . $uuid . "/" . $filename;
                 echo "<a href = '" . $link . "'>" . $link . "</a>";
 
@@ -298,24 +295,23 @@ break;
             }
             break;
 
-        case 'web':
+        case "web":
             if (is_string($value)) {
                 //$value = str_replace('</a>','</object></a>', $value);
                 //$value = str_replace('<a ','<object><a ', $value);
                 //$value = '<object>' . $value . '</object>';
 
                 //                echo quoted_printable_decode($value);
-
                 echo quoted_printable_decode(snippetWeb($value, false));
 
                 //                echo "Web content available";
             }
             break;
 
-        case 'choices':
-            if (isset($value['button'])) {
-                $value = '<object>' . $value . '</object>';
-                echo quoted_printable_decode($value['button']);
+        case "choices":
+            if (isset($value["button"])) {
+                $value = "<object>" . $value . "</object>";
+                echo quoted_printable_decode($value["button"]);
             }
             break;
 
@@ -325,15 +321,15 @@ break;
             }
 
             if (is_string($value)) {
-                $value = '<object>' . $value . '</object>';
+                $value = "<object>" . $value . "</object>";
                 echo $value;
             }
     }
-    echo '</div>';
-    echo '</div>';
-if ($clickable) { 
-   echo '</a>';
-}
+    echo "</div>";
+    echo "</div>";
+    if ($clickable) {
+        echo "</a>";
+    }
 
     return;
 }
@@ -346,20 +342,20 @@ if ($clickable) {
 
 
 <?php
-if (isset($thing_report['requested_channel'])) {
-    if (!isset($thing_report['thing'])) {
-        $GLOBALS['uuid'] = false;
+if (isset($thing_report["requested_channel"])) {
+    if (!isset($thing_report["thing"])) {
+        $GLOBALS["uuid"] = false;
     } else {
-        $GLOBALS['uuid'] = $thing_report['thing']->uuid;
+        $GLOBALS["uuid"] = $thing_report["thing"]->uuid;
     }
 
     //echo $GLOBALS['uuid'];
 }
 
-if (!isset($thing_report['requested_channel'])) {
+if (!isset($thing_report["requested_channel"])) {
     $requested_channel = "web";
 } else {
-    $requested_channel = $thing_report['requested_channel'];
+    $requested_channel = $thing_report["requested_channel"];
 }
 
 $whitelistArray = [
@@ -378,62 +374,40 @@ if (in_array(strtolower($requested_channel), $whitelistArray)) {
 } else {
     $requested_channel = "web";
 }
-
-//echo strtoupper($requested_channel) . "<br>";
-// h2
 ?>
 
 
 <div class="content">
 <div class="grid">
-<?php //var_dump($requested_channel);
-
-switch ($requested_channel) {
+<?php switch ($requested_channel) {
     case "thing":
+        if (!isset($thing_report["web"])) {
+            echo bubbleSMS("No web content available.");
 
-if (!isset($thing_report['web'])) {
+            break;
+        }
 
-//echo '<div class="agent">';
-            echo bubbleSMS('No web content available.');
-
-//echo 'No web content available.';
-//echo '</div>';
-break;
-
-
-
-}
-
-echo '<div class="agent">';
-echo thingWeb($thing_report['web']);
-echo '</div>';
-break;
+        echo '<div class="agent">';
+        echo thingWeb($thing_report["web"]);
+        echo "</div>";
+        break;
 
     case "snippet":
+        if (!isset($thing_report["web"])) {
+            echo bubbleSMS("No web content available.");
 
-if (!isset($thing_report['web'])) {
+            break;
+        }
 
-//echo '<div class="agent">';
-            echo bubbleSMS('No web content available.');
-
-//echo 'No web content available.';
-//echo '</div>';
-break;
-
-
-
-}
-
-echo '<div class="agent">';
-echo snippetWeb($thing_report['web']);
-echo '</div>';
-break;
-
+        echo '<div class="agent">';
+        echo snippetWeb($thing_report["web"]);
+        echo "</div>";
+        break;
 
     case "agent":
         $head = '<div class="card">';
 
-        $foot = '</div>';
+        $foot = "</div>";
         echo '<div class="agent">';
         foreach ($thing_report as $channel => $value) {
             switch ($channel) {
@@ -445,10 +419,10 @@ break;
                 default:
                     //       echo quoted_printable_decode($head);
 
-                    if ($channel == 'thing') {
+                    if ($channel == "thing") {
                         displayThingreport(
-                            'message',
-                            '"' . $thing_report['request'] . '"'
+                            "message",
+                            '"' . $thing_report["request"] . '"'
                         );
                     } else {
                         displayThingreport($channel, $value);
@@ -459,7 +433,7 @@ break;
                 //       echo quoted_printable_decode($foot);
             }
         }
-        echo '</div>';
+        echo "</div>";
         echo quoted_printable_decode(buttonsChoices());
 
         break;
@@ -469,7 +443,7 @@ break;
             <tr>
             <td class="blob">';
 
-        echo quoted_printable_decode($thing_report['log']);
+        echo quoted_printable_decode($thing_report["log"]);
 
         echo "<br>
             </td>
@@ -478,17 +452,20 @@ break;
         break;
 
     case "web":
-        if (isset($thing_report['web'])) {
-            $value = $thing_report['web'];
+        if (isset($thing_report["web"])) {
+            $value = $thing_report["web"];
 
             //echo snippetWeb($value);
             //break;
 
-            echo quoted_printable_decode(snippetWeb($value));
+// dev August 8, 2021 - quoted_printable_decode process a href link value
+//            echo quoted_printable_decode(snippetWeb($value));
+            echo snippetWeb($value);
+
             break;
 
-            $value = str_replace('</a>', '</object></a>', $value);
-            $value = str_replace('<a ', '<object><a ', $value);
+            $value = str_replace("</a>", "</object></a>", $value);
+            $value = str_replace("<a ", "<object><a ", $value);
 
             echo '<div id="imagecentered">';
 
@@ -500,29 +477,29 @@ break;
 
     case "email":
         if (
-            isset($thing_report['email']) and is_string($thing_report['email'])
+            isset($thing_report["email"]) and is_string($thing_report["email"])
         ) {
             echo '<div class="card email">';
-            echo quoted_printable_decode($thing_report['email']);
-            echo '</div>';
+            echo quoted_printable_decode($thing_report["email"]);
+            echo "</div>";
             break;
         }
 
     case "message":
-        if (isset($thing_report['message'])) {
+        if (isset($thing_report["message"])) {
             //$button_align = "left";
             //$bubble = '<div class="triangle-border">' . $thing_report['sms'] . '</div>';
             echo '<div class="card message">';
 
-            echo quoted_printable_decode($thing_report['message']);
-            echo '</div>';
+            echo quoted_printable_decode($thing_report["message"]);
+            echo "</div>";
 
             break;
         }
 
     case "sms":
-        if (isset($thing_report['sms'])) {
-            echo bubbleSMS($thing_report['sms']);
+        if (isset($thing_report["sms"])) {
+            echo bubbleSMS($thing_report["sms"]);
             break;
         }
     // Drop through to default
@@ -531,8 +508,8 @@ break;
 
         // Otherwise check for a sms message and display.
 
-        if (isset($thing_report['sms'])) {
-            echo bubbleSMS($thing_report['sms']);
+        if (isset($thing_report["sms"])) {
+            echo bubbleSMS($thing_report["sms"]);
         } else {
             echo bubbleSMS(
                 "THING | That Thing seems to be forgotten. Or never was. Or no agent responded."
@@ -555,14 +532,14 @@ break;
 
 <?php
 echo '<div class="card state">';
-echo "usermanager: " . quoted_printable_decode($state['thing']);
-echo '</div>';
+echo "usermanager: " . quoted_printable_decode($state["thing"]);
+echo "</div>";
 ?>
 <br>
 <?php
 echo '</div class="card stack">';
-echo "stack: " . quoted_printable_decode($state['stack']);
-echo '</div>';
+echo "stack: " . quoted_printable_decode($state["stack"]);
+echo "</div>";
 ?>
 <br>
 
@@ -580,7 +557,7 @@ echo '</div>';
 <div class="meta-stack">
 
 
-<?php $web_prefix = $settings['settings']['stack']['web_prefix']; ?>
+<?php $web_prefix = $settings["settings"]["stack"]["web_prefix"]; ?>
 <div class="id-image"><img src="<?php echo $web_prefix; ?>pixel_sml.png"></div>
 
 <?php
@@ -590,12 +567,12 @@ echo '</div>';
 
 <?php
 // calculated using thing_report elapsed_time since gearman call
-echo $settings['settings']['stack']['hashmessage'];
+echo $settings["settings"]["stack"]["hashmessage"];
 // Show the elapsed time
-if (isset($thing_report['etime'])):
+if (isset($thing_report["etime"])):
 
     echo " ";
-    echo quoted_printable_decode($thing_report['etime']) . 'ms';
+    echo quoted_printable_decode($thing_report["etime"]) . "ms";
     ?>
 <br>
 
@@ -607,8 +584,8 @@ endif;
 
 <?php
 // Confirm if there is a validated identit behind the agent request
-if (isset($thing_report['thing']->nom_from)) {
-    $nom_from = $thing_report['thing']->nom_from;
+if (isset($thing_report["thing"]->nom_from)) {
+    $nom_from = $thing_report["thing"]->nom_from;
 } else {
     $nom_from = null;
 }

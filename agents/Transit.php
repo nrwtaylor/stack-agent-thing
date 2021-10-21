@@ -56,7 +56,7 @@ class Transit extends Agent  {
         //                'block' => array('default run_time'=>'105',
         //                                'negative_time'=>'yes'),
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         //$this->default_run_time = $this->thing->container['api']['train']['default run_time'];
         //$this->negative_time = $this->thing->container['api']['train']['negative_time'];
@@ -77,7 +77,7 @@ class Transit extends Agent  {
 
 
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->thing_report['help'] = 'This is a bus with people on it.';
 
@@ -136,22 +136,21 @@ class Transit extends Agent  {
         $this->identity = $this->from;
 
         $this->thing->db->setFrom($this->identity);
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("transit", "state"),
             $this->state
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("transit", "transit_id"),
             $this->transit_id
         );
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("transit", "agency"),
             $this->agency
         );
 
         $this->refreshed_at = $this->current_time;
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             array("transit", "refreshed_at"),
             $this->refreshed_at
         );

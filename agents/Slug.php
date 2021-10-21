@@ -56,10 +56,9 @@ class Slug extends Agent
      */
     function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["slug", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -93,7 +92,8 @@ class Slug extends Agent
         $slug = str_replace('\'', "", $text);
         $slug = str_replace('/', " ", $text);
 
-        $slug = $this->alphanumeric_agent->filterAlphanumeric($slug);
+        //$slug = $this->alphanumeric_agent->filterAlphanumeric($slug);
+        $slug = $this->filterAlphanumeric($slug);
         $slug = preg_replace('/\s+/', ' ', $slug);
         //$slug = str_replace("'","",$despaced_slug);
         //$slug = str_replace("/"," ",$slug);

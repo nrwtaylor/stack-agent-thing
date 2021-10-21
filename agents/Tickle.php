@@ -36,16 +36,14 @@ class Tickle extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "tickle",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["tickle", "refreshed_at"],
                 $time_string
             );
@@ -447,14 +445,6 @@ return $html_table;
         //        $pdf->useTemplate($tplidx1,0,0,215);
         $pdf->useTemplate($tplidx1);
 
-        //$separator = "\r\n";
-        //$line = strtok($this->thing_report['txt'], $separator);
-
-        //while ($line !== false) {
-        //    # do something with $line
-        //    $line = strtok( $separator );
-        //echo $line;
-        //}
         $pdf->SetTextColor(0, 0, 0);
 
         $num_rows = 40;

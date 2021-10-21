@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -13,22 +13,22 @@ class Youtube extends Agent
 {
     // This does Youtube Search via Google's API.
 
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->test = "Development code"; // Always
 
-        $this->keywords = ['youtube', 'search', 'video'];
+        $this->keywords = ["youtube", "search", "video"];
 
         $this->api_key =
-            $this->thing->container['api']['google']['youtube']['api_key'];
+            $this->thing->container["api"]["google"]["youtube"]["api_key"];
 
-        $this->thing_report['help'] =
-            'This provides video search via the Youtube API. Try YOUTUBE MIND THE GAP.';
+        $this->thing_report["help"] =
+            "This provides video search via the Youtube API. Try YOUTUBE MIND THE GAP.";
 
-        $this->thing_report['info'] =
-            'This provides video  search via the Youtube API.';
+        $this->thing_report["info"] =
+            "This provides video  search via the Youtube API.";
     }
 
     function set()
@@ -47,14 +47,13 @@ class Youtube extends Agent
             "variables " . "youtube" . " " . $this->from
         );
 
-
         $this->counter = $this->variables_agent->getVariable("counter");
         $this->refreshed_at = $this->variables_agent->getVariable(
             "refreshed_at"
         );
 
         $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->counter . ".",
+            $this->agent_prefix . "loaded " . $this->counter . ".",
             "DEBUG"
         );
 
@@ -66,8 +65,8 @@ class Youtube extends Agent
         // For testing to save quota
         $this->getVideos();
 
-        if (isset($this->items[0]['id'])) {
-            $this->video_id = $this->items[0]['id'];
+        if (isset($this->items[0]["id"])) {
+            $this->video_id = $this->items[0]["id"];
         }
 
         if (!isset($this->video_id)) {
@@ -143,11 +142,11 @@ class Youtube extends Agent
 
         $json_data = json_decode($data, true);
 
-        if (!isset($json_data['items'][0]['id'])) {
+        if (!isset($json_data["items"][0]["id"])) {
             return true;
         }
 
-        $caption_id = $json_data['items'][0]['id'];
+        $caption_id = $json_data["items"][0]["id"];
 
         return $caption_id;
     }
@@ -155,15 +154,15 @@ class Youtube extends Agent
     public function captionYoutube($caption_id = null)
     {
         $data_source =
-            'https://www.googleapis.com/youtube/v3/captions/id?id=' .
+            "https://www.googleapis.com/youtube/v3/captions/id?id=" .
             $caption_id .
-            '' .
+            "" .
             "&key=" .
             $this->api_key;
 
         $googleauthorize_agent = new Googleauthorize(
             $this->thing,
-            'googleauthorize'
+            "googleauthorize"
         );
 
         $http = $googleauthorize_agent->client->authorize();
@@ -173,25 +172,13 @@ class Youtube extends Agent
         //            $caption_id);
 
         $response = $http->request(
-            'GET',
-            '/youtube/v3/captions/id=' . $caption_id
+            "GET",
+            "/youtube/v3/captions/id=" . $caption_id
         );
 
-        var_dump($response);
-        exit();
-        /*
-// returns a Guzzle HTTP Client
-$httpClient = $googleauthorize_agent->client->authorize();
-
-$response = $httpClient->get($data_source);
-
-var_dump($response);
-exit();
-
-*/
+        return true;
 
         /*
-        var_dump($googleauthorize_agent->access_token);
 
         $options = [
             "http" => [
@@ -207,17 +194,10 @@ exit();
         $context = stream_context_create($options);
 
         $data = file_get_contents($data_source, false, $context);
-var_dump($data);
-exit();
 */
         $youtube = new \Google_Service_YouTube($googleauthorize_agent->client);
 
         $captions = $youtube->captions->listCaptions("snippet", $video_id);
-
-        var_dump($captions);
-        echo "merp";
-
-        exit();
 
         return false;
     }
@@ -229,7 +209,7 @@ exit();
         }
 
         $data = @file_get_contents($data_source);
-        //var_dump($data);
+
         if ($data == false) {
             $this->response .= "Could not ask Youtube.";
             //            $this->items_count = 0;
@@ -245,29 +225,29 @@ exit();
     {
         $items = [];
 
-        $total_results = $array['pageInfo']['totalResults'];
-        $results_per_page = $array['pageInfo']['resultsPerPage'];
+        $total_results = $array["pageInfo"]["totalResults"];
+        $results_per_page = $array["pageInfo"]["resultsPerPage"];
         // devstac
-        if (!isset($array['items'])) {
+        if (!isset($array["items"])) {
             return true;
         }
-        foreach ($array['items'] as $i => $item) {
-            if (!isset($item['id']['videoId'])) {
+        foreach ($array["items"] as $i => $item) {
+            if (!isset($item["id"]["videoId"])) {
                 continue;
             }
-            $id = $item['id']['videoId'];
+            $id = $item["id"]["videoId"];
             $link = "https://www.youtube.com/watch?v=" . $id;
-            $kind = $item['id']['kind'];
+            $kind = $item["id"]["kind"];
 
-            $snippet = $item['snippet'];
-            $title = $snippet['title'];
-            $description = $snippet['description'];
+            $snippet = $item["snippet"];
+            $title = $snippet["title"];
+            $description = $snippet["description"];
 
-            $created_at = $snippet['publishTime'];
+            $created_at = $snippet["publishTime"];
 
             $image_urls = [];
-            foreach ($snippet['thumbnails'] as $j => $image_thumbnail) {
-                $image_urls[] = $image_thumbnail['url'];
+            foreach ($snippet["thumbnails"] as $j => $image_thumbnail) {
+                $image_urls[] = $image_thumbnail["url"];
             }
             $item = [
                 "id" => $id,
@@ -305,16 +285,16 @@ exit();
         $this->thing->flagGreen();
 
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
 
         $this->flag = "green";
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         //        $this->thing_report['help'] =
@@ -327,13 +307,13 @@ exit();
     {
         //        $text = $item['title'];
 
-        $link = $item['link'];
+        $link = $item["link"];
         $html_link = '<a href="' . $link . '">';
         //        $web .= $this->html_image;
         $html_link .= "youtube";
         $html_link .= "</a>";
 
-        $text = $item['title'] . " " . $html_link;
+        $text = $item["title"] . " " . $html_link;
         return $text;
     }
 
@@ -370,13 +350,13 @@ exit();
             case 1:
                 $sms .=
                     " | " .
-                    $this->items[0]['title'] .
+                    $this->items[0]["title"] .
                     " " .
-                    $this->items[0]['link'];
+                    $this->items[0]["link"];
                 break;
             default:
                 foreach ($this->items as $i => $item) {
-                    $sms .= " / " . $item['title'] . " " . $item['link'];
+                    $sms .= " / " . $item["title"] . " " . $item["link"];
                     if ($i > 5) {
                         $sms .= " [ TEXT WEB for more items ] ";
                         break;
@@ -407,7 +387,7 @@ exit();
                 break;
             default:
                 foreach ($this->items as $item) {
-                    $message .= " / " . $item['title'] . "  " . $item['link'];
+                    $message .= " / " . $item["title"] . "  " . $item["link"];
                 }
         }
 
@@ -416,9 +396,9 @@ exit();
 
     private function thingreportYoutube()
     {
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['web'] = $this->html_message;
-        $this->thing_report['message'] = $this->message;
+        $this->thing_report["sms"] = $this->sms_message;
+        $this->thing_report["web"] = $this->html_message;
+        $this->thing_report["message"] = $this->message;
     }
 
     public function readSubject()
@@ -445,7 +425,7 @@ exit();
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'youtube') {
+            if ($input == "youtube") {
                 //$this->search_words = null;
                 $this->response .= "Asked Youtube about nothing. ";
                 return;

@@ -29,8 +29,6 @@ class Chooser extends Agent
 
         $this->description = 'scalar';
 
-        //		$old_number = $this->thing->account[$this->description]->balance['amount'];
-        //		echo "old number :", $old_number;
     }
 
     public function makeChoice()
@@ -46,7 +44,6 @@ class Chooser extends Agent
             case 'destroy':
                 break;
             default:
-            //echo 'default';
         }
     }
 

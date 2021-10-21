@@ -8,8 +8,10 @@ mpm-child-cnxns=10000
 YOUR_EMAIL=myaddress@example.com
 MYSQLPASSWORD=Stack_1user
 AGENT_LOCATION=../agent
+TODAY := $(shell date +"%Y%m%d")
 #WEB_PREFIX=http:\/\/localhost:8000\/ 
-#LOCAL_PORT=8000
+LOCAL_PORT=8000
+#ADD_APACHE_PORT=$(shell bash -c 'read -p "Add port to Apache? (y|n)" key; echo $$key')
 
 .PHONY: help
 help: ## Show this help
@@ -103,9 +105,9 @@ php7-4: ## Set up PHP extensions - bleeding edge
 	sudo apt-get --assume-yes install -f php-fpm
 	sudo service apache2 restart
 
-apachefiling: ## Create and assemble filing for Apache2 server
+apachefiling: ## Create and assemble filing for Agent and Apache2 server
 	@echo "===== Creating filesystem for Apache2 server ==============="
-ifneq ("$(wildcard /var/www/$(SERVERNAME))","")
+ifneq ("$(wildcard /var/www/$(SERVERNAME)/private)","")
 	@echo "exists"
 else 
 	echo "does not"; \
@@ -128,13 +130,27 @@ else
 endif
 	# sudo cp -r . /var/www/$(SERVERNAME)
 
+webserver: ## Set up web server Public Folder and Port
+	@if [ -d /var/www/$(SERVERNAME)/public ] ; then  sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/public/ ; fi
+#	sudo cp -r /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/public /var/www/$(SERVERNAME)/templates/;
+	sudo chown -R www-data:www-data /var/www/$(SERVERNAME)/public; \
+	sudo chmod -R 774 /var/www/$(SERVERNAME)/public;  
+	read -p "Add port to Apache? (y|n)" key; echo $$key ; \
+	if [ "$$key" = "y" ] ; then sudo sed -i 's/Listen 80$$/Listen 80\nListen $(LOCAL_PORT)\n/' /etc/apache2/ports.conf ; fi
+	# TODO: make sure only adds port once - check exists
+
 
 memcached: ## Install MemCache Daemon
 	@echo "===== Installing MemCache Daemon =============="
 	sudo apt-get update; sudo apt-get install memcached; \
 	sudo apt-get install -y php-memcached
 
+.PHONY: agent
 agent: ## Add commandline shell interface to call the stack
+ifneq ("$(wildcard /var/www/$(SERVERNAME)/agent)","")
+	@echo "agent exists"
+	mv /var/www/$(SERVERNAME)/agent /var/www/$(SERVERNAME)/agent.$(TODAY)
+endif
 	cd /var/www/$(SERVERNAME); \
 	wget https://raw.githubusercontent.com/nrwtaylor/agent/master/agent; \
 	sudo touch agent; \
@@ -145,7 +161,7 @@ agent: ## Add commandline shell interface to call the stack
 	sed -i 's/"user" => "<private>"/"user" => "stackuser"/' settings.php; \
 	sed -i 's/"pass" => "<private>"/"pass" => "$(MYSQLPASSWORD)"/' settings.php; \
 	# next not working -- create sed script to group all commands?
-	sed -i 's/\'web_prefix\' => \'<not set>\'/\'web_prefix\' => \'http:\/\/localhost:8000\/\'/' settings.php
+#	sed -i 's/\'web_prefix\' => \'<not set>\'/\'web_prefix\' => \'http:\/\/localhost:8000\/\'/' settings.php
 
 path: ## Add the stack to your path
 	./setpath $(SERVERNAME)
@@ -218,21 +234,26 @@ tailoring: ## Set your servername in system files
 
 clean: ## Clean up the web folders and settings
 	@echo "===== Cleaning up: removing web folders and settings ==============="
-	rm -Rvf /var/www/$(SERVERNAME)
-	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf
-	
+	read -p "Ready to erase all files in /var/www/stackr.test? (y|n)" cleaning; echo $$cleaning ; \
+
+	if [ "$$cleaning" = "n" ]; then \
+	echo "phew"; else \
+	rm -Rvf /var/www/$(SERVERNAME); \
+	rm -f /etc/apache2/sites-available/$(SERVERNAME).conf; fi
+
 #	rm -f /etc/apache2/sites-available/000-default.conf
 #	rm -f apache settings for SERVERNAME
 # perhaps also:  mysql? php?
 
 patch: ## Activate a patch
+	@echo "Copy files from working to operating stack."; \
 	sudo cp -rf * /var/www/$(SERVERNAME)/vendor/nrwtaylor/stack-agent-thing/
 
 debug: ## Install enhanced debugging environment (dev optional?)
 	sudo apt install php-dev
 	sudo pecl install xdebug
 
-configuration: 
+configuration:
 # sudo nano /etc/sysctl.conf
 # fs.file-max = 65535
 

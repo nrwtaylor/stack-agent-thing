@@ -9,15 +9,15 @@ namespace Nrwtaylor\StackAgentThing;
 
 use setasign\Fpdi;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Wumpus extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     // Lots of work needed here.
     // Currently has persistent coordinate movement (north, east, south, west).
@@ -34,27 +34,27 @@ class Wumpus extends Agent
         $this->test = "Development code";
 
         // Load in some characterizations.
-        $this->short_name = $this->thing->container['stack']['short_name'];
+        $this->short_name = $this->thing->container["stack"]["short_name"];
 
         $this->sms_seperator =
-            $this->thing->container['stack']['sms_separator'];
-        $this->sms_address = $this->thing->container['stack']['sms_address'];
+            $this->thing->container["stack"]["sms_separator"];
+        $this->sms_address = $this->thing->container["stack"]["sms_address"];
 
         // Get some stuff from the stack which will be helpful.
-        $this->word = $this->thing->container['stack']['word'];
-        $this->email = $this->thing->container['stack']['email'];
+        $this->word = $this->thing->container["stack"]["word"];
+        $this->email = $this->thing->container["stack"]["email"];
 
         // Load in time quantums
-        $this->cron_period = $this->thing->container['stack']['cron_period']; // 60s
+        $this->cron_period = $this->thing->container["stack"]["cron_period"]; // 60s
         $this->thing_resolution =
-            $this->thing->container['stack']['thing_resolution']; // 1ms
+            $this->thing->container["stack"]["thing_resolution"]; // 1ms
 
         // Load in a pointer to the stack record.
-        $this->stack_uuid = $this->thing->container['stack']['uuid'];
+        $this->stack_uuid = $this->thing->container["stack"]["uuid"];
 
         $this->primary_place = "lair";
 
-        $this->created_at = $this->thing->thing->created_at;
+        $this->created_at = $this->thing->created_at;
 
         $this->sqlresponse = null;
 
@@ -146,7 +146,7 @@ class Wumpus extends Agent
             'The "Wumpus" agent provides an text driven interface to manage a 3-D coordinate on ' .
             $this->short_name;
         $info .=
-            'from the web.  The Management suggests you explore the NEST MAINTENANCE button';
+            "from the web.  The Management suggests you explore the NEST MAINTENANCE button";
 
         //        // dev stack
         //        $t = new Input($this->thing, "wumpus");
@@ -181,17 +181,17 @@ class Wumpus extends Agent
         $variables->setVariable("tag", $this->wumpus_tag);
         $variables->setVariable("refreshed_at", $this->refreshed_at);
 
-        $this->entity_agent->json->writeVariable(
+        $this->entity_agent->Write(
             ["wumpus", "left_count"],
             $this->left_count
         );
-        $this->entity_agent->json->writeVariable(
+        $this->entity_agent->Write(
             ["wumpus", "right_count"],
             $this->right_count
         );
 
         // Which cave is the Wumpus in?  And is it a number or a name?
-        $this->entity_agent->json->writeVariable(
+        $this->entity_agent->Write(
             ["wumpus", "cave"],
             strval($this->x)
         );
@@ -224,11 +224,10 @@ class Wumpus extends Agent
 
         $this->getWumpus($crow_code);
 
-        $this->current_time = $this->entity_agent->json->time();
+        $this->current_time = $this->entity_agent->time();
 
         // Borrow this from iching
-        $this->entity_agent->json->setField("variables");
-        $this->time_string = $this->entity_agent->json->readVariable([
+        $this->time_string = $this->entity_agent->Read([
             "wumpus",
             "refreshed_at",
         ]);
@@ -237,10 +236,9 @@ class Wumpus extends Agent
             $crow_code = $this->uuid;
         }
 
-        $this->entity_agent->json->setField("variables");
         if ($this->time_string == false) {
-            $this->time_string = $this->entity_agent->json->time();
-            $this->entity_agent->json->writeVariable(
+            $this->time_string = $this->entity_agent->time();
+            $this->entity_agent->Write(
                 ["wumpus", "refreshed_at"],
                 $this->time_string
             );
@@ -249,13 +247,13 @@ class Wumpus extends Agent
         $this->refreshed_at = strtotime($this->time_string);
 
         $this->left_count = strtolower(
-            $this->entity_agent->json->readVariable(["wumpus", "left_count"])
+            $this->entity_agent->Read(["wumpus", "left_count"])
         );
-        $this->right_count = $this->entity_agent->json->readVariable([
+        $this->right_count = $this->entity_agent->Read([
             "wumpus",
             "right_count",
         ]);
-        $this->x = $this->entity_agent->json->readVariable(["wumpus", "cave"]);
+        $this->x = $this->entity_agent->Read(["wumpus", "cave"]);
 
         if ($this->left_count == false or ($this->left_count = "")) {
             $this->left_count = 0;
@@ -299,7 +297,7 @@ class Wumpus extends Agent
         $entity = new Entity($this->thing, $entity_input);
         $this->entity_agent = $entity->thing;
 
-        $this->state = $this->entity_agent->choice->load('lair');
+        $this->state = $this->entity_agent->choice->load("lair");
         $this->uuid = $this->entity_agent->uuid;
         $this->nuuid = $this->entity_agent->nuuid;
 
@@ -319,7 +317,7 @@ class Wumpus extends Agent
 
         // Makes a one character dictionary
 
-        $file = $this->resource_path . 'wumpus/wumpus.txt';
+        $file = $this->resource_path . "wumpus/wumpus.txt";
         $contents = file_get_contents($file);
 
         $separator = "\r\n";
@@ -343,7 +341,7 @@ class Wumpus extends Agent
 
         // Makes a one character dictionary
 
-        $file = $this->resource_path . 'wumpus/news.txt';
+        $file = $this->resource_path . "wumpus/news.txt";
         $contents = file_get_contents($file);
 
         $separator = "\r\n";
@@ -448,52 +446,14 @@ class Wumpus extends Agent
         $this->thing->flagGreen();
 
         // Generate SMS response
-        /*
-        $this->whatisthis = [
-            'inside nest' =>
-                'Each time the ' .
-                $this->short_name .
-                ' service is accessed, Stackr creates a uniquely identifable Thing.
-				This one is ' .
-                $this->uuid .
-                '.
-				This message from the "Wumpus" ai which was been tasked with mediating web access to this Thing.
-				Manage Things on ' .
-                $this->short_name .
-                ' using the [ NEST MAINTENANCE ] command.
-				If Wumpus\'s are bothing you, you can either use the [ FORGET ] command
-				to stop receiving notifications for the Thing, or you can turn [ WUMPUS OFF ].
-				"Wumpus" is how ' .
-                $this->short_name .
-                ' manages interactions with your Things by other identities.
-				[WUMPUS OFF] will stop any "Wumpus" agent responding.  You can say [ NEST MAINTENANCE ] later if you change your mind.',
-            'nest maintenance' =>
-                'A Things of yours was displayed again, perhaps by yourself.  This Wumpus is doing some nest maintenance.',
-            'patrolling' =>
-                "A Thing associated with " .
-                "this identity" .
-                " was displayed (or requested by) a device.  That's twice now.  This Wumpus is patrolling.",
-            'foraging' =>
-                "This wumpus is on it's last legs.  It has gone foraging for stack information about you to forget.",
-            'midden work' =>
-                'One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is doing midden work.',
-            'start' =>
-                "Start. Not normally means that you displayed a record, let's see if we get any more Wumpus messages.",
-        ];
-*/
         // Generate email response.
 
-        //      $to = $this->thing->from;
-        //      $from = "wumpus";
-
-        //$this->makeChoices();
         $this->choices = false;
 
-        //if ($this->agent_input == null) {
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-        $this->thing_report['help'] =
+        $this->thing_report["help"] =
             'This is the "Wumpus" Agent. It stumbles around Things.';
     }
 
@@ -509,7 +469,7 @@ class Wumpus extends Agent
             "<b>WUMPUS " .
             strtoupper($this->entity_agent->nuuid) .
             "" .
-            ' NOW ';
+            " NOW ";
 
         $test_message .= "AT ";
         // . strtoupper($this->x) . "" .
@@ -533,7 +493,7 @@ class Wumpus extends Agent
 
         $test_message .= "PDF ";
 
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/wumpus.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/wumpus.pdf";
         $test_message .= '<a href="' . $link . '">wumpus.pdf</a>';
         //$web .= " | ";
 
@@ -558,25 +518,25 @@ class Wumpus extends Agent
         //   $this->response .= "";
 
         if ($this->state != false) {
-            $test_message .= '<p><b>Wumpus State</b>';
+            $test_message .= "<p><b>Wumpus State</b>";
 
             $test_message .=
                 '<br>Last thing heard: "' .
                 $this->subject .
                 '"<br>' .
-                'The next Wumpus choices are [ ' .
-                $this->choices['link'] .
-                '].';
-            $test_message .= '<br>Lair state: ' . $this->state;
+                "The next Wumpus choices are [ " .
+                $this->choices["link"] .
+                "].";
+            $test_message .= "<br>Lair state: " . $this->state;
 
             //$test_message .= '<br>left_count is ' . $this->left_count;
             //$test_message .= '<br>right count is ' . $this->right_count;
 
-            $test_message .= '<br>' . $this->behaviour[$this->state] . '<br>';
+            $test_message .= "<br>" . $this->behaviour[$this->state] . "<br>";
             $test_message .=
-                '<br>' . $this->thing_behaviour[$this->state] . '<br>';
-            $test_message .= '<br>' . $this->litany[$this->state] . '<br>';
-            $test_message .= '<br>' . $this->narrative[$this->state] . '<br>';
+                "<br>" . $this->thing_behaviour[$this->state] . "<br>";
+            $test_message .= "<br>" . $this->litany[$this->state] . "<br>";
+            $test_message .= "<br>" . $this->narrative[$this->state] . "<br>";
         }
 
         $refreshed_at = max($this->created_at, $this->created_at);
@@ -588,7 +548,7 @@ class Wumpus extends Agent
 
         $test_message .= "<br>Thing happened about " . $ago . " ago.";
 
-        $this->thing_report['web'] = $test_message;
+        $this->thing_report["web"] = $test_message;
     }
 
     function doWumpus()
@@ -644,11 +604,10 @@ class Wumpus extends Agent
 
         $this->choices = $choices;
 
-        //$this->choices_text = $this->thing->choice->current_node;
         $this->choices_text = "";
-        if ($this->choices['words'] != null) {
+        if ($this->choices["words"] != null) {
             $this->choices_text = strtoupper(
-                implode(" / ", $this->choices['words'])
+                implode(" / ", $this->choices["words"])
             );
         }
 
@@ -656,7 +615,7 @@ class Wumpus extends Agent
         $choices = $this->entity_agent->choice->makeLinks();
 
         $this->choices = $choices;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     /**
@@ -670,7 +629,7 @@ class Wumpus extends Agent
             $m = "No response.";
         }
         $this->message = $m;
-        $this->thing_report['message'] = $m;
+        $this->thing_report["message"] = $m;
     }
 
     /**
@@ -698,8 +657,7 @@ class Wumpus extends Agent
         $sms .= " \n" . $this->response;
         $sms .= "\n";
 
-        if (strpos($this->web_prefix, '192.168') !== false) {
-            //echo 'true';
+        if (strpos($this->web_prefix, "192.168") !== false) {
         } else {
             $sms .= $this->web_prefix . "thing/" . $this->uuid . "/wumpus" . "";
 
@@ -714,7 +672,7 @@ class Wumpus extends Agent
             $this->cave_list_text =
                 trim(implode(" ", $this->caves[strval($this->x)])) . "";
         }
-        //var_dump($this->wumpus_input_flag);
+
         if ($this->wumpus_input_flag == "anticipate") {
             $sms .=
                 "YOUR CHOICES ARE [ " .
@@ -730,7 +688,7 @@ class Wumpus extends Agent
         $sms .= $this->input;
 
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -739,27 +697,26 @@ class Wumpus extends Agent
      */
     public function makePDF()
     {
-        $file = $this->resource_path . 'wumpus/wumpus.pdf';
-        if (($file === null) or (!file_exists($file))) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf'];
+        $file = $this->resource_path . "wumpus/wumpus.pdf";
+        if ($file === null or !file_exists($file)) {
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
-
-        $txt = $this->thing_report['sms'];
+        $txt = $this->thing_report["sms"];
 
         // initiate FPDI
         $pdf = new Fpdi\Fpdi();
 
         $pdf->setSourceFile($file);
 
-        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetFont("Helvetica", "", 10);
 
-        $tplidx1 = $pdf->importPage(1, '/MediaBox');
+        $tplidx1 = $pdf->importPage(1, "/MediaBox");
 
         $s = $pdf->getTemplatesize($tplidx1);
 
-        $pdf->addPage($s['orientation'], $s);
+        $pdf->addPage($s["orientation"], $s);
         // $pdf->useTemplate($tplidx1,0,0,215);
         $pdf->useTemplate($tplidx1);
 
@@ -769,11 +726,11 @@ class Wumpus extends Agent
         //        $pdf->SetXY(130, 10);
         //        $pdf->Write(0, $text);
 
-        $image = $pdf->Output('', 'S');
+        $image = $pdf->Output("", "S");
 
-        $this->thing_report['pdf'] = $image;
+        $this->thing_report["pdf"] = $image;
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     /**
@@ -944,72 +901,72 @@ class Wumpus extends Agent
             foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'run':
+                        case "run":
                             $t = new Run($this->thing, "run");
                             break;
-                        case 'news':
+                        case "news":
                             $this->newsWumpus();
                             $wumpus_response = $this->news;
                             //$this->response .= "May 18th is a Wumpus hunt at Queen Elizabeth Park. ";
                             break;
 
-                        case 'arrow':
+                        case "arrow":
                             $this->arrow();
-                            $wumpus_response = 'Fired a wonky arrow. ';
+                            $wumpus_response = "Fired a wonky arrow. ";
                             break;
 
-                        case 'look':
+                        case "look":
                             $this->caveWumpus($this->x);
                             $wumpus_response =
                                 "You see " . $this->cave_name . ". ";
                             break;
 
-                        case 'caves':
+                        case "caves":
                             $this->caves();
                             break;
 
-                        case 'west':
-                        case 'south':
-                        case 'east':
-                        case 'north':
+                        case "west":
+                        case "south":
+                        case "east":
+                        case "north":
                             $wumpus_response = ucwords($piece) . "? ";
                             break;
 
-                        case 'left':
+                        case "left":
                             $wumpus_response = "You turned left. ";
                             break;
-                        case 'right':
+                        case "right":
                             $wumpus_response = "You turned right. ";
                             break;
 
-                        case 'forward':
+                        case "forward":
                             $this->left_count += 1;
                             $this->right_count += 1;
                             $wumpus_response = "You bumped into the wall. ";
                             break;
 
-                        case 'lair':
+                        case "lair":
                             $wumpus_response = "Lair. ";
                             break;
 
-                        case 'meep':
+                        case "meep":
                             $wumpus_response = "Merp. ";
                             break;
 
-                        case 'start':
+                        case "start":
                             $this->start();
                             $this->entity_agent->choice->Choose($piece);
 
                             $wumpus_response = "Heard " . $this->state . ". ";
                             break;
 
-                        case 'teleport':
-                        case 'spawn':
+                        case "teleport":
+                        case "spawn":
                             $this->spawnWumpus();
                             $this->response .= "Spawn. ";
                             break;
 
-                        case 'inside nest':
+                        case "inside nest":
                             $this->entity_agent->choice->Choose($piece);
 
                             $this->state =
@@ -1018,7 +975,7 @@ class Wumpus extends Agent
                             $wumpus_response = "Heard inside nest.";
                             break;
 
-                        case 'foraging':
+                        case "foraging":
                             $this->entity_agent->choice->Choose($piece);
 
                             $this->state =
@@ -1027,7 +984,7 @@ class Wumpus extends Agent
                             $wumpus_response = "Now foraging. ";
                             break;
 
-                        case 'nest maintenance':
+                        case "nest maintenance":
                             $this->entity_agent->choice->Choose($piece);
 
                             $this->state =
@@ -1036,7 +993,7 @@ class Wumpus extends Agent
                             $wumpus_response = "Heard nest maintenance. ";
                             break;
 
-                        case 'patrolling':
+                        case "patrolling":
                             $this->entity_agent->choice->Choose($piece);
                             $this->state =
                                 $this->entity_agent->choice->current_node;
@@ -1044,7 +1001,7 @@ class Wumpus extends Agent
                             $wumpus_response .= "Now " . $piece . ". ";
                             break;
 
-                        case 'midden work':
+                        case "midden work":
                             $this->middenwork();
 
                             $this->entity_agent->choice->Choose($piece);
@@ -1054,7 +1011,7 @@ class Wumpus extends Agent
                             $wumpus_response .= "Heard midden work. Urgh. ";
                             break;
 
-                        case 'break':
+                        case "break":
                             $this->middenwork();
                             $run = new Run($this->thing, "break");
 
@@ -1081,8 +1038,8 @@ class Wumpus extends Agent
     public function initWumpus()
     {
         $this->whatisthis = [
-            'inside nest' =>
-                'Each time the ' .
+            "inside nest" =>
+                "Each time the " .
                 $this->short_name .
                 ' service is accessed, Stackr creates a uniquely identifable Thing.
                 This one is ' .
@@ -1098,74 +1055,74 @@ class Wumpus extends Agent
                 $this->short_name .
                 ' manages interactions with your Things by other identities.
                 [WUMPUS OFF] will stop any "Wumpus" agent responding.  You can say [ NEST MAINTENANCE ] later if you change your mind.',
-            'nest maintenance' =>
-                'A Things of yours was displayed again, perhaps by yourself.  This Wumpus is doing some nest maintenance.',
-            'patrolling' =>
+            "nest maintenance" =>
+                "A Things of yours was displayed again, perhaps by yourself.  This Wumpus is doing some nest maintenance.",
+            "patrolling" =>
                 "A Thing associated with " .
                 "this identity" .
                 " was displayed (or requested by) a device.  That's twice now.  This Wumpus is patrolling.",
-            'foraging' =>
+            "foraging" =>
                 "This wumpus is on it's last legs.  It has gone foraging for stack information about you to forget.",
-            'midden work' =>
-                'One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is doing midden work.',
-            'start' =>
+            "midden work" =>
+                "One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is doing midden work.",
+            "start" =>
                 "Start. Not normally means that you displayed a record, let's see if we get any more Wumpus messages.",
         ];
 
         $this->litany = [
-            'inside nest' =>
-                'One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is waiting in the nest.',
-            'nest maintenance' =>
-                'A record of yours was displayed again, perhaps by yourself.  This Wumpus is doing some nest maintenance.',
-            'patrolling' =>
+            "inside nest" =>
+                "One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is waiting in the nest.",
+            "nest maintenance" =>
+                "A record of yours was displayed again, perhaps by yourself.  This Wumpus is doing some nest maintenance.",
+            "patrolling" =>
                 "A record of yours was displayed.  That's twice now.  This Wumpus is patrolling.",
-            'foraging' =>
+            "foraging" =>
                 "This wumpus is on it's last legs.  It has gone foraging for stack information about you to forget.",
-            'midden work' =>
-                'One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is doing midden work.',
-            'start' =>
+            "midden work" =>
+                "One of your records was displayed, perhaps by yourself.  A Wumpus spawned and is doing midden work.",
+            "start" =>
                 "Start.  Not normally means that you displayed a record, let's see if we get any more Wumpus messages.",
         ];
 
         $this->thing_behaviour = [
-            'inside nest' => 'A Thing was instantiated.',
-            'nest maintenance' => 'A Thing was instantiated again.',
-            'patrolling' => "A Thing was instantiated twice.",
-            'foraging' => "A Thing is searching the stack.",
-            'midden work' => 'A Thing is doing stack work.',
-            'start' => "Start. A Thing started.",
+            "inside nest" => "A Thing was instantiated.",
+            "nest maintenance" => "A Thing was instantiated again.",
+            "patrolling" => "A Thing was instantiated twice.",
+            "foraging" => "A Thing is searching the stack.",
+            "midden work" => "A Thing is doing stack work.",
+            "start" => "Start. A Thing started.",
         ];
 
         // Behaviour
         $this->behaviour = [
-            'inside nest' =>
-                'Wumpus spawned and is waiting in the lair. For you.',
-            'nest maintenance' => 'Wumpus is doing some work on the lair.',
-            'patrolling' =>
+            "inside nest" =>
+                "Wumpus spawned and is waiting in the lair. For you.",
+            "nest maintenance" => "Wumpus is doing some work on the lair.",
+            "patrolling" =>
                 "That's twice the Wumpus heard you. Now the Wumpus is patrolling.",
-            'foraging' => "The Wumpus has gone to look for a snack.",
-            'midden work' => 'A Wumpus spawned and is tidying up the lair.',
-            'start' => "Wumpus egg.",
+            "foraging" => "The Wumpus has gone to look for a snack.",
+            "midden work" => "A Wumpus spawned and is tidying up the lair.",
+            "start" => "Wumpus egg.",
         ];
 
         // Narrative
         $this->narrative = [
-            'inside nest' => 'Everything is dark.',
-            'nest maintenance' => "You are hunting for a Wumpus in it's lair.",
-            'patrolling' => "Now you are a Wumpus Hunter.",
-            'foraging' => "Find the Wumpus.",
-            'midden work' => 'You are a Midden Worker. Have fun.',
-            'start' => "Ant egg.",
+            "inside nest" => "Everything is dark.",
+            "nest maintenance" => "You are hunting for a Wumpus in it's lair.",
+            "patrolling" => "Now you are a Wumpus Hunter.",
+            "foraging" => "Find the Wumpus.",
+            "midden work" => "You are a Midden Worker. Have fun.",
+            "start" => "Ant egg.",
         ];
 
         $this->choices_text = "WUMPUS";
         $this->prompt_litany = [
-            'inside nest' => 'TEXT WEB / ' . $this->choices_text,
-            'nest maintenance' => 'TEXT WEB / ' . $this->choices_text,
-            'patrolling' => "TEXT WEB / " . $this->choices_text,
-            'foraging' => "TEXT WEB / " . $this->choices_text,
-            'midden work' => 'TEXT WEB / ' . $this->choices_text,
-            'start' => "TEXT WEB / " . $this->choices_text,
+            "inside nest" => "TEXT WEB / " . $this->choices_text,
+            "nest maintenance" => "TEXT WEB / " . $this->choices_text,
+            "patrolling" => "TEXT WEB / " . $this->choices_text,
+            "foraging" => "TEXT WEB / " . $this->choices_text,
+            "midden work" => "TEXT WEB / " . $this->choices_text,
+            "start" => "TEXT WEB / " . $this->choices_text,
         ];
     }
 
@@ -1273,7 +1230,7 @@ class Wumpus extends Agent
         $this->getWumpus();
         //$coordinate = new Coordinate($this->thing, "(0,0)");
 
-        $pheromone['stack'] = 4;
+        $pheromone["stack"] = 4;
 
         $this->cave = strval(random_int(1, 20));
         $this->x = $this->cave;

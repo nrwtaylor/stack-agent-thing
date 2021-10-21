@@ -10,8 +10,8 @@ namespace Nrwtaylor\StackAgentThing;
 // Recognizes and handles UUIDS.
 // Does not generate them.  That is a Thing function.
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 // devstack read the frequency list.
@@ -24,14 +24,9 @@ class Frequency extends Agent
     function init()
     {
         $this->agent_name = "FREQUENCY";
-        //$this->multiplier = "MHz";
 
-        $this->stack_state = $this->thing->container['stack']['state'];
-        $this->short_name = $this->thing->container['stack']['short_name'];
-
-        $this->thing->log(
-            'started running on Thing ' . date("Y-m-d H:i:s") . ''
-        );
+        $this->stack_state = $this->thing->container["stack"]["state"];
+        $this->short_name = $this->thing->container["stack"]["short_name"];
 
         $this->node_list = ["frequency" => ["frequency", "snowflake"]];
 
@@ -41,7 +36,7 @@ class Frequency extends Agent
 
         $data_source = $this->resource_path . "ised/frequencies.url";
 
-        $this->thing_report['help'] = "Recognizes frequencies.";
+        $this->thing_report["help"] = "Recognizes frequencies.";
     }
 
     /**
@@ -49,15 +44,15 @@ class Frequency extends Agent
      */
     function makeTable()
     {
-        if (!isset($this->channel['vector'])) {
+        if (!isset($this->channel["vector"])) {
             $this->getFrequencies();
         }
 
-        if (!isset($this->channel['vector'])) {
+        if (!isset($this->channel["vector"])) {
             return;
         }
 
-        $data = $this->channel['vector'];
+        $data = $this->channel["vector"];
 
         $t = explode("\n", $data);
         $flag = false;
@@ -66,7 +61,7 @@ class Frequency extends Agent
             if (
                 strpos(
                     $line,
-                    'Canadian Table of Frequency Allocations — kHz'
+                    "Canadian Table of Frequency Allocations — kHz"
                 ) !== false
             ) {
                 $multiplier = "kHz";
@@ -75,7 +70,7 @@ class Frequency extends Agent
             if (
                 strpos(
                     $line,
-                    'Canadian Table of Frequency Allocations — MHz'
+                    "Canadian Table of Frequency Allocations — MHz"
                 ) !== false
             ) {
                 $multiplier = "MHz";
@@ -84,7 +79,7 @@ class Frequency extends Agent
             if (
                 strpos(
                     $line,
-                    'Canadian Table of Frequency Allocations — GHz'
+                    "Canadian Table of Frequency Allocations — GHz"
                 ) !== false
             ) {
                 $multiplier = "GHz";
@@ -201,14 +196,14 @@ class Frequency extends Agent
         foreach ($this->band as $i => $band) {
             if (
                 isset($this->multiplier) and
-                $band['multiplier'] != $this->multiplier
+                $band["multiplier"] != $this->multiplier
             ) {
                 continue;
             }
 
             if (
-                $search_frequency >= $band['start'] and
-                $search_frequency <= $band['end']
+                $search_frequency >= $band["start"] and
+                $search_frequency <= $band["end"]
             ) {
                 $matches[] = $band;
             }
@@ -225,7 +220,7 @@ class Frequency extends Agent
         $this->getFrequencies();
         $this->makeTable();
         $this->makeResponse();
-        $this->makeSMS();
+        //$this->makeSMS();
     }
 
     /**
@@ -292,7 +287,7 @@ class Frequency extends Agent
             }
         }
         $this->data = $data;
-        $this->channel['vector'] = $data;
+        $this->channel["vector"] = $data;
     }
 
     /**
@@ -326,6 +321,52 @@ class Frequency extends Agent
 
         $arr = $m[0];
         //array_pop($arr);
+
+        // Look for tokens with Hz
+
+        $ngrams = $this->extractNgrams($input, 2);
+        foreach ($ngrams as $ngram) {
+            $tokens = explode(" ", $ngram);
+
+            if (count($tokens) == 1 or count($tokens) == 2) {
+                $multiplier = $this->extractMultiplier($ngram);
+                if (is_numeric($tokens[0])) {
+                    if ($multiplier === false or $multiplier === true) {
+                        continue;
+                    }
+                    $arr[] = $ngram;
+                    continue;
+                }
+                $number = trim(str_replace($multiplier, "", $ngram));
+                if (is_numeric($number)) {
+                    $arr[] = $number . " " . $multiplier;
+                }
+            }
+        }
+
+        $numbers = [];
+        foreach ($arr as $index => $frequency) {
+            $tokens = explode(" ", $frequency);
+            $numbers[$index] = $tokens[0];
+        }
+        // devstack make more general for any number of list
+        // Deal with case where there is two frequencies
+
+        if (count($arr) == 2) {
+            $numberA_tokens = explode(" ", $arr[0]);
+            $numberB_tokens = explode(" ", $arr[1]);
+
+            if ($numberA_tokens[0] == $numberB_tokens[0]) {
+                if (!isset($numberA_tokens[1])) {
+                    unset($arr[0]);
+                }
+                if (!isset($numberB_tokens[1])) {
+                    unset($arr[1]);
+                }
+            }
+        }
+
+        $arr = array_values($arr);
         $this->frequencies = $arr;
         return $arr;
     }
@@ -345,7 +386,7 @@ class Frequency extends Agent
         if (is_array($frequencies) and count($frequencies) == 1) {
             $this->frequency = $frequencies[0];
             $this->thing->log(
-                'found a frequency (' . $this->frequency . ') in the text.'
+                "found a frequency (" . $this->frequency . ") in the text."
             );
             return $this->frequency;
         }
@@ -367,22 +408,26 @@ class Frequency extends Agent
      */
     function extractMultiplier($input)
     {
-        $multipliers = ["kHz", "MHz", "GHz"];
-
+        $multipliers = ["GHz", "MHz", "kHz", "Hz"];
+        $matches = [];
         //        $frequencies = $this->extractFrequencies($input);
         //        if (!(is_array($frequencies))) {return true;}
-
         $flag = false;
         foreach ($multipliers as $multiplier) {
             if (stripos($input, $multiplier) !== false) {
+                //                $matches[] = $multiplier;
+                if (count($matches) >= 1 and $multiplier == "Hz") {
+                    continue;
+                }
                 $matches[] = $multiplier;
-                echo 'true';
+
+                //                echo "true";
             }
         }
-
         if (isset($matches) and count($matches) == 1) {
-            $this->multiplier = $matches[0];
-            return;
+            $multiplier = $matches[0];
+            $this->multiplier = $multiplier;
+            return $multiplier;
         }
 
         return true;
@@ -415,15 +460,9 @@ class Frequency extends Agent
      */
     function set()
     {
-        //        $this->thing->json->setField("settings");
-        //        $this->thing->json->writeVariable(array("frequency",
-        //                "received_at"),  $this->thing->json->time()
-        //        );
-
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["frequency", "refreshed_at"],
-            $this->thing->json->time()
+            $this->thing->time()
         );
     }
 
@@ -433,9 +472,11 @@ class Frequency extends Agent
      */
     public function readSubject()
     {
-        $this->extractFrequency($this->input);
+        $input = $this->input;
+        $input = $this->stripUrls($input);
 
-        $this->extractMultiplier($this->input);
+        $this->extractFrequency($input);
+        $this->extractMultiplier($input);
 
         if (isset($this->frequency) and $this->frequency != null) {
             $this->response = "Frequency spotted.";
@@ -448,14 +489,16 @@ class Frequency extends Agent
                     $t .= $this->frequencyString($band) . " / ";
                 }
             }
-
             if (strpos(strtolower($t), "amateur")) {
                 $ars_thing = new Amateurradioservice($this->thing);
                 $this->thing_report = $ars_thing->thing_report;
                 $this->agent_name = $ars_thing->agent_name;
                 $this->response = $ars_thing->response;
-
                 return;
+            }
+
+            if ($t == "") {
+                $t = $input;
             }
 
             $this->response = $t;
@@ -463,7 +506,7 @@ class Frequency extends Agent
             return;
         }
 
-        $input = $this->input;
+        $input = $input;
         $strip_words = ["frequency"];
 
         foreach ($strip_words as $i => $strip_word) {
@@ -487,7 +530,6 @@ class Frequency extends Agent
 
             $input = $whatIWant;
         }
-
         $filtered_input = ltrim(strtolower($input), " ");
 
         $this->doFrequency($filtered_input);
@@ -520,9 +562,9 @@ class Frequency extends Agent
     {
         $this->sms_message = strtoupper($this->agent_name) . " | ";
         $this->sms_message .= $this->response;
-        $this->sms_message .= ' | TEXT CHANNEL';
+        $this->sms_message .= " | TEXT CHANNEL";
 
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     /**
@@ -537,7 +579,7 @@ class Frequency extends Agent
         );
 
         $choices = $this->thing->choice->makeLinks("frequency");
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
         $this->choices = $choices;
     }
 

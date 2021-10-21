@@ -62,7 +62,7 @@ return false;
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable(["quote", "inject"], $this->inject);
+        $this->thing->Write(["quote", "inject"], $this->inject);
 
         $this->refreshed_at = $this->current_time;
 
@@ -119,16 +119,14 @@ return false;
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "quote",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["quote", "refreshed_at"],
                 $time_string
             );
@@ -136,7 +134,7 @@ return false;
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable(["quote", "inject"]);
+        $this->inject = $this->thing->Read(["quote", "inject"]);
     }
 
     function setState($state)

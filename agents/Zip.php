@@ -58,11 +58,9 @@ curl_setopt($ch_start, CURLOPT_SSL_VERIFYPEER, 0);
 curl_setopt($ch_start, CURLOPT_FILE, $zip_resource);
 $page = curl_exec($ch_start);
 
-var_dump($page);
-
 if(!$page)
 {
- echo "Error :- ".curl_error($ch_start);
+ $this->thing->console("Error :- ".curl_error($ch_start));
 }
 curl_close($ch_start);
 
@@ -71,7 +69,7 @@ $zip = new \ZipArchive;
 $extractPath = "Download File Path";
 if($zip->open($zipFile) != "true")
 {
- echo "Error :- Unable to open the Zip File";
+ $this->thing->console("Error :- Unable to open the Zip File");
 } 
 
 $zip->extractTo($extractPath);
@@ -142,7 +140,6 @@ $this->link = trim($text);
      */
     function makeSMS() {
         if ((!isset($this->response)) or ($this->response == null)){$this->response = "Not found.";}
-        //var_dump($this->response);
         $this->node_list = array("zip"=>array("zip"));
         $m = strtoupper("ZIP") . " | " . $this->response;
         $this->sms_message = $m;
@@ -166,7 +163,6 @@ $this->link = trim($text);
     public function readSubject() {
 
         $input= $this->input;
-        //var_dump($this->input);
         $strip_words = array("zip");
 
         foreach ($strip_words as $i=>$strip_word) {
@@ -181,7 +177,6 @@ $this->link = trim($text);
             $input = $whatIWant;
         }
 
-        //var_dump($input);
         $this->doZip($input);
         return false;
     }

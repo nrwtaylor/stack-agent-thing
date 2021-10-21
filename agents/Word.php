@@ -16,11 +16,11 @@ class Word extends Agent
      */
     function init()
     {
-        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
         $this->resource_path_words =
-            $GLOBALS["stack_path"] . "resources/words/";
+            $this->resource_path . "words/";
 
-        $this->resource_path_ewol = $GLOBALS["stack_path"] . "resources/ewol/";
+
+        $this->resource_path_ewol = $this->resource_path . "ewol/";
         $this->keywords = [];
 
         $this->wordpress_path_to = false;
@@ -33,11 +33,43 @@ class Word extends Agent
         $this->thing_report["help"] =
             "Screens against a list of over four hundred thousand words.";
         $this->getMemcached();
+        $this->initWords();
+    }
+
+    public function initWords() {
+       $this->thing->log("init words start.");
+       if ($this->getMemory('words-words') !== true) {
+           $this->thing->log("load words words.");
+           $this->loadDictionary('words/words');
+           $this->setMemory('words-words',true); 
+       }
+
+       if ($this->getMemory('words-offensive') !== true) {
+           $this->thing->log("load words/offensive.");
+           $this->loadDictionary('offensive/bad-words');
+           $this->setMemory('words-offensive',true); 
+       }
+       if ($this->getMemory('words-eowl') !== true) {
+        $this->thing->log("load words/eowl.");
+        foreach (range("A", "Z") as $v) {
+            $resource = 'ewol/' . $v . " Words";
+           $this->loadDictionary($resource);
+        }
+
+        $this->setMemory('words-eowl',true); 
+       }
+       $this->thing->log("init words complete.");
+
     }
 
     function set()
     {
-        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
+        $this->reading = null;
+        if (isset($this->words)) {
+            $this->reading = count($this->words);
+        }
+
+        $this->thing->Write(["word", "reading"], $this->reading);
 
         if ((isset($this->words) and count($this->words)) != 0) {
             $this->thing->log(
@@ -53,23 +85,21 @@ class Word extends Agent
 
     function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "word",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["word", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable(["word", "reading"]);
+        $this->reading = $this->thing->Read(["word", "reading"]);
     }
 
     /**
@@ -91,7 +121,6 @@ class Word extends Agent
 
         $pattern =
             '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){1,}/';
-        //      $t = explode("  ", $test);
         $t = preg_split($pattern, $test);
 
         foreach ($t as $key => $word) {
@@ -99,22 +128,6 @@ class Word extends Agent
         }
         //
         return $new_words;
-    }
-
-    /**
-     *
-     * @param unknown $input
-     * @param unknown $replace_with (optional)
-     * @return unknown
-     */
-    public function stripPunctuation($input, $replace_with = " ")
-    {
-        $unpunctuated = preg_replace(
-            '/[\:\;\/\!\?\#\.\,\'\"\{\}\[\]\<\>\(\)]/i',
-            $replace_with,
-            $input
-        );
-        return $unpunctuated;
     }
 
     public function imageWord($text = null)
@@ -128,7 +141,6 @@ class Word extends Agent
         }
 
         $image = imagecreatetruecolor($canvas_size_x, $canvas_size_y);
-        //$this->image = imagecreatetruecolor(164, 164);
 
         $this->white = imagecolorallocate($image, 255, 255, 255);
         $this->black = imagecolorallocate($image, 0, 0, 0);
@@ -174,9 +186,8 @@ class Word extends Agent
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
         extract($bbox, EXTR_PREFIX_ALL, "bb");
+
         //check width of the image
-        //        $width = imagesx($this->image);
-        //        $height = imagesy($this->image);
         $pad = 0;
         imagettftext(
             $image,
@@ -216,9 +227,6 @@ class Word extends Agent
         }
         $this->thing->log('called extractWords on "' . $string . '".', "DEBUG");
 
-        //echo "\n";
-        //                    $value = preg_replace('/[^a-z]+/i', ' ', $value);
-        //echo $string . "\n";
         $string = strtolower($string);
         preg_match_all(
             '/([a-zA-Z]|\xC3[\x80-\x96\x98-\xB6\xB8-\xBF]|\xC5[\x92\x93\xA0\xA1\xB8\xBD\xBE]){2,}/',
@@ -227,8 +235,6 @@ class Word extends Agent
         );
         //print_r($emojis[0]); // Array ( [0] => 😃 [1] => 🙃 )
         $w = $words[0];
-
-        //echo implode("_",$w) . "\n";
 
         $this->notwords = [];
         $this->words = [];
@@ -239,20 +245,15 @@ class Word extends Agent
             $text = $this->findWord("list", $value);
 
             if ($text != false) {
-                //   echo "word is " . $text . "\n";
                 $this->words[] = $text;
             } else {
                 $this->notwords[] = $value;
-                //   echo "word is not " . $value . "\n";
             }
         }
 
         if (count($this->words) != 0) {
             $this->word = $this->words[0];
         } else {
-            //            $text = $this->nearestWord($value);
-            //echo $text;
-            //exit();
             $this->word = null;
         }
 
@@ -290,18 +291,12 @@ class Word extends Agent
 
         $this->thing->log("ewolWords.");
 
-        //if (!isset($this->mem_cached)) {
-        //    $this->getMemcached();
-        //}
-        //if ($this->wordpress_path_to !== false) {
-        //    require_once $this->wordpress_path_to. 'wp-load.php';
         if (
             $this->ewol_dictionary = $this->getMemory("agent-ewol-dictionary")
         ) {
             $this->thing->log("loaded ewol dictionary from memory.");
             return;
         }
-        //}
 
         $contents = "";
         foreach (range("A", "Z") as $v) {
@@ -310,7 +305,9 @@ class Word extends Agent
             if (file_exists($file)) {
                 $c = @file_get_contents($file);
             }
-            if ($c == false) {
+            if ($c === false) {
+                if (!isset($this->error)) {$this->error = "";}
+                $this->error .= "Missing ewol file. ";
                 return true;
             }
             $contents .= $c;
@@ -323,7 +320,6 @@ class Word extends Agent
             }
             $this->ewol_dictionary[$line] = true;
         }
-
         if ($this->wordpress_path_to !== false) {
             $this->mem_cached->set(
                 "agent-ewol-dictionary",
@@ -364,7 +360,6 @@ class Word extends Agent
                 }
                 $file = $this->resource_path_words . "words.txt";
 
-                //$this->getMemcached();
                 if ($contents = $this->mem_cached->get("agent-words-list")) {
                     $this->words_list = $contents;
                     $this->thing->log("loaded words from memory.");
@@ -457,11 +452,10 @@ class Word extends Agent
     {
         if (!isset($this->ewol_dictionary)) {
             $this->ewolWords();
-            //return true;
         }
 
         if ($number === null or $number === false) {
-//        if ($length === null or $length === false) {
+
             $min_number = 3;
             $max_number = $number;
             if ($number == false) {
@@ -505,12 +499,9 @@ class Word extends Agent
             return $this->contents;
         }
 
-        //   if ($this->wordpress_path_to !== false) {
-
         if ($this->contents = $this->mem_cached->get("agent-word-contents")) {
             return $this->contents;
         }
-        //   }
 
         $file = $this->resource_path_words . "words.txt";
         $contents = "";
@@ -519,9 +510,8 @@ class Word extends Agent
         }
 
         $this->contents = $contents;
-        //   if ($this->wordpress_path_to !== false) {
+
         $this->mem_cached->set("agent-word-contents", $this->contents);
-        //   }
     }
 
     function isWord($input)
@@ -549,7 +539,6 @@ class Word extends Agent
         return false;
 
         if (!isset($this->contents)) {
-            //$this->getContents();
             $file = $this->resource_path_words . "words.txt";
 
             $contents = "";
@@ -576,17 +565,14 @@ class Word extends Agent
         return;
 
         $words = explode("\n", $this->contents);
-        //$input = trim($input);
 
         $input = str_replace(["\r", "\n"], "", $input);
 
         foreach ($words as $key => $word) {
-            //$word = trim($word);
 
             $word = str_replace(["\r", "\n"], "", $word);
 
             if (strcasecmp($input, $word) == 0) {
-                //        if ( strtolower($input) == strtolower($word) ) {
                 return true;
             }
         }
@@ -614,7 +600,6 @@ class Word extends Agent
 
         foreach ($words as $key => $word) {
             $nearness = levenshtein($input, $word);
-            //$nearness = similar_text($word, $input);
 
             if ($nearness < $nearness_min) {
                 $word_list = [];
@@ -629,7 +614,6 @@ class Word extends Agent
         $word = false;
 
         foreach ($word_list as $key => $word) {
-            //$nearness = levenshtein($input, $word);
             $nearness = similar_text($word, $input);
 
             if ($nearness > $nearness_max) {
@@ -654,7 +638,7 @@ class Word extends Agent
      *
      * @return unknown
      */
-    public function respond()
+    public function respondResponse()
     {
         $this->cost = 100;
 
@@ -662,27 +646,18 @@ class Word extends Agent
         $this->thing->flagGreen();
 
         // Make SMS
-        $this->makeSMS();
         $this->thing_report["sms"] = $this->sms_message;
 
         // Make message
         $this->thing_report["message"] = $this->sms_message;
 
-        // Make email
-        $this->makeEmail();
 
         $this->thing_report["email"] = $this->sms_message;
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
-        $this->reading = null;
-        if (isset($this->words)) {
-            $this->reading = count($this->words);
-        }
-        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
 
-        return $this->thing_report;
     }
 
     /**
@@ -699,7 +674,6 @@ class Word extends Agent
                     $this->sms_message = "WORD | no words found";
                 }
 
-                //            $this->sms_message = "WORD | no words found";
                 return;
             }
 
@@ -743,7 +717,6 @@ class Word extends Agent
 
         $keywords = ["word", "random"];
         $pieces = explode(" ", strtolower($input));
-
         foreach ($pieces as $key => $piece) {
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
@@ -779,10 +752,17 @@ class Word extends Agent
                             }
                         default:
 
-                        //echo 'default';
                     }
                 }
             }
+        }
+        $words = $input;
+        $this->search_words = $words;
+        $this->extractWords($words);
+
+
+        if ($this->word != null) {
+            return;
         }
 
         $words = $input;

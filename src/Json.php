@@ -52,8 +52,10 @@ class Json
 
         // This will be creating multiple (unnecessay?) db calls.
         // But needed otherwise readField on null line 422
-        $this->db = new Database($uuid, 'refactorout' . $this->mail_postfix);
+        // $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
 
+        // new Database(false, ...) creates a read-only thing.
+        $this->db = new Database(null, ['uuid'=>$uuid, 'from'=>'refactorout' . $this->mail_postfix]);
         $this->array_data = array();
         $this->json_data = '{}';
 
@@ -86,7 +88,7 @@ class Json
      * @param unknown $time (optional)
      * @return unknown
      */
-    function time($time = null)
+    function deprecate_time($time = null)
     {
         if ($time == null) {
             $time = time();
@@ -101,7 +103,7 @@ class Json
      * @param unknown $time (optional)
      * @return unknown
      */
-    function microtime($time = null)
+    function deprecate_microtime($time = null)
     {
         if ($time == null) {
             $time = time();
@@ -188,6 +190,11 @@ class Json
             $this->array_data = false;
             return;
         }
+
+        if (is_string($array_data)) {
+            $array_data = ['text'=>$array_data];
+        }
+
 
         foreach ($array_data as $key => $value) {
             if ($key != "") {
@@ -318,7 +325,6 @@ class Json
         }
         array_splice($this->array_data[$stream_id], $pos, 0, $value);
         $this->setArray($this->array_data);
-        //var_dump($this->db->last_update);
     }
 
     /**
@@ -517,7 +523,6 @@ class Json
             return;
         }
         if (strlen($this->json_data) > $this->char_max) {
-            //var_dump($this->json_data);
 
             // devstack what do you do here?
             // This is the place where Json borks when asked to save too much.
@@ -556,7 +561,6 @@ class Json
                     $this->field,
                     $this->json_data
                 );
-                //var_dump($var);
             }
             return true;
         }

@@ -45,8 +45,7 @@ class IChing extends Agent
     {
         // Take a look at this thing for IChing variables.
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "iching",
             "refreshed_at",
         ]);
@@ -54,16 +53,14 @@ class IChing extends Agent
         // And if there is no IChing timestamp create one now.
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["iching", "refreshed_at"],
                 $time_string
             );
         }
 
-        $this->thing->json->setField("variables");
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "iching",
             "reading",
         ]);
@@ -74,7 +71,7 @@ class IChing extends Agent
      */
     function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["iching", "reading"],
             $this->reading
         );
@@ -88,7 +85,7 @@ class IChing extends Agent
         $this->changinglines();
         if ($this->reading == false) {
             $this->reading = $this->hexagramGenerator();
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["iching", "reading"],
                 $this->reading
             );
@@ -206,7 +203,7 @@ class IChing extends Agent
 
 //        $this->thing->log('NOT enough balance to send a Message');
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["iching", "reading"],
             $this->reading
         );

@@ -14,31 +14,9 @@ class Wikipedia extends Agent
     public $var = "hello";
     function init()
     {
-        //    function __construct(Thing $thing, $agent_input = null)
-        //        $this->start_time = $thing->elapsed_runtime();
-
-        //        $this->agent_input = $agent_input;
-
         $this->keyword = "know";
 
-        //        $this->thing = $thing;
-        //        $this->thing_report['thing'] = $this->thing->thing;
-
-        //        $this->test= "Development code"; // Always
-
-        //        $this->uuid = $thing->uuid;
-        //        $this->to = $thing->to;
-        //        $this->from = $thing->from;
-        //        $this->subject = $thing->subject;
-        //       $this->sqlresponse = null;
-
-        //       $this->agent_prefix = 'Agent "Wikipedia" ';
-
-        //$this->node_list = array("off"=>array("on"=>array("off")));
-
         $this->keywords = ["wikipedia", "definition"];
-
-        //       $this->current_time = $this->thing->time();
 
         $this->application_id = null;
         $this->application_key = null;
@@ -49,26 +27,6 @@ class Wikipedia extends Agent
             $this->thing,
             "variables " . "wikipedia" . " " . $this->from
         );
-
-        // Loads in variables.
-        //        $this->get();
-
-        //		$this->thing->log('running on Thing '. $this->thing->nuuid . '.');
-        //		$this->thing->log('received this Thing "'.  $this->subject . '".');
-
-        //		$this->readSubject();
-
-        //        $this->getApi();
-
-        //		$this->respond();
-
-        //        $this->thing->log('ran for ' . number_format($this->thing->elapsed_runtime() - $this->start_time) . 'ms.');
-        //		$this->thing->log( 'completed.');
-
-        //        $this->thing_report['log'] = $this->thing->log;
-        //        $this->thing_report['response'] = $this->response;
-
-        //		return;
     }
 
     function set()
@@ -95,21 +53,20 @@ class Wikipedia extends Agent
         $this->counter = $this->counter + 1;
     }
 
-function apiWikipedia($keywords = null, $sort_order = null) {
-//    function getApi($sort_order = null)
-//    {
+    function apiWikipedia($keywords = null, $sort_order = null)
+    {
         if ($sort_order == null) {
             $sort_order = "popularity";
         }
 
         $city = "vancouver";
         // "America/Vancouver" apparently
-if (($keywords === "") or ($keywords === null)) {
-        $keywords = "";
-        if (isset($this->search_words)) {
-            $keywords = $this->search_words;
+        if ($keywords === "" or $keywords === null) {
+            $keywords = "";
+            if (isset($this->search_words)) {
+                $keywords = $this->search_words;
+            }
         }
-}
         $keywords = urlencode($keywords);
 
         //$titles = "&titles=New_York_Yankees";
@@ -174,10 +131,7 @@ if (($keywords === "") or ($keywords === null)) {
 
     public function respondResponse()
     {
-        // Thing actions
-
         $this->thing->flagGreen();
-        // Generate email response.
 
         $choices = false;
         $this->thing_report["choices"] = $choices;
@@ -227,7 +181,6 @@ if (($keywords === "") or ($keywords === null)) {
         }
 
         $sms .= $text;
-        // $sms .= $this->truncate($this->text,130);
         $sms .= " | " . $this->response;
         $this->thing_report["sms"] = $sms;
         $this->sms_message = $sms;
@@ -255,14 +208,6 @@ if (($keywords === "") or ($keywords === null)) {
         $this->thing_report["message"] = $message;
         $this->message = $message;
     }
-    /*
-    private function thingreportWikipedia()
-    {
-        $this->thing_report['sms'] = $this->sms_message;
-        $this->thing_report['web'] = $this->html_message;
-        $this->thing_report['message'] = $this->message;
-    }
-*/
     public function extractNumber($input = null)
     {
         if ($input == null) {
@@ -312,8 +257,6 @@ if (($keywords === "") or ($keywords === null)) {
         }
 
         $this->input = $input;
-
-        //$haystack = $this->agent_input . " " . $this->from . " " . $this->subject;
 
         $prior_uuid = null;
 

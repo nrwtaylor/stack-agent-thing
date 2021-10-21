@@ -191,7 +191,7 @@ class Discord extends Agent
 
         return true;
     }
-
+/*
     public function respondResponse()
     {
         $this->thing->flagGreen();
@@ -203,7 +203,7 @@ class Discord extends Agent
             //$this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
-
+*/
     public function readSubject()
     {
         // A Discord thing will have an array in agent_input.

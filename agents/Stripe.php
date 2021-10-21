@@ -320,15 +320,13 @@ class Stripe extends Agent
 
         $this->runtime = $this->thing->elapsed_runtime() - $this->start_time;
 
-        $this->thing->json->setField("variables");
-
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["stripe", "runtime"],
             $this->runtime
         );
 
-        $this->thing->json->writeVariable(["stripe", "state"], $this->state);
-        $this->thing->json->writeVariable(
+        $this->thing->Write(["stripe", "state"], $this->state);
+        $this->thing->Write(
             ["stripe", "refreshed_at"],
             $this->current_time
         );

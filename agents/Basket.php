@@ -49,7 +49,7 @@ class Basket extends Agent {
     public function set() {
 
         $this->basket_tag= $this->basket_thing->nuuid;
-        echo "setting basket tag " . $this->basket_tag . "\n";
+        $this->thing->console("setting basket tag " . $this->basket_tag . "\n");
 
         if (!isset($this->refreshed_at)) {$this->refreshed_at = $this->thing->time();}
 
@@ -65,10 +65,8 @@ class Basket extends Agent {
         // "I/we call this place < some symbol signal >"
         // "Awk."
 
-        //        $this->basket_thing->json->setField('variables');
-
-        $this->basket_thing->json->writeVariable( array("basket", "name"), $this->name );
-        $this->basket_thing->json->writeVariable( array("basket", "sign"), $this->sign );
+        $this->basket_thing->Write( array("basket", "name"), $this->name );
+        $this->basket_thing->Write( array("basket", "sign"), $this->sign );
 
     }
 
@@ -108,7 +106,7 @@ return;
      * @return unknown
      */
     public function get($basket_code = null) {
-        echo "Asked to get basket " . $basket_code . ".\n";
+        $this->thing->console("Asked to get basket " . $basket_code . ".\n");
 
         $basket = new Variables($this->thing, "variables basket " . $this->from);
 
@@ -118,26 +116,24 @@ return;
         if ($this->basket_tag != false) {$basket_code = $this->basket_tag;}
 
         // Load up the appropriate crow_thing
-        echo "got basket code " .$basket_code . "\n";
+        $this->thing->console("got basket code " .$basket_code . "\n");
         $this->getBasket($basket_code);
 
         if (!isset($this->basket_thing)) {$this->newBasket();}
 
 
-        $this->current_time = $this->basket_thing->json->time();
-        $this->basket_thing->json->setField("variables");
-        $this->time_string = $this->basket_thing->json->readVariable( array("basket", "refreshed_at") );
+        $this->current_time = $this->basket_thing->time();
+        $this->time_string = $this->basket_thing->Read( array("basket", "refreshed_at") );
 
         if ($this->time_string == false) {
-            $this->basket_thing->json->setField("variables");
-            $this->time_string = $this->basket_thing->json->time();
-            $this->basket_thing->json->writeVariable( array("basket", "refreshed_at"), $this->time_string );
+            $this->time_string = $this->basket_thing->time();
+            $this->basket_thing->Write( array("basket", "refreshed_at"), $this->time_string );
         }
 
         $this->refreshed_at = strtotime($this->time_string);
 
-        $this->name = strtolower($this->basket_thing->json->readVariable( array("basket", "name") ));
-        $this->sign = $this->basket_thing->json->readVariable( array("basket", "sign") );
+        $this->name = strtolower($this->basket_thing->Read( array("basket", "name") ));
+        $this->sign = $this->basket_thing->Read( array("basket", "sign") );
 
 
         if ( ($this->name == false) or ($this->name = "")) {
@@ -170,11 +166,9 @@ return;
      */
     function doBasket($text = null) {
 
-echo "do basket.\n";
-
         $filtered_text = strtolower($text);
         $ngram_agent = new Ngram($this->thing, $filtered_text);
-var_dump($text);
+
         foreach ($ngram_agent->ngrams as $index=>$ngram) {
 
             switch ($ngram) {
@@ -256,7 +250,7 @@ $this->assertCrow($filtered_text);
             case "what is in":
             case "contents":
             case "contains":
-                //echo "spawn";
+
                 $this->inventoryBasket();
                 $this->response .= "Got the contents of the Basket. ";
                 break;
@@ -284,8 +278,6 @@ $this->assertCrow($filtered_text);
                    break;
                 }
 
-//$n = $this->nuuid_agent->extractNuuid($filtered_text);
-//var_dump($n);
 $n = null;
 if (isset($this->register_nuuid)) {
 $n = $this->register_nuuid;
@@ -317,16 +309,16 @@ $n = $this->register_nuuid;
      */
     function getBasket($search_text = null) {
 
-        echo "Asked to get basket using words: " . $search_text . ".\n";
+        $this->thing->console("Asked to get basket using words: " . $search_text . ".\n");
 
         $requested_nuuid = $this->nuuid_agent->extractNuuid($search_text);
-        echo "requested nuuid " . $requested_nuuid . "\n";
-        //var_dump($requested_nuuid);
+        $this->thing->console("requested nuuid " . $requested_nuuid . "\n");
+
         if ($requested_nuuid == null) {return;}
         $entity_input = "get basket";
         if ($requested_nuuid != null) {$entity_input = "get basket ".$requested_nuuid;} else {$entity_input = "get basket";}
 
-        echo "entity input " . $entity_input . "\n";
+        $this->thing->console("entity input " . $entity_input . "\n");
 
         $entity = new Entity($this->thing, $entity_input );
 
@@ -351,7 +343,7 @@ $this->name = $text;
      */
     function newBasket() {
 
-        echo "Asked to get a new basket " . $this->thing->nuuid . ".\n";
+        $this->thing->console( "Asked to get a new basket " . $this->thing->nuuid . ".\n");
 
         // Need to log it as an entity for it to spawn
         $entity = new Entity($this->thing, "spawn basket " . $this->thing->nuuid);
@@ -360,18 +352,16 @@ $this->name = $text;
         // And then here the thing get's loaded in.
         $this->basket_thing = $entity->thing;
 
-        echo "Got new basket nuuid " . $this->basket_thing->nuuid . "\n";
+        $this->thing->console("Got new basket nuuid " . $this->basket_thing->nuuid . "\n");
 
 $this->basket_tag = $this->basket_thing->nuuid;
 $this->register_nuuid = $this->basket_thing->nuuid;
-        echo "basket tag " . $this->basket_tag . "\n";
+        $this->thing->console("basket tag " . $this->basket_tag . "\n");
 
 $this->assertIs("basket");
 
         $this->response .= "basket_thing->nuuid " . $this->basket_thing->nuuid .". ";
 
-        //$this->items = json_decode($this->basket_thing->thing->associations);
-        //var_dump($this->items);
 
     }
 
@@ -382,26 +372,14 @@ $this->assertIs("basket");
      */
     function getItems($search_text = null) {
 
-        // Get the basket
-        //if ($search_text == null) {$search_text = $this->basket_tag;echo "basket tag used " . $this->basket_tag . ".\n";}
-//        $this->getBasket($search_text);
 
-        //$basket_uuid = "23c9a180-28cf-4ca5-aefe-8ba3a5a88cd8";
-
-        //$basket = new Thing($basket_uuid);
-
-        //$basket_uuid = "23c9a180-28cf-4ca5-aefe-8ba3a5a88cd8";
-
-        echo "getting a list of items in basket " . $this->basket_thing->nuuid . ".\n";
+        $this->thing->console("getting a list of items in basket " . $this->basket_thing->nuuid . ".\n");
 
         $this->items = json_decode($this->basket_thing->thing->associations);
 
 
         // Try some other things.
 
-        // Last thing?  Is that helpful. Or useful.
-        //$last_thing = $this->thing->db->priorGet();
-        //var_dump($last_thing);
 
         $search_text = "";
         $associated_things = $this->thing->db->associationSearch($search_text, $max = null);
@@ -409,7 +387,6 @@ $this->assertIs("basket");
         $agent_search = "basket";
         $max = 10000;
         $a = $this->thing->db->agentSearch($agent_search, $max);
-        //var_dump($a);
 
 
     }
@@ -426,7 +403,6 @@ $this->assertIs("basket");
         $agent_search = "basket";
         $max = 10000;
         $a = $this->thing->db->agentSearch($agent_search, $max);
-        //var_dump($a);
     }
 
 
@@ -435,7 +411,7 @@ $this->assertIs("basket");
      */
     function getThing() {
 
-        echo "Asked to get a thing. Made a jelly sandwich.\n";
+        $this->thing->console("Asked to get a thing. Made a jelly sandwich.\n");
         // Make something and put it in the basket
         $picanic_thing = new Thing(null);
         $picanic_thing->Create("picanic", "basket" , "s/ jelly sandwich");
@@ -449,7 +425,7 @@ $this->assertIs("basket");
      * @param unknown $picnic_uuid (optional)
      */
     function putinBasket($picnic_uuid = null) {
-echo "Putin basket " . $picnic_uuid . "\n";
+$this->thing->console( "Putin basket " . $picnic_uuid . "\n");
         //$this->getBasket();
 
         if ($picnic_uuid == null) {
@@ -463,7 +439,7 @@ echo "Putin basket " . $picnic_uuid . "\n";
             $picnic_uuid = $this->picanic_thing->uuid;
 
         }
-echo "Putin basket " . $picnic_uuid . "\n";
+$this->thing->console("Putin basket " . $picnic_uuid . "\n");
 
         $this->basket_thing->json->setField("associations");
         $this->basket_thing->json->pushStream($picnic_uuid);
@@ -485,18 +461,16 @@ $this->getItems();
 
         //if ($text == null) {$text = $this->input;}
 
-        echo "asked to drop " . $text . "\n";
+        $this->thing->console( "asked to drop " . $text . "\n");
 
 
         $this->inventoryBasket();
         $items = $this->items->agent;
-        //exit();
-        //$this->basket_thing = array();
+
         foreach ($items as $index=>$item) {
             //foreach($this->items as $index=>$item) {
             if (stripos($item, $text) !== false) {
-                //echo $index . " " . $item . "\n";
-                echo "matched " . $text . "\n";
+                $this->thing->console("matched " . $text . "\n");
 
                 //                $this->place_codes[] = $place_code;
                 //           }
@@ -507,13 +481,12 @@ $this->getItems();
         if ((isset($drop_list)) and (count($drop_list) == 1)) {
             $drop_index = $drop_list[0]["index"];
 
-            echo "Dropping index " . $drop_index . ".\n";
+            $this->thing->console("Dropping index " . $drop_index . ".\n");
 
             $this->basket_thing->json->setField('associations');
 
             $this->basket_thing->json->popstream($drop_index);
             $this->inventoryBasket();
-            //var_dump($this->basket_thing->json->array_data);
         }
 
     }
@@ -540,24 +513,20 @@ $this->getItems();
     function inventoryBasket() {
 
         $this->getItems();
-        //        var_dump($this->items);
 
 if (!isset($this->items)) {
 $this->inventory_response = "Basket is empty. ";
-//$this->response .= "Basket is empty. ";
 return;
 }
         $items = $this->items->agent;
 
-        //exit();
-        //$this->basket_thing = array();
         $this->inventory_response = "inventory ";
         foreach ($items as $index=>$item) {
 
             $thing = new Thing($item);
 
 
-            echo substr($thing->uuid, 0, 4) . " " . $thing->subject . "\n";
+            $this->thing->console(substr($thing->uuid, 0, 4) . " " . $thing->subject . "\n");
             $this->inventory_response .= " ". $thing->nuuid;
 
         }
@@ -681,10 +650,7 @@ $this->getitems();
         //$uuids = $this->uuid_agent->extractUuids($this->input);
         $nuuids = $this->nuuid_agent->extractNuuids($this->input);
 
-        //var_dump($nuuids);
-
         $nuuid = $this->nuuid_agent->extractNuuid($this->input);
-        //        var_dump($nuuid);
 
         if ($nuuid != false) {
             $this->register_nuuid = $nuuid;

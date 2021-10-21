@@ -45,9 +45,6 @@ class Trivia extends Agent
             "variables trivia " . $this->from
         );
 
-        //var_dump($this->thing);
-        //exit();
-        //        $this->getMemcached();
     }
 
     function isTrivia($state = null)
@@ -69,7 +66,7 @@ class Trivia extends Agent
 
     function set($requested_state = null)
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["trivia", "inject"],
             $this->inject
         );
@@ -124,16 +121,14 @@ class Trivia extends Agent
             "INFORMATION"
         );
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "trivia",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["trivia", "refreshed_at"],
                 $time_string
             );
@@ -141,7 +136,7 @@ class Trivia extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->inject = $this->thing->json->readVariable([
+        $this->inject = $this->thing->Read([
             "trivia",
             "inject",
         ]);
@@ -247,10 +242,13 @@ $this->makeChoices();
 
     function makeSMS()
     {
-        $sms = "TRIVIA ". "\n";
+        $sms = "TRIVIA ". "";
 
+        if ($this->short_message == '') {
+        $sms .= "\n";
         $sms .= trim($this->short_message) . "\n";
-
+        }
+        $sms .= $this->response . " " ;
         $sms .= "TEXT WEB";
         // $this->response;
 
@@ -360,6 +358,11 @@ $this->makeChoices();
     {
         $this->getMessages();
 
+        if ($this->messages == null) {
+$this->response .= "No injects found. ";
+return true;
+}
+
         if ($this->inject == false) {
             $this->num = array_rand($this->messages);
             $this->inject = $this->bank . "-" . $this->num;
@@ -375,6 +378,7 @@ $this->makeChoices();
             $this->bank = $arr[0] . "-" . $arr[1];
             $this->num = $arr[2];
         }
+
     }
 
     public function getMessage()

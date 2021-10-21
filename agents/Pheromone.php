@@ -50,27 +50,25 @@ class Pheromone extends Agent
 
     function set()
     {
-        $this->pheromone_thing->json->setField("variables");
-
-        $this->pheromone_thing->json->writeVariable(
+        $this->pheromone_thing->Write(
             ["pheromone", "value"],
             $this->value
         );
 
         $time_string = $this->pheromone_thing->time();
-        $this->pheromone_thing->json->writeVariable(
+        $this->pheromone_thing->Write(
             ["pheromone", "refreshed_at"],
             $time_string
         );
 
         $time_string = $this->thing->time();
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["pheromone", "refreshed_at"],
             $time_string
         );
 
         $pheromone_timestamp = $this->pheromone_thing->microtime(); // Trial microtime.
-        $this->pheromone_thing->json->writeVariable(
+        $this->pheromone_thing->Write(
             ["pheromone", "timestamp"],
             $pheromone_timestamp
         );
@@ -89,13 +87,12 @@ class Pheromone extends Agent
 
     function getPheromone()
     {
-        $this->pheromone_thing->json->setField("variables");
-        $time_string = $this->pheromone_thing->json->readVariable([
+        $time_string = $this->pheromone_thing->Read([
             "pheromone",
             "refreshed_at",
         ]);
 
-        $micro_timestamp = $this->pheromone_thing->json->readVariable([
+        $micro_timestamp = $this->pheromone_thing->Read([
             "pheromone",
             "timestamp",
         ]);
@@ -103,8 +100,8 @@ class Pheromone extends Agent
         // Keep second level timestamp because ...
         // not all stacks are capable of microtime.
         if ($time_string == false) {
-            $time_string = $this->pheromone_thing->json->time();
-            $this->pheromone_thing->json->writeVariable(
+            $time_string = $this->pheromone_thing->time();
+            $this->pheromone_thing->Write(
                 ["pheromone", "refreshed_at"],
                 $time_string
             );
@@ -113,7 +110,7 @@ class Pheromone extends Agent
         // And in microtime code for Pheromone.
         if ($micro_timestamp == false) {
             $micro_timestamp = $this->pheromone_thing->microtime();
-            $this->pheromone_thing->json->writeVariable(
+            $this->pheromone_thing->Write(
                 ["pheromone", "timestamp"],
                 $micro_timestamp
             );
@@ -122,7 +119,7 @@ class Pheromone extends Agent
         // If it has already been processed ...
         $this->last_timestamp = $micro_timestamp;
 
-        $this->value = $this->pheromone_thing->json->readVariable([
+        $this->value = $this->pheromone_thing->Read([
             "pheromone",
             "value",
         ]);

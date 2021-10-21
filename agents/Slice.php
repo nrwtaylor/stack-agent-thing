@@ -7,8 +7,6 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-//use QR_Code\QR_Code;
-
 ini_set('display_startup_errors', 1);
 ini_set('display_errors', 1);
 error_reporting(-1);
@@ -41,7 +39,7 @@ class Slice extends Agent
 
         $this->node_list = ["slice" => ["slice", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container['stack']['entity_name'];
@@ -123,7 +121,6 @@ class Slice extends Agent
             $whatIWant = substr(strtolower($input), $pos + strlen($whatis));
         }
 
-        //$filtered_input = ltrim(strtolower($whatIWant), " ");
         $filtered_input = ltrim($whatIWant, " ");
 
         $this->whatis = $filtered_input;
@@ -137,14 +134,11 @@ class Slice extends Agent
     public function timestampSlice($t = null)
     {
 
-//        $s = $this->thing->thing->created_at;
-
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {
             $t = $this->retain_to;
             $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
-            //$text = "CLICK FOR PDF";
         }
         $this->timestamp = $text;
         return $this->timestamp;
@@ -227,8 +221,7 @@ class Slice extends Agent
     public function setSlice()
     {
         return;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["slice", "decimal"],
             $this->decimal_slice
         );
@@ -449,7 +442,6 @@ class Slice extends Agent
 
         $this->thing_report['png'] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -620,16 +612,14 @@ class Slice extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "slice",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["slice", "refreshed_at"],
                 $time_string
             );
@@ -762,7 +752,7 @@ class Slice extends Agent
             $image = $pdf->Output('', 'S');
             $this->thing_report['pdf'] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->error .= 'Caught exception: ' . $e->getMessage() .". ";
         }
 
         return $this->thing_report['pdf'];

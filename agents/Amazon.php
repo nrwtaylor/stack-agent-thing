@@ -1,8 +1,8 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
@@ -11,46 +11,47 @@ ini_set("allow_url_fopen", 1);
 
 class Amazon extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->test = "Development code"; // Always
-        $this->keywords = array('amazon', 'items');
+        $this->keywords = ["amazon", "items"];
 
-$this->access_key = null;
-if (isset($this->thing->container['api']['amazon']['access key'])) {
-        $this->access_key =
-            $this->thing->container['api']['amazon']['access key'];
-}
+        $this->access_key = null;
+        if (isset($this->thing->container["api"]["amazon"]["access key"])) {
+            $this->access_key =
+                $this->thing->container["api"]["amazon"]["access key"];
+        }
 
-$this->secret_key = null;
-if (isset($this->thing->container['api']['amazon']['secret key'])) {
-        $this->secret_key =
-            $this->thing->container['api']['amazon']['secret key'];
-}
-$this->associate_tag = null;
-if (isset($this->thing->container['api']['amazon']['associate tag'])) {
-        $this->associate_tag =
-            $this->thing->container['api']['amazon']['associate tag'];
-}
+        $this->secret_key = null;
+        if (isset($this->thing->container["api"]["amazon"]["secret key"])) {
+            $this->secret_key =
+                $this->thing->container["api"]["amazon"]["secret key"];
+        }
+        $this->associate_tag = null;
+        if (isset($this->thing->container["api"]["amazon"]["associate tag"])) {
+            $this->associate_tag =
+                $this->thing->container["api"]["amazon"]["associate tag"];
+        }
 
-$this->amazon_stack_state = 'off';
-if (isset($this->thing->container['api']['amazon']['state'])) {
-        $this->amazon_stack_state = $this->thing->container['api']['amazon']['state'];
-}
+        $this->amazon_stack_state = "off";
+        if (isset($this->thing->container["api"]["amazon"]["state"])) {
+            $this->amazon_stack_state =
+                $this->thing->container["api"]["amazon"]["state"];
+        }
         $this->run_time_max = 360; // 5 hours
         $this->link = "https://www.amazon.com";
 
         $this->response .= "Dev. ";
 
-        $this->thing_report['help'] =
-            'This requests products using the Amazon API.';
+        $this->thing_report["help"] =
+            "This requests products using the Amazon API.";
     }
 
     function run()
     {
-  //      $this->getItemSearch();
+        //      $this->getItemSearch();
 
         // Test
         //$this->getItemLookup("B0774T8DC6");
@@ -79,43 +80,43 @@ if (isset($this->thing->container['api']['amazon']['state'])) {
         );
 
         $this->thing->log(
-            $this->agent_prefix . 'loaded ' . $this->counter . ".",
+            $this->agent_prefix . "loaded " . $this->counter . ".",
             "DEBUG"
         );
 
         $this->counter = $this->counter + 1;
     }
 
-function logAmazon($text) {
+    function logAmazon($text)
+    {
+        if ($text == null) {
+            $text = "MErp";
+        }
 
-if ($text == null) {$text = "MErp";}
+        $log_text = "Error message not found.";
+        if (isset($text["errorMessage"]["error"]["message"])) {
+            $log_text = $text["errorMessage"]["error"]["message"];
+        }
 
+        $request = "No request. ";
+        if (isset($this->request)) {
+            $request = $this->request;
+        }
 
-
-$log_text = "Error message not found.";
-if (isset($text['errorMessage']['error']['message'])) {
-
-$log_text = $text['errorMessage']['error']['message'];
-
-}
-
-$request = "No request. ";
-if (isset($this->request)) {
-$request = $this->request;
-}
-
-$thing = new Thing(null);
-$thing->Create("meep","amazon", "g/ amazon error " . $request ." - ". $log_text);
+        $thing = new Thing(null);
+        $thing->Create(
+            "meep",
+            "amazon",
+            "g/ amazon error " . $request . " - " . $log_text
+        );
 
         $this->thing->db->setFrom($this->from);
 
         $this->thing->json->setField("message1");
-        $this->thing->json->writeVariable( array("ebay") , $text );
+        $this->thing->json->writeVariable(["ebay"], $text);
 
-$this->response .= $request . " - " . $log_text ." " ;
-
-}
-
+        $this->response .= $request . " - " . $log_text . " ";
+    }
 
     public function parseItem($amazon_item = null)
     {
@@ -129,79 +130,70 @@ $this->response .= $request . " - " . $log_text ." " ;
 
         $source = "amazon";
 
-        //$url = $amazon_item['DetailPageURL'];
         $url = "";
-        if (isset($amazon_item['DetailPageURL'])) {
-            $url = $amazon_item['DetailPageURL'];
+        if (isset($amazon_item["DetailPageURL"])) {
+            $url = $amazon_item["DetailPageURL"];
         }
 
         //$asin = $amazon_item['ASIN'];
 
         $asin = "";
-        if (isset($amazon_item['ASIN'])) {
-            $asin = $amazon_item['ASIN'];
+        if (isset($amazon_item["ASIN"])) {
+            $asin = $amazon_item["ASIN"];
         }
 
         $author = "";
-        if (isset($amazon_item['ItemAttributes']['Author'])) {
-            $author = $amazon_item['ItemAttributes']['Author'];
+        if (isset($amazon_item["ItemAttributes"]["Author"])) {
+            $author = $amazon_item["ItemAttributes"]["Author"];
         }
 
         $creator = "";
-        if (isset($amazon_item['ItemAttributes']['Creator'])) {
-            $creator = $amazon_item['ItemAttributes']['Creator'];
+        if (isset($amazon_item["ItemAttributes"]["Creator"])) {
+            $creator = $amazon_item["ItemAttributes"]["Creator"];
         }
 
         $manufacturer = "";
-        if (isset($amazon_item['ItemAttributes']['Manufacturer'])) {
-            $manufacturer = $amazon_item['ItemAttributes']['Manufacturer'];
+        if (isset($amazon_item["ItemAttributes"]["Manufacturer"])) {
+            $manufacturer = $amazon_item["ItemAttributes"]["Manufacturer"];
         }
 
         $product_group = "";
-        if (isset($amazon_item['ItemAttributes']['ProductGroup'])) {
-            $product_group = $amazon_item['ItemAttributes']['ProductGroup'];
+        if (isset($amazon_item["ItemAttributes"]["ProductGroup"])) {
+            $product_group = $amazon_item["ItemAttributes"]["ProductGroup"];
         }
 
         $title = "";
-        if (isset($amazon_item['ItemAttributes']['Title'])) {
-            $title = $amazon_item['ItemAttributes']['Title'];
+        if (isset($amazon_item["ItemAttributes"]["Title"])) {
+            $title = $amazon_item["ItemAttributes"]["Title"];
         }
 
-$link_thumbnail = null;
-if (isset($amazon_item['MediumImage']['URL'])) {
+        $link_thumbnail = null;
+        if (isset($amazon_item["MediumImage"]["URL"])) {
+            $link_thumbnail = $amazon_item["MediumImage"]["URL"];
+        }
 
-$link_thumbnail = $amazon_item['MediumImage']['URL'];
-
-}
-
-/*
+        /*
 if (($link_thumbnail == null) and (isset($amazon_item['SmallImage']['URL']))) {
 
 $link_thumbnail = $amazon_item['SmallImage']['URL'];
 
 }
 */
-if ($link_thumbnail == null) {
-
-$link_thumbnail = $this->web_prefix . "noimage.png";
-
-
-}
-
-
+        if ($link_thumbnail == null) {
+            $link_thumbnail = $this->web_prefix . "noimage.png";
+        }
 
         //$item = $this->parsedItem($amazon_item);
-//echo "---<br>";
-        $item = array(
+        $item = [
             "id" => $asin,
             "title" => $title,
             "thumbnail" => $link_thumbnail,
             "link" => $url,
             "source" => "amazon:" . $asin,
-            "vendor" => $amazon_item
-        );
+            "vendor" => $amazon_item,
+        ];
 
-/* ebay reference
+        /* ebay reference
             "source"=>$source,
             "id" => $item_id,
             "category_name" => $category_name,
@@ -223,7 +215,6 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
     function getRequest($request_array = null)
     {
-
         $index = "All";
 
         $region = "com";
@@ -231,19 +222,19 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
         $host = "webservices.amazon." . $region;
         $uri = "/onca/xml";
 
-        $arr = array(
+        $arr = [
             "Service" => "AWSECommerceService",
             "AWSAccessKeyId" => $this->access_key,
             "AssociateTag" => $this->associate_tag,
-            "Timestamp" => gmdate("Y-m-d\TH:i:s\Z")
-        );
+            "Timestamp" => gmdate("Y-m-d\TH:i:s\Z"),
+        ];
 
         if ($request_array == null) {
-            $request_array = array(
+            $request_array = [
                 "Operation" => "ItemSearch",
                 "Keywords" => $slug,
-                "SearchIndex" => $index
-            );
+                "SearchIndex" => $index,
+            ];
         }
 
         $arr = array_merge($arr, $request_array);
@@ -263,7 +254,7 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
         // Calculate an RFC 2104-compliant HMAC with the SHA256 hash algorithm
 
         $signature = base64_encode(
-            hash_hmac('sha256', $string_to_sign, $this->secret_key, true)
+            hash_hmac("sha256", $string_to_sign, $this->secret_key, true)
         );
         /* encode the signature for the request */
         //   $signature = str_replace("%7E", "~", rawurlencode($signature));
@@ -285,10 +276,10 @@ $link_thumbnail = $this->web_prefix . "noimage.png";
 
     function getAmazon($text)
     {
-if ($this->amazon_stack_state == 'off') {
-$this->response .= "Agent is off. ";
-return true;
-}
+        if ($this->amazon_stack_state == "off") {
+            $this->response .= "Agent is off. ";
+            return true;
+        }
         $request = $text;
 
         $ch = curl_init();
@@ -323,16 +314,20 @@ return true;
 
     function getItemSearch($text = null)
     {
-if ($this->amazon_stack_state == 'off') {
-$this->response .= "Agent is off. ";
-return true;
-}
+        if ($this->amazon_stack_state == "off") {
+            $this->response .= "Agent is off. ";
+            return true;
+        }
 
-if (($text == null) and ($this->search_words == null)) {return true;}
+        if ($text == null and $this->search_words == null) {
+            return true;
+        }
 
-if ($text == null) {$text = $this->search_words;}
+        if ($text == null) {
+            $text = $this->search_words;
+        }
 
-$keywords= $text;
+        $keywords = $text;
         $keywords = urlencode($keywords);
 
         $this->response .=
@@ -342,48 +337,44 @@ $keywords= $text;
         $slug = $keywords;
         $index = "All";
 
-        $request_array = array(
+        $request_array = [
             "Operation" => "ItemSearch",
             "Keywords" => $slug,
-            "SearchIndex" => $index
-        );
+            "SearchIndex" => $index,
+        ];
 
         $request = $this->getRequest($request_array);
-// devstack
-//var_dump($request);
 
         $amazon_array = $this->getAmazon($request);
-// devstack
-//var_dump($amazon_array);
-if (!isset($amazon_array['Items'])) {
-if (isset($amazon_array['Error'])) {
 
-$this->logAmazon($amazon_array['Error']['Message']);
-return true;
-}
-}
+        if (!isset($amazon_array["Items"])) {
+            if (isset($amazon_array["Error"])) {
+                $this->logAmazon($amazon_array["Error"]["Message"]);
+                return true;
+            }
+        }
 
-        $is_valid = $amazon_array['Items']['Request']['IsValid'];
-        $total_results = $amazon_array['Items']['TotalResults'];
-        $total_pages = $amazon_array['Items']['TotalPages'];
-        $more_results_url = $amazon_array['Items']['MoreSearchResultsUrl'];
+        $is_valid = $amazon_array["Items"]["Request"]["IsValid"];
+        $total_results = $amazon_array["Items"]["TotalResults"];
+        $total_pages = $amazon_array["Items"]["TotalPages"];
+        $more_results_url = $amazon_array["Items"]["MoreSearchResultsUrl"];
 
+        $items = [];
+        if ($total_results > 0) {
+            $items = $amazon_array["Items"]["Item"];
+        }
 
-$items = array();
-if ($total_results > 0) {
-        $items = $amazon_array['Items']['Item'];
-}
-
-$this->more_results_url = $more_results_url;
-if ($items == array()) {$this->items = array(); return;}
+        $this->more_results_url = $more_results_url;
+        if ($items == []) {
+            $this->items = [];
+            return;
+        }
 
         foreach ($items as $i => $item) {
             $parsed_item = $this->parseItem($item);
 
             $this->items[] = $parsed_item;
         }
-
-
 
         // $this->items = $items;
         if (!isset($this->items)) {
@@ -399,7 +390,6 @@ if ($items == array()) {$this->items = array(); return;}
             $this->item = $this->items[0];
         }
 
-
         $this->items_count = count($this->items);
 
         $this->thing->log("got " . $this->items_count . " items.");
@@ -409,20 +399,15 @@ if ($items == array()) {$this->items = array(); return;}
 
     function getItems($text = null)
     {
-        $this->items = array();
+        $this->items = [];
     }
-
-
-
 
     function getItemLookup($item_id = null, $item_id_type = "ASIN")
     {
-
-if ($this->amazon_stack_state == 'off') {
-$this->response .= "Agent is off. ";
-return true;
-}
-
+        if ($this->amazon_stack_state == "off") {
+            $this->response .= "Agent is off. ";
+            return true;
+        }
 
         //https://docs.aws.amazon.com/AWSECommerceService/latest/DG/ItemLookup.html
         // IdType
@@ -440,28 +425,28 @@ return true;
 
         $this->response .= 'Asked Amazon about the item "' . $item_id . '". ';
         $this->response .= 'Asked Amazon about the item "' . $item_id . '". ';
-/*
+        /*
         $request_array = array(
             "Operation" => "ItemLookup",
             "ResponseGroup" => "Images,Small",
             "ItemId" => $item_id
         );
 */
-        $request_array = array(
+        $request_array = [
             "Operation" => "ItemLookup",
             "ResponseGroup" => "OfferFull",
-            "ItemId" => $item_id
-        );
+            "ItemId" => $item_id,
+        ];
 
-        $item_id_type_array = array("SKU", "UPC");
+        $item_id_type_array = ["SKU", "UPC"];
 
         $index = "All";
 
         if (in_array($item_id_type, $item_id_type_array)) {
-            $id_type_array = array(
+            $id_type_array = [
                 "IdType" => $item_id_type,
-                "SearchIndex" => $index
-            );
+                "SearchIndex" => $index,
+            ];
 
             $request_array = array_merge($request_array, $id_type_array);
 
@@ -473,32 +458,31 @@ return true;
         $amazon_array = $this->getAmazon($request);
 
         $is_valid = "";
-        if (isset($amazon_array['Items']['Request']['IsValid'])) {
-            $is_valid = $amazon_array['Items']['Request']['IsValid'];
+        if (isset($amazon_array["Items"]["Request"]["IsValid"])) {
+            $is_valid = $amazon_array["Items"]["Request"]["IsValid"];
         }
 
         $total_results = "";
-        if (isset($amazon_array['Items']['TotalResults'])) {
-            $total_results = $amazon_array['Items']['TotalResults'];
+        if (isset($amazon_array["Items"]["TotalResults"])) {
+            $total_results = $amazon_array["Items"]["TotalResults"];
         }
 
         $total_pages = "";
-        if (isset($amazon_array['Items']['TotalPages'])) {
-            $total_pages = $amazon_array['Items']['TotalPages'];
+        if (isset($amazon_array["Items"]["TotalPages"])) {
+            $total_pages = $amazon_array["Items"]["TotalPages"];
         }
 
         $more_results_url = "";
-        if (isset($amazon_array['Items']['MoreSearchResultsUrl'])) {
-            $more_results_url = $amazon_array['Items']['MoreSearchResultsUrl'];
+        if (isset($amazon_array["Items"]["MoreSearchResultsUrl"])) {
+            $more_results_url = $amazon_array["Items"]["MoreSearchResultsUrl"];
         }
 
-        $items = array();
-        if (isset($amazon_array['Items']['Item'])) {
-            $items = $amazon_array['Items']['Item'];
+        $items = [];
+        if (isset($amazon_array["Items"]["Item"])) {
+            $items = $amazon_array["Items"]["Item"];
         }
 
         foreach ($items as $i => $item) {
-
             $parsed_item = $this->parseItem($item);
             $this->items[] = $parsed_item;
         }
@@ -521,7 +505,7 @@ return true;
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
     }
 
@@ -531,7 +515,7 @@ return true;
         $html .= "<p><b>Amazon definitions</b>";
 
         $this->html_message = $html;
-        $this->thing_report['web'] = $this->html_message;
+        $this->thing_report["web"] = $this->html_message;
     }
 
     public function makeSMS()
@@ -539,24 +523,24 @@ return true;
         //      $sms = "AMAZON | " . $this->response;
         $s = "";
 
-if (isset($this->items)) {
-        foreach ($this->items as $i => $item) {
-if (isset($item['title'])) {
-            $s .= $item['title'] . " / ";
-}
+        if (isset($this->items)) {
+            foreach ($this->items as $i => $item) {
+                if (isset($item["title"])) {
+                    $s .= $item["title"] . " / ";
+                }
+            }
         }
-}
 
         $sms = "AMAZON | " . $s . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $this->sms_message;
+        $this->thing_report["sms"] = $this->sms_message;
     }
 
     public function makeMessage()
     {
         $message = "Amazon";
         $this->message = $message;
-        $this->thing_report['message'] = $this->message;
+        $this->thing_report["message"] = $this->message;
     }
 
     public function readSubject()
@@ -579,7 +563,7 @@ if (isset($item['title'])) {
         // So this is really the 'sms' section
         // Keyword
         if (count($pieces) == 1) {
-            if ($input == 'amazon') {
+            if ($input == "amazon") {
                 $this->search_words = null;
                 $this->response .= "Asked Amazon about nothing. ";
                 return;
@@ -609,8 +593,9 @@ if (isset($item['title'])) {
         $filtered_input = ltrim(strtolower($whatIWant), " ");
         if ($filtered_input != "") {
             $this->search_words = $filtered_input;
-            $this->response .= 'Asked Amazon about the word "' . $this->search_words . '". ';
-$this->getItemSearch();
+            $this->response .=
+                'Asked Amazon about the word "' . $this->search_words . '". ';
+            $this->getItemSearch();
             return false;
         }
 

@@ -54,8 +54,7 @@ class Pdf extends Agent
 		$this->sms_message .= " | TEXT INFO";
 		$this->thing_report['sms'] = $this->sms_message;
 */
-		$this->thing->json->setField("variables");
-		$this->thing->json->writeVariable(array("pdf",
+		$this->thing->Write(array("pdf",
 			"received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
 			);
 
@@ -91,14 +90,8 @@ class Pdf extends Agent
         //$agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
         //$agent = new {$agent_namespace_name}($this->thing);
 
-//var_dump($agent->thing_report['pdf']);
-
-//            if (isset($agent->thing_report['pdf'])) {
                 $this->sms_message = "PDF | " . $this->web_prefix . "" . $this->link_uuid . "/" . strtolower($this->prior_agent) . ".pdf";
-//            }
         }
-
-//var_dump($this->thing_report['pdf']);
 
         if (!$this->pdf_exists) {$this->sms_message = "PDF | No PDF available from the last agent.";}
 
@@ -162,7 +155,7 @@ class Pdf extends Agent
 
         $this->pdf_exists = true;
         $agent_thing = new Agent($previous_thing);
-//var_dump($agent_thing->thing_report['pdf']);
+
         if (!isset($agent_thing->thing_report['pdf'] )) {$this->pdf_exists = false;}
 
         return $this->link_uuid;

@@ -13,6 +13,11 @@ use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 // For testing.
 // See https://jolicode.com/blog/find-segfaults-in-php-like-a-boss
 
+// PHP class for a Thing.
+// A Thing needs access to a store (db)
+// and a means to serialize and deserialize into that store (json).
+// And a way to generate a unique identifier (uuid).
+
 class Thing
 {
     public $var = 'hello';
@@ -52,9 +57,13 @@ class Thing
         // It is a significant Stack concern.
 
         if (!isset($GLOBALS['stack_path'])) {
+//$directory = __DIR__ .'/../../../../';
+
             // Try this, otherwise fail.
             //$GLOBALS['stack_path'] = "/var/www/stackr.test/";
             $GLOBALS['stack_path'] = "/var/www/html/stackr.ca/";
+        //    $GLOBALS['stack_path'] = $directory;
+
         }
 
         //set_error_handler(array($this, "exception_error_handler"));
@@ -135,10 +144,16 @@ class Thing
             $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
-        //set_error_handler(array($this, "exception_error_handler"));
+        $this->hash_algorithm = "sha256";
+        if (isset($this->container['stack']['hash_algorithm'])) {
+            $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
+        }
 
+
+        //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
+
         } catch (\Exception $e) {
             $this->log("No Thing to get.");
 
@@ -151,12 +166,12 @@ class Thing
         // devstack
         //		echo "Stack Balance<br>";
         //		$this->stackBalance($this->uuid);
-
         $this->log("Thing instantiation completed.");
     }
 
     function __destruct()
     {
+
         $t = "";
         if (isset($this->nuuid)) {
             $t = $this->nuuid;
@@ -179,7 +194,7 @@ class Thing
 
             $this->log("Thing made a UUID.");
 
-            // And then we pull out some Thing related variables and settings.
+            // And then we pull out some Thing related svariables and settings.
 
             $this->container['thing'] = function ($c) {
                 $db = $c['settings']['thing'];
@@ -198,7 +213,6 @@ class Thing
             // Variable overflow is challenging. See VARIABLES.
 
             // Can't call db here, can only call it when $from is known.
-            // $this->db = new Database($this->uuid, $this->from);
 
             $this->json = new Json($this->uuid);
 
@@ -236,13 +250,11 @@ class Thing
 
             $this->uuid = $uuid;
             $this->nuuid = substr($this->uuid, 0, 4);
-
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
-            $this->db = new Database($this->uuid, 'null' . $this->mail_postfix);
+            $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->log("Thing made a db connector.");
-
             // Provide handler for Json translation from/to MySQL.
             $this->json = new Json($this->uuid);
 
@@ -315,8 +327,10 @@ class Thing
 
         $client->addServer();
         $arr = json_encode($datagram);
+$function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
+//        $client->doLowBackground("call_agent", $arr);
+        $client->doLowBackground($function_name, $arr);
 
-        $client->doLowBackground("call_agent", $arr);
         $this->log("spawned a Thing.");
     }
 
@@ -355,7 +369,9 @@ class Thing
                 $this->uuid . " found and removed an @ sign";
         }
 
-        $this->db = new Database($this->uuid, $from);
+if (!isset($this->db)) {
+        $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
+}
         $this->log("Create. Database connector made.");
 
         // All records are associated with a posterior record.  Ideally
@@ -518,11 +534,26 @@ class Thing
         return false;
     }
 
+/*
+Use this pattern. And deprecate getVariables.
+And review Agent variables.
+*/
+
+    public function Read($path) {
+        $this->json->setField("variables");
+        return $this->json->readVariable($path);
+    }
+
+    public function Write($path, $value) {
+        $this->json->setField("variables");
+        $this->json->writeVariable($path, $value);
+    }
+
     public function loadAccounts()
     {
         $this->json->setField("variables");
 
-        $accounts = $this->json->readVariable(["account"]);
+        $accounts = $this->Read(["account"]);
 
         // At this point we have a PHP array of all accounts on
         // this Thing.
@@ -651,39 +682,34 @@ class Thing
         // Call Db and forget the record.
 
         if (!isset($this->db)) {
-            return;
+            return ['error'=>true];
         }
         $thingreport = $this->db->Forget($this->uuid);
+        return $thingreport;
     }
 
     public function Ignore()
     {
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "green");
+        $this->Write(["thing", "status"], "green");
         $this->Get();
     }
 
     public function flagRed()
     {
         // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "red");
+        $this->Write(["thing", "status"], "red");
         $this->Get();
     }
 
     public function silenceOn()
     {
-        // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "silence"], "on");
+        $this->Write(["thing", "silence"], "on");
         $this->Get();
     }
 
     public function silenceOff()
     {
-        // Make the Thing show Red
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "silence"], "off");
+        $this->Write(["thing", "silence"], "off");
         $this->Get();
     }
 
@@ -691,7 +717,7 @@ class Thing
     {
         // Ask if the Thing is Green
         $var_path = ["thing", "silence"];
-        if ($this->json->readVariable($var_path) == "on") {
+        if ($this->Read($var_path) == "on") {
             return true;
         }
         return false;
@@ -700,16 +726,14 @@ class Thing
     public function flagAmber()
     {
         // Make the Thing show Amber
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "amber");
+        $this->Write(["thing", "status"], "amber");
         $this->Get();
     }
 
     public function flagGreen()
     {
         // Make the Thing show Green
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], "green");
+        $this->Write(["thing", "status"], "green");
         $this->Get();
     }
 
@@ -717,7 +741,7 @@ class Thing
     {
         // Ask if the Thing is Red
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "red") {
+        if ($this->Read($var_path) == "red") {
             return true;
         }
         return false;
@@ -727,7 +751,7 @@ class Thing
     {
         // Ask if the Thing is Green
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "green") {
+        if ($this->Read($var_path) == "green") {
             return true;
         }
         return false;
@@ -738,7 +762,7 @@ class Thing
     {
         // Ask if the Thing is Amber.  Is it ready to go?
         $var_path = ["thing", "status"];
-        if ($this->json->readVariable($var_path) == "amber") {
+        if ($this->Read($var_path) == "amber") {
             return true;
         }
         return false;
@@ -765,7 +789,7 @@ class Thing
     {
         // More open way to ask a thing for its flag
         $var_path = ["thing", "status"];
-        return $this->json->readVariable($var_path);
+        return $this->Read($var_path);
     }
 
     public function flagSet($color = null)
@@ -775,8 +799,7 @@ class Thing
             $color = 'red';
         }
 
-        $this->json->setField("variables");
-        $this->json->writeVariable(["thing", "status"], $color);
+        $this->Write(["thing", "status"], $color);
         $this->Get();
     }
 
@@ -787,9 +810,21 @@ class Thing
         // Bootstrapping db access.
         // A Thing can call an UUID so called up
         // the requested UUID.  Using the null account.
+/*
+if (isset($this->db)) {
+        $hash_nom_from = hash($this->hash_algorithm, $this->from);
 
+$prior_uuid = $this->db->getMemory($hash_nom_from);
+echo "Previous uuid got " . ($prior_uuid) . "\n";
+}
+*/
+
+
+$thing = false;
+if (isset($this->db)) {
         $thingreport = $this->db->Get($this->uuid);
         $thing = $thingreport['thing'];
+}
 
         $this->log("loaded thing " . $this->nuuid . " from db.");
 
@@ -802,36 +837,12 @@ class Thing
             // This just makes sure these four variables
             // are consistently available
             // as top level Thing objects.
-            //$this->uuid = $this->thing->uuid;
             $this->to = $thing->nom_to;
             $this->from = $thing->nom_from;
-
-            // One of these looks promising.
-
-            //$thingreport = $this->db->setUser($this->from);
-            //$thingreport = $this->db->from = $this->from;
-
             $this->subject = $thing->task;
         }
 
         $this->thing = $thing;
-
-        // Once the Thing has been pulled we can update the db connector
-        // to use the current from.
-
-        //		$this->db->setFrom($this->from);
-
-        //$this->db = new Database($this->uuid, $this->from);
-
-        //$thingreport = $this->db->setUser($this->from);
-
-        // Uncommenting any of the above options results in non-working uuids
-
-        // Commented out to allow PNG to work
-
-        // Keep for debugging.  Working as of 5 April 2017.  And passing all tests
-        // 25 Apr, except Test 4: Test posterior association.
-        // echo '<pre>  db.php Get()'; print_r($this->thing); echo '</pre>';
 
         return $thing;
     }
@@ -848,9 +859,6 @@ class Thing
 
     function getState($agent = null)
     {
-        // This can probably be deprecated after updating usermanager
-        //echo "agent provided";$agent;
-
         if ($agent == null) {
             $agent = 'thing';
         }
@@ -974,10 +982,13 @@ class Thing
 
     public function console($text = null)
     {
-        //$this->c_output = "off";
-        //if (isset($this->container['stack']['console_output'])) {
-        //        $this->console_output = $this->container['stack']['console_output'];
-        //}
+if ($this->console_output == 'off') {return;}
+
+        if (!isset($this->console_output)) {
+
+            $this->console_output = 'on';
+            echo "Thing console started. Turn off in private/settings.\n";
+        }
 
         if (!isset($this->console_output)) {
             return;
@@ -1107,19 +1118,24 @@ $class_name = $this->agent_class_name_current;
 
         //        $trace = debug_backtrace();
         //        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $trace = debug_backtrace(false, 2);
+
+//        $trace = debug_backtrace(false, 2);
 
         // Get the class that is asking for who awoke it
         $class_name = "X";
+/*
         if (isset($trace[1]['class'])) {
             $class_namespace = $trace[1]['class'];
             $class_name_array = explode("\\", $class_namespace);
             $class_name = end($class_name_array);
         }
-
+*/
         $runtime = number_format($this->elapsed_runtime()) . "ms";
 
         $text = strip_tags($text);
+if (isset($this->agent_class_name_current )){
+$class_name = $this->agent_class_name_current;
+}
         $agent_prefix = 'Agent "' . ucwords($class_name) . '"';
 
         $text = str_replace($agent_prefix, "", $text);
@@ -1201,7 +1217,7 @@ $class_name = $this->agent_class_name_current;
         ];
 
         foreach ($a as $secs => $str) {
-            $d = $etime / $secs;
+            $d = (float) $etime / (float) $secs;
             if ($d >= 1) {
                 $r = round($d);
                 return $r . ' ' . ($r > 1 ? $a_plural[$str] : $str) . '';

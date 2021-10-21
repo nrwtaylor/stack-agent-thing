@@ -3,8 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -13,19 +13,19 @@ ini_set("allow_url_fopen", 1);
 
 class Lattice extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     public function init()
     {
         $this->test = "Development code";
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $command_line = null;
 
         $this->node_list = ["snowflake" => ["snowflake", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->canvas_size_x = 1640;
         $this->canvas_size_y = 1640;
@@ -64,7 +64,7 @@ class Lattice extends Agent
         $this->draw_center = false;
         $this->draw_outline = false; //Draw hexagon line
 
-        $this->thing_report['log'] = $this->thing->log;
+        $this->thing_report["log"] = $this->thing->log;
     }
 
     // https://www.math.ucdavis.edu/~gravner/RFG/hsud.pdf
@@ -90,13 +90,14 @@ class Lattice extends Agent
 
     public function timestampLattice($t = null)
     {
-        $s = $this->thing->thing->created_at;
+        //        $s = $this->thing->thing->created_at;
+        //        $s = $this->thing->created_at;
 
         if (!isset($this->retain_to)) {
             $text = "X";
         } else {
             $t = $this->retain_to;
-            $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
+            $text = "GOOD UNTIL " . strtoupper(date("Y M d D H:i", $t));
         }
         $this->timestamp = $text;
         return $this->timestamp;
@@ -114,12 +115,12 @@ class Lattice extends Agent
         //$this->thing->log($this->agent_prefix .'started message. Timestamp = ' . number_format($this->thing->elapsed_runtime()) .  'ms.', "OPTIMIZE");
 
         $message_thing = new Message($this->thing, $this->thing_report);
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
         $this->thing->log(
-            'completed message. Timestamp = ' .
+            "completed message. Timestamp = " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
         return $this->thing_report;
@@ -134,15 +135,15 @@ class Lattice extends Agent
         );
         $this->thing->log(
             $this->agent_prefix .
-                'completed create choice. Timestamp = ' .
+                "completed create choice. Timestamp = " .
                 number_format($this->thing->elapsed_runtime()) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
 
-        $this->choices = $this->thing->choice->makeLinks('lattice');
+        $this->choices = $this->thing->choice->makeLinks("lattice");
 
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     public function makeSMS()
@@ -151,7 +152,7 @@ class Lattice extends Agent
         $sms = "LATTICE | ";
         $sms .= $this->web_prefix . "thing/" . $this->uuid . "/lattice";
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     public function makeMessage()
@@ -167,41 +168,39 @@ class Lattice extends Agent
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
             '/lattice.png" alt="lattice" height="92" width="92">';
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     public function setLattice()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["lattice", "decimal"],
             $this->decimal_lattice
         );
 
         $this->thing->log(
             $this->agent_prefix .
-                ' saved decimal lattice ' .
+                " saved decimal lattice " .
                 $this->decimal_lattice .
-                '.',
+                ".",
             "INFORMATION"
         );
     }
 
     public function getLattice()
     {
-        $this->thing->json->setField("variables");
-        $this->decimal_lattice = $this->thing->json->readVariable([
+        $this->decimal_lattice = $this->thing->Read([
             "lattice",
             "decimal",
         ]);
 
         if ($this->decimal_lattice == false) {
             $this->thing->log(
-                $this->agent_prefix . ' did not find a decimal lattice.',
+                $this->agent_prefix . " did not find a decimal lattice.",
                 "INFORMATION"
             );
             // No snowflake saved.  Return.
@@ -209,7 +208,7 @@ class Lattice extends Agent
         }
 
         $this->thing->log(
-            'loaded decimal lattice ' . $this->decimal_lattice . '.',
+            "loaded decimal lattice " . $this->decimal_lattice . ".",
             "INFORMATION"
         );
     }
@@ -225,7 +224,7 @@ class Lattice extends Agent
                 $dec,
                 bcmul(
                     strval(hexdec($hex[$i - 1])),
-                    bcpow('16', strval($len - $i))
+                    bcpow("16", strval($len - $i))
                 )
             );
         }
@@ -244,20 +243,20 @@ class Lattice extends Agent
                 $dec,
                 bcmul(
                     strval(hex2bin($hex[$i - 1])),
-                    bcpow('16', strval($len - $i))
+                    bcpow("16", strval($len - $i))
                 )
             );
         }
 
         $this->thing->log(
-            'loaded decimal lattice ' . $this->decimal_lattice . '.',
+            "loaded decimal lattice " . $this->decimal_lattice . ".",
             "INFORMATION"
         );
     }
 
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/lattice.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/lattice.pdf";
         $this->node_list = ["web" => ["snowflake", "uuid snowflake"]];
 
         $web = '<a href="' . $link . '">';
@@ -273,17 +272,17 @@ class Lattice extends Agent
         $web .= $this->decimal_lattice . "<br>";
 
         $web .= "<br><br>";
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     public function makeTXT()
     {
-        $txt = 'This is a LATTICE';
+        $txt = "This is a LATTICE";
         $txt .= "\n";
-        $txt .= count($this->lattice) . ' cells retrieved.';
+        $txt .= count($this->lattice) . " cells retrieved.";
 
         $txt .= "\n";
-        $txt .= str_pad("COORD (Q,R,S)", 15, ' ', STR_PAD_LEFT);
+        $txt .= str_pad("COORD (Q,R,S)", 15, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("NAME", 10, " ", STR_PAD_LEFT);
         $txt .= " " . str_pad("STATE", 10, " ", STR_PAD_RIGHT);
         $txt .= " " . str_pad("VALUE", 10, " ", STR_PAD_LEFT);
@@ -316,9 +315,9 @@ class Lattice extends Agent
                     STR_PAD_LEFT
                 );
 
-            $txt .= " " . str_pad($cell['name'], 10, ' ', STR_PAD_LEFT);
-            $txt .= " " . str_pad($cell['state'], 10, " ", STR_PAD_LEFT);
-            $txt .= " " . str_pad($cell['value'], 10, " ", STR_PAD_RIGHT);
+            $txt .= " " . str_pad($cell["name"], 10, " ", STR_PAD_LEFT);
+            $txt .= " " . str_pad($cell["state"], 10, " ", STR_PAD_LEFT);
+            $txt .= " " . str_pad($cell["value"], 10, " ", STR_PAD_RIGHT);
 
             //$txt .= " " . str_pad($cell['neighbours'], 10, ' ', STR_PAD_LEFT);
             //$txt .= " " . str_pad($cell['p_melt'], 10, " ", STR_PAD_LEFT);
@@ -327,7 +326,7 @@ class Lattice extends Agent
             $txt .= "\n";
         }
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -410,7 +409,7 @@ class Lattice extends Agent
         $bbox["height"] =
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        extract($bbox, EXTR_PREFIX_ALL, "bb");
         //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
@@ -453,9 +452,8 @@ class Lattice extends Agent
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -472,7 +470,7 @@ class Lattice extends Agent
         return $response;
 
         $this->PNG = $image;
-        $this->thing_report['png'] = $image;
+        $this->thing_report["png"] = $image;
     }
 
     public function drawWord(
@@ -518,7 +516,7 @@ class Lattice extends Agent
         $bbox["height"] =
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        extract($bbox, EXTR_PREFIX_ALL, "bb");
         //check width of the image
         $width = imagesx($this->image);
         $height = imagesy($this->image);
@@ -599,7 +597,7 @@ class Lattice extends Agent
         foreach (range(0, 5, 1) as $n) {
             $angle_offset = 0.15;
             $angle2 = ($n * pi()) / 3 + $angle_offset;
-            //var_dump($angle2);
+
             $x = $x_pt;
             $y = $y_pt;
 
@@ -636,7 +634,7 @@ class Lattice extends Agent
             $bbox["height"] =
                 max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
                 min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-            extract($bbox, EXTR_PREFIX_ALL, 'bb');
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
 
             imagettftext(
                 $this->image,
@@ -810,7 +808,7 @@ rgb
 
     public function setProbability()
     {
-        $type = 'preset';
+        $type = "preset";
 
         $this->thing->log(
             $this->agent_prefix .
@@ -821,7 +819,7 @@ rgb
         );
 
         switch ($type) {
-            case 'preset':
+            case "preset":
                 $this->p_freeze = [
                     1,
                     0.2,
@@ -853,7 +851,7 @@ rgb
                     0,
                 ];
                 break;
-            case 'random':
+            case "random":
                 $this->p_melt = [];
                 $this->p_freeze = [];
                 foreach (range(1, 13) as $t) {
@@ -861,7 +859,7 @@ rgb
                     $this->p_freeze[$t] = rand(0, 1000) / 1000;
                 }
                 break;
-            case 'uuid':
+            case "uuid":
                 $s = $this->uuid;
                 $s = strtolower(str_replace("-", "", $s));
 
@@ -879,22 +877,22 @@ rgb
     {
         $n = $value;
 
-        if ($value == 'a') {
+        if ($value == "a") {
             $n = 10;
         }
-        if ($value == 'b') {
+        if ($value == "b") {
             $n = 11;
         }
-        if ($value == 'c') {
+        if ($value == "c") {
             $n = 12;
         }
-        if ($value == 'd') {
+        if ($value == "d") {
             $n = 13;
         }
-        if ($value == 'e') {
+        if ($value == "e") {
             $n = 14;
         }
-        if ($value == 'f') {
+        if ($value == "f") {
             $n = 15;
         }
 
@@ -947,8 +945,6 @@ rgb
                 //                $n = 13;
             }
         }
-        //echo " p = " .$n
-
         // So we are supposed to use rule N for
         // finding the probability of melting
         // and freezing to the cell.
@@ -966,7 +962,7 @@ rgb
         $this->s_centre = 0;
 
         $this->thing->log(
-            $this->agent_prefix . 'initialized the lattice.',
+            $this->agent_prefix . "initialized the lattice.",
             "INFORMATION"
         );
 
@@ -1012,13 +1008,13 @@ rgb
             $s > $this->lattice_size or
             $s < -$this->lattice_size
         ) {
-            $cell = ['name' => 'boundary', 'state' => 'off', 'value' => 0]; // red?
+            $cell = ["name" => "boundary", "state" => "off", "value" => 0]; // red?
         } else {
             if (isset($this->lattice[$q][$r][$s])) {
                 $cell = $this->lattice[$q][$r][$s];
             } else {
                 // Flag an error;
-                $cell = ['name' => "bork", 'state' => 'off', 'value' => true];
+                $cell = ["name" => "bork", "state" => "off", "value" => true];
             }
         }
 
@@ -1050,7 +1046,7 @@ rgb
                         $s + $s_offset
                     );
 
-                    if ($neighbour_cell['state'] == 'on') {
+                    if ($neighbour_cell["state"] == "on") {
                         $states[$i] = 1;
                     } else {
                         $states[$i] = 0;
@@ -1065,25 +1061,25 @@ rgb
 
         list($n, $p_melt, $p_freeze) = $this->getProb($states);
 
-        $cell['neighbours'] =
+        $cell["neighbours"] =
             $states[0] .
-            ' ' .
+            " " .
             $states[1] .
-            ' ' .
+            " " .
             $states[2] .
-            ' ' .
+            " " .
             $states[3] .
             $states[4] .
-            ' ' .
+            " " .
             $states[5];
 
-        $cell['p_melt'] = $p_melt;
-        $cell['p_frozen'] = $p_freeze;
+        $cell["p_melt"] = $p_melt;
+        $cell["p_frozen"] = $p_freeze;
 
         if ($p_melt < $p_freeze) {
-            $cell['state'] = 'on';
+            $cell["state"] = "on";
         } else {
-            $cell['state'] = 'off';
+            $cell["state"] = "off";
         }
 
         //if (rand(0,10)/10 > .3) {
@@ -1123,7 +1119,7 @@ rgb
     public function initSegment()
     {
         $this->thing->log(
-            $this->agent_prefix . 'initialized the segment.',
+            $this->agent_prefix . "initialized the segment.",
             "INFORMATION"
         );
 
@@ -1141,7 +1137,7 @@ rgb
     public function updateLattice()
     {
         $this->thing->log(
-            $this->agent_prefix . 'updated the snowflake.',
+            $this->agent_prefix . "updated the snowflake.",
             "INFORMATION"
         );
 
@@ -1190,10 +1186,10 @@ rgb
             //   $this->updateCell($q,$r,$s);
 
             // Gives any cell value
-            $this->positive_coordinates_only = 'off';
+            $this->positive_coordinates_only = "off";
             if (
                 ($q < 0 or $r < 0 or $s < 0) and
-                $this->positive_coordinates_only == 'on'
+                $this->positive_coordinates_only == "on"
             ) {
                 continue;
             }
@@ -1204,7 +1200,7 @@ rgb
 
             $cell = $this->lattice[$q][$r][$s];
             $color = $this->black;
-            if ($cell['state'] == 'on') {
+            if ($cell["state"] == "on") {
                 $color = $this->grey;
                 $this->lattice_points[] = 1;
             } else {
@@ -1256,8 +1252,8 @@ rgb
                 $coordinate_position = $this->coordinate_position;
             }
             if (
-                $coordinate_position == 'center' or
-                $coordinate_position == 'centre'
+                $coordinate_position == "center" or
+                $coordinate_position == "centre"
             ) {
                 //dev stack
                 // Make lables positive coordinate set
@@ -1281,8 +1277,8 @@ rgb
             }
 
             if (
-                $coordinate_position == 'wall' or
-                $coordinate_position == 'wall'
+                $coordinate_position == "wall" or
+                $coordinate_position == "wall"
             ) {
                 $label = null;
                 $this->labelCell(
@@ -1321,48 +1317,34 @@ rgb
             //                    // Which eventually becomes recursively $this->drawSnowflake(...)
         }
 
-        //var_dump($this->decimal_lattice);
-        //echo "drawLattice";
-        //exit();
         $this->wordLattice();
 
         $this->thing->log(
             $this->agent_prefix .
-                'drew a lattice in ' .
+                "drew a lattice in " .
                 number_format(
                     $this->thing->elapsed_runtime() - $this->split_time
                 ) .
-                'ms.',
+                "ms.",
             "OPTIMIZE"
         );
         $this->thing->log(
-            $this->agent_prefix . 'drew an lattice.',
+            $this->agent_prefix . "drew an lattice.",
             "INFORMATION"
         );
 
         return;
     }
-    /*
-    public function read()
-    {
-        //$this->thing->log("read");
-
-        //        $this->get();
-        return $this->state;
-    }
-*/
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "snowflake",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["snowflake", "refreshed_at"],
                 $time_string
             );
@@ -1376,15 +1358,15 @@ rgb
             $pdf = new Fpdi\Fpdi();
 
             $pdf->setSourceFile($this->default_pdf_page_template);
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $tplidx1 = $pdf->importPage(1, "/MediaBox");
             $pdf->addPage();
             $pdf->useTemplate($tplidx1, 0, 0, 215);
             $this->getNuuid();
-            $pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
+            $pdf->Image($this->nuuid_png, 5, 18, 20, 20, "PNG");
 
-            $pdf->Image($this->PNG_embed, 5, 5, 400, 400, 'PNG');
+            $pdf->Image($this->PNG_embed, 5, 5, 400, 400, "PNG");
             //$pdf->Image($this->PNG_embed, 5, 5, 20, 20, 'PNG');
 
             //$pdf->Image($this->PNG_embed, 5, 5, 5+$this->canvas_size_x, 5 + $this->canvas_size_y, 'PNG');
@@ -1401,7 +1383,7 @@ rgb
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
             //            $this->getUuid();
             //            $pdf->Image($this->uuid_png, 175, 5, 30, 30, 'PNG');
@@ -1413,7 +1395,7 @@ rgb
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(15, 10);
-            $t = $this->thing_report['sms'];
+            $t = $this->thing_report["sms"];
 
             $pdf->Write(0, $t);
 
@@ -1431,16 +1413,16 @@ rgb
             }
 
             ob_start();
-            $image = $pdf->Output('', 'I');
+            $image = $pdf->Output("", "I");
             $image = ob_get_contents();
             ob_clean();
 
-            $this->thing_report['pdf'] = $image;
+            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     public function readSubject()
@@ -1449,20 +1431,20 @@ rgb
 
         $pieces = explode(" ", strtolower($input));
 
-        if (strpos(strtolower($input), 'wall') !== false) {
+        if (strpos(strtolower($input), "wall") !== false) {
             $this->coordinate_position = "wall";
         }
 
-        if (strpos(strtolower($input), 'center') !== false) {
+        if (strpos(strtolower($input), "center") !== false) {
             $this->coordinate_position = "center";
         }
 
-        if (strpos(strtolower($input), 'centre') !== false) {
+        if (strpos(strtolower($input), "centre") !== false) {
             $this->coordinate_position = "centre";
         }
 
         if (count($pieces) == 1) {
-            if ($input == 'lattice') {
+            if ($input == "lattice") {
                 $this->getLattice();
 
                 if (
@@ -1487,7 +1469,7 @@ rgb
             foreach ($keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'word':
+                        case "word":
                             $this->max = sqrt(128) + 6;
                             //$this->max = 24;
 
@@ -1497,7 +1479,7 @@ rgb
 
                             return;
 
-                        case 'uuid':
+                        case "uuid":
                             $this->max = sqrt(128) + 6;
                             //$this->max = 24;
 
@@ -1507,16 +1489,16 @@ rgb
 
                             return;
 
-                        case 'iterate':
+                        case "iterate":
                             $this->thing->log(
                                 $this->agent_prefix .
-                                    'received a command to update the snowflake.',
+                                    "received a command to update the snowflake.",
                                 "INFORMATION"
                             );
                             $this->updateLattice();
                             return;
 
-                        case 'on':
+                        case "on":
                         //$this->setFlag('green');
                         //break;
 
@@ -1540,14 +1522,14 @@ rgb
         $this->lattice_size = 40;
         return;
 
-        if (strpos($input, 'uuid') !== false) {
+        if (strpos($input, "uuid") !== false) {
             //    $this->uuidSnowflake();
         }
 
         if ($this->agent_input == "lattice iterate") {
             $this->thing->log(
                 $this->agent_prefix .
-                    'received a command to update the snowflake.',
+                    "received a command to update the snowflake.",
                 "INFORMATION"
             );
             $this->updateLattice();

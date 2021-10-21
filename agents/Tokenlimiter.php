@@ -34,7 +34,7 @@ class Tokenlimiter {
 
         // Call the TokenLimiter which will then 'on-call' the service you are requesting.
 
-        $this->tokens = array('red', 'red', 'blue', 'red', 'sms', 'facebook', 'slack', 'email','ntp');
+        $this->tokens = array('red', 'red', 'blue', 'red', 'sms', 'facebook', 'slack', 'email','ntp', 'discord');
 
         // Set default rate at 1 per 15 minutes.
         $this->token_window = 30;
@@ -42,17 +42,14 @@ class Tokenlimiter {
 
 
 
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("tokenlimiter", "refreshed_at") );
+        $time_string = $this->thing->Read( array("tokenlimiter", "refreshed_at") );
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $time_string );
+            $time_string = $this->thing->time();
+            $this->thing->Write( array("tokenlimiter", "refreshed_at"), $time_string );
         }
 
-        $this->thing->json->setField("variables");
-        $tokens = $this->thing->json->readVariable( array("tokenlimiter", "tokens") );
+        $tokens = $this->thing->Read( array("tokenlimiter", "tokens") );
 
 
         if ($tokens == false) {
@@ -74,8 +71,6 @@ class Tokenlimiter {
         }
 
 
-        //                echo "<pre>Available tokens"; print_r($this->tokens); echo "</pre>";
-
         // Does agent input have a clear token request
 
 
@@ -90,13 +85,10 @@ class Tokenlimiter {
         foreach ($this->tokens as $key=>$token) {
             if ($token == $this->token_request) {
 
-                //    echo "found";
-
                 unset($this->tokens[$key]);
 
 
-                $this->thing->json->setField("variables");
-                $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
+                $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
                 //callAgent($this->thing->uuid, $token);
                 $c = new Callagent($this->thing);
@@ -112,10 +104,6 @@ class Tokenlimiter {
 
         $this->thing_report['token'] = false;
 
-        //$this->thing->json->setField("variables");
-        //$this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
-
-        //             $this->thing->log("<pre>Token issue" . print_r($this->tokens) . "</pre>");
 
         $this->thing->log( 'Agent "Token Limiter" did not provide a Token.' );
 
@@ -124,35 +112,8 @@ class Tokenlimiter {
 
         return;
 
-
-        //function __construct($arguments) {
-
-        //  $defaults = array(
-        //    'uuid' => Uuid::uuid4(),
-        //    'from' => NULL,
-        // 'to' => NULL,
-        // 'subject' => NULL,
-        // 'sqlresponse' => NULL
-        //  );
-
-        //  $arguments = array_merge($defaults, $arguments);
-
-        //  echo $arguments['firstName'] . ' ' . $arguments['lastName'];
-
-
-
         $this->test= "Development code";
 
-
-        //  $this->container['api'] = function ($c) {
-        //   $db = $c['settings']['api'];
-        //   return $db;
-        //   };
-
-        //  $this->api_key = $this->container['api']['translink'];
-
-
-        //  $thingy = $thing->thing;
         $this->thing = $thing;
 
 
@@ -174,21 +135,7 @@ class Tokenlimiter {
         $this->thing->log( '<pre> Agent "Tokenlimiter" running on Thing ' .  $this->thing->nuuid . '.</pre>');
         $this->thing->log( '<pre> Agent "Tokenlimiter" received this Thing "' .  $this->subject . '".</pre>');
 
-        //echo "construct email responser";
-
-        //$this->thing->account->scalar = new Account($this->uuid,
-
-        //  $scalar_amount = 0;
-        //  $this->createAccount($scalar_amount); // Yup
-
-
-        // Read the subject as passed to this class.
-
-        //echo '<pre> Agent "Tokenlimiter" start state is ';
         $this->state = $thing->choice->load('token'); //this might cause problems
-        //echo $this->thing->getState('usermanager');
-        //echo $this->state;
-        //echo'"</pre>';
 
         $balance = array('amount'=>0, 'attribute'=>'transferable', 'unit'=>'tokens');
         $t = $this->thing->newAccount($this->uuid, 'token', $balance); //This might be a problem
@@ -213,17 +160,7 @@ class Tokenlimiter {
 
         // So just return the contents of thing.  false if it doesn't exist.
 
-        //return $this->getThing();
-
-        //echo '<pre> Agent "Tokenlimiter" end state is ';
         $this->state = $thing->choice->load('token');
-        //echo $this->thing->getState('usermanager');
-        //      echo $this->state;
-        //    echo'"</pre>';
-
-
-
-        //  echo '<pre> Agent "Tokenlimiter" completed</pre>';
 
         return;
 
@@ -237,17 +174,12 @@ class Tokenlimiter {
      */
     function initTokens() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
+        $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
-        $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'sms', 'facebook', 'slack', 'email', 'satoshi', 'satoshi', 'microsoft','ntp');
+        $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'sms', 'facebook', 'slack', 'email', 'satoshi', 'satoshi', 'microsoft','ntp', 'discord');
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
+        $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
-        //                        echo "<pre>Tokens refreshed" ; print_r($this->tokens); echo "</pre>";
-
-        return;
     }
 
 
@@ -256,32 +188,21 @@ class Tokenlimiter {
      */
     function refreshTokens() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
+        $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
         $this->tokens = array('red', 'red', 'blue', 'red', 'orange', 'orange', 'satoshi');
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
-
-        //                        echo "<pre>Tokens refreshed" ; print_r($this->tokens); echo "</pre>";
-
-        return;
+        $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
     }
 
     function revokeTokens() {
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "refreshed_at"), $this->thing->json->time() );
+        $this->thing->Write( array("tokenlimiter", "refreshed_at"), $this->thing->time() );
 
         $this->tokens = array();
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable( array("tokenlimiter", "tokens"), $this->tokens );
+        $this->thing->Write( array("tokenlimiter", "tokens"), $this->tokens );
 
-        //                        echo "<pre>Tokens refreshed" ; print_r($this->tokens); echo "</pre>";
-
-        return;
     }
 
 
@@ -294,9 +215,6 @@ class Tokenlimiter {
 
 
 
-
-    // -----------------------
-
     /**
      *
      */
@@ -307,20 +225,12 @@ class Tokenlimiter {
 
         $this->thing->flagGreen();
 
-
         // Generate email response.
 
         $to = $this->thing->from;
         $from = "token";
 
-        //  echo "<br>";
-
-
-
         $choices = $this->thing->choice->makeLinks($this->state);
-        //  echo "<br>";
-        //echo $html_links;
-
 
         $test_message = 'Last thing heard: "' . $this->subject . '".  Your next choices are [ ' . $choices['link'] . '].';
         $test_message .= '<br>Hive state: ' . $this->state . '<br>';
@@ -328,13 +238,6 @@ class Tokenlimiter {
         $this->thing->email->sendGeneric($to, $from, $this->subject, $test_message, $choices);
 
         $this->thing_report = array('thing' => $this->thing->thing, 'choices' => $choices, 'info' => 'This is a hive state engine.', 'help' => 'Ants.  Lots of ants.');
-
-
-        //echo '<pre> Agent "Account" email NOT sent to '; echo $to; echo ' </pre>';
-        //echo $message;
-
-        return;
-
 
     }
 
@@ -345,14 +248,9 @@ class Tokenlimiter {
      */
     public function readSubject() {
 
-        //test
-        //echo "meep";
-        //$this->middenwork();
-
         $this->response = null;
 
         if ($this->state == null) {
-            //echo "tokenlimiter detected state null - run subject discriminator";
 
 
 
@@ -361,7 +259,6 @@ class Tokenlimiter {
                 $this->create();
                 break;
             case "token store":
-                //$this->kill();
                 break;
             case "token use":
                 $this->thing->choice->Choose("token use");
@@ -376,9 +273,6 @@ class Tokenlimiter {
 
 
         $this->state = $this->thing->choice->load('token');
-
-        //echo "this state is " .$this->state;
-        //echo "meep";
 
         // Will need to develop this to only only valid state changes.
 
@@ -410,19 +304,6 @@ class Tokenlimiter {
 
             break;
         default:
-            //echo "not found";
-
-            // this case really shouldn't happen.
-            // but it does when a web button lands us here.
-
-
-            //if (rand(0,5)<=3) {
-            //         $this->thing->choice->Create('hive', $this->node_list, "inside nest");
-            //} else {
-            // $this->thing->choice->Create('hive', $this->node_list, "midden work");
-            //}
-
-
 
         }
 

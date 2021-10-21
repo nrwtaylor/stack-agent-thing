@@ -26,11 +26,9 @@ class Authority extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-
         $this->authority['refreshed_at'] = $this->current_time;
 
-        $this->thing->json->writeVariable(["authority"], $this->authority);
+        $this->thing->Write(["authority"], $this->authority);
     }
 
     public function isAuthority($authority = null)

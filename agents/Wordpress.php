@@ -129,7 +129,6 @@ class Wordpress extends Agent
     public function randomPost()
     {
         $n = get_posts(['orderby' => 'rand', 'posts_per_page' => 1]);
-        //var_dump($n);
         $post_id = $n[0]->ID;
 
         return $post_id;
@@ -235,7 +234,6 @@ class Wordpress extends Agent
         $this->sms_message = "WORDPRESS | Content. Autommatic. ";
         $this->sms_message .= $this->response;
 
-        //        $this->sms_message .= " | TEXT WATSON";
         $this->thing_report['sms'] = $this->sms_message;
     }
 

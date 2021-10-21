@@ -32,7 +32,7 @@ class Call extends Agent
 
         $this->node_list = ["call" => ["call", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->initCall();
     }
@@ -107,9 +107,12 @@ class Call extends Agent
      */
     public function initCall()
     {
-
-        $this->recognized_services = ['zoom','webex','gotomeeting','mailchimp'];
-
+        $this->recognized_services = [
+            "zoom",
+            "webex",
+            "gotomeeting",
+            "mailchimp",
+        ];
     }
 
     public function textCall($call = null)
@@ -180,16 +183,14 @@ class Call extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "call",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["call", "refreshed_at"],
                 $time_string
             );
@@ -199,40 +200,51 @@ class Call extends Agent
     // TODO: Test extraction of telephone numbers
     public function readCall($text = null)
     {
-        $service = "X";
+
+        $service_name = "X";
         $password = "X";
         $access_code = "X";
         $url = "X";
         $urls = [];
         $host_url = "X";
         $telephone_numbers = [];
-
         $urls = $this->extractUrls($text);
         $telephone_numbers = $this->extractTelephonenumbers($text);
 
-	$services = ['zoom','webex','gotomeeting','mailchimp'];
-        foreach($this->recognized_services as $i=>$service) {
+        $services = ["zoom", "webex", "gotomeeting", "mailchimp"];
+        foreach ($this->recognized_services as $i => $service) {
+            $is_service_flag = $this->{"is" . ucwords($service)}($text);
+            $count = 0;
+            if ($is_service_flag) {
 
-	   $is_service_flag = $this->{"is" . ucwords($service)}($text);
-$count = 0;
-        if ($is_service_flag) { // True service matches
-$count += 1;
-if ($count > 1) {continue;} // Take first matching service.
-
-            $this->thing->{$service . "_handler"}->{"read".ucwords($service)}($text);
-
-            $password = $this->thing->{$service . "_handler"}->password;
-            $access_code = $this->thing->{$service . "_handler"}->access_code;
-            $url = $this->thing->{$service . "_handler"}->url;
-            $urls = $this->thing->{$service . "_handler"}->urls;
-            $host_url = $this->thing->{$service . "_handler"}->host_url;
-            $telephone_numbers = $this->thing->{$service . "_handler"}->telephone_numbers;
+                // True service matches
+                $count += 1;
+                if ($count > 1) {
+                    continue;
+                } // Take first matching service.
+                $this->thing->{$service . "_handler"}->{"read" .
+                    ucwords($service)}($text);
+                $service_name = $service;
+                $password = $this->thing->{$service . "_handler"}->password;
+                $access_code =
+                    $this->thing->{$service . "_handler"}->access_code;
+                $url = $this->thing->{$service . "_handler"}->url;
+                $urls = isset($this->thing->{$service . "_handler"}->urls)
+                    ? $this->thing->{$service . "_handler"}->urls
+                    : [];
+                $host_url = $this->thing->{$service . "_handler"}->host_url;
+                $telephone_numbers =
+                    $this->thing->{$service . "_handler"}->telephone_numbers;
+            }
         }
 
+        // No URL? Try a general search for a
+        // paragraph with join a webinar and a url in it.
+        if (($url === false) or ($url == "X")) {
+            $url = $this->urlWebinar($text);
         }
-
         $call = [
-            "service" => $service,
+            "service" => $service_name,
             "password" => $password,
             "access_code" => $access_code,
             "url" => $url,
@@ -358,7 +370,6 @@ if ($count > 1) {continue;} // Take first matching service.
         }
 
         $this->input = $input;
-
         $this->readCall($input);
 
         if (strtolower($input) == "next call") {

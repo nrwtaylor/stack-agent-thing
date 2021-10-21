@@ -3,8 +3,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 //namespace Twitter;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 //use Abraham\TwitterOAuth\TwitterOAuth;
@@ -14,35 +14,44 @@ ini_set("allow_url_fopen", 1);
 
 class Twitter extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
         $this->cost = 50;
 
+        $this->keywords = ["twitter", "channel", "tweet", "hashtag"];
+
         $this->test = "Development code";
 
-        $this->thing_report['info'] = 'This is a twitter message agent.';
+        $this->thing_report["info"] = "This is a twitter message agent.";
 
-        $this->api_key = $this->thing->container['api']['twitter']['api_key'];
+        $this->initTwitter();
+        $this->tweeted_words_location = $this->settingsAgent([
+            "twitter",
+            "tweeted_words_location",
+        ]);
+
+        $this->node_list = ["twitter" => ["twitter"]];
+    }
+
+    public function initTwitter()
+    {
+        $this->api_key = $this->thing->container["api"]["twitter"]["api_key"];
         $this->api_secret =
-            $this->thing->container['api']['twitter']['api_secret'];
+            $this->thing->container["api"]["twitter"]["api_secret"];
 
         $this->access_token =
-            $this->thing->container['api']['twitter']['access_token'];
+            $this->thing->container["api"]["twitter"]["access_token"];
         $this->access_token_secret =
-            $this->thing->container['api']['twitter']['access_token_secret'];
-
-        $this->node_list = ["sms send" => ["sms send"]];
-
+            $this->thing->container["api"]["twitter"]["access_token_secret"];
     }
 
     public function nullAction()
     {
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
+        $names = $this->thing->Write(
             ["character", "action"],
-            'null'
+            "null"
         );
 
         $this->message = "TWITTER | Request not understood. | TEXT SYNTAX";
@@ -51,28 +60,119 @@ class Twitter extends Agent
         return $this->message;
     }
 
-    function makeTXT()
+    public function run()
     {
-        $file = '../temp/twitter_words.txt';
-        $current = "-";
-        file_put_contents($file, $current, FILE_APPEND | LOCK_EX);
+        $this->heardTwitter();
+        $this->affectTwitter();
+        $this->countTweets();
+    }
 
-        $current = file_get_contents($file);
+    public function countTweets() {
+       if (!isset($this->tweets)) {$count = true;} else {
 
+       $count = count($this->tweets);
+       }
+
+       $this->count_tweets = $count;
+       return $count;
+
+    }
+
+    public function heardTwitter()
+    {
+
+        $file = $this->tweeted_words_location;
+        if (!file_exists($file)) {
+            $this->error .= "Tweeted words location not available. ";
+            return true;
+        }
+
+        $contents = file_get_contents($file);
+
+        if ($contents === false) {
+            $this->error .= "No tweeted words resource retrieved. ";
+            return true;
+        }
+
+        // Get unique tokens
+        $tokens = [];
         foreach ($this->tweets as $k => $v) {
-            //var_dump($v);
-            $pieces = explode(" ", strtolower($v['text']));
+            $pieces = explode(" ", strtolower($v["text"]));
             foreach ($pieces as $piece) {
-                echo $piece;
-
-                $this->findWord('affect', $piece);
+                $tokens[] = $piece;
             }
         }
-//        exit();
-        // Append a new person to the file
-        $current .= "John Smith\n";
-        // Write the contents back to the file
-        file_put_contents($file, $current, FILE_APPEND | LOCK_EX);
+        $tokens = array_unique($tokens);
+
+        // Write tokens not previously seen
+        foreach ($tokens as $token) {
+            if (stripos($contents, $token) !== false) {
+                $t = trim($token) . "\n";
+                file_put_contents($file, $t, FILE_APPEND | LOCK_EX);
+            }
+        }
+
+    }
+
+    public function makeTXT()
+    {
+        $txt = "";
+        foreach ($this->tweets as $index => $tweet) {
+            $txt .= $tweet["text"] . "\n";
+            $txt .= $tweet["created_at"] . "\n";
+        }
+
+        $this->txt = $txt;
+        $this->thing_report["txt"] = $txt;
+    }
+
+    public function makeSnippet()
+    {
+        $web = "";
+        if (isset($this->channel)) {
+        $web .= "Channel: ".  $this->channel;
+        $web .= "<p>";
+        }
+        if (isset($this->tweets)) {
+            $web .= "<ul>";
+            foreach ($this->tweets as $index => $tweet) {
+                $web .=
+                    "<li><div>" . $this->restoreUrl($tweet["text"]) . "</div>";
+                $web .= "<div>" . $tweet["created_at"] . "</div>";
+                if (isset($tweet["affect"])) {
+                    $web .=
+                        "<div>" .
+                        $tweet["affect"]["affect"] .
+                        " (" .
+                        $tweet["affect"]["pleasantness"] .
+                        " " .
+                        $tweet["affect"]["activation"] .
+                        ")" .
+                        "</div>";
+                }
+            }
+            $web .= "</ul>";
+
+        }
+        $web .= "<p>";
+        $web .= "Affect: " . $this->affect . " for this set";
+        $web .= "<br>";
+        $web .= "Tweets counted: " . $this->count_tweets;
+        $web .= "<br>";
+        $web .= "Tweet affect: " . round($this->affect / $this->count_tweets,1) . " per tweet";
+
+
+        $this->snippet = $web;
+        $this->thing_report["snippet"] = $web;
+    }
+
+    public function makeWeb()
+    {
+        $web = "";
+        $web .= $this->snippet;
+
+        $this->web = $web;
+        $this->thing_report["web"] = $web;
     }
 
     function findWord($librex, $searchfor)
@@ -84,74 +184,39 @@ class Twitter extends Agent
         switch ($librex) {
             case null:
             // Drop through
-            case 'affect':
-                $file = '/var/www/html/stackr.ca/temp/twitter_words.txt';
+            case "affect":
+                $file =
+                    $this->resource_path . "twitter/twitter_words_affect.txt";
                 $contents = file_get_contents($file);
                 break;
             default:
-                $file = '/var/www/html/stackr.ca/resources/word/words.txt';
+                $file = $this->resource_path . "word/words.txt";
         }
-        //        header('Content-Type: text/plain');
-        //        $pattern = preg_quote($searchfor, '/');
-        // finalise the regular expression, matching the whole line
-        //  $pattern = "/^.*$pattern.*\$/m";
         $pattern = "|\b($searchfor)\b|";
 
-        echo "foo";
-        var_dump($contents);
-        echo "bar";
-        exit();
+        // dev
+        return;
+
         // search, and store all matching occurences in $matches
 
         if (preg_match_all($pattern, $contents, $matches)) {
-            //echo "Found matches:\n";
-            //$m = implode("\n", $matches[0]);
 
             $m = $matches[0][0];
             return $m;
         } else {
-            //echo "no found";
             return false;
-            //echo "No matches found";
         }
     }
 
     public function respondResponse()
     {
-        // Thing actions
-
         $this->thing->flagGreen();
 
-        // Generate email response.
+        $message_thing = new Message($this->thing, $this->thing_report);
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
 
-//        $to = $this->from;
-/*
-        if ($this->agent_input != null) {
-            $test_message = $this->agent_input;
-        } else {
-            $test_message = $this->subject;
-        }
-*/
-//        $this->makeSMS();
-
-        $this->thing_report['info'] =
-            '<pre> Agent "Twitter" sent a twitter message to ' .
-            $this->from .
-            '.</pre>';
-
-        if ($this->agent_input == null) {
-            $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
-
-            echo $this->sms_message;
-        }
-
-//        $this->makeHelp();
-
-        $this->thing_report['choices'] = false;
-        $this->thing_report['help'] = 'In development.';
-        $this->thing_report['log'] = $this->thing->log;
-
+        $this->thing_report["choices"] = false;
+        $this->thing_report["help"] = "In development.";
     }
 
     function makeHelp()
@@ -160,78 +225,54 @@ class Twitter extends Agent
 
     public function readSubject()
     {
-        //        $this->getAffect();
-        //        $this->getTweets();
-
-        /*      No reading to be done.
- 		if ( !is_numeric($this->from) ) {
-			// This isn't a textable number.
-			return true;
-		}
-*/
-
-        $emoji_thing = new Emoji($this->thing, "emoji");
-        $thing_report = $emoji_thing->thing_report;
-
-        if (isset($emoji_thing->emojis)) {
-            $input = ltrim(strtolower($emoji_thing->translated_input));
+        $input = $this->input;
+        $this->score = 1;
+        if (stripos($input, "twitter") !== false) {
+            $this->score = $this->score * 10;
+        }
+        if (stripos($input, "tweet") !== false) {
+            $this->score = $this->score * 10;
         }
 
-        $this->response = null;
+        $filtered_input = $this->assert($this->input, "twitter", false);
 
-        $keywords = ['twitter'];
-
-        //$input = strtolower($this->subject);
-
-        $prior_uuid = null;
-
-        $pieces = explode(" ", strtolower($input));
-
-        if (count($pieces) == 1) {
-            $input = $this->subject;
-
-            if (strtolower($input) == 'twitter') {
-                $this->randomTweet();
-                return;
-            }
+        if ($filtered_input == "") {
+            $this->score = 20;
+            $this->randomTweet();
+            return;
         }
+
+        $pieces = explode(" ", strtolower($filtered_input));
 
         foreach ($pieces as $key => $piece) {
-            foreach ($keywords as $command) {
+            foreach ($this->keywords as $command) {
                 if (strpos(strtolower($piece), $command) !== false) {
                     switch ($piece) {
-                        case 'twitter':
-                            $prefix = 'twitter';
+                        case "channel":
+                            $this->score = $this->score * 10;
+                            $prefix = "channel";
                             $words = preg_replace(
-                                '/^' . preg_quote($prefix, '/') . '/',
-                                '',
+                                "/^" . preg_quote($prefix, "/") . "/",
+                                "",
                                 $input
                             );
                             $words = ltrim($words);
 
                             $this->channel = $words;
-                            //exit();
 
-                            //                            $this->Get($words);
                             $this->randomTweet();
-
+                            $this->response .=
+                                "Saw a twitter channel request. ";
                             return;
 
                         default:
-
-                        //echo 'default';
                     }
                 }
             }
         }
+        $this->channel = $filtered_input;
+        $this->randomTweet();
 
-        //        $this->getAffect();
-
-        $this->nullAction();
-
-        return "Message not understood";
-
-        //return false;
     }
 
     function makeMessage($message = null)
@@ -294,16 +335,13 @@ class Twitter extends Agent
 
     function makeSMS()
     {
-        //echo "meep";
-        //        $this->sms_message = "test";
         if (!isset($this->sms_message)) {
             if (!isset($this->random_tweet)) {
                 $this->random_tweet = "test";
             }
-            $this->sms_message = $this->random_tweet['text'];
+            $this->sms_message = $this->random_tweet["text"];
         }
-        $this->thing_report['sms'] = "TWITTER | " . $this->sms_message;
-        //echo $this->sms_message;
+        $this->thing_report["sms"] = "TWITTER | " . $this->sms_message;
     }
 
     function makeBasicMessage($message = null)
@@ -339,7 +377,6 @@ class Twitter extends Agent
             // Build tweet from $to and $text.
         }
 
-        //$to = "id";
         $this->tweet = "#test";
 
         $this->connection = new \Abraham\TwitterOAuth\TwitterOAuth(
@@ -348,31 +385,12 @@ class Twitter extends Agent
             $this->access_token,
             $this->access_token_secret
         );
-        $this->content = $this->connection->get('account/verify_credentials');
+        $this->content = $this->connection->get("account/verify_credentials");
 
         $this->statuses = $this->connection->get("search/tweets", [
             "q" => "twitterapi",
         ]);
 
-        echo "<br>";
-        //var_dump($this->content);
-        var_dump($this->statuses);
-        var_dump(count($this->statuses));
-        echo "<br>";
-
-        var_dump($this->twitterOK());
-        exit();
-
-        //                        $connection->post('statuses/update', array('status' => $this->tweet));
-        if ($connection->getLastHttpCode() === 200) {
-            echo '<p><strong>Your latest tweet:</strong> ' .
-                $tweet .
-                '</p>' .
-                PHP_EOL;
-        } else {
-            echo '<p><strong>Error:</strong> A problem ocurred. You filled your Twitter credentials correctly? Or walk abusing the Twitter API?</p>' .
-                PHP_EOL;
-        }
     }
 
     function randomTweet()
@@ -380,49 +398,37 @@ class Twitter extends Agent
         if (!isset($this->tweets)) {
             $this->getTweets();
         }
-        //echo count($this->tweets);
-        //exit();
-
-        $i = rand(1, count($this->tweets));
+        $i = rand(0, count($this->tweets) - 1);
         $this->random_tweet = $this->tweets[$i];
 
-        var_dump($this->random_tweet);
+        return $this->random_tweet;
     }
 
-    function getPleasantness()
+    function affectTweet($tweet = null)
     {
-        // The free dictionary
-        // 1. Giving or affording pleasure or enjoyment; agreeable:
-        // a pleasant scene; pleasant sensations.
-        // 2. Pleasing in manner, behavior, or appearance.
-
-        // Going to focus on the first.
-
-        if (!isset($this->tweets)) {
-            $this->getTweets();
+        if ($tweet === null) {
+            return 0;
         }
 
-        foreach ($this->tweets as $tweet) {
-            echo $tweet['text'];
-        }
+        $a = $this->countActivations($tweet["text"]);
+        $p = $this->countPleasantness($tweet["text"]);
+
+        return [
+            "activation" => $a,
+            "pleasantness" => $p,
+            "affect" => ($a + 1) * ($p + 1),
+        ];
     }
 
-    function getActivation()
+    function affectTwitter()
     {
-        if (!isset($this->tweets)) {
-            $this->getTweets();
+        $score = 0;
+        foreach ($this->tweets as $i => $tweet) {
+            $affect = $this->affectTweet($tweet);
+            $this->tweets[$i]["affect"] = $affect;
+            $score = $score + $affect['affect'];
         }
-
-        foreach ($this->tweets as $tweet) {
-            echo $tweet['created_at'];
-            echo "<br>";
-        }
-    }
-
-    function getAffect()
-    {
-        $this->getPleasantness(); // Negative to Positive computed ranges
-        $this->getActivation(); // Negative to Positive computed ranges
+        $this->affect = $score;
     }
 
     function getTweets($channel = null)
@@ -435,10 +441,7 @@ class Twitter extends Agent
             }
         }
 
-        //$to = "id";
         $this->tweet = "#test";
-
-        //require_once '/var/www/html/stackr.ca/vendor/abraham/twitteroauth/src/TwitterOAuth.php';
 
         $this->connection = new \Abraham\TwitterOAuth\TwitterOAuth(
             $this->api_key,
@@ -446,28 +449,21 @@ class Twitter extends Agent
             $this->access_token,
             $this->access_token_secret
         );
-        //                        $this->content = $this->connection->get('account/verify_credentials');
-        //var_dump($channel);
-        //exit();
+
         $this->statuses = $this->connection->get("search/tweets", [
             "q" => $channel,
         ]);
 
-        echo "<br>";
         $this->tweets = [];
-        //var_dump($this->content);
-        foreach ($this->statuses->statuses as $k => $v) {
-            //var_dump($v->text);
 
+        foreach ($this->statuses->statuses as $k => $v) {
             $this->tweets[] = [
                 "text" => $v->text,
                 "created_at" => $v->created_at,
             ];
-            //echo "<br>---<br>";
         }
-        //echo "<br>";
 
-        if ($this->twitterOK() != 'green') {
+        if ($this->twitterOK() != "green") {
             return true;
         }
 
@@ -477,14 +473,17 @@ class Twitter extends Agent
     function twitterOK()
     {
         if ($this->connection->getLastHttpCode() === 200) {
-            echo '<p><strong>Your latest twitter request was OK.</p>' . PHP_EOL;
-            return 'green';
+            $this->response .=  "Your latest twitter request was OK. ";
+            return "green";
         } else {
-            echo '<p><strong>Error:</strong> A problem ocurred. You filled your Twitter credentials correctly? Or walk abusing the Twitter API?</p>' .
-                PHP_EOL;
-            return 'red';
+            $this->error .= "Error: A problem ocurred reading Twitter. ";
+            return "red";
         }
     }
+
+    // TODO
+    // Create code to post tweets through Twitter API.
+    // Outline code from Facebook here.
 
     function sendMessage($to, $text)
     {
@@ -527,7 +526,7 @@ class Twitter extends Agent
 
         //API Url
         $url =
-            'https://graph.facebook.com/v2.6/me/messages?access_token=' .
+            "https://graph.facebook.com/v2.6/me/messages?access_token=" .
             $this->page_access_token;
 
         //Initiate cURL.
@@ -570,7 +569,7 @@ class Twitter extends Agent
 
         //Set the content type to application/json
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
+            "Content-Type: application/json",
         ]);
         //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
 
@@ -579,17 +578,14 @@ class Twitter extends Agent
             $result = curl_exec($ch);
         }
 
-        $this->thing->json->setField("variables");
-        $names = $this->thing->json->writeVariable(
-            ["facebook", "result"],
+        $names = $this->thing->Write(
+            ["twitter", "result"],
             $result
         );
-        $time_string = $this->thing->json->time();
-        $this->thing->json->writeVariable(
-            ["facebook", "refreshed_at"],
+        $time_string = $this->thing->time();
+        $this->thing->Write(
+            ["twitter", "refreshed_at"],
             $time_string
         );
-
-        return;
     }
 }

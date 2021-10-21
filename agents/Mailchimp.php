@@ -30,7 +30,7 @@ class Mailchimp extends Agent
 
         $this->node_list = ["mailchimp" => ["mailchimp", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->initMailchimp();
     }
@@ -167,16 +167,14 @@ class Mailchimp extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "mailchimp",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["mailchimp", "refreshed_at"],
                 $time_string
             );

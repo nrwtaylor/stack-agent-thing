@@ -12,8 +12,8 @@ namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 use setasign\Fpdi;
@@ -22,7 +22,7 @@ ini_set("allow_url_fopen", 1);
 
 class Day extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -35,18 +35,18 @@ class Day extends Agent
 
         $this->thing_report["info"] =
             "A DAY is the period from noon to noon in any given place.";
-        $this->thing_report["help"] = 'Click on the image for a PDF.';
+        $this->thing_report["help"] = "Click on the image for a PDF.";
 
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $command_line = null;
 
         $this->node_list = ["day" => ["day", "year", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         // Get some stuff from the stack which will be helpful.
-        $this->entity_name = $this->thing->container['stack']['entity_name'];
+        $this->entity_name = $this->thing->container["stack"]["entity_name"];
 
         $this->default_canvas_size_x = 2000;
         $this->default_canvas_size_y = 2000;
@@ -80,83 +80,93 @@ class Day extends Agent
         ];
 
         $this->default_prime_meridian_offset = 0;
-        $this->default_julian_correlation['mesoamerican'] = 584283; //GMT
+        $this->default_julian_correlation["mesoamerican"] = 584283; //GMT
 
         $this->initDay();
-
     }
 
-    public function initDay() {
+    public function initDay()
+    {
+        $time_agent = new Time($this->thing, "time");
+        $this->working_datum = $time_agent->datumtime($this->current_time);
 
         $this->long_count_rounds = [
-            'baktun' => 20,
-            'katun' => 20,
-            'tun' => 20,
-            'uinal' => 18,
-            'kin' => 20,
+            "baktun" => 20,
+            "katun" => 20,
+            "tun" => 20,
+            "uinal" => 18,
+            "kin" => 20,
         ];
 
-// Tzolk'in Calendar
+        // Tzolk'in Calendar
 
-// http://dylansung.tripod.com/sapienti/maya/maya.htm
-// https://mayaarchaeologist.co.uk/2016/12/31/maya-calendar-system/#2
-// https://en.wikipedia.org/wiki/Tzolk%CA%BCin
-// Count of days
+        // http://dylansung.tripod.com/sapienti/maya/maya.htm
+        // https://mayaarchaeologist.co.uk/2016/12/31/maya-calendar-system/#2
+        // https://en.wikipedia.org/wiki/Tzolk%CA%BCin
+        // Count of days
 
-// First item in array is the wikipedia,
-// 'Associated natural phenomena or meaning.
+        // First item in array is the wikipedia,
+        // 'Associated natural phenomena or meaning.
 
-// Index is the wikipedia Day Name.
+        // Index is the wikipedia Day Name.
 
         $this->tzolkin_days = [
-            'Imix' =>['Waterlily', 'Crocodile','Alligator','Birth','Water','Wine', 'Sea Dragon'],
-            'Ik'=>['Wind','Breath','Life force','Air','Life'],
-            'Akbal'=>['Darkness','Night', 'Early dawn'],
-            'Kan'=>['Net','Sacrifice','Sky'],
-            'Chicchan'=>['Cosmological snake','Snake'],
-            'Cimi'=>['Death'],
-            'Manik'=>['Deer'],
-            'Lamat'=>['Venus','Star','Ripe','Ripeness','Maize seeds'],
-            'Muluc'=>['Jade','Water', 'Offering','Moon'],
-            'Oc'=>['Dog'],
-            'Chuen'=>['Howler monkey','Ancestor'],
-            'Eb'=>['Rain','Tooth/Jaw'],
-            'Ben'=>['Green/young maize', 'Seed', 'Maize'],
-            'Ix'=>['Jaguar'],
-            'Men'=>['Eagle'],
-            'Cib'=>['Wax', 'Candle'],
-            'Caban'=>['Earth'],
-            'Etznab'=>['Flint','Obsidian'],
-            'Cauac'=>['Rain storm','Storm'],
-            'Ahau'=>['Lord','Ruler','Sun'],
+            "Imix" => [
+                "Waterlily",
+                "Crocodile",
+                "Alligator",
+                "Birth",
+                "Water",
+                "Wine",
+                "Sea Dragon",
+            ],
+            "Ik" => ["Wind", "Breath", "Life force", "Air", "Life"],
+            "Akbal" => ["Darkness", "Night", "Early dawn"],
+            "Kan" => ["Net", "Sacrifice", "Sky"],
+            "Chicchan" => ["Cosmological snake", "Snake"],
+            "Cimi" => ["Death"],
+            "Manik" => ["Deer"],
+            "Lamat" => ["Venus", "Star", "Ripe", "Ripeness", "Maize seeds"],
+            "Muluc" => ["Jade", "Water", "Offering", "Moon"],
+            "Oc" => ["Dog"],
+            "Chuen" => ["Howler monkey", "Ancestor"],
+            "Eb" => ["Rain", "Tooth/Jaw"],
+            "Ben" => ["Green/young maize", "Seed", "Maize"],
+            "Ix" => ["Jaguar"],
+            "Men" => ["Eagle"],
+            "Cib" => ["Wax", "Candle"],
+            "Caban" => ["Earth"],
+            "Etznab" => ["Flint", "Obsidian"],
+            "Cauac" => ["Rain storm", "Storm"],
+            "Ahau" => ["Lord", "Ruler", "Sun"],
         ];
 
         $this->haab_months = [
-            'Pop'=>['mat'],
-            "Wo'"=>["black conjunction"],
-            'Sip'=>["red conjunction"],
-            "Sotz'"=>["bat"],
-            'Sek'=>["death"],
-            'Xul'=>["dog"],
-            "Yaxk'in"=>["new sun"],
-            'Mol'=>["water"],
-            "Ch'en"=>["black storm"],
-            'Yax'=>["green storm"],
-            'Sak'=>["white storm"],
-            'Keh'=>["red storm"],
-            'Mak'=>["enclosed"],
-            "K'ank'in"=>["yellow sun"],
-            'Muwan'=>["owl"],
-            'Pax'=>["planting time"],
-            "K'ayab"=>["turtle"],
-            "Kumk'u"=>["granary"],
-            "Wayeb'"=>["five unlucky days"],
+            "Pop" => ["mat"],
+            "Wo'" => ["black conjunction"],
+            "Sip" => ["red conjunction"],
+            "Sotz'" => ["bat"],
+            "Sek" => ["death"],
+            "Xul" => ["dog"],
+            "Yaxk'in" => ["new sun"],
+            "Mol" => ["water"],
+            "Ch'en" => ["black storm"],
+            "Yax" => ["green storm"],
+            "Sak" => ["white storm"],
+            "Keh" => ["red storm"],
+            "Mak" => ["enclosed"],
+            "K'ank'in" => ["yellow sun"],
+            "Muwan" => ["owl"],
+            "Pax" => ["planting time"],
+            "K'ayab" => ["turtle"],
+            "Kumk'u" => ["granary"],
+            "Wayeb'" => ["five unlucky days"],
         ];
-
     }
 
     public function runDay($text = null)
     {
+        /*
         $longitude_agent = new Longitude($this->thing, "longitude");
 
         // Cannot calculate local time without knowing longitude.
@@ -168,26 +178,30 @@ class Day extends Agent
 
         $latitude_agent = new Latitude($this->thing, "latitude");
         $latitude = $latitude_agent->latitude;
-
-        if ($latitude === false) {
-           $this->response .= "Latitude not known. ";
+*/
+        if ($this->latitude === false) {
+            $this->response .= "Latitude not known. ";
         }
 
-	if (($latitude === false) or ($longitude === false)) {
+        if ($this->latitude === false or $this->longitude === false) {
             return true;
-	}
+        }
 
         $timestamp_epoch = time();
         if ($text != null) {
             $timestamp_epoch = strtotime($text);
         }
 
-        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
-
+        $solar_array = date_sun_info(
+            $timestamp_epoch,
+            $this->latitude,
+            $this->longitude
+        );
         $this->solar_array = $solar_array;
         $this->timestamp_epoch = $timestamp_epoch;
 
         $arr = [
+            //"night"=> "night",
             "astronomical twilight begin" => "astronomical twilight",
             "nautical twilight begin" => "nautical twilight",
             "civil twilight begin" => "civil twilight",
@@ -198,30 +212,62 @@ class Day extends Agent
             "nautical twilight end" => "astronomical twilight",
             "astronomical twilight end" => "night",
         ];
+
         $message = "";
         $count = 0;
-        foreach ($arr as $period => $epoch) {
-            $datum = $this->twilightDay($period);
-            if ($count == 0) {
-                $message .= $period . " " . $datum->format("Y/m/d G:i:s") . " ";
-            } else {
-                $message .= $period . " " . $datum->format("G:i:s") . " ";
-            }
-            $count += 1;
+        foreach (range(0, 1, 1) as $period_index) {
+            foreach ($arr as $period => $epoch) {
+                // The datum returned is when this event will happen
+                // as a DateTime (datum) object.
 
-            $variable_text = str_replace(" ", "_", $period);
+                $period_timestamp =
+                    $this->working_datum->getTimestamp() +
+                    $period_index * (60 * 60 * 24);
 
-            if ($this->solar_array[$variable_text] < $timestamp_epoch) {
-                $time_of_day = $period;
+                $e = strtotime($this->current_time);
+
+                $datum_projected = new \DateTime();
+                $datum_projected->setTimestamp($period_timestamp);
+                $datum = $this->twilightDay($period, $datum_projected);
+
+                if ($period_timestamp < $e) {
+                    continue;
+                }
+
+                if ($count == 0) {
+                    $message .=
+                        $period . " " . $datum->format("Y/m/d G:i:s") . " ";
+                } else {
+                    $message .=
+                        $period . " " . $datum_projected->format("G:i:s") . " ";
+                }
+                $count += 1;
+
+                $variable_text = str_replace(" ", "_", $period);
+
+                if ($this->solarDay($datum_projected)[$variable_text] < $timestamp_epoch) {
+//
+//                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
+                    $time_of_day = $period;
+                }
+                if ($count > 7) {
+                    break;
+                }
             }
         }
+        $day_time = "night";
 
-        $day_time = $arr[$time_of_day];
+        if (isset($time_of_day) and isset($arr[$time_of_day])) {
+            $day_time = $arr[$time_of_day];
+        }
 
-        $tz = $datum->getTimezone();
+        $tz = $datum_projected->getTimezone();
         $message .= $tz->getName();
 
-        if (isset($this->day_twilight_flag) and $this->day_twilight_flag == 'on') {
+        if (
+            isset($this->day_twilight_flag) and
+            $this->day_twilight_flag == "on"
+        ) {
             $this->message = strtoupper($day_time) . " " . $message;
         } else {
             $this->message = strtoupper($day_time);
@@ -229,23 +275,56 @@ class Day extends Agent
         $this->day_time = $day_time;
     }
 
-    public function twilightDay($text)
+    public function solarDay($text = null)
     {
+        $timestamp_epoch = time();
+
+        if ($text != null and is_string($text)) {
+            $timestamp_epoch = strtotime($text);
+        }
+
+        if (is_a($text, "DateTime")) {
+            $timestamp_epoch = $text->getTimestamp();
+        }
+
+        $solar_array = date_sun_info(
+            $timestamp_epoch,
+            $this->latitude,
+            $this->longitude
+        );
+
+        return $solar_array;
+    }
+
+    public function twilightDay($text, $datum = null)
+    {
+        if ($text == "night") {
+            $text = "astronomical twilight begin";
+        }
+
         $variable_text = str_replace(" ", "_", $text);
 
-        $seconds_to_event =
-            $this->solar_array[$variable_text] - $this->timestamp_epoch;
+        // $seconds_to_event =
+        //     $this->solar_array[$variable_text] - $this->timestamp_epoch;
 
-        $time_agent = new Time($this->thing, "time");
-        $working_datum = $time_agent->datumtime($this->current_time);
+        //$time_agent = new Time($this->thing, "time");
+        //$working_datum = $time_agent->datumtime($this->current_time);
+        $working_datum = $this->working_datum;
+        if ($datum != null) {
+            $working_datum = $datum;
+        }
+
+        $seconds_to_event =
+            $this->solarDay($working_datum)[$variable_text] -
+            $this->timestamp_epoch;
 
         if ($seconds_to_event < 0) {
             $working_datum->sub(
-                new \DateInterval('PT' . -1 * $seconds_to_event . 'S')
+                new \DateInterval("PT" . -1 * $seconds_to_event . "S")
             );
         } else {
             $working_datum->add(
-                new \DateInterval('PT' . $seconds_to_event . 'S')
+                new \DateInterval("PT" . $seconds_to_event . "S")
             );
         }
 
@@ -316,7 +395,7 @@ class Day extends Agent
             $text = "X";
         } else {
             $t = $this->retain_to;
-            $text = "GOOD UNTIL " . strtoupper(date('Y M d D H:i', $t));
+            $text = "GOOD UNTIL " . strtoupper(date("Y M d D H:i", $t));
             //$text = "CLICK FOR PDF";
         }
         $this->timestamp = $text;
@@ -335,7 +414,7 @@ class Day extends Agent
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         return $this->thing_report;
@@ -347,7 +426,7 @@ class Day extends Agent
     public function makeChoices()
     {
         $this->choices = false;
-        $this->thing_report['choices'] = $this->choices;
+        $this->thing_report["choices"] = $this->choices;
     }
 
     public function mesoamericanDay()
@@ -372,7 +451,7 @@ class Day extends Agent
         //$gmt_julian_day_number = 584283;
 
         $gmt_julian_day_number =
-            $this->default_julian_correlation['mesoamerican'];
+            $this->default_julian_correlation["mesoamerican"];
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
 
@@ -386,11 +465,12 @@ class Day extends Agent
 
         $t1_text = $numbered_days[$t1];
 
-
-        if (isset($this->day_translate_flag) and $this->day_translate_flag == 'on') {
+        if (
+            isset($this->day_translate_flag) and
+            $this->day_translate_flag == "on"
+        ) {
             $t1_text = ucwords($days[$t1_text][0]);
-        } 
-
+        }
 
         return $t1_text . " " . $t2;
     }
@@ -404,13 +484,13 @@ class Day extends Agent
         //$gmt_julian_day_number = 584283;
 
         $gmt_julian_day_number =
-            $this->default_julian_correlation['mesoamerican'];
+            $this->default_julian_correlation["mesoamerican"];
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
 
         $g = (($days_since_correlation + 8) % 9) + 1;
 
-        return 'G' . $g;
+        return "G" . $g;
     }
 
     public function haabDay()
@@ -422,7 +502,7 @@ class Day extends Agent
         //$gmt_julian_day_number = 584283;
 
         $gmt_julian_day_number =
-            $this->default_julian_correlation['mesoamerican'];
+            $this->default_julian_correlation["mesoamerican"];
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
 
@@ -441,10 +521,12 @@ class Day extends Agent
 
         $numbered_months = array_keys($months);
 
-
         $h1_text = $numbered_months[$h1];
 
-        if (isset($this->day_translate_flag) and $this->day_translate_flag == 'on') {
+        if (
+            isset($this->day_translate_flag) and
+            $this->day_translate_flag == "on"
+        ) {
             $h1_text = ucwords($months[$h1_text][0]);
         }
 
@@ -536,7 +618,7 @@ class Day extends Agent
         //$gmt_julian_day_number = 584283;
 
         $gmt_julian_day_number =
-            $this->default_julian_correlation['mesoamerican'];
+            $this->default_julian_correlation["mesoamerican"];
 
         $days_since_correlation = $julian_day_number - $gmt_julian_day_number;
 
@@ -557,14 +639,14 @@ class Day extends Agent
     {
         $sms = "DAY";
 
-        if (isset($this->day_julian_flag) and $this->day_julian_flag == 'on') {
+        if (isset($this->day_julian_flag) and $this->day_julian_flag == "on") {
             $julian_day_number = $this->julianDay();
             $sms .= " JD " . $julian_day_number;
         }
 
         if (
             isset($this->day_mesoamerican_flag) and
-            $this->day_mesoamerican_flag == 'on'
+            $this->day_mesoamerican_flag == "on"
         ) {
             $long_count_day = $this->longcountDay();
 
@@ -590,7 +672,7 @@ class Day extends Agent
 
         $sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
-        $this->thing_report['sms'] = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     /**
@@ -609,11 +691,11 @@ class Day extends Agent
         $message .=
             '<img src="' .
             $this->web_prefix .
-            'thing/' .
+            "thing/" .
             $uuid .
             '/day.png" alt="day" height="92" width="92">';
 
-        $this->thing_report['message'] = $message;
+        $this->thing_report["message"] = $message;
     }
 
     /**
@@ -622,17 +704,13 @@ class Day extends Agent
     public function setDay()
     {
         return;
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["day", "decimal"],
-            $this->decimal_day
-        );
+        $this->thing->Write(["day", "decimal"], $this->decimal_day);
 
         $this->thing->log(
             $this->agent_prefix .
-                ' saved decimal day ' .
+                " saved decimal day " .
                 $this->decimal_day .
-                '.',
+                ".",
             "INFORMATION"
         );
     }
@@ -643,6 +721,18 @@ class Day extends Agent
      */
     public function getDay()
     {
+        $longitude_agent = new Longitude($this->thing, "longitude");
+
+        // Cannot calculate local time without knowing longitude.
+        if ($longitude_agent->longitude === false) {
+            $this->response .= "Longitude not known. ";
+        }
+
+        $this->longitude = $longitude_agent->longitude;
+
+        $latitude_agent = new Latitude($this->thing, "latitude");
+        $this->latitude = $latitude_agent->latitude;
+
         return;
     }
 
@@ -664,7 +754,7 @@ class Day extends Agent
      */
     public function makeWeb()
     {
-        $link = $this->web_prefix . 'thing/' . $this->uuid . '/day.pdf';
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
         $this->node_list = ["day" => ["day"]];
         $web = "";
         $web .= '<a href="' . $link . '">';
@@ -672,7 +762,7 @@ class Day extends Agent
         $web .= "</a>";
         $web .= "<br>";
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**
@@ -680,10 +770,10 @@ class Day extends Agent
      */
     public function makeTXT()
     {
-        $txt = 'This is a DAY';
+        $txt = "This is a DAY";
         $txt .= "\n";
 
-        $this->thing_report['txt'] = $txt;
+        $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }
 
@@ -719,13 +809,13 @@ class Day extends Agent
         // Code from PHP Manual comment for generating decimal julian day.
         $julianDate = gregoriantojd($month, $day, $year);
         //correct for half-day offset
-        $dayfrac = date('G') / 24 - 0.5;
+        $dayfrac = date("G") / 24 - 0.5;
         if ($dayfrac < 0) {
             $dayfrac += 1;
         }
 
         //now set the fraction of a day
-        $frac = $dayfrac + (date('i') + date('s') / 60) / 60 / 24;
+        $frac = $dayfrac + (date("i") + date("s") / 60) / 60 / 24;
 
         $julianDate = $julianDate + $frac;
 
@@ -846,22 +936,22 @@ class Day extends Agent
         $size = $canvas_size_x - 90;
         $size = 20;
         $angle = 0;
-if (file_exists($font)) {
-        $bbox = imagettfbbox($size, $angle, $font, $text);
-        $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        $bbox["width"] =
-            max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
-            min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
-        $bbox["height"] =
-            max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
-            min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
-        //check width of the image
-        $width = imagesx($this->image);
-        $height = imagesy($this->image);
-        $pad = 0;
-}
+        if (file_exists($font)) {
+            $bbox = imagettfbbox($size, $angle, $font, $text);
+            $bbox["left"] = 0 - min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["top"] = 0 - min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            $bbox["width"] =
+                max($bbox[0], $bbox[2], $bbox[4], $bbox[6]) -
+                min($bbox[0], $bbox[2], $bbox[4], $bbox[6]);
+            $bbox["height"] =
+                max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
+                min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
+            extract($bbox, EXTR_PREFIX_ALL, "bb");
+            //check width of the image
+            $width = imagesx($this->image);
+            $height = imagesy($this->image);
+            $pad = 0;
+        }
         //        imagettftext($this->image, $size, $angle, $width/2-$bb_width/2, $height/2+ $bb_height/2, $this->black, $font, $text);
 
         //imagestring($this->image, 2, 140, 0, $this->thing->nuuid, $textcolor);
@@ -878,9 +968,8 @@ if (file_exists($font)) {
 
         ob_end_clean();
 
-        $this->thing_report['png'] = $imagedata;
+        $this->thing_report["png"] = $imagedata;
 
-        //echo '<img src="data:image/png;base64,'.base64_encode($imagedata).'"/>';
         $response =
             '<img src="data:image/png;base64,' .
             base64_encode($imagedata) .
@@ -898,7 +987,7 @@ if (file_exists($font)) {
         return $response;
 
         $this->PNG = $image;
-        $this->thing_report['png'] = $image;
+        $this->thing_report["png"] = $image;
 
         return;
     }
@@ -958,6 +1047,8 @@ if (file_exists($font)) {
 
     public function wedgeDay()
     {
+        imagesetthickness($this->image, 1);
+
         $size = null;
         if ($size == null) {
             $size = $this->size;
@@ -977,19 +1068,25 @@ if (file_exists($font)) {
         $center_x = $canvas_size_x / 2;
         $center_y = $canvas_size_y / 2;
 
+        $this->center_x = $center_x;
+        $this->center_y = $center_y;
+
         // devstack rotation not yet implemented
         if (!isset($this->angle)) {
             $this->angle = 0;
         }
 
-        $init_angle = (-1 * pi()) / 2;
+        $i = (-1 * pi()) / 2;
+        $this->init_angle = $i;
         $angle = (2 * 3.14159) / 24;
         //$x_pt =  230;
         //$y_pt = 230;
 
         foreach (range(0, 24 - 1, 1) as $i) {
-            $x_pt = $size * cos($angle * $i + $init_angle);
-            $y_pt = $size * sin($angle * $i + $init_angle);
+            $this->drawTick(null, $i * (360 / 24), 25, $size - 25);
+
+            $x_pt = $size * cos($angle * $i + $this->init_angle);
+            $y_pt = $size * sin($angle * $i + $this->init_angle);
             /*
             imageline(
                 $this->image,
@@ -1000,6 +1097,7 @@ if (file_exists($font)) {
                 $this->black
             );
 */
+            /*
             imageline(
                 $this->image,
                 $center_x,
@@ -1008,7 +1106,45 @@ if (file_exists($font)) {
                 $center_y + $y_pt,
                 $this->black
             );
+*/
         }
+        $angle = 20;
+        $length = 50;
+        $radius = $size;
+        $text = "tick";
+
+        $arc = [];
+
+        $a = $this->solarDay();
+        foreach ($a as $period_name => $period) {
+            $period_timestamp = $this->working_datum->getTimestamp();
+
+            $datum_projected = new \DateTime();
+            $datum_projected->setTimestamp($period_timestamp);
+
+            $datum = $this->twilightDay($period_name, $datum_projected);
+
+            $t = $datum->format("G:i:s");
+            // dev?
+
+            $parts = explode(":", $t);
+            $angle =
+                (($parts[0] * 60 * 60 + $parts[1] * 60 + $parts[2]) /
+                    (24 * 60 * 60)) *
+                360;
+            imagesetthickness($this->image, 2);
+            //if ($period_name == "sunset" or $period_name == "sunrise") {
+            //    imagesetthickness($this->image, 7);
+            //}
+            if (strpos($period_name, "astronomical") !== false) {
+                $arc[] = $angle;
+                imagesetthickness($this->image, 7);
+            }
+
+            $this->drawTick($text, $angle, $radius, $length);
+        }
+
+        imagesetthickness($this->image, 3);
 
         imagearc(
             $this->image,
@@ -1020,35 +1156,72 @@ if (file_exists($font)) {
             360,
             $this->black
         );
+
+        imagesetthickness($this->image, 7);
+
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            $arc[1] + ($this->init_angle * 180) / pi(),
+            $arc[0] + ($this->init_angle * 180) / pi(),
+            $this->black
+        );
     }
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
-            "day",
-            "refreshed_at",
-        ]);
+        $time_string = $this->thing->Read(["day", "refreshed_at"]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
-                ["day", "refreshed_at"],
-                $time_string
-            );
+            $time_string = $this->thing->time();
+            $this->thing->Write(["day", "refreshed_at"], $time_string);
         }
+
+        $this->getDay();
     }
 
+    public function drawTick($text, $angle, $radius, $length)
+    {
+        // angle in degrees
+        //imagesetthickness($this->image, 5);
+        //$init_angle = (-1 * pi()) / 2;
+        //$angle = (2 * 3.14159) / 24;
+        //$x_pt =  230;
+        //$y_pt = 230;
+
+        $angle_radians = ($angle / 180) * pi();
+
+        //foreach (range(0, 24 - 1, 1) as $i) {
+        $x_start = $radius * cos($angle_radians + $this->init_angle);
+        $y_start = $radius * sin($angle_radians + $this->init_angle);
+
+        $x_end = ($radius + $length) * cos($angle_radians + $this->init_angle);
+        $y_end = ($radius + $length) * sin($angle_radians + $this->init_angle);
+
+        imageline(
+            $this->image,
+            $this->center_x + $x_start,
+            $this->center_y + $y_start,
+            $this->center_x + $x_end,
+            $this->center_y + $y_end,
+            $this->black
+        );
+    }
     /**
      *
      * @return unknown
      */
     public function makePDF()
     {
-        if (($this->default_pdf_page_template === null) or (!file_exists($this->default_pdf_page_template))) {
-            $this->thing_report['pdf'] = false;
-            return $this->thing_report['pdf'];
+        if (
+            $this->default_pdf_page_template === null or
+            !file_exists($this->default_pdf_page_template)
+        ) {
+            $this->thing_report["pdf"] = false;
+            return $this->thing_report["pdf"];
         }
 
         $this->getWhatis($this->subject);
@@ -1057,12 +1230,12 @@ if (file_exists($font)) {
             $pdf = new Fpdi\Fpdi();
 
             $pdf->setSourceFile($this->default_pdf_page_template);
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
 
-            $tplidx1 = $pdf->importPage(1, '/MediaBox');
+            $tplidx1 = $pdf->importPage(1, "/MediaBox");
             $s = $pdf->getTemplatesize($tplidx1);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
             $pdf->useTemplate($tplidx1);
             /*
             if (isset($this->hextile_PNG)) {
@@ -1081,12 +1254,12 @@ if (file_exists($font)) {
 */
             $this->getNuuid();
             //$pdf->Image($this->nuuid_png, 5, 18, 20, 20, 'PNG');
-            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, 'PNG');
+            $pdf->Image($this->PNG_embed, 7, 30, 200, 200, "PNG");
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
 
-            $pdf->SetFont('Helvetica', '', 26);
+            $pdf->SetFont("Helvetica", "", 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
 
             $pdf->SetXY(140, 7);
@@ -1104,25 +1277,25 @@ if (file_exists($font)) {
                     $top_y,
                     -300,
                     -300,
-                    'PNG'
+                    "PNG"
                 );
             }
 
             // Page 2
             $tplidx2 = $pdf->importPage(2);
 
-            $pdf->addPage($s['orientation'], $s);
+            $pdf->addPage($s["orientation"], $s);
 
             $pdf->useTemplate($tplidx2, 0, 0);
             // Generate some content for page 2
 
-            $pdf->SetFont('Helvetica', '', 10);
+            $pdf->SetFont("Helvetica", "", 10);
             $this->txt = "" . $this->uuid . ""; // Pure uuid.
 
-            $link = $this->web_prefix . 'thing/' . $this->uuid . '/day';
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/day";
 
             $this->getQuickresponse($link);
-            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, 'PNG');
+            $pdf->Image($this->quick_response_png, 175, 5, 30, 30, "PNG");
 
             //$pdf->Link(175,5,30,30, $link);
 
@@ -1132,7 +1305,7 @@ if (file_exists($font)) {
 
             $line_height = 4;
 
-            $t = $this->thing_report['sms'];
+            $t = $this->thing_report["sms"];
 
             $t = str_replace(" | ", "\n", $t);
 
@@ -1163,19 +1336,19 @@ if (file_exists($font)) {
             $pdf->SetXY(175, 35);
             $pdf->MultiCell(30, $line_height, $text, 0, "L");
 
-            $image = $pdf->Output('', 'S');
-            $this->thing_report['pdf'] = $image;
+            $image = $pdf->Output("", "S");
+            $this->thing_report["pdf"] = $image;
         } catch (Exception $e) {
-            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->thing->console("Caught exception: ", $e->getMessage(), "\n");
         }
 
-        return $this->thing_report['pdf'];
+        return $this->thing_report["pdf"];
     }
 
     public function isDay($text)
     {
         $this->parsed_date = date_parse($text);
-        $day = $this->parsed_date['day'];
+        $day = $this->parsed_date["day"];
 
         if ($day !== false) {
             return $day;
@@ -1230,7 +1403,7 @@ if (file_exists($font)) {
             if (is_integer($response)) {
                 // Check if a day has been mis-categorized as a year.
                 $this->parsed_date = date_parse($text);
-                $day = $this->parsed_date['day'];
+                $day = $this->parsed_date["day"];
                 if ($response == $day) {
                     continue;
                 }
@@ -1238,14 +1411,14 @@ if (file_exists($font)) {
                 $day_text = strval($response);
 
                 //$era = $this->eraDay($text);
-                $day = ['day' => $day_text, "era" => $era];
+                $day = ["day" => $day_text, "era" => $era];
                 $days[] = $day;
             }
         }
 
         // Remove duplicates.
         // https://stackoverflow.com/questions/307674/how-to-remove-duplicate-values-from-a-multi-dimensional-array-in-php
-        $serialized = array_map('serialize', $days);
+        $serialized = array_map("serialize", $days);
         $unique = array_unique($serialized);
         $days = array_intersect_key($days, $unique);
         return $days;
@@ -1303,16 +1476,16 @@ if (file_exists($font)) {
 
         $this->parsed_date = date_parse($input);
         if (
-            $this->parsed_date['year'] != false and
-            $this->parsed_date['month'] != false and
-            $this->parsed_date['day'] != false
+            $this->parsed_date["year"] != false and
+            $this->parsed_date["month"] != false and
+            $this->parsed_date["day"] != false
         ) {
             $date_string =
-                $this->parsed_date['year'] .
+                $this->parsed_date["year"] .
                 "/" .
-                $this->parsed_date['month'] .
+                $this->parsed_date["month"] .
                 "/" .
-                $this->parsed_date['day'];
+                $this->parsed_date["day"];
 
             $unixTimestamp = strtotime($date_string);
             $p_day = strtoupper(date("D", $unixTimestamp));
@@ -1369,7 +1542,16 @@ if (file_exists($font)) {
         }
 
         if (count($scores) == 1) {
-            return array_key_first($scores);
+            if (!function_exists("array_key_first")) {
+                // function array_key_first(array $scores) {
+                foreach ($arr as $key => $unused) {
+                    return $key;
+                }
+                return null;
+                //}
+            }
+
+            //            return array_key_first($scores);
         }
 
         // Leave it here for now.
@@ -1404,7 +1586,7 @@ if (file_exists($font)) {
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'day') {
+            if ($input == "day") {
                 $this->getDay();
 
                 if (!isset($this->decimal_day) or $this->decimal_day == null) {
@@ -1423,25 +1605,25 @@ if (file_exists($font)) {
         }
 
         $indicators = [
-            'translate'=>['translate','english','anglic'],
-            'julian'=>['julian'],
-            'mesoamerican'=>['maya'],
-            'twilight' => [
-                'twilight',
-                'dawn',
-                'sunset',
-                'sunrise',
-                'transit',
-                'noon',
+            "translate" => ["translate", "english", "anglic"],
+            "julian" => ["julian"],
+            "mesoamerican" => ["maya"],
+            "twilight" => [
+                "twilight",
+                "dawn",
+                "sunset",
+                "sunrise",
+                "transit",
+                "noon",
             ],
         ];
 
         $this->flagAgent($indicators, $input);
 
         $input_agent = new Input($this->thing, "input");
-        $discriminators = ['wedge', 'slice'];
-        $input_agent->aliases['wedge'] = ['pizza', 'wheel', 'wedge'];
-        $input_agent->aliases['slice'] = ['slice', 'column', 'columns'];
+        $discriminators = ["wedge", "slice"];
+        $input_agent->aliases["wedge"] = ["pizza", "wheel", "wedge"];
+        $input_agent->aliases["slice"] = ["slice", "column", "columns"];
         $type = $input_agent->discriminateInput($input, $discriminators);
         if ($type != false) {
             $this->type = $type;

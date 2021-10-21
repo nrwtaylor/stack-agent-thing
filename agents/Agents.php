@@ -90,8 +90,6 @@ $this->split_time = $this->thing->elapsed_runtime();
 $this->time_budget = 2000;
 
         do {
-//echo "MERP";
-            //$array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
             $k = array_rand($this->agents);
             $v = $this->agents[$k];
 
@@ -105,17 +103,13 @@ if (strtolower($agent_class_name) =="agentstest") {continue;}
             $flag = "red";
             $ex = null;
             try {
-//                $agent_namespace_name = '\\Nrwtaylor\\StackAgentThing\\'.$agent_class_name;
-
                 $test_agent = new $agent_namespace_name($this->thing, $agent_class_name); 
                 $flag = $test_agent->test();
                 $m = null;
 
             } catch (\Error $ex) { // Error is the base class for all internal PHP error exceptio$
-                //echo $agent_name . "[ RED ]" . "\n";
                 $m = $ex->getMessage();
                 $flag = "red";
-                //continue;
             }
 
             $this->test_results[] = array("agent_name"=>$agent_class_name, "flag"=>$flag, "error"=>$m);
@@ -123,9 +117,6 @@ if (strtolower($agent_class_name) =="agentstest") {continue;}
 
         } while ($this->thing->elapsed_runtime() - $this->split_time < $this->time_budget);
 
-//var_dump($this->test_results);
-//echo "done";
-//exit();
     }
 
     function makeSMS()

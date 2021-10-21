@@ -80,8 +80,7 @@ $sms .= $txt_link;
 //        $this->thing_report['sms'] = $this->sms_message;
 
 
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(array("txt",
+        $this->thing->Write(array("txt",
                 "received_at"),  gmdate("Y-m-d\TH:i:s\Z", time())
         );
 

@@ -7,15 +7,15 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Time extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -32,28 +32,52 @@ class Time extends Agent
         $this->thing_report["help"] = "Get the time. Text CLOCKTIME.";
 
         $this->initTime();
-
-        //$this->time = $this->thing->time();
-        //$this->time = time();
-        //$this->time_zone = 'America/Vancouver';
     }
 
     function initTime()
     {
-        $this->default_time_zone = 'America/Vancouver';
-        if (isset($this->thing->container['api']['time'])) {
+        $this->default_time_zone = "America/Vancouver";
+        if (isset($this->thing->container["api"]["time"])) {
             if (
                 isset(
-                    $this->thing->container['api']['time']['default_time_zone']
+                    $this->thing->container["api"]["time"]["default_time_zone"]
                 )
             ) {
                 $this->default_time_zone =
-                    $this->thing->container['api']['time']['default_time_zone'];
+                    $this->thing->container["api"]["time"]["default_time_zone"];
             }
         }
 
         $this->time_zone = $this->default_time_zone;
     }
+
+    public function set()
+    {
+        $this->thing->Write(["time", "refreshed_at"], $this->current_time);
+    }
+
+    public function respondResponse()
+    {
+        // Thing actions
+//        $this->thing->flagGreen();
+
+//        $this->thing->choice->Create($this->agent_name, $this->node_list, "start");
+//        $choices = $this->thing->choice->makeLinks('start');
+//        $this->thing_report['choices'] = $choices;
+
+//        $this->sms_message = "HEY | " . $this->sms_message . "";
+//        $this->thing_report['sms'] = $this->sms_message;
+
+        $this->thing_report['email'] = $this->message;
+        $this->thing_report['message'] = $this->message;
+
+        if ($this->agent_input == null) {
+            $message_thing = new Message($this->thing, $this->thing_report);
+            $this->thing_report['info'] = $message_thing->thing_report['info'] ;
+        }
+
+    }
+
 
     /**
      *
@@ -63,7 +87,7 @@ class Time extends Agent
         $this->node_list = ["time" => ["time"]];
         $m = strtoupper($this->agent_name) . " | " . $this->response;
         $this->sms_message = $m;
-        $this->thing_report['sms'] = $m;
+        $this->thing_report["sms"] = $m;
     }
 
     /**
@@ -72,7 +96,7 @@ class Time extends Agent
     function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     /**
@@ -94,7 +118,7 @@ class Time extends Agent
         }
 
         if (
-            checkdate(date('m', $stamp), date('d', $stamp), date('Y', $stamp))
+            checkdate(date("m", $stamp), date("d", $stamp), date("Y", $stamp))
         ) {
             return true;
         }
@@ -109,7 +133,7 @@ class Time extends Agent
     public function textTime($text)
     {
         $timestamp = strtotime($text);
-        $new_date_format = date('m/d H:i', $timestamp);
+        $new_date_format = date("m/d H:i", $timestamp);
         return $new_date_format;
     }
 
@@ -135,7 +159,7 @@ class Time extends Agent
         $tz = $datum->getTimezone();
         $timezone = $tz->getName();
 
-        $time_stamp = $datum->format('Y-m-d H:i:s') . " ";
+        $time_stamp = $datum->format("Y-m-d H:i:s") . " ";
         if ($flag_timezone === true) {
             $timestamp .= $timezone;
         }
@@ -153,28 +177,51 @@ class Time extends Agent
 
             $datum = $this->datumTime($text);
             if ($datum !== false) {
-                $this->text = $datum->format('H:i');
+                $this->text = $datum->format("H:i");
                 $m .=
                     "In the timezone " .
                     $this->time_zone .
                     ", it is " .
-                    $datum->format('l') .
+                    $datum->format("l") .
                     " " .
-                    $datum->format('d/m/Y, H:i:s') .
+                    $datum->format("d/m/Y, H:i:s") .
                     ". ";
             }
 
             if ($datum === false) {
                 $m .= "The local meridian/mean/solar(?) time is ";
                 $m .= $this->lmtTime();
-                $m .= ". This is a developmental stack service. Validate before use.";
+                $m .=
+                    ". This is a developmental stack service. Validate before use.";
             }
+        } else {
+            $datum = true;
         }
 
         $this->response .= $m;
         $this->time_message = $this->response;
 
         return $datum;
+    }
+
+    function humanTime($text = null)
+    {
+        if ($text == null) {
+            $text = $this->getTime();
+        }
+        if ($this->isDateValid($text)) {
+            $datum = $this->datumTime($text);
+            if ($datum !== false) {
+                //$this->text = $datum->format('H:i');
+                $text =
+                    $datum->format("l") . " " . $datum->format("d/m/Y, H:i:s");
+            }
+
+            if ($datum === false) {
+                $text = $this->lmtTime();
+            }
+        }
+        return $text;
     }
 
     function getTime($text = null)
@@ -206,8 +253,10 @@ class Time extends Agent
 
         $longitude_agent = new Longitude($this->thing, "longitude");
 
-	// Cannot calculate local time without knowing longitude.
-	if ($longitude_agent->longitude === false) {return true;}
+        // Cannot calculate local time without knowing longitude.
+        if ($longitude_agent->longitude === false) {
+            return true;
+        }
 
         $longitude = $longitude_agent->longitude;
 
@@ -223,7 +272,7 @@ class Time extends Agent
 
         $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
 
-        $transit_epoch = $solar_array['transit'];
+        $transit_epoch = $solar_array["transit"];
 
         $offset = $timestamp_epoch - $transit_epoch; // seconds
 
@@ -304,9 +353,9 @@ class Time extends Agent
         }
 
         // If not datum is provided.
-        // Check for a zull flug.
+        // Check for a zulu flag.
         $zulu_flag = null;
-        if (strtolower(substr($text, -1)) == 'z') {
+        if (strtolower(substr($text, -1)) == "z") {
             $zulu_flag = "Z";
         }
 
@@ -334,60 +383,36 @@ class Time extends Agent
 
     /**
      *
-     * @param unknown $text (optional)
-     * @return unknown
-     */
-    public function extractTimezone($text = null)
-    {
-        if ($text == null or $text == "") {
-            return true;
-        }
-
-        if (stripos($text, "lmt") !== false) {
-            return "lmt";
-        }
-
-        $text = str_replace("time", "", $text);
-        $text = trim(str_replace("stamp", "", $text));
-
-        $OptionsArray = timezone_identifiers_list();
-
-        $matches = [];
-
-        // Devstack. Librex.
-        foreach ($OptionsArray as $i => $timezone_id) {
-            if (
-                stripos($timezone_id, $text) !== false or
-                stripos($timezone_id, str_replace(" ", "_", $text)) !== false
-            ) {
-                $matches[] = $timezone_id;
-            }
-        }
-        $match = false;
-        if (isset($matches) and count($matches) == 1) {
-            $match = $matches[0];
-        } else {
-            $this->response .= "Could not resolve the timezone. ";
-        }
-        return $match;
-    }
-
-    /**
-     *
      * @return unknown
      */
     public function readSubject()
     {
-        //$input = $this->input;
-        //if (stripos($input, "lmt") !== false) {$this->timezone="lmt";}
-
         if ($this->agent_input == "time") {
             return;
         }
         $this->filtered_input = $this->assert($this->input, "time");
 
         if ($this->filtered_input != "") {
-            $timezone = $this->extractTimezone($this->filtered_input);
+            $subsets_tokens = $this->subsetsTokens(
+                explode(" ", trim($this->filtered_input))
+            );
+
+            $match = false;
+            foreach ($subsets_tokens as $i => $subset) {
+                $timezone = $this->extractTimezone($subset);
+
+                //        $timezone = $this->extractTimezone($this->filtered_input);
+                //            if ($timezone === true) {$this->response .= "Timezone not recognized. ";}
+
+                if ($timezone === true) {
+                    continue;
+                }
+                break;
+            }
+
+            if ($match = false) {
+                $this->response .= "Timezone not recognized. ";
+            }
         }
 
         if (isset($timezone) and is_string($timezone)) {

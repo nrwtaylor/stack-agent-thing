@@ -36,18 +36,16 @@ class Pick extends Agent
      */
     public function get()
     {
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
-        // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "pick",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["pick", "refreshed_at"],
                 $time_string
             );
@@ -55,7 +53,7 @@ class Pick extends Agent
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->last_result = $this->thing->json->readVariable([
+        $this->last_result = $this->thing->Read([
             "pick",
             "result",
         ]);
@@ -187,7 +185,7 @@ class Pick extends Agent
     function set()
     {
         if ($this->last_result == false) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["pick", "result"],
                 $this->result
             );

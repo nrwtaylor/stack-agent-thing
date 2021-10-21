@@ -16,12 +16,10 @@ class Wordcombination extends Agent
      */
     function init()
     {
-        //      $this->resource_path = $GLOBALS['stack_path'] . 'resources/words/';
     }
 
     public function run()
     {
-        //$this->test();
     }
 
     public function test()
@@ -32,23 +30,21 @@ class Wordcombination extends Agent
 
     public function get()
     {
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "wordcombination",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            //$this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["wordcombination", "refreshed_at"],
                 $time_string
             );
         }
 
         // If it has already been processed ...
-        $this->reading = $this->thing->json->readVariable([
+        $this->reading = $this->thing->Read([
             "wordcombination",
             "reading",
         ]);
@@ -56,7 +52,7 @@ class Wordcombination extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["wordcombination", "reading"],
             $this->reading
         );
@@ -155,15 +151,8 @@ class Wordcombination extends Agent
 
         $this->thing->flagGreen();
 
-        //        $this->makeSMS();
-        //        $this->thing_report['sms'] = $this->sms_message;
-
         // Make message
         $this->thing_report['message'] = $this->sms_message;
-
-        // Make email
-        //        $this->makeEmail();
-
         $this->thing_report['email'] = $this->sms_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
@@ -174,9 +163,7 @@ class Wordcombination extends Agent
             $this->reading = count($this->words);
         }
 
-        $this->thing->json->writeVariable(["word", "reading"], $this->reading);
-
-        //        return $this->thing_report;
+        $this->thing->Write(["word", "reading"], $this->reading);
     }
 
     /**
@@ -265,15 +252,11 @@ class Wordcombination extends Agent
                             );
                             $words = ltrim($words);
 
-                            //$this->search_words = $words;
-
                             $this->extractWordcombinations($words);
 
                             return;
 
                         default:
-
-                        //echo 'default';
                     }
                 }
             }
@@ -282,9 +265,6 @@ class Wordcombination extends Agent
         $this->extractWordcombinations($input);
 
         $status = true;
-
-        //        }
-
         return $status;
     }
 }

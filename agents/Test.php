@@ -10,18 +10,18 @@ class Test extends Agent
 
     public function set()
     {
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["test", "refreshed_at"],
             $this->current_time
         );
 
-        $this->thing->json->writeVariable(
+        $this->thing->Write(
             ["test", "response"],
             $this->response
         );
 
         if (isset($this->test_text)) {
-            $this->thing->json->writeVariable(
+            $this->thing->Write(
                 ["test", "text"],
                 $this->test_text
             );
@@ -52,27 +52,12 @@ class Test extends Agent
 
             $this->response .= "Test text is " . $this->test_text . ". ";
 
-            //     $stub = $this->getMockBuilder($this->test_text)->disableOriginalConstructor()->getMock();
-            //      $stub->method("init")->willReturn(11);
-            // Calling $stub->doSomething() will now return
-            // 'foo'.
-            //        $this->assertEquals('foo', $stub->init());
             set_time_limit(20);
 
             $thing = new Thing(null);
-            //var_dump($this->from);
-            //var_dump($agent_name);
+
             $thing->Create($this->from, "agent", $agent_name);
             $agent = new Agent($thing);
-
-            //var_dump($a->thing_report['sms']);
-            //var_dump($a->thing_report['response']);
-
-            //$agent = new \stdClass();
-            //$agent->response = $a->thing_report['response'];
-            //$agent->response = $a->thing_report['sms']
-
-            //            $agent = $this->getAgent($agent_name); // Push agent response.
 
             if (isset($agent->thing_report['response'])) {
                 $this->response .=
@@ -224,7 +209,7 @@ class Test extends Agent
     {
         $this->agentsTest();
         $files = $this->agents;
-        //var_dump($files);
+
         $file = $files[array_rand($files)];
 
         $tokens = explode(".", $file);

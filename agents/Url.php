@@ -1,20 +1,20 @@
 <?php
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 ini_set("allow_url_fopen", 1);
 
 class Url extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     function init()
     {
-        $this->thing_report['help'] =
-            'Text URL < A web link> to add a link to this list.';
+        $this->thing_report["help"] =
+            "Text URL < A web link> to add a link to this list.";
     }
 
     function run()
@@ -23,11 +23,7 @@ class Url extends Agent
 
     public function set()
     {
-        $this->thing->json->setField("variables");
-        $this->thing->json->writeVariable(
-            ["url", "refreshed_at"],
-            $this->thing->json->time()
-        );
+        $this->thing->Write(["url", "refreshed_at"], $this->thing->time());
     }
 
     function get()
@@ -37,12 +33,12 @@ class Url extends Agent
     public function makeChoices()
     {
         $choices = false;
-        $this->thing_report['choices'] = $choices;
+        $this->thing_report["choices"] = $choices;
     }
 
     public function makeTxt()
     {
-        $this->thing_report['txt'] = "No text retrieved.";
+        $this->thing_report["txt"] = "No text retrieved.";
     }
 
     function cleanUrl($text = null)
@@ -71,32 +67,32 @@ class Url extends Agent
         $web = "<b>URL Agent</b><br><p>";
         $web .= "<p>";
 
-        if (isset($this->urls) and count($this->urls) > 0) {
+        if (isset($this->urls) and is_array($this->urls) and count($this->urls) > 0) {
             $web .= "<b>COLLECTED URLS</b><br><p>";
             $web .= "<ul>";
             //$urls = array_unique($this->urls);
 
-            $tempArr = array_unique(array_column($this->urls, 'url'));
+            $tempArr = array_unique(array_column($this->urls, "url"));
             $urls = array_intersect_key($this->urls, $tempArr);
 
             foreach ($urls as $i => $url_array) {
-                $url = $url_array['url'];
+                $url = $url_array["url"];
 
                 $url_link =
                     $this->web_prefix .
                     "thing/" .
-                    $url_array['uuid'] .
+                    $url_array["uuid"] .
                     "/forget";
                 $html_link = "[" . '<a href="' . $url_link . '">forget</a>]';
 
                 if (stripos($url, "://") !== false) {
-                    $link = '<a href="' . $url . '">' . $url . '</a>';
+                    $link = '<a href="' . $url . '">' . $url . "</a>";
                     $web .= "<li>" . $link . " " . $html_link . "<br>";
 
                     continue;
                 } elseif (stripos($url, ":/") !== false) {
-                    $link = '<a href="' . $url . '">' . $url . '</a>';
-                    $try_link = '[Try ' . str_replace(":/", "://", $link) . ']';
+                    $link = '<a href="' . $url . '">' . $url . "</a>";
+                    $try_link = "[Try " . str_replace(":/", "://", $link) . "]";
                     $web .= "<li>" . $link . " " . $try_link . "<br>";
 
                     continue;
@@ -107,14 +103,14 @@ class Url extends Agent
                         '">' .
                         "https://" .
                         $url .
-                        '</a>';
+                        "</a>";
 
                     $web .=
                         "<li>" .
                         $url .
-                        ' [' .
+                        " [" .
                         $link .
-                        ']' .
+                        "]" .
                         $html_link .
                         "<br>";
                     continue;
@@ -128,9 +124,9 @@ class Url extends Agent
             $web .= "<p>";
         }
         $web .= "<b>HELP</b><br><p>";
-        $web .= $this->thing_report['help'];
+        $web .= $this->thing_report["help"];
 
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     function makeSMS()
@@ -151,7 +147,7 @@ class Url extends Agent
         }
         $sms_message .= " | " . $urls_text;
 
-        $this->thing_report['sms'] = $sms_message;
+        $this->thing_report["sms"] = $sms_message;
         $this->sms_message = $sms_message;
     }
 
@@ -161,7 +157,7 @@ class Url extends Agent
 
         $this->url = "X";
         if (isset($this->urls[0])) {
-            $this->url = $this->urls[0]['url'];
+            $this->url = $this->urls[0]["url"];
         }
     }
 
@@ -169,29 +165,29 @@ class Url extends Agent
     {
         $urls = [];
 
-        $findagent_thing = new Findagent($this->thing, 'url');
+        $findagent_thing = new Findagent($this->thing, "url");
 
-        if (!is_array($findagent_thing->thing_report['things'])) {
+        if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
 
-        $count = count($findagent_thing->thing_report['things']);
+        $count = count($findagent_thing->thing_report["things"]);
 
         if ($count > 0) {
             foreach (
-                array_reverse($findagent_thing->thing_report['things'])
+                array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-                $uuid = $thing_object['uuid'];
-                $variables_json = $thing_object['variables'];
+                $uuid = $thing_object["uuid"];
+                $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
                 $age =
                     strtotime($this->thing->time()) -
-                    strtotime($thing_object['created_at']);
+                    strtotime($thing_object["created_at"]);
 
-                if (isset($variables['url'])) {
-                    $task_urls = $this->extractUrls($thing_object['task']);
+                if (isset($variables["url"])) {
+                    $task_urls = $this->extractUrls($thing_object["task"]);
                     if ($task_urls === true) {
                         continue;
                     }
@@ -202,7 +198,7 @@ class Url extends Agent
 
                     $url = [
                         "url" => implode(" ", $task_urls),
-                        "uuid" => $thing_object['uuid'],
+                        "uuid" => $thing_object["uuid"],
                     ];
 
                     $urls[] = $url;
@@ -218,13 +214,13 @@ class Url extends Agent
     {
         $urls = $this->extractUrls($text);
 
-        if ($urls === true) {return $text;}
-
+        if ($urls === true) {
+            return $text;
+        }
         foreach ($urls as $i => $url) {
-            $link = '<a href="' . $url . '">' . $url . '</a>';
+            $link = '<a href="' . $url . '">' . $url . "</a>";
             $text = str_replace($url, $link, $text);
         }
-
         $restored_text = $text;
         return $restored_text;
     }
@@ -237,8 +233,8 @@ class Url extends Agent
         foreach ($urls as $i => $url) {
             $parts = explode(" ", $url);
             if (count($parts) == 1) {
-                if (stripos($url, '.') !== false) {
-                    $urls[$i] = explode(' ', $url)[0];
+                if (stripos($url, ".") !== false) {
+                    $urls[$i] = explode(" ", $url)[0];
                 } else {
                     unset($urls[$i]);
                 }
@@ -274,13 +270,13 @@ class Url extends Agent
 
         $this->thing->flagGreen();
 
-        $this->thing_report['email'] = $this->sms_message;
-        $this->thing_report['message'] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
+        $this->thing_report["email"] = $this->sms_message;
+        $this->thing_report["message"] = $this->sms_message; // NRWTaylor 4 Oct - slack can't take html in $test_message;
 
         $message_thing = new Message($this->thing, $this->thing_report);
 
-        $this->thing_report['info'] = $message_thing->thing_report['info'];
-        $this->thing_report['help'] = 'This reads a web resource.';
+        $this->thing_report["info"] = $message_thing->thing_report["info"];
+        $this->thing_report["help"] = "This reads a web resource.";
     }
 
     public function extractUrls($text = null)
@@ -288,10 +284,13 @@ class Url extends Agent
         if ($text == null) {
             return true;
         }
-
+        /*
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
+        $pattern =
+            '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
+*/
         $pattern =
             '/\b(https?|ftp|file:\/\/)?[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i';
 
@@ -308,15 +307,20 @@ class Url extends Agent
             if (strtotime($url) !== false) {
                 unset($urls[$i]);
                 continue;
-                //var_dump($url); var_dump(strtotime($url));
             }
 
             if (is_numeric(str_replace(".", "", $url))) {
                 unset($urls[$i]);
                 continue;
             }
-        }
 
+            // 12.000kHz is not a URL
+            $tokens = explode(".", $url);
+            if (count($tokens) === 2 and is_numeric($tokens[0])) {
+                unset($urls[$i]);
+                continue;
+            }
+        }
         // Deal with spaces
         $urls = $this->filterUrls($urls);
         // TODO: Test.
@@ -326,8 +330,12 @@ class Url extends Agent
                 $urls[$i] = rtrim($tokens[1], "&gt");
             }
         }
-
         return $urls;
+    }
+
+    public function isUrl($text)
+    {
+        return $this->hasUrl($text);
     }
 
     public function hasUrl($text = null)
@@ -378,6 +386,14 @@ class Url extends Agent
         return $text;
     }
 
+    public function readUrl($text = null)
+    {
+        // dev below creates a loop
+        // develop
+        //      if (!$this->isUrl($text)) {return true;}
+        //      return $this->urlRead($text);
+    }
+
     public function readSubject()
     {
         $this->response = null;
@@ -386,8 +402,8 @@ class Url extends Agent
         $input = $this->input;
 
         $string = $input;
-        $str_pattern = 'url';
-        $str_replacement = '';
+        $str_pattern = "url";
+        $str_replacement = "";
         $filtered_input = $input;
         if (strpos($string, $str_pattern) !== false) {
             $occurrence = strpos($string, $str_pattern);
@@ -402,14 +418,14 @@ class Url extends Agent
         if (!isset($this->thing->quote_handler)) {
             $this->thing->quote_handler = new Quote($this->thing, "quote");
         }
-        $filtered_input = $this->thing->quote_handler->stripQuotes($filtered_input);
+        $filtered_input = $this->thing->quote_handler->stripQuotes(
+            $filtered_input
+        );
 
-//        $filtered_input = $this->stripQuotes($filtered_input);
-
+        //        $filtered_input = $this->stripQuotes($filtered_input);
 
         $input_input = trim($filtered_input);
-
-        if ($input == '') {
+        if ($input == "") {
             $this->getUrl();
             return;
         }
@@ -424,12 +440,12 @@ class Url extends Agent
         $pieces = explode(" ", strtolower($input));
 
         if (count($pieces) == 1) {
-            if ($input == 'url') {
+            if ($input == "url") {
                 $this->getUrl();
                 return;
             }
 
-            if ($input == 'read') {
+            if ($input == "read") {
                 return;
             }
         }

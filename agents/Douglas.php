@@ -31,7 +31,7 @@ class Douglas extends Agent
 
         $this->node_list = ["douglas" => ["douglas", "uuid"]];
 
-        $this->current_time = $this->thing->json->time();
+        $this->current_time = $this->thing->time();
 
         $this->initDouglas();
     }
@@ -79,10 +79,11 @@ class Douglas extends Agent
 
     public function zipDouglas()
     {
-if ( class_exists("\ZipArchive") == false) {
-$this->zip_error = true;
-$this->response .= "ZIP archive not available. ";
-return true;}
+        if (class_exists("\ZipArchive") == false) {
+            $this->zip_error = true;
+            $this->response .= "ZIP archive not available. ";
+            return true;
+        }
 
         $zip = new \ZipArchive();
 
@@ -188,7 +189,7 @@ return true;}
         if (isset($this->sheet_count)) {
             $sheet_count = $sheet_count;
         }
-        $sheet_count = $this->thing->json->writeVariable(
+        $sheet_count = $this->thing->Write(
             ["douglas", "sheet_count"],
             $sheet_count
         );
@@ -225,14 +226,14 @@ return true;}
     {
     }
 
-    public function makeHelp() {
-$help = "ZIP files are not available on this stack.";
-if (!(isset($this->zip_error)) or ($this->zip_error !== true)) {
-$help = "Click on the ZIP link for a package of PDFs.";
-}
-$this->help = $help;
-$this->thing_report["help"] = $help;
-
+    public function makeHelp()
+    {
+        $help = "ZIP files are not available on this stack.";
+        if (!isset($this->zip_error) or $this->zip_error !== true) {
+            $help = "Click on the ZIP link for a package of PDFs.";
+        }
+        $this->help = $help;
+        $this->thing_report["help"] = $help;
     }
 
     /**
@@ -240,67 +241,77 @@ $this->thing_report["help"] = $help;
      */
     public function makeWeb()
     {
-$web = "";
-if (!(isset($this->zip_error)) or ($this->zip_error !== true)) {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
-        $this->node_list = ["douglas" => ["douglas"]];
-        $web .=
-            "ZIP file with " .
-            $this->sheet_count .
-            " randomly generated sheets.<br>";
+        $web = "";
+        if (!isset($this->zip_error) or $this->zip_error !== true) {
+            $link = $this->web_prefix . "thing/" . $this->uuid . "/douglas.zip";
+            $this->node_list = ["douglas" => ["douglas"]];
+            $web .=
+                "ZIP file with " .
+                $this->sheet_count .
+                " randomly generated sheets.<br>";
 
-        $web .= '<a href="' . $link . '">';
-        $web .= $link;
-        $web .= "</a>";
-        $web .= "<br>";
+            $web .= '<a href="' . $link . '">';
+            $web .= $link;
+            $web .= "</a>";
+            $web .= "<br>";
 
-        $web .= "<p>";
-        $web .= "Individual radiograms.<br>";
-}
-if (isset($this->association_uuids)) { 
-       foreach ($this->association_uuids as $i => $uuid) {
-            $rocky_link = $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
-
-            $web .= '<a href="' . $rocky_link . '">';
-            $web .= $rocky_link;
-            $web .= "</a><br>";
+            $web .= "<p>";
+            $web .= "Individual radiograms.<br>";
         }
-}
+        if (isset($this->association_uuids)) {
+            foreach ($this->association_uuids as $i => $uuid) {
+                $rocky_link =
+                    $this->web_prefix . "thing/" . $uuid . "/rocky.pdf";
+
+                $web .= '<a href="' . $rocky_link . '">';
+                $web .= $rocky_link;
+                $web .= "</a><br>";
+            }
+        }
 
         $this->thing_report["web"] = $web;
     }
 
     public function get()
     {
-        //echo "associations" . $this->thing->associations ."\n";
-
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable([
+        $time_string = $this->thing->Read([
             "douglas",
             "refreshed_at",
         ]);
 
         if ($time_string == false) {
-            $this->thing->json->setField("variables");
-            $time_string = $this->thing->json->time();
-            $this->thing->json->writeVariable(
+            $time_string = $this->thing->time();
+            $this->thing->Write(
                 ["douglas", "refreshed_at"],
                 $time_string
             );
         }
 
-        $sheet_count = $this->thing->json->readVariable([
+        $sheet_count = $this->thing->Read([
             "douglas",
             "sheet_count",
         ]);
         $this->sheet_count = $sheet_count;
+        $associations = null;
+        if (isset($this->thing->thing->assocations)) {
+            $associations = json_decode(
+                $this->thing->thing->associations,
+                true
+            );
+        }
+        if ($associations === null) {
+            return;
+        }
+        $association_uuids = $associations["agent"];
 
+/*
         $associations = json_decode($this->thing->thing->associations, true);
         //var_dump($associations);
         if ($associations === null) {
             return;
         }
         $association_uuids = $associations['agent'];
+*/
         $this->association_uuids = $association_uuids;
     }
 

@@ -7,13 +7,13 @@
 
 namespace Nrwtaylor\StackAgentThing;
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
+ini_set("display_startup_errors", 1);
+ini_set("display_errors", 1);
 error_reporting(-1);
 
 class Icosahedron extends Agent
 {
-    public $var = 'hello';
+    public $var = "hello";
 
     /**
      *
@@ -29,11 +29,11 @@ class Icosahedron extends Agent
         //        $this->drawD20(2);
 
         $this->node_list = ["roll" => ["roll", "card"]];
-        $this->resource_path = $GLOBALS['stack_path'] . 'resources/';
+        $this->resource_path = $GLOBALS["stack_path"] . "resources/";
 
         $this->thing_report["info"] = "This rolls a dice.  See
                                 https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
-        $this->thing_report['help'] =
+        $this->thing_report["help"] =
             'This is about dice with more than 6 sides.  Try "Roll d20". Or "Roll 3d20+17. Or "Card"';
 
         /*
@@ -79,7 +79,6 @@ imageline($this->image, $x, $y, $x, $y, $this->black);
 
 }
 
-exit();
 */
     }
 
@@ -96,14 +95,14 @@ exit();
 
         $this->thing_report["info"] = "This rolls a dice.  See
 				https:\\codegolf.stackexchange.com/questions/25416/roll-dungeons-and-dragons-dice";
-        if (!isset($this->thing_report['help'])) {
+        if (!isset($this->thing_report["help"])) {
             $this->thing_report["help"] =
                 'This is about dice with more than 6 sides.  Try "Roll d20". Or "Roll 3d20+17. Or "Card"';
         }
 
         if ($this->agent_input == null) {
             $message_thing = new Message($this->thing, $this->thing_report);
-            $this->thing_report['info'] = $message_thing->thing_report['info'];
+            $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
         return $this->thing_report;
@@ -147,7 +146,7 @@ exit();
         //$yaw = atan2($camz, $camx);
         //$pitch = atan2($camy, pow((pow($camx,2) + pow($camz,2)),0.5) );
 
-        //echo "yaw " . $yaw . " " . "pitch " . $pitch . "<br>";
+        //$this->thing->console("yaw " . $yaw . " " . "pitch " . $pitch . "\n");
 
         $x_camera_offset = $this->width / 2;
         $y_camera_offset = $this->height / 2;
@@ -156,16 +155,10 @@ exit();
 
         $t = new Stl($this->thing, "stl");
         foreach ($t->triangles as $i => $triangle) {
-            $normal = $triangle['normal'];
+            $normal = $triangle["normal"];
             $normal[2] = $normal[2] * -1;
 
-            //echo "face normal " .
-                $normal[0] .
-                " - " .
-                $normal[1] .
-                " - " .
-                $normal[2] .
-                " ";
+            $normal[0] . " - " . $normal[1] . " - " . $normal[2] . " ";
 
             $x = $normal[0];
             $y = $normal[1];
@@ -186,8 +179,6 @@ exit();
 
             $dot_product = $camx * $x + $camy * $y + $camz * $z;
 
-            //echo "dot product" . $dot_product . "<br>";
-
             // Is face away from camera?
             if ($dot_product < 0) {
                 //continue;
@@ -203,8 +194,8 @@ exit();
             $y_old = null;
             $z_old = null;
 
-            foreach ($triangle['vertices'] as $k => $point) {
-                //var_dump($point);
+            foreach ($triangle["vertices"] as $k => $point) {
+
                 if ($k == 0) {
                     $x_old = $point[0];
                     $y_old = $point[1];
@@ -245,7 +236,6 @@ exit();
                     $max_length = $length;
                 }
 
-                //echo "length " . $length . "<br>";
             }
 
             // Skip pointy triangles;
@@ -271,9 +261,9 @@ exit();
                 continue;
             }
 
-            foreach ($triangle['vertices'] as $j => $point) {
+            foreach ($triangle["vertices"] as $j => $point) {
                 $point[2] = $point[2] * -1;
-/*
+                /*
                 echo "3D " .
                     $point[0] .
                     " " .
@@ -319,7 +309,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
                 //if ($y <= 0) {continue;}
 
                 //echo $x ." " . $y ." " . $z ."\n";
-/*
+                /*
                 echo "2D (" .
                     $x_old .
                     "," .
@@ -410,7 +400,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
         $bbox["height"] =
             max($bbox[1], $bbox[3], $bbox[5], $bbox[7]) -
             min($bbox[1], $bbox[3], $bbox[5], $bbox[7]);
-        extract($bbox, EXTR_PREFIX_ALL, 'bb');
+        extract($bbox, EXTR_PREFIX_ALL, "bb");
 
         //check width of the image
         $this->width = imagesx($this->image);
@@ -427,7 +417,6 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
             $number
         );
 
-        //var_dump ($width);
         imagestring($this->image, 2, 100, 0, $die, $textcolor);
 
         return $this->image;
@@ -608,7 +597,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
         $this->PNG = $agent->PNG;
 
         //$this->thing_report['png'] = $agent->PNG;
-        $this->thing_report['png'] = $agent->image_string;
+        $this->thing_report["png"] = $agent->image_string;
     }
 
     /**
@@ -628,7 +617,7 @@ $x = $point[0] - $camx; $y = $point[1] - $camy; $z = $point[2] - $camz;
     public function makeWeb()
     {
         $web = "";
-        $this->thing_report['web'] = $web;
+        $this->thing_report["web"] = $web;
     }
 
     /**

@@ -33,21 +33,17 @@ class Ack extends Agent {
     public function get() {
 
         // Borrow this from iching
-        $this->thing->json->setField("variables");
-        $time_string = $this->thing->json->readVariable( array("ack", "refreshed_at") );
+        $time_string = $this->thing->Read( array("ack", "refreshed_at") );
 
         if ($time_string == false) {
-            //            $this->thing->json->setField("variables");
             $time_string = $this->thing->time();
-            $this->thing->json->writeVariable( array("ack", "refreshed_at"), $time_string );
+            $this->thing->Write( array("ack", "refreshed_at"), $time_string );
         }
 
         $this->refreshed_at = strtotime($time_string);
 
 
-        //        $this->thing->json->setField("variables");
-        $this->alpha = $this->thing->json->readVariable( array("ack", "alpha"));
-        //        $this->text = $this->thing->json->readVariable( array("ack", "text") ); // Test because this will become A6.
+        $this->alpha = $this->thing->Read( array("ack", "alpha"));
     }
 
 
@@ -59,8 +55,7 @@ class Ack extends Agent {
         if ($this->alpha == false) {
 
             $this->makeACk();
-            $this->thing->json->writeVariable( array("ack", "alpha"), $this->alpha );
-            //            $this->thing->json->writeVariable( array("ack", "text"), $this->text );
+            $this->thing->Write( array("ack", "alpha"), $this->alpha );
 
         }
 

@@ -47,13 +47,12 @@ class Nominal extends Agent
             $this->nominal_thing = $this->thing;
         }
 
-        $this->nominal_thing->json->setField("variables");
-        $this->nominal_thing->json->writeVariable(
+        $this->nominal_thing->Write(
             ["nominal", "state"],
             $this->state
         );
 
-        $this->nominal_thing->json->writeVariable(
+        $this->nominal_thing->Write(
             ["nominal", "refreshed_at"],
             $this->current_time
         );
@@ -81,6 +80,9 @@ class Nominal extends Agent
         // We need the newest Nominal as that is most likely to be relevant to
         // what we are doing.
 
+$things = $findagent_thing->thing_report['things'];
+
+
         $this->thing->log(
             'Agent "Nominal" found ' .
                 count($findagent_thing->thing_report['things']) .
@@ -96,7 +98,7 @@ class Nominal extends Agent
             $nominal_things = $findagent_thing->thing_report['things'];
             $nominal_thing = $nominal_things[0];
             $thing = new Thing($nominal_thing['uuid']);
-            $latest_variable = $thing->json->readVariable(["nominal", "state"]);
+            $latest_variable = $thing->Read(["nominal", "state"]);
         }
 
         if (strtolower($variable) == strtolower($this->default_variable)) {
@@ -107,19 +109,18 @@ class Nominal extends Agent
             }
         }
 
+
         foreach (
-            array_reverse($findagent_thing->thing_report['things'])
+            array_reverse($things)
             as $nominal_thing
         ) {
             $thing = new Thing($nominal_thing['uuid']);
 
-            $thing->json->setField("variables");
-
             // Load requird val
-            $thing->index = $thing->json->readVariable(["nominal", "index"]);
-            $thing->state = $thing->json->readVariable(["nominal", "state"]);
+            $thing->index = $thing->Read(["nominal", "index"]);
+            $thing->state = $thing->Read(["nominal", "state"]);
 
-            $thing->refreshed_at = $thing->json->readVariable([
+            $thing->refreshed_at = $thing->Read([
                 "Nominal",
                 "refreshed_at",
             ]);
@@ -485,7 +486,6 @@ class Nominal extends Agent
         // Keyword
         if (count($pieces) == 1) {
             if ($input == 'nominal') {
-                //echo "readsubject Nominal";
                 $this->readNominal();
                 return;
             }

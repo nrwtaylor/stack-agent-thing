@@ -26,9 +26,6 @@ class Testfacebook {
 			echo $this->requested_agent;
 			
 
-			//$this->requested_agent = "bar";
-			//echo $input;
-			//exit();
 		}
 
 
@@ -117,18 +114,9 @@ $this->num_hits = 0;
                        $thing_report['info'] = $fb_thing->thing_report['info'];
 
         
-        exit();
+                        $time_string = $this->thing->time();
+                        $this->thing->Write( array("testfacebook", "refreshed_at"), $time_string );
 
-
-//exit();
-                //if ($time_string == false) {
-                        $this->thing->json->setField("variables");
-                        $time_string = $this->thing->json->time();
-                        $this->thing->json->writeVariable( array("testfacebook", "refreshed_at"), $time_string );
-                //}
-
-//echo $this->group_id;
-//exit();
 
 
                 return $this->message;
@@ -182,23 +170,6 @@ $this->num_hits = 0;
 		return;
 	}
         public function PNG() {
-// Thx https://stackoverflow.com/questions/24019077/how-to-define-the-result-of-qrcodepng-as-a-variable
-
-//I just lost about 4 hours on a really stupid problem. My images on the local server were somehow broken and therefore did not display in the browsers. After much looking around and tes$
-//No the problem was not a whitespace, but the UTF BOM encoding character at the begining of one of my inluded files...
-//So beware of your included files!
-//Make sure they are not encoded in UTF or otherwise in UTF without BOM.
-//Hope it save someone's time.
-
-//http://php.net/manual/en/function.imagepng.php
-
-//header('Content-Type: text/html');
-//echo "Hello World";
-//exit();
-
-//header('Content-Type: image/png');
-//QRcode::png('PHP QR Code :)');
-//exit();
                 // here DB request or some processing
 
 		if ($this->requested_agent == null) {
