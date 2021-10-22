@@ -46,6 +46,7 @@ return $thing_report;
      */
     public function respondResponse()
     {
+
 $t = $this->tokensLimit();
 if ($t != null and in_array('response', $t)) {
 
@@ -53,19 +54,18 @@ $this->response .= "Saw limit response token. ";
 $this->thing_report = $this->limitResponse();
 
 }
-
         $agent_flag = true;
         if ($this->agent_name == "agent") {
             return;
         }
-
         if ($agent_flag == true) {
             if (!isset($this->thing_report["sms"])) {
                 $this->thing_report["sms"] = "AGENT | Standby.";
             }
 
             $this->thing_report["message"] = $this->thing_report["sms"];
-            if ($this->agent_input == null or $this->agent_input == "") {
+
+            if ($this->agent_input == null or $this->agent_input == "" or $this->agent_input == 'response') {
                 $message_thing = new Message($this->thing, $this->thing_report);
                 $this->thing_report["info"] =
                     $message_thing->thing_report["info"];

@@ -448,7 +448,8 @@ if (!isset($this->db)) {
             //$this->sqlresponse = "Error: " . $sql . "<br>" . $query->errorInfo();
             $this->sqlresponse = "Error: " . implode(":", $query->errorInfo());
             $message0['50 words'] .= $this->sqlresponse;
-            return false;
+//return $this->Get();
+            //return false;
         }
 
         // Create new accounts.  Still under development as of 25 April.

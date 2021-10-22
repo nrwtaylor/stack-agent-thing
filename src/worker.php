@@ -11,7 +11,7 @@ error_reporting(-1);
 
 //register_shutdown_function('shutdown');
 
-echo "Worker whitefox 14 October 2021\n";
+echo "Worker whitefox 21 October 2021\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 
@@ -28,11 +28,11 @@ $task = "Nrwtaylor\StackAgentThing\call_agent_function";
 $worker->addFunction(
     $name,
     function () use ($task) {
-// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
-//         set_error_handler(
-//               'worker_fatal_handler',
-//               E_FATAL
-//           );
+        // https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+        //         set_error_handler(
+        //               'worker_fatal_handler',
+        //               E_FATAL
+        //           );
 
         try {
             $result = call_user_func_array($task, func_get_args());
@@ -41,10 +41,10 @@ $worker->addFunction(
             echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
             // Send exception to Exceptional so it can be logged with details
             // Exceptional::handle_exception($e, false);
-            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+            file_put_contents("/tmp/test.log", $e->getMessage(), FILE_APPEND);
         }
 
-//            restore_error_handler();
+        //            restore_error_handler();
 
         return $result;
     },
@@ -57,11 +57,11 @@ $task = "Nrwtaylor\StackAgentThing\call_agent_function";
 $worker->addFunction(
     $name,
     function () use ($task) {
-// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
-//         set_error_handler(
-//               'worker_fatal_handler',
-//               E_FATAL
-//           );
+        // https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+        //         set_error_handler(
+        //               'worker_fatal_handler',
+        //               E_FATAL
+        //           );
 
         try {
             $result = call_user_func_array($task, func_get_args());
@@ -70,10 +70,10 @@ $worker->addFunction(
             echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
             // Send exception to Exceptional so it can be logged with details
             // Exceptional::handle_exception($e, false);
-            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+            file_put_contents("/tmp/test.log", $e->getMessage(), FILE_APPEND);
         }
 
-//            restore_error_handler();
+        //            restore_error_handler();
 
         return $result;
     },
@@ -85,11 +85,11 @@ $name = "call_agent_routine";
 $worker->addFunction(
     $name,
     function () use ($task) {
-// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
-//         set_error_handler(
-//               'worker_fatal_handler',
-//               E_FATAL
-//           );
+        // https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+        //         set_error_handler(
+        //               'worker_fatal_handler',
+        //               E_FATAL
+        //           );
 
         try {
             $result = call_user_func_array($task, func_get_args());
@@ -98,10 +98,10 @@ $worker->addFunction(
             echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
             // Send exception to Exceptional so it can be logged with details
             // Exceptional::handle_exception($e, false);
-            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+            file_put_contents("/tmp/test.log", $e->getMessage(), FILE_APPEND);
         }
 
-//            restore_error_handler();
+        //            restore_error_handler();
 
         return $result;
     },
@@ -113,11 +113,11 @@ $name = "call_agent_priority";
 $worker->addFunction(
     $name,
     function () use ($task) {
-// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
-//         set_error_handler(
-//               'worker_fatal_handler',
-//               E_FATAL
-//           );
+        // https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+        //         set_error_handler(
+        //               'worker_fatal_handler',
+        //               E_FATAL
+        //           );
 
         try {
             $result = call_user_func_array($task, func_get_args());
@@ -126,10 +126,10 @@ $worker->addFunction(
             echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
             // Send exception to Exceptional so it can be logged with details
             // Exceptional::handle_exception($e, false);
-            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+            file_put_contents("/tmp/test.log", $e->getMessage(), FILE_APPEND);
         }
 
-//            restore_error_handler();
+        //            restore_error_handler();
 
         return $result;
     },
@@ -141,11 +141,11 @@ $name = "call_agent_emergency";
 $worker->addFunction(
     $name,
     function () use ($task) {
-// https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
-//         set_error_handler(
-//               'worker_fatal_handler',
-//               E_FATAL
-//           );
+        // https://vancelucas.com/blog/handling-exceptions-in-gearman-tasks-even-background-ones/
+        //         set_error_handler(
+        //               'worker_fatal_handler',
+        //               E_FATAL
+        //           );
 
         try {
             $result = call_user_func_array($task, func_get_args());
@@ -154,39 +154,35 @@ $worker->addFunction(
             echo "Gearman: CAUGHT EXCEPTION: " . $e->getMessage();
             // Send exception to Exceptional so it can be logged with details
             // Exceptional::handle_exception($e, false);
-            file_put_contents('/tmp/test.log', $e->getMessage(), FILE_APPEND);
+            file_put_contents("/tmp/test.log", $e->getMessage(), FILE_APPEND);
         }
 
-//            restore_error_handler();
+        //            restore_error_handler();
 
         return $result;
     },
     $uuid
 );
 
-
 // This would limit the length of any one worker.
 // This is handled by supervisor
 //$worker->setTimeout(1000);
 
 // Turn off timeout
-//$worker->setTimeout(5000);
+//$worker->setTimeout(50ge00);
 
 while ($worker->work() || $worker->returnCode() == GEARMAN_TIMEOUT) {
     echo "\nWaiting for a job\n";
 
-  if($worker->returnCode() == GEARMAN_TIMEOUT)
-  {
-    echo "Timeout.\n";
-    exit(0);
-  }
+    if ($worker->returnCode() == GEARMAN_TIMEOUT) {
+        echo "Timeout.\n";
+        exit(0);
+    }
 
-      if ($worker->returnCode() != GEARMAN_SUCCESS)
-      {
+    if ($worker->returnCode() != GEARMAN_SUCCESS) {
         echo "return_code: " . $worker->returnCode() . "\n";
-      }
-        echo "\nGearman return code " . $worker->returnCode() . "\n";
-
+    }
+    echo "\nGearman return code " . $worker->returnCode() . "\n";
 }
 
 function call_agent_function($job)
@@ -199,39 +195,37 @@ function call_agent_function($job)
         $agent_input = $arr["agent_input"];
     }
 
-    if (isset($arr['uuid'])) {
-        echo "worker found uuid - loading thing " . $arr['uuid'] . "\n";
-        $thing = new Thing($arr['uuid'], $agent_input);
+    if (isset($arr["uuid"])) {
+        echo "worker found uuid - loading thing " . $arr["uuid"] . "\n";
+        $thing = new Thing($arr["uuid"], $agent_input);
         $start_time = $thing->elapsed_runtime();
     } else {
-if (($arr['to'] == null) and ($arr['from'] == null) and ($arr['subject'] == null)) {
-return true;
-}
+        if (
+            $arr["to"] == null and
+            $arr["from"] == null and
+            $arr["subject"] == null
+        ) {
+            return true;
+        }
 
         echo "worker found message\n";
         $thing = new \Nrwtaylor\StackAgentThing\Thing(null, $agent_input);
-        echo "worker instantiated a thing " .$thing->uuid . "\n";
+        echo "worker instantiated a thing " . $thing->uuid . "\n";
 
         $start_time = $thing->elapsed_runtime();
-        $thing->Create($arr["to"], $arr["from"], $arr["subject"]);
-        echo "worker created a thing\n";
+        $response = $thing->Create($arr["to"], $arr["from"], $arr["subject"]);
 
+        echo "worker created a thing\n";
     }
 
-    //if ($thing->from== "17787923915") {
-    //    echo "matched number";
-    //    return true;
-    //}
-
     if ($thing->thing == false) {
-        echo "Thing is false";
+        echo "Thing is false\n";
         return true;
     }
     echo "worker nuuid " . $thing->nuuid . "\n";
     echo "worker uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
     echo "thing subject " . $thing->subject . "\n";
-
 
     $age = true;
     if (isset($thing->thing->created_at)) {
@@ -251,22 +245,28 @@ return true;
     // Or that a new thing was created.
     echo "thing age is " . $thing->human_time($age) . " ago.\n";
 
+    echo "job timestamp " .
+        (isset($thing->thing->created_at)
+            ? $thing->thing->created_at
+            : "Just now") .
+        "\n";
 
-    echo "job timestamp " . $thing->thing->created_at . "\n";
-
-//    echo "agent input" . $agent_input . "\n";
+    //    echo "agent input" . $agent_input . "\n";
 
     $do_not_respond = false;
-    if (isset($arr['body']['messageId'])) {
-        $message_id = $arr['body']['messageId'];
+    if (isset($arr["body"]["messageId"])) {
+        $message_id = $arr["body"]["messageId"];
 
-    echo "worker looking for message id " . $message_id. "\n";
-
+        echo "worker looking for message id " . $message_id . "\n";
 
         $m = $thing->db->variableSearch(null, $message_id, false);
 
-        echo "worker counted things with message idenfifier " . $message_id . ": " . count($m['things']) . "\n";
-        if (count($m['things']) > 0) {
+        echo "worker counted things with message idenfifier " .
+            $message_id .
+            ": " .
+            count($m["things"]) .
+            "\n";
+        if (count($m["things"]) > 0) {
             echo "Found message already.\n";
 
             $do_not_respond = true;
@@ -275,7 +275,7 @@ return true;
         new Messageidentifier($thing, $message_id);
     }
 
-echo "worker wrote message to thing";
+    echo "worker wrote message to thing\n";
 
     $thing->db->setFrom($thing->from);
 
@@ -286,6 +286,8 @@ echo "worker wrote message to thing";
         echo "worker call agent\n";
         $t = new Agent($thing);
     }
+    echo "thing report info " . $t->thing_report["info"] . "\n";
+    echo "worker complete\n";
 
     if (!isset($t->thing_report["sms"])) {
         echo "WORKER | No SMS message found." . "\n";

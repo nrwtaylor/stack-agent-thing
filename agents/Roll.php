@@ -828,6 +828,7 @@ class Roll extends Agent
     {
         if ($this->last_roll == false or $this->last_result == false) {
             //        $input = '2d20+5+d100';
+/*
             if ($this->agent_input != null) {
                 $input = strtolower($this->agent_input);
             } else {
@@ -836,7 +837,9 @@ class Roll extends Agent
                 $temp_thing = new Emoji($this->thing, "emoji");
                 $input = $temp_thing->translated_input;
             }
-
+*/
+var_dump($this->input);
+$input = $this->input;
             $n = substr_count($input, "roll");
 
             $input = preg_replace(

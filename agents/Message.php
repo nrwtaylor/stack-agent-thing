@@ -445,7 +445,8 @@ class Message extends Agent
 
         if (isset($this->do_not_send) and $this->do_not_send == true) {
             $this->thing->log($this->agent_prefix . " do not send.", "WARNING");
-            $this->thing_report["info"] = 'Agent "Message" saw, "Do not send this thing.".';
+            $this->thing_report["info"] =
+                'Agent "Message" saw, "Do not send this thing.".';
             return;
         }
 
@@ -476,7 +477,6 @@ class Message extends Agent
             return $this->thing_report;
         } else {
         }
-
         $from = $this->from;
         $to = $this->to;
 
@@ -541,7 +541,7 @@ class Message extends Agent
                 $dev_overide == true
             ) {
                 //$this->sendMicrosoft($this->from, "testtest");
-/*
+                /*
                 $microsoft_thing = new Microsoft(
                     $this->thing,
                     $this->sms_message
@@ -550,7 +550,6 @@ class Message extends Agent
                 $microsoft_thing->sendMicrosoft($this->from, $this->sms_message);
 */
                 $this->sendMicrosoft($this->from, $this->sms_message);
-
 
                 $thing_report["info"] = $microsoft_thing->thing_report["info"];
 
@@ -595,7 +594,7 @@ class Message extends Agent
                 "received a " . $token_thing->thing_report["token"] . " Token.",
                 "INFORMATION"
             );
-            $dev_overide = null;
+            $dev_overide = true;
             if (
                 $token_thing->thing_report["token"] == "discord" or
                 $dev_overide == true

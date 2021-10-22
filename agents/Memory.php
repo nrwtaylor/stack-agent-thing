@@ -26,7 +26,6 @@ return;}
             } catch (\Throwable $t) {
                 //$this->response .= "Could not access memory. ";
                 // Failto
-//var_dump("merp");
 
 //$thing = $this->thing;
 //if ($this->thing == null) {
@@ -78,6 +77,10 @@ if (!isset($this->memory)) {return null;}
         // Fail to stack php memory code if Memcached is not availble.
         $memory = $this->memory->get($text);
         return $memory;
+    }
+
+    public function createMemory($subject, $to) {
+        return $this->setMemory(null,['from'=>$to,'to'=>'merp','task'=>'subject']);
     }
 
     public function setMemory($text = null, $variable = null)

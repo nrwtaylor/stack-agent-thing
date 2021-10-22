@@ -460,11 +460,16 @@ if (count($this->available_stacks) > 0) {
      */
     function Create($subject, $to)
     {
-
         $response = false;
+
         if ((isset($this->stack['infrastructure'])) and ($this->stack["infrastructure"] == "mysql")) {
             $response = $this->stack_handler->createMysql($subject, $to);
         }
+
+        if ((isset($this->stack['infrastructure'])) and ($this->stack["infrastructure"] == "memory")) {
+            $response = $this->stack_handler->createMemory($subject, $to);
+        }
+
         return $response;
     }
 
@@ -491,6 +496,7 @@ if (count($this->available_stacks) > 0) {
                 case "mongo":
                     break 2;
                 case "memory":
+
                     $t = $this->stack_handler->getMemory($this->uuid);
                     if ($t !== false) {
                         $thing = new Thing(null);
@@ -658,10 +664,10 @@ if ($string_in_string === true) {
             //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
 
-/*
+
             $query =
                 "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-*/
+
 /*
 if ($this->hash_state == "off") {
             $query =
@@ -673,8 +679,8 @@ if ($this->hash_state == "on") {
                 "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 }
 */
-           $query =
-                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
+//           $query =
+//                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables
 
             //    $query =
