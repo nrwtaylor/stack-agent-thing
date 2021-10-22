@@ -127,8 +127,6 @@ class Discord extends Agent
 
     public function testDiscord()
     {
-        $this->sendDiscord("merp1", "kokopelli:#general@kaiju.discord");
-        $this->sendDiscord("merp2", "488580125017899008");
     }
 
     public function sendDiscord($text, $to)
