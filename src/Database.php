@@ -441,6 +441,7 @@ if (count($this->available_stacks) > 0) {
     function readField($field)
     {
         $thingreport = $this->Get();
+
         $this->thing = $thingreport["thing"];
 
         if (isset($this->thing->$field)) {
@@ -460,17 +461,30 @@ if (count($this->available_stacks) > 0) {
      */
     function Create($subject, $to)
     {
-        $response = false;
 
-        if ((isset($this->stack['infrastructure'])) and ($this->stack["infrastructure"] == "mysql")) {
+foreach($this->available_stacks as $stack_name => $stack_descriptor) {
+
+$stack_infrastructure = $stack_descriptor['infrastructure'];
+
+        if ($stack_infrastructure == "mysql") {
             $response = $this->stack_handler->createMysql($subject, $to);
+            $this->available_stacks['mysql']['response'] = $response;
         }
 
-        if ((isset($this->stack['infrastructure'])) and ($this->stack["infrastructure"] == "memory")) {
+        if ($stack_infrastructure == "memory") {
             $response = $this->stack_handler->createMemory($subject, $to);
+            $this->available_stacks['memory']['response'] = $response;
         }
 
-        return $response;
+}
+
+foreach($this->available_stacks as $stack_name => $stack_descriptor) {
+if ($stack_descriptor['response'] === true) {
+return true;}
+}
+
+return false;
+        //return $response;
     }
 
     /**
@@ -479,6 +493,7 @@ if (count($this->available_stacks) > 0) {
      */
     function Get()
     {
+
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
 
@@ -489,26 +504,34 @@ if (count($this->available_stacks) > 0) {
         $thing = false;
 
         foreach ($this->available_stacks as $stack_name => $stack) {
+
             switch ($stack["infrastructure"]) {
                 case "mysql":
-                    $thing = $this->stack_handler->getMysql();
-                    break 2;
+                    $thing = $this->stack_handlers[$stack['infrastructure']]->getMysql();
+
+if (($thing !== false) and ($thing !== true)) {break;}
+
                 case "mongo":
-                    break 2;
+                    break;
                 case "memory":
+                    $thing = $this->stack_handlers[$stack['infrastructure']]->getMemory($this->uuid);
 
-                    $t = $this->stack_handler->getMemory($this->uuid);
-                    if ($t !== false) {
-                        $thing = new Thing(null);
-                        $thing->created_at = null;
-                        $thing->nom_to = null;
-                        $thing->nom_from = null;
-                        $thing->task = "empty task";
-                        $thing->variables = json_encode($t, true);
-                        $thing->settings = null;
+if (($thing !== false) and ($thing !== true)) {break;}
+
+/*
+                    if ($thing !== false) {
+                        //$thing = new Thing(null);
+                        //$thing->created_at = null;
+                        //$thing->nom_to = null;
+                        //$thing->nom_from = null;
+                        //$thing->task = "empty task";
+                        //$thing->variables = json_encode($t, true);
+                        //$thing->settings = null;
+                        break;
                     }
+*/
 
-                    break 2;
+                    //break 2;
             }
         }
 

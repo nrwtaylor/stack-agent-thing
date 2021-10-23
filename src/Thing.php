@@ -24,8 +24,9 @@ class Thing
 
     public $from = null;
 
-    function __construct($uuid, $test_message = null)
+    public function __construct($uuid, $test_message = null)
     {
+
         //declare(ticks=1);
 
         //$resource_path = "/var/www/stackr.test/resources/debug";
@@ -153,14 +154,13 @@ class Thing
         //set_error_handler(array($this, "exception_error_handler"));
         try {
             $this->getThing($uuid);
-
         } catch (\Exception $e) {
+            $this->error = "No Thing to get";
             $this->log("No Thing to get.");
 
             // Fail quietly. There was no Thing to get.
-            //echo 'Caught exception: ',  $e->getMessage(), "\n";
+            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
         }
-
         // Deal with it.
 
         // devstack
@@ -169,7 +169,7 @@ class Thing
         $this->log("Thing instantiation completed.");
     }
 
-    function __destruct()
+    public function __destruct()
     {
 
         $t = "";
@@ -179,7 +179,7 @@ class Thing
         $this->log("Thing " . $t . " de-instantiated.");
     }
 
-    function getThing($uuid = null)
+    public function getThing($uuid = null)
     {
         if (null === $uuid) {
             // ONLY PLACE IN STACK WHERE UUIDs ARE ASSIGNED
@@ -221,6 +221,7 @@ class Thing
 
             // Testing this as of 15 June 2018.  Not used by framework yet.
             $this->variables = new Json($this->uuid);
+
             $this->variables->setField("variables");
 
             $this->choice = new Choice($this->uuid, $this->from);
@@ -234,7 +235,6 @@ class Thing
             // The instatiation function needs to return a minimum clean false
             // Thing.
             $this->thing = false;
-
             // Calling constructor with a uuid that doesn't exist,
             // returns false, and with a Thing instantiated.  For tasking.
         } else {
@@ -348,7 +348,7 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         $this->Forget();
     }
 
-    function Create($from = null, $to = "", $subject = "")
+    function Create($from = null, $to = "", $subject = "", $agent_input = null)
     {
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
@@ -372,6 +372,7 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
 if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
 }
+
         $this->log("Create. Database connector made.");
 
         // All records are associated with a posterior record.  Ideally
@@ -410,10 +411,11 @@ if (!isset($this->db)) {
 
         $query = $this->db->Create($subject, $to); // 3s
         $this->log("Create. Database create call completed.");
-
         $this->to = $to;
         $this->from = $from;
         $this->subject = $subject;
+
+        $this->agent_input = $agent_input;
 
         // test 9383 30 January 2021
         $this->created_at = time();
@@ -426,6 +428,13 @@ if (!isset($this->db)) {
             $this->sqlresponse = "New record created successfully.";
             $message0['500 words'] .= $this->sqlresponse;
         } elseif ($query == false) {
+
+           $this->log(
+                'new record received FALSE on create.',
+                "INFORMATION"
+            );
+
+
             return false;
         } else {
             $error_text = $query->errorInfo();
@@ -434,6 +443,13 @@ if (!isset($this->db)) {
         }
 
         if ($to == "error") {
+
+           $this->log(
+                'new record heard error.',
+                "INFORMATION"
+            );
+
+
             return true;
         }
 
@@ -462,12 +478,10 @@ if (!isset($this->db)) {
         // information with newly presented information.
 
         // Which means the stack can reset a Things balance.  Handy.
-
         $this->account = [];
 
         // Kind of ugly.  But I guess this isn't Python.  And null
         // accounts can't be allowed.
-
         if ($this->stack_account != null) {
             $this->newAccount(
                 $this->stack_uuid,
@@ -506,9 +520,11 @@ if (!isset($this->db)) {
         //$this->stackBalance();
 
         $this->log("Create completed.");
-        $this->log("Now called Get. (again?)");
+$g = $this->Get();
 
-        return $this->Get();
+        $this->log("Finished create.");
+
+        return $g;
     }
 
     public function newAccount($account_uuid, $account_name, $balance = null)
@@ -820,7 +836,6 @@ echo "Previous uuid got " . ($prior_uuid) . "\n";
 }
 */
 
-
 $thing = false;
 if (isset($this->db)) {
         $thingreport = $this->db->Get($this->uuid);
@@ -830,10 +845,16 @@ if (isset($this->db)) {
         $this->log("loaded thing " . $this->nuuid . " from db.");
 
         if ($thing == false) {
-            //$this->uuid = $this->thing->uuid;
+
+// Returned thing is false.
+// So not on stack.
+
+// Use what we know.
+/*
             $this->to = null;
             $this->from = null;
             $this->subject = null;
+*/
         } else {
             // This just makes sure these four variables
             // are consistently available
@@ -1083,7 +1104,7 @@ $class_name = $this->agent_class_name_current;
                         break;
                     }
                 default:
-                //echo "i is not equal to 0, 1 or 2";
+                // No action.
             }
         }
         $this->log_last = $t;
@@ -1171,7 +1192,7 @@ $class_name = $this->agent_class_name_current;
                         break;
                     }
                 default:
-                //echo "i is not equal to 0, 1 or 2";
+                // No action.
             }
         }
         $this->log_last = $t;

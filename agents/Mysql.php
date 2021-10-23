@@ -140,24 +140,47 @@ echo "fopo";
             $this->user = $db["user"];
             $this->pass = $db["pass"];
         }
-
+// https://stackoverflow.com/questions/6263443/pdo-connection-test/6263868#6263868
+/*
+try {
+    $this->pdo = new PDO($cfg['DB'], $cfg['DB_USER'], $cfg['DB_PASS'],
+        array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+} catch {
+    echo("Can't open the database.");
+}
+*/
+        $this->error = null;
         try {
             $pdo = new PDO(
                 "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
                 $this->user,
-                $this->pass
+                $this->pass,
             );
-//echo "bar";
-//exit();
+
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
             $this->pdo = $pdo;
         } catch (\Throwable $t) {
+            $this->error = 'Could not connect to MySQL database';
+
+           $this->thing->log(
+                'could not connect to MySQL database.',
+                "INFORMATION"
+            );
+
             throw new \Exception("Could not connect to MySQL database.");
         } catch (\Error $ex) {
+            $this->error = 'Could not connect to MySQL database';
+
+           $this->thing->log(
+                'could not connect to MySQL database.',
+                "INFORMATION"
+            );
+
+
             throw new \Exception("Could not connect to MySQL database.");
         }
+
 
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
@@ -224,7 +247,7 @@ echo "fopo";
      */
     function priorMysql($created_at = null)
     {
-        if ($this->get_prior === false) {
+        if (!isset($this->pdo) or $this->pdo == null or $this->get_prior === false) {
             $thingreport = [
                 "thing" => false,
                 "info" => "Prior get is off for this stack.",
@@ -311,6 +334,7 @@ echo "fopo";
      */
     function writeField($field_text, $string_text)
     {
+        if (!isset($this->pdo) or ($this->pdo == null)) {return;}
         //        $this->split_time = microtime(true);
         //        $this->log = [$field_text, $string_text];
         //$this->test( $this->get_calling_function() );
@@ -408,6 +432,7 @@ echo "fopo";
      */
     function createMysql($subject, $to)
     {
+        if (!isset($this->pdo) or $this->pdo == null) {return false;}
         try {
             // Create a new record in the db for the Thing.
             //            $this->split_time = microtime(true);
@@ -436,9 +461,23 @@ echo "fopo";
 
             $query->execute();
             $query = null;
+
+//           $this->thing->log(
+//                'made MYSQL record.',
+//                "INFORMATION"
+//            );
+
+
             return true;
             return $query;
         } catch (\Exception $e) {
+
+//           $this->thing->log(
+//                'could not create MySQL record.',
+//                "INFORMATION"
+//            );
+
+
             // Devstack - decide how to handle thing full
             // Do this for now.
 
@@ -470,23 +509,25 @@ echo "fopo";
         // Chance of collision super-super-small.
 
         // So just return the contents of thing.  false if it doesn't exist.
-
+if (!isset($this->pdo) or $this->pdo == null) {return false;}
         try {
             // Trying long form.  Doesn't seme to have performance advantage.
 //            $sth = $this->pdo->prepare(
 //                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, message1, message2, message3, message4, message5, message6, message7, settings, variables FROM stack WHERE uuid=:uuid"
 //            );
-
-            $sth = $this->pdo->prepare(
-                "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, settings, variables FROM stack WHERE uuid=:uuid"
-            );
-
+            $query = "SELECT uuid, task, nom_from, nom_to, created_at, associations, message0, settings, variables FROM stack WHERE uuid=:uuid";
+            $sth = $this->pdo->prepare($query);
 
             //$sth = $this->container->db->prepare("SELECT * FROM stack WHERE uuid=:uuid");
             $sth->bindParam("uuid", $this->uuid);
-            $sth->execute();
-            $thing = $sth->fetchObject();
 
+            $sth->execute();
+
+            $thing = $sth->fetchObject();
+//    } catch ( \PDOException $e ) {
+//        echo 'ERROR!';
+//exit();
+//        print_r( $e )
         } catch (\Exception $e) {
             // devstack look get the error code.
             // SQLSTATE[HY000] [2002] Connection refused
@@ -500,6 +541,7 @@ echo "fopo";
             $thing = false;
         }
         $sth = null;
+
         return $thing;
     }
 

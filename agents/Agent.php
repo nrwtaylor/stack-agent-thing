@@ -66,7 +66,6 @@ class Agent
         // and create the most appropriate agent to respond to it.
 
         $this->thing = $thing;
-
         $this->thing->agent_class_name_current = $this->agent_class_name;
 
         $this->thing_report["thing"] = $this->thing;
@@ -199,6 +198,7 @@ class Agent
 
 }
 */
+
         $this->init();
 
         // read the current agent.
@@ -206,6 +206,7 @@ class Agent
             $this->{"init" . $this->agent_class_name}();
         }
         $this->get();
+
         try {
             $this->read();
             $this->run();
@@ -213,6 +214,7 @@ class Agent
 
             $this->set();
         } catch (\OverflowException $t) {
+
             $this->response =
                 "Stack variable store is full. Variables not saved. Text FORGET ALL.";
             $web_thing = new Thing(null);
@@ -257,9 +259,10 @@ class Agent
             $this->thing->log($error_text, "ERROR");
             // Executed only in PHP 5, will not be reached in PHP 7
         }
-
         if ($this->agent_input == null or $this->agent_input == "") {
+
             $this->respond();
+
         }
         if (!isset($this->response)) {
             $this->response = "No response found.";
@@ -278,7 +281,12 @@ class Agent
             $this->test();
         }
         $this->thing->log("__construct complete");
+
     }
+
+function __destruct() {
+
+}
 
     public function initAgent()
     {
@@ -300,7 +308,8 @@ class Agent
     // TODO DEV?
     public function __call($agent_function, $args)
     {
-if (!isset($this->thing)) {return true;}
+if (!isset($this->thing)) {
+return true;}
 //        $this->thing->log("__call start");
         /*
         Generalize this pattern from agents.
@@ -353,7 +362,6 @@ if (!isset($this->thing)) {return true;}
         // Call it if we find it.
 
         $agent_namespace_names[] = $agent_namespace_name;
-
         $agent_namespace_names[] =
             "\\Nrwtaylor\\StackAgentThing\\" . strtoupper($agent_class_name);
 
@@ -385,7 +393,6 @@ if (!isset($this->thing)) {return true;}
                 );
                 $response = $agent_handler->{$function_name}(...$args);
 */
-
                 // Test optimize by only initiating once.
                 if (!isset($this->thing->{$agent_name . "_handler"})) {
                     $this->thing->{$agent_name .
@@ -466,7 +473,7 @@ public function __set($name, $value) {
      */
     public function set()
     {
-       if (!isset($this->ping)) {return true;}
+       if (!isset($this->{$this->agent_name})) {return true;}
        $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
     }
 
@@ -1950,7 +1957,6 @@ $this->shutdownHandler();
                 'trying Agent "' . $agent_class_name . '".',
                 "INFORMATION"
             );
-
             if ($agent_class_name == null) {
                 throw \Exception($agent_class_name . " is a null agent.");
             }
@@ -2177,9 +2183,11 @@ if ($pid == -1) {
         $this->responsive_agents = $responsive_agents;
 
         foreach ($this->responsive_agents as $i => $j) {
-            $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n");
+            $this->thing->log($j["agent_name"] . " " . $j["score"] . "\n", "INFORMATION");
 
         }
+
+
     }
 
     public function scoreAgent($text, $matched_characters = null)

@@ -131,14 +131,11 @@ class Discord extends Agent
 
     public function sendDiscord($text, $to)
     {
-        var_dump($to);
-        var_dump($this->aliases);
         //$to = "kokopelli:#general@kaiju.discord"; // for testing
         $bot_name = $to;
 
         $parts = explode(":", $to);
-        //var_dump($parts);
-        //exit();
+
         if (count($parts) == 1) {
             if (isset($this->aliases[$parts[0]])) {
                 $alias = $this->aliases[$parts[0]];
@@ -151,8 +148,7 @@ class Discord extends Agent
             $to = $parts[1];
             $bot_name = ucwords($parts[0]);
         }
-        var_dump("to", $to);
-        var_dump("bot_name", $bot_name);
+
         $bot_webhook = $this->settingsAgent([
             "discord",
             "servers",
@@ -185,8 +181,6 @@ class Discord extends Agent
         $msg = $datagram["subject"];
         $avatar = null;
 
-        var_dump($datagram);
-
         $curl = curl_init();
         //timeouts - 5 seconds
         curl_setopt($curl, CURLOPT_TIMEOUT, 5); // 5 seconds
@@ -212,8 +206,7 @@ class Discord extends Agent
         );
 
         $output = json_decode(curl_exec($curl), true);
-        //var_dump($output);
-        //var_dump(curl_getinfo($curl));
+
         if (curl_getinfo($curl, CURLINFO_HTTP_CODE) != 204) {
             curl_close($curl);
             $this->thing->Write(
@@ -413,13 +406,12 @@ class Discord extends Agent
         $this->getDiscord();
     }
 
+
+    // Not tested.
     function getDiscord()
     {
-        //var_dump($this->thing->thing->message0);
         $bodies = json_decode($this->thing->thing->message0, true);
         $this->body = $bodies["discord"];
-        var_dump($this->body);
-        //        $this->variablesGet();
         return $this->body;
     }
 

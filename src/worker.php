@@ -11,7 +11,7 @@ error_reporting(-1);
 
 //register_shutdown_function('shutdown');
 
-echo "Worker whitefox 21 October 2021\n";
+echo "Worker whitefox 22 October 2021\n";
 echo "Gearman Worker started\n";
 $worker = new \GearmanWorker();
 
@@ -205,12 +205,13 @@ function call_agent_function($job)
             $arr["from"] == null and
             $arr["subject"] == null
         ) {
+            echo "worker saw to from subject null\n";
             return true;
         }
 
-        echo "worker found message\n";
+        echo "worker creating a thing from provided datagram\n";
         $thing = new \Nrwtaylor\StackAgentThing\Thing(null, $agent_input);
-        echo "worker instantiated a thing " . $thing->uuid . "\n";
+        echo "worker instantiated thing " . $thing->uuid . "\n";
 
         $start_time = $thing->elapsed_runtime();
         $response = $thing->Create($arr["to"], $arr["from"], $arr["subject"]);
@@ -220,12 +221,25 @@ function call_agent_function($job)
 
     if ($thing->thing == false) {
         echo "Thing is false\n";
-        return true;
+
+$thing->to = $arr['from'];
+$thing->from = $arr['to'];
+$thing->subject = $arr['subject'];
+$thing->agent_input = $arr['agent_input'];
+
+//        $this->current_time = $this->thing->time();
+$thing->created_at = $thing->time();
+
+//        return true;
     }
     echo "worker nuuid " . $thing->nuuid . "\n";
     echo "worker uuid " . $thing->uuid . "\n";
     echo "worker timestamp " . $thing->microtime() . "\n";
     echo "thing subject " . $thing->subject . "\n";
+
+    echo "thing to " . $thing->to . "\n";
+    echo "thing from " . $thing->from . "\n";
+
 
     $age = true;
     if (isset($thing->thing->created_at)) {

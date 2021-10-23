@@ -368,17 +368,12 @@ class Resource extends Agent
             return;
         }
 
-        //        $findagent_thing = new Findagent($this->thing, 'resource');
-
         $this->thing->log(
             'Agent "Place" found ' . count($things) . " resource Things."
         );
 
-        //        if ($findagent_thing->thing_report['things'] == true) {
-        //        }
-
         if (count($things) == 0) {
-            // No places found
+            // No things found
         } else {
             //$this->response .= "Found some resources on the stack. ";
             foreach (array_reverse($things) as $thing) {
@@ -419,13 +414,13 @@ class Resource extends Agent
         // Add in a set of default places
 
         $default_resourcename_list = [
-            "Fuel",
-            "Food",
-            "Water",
-            "Communications",
+            "Fuel"=>100,
+            "Food"=>100,
+            "Water"=>100,
+            "Communications"=>"X",
         ];
 
-        foreach ($default_resourcename_list as $resource_name) {
+        foreach ($default_resourcename_list as $resource_name => $resource_quantity) {
             //$place_code = str_pad(RAND(1,99999), 8, " ", STR_PAD_LEFT);
 
             //$this->placecode_list[] = $place_code;

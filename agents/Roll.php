@@ -838,8 +838,9 @@ class Roll extends Agent
                 $input = $temp_thing->translated_input;
             }
 */
-var_dump($this->input);
+
 $input = $this->input;
+
             $n = substr_count($input, "roll");
 
             $input = preg_replace(

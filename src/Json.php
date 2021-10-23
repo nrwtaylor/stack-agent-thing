@@ -574,7 +574,6 @@ class Json
     function read()
     {
         $this->json_data = $this->db->readField($this->field);
-
         //        if ($this->json_data == null) {$this->initField();}
 
         $array = $this->jsontoArray();

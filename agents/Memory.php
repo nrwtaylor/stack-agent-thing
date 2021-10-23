@@ -80,7 +80,14 @@ if (!isset($this->memory)) {return null;}
     }
 
     public function createMemory($subject, $to) {
-        return $this->setMemory(null,['from'=>$to,'to'=>'merp','task'=>'subject']);
+
+           $this->thing->log(
+                'asked to create a Memory.',
+                "INFORMATION"
+            );
+
+
+        return $this->setMemory(null,['from'=>$to,'to'=>'memory','task'=>$subject]);
     }
 
     public function setMemory($text = null, $variable = null)
