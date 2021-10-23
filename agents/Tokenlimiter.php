@@ -291,23 +291,6 @@ $this->state = null;
             //$this->thing->choice->Choose("foraging");
 
             break;
-        case "inside nest":
-            //$this->thing->choice->Choose("in nest");
-            break;
-        case "nest maintenance":
-            //$this->thing->choice->Choose("nest maintenance");
-            break;
-        case "patrolling":
-            //$this->thing->choice->Choose("patrolling");
-            break;
-        case "midden work":
-            //$this->thing->choice->Choose("midden work");
-            $this->middenwork();
-
-            // Need to figure out how to set flag to red given that respond will then reflag it as green.
-            // Can green reflag red?  Think about reset conditions.
-
-            break;
         default:
 
         }

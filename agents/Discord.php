@@ -127,6 +127,9 @@ class Discord extends Agent
 
     public function testDiscord()
     {
+
+$this->sendDiscord("merp",'kokopelli:#general@kaiju.discord');
+
     }
 
     public function sendDiscord($text, $to)
@@ -209,16 +212,21 @@ class Discord extends Agent
 
         if (curl_getinfo($curl, CURLINFO_HTTP_CODE) != 204) {
             curl_close($curl);
+
             $this->thing->Write(
                 ["discord", "response_message"],
                 $output["message"]
             );
+
+
             $this->thing_report["info"] =
                 "Could not send message: " . $output["message"] . ". ";
             $this->response .=
                 "Could not send message to Discord. [" .
                 $output["message"] .
                 "]. ";
+
+
             return true;
             //throw new Exception("Something went wrong to send a discord message: " . $output['message']);
         }
@@ -411,8 +419,12 @@ class Discord extends Agent
     function getDiscord()
     {
         $bodies = json_decode($this->thing->thing->message0, true);
-        $this->body = $bodies["discord"];
-        return $this->body;
+if ($bodies == null) {
+$this->body = null;
+return null;
+}
+       $this->body = $bodies["discord"];
+//        return $this->body;
     }
 
     function variablesGet()

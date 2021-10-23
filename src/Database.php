@@ -509,14 +509,14 @@ return false;
                 case "mysql":
                     $thing = $this->stack_handlers[$stack['infrastructure']]->getMysql();
 
-if (($thing !== false) and ($thing !== true)) {break;}
+if (($thing !== false) and ($thing !== true)) {break 2;}
 
                 case "mongo":
                     break;
                 case "memory":
                     $thing = $this->stack_handlers[$stack['infrastructure']]->getMemory($this->uuid);
 
-if (($thing !== false) and ($thing !== true)) {break;}
+if (($thing !== false) and ($thing !== true)) {break 2;}
 
 /*
                     if ($thing !== false) {
