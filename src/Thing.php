@@ -306,16 +306,17 @@ class Thing
     function spawn($datagram = null)
     {
         if (strtolower($this->queue_handler) != "gearman") {
+
             $this->log("No queue handler recognized");
             return true;
         }
 
         // "Failed to set exception option."
         // Try to catch.
-
         $client = new \GearmanClient();
 
         $arr = (array) $client;
+
         if (!$arr) {
             $this->log("spawn. Job queue not available.");
             // do stuff
@@ -329,6 +330,11 @@ class Thing
         $client->addServer();
         $arr = json_encode($datagram);
 $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
+
+
+//$function_name = "call_agent";
+
+
 //        $client->doLowBackground("call_agent", $arr);
         $client->doLowBackground($function_name, $arr);
 
