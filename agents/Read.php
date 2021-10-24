@@ -70,16 +70,18 @@ class Read extends Agent
             $slug_agent = new Slug($this->thing, "slug");
             $uri_slug = $slug_agent->getSlug($uri);
             $file = $this->resource_path . "read/" . $uri_slug;
+            if (file_exists($file)) {
+                $cached_time = filemtime($file);
 
-            $cached_time = filemtime($file);
-            $age = time() - $cached_time;
-            // Use cached file if horizon is set and age is less than horizon.
-            if ($age < $file_cache_horizon) {
-                $this->contents = file_get_contents($file);
+                $age = time() - $cached_time;
+                // Use cached file if horizon is set and age is less than horizon.
+                if ($age < $file_cache_horizon) {
+                    $this->contents = file_get_contents($file);
 
-                $this->response .= "Got local file cache. ";
-                return $this->contents;
-                //return $this->contents;
+                    $this->response .= "Got local file cache. ";
+                    return $this->contents;
+                    //return $this->contents;
+                }
             }
         }
 

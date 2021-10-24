@@ -102,7 +102,7 @@ $this->thing_report = $this->limitResponse();
         $this->getMeta();
         $t = "";
         $t .= $this->meta;
-        $t .= " " . this->meta_string;
+        $t .= " " . $this->meta_string;
         $t .= " " . $this->agent_name;
        return $t;
     }
