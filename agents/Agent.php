@@ -59,8 +59,6 @@ class Agent
             $this->agent_input = $input;
         }
 
-//        $this->getName();
-
         $this->agent_prefix = 'Agent "' . ucfirst($this->agent_name) . '" ';
         // Given a "thing".  Instantiate a class to identify
         // and create the most appropriate agent to respond to it.
@@ -489,6 +487,7 @@ public function __set($name, $value) {
         $this->rules_list = [];
         $this->unique_count = 0;
         $findagent_thing = new Findagent($this->thing, $agent_name);
+
         if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
@@ -1413,34 +1412,10 @@ public function __set($name, $value) {
      */
     public function respond()
     {
+        // Call the response agent
         $this->respondResponse();
     }
 
-    /**
-     *
-     */
-/*
-    public function respondResponse()
-    {
-        $agent_flag = true;
-        if ($this->agent_name == "agent") {
-            return;
-        }
-
-        if ($agent_flag == true) {
-            if (!isset($this->thing_report["sms"])) {
-                $this->thing_report["sms"] = "AGENT | Standby.";
-            }
-
-            $this->thing_report["message"] = $this->thing_report["sms"];
-            if ($this->agent_input == null or $this->agent_input == "") {
-                $message_thing = new Message($this->thing, $this->thing_report);
-                $this->thing_report["info"] =
-                    $message_thing->thing_report["info"];
-            }
-        }
-    }
-*/
     public function makeInput()
     {
     }
@@ -3114,20 +3089,23 @@ echo "TRUE";
         $input_agent = new Input($this->thing, "input");
         $input_state = $input_agent->stateInput();
         if ($input_agent->stateInput() == "anticipate") {
-            $this->response .= "Input anticipated. ";
+            $this->response .= "Input anticipated ";
 
             $agent_class_name = $input_agent->agentInput();
+if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
 
-            $this->response .= "Saw " . $agent_class_name . ". ";
+            $this->response .= "by " . $agent_class_name . ". ";
 
             $agent = $this->getAgent($agent_class_name, "input");
 
-            if ($agent !== false) {
+            if (!($agent == false or $agent == true)) {
                 $this->thing_report = $agent->thing_report;
                 $input_agent->dropInput();
 
                 return $this->thing_report;
             }
+
+
         }
 
         $headcode = new Headcode($this->thing, "extract");

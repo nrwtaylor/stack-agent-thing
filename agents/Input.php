@@ -370,11 +370,19 @@ Input: <input type="text" onkeyup="callAgent(this.value)">
 
     public function agentInput($text = null)
     {
-        if ($text != null) {
-            $this->input_agent = $text;
-        }
-        $this->response .= "input_agent " . $this->input_agent . ". ";
-        return $this->input_agent;
+
+$input_agent = $this->input_agent;
+
+if ($text != null) {
+$this->input_agent = $text;
+}
+$input_agent = $this->input_agent;
+
+//        if ($text != null) {
+//            $this->input_agent = $text;
+//        }
+        $this->response .= "input_agent " . $input_agent . ". ";
+        return $input_agent;
     }
 
     public function stateInput($text = null)

@@ -423,7 +423,11 @@ if ($bodies == null) {
 $this->body = null;
 return null;
 }
-       $this->body = $bodies["discord"];
+if (isset($bodies['msg'])) {
+//       $this->body = $bodies["discord"];
+       $this->body = $bodies["msg"];
+
+}
 //        return $this->body;
     }
 

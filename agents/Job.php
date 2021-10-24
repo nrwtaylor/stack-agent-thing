@@ -96,7 +96,8 @@ class Job extends Agent
         $subject = $datagram["subject"];
         $from = $datagram["from"];
 
-        if ($datagram["agent_input"] == "gearman") {
+
+        if ((isset($datagram['agent_input'])) and $datagram["agent_input"] == "gearman") {
             $arr = json_encode([
                 "to" => $to,
                 "from" => $from,

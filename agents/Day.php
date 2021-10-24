@@ -733,7 +733,9 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
 
-        return;
+if ($this->latitude == 'Z') {$this->latitude = $latitude_agent->default_latitude;}
+if ($this->longitude == 'Z') {$this->longitude = $longitude_agent->default_longitude;}
+var_dump($this->latitude);
     }
 
     /**

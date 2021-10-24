@@ -97,6 +97,36 @@ class Ping extends Agent
         return $latency;
     }
 
+    public function getPings()
+    {
+        $jobs = [];
+        $agent_name = "ping";
+        $things = $this->getThings("ping");
+
+        if ($things == []) {
+            $this->pings = $jobs;
+            return $this->pings;
+        }
+
+        foreach (array_reverse($things) as $thing) {
+            $subject = $thing->subject;
+            $variables = $thing->variables;
+            $created_at = $thing->created_at;
+
+            if (isset($variables[$agent_name])) {
+                $job = ["subject" => $subject, "created_at" => $created_at];
+
+                $job = array_merge($job, $variables[$agent_name]);
+
+                $jobs = $job;
+            }
+        }
+
+        $this->pings = array_merge($jobs, $this->pings);
+        return $this->pings;
+    }
+
+
     private function checksumPing($data)
     {
         if (strlen($data) % 2) {
@@ -234,6 +264,15 @@ class Ping extends Agent
             $this->hostPing($urls);
         }
 */
+
+ if ($this->hasText(strtolower($this->input), 'digest')) {
+
+$this->getPings();
+var_dump($this->pings);
+if ($this->pings == true) {$this->response .= 'Did not see pings. '; return;}
+$this->response .= count($this->pings) . " pings seen. ";
+return;
+}
 
         $this->response .= 'Heard, "' . $this->input . '". ';
 

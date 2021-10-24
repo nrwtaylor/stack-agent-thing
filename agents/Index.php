@@ -92,6 +92,7 @@ class Index extends Agent
             default:
         }
 
+        $this->padIndex();
         $sms .= "" . $this->index_padded;
 
         $this->sms_message = $sms;

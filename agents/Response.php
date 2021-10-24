@@ -17,11 +17,11 @@ class Response extends Agent
     public function doResponse()
     {
         if ($this->agent_input == null) {
-            $array = array('miao', 'miaou', 'hiss', 'prrr', 'grrr');
+            $array = array('Hmmmm.', 'Is that so.', 'Right.');
             $k = array_rand($array);
             $v = $array[$k];
 
-            $response = "RESPONSE | " . strtolower($v) . ".";
+            $response = strtolower($v) . ".";
 
             $this->response_message = $response; // mewsage?
         } else {
@@ -36,7 +36,12 @@ if ($thing_report == null) {
 
 // dev placeholder for calling shorten.
 // Needs to work through the whole thing_report.
-$thing_report['sms'] = "[apply limit] " . $thing_report['sms'];
+
+$parts = explode('. ', $thing_report['sms']);
+$thing_report['sms'] = $parts[0] . ".";
+
+
+$thing_report['sms'] = "[dev apply limit] " . $thing_report['sms'];
 
 return $thing_report;
     }
@@ -58,10 +63,18 @@ $this->thing_report = $this->limitResponse();
         if ($this->agent_name == "agent") {
             return;
         }
+
+        // Don't respond to responses.
+        if ($this->agent_name == "response") {
+            return;
+        }
+
+
         if ($agent_flag == true) {
             if (!isset($this->thing_report["sms"])) {
                 $this->thing_report["sms"] = "AGENT | Standby.";
             }
+            $this->thing_report['sms'] .= " response added " . $this->agent_name;
 
             $this->thing_report["message"] = $this->thing_report["sms"];
 
@@ -73,14 +86,28 @@ $this->thing_report = $this->limitResponse();
         }
     }
 
+    function metaResponse() {
+        $this->getMeta();
+        $t = "";
+        $t .= $this->meta;
+        $t .= " " . this->meta_string;
+        $t .= " " . $this->agent_name;
+       return $t;
+    }
+
     function makeSMS()
     {
-        $this->sms_message = "" . $this->response_message;
+        $this->sms_message = "RESPONSE | " . "" . $this->response_message . " " . $this->response;
         $this->thing_report['sms'] = $this->sms_message;
     }
 
     public function readSubject()
     {
+if ($this->hasText($this->input, "meta")) {
+
+$this->response .= $this->metaResponse() ." ";
+}
+
         return false;
     }
 }
