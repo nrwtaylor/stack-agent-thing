@@ -1127,7 +1127,7 @@ $web .= $token_handler->web_token['calendar-page'];
         $text = "tick";
 
         $arc = [];
-
+$arc_day = [];
         $a = $this->solarDay();
         foreach ($a as $period_name => $period) {
             $period_timestamp = $this->working_datum->getTimestamp();
@@ -1154,7 +1154,23 @@ $web .= $token_handler->web_token['calendar-page'];
                 imagesetthickness($this->image, 7);
             }
 
-            $this->drawTick($text, $angle, $radius, $length);
+            if (strpos($period_name, "sunrise") !== false) {
+                $arc_day[] = $angle;
+                $colour = $this->blue;
+                imagesetthickness($this->image, 7);
+
+            }
+
+            if (strpos($period_name, "sunset") !== false) {
+                $arc_day[] = $angle;
+                $colour = $this->blue;
+                imagesetthickness($this->image, 7);
+
+            }
+
+
+            $this->drawTick($text, $angle, $radius, $length, $colour);
+            $colour = $this->black;
         }
 
         imagesetthickness($this->image, 3);
@@ -1182,6 +1198,19 @@ $web .= $token_handler->web_token['calendar-page'];
             $arc[0] + ($this->init_angle * 180) / pi(),
             $this->black
         );
+
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            $arc_day[0] + ($this->init_angle * 180) / pi(),
+            $arc_day[1] + ($this->init_angle * 180) / pi(),
+            $this->blue
+        );
+
+
     }
 
     public function get()
@@ -1196,8 +1225,9 @@ $web .= $token_handler->web_token['calendar-page'];
         $this->getDay();
     }
 
-    public function drawTick($text, $angle, $radius, $length)
+    public function drawTick($text, $angle, $radius, $length, $colour = null)
     {
+        if ($colour == null) {$colour = $this->black;}
         // angle in degrees
         //imagesetthickness($this->image, 5);
         //$init_angle = (-1 * pi()) / 2;
@@ -1220,7 +1250,7 @@ $web .= $token_handler->web_token['calendar-page'];
             $this->center_y + $y_start,
             $this->center_x + $x_end,
             $this->center_y + $y_end,
-            $this->black
+            $colour
         );
     }
     /**
