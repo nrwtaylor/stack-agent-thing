@@ -1921,17 +1921,19 @@ $this->shutdownHandler();
 */
 
         //if ($agent_class_name == 'Test') {return false;}
-        set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
+          set_error_handler([$this, "warning_handler"], E_WARNING | E_NOTICE);
 
         //set_error_handler("warning_handler", E_WARNING);
 
         try {
             $agent_namespace_name =
                 "\\Nrwtaylor\\StackAgentThing\\" . $agent_class_name;
+
             $this->thing->log(
                 'trying Agent "' . $agent_class_name . '".',
                 "INFORMATION"
             );
+
             if ($agent_class_name == null) {
                 throw \Exception($agent_class_name . " is a null agent.");
             }
@@ -1951,7 +1953,6 @@ $this->shutdownHandler();
             if (!isset($thing->subject)) {
                 $thing->subject = $this->input;
             }
-
             $agent = new $agent_namespace_name($thing, $agent_input);
             //$shouldExit = false;
 
@@ -1998,10 +1999,23 @@ if ($pid == -1) {
             //$agent = false;
             //}
         } catch (\Throwable $t) {
+
             restore_error_handler();
             $this->thing->log("caught throwable.", "WARNING");
+
+            $message = $t->getMessage();
+
+            // $code = $ex->getCode();
+            $file = $t->getFile();
+            $line = $t->getLine();
+
+            $input = $message . "  " . $file . " line:" . $line;
+            $this->thing->log($input, "WARNING");
+
+
             return false;
         } catch (\Error $ex) {
+
             restore_error_handler();
             // Error is the base class for all internal PHP error exceptions.
             $this->thing->log(
