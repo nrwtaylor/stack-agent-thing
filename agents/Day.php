@@ -759,6 +759,17 @@ class Day extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
         $this->node_list = ["day" => ["day"]];
         $web = "";
+/*
+                $this->itemToken($item_slug);
+                $web .= $this->web_token[$item_slug];
+
+*/
+$thing = new Thing(null);
+$thing->Create('token',$this->from, 'calendar-page-token');
+
+$token_handler = new Token($thing, "calendar-page-token");
+$token_handler->itemToken['calendar-page'];
+$web .= $token_handler->web_token['calendar-page'];
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";

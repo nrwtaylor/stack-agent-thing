@@ -35,7 +35,10 @@ class Kplex extends Agent
 
         if (!$fp) {
             echo "$errstr ($errno)<br />\n";
-            die();
+            $this->snapshot = null;
+            return;
+         }
+
         }
         echo "Connected to kplex server.\n";
 
