@@ -252,6 +252,7 @@ class Thing
             $this->nuuid = substr($this->uuid, 0, 4);
             // Is link to the ->db broken when the Thing is deinstantiated.
             // Assume yes.
+
             $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>'null' . $this->mail_postfix]);
 
             $this->log("Thing made a db connector.");
@@ -368,7 +369,6 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
             $message0['50 words'] .=
                 $this->uuid . " found and removed an @ sign";
         }
-
 if (!isset($this->db)) {
         $this->db = new Database(null, ['uuid'=>$this->uuid, 'from'=>$from] );
 }

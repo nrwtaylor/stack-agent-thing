@@ -507,7 +507,6 @@ try {
     {
         // But we don't need to find, it because the UUID is randomly created.
         // Chance of collision super-super-small.
-
         // So just return the contents of thing.  false if it doesn't exist.
 if (!isset($this->pdo) or $this->pdo == null) {return false;}
         try {
