@@ -324,7 +324,7 @@ class Weather extends Agent
 
         $xml = new \SimpleXMLElement($this->data);
 
-        $this->weather_daily_call_count += 1;
+        //$this->weather_daily_call_count += 1;
 
         if ($xml) {
             $json = json_encode($xml);

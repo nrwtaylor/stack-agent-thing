@@ -81,11 +81,12 @@ if (!isset($this->memory)) {return null;}
 
     public function createMemory($subject, $to) {
 
-           $this->thing->log(
-                'asked to create a Memory.',
-                "INFORMATION"
-            );
-
+if (!isset($this->response)) {$this->response = "";}
+  //         $this->thing->log(
+  //              'asked to create a Memory.',
+  //              "INFORMATION"
+  //          );
+        $this->response .= "Created a Memory. ";
 
         return $this->setMemory(null,['from'=>$to,'to'=>'memory','task'=>$subject]);
     }

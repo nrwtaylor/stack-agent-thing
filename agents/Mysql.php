@@ -161,22 +161,26 @@ try {
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->pdo = $pdo;
         } catch (\Throwable $t) {
-            $this->error = 'Could not connect to MySQL database';
 
-           $this->thing->log(
+            $this->error = 'Could not connect to MySQL database';
+$this->errorMysql($t->getMessage()); 
+/*
+            $this->thing->log(
                 'could not connect to MySQL database.',
                 "INFORMATION"
             );
-
+*/
             throw new \Exception("Could not connect to MySQL database.");
         } catch (\Error $ex) {
-            $this->error = 'Could not connect to MySQL database';
+$this->errorMysql($ex->getMessage()); 
 
+            $this->error = 'Could not connect to MySQL database';
+/*
            $this->thing->log(
                 'could not connect to MySQL database.',
                 "INFORMATION"
             );
-
+*/
 
             throw new \Exception("Could not connect to MySQL database.");
         }
@@ -201,7 +205,14 @@ try {
 
         //        $this->split_time = microtime(true);
     }
+   
+    public function errorMysql($text = null) {
+      if ($text == null) {return;}
+      if (!isset($this->response)) {$this->response = "";}
+      $this->response .= $text . " ";
 
+
+    }
     function get()
     {
     }
