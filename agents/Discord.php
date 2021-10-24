@@ -213,6 +213,7 @@ $this->sendDiscord("merp",'kokopelli:#general@kaiju.discord');
         if (curl_getinfo($curl, CURLINFO_HTTP_CODE) != 204) {
             curl_close($curl);
 
+
             $this->thing->Write(
                 ["discord", "response_message"],
                 $output["message"]

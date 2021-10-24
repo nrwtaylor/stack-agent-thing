@@ -69,6 +69,8 @@ $this->thing_report = $this->limitResponse();
             return;
         }
 
+// conditionResponse.
+//$this->response = $this->conditionResponse($this->response);
 
         if ($agent_flag == true) {
             if (!isset($this->thing_report["sms"])) {
@@ -86,7 +88,17 @@ $this->thing_report = $this->limitResponse();
         }
     }
 
-    function metaResponse() {
+    public function makeResponse($text = null) {
+       if ($text == null) {return true;}
+       if (isset($this->meta_string)) {$this->response = $this->meta_string . " - " . $this->response;} 
+       if (!isset($this->meta_string)) {$this->response = "no meta" . " - " . $this->response;}
+
+       $this->thing_report['response'] = $this->response;
+
+       return $this->response;
+    }
+
+    public function metaResponse() {
         $this->getMeta();
         $t = "";
         $t .= $this->meta;
@@ -95,7 +107,7 @@ $this->thing_report = $this->limitResponse();
        return $t;
     }
 
-    function makeSMS()
+    public function makeSMS()
     {
         $this->sms_message = "RESPONSE | " . "" . $this->response_message . " " . $this->response;
         $this->thing_report['sms'] = $this->sms_message;

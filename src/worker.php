@@ -222,6 +222,15 @@ function call_agent_function($job)
     if ($thing->thing == false) {
         echo "Thing is false\n";
 
+  /*
+        REFERENCE
+        $datagram = [
+            "to" => "null" . $this->mail_postfix,
+            "from" => "job",
+            "subject" => "s/ job stack",
+        ];
+  */
+
 $thing->to = $arr['from'];
 $thing->from = $arr['to'];
 $thing->subject = $arr['subject'];

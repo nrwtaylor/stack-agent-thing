@@ -179,7 +179,7 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $latitude = $latitude_agent->latitude;
 */
-        if ($this->latitude === false) {
+        if ($this->latitude === false or strtolower($this->latitude) == 'z') {
             $this->response .= "Latitude not known. ";
         }
 
@@ -733,9 +733,9 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
 
-if ($this->latitude == 'Z') {$this->latitude = $latitude_agent->default_latitude;}
-if ($this->longitude == 'Z') {$this->longitude = $longitude_agent->default_longitude;}
-var_dump($this->latitude);
+//if ($this->latitude == 'Z') {$this->latitude = $latitude_agent->default_latitude;}
+//if ($this->longitude == 'Z') {$this->longitude = $longitude_agent->default_longitude;}
+//var_dump($this->latitude);
     }
 
     /**

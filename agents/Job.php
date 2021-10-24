@@ -92,9 +92,9 @@ class Job extends Agent
 
     public function runJob($datagram)
     {
-        $to = $datagram["to"];
+        $to = $datagram["from"];
         $subject = $datagram["subject"];
-        $from = $datagram["from"];
+        $from = $datagram["to"];
 
 
         if ((isset($datagram['agent_input'])) and $datagram["agent_input"] == "gearman") {
@@ -114,7 +114,8 @@ class Job extends Agent
         $this->thing->console($subject . "\n");
 
         $thing = new Thing(null);
-        $thing->Create($from, $to, $subject);
+        $thing->Create($to, $from, $subject);
+        //$thing->Create($from, $to, $subject);
         $agent_handler = new Agent($thing, null);
         $this->thing->console($agent_handler->thing_report["sms"] . "\n");
         $this->response .= "Ran job. ";
