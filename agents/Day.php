@@ -31,6 +31,7 @@ class Day extends Agent
      */
     public function init()
     {
+        $this->dateline = false;
         $this->test = "Development code";
 
         $this->thing_report["info"] =
@@ -44,6 +45,8 @@ class Day extends Agent
         $this->node_list = ["day" => ["day", "year", "uuid"]];
 
         $this->current_time = $this->thing->time();
+
+        $this->projected_time = $this->current_time;
 
         // Get some stuff from the stack which will be helpful.
         $this->entity_name = $this->thing->container["stack"]["entity_name"];
@@ -87,8 +90,8 @@ class Day extends Agent
 
     public function initDay()
     {
-        $time_agent = new Time($this->thing, "time");
-        $this->working_datum = $time_agent->datumtime($this->current_time);
+        $this->time_agent = new Time($this->thing, "time");
+        $this->working_datum = $this->time_agent->datumTime($this->projected_time);
 
         $this->long_count_rounds = [
             "baktun" => 20,
@@ -179,7 +182,7 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $latitude = $latitude_agent->latitude;
 */
-        if ($this->latitude === false or strtolower($this->latitude) == 'z') {
+        if ($this->latitude === false or strtolower($this->latitude) == "z") {
             $this->response .= "Latitude not known. ";
         }
 
@@ -187,18 +190,14 @@ class Day extends Agent
             return true;
         }
 
-        $timestamp_epoch = time();
-        if ($text != null) {
-            $timestamp_epoch = strtotime($text);
-        }
+        $latitude = (float) $this->latitude;
+        $longitude = (float) $this->latitude;
 
-        $solar_array = date_sun_info(
-            $timestamp_epoch,
-            $this->latitude,
-            $this->longitude
-        );
+        $timestamp_epoch = (float) $this->timestampEpoch($text);
+//$timestamp_epoch = $this->timestamp_epoch;
+        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
         $this->solar_array = $solar_array;
-        $this->timestamp_epoch = $timestamp_epoch;
+        //$this->timestamp_epoch = $timestamp_epoch;
 
         $arr = [
             //"night"=> "night",
@@ -213,18 +212,23 @@ class Day extends Agent
             "astronomical twilight end" => "night",
         ];
 
+        $this->day_solar_milestones = $arr;
+
         $message = "";
         $count = 0;
         foreach (range(0, 1, 1) as $period_index) {
-            foreach ($arr as $period => $epoch) {
+            foreach ($this->day_solar_milestones as $period => $epoch) {
                 // The datum returned is when this event will happen
                 // as a DateTime (datum) object.
+
 
                 $period_timestamp =
                     $this->working_datum->getTimestamp() +
                     $period_index * (60 * 60 * 24);
 
-                $e = strtotime($this->current_time);
+
+
+                $e = strtotime($this->projected_time);
 
                 $datum_projected = new \DateTime();
                 $datum_projected->setTimestamp($period_timestamp);
@@ -245,9 +249,13 @@ class Day extends Agent
 
                 $variable_text = str_replace(" ", "_", $period);
 
-                if ($this->solarDay($datum_projected)[$variable_text] < $timestamp_epoch) {
-//
-//                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
+
+                if (
+                    $this->solarDay($datum_projected)[$variable_text] <
+                    $timestamp_epoch
+                ) {
+                    //
+                    //                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
                     $time_of_day = $period;
                 }
                 if ($count > 7) {
@@ -255,11 +263,16 @@ class Day extends Agent
                 }
             }
         }
-        $day_time = "night";
 
-        if (isset($time_of_day) and isset($arr[$time_of_day])) {
-            $day_time = $arr[$time_of_day];
+        $day_time = "night";
+        if (
+            isset($time_of_day) and
+            isset($this->day_solar_milestones[$time_of_day])
+        ) {
+            $day_time = $this->day_solar_milestones[$time_of_day];
         }
+
+
 
         $tz = $datum_projected->getTimezone();
         $message .= $tz->getName();
@@ -272,11 +285,78 @@ class Day extends Agent
         } else {
             $this->message = strtoupper($day_time);
         }
+
         $this->day_time = $day_time;
+    }
+
+    public function timestampEpoch($text)
+    {
+        //$timestamp_epoch = time();
+        $timestamp_epoch = $this->projected_time;
+
+        if ($this->dateline !== false) {
+            /*
+https://www.w3schools.com/php/func_date_strtotime.asp
+Note: Be aware of dates in the m/d/y or d-m-y formats;
+ if the separator is a slash (/), then the American m/d/y
+ is assumed. If the separator is a dash (-) or a dot (.),
+ then the European d-m-y format is assumed.
+ To avoid potential errors, you should YYYY-MM-DD dates or date_create_from_format() when possible.
+*/
+            //$timestamp_epoch = strtotime($this->dateline['year']."-".$this->dateline['month']."-".$this->dateline['day_number']);
+
+            //$timestamp_epoch = strtotime("2021-10-24");
+
+        }
+
+        /*
+https://www.php.net/manual/en/function.date-sun-info.php
+ info at mobger dot de ¶
+10 months ago
+The relation between timestamp and geoposition is not good defined.
+My try of a definition is:
+
+date_sun_info —
+Returns an array with information about sunset/sunrise and twilight begin/end
+ as Unix-Timestamp for the the geoposition, which must have the same (local) date
+ as the timestamp in the parameter-block for the function `date_sun_info`.
+*/
+
+        /*
+Dev review against
+https://nrc.canada.ca/en/research-development/products-services/software-applications/sun-calculator/
+Sunrise sunset full year
+10 October 2021
+Vancouver
+Oct 24 2021,5:38,6:16,6:48,11:57,17:04,17:37,18:14,10.27,1.09,11.36,1:59:19
+
+DAY | DAY astronomical twilight begin 2021/10/24 6:01:53 
+ nautical twilight begin 6:38:43 civil twilight begin 7:15:53
+ sunrise 7:48:31 transit 12:56:36 sunset 18:04:41
+ civil twilight end 18:37:19 nautical twilight end 19:14:29
+ astronomical twilight begin 6:03:21 America/Los_Angeles 
+
+*/
+
+        //        $timestamp_epoch = time();
+
+        if ($text != null and is_string($text)) {
+            $timestamp_epoch = strtotime($text);
+        }
+
+        if (is_a($text, "DateTime")) {
+
+            $timestamp_epoch = $text->getTimestamp();
+        }
+
+        $this->timestamp_epoch = $timestamp_epoch;
+
+        return $timestamp_epoch;
     }
 
     public function solarDay($text = null)
     {
+        /*
         $timestamp_epoch = time();
 
         if ($text != null and is_string($text)) {
@@ -286,12 +366,11 @@ class Day extends Agent
         if (is_a($text, "DateTime")) {
             $timestamp_epoch = $text->getTimestamp();
         }
-
-        $solar_array = date_sun_info(
-            $timestamp_epoch,
-            $this->latitude,
-            $this->longitude
-        );
+*/
+        $timestamp_epoch = (int) $this->timestampEpoch($text);
+        $latitude = (float) $this->latitude;
+        $longitude = (float) $this->longitude;
+        $solar_array = date_sun_info($timestamp_epoch, $latitude, $longitude);
 
         return $solar_array;
     }
@@ -664,11 +743,19 @@ class Day extends Agent
             $days = $this->days;
         }
 
+/*
         $day_text = "No day found.";
         if (isset($this->day)) {
             $day_text = $this->day;
             $sms .= " | " . $day_text;
         }
+*/
+        $day_text = "Merp.";
+        if (isset($this->day_time)) {
+            $day_time_text = $this->day_time;
+            $sms .= " | " . $day_time_text;
+        }
+
 
         $sms .= " | " . $this->message . " " . $this->response;
         $this->sms_message = $sms;
@@ -733,9 +820,6 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
 
-//if ($this->latitude == 'Z') {$this->latitude = $latitude_agent->default_latitude;}
-//if ($this->longitude == 'Z') {$this->longitude = $longitude_agent->default_longitude;}
-//var_dump($this->latitude);
     }
 
     /**
@@ -751,6 +835,15 @@ class Day extends Agent
         $this->runDay();
     }
 
+public function datestringDay($datum) {
+$date_string = $datum["year"] .
+                    "-" .
+                    str_pad($datum["month"],2,"0",STR_PAD_LEFT) .
+                    "-" .
+                    str_pad($datum["day_number"],2,"0",STR_PAD_LEFT);
+
+return $date_string;
+}
     /**
      *
      */
@@ -758,18 +851,42 @@ class Day extends Agent
     {
         $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
         $this->node_list = ["day" => ["day"]];
+
         $web = "";
-/*
+$web .= $this->datestringDay($this->dateline);
+
+        $web .= "<br>";
+        $latitude = (float) $this->latitude;
+        $longitude = (float) $this->longitude;
+        $web .= $latitude . " " . $longitude;
+        $web .= "<br>";
+
+        $day_text = "X";
+        if (isset($this->day_time)) {
+            $day_time_text = $this->day_time;
+            $web .= strtoupper($day_time_text);
+        }
+
+
+        $web .= "<p>";
+
+        /*
                 $this->itemToken($item_slug);
                 $web .= $this->web_token[$item_slug];
 
 */
-$thing = new Thing(null);
-$thing->Create('token',$this->from, 'calendar-page-token');
+        $thing = new Thing(null);
+        $thing->Create("token", $this->from, "calendar-page-token");
 
-$token_handler = new Token($thing, "calendar-page-token");
-$token_handler->itemToken['calendar-page'];
-$web .= $token_handler->web_token['calendar-page'];
+        $token_handler = new Token($thing, "calendar-page-token");
+
+        if (
+            isset($token_handler->itemToken) and
+            isset($token_handler->itemToken["calendar-page"])
+        ) {
+            $token_handler->itemToken["calendar-page"];
+            $web .= $token_handler->web_token["calendar-page"];
+        }
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -803,8 +920,8 @@ $web .= $token_handler->web_token['calendar-page'];
 
     public function julianDay($text = null)
     {
-        $time_agent = new Time($this->thing, "time");
-        $time_string = $time_agent->getTime($text);
+        //$time_agent = new Time($this->thing, "time");
+        $time_string = $this->time_agent->getTime($text);
 
         $dateValue = strtotime($time_string);
         // Expect a UTC Zulu time.
@@ -1096,7 +1213,7 @@ $web .= $token_handler->web_token['calendar-page'];
         //$y_pt = 230;
 
         foreach (range(0, 24 - 1, 1) as $i) {
-            $this->drawTick(null, $i * (360 / 24), 25, $size - 25);
+            $this->drawTick(null, $i * (360 / 24), 50, $size - 100, 0);
 
             $x_pt = $size * cos($angle * $i + $this->init_angle);
             $y_pt = $size * sin($angle * $i + $this->init_angle);
@@ -1127,8 +1244,16 @@ $web .= $token_handler->web_token['calendar-page'];
         $text = "tick";
 
         $arc = [];
-$arc_day = [];
-        $a = $this->solarDay();
+        $arc_day = [];
+$period_index = 0;
+                $period_timestamp =
+                    $this->working_datum->getTimestamp() +
+                    $period_index * (60 * 60 * 24);
+
+                $datum_projected = new \DateTime();
+                $datum_projected->setTimestamp($period_timestamp);
+
+        $a = $this->solarDay($datum_projected);
         foreach ($a as $period_name => $period) {
             $period_timestamp = $this->working_datum->getTimestamp();
 
@@ -1158,18 +1283,16 @@ $arc_day = [];
                 $arc_day[] = $angle;
                 $colour = $this->blue;
                 imagesetthickness($this->image, 7);
-
             }
 
             if (strpos($period_name, "sunset") !== false) {
                 $arc_day[] = $angle;
                 $colour = $this->blue;
                 imagesetthickness($this->image, 7);
-
             }
 
-
-            $this->drawTick($text, $angle, $radius, $length, $colour);
+            $offset = 0;
+            $this->drawTick($text, $angle, $radius, $length, $offset, $colour);
             $colour = $this->black;
         }
 
@@ -1209,8 +1332,6 @@ $arc_day = [];
             $arc_day[1] + ($this->init_angle * 180) / pi(),
             $this->blue
         );
-
-
     }
 
     public function get()
@@ -1225,9 +1346,17 @@ $arc_day = [];
         $this->getDay();
     }
 
-    public function drawTick($text, $angle, $radius, $length, $colour = null)
-    {
-        if ($colour == null) {$colour = $this->black;}
+    public function drawTick(
+        $text,
+        $angle,
+        $radius,
+        $length,
+        $offset = 0,
+        $colour = null
+    ) {
+        if ($colour == null) {
+            $colour = $this->black;
+        }
         // angle in degrees
         //imagesetthickness($this->image, 5);
         //$init_angle = (-1 * pi()) / 2;
@@ -1238,11 +1367,17 @@ $arc_day = [];
         $angle_radians = ($angle / 180) * pi();
 
         //foreach (range(0, 24 - 1, 1) as $i) {
-        $x_start = $radius * cos($angle_radians + $this->init_angle);
-        $y_start = $radius * sin($angle_radians + $this->init_angle);
+        $x_start =
+            ($radius + $offset) * cos($angle_radians + $this->init_angle);
+        $y_start =
+            ($radius + $offset) * sin($angle_radians + $this->init_angle);
 
-        $x_end = ($radius + $length) * cos($angle_radians + $this->init_angle);
-        $y_end = ($radius + $length) * sin($angle_radians + $this->init_angle);
+        $x_end =
+            ($radius + $offset + $length) *
+            cos($angle_radians + $this->init_angle);
+        $y_end =
+            ($radius + $offset + $length) *
+            sin($angle_radians + $this->init_angle);
 
         imageline(
             $this->image,
@@ -1467,6 +1602,8 @@ $arc_day = [];
         return $days;
     }
 
+    // Extract weekday will be something else.
+
     function extractDay($input = null)
     {
         $day = "X";
@@ -1518,17 +1655,19 @@ $arc_day = [];
         }
 
         $this->parsed_date = date_parse($input);
+
+
         if (
             $this->parsed_date["year"] != false and
             $this->parsed_date["month"] != false and
-            $this->parsed_date["day"] != false
+            $this->parsed_date["day_number"] != false
         ) {
             $date_string =
                 $this->parsed_date["year"] .
                 "/" .
                 $this->parsed_date["month"] .
                 "/" .
-                $this->parsed_date["day"];
+                $this->parsed_date["day_number"];
 
             $unixTimestamp = strtotime($date_string);
             $p_day = strtoupper(date("D", $unixTimestamp));
@@ -1587,8 +1726,8 @@ $arc_day = [];
         if (count($scores) == 1) {
             if (!function_exists("array_key_first")) {
                 // function array_key_first(array $scores) {
-                foreach ($arr as $key => $unused) {
-                    return $key;
+                foreach ($this->day_solar_milestones as $key => $unused) {
+                return $key;
                 }
                 return null;
                 //}
@@ -1600,6 +1739,9 @@ $arc_day = [];
         // Leave it here for now.
         // TODO: Consider three days all with same score
         // TODO: Consider two days wth non-zero scores.
+
+        // TODO: Day of week extraction.
+
         return false;
     }
 
@@ -1608,8 +1750,55 @@ $arc_day = [];
      */
     public function readSubject()
     {
+        $i = str_replace("-", " ", $this->input);
+
+        $dateline = $this->extractDateline($i);
+
+//$this->dateline = $dateline;
+
+        if (
+            !(
+                $dateline["year"] === false and
+                $dateline["month"] === false and
+                $dateline["day_number"] === false
+            )
+        ) {
+$date_string = $dateline["year"] .
+                    "-" .
+                    str_pad($dateline["month"],2,"0",STR_PAD_LEFT) .
+                    "-" .
+                    str_pad($dateline["day_number"],2,"0",STR_PAD_LEFT);
+
+            $this->projected_time = strtotime($date_string);
+
+        $this->working_datum = $this->time_agent->datumTime($date_string);
+$this->dateline = $dateline;
+        } else {
+//$timestamp_agent = new Timestamp($this->thing,"timestamp");
+//        $dateline = $this->extractDateline($timestamp_agent->timestamp);
+
+$timestamp = $this->zuluStamp($this->current_time);
+
+$dateline = $this->extractDateline($timestamp);
+
+$this->dateline = $dateline;
+
+$this->project_time = strtotime($this->current_time);
+$this->working_datum = $this->time_agent->datumTime($this->current_time);
+        }
+
+
+        $longitude = $this->extractLongitude($i);
+        $latitude = $this->extractLatitude($i);
+        if ($longitude !== false) {
+            $this->longitude = $longitude;
+        }
+        if ($latitude !== false) {
+            $this->latitude = $latitude;
+        }
+
         $this->type = "wedge";
-        //$input = $this->agent_input;
+
         $input = $this->agent_input;
         if ($this->agent_input == "" or $this->agent_input == null) {
             $input = $this->subject;
@@ -1621,10 +1810,13 @@ $arc_day = [];
 
         $this->days = $this->extractDays($input);
         $day = $this->extractDay($input);
-        if ($day != false) {
+
+        if ($day !== false) {
             $this->day = $day;
             //$this->era = $day['era'];
         }
+
+
 
         $pieces = explode(" ", strtolower($input));
 

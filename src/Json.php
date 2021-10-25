@@ -457,6 +457,7 @@ class Json
     {
         // we need references as we will modify the first parameter
         $dest = &$arr;
+if ($dest == null) {return null;}
         $finalKey = array_pop($path);
         foreach ($path as $key) {
             $dest = &$dest[$key];
