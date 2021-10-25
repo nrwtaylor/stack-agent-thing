@@ -8,6 +8,8 @@
 // TODO
 // PDF and PNG rendering
 
+// https://nrc.canada.ca/en/research-development/products-services/software-applications/sun-calculator/
+
 namespace Nrwtaylor\StackAgentThing;
 
 //use QR_Code\QR_Code;
