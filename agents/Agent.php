@@ -3150,7 +3150,12 @@ if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
                 }
                 // Otherwise check in as last resort...
             }
+$this->head_code = $headcode->head_code;
+var_dump($this->head_code);
+//var_dump($headcode->head_code);
+
         }
+
 
         // Temporarily alias robots
         if (strpos($input, "robots") !== false) {
