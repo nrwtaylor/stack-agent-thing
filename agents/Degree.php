@@ -41,6 +41,28 @@ class Degree extends Agent
         // But likely to be 0 to 360.
         return true;
     }
+// https://stackoverflow.com/questions/22316348/converting-degree-minutes-seconds-dms-to-decimal-in-php
+public function decimalDegree($deg,$min,$sec)
+{
+
+    // Converting DMS ( Degrees / minutes / seconds ) to decimal format
+    return $deg+((($min*60)+($sec))/3600);
+}    
+
+public function dmsDegree($dec)
+{
+    // Converts decimal format to DMS ( Degrees / minutes / seconds ) 
+    $vars = explode(".",$dec);
+    $deg = $vars[0];
+    $tempma = "0.".$vars[1];
+
+    $tempma = $tempma * 3600;
+    $min = floor($tempma / 60);
+    $sec = $tempma - ($min*60);
+
+    return array("degrees"=>$deg,"minutes"=>$min,"seconds"=>$sec);
+} 
+
 
     public function extractDegree($text) {
        $number = $this->extractNumber($text);

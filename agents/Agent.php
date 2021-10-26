@@ -583,7 +583,7 @@ public function __set($name, $value) {
         foreach ($indicators as $flag_name => $flag_indicators) {
             foreach ($flag_indicators as $flag_indicator) {
                 $f = $this->agent_name . "_" . $flag_name . "_flag";
-                if (stripos($input, $flag_indicator) !== false) {
+          if (stripos($input, $flag_indicator) !== false) {
                     $this->{$f} = "on";
                 }
 
