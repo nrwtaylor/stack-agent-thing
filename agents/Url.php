@@ -370,10 +370,14 @@ class Url extends Agent
         //$urls = [];
         foreach ($text_variants as $i => $text_variant) {
             $pattern_urls = $this->patternUrls($text_variant);
-
-            if ($urls === null) {
+if ($pattern_urls == null) {continue;}
+            if ($urls == null) {
                 $urls = [];
             }
+// test
+if ($pattern_urls === true) {continue;}
+if ($pattern_urls === false) {continue;}
+
             $urls = array_merge($urls, $pattern_urls);
 
             // Now need to check whether each of these is a Url.
