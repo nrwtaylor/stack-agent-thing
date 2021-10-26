@@ -179,7 +179,7 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $latitude = $latitude_agent->latitude;
 */
-        if ($this->latitude === false) {
+        if ($this->latitude === false or strtolower($this->latitude) == 'z') {
             $this->response .= "Latitude not known. ";
         }
 
@@ -733,7 +733,9 @@ class Day extends Agent
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
 
-        return;
+//if ($this->latitude == 'Z') {$this->latitude = $latitude_agent->default_latitude;}
+//if ($this->longitude == 'Z') {$this->longitude = $longitude_agent->default_longitude;}
+//var_dump($this->latitude);
     }
 
     /**
@@ -757,6 +759,17 @@ class Day extends Agent
         $link = $this->web_prefix . "thing/" . $this->uuid . "/day.pdf";
         $this->node_list = ["day" => ["day"]];
         $web = "";
+/*
+                $this->itemToken($item_slug);
+                $web .= $this->web_token[$item_slug];
+
+*/
+$thing = new Thing(null);
+$thing->Create('token',$this->from, 'calendar-page-token');
+
+$token_handler = new Token($thing, "calendar-page-token");
+$token_handler->itemToken['calendar-page'];
+$web .= $token_handler->web_token['calendar-page'];
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -1114,7 +1127,7 @@ class Day extends Agent
         $text = "tick";
 
         $arc = [];
-
+$arc_day = [];
         $a = $this->solarDay();
         foreach ($a as $period_name => $period) {
             $period_timestamp = $this->working_datum->getTimestamp();
@@ -1141,7 +1154,23 @@ class Day extends Agent
                 imagesetthickness($this->image, 7);
             }
 
-            $this->drawTick($text, $angle, $radius, $length);
+            if (strpos($period_name, "sunrise") !== false) {
+                $arc_day[] = $angle;
+                $colour = $this->blue;
+                imagesetthickness($this->image, 7);
+
+            }
+
+            if (strpos($period_name, "sunset") !== false) {
+                $arc_day[] = $angle;
+                $colour = $this->blue;
+                imagesetthickness($this->image, 7);
+
+            }
+
+
+            $this->drawTick($text, $angle, $radius, $length, $colour);
+            $colour = $this->black;
         }
 
         imagesetthickness($this->image, 3);
@@ -1169,6 +1198,19 @@ class Day extends Agent
             $arc[0] + ($this->init_angle * 180) / pi(),
             $this->black
         );
+
+        imagearc(
+            $this->image,
+            $center_x,
+            $center_y,
+            2 * $size,
+            2 * $size,
+            $arc_day[0] + ($this->init_angle * 180) / pi(),
+            $arc_day[1] + ($this->init_angle * 180) / pi(),
+            $this->blue
+        );
+
+
     }
 
     public function get()
@@ -1183,8 +1225,9 @@ class Day extends Agent
         $this->getDay();
     }
 
-    public function drawTick($text, $angle, $radius, $length)
+    public function drawTick($text, $angle, $radius, $length, $colour = null)
     {
+        if ($colour == null) {$colour = $this->black;}
         // angle in degrees
         //imagesetthickness($this->image, 5);
         //$init_angle = (-1 * pi()) / 2;
@@ -1207,7 +1250,7 @@ class Day extends Agent
             $this->center_y + $y_start,
             $this->center_x + $x_end,
             $this->center_y + $y_end,
-            $this->black
+            $colour
         );
     }
     /**
