@@ -899,8 +899,9 @@ $web .= "<br>";
 
             $calendar_round_day = $this->calendarroundDay();
 
-            $web .= "" . $long_count_day . " " . $calendar_round_day . "";
-
+            $web .= "" . $long_count_day ;
+            $web .= "<br>";
+            $web .= $calendar_round_day;
             $web .= "<br>";
         }
 
