@@ -174,7 +174,7 @@ class Burst extends Agent
             $t = $findagent_thing->thing_report;
         } else {
             $this->thing->db->setUser($this->from);
-            $t = $this->thing->db->variableSearch(null, null, $this->horizon);
+            $t = $this->thing->db->variableSearch(null, $this->horizon);
         }
 
         if (!isset($t)) {

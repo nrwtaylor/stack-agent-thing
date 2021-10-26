@@ -74,7 +74,6 @@ class Findagent extends Agent
         if (isset($this->thing->db)) {
             //$thing_report = $this->thing->db->setUser($this->from);
             $thing_report = $this->thing->db->variableSearch(
-                null,
                 $name,
                 $this->horizon,
                 true

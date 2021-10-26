@@ -491,6 +491,7 @@ public function __set($name, $value) {
         if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
+
         $count = count($findagent_thing->thing_report["things"]);
 
         //$rule_agent = new Rule($this->thing, "rule");
@@ -500,7 +501,7 @@ public function __set($name, $value) {
                 array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-                $uuid = $thing_object["uuid"];
+              $uuid = $thing_object["uuid"];
                 $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
@@ -517,6 +518,7 @@ public function __set($name, $value) {
                 $thing->nom_from = $thing_object["nom_from"];
 
                 $thing->variables = $variables;
+
                 $thing->created_at = $thing_object["created_at"];
 
                 $thing->associations = $associations;
@@ -529,7 +531,6 @@ public function __set($name, $value) {
                 $response = $this->readAgent($thing_object["task"]);
             }
         }
-
         return $things;
     }
 

@@ -647,7 +647,6 @@ function isValidSha256($sha256 ='') {
      * @return unknown
      */
     public function variableSearch(
-        $path,
         $value,
         $max = null,
         $string_in_string = false

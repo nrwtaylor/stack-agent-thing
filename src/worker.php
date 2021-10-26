@@ -282,7 +282,7 @@ $thing->created_at = $thing->time();
 
         echo "worker looking for message id " . $message_id . "\n";
 
-        $m = $thing->db->variableSearch(null, $message_id, false);
+        $m = $thing->db->variableSearch($message_id, false);
 
         echo "worker counted things with message idenfifier " .
             $message_id .
