@@ -17,6 +17,19 @@ class Latitude extends Agent
 
     function get()
     {
+// Can we get the latitude from Kplex?
+//$this->kplex_agent = new Kplex($this->thing, "kplex");
+//var_dump($this->kplex_agent);
+//exit();
+//$this->listenKplex();
+//var_dump($this->snapshot);
+//exit();
+//if (!isset($this->snapshot)) {
+
+//$this->listenKplex();
+
+//}
+//var_dump($this->snapshot);
         $this->latitude_agent = new Variables(
             $this->thing,
             "variables latitude " . $this->from
@@ -33,6 +46,20 @@ class Latitude extends Agent
         $this->refreshed_at = $this->latitude_agent->getVariable(
             "refreshed_at"
         );
+    }
+
+    public function formatLatitude($text = null, $pattern = null) {
+
+        if ($text == null) {return null;}
+
+$sign = "N";
+if ($text > 0) {$sign = "N";} else {$sign = "S";
+$text = abs($text);}
+//$arr = $this->dmsDegree($text);
+if (is_numeric($text)) {return $text . $sign;}
+
+return $text;
+
     }
 
     function set()

@@ -49,6 +49,7 @@ class Slug extends Agent
             $this->thing,
             "alphanumeric"
         );
+        $this->getSlugs();
     }
 
     /**
@@ -169,21 +170,74 @@ class Slug extends Agent
 
     }
 
+    public function hasSlug($text = null) {
+// dev
+
+
+
+//
+        if ($text == null) {
+            return false;
+        }
+
+//$destarred_text = trim(strtolower(str_replace('*'," ",$text)));
+//$text = $destarred_text;
+        //$allowed_endpoints = require $this->resource_path .
+        //    $this->allowed_slugs_resource;
+
+        if (in_array($text, $this->slugs)) {
+            return true;
+        }
+
+foreach($this->slugs as $i => $slug_text) {
+
+$destarred_slug_text = trim(strtolower(str_replace('*'," ",$slug_text)));
+
+
+if (strpos($text, $destarred_slug_text) !== false) {
+    return true;
+}
+
+}
+
+
+        $hyphenated_text = strtolower(str_replace(" ","-",$text));
+        if (in_array($hyphenated_text, $this->slugs)) {
+            return true;
+        }
+
+foreach($this->slugs as $i => $slug_text) {
+
+$destarred_slug_text = trim(strtolower(str_replace('*'," ",$slug_text)));
+
+
+if (strpos($hyphenated_text, $destarred_slug_text) !== false) {
+    return true;
+}
+
+}
+
+
+
+return false;
+
+    }
+
     public function isSlug($text = null)
     {
         if ($text == null) {
             return false;
         }
 
-        $allowed_endpoints = require $this->resource_path .
-            $this->allowed_slugs_resource;
+        //$allowed_endpoints = require $this->resource_path .
+        //    $this->allowed_slugs_resource;
 
-        if (in_array($text, $allowed_endpoints)) {
+        if (in_array($text, $this->slugs)) {
             return true;
         }
 
-$hyphenated_text = strtolower(str_replace(" ","-",$text));
-        if (in_array($hyphenated_text, $allowed_endpoints)) {
+        $hyphenated_text = strtolower(str_replace(" ","-",$text));
+        if (in_array($hyphenated_text, $this->slugs)) {
             return true;
         }
 
