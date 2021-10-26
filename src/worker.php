@@ -234,7 +234,10 @@ function call_agent_function($job)
 $thing->to = $arr['from'];
 $thing->from = $arr['to'];
 $thing->subject = $arr['subject'];
-$thing->agent_input = $arr['agent_input'];
+$agent_input = null;
+if (isset($arr['agent_input'])) {$agent_input = $arr['agent_input'];}
+$thing->agent_input = $agent_input;
+//$thing->agent_input = $arr['agent_input'];
 
 //        $this->current_time = $this->thing->time();
 $thing->created_at = $thing->time();
@@ -309,8 +312,11 @@ $thing->created_at = $thing->time();
         echo "worker call agent\n";
         $t = new Agent($thing);
     }
+if (isset($t->thing_report['info'])) {
     echo "thing report info " . $t->thing_report["info"] . "\n";
+}
     echo "worker complete\n";
+
 
     if (!isset($t->thing_report["sms"])) {
         echo "WORKER | No SMS message found." . "\n";

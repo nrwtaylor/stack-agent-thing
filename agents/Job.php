@@ -357,6 +357,10 @@ class Job extends Agent
             $this->txt_message .= "\n\n";
             $this->txt_message .= $this->sms_message;
         }
+$created_at_text = "just now";
+if ($this->thing->thing !== false) {
+$created_at_text = $this->thing->thing->created_at;
+}
 
         if ($this->verbosity >= 1) {
             $this->txt_message .= "\n";
@@ -365,7 +369,7 @@ class Job extends Agent
                 "thing to do " .
                 $this->thing->nuuid .
                 " made up at " .
-                $this->thing->thing->created_at .
+                $created_at_text .
                 "\n";
             $this->txt_message .=
                 "This template job is hosted by the " .

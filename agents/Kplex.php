@@ -39,8 +39,9 @@ class Kplex extends Agent
             return;
          }
 
-        }
-        echo "Connected to kplex server.\n";
+
+        $this->thing->console("Connected to Kplex server."); 
+        //$this->response .= "Connected to Kplex server. ";
 
         $ship_handler = new Ship($this->thing, "ship");
         $snapshot = null;

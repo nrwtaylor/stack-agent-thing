@@ -492,7 +492,6 @@ class Database
         // Get first available.
 
         $thing = false;
-
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
