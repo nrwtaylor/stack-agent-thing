@@ -932,9 +932,24 @@ class Month extends Agent
             return false;
         }
 
+//        if (count($scores) == 1) {
+//            return array_key_first($scores);
+//        }
+
         if (count($scores) == 1) {
-            return array_key_first($scores);
+            if (!function_exists("array_key_first")) {
+                // function array_key_first(array $scores) {
+                foreach ($scores as $key => $unused) {
+                    return $key;
+                }
+                return null;
+                //}
+            }
+
+            //            return array_key_first($scores);
         }
+
+
 
         // Leave it here for now.
         // TODO: Consider three months all with same score

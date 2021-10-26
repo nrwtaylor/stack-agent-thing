@@ -882,6 +882,15 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
         $this->node_list = ["day" => ["day"]];
 
         $web = "";
+
+$thing = new Thing(null);
+$thing->Create('token',$this->from, 'calendar-page-token');
+
+$token_handler = new Token($thing, "calendar-page-token");
+$token_handler->itemToken['calendar-page'];
+$web .= $token_handler->web_token['calendar-page'];
+$web .= "<br>";
+
         if (
             isset($this->day_mesoamerican_flag) and
             $this->day_mesoamerican_flag == "on"
@@ -925,6 +934,7 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
                 $web .= $this->web_token[$item_slug];
 
 */
+/*
         $thing = new Thing(null);
         $thing->Create("token", $this->from, "calendar-page-token");
 
@@ -937,6 +947,9 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
             $token_handler->itemToken["calendar-page"];
             $web .= $token_handler->web_token["calendar-page"];
         }
+*/
+
+
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
@@ -1949,7 +1962,6 @@ Now draw the twilight.
         if (count($scores) == 0) {
             return false;
         }
-
         if (count($scores) == 1) {
             if (!function_exists("array_key_first")) {
                 // function array_key_first(array $scores) {
@@ -1980,7 +1992,6 @@ Now draw the twilight.
         $i = str_replace("-", " ", $this->input);
 
         $dateline = $this->extractDateline($i);
-
         if (
             !(
                 $dateline["year"] === false and
@@ -2011,7 +2022,6 @@ Now draw the twilight.
                 $this->current_time
             );
         }
-
         $longitude = $this->extractLongitude($i);
         $latitude = $this->extractLatitude($i);
         if ($longitude !== false) {
