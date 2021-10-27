@@ -242,7 +242,7 @@ class Day extends Agent
                     $period_index * (60 * 60 * 24);
 
                 $t = $this->projected_time;
-                //$t = $this->current_time;
+
                 $e = strtotime($t);
 
                 $datum_projected = new \DateTime();
@@ -259,23 +259,27 @@ class Day extends Agent
                     $message .=
                         $period . " " . $datum->format("Y/m/d G:i:s") . " ";
                 } else {
-                    $message .=
-                        $period . " " . $datum_projected->format("G:i:s") . " ";
+                    $message .= $period . " " . $datum->format("G:i:s") . " ";
                 }
                 $count += 1;
-
+                $match = false;
                 $variable_text = str_replace(" ", "_", $period);
-
                 if (
+                    $match === false and
                     $this->solarDay($datum_projected)[$variable_text] <
-                    $timestamp_epoch
+                        $timestamp_epoch
                 ) {
+                    if (!isset($this->twilights)) {
+                        $this->twilights = [];
+                    }
+                    $this->twilights[$period] = [
+                        "text" => ucwords(strtolower($period)),
+                        "time" => $datum->format("G:i:s"),
+                    ];
                     //
                     //                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
                     $time_of_day = $period;
-                }
-                if ($count > 7) {
-                    break;
+                    $match = true;
                 }
             }
         }
@@ -883,13 +887,13 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
         $web = "";
 
-$thing = new Thing(null);
-$thing->Create('token',$this->from, 'calendar-page-token');
+        $thing = new Thing(null);
+        $thing->Create("token", $this->from, "calendar-page-token");
 
-$token_handler = new Token($thing, "calendar-page-token");
-$token_handler->itemToken['calendar-page'];
-$web .= $token_handler->web_token['calendar-page'];
-$web .= "<br>";
+        $token_handler = new Token($thing, "calendar-page-token");
+        $token_handler->itemToken["calendar-page"];
+        $web .= $token_handler->web_token["calendar-page"];
+        $web .= "<br>";
 
         if (
             isset($this->day_mesoamerican_flag) and
@@ -899,7 +903,7 @@ $web .= "<br>";
 
             $calendar_round_day = $this->calendarroundDay();
 
-            $web .= "" . $long_count_day ;
+            $web .= "" . $long_count_day;
             $web .= "<br>";
             $web .= $calendar_round_day;
             $web .= "<br>";
@@ -913,13 +917,6 @@ $web .= "<br>";
         $web .= $latitude_text . " " . $longitude_text;
         $web .= "<br>";
 
-        if ($this->isToday($this->current_time)) {
-            $day_text = "X";
-            if (isset($this->day_time)) {
-                $day_time_text = $this->day_time;
-                $web .= strtoupper($day_time_text);
-            }
-        }
         if (
             isset($this->day_authority_flag) and
             $this->day_authority_flag == "on"
@@ -928,6 +925,25 @@ $web .= "<br>";
             $web .= "<br>";
         }
 
+        /*
+        if (
+            isset($this->day_twilight_flag) and
+            $this->day_twilight_flag == "on"
+        ) {
+
+        $web .= $this->message;
+            $web .="<br>";
+        } else {
+*/
+        if ($this->isToday($this->current_time)) {
+            $day_text = "X";
+            if (isset($this->day_time)) {
+                $day_time_text = $this->day_time;
+                $web .= strtoupper($day_time_text);
+            }
+        }
+
+        //}
         $web .= "<p>";
 
         /*
@@ -935,7 +951,7 @@ $web .= "<br>";
                 $web .= $this->web_token[$item_slug];
 
 */
-/*
+        /*
         $thing = new Thing(null);
         $thing->Create("token", $this->from, "calendar-page-token");
 
@@ -950,11 +966,12 @@ $web .= "<br>";
         }
 */
 
-
         $web .= '<a href="' . $link . '">';
         $web .= $this->html_image;
         $web .= "</a>";
         $web .= "<br>";
+
+        $web .= $this->htmlTable($this->twilights);
 
         $this->thing_report["web"] = $web;
     }
@@ -1263,7 +1280,6 @@ $web .= "<br>";
         //foreach (range(0, 24 - 1, 1) as $i) {
         $x_dot = ($radius + $offset) * cos($angle_radians + $this->init_angle);
         $y_dot = ($radius + $offset) * sin($angle_radians + $this->init_angle);
-
 
         imagearc(
             $this->image,
