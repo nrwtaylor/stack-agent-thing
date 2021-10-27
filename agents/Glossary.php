@@ -16,6 +16,7 @@ class Glossary extends Agent
      */
     function init()
     {
+
         $this->thing_report["agency"] =
             "Prepare a helpful glossary of ALL stack agents.";
         $this->thing_report["info"] =
