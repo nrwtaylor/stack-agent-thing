@@ -130,9 +130,10 @@ class Hexflake extends Agent
 
     function makeWeb()
     {
-        $link = $this->web_prefix . "thing/" . $this->uuid . "/agent";
+        $this->thing_report['help'] = "Click on the image for a PDF.";
+        $link = $this->web_prefix . "thing/" . $this->uuid . "/hexflake.pdf";
 
-        $this->node_list = ["web" => ["hexflake"]];
+        $this->node_list = ["web" => ["next hexflake"]];
         // Make buttons
         $this->thing->choice->Create(
             $this->agent_name,
@@ -149,8 +150,12 @@ class Hexflake extends Agent
 <div padding: 5px; text-align: center">';
 
         $foot = "</td></div></td></tr></tbody></table></td></tr>";
-
-        $web = '<a href="' . $link . '">';
+        $web = "";
+// test
+//$web .= $this->input;
+//$web .= "<br>";
+//$web .= $this->subject;
+        $web .= '<a href="' . $link . '">';
         $web .=
             '<img src= "' .
             $this->web_prefix .
@@ -164,7 +169,8 @@ class Hexflake extends Agent
 
         $web .= "<br><br>";
         $web .= $head;
-        $web .= $choices["button"];
+// prod. Develop snowflake renderer.
+//        $web .= $choices["button"];
         $web .= $foot;
 
         $this->thing_report["web"] = $web;
@@ -225,7 +231,6 @@ class Hexflake extends Agent
     public function makePNG()
     {
         $image = $this->snowflake_agent->thing_report["png"];
-
         $this->PNG = $image;
         $this->thing_report["png"] = $image;
     }
