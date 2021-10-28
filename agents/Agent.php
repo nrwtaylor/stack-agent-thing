@@ -2439,6 +2439,17 @@ if ($pid == -1) {
             }
         }
 
+        // Recognize incoming things.
+        // Develop channel forwarding.
+        if (substr($this->subject, 0, 7) == "THING |") {
+
+            $to_repeat = $this->addressKaiju($this->from);
+            if ($to_repeat !== null) {
+                $this->sendDiscord($this->subject, $to_repeat);
+            }
+        }
+
+
         // Dev test for robots
         $this->thing->log("created a Robot agent.", "INFORMATION");
         $this->robot_agent = new Robot($this->thing, "robot");

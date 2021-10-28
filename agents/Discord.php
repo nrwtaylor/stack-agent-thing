@@ -127,8 +127,7 @@ class Discord extends Agent
 
     public function testDiscord()
     {
-
-$this->sendDiscord("merp",'kokopelli:#general@kaiju.discord');
+$this->sendDiscord("merp",'edna:#general@edna.discord');
 
     }
 
@@ -155,7 +154,7 @@ $this->sendDiscord("merp",'kokopelli:#general@kaiju.discord');
         $bot_webhook = $this->settingsAgent([
             "discord",
             "servers",
-            $to,
+            $bot_name,
             "webhook",
         ]);
 
