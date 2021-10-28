@@ -261,6 +261,16 @@ class Day extends Agent
                 } else {
                     $message .= $period . " " . $datum->format("G:i:s") . " ";
                 }
+
+                    if (!isset($this->twilights)) {
+                        $this->twilights = [];
+                    }
+                    $this->twilights[$period] = [
+                        "text" => ucwords(strtolower($period)),
+                        "time" => $datum->format("G:i:s"),
+                    ];
+
+
                 $count += 1;
                 $match = false;
                 $variable_text = str_replace(" ", "_", $period);
@@ -269,6 +279,7 @@ class Day extends Agent
                     $this->solarDay($datum_projected)[$variable_text] <
                         $timestamp_epoch
                 ) {
+/*
                     if (!isset($this->twilights)) {
                         $this->twilights = [];
                     }
@@ -276,6 +287,7 @@ class Day extends Agent
                         "text" => ucwords(strtolower($period)),
                         "time" => $datum->format("G:i:s"),
                     ];
+*/
                     //
                     //                if ($this->solar_array[$variable_text] < $timestamp_epoch) {
                     $time_of_day = $period;
@@ -1694,7 +1706,7 @@ Now draw the twilight.
 
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(1, 1);
-
+/*
             $pdf->SetFont("Helvetica", "", 26);
             $this->txt = "" . $this->whatis . ""; // Pure uuid.
 
@@ -1702,7 +1714,7 @@ Now draw the twilight.
             $text = $this->whatis;
             $line_height = 20;
             $pdf->MultiCell(150, $line_height, $text, 0);
-
+*/
             if (isset($this->hextile_PNG)) {
                 $top_x = -6;
                 $top_y = 11;
