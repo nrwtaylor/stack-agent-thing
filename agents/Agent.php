@@ -2455,6 +2455,14 @@ if ($pid == -1) {
             }
         }
 
+//        if (substr($this->subject, 0, 7) == "THING |") {
+//if ($this->from == '17787923915') {
+
+//$this->sendDiscord($this->subject, 'kokopelli:#general@kaiju.discord');
+
+//}
+  //      }
+
         // Dev test for robots
         $this->thing->log("created a Robot agent.", "INFORMATION");
         $this->robot_agent = new Robot($this->thing, "robot");
