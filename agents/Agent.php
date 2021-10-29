@@ -1835,6 +1835,14 @@ public function __set($name, $value) {
 
         $this->thing->log('read "' . $this->subject . '".');
 
+// dev here?
+
+$indicators = [
+'link' => ['web','link'],
+];
+
+$this->flagAgent($indicators, $this->subject);
+
         $this->readFrom();
         $this->readSubject();
         // read the current agent.
@@ -3162,8 +3170,6 @@ if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
                 // Otherwise check in as last resort...
             }
 $this->head_code = $headcode->head_code;
-var_dump($this->head_code);
-//var_dump($headcode->head_code);
 
         }
 

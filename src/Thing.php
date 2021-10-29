@@ -145,12 +145,6 @@ class Thing
             $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
-
-        $this->hash = "off";
-        if (isset($this->container['stack']['hash'])) {
-            $this->hash = $this->container['stack']['hash'];
-        }
-
         $this->hash_algorithm = "sha256";
         if (isset($this->container['stack']['hash_algorithm'])) {
             $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
@@ -312,17 +306,16 @@ class Thing
     function spawn($datagram = null)
     {
         if (strtolower($this->queue_handler) != "gearman") {
-
             $this->log("No queue handler recognized");
             return true;
         }
 
         // "Failed to set exception option."
         // Try to catch.
+
         $client = new \GearmanClient();
 
         $arr = (array) $client;
-
         if (!$arr) {
             $this->log("spawn. Job queue not available.");
             // do stuff
@@ -336,11 +329,6 @@ class Thing
         $client->addServer();
         $arr = json_encode($datagram);
 $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedence'] : "");
-
-
-//$function_name = "call_agent";
-
-
 //        $client->doLowBackground("call_agent", $arr);
         $client->doLowBackground($function_name, $arr);
 
@@ -361,25 +349,11 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         $this->Forget();
     }
 
-    function isValidSha256($sha256 ='') {
-        return strlen($sha256) == 64 && ctype_xdigit($sha256);
-    }
-
     function Create($from = null, $to = "", $subject = "", $agent_input = null)
     {
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
-
-        /*
-            Check if this is a hash.
-            If it is don't re-hash.
-        */
-
-        if (($this->hash=='on') and (!$this->isValidSha256($from))) {
-            $from = hash($this->hash_algorithm, $from);
-        }
-
         $message0 = [];
         $message0['50 words'] = null;
         $message0['500 words'] = null;
