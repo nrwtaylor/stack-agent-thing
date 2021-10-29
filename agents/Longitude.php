@@ -20,22 +20,6 @@ class Longitude extends Agent
         $this->doLongitude();
     }
 
-    public function formatLongitude($text = null, $pattern = null) {
-
-        if ($text == null) {return null;}
-
-$sign = "E";
-if ($text > 0) {$sign = "E";} else {$sign = "W";
-$text = abs($text);}
-//$arr = $this->dmsDegree($text);
-if (is_numeric($text)) {return $text . $sign;}
-
-
-
-        return $text;
-    }
-
-
     public function doLongitude()
     {
         if ($this->agent_input == null) {

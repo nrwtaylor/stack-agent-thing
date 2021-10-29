@@ -145,12 +145,6 @@ class Thing
             $this->queue_handler = $this->container['stack']['queue_handler'];
         }
 
-
-        $this->hash = "off";
-        if (isset($this->container['stack']['hash'])) {
-            $this->hash = $this->container['stack']['hash'];
-        }
-
         $this->hash_algorithm = "sha256";
         if (isset($this->container['stack']['hash_algorithm'])) {
             $this->hash_algorithm = $this->container['stack']['hash_algorithm'];
@@ -361,25 +355,11 @@ $function_name = "call_agent" . (isset($arr['precedence']) ? "_".$arr['precedenc
         $this->Forget();
     }
 
-    function isValidSha256($sha256 ='') {
-        return strlen($sha256) == 64 && ctype_xdigit($sha256);
-    }
-
     function Create($from = null, $to = "", $subject = "", $agent_input = null)
     {
         if ($from == null) {
             $from = 'null' . $this->mail_postfix;
         }
-
-        /*
-            Check if this is a hash.
-            If it is don't re-hash.
-        */
-
-        if (($this->hash=='on') and (!$this->isValidSha256($from))) {
-            $from = hash($this->hash_algorithm, $from);
-        }
-
         $message0 = [];
         $message0['50 words'] = null;
         $message0['500 words'] = null;

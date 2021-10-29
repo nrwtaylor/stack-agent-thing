@@ -107,10 +107,9 @@ class Time extends Agent
      * @param unknown $text (optional)
      * @return unknown
      */
-    public function textTime($text = null)
+    public function textTime($text)
     {
         $timestamp = strtotime($text);
-
         $new_date_format = date("m/d H:i", $timestamp);
         return $new_date_format;
     }

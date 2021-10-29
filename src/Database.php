@@ -492,6 +492,7 @@ class Database
         // Get first available.
 
         $thing = false;
+
         foreach ($this->available_stacks as $stack_name => $stack) {
             switch ($stack["infrastructure"]) {
                 case "mysql":
@@ -630,14 +631,6 @@ class Database
         return $thing_report;
     }
 
-function isValidMd5($md5 ='') {
-  return strlen($md5) == 32 && ctype_xdigit($md5);
-}
-
-function isValidSha256($sha256 ='') {
-  return strlen($sha256) == 64 && ctype_xdigit($sha256);
-}
-
     /**
      *
      * @param unknown $path
@@ -646,11 +639,11 @@ function isValidSha256($sha256 ='') {
      * @return unknown
      */
     public function variableSearch(
+        $path,
         $value,
         $max = null,
         $string_in_string = false
     ) {
-
         //        $thing = false;
         /*
         $thing_report = [];
@@ -680,10 +673,8 @@ return $thing_report;
             $max = 3;
         }
         $max = (int) $max;
-        $user_search = $this->from;
 
-//$hash_user_search = $user_search;
-//} else {
+        $user_search = $this->from;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
@@ -697,7 +688,7 @@ return $thing_report;
             //                "SELECT * FROM stack FORCE INDEX (created_at_nom_from) WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             //            $query =
-              //              "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+            //                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
             if ($this->hash_state == "off") {
                 $query =
@@ -708,7 +699,6 @@ return $thing_report;
                 $query =
                     "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
             }
-
             //           $query =
             //                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables

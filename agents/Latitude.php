@@ -48,20 +48,6 @@ class Latitude extends Agent
         );
     }
 
-    public function formatLatitude($text = null, $pattern = null) {
-
-        if ($text == null) {return null;}
-
-$sign = "N";
-if ($text > 0) {$sign = "N";} else {$sign = "S";
-$text = abs($text);}
-//$arr = $this->dmsDegree($text);
-if (is_numeric($text)) {return $text . $sign;}
-
-return $text;
-
-    }
-
     function set()
     {
         $this->latitude_agent->setVariable("latitude", $this->latitude);

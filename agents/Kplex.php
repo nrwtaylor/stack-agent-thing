@@ -35,13 +35,9 @@ class Kplex extends Agent
 
         if (!$fp) {
             echo "$errstr ($errno)<br />\n";
-            $this->snapshot = null;
-            return;
-         }
-
-
-        $this->thing->console("Connected to Kplex server."); 
-        //$this->response .= "Connected to Kplex server. ";
+            die();
+        }
+        echo "Connected to kplex server.\n";
 
         $ship_handler = new Ship($this->thing, "ship");
         $snapshot = null;

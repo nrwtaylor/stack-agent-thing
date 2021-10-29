@@ -418,12 +418,6 @@ $this->sendDiscord("merp",'edna:#general@edna.discord');
     // Not tested.
     function getDiscord()
     {
-
-if ($this->thing->thing === false) {
-//$this->body = null;
-return;
-}
-
         $bodies = json_decode($this->thing->thing->message0, true);
 if ($bodies == null) {
 $this->body = null;

@@ -181,7 +181,7 @@ class Ping extends Agent
     public function getPing()
     {
         $received_at = $this->created_at;
-        $this->ping_time = time() - strtotime($received_at);
+        $this->ping_time = time() - $received_at;
 
         if ($this->ping_time < 1) {
             $this->ping_text = "<1 second";

@@ -491,7 +491,6 @@ public function __set($name, $value) {
         if (!is_array($findagent_thing->thing_report["things"])) {
             return;
         }
-
         $count = count($findagent_thing->thing_report["things"]);
 
         //$rule_agent = new Rule($this->thing, "rule");
@@ -501,7 +500,7 @@ public function __set($name, $value) {
                 array_reverse($findagent_thing->thing_report["things"])
                 as $thing_object
             ) {
-              $uuid = $thing_object["uuid"];
+                $uuid = $thing_object["uuid"];
                 $variables_json = $thing_object["variables"];
                 $variables = $this->thing->json->jsontoArray($variables_json);
 
@@ -518,7 +517,6 @@ public function __set($name, $value) {
                 $thing->nom_from = $thing_object["nom_from"];
 
                 $thing->variables = $variables;
-
                 $thing->created_at = $thing_object["created_at"];
 
                 $thing->associations = $associations;
@@ -531,6 +529,7 @@ public function __set($name, $value) {
                 $response = $this->readAgent($thing_object["task"]);
             }
         }
+
         return $things;
     }
 
@@ -583,7 +582,7 @@ public function __set($name, $value) {
         foreach ($indicators as $flag_name => $flag_indicators) {
             foreach ($flag_indicators as $flag_indicator) {
                 $f = $this->agent_name . "_" . $flag_name . "_flag";
-          if (stripos($input, $flag_indicator) !== false) {
+                if (stripos($input, $flag_indicator) !== false) {
                     $this->{$f} = "on";
                 }
 
@@ -3161,12 +3160,7 @@ if (!is_string($agent_class_name)) {$agent_class_name = $this->agent_name;}
                 }
                 // Otherwise check in as last resort...
             }
-$this->head_code = $headcode->head_code;
-var_dump($this->head_code);
-//var_dump($headcode->head_code);
-
         }
-
 
         // Temporarily alias robots
         if (strpos($input, "robots") !== false) {

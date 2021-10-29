@@ -212,7 +212,7 @@ class Group extends Agent
         $names = $this->thing->Write(["group", "action"], 'find');
 
         $thingreport = $this->thing->db->setUser($this->from);
-        $thingreport = $this->thing->db->variableSearch("group_id", 99);
+        $thingreport = $this->thing->db->variableSearch(null, "group_id", 99);
 
         $groups = [];
 
