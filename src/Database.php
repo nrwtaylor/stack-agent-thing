@@ -678,9 +678,9 @@ return $thing_report;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         // https://stackoverflow.com/questions/11068230/using-like-in-bindparam-for-a-mysql-pdo-query
-        if ($string_in_string === true) {
+        //if ($string_in_string === true) {
             $value = "%$value%"; // Value to search for in Variables
-        }
+        //}
         $thingreport["things"] = [];
 
         try {
@@ -690,15 +690,15 @@ return $thing_report;
             //            $query =
             //                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
 
-            if ($this->hash_state == "off") {
+         //   if ($this->hash_state == "off") {
                 $query =
                     "SELECT * FROM stack WHERE nom_from=:user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-            }
+           // }
 
-            if ($this->hash_state == "on") {
-                $query =
-                    "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
-            }
+           // if ($this->hash_state == "on") {
+             //   $query =
+               //     "SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value ORDER BY created_at DESC LIMIT :max";
+          //  }
             //           $query =
             //                "(SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) UNION ALL (SELECT * FROM stack WHERE nom_from=:hash_user_search AND variables LIKE :value) ORDER BY created_at DESC LIMIT :max";
             //$value = "+$value"; // Value to search for in Variables
@@ -707,12 +707,12 @@ return $thing_report;
             //        'SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND MATCH(variables) AGAINST (:value IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max';
 
             $sth = $this->container->db->prepare($query);
-            if ($this->hash_state == "off") {
+            //if ($this->hash_state == "off") {
                 $sth->bindParam(":user_search", $user_search);
-            }
-            if ($this->hash_state == "on") {
-                $sth->bindParam(":hash_user_search", $hash_user_search);
-            }
+           // }
+            //if ($this->hash_state == "on") {
+            //    $sth->bindParam(":hash_user_search", $hash_user_search);
+            //}
             $sth->bindParam(":value", $value);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
@@ -745,13 +745,16 @@ return $thing_report;
         $thingreport["things"] = [];
 
         try {
+       //     $query =
+         //       "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND uuid LIKE :nuuid ORDER BY created_at DESC";
+
             $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND uuid LIKE :nuuid ORDER BY created_at DESC";
+                "SELECT * FROM stack WHERE nom_from=:user_search AND uuid LIKE :nuuid ORDER BY created_at DESC";
 
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
+      //      $sth->bindParam(":hash_user_search", $hash_user_search);
 
             $sth->bindParam(":nuuid", $nuuid);
             $sth->execute();
@@ -796,24 +799,24 @@ return $thing_report;
         if ($mode == null or strtolower($mode) == "boolean") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max";
+                "SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN BOOLEAN MODE) ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "like") {
             $keyword = "$keyword_input"; // Value to search for in Variables
             $query =
-                "SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max";
+                "SELECT * FROM stack WHERE task LIKE BINARY :keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max";
         }
         if (strtolower($mode) == "where") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                "SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) ORDER BY created_at DESC LIMIT :max";
+                "SELECT * FROM stack WHERE task = BINARY :keyword AND nom_to=:agent AND nom_from=:user_search ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "natural language") {
             $keyword = $this->container->db->quote($keyword_input);
             $query =
-                "SELECT * FROM stack WHERE (nom_from=:user_search OR nom_from=:hash_user_search) AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max";
+                "SELECT * FROM stack WHERE nom_from=:user_search AND nom_to=:agent AND MATCH(task) AGAINST (:keyword IN NATURAL LANGUAGE MODE) ORDER BY created_at DESC LIMIT :max";
         }
 
         if (strtolower($mode) == "equal") {
@@ -834,7 +837,7 @@ return $thing_report;
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
-        $sth->bindParam(":hash_user_search", $hash_user_search);
+     //   $sth->bindParam(":hash_user_search", $hash_user_search);
 
         $sth->bindParam(":keyword", $keyword);
         $sth->bindParam(":agent", $agent);
@@ -936,11 +939,11 @@ return $thing_report;
         $hash_user_search = hash($this->hash_algorithm, $user_search);
 
         $query =
-            "SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) AND created_at > (NOW() - INTERVAL :horizon HOUR)";
+            "SELECT COUNT(*) FROM stack WHERE nom_to=:agent AND nom_from=:user_search AND created_at > (NOW() - INTERVAL :horizon HOUR)";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
-        $sth->bindParam(":hash_user_search", $hash_user_search);
+       // $sth->bindParam(":hash_user_search", $hash_user_search);
 
         $sth->bindParam(":agent", $agent);
         $sth->bindParam(":horizon", $horizon, PDO::PARAM_INT);
@@ -1024,11 +1027,11 @@ return $thing_report;
         //$query = 'delete from stack where nom_to=:agent and nom_from=:user_search and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
         //$query = 'delete /*+ MAX_EXECUTION_TIME(100) */ from stack where nom_to="tile" and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)';
         $query =
-            "delete from stack where nom_to=:agent AND (nom_from=:user_search OR nom_from=:hash_user_search) and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)";
+            "delete from stack where nom_to=:agent AND nom_from=:user_search  and not exists (select * from (select MAX(id) maxID FROM stack GROUP BY task HAVING count(*) > 0 ) AS q WHERE maxID=id)";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
-        $sth->bindParam(":hash_user_search", $hash_user_search);
+      //  $sth->bindParam(":hash_user_search", $hash_user_search);
 
         $sth->bindParam(":agent", $agent);
         $sth->execute();
@@ -1067,12 +1070,12 @@ return $thing_report;
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
         $query =
-            "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+            "SELECT * FROM stack WHERE nom_from = :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         try {
             $sth = $this->container->db->prepare($query);
             $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
+         //   $sth->bindParam(":hash_user_search", $hash_user_search);
             $sth->bindParam(":agent", $agent);
             $sth->bindParam(":max", $max, PDO::PARAM_INT);
             $sth->execute();
@@ -1114,13 +1117,13 @@ return $thing_report;
         //  $query = "SELECT * FROM stack WHERE nom_from LIKE '%$user_search%' AND task LIKE '%$keyword%' ORDER BY created_at DESC";
         //      $query = "SELECT * FROM stack WHERE nom_from = :user_search AND task LIKE '%$keyword%' ORDER BY created_at DESC";
         $query =
-            "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND task LIKE :keyword ORDER BY created_at DESC";
+            "SELECT * FROM stack WHERE nom_from = :user_search  AND task LIKE :keyword ORDER BY created_at DESC";
 
         try {
             $sth = $this->container->db->prepare($query);
 
             $sth->bindParam(":user_search", $user_search);
-            $sth->bindParam(":hash_user_search", $hash_user_search);
+          //  $sth->bindParam(":hash_user_search", $hash_user_search);
 
             $sth->bindParam(":keyword", $keyword);
 
@@ -1468,11 +1471,11 @@ return $thing_report;
 
         //$query = "SELECT * FROM stack WHERE nom_from LIKE :user_search AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
         $query =
-            "SELECT * FROM stack WHERE (nom_from = :user_search OR nom_from=:hash_user_search) AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
+            "SELECT * FROM stack WHERE nom_from = :user_search  AND nom_to = :agent ORDER BY created_at DESC LIMIT :max";
 
         $sth = $this->container->db->prepare($query);
         $sth->bindParam(":user_search", $user_search);
-        $sth->bindParam(":hash_user_search", $hash_user_search);
+     //   $sth->bindParam(":hash_user_search", $hash_user_search);
 
         $sth->bindParam(":agent", $agent);
         $sth->bindParam(":max", $max, PDO::PARAM_INT);
