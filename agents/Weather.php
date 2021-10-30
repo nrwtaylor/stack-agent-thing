@@ -271,6 +271,9 @@ class Weather extends Agent
         );
 
         $this->refreshed_at = $this->current_time;
+
+$this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
+
     }
 
     /**

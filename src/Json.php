@@ -62,7 +62,6 @@ class Json
         $this->field = null;
         //        $this->write_field_list = array();
         $this->thing_array = array();
-
         // Temporary hack of sorts.
         $this->uuid = $uuid;
     }
@@ -317,9 +316,14 @@ class Json
      */
     function pushStream($value, $pos = -1)
     {
+// dev
+//if ($this->array_data == null) {return;}
+
         $this->setField($this->field);
 
         $stream_id = $this->idStream();
+if ($this->array_data[$stream_id] == null) {return;}
+
         if ($pos == -1) {
             $pos = count($this->array_data[$stream_id]);
         }
@@ -457,7 +461,10 @@ class Json
     {
         // we need references as we will modify the first parameter
         $dest = &$arr;
-if ($dest == null) {return null;}
+if ($dest == null) {
+$dest =[];
+}
+//return null;}
         $finalKey = array_pop($path);
         foreach ($path as $key) {
             $dest = &$dest[$key];
@@ -523,6 +530,7 @@ if ($dest == null) {return null;}
         if ($this->field == null) {
             return;
         }
+
         if (strlen($this->json_data) > $this->char_max) {
 
             // devstack what do you do here?
@@ -560,7 +568,7 @@ if ($dest == null) {return null;}
             } else {
                 $this->last_write = $this->db->writeField(
                     $this->field,
-                    $this->json_data
+                    $this->json_data,
                 );
             }
             return true;

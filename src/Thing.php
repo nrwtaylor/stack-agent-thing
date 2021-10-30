@@ -311,6 +311,7 @@ class Thing
 
     function spawn($datagram = null)
     {
+
         if (strtolower($this->queue_handler) != "gearman") {
 
             $this->log("No queue handler recognized");
@@ -588,6 +589,7 @@ And review Agent variables.
     }
 
     public function Write($path, $value) {
+
         $this->json->setField("variables");
         $this->json->writeVariable($path, $value);
     }

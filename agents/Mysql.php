@@ -345,20 +345,48 @@ $this->errorMysql($ex->getMessage());
      */
     function writeField($field_text, $string_text)
     {
-        if (!isset($this->pdo) or ($this->pdo == null)) {return;}
+
+// merp
+if (strlen($string_text) > 100000) {
+
+var_dump($string_text);
+
+$string_text = json_encode(['mysql'=>['field length exceed']]);
+
+}
+
+
+
+/*
+$x = json_decode($string_text, true);
+foreach($x as $i=>$j) {
+if (sizeof($j) == 2) {continue;}
+var_dump(sizeof($j));
+//if ($i == 'limit') {var_dump($j);}
+//var_dump($j);
+var_dump($i);
+//exit();
+}
+exit();}
+*/
+//        if (!isset($this->pdo) or ($this->pdo == null)) {return;}
+
         //        $this->split_time = microtime(true);
         //        $this->log = [$field_text, $string_text];
         //$this->test( $this->get_calling_function() );
-
         // sqlinjection commentary
         // user provided string_text
         // stack provided field_text
+//var_dump($field_text);
+//var_dump($string_text);
+$uuid = $this->uuid;
 
         try {
             $query = "UPDATE stack SET $field_text=:string_text WHERE uuid=:uuid";
             $sth = $this->pdo->prepare($query);
+            $sth->bindParam(":uuid", $uuid);
 
-            $sth->bindParam(":uuid", $this->uuid);
+//            $sth->bindParam(":uuid", $this->uuid);
             $sth->bindParam(":string_text", $string_text);
 
             // This is not allowed by PHP.
@@ -366,10 +394,25 @@ $this->errorMysql($ex->getMessage());
             //$sth->bindParam(":field_text", $field_text);
 
             $sth->execute();
-            //            $sth = null;
+
+if (!$sth) {
+    echo "\nPDO::errorInfo():\n";
+    print_r($dbh->errorInfo());
+exit();
+}
+
             //$sth->close();
             $this->last_update = false;
+}catch(\PDOException $e){
+    print "error in connection" . $e->getMessage();
+
+exit();
+        } catch (\Throwable $e) {
+var_dump($e);
+exit();
         } catch (\Exception $e) {
+
+//var_dump($e->getMessage());
             // Devstack - decide how to handle thing full
             // Do this for now.
 
@@ -384,6 +427,7 @@ $this->errorMysql($ex->getMessage());
             //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
             $this->last_update = true;
+exit();
         }
 
         $sth = null;
@@ -450,14 +494,19 @@ $this->errorMysql($ex->getMessage());
 
             //$this->test("Create");
 
-            $query = $this->pdo->prepare("INSERT INTO stack
-			(uuid,task,nom_from,nom_to)
-			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
+//            $query = $this->pdo->prepare("INSERT INTO stack
+///			(uuid,task,nom_from,nom_to)
+//			VALUES (:uuid, :task, :hash_nom_from, :nom_to)");
 
-            $query->bindParam(":uuid", $uuid);
-            $query->bindParam(":task", $task);
-            $query->bindParam(":hash_nom_from", $hash_nom_from);
-            $query->bindParam(":nom_to", $nom_to);
+            $query = $this->pdo->prepare("INSERT INTO stack
+                        (uuid,task,nom_from,nom_to)
+                        VALUES (:uuid, :task, :nom_from, :nom_to)");
+
+
+//            $query->bindParam(":uuid", $uuid);
+  //          $query->bindParam(":task", $task);
+    //        $query->bindParam(":hash_nom_from", $hash_nom_from);
+      //      $query->bindParam(":nom_to", $nom_to);
 
             $uuid = $this->uuid;
             $task = $subject;
@@ -469,6 +518,13 @@ $this->errorMysql($ex->getMessage());
                 $hash_nom_from = $nom_from;
             }
             $nom_to = $to;
+
+
+            $query->bindParam(":uuid", $uuid);
+            $query->bindParam(":task", $task);
+            $query->bindParam(":nom_from", $nom_from);
+          //  $query->bindParam(":hash_nom_from", $hash_nom_from);
+            $query->bindParam(":nom_to", $nom_to);
 
             $query->execute();
             $query = null;

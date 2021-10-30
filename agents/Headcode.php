@@ -817,14 +817,19 @@ if (file_exists($font)) {
             $this->getHeadcodes();
         }
 
+        if (!isset($this->headcodes)) {
+            $this->getHeadcodes();
+        }
+
         $txt =
             "These are HEADCODES for RAILWAY " . $this->headcode->nuuid . ". ";
         $txt .= "\n";
 
         $count = "X";
-        if (is_array($this->headcodes)) {
+        if (isset($this->headcodes) and is_array($this->headcodes)) {
             $count = count($this->headcodes);
         }
+
 
         $txt .= "Last " . $count . " Headcodes retrieved.";
 
@@ -850,7 +855,7 @@ if (file_exists($font)) {
 
         $txt .= "\n";
         $txt .= "\n";
-
+if (isset($this->headcodes)) {
         //$txt = "Test \n";
         foreach (array_reverse($this->headcodes) as $headcode) {
             //            $txt .= " " . str_pad(strtoupper($headcode['head_code']), 4, "X", STR_PAD_LEFT);
@@ -927,7 +932,7 @@ if (file_exists($font)) {
             }
             $txt .= "\n";
         }
-
+}
         $this->thing_report["txt"] = $txt;
         $this->txt = $txt;
     }

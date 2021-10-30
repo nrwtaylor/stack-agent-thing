@@ -377,7 +377,7 @@ class Database
      * @param unknown $field_text
      * @param unknown $string_text
      */
-    public function writeField($field_text, $string_text)
+    public function writeField($field_text, $string_text, $uuid = null)
     {
         foreach (
             $this->active_stacks
@@ -386,7 +386,7 @@ class Database
             if ($active_service_name == "mysql") {
                 $this->stack_handlers["mysql"]->writeField(
                     $field_text,
-                    $string_text
+                    $string_text,
                 );
             }
             /*
