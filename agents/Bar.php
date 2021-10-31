@@ -11,6 +11,8 @@ class Bar extends Agent
 {
     public function init()
     {
+        $this->bar_terse_flag = "on";
+
         $this->state = "red"; // running
 
         $this->current_time = $this->thing->time();
@@ -59,33 +61,35 @@ class Bar extends Agent
         $this->getTicks();
         $this->ticksBar();
 
-        $this->age = strtotime($this->current_time) - strtotime($this->last_refreshed_at);
-
+        $this->age =
+            strtotime($this->current_time) -
+            strtotime($this->last_refreshed_at);
     }
 
-    public function ticksBar() {
-
+    public function ticksBar()
+    {
         // So the question is when was the last bar.
         // without hearing the last bar.
 
         // Make an assumption. And then check if we miss anything.
         // Eventually.
 
-$this->bar_time = 60 * 4;
+        $this->bar_time = 60 * 4;
 
         $this->getTicks();
 
         // A step to making this faster because then we can end the for loop
         // as soon as we see it.
 
-$timestamp = $this->last_refreshed_at;
-if ($this->last_refreshed_at === false) {
-$timestamp = $this->current_time;
-$this->response .= "Saw false timestamp. ";}
+        $timestamp = $this->last_refreshed_at;
+        if ($this->last_refreshed_at === false) {
+            $timestamp = $this->current_time;
+            $this->response .= "Saw false timestamp. ";
+        }
 
         usort($this->ticks_history, function ($a, $b) {
-            $countA = strtotime($a['refreshed_at']);
-            $countB = strtotime($b['refreshed_at']);
+            $countA = strtotime($a["refreshed_at"]);
+            $countB = strtotime($b["refreshed_at"]);
 
             $diff = $countB - $countA;
             return $diff;
@@ -95,17 +99,16 @@ $this->response .= "Saw false timestamp. ";}
         // How many ticks have there been send the last_refreshed_at time stamp.
         $count = 0;
         foreach ($this->ticks_history as $i => $tick_history) {
-$is_new_tick = (strtotime($timestamp) - $this->bar_time) <
+            $is_new_tick =
+                strtotime($timestamp) - $this->bar_time <
                 strtotime($tick_history["refreshed_at"]);
 
-            if ($is_new_tick)
-            {
+            if ($is_new_tick) {
                 $count += 1;
             }
         }
 
         $this->tick_count = $count;
-
     }
 
     public function makeChoice()
@@ -163,32 +166,59 @@ $is_new_tick = (strtotime($timestamp) - $this->bar_time) <
         );
 
         $this->getBars();
-
     }
 
     function makeSMS()
     {
-        $message = "BAR";
+        $sms = "BAR | ";
 
         if (!isset($this->bar_count) or $this->bar_count === false) {
-            $message .= " | Bar count not set. Text BAR ADVANCE.";
+            $sms .= "Bar count not set. Text BAR ADVANCE.";
         } else {
-            $message .=
-                " | " .
-                $this->bar_count .
-                " of " .
-                $this->max_bar_count .
-                ". Counted " .
-                $this->tick_count .
-                " ticks since the last bar update " . $this->age . " ago. " .
-                " current time " . $this->current_time . " " .
-                " last refreshed at " . $this->last_refreshed_at . " " .
-                " bar time " . $this->bar_time . " " . 
-                $this->response;
+            if (
+                isset($this->bar_terse_flag) and
+                $this->bar_terse_flag == "on"
+            ) {
+                $sms .=
+                    $this->bar_count .
+                    " of " .
+                    $this->max_bar_count .
+                    ". " .
+                    $this->tick_count .
+                    " ticks. " .
+                    $this->last_refreshed_at .
+                    ". " .
+                    $this->bar_time .
+                    " time.";
+            } else {
+                $sms .=
+                    $this->bar_count .
+                    " of " .
+                    $this->max_bar_count .
+                    ". Counted " .
+                    $this->tick_count .
+                    " ticks since the last bar update " .
+                    $this->age .
+                    " ago. " .
+                    " current time " .
+                    $this->current_time .
+                    " " .
+                    " last refreshed at " .
+                    $this->last_refreshed_at .
+                    " " .
+                    " bar time " .
+                    $this->bar_time .
+                    " ";
+            }
         }
 
-        $this->sms_message = $message;
-        $this->thing_report["sms"] = $message;
+        if (isset($this->bar_terse_flag) and $this->bar_terse_flag == "on") {
+        } else {
+            $sms .= $this->response;
+        }
+
+        $this->sms_message = $sms;
+        $this->thing_report["sms"] = $sms;
     }
 
     function makeWeb()
@@ -231,7 +261,6 @@ $is_new_tick = (strtotime($timestamp) - $this->bar_time) <
         }
 
         $this->doBar();
-
     }
 
     public function Perform($piece)
@@ -384,7 +413,6 @@ $is_new_tick = (strtotime($timestamp) - $this->bar_time) <
         // Call stack job with the current bar,
         // to trigger stack related jobs on file.
         $this->stackJob($this->bar_count);
-
     }
 
     public function makeImage()
