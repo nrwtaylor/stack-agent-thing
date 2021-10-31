@@ -139,11 +139,13 @@ if ($this->snapshot != null) {
         $sms .= "speed " . $this->snapshot->speed_in_knots . " knots ";
 
 $true_course_text = "";
-if ($this->snapshot->true_course == null) {
+if ($this->snapshot->true_course != null) {
 $true_course_text = $this->snapshot->true_course;
+        $sms .= "course " . $true_course_text . " degrees ";
+
 }
 
-        $sms .= "course " . $true_course_text . " degrees ";
+//        $sms .= "course " . $true_course_text . " degrees ";
 
         if (isset($this->snapshot->destination_waypoint_id)) {
             $sms .=

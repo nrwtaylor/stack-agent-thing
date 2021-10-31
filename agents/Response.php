@@ -63,7 +63,6 @@ $this->thing_report = $this->limitResponse();
         if ($this->agent_name == "agent") {
             return;
         }
-
         // Don't respond to responses.
         if ($this->agent_name == "response") {
             return;
@@ -79,7 +78,6 @@ $this->thing_report = $this->limitResponse();
             $this->thing_report['sms'] .= " response added " . $this->agent_name;
 
             $this->thing_report["message"] = $this->thing_report["sms"];
-
             if ($this->agent_input == null or $this->agent_input == "" or $this->agent_input == 'response') {
                 $message_thing = new Message($this->thing, $this->thing_report);
                 $this->thing_report["info"] =

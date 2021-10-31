@@ -1413,6 +1413,8 @@ public function __set($name, $value) {
      */
     public function respond()
     {
+//if ($this->agent_name !== 'agent') {return;}
+//var_dump($this->agent_name);
         // Call the response agent
         $this->respondResponse();
     }
