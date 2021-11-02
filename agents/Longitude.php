@@ -20,21 +20,26 @@ class Longitude extends Agent
         $this->doLongitude();
     }
 
-    public function formatLongitude($text = null, $pattern = null) {
+    public function formatLongitude($text = null, $pattern = null)
+    {
+        if ($text == null) {
+            return null;
+        }
 
-        if ($text == null) {return null;}
-
-$sign = "E";
-if ($text > 0) {$sign = "E";} else {$sign = "W";
-$text = abs($text);}
-//$arr = $this->dmsDegree($text);
-if (is_numeric($text)) {return $text . $sign;}
-
-
+        $sign = "E";
+        if ($text > 0) {
+            $sign = "E";
+        } else {
+            $sign = "W";
+            $text = abs($text);
+        }
+        //$arr = $this->dmsDegree($text);
+        if (is_numeric($text)) {
+            return $text . $sign;
+        }
 
         return $text;
     }
-
 
     public function doLongitude()
     {
@@ -203,7 +208,11 @@ if (is_numeric($text)) {return $text . $sign;}
     public function readSubject()
     {
         $input = $this->input;
-        $this->extractLongitude($input);
+        $longitude = $this->extractLongitude($input);
+        if ($longitude !== false) {
+            $this->longitude = $longitude;
+        }
+
         return false;
     }
 }

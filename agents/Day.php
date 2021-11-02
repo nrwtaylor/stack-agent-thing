@@ -861,8 +861,10 @@ DAY | DAY astronomical twilight begin 2021/10/24 6:01:53
 
         $this->longitude = $longitude_agent->longitude;
 
+
         $latitude_agent = new Latitude($this->thing, "latitude");
         $this->latitude = $latitude_agent->latitude;
+
     }
 
     /**

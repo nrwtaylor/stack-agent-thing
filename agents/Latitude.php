@@ -17,26 +17,25 @@ class Latitude extends Agent
 
     function get()
     {
-// Can we get the latitude from Kplex?
-//$this->kplex_agent = new Kplex($this->thing, "kplex");
-//var_dump($this->kplex_agent);
-//exit();
-//$this->listenKplex();
-//var_dump($this->snapshot);
-//exit();
-//if (!isset($this->snapshot)) {
+        // Can we get the latitude from Kplex?
+        //$this->kplex_agent = new Kplex($this->thing, "kplex");
+        //var_dump($this->kplex_agent);
+        //exit();
+        //$this->listenKplex();
+        //var_dump($this->snapshot);
+        //exit();
+        //if (!isset($this->snapshot)) {
 
-//$this->listenKplex();
+        //$this->listenKplex();
 
-//}
-//var_dump($this->snapshot);
+        //}
+        //var_dump($this->snapshot);
         $this->latitude_agent = new Variables(
             $this->thing,
             "variables latitude " . $this->from
         );
 
         $latitude = $this->latitude_agent->getVariable("latitude");
-
         if (is_numeric($latitude)) {
             $this->latitude = $latitude;
         } else {
@@ -48,18 +47,25 @@ class Latitude extends Agent
         );
     }
 
-    public function formatLatitude($text = null, $pattern = null) {
+    public function formatLatitude($text = null, $pattern = null)
+    {
+        if ($text == null) {
+            return null;
+        }
 
-        if ($text == null) {return null;}
+        $sign = "N";
+        if ($text > 0) {
+            $sign = "N";
+        } else {
+            $sign = "S";
+            $text = abs($text);
+        }
+        //$arr = $this->dmsDegree($text);
+        if (is_numeric($text)) {
+            return $text . $sign;
+        }
 
-$sign = "N";
-if ($text > 0) {$sign = "N";} else {$sign = "S";
-$text = abs($text);}
-//$arr = $this->dmsDegree($text);
-if (is_numeric($text)) {return $text . $sign;}
-
-return $text;
-
+        return $text;
     }
 
     function set()
@@ -206,7 +212,6 @@ return $text;
             $latitude = $nmea_response["latitude"] * $sign;
             $latitudes[] = $latitude;
         }
-
         if (count($latitudes) == 1) {
             $latitude = $latitudes[0];
         }
@@ -217,7 +222,10 @@ return $text;
     public function readSubject()
     {
         $input = $this->input;
-        $this->extractLatitude($input);
+        $latitude = $this->extractLatitude($input);
+        if ($latitude !== false) {
+            $this->latitude = $latitude;
+        }
         return false;
     }
 }

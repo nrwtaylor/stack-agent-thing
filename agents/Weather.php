@@ -300,6 +300,36 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
         $this->verbosity = $this->variables_agent->getVariable("verbosity");
     }
 
+
+public function lineWeather($contents, $searchfor) {
+
+
+//        $searchfor = "Current Conditions";
+
+        $pattern = preg_quote($searchfor, "/");
+        // finalise the regular expression, matching the whole line
+        $pattern = "/^.*" . $pattern . ".*\$/m";
+
+        // search, and store all matching occurences in $matches
+        $m = false;
+        if (preg_match_all($pattern, $contents, $matches)) {
+            $m = implode("\n", $matches[0]);
+            $this->matches = $matches;
+        }
+        // Condition text
+        $text = str_replace(
+            $searchfor,
+            "",
+            $this->matches[0][0]
+        );
+
+        $text = trim(
+            str_replace(": ", "", $text)
+        );
+return $text;
+
+
+}
     /**
      *
      * @return unknown
@@ -346,19 +376,18 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
         $data = preg_replace("/<.*?>/", " ", $this->data);
         $contents = $data;
         $this->weather_contents = $data;
+/*
         $searchfor = "Current Conditions";
 
         $pattern = preg_quote($searchfor, "/");
         // finalise the regular expression, matching the whole line
         $pattern = "/^.*" . $pattern . ".*\$/m";
-
         // search, and store all matching occurences in $matches
         $m = false;
         if (preg_match_all($pattern, $contents, $matches)) {
             $m = implode("\n", $matches[0]);
             $this->matches = $matches;
         }
-
         // Condition text
         $this->current_conditions = str_replace(
             $searchfor,
@@ -373,6 +402,72 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
         $this->current_conditions = trim(
             str_replace(": ", "", $this->current_conditions)
         );
+*/
+/*
+
+ Temperature:  5.9&deg;C  
+ Pressure:  101.8 kPa  
+ Humidity:  99 % 
+ Dewpoint:  5.7&deg;C  
+ Wind:  SW 4 km/h 
+ Air Quality Health Index:  N/A 
+
+*/
+
+
+$text_temperature = $this->lineWeather($contents, 'Temperature');
+        $text_temperature = str_replace(
+            "&deg;",
+            '°',
+            $text_temperature
+        );
+
+
+
+$text_pressure = $this->lineWeather($contents, 'Pressure');
+$text_humidity = $this->lineWeather($contents, 'Humidity');
+$text_dewpoint = $this->lineWeather($contents, 'Dewpoint');
+$text_wind = $this->lineWeather($contents, 'Wind');
+$text_air_quality_health_index = $this->lineWeather($contents, 'Air Quality Health Index');
+
+$text_observed_at = $this->lineWeather($contents, 'Observed at');
+
+$this->current_conditions = $text_temperature . " " . $text_pressure ." " . $text_wind;
+
+
+
+
+$dateline = $this->extractDateline($text_observed_at);
+//var_dump($text_observed_at);
+//$timestamp = $this->timestampDateline($dateline);
+
+$text = $dateline['year']."-" . $dateline['month'] . "-" . $dateline['day_number'] . "T" . $dateline['hour'] . ":" . $dateline['minute'];
+
+//var_dump($text);
+
+        $this->time_agent = new Time($this->thing, "time");
+        $this->working_datum = $this->time_agent->datumTime(
+           $text, "America/Vancouver"
+        );
+
+
+        $this->current_datum = $this->time_agent->datumTime(
+           $this->current_time, "America/Vancouver"
+        );
+//var_dump($this->working_datum);
+//var_dump($this->current_datum);
+$age = strtotime($this->timestampTime($this->current_datum)) - strtotime($this->timestampTime($this->working_datum));
+//var_dump($age);
+//var_dump($this->thing->human_time(-1 *$age));
+
+
+// dev improve dateline extraction for 12 am
+
+
+
+
+
+
 
         $contents = $data;
         $searchfor = "Forecast issued";
@@ -448,7 +543,7 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
     /**
      *
      */
-/*
+
     public function respondResponse()
     {
         // Thing actions
@@ -473,11 +568,11 @@ $this->thing->Write(['weather','refreshed_at'], $this->refreshed_at);
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 
-        $this->makeWeb();
+//        $this->makeWeb();
 
         $this->thing_report["help"] = "This reads a web resource.";
     }
-*/
+
     /**
      *
      */

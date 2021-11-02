@@ -568,7 +568,7 @@ $dest =[];
             } else {
                 $this->last_write = $this->db->writeField(
                     $this->field,
-                    $this->json_data,
+                    $this->json_data
                 );
             }
             return true;

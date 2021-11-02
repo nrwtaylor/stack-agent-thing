@@ -386,7 +386,7 @@ class Database
             if ($active_service_name == "mysql") {
                 $this->stack_handlers["mysql"]->writeField(
                     $field_text,
-                    $string_text,
+                    $string_text
                 );
             }
             /*
