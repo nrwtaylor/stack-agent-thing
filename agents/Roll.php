@@ -37,7 +37,7 @@ class Roll extends Agent
      */
     public function get()
     {
-        $this->current_time = $this->thing->time();
+//        $this->current_time = $this->thing->time();
 
         // Borrow this from iching
         $time_string = $this->thing->Read([

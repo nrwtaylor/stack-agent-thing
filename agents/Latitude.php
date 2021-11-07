@@ -160,7 +160,7 @@ class Latitude extends Agent
 
         foreach ($tokens as $i => $token) {
             $sign = +1;
-            $last_character = strtolower(substr(trim($text), -1));
+            $last_character = strtolower(substr(trim($token), -1));
             $text_token = $token;
             if ($last_character == "n" or $last_character == "s") {
                 if ($last_character == "n") {
@@ -170,10 +170,11 @@ class Latitude extends Agent
                     $sign = -1;
                 }
                 $text_token = mb_substr($token, 0, -1);
-            }
+           // }
 
             if (is_numeric($text_token)) {
                 $latitudes[] = $sign * $text_token;
+            }
             }
         }
 

@@ -30,20 +30,16 @@ class A4 extends Agent
      */
     public function get()
     {
-        // Borrow this from iching
         $time_string = $this->thing->Read(["a4", "refreshed_at"]);
 
         if ($time_string == false) {
             $time_string = $this->thing->time();
-            $this->thing->Write(
-                ["a4", "refreshed_at"],
-                $time_string
-            );
+            $this->thing->Write(["a4", "refreshed_at"], $time_string);
         }
 
         $this->refreshed_at = strtotime($time_string);
 
-        $this->alpha = $this->thing->Read(["a4", "alpha"]);
+        $this->a4 = $this->thing->Read(["a4", "alpha"]);
     }
 
     /**
@@ -51,9 +47,8 @@ class A4 extends Agent
      */
     public function set()
     {
-        if ($this->alpha == false) {
-            $this->makeA4();
-            $this->thing->Write(["a4", "alpha"], $this->alpha);
+        if (is_string($this->a4)) {
+            $this->thing->Write(["a4", "alpha"], $this->a4);
         }
     }
 
@@ -62,7 +57,7 @@ class A4 extends Agent
      */
     public function makeA4()
     {
-        if (ctype_alpha($this->alpha)) {
+        if (ctype_alpha($this->a4)) {
             $this->response = "Read this four-character alpha sequence.";
             return;
         }
@@ -82,12 +77,10 @@ class A4 extends Agent
             $rand = mt_rand(0, $max);
             $str .= $characters[$rand];
         }
-        $this->alpha = $str;
+        $this->a4 = $str;
 
         // https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits
     }
-
-    // -----------------------
 
     /**
      *
@@ -97,20 +90,7 @@ class A4 extends Agent
     {
         $this->thing->flagGreen();
 
-        // This should be the code to handle non-matching responses.
-
-        $to = $this->thing->from;
-        $from = "a4";
-
-        $choices = false;
-
-        //$this->makeSMS();
-        //$this->makeMessage();
-
         $this->makeChoices();
-        //$this->makeWeb();
-
-        //$this->makeEmail();
 
         $this->thing_report["info"] = "This makes four character identities.";
         if (!isset($this->thing_report['help'])) {
@@ -122,8 +102,6 @@ class A4 extends Agent
             $message_thing = new Message($this->thing, $this->thing_report);
             $this->thing_report['info'] = $message_thing->thing_report['info'];
         }
-
-        //return $this->thing_report;
     }
 
     /**
@@ -131,9 +109,9 @@ class A4 extends Agent
      */
     function makeChoices()
     {
-        $this->thing->choice->Create($this->agent_name, $this->node_list, "n6");
+        $this->thing->choice->Create($this->agent_name, $this->node_list, "a4");
 
-        $choices = $this->thing->choice->makeLinks('n6');
+        $choices = $this->thing->choice->makeLinks('a4');
         $this->thing_report['choices'] = $choices;
     }
 
@@ -189,8 +167,8 @@ class A4 extends Agent
         $choices = $this->thing->choice->makeLinks('web');
 
         $web = "";
-        $web .= "Four letter alpha (A4) is " . $this->alpha . ".";
-        $web .= '<br>A4 says, "' . $this->sms_message . '".';
+        $web .= "Four letter alpha (A4) is " . strtoupper($this->a4) . ".";
+        //$web .= '<br>A4 says, "' . $this->sms_message . '".';
 
         //$received_at = strtotime($this->thing->thing->created_at);
         $ago = $this->thing->human_time(time() - $this->refreshed_at);
@@ -206,7 +184,7 @@ class A4 extends Agent
      */
     function makeSMS()
     {
-        $sms = "A4 | " . $this->alpha . " | " . $this->response;
+        $sms = "A4 | " . $this->a4 . ". " . $this->response;
 
         $this->sms_message = $sms;
         $this->thing_report['sms'] = $sms;
@@ -218,11 +196,9 @@ class A4 extends Agent
     function makeMessage()
     {
         $message = "Stackr got this A4 for you.<br>";
-        $message .= $this->alpha . ".";
+        $message .= $this->a4 . ".";
 
         $this->thing_report['message'] = $message;
-
-        return;
     }
 
     /**
@@ -239,19 +215,19 @@ class A4 extends Agent
 
         if (count($this->a4s) == 1) {
             $this->response = "Found a four-character alpha sequence.";
-            $this->a4 = strtolower($this->a4s[0]);
-            return $this->a4;
+            $a4 = strtolower($this->a4s[0]);
+            return $a4;
         }
 
         if (count($this->a4s) == 0) {
             $this->response =
                 "Did not find any four-character alpha sequences.";
-            $this->a4 = null;
-            return $this->a4;
+            $a4 = null;
+            return $a4;
         }
 
-        $this->a4 = false;
-        return false;
+        $a4 = false;
+        return $a4;
     }
 
     /**
@@ -261,7 +237,6 @@ class A4 extends Agent
      */
     function extractA4s($input)
     {
-        // Devstack this just does numbers.
         if (!isset($this->a4s)) {
             $this->a4s = [];
         }
@@ -281,16 +256,21 @@ class A4 extends Agent
     {
         $this->response = "Read.";
 
-        $input = strtolower($this->subject);
+        $input = strtolower($this->input);
 
-        if ($this->agent_input != null) {
-            $input = strtolower($this->agent_input);
+        if (is_string($this->a4)) {
+            $this->response .= 'Got thing ' . $this->a4 . ". ";
         }
 
-        $this->extractA4($input);
+        $a4 = $this->extractA4($input);
 
-        if ($this->a4 == null) {
-            $this->a4 = "XXXX";
+        if (is_string($a4)) {
+            $this->response .= "Saw A4 is " . $a4 . ". ";
+            $this->a4 = $a4;
+        }
+
+        if (!is_string($this->a4)) {
+            $this->makeA4();
         }
     }
 }

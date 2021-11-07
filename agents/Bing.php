@@ -81,7 +81,7 @@ class Bing extends Agent
         $data_source =
             "https://api.cognitive.microsoft.com/bing/v7.0/search?q=" .
             $keywords;
-        $data = file_get_contents($data_source, false, $context);
+        $data = @file_get_contents($data_source, false, $context);
         if ($data == false) {
             $this->response .= "Could not ask Bing. ";
             $this->definitions_count = 0;
@@ -233,7 +233,7 @@ if (isset($this->definitions_count)) {
 
     public function readSubject()
     {
-        $this->input = $input;
+//        $this->input = $input;
 
         $input = $this->input;
         $pieces = explode(" ", strtolower($input));

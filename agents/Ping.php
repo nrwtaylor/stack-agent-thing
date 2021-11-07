@@ -172,7 +172,7 @@ class Ping extends Agent
         $sms = strtoupper($this->agent_name) . " | ";
         //$sms = "PING | A message from this Identity pinged us.";
         if (!isset($this->ping) or $this->ping == null) {
-            $sms .= $this->message;
+            $sms .= $this->message . " ";
         }
 
         $sms .= $this->response;
@@ -186,14 +186,7 @@ class Ping extends Agent
     public function getPing()
     {
         $received_at = $this->created_at;
-        $this->ping_time = time() - strtotime($received_at);
-        /*
-        if ($this->ping_time < 1) {
-            $this->ping_text = "<1 second";
-        } else {
-            $this->ping_text = $this->thing->human_time($this->ping_time);
-        }
-*/
+        $this->ping_time = strtotime($this->current_time) - $received_at;
     }
 
     /**
@@ -295,6 +288,15 @@ class Ping extends Agent
     public function readSubject()
     {
         $urls = $this->extractUrls($this->input);
+
+if (strtolower($this->input) == 'pings') {
+
+            $this->getPings();
+$this->response .= "Saw pings. ";
+return;
+
+}
+
         $input = $this->assert($this->input);
 
         $urls = $this->extractUrls($input);
@@ -306,9 +308,9 @@ class Ping extends Agent
         }
 */
 
+
         if ($this->hasText(strtolower($this->input), "digest")) {
             $this->getPings();
-            var_dump($this->pings);
             if ($this->pings == true) {
                 $this->response .= "Did not see pings. ";
                 return;

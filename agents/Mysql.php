@@ -88,7 +88,6 @@ echo "fopo";
         // create ontainer and configure it
 
         $settings = require $GLOBALS["stack_path"] . "private/settings.php";
-
         $this->web_prefix = $settings["settings"]["stack"]["web_prefix"];
         $this->state = $settings["settings"]["stack"]["state"];
 
@@ -151,6 +150,10 @@ try {
 */
         $this->error = null;
         try {
+//var_dump($this->host);
+//var_dump($this->dbname);
+//var_dump($this->user);
+//var_dump($this->pass);
             $pdo = new PDO(
                 "mysql:host=" . $this->host . ";dbname=" . $this->dbname,
                 $this->user,
@@ -161,17 +164,21 @@ try {
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->pdo = $pdo;
         } catch (\Throwable $t) {
-
+//var_dump("foo");
             $this->error = 'Could not connect to MySQL database';
 $this->errorMysql($t->getMessage()); 
+
+//var_dump($t->getMessage());
+
 /*
             $this->thing->log(
                 'could not connect to MySQL database.',
                 "INFORMATION"
             );
 */
-            throw new \Exception("Could not connect to MySQL database.");
+//            throw new \Exception("Could not connect to MySQL database.");
         } catch (\Error $ex) {
+//var_dump("bar");
 $this->errorMysql($ex->getMessage()); 
 
             $this->error = 'Could not connect to MySQL database';
@@ -182,10 +189,10 @@ $this->errorMysql($ex->getMessage());
             );
 */
 
-            throw new \Exception("Could not connect to MySQL database.");
+//            throw new \Exception("Could not connect to MySQL database.");
         }
 
-
+//var_dump($this->error);
         // NRW Taylor 12 June 2018
         // devstack Database for to disk persistent memory calls, redis for in ram persistent calls
 
@@ -222,6 +229,22 @@ $this->errorMysql($ex->getMessage());
 
     public function respondResponse()
     {
+
+            $this->thing_report["message"] = $this->thing_report["sms"];
+            if (
+                $this->agent_input == null or
+                $this->agent_input == "" or
+                $this->agent_input == 'response'
+            ) {
+                $message_thing = new Message($this->thing, $this->thing_report);
+                $this->thing_report["info"] =
+                    $message_thing->thing_report["info"];
+            }
+    }
+
+
+//    public function respondResponse()
+//    {
         /*
         $this->thing->flagGreen();
 
@@ -234,7 +257,7 @@ $this->errorMysql($ex->getMessage());
             $this->thing_report["info"] = $message_thing->thing_report["info"];
         }
 */
-    }
+//    }
 
     function readSubject()
     {
@@ -247,6 +270,7 @@ $this->errorMysql($ex->getMessage());
     public function makeSMS()
     {
         $sms = "MYSQL";
+
         $this->sms_message = $sms;
         $this->thing_report["sms"] = $sms;
     }
@@ -355,6 +379,11 @@ $string_text = json_encode(['mysql'=>['field length exceed']]);
 
 }
 
+if (!isset($this->pdo)) {return true;}
+
+//var_dump($this->pdo);
+//exit();
+
 
 
 /*
@@ -396,21 +425,26 @@ $uuid = $this->uuid;
             $sth->execute();
 
 if (!$sth) {
-    echo "\nPDO::errorInfo():\n";
-    print_r($dbh->errorInfo());
-exit();
+//    echo "\nPDO::errorInfo():\n";
+//    print_r($sth->errorInfo());
+$this->error .= $sth->errorInfo();
+//exit();
 }
 
             //$sth->close();
             $this->last_update = false;
 }catch(\PDOException $e){
-    print "error in connection" . $e->getMessage();
+$this->error .= $e->getMessage();
 
-exit();
+//    print "error in connection" . $e->getMessage();
+
+//exit();
         } catch (\Throwable $e) {
-var_dump($e);
-exit();
+$this->error .= $e->getMessage();
+//var_dump($e);
+//exit();
         } catch (\Exception $e) {
+$this->error .= $e->getMessage();
 
 //var_dump($e->getMessage());
             // Devstack - decide how to handle thing full
@@ -427,7 +461,7 @@ exit();
             //echo 'Caught error: ',  $e->getMessage(), "\n";
             $thing = false;
             $this->last_update = true;
-exit();
+//exit();
         }
 
         $sth = null;

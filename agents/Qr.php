@@ -46,11 +46,16 @@ class Qr extends Agent
 
     public function set()
     {
+/*
         $this->thing->json->setField("settings");
         $this->thing->json->writeVariable(
             ["qr", "received_at"],
             $this->thing->time()
         );
+*/
+        $time_string = $this->thing->time();
+        $this->thing->Write(["qr", "refreshed_at"], $time_string);
+
     }
 
     function makeWeb()

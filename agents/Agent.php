@@ -230,7 +230,7 @@ class Agent
             $web_thing->Create(
                 $this->from,
                 "error",
-                "Throwable: Set failed." .
+                "Throwable: Set failed. " .
                     $t->getMessage() .
                     " " .
                     $t->getTraceAsString()
@@ -248,7 +248,7 @@ class Agent
             $web_thing->Create(
                 $this->from,
                 "error",
-                "Exception: Set failed." .
+                "Exception: Set failed. " .
                     $e->getMessage() .
                     " " .
                     $t->getTraceAsString()
@@ -471,6 +471,7 @@ public function __set($name, $value) {
      */
     public function set()
     {
+       if ($this->agent_name == 'agent') {return;}
        if (!isset($this->{$this->agent_name})) {return true;}
        $this->thing->Write([$this->agent_name], $this->{$this->agent_name});
     }
@@ -685,6 +686,14 @@ public function __set($name, $value) {
         $this->makeJPEGs();
 
         $this->makeSMS();
+
+        //var_dump($this->error);
+
+        if (isset($this->error) and $this->error != "" and $this->error != null) {
+           $sms = $this->thing_report['sms'];
+           $this->sms_message = $sms . " " . $this->error;
+           $this->thing_report['sms'] = $sms . " " . $this->error;
+        } 
 
         // Snippet might be used by web.
         // So run it first.

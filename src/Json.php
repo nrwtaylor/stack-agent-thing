@@ -410,6 +410,7 @@ if ($this->array_data[$stream_id] == null) {return;}
         $this->setValueFromPath($this->array_data, $var_path, $value);
         $this->arraytoJson();
         $t = $this->write();
+
         // Failing to write a variable isn't a problem.
         // The agents will do what they can.
 
@@ -464,6 +465,7 @@ if ($this->array_data[$stream_id] == null) {return;}
 if ($dest == null) {
 $dest =[];
 }
+//var_dump($dest);
 //return null;}
         $finalKey = array_pop($path);
         foreach ($path as $key) {
@@ -474,6 +476,10 @@ $dest =[];
            throw new Exception('Array received as path.');
            return true;
         }
+if (is_string($dest)) {
+return true;
+// dev 5 November 2021
+}
         $dest[$finalKey] = $value;
     }
 

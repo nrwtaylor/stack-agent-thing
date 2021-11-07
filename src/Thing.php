@@ -320,7 +320,18 @@ class Thing
 
         // "Failed to set exception option."
         // Try to catch.
+        //set_error_handler(array($this, "exception_error_handler"));
+        try {
         $client = new \GearmanClient();
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+            $this->log('Caught throwable: ',  $e->getMessage(), "\n", 'INFORMATION');
+            return true;
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+            $this->log('Caught exception: ',  $e->getMessage(), "\n", 'INFORMATION');
+            return true;
+        }
 
         $arr = (array) $client;
 

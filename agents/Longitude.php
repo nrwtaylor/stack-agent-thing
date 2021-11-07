@@ -149,59 +149,67 @@ class Longitude extends Agent
 
         foreach ($tokens as $i => $token) {
             $sign = +1;
-            $last_character = strtolower(substr(trim($text), -1));
+            $last_character = strtolower(substr(trim($token), -1));
             $text_token = $token;
             if ($last_character == "w" or $last_character == "e") {
+
                 if ($last_character == "w") {
                     $sign = -1;
                 }
                 if ($last_character == "e") {
                     $sign = +1;
                 }
-                $text_token = mb_substr($token, 0, -1);
-            }
 
-            if (is_numeric($text_token)) {
-                $longitudes[] = $sign * $text_token;
+                $text_token = mb_substr($token, 0, -1);
+
+                if (is_numeric($text_token)) {
+                    $longitudes[] = $sign * $text_token;
+                }
             }
         }
         $nmea_response = $this->readNMEA($text);
 
-        if (
-            isset($nmea_response["current_longitude"]) and
-            isset($nmea_response["current_longitude_east_west"])
-        ) {
-            if (
-                strtolower($nmea_response["current_longitude_east_west"]) == "e"
-            ) {
-                $sign = +1;
-            }
-            if (
-                strtolower($nmea_response["current_longitude_east_west"]) == "w"
-            ) {
-                $sign = -1;
-            }
-            $longitude = $nmea_response["current_longitude"] * $sign;
-            $longitudes[] = $longitude;
-        }
+        if ($nmea_response !== true) {
 
-        if (
-            isset($nmea_response["longitude"]) and
-            isset($nmea_response["longitude_east_west"])
-        ) {
-            if (strtolower($nmea_response["longitude_east_west"]) == "e") {
-                $sign = +1;
+            if (
+                isset($nmea_response["current_longitude"]) and
+                isset($nmea_response["current_longitude_east_west"])
+            ) {
+                if (
+                    strtolower($nmea_response["current_longitude_east_west"]) ==
+                    "e"
+                ) {
+                    $sign = +1;
+                }
+                if (
+                    strtolower($nmea_response["current_longitude_east_west"]) ==
+                    "w"
+                ) {
+                    $sign = -1;
+                }
+                $longitude = $nmea_response["current_longitude"] * $sign;
+                $longitudes[] = $longitude;
             }
-            if (strtolower($nmea_response["longitude_east_west"]) == "w") {
-                $sign = -1;
+
+            if (
+                isset($nmea_response["longitude"]) and
+                isset($nmea_response["longitude_east_west"])
+            ) {
+                if (strtolower($nmea_response["longitude_east_west"]) == "e") {
+                    $sign = +1;
+                }
+                if (strtolower($nmea_response["longitude_east_west"]) == "w") {
+                    $sign = -1;
+                }
+                $longitude = $nmea_response["longitude"] * $sign;
+                $longitudes[] = $longitude;
             }
-            $longitude = $nmea_response["longitude"] * $sign;
-            $longitudes[] = $longitude;
         }
 
         if (count($longitudes) == 1) {
             $longitude = $longitudes[0];
         }
+
         return $longitude;
     }
 
