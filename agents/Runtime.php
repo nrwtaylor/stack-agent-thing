@@ -85,22 +85,11 @@ Show 1 minute.
      *
      * @return unknown
      */
-    function getRuntime()
-    {
-        if (!isset($this->run_time)) {
-
-        $this->runtime->setVariable("seconds", $this->seconds);
-        $this->runtime->setVariable("units", $this->units);           
- if (isset($run_time)) {
-                $this->run_time = $run_time;
-            } else {
-                return true;
-            }
-        }
-        return $this->run_time;
+function get() {
+$this->getRuntime();
     }
 
-    public function get()
+    public function getRuntime()
     {
         // Get headcode.
         // Runtime is a train variable.
@@ -141,6 +130,7 @@ Show 1 minute.
         } else {
             $this->units = $this->default_units;
         }
+
     }
 
     public function humanRuntime($seconds = null)
@@ -260,8 +250,14 @@ Show 1 minute.
         return $seconds;
     }
 
-    public function textRuntime($amount, $units)
+    public function textRuntime($amount = null, $units = null)
     {
+
+        if (($amount == null) and ($units == null)) {
+          $amount = $this->seconds;
+          $units = $this->units;
+        }
+
         foreach ($this->periods as $multiplier => $period_array) {
             if ($period_array[0] === $units) {
                 $text = $amount / $multiplier . " " . $units;
